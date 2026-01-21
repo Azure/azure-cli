@@ -2095,32 +2095,70 @@ def create_av_set(cmd, availability_set_name, resource_group_name, platform_faul
                   platform_update_domain_count=None, location=None, proximity_placement_group=None, unmanaged=False,
                   no_wait=False, tags=None, validate=False, additional_scheduled_events=None,
                   enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None):
-    if validate:
-        raise CLIError(
-            "--validate is not supported for 'az vm availability-set create' "
-            "after migration to AAZ. This command no longer generates ARM templates."
-        )
+    from azure.core.exceptions import HttpResponseError
 
     from .aaz.latest.vm.availability_set import Create as _Create
-    tags = tags or {}
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from azure.mgmt.core.tools import resource_id
 
+    if validate:
+        raise CLIError(
+            "[Deprecated] '--validate' is not supported for 'az vm availability-set create' after migration to AAZ. "
+            "This command no longer generates ARM templates; remove '--validate' and retry."
+        )
+
+    tags = tags or {}
+    if proximity_placement_group is not None:
+            if isinstance(proximity_placement_group, dict):
+                if 'id' not in proximity_placement_group:
+                    raise CLIError("Invalid proximity placement group value. Expect an object with key 'id'.")
+            elif isinstance(proximity_placement_group, str):
+                ppg_value = proximity_placement_group.strip()
+                if ppg_value.lower().startswith('/subscriptions/'):
+                    ppg_id = ppg_value
+                else:
+                    ppg_id = resource_id(
+                        subscription=get_subscription_id(cmd.cli_ctx),
+                        resource_group=resource_group_name,
+                        namespace='Microsoft.Compute',
+                        type='proximityPlacementGroups',
+                        name=ppg_value
+                    )
+                proximity_placement_group = {'id': ppg_id}
+            else:
+                raise CLIError(f"Invalid proximity placement group type: {type(proximity_placement_group)}")
     command_args = {
         "resource_group": resource_group_name,
         "availability_set_name": availability_set_name,
         "location": location,
         "platform_fault_domain_count": platform_fault_domain_count,
         "platform_update_domain_count": platform_update_domain_count,
-        "unmanaged": unmanaged,
         "proximity_placement_group": proximity_placement_group,
         "additional_scheduled_events": additional_scheduled_events,
         "enable_user_reboot_scheduled_events": enable_user_reboot_scheduled_events,
         "enable_user_redeploy_scheduled_events": enable_user_redeploy_scheduled_events,
+        "sku": {"name": "Classic" if unmanaged else "Aligned"},
         "tags": tags,
         "no_wait": no_wait,
     }
-    command_args = {k: v for k, v in command_args.items() if v is not None}
 
-    return _Create(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+    def _drop_none(obj):
+        if isinstance(obj, dict):
+            return {k: _drop_none(v) for k, v in obj.items() if v is not None}
+        return obj
+
+    command_args = _drop_none(command_args)
+
+    try:
+        return _Create(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+    except HttpResponseError as ex:
+        msg = str(ex)
+        if ("Scheduled Event Policy is not supported" in msg) or ("scheduledEventsPolicy" in msg):
+            raise CLIError(
+                "Scheduled Events Policy is not supported for availability sets in this environment. "
+                "Retry without --additional-events/--enable-reboot/--enable-redeploy."
+            )
+        raise
 # endregion
 
 
