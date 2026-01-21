@@ -302,7 +302,7 @@ def get_latest_version_from_ame_storage(package_path='azure-cli'):
 
     This replaces get_latest_from_github() due to network isolation requirements.
     The setup.py files are uploaded to AME Storage Account during release pipeline.
-    
+
     Args:
         package_path: Package name, e.g., 'azure-cli', 'azure-cli-core', 'azure-cli-telemetry', 'azure-cli-testsdk'
     """
