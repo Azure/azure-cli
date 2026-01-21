@@ -2095,51 +2095,32 @@ def create_av_set(cmd, availability_set_name, resource_group_name, platform_faul
                   platform_update_domain_count=None, location=None, proximity_placement_group=None, unmanaged=False,
                   no_wait=False, tags=None, validate=False, additional_scheduled_events=None,
                   enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None):
-    from azure.cli.core.util import random_string
-    from azure.cli.core.commands.arm import ArmTemplateBuilder
-    from azure.cli.command_modules.vm._template_builder import build_av_set_resource
+    if validate:
+        raise CLIError(
+            "--validate is not supported for 'az vm availability-set create' "
+            "after migration to AAZ. This command no longer generates ARM templates."
+        )
 
+    from .aaz.latest.vm.availability_set import Create as _Create
     tags = tags or {}
 
-    # Build up the ARM template
-    master_template = ArmTemplateBuilder()
+    command_args = {
+        "resource_group": resource_group_name,
+        "availability_set_name": availability_set_name,
+        "location": location,
+        "platform_fault_domain_count": platform_fault_domain_count,
+        "platform_update_domain_count": platform_update_domain_count,
+        "unmanaged": unmanaged,
+        "proximity_placement_group": proximity_placement_group,
+        "additional_scheduled_events": additional_scheduled_events,
+        "enable_user_reboot_scheduled_events": enable_user_reboot_scheduled_events,
+        "enable_user_redeploy_scheduled_events": enable_user_redeploy_scheduled_events,
+        "tags": tags,
+        "no_wait": no_wait,
+    }
+    command_args = {k: v for k, v in command_args.items() if v is not None}
 
-    av_set_resource = build_av_set_resource(cmd, availability_set_name, location, tags,
-                                            platform_update_domain_count,
-                                            platform_fault_domain_count, unmanaged,
-                                            proximity_placement_group=proximity_placement_group,
-                                            additional_scheduled_events=additional_scheduled_events,
-                                            enable_user_reboot_scheduled_events=enable_user_reboot_scheduled_events,
-                                            enable_user_redeploy_scheduled_events=enable_user_redeploy_scheduled_events)
-    master_template.add_resource(av_set_resource)
-
-    template = master_template.build()
-
-    # deploy ARM template
-    deployment_name = 'av_set_deploy_' + random_string(32)
-    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
-    DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-    properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
-    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-    deployment = Deployment(properties=properties)
-
-    if validate:
-        if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
-            validation_poller = client.begin_validate(resource_group_name, deployment_name, deployment)
-            return LongRunningOperation(cmd.cli_ctx)(validation_poller)
-
-        return client.validate(resource_group_name, deployment_name, deployment)
-
-    if no_wait:
-        return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, deployment_name, deployment)
-    LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(no_wait, client.begin_create_or_update,
-                                                  resource_group_name, deployment_name, deployment))
-
-    from .aaz.latest.vm.availability_set import Show as _Show
-    return _Show(cli_ctx=cmd.cli_ctx)(command_args={'resource_group': resource_group_name,
-                                                    'availability_set_name': availability_set_name})
-
-
+    return _Create(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 # endregion
 
 

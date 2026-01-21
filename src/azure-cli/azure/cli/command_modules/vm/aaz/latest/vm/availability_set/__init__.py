@@ -11,6 +11,7 @@
 from .__cmd_group import *
 from ._cancel_migration_to_vmss import *
 from ._convert_to_vmss import *
+from ._create import *
 from ._delete import *
 from ._list import *
 from ._list_sizes import *
