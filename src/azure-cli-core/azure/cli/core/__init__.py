@@ -690,7 +690,7 @@ class MainCommandsLoader(CLICommandsLoader):
             
             # Function to cache help for a single group
             def _cache_single_group_help(group_path, subparser):
-                """Cache help for a single group and return its data along with subgroups to process."""
+                """Cache help for a single group and return its data along with subgroups and commands to process."""
                 try:
                     help_file = CliGroupHelpFile(self.cli_ctx.invocation.help, group_path, subparser)
                     help_file.load(subparser)
@@ -698,6 +698,7 @@ class MainCommandsLoader(CLICommandsLoader):
                     groups = {}
                     commands = {}
                     subgroup_names = []
+                    command_entries = []  # Store individual command cache entries
                     
                     for child in help_file.children:
                         if hasattr(child, 'name') and hasattr(child, 'short_summary'):
@@ -725,17 +726,27 @@ class MainCommandsLoader(CLICommandsLoader):
                                 subgroup_names.append(full_subgroup_name)
                             else:
                                 commands[child_name] = item_data
+                                # Create individual cache entry for this command
+                                if group_path:
+                                    full_command_name = f"{group_path} {child_name}"
+                                else:
+                                    full_command_name = child_name
+                                # Store individual command with its full help data
+                                command_entries.append((full_command_name, {
+                                    'groups': {},
+                                    'commands': {child_name: item_data}
+                                }))
                     
                     level_key = group_path if group_path else 'root'
                     level_data = None
                     if groups or commands:
                         level_data = {'groups': groups, 'commands': commands}
                     
-                    return level_key, level_data, subgroup_names
+                    return level_key, level_data, subgroup_names, command_entries
                 
                 except Exception as ex:  # pylint: disable=broad-except
                     logger.debug("Failed to cache help for '%s': %s", group_path, ex)
-                    return None, None, []
+                    return None, None, [], []
             
             # Build help index using BFS with parallel processing at each level
             help_index_data = {}
@@ -753,9 +764,13 @@ class MainCommandsLoader(CLICommandsLoader):
                     next_level = []
                     for future in concurrent.futures.as_completed(futures):
                         try:
-                            level_key, level_data, subgroup_names = future.result(timeout=10)
+                            level_key, level_data, subgroup_names, command_entries = future.result(timeout=10)
                             if level_data:
                                 help_index_data[level_key] = level_data
+                            
+                            # Add individual command entries to cache
+                            for cmd_key, cmd_data in command_entries:
+                                help_index_data[cmd_key] = cmd_data
                             
                             # Queue subgroups for next level
                             for subgroup_name in subgroup_names:
