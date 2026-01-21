@@ -79,7 +79,7 @@ class Create(AAZCommand):
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
-        _args_schema.bandwidth_in_gbps = AAZStrArg(
+        _args_schema.bandwidth_in_gbps = AAZIntArg(
             options=["--bandwidth-in-gbps"],
             arg_group="Properties",
             help="Bandwidth of the VirtualNetworkAppliance resource in Gbps.",
@@ -690,7 +690,7 @@ class Create(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("bandwidthInGbps", AAZStrType, ".bandwidth_in_gbps")
+                properties.set_prop("bandwidthInGbps", AAZIntType, ".bandwidth_in_gbps")
                 properties.set_prop("subnet", AAZObjectType, ".subnet")
 
             subnet = _builder.get(".properties.subnet")
@@ -972,7 +972,7 @@ class Create(AAZCommand):
             )
 
             properties = cls._schema_on_200_201.properties
-            properties.bandwidth_in_gbps = AAZStrType(
+            properties.bandwidth_in_gbps = AAZIntType(
                 serialized_name="bandwidthInGbps",
             )
             properties.ip_configurations = AAZListType(

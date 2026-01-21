@@ -173,7 +173,7 @@ class Show(AAZCommand):
             )
 
             properties = cls._schema_on_200.properties
-            properties.bandwidth_in_gbps = AAZStrType(
+            properties.bandwidth_in_gbps = AAZIntType(
                 serialized_name="bandwidthInGbps",
             )
             properties.ip_configurations = AAZListType(
