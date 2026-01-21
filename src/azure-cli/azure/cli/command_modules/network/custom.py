@@ -6723,8 +6723,9 @@ class CustomIpPrefixUpdate(_CustomIpPrefixUpdate):
 
 def create_ddos_custom_policy(cmd, ddos_custom_policy_name, resource_group_name, location=None, tags=None,
                               detection_rule_name=None, detection_mode=None, traffic_type=None,
-                              packets_per_second=None, ip_config_id=None, no_wait=None):
+                              packets_per_second=None, no_wait=None):
     from .aaz.latest.network.ddos_custom_policy import Create as DdosCustomPolicyCreate, Show as DdosCustomPolicyShow
+    from .operations.ddos_custom_policy import convert_ddos_custom_policy_to_snake_case, combine_old_and_new_custom_policy
     from ._template_builder import build_ddos_custom_policy
 
     existing_policy = None
@@ -6746,7 +6747,7 @@ def create_ddos_custom_policy(cmd, ddos_custom_policy_name, resource_group_name,
                        ddos_custom_policy_name, resource_group_name, err)
 
     policy = build_ddos_custom_policy(cmd, ddos_custom_policy_name, location, tags, detection_rule_name, detection_mode,
-                                      packets_per_second, traffic_type, ip_config_id)
+                                      packets_per_second, traffic_type)
 
     if existing_policy:
         policy = combine_old_and_new_custom_policy(existing_policy, policy)
@@ -6756,78 +6757,3 @@ def create_ddos_custom_policy(cmd, ddos_custom_policy_name, resource_group_name,
 
     return DdosCustomPolicyCreate(cli_ctx=cmd.cli_ctx)(command_args=policy)
 
-
-def combine_old_and_new_custom_policy(old_policy, new_policy):
-    old_rules = old_policy.get('detection_rules', [])
-    new_rules = new_policy.get('detection_rules', [])
-
-    new_rule_name = {rule['name']: rule for rule in new_rules}
-    combined_rule = []
-    used = []
-
-    for rule in old_rules:
-        name = rule.get('name')
-        if name in new_rule_name:
-            combined_rule.append(new_rule_name[name])
-            used.append(name)
-            continue
-
-        combined_rule.append(rule)
-
-    for rule in new_rules:
-        name = rule.get('name')
-        if name not in used:
-            combined_rule.append(rule)
-
-    new_policy['detection_rules'] = combined_rule
-    return new_policy
-
-
-def convert_ddos_custom_policy_to_snake_case(policy):
-    new_policy = {}
-
-    if 'location' in policy:
-        new_policy['location'] = policy['location']
-
-    if 'name' in policy:
-        new_policy['name'] = policy['name']
-
-    if 'detectionRules' in policy:
-        new_policy['detection_rules'] = []
-
-        for rule in policy['detectionRules']:
-            detection_rule = {}
-            if 'name' in rule:
-                detection_rule['name'] = rule['name']
-
-            if 'detectionMode' in rule:
-                detection_rule['detection_mode'] = rule['detectionMode']
-
-            if 'trafficDetectionRule' in rule:
-                traffic_detection_rule = rule['trafficDetectionRule']
-
-                if 'packetsPerSecond' in traffic_detection_rule:
-                    traffic_detection_rule['packets_per_second'] = traffic_detection_rule['packetsPerSecond']
-                    traffic_detection_rule.pop('packetsPerSecond')
-
-                if 'trafficType' in traffic_detection_rule:
-                    traffic_detection_rule['traffic_type'] = traffic_detection_rule['trafficType']
-                    traffic_detection_rule.pop('trafficType')
-
-                detection_rule['traffic_detection_rule'] = traffic_detection_rule
-
-            new_policy['detection_rules'].append(detection_rule)
-
-    if 'frontEndIpConfiguration' in policy:
-        new_policy['front_end_ip_configuration'] = policy['frontEndIpConfiguration']
-
-    return new_policy
-
-
-class DdosCustomPolicyUpdate(_DdosCustomPolicyUpdate):
-
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.front_end_ip_configuration._options = ["--ip-config-id", "--front-end-ip-configuration"]
-        return args_schema
