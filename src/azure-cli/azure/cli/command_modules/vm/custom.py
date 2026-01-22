@@ -4226,6 +4226,7 @@ def get_vmss_by_aaz(cmd, resource_group_name, name, instance_id=None, include_us
         command_args['expand'] = 'userData'
 
     if instance_id is not None:
+        command_args['instance_id'] = instance_id
         return VMSSVMSShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
     return VMSSShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
@@ -5442,7 +5443,7 @@ def remove_vmss_identity(cmd, resource_group_name, vmss_name, identities=None):
 
         if vmss.get('identity') and vmss.get('identity').get('type') == IdentityType.USER_ASSIGNED.value:
             # NOTE: The literal 'UserAssigned' is intentionally appended as a marker for
-            # VMIdentityRemove._format_content, which uses it to apply special handling
+            # VMSSIdentityRemove._format_content, which uses it to apply special handling
             # for purely user-assigned identities. It is not a real identity resource ID.
             command_args['mi_user_assigned'] = \
                 list(vmss.get('identity', {}).get('userAssignedIdentities', {}).keys()) + ['UserAssigned']

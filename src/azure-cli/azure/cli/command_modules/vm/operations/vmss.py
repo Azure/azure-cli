@@ -102,7 +102,7 @@ class VMSSIdentityRemove(_VMSSPatch):
 
         if not identity.get('userAssignedIdentities'):
             identity['userAssignedIdentities'] = None
-            return None
+            return result
 
         for user_identity in identity.get('userAssignedIdentities', {}).keys():
             if not identity['userAssignedIdentities'][user_identity].get('clientId'):
