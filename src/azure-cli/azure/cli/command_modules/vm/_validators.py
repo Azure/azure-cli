@@ -2690,7 +2690,9 @@ def _validate_community_gallery_legal_agreement_acceptance(cmd, namespace):
 
 def _validate_image_deprecation_status(cmd, namespace):
     from .aaz.latest.vm.image import Show as _ImageShow
-    from ._actions import _get_latest_image_version
+
+    if not namespace.os_publisher or not namespace.os_offer or not namespace.os_sku or not namespace.os_version:
+        return
 
     if namespace.os_version.lower() == 'latest':
         latest_version = _get_latest_image_version(
@@ -2703,16 +2705,20 @@ def _validate_image_deprecation_status(cmd, namespace):
     else:
         latest_version = namespace.os_version
 
-    image = _ImageShow(cli_ctx=cmd.cli_ctx)(command_args={
-            'location': namespace.location,
-            'publisher': namespace.os_publisher,
-            'offer': namespace.os_offer,
-            'sku': namespace.os_sku,
-            'version': latest_version,
-        })
+    try:
+        image = _ImageShow(cli_ctx=cmd.cli_ctx)(command_args={
+                'location': namespace.location,
+                'publisher': namespace.os_publisher,
+                'offer': namespace.os_offer,
+                'sku': namespace.os_sku,
+                'version': latest_version,
+            })
+    except Exception as err:
+        logger.warning('Failed to retrieve image deprecation status: %s', err)
+        return
 
     if not image:
-        return 
-    
+        return
+
     if image.get('imageDeprecationStatus', {}).get('imageState') == 'ScheduledForDeprecation':
         logger.warning('The selected image is scheduled for deprecation.')
