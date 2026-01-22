@@ -2109,24 +2109,25 @@ def create_av_set(cmd, availability_set_name, resource_group_name, platform_faul
 
     tags = tags or {}
     if proximity_placement_group is not None:
-            if isinstance(proximity_placement_group, dict):
-                if 'id' not in proximity_placement_group:
-                    raise CLIError("Invalid proximity placement group value. Expect an object with key 'id'.")
-            elif isinstance(proximity_placement_group, str):
-                ppg_value = proximity_placement_group.strip()
-                if ppg_value.lower().startswith('/subscriptions/'):
-                    ppg_id = ppg_value
-                else:
-                    ppg_id = resource_id(
-                        subscription=get_subscription_id(cmd.cli_ctx),
-                        resource_group=resource_group_name,
-                        namespace='Microsoft.Compute',
-                        type='proximityPlacementGroups',
-                        name=ppg_value
-                    )
-                proximity_placement_group = {'id': ppg_id}
+        if isinstance(proximity_placement_group, dict):
+            if 'id' not in proximity_placement_group:
+                raise CLIError("Invalid proximity placement group value. Expect an object with key 'id'.")
+        elif isinstance(proximity_placement_group, str):
+            ppg_value = proximity_placement_group.strip()
+            if ppg_value.lower().startswith('/subscriptions/'):
+                ppg_id = ppg_value
             else:
-                raise CLIError(f"Invalid proximity placement group type: {type(proximity_placement_group)}")
+                ppg_id = resource_id(
+                    subscription=get_subscription_id(cmd.cli_ctx),
+                    resource_group=resource_group_name,
+                    namespace='Microsoft.Compute',
+                    type='proximityPlacementGroups',
+                    name=ppg_value
+                )
+            proximity_placement_group = {'id': ppg_id}
+        else:
+            raise CLIError(f"Invalid proximity placement group type: {type(proximity_placement_group)}")
+
     command_args = {
         "resource_group": resource_group_name,
         "availability_set_name": availability_set_name,

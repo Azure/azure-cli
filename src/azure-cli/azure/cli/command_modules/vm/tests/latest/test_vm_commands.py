@@ -2127,35 +2127,35 @@ class VMAvailSetScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_vm_availset_scheduled_events_policy_', location='eastasia')
     def test_vm_availset_scheduled_events_policy(self, resource_group):
         self.kwargs.update({
-            'availset1': 'availset-test1',
-            'availset2': 'availset-test2'
+            'availset1': self.create_random_name('availset', 15),
+            'availset2': self.create_random_name('availset', 15),
         })
 
-        self.cmd('vm availability-set create -g {rg} -n {availset1} --additional-events True --enable-reboot True --enable-redeploy True --platform-fault-domain-count 1 --platform-update-domain-count 1', checks=[
-            self.check('name', '{availset1}'),
-            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True),
-            self.check('scheduledEventsPolicy.userInitiatedRedeploy.automaticallyApprove', True),
-            self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', True)
-        ])
+        # creating availability set with scheduled events parameters is not supported
+        self.cmd(
+            'vm availability-set create -g {rg} -n {availset1} '
+            '--additional-events true '
+            '--enable-reboot true '
+            '--enable-redeploy true '
+            '--platform-fault-domain-count 1 '
+            '--platform-update-domain-count 1',
+            expect_failure=True
+        )
 
-        self.cmd('vm availability-set update -g {rg} -n {availset1} --additional-events False --enable-redeploy False', checks=[
-            self.check('name', '{availset1}'),
-            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', False),
-            self.check('scheduledEventsPolicy.userInitiatedRedeploy.automaticallyApprove', False),
-            self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', True)
-        ])
+        # updating a regular availability set with scheduled events parameters is not supported
+        self.cmd(
+            'vm availability-set create -g {rg} -n {availset2} '
+            '--platform-fault-domain-count 1 '
+            '--platform-update-domain-count 1'
+        )
 
-        self.cmd('vm availability-set create -g {rg} -n {availset2} --platform-fault-domain-count 1 --platform-update-domain-count 1', checks=[
-            self.check('name', '{availset2}'),
-            self.check('scheduledEventsPolicy', None),
-        ])
-
-        self.cmd('vm availability-set update -g {rg} -n {availset2} --enable-reboot False --additional-events True', checks=[
-            self.check('name', '{availset2}'),
-            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True),
-            self.check('scheduledEventsPolicy.userInitiatedRedeploy', None),
-            self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', False)
-        ])
+        self.cmd(
+            'vm availability-set update -g {rg} -n {availset2} '
+            '--additional-events true '
+            '--enable-reboot false '
+            '--enable-redeploy false',
+            expect_failure=True
+        )
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_avset_scheduled_events_policy_parameters', location='eastus')
     def test_vm_avset_scheduled_events_policy_parameters(self, resource_group):
@@ -2164,9 +2164,13 @@ class VMAvailSetScenarioTest(ScenarioTest):
         })
 
         self.cmd('vm availability-set create -g {rg} -n {avset} --platform-fault-domain-count 1 --platform-update-domain-count 1')
-        self.cmd('vm availability-set update -g {rg} -n {avset} --enable-all-instance-down True', checks=[
-            self.check('scheduledEventsPolicy.allInstancesDown.automaticallyApprove', True)
-        ])
+
+        # Scheduled Events Policy is not supported for regular availability sets.
+        # Verify the service returns an error consistently.
+        with self.assertRaisesRegex(HttpResponseError, "Scheduled Event Policy is not supported"):
+            self.cmd(
+                'vm availability-set update -g {rg} -n {avset} --enable-all-instance-down True'
+            )
         with self.assertRaises(HttpResponseError): # No available regions found
             self.cmd('vm availability-set update -g {rg} -n {avset} --scheduled-events-api-version 2020-07-01', checks=[
                 self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.scheduledEventsApiVersion', '2020-07-01')
@@ -2203,25 +2207,44 @@ class VMAvailSetLiveScenarioTest(ScenarioTest):
             'new_vmss': self.create_random_name('newvmss', 15),
         })
 
-        self.cmd('vm availability-set create -g {rg} -n {avset1} --platform-fault-domain-count 2 --platform-update-domain-count 2', checks=[
-            self.check('name', '{avset1}'),
-            self.check('platformFaultDomainCount', 2)
-        ])
-        self.cmd('vm create -g {rg} -n {vm1} --image OpenLogic:CentOS:7.5:latest --admin-username vmtest --nsg-rule NONE --size Standard_B2ms --availability-set {avset1}')
-        self.cmd('vmss create -g {rg} -n {vmss} --image OpenLogic:CentOS:7.5:latest --admin-username vmsstest --vm-sku Standard_B2ms')
-        vmss = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()
-        self.kwargs.update({
-            'vmss_id': vmss['id'],
-        })
-        self.cmd('vm availability-set validate-migration-to-vmss -n {avset1} -g {rg} --vmss-flexible-id {vmss_id}')
-        self.cmd('vm availability-set start-migration-to-vmss -n {avset1} -g {rg} --vmss-flexible-id {vmss_id}')
-        self.cmd('vm availability-set cancel-migration-to-vmss -n {avset1} -g {rg}')
+        self.cmd(
+            'vm availability-set create -g {rg} -n {avset1} '
+            '--platform-fault-domain-count 2 --platform-update-domain-count 2',
+            checks=[self.check('name', '{avset1}'), self.check('platformFaultDomainCount', 2)]
+        )
+        self.cmd(
+            'vm create -g {rg} -n {vm1} --image OpenLogic:CentOS:7.5:latest '
+            '--admin-username vmtest --nsg-rule NONE --size Standard_B2ms '
+            '--availability-set {avset1}'
+        )
 
-        self.cmd('vm availability-set create -g {rg} -n {avset2} --platform-fault-domain-count 2 --platform-update-domain-count 2')
-        self.cmd('vm availability-set convert-to-vmss -n {avset2} -g {rg} --vmss-name {new_vmss}')
-        self.cmd('vmss show -n {new_vmss} -g {rg}', checks=[
-            self.check('name', '{new_vmss}')
-        ])
+        self.cmd(
+            'vmss create -g {rg} -n {vmss} --image OpenLogic:CentOS:7.5:latest '
+            '--admin-username vmsstest --vm-sku Standard_B2ms --orchestration-mode Flexible'
+        )
+        vmss = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()
+        self.kwargs.update({'vmss_id': vmss['id']})
+
+        try:
+            self.cmd('vm availability-set validate-migration-to-vmss -n {avset1} -g {rg} --vmss-flexible-id {vmss_id}')
+            self.cmd('vm availability-set start-migration-to-vmss -n {avset1} -g {rg} --vmss-flexible-id {vmss_id}')
+            self.cmd('vm availability-set cancel-migration-to-vmss -n {avset1} -g {rg}')
+        except HttpResponseError as ex:
+            if 'Subscription is not eligible to migrate Availability Set' in str(ex):
+                self.skipTest(str(ex))
+            raise
+
+        self.cmd(
+            'vm availability-set create -g {rg} -n {avset2} --platform-fault-domain-count 2 --platform-update-domain-count 2')
+
+        try:
+            self.cmd('vm availability-set convert-to-vmss -n {avset2} -g {rg} --vmss-name {new_vmss}')
+        except HttpResponseError as ex:
+            if 'Subscription is not eligible to migrate Availability Set' in str(ex):
+                self.skipTest(str(ex))
+            raise
+
+        self.cmd('vmss show -n {new_vmss} -g {rg}', checks=[self.check('name', '{new_vmss}')])
 
 
 class ComputeListSkusScenarioTest(ScenarioTest):
