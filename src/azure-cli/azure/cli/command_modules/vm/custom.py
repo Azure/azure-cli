@@ -2585,45 +2585,6 @@ def list_vm_extension_images(
 
 
 # region VirtualMachines Identity
-def _remove_identities(cmd, resource_group_name, name, identities, getter, setter):
-    from ._vm_utils import MSI_LOCAL_ID
-    ResourceIdentityType = cmd.get_models('ResourceIdentityType', operation_group='virtual_machines')
-    remove_system_assigned_identity = False
-    if MSI_LOCAL_ID in identities:
-        remove_system_assigned_identity = True
-        identities.remove(MSI_LOCAL_ID)
-    resource = getter(cmd, resource_group_name, name)
-    if resource.identity is None:
-        return None
-    emsis_to_remove = []
-    if identities:
-        existing_emsis = {x.lower() for x in (resource.identity.user_assigned_identities or {}).keys()}
-        emsis_to_remove = {x.lower() for x in identities}
-        non_existing = emsis_to_remove.difference(existing_emsis)
-        if non_existing:
-            raise CLIError("'{}' are not associated with '{}'".format(','.join(non_existing), name))
-        if not list(existing_emsis - emsis_to_remove):  # if all emsis are gone, we need to update the type
-            if resource.identity.type == ResourceIdentityType.user_assigned:
-                resource.identity.type = ResourceIdentityType.none
-            elif resource.identity.type == ResourceIdentityType.system_assigned_user_assigned:
-                resource.identity.type = ResourceIdentityType.system_assigned
-
-    resource.identity.user_assigned_identities = None
-    if remove_system_assigned_identity:
-        resource.identity.type = (ResourceIdentityType.none
-                                  if resource.identity.type == ResourceIdentityType.system_assigned
-                                  else ResourceIdentityType.user_assigned)
-
-    if emsis_to_remove:
-        if resource.identity.type not in [ResourceIdentityType.none, ResourceIdentityType.system_assigned]:
-            resource.identity.user_assigned_identities = {}
-            for identity in emsis_to_remove:
-                resource.identity.user_assigned_identities[identity] = None
-
-    result = LongRunningOperation(cmd.cli_ctx)(setter(resource_group_name, name, resource))
-    return result.identity
-
-
 def _remove_identities_by_aaz(cmd, resource_group_name, name, identities, getter, setter):
     from ._vm_utils import MSI_LOCAL_ID
 
@@ -5469,24 +5430,35 @@ def vmss_run_command_show(cmd,
 
 # region VirtualMachineScaleSets Identity
 def remove_vmss_identity(cmd, resource_group_name, vmss_name, identities=None):
-    client = _compute_client_factory(cmd.cli_ctx)
+    def setter(resource_group_name, vmss_name, vmss):
+        command_args = {
+            'resource_group': resource_group_name,
+            'vm_scale_set_name': vmss_name
+        }
 
-    def _get_vmss(_, resource_group_name, vmss_name):
-        return client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+        if vmss.get('identity') and vmss.get('identity').get('type') == IdentityType.USER_ASSIGNED.value:
+            # NOTE: The literal 'UserAssigned' is intentionally appended as a marker for
+            # VMIdentityRemove._format_content, which uses it to apply special handling
+            # for purely user-assigned identities. It is not a real identity resource ID.
+            command_args['mi_user_assigned'] = \
+                list(vmss.get('identity', {}).get('userAssignedIdentities', {}).keys()) + ['UserAssigned']
+        elif vmss.get('identity') and vmss.get('identity').get('type') == IdentityType.SYSTEM_ASSIGNED.value:
+            command_args['mi_user_assigned'] = []
+            command_args['mi_system_assigned'] = 'True'
+        elif vmss.get('identity') and vmss.get('identity').get('type') == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value:
+            command_args['mi_user_assigned'] = list(vmss.get('identity', {}).get('userAssignedIdentities', {}).keys())
+            command_args['mi_system_assigned'] = 'True'
+        else:
+            command_args['mi_user_assigned'] = []
 
-    def _set_vmss(resource_group_name, name, vmss_instance):
-        VirtualMachineScaleSetUpdate = cmd.get_models('VirtualMachineScaleSetUpdate',
-                                                      operation_group='virtual_machine_scale_sets')
-        vmss_update = VirtualMachineScaleSetUpdate(identity=vmss_instance.identity)
-        return client.virtual_machine_scale_sets.begin_update(resource_group_name, vmss_name, vmss_update)
+        from .operations.vmss import VMSSIdentityRemove
+        return VMSSIdentityRemove(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
     if identities is None:
         from ._vm_utils import MSI_LOCAL_ID
         identities = [MSI_LOCAL_ID]
 
-    return _remove_identities(cmd, resource_group_name, vmss_name, identities,
-                              _get_vmss,
-                              _set_vmss)
+    return _remove_identities_by_aaz(cmd, resource_group_name, vmss_name, identities, get_vmss_by_aaz, setter)
 # endregion
 
 
