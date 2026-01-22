@@ -387,6 +387,13 @@ def load_arguments(self, _):
         )
         c.argument("agent_version", help="Cognitive Services hosted agent version")
 
+    with self.argument_context("cognitiveservices agent status") as c:
+        c.argument(
+            "agent_version",
+            help="Cognitive Services hosted agent version",
+            required=True,
+        )
+
     with self.argument_context('cognitiveservices agent create') as c:
         c.argument(
             'agent_name',

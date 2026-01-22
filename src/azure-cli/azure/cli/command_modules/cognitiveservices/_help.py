@@ -658,6 +658,18 @@ examples:
 """
 
 helps[
+    "cognitiveservices agent status"
+] = """
+type: command
+short-summary: Get the status of a hosted agent deployment.
+long-summary: |
+    Calls the agent container status endpoint and returns the raw service payload.
+examples:
+  - name: Get hosted agent deployment status.
+    text: az cognitiveservices agent status --account-name myAccount --project-name myProject --name myAgent --agent-version 1
+"""
+
+helps[
     "cognitiveservices agent update"
 ] = """
 type: command

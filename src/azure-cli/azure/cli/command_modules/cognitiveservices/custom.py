@@ -1393,6 +1393,17 @@ def agent_show(
     return response.json()
 
 
+def agent_status(
+    client,
+    account_name,
+    project_name,
+    agent_name,
+    agent_version,
+):  # pylint: disable=unused-argument
+    """Get the status of a hosted agent deployment (default container)."""
+    return _get_agent_container_status(client, agent_name, agent_version)
+
+
 def _get_resource_group_by_account_name(cmd, account_name):
     """
     Get resource group name for a Cognitive Services account by querying ARM.
