@@ -8,7 +8,8 @@ from knack.log import get_logger
 from ..aaz.latest.vmss import (ListInstances as _VMSSListInstances,
                                Start as _Start,
                                Create as _VMSSCreate,
-                               Show as _VMSSShow)
+                               Show as _VMSSShow,
+                               Patch as _VMSSPatch)
 from azure.cli.core.aaz import AAZUndefined, has_value
 
 logger = get_logger(__name__)
@@ -53,6 +54,20 @@ class VMSSCreate(_VMSSCreate):
 
 
 class VMSSShow(_VMSSShow):
+
+    def _output(self, *args, **kwargs):
+        # Resolve flatten conflict
+        # When the type field conflicts, the type in inner layer is ignored and the outer layer is applied
+        if has_value(self.ctx.vars.instance.properties.virtual_machine_profile.extension_profile.extensions):
+            for extension in self.ctx.vars.instance.properties.virtual_machine_profile.extension_profile.extensions:
+                if has_value(extension.type):
+                    extension.type = AAZUndefined
+
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+
+class VMSSPatch(_VMSSPatch):
 
     def _output(self, *args, **kwargs):
         # Resolve flatten conflict

@@ -780,3 +780,9 @@ class IdentityType(Enum):
     USER_ASSIGNED = 'UserAssigned'
     SYSTEM_ASSIGNED_USER_ASSIGNED = 'SystemAssigned, UserAssigned'
     NONE = 'None'
+
+
+class UpgradeMode(Enum):
+    AUTOMATIC = 'Automatic'
+    MANUAL = 'Manual'
+    ROLLING = 'Rolling'

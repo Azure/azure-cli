@@ -3610,49 +3610,75 @@ def reset_linux_ssh(cmd, resource_group_name, vm_name, no_wait=False):
 # region VirtualMachineScaleSets
 def assign_vmss_identity(cmd, resource_group_name, vmss_name, assign_identity=None, identity_role=None,
                          identity_role_id=None, identity_scope=None):
-    VirtualMachineScaleSetIdentity, UpgradeMode, ResourceIdentityType, VirtualMachineScaleSetUpdate = cmd.get_models(
-        'VirtualMachineScaleSetIdentity', 'UpgradeMode', 'ResourceIdentityType', 'VirtualMachineScaleSetUpdate')
-    IdentityUserAssignedIdentitiesValue = cmd.get_models(
-        'VirtualMachineScaleSetIdentityUserAssignedIdentitiesValue') or cmd.get_models('UserAssignedIdentitiesValue')
-    from azure.cli.core.commands.arm import assign_identity as assign_identity_helper
-    client = _compute_client_factory(cmd.cli_ctx)
-    _, _, external_identities, enable_local_identity = _build_identities_info(assign_identity)
+    identity, _, external_identities, enable_local_identity = _build_identities_info(assign_identity)
+    from ._vm_utils import assign_identity as assign_identity_helper, UpgradeMode
+
+    command_args = {'resource_group': resource_group_name, 'vm_scale_set_name': vmss_name}
 
     def getter():
-        return client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+        return get_vmss_by_aaz(cmd, resource_group_name, vmss_name)
 
     def setter(vmss, external_identities=external_identities):
-
-        if vmss.identity and vmss.identity.type == ResourceIdentityType.system_assigned_user_assigned:
-            identity_types = ResourceIdentityType.system_assigned_user_assigned
-        elif vmss.identity and vmss.identity.type == ResourceIdentityType.system_assigned and external_identities:
-            identity_types = ResourceIdentityType.system_assigned_user_assigned
-        elif vmss.identity and vmss.identity.type == ResourceIdentityType.user_assigned and enable_local_identity:
-            identity_types = ResourceIdentityType.system_assigned_user_assigned
+        if vmss.get('identity', {}).get('type', None) == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value:
+            identity_types = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value
+        elif vmss.get('identity', {}).get('type', None) == IdentityType.SYSTEM_ASSIGNED.value and external_identities:
+            identity_types = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value
+        elif vmss.get('identity', {}).get('type', None) == IdentityType.USER_ASSIGNED.value and enable_local_identity:
+            identity_types = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value
         elif external_identities and enable_local_identity:
-            identity_types = ResourceIdentityType.system_assigned_user_assigned
+            identity_types = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value
         elif external_identities:
-            identity_types = ResourceIdentityType.user_assigned
+            identity_types = IdentityType.USER_ASSIGNED.value
         else:
-            identity_types = ResourceIdentityType.system_assigned
-        vmss.identity = VirtualMachineScaleSetIdentity(type=identity_types)
-        if external_identities:
-            vmss.identity.user_assigned_identities = {}
-            for identity in external_identities:
-                vmss.identity.user_assigned_identities[identity] = IdentityUserAssignedIdentitiesValue()
-        vmss_patch = VirtualMachineScaleSetUpdate()
-        vmss_patch.identity = vmss.identity
-        poller = client.virtual_machine_scale_sets.begin_update(resource_group_name, vmss_name, vmss_patch)
-        return LongRunningOperation(cmd.cli_ctx)(poller)
+            identity_types = IdentityType.SYSTEM_ASSIGNED.value
+
+        if identity_types == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value:
+            command_args['mi_system_assigned'] = "True"
+            command_args['mi_user_assigned'] = []
+        elif identity_types == IdentityType.USER_ASSIGNED.value:
+            command_args['mi_user_assigned'] = []
+        else:
+            command_args['mi_system_assigned'] = "True"
+            command_args['mi_user_assigned'] = []
+
+        if vmss.get('identity', {}).get('userAssignedIdentities', None):
+            for key in vmss.get('identity').get('userAssignedIdentities').keys():
+                command_args['mi_user_assigned'].append(key)
+
+        if identity.get('userAssignedIdentities'):
+            for key in identity.get('userAssignedIdentities', {}).keys():
+                if key not in command_args['mi_user_assigned']:
+                    command_args['mi_user_assigned'].append(key)
+
+        from .operations.vmss import VMSSPatch
+        update_vmss_identity = VMSSPatch(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+        LongRunningOperation(cmd.cli_ctx)(update_vmss_identity)
+        result = update_vmss_identity.result()
+        return result
 
     assign_identity_helper(cmd.cli_ctx, getter, setter, identity_role=identity_role_id, identity_scope=identity_scope)
-    vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
-    if vmss.upgrade_policy.mode == UpgradeMode.manual:
+
+    vmss = getter()
+    if vmss.get('upgradePolicy', {}).get('mode', '') == UpgradeMode.MANUAL.value:
         logger.warning("With manual upgrade mode, you will need to run 'az vmss update-instances -g %s -n %s "
                        "--instance-ids *' to propagate the change", resource_group_name, vmss_name)
 
-    return _construct_identity_info(identity_scope, identity_role, vmss.identity.principal_id,
-                                    vmss.identity.user_assigned_identities)
+    info = _construct_identity_info(
+        identity_scope,
+        identity_role,
+        vmss.get('identity').get('principalId') if vmss.get('identity') else None,
+        vmss.get('identity').get('userAssignedIdentities') if vmss.get('identity') else None)
+
+    if not info.get('userAssignedIdentities'):
+        return info
+
+    for user_identity in info.get('userAssignedIdentities', {}).keys():
+        if not info['userAssignedIdentities'][user_identity].get('clientId'):
+            info['userAssignedIdentities'][user_identity]['clientId'] = None
+        if not info['userAssignedIdentities'][user_identity].get('principalId'):
+            info['userAssignedIdentities'][user_identity]['principalId'] = None
+
+    return info
 
 
 # pylint: disable=too-many-locals, too-many-statements
