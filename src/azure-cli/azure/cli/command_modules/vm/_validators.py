@@ -657,6 +657,8 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                                               source_disk_restore_point_size_gb=getattr(namespace, 'source_disk_restore_point_size_gb', None)
                                               )
 
+    _validate_image_deprecation_status(cmd, namespace)
+
 
 def _validate_vm_create_storage_account(cmd, namespace):
     from azure.mgmt.core.tools import parse_resource_id
@@ -2684,3 +2686,33 @@ def _validate_community_gallery_legal_agreement_acceptance(cmd, namespace):
     if not prompt_y_n(msg, default="y"):
         import sys
         sys.exit(0)
+
+
+def _validate_image_deprecation_status(cmd, namespace):
+    from .aaz.latest.vm.image import Show as _ImageShow
+    from ._actions import _get_latest_image_version
+
+    if namespace.os_version.lower() == 'latest':
+        latest_version = _get_latest_image_version(
+            cmd.cli_ctx,
+            location=namespace.location,
+            publisher=namespace.os_publisher,
+            offer=namespace.os_offer,
+            sku=namespace.os_sku,
+        )
+    else:
+        latest_version = namespace.os_version
+
+    image = _ImageShow(cli_ctx=cmd.cli_ctx)(command_args={
+            'location': namespace.location,
+            'publisher': namespace.os_publisher,
+            'offer': namespace.os_offer,
+            'sku': namespace.os_sku,
+            'version': latest_version,
+        })
+
+    if not image:
+        return 
+    
+    if image.get('imageDeprecationStatus', {}).get('imageState') == 'ScheduledForDeprecation':
+        logger.warning('The selected image is scheduled for deprecation.')
