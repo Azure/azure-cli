@@ -842,8 +842,31 @@ def show_vm_identity(cmd, resource_group_name, vm_name):
 
 
 def show_vmss_identity(cmd, resource_group_name, vm_name):
-    client = _compute_client_factory(cmd.cli_ctx)
-    return client.virtual_machine_scale_sets.get(resource_group_name, vm_name).identity
+    vm = get_vmss_by_aaz(cmd, resource_group_name, vm_name)
+
+    identity = vm.get("identity", {}) if vm else None
+
+    if not identity:
+        return None
+
+    user_assigned = identity.get('userAssignedIdentities', {})
+
+    if not user_assigned:
+        identity['userAssignedIdentities'] = None
+    else:
+        for user_identity in user_assigned.keys():
+            if not user_assigned.get(user_identity).get('clientId'):
+                user_assigned[user_identity]['clientId'] = None
+            if not user_assigned.get(user_identity).get('principalId'):
+                user_assigned[user_identity]['principalId'] = None
+
+    if not identity.get('principalId'):
+        identity['principalId'] = None
+
+    if not identity.get('tenantId'):
+        identity['tenantId'] = None
+
+    return identity or None
 
 
 def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, identity_role=None,
@@ -4197,6 +4220,23 @@ def get_vmss(cmd, resource_group_name, name, instance_id=None, include_user_data
     if cmd.supported_api_version(min_api='2021-03-01', operation_group='virtual_machine_scale_sets'):
         return client.virtual_machine_scale_sets.get(resource_group_name, name, expand=expand)
     return client.virtual_machine_scale_sets.get(resource_group_name, name)
+
+
+def get_vmss_by_aaz(cmd, resource_group_name, name, instance_id=None, include_user_data=False):
+    from .operations.vmss import VMSSShow
+    from .operations.vmss_vms import VMSSVMSShow
+
+    command_args = {
+        'resource_group': resource_group_name,
+        'vm_scale_set_name': name,
+    }
+
+    if include_user_data:
+        command_args['expand'] = 'userData'
+
+    if instance_id is not None:
+        return VMSSVMSShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+    return VMSSShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
 def _check_vmss_hyper_v_generation(cli_ctx, vmss):
