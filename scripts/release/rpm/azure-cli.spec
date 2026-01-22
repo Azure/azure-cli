@@ -57,6 +57,10 @@ deactivate
 for d in %{buildroot}%{cli_lib_dir}/bin/*; do perl -p -i -e "s#%{buildroot}##g" $d; done;
 rm %{buildroot}%{cli_lib_dir}/pyvenv.cfg
 
+# Remove vendored binaries with foreign shebangs that cause RPM dependency issues
+# Use || true to not fail if path doesn't exist
+rm -rf %{buildroot}%{cli_lib_dir}/lib/python*/site-packages/setuptools/_vendor/bin || true
+
 # Create executable (entry script)
 
 # For PYTHONPATH:
