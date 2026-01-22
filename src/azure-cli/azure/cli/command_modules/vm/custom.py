@@ -2629,6 +2629,10 @@ def _remove_identities_by_aaz(cmd, resource_group_name, name, identities, getter
             existing_identity['type'] = IdentityType.NONE.value
 
     result = LongRunningOperation(cmd.cli_ctx)(setter(resource_group_name, name, resource))
+
+    if not result:
+        return None
+
     return result.get('identity') or None
 
 
