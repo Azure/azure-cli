@@ -7,7 +7,9 @@ from typing import Tuple
 
 from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
     CONST_ACSTOR_ALL,
+    CONST_ACSTOR_EXT_INSTALLATION_NAME,
     CONST_ACSTOR_IO_ENGINE_LABEL_KEY,
+    CONST_ACSTOR_K8S_EXTENSION_NAME,
     CONST_ACSTOR_V1_K8S_EXTENSION_NAME,
     CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY,
     CONST_DISK_TYPE_PV_WITH_ANNOTATION,
@@ -146,7 +148,7 @@ def check_if_extension_is_installed(cmd, resource_group, cluster_name) -> bool:
     return return_val
 
 
-def get_extension_installed_and_cluster_configs(
+def get_extension_installed_and_cluster_configs_v1(
     cmd,
     resource_group,
     cluster_name,
@@ -242,6 +244,56 @@ def get_extension_installed_and_cluster_configs(
         resource_cpu_value,
         ephemeral_disk_volume_type,
         perf_tier
+    )
+
+
+def get_extension_installed_and_cluster_configs(
+    cmd,
+    resource_group,
+    cluster_name
+) -> Tuple[bool, bool, bool]:
+    client_factory = get_k8s_extension_module(CONST_K8S_EXTENSION_CLIENT_FACTORY_MOD_NAME)
+    client = client_factory.cf_k8s_extension_operation(cmd.cli_ctx)
+    k8s_extension_custom_mod = get_k8s_extension_module(CONST_K8S_EXTENSION_CUSTOM_MOD_NAME)
+    is_extension_installed = False
+    is_ephemeral_disk_enabled = False
+    is_elastic_san_enabled = False
+
+    try:
+        extension = k8s_extension_custom_mod.show_k8s_extension(
+            client,
+            resource_group,
+            cluster_name,
+            CONST_ACSTOR_EXT_INSTALLATION_NAME,
+            "managedClusters",
+        )
+
+        extension_type = extension.extension_type.lower()
+        is_extension_installed = extension_type == CONST_ACSTOR_K8S_EXTENSION_NAME
+        config_settings = extension.configuration_settings
+
+        if is_extension_installed and config_settings is not None:
+            is_ephemeral_disk_enabled = (
+                config_settings.get("csiDriverConfigs.local-csi-driver.enabled", "False") == "True"
+            )
+            is_elastic_san_enabled = (
+                config_settings.get("csiDriverConfigs.azuresan-csi-driver.enabled", "False") == "True"
+            )
+
+    except:  # pylint: disable=bare-except
+        is_extension_installed = False
+
+    return (
+        is_extension_installed,
+        is_ephemeral_disk_enabled,
+        is_elastic_san_enabled,
+    )
+
+
+def should_delete_extension(storage_options_to_remove) -> bool:
+    return (
+        storage_options_to_remove in [True, CONST_ACSTOR_ALL] or
+        (isinstance(storage_options_to_remove, list) and CONST_ACSTOR_ALL in storage_options_to_remove)
     )
 
 

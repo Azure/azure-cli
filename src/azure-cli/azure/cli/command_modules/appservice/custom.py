@@ -519,9 +519,47 @@ def update_app_settings_functionapp(cmd, resource_group_name, name, settings=Non
     return update_app_settings(cmd, resource_group_name, name, settings, slot, slot_settings)
 
 
+def _parse_json_setting(s, result, slot_result, setting_type):
+    """
+    Parse JSON format settings.
+
+    Parameters:
+        s (str): The input string containing JSON-formatted settings.
+        result (dict): A dictionary to store the parsed key-value pairs from the settings.
+        slot_result (dict): A dictionary to store slot setting flags for each key.
+        setting_type (str): The type of settings being parsed, either "SlotSettings" or "Settings".
+
+    Returns:
+        bool: True if parsing was successful, False otherwise.
+    """
+    try:
+        temp = shell_safe_json_parse(s)
+        if isinstance(temp, list):  # Accept the output of the "list" command
+            for t in temp:
+                if 'slotSetting' in t.keys():
+                    slot_result[t['name']] = t['slotSetting']
+                elif setting_type == "SlotSettings":
+                    slot_result[t['name']] = True
+                result[t['name']] = t['value']
+        else:
+            # Handle JSON objects: setting_type is either "SlotSettings" or "Settings"
+            # Different logic needed for slot settings vs regular settings
+            if setting_type == "SlotSettings":
+                # For slot settings JSON objects, add values to result and mark as slot settings
+                result.update(temp)
+                for key in temp:
+                    slot_result[key] = True
+            else:
+                # For regular settings JSON objects, add values to result only
+                result.update(temp)
+        return True
+    except InvalidArgumentValueError:
+        return False
+
+
 def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None, slot_settings=None):
     if not settings and not slot_settings:
-        raise MutuallyExclusiveArgumentError('Usage Error: --settings |--slot-settings')
+        raise MutuallyExclusiveArgumentError('Please provide either --settings or --slot-settings parameter.')
 
     settings = settings or []
     slot_settings = slot_settings or []
@@ -529,50 +567,39 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
     app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
                                            'list_application_settings', slot)
     result, slot_result = {}, {}
-    # pylint: disable=too-many-nested-blocks
-    for src, dest, setting_type in [(settings, result, "Settings"), (slot_settings, slot_result, "SlotSettings")]:
-        for s in src:
-            # Check if this looks like a simple key=value pair without JSON/dict syntax
-            # If so, parse it directly to avoid unnecessary warnings from ast.literal_eval
-            if ('=' in s and not s.lstrip().startswith(('{"', "[", "{")) and
-                    not s.startswith('@')):  # @ indicates file input
-                try:
-                    setting_name, value = s.split('=', 1)
-                    dest[setting_name] = value
-                    continue
-                except ValueError:
-                    pass  # Fall back to JSON parsing if split fails
 
+    for src, setting_type in [(settings, "Settings"), (slot_settings, "SlotSettings")]:
+        for s in src:
+            # Try simple key=value parsing first
+            if '=' in s and not s.lstrip().startswith(('{"', "[", "{")) and not s.startswith('@'):
+                k, v = s.split('=', 1)
+                result[k] = v
+                if setting_type == "SlotSettings":
+                    slot_result[k] = True
+                continue
+
+            # Try JSON parsing
+            if _parse_json_setting(s, result, slot_result, setting_type):
+                continue
+
+            # Fallback to key=value parsing with error handling
             try:
-                temp = shell_safe_json_parse(s)
-                if isinstance(temp, list):  # a bit messy, but we'd like accept the output of the "list" command
-                    for t in temp:
-                        if 'slotSetting' in t.keys():
-                            slot_result[t['name']] = t['slotSetting']
-                        elif setting_type == "SlotSettings":
-                            slot_result[t['name']] = True
-                        result[t['name']] = t['value']
-                else:
-                    dest.update(temp)
-            except CLIError:
-                setting_name, value = s.split('=', 1)
-                dest[setting_name] = value
-                result.update(dest)
+                k, v = s.split('=', 1)
+            except ValueError as ex:
+                raise InvalidArgumentValueError(
+                    f"Invalid setting format: '{s}'. Expected 'key=value' format or valid JSON.",
+                    recommendation="Use 'key=value' format or provide valid JSON like '{\"key\": \"value\"}'."
+                ) from ex
+
+            result[k] = v
+            if setting_type == "SlotSettings":
+                slot_result[k] = True
 
     for setting_name, value in result.items():
         app_settings.properties[setting_name] = value
     client = web_client_factory(cmd.cli_ctx)
 
-
-# TODO: Centauri currently return wrong payload for update appsettings, remove this once backend has the fix.
-    if is_centauri_functionapp(cmd, resource_group_name, name):
-        update_application_settings_polling(cmd, resource_group_name, name, app_settings, slot, client)
-        result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings', slot)
-    else:
-        result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
-                                             'update_application_settings',
-                                             app_settings, slot, client)
-
+    # Process slot configurations before updating application settings to ensure proper configuration order.
     app_settings_slot_cfg_names = []
     if slot_result:
         slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
@@ -585,6 +612,15 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
                 slot_cfg_names.app_setting_names.remove(slot_setting_name)
         app_settings_slot_cfg_names = slot_cfg_names.app_setting_names
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
+
+# TODO: Centauri currently return wrong payload for update appsettings, remove this once backend has the fix.
+    if is_centauri_functionapp(cmd, resource_group_name, name):
+        update_application_settings_polling(cmd, resource_group_name, name, app_settings, slot, client)
+        result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings', slot)
+    else:
+        result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
+                                             'update_application_settings',
+                                             app_settings, slot, client)
 
     return _build_app_settings_output(result.properties, app_settings_slot_cfg_names, redact=True)
 
@@ -605,7 +641,7 @@ def update_application_settings_polling(cmd, resource_group_name, name, app_sett
                 time.sleep(5)
                 r = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
         else:
-            raise CLIError(ex)
+            raise AzureResponseError(f"Failed to update application settings: {str(ex)}") from ex
 
 
 def add_azure_storage_account(cmd, resource_group_name, name, custom_id, storage_type, account_name,
