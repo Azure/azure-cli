@@ -85,8 +85,6 @@ class VMSSPatch(_VMSSPatch):
 
 class VMSSIdentityRemove(_VMSSPatch):
     def _output(self, *args, **kwargs):
-        from azure.cli.core.aaz import AAZUndefined, has_value
-
         # Resolve flatten conflict
         # When the type field conflicts, the type in inner layer is ignored and the outer layer is applied
         if has_value(self.ctx.vars.instance.properties.virtual_machine_profile.extension_profile.extensions):

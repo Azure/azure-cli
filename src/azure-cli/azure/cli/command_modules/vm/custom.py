@@ -5441,16 +5441,16 @@ def remove_vmss_identity(cmd, resource_group_name, vmss_name, identities=None):
             'vm_scale_set_name': vmss_name
         }
 
-        if vmss.get('identity') and vmss.get('identity').get('type') == IdentityType.USER_ASSIGNED.value:
+        if vmss.get('identity') and vmss['identity'].get('type') == IdentityType.USER_ASSIGNED.value:
             # NOTE: The literal 'UserAssigned' is intentionally appended as a marker for
             # VMSSIdentityRemove._format_content, which uses it to apply special handling
             # for purely user-assigned identities. It is not a real identity resource ID.
             command_args['mi_user_assigned'] = \
                 list(vmss.get('identity', {}).get('userAssignedIdentities', {}).keys()) + ['UserAssigned']
-        elif vmss.get('identity') and vmss.get('identity').get('type') == IdentityType.SYSTEM_ASSIGNED.value:
+        elif vmss.get('identity') and vmss['identity'].get('type') == IdentityType.SYSTEM_ASSIGNED.value:
             command_args['mi_user_assigned'] = []
             command_args['mi_system_assigned'] = 'True'
-        elif vmss.get('identity') and vmss.get('identity').get('type') == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value:
+        elif vmss.get('identity') and vmss['identity'].get('type') == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value:
             command_args['mi_user_assigned'] = list(vmss.get('identity', {}).get('userAssignedIdentities', {}).keys())
             command_args['mi_system_assigned'] = 'True'
         else:
