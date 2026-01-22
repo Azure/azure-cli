@@ -454,7 +454,7 @@ class MainCommandsLoader(CLICommandsLoader):
         use_command_index = self.cli_ctx.config.getboolean('core', 'use_command_index', fallback=True)
         
         # Fast path for help requests - check if we can use cached help index to skip module loading
-        if use_command_index and args and '--help' in args or '-h' in args or (args and args[-1] == 'help'):
+        if use_command_index and args and ('--help' in args or '-h' in args or args[-1] == 'help'):
             # Parse the command path from args (e.g., ['vm', '--help'] -> 'vm')
             command_path_parts = []
             for arg in args:
@@ -474,14 +474,6 @@ class MainCommandsLoader(CLICommandsLoader):
                 # Raise SystemExit to stop execution (similar to how --help normally works)
                 sys.exit(0)
         # Fast path for top-level with no args (az with no arguments)
-        elif use_command_index and not args:
-            command_index = CommandIndex(self.cli_ctx)
-            help_index = command_index.get_help_index()
-            if help_index and 'root' in help_index:
-                logger.debug("Using cached help index for root, skipping module loading")
-                self._display_cached_help(help_index['root'], 'root')
-                sys.exit(0)
-        
         if use_command_index:
             command_index = CommandIndex(self.cli_ctx)
             index_result = command_index.get(args)
@@ -1411,3 +1403,4 @@ def get_default_cli():
                  logging_cls=AzCliLogging,
                  output_cls=AzOutputProducer,
                  help_cls=AzCliHelp)
+
