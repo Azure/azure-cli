@@ -2721,4 +2721,6 @@ def _validate_image_deprecation_status(cmd, namespace):
         return
 
     if image.get('imageDeprecationStatus', {}).get('imageState') == 'ScheduledForDeprecation':
-        logger.warning('The selected image is scheduled for deprecation.')
+        logger.warning('Warning: This image {} is scheduled for deprecation and will be blocked for new deployments once enforcement begins.\n'
+                       'VM / VMSS creation is allowed temporarily, but future deployments, redeployments, or scale‑out operations may fail.\n'
+                       'Consider switching to a supported image now.'.format(namespace.image))
