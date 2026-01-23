@@ -2700,19 +2700,19 @@ def _validate_image_deprecation_status(cmd, namespace):
             location=namespace.location,
             publisher=namespace.os_publisher,
             offer=namespace.os_offer,
-            sku=namespace.os_sku,
+            sku=namespace.os_sku
         )
     else:
         latest_version = namespace.os_version
 
     try:
         image = _ImageShow(cli_ctx=cmd.cli_ctx)(command_args={
-                'location': namespace.location,
-                'publisher': namespace.os_publisher,
-                'offer': namespace.os_offer,
-                'sku': namespace.os_sku,
-                'version': latest_version,
-            })
+            'location': namespace.location,
+            'publisher': namespace.os_publisher,
+            'offer': namespace.os_offer,
+            'sku': namespace.os_sku,
+            'version': latest_version
+        })
     except Exception as err:
         logger.warning('Failed to retrieve image deprecation status: %s', err)
         return
@@ -2721,6 +2721,8 @@ def _validate_image_deprecation_status(cmd, namespace):
         return
 
     if image.get('imageDeprecationStatus', {}).get('imageState') == 'ScheduledForDeprecation':
-        logger.warning('Warning: This image {} is scheduled for deprecation and will be blocked for new deployments once enforcement begins.\n'
-                       'VM / VMSS creation is allowed temporarily, but future deployments, redeployments, or scale‑out operations may fail.\n'
-                       'Consider switching to a supported image now.'.format(namespace.image))
+        logger.warning('Warning: This image %s is scheduled for deprecation and will be blocked for new deployments '
+                       'once enforcement begins.\n'
+                       'VM / VMSS creation is allowed temporarily, but future deployments, redeployments, or '
+                       'scale‑out operations may fail.\n'
+                       'Consider switching to a supported image now.', namespace.image)
