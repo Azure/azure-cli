@@ -2688,6 +2688,7 @@ def _validate_community_gallery_legal_agreement_acceptance(cmd, namespace):
         sys.exit(0)
 
 
+# pylint:disable=broad-exception-caught
 def _validate_image_deprecation_status(cmd, namespace):
     from .aaz.latest.vm.image import Show as _ImageShow
 
