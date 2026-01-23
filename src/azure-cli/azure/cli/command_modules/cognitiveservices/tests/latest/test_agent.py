@@ -39,6 +39,8 @@ import unittest
 import os
 import tempfile
 import shutil
+from unittest import mock
+from urllib.parse import urlparse, parse_qs
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from azure.cli.testsdk.decorators import serial_test
@@ -55,12 +57,42 @@ from azure.cli.command_modules.cognitiveservices.custom import (
     _is_docker_running,
     _is_fully_qualified_image,
     _validate_path_for_subprocess,
+    _get_agent_container_status,
+    AGENT_API_VERSION_PARAMS,
 )
 from azure.cli.command_modules.cognitiveservices._params import _environment_variables_type
 
 
 class CognitiveServicesAgentHelperTests(unittest.TestCase):
     """Unit tests for agent helper functions."""
+
+    def test_get_agent_container_status_builds_expected_request(self):
+        """Test that agent status calls the default container endpoint and returns payload."""
+        expected_payload = {"status": "Running"}
+
+        client = mock.Mock()
+        response = mock.Mock()
+        response.json.return_value = expected_payload
+        client.send_request.return_value = response
+
+        result = _get_agent_container_status(client, "myAgent", "10")
+
+        self.assertEqual(result, expected_payload)
+        client.send_request.assert_called_once()
+        response.raise_for_status.assert_called_once()
+
+        request = client.send_request.call_args[0][0]
+        self.assertEqual(getattr(request, "method", None), "GET")
+
+        parsed = urlparse(getattr(request, "url", ""))
+        self.assertEqual(
+            parsed.path,
+            "/agents/myAgent/versions/10/containers/default",
+        )
+        self.assertEqual(
+            parse_qs(parsed.query).get("api-version"),
+            [AGENT_API_VERSION_PARAMS["api-version"]],
+        )
     
     def test_validate_image_tag_valid(self):
         """Test tag validation and extraction from valid image URIs."""
