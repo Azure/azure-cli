@@ -657,8 +657,6 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                                               source_disk_restore_point_size_gb=getattr(namespace, 'source_disk_restore_point_size_gb', None)
                                               )
 
-    _validate_image_deprecation_status(cmd, namespace)
-
 
 def _validate_vm_create_storage_account(cmd, namespace):
     from azure.mgmt.core.tools import parse_resource_id
@@ -1454,6 +1452,15 @@ def _validate_generation_version_and_trusted_launch(cmd, namespace):
                                                        namespace.os_offer, namespace.os_sku)
             vm_image_info = client.get(namespace.location, namespace.os_publisher, namespace.os_offer,
                                        namespace.os_sku, os_version)
+            
+            if vm_image_info.image_deprecation_status.image_state == 'ScheduledForDeprecation':
+                logger.warning(
+                    'Warning: This image %s is scheduled for deprecation and will be blocked after %s.\n'
+                    'VM / VMSS creation is allowed temporarily, but future deployments, redeployments, or '
+                    'scale‑out operations may fail after this date.\n'
+                    'Consider switching to a supported image now.',
+                    namespace.image, vm_image_info.image_deprecation_status.scheduled_deprecation_time.strftime("%B %d, %Y"))
+                
             generation_version = vm_image_info.hyper_v_generation if hasattr(vm_image_info,
                                                                              'hyper_v_generation') else None
             features = vm_image_info.features if hasattr(vm_image_info, 'features') and vm_image_info.features else []
@@ -2686,44 +2693,3 @@ def _validate_community_gallery_legal_agreement_acceptance(cmd, namespace):
     if not prompt_y_n(msg, default="y"):
         import sys
         sys.exit(0)
-
-
-# pylint:disable=broad-exception-caught
-def _validate_image_deprecation_status(cmd, namespace):
-    from .aaz.latest.vm.image import Show as _ImageShow
-
-    if not namespace.os_publisher or not namespace.os_offer or not namespace.os_sku or not namespace.os_version:
-        return
-
-    if namespace.os_version.lower() == 'latest':
-        latest_version = _get_latest_image_version(
-            cmd.cli_ctx,
-            location=namespace.location,
-            publisher=namespace.os_publisher,
-            offer=namespace.os_offer,
-            sku=namespace.os_sku
-        )
-    else:
-        latest_version = namespace.os_version
-
-    try:
-        image = _ImageShow(cli_ctx=cmd.cli_ctx)(command_args={
-            'location': namespace.location,
-            'publisher': namespace.os_publisher,
-            'offer': namespace.os_offer,
-            'sku': namespace.os_sku,
-            'version': latest_version
-        })
-    except Exception as err:
-        logger.warning('Failed to retrieve image deprecation status: %s', err)
-        return
-
-    if not image:
-        return
-
-    if image.get('imageDeprecationStatus', {}).get('imageState') == 'ScheduledForDeprecation':
-        logger.warning('Warning: This image %s is scheduled for deprecation and will be blocked for new deployments '
-                       'once enforcement begins.\n'
-                       'VM / VMSS creation is allowed temporarily, but future deployments, redeployments, or '
-                       'scale‑out operations may fail.\n'
-                       'Consider switching to a supported image now.', namespace.image)
