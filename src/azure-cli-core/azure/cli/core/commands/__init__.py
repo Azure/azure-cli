@@ -1134,17 +1134,22 @@ def _load_command_loader(loader, args, name, prefix):
             logger.debug("Module '%s' is missing `get_command_loader` entry.", name)
 
     command_table = {}
-    command_loader = None
 
     if loader_cls:
         command_loader = loader_cls(cli_ctx=loader.cli_ctx)
+        loader.loaders.append(command_loader)  # This will be used by interactive
         if command_loader.supported_resource_type():
             command_table = command_loader.load_command_table(args)
+            if command_table:
+                for cmd in list(command_table.keys()):
+                    # TODO: If desired to for extension to patch module, this can be uncommented
+                    # if loader.cmd_to_loader_map.get(cmd):
+                    #    loader.cmd_to_loader_map[cmd].append(command_loader)
+                    # else:
+                    loader.cmd_to_loader_map[cmd] = [command_loader]
     else:
         logger.debug("Module '%s' is missing `COMMAND_LOADER_CLS` entry.", name)
-
-    group_table = command_loader.command_group_table if command_loader else {}
-    return command_table, group_table, command_loader
+    return command_table, command_loader.command_group_table
 
 
 def _load_extension_command_loader(loader, args, ext):

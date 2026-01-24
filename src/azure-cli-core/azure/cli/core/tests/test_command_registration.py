@@ -230,7 +230,7 @@ class TestCommandRegistration(unittest.TestCase):
             if command_table:
                 module_command_table.update(command_table)
                 loader.loaders.append(command_loader)  # this will be used later by the load_arguments method
-        return module_command_table, command_loader.command_group_table, command_loader
+        return module_command_table, command_loader.command_group_table
 
     expected_command_index = {'hello': ['azure.cli.command_modules.hello', 'azext_hello2', 'azext_hello1'],
                               'extra': ['azure.cli.command_modules.extra']}
@@ -432,12 +432,12 @@ class TestCommandRegistration(unittest.TestCase):
         # Test command index is built for command with positional argument
         cmd_tbl = loader.load_command_table(["extra", "extra", "positional_argument"])
         self.assertDictEqual(INDEX[CommandIndex._COMMAND_INDEX], self.expected_command_index)
-        self.assertSetEqual(set(cmd_tbl), {'hello mod-only', 'hello overridden', 'extra final', 'hello ext-only'})
+        self.assertEqual(list(cmd_tbl), ['hello mod-only', 'hello overridden', 'extra final', 'hello ext-only'])
 
         # Test command index is used by command with positional argument
         cmd_tbl = loader.load_command_table(["hello", "mod-only", "positional_argument"])
         self.assertDictEqual(INDEX[CommandIndex._COMMAND_INDEX], self.expected_command_index)
-        self.assertSetEqual(set(cmd_tbl), {'hello mod-only', 'hello overridden', 'hello ext-only'})
+        self.assertEqual(list(cmd_tbl), ['hello mod-only', 'hello overridden', 'hello ext-only'])
 
         # Test command index is used by command with positional argument
         cmd_tbl = loader.load_command_table(["extra", "final", "positional_argument2"])
