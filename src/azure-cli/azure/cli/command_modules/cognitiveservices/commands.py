@@ -129,6 +129,10 @@ def load_command_table(self, _):
         g.custom_command('list', 'agent_list')
         g.custom_command('list-versions', 'agent_versions_list')
         g.custom_show_command('show', 'agent_show')
+
+    with self.command_group('cognitiveservices agent logs', client_factory=cf_ai_projects, is_preview=True) as g:
+        g.custom_show_command('show', 'agent_logs_show')
+
     with self.command_group(
             'cognitiveservices account project', projects_type,
             client_factory=cf_projects) as g:

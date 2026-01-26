@@ -635,6 +635,14 @@ examples:
           --name my-agent \\
           --image myregistry.azurecr.io/my-large-agent:v1.0 \\
           --timeout 1200
+  - name: Create agent and stream container logs during deployment
+    text: |
+        az cognitiveservices agent create \\
+          --account-name myAccount \\
+          --project-name myProject \\
+          --name my-agent \\
+          --image myregistry.azurecr.io/my-agent:v1.0 \\
+          --show-logs
 """
 
 helps[
@@ -642,9 +650,41 @@ helps[
 ] = """
 type: command
 short-summary: Start a hosted agent deployment.
+long-summary: |
+    Starts a previously stopped agent deployment. Use --show-logs to stream
+    container console logs during startup for troubleshooting.
 examples:
   - name: Start hosted agent deployment.
     text: az cognitiveservices agent start --account-name myAccount --project-name myProject --name myAgent --agent-version 1
+  - name: Start agent and stream console logs during startup.
+    text: az cognitiveservices agent start --account-name myAccount --project-name myProject --name myAgent --agent-version 1 --show-logs
+"""
+
+helps[
+    "cognitiveservices agent logs"
+] = """
+type: group
+short-summary: Manage hosted agent container logs.
+"""
+
+helps[
+    "cognitiveservices agent logs show"
+] = """
+type: command
+short-summary: Show logs from a hosted agent container.
+long-summary: |
+    Streams console output (stdout/stderr) or system events from an agent container.
+    Use --follow to stream logs in real-time, or omit it to fetch recent logs and exit.
+    This is useful for troubleshooting agent startup issues or monitoring agent behavior.
+examples:
+  - name: Fetch the last 50 lines of console logs from an agent.
+    text: az cognitiveservices agent logs show --account-name myAccount --project-name myProject --name myAgent --agent-version 1
+  - name: Stream console logs in real-time.
+    text: az cognitiveservices agent logs show --account-name myAccount --project-name myProject --name myAgent --agent-version 1 --follow
+  - name: Fetch the last 100 lines of system event logs.
+    text: az cognitiveservices agent logs show --account-name myAccount --project-name myProject --name myAgent --agent-version 1 --type system --tail 100
+  - name: Stream logs with custom tail size.
+    text: az cognitiveservices agent logs show --account-name myAccount --project-name myProject --name myAgent --agent-version 1 --follow --tail 200
 """
 
 helps[

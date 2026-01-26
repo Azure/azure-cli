@@ -908,6 +908,162 @@ def _get_agent_container_status(client, agent_name, agent_version):
     return response.json()
 
 
+# Constants for log streaming
+LOG_STREAM_CONNECT_TIMEOUT = 10  # seconds
+LOG_STREAM_READ_TIMEOUT = 5  # seconds for non-follow mode
+LOG_STREAM_RETRY_INTERVAL = 5  # seconds between retries
+LOG_STREAM_MAX_RETRIES = 30  # max retry attempts (~2.5 minutes)
+LOG_STREAM_POST_DEPLOY_WAIT = 15  # seconds to stream after deployment ready
+
+
+def _get_log_stream_auth_header(cmd):
+    """
+    Get authorization header for log stream API.
+
+    Args:
+        cmd: CLI command context
+
+    Returns:
+        dict: Authorization header with Bearer token
+    """
+    from azure.cli.core._profile import Profile
+
+    profile = Profile(cli_ctx=cmd.cli_ctx)
+    credential, _, _ = profile.get_login_credentials(
+        subscription_id=cmd.cli_ctx.data.get("subscription_id")
+    )
+    token = credential.get_token("https://ai.azure.com/.default")
+    return {"Authorization": f"Bearer {token.token}"}
+
+
+def _build_log_stream_url(client, agent_name, agent_version, container_name="default"):
+    """
+    Build the log stream URL for an agent container.
+
+    Args:
+        client: Service client with endpoint configuration
+        agent_name: Name of the agent
+        agent_version: Version of the agent
+        container_name: Container name (default: 'default')
+
+    Returns:
+        str: Full URL for the log stream endpoint
+    """
+    endpoint = client._config.endpoint  # pylint: disable=protected-access
+    return (
+        f"{endpoint}/agents/{urllib.parse.quote(agent_name)}"
+        f"/versions/{urllib.parse.quote(str(agent_version))}"
+        f"/containers/{urllib.parse.quote(container_name)}:logstream"
+    )
+
+
+def _stream_agent_logs(
+    cmd,
+    client,
+    agent_name,
+    agent_version,
+    kind="console",
+    tail=50,
+    follow=True,
+):
+    """
+    Stream logs from an agent container.
+
+    Args:
+        cmd: CLI command context
+        client: Service client (AIProjectClient)
+        agent_name: Name of the agent
+        agent_version: Version of the agent
+        kind: Type of logs - 'console' (stdout/stderr) or 'system' (container events)
+        tail: Number of trailing lines to fetch (1-300)
+        follow: Whether to stream logs in real-time
+
+    Yields:
+        str: Log lines as they arrive
+
+    Raises:
+        InvalidArgumentValueError: If tail or kind parameters are invalid
+        AzureResponseError: If connection to log stream fails
+    """
+    import requests as http_requests
+
+    # Validate parameters
+    if tail is not None and not 1 <= tail <= 300:
+        raise InvalidArgumentValueError("--tail must be between 1 and 300")
+    if kind not in ("console", "system"):
+        raise InvalidArgumentValueError("--type must be 'console' or 'system'")
+
+    log_url = _build_log_stream_url(client, agent_name, agent_version)
+    params = {
+        "api-version": AGENT_API_VERSION_PARAMS["api-version"],
+        "kind": kind,
+        "tail": tail,
+    }
+    headers = _get_log_stream_auth_header(cmd)
+
+    logger.info("Connecting to log stream: %s", log_url)
+
+    timeout = None if follow else (LOG_STREAM_CONNECT_TIMEOUT, LOG_STREAM_READ_TIMEOUT)
+
+    try:
+        response = http_requests.get(
+            log_url, params=params, headers=headers, stream=True, timeout=timeout
+        )
+
+        if not response.ok:
+            error_detail = response.text or f"HTTP {response.status_code}"
+            raise AzureResponseError(f"Failed to connect to log stream: {error_detail}")
+
+        for line in response.iter_lines():
+            if line:
+                yield line.decode("utf-8", errors="replace")
+
+    except http_requests.exceptions.Timeout:
+        pass  # Expected when follow=False - read timeout after fetching available logs
+    except http_requests.exceptions.ConnectionError as e:
+        if "timed out" in str(e).lower():
+            pass  # Timeout wrapped in ConnectionError
+        else:
+            raise AzureResponseError(f"Failed to connect to log stream: {e}") from e
+    except KeyboardInterrupt:
+        logger.warning("Log streaming interrupted by user")
+        raise
+
+
+def agent_logs_show(
+    cmd,
+    client,
+    account_name,
+    project_name,
+    agent_name,
+    agent_version,
+    kind="console",
+    tail=50,
+    follow=False,
+):  # pylint: disable=unused-argument
+    """
+    Show logs from a hosted agent container.
+
+    Args:
+        cmd: CLI command context
+        client: Service client
+        account_name: Cognitive Services account name (unused, for CLI routing)
+        project_name: AI Foundry project name (unused, for CLI routing)
+        agent_name: Name of the agent
+        agent_version: Version of the agent
+        kind: Type of logs - 'console' or 'system'
+        tail: Number of trailing lines (1-300)
+        follow: Stream logs in real-time if True
+    """
+    try:
+        for log_line in _stream_agent_logs(
+            cmd, client, agent_name, agent_version, kind=kind, tail=tail, follow=follow
+        ):
+            print(log_line)
+    except KeyboardInterrupt:
+        pass  # Clean exit on Ctrl+C
+
+
 def _wait_for_agent_deployment_ready(
         cmd, client, agent_name, agent_version, timeout=600, poll_interval=5):
     """
@@ -1208,7 +1364,98 @@ def _resolve_agent_image_uri(
     return image
 
 
-def _deploy_agent_version(cmd, client, agent_name, created_version, min_replicas, max_replicas, timeout=600):
+class _BackgroundLogStreamer:
+    """
+    Context manager for streaming logs in a background thread during deployment.
+
+    Usage:
+        with _BackgroundLogStreamer(cmd, client, agent_name, version) as streamer:
+            # deployment operations...
+            streamer.wait_after_ready()  # optional: stream logs after deployment ready
+    """
+
+    def __init__(self, cmd, client, agent_name, agent_version, enabled=True):
+        self.cmd = cmd
+        self.client = client
+        self.agent_name = agent_name
+        self.agent_version = agent_version
+        self.enabled = enabled
+        self._thread = None
+        self._stop_event = None
+
+    def __enter__(self):
+        if not self.enabled:
+            return self
+
+        import threading
+        self._stop_event = threading.Event()
+        self._thread = threading.Thread(target=self._stream_with_retry, daemon=True)
+        self._thread.start()
+        logger.warning("Streaming container logs (Ctrl+C to stop)...")
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self._thread and self._stop_event:
+            self._stop_event.set()
+            self._thread.join(timeout=2)
+        return False  # Don't suppress exceptions
+
+    def _stream_with_retry(self):
+        """Stream logs with retry logic for container startup."""
+        import time
+
+        for attempt in range(LOG_STREAM_MAX_RETRIES):
+            if self._stop_event.is_set():
+                return
+
+            try:
+                # Check if container is in a streamable state
+                if not self._is_container_ready():
+                    time.sleep(LOG_STREAM_RETRY_INTERVAL)
+                    continue
+
+                # Stream logs
+                for log_line in _stream_agent_logs(
+                    self.cmd, self.client, self.agent_name, self.agent_version,
+                    kind="console", tail=100, follow=True
+                ):
+                    if self._stop_event.is_set():
+                        return
+                    print(log_line)
+                return  # Successfully streamed
+
+            except Exception as e:  # pylint: disable=broad-except
+                if self._stop_event.is_set():
+                    return
+                logger.debug("Log stream attempt %d failed: %s", attempt + 1, e)
+                if attempt < LOG_STREAM_MAX_RETRIES - 1:
+                    time.sleep(LOG_STREAM_RETRY_INTERVAL)
+
+    def _is_container_ready(self):
+        """Check if container is in a state where logs can be streamed."""
+        try:
+            status = _get_agent_container_status(self.client, self.agent_name, self.agent_version)
+            return status.get("status", "").lower() in ("running", "starting", "pending")
+        except Exception:  # pylint: disable=broad-except
+            return True  # Try streaming anyway if status check fails
+
+    def wait_after_ready(self, seconds=LOG_STREAM_POST_DEPLOY_WAIT):
+        """Wait for additional log streaming after deployment is ready."""
+        import time
+
+        if not self.enabled or not self._thread or not self._thread.is_alive():
+            return
+
+        logger.warning("Deployment ready. Streaming logs for %d more seconds (Ctrl+C to stop)...", seconds)
+        for _ in range(seconds):
+            if not self._thread.is_alive():
+                break
+            time.sleep(1)
+
+
+def _deploy_agent_version(
+    cmd, client, agent_name, created_version, min_replicas, max_replicas, timeout=600, show_logs=False
+):
     """
     Deploy an agent version with horizontal scaling configuration.
 
@@ -1220,6 +1467,7 @@ def _deploy_agent_version(cmd, client, agent_name, created_version, min_replicas
         min_replicas: Minimum number of replicas (default 0)
         max_replicas: Maximum number of replicas (default 3)
         timeout: Maximum time to wait for deployment (default 600 seconds)
+        show_logs: Stream container logs during deployment (default False)
     """
     effective_min_replicas = min_replicas if min_replicas is not None else 0
     effective_max_replicas = max_replicas if max_replicas is not None else 3
@@ -1229,35 +1477,26 @@ def _deploy_agent_version(cmd, client, agent_name, created_version, min_replicas
         effective_min_replicas,
         effective_max_replicas,
     )
-    try:
-        _invoke_agent_container_operation(
-            client,
-            agent_name,
-            created_version,
-            action="start",
-        )
 
-        _wait_for_agent_deployment_ready(cmd, client, agent_name, created_version, timeout=timeout)
+    with _BackgroundLogStreamer(cmd, client, agent_name, created_version, enabled=show_logs) as streamer:
+        try:
+            _invoke_agent_container_operation(client, agent_name, created_version, action="start")
+            _wait_for_agent_deployment_ready(cmd, client, agent_name, created_version, timeout=timeout)
 
-        if min_replicas is not None or max_replicas is not None:
-            _invoke_agent_container_operation(
-                client,
-                agent_name,
-                created_version,
-                action="update",
-                min_replicas=effective_min_replicas,
-                max_replicas=effective_max_replicas,
-            )
+            if min_replicas is not None or max_replicas is not None:
+                _invoke_agent_container_operation(
+                    client, agent_name, created_version, action="update",
+                    min_replicas=effective_min_replicas, max_replicas=effective_max_replicas
+                )
 
-        logger.info("Agent deployment started successfully")
-    except Exception as deploy_err:
-        recommendation = (
-            "Use 'az cognitiveservices agent start' to retry deployment once the underlying issue is resolved."
-        )
-        raise DeploymentError(
-            f"Agent version '{created_version}' was created but deployment failed: {deploy_err}",
-            recommendation=recommendation,
-        ) from deploy_err
+            logger.info("Agent deployment started successfully")
+            streamer.wait_after_ready()
+
+        except Exception as deploy_err:
+            raise DeploymentError(
+                f"Agent version '{created_version}' was created but deployment failed: {deploy_err}",
+                recommendation="Use 'az cognitiveservices agent start' to retry deployment."
+            ) from deploy_err
 
 
 def agent_update(
@@ -1298,14 +1537,33 @@ def agent_stop(
 
 
 def agent_start(
-    client, account_name, project_name, agent_name, agent_version
+    cmd, client, account_name, project_name, agent_name, agent_version, show_logs=False, timeout=600
 ):  # pylint: disable=unused-argument
     """
     Start hosted agent deployment.
+
+    Args:
+        cmd: CLI command context
+        client: Service client
+        account_name: Cognitive Services account name (unused, for CLI routing)
+        project_name: AI Foundry project name (unused, for CLI routing)
+        agent_name: Name of the agent
+        agent_version: Version of the agent to start
+        show_logs: Stream container logs during startup (default False)
+        timeout: Maximum time to wait for deployment to be ready (default 600 seconds)
     """
-    return _invoke_agent_container_operation(
-        client, agent_name, agent_version, action="start"
-    )
+    result = _invoke_agent_container_operation(client, agent_name, agent_version, action="start")
+
+    if show_logs:
+        with _BackgroundLogStreamer(cmd, client, agent_name, agent_version) as streamer:
+            try:
+                _wait_for_agent_deployment_ready(cmd, client, agent_name, agent_version, timeout=timeout)
+                logger.warning("Agent deployment is now running")
+                streamer.wait_after_ready()
+            except KeyboardInterrupt:
+                logger.warning("Log streaming interrupted")
+
+    return result
 
 
 def agent_delete_deployment(
@@ -1621,6 +1879,7 @@ def agent_create(  # pylint: disable=too-many-locals
     no_wait=False,
     no_start=False,
     timeout=600,
+    show_logs=False,
 ):
     """
     Create a new hosted agent from a container image or source code.
@@ -1652,6 +1911,7 @@ def agent_create(  # pylint: disable=too-many-locals
         no_wait: Don't wait for operation completion (default False)
         no_start: Skip automatic deployment after version creation (default False)
         timeout: Maximum time in seconds to wait for deployment (default 600)
+        show_logs: Stream container logs during deployment (default False)
 
     Returns:
         dict: Created agent version details including status, version, and configuration
@@ -1779,6 +2039,7 @@ def agent_create(  # pylint: disable=too-many-locals
             min_replicas,
             max_replicas,
             timeout=timeout,
+            show_logs=show_logs,
         )
     elif created_version and no_start:
         logger.info("Agent version created but not deployed (--no-start specified). "

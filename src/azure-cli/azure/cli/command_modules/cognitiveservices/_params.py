@@ -511,6 +511,16 @@ def load_arguments(self, _):
             ),
             default=600
         )
+        c.argument(
+            'show_logs',
+            options_list=['--show-logs'],
+            action='store_true',
+            help=(
+                'Stream container console logs during deployment. '
+                'Shows real-time output from the agent container as it starts up. '
+                'Useful for debugging startup issues.'
+            )
+        )
 
     with self.argument_context("cognitiveservices agent update") as c:
         c.argument(
@@ -533,6 +543,67 @@ def load_arguments(self, _):
             help="Cognitive Services hosted agent version. If not provided, deletes all versions.",
             required=False,
         )
+
+    with self.argument_context("cognitiveservices agent start") as c:
+        c.argument(
+            'show_logs',
+            options_list=['--show-logs'],
+            action='store_true',
+            help=(
+                'Stream container console logs during startup. '
+                'Shows real-time output from the agent container as it starts. '
+                'Useful for debugging startup issues.'
+            )
+        )
+        c.argument(
+            'timeout',
+            type=int,
+            help=(
+                'Maximum time in seconds to wait for deployment to be ready. '
+                'Default: 600 seconds (10 minutes).'
+            ),
+            default=600
+        )
+
+    with self.argument_context("cognitiveservices agent logs") as c:
+        c.argument(
+            "account_name",
+            options_list=["--account-name", "-a"],
+            help="Cognitive service account name."
+        )
+        c.argument(
+            "project_name",
+            options_list=["--project-name", "-p"],
+            help="AI project name"
+        )
+        c.argument(
+            "agent_name",
+            options_list=["--name", "-n"],
+            help="Cognitive Services hosted agent name",
+        )
+        c.argument("agent_version", help="Cognitive Services hosted agent version")
+
+    with self.argument_context("cognitiveservices agent logs show") as c:
+        c.argument(
+            'kind',
+            options_list=['--type', '-t'],
+            help="Type of logs to stream. 'console' for stdout/stderr, 'system' for container events.",
+            arg_type=get_enum_type(['console', 'system']),
+            default='console'
+        )
+        c.argument(
+            'tail',
+            type=int,
+            help='Number of trailing log lines to fetch (1-300). Default: 50',
+            default=50
+        )
+        c.argument(
+            'follow',
+            options_list=['--follow', '-f'],
+            action='store_true',
+            help='Stream logs in real-time. Without this flag, fetches recent logs and exits.'
+        )
+
     with self.argument_context('cognitiveservices') as c:
         c.argument('account_name', arg_type=name_arg_type, help='cognitive service account name',
                    completer=get_resource_name_completion_list('Microsoft.CognitiveServices/accounts'))
