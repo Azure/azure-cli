@@ -55,8 +55,9 @@ def _postgres_parse_list_capability(result, is_offer_restriction_check_required=
     geo_backup = [feature for feature in supported_features if feature.name == "GeoBackup"]
     autonomous_tuning = [feature for feature in supported_features if feature.name == "IndexTuning"]
 
+    # Update once capability calls are corrected for each command
     if restricted == "Enabled" and not is_offer_restriction_check_required:
-        raise InvalidArgumentValueError("The location is restricted for provisioning of flexible servers. Please try using another region.")
+        raise InvalidArgumentValueError("The location is restricted from performing this operation.")
 
     if restricted != "Disabled" and not is_offer_restriction_check_required:
         raise InvalidArgumentValueError("No available SKUs in this location.")
