@@ -365,7 +365,11 @@ class ContainerAppEnvUpdateDecorator(ContainerAppEnvDecorator):
         workload_profile_name = self.get_argument_workload_profile_name()
         workload_profile_type = self.get_argument_workload_profile_type()
 
-        if workload_profile_name:
+        if (workload_profile_name is None and workload_profile_type is not None and workload_profile_type.lower() != "flex"):
+            raise ValidationError("The following arguments are required: --workload-profile-name")
+
+        # The API will automatically name flex workload profiles as "flex"
+        if workload_profile_name or workload_profile_type.lower() == "flex":
             if "workloadProfiles" not in r["properties"] or not r["properties"]["workloadProfiles"]:
                 raise ValidationError(
                     "This environment does not allow for workload profiles. Can create a compatible environment with 'az containerapp env create --enable-workload-profiles'")
@@ -373,7 +377,7 @@ class ContainerAppEnvUpdateDecorator(ContainerAppEnvDecorator):
             if workload_profile_type:
                 workload_profile_type = workload_profile_type.upper()
             workload_profiles = r["properties"]["workloadProfiles"]
-            profile = [p for p in workload_profiles if p["name"].lower() == workload_profile_name.lower()]
+            profile = [p for p in workload_profiles if workload_profile_name and p["name"].lower() == workload_profile_name.lower()]
             update = False  # flag for updating an existing profile
             if profile:
                 profile = profile[0]
@@ -391,7 +395,7 @@ class ContainerAppEnvUpdateDecorator(ContainerAppEnvDecorator):
             if not update:
                 workload_profiles.append(profile)
             else:
-                idx = [i for i, p in enumerate(workload_profiles) if p["name"].lower() == workload_profile_name.lower()][0]
+                idx = [i for i, p in enumerate(workload_profiles) if workload_profile_name and p["name"].lower() == workload_profile_name.lower()][0]
                 workload_profiles[idx] = profile
 
             safe_set(self.managed_env_def, "properties", "workloadProfiles", value=workload_profiles)

@@ -447,6 +447,44 @@ class ContainerAppWorkloadProfilesTest(ScenarioTest):
         self.cmd('containerapp env delete -g {} -n {} --yes'.format(resource_group, env), expect_failure=False)
 
     @AllowLargeResponse(8192)
+    @ResourceGroupPreparer(location="northcentralus")
+    def test_containerapp_env_workload_profiles_name_validation(self, resource_group):
+        # Set location to a region that supports flex workload profiles
+        TEST_LOCATION = "northcentralusstage"
+        self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
+
+        env = self.create_random_name(prefix='env', length=24)
+
+        self.cmd('containerapp env create -g {} -n {} --location {} --logs-destination none --enable-workload-profiles'.format(resource_group, env, TEST_LOCATION))
+
+        containerapp_env = self.cmd('containerapp env show -g {} -n {}'.format(resource_group, env)).get_output_in_json()
+
+        while containerapp_env["properties"]["provisioningState"].lower() in ["waiting", "inprogress"]:
+            time.sleep(5)
+            containerapp_env = self.cmd('containerapp env show -g {} -n {}'.format(resource_group, env)).get_output_in_json()
+        time.sleep(30)
+
+        # Test 1: Creating a flex workload-profile should succeed without providing the workload-profile-name
+        self.cmd('containerapp env workload-profile add -g {} -n {} --workload-profile-type flex'.format(resource_group, env), expect_failure=False)
+
+        containerapp_env = self.cmd('containerapp env show -g {} -n {}'.format(resource_group, env)).get_output_in_json()
+
+        while containerapp_env["properties"]["provisioningState"].lower() in ["waiting", "inprogress"]:
+            time.sleep(5)
+            containerapp_env = self.cmd('containerapp env show -g {} -n {}'.format(resource_group, env)).get_output_in_json()
+        time.sleep(30)
+
+        # Verify the flex profile was created with a default name
+        profiles = self.cmd("az containerapp env workload-profile list -g {} -n {}".format(resource_group, env)).get_output_in_json()
+        flex_profiles = [p for p in profiles if p["properties"]["workloadProfileType"].lower() == "flex"]
+        self.assertEqual(len(flex_profiles), 1)
+
+        # Test 2: Creating any other workload-profile-type should fail if the name isn't provided
+        self.cmd('containerapp env workload-profile add -g {} -n {} --workload-profile-type D4 --min-nodes 1 --max-nodes 2'.format(resource_group, env), expect_failure=True)
+
+        self.cmd('containerapp env delete -g {} -n {} --yes --no-wait'.format(resource_group, env), expect_failure=False)
+
+    @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="eastus")
     def test_containerapp_env_enable_workload_profiles_infer_env_type_v1(self, resource_group):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
