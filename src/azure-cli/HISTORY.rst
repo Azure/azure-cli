@@ -34,7 +34,7 @@ Release History
 
 **Container app**
 
-* `az containerapp env create`: Update the error display for CO environment creation (#32648)
+* `az containerapp env create`: Update the error display for ConsumptionOnly environment creation (#32648)
 
 **MySQL**
 
@@ -53,13 +53,13 @@ Release History
 
 * Optimize MSI upgrade performance by simplifying file replacement logic (#32678)
 
-**POSTGRESQL**
+**PostgreSQL**
 
 * `az postgres flexible-server create/georestore/replica`: Allow SSDV2 servers to perform create replica and geo restore (#32649)
 
 **Profile**
 
-* `az login`: For managed identity authentication, no longer retrieve the FQDN of the machine, bypassing hanging or error caused by misconfigured network setup. (#32611)
+* `az login`: For managed identity authentication, no longer retrieve the FQDN of the machine, bypassing hanging or error caused by misconfigured network setup (#32611)
 
 **Storage**
 
