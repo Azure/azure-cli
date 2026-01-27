@@ -3230,7 +3230,8 @@ class VMSSExtensionInstallTest(ScenarioTest):
             'config_file': config_file
         })
 
-        self.cmd('vmss create -n {vmss} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password --admin-username admin123 --admin-password testPassword0 --instance-count 1 --orchestration-mode Uniform --lb-sku Standard --no-wait')
+        self.cmd('vmss create -n {vmss} -g {rg} --image OpenLogic:CentOS:7.5:latest --authentication-type password --admin-username admin123 '
+                 '--admin-password testPassword0 --vm-sku Standard_B2ms --instance-count 1 --orchestration-mode Uniform --lb-sku Standard --no-wait')
         self.cmd('vmss wait --created -n {vmss} -g {rg}')
 
         self.cmd('vmss extension set -n {net-ext} --publisher {net-pub} --version 1.4  --vmss-name {vmss} --resource-group {rg} --protected-settings "{config_file}" --force-update --enable-auto-upgrade false')
@@ -3295,7 +3296,8 @@ class VMSSExtensionInstallTest(ScenarioTest):
             'config_file': config_file
         })
 
-        self.cmd('vmss create -n {vmss} -g {rg} --image Debian:debian-10:10:latest --authentication-type password --admin-username admin123 --admin-password testPassword0 --instance-count 1 --no-wait --orchestration-mode Uniform --lb-sku Standard')
+        self.cmd('vmss create -g {rg} -n {vmss} --image OpenLogic:CentOS:7.5:latest --admin-username azureuser '
+                 '--vm-sku Standard_B2ms --orchestration-mode Uniform --lb-sku Standard')
         self.cmd('vmss wait --created -n {vmss} -g {rg}')
 
         self.cmd('vmss extension set -n {net-ext} --publisher {net-pub} --version 1.4  --vmss-name {vmss} --resource-group {rg} --protected-settings "{config_file}" --force-update --enable-auto-upgrade false')
@@ -3352,7 +3354,8 @@ class VMSSExtensionInstallTest(ScenarioTest):
             'ext_name': 'MyNetworkWatcher'
         })
 
-        self.cmd('vmss create -n {vmss} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password --admin-username admin123 --admin-password testPassword0 --instance-count 1 --orchestration-mode Flexible')
+        self.cmd('vmss create -n {vmss} -g {rg} --image OpenLogic:CentOS:7.5:latest --authentication-type password '
+                 '--admin-username admin123 --admin-password testPassword0 --vm-sku Standard_B2ms')
         self.cmd('vmss extension set -n {ext_type} --publisher {pub} --version 1.4  --vmss-name {vmss} --resource-group {rg} '
                  '--protected-settings "{config_file}" --extension-instance-name {ext_name}')
         self.cmd('vmss extension show --resource-group {rg} --vmss-name {vmss} --name {ext_name}', checks=[
@@ -3416,10 +3419,10 @@ class DiagnosticsExtensionInstallTest(ScenarioTest):
             'vnet': 'vnet1'
         })
 
-        self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password '
-                 '--lb-sku Standard --admin-username user11 --admin-password TestTest12#$ --orchestration-mode Uniform')
-        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password '
-                 '--admin-username user11 --admin-password TestTest12#$ --use-unmanaged-disk --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+        self.cmd('vmss create -g {rg} -n {vmss} --image OpenLogic:CentOS:7.5:latest --admin-username azureuser '
+                 '--vm-sku Standard_B2ms --orchestration-mode Uniform --lb-sku Standard')
+        self.cmd('vm create -g {rg} -n {vm} --use-unmanaged-disk --image OpenLogic:CentOS:7.5:latest --admin-username centosadmin '
+                 '--admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --size Standard_B2ms --nsg-rule NONE')
 
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
@@ -10978,7 +10981,8 @@ class VMSSAutomaticRepairsScenarioTest(ScenarioTest):
         })
 
         # Prepare vmss
-        self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username azureuser --orchestration-mode Uniform --lb-sku Standard')
+        self.cmd('vmss create -g {rg} -n {vmss} --image OpenLogic:CentOS:7.5:latest --admin-username azureuser '
+                 '--vm-sku Standard_B2ms --orchestration-mode Uniform --lb-sku Standard')
 
         # Prepare health extension
         _, settings_file = tempfile.mkstemp()
@@ -11714,7 +11718,9 @@ class VMSSPatchModeScenarioTest(ScenarioTest):
             'rg': resource_group
         })
 
-        self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --enable-agent --patch-mode ImageDefault --generate-ssh-keys --instance-count 0 --admin-username vmtest --vm-sku Standard_B2ms')
+        self.cmd('vmss create -g {rg} -n {vmss} --image OpenLogic:CentOS:7.5:latest --enable-agent '
+                 '--patch-mode ImageDefault --generate-ssh-keys --instance-count 0 '
+                 '--admin-username vmtest --vm-sku Standard_B2ms')
 
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         health_extension_file = os.path.join(curr_dir, 'health_extension.json').replace('\\', '\\\\')
@@ -13130,8 +13136,10 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
 
         self.cmd('vmss application list -g {rg} --name {vmss}')
 
+    @unittest.skip("SKIPPING: This test fails in Live mode because 'vid1' and 'vid2' are hardcoded. The referenced "
+                   "Gallery Application Versions do not exist in the current subscription. ")
     @AllowLargeResponse()
-    @ResourceGroupPreparer(name_prefix='cli_test_test_vm_vmss_application_enable_automatic_upgrade', location='eastus')
+    @ResourceGroupPreparer(name_prefix='cli_test_test_vm_vmss_application_enable_automatic_upgrade', location='australiacentral')
     def test_vm_vmss_application_enable_automatic_upgrade(self, resource_group):
         self.kwargs.update({
             'vm': self.create_random_name('vm', 10),
@@ -13148,8 +13156,8 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         health_extension_file = os.path.join(curr_dir, 'health_extension.json').replace('\\', '\\\\')
         self.kwargs['extension_file'] = health_extension_file
-        self.cmd('vm create -g {rg} -n {vm} --image Win2022Datacenter --size Standard_D2s_v3 --subnet {subnet} --vnet-name {vnet} --admin-password Password001! --nsg-rule NONE')
-        self.cmd('vm extension set --name ApplicationHealthWindows --publisher Microsoft.ManagedServices --version 1.0 --resource-group {rg} --vm-name {vm} --settings {extension_file}')
+        self.cmd('vm create -g {rg} -n {vm} --image ubuntu2204 --size Standard_B2ms --subnet {subnet} --vnet-name {vnet} --admin-password Password001! --nsg-rule NONE')
+        self.cmd('vm extension set --name  ApplicationHealthLinux --publisher Microsoft.ManagedServices --version 1.0 --resource-group {rg} --vm-name {vm} --settings {extension_file}')
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
         self.cmd('vm application set -g {rg} -n {vm} --app-version-ids {vid1} {vid2} --enable-automatic-upgrade True False', checks=[
             self.check('applicationProfile.galleryApplications[0].enableAutomaticUpgrade', True),
@@ -13161,7 +13169,7 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
         ])
 
         self.cmd('vmss create -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1! --image Win2022Datacenter --vm-sku Standard_D2s_v3')
-        self.cmd('vmss extension set --name ApplicationHealthWindows --publisher Microsoft.ManagedServices --version 1.0 --resource-group {rg} --vmss-name {vmss} --settings {extension_file}')
+        self.cmd('vmss extension set --name ApplicationHealthLinux --publisher Microsoft.ManagedServices --version 1.0 --resource-group {rg} --vmss-name {vmss} --settings {extension_file}')
         self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids {vid1} {vid2} --enable-automatic-upgrade True False', checks=[
             self.check('virtualMachineProfile.applicationProfile.galleryApplications[0].enableAutomaticUpgrade', True),
             self.check('virtualMachineProfile.applicationProfile.galleryApplications[1].enableAutomaticUpgrade', False)
@@ -13172,7 +13180,7 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
         ])
         message = 'usage error: --enable-automatic-upgrade should have the same number of items as --application-version-ids'
         with self.assertRaisesRegex(ArgumentUsageError, message):
-            self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids {vid1} {vid2} --enable-automatic-upgrade True\]', checks=[
+            self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids {vid1} {vid2} --enable-automatic-upgrade True', checks=[
                 self.check('virtualMachineProfile.applicationProfile.galleryApplications[0].enableAutomaticUpgrade', True),
                 self.check('virtualMachineProfile.applicationProfile.galleryApplications[1].enableAutomaticUpgrade', False)
             ])
