@@ -1403,7 +1403,9 @@ class _BackgroundLogStreamer:
     def _stream_with_retry(self):
         """Stream logs with retry logic for container startup."""
         import time
+        from requests.exceptions import ConnectionError as RequestsConnectionError, Timeout
 
+        last_error = None
         for attempt in range(LOG_STREAM_MAX_RETRIES):
             if self._stop_event.is_set():
                 return
@@ -1424,12 +1426,31 @@ class _BackgroundLogStreamer:
                     print(log_line)
                 return  # Successfully streamed
 
-            except Exception as e:  # pylint: disable=broad-except
+            except (RequestsConnectionError, Timeout) as e:
+                # Expected transient errors during container startup
                 if self._stop_event.is_set():
                     return
+                last_error = e
+                logger.debug("Log stream attempt %d failed (transient): %s", attempt + 1, e)
+                if attempt < LOG_STREAM_MAX_RETRIES - 1:
+                    time.sleep(LOG_STREAM_RETRY_INTERVAL)
+
+            except Exception as e:  # pylint: disable=broad-except
+                # Unexpected errors - log and continue retrying
+                if self._stop_event.is_set():
+                    return
+                last_error = e
                 logger.debug("Log stream attempt %d failed: %s", attempt + 1, e)
                 if attempt < LOG_STREAM_MAX_RETRIES - 1:
                     time.sleep(LOG_STREAM_RETRY_INTERVAL)
+
+        # All retries exhausted - warn user
+        if last_error and not self._stop_event.is_set():
+            logger.warning(
+                "Unable to establish log stream after %d attempts. "
+                "The agent may still be starting. Last error: %s",
+                LOG_STREAM_MAX_RETRIES, last_error
+            )
 
     def _is_container_ready(self):
         """Check if container is in a state where logs can be streamed."""
