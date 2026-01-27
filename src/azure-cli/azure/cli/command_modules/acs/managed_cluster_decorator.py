@@ -2597,12 +2597,8 @@ class AKSManagedClusterContext(BaseAKSContext):
         """Get the enablement of container network logs
 
         :return: bool or None"""
-        enable_cnl = (
-            self.raw_param.get("enable_container_network_logs")
-        )
-        disable_cnl = (
-            self.raw_param.get("disable_container_network_logs")
-        )
+        enable_cnl = self.raw_param.get("enable_container_network_logs")
+        disable_cnl = self.raw_param.get("disable_container_network_logs")
         if enable_cnl is None and disable_cnl is None:
             return None
         if enable_cnl and disable_cnl:
@@ -2610,28 +2606,30 @@ class AKSManagedClusterContext(BaseAKSContext):
                 "Cannot specify --enable-container-network-logs and "
                 "--disable-container-network-logs at the same time."
             )
-        if enable_cnl:
-            # Check if ACNS is enabled (either via parameter or already on the cluster)
-            acns_enabled = (
-                self.raw_param.get("enable_acns", False) or
-                (mc.network_profile and mc.network_profile.advanced_networking and
-                 mc.network_profile.advanced_networking.enabled)
-            )
-            # Check if monitoring is enabled (either via parameter or already on the cluster)
-            enable_addons = self.raw_param.get("enable_addons", "")
-            monitoring_being_enabled = "monitoring" in enable_addons if enable_addons else False
-            monitoring_already_enabled = (
-                mc.addon_profiles and
-                mc.addon_profiles.get("omsagent") and
-                mc.addon_profiles["omsagent"].enabled
-            )
-            monitoring_enabled = monitoring_being_enabled or monitoring_already_enabled
 
-            if not acns_enabled or not monitoring_enabled:
-                raise InvalidArgumentValueError(
-                    "Container network logs requires '--enable-acns', advanced networking "
-                    "to be enabled, and the monitoring addon to be enabled."
-                )
+        # Check if monitoring is being enabled via enable_addons parameter (for create scenarios)
+        enable_addons = self.raw_param.get("enable_addons")
+        monitoring_via_enable_addons = enable_addons and "monitoring" in enable_addons
+
+        # Check if monitoring is already enabled on the cluster
+        monitoring_on_cluster = (
+            mc.addon_profiles and
+            mc.addon_profiles.get("omsagent") and
+            mc.addon_profiles["omsagent"].enabled
+        )
+
+        # Check if ACNS is being enabled or already enabled
+        acns_enabled = (
+            self.raw_param.get("enable_acns", False) or
+            (mc.network_profile and mc.network_profile.advanced_networking and
+             mc.network_profile.advanced_networking.enabled)
+        )
+
+        if enable_cnl and (not acns_enabled or not (monitoring_via_enable_addons or monitoring_on_cluster)):
+            raise InvalidArgumentValueError(
+                "Container network logs requires '--enable-acns', advanced networking "
+                "to be enabled, and the monitoring addon to be enabled."
+            )
         enable_cnl = bool(enable_cnl) if enable_cnl is not None else False
         disable_cnl = bool(disable_cnl) if disable_cnl is not None else False
         return enable_cnl or not disable_cnl

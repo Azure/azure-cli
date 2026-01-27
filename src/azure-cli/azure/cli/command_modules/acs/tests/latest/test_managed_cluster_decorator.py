@@ -14386,6 +14386,74 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             ):
                 dec_6.set_up_addon_profiles(mc_6)
 
+        # Case 7: enable_container_network_logs for update with ACNS already enabled and monitoring enabled
+        dec_7 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_container_network_logs": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_7 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="azure",
+                network_plugin_mode="overlay",
+                network_dataplane="azure",
+                pod_cidr="100.64.0.0/16",
+                service_cidr="192.168.0.0/16",
+                advanced_networking=self.models.AdvancedNetworking(
+                    enabled=True,
+                ),
+            ),
+            addon_profiles={
+                "omsagent": self.models.ManagedClusterAddonProfile(
+                    enabled=True,
+                )
+            },
+        )
+        dec_7.context.attach_mc(mc_7)
+        # Should succeed since ACNS and monitoring are enabled on cluster
+        dec_7.update_monitoring_profile_flow_logs(mc_7)
+
+        # Case 8: enable_container_network_logs with enable_high_log_scale_mode explicitly set to False
+        dec_8 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "name": "test_name",
+                "resource_group_name": "test_rg_name",
+                "location": "test_location",
+                "vnet_subnet_id": "test_vnet_subnet_id",
+                "enable_addons": "monitoring",
+                "workspace_resource_id": "test_workspace_resource_id",
+                "enable_msi_auth_for_monitoring": True,
+                "enable_acns": True,
+                "enable_container_network_logs": True,
+                "enable_high_log_scale_mode": False,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_8 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="azure",
+                network_plugin_mode="overlay",
+                network_dataplane="cilium",
+                pod_cidr="100.64.0.0/16",
+                service_cidr="192.168.0.0/16",
+            ),
+        )
+        dec_8.context.set_intermediate("subscription_id", "test_subscription_id")
+        dec_8.context.attach_mc(mc_8)
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            with patch(
+                "azure.cli.command_modules.acs.managed_cluster_decorator.ensure_container_insights_for_monitoring",
+                return_value=None,
+            ):
+                dec_8.set_up_addon_profiles(mc_8)
+
 
 if __name__ == "__main__":
     unittest.main()
