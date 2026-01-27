@@ -2358,9 +2358,8 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
                 # snapshot / copy
                 disk_lun = _get_disk_lun(data_disks_list)
                 if source_snapshots_or_disks:
-                    if new_names_of_source_snapshots_or_disks is None:
-                        new_names_of_source_snapshots_or_disks = [None] * len(source_snapshots_or_disks)
-                    for src_id, name in zip(source_snapshots_or_disks, new_names_of_source_snapshots_or_disks):
+                    _new_names = new_names_of_source_snapshots_or_disks or [None] * len(source_snapshots_or_disks)
+                    for src_id, name in zip(source_snapshots_or_disks, _new_names):
                         disk_obj = {
                             'name': name,
                             'lun': disk_lun,
@@ -2377,9 +2376,8 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
                         disk_lun += 1
                 # restore point
                 if source_disk_restore_point:
-                    if new_names_of_source_disk_restore_point is None:
-                        new_names_of_source_disk_restore_point = [None] * len(source_disk_restore_point)
-                    for src_id, name in zip(source_disk_restore_point, new_names_of_source_disk_restore_point):
+                    _new_names_rp = new_names_of_source_disk_restore_point or [None] * len(source_disk_restore_point)
+                    for src_id, name in zip(source_disk_restore_point, _new_names_rp):
                         disk_obj = {
                             'name': name,
                             'lun': disk_lun,
