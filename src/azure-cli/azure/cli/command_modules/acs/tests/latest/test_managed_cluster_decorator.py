@@ -6250,6 +6250,92 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         self.assertEqual(certs_empty, [])
 
 
+    def test_get_enable_azure_monitor_app_monitoring(self):
+        # default value
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_azure_monitor_app_monitoring": False,
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_enable_azure_monitor_app_monitoring(), False)
+
+        # custom value - enabled
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_azure_monitor_app_monitoring": True,
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_2.get_enable_azure_monitor_app_monitoring(), True)
+
+    def test_get_disable_azure_monitor_app_monitoring(self):
+        # default value
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "disable_azure_monitor_app_monitoring": False,
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_1.get_disable_azure_monitor_app_monitoring(), False)
+
+        # custom value - disabled
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "disable_azure_monitor_app_monitoring": True,
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_2.get_disable_azure_monitor_app_monitoring(), True)
+
+    def test_get_enable_disable_azure_monitor_app_monitoring_mutually_exclusive(self):
+        # test mutually exclusive - both enabled raises error
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_azure_monitor_app_monitoring": True,
+                    "disable_azure_monitor_app_monitoring": True,
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_1.get_enable_azure_monitor_app_monitoring()
+
+        # test mutually exclusive from disable side
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_azure_monitor_app_monitoring": True,
+                    "disable_azure_monitor_app_monitoring": True,
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_2.get_disable_azure_monitor_app_monitoring()
+
+
 class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
     def setUp(self):
         self.cli_ctx = MockCLI()
@@ -15625,6 +15711,54 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         with self.assertRaises(MutuallyExclusiveArgumentError):
             dec_17.update_monitoring_profile_flow_logs(mc_17)
 
+
+
+    def test_update_azure_monitor_profile_enable_app_monitoring(self):
+        # Test enabling app monitoring on a cluster without existing azure_monitor_profile
+        dec_1 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_azure_monitor_app_monitoring": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.update_azure_monitor_profile(mc_1)
+
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile)
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile.app_monitoring)
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile.app_monitoring.auto_instrumentation)
+        self.assertTrue(dec_mc_1.azure_monitor_profile.app_monitoring.auto_instrumentation.enabled)
+
+    def test_update_azure_monitor_profile_disable_app_monitoring(self):
+        # Test disabling app monitoring on a cluster with existing azure_monitor_profile
+        dec_1 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "disable_azure_monitor_app_monitoring": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            azure_monitor_profile=self.models.ManagedClusterAzureMonitorProfile(
+                app_monitoring=self.models.ManagedClusterAzureMonitorProfileAppMonitoring(
+                    auto_instrumentation=self.models.ManagedClusterAzureMonitorProfileAppMonitoringAutoInstrumentation(
+                        enabled=True
+                    )
+                )
+            )
+        )
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.update_azure_monitor_profile(mc_1)
+
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile)
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile.app_monitoring)
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile.app_monitoring.auto_instrumentation)
+        self.assertFalse(dec_mc_1.azure_monitor_profile.app_monitoring.auto_instrumentation.enabled)
 
 if __name__ == "__main__":
     unittest.main()
