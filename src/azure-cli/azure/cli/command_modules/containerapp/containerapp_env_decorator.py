@@ -308,6 +308,12 @@ class ContainerAppEnvUpdateDecorator(ContainerAppEnvDecorator):
         if self.get_argument_p2p_encryption_enabled() is False and self.get_argument_mtls_enabled() is True:
             raise ValidationError("Cannot use '--enable-mtls' with '--enable-peer-to-peer-encryption False'")
 
+        # validate workload profile arguments - flex profiles will be named automatically
+        workload_profile_name = self.get_argument_workload_profile_name()
+        workload_profile_type = self.get_argument_workload_profile_type()
+        if (workload_profile_name is None and workload_profile_type is not None and workload_profile_type.lower() != "flex"):
+            raise ValidationError("The following arguments are required: --workload-profile-name")
+
     def construct_payload(self):
         try:
             r = self.client.show(cmd=self.cmd, resource_group_name=self.get_argument_resource_group_name(), name=self.get_argument_name())
@@ -365,11 +371,8 @@ class ContainerAppEnvUpdateDecorator(ContainerAppEnvDecorator):
         workload_profile_name = self.get_argument_workload_profile_name()
         workload_profile_type = self.get_argument_workload_profile_type()
 
-        if (workload_profile_name is None and workload_profile_type is not None and workload_profile_type.lower() != "flex"):
-            raise ValidationError("The following arguments are required: --workload-profile-name")
-
-        # The API will automatically name flex workload profiles as "flex"
-        if workload_profile_name or workload_profile_type.lower() == "flex":
+        # We have already validated that the configuration is valid if adding a workload profile
+        if workload_profile_name or workload_profile_type:
             if "workloadProfiles" not in r["properties"] or not r["properties"]["workloadProfiles"]:
                 raise ValidationError(
                     "This environment does not allow for workload profiles. Can create a compatible environment with 'az containerapp env create --enable-workload-profiles'")
