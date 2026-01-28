@@ -14386,7 +14386,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             ):
                 dec_6.set_up_addon_profiles(mc_6)
 
-        # Case 7: enable_container_network_logs for update with ACNS already enabled and monitoring enabled
+        # Case 7: enable_container_network_logs for update with ACNS enabled, monitoring enabled, but NOT cilium
         dec_7 = AKSManagedClusterUpdateDecorator(
             self.cmd,
             self.client,
@@ -14414,8 +14414,9 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             },
         )
         dec_7.context.attach_mc(mc_7)
-        # Should succeed since ACNS and monitoring are enabled on cluster
-        dec_7.update_monitoring_profile_flow_logs(mc_7)
+        # Should fail since cilium network dataplane is required
+        with self.assertRaises(InvalidArgumentValueError):
+            dec_7.update_monitoring_profile_flow_logs(mc_7)
 
         # Case 8: enable_container_network_logs with enable_high_log_scale_mode explicitly set to False
         dec_8 = AKSManagedClusterCreateDecorator(

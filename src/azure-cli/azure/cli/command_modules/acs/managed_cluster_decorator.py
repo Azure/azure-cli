@@ -2625,10 +2625,20 @@ class AKSManagedClusterContext(BaseAKSContext):
              mc.network_profile.advanced_networking.enabled)
         )
 
-        if enable_cnl and (not acns_enabled or not (monitoring_via_enable_addons or monitoring_on_cluster)):
+        # Check if network dataplane is set to cilium (either via parameter or already on the cluster)
+        network_dataplane_param = self.raw_param.get("network_dataplane")
+        network_dataplane_cluster = None
+        if mc.network_profile is not None:
+            network_dataplane_cluster = getattr(mc.network_profile, "network_dataplane", None)
+        network_dataplane = network_dataplane_param or network_dataplane_cluster
+        cilium_enabled = safe_lower(network_dataplane) == "cilium"
+
+        monitoring_enabled = monitoring_via_enable_addons or monitoring_on_cluster
+
+        if enable_cnl and (not acns_enabled or not monitoring_enabled or not cilium_enabled):
             raise InvalidArgumentValueError(
-                "Container network logs requires '--enable-acns', advanced networking "
-                "to be enabled, and the monitoring addon to be enabled."
+                "Container network logs requires ACNS to be enabled, the monitoring addon to be enabled, "
+                "and the cilium network dataplane."
             )
         enable_cnl = bool(enable_cnl) if enable_cnl is not None else False
         disable_cnl = bool(disable_cnl) if disable_cnl is not None else False
