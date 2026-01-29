@@ -1276,9 +1276,10 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     if (is_trusted_launch or is_confidential_vm) and enable_integrity_monitoring:
         vm = get_vm_by_aaz(cmd, resource_group_name, vm_name, 'instanceView')
 
+        publisher = ''
         if vm.get('storageProfile', {}).get('osDisk', {}).get('osType', '') == 'Linux':
             publisher = 'Microsoft.Azure.Security.LinuxAttestation'
-        if vm.get('storageProfile', {}).get('osDisk', {}).get('osType', '') == 'Windows':
+        elif vm.get('storageProfile', {}).get('osDisk', {}).get('osType', '') == 'Windows':
             publisher = 'Microsoft.Azure.Security.WindowsAttestation'
 
         version = _normalize_extension_version(cmd.cli_ctx, publisher, 'GuestAttestation', None, vm['location'])

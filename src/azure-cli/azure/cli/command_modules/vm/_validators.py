@@ -259,7 +259,7 @@ def _parse_image_argument(cmd, namespace):
         namespace.os_version = urn_match.group(4)
 
         if not any([namespace.plan_name, namespace.plan_product, namespace.plan_publisher]):
-            image_plan = _get_image_plan_info_if_exists_by_aaz(cmd, namespace)
+            image_plan = _get_image_plan_info_if_exists(cmd, namespace)
             if image_plan and image_plan.get('name') and image_plan.get('product') and image_plan.get('publisher'):
                 namespace.plan_name = image_plan['name']
                 namespace.plan_product = image_plan['product']
@@ -284,7 +284,7 @@ def _parse_image_argument(cmd, namespace):
             namespace.os_sku = matched['sku']
             namespace.os_version = matched['version']
             if not any([namespace.plan_name, namespace.plan_product, namespace.plan_publisher]):
-                image_plan = _get_image_plan_info_if_exists_by_aaz(cmd, namespace)
+                image_plan = _get_image_plan_info_if_exists(cmd, namespace)
                 if image_plan and image_plan.get('name') and image_plan.get('product') and image_plan.get('publisher'):
                     namespace.plan_name = image_plan['name']
                     namespace.plan_product = image_plan['product']
@@ -301,6 +301,8 @@ def _parse_image_argument(cmd, namespace):
             'resource_group': namespace.resource_group_name,
 
         }
+
+        # Purpose of calling ImageShow is just to check its existence
         ImageShow(cli_ctx=cmd.cli_ctx, command_args=command_args)
         namespace.image = _get_resource_id(cmd.cli_ctx, namespace.image, namespace.resource_group_name,
                                            'images', 'Microsoft.Compute')
@@ -319,32 +321,10 @@ def _parse_image_argument(cmd, namespace):
 
 def _get_image_plan_info_if_exists(cmd, namespace):
     try:
-        compute_client = _compute_client_factory(cmd.cli_ctx)
-        if namespace.os_version.lower() == 'latest':
-            image_version = _get_latest_image_version(cmd.cli_ctx, namespace.location, namespace.os_publisher,
-                                                      namespace.os_offer, namespace.os_sku)
-        else:
-            image_version = namespace.os_version
-
-        image = compute_client.virtual_machine_images.get(namespace.location,
-                                                          namespace.os_publisher,
-                                                          namespace.os_offer,
-                                                          namespace.os_sku,
-                                                          image_version)
-
-        # pylint: disable=no-member
-        return image.plan
-    except ResourceNotFoundError as ex:
-        logger.warning("Querying the image of '%s' failed for an error '%s'. Configuring plan settings "
-                       "will be skipped", namespace.image, ex.message)
-
-
-def _get_image_plan_info_if_exists_by_aaz(cmd, namespace):
-    try:
         from .aaz.latest.vm.image import Show as VmImageShow
         if namespace.os_version.lower() == 'latest':
-            image_version = _get_latest_image_version(cmd.cli_ctx, namespace.location, namespace.os_publisher,
-                                                      namespace.os_offer, namespace.os_sku)
+            image_version = _get_latest_image_version_by_aaz(cmd.cli_ctx, namespace.location, namespace.os_publisher,
+                                                             namespace.os_offer, namespace.os_sku)
         else:
             image_version = namespace.os_version
 
@@ -539,7 +519,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
 
             namespace.os_type = image_info.get('storageProfile', {}).get('osDisk', {}).get('osType')
             image_data_disks = image_info.get('storageProfile', {}).get('dataDisks', [])
-            image_data_disks = [{'lun': disk.lun} for disk in image_data_disks]
+            image_data_disks = [{'lun': disk.get('lun')} for disk in image_data_disks]
 
         elif res['type'].lower() == 'galleries':
             from .aaz.latest.sig.image_definition import Show as SigImageDefinitionShow
@@ -614,7 +594,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
 
         if namespace.os_type and namespace.os_type.lower() != shared_gallery_image_info.get('osType', '').lower():
             raise ArgumentUsageError("The --os-type is not the correct os type of this shared gallery image, "
-                                     "the os type of this image should be {}".format(shared_gallery_image_info.os_type))
+                                     "the os type of this image should be {}".format(shared_gallery_image_info.get('osType', '')))
         namespace.os_type = shared_gallery_image_info['osType']
 
     if namespace.storage_profile == StorageProfile.CommunityGalleryImage:
@@ -637,7 +617,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
         if namespace.os_type and namespace.os_type.lower() != community_gallery_image_info.get('osType', '').lower():
             raise ArgumentUsageError(
                 "The --os-type is not the correct os type of this community gallery image, "
-                "the os type of this image should be {}".format(community_gallery_image_info.os_type))
+                "the os type of this image should be {}".format(community_gallery_image_info.get('osType', '')))
         namespace.os_type = community_gallery_image_info['osType']
 
     if getattr(namespace, 'security_type', None) == 'ConfidentialVM' and \
@@ -971,7 +951,7 @@ def _validate_vm_vmss_accelerated_networking(cli_ctx, namespace):
                 'location': namespace.location
             })
 
-            size_info = next((s for s in sizes if s.name.lower() == size), None)
+            size_info = next((s for s in sizes if s.get('name', '').lower() == size), None)
             if size_info is None or size_info.get('numberOfCores') < 8:
                 return
 
