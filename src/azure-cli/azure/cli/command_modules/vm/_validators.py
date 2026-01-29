@@ -298,8 +298,7 @@ def _parse_image_argument(cmd, namespace):
         from .aaz.latest.image import Show as ImageShow
         command_args = {
             'image_name': namespace.image,
-            'resource_group': namespace.resource_group_name,
-
+            'resource_group': namespace.resource_group_name
         }
 
         # Purpose of calling ImageShow is just to check its existence
