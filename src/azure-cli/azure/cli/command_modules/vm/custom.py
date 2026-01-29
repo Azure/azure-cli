@@ -1157,7 +1157,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         secrets = _merge_secrets([validate_file_or_dict(secret) for secret in secrets])
 
     vm_resource = build_vm_resource(
-        cmd=cmd, name=vm_name, location=location, tags=tags, size=size, storage_profile=storage_profile, nics=nics,
+        name=vm_name, location=location, tags=tags, size=size, storage_profile=storage_profile, nics=nics,
         admin_username=admin_username, availability_set_id=availability_set, admin_password=admin_password,
         ssh_key_values=ssh_key_value, ssh_key_path=ssh_dest_key_path, image_reference=image,
         os_disk_name=os_disk_name, custom_image_os_type=os_type, authentication_type=authentication_type,
