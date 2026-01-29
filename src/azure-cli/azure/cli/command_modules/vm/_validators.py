@@ -1484,7 +1484,7 @@ def _validate_generation_version_and_trusted_launch(cmd, namespace):
             os_version = namespace.os_version
             if os_version.lower() == 'latest':
                 os_version = _get_latest_image_version_by_aaz(cmd.cli_ctx, namespace.location, namespace.os_publisher,
-                                                       namespace.os_offer, namespace.os_sku)
+                                                              namespace.os_offer, namespace.os_sku)
 
             command_args = {
                 'location': namespace.location,
