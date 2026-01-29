@@ -332,18 +332,8 @@ helps['containerapp revision copy'] = """
               --cpu 0.75 --memory 1.5Gi
     - name: Create a revision based on a previous revision.
       text: |
-          az containerapp revision copy -g MyResourceGroup \\
+          az containerapp revision copy -n my-containerapp -g MyResourceGroup \\
               --from-revision PreviousRevisionName --cpu 0.75 --memory 1.5Gi
-
-"""
-
-helps['containerapp revision copy'] = """
-    type: command
-    short-summary: Create a revision based on a previous revision.
-    examples:
-    - name: Create a revision based on a previous revision.
-      text: |
-          az containerapp revision copy -n my-containerapp -g MyResourceGroup --cpu 0.75 --memory 1.5Gi
 """
 
 helps['containerapp revision label'] = """
