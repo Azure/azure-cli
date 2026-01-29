@@ -1285,7 +1285,6 @@ helps['containerapp secret set'] = """
           az containerapp secret set -n my-containerapp -g MyResourceGroup --secrets MyExistingSecretName=MyNewSecretValue MyExistingSecretName2=keyvaultref:https://example.vault.azure.net/secrets/mysecret,identityref:/subscriptions/sub/resourceGroups/rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myidentity
 """
 
-
 helps['containerapp github-action'] = """
     type: group
     short-summary: Commands to manage GitHub Actions.
