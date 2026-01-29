@@ -11,12 +11,8 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "sshkey delete",
-    confirmation="Are you sure you want to perform this operation?",
-)
 class Delete(AAZCommand):
-    """Delete an SSH public key.
+    """Delete a SSH public key.
 
     :example: SshPublicKey_Delete_MaximumSet_Gen
         az sshkey delete --resource-group rgcompute --ssh-public-key-name aaaaaaaaaa

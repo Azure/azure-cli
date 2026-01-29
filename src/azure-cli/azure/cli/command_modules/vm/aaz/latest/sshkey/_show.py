@@ -11,13 +11,10 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "sshkey show",
-)
 class Show(AAZCommand):
-    """Get information about an SSH public key.
+    """Get information about a SSH public key.
 
-    :example: Get an ssh public key.
+    :example: Get a ssh public key.
         az sshkey show --resource-group myResourceGroup --ssh-public-key-name mySshPublicKeyName
     """
 

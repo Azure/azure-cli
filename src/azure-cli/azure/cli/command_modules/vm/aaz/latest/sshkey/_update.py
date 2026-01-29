@@ -11,13 +11,10 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "sshkey update",
-)
 class Update(AAZCommand):
-    """Update a new SSH public key resource.
+    """Update a SSH public key resource.
 
-    :example: Create a new SSH public key resource.
+    :example: Update a SSH public key resource.
         az sshkey update --resource-group myResourceGroup --ssh-public-key-name mySshPublicKeyName --public-key {ssh-rsa public key}
     """
 

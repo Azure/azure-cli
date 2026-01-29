@@ -11,9 +11,6 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "sshkey create",
-)
 class Create(AAZCommand):
     """Create a new SSH public key resource.
 

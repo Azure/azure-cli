@@ -11,9 +11,6 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "sshkey list",
-)
 class List(AAZCommand):
     """List all of the SSH public keys in the subscription. Use the nextLink property in the response to get the next page of SSH public keys.
 
