@@ -308,12 +308,6 @@ class ContainerAppEnvUpdateDecorator(ContainerAppEnvDecorator):
         if self.get_argument_p2p_encryption_enabled() is False and self.get_argument_mtls_enabled() is True:
             raise ValidationError("Cannot use '--enable-mtls' with '--enable-peer-to-peer-encryption False'")
 
-        # validate workload profile arguments - flex profiles will be named automatically
-        workload_profile_name = self.get_argument_workload_profile_name()
-        workload_profile_type = self.get_argument_workload_profile_type()
-        if (workload_profile_name is None and workload_profile_type is not None and workload_profile_type.lower() != "flex"):
-            raise ValidationError("The following arguments are required: --workload-profile-name")
-
     def construct_payload(self):
         try:
             r = self.client.show(cmd=self.cmd, resource_group_name=self.get_argument_resource_group_name(), name=self.get_argument_name())
@@ -371,16 +365,17 @@ class ContainerAppEnvUpdateDecorator(ContainerAppEnvDecorator):
         workload_profile_name = self.get_argument_workload_profile_name()
         workload_profile_type = self.get_argument_workload_profile_type()
 
-        # We have already validated that the configuration is valid if adding a workload profile
-        if workload_profile_name or workload_profile_type:
+        workload_profile_name = workload_profile_type if workload_profile_name is None else workload_profile_name
+
+        if workload_profile_name:
             if "workloadProfiles" not in r["properties"] or not r["properties"]["workloadProfiles"]:
                 raise ValidationError(
-                    "This environment does not allow for workload profiles. Can create a compatible environment with 'az containerapp env create --enable-workload-profiles'")
+                    "This environment does not allow for workload profiles. You can create a compatible environment with 'az containerapp env create --enable-workload-profiles'")
 
             if workload_profile_type:
                 workload_profile_type = workload_profile_type.upper()
             workload_profiles = r["properties"]["workloadProfiles"]
-            profile = [p for p in workload_profiles if workload_profile_name and p["name"].lower() == workload_profile_name.lower()]
+            profile = [p for p in workload_profiles if p["name"].lower() == workload_profile_name.lower()]
             update = False  # flag for updating an existing profile
             if profile:
                 profile = profile[0]
@@ -398,7 +393,7 @@ class ContainerAppEnvUpdateDecorator(ContainerAppEnvDecorator):
             if not update:
                 workload_profiles.append(profile)
             else:
-                idx = [i for i, p in enumerate(workload_profiles) if workload_profile_name and p["name"].lower() == workload_profile_name.lower()][0]
+                idx = [i for i, p in enumerate(workload_profiles) if p["name"].lower() == workload_profile_name.lower()][0]
                 workload_profiles[idx] = profile
 
             safe_set(self.managed_env_def, "properties", "workloadProfiles", value=workload_profiles)
