@@ -311,7 +311,8 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
         enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None,
         zone_placement_policy=None, include_zones=None, exclude_zones=None, align_regional_disks_to_vm_zone=None,
         wire_server_mode=None, imds_mode=None, wire_server_access_control_profile_reference_id=None,
-        imds_access_control_profile_reference_id=None, key_incarnation_id=None, add_proxy_agent_extension=None):
+        imds_access_control_profile_reference_id=None, key_incarnation_id=None, add_proxy_agent_extension=None,
+        disk_iops_read_write=None, disk_mbps_read_write=None):
 
     os_caching = disk_info['os'].get('caching')
 
@@ -567,8 +568,12 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
             for i, data_disk in enumerate(data_disks):
                 data_disk['managedDisk']['diskEncryptionSet'] = {'id': data_disk_encryption_sets[i]}
         if data_disks:
-            profile['dataDisks'] = data_disks
-
+            profile['dataDisks'] = list(data_disks)
+            for data_disk in profile['dataDisks']:
+                if disk_iops_read_write is not None:
+                    data_disk['diskIOPSReadWrite'] = disk_iops_read_write
+                if disk_mbps_read_write is not None:
+                    data_disk['diskMBPSReadWrite'] = disk_mbps_read_write
         if disk_info['os'].get('diffDiskSettings'):
             profile['osDisk']['diffDiskSettings'] = disk_info['os']['diffDiskSettings']
 
@@ -732,7 +737,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
         }
 
     vm = {
-        'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machines'),
+        'apiVersion': '2025-04-01',
         'type': 'Microsoft.Compute/virtualMachines',
         'name': name,
         'location': location,
@@ -1239,7 +1244,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
         for i, data_disk in enumerate(data_disks):
             data_disk['diskMBpsReadWrite'] = data_disk_mbps[i]
     if data_disks:
-        storage_properties['dataDisks'] = data_disks
+        storage_properties['dataDisks'] = list(data_disks)
     if disk_controller_type is not None:
         storage_properties['diskControllerType'] = disk_controller_type
 
