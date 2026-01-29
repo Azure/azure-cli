@@ -24,7 +24,7 @@ from azure.cli.core import keys
 from azure.core.exceptions import ResourceNotFoundError
 
 from ._client_factory import _compute_client_factory
-from ._actions import _get_latest_image_version, _get_latest_image_version_by_aaz
+from ._actions import _get_latest_image_version_by_aaz
 
 
 logger = get_logger(__name__)
@@ -510,7 +510,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
         namespace.aux_subscriptions = [res['subscription']]
         if res['type'].lower() == 'images':
             from .aaz.latest.image import Show as ImageShow
-            command_args={
+            command_args = {
                 'image_name': res['name'],
                 'resource_group': res['resource_group']
             }
@@ -522,7 +522,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
 
         elif res['type'].lower() == 'galleries':
             from .aaz.latest.sig.image_definition import Show as SigImageDefinitionShow
-            command_args={
+            command_args = {
                 'gallery_image_definition': res['child_name_1'],
                 'gallery_name': res['name'],
                 'resource_group': res['resource_group']
@@ -593,7 +593,8 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
 
         if namespace.os_type and namespace.os_type.lower() != shared_gallery_image_info.get('osType', '').lower():
             raise ArgumentUsageError("The --os-type is not the correct os type of this shared gallery image, "
-                                     "the os type of this image should be {}".format(shared_gallery_image_info.get('osType', '')))
+                                     "the os type of this image should be {}"
+                                     .format(shared_gallery_image_info.get('osType', '')))
         namespace.os_type = shared_gallery_image_info['osType']
 
     if namespace.storage_profile == StorageProfile.CommunityGalleryImage:
@@ -1280,7 +1281,7 @@ def validate_ssh_key(namespace, cmd=None):
         if not namespace.ssh_key_value and not namespace.generate_ssh_keys:
             # Use existing key, key must exist
             try:
-                command_args={
+                command_args = {
                     'resource_group': namespace.resource_group_name,
                     'ssh_public_key_name': namespace.ssh_key_name
                 }
@@ -1493,7 +1494,6 @@ def _validate_generation_version_and_trusted_launch(cmd, namespace):
                 'sku': namespace.os_sku,
                 'version': os_version
             }
-
             vm_image_info = VmImageShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
             generation_version = vm_image_info.get('hyperVGeneration', None)
@@ -1511,7 +1511,7 @@ def _validate_generation_version_and_trusted_launch(cmd, namespace):
 
         from .aaz.latest.disk import Show as DiskShow
         attach_os_disk_name = parse_resource_id(namespace.attach_os_disk)['name']
-        command_args={
+        command_args = {
             'disk_name': attach_os_disk_name,
             'resource_group': namespace.resource_group_name
         }
