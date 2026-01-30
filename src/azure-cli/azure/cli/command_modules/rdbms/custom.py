@@ -48,8 +48,6 @@ def _server_create(cmd, client, resource_group_name=None, server_name=None, sku_
 
     server_result = firewall_id = None
     administrator_login_password = generate_password(administrator_login_password)
-    engine_name = 'postgres'
-    pricing_link = 'https://aka.ms/postgres-pricing'
     start_ip = end_ip = ''
 
     if public_network_access is not None and str(public_network_access).lower() != 'enabled' and str(public_network_access).lower() != 'disabled':
@@ -821,10 +819,8 @@ def check_server_name_availability(check_name_client, parameters):
 
 
 def update_local_contexts(cmd, provider, server_name, resource_group_name, location, user):
-    engine = 'postgres'
-    if provider == 'Microsoft.DBforMySQL':
-        engine = 'mysql'
-    elif provider == 'Microsoft.DBforMariaDB':
+    engine = 'mysql'
+    if provider == 'Microsoft.DBforMariaDB':
         engine = 'mariadb'
 
     if cmd.cli_ctx.local_context.is_on:

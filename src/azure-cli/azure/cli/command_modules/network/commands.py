@@ -784,3 +784,8 @@ def load_command_table(self, _):
     self.command_table["network custom-ip prefix create"] = CustomIpPrefixCreate(loader=self)
     self.command_table["network custom-ip prefix update"] = CustomIpPrefixUpdate(loader=self)
     # endregion
+
+    # region DdosCustomPolicy
+    with self.command_group('network ddos-custom-policy') as g:
+        g.custom_command('create', 'create_ddos_custom_policy', supports_no_wait=True)
+    # endregion

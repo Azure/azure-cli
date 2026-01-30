@@ -186,6 +186,7 @@ class AzCliCommandParser(CLICommandParser):
 
         telemetry.set_command_details(
             command=self.prog[3:],
+            parameters=['--help'],
             extension_name=extension_name,
             extension_version=extension_version)
         telemetry.set_success(summary='show help')

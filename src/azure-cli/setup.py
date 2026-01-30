@@ -17,7 +17,7 @@ except ImportError:
     logging.warning("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.82.0"
+VERSION = "2.83.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -51,7 +51,7 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     "antlr4-python3-runtime~=4.13.1",
-    'azure-appconfiguration~=1.7.1',
+    'azure-appconfiguration~=1.7.2',
     'azure-ai-projects~=1.0.0',
     'azure-batch==15.0.0b1',
     'azure-cli-core=={}'.format(VERSION),
@@ -204,12 +204,17 @@ setup(
             '*.json',
             'randomname/adjectives.txt',
             'randomname/nouns.txt',
-            'templates/mysql_githubaction_template.yaml',
-            'templates/postgresql_githubaction_template.yaml'
+            'templates/mysql_githubaction_template.yaml'
         ],
         'azure.cli.command_modules.mysql': [
             'random/adjectives.txt',
             'random/nouns.txt'
+        ],
+        'azure.cli.command_modules.postgresql': [
+            '*.json',
+            'randomname/adjectives.txt',
+            'randomname/nouns.txt',
+            'templates/postgresql_githubaction_template.yaml'
         ]
     },
     cmdclass=cmdclass

@@ -3,6 +3,72 @@
 Release History
 ===============
 
+2.83.0
+++++++
+
+**ACR**
+
+* `az acr config content-trust update`: Add breaking changes announcement that `enabled` status will no longer be accepted (#32462)
+* `az acr check-health`: Add breaking change announcement that Notary client check will be removed (#32462)
+
+**AKS**
+
+* `az aks create`: Enable ACStor v2 without any storage options on a new cluster by `--enable-azure-container-storage` parameter (#32558)
+* `az aks update`: Enable the ephemeral disk storage option of ACStor v2 by `--enable-azure-container-storage ephemeralDisk` parameter (#32558)
+* `az aks update`: Disable the elastic SAN storage option of ACStor v2 by `--disable-azure-container-storage elasticSan` parameter (#32558)
+* `az aks update`: Disable ACStor v2 by `--disable-azure-container-storage` parameter (#32558)
+
+**App Config**
+
+* `az appconfig`: Add option `anonymous` for `--auth-mode` parameter (#32639)
+
+**App Service**
+
+* Fix #32290: `az functionapp config appsettings set`: Fix command failure when using `--slot-settings` parameter to update existing slot settings (#32291)
+
+**Cognitive Services**
+
+* `az cognitiveservices agent logs show`: Add console log streaming for hosted agents (#32701)
+* `az cognitiveservices agent create`: Add `--show-logs` flag for deployment troubleshooting (#32701)
+* `az cognitiveservices agent start`: Add `--show-logs` and `--timeout` flags (#32701)
+
+**Container app**
+
+* `az containerapp env create`: Update the error display for ConsumptionOnly environment creation (#32648)
+
+**MySQL**
+
+* `az mysql flexible-server restore`: Support restore server to different subscription (#32620)
+* `az mysql flexible-server geo-restore`: Support geo restore server to different subscription (#32620)
+* `az mysql flexible-server replica create`: Support create server replica to different subscription (#32620)
+
+**Network**
+
+* `az network vnet-gateway`: Add identity-related parameters and subgroup (#32524)
+* `az network vpn-connection`: Add `--auth-type` and `--cert-auth` parameters (#32524)
+* `az network virtual-network-appliance`: Support Virtual Network Appliance feature (#32645)
+* `az network ddos-custom-policy`: Support DDoS Policy Customization (#32673)
+
+**Packaging**
+
+* Optimize MSI upgrade performance by simplifying file replacement logic (#32678)
+
+**PostgreSQL**
+
+* `az postgres flexible-server create/georestore/replica`: Allow SSDV2 servers to perform create replica and geo restore (#32649)
+
+**Profile**
+
+* `az login`: For managed identity authentication, no longer retrieve the FQDN of the machine, bypassing hanging or error caused by misconfigured network setup (#32611)
+
+**Storage**
+
+* Fix #32503: `az storage file list`: Fix listing files when using Oauth without Reader access (#32602)
+* `az storage account file-service-properties update`: Add `--require-smb-encryption-in-transit` and `--require-nfs-encryption-in-transit` (#32619)
+* `az storage account create/update`: Add `--publish-ipv6-endpoint` (#26826)
+* `az storage account network-rule add/remove`: Add `--ipv6-address` (#26826)
+* `az storage account create/update`: Set `--min-tls-version` to `tls1_2` if the value provided is `tls1_0` and `tls1_1` (#32652)
+
 2.82.0
 ++++++
 

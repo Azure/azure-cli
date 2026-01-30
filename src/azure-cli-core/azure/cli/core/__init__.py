@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long
 
-__version__ = "2.82.0"
+__version__ = "2.83.0"
 
 import os
 import sys
@@ -26,6 +26,8 @@ logger = get_logger(__name__)
 EXCLUDED_PARAMS = ['self', 'raw', 'polling', 'custom_headers', 'operation_config',
                    'content_version', 'kwargs', 'client', 'no_wait']
 EVENT_FAILED_EXTENSION_LOAD = 'MainLoader.OnFailedExtensionLoad'
+# Marker used by CommandIndex.get() to signal top-level tab completion optimization
+TOP_LEVEL_COMPLETION_MARKER = '__top_level_completion__'
 
 # [Reserved, in case of future usage]
 # Modules that will always be loaded. They don't expose commands but hook into CLI core.
@@ -207,6 +209,24 @@ class MainCommandsLoader(CLICommandsLoader):
         super().__init__(cli_ctx)
         self.cmd_to_loader_map = {}
         self.loaders = []
+
+    def _create_stub_commands_for_completion(self, command_names):
+        """Create stub commands for top-level tab completion optimization.
+
+        Stub commands allow argcomplete to parse command names without loading modules.
+
+        :param command_names: List of command names to create stubs for
+        """
+        from azure.cli.core.commands import AzCliCommand
+
+        def _stub_handler(*_args, **_kwargs):
+            """Stub command handler used only for argument completion."""
+            return None
+
+        for cmd_name in command_names:
+            if cmd_name not in self.command_table:
+                # Stub commands only need names for argcomplete parser construction.
+                self.command_table[cmd_name] = AzCliCommand(self, cmd_name, _stub_handler)
 
     def _update_command_definitions(self):
         for cmd_name in self.command_table:
@@ -434,9 +454,16 @@ class MainCommandsLoader(CLICommandsLoader):
             index_result = command_index.get(args)
             if index_result:
                 index_modules, index_extensions = index_result
+
+                if index_modules == TOP_LEVEL_COMPLETION_MARKER:
+                    self._create_stub_commands_for_completion(index_extensions)
+                    _update_command_table_from_extensions([], ALWAYS_LOADED_EXTENSIONS)
+                    return self.command_table
+
                 # Always load modules and extensions, because some of them (like those in
                 # ALWAYS_LOADED_EXTENSIONS) don't expose a command, but hooks into handlers in CLI core
                 _update_command_table_from_modules(args, index_modules)
+
                 # The index won't contain suppressed extensions
                 _update_command_table_from_extensions([], index_extensions)
 
@@ -484,7 +511,6 @@ class MainCommandsLoader(CLICommandsLoader):
             else:
                 logger.debug("No module found from index for '%s'", args)
 
-        # No module found from the index. Load all command modules and extensions
         logger.debug("Loading all modules and extensions")
         _update_command_table_from_modules(args)
 
@@ -580,6 +606,23 @@ class CommandIndex:
             self.cloud_profile = cli_ctx.cloud.profile
         self.cli_ctx = cli_ctx
 
+    def _get_top_level_completion_commands(self):
+        """Get top-level command names for tab completion optimization.
+
+        Returns marker and list of top-level commands (e.g., 'network', 'vm') for creating
+        stub commands without module loading. Returns None if index is empty, triggering
+        fallback to full module loading.
+
+        :return: tuple of (TOP_LEVEL_COMPLETION_MARKER, list of top-level command names) or None
+        """
+        index = self.INDEX.get(self._COMMAND_INDEX) or {}
+        if not index:
+            logger.debug("Command index is empty, will fall back to loading all modules")
+            return None
+        top_level_commands = list(index.keys())
+        logger.debug("Top-level completion: %d commands available", len(top_level_commands))
+        return TOP_LEVEL_COMPLETION_MARKER, top_level_commands
+
     def get(self, args):
         """Get the corresponding module and extension list of a command.
 
@@ -599,6 +642,9 @@ class CommandIndex:
         # Make sure the top-level command is provided, like `az version`.
         # Skip command index for `az` or `az --help`.
         if not args or args[0].startswith('-'):
+            # For top-level completion (az [tab])
+            if not args and self.cli_ctx.data.get('completer_active'):
+                return self._get_top_level_completion_commands()
             return None
 
         # Get the top-level command, like `network` in `network vnet create -h`

@@ -128,7 +128,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                   public_network_access=None, acr_use_identity=False, acr_identity=None, basic_auth="",
                   auto_generated_domain_name_label_scope=None, end_to_end_encryption_enabled=None,
                   min_tls_version=None, min_tls_cipher_suite=None):
-    from azure.mgmt.web.models import Site
+    from azure.mgmt.web.models import Site, OutboundVnetRouting
     from azure.core.exceptions import ResourceNotFoundError as _ResourceNotFoundError
     SiteConfig, SkuDescription, NameValuePair = cmd.get_models(
         'SiteConfig', 'SkuDescription', 'NameValuePair')
@@ -228,10 +228,10 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                                vnet_name=subnet_info["vnet_name"],
                                subnet_name=subnet_info["subnet_name"])
         subnet_resource_id = subnet_info["subnet_resource_id"]
-        vnet_route_all_enabled = True
+        outbound_vnet_routing = OutboundVnetRouting(application_traffic=True)
     else:
         subnet_resource_id = None
-        vnet_route_all_enabled = None
+        outbound_vnet_routing = None
 
     if using_webapp_up:
         https_only = using_webapp_up
@@ -247,7 +247,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
 
     webapp_def = Site(location=location, site_config=site_config, server_farm_id=plan_info.id, tags=tags,
                       https_only=https_only, virtual_network_subnet_id=subnet_resource_id,
-                      public_network_access=public_network_access, vnet_route_all_enabled=vnet_route_all_enabled,
+                      public_network_access=public_network_access, outbound_vnet_routing=outbound_vnet_routing,
                       auto_generated_domain_name_label_scope=auto_generated_domain_name_label_scope,
                       end_to_end_encryption_enabled=end_to_end_encryption_enabled)
     if runtime:
@@ -527,9 +527,47 @@ def update_app_settings_functionapp(cmd, resource_group_name, name, settings=Non
     return update_app_settings(cmd, resource_group_name, name, settings, slot, slot_settings)
 
 
+def _parse_json_setting(s, result, slot_result, setting_type):
+    """
+    Parse JSON format settings.
+
+    Parameters:
+        s (str): The input string containing JSON-formatted settings.
+        result (dict): A dictionary to store the parsed key-value pairs from the settings.
+        slot_result (dict): A dictionary to store slot setting flags for each key.
+        setting_type (str): The type of settings being parsed, either "SlotSettings" or "Settings".
+
+    Returns:
+        bool: True if parsing was successful, False otherwise.
+    """
+    try:
+        temp = shell_safe_json_parse(s)
+        if isinstance(temp, list):  # Accept the output of the "list" command
+            for t in temp:
+                if 'slotSetting' in t.keys():
+                    slot_result[t['name']] = t['slotSetting']
+                elif setting_type == "SlotSettings":
+                    slot_result[t['name']] = True
+                result[t['name']] = t['value']
+        else:
+            # Handle JSON objects: setting_type is either "SlotSettings" or "Settings"
+            # Different logic needed for slot settings vs regular settings
+            if setting_type == "SlotSettings":
+                # For slot settings JSON objects, add values to result and mark as slot settings
+                result.update(temp)
+                for key in temp:
+                    slot_result[key] = True
+            else:
+                # For regular settings JSON objects, add values to result only
+                result.update(temp)
+        return True
+    except InvalidArgumentValueError:
+        return False
+
+
 def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None, slot_settings=None):
     if not settings and not slot_settings:
-        raise MutuallyExclusiveArgumentError('Usage Error: --settings |--slot-settings')
+        raise MutuallyExclusiveArgumentError('Please provide either --settings or --slot-settings parameter.')
 
     settings = settings or []
     slot_settings = slot_settings or []
@@ -537,50 +575,39 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
     app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
                                            'list_application_settings', slot)
     result, slot_result = {}, {}
-    # pylint: disable=too-many-nested-blocks
-    for src, dest, setting_type in [(settings, result, "Settings"), (slot_settings, slot_result, "SlotSettings")]:
-        for s in src:
-            # Check if this looks like a simple key=value pair without JSON/dict syntax
-            # If so, parse it directly to avoid unnecessary warnings from ast.literal_eval
-            if ('=' in s and not s.lstrip().startswith(('{"', "[", "{")) and
-                    not s.startswith('@')):  # @ indicates file input
-                try:
-                    setting_name, value = s.split('=', 1)
-                    dest[setting_name] = value
-                    continue
-                except ValueError:
-                    pass  # Fall back to JSON parsing if split fails
 
+    for src, setting_type in [(settings, "Settings"), (slot_settings, "SlotSettings")]:
+        for s in src:
+            # Try simple key=value parsing first
+            if '=' in s and not s.lstrip().startswith(('{"', "[", "{")) and not s.startswith('@'):
+                k, v = s.split('=', 1)
+                result[k] = v
+                if setting_type == "SlotSettings":
+                    slot_result[k] = True
+                continue
+
+            # Try JSON parsing
+            if _parse_json_setting(s, result, slot_result, setting_type):
+                continue
+
+            # Fallback to key=value parsing with error handling
             try:
-                temp = shell_safe_json_parse(s)
-                if isinstance(temp, list):  # a bit messy, but we'd like accept the output of the "list" command
-                    for t in temp:
-                        if 'slotSetting' in t.keys():
-                            slot_result[t['name']] = t['slotSetting']
-                        elif setting_type == "SlotSettings":
-                            slot_result[t['name']] = True
-                        result[t['name']] = t['value']
-                else:
-                    dest.update(temp)
-            except CLIError:
-                setting_name, value = s.split('=', 1)
-                dest[setting_name] = value
-                result.update(dest)
+                k, v = s.split('=', 1)
+            except ValueError as ex:
+                raise InvalidArgumentValueError(
+                    f"Invalid setting format: '{s}'. Expected 'key=value' format or valid JSON.",
+                    recommendation="Use 'key=value' format or provide valid JSON like '{\"key\": \"value\"}'."
+                ) from ex
+
+            result[k] = v
+            if setting_type == "SlotSettings":
+                slot_result[k] = True
 
     for setting_name, value in result.items():
         app_settings.properties[setting_name] = value
     client = web_client_factory(cmd.cli_ctx)
 
-
-# TODO: Centauri currently return wrong payload for update appsettings, remove this once backend has the fix.
-    if is_centauri_functionapp(cmd, resource_group_name, name):
-        update_application_settings_polling(cmd, resource_group_name, name, app_settings, slot, client)
-        result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings', slot)
-    else:
-        result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
-                                             'update_application_settings',
-                                             app_settings, slot, client)
-
+    # Process slot configurations before updating application settings to ensure proper configuration order.
     app_settings_slot_cfg_names = []
     if slot_result:
         slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
@@ -593,6 +620,15 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
                 slot_cfg_names.app_setting_names.remove(slot_setting_name)
         app_settings_slot_cfg_names = slot_cfg_names.app_setting_names
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
+
+# TODO: Centauri currently return wrong payload for update appsettings, remove this once backend has the fix.
+    if is_centauri_functionapp(cmd, resource_group_name, name):
+        update_application_settings_polling(cmd, resource_group_name, name, app_settings, slot, client)
+        result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings', slot)
+    else:
+        result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
+                                             'update_application_settings',
+                                             app_settings, slot, client)
 
     return _build_app_settings_output(result.properties, app_settings_slot_cfg_names, redact=True)
 
@@ -613,7 +649,7 @@ def update_application_settings_polling(cmd, resource_group_name, name, app_sett
                 time.sleep(5)
                 r = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
         else:
-            raise CLIError(ex)
+            raise AzureResponseError(f"Failed to update application settings: {str(ex)}") from ex
 
 
 def add_azure_storage_account(cmd, resource_group_name, name, custom_id, storage_type, account_name,
@@ -3135,7 +3171,7 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
     import inspect
     frame = inspect.currentframe()
     bool_flags = ['remote_debugging_enabled', 'web_sockets_enabled', 'always_on',
-                  'auto_heal_enabled', 'use32_bit_worker_process', 'http20_enabled', 'vnet_route_all_enabled']
+                  'auto_heal_enabled', 'use32_bit_worker_process', 'http20_enabled']
     int_flags = ['pre_warmed_instance_count', 'number_of_workers']
     # note: getargvalues is used already in azure.cli.core.commands.
     # and no simple functional replacement for this deprecating method for 3.5
@@ -3208,7 +3244,21 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
         if max_replicas is not None:
             setattr(configs, 'function_app_scale_limit', max_replicas)
         return update_configuration_polling(cmd, resource_group_name, name, slot, configs)
-    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
+
+    # Update SiteConfig first
+    result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
+
+    # Handle vnet_route_all_enabled separately using Site-level outbound_vnet_routing property
+    # This is done after SiteConfig update to ensure the Site-level property is not overwritten
+    if vnet_route_all_enabled is not None:
+        from azure.mgmt.web.models import OutboundVnetRouting
+        client = web_client_factory(cmd.cli_ctx)
+        app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot, client=client)
+        app.outbound_vnet_routing = OutboundVnetRouting(application_traffic=vnet_route_all_enabled == 'true')
+        _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'begin_create_or_update', slot,
+                                client=client, extra_parameter=app)
+
+    return result
 
 
 def update_configuration_polling(cmd, resource_group_name, name, slot, configs):
@@ -7212,9 +7262,11 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                                subnet_name=subnet_info["subnet_name"],
                                subnet_service_delegation=FLEX_SUBNET_DELEGATION if flexconsumption_location else None)
         subnet_resource_id = subnet_info["subnet_resource_id"]
-        site_config.vnet_route_all_enabled = True
+        from azure.mgmt.web.models import OutboundVnetRouting
+        outbound_vnet_routing = OutboundVnetRouting(application_traffic=True)
     else:
         subnet_resource_id = None
+        outbound_vnet_routing = None
 
     # if this is a managed function app (Azure Functions on Azure Containers), http20_proxy_flag must be None
     if environment is not None:
@@ -7222,7 +7274,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
 
     functionapp_def = Site(location=None, site_config=site_config, tags=tags,
                            virtual_network_subnet_id=subnet_resource_id, https_only=https_only,
-                           auto_generated_domain_name_label_scope=auto_generated_domain_name_label_scope)
+                           auto_generated_domain_name_label_scope=auto_generated_domain_name_label_scope,
+                           outbound_vnet_routing=outbound_vnet_routing)
 
     plan_info = None
     if runtime is not None:
@@ -8796,7 +8849,8 @@ def _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=Non
                                subnet_service_delegation=FLEX_SUBNET_DELEGATION if is_flex else None)
 
     app.virtual_network_subnet_id = subnet_info["subnet_resource_id"]
-    app.site_config.vnet_route_all_enabled = True
+    from azure.mgmt.web.models import OutboundVnetRouting
+    app.outbound_vnet_routing = OutboundVnetRouting(application_traffic=True)
 
     _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'begin_create_or_update', slot,
                             client=client, extra_parameter=app)
