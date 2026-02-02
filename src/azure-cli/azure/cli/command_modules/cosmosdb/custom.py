@@ -460,10 +460,10 @@ def cli_cosmosdb_update(client,
         update_consistency_policy = True
 
     if network_acl_bypass_resource_ids is not None:
-        from azure.mgmt.core.tools import is_valid_resource_id
         from azure.cli.core.azclierror import InvalidArgumentValueError
+        from azure.cli.command_modules.cosmosdb._validators import is_valid_network_acl_bypass_resource_id
         for resource_id in network_acl_bypass_resource_ids:
-            if not is_valid_resource_id(resource_id):
+            if not is_valid_network_acl_bypass_resource_id(resource_id):
                 raise InvalidArgumentValueError(
                     f'{resource_id} is not a valid resource ID for --network-acl-bypass-resource-ids')
 
