@@ -367,7 +367,7 @@ class MainCommandsLoader(CLICommandsLoader):
                         # from an extension requires this map to be up-to-date.
                         # self._mod_to_ext_map[ext_mod] = ext_name
                         start_time = timeit.default_timer()
-                        extension_command_table, extension_group_table, _ = \
+                        extension_command_table, extension_group_table, extension_command_loader = \
                             _load_extension_command_loader(self, args, ext_mod)
                         import_extension_breaking_changes(ext_mod)
 
@@ -377,6 +377,14 @@ class MainCommandsLoader(CLICommandsLoader):
                                 overrides_command=cmd_name in module_commands,
                                 preview=ext.preview,
                                 experimental=ext.experimental)
+
+                        # Populate cmd_to_loader_map for extension commands
+                        if extension_command_loader:
+                            self.loaders.append(extension_command_loader)
+                            for cmd_name in extension_command_table:
+                                if cmd_name not in self.cmd_to_loader_map:
+                                    self.cmd_to_loader_map[cmd_name] = []
+                                self.cmd_to_loader_map[cmd_name].append(extension_command_loader)
 
                         self.command_table.update(extension_command_table)
                         self.command_group_table.update(extension_group_table)
@@ -636,7 +644,9 @@ class MainCommandsLoader(CLICommandsLoader):
             self.loaders.append(result.command_loader)
 
             for cmd in result.command_table:
-                self.cmd_to_loader_map[cmd] = [result.command_loader]
+                if cmd not in self.cmd_to_loader_map:
+                    self.cmd_to_loader_map[cmd] = []
+                self.cmd_to_loader_map[cmd].append(result.command_loader)
 
         for cmd in result.command_table.values():
             cmd.command_source = result.module_name

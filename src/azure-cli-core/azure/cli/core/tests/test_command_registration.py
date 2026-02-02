@@ -265,6 +265,41 @@ class TestCommandRegistration(unittest.TestCase):
     @mock.patch('azure.cli.core.commands._load_command_loader', _mock_load_command_loader)
     @mock.patch('azure.cli.core.extension.get_extension_modname', _mock_get_extension_modname)
     @mock.patch('azure.cli.core.extension.get_extensions', _mock_get_extensions)
+    def test_cmd_to_loader_map_populated_after_parallel_loading(self):
+        """
+        Validates that all commands in command_table have corresponding entries in cmd_to_loader_map.
+        """
+        cli = DummyCli()
+        loader = cli.commands_loader
+
+        # Load all commands (triggers parallel module loading)
+        cmd_tbl = loader.load_command_table(None)
+        
+        # Verify EVERY command in command_table has an entry in cmd_to_loader_map
+        # This is exactly what azdev does before it hits KeyError
+        for cmd_name in cmd_tbl:
+            # This should NOT raise KeyError
+            self.assertIn(cmd_name, loader.cmd_to_loader_map, 
+                         f"Command '{cmd_name}' missing from cmd_to_loader_map - "
+                         f"would cause KeyError in azdev command-change meta-export")
+            
+            # Verify the entry is a list with at least one loader
+            loaders = loader.cmd_to_loader_map[cmd_name]
+            self.assertIsInstance(loaders, list, 
+                                 f"cmd_to_loader_map['{cmd_name}'] should be a list")
+            self.assertGreater(len(loaders), 0, 
+                              f"cmd_to_loader_map['{cmd_name}'] should have at least one loader")
+        
+        # Verify all expected commands are present
+        expected_commands = {'hello mod-only', 'hello overridden', 'extra final', 'hello ext-only'}
+        actual_commands = set(cmd_tbl.keys())
+        self.assertEqual(expected_commands, actual_commands)
+
+    @mock.patch('importlib.import_module', _mock_import_lib)
+    @mock.patch('pkgutil.iter_modules', _mock_iter_modules)
+    @mock.patch('azure.cli.core.commands._load_command_loader', _mock_load_command_loader)
+    @mock.patch('azure.cli.core.extension.get_extension_modname', _mock_get_extension_modname)
+    @mock.patch('azure.cli.core.extension.get_extensions', _mock_get_extensions)
     def test_command_index(self):
         from azure.cli.core._session import INDEX
         from azure.cli.core import CommandIndex, __version__
