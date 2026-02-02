@@ -370,3 +370,12 @@ class AccessTokenCredential:  # pylint: disable=too-few-public-methods
         from azure.cli.core.auth.util import AccessToken
         # Assume the access token expires in 1 year / 31536000 seconds
         return AccessToken(self.access_token, int(time.time()) + 31536000)
+
+
+def show_what_if(cmd, script_path, no_pretty_print=False):
+    from azure.cli.core.what_if import show_what_if as _show_what_if, read_script_file
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    script_content = read_script_file(script_path)
+    return _show_what_if(cmd.cli_ctx, script_content, subscription_id=subscription_id, no_pretty_print=no_pretty_print)

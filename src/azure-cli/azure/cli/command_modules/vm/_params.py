@@ -13,7 +13,7 @@ from azure.cli.core.commands.parameters import get_datetime_type
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict)
 from azure.cli.core.commands.parameters import (
-    get_location_type, get_resource_name_completion_list, tags_type, get_three_state_flag,
+    get_location_type, get_what_if_type, get_resource_name_completion_list, tags_type, get_three_state_flag,
     file_type, get_enum_type, zone_type, zones_type)
 from azure.cli.command_modules.vm._actions import _resource_not_exists
 from azure.cli.command_modules.vm._completers import (
@@ -415,6 +415,7 @@ def load_arguments(self, _):
         c.argument('workspace', is_preview=True, arg_group='Monitor', help='Name or ID of Log Analytics Workspace. If you specify the workspace through its name, the workspace should be in the same resource group with the vm, otherwise a new workspace will be created.')
 
     with self.argument_context('vm update') as c:
+        c.argument('what_if', get_what_if_type())
         c.argument('os_disk', min_api='2017-12-01', help="Managed OS disk ID or name to swap to")
         c.argument('write_accelerator', nargs='*', min_api='2017-12-01',
                    help="enable/disable disk write accelerator. Use singular value 'true/false' to apply across, or specify individual disks, e.g.'os=true 1=true 2=true' for os disk and data disks with lun of 1 & 2")
@@ -1077,6 +1078,7 @@ def load_arguments(self, _):
     for scope in ['vm create', 'vmss create']:
         with self.argument_context(scope) as c:
             c.argument('location', get_location_type(self.cli_ctx), help='Location in which to create VM and related resources. If default location is not configured, will default to the resource group\'s location')
+            c.argument('what_if', get_what_if_type())
             c.argument('tags', tags_type)
             c.argument('no_wait', help='Do not wait for the long-running operation to finish.')
             c.argument('validate', options_list=['--validate'], help='Generate and validate the ARM template without creating any resources.', action='store_true')
