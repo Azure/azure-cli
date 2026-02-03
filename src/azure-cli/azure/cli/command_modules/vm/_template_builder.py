@@ -568,7 +568,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
             for i, data_disk in enumerate(data_disks):
                 data_disk['managedDisk']['diskEncryptionSet'] = {'id': data_disk_encryption_sets[i]}
         if data_disks:
-            profile['dataDisks'] = list(data_disks)
+            profile['dataDisks'] = data_disks
             for data_disk in profile['dataDisks']:
                 if disk_iops_read_write is not None:
                     data_disk['diskIOPSReadWrite'] = disk_iops_read_write
@@ -1244,7 +1244,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
         for i, data_disk in enumerate(data_disks):
             data_disk['diskMBpsReadWrite'] = data_disk_mbps[i]
     if data_disks:
-        storage_properties['dataDisks'] = list(data_disks)
+        storage_properties['dataDisks'] = data_disks
     if disk_controller_type is not None:
         storage_properties['diskControllerType'] = disk_controller_type
 
