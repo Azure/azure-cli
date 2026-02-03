@@ -23,7 +23,7 @@ from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissin
 from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flexible_firewall_rules, cf_mysql_flexible_db, \
     cf_mysql_check_resource_availability, cf_mysql_check_resource_availability_without_location, cf_mysql_flexible_config, \
     cf_mysql_flexible_servers, cf_mysql_flexible_replica, cf_mysql_flexible_adadmin, cf_mysql_flexible_private_dns_zone_suffix_operations, cf_mysql_servers, \
-    cf_mysql_firewall_rules
+    cf_mysql_firewall_rules, get_mysql_flexible_management_client_by_sub
 from ._util import resolve_poller, generate_missing_parameters, get_mysql_list_skus_info, generate_password, parse_maintenance_window, \
     replace_memory_optimized_tier, build_identity_and_data_encryption, get_identity_and_data_encryption, get_tenant_id, run_subprocess, \
     fill_action_template, get_git_root_dir, get_single_to_flex_sku_mapping, get_firewall_rules_from_paged_response, \
@@ -734,7 +734,9 @@ def flexible_server_restore(cmd, client, resource_group_name, server_name, sourc
 
     try:
         id_parts = parse_resource_id(source_server_id)
-        source_server_object = client.get(id_parts['resource_group'], id_parts['name'])
+        source_client = get_mysql_flexible_management_client_by_sub(cmd.cli_ctx, id_parts['subscription']).servers
+
+        source_server_object = source_client.get(id_parts['resource_group'], id_parts['name'])
         location = ''.join(source_server_object.location.lower().split())
         list_skus_info = get_mysql_list_skus_info(cmd, location)
 
@@ -880,7 +882,9 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
 
     try:
         id_parts = parse_resource_id(source_server_id)
-        source_server_object = client.get(id_parts['resource_group'], id_parts['name'])
+        source_client = get_mysql_flexible_management_client_by_sub(cmd.cli_ctx, id_parts['subscription']).servers
+
+        source_server_object = source_client.get(id_parts['resource_group'], id_parts['name'])
         list_skus_info = get_mysql_list_skus_info(cmd, location)
 
         if not tier:
@@ -1340,7 +1344,8 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
 
     source_server_id_parts = parse_resource_id(source_server_id)
     try:
-        source_server_object = client.get(source_server_id_parts['resource_group'], source_server_id_parts['name'])
+        source_client = get_mysql_flexible_management_client_by_sub(cmd.cli_ctx, source_server_id_parts['subscription']).servers
+        source_server_object = source_client.get(source_server_id_parts['resource_group'], source_server_id_parts['name'])
         validate_mysql_replica(source_server_object)
     except Exception as e:
         raise ResourceNotFoundError(e)

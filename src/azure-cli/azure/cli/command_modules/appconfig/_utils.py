@@ -8,13 +8,14 @@ from knack.log import get_logger
 from knack.util import CLIError
 from azure.appconfiguration import AzureAppConfigurationClient
 from azure.core.exceptions import HttpResponseError
+from azure.core.credentials import AzureKeyCredential
 from azure.cli.core.azclierror import (ValidationError,
                                        AzureResponseError,
                                        InvalidArgumentValueError,
                                        ResourceNotFoundError,
                                        RequiredArgumentMissingError,
                                        MutuallyExclusiveArgumentError)
-
+from azure.core.pipeline.transport import RequestsTransport  # pylint: disable=no-name-in-module
 from ._client_factory import cf_configstore
 from ._constants import HttpHeaders, FeatureFlagConstants
 
@@ -156,8 +157,33 @@ def prep_filter_for_url_encoding(filter_value=None):
     return filter_value
 
 
+class AuthHeaderRequestsTransport(RequestsTransport):  # pylint: disable=too-few-public-methods
+    def send(self, request, **kwargs):  # pylint: disable=arguments-differ
+        # Strip any auth/signature headers to allow anonymous access
+        if 'Authorization' in request.headers:
+            del request.headers['Authorization']
+
+        # Also remove HMAC signature header if present
+        if 'x-ms-content-sha256' in request.headers:
+            del request.headers['x-ms-content-sha256']
+
+        return super().send(request, **kwargs)
+
+
 def get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint):
     azconfig_client = None
+
+    if auth_mode == "anonymous":
+        try:
+            azconfig_client = AzureAppConfigurationClient(
+                base_url=endpoint,
+                credential=AzureKeyCredential(key=""),
+                id_credential="",
+                user_agent=HttpHeaders.USER_AGENT,
+                transport=AuthHeaderRequestsTransport())
+        except (ValueError, TypeError) as ex:
+            raise CLIError("Failed to initialize AzureAppConfigurationClient due to an exception: {}".format(str(ex)))
+
     if auth_mode == "key":
         connection_string = resolve_connection_string(cmd, name, connection_string)
         try:
@@ -254,3 +280,10 @@ def parse_tags_to_dict(tags):
                 tags_dict[tag_key] = tag_value
         return tags_dict
     return tags
+
+
+def is_http_endpoint(endpoint):
+    if not endpoint:
+        return False
+
+    return str(endpoint).lower().startswith('http://')
