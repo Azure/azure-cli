@@ -2517,3 +2517,80 @@ def set_attributes_certificate(client, certificate_name, version=None, policy=No
     if kwargs.get('enabled') is not None or kwargs.get('tags') is not None:
         return client.update_certificate_properties(certificate_name=certificate_name, version=version, **kwargs)
     return client.get_certificate(certificate_name=certificate_name)
+
+
+def copy_secret(cmd, client, destination_vault, name=None, all_secrets=False, rewrite=False):
+    from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
+    from azure.keyvault.secrets import SecretClient
+    from azure.cli.core._profile import Profile
+    from azure.cli.core.commands.client_factory import prepare_client_kwargs_track2
+
+    if not name:
+        all_secrets = True
+
+    if name and all_secrets:
+        all_secrets = False
+    
+    # Validation
+    if client.vault_url.rstrip('/') == destination_vault.rstrip('/'):
+        raise CLIError("Source and destination Key Vaults cannot be the same.")
+
+    profile = Profile(cli_ctx=cmd.cli_ctx)
+    credential, _, _ = profile.get_login_credentials(subscription_id=cmd.cli_ctx.data.get('subscription_id'))
+
+    # Use standard client kwargs for consistent logging/telemetry
+    client_kwargs = prepare_client_kwargs_track2(cmd.cli_ctx)
+    client_kwargs.pop('http_logging_policy', None) # KeyVault clients handle this internally or differently sometimes, mimicking _client_factory
+
+    dest_client = SecretClient(vault_url=destination_vault, credential=credential, **client_kwargs)
+
+    secrets_to_copy = []
+    if name:
+        secrets_to_copy.append(name)
+    else:
+        logger.warning("Copying all secrets from source...")
+        try:
+            source_secrets = client.list_properties_of_secrets()
+            for s in source_secrets:
+                if s.managed:
+                    logger.warning(f"Skipping managed secret: {s.name}")
+                    continue
+                secrets_to_copy.append(s.name)
+        except HttpResponseError as e:
+            raise CLIError(f"Failed to list secrets from source: {str(e)}")
+
+    for secret_name in secrets_to_copy:
+        try:
+            # Check destination
+            if not rewrite:
+                try:
+                    dest_client.get_secret(secret_name)
+                    logger.warning(f"Secret '{secret_name}' already exists in destination. Skipping.")
+                    continue
+                except ResourceNotFoundError:
+                    pass
+                except HttpResponseError as e:
+                    logger.warning(f"Error checking secret '{secret_name}' in destination: {str(e)}")
+                    if e.status_code == 403:
+                        logger.error(f"Access denied checking secret '{secret_name}' in destination.")
+                    continue
+
+            # Copy
+            logger.info(f"Copying secret: {secret_name}")
+            s = client.get_secret(secret_name)
+
+            dest_client.set_secret(
+                s.name,
+                s.value,
+                content_type=s.properties.content_type,
+                tags=s.properties.tags,
+                enabled=s.properties.enabled,
+                not_before=s.properties.not_before,
+                expires_on=s.properties.expires_on
+            )
+
+        except HttpResponseError as e:
+            if e.status_code == 403:  # Forbidden
+                logger.error(f"Access denied (403) for secret '{secret_name}': {str(e)}")
+            else:
+                logger.error(f"Failed to copy secret '{secret_name}': {str(e)}")
