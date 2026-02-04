@@ -251,6 +251,35 @@ class Common:
 
         return None
 
+    @staticmethod
+    def SetSchemaNullable(obj, path=''):
+        if hasattr(obj, '_fields'):
+            for key, value in obj._fields.items():
+                new_path = f"{path}._fields.{key}" if path else key
+                Common.SetSchemaNullable(value, new_path)
+        elif hasattr(obj, '_element'):
+            if hasattr(obj._element, 'DataType'):
+                if obj._element.DataType is None:
+                    obj._element._nullable = True
+            else:
+                new_path = f"{path}._element"
+                Common.SetSchemaNullable(obj._element, new_path)
+
+    @staticmethod
+    def SetUndefinedNone(value):
+        from azure.cli.core.aaz import AAZUndefined
+        if isinstance(value, dict):
+            for _, item in value.items():
+                Common.SetUndefinedNone(item)
+        elif isinstance(value, list):
+            for item in value:
+                Common.SetUndefinedNone(item)
+        elif hasattr(value, 'data'):
+            if value.data == AAZUndefined:
+                value.data = None
+            else:
+                Common.SetUndefinedNone(value.data)
+
 
 # Completers for policy command arguments
 class Completers:
@@ -303,6 +332,21 @@ class PolicyAssignmentCreate(AssignmentCreate):
             help='Role name or id that will be assigned to the managed identity.')
         return args_schema
 
+    class PolicyAssignmentsCreate(AssignmentCreate.PolicyAssignmentsCreate):
+
+        @staticmethod
+        def serialize_content(value, required=False):
+            # pylint: disable=protected-access
+            Common.SetUndefinedNone(value._data)
+            content = AssignmentCreate.PolicyAssignmentsCreate.serialize_content(value, required)
+            return content
+
+        @classmethod
+        def _build_schema_on_201(cls):
+            _schema = super()._build_schema_on_201()
+            Common.SetSchemaNullable(_schema)
+            return _schema
+
     def pre_operations(self):
         Common.ValidatePolicyDefinitionId(self.ctx)
         Common.ValidateScope(self.ctx)
@@ -312,6 +356,11 @@ class PolicyAssignmentCreate(AssignmentCreate):
         Common.ResolvePolicyId(self.ctx)
         Common.ResolveUserAssignedIdentityId(self.ctx, self.cli_ctx)
         Common.ResolveCreateIdentityType(self.ctx)
+
+    def _execute_operations(self):
+        self.pre_operations()
+        self.PolicyAssignmentsCreate(ctx=self.ctx)()
+        self.post_operations()
 
     def post_operations(self):
         Common.CreateRoleAssignment(self.ctx, self.cli_ctx, self.ctx.vars.instance)
@@ -359,15 +408,32 @@ class PolicyAssignmentList(AssignmentList):
         self.subscription_from_scope = None
 
     class PolicyAssignmentsListForManagementGroup(AssignmentList.PolicyAssignmentsListForManagementGroup):
-        pass
+
+        @classmethod
+        def _build_schema_on_200(cls):
+            _schema = super()._build_schema_on_200()
+            Common.SetSchemaNullable(_schema)
+            return _schema
 
     class PolicyAssignmentsListForResourceGroup(AssignmentList.PolicyAssignmentsListForResourceGroup):
-        pass
+
+        @classmethod
+        def _build_schema_on_200(cls):
+            _schema = super()._build_schema_on_200()
+            Common.SetSchemaNullable(_schema)
+            return _schema
 
     class PolicyAssignmentsList(AssignmentList.PolicyAssignmentsList):
+
         def __init__(self, ctx, subscription_from_scope):
             super().__init__(ctx)
             self.subscription_from_scope = subscription_from_scope
+
+        @classmethod
+        def _build_schema_on_200(cls):
+            _schema = super()._build_schema_on_200()
+            Common.SetSchemaNullable(_schema)
+            return _schema
 
         @property
         def url(self):
@@ -408,6 +474,12 @@ class PolicyAssignmentShow(AssignmentShow):
         args_schema.resource_group = AAZResourceGroupNameArg()
         return args_schema
 
+    @classmethod
+    def _build_schema_on_200(cls):
+        _schema = super()._build_schema_on_200()
+        Common.SetSchemaNullable(_schema)
+        return _schema
+
     def pre_operations(self):
         Common.ValidateScope(self.ctx)
         Common.PopulateScopeFromContext(self.ctx, self.cli_ctx)
@@ -427,10 +499,36 @@ class PolicyAssignmentUpdate(AssignmentUpdate):
             help='The name or resource ID of the policy definition or policy set definition to be assigned.')
         return args_schema
 
+    class PolicyAssignmentsCreate(AssignmentUpdate.PolicyAssignmentsCreate):
+
+        @staticmethod
+        def serialize_content(value, required=False):
+            Common.SetUndefinedNone(value._data)
+            content = AssignmentUpdate.PolicyAssignmentsCreate.serialize_content(value, required)
+            return content
+
+    class PolicyAssignmentsGet(AssignmentUpdate.PolicyAssignmentsGet):
+
+        @classmethod
+        def _build_schema_on_200(cls):
+            _schema = super()._build_schema_on_200()
+            Common.SetSchemaNullable(_schema)
+            return _schema
+
     def pre_operations(self):
         Common.ValidateScope(self.ctx)
         Common.PopulateScopeFromContext(self.ctx, self.cli_ctx)
         Common.ValidateNotScopes(self.ctx)
+
+    def _execute_operations(self):
+        self.pre_operations()
+        self.PolicyAssignmentsGet(ctx=self.ctx)()
+        self.pre_instance_update(self.ctx.vars.instance)
+        self.InstanceUpdateByJson(ctx=self.ctx)()
+        self.InstanceUpdateByGeneric(ctx=self.ctx)()
+        self.post_instance_update(self.ctx.vars.instance)
+        self.PolicyAssignmentsCreate(ctx=self.ctx)()
+        self.post_operations()
 
     # pylint: disable=arguments-differ
     def _output(self):
@@ -581,12 +679,43 @@ class PolicyAssignmentNonComplianceMessageUpdate(NonComplianceMessageUpdate):
 
 class PolicyDefinitionCreate(DefinitionCreate):
 
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        Common.SetSchemaNullable(args_schema)
+        return args_schema
+
     class PolicyDefinitionsCreateOrUpdateAtManagementGroup(
             DefinitionCreate.PolicyDefinitionsCreateOrUpdateAtManagementGroup):
-        pass
+
+        @classmethod
+        def _build_schema_on_201(cls):
+            _schema = super()._build_schema_on_201()
+            Common.SetSchemaNullable(_schema)
+            return _schema
+
+        @staticmethod
+        def serialize_content(value, required=False):
+            # pylint: disable=protected-access
+            Common.SetUndefinedNone(value._data)
+            content = DefinitionCreate.PolicyDefinitionsCreateOrUpdateAtManagementGroup.serialize_content(
+                value, required)
+            return content
 
     class PolicyDefinitionsCreateOrUpdate(DefinitionCreate.PolicyDefinitionsCreateOrUpdate):
-        pass
+
+        @classmethod
+        def _build_schema_on_201(cls):
+            _schema = super()._build_schema_on_201()
+            Common.SetSchemaNullable(_schema)
+            return _schema
+
+        @staticmethod
+        def serialize_content(value, required=False):
+            # pylint: disable=protected-access
+            Common.SetUndefinedNone(value._data)
+            content = DefinitionCreate.PolicyDefinitionsCreateOrUpdate.serialize_content(value, required)
+            return content
 
     def pre_operations(self):
         pass
@@ -618,10 +747,20 @@ class PolicyDefinitionDelete(DefinitionDelete):
 class PolicyDefinitionList(DefinitionList):
 
     class PolicyDefinitionsListByManagementGroup(DefinitionList.PolicyDefinitionsListByManagementGroup):
-        pass
+
+        @classmethod
+        def _build_schema_on_200(cls):
+            _schema = super()._build_schema_on_200()
+            Common.SetSchemaNullable(_schema)
+            return _schema
 
     class PolicyDefinitionsList(DefinitionList.PolicyDefinitionsList):
-        pass
+
+        @classmethod
+        def _build_schema_on_200(cls):
+            _schema = super()._build_schema_on_200()
+            Common.SetSchemaNullable(_schema)
+            return _schema
 
     def pre_operations(self):
         pass
@@ -651,6 +790,12 @@ class PolicyDefinitionShow(DefinitionShow):
 
     class PolicyDefinitionsGetBuiltIn(DefinitionShow.PolicyDefinitionsGet):
 
+        @classmethod
+        def _build_schema_on_200(cls):
+            _schema = super()._build_schema_on_200()
+            Common.SetSchemaNullable(_schema)
+            return _schema
+
         @property
         def url(self):
             return self.client.format_url(
@@ -669,10 +814,20 @@ class PolicyDefinitionShow(DefinitionShow):
             return parameters
 
     class PolicyDefinitionsGetAtManagementGroup(DefinitionShow.PolicyDefinitionsGetAtManagementGroup):
-        pass
+
+        @classmethod
+        def _build_schema_on_200(cls):
+            _schema = super()._build_schema_on_200()
+            Common.SetSchemaNullable(_schema)
+            return _schema
 
     class PolicyDefinitionsGet(DefinitionShow.PolicyDefinitionsGet):
-        pass
+
+        @classmethod
+        def _build_schema_on_200(cls):
+            _schema = super()._build_schema_on_200()
+            Common.SetSchemaNullable(_schema)
+            return _schema
 
     def pre_operations(self):
         pass
@@ -710,16 +865,49 @@ class PolicyDefinitionUpdate(DefinitionUpdate):
 
     class PolicyDefinitionsCreateOrUpdateAtManagementGroup(
             DefinitionUpdate.PolicyDefinitionsCreateOrUpdateAtManagementGroup):
-        pass
+
+        @classmethod
+        def _build_schema_on_200(cls):
+            _schema = super()._build_schema_on_200()
+            Common.SetSchemaNullable(_schema)
+            return _schema
+
+        @staticmethod
+        def serialize_content(value, required=False):
+            Common.SetUndefinedNone(value._data)
+            content = DefinitionUpdate.PolicyDefinitionsCreateOrUpdateAtManagementGroup.serialize_content(
+                value, required)
+            return content
 
     class PolicyDefinitionsCreateOrUpdate(DefinitionUpdate.PolicyDefinitionsCreateOrUpdate):
-        pass
+
+        @classmethod
+        def _build_schema_on_200(cls):
+            _schema = super()._build_schema_on_200()
+            Common.SetSchemaNullable(_schema)
+            return _schema
+
+        @staticmethod
+        def serialize_content(value, required=False):
+            Common.SetUndefinedNone(value._data)
+            content = DefinitionUpdate.PolicyDefinitionsCreateOrUpdate.serialize_content(value, required)
+            return content
 
     class PolicyDefinitionsGetAtManagementGroup(DefinitionUpdate.PolicyDefinitionsGetAtManagementGroup):
-        pass
+
+        @classmethod
+        def _build_schema_on_200(cls):
+            _schema = super()._build_schema_on_200()
+            Common.SetSchemaNullable(_schema)
+            return _schema
 
     class PolicyDefinitionsGet(DefinitionUpdate.PolicyDefinitionsGet):
-        pass
+
+        @classmethod
+        def _build_schema_on_200(cls):
+            _schema = super()._build_schema_on_200()
+            Common.SetSchemaNullable(_schema)
+            return _schema
 
     # pylint: disable=too-few-public-methods
     class InstanceUpdateByJson(DefinitionUpdate.InstanceUpdateByJson):
@@ -890,12 +1078,43 @@ class PolicyExemptionUpdate(ExemptionUpdate):
 
 class PolicySetDefinitionCreate(SetDefinitionCreate):
 
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        Common.SetSchemaNullable(args_schema)
+        return args_schema
+
     class PolicySetDefinitionsCreateOrUpdateAtManagementGroup(
             SetDefinitionCreate.PolicySetDefinitionsCreateOrUpdateAtManagementGroup):
-        pass
+
+        @classmethod
+        def _build_schema_on_201(cls):
+            _schema = super()._build_schema_on_201()
+            Common.SetSchemaNullable(_schema)
+            return _schema
+
+        @staticmethod
+        def serialize_content(value, required=False):
+            # pylint: disable=protected-access
+            Common.SetUndefinedNone(value._data)
+            content = DefinitionCreate.PolicyDefinitionsCreateOrUpdateAtManagementGroup.serialize_content(
+                value, required)
+            return content
 
     class PolicySetDefinitionsCreateOrUpdate(SetDefinitionCreate.PolicySetDefinitionsCreateOrUpdate):
-        pass
+
+        @classmethod
+        def _build_schema_on_201(cls):
+            _schema = super()._build_schema_on_201()
+            Common.SetSchemaNullable(_schema)
+            return _schema
+
+        @staticmethod
+        def serialize_content(value, required=False):
+            # pylint: disable=protected-access
+            Common.SetUndefinedNone(value._data)
+            content = DefinitionCreate.PolicyDefinitionsCreateOrUpdate.serialize_content(value, required)
+            return content
 
     def pre_operations(self):
         pass
@@ -927,10 +1146,20 @@ class PolicySetDefinitionDelete(SetDefinitionDelete):
 class PolicySetDefinitionList(SetDefinitionList):
 
     class PolicySetDefinitionsListByManagementGroup(SetDefinitionList.PolicySetDefinitionsListByManagementGroup):
-        pass
+
+        @classmethod
+        def _build_schema_on_200(cls):
+            _schema = super()._build_schema_on_200()
+            Common.SetSchemaNullable(_schema)
+            return _schema
 
     class PolicySetDefinitionsList(SetDefinitionList.PolicySetDefinitionsList):
-        pass
+
+        @classmethod
+        def _build_schema_on_200(cls):
+            _schema = super()._build_schema_on_200()
+            Common.SetSchemaNullable(_schema)
+            return _schema
 
     def pre_operations(self):
         pass
@@ -960,6 +1189,12 @@ class PolicySetDefinitionShow(SetDefinitionShow):
 
     class PolicySetDefinitionsGetBuiltIn(SetDefinitionShow.PolicySetDefinitionsGet):
 
+        @classmethod
+        def _build_schema_on_200(cls):
+            _schema = super()._build_schema_on_200()
+            Common.SetSchemaNullable(_schema)
+            return _schema
+
         @property
         def url(self):
             return self.client.format_url(
@@ -978,10 +1213,20 @@ class PolicySetDefinitionShow(SetDefinitionShow):
             return parameters
 
     class PolicySetDefinitionsGetAtManagementGroup(SetDefinitionShow.PolicySetDefinitionsGetAtManagementGroup):
-        pass
+
+        @classmethod
+        def _build_schema_on_200(cls):
+            _schema = super()._build_schema_on_200()
+            Common.SetSchemaNullable(_schema)
+            return _schema
 
     class PolicySetDefinitionsGet(SetDefinitionShow.PolicySetDefinitionsGet):
-        pass
+
+        @classmethod
+        def _build_schema_on_200(cls):
+            _schema = super()._build_schema_on_200()
+            Common.SetSchemaNullable(_schema)
+            return _schema
 
     def pre_operations(self):
         pass
@@ -1018,16 +1263,49 @@ class PolicySetDefinitionUpdate(SetDefinitionUpdate):
 
     class PolicySetDefinitionsCreateOrUpdateAtManagementGroup(
             SetDefinitionUpdate.PolicySetDefinitionsCreateOrUpdateAtManagementGroup):
-        pass
+
+        @classmethod
+        def _build_schema_on_200(cls):
+            _schema = super()._build_schema_on_200()
+            Common.SetSchemaNullable(_schema)
+            return _schema
+
+        @staticmethod
+        def serialize_content(value, required=False):
+            Common.SetUndefinedNone(value._data)
+            content = SetDefinitionUpdate.PolicySetDefinitionsCreateOrUpdateAtManagementGroup.serialize_content(
+                value, required)
+            return content
 
     class PolicySetDefinitionsCreateOrUpdate(SetDefinitionUpdate.PolicySetDefinitionsCreateOrUpdate):
-        pass
+
+        @classmethod
+        def _build_schema_on_200(cls):
+            _schema = super()._build_schema_on_200()
+            Common.SetSchemaNullable(_schema)
+            return _schema
+
+        @staticmethod
+        def serialize_content(value, required=False):
+            Common.SetUndefinedNone(value._data)
+            content = SetDefinitionUpdate.PolicySetDefinitionsCreateOrUpdate.serialize_content(value, required)
+            return content
 
     class PolicySetDefinitionsGetAtManagementGroup(SetDefinitionUpdate.PolicySetDefinitionsGetAtManagementGroup):
-        pass
+
+        @classmethod
+        def _build_schema_on_200(cls):
+            _schema = super()._build_schema_on_200()
+            Common.SetSchemaNullable(_schema)
+            return _schema
 
     class PolicySetDefinitionsGet(SetDefinitionUpdate.PolicySetDefinitionsGet):
-        pass
+
+        @classmethod
+        def _build_schema_on_200(cls):
+            _schema = super()._build_schema_on_200()
+            Common.SetSchemaNullable(_schema)
+            return _schema
 
     # pylint: disable=too-few-public-methods
     class InstanceUpdateByJson(SetDefinitionUpdate.InstanceUpdateByJson):

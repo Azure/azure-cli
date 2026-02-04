@@ -843,3 +843,14 @@ def load_arguments(self, _):
             c.argument('resource_group_name', required=False)
             c.argument('resource_name', required=False, help='Name of the resource')
     # endregion
+
+    # region DdosCustomPolicy
+    with self.argument_context('network ddos-custom-policy create') as c:
+        c.argument('ddos_custom_policy_name', options_list=['--ddos-custom-policy-name', '--name', '-n'], help='The name of the DDoS custom policy.')
+        c.argument('location', arg_group='Parameters', help='Resource location.')
+        c.argument('tags', arg_group='Parameters', help='Resource tags.')
+        c.argument('detection_rule_name', arg_group='Detection Rules', help='The name of the DDoS detection rule.')
+        c.argument('detection_mode', arg_group='Detection Rules', help='The detection mode for the DDoS detection rule.')
+        c.argument('traffic_type', arg_group='Detection Rules', help='The traffic type (one of Tcp, Udp, TcpSyn) that the detection rule will be applied upon.')
+        c.argument('packets_per_second', arg_group='Detection Rules', help='The customized packets per second threshold.')
+    # endregion

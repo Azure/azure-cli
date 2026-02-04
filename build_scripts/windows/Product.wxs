@@ -49,7 +49,8 @@
       <UpgradeVersion Property="WIX_DOWNGRADE_DETECTED" Minimum="$(var.ProductVersion)" IncludeMinimum="no" OnlyDetect="yes" />
     </Upgrade>
     <InstallExecuteSequence>
-      <RemoveExistingProducts After="InstallExecute" />
+      <!-- RemoveExistingProducts runs BEFORE InstallInitialize to completely remove old version first. -->
+      <RemoveExistingProducts Before="InstallInitialize" />
     </InstallExecuteSequence>
 
     <!-- New product architectures should upgrade the original x86 product - even of the same version. -->
@@ -74,6 +75,9 @@
     <Property Id="MSIFASTINSTALL" Value="7" />
     <Property Id="ApplicationFolderName" Value="Microsoft SDKs\Azure" />
     <Property Id="WixAppFolder" Value="WixPerMachineFolder" />
+    
+    <!-- Force reinstall of all files during upgrade -->
+    <SetProperty Id="REINSTALLMODE" Value="amus" Before="CostFinalize" Sequence="both">WIX_UPGRADE_DETECTED</SetProperty>
 
     <Feature Id="ProductFeature"
              Title="Microsoft Azure CLI"

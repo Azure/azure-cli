@@ -21,7 +21,7 @@ from azure.cli.core.profiles import ResourceType, get_sdk
 from knack.arguments import CLICommandArgument, ignore_type
 from knack.introspection import extract_args_from_signature
 from knack.log import get_logger
-from knack.util import todict, CLIError
+from knack.util import CLIError
 
 logger = get_logger(__name__)
 EXCLUDED_NON_CLIENT_PARAMS = list(set(EXCLUDED_PARAMS) - set(['self', 'client']))
@@ -479,6 +479,7 @@ def show_exception_handler(ex):
 
 
 def verify_property(instance, condition):
+    from azure.cli.core.util import todict
     from jmespath import compile as compile_jmespath
     result = todict(instance)
     jmes_query = compile_jmespath(condition)

@@ -48,7 +48,7 @@ class WebAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('scmIpSecurityRestrictions[0].name', 'Allow all'),
             JMESPathCheck('scmIpSecurityRestrictions[0].action', 'Allow'),
             JMESPathCheck('scmIpSecurityRestrictionsUseMain', False),
-            JMESPathCheck('pSecurityRestrictionsDefaultAction', None),
+            JMESPathCheck('ipSecurityRestrictionsDefaultAction', None),
             JMESPathCheck('scmIpSecurityRestrictionsDefaultAction', None)
         ])
 
@@ -449,7 +449,7 @@ class WebAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('scmIpSecurityRestrictions[0].name', 'Allow all'),
             JMESPathCheck('scmIpSecurityRestrictions[0].action', 'Allow'),
             JMESPathCheck('scmIpSecurityRestrictionsUseMain', False),
-            JMESPathCheck('pSecurityRestrictionsDefaultAction', None),
+            JMESPathCheck('ipSecurityRestrictionsDefaultAction', None),
             JMESPathCheck('scmIpSecurityRestrictionsDefaultAction', None)
         ])
 
