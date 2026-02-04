@@ -2519,7 +2519,7 @@ def set_attributes_certificate(client, certificate_name, version=None, policy=No
     return client.get_certificate(certificate_name=certificate_name)
 
 
-def copy_secret(cmd, client, destination_vault, name=None, all_secrets=False, rewrite=False):
+def copy_secret(cmd, client, destination_vault, name=None, all_secrets=False, overwrite=False):
     from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
     from azure.keyvault.secrets import SecretClient
     from azure.cli.core._profile import Profile
@@ -2559,10 +2559,11 @@ def copy_secret(cmd, client, destination_vault, name=None, all_secrets=False, re
         except HttpResponseError as e:
             raise CLIError(f"Failed to list secrets from source: {str(e)}")
 
+    copied_secrets = []
     for secret_name in secrets_to_copy:
         try:
             # Check destination
-            if not rewrite:
+            if not overwrite:
                 try:
                     dest_client.get_secret(secret_name)
                     logger.warning(f"Secret '{secret_name}' already exists in destination. Skipping.")
@@ -2579,7 +2580,7 @@ def copy_secret(cmd, client, destination_vault, name=None, all_secrets=False, re
             logger.info(f"Copying secret: {secret_name}")
             s = client.get_secret(secret_name)
 
-            dest_client.set_secret(
+            new_secret = dest_client.set_secret(
                 s.name,
                 s.value,
                 content_type=s.properties.content_type,
@@ -2588,9 +2589,14 @@ def copy_secret(cmd, client, destination_vault, name=None, all_secrets=False, re
                 not_before=s.properties.not_before,
                 expires_on=s.properties.expires_on
             )
+            
+            logger.warning(f"Successfully copied secret: {secret_name}")
+            copied_secrets.append({'name': new_secret.name, 'id': new_secret.id})
 
         except HttpResponseError as e:
             if e.status_code == 403:  # Forbidden
                 logger.error(f"Access denied (403) for secret '{secret_name}': {str(e)}")
             else:
                 logger.error(f"Failed to copy secret '{secret_name}': {str(e)}")
+    
+    return copied_secrets

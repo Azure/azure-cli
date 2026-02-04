@@ -576,7 +576,7 @@ def load_arguments(self, _):
                 options_list=['--destination-vault'], help='Name of the destination Key Vault.', required=True)
         c.argument('name', options_list=['--name', '-n'], help='Name of the secret to copy.', required=False)
         c.extra('all_secrets', arg_type=get_three_state_flag(), options_list=['--all'], help='Copy all secrets.')
-        c.extra('rewrite', arg_type=get_three_state_flag(), help='Overwrite existing secrets in destination.')
+        c.extra('overwrite', arg_type=get_three_state_flag(), help='Overwrite existing secrets in destination.')
     # endregion
 
     # region keyvault security-domain

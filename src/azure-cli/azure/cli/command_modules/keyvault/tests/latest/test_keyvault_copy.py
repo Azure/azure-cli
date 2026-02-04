@@ -58,7 +58,7 @@ class KeyVaultCopyScenarioTest(ScenarioTest):
         ])
 
         # 4. Test Rewrite
-        self.cmd('keyvault secret copy --source-vault {kv} --destination-vault ' + dest_kv + ' --name ' + secret_name + ' --rewrite')
+        self.cmd('keyvault secret copy --source-vault {kv} --destination-vault ' + dest_kv + ' --name ' + secret_name + ' --overwrite')
         
         # Verify destination has new value
         self.cmd('keyvault secret show --vault-name ' + dest_kv + ' -n ' + secret_name, checks=[
