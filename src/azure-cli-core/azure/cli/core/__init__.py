@@ -334,78 +334,80 @@ class MainCommandsLoader(CLICommandsLoader):
                 return filtered_extensions
 
             extensions = get_extensions()
-            if extensions:
-                if extension_modname is not None:
-                    extension_modname.extend(ALWAYS_LOADED_EXTENSIONS)
-                    extensions = _filter_modname(extensions)
-                allowed_extensions = _handle_extension_suppressions(extensions)
-                module_commands = set(self.command_table.keys())
+            if not extensions:
+                return
 
-                count = 0
-                cumulative_elapsed_time = 0
-                cumulative_group_count = 0
-                cumulative_command_count = 0
-                logger.debug("Loading extensions:")
-                logger.debug(self.header_ext)
+            if extension_modname is not None:
+                extension_modname.extend(ALWAYS_LOADED_EXTENSIONS)
+                extensions = _filter_modname(extensions)
+            allowed_extensions = _handle_extension_suppressions(extensions)
+            module_commands = set(self.command_table.keys())
 
-                for ext in allowed_extensions:
-                    try:
-                        # Import in the `for` loop because `allowed_extensions` can be []. In such case we
-                        # don't need to import `check_version_compatibility` at all.
-                        from azure.cli.core.extension.operations import check_version_compatibility
-                        check_version_compatibility(ext.get_metadata())
-                    except CLIError as ex:
-                        # issue warning and skip loading extensions that aren't compatible with the CLI core
-                        logger.warning(ex)
-                        continue
-                    ext_name = ext.name
-                    ext_dir = ext.path or get_extension_path(ext_name)
-                    sys.path.append(ext_dir)
-                    try:
-                        ext_mod = get_extension_modname(ext_name, ext_dir=ext_dir)
-                        # Add to the map. This needs to happen before we load commands as registering a command
-                        # from an extension requires this map to be up-to-date.
-                        # self._mod_to_ext_map[ext_mod] = ext_name
-                        start_time = timeit.default_timer()
-                        extension_command_table, extension_group_table, extension_command_loader = \
-                            _load_extension_command_loader(self, args, ext_mod)
-                        import_extension_breaking_changes(ext_mod)
+            count = 0
+            cumulative_elapsed_time = 0
+            cumulative_group_count = 0
+            cumulative_command_count = 0
+            logger.debug("Loading extensions:")
+            logger.debug(self.header_ext)
 
-                        for cmd_name, cmd in extension_command_table.items():
-                            cmd.command_source = ExtensionCommandSource(
-                                extension_name=ext_name,
-                                overrides_command=cmd_name in module_commands,
-                                preview=ext.preview,
-                                experimental=ext.experimental)
+            for ext in allowed_extensions:
+                try:
+                    # Import in the `for` loop because `allowed_extensions` can be []. In such case we
+                    # don't need to import `check_version_compatibility` at all.
+                    from azure.cli.core.extension.operations import check_version_compatibility
+                    check_version_compatibility(ext.get_metadata())
+                except CLIError as ex:
+                    # issue warning and skip loading extensions that aren't compatible with the CLI core
+                    logger.warning(ex)
+                    continue
+                ext_name = ext.name
+                ext_dir = ext.path or get_extension_path(ext_name)
+                sys.path.append(ext_dir)
+                try:
+                    ext_mod = get_extension_modname(ext_name, ext_dir=ext_dir)
+                    # Add to the map. This needs to happen before we load commands as registering a command
+                    # from an extension requires this map to be up-to-date.
+                    # self._mod_to_ext_map[ext_mod] = ext_name
+                    start_time = timeit.default_timer()
+                    extension_command_table, extension_group_table, extension_command_loader = \
+                        _load_extension_command_loader(self, args, ext_mod)
+                    import_extension_breaking_changes(ext_mod)
 
-                        # Populate cmd_to_loader_map for extension commands
-                        if extension_command_loader:
-                            self.loaders.append(extension_command_loader)
-                            for cmd_name in extension_command_table:
-                                if cmd_name not in self.cmd_to_loader_map:
-                                    self.cmd_to_loader_map[cmd_name] = []
-                                self.cmd_to_loader_map[cmd_name].append(extension_command_loader)
+                    for cmd_name, cmd in extension_command_table.items():
+                        cmd.command_source = ExtensionCommandSource(
+                            extension_name=ext_name,
+                            overrides_command=cmd_name in module_commands,
+                            preview=ext.preview,
+                            experimental=ext.experimental)
 
-                        self.command_table.update(extension_command_table)
-                        self.command_group_table.update(extension_group_table)
+                    # Populate cmd_to_loader_map for extension commands
+                    if extension_command_loader:
+                        self.loaders.append(extension_command_loader)
+                        for cmd_name in extension_command_table:
+                            if cmd_name not in self.cmd_to_loader_map:
+                                self.cmd_to_loader_map[cmd_name] = []
+                            self.cmd_to_loader_map[cmd_name].append(extension_command_loader)
 
-                        elapsed_time = timeit.default_timer() - start_time
-                        logger.debug(self.item_ext_format_string, ext_name, elapsed_time,
-                                     len(extension_group_table), len(extension_command_table),
-                                     ext_dir)
-                        count += 1
-                        cumulative_elapsed_time += elapsed_time
-                        cumulative_group_count += len(extension_group_table)
-                        cumulative_command_count += len(extension_command_table)
-                    except Exception as ex:  # pylint: disable=broad-except
-                        self.cli_ctx.raise_event(EVENT_FAILED_EXTENSION_LOAD, extension_name=ext_name)
-                        logger.warning("Unable to load extension '%s: %s'. Use --debug for more information.",
-                                       ext_name, ex)
-                        logger.debug(traceback.format_exc())
-                # Summary line
-                logger.debug(self.item_ext_format_string,
-                             "Total ({})".format(count), cumulative_elapsed_time,
-                             cumulative_group_count, cumulative_command_count, "")
+                    self.command_table.update(extension_command_table)
+                    self.command_group_table.update(extension_group_table)
+
+                    elapsed_time = timeit.default_timer() - start_time
+                    logger.debug(self.item_ext_format_string, ext_name, elapsed_time,
+                                 len(extension_group_table), len(extension_command_table),
+                                 ext_dir)
+                    count += 1
+                    cumulative_elapsed_time += elapsed_time
+                    cumulative_group_count += len(extension_group_table)
+                    cumulative_command_count += len(extension_command_table)
+                except Exception as ex:  # pylint: disable=broad-except
+                    self.cli_ctx.raise_event(EVENT_FAILED_EXTENSION_LOAD, extension_name=ext_name)
+                    logger.warning("Unable to load extension '%s: %s'. Use --debug for more information.",
+                                   ext_name, ex)
+                    logger.debug(traceback.format_exc())
+            # Summary line
+            logger.debug(self.item_ext_format_string,
+                         "Total ({})".format(count), cumulative_elapsed_time,
+                         cumulative_group_count, cumulative_command_count, "")
 
         def _wrap_suppress_extension_func(func, ext):
             """ Wrapper method to handle centralization of log messages for extension filters """
