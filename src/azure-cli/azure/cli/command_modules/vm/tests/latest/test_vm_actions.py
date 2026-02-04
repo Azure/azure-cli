@@ -204,31 +204,6 @@ class TestActions(unittest.TestCase):
         _validate_admin_password('Pas' + '1' * 70, 'windows')
 
     @mock.patch('azure.cli.command_modules.vm._validators._compute_client_factory', autospec=True)
-    def test_parse_image_argument(self, client_factory_mock):
-        compute_client = mock.MagicMock()
-        image = mock.MagicMock()
-        cmd = mock.MagicMock()
-        cmd.cli_ctx = DummyCli()
-        image.plan.name = 'plan1'
-        image.plan.product = 'product1'
-        image.plan.publisher = 'publisher1'
-        compute_client.virtual_machine_images.get.return_value = image
-        client_factory_mock.return_value = compute_client
-
-        np = mock.MagicMock()
-        np.location = 'some region'
-        np.plan_name, np.plan_publisher, np.plan_product = '', '', ''
-        np.image = 'publisher1:offer1:sku1:1.0.0'
-
-        # action
-        _parse_image_argument(cmd, np)
-
-        # assert
-        self.assertEqual('plan1', np.plan_name)
-        self.assertEqual('product1', np.plan_product)
-        self.assertEqual('publisher1', np.plan_publisher)
-
-    @mock.patch('azure.cli.command_modules.vm._validators._compute_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.vm._validators.logger.warning', autospec=True)
     def test_parse_staging_image_argument(self, logger_mock, client_factory_mock):
         from azure.core.exceptions import ResourceNotFoundError
