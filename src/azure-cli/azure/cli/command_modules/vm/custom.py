@@ -181,7 +181,22 @@ def _get_disk_lun(data_disks):
     if not data_disks:
         return 0
 
-    existing_luns = sorted([d.lun for d in data_disks])
+    try:
+        existing_luns = sorted([
+            (d.get('lun') if isinstance(d, dict) else getattr(d, 'lun'))
+            for d in data_disks
+        ])
+    except (AttributeError, TypeError, ValueError, KeyError):
+        existing_luns = []
+        for d in data_disks:
+            try:
+                lun = d.get('lun') if isinstance(d, dict) else getattr(d, 'lun', None)
+                if lun is not None:
+                    existing_luns.append(lun)
+            except Exception:
+                pass
+        existing_luns = sorted(existing_luns)
+
     for i, current in enumerate(existing_luns):
         if current != i:
             return i
