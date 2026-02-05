@@ -1707,8 +1707,7 @@ def resize_vm(cmd, resource_group_name, vm_name, size, no_wait=False):
 
 
 def restart_vm(cmd, resource_group_name, vm_name, no_wait=False, force=False):
-    from .aaz.latest.vm import Redeploy as _VMRedeploy
-    from .aaz.latest.vm import Restart as _VMRestart
+    from .aaz.latest.vm import Redeploy as _VMRedeploy, Restart as _VMRestart
 
     command_args = {
         "resource_group": resource_group_name,
