@@ -6011,6 +6011,11 @@ class DeploymentWithBicepScenarioTest(LiveScenarioTest):
         self.assertFalse(is_using_none_bicepparam_file(path))
         os.unlink(path)
 
+        # Test data file with comments (on-disk fixture)
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        comments_file = os.path.join(curr_dir, 'data', 'bicepparam', 'using_none_with_comments_params.bicepparam')
+        self.assertTrue(is_using_none_bicepparam_file(comments_file))
+
         # Non-existent file
         self.assertFalse(is_using_none_bicepparam_file('/nonexistent/path.bicepparam'))
 
