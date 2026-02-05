@@ -580,7 +580,7 @@ def load_arguments(self, _):
         c.extra('all_secrets', arg_type=get_three_state_flag(), options_list=['--all'],
                 help='Copy all secrets from the source vault. Cannot be used with --name. If omitted, you must '
                      'specify --name.')
-        c.extra('overwrite', arg_type=get_three_state_flag(), help='Overwrite existing secrets in destination.')
+        c.extra('overwrite', action='store_true', help='Overwrite existing secrets in destination.')
     # endregion
 
     # region keyvault security-domain

@@ -2852,5 +2852,19 @@ class KeyVaultCopyScenarioTest(ScenarioTest):
         # 8. Test Non-existent Secret in Source (Should fail)
         self.cmd('keyvault secret copy --source-vault {kv} --destination-vault {dest_kv} --name non_existent_secret_123', expect_failure=True)
 
+        # 9. Test Default Behavior (Implicit --all)
+        # Add a unique secret to check implicit copy
+        secret_name_3 = self.create_random_name('secret3-', 24)
+        self.kwargs['secret_name_3'] = secret_name_3
+        self.cmd('keyvault secret set --vault-name {kv} -n {secret_name_3} --value {secret_value}')
+        
+        # Run copy without --name or --all
+        self.cmd('keyvault secret copy --source-vault {kv} --destination-vault {dest_kv}')
+        
+        # Verify it was copied
+        self.cmd('keyvault secret show --vault-name {dest_kv} -n {secret_name_3}', checks=[
+            self.check('value', '{secret_value}')
+        ])
+
 if __name__ == '__main__':
     unittest.main()
