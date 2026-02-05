@@ -2519,7 +2519,7 @@ def set_attributes_certificate(client, certificate_name, version=None, policy=No
     return client.get_certificate(certificate_name=certificate_name)
 
 
-def copy_secret(cmd, client, destination_vault, name=None, all_secrets=False, overwrite=False):
+def copy_secret(cmd, client, destination_vault, name=None, all_secrets=None, overwrite=False):
     from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
     from azure.keyvault.secrets import SecretClient
     from azure.cli.core._profile import Profile
