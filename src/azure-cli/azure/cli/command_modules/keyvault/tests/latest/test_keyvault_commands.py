@@ -2798,7 +2798,7 @@ class KeyVaultCopyScenarioTest(ScenarioTest):
         # Use simple creation to ensure speed and reliability in playback
         self.cmd('keyvault create -g {rg} -n {dest_kv}')
         self.addCleanup(self.cmd, 'keyvault delete -g {rg} -n {dest_kv}')
-        self.addCleanup(self.cmd, 'keyvault purge -n {dest_kv} -l eastus')
+        self.addCleanup(self.cmd, 'keyvault purge -n {dest_kv}')
 
         # Set secret in Source with tags and content-type
         self.cmd('keyvault secret set --vault-name {kv} -n {secret_name} --value {secret_value} --tags tag1=value1 --content-type text/plain')
