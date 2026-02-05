@@ -2525,8 +2525,6 @@ def copy_secret(cmd, client, destination_vault, name=None, all_secrets=False, ov
     from azure.cli.core._profile import Profile
     from azure.cli.core.commands.client_factory import prepare_client_kwargs_track2
 
-    from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
-
     # If neither a specific secret name nor --all is provided, default to copying all secrets.
     if not name and not all_secrets:
         all_secrets = True
