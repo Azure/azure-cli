@@ -218,7 +218,7 @@ def is_using_none_bicepparam_file(file_path):
         if stripped == '' or stripped.startswith('//'):
             continue
         # The 'using' declaration must be the first non-comment, non-empty statement
-        return stripped.lower() == 'using none'
+        return re.fullmatch(r'using\s+none', stripped, re.IGNORECASE) is not None
     return False
 
 
