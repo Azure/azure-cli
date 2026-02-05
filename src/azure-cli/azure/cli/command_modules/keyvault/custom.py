@@ -2571,7 +2571,7 @@ def _copy_single_secret(source_client, dest_client, secret_name, overwrite, is_s
 
 
 def copy_secret(cmd, client, destination_vault, name=None, all_secrets=None, overwrite=False):
-    from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
+    from azure.core.exceptions import HttpResponseError
     from azure.keyvault.secrets import SecretClient
     from azure.cli.core._profile import Profile
     from azure.cli.core.commands.client_factory import prepare_client_kwargs_track2
