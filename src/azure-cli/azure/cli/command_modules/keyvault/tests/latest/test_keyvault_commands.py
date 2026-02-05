@@ -2832,7 +2832,7 @@ class KeyVaultCopyScenarioTest(ScenarioTest):
         
         # Verify destination still has old value
         self.cmd('keyvault secret show --vault-name {dest_kv} -n {secret_name}', checks=[
-            self.check('value', '{secret_value}') 
+            self.check('value', '{secret_value}')
         ])
 
         # 4. Test overwrite
