@@ -5328,7 +5328,7 @@ def set_orchestration_service_state(cmd, resource_group_name, vm_scale_set_name,
 
 
 def upgrade_vmss_extension(cmd, resource_group_name, vm_scale_set_name, no_wait=False):
-    from azure.cli.command_modules.vm.aaz.latest.compute.virtual_machine_scale_set import ExtensionRollingUpgrade
+    from azure.cli.command_modules.vm.aaz.latest.vmss import ExtensionRollingUpgrade
 
     return ExtensionRollingUpgrade(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,

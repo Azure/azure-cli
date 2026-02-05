@@ -12,14 +12,14 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "compute virtual-machine-scale-set extension-rolling-upgrade",
+    "vmss extension-rolling-upgrade",
 )
 class ExtensionRollingUpgrade(AAZCommand):
     """Starts a rolling upgrade to move all extensions for all virtual machine scale set instances to the latest available extension version.
     Instances which are already running the latest extension versions are not affected.
 
     :example: Upgrade a vmss extension
-    az compute virtual-machine-scale-set extension-rolling-upgrade -g MyResourceGroup --ids id1 --vm-scale-set-name MyVmssName
+    az vmss extension-rolling-upgrade -g MyResourceGroup --ids id1 --vm-scale-set-name MyVmssName
     """
 
     _aaz_info = {
