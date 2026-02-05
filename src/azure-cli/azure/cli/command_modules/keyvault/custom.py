@@ -2532,24 +2532,40 @@ def _copy_single_secret(source_client, dest_client, secret_name, overwrite, is_s
             except ResourceNotFoundError:
                 pass
             except HttpResponseError as e:
-                logger.warning("Error checking secret '%s' in destination: %s", secret_name, str(e))
-                if e.status_code == 403:
-                    logger.error("Access denied checking secret '%s' in destination.", secret_name)
+                status_code = getattr(e, "status_code", None)
+                if status_code == 403:
+                    logger.error("Access denied (403) checking secret '%s' in destination: %s", secret_name, str(e))
+                elif status_code is not None and 400 <= status_code < 500:
+                    logger.warning("Client error (%s) checking secret '%s' in destination: %s", 
+                                   status_code, secret_name, str(e))
+                elif status_code is not None and status_code >= 500:
+                    logger.error("Server error (%s) checking secret '%s' in destination: %s", 
+                                 status_code, secret_name, str(e))
+                else:
+                    logger.error("Unexpected error checking secret '%s' in destination: %s", secret_name, str(e))
                 return False  # Failed
 
         # Copy
         logger.info("Copying secret: %s", secret_name)
         s = source_client.get_secret(secret_name)
 
-        new_secret = dest_client.set_secret(
-            s.name,
-            s.value,
-            content_type=s.properties.content_type,
-            tags=s.properties.tags,
-            enabled=s.properties.enabled,
-            not_before=s.properties.not_before,
-            expires_on=s.properties.expires_on
-        )
+        try:
+            new_secret = dest_client.set_secret(
+                s.name,
+                s.value,
+                content_type=s.properties.content_type,
+                tags=s.properties.tags,
+                enabled=s.properties.enabled,
+                not_before=s.properties.not_before,
+                expires_on=s.properties.expires_on
+            )
+        except HttpResponseError as e:
+            from azure.cli.core.azclierror import CLIError
+            if is_single_mode:
+                raise CLIError(f"Failed to copy secret '{secret_name}': {str(e)}")
+            
+            logger.error("Failed to copy secret '%s': %s", secret_name, str(e))
+            return False
 
         logger.info("Successfully copied secret: %s", secret_name)
         return {'name': new_secret.name, 'id': new_secret.id}
@@ -2571,7 +2587,7 @@ def _copy_single_secret(source_client, dest_client, secret_name, overwrite, is_s
 
 
 def copy_secret(cmd, client, destination_vault, name=None, all_secrets=None, overwrite=False):
-    from azure.core.exceptions import HttpResponseError
+    from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
     from azure.keyvault.secrets import SecretClient
     from azure.cli.core._profile import Profile
     from azure.cli.core.commands.client_factory import prepare_client_kwargs_track2
@@ -2595,25 +2611,30 @@ def copy_secret(cmd, client, destination_vault, name=None, all_secrets=None, ove
     # KeyVault clients handle this internally or differently sometimes, mimicking _client_factory
     client_kwargs.pop('http_logging_policy', None)
 
-    dest_client = SecretClient(vault_url=destination_vault, credential=credential, **client_kwargs)
+    dest_client = SecretClient(
+        vault_url=destination_vault,
+        credential=credential,
+        api_version='7.4',
+        verify_challenge_resource=False,
+        **client_kwargs
+    )
 
     # Fail fast if destination vault is not accessible or does not exist
     try:
         # Perform a lightweight call to validate vault accessibility.
         # A 404 for a dummy secret name means the vault is reachable but the secret does not exist.
         dest_client.get_secret("azure-cli-validation-dummy")
+    except ResourceNotFoundError:
+        # Vault is accessible but the dummy secret does not exist, which is expected.
+        pass
     except HttpResponseError as e:
-        if getattr(e, "status_code", None) == 404:
-            # Vault is accessible but the dummy secret does not exist, which is expected.
-            pass
-        else:
-            raise CLIError(f"Failed to access destination Key Vault '{destination_vault}': {str(e)}")
+        raise CLIError(f"Failed to access destination Key Vault '{destination_vault}': {str(e)}")
 
     secrets_to_copy = []
     if name:
         secrets_to_copy.append(name)
     else:
-        logger.warning("Copying all secrets from source...")
+        logger.info("Copying all secrets from source...")
         try:
             source_secrets = client.list_properties_of_secrets()
             for s in source_secrets:

@@ -581,7 +581,7 @@ def load_arguments(self, _):
         c.extra('all_secrets', arg_type=get_three_state_flag(), options_list=['--all'],
                 help='Copy all secrets from the source vault. Mutually exclusive with --name. If neither --name nor '
                      '--all is specified, all secrets will be copied.')
-        c.extra('overwrite', arg_type=get_three_state_flag(), help='Overwrite existing secrets in destination.')
+        c.extra('overwrite', arg_type=get_three_state_flag(), help='Overwrite secrets in the destination vault if they already exist.')
     # endregion
 
     # region keyvault security-domain
