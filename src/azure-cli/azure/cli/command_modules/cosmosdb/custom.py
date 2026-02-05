@@ -413,10 +413,9 @@ def _create_database_account(client,
         docdb_account = async_docdb_create.result()
     except HttpResponseError as ex:
         if is_restore_request and ex.status_code == 403 and "does not exist" in str(ex):
-            pass
+            docdb_account = client.get(resource_group_name, account_name)  # Workaround
         else:
             raise ex
-    docdb_account = client.get(resource_group_name, account_name)  # Workaround
     return docdb_account
 
 

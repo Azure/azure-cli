@@ -651,3 +651,35 @@ class CosmosDBRestoreUnitTests(unittest.TestCase):
                 is_restore_request=False, # Normal create
                 arm_location="westeurope"
             )
+
+    def test_normal_create_success(self):
+        from azure.cli.command_modules.cosmosdb.custom import _create_database_account
+
+        # Setup mocks
+        client = mock.MagicMock()
+        poller = mock.MagicMock()
+        
+        # Simulate successful creation
+        mock_created_account = mock.MagicMock()
+        mock_created_account.provisioning_state = "Succeeded"
+        poller.result.return_value = mock_created_account
+        client.begin_create_or_update.return_value = poller
+
+        # Call the private function
+        result = _create_database_account(
+            client=client,
+            resource_group_name="rg",
+            account_name="myaccount",
+            is_restore_request=False,
+            arm_location="westeurope"
+        )
+
+        # Assertions
+        # 1. begin_create_or_update called
+        client.begin_create_or_update.assert_called()
+        # 2. poller.result() called
+        poller.result.assert_called()
+        # 3. client.get should NOT be called since result() succeeded
+        client.get.assert_not_called()
+        # 4. Result matches
+        self.assertEqual(result, mock_created_account)
