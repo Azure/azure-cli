@@ -209,7 +209,7 @@ def is_bicepparam_file(file_path):
 def is_using_none_bicepparam_file(file_path):
     """Check if a .bicepparam file uses 'using none' declaration."""
     try:
-        with open(file_path, 'r') as f:
+        with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
     except IOError:
         return False
