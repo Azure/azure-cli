@@ -6054,6 +6054,26 @@ class DeploymentWithBicepScenarioTest(LiveScenarioTest):
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_with_bicepparam_using_none_json')
+    def test_resource_group_level_deployment_with_bicepparam_using_none_and_json_template(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'data', 'bicepparam', 'storage_account_template.json'),
+            'params': os.path.join(curr_dir, 'data', 'bicepparam', 'using_none_params.bicepparam')
+        })
+
+        self.cmd('deployment group validate --resource-group {rg} --template-file "{tf}" --parameters {params}', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment group what-if --resource-group {rg} --template-file "{tf}" --parameters {params} --no-pretty-print', checks=[
+            self.check('status', 'Succeeded'),
+        ])
+
+        self.cmd('deployment group create --resource-group {rg} --template-file "{tf}" --parameters {params}', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
     def test_resource_deployment_with_bicepparam_using_none_and_no_template(self):
         import tempfile
 
