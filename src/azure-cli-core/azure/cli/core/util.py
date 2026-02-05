@@ -52,6 +52,12 @@ DISALLOWED_USER_NAMES = [
     "sys", "test2", "test3", "user4", "user5"
 ]
 
+# AME Storage Account URL for version checking and VM image aliases (Network Isolation)
+# Files are stored as:
+#   - https://azcliprod.blob.core.windows.net/cli/{package}/setup.py (CLI versions)
+#   - https://azcliprod.blob.core.windows.net/cli/vm/aliases.json (VM image aliases)
+AME_STORAGE_BASE_URL = "https://azcliprod.blob.core.windows.net/cli"
+
 
 def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
     # For error code, follow guidelines at https://docs.python.org/2/library/sys.html#sys.exit,
@@ -291,14 +297,23 @@ def get_installed_cli_distributions():
     ]
 
 
-def get_latest_from_github(package_path='azure-cli'):
+def get_latest_version_from_ame_storage(package_path='azure-cli'):
+    """Get the latest version from AME Storage Account.
+
+    This replaces get_latest_from_github() due to network isolation requirements.
+    The setup.py files are uploaded to AME Storage Account during release pipeline.
+
+    Args:
+        package_path: Package name, e.g., 'azure-cli', 'azure-cli-core', 'azure-cli-telemetry', 'azure-cli-testsdk'
+    """
     try:
         import requests
-        git_url = "https://raw.githubusercontent.com/Azure/azure-cli/main/src/{}/setup.py".format(package_path)
-        response = requests.get(git_url, timeout=10)
+        storage_url = "{}/{}/setup.py".format(AME_STORAGE_BASE_URL, package_path)
+
+        response = requests.get(storage_url, timeout=10)
         if response.status_code != 200:
             logger.info("Failed to fetch the latest version from '%s' with status code '%s' and reason '%s'",
-                        git_url, response.status_code, response.reason)
+                        storage_url, response.status_code, response.reason)
             return None
         for line in response.iter_lines():
             txt = line.decode('utf-8', errors='ignore')
@@ -307,16 +322,28 @@ def get_latest_from_github(package_path='azure-cli'):
                 if match:
                     return match.group(1)
     except Exception as ex:  # pylint: disable=broad-except
-        logger.info("Failed to get the latest version from '%s'. %s", git_url, str(ex))
+        logger.info("Failed to get the latest version from '%s'. %s", storage_url, str(ex))
         return None
 
 
-def _update_latest_from_github(versions):
-    if not check_connectivity(url='https://raw.githubusercontent.com', max_retries=0):
+def get_latest_from_github(package_path='azure-cli'):
+    """Deprecated: Use get_latest_version_from_ame_storage() instead.
+
+    This function is kept for backward compatibility but now reads from AME Storage Account.
+    """
+    return get_latest_version_from_ame_storage(package_path)
+
+
+def _update_latest_from_ame_storage(versions):
+    """Update versions from AME Storage Account.
+
+    This replaces _update_latest_from_github() due to network isolation requirements.
+    """
+    if not check_connectivity(url=AME_STORAGE_BASE_URL, max_retries=0):
         return versions, False
     success = True
     for pkg in ['azure-cli-core', 'azure-cli-telemetry']:
-        version = get_latest_from_github(pkg)
+        version = get_latest_version_from_ame_storage(pkg)
         if not version:
             success = False
         else:
@@ -326,6 +353,14 @@ def _update_latest_from_github(versions):
     except KeyError:
         pass
     return versions, success
+
+
+def _update_latest_from_github(versions):
+    """Deprecated: Use _update_latest_from_ame_storage() instead.
+
+    This function is kept for backward compatibility but now reads from AME Storage Account.
+    """
+    return _update_latest_from_ame_storage(versions)
 
 
 def get_cached_latest_versions(versions=None):
@@ -343,7 +378,7 @@ def get_cached_latest_versions(versions=None):
             if cache_versions and cache_versions['azure-cli']['local'] == versions['azure-cli']['local']:
                 return cache_versions.copy(), True
 
-    versions, success = _update_latest_from_github(versions)
+    versions, success = _update_latest_from_ame_storage(versions)
     VERSIONS['versions'] = versions
     VERSIONS[_VERSION_UPDATE_TIME] = str(datetime.datetime.now())
     return versions.copy(), success
@@ -369,7 +404,7 @@ def get_az_version_string(use_cache=False):  # pylint: disable=too-many-statemen
     versions = _get_local_versions()
 
     # get the versions from pypi
-    versions, success = get_cached_latest_versions(versions) if use_cache else _update_latest_from_github(versions)
+    versions, success = get_cached_latest_versions(versions) if use_cache else _update_latest_from_ame_storage(versions)
     updates_available_components = []
 
     def _print(val=''):

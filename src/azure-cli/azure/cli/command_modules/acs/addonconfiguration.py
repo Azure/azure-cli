@@ -198,6 +198,7 @@ ContainerInsightsStreams = [
     "Microsoft-ContainerInventory",
     "Microsoft-ContainerNodeInventory",
     "Microsoft-Perf",
+    "Microsoft-ContainerNetworkLogs",
 ]
 
 

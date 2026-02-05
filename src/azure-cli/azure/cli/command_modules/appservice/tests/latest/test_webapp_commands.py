@@ -2164,6 +2164,48 @@ class WebappUpdateTest(ScenarioTest):
             self.check('clientAffinityEnabled', True)
         ])
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_update_e2e_encryption(self, resource_group):
+        webapp_name = self.create_random_name('webapp-e2e-test', 40)
+        plan_name = self.create_random_name('webapp-e2e-plan', 40)
+        self.cmd('appservice plan create -g {} -n {} --sku S1'
+                 .format(resource_group, plan_name))
+
+        self.cmd('webapp create -g {} -n {} --plan {}'
+                 .format(resource_group, webapp_name, plan_name))
+
+        # Enable end-to-end encryption
+        self.cmd('webapp update -g {} -n {} --end-to-end-encryption-enabled true'
+                 .format(resource_group, webapp_name)).assert_with_checks([
+                     JMESPathCheck('name', webapp_name),
+                     JMESPathCheck('endToEndEncryptionEnabled', True)])
+
+        # Disable end-to-end encryption
+        self.cmd('webapp update -g {} -n {} -e false'
+                 .format(resource_group, webapp_name)).assert_with_checks([
+                     JMESPathCheck('endToEndEncryptionEnabled', False)])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_create_with_tls_settings(self, resource_group):
+        webapp_name = self.create_random_name('webapp-tls-test', 40)
+        plan_name = self.create_random_name('webapp-tls-plan', 40)
+        self.cmd('appservice plan create -g {} -n {} --sku S1'
+                 .format(resource_group, plan_name))
+
+        # Create webapp with end-to-end encryption, min TLS version, and min TLS cipher suite
+        self.cmd('webapp create -g {} -n {} --plan {} --end-to-end-encryption-enabled true --min-tls-version 1.0 --min-tls-cipher-suite TLS_RSA_WITH_AES_128_CBC_SHA256'
+                 .format(resource_group, webapp_name, plan_name)).assert_with_checks([
+                     JMESPathCheck('name', webapp_name),
+                     JMESPathCheck('endToEndEncryptionEnabled', True)])
+
+        # Verify the config settings
+        self.cmd('webapp config show -g {} -n {}'
+                 .format(resource_group, webapp_name)).assert_with_checks([
+                     JMESPathCheck('minTlsVersion', '1.0'),
+                     JMESPathCheck('minTlsCipherSuite', 'TLS_RSA_WITH_AES_128_CBC_SHA256')])
+
 
 class BasicAuthScenarioTest(LiveScenarioTest):
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
