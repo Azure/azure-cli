@@ -409,7 +409,16 @@ def _create_database_account(client,
     )
 
     async_docdb_create = client.begin_create_or_update(resource_group_name, account_name, params)
-    docdb_account = async_docdb_create.result()
+    try:
+        docdb_account = async_docdb_create.result()
+    except HttpResponseError as ex:
+        # CLI workaround for service bug: https://github.com/Azure/azure-cli/issues/28434
+        # The restore operation might incorrectly append the region to the account name during polling,
+        # resulting in a 403 Forbidden error saying the account does not exist.
+        if is_restore_request and ex.status_code == 403 and "does not exist" in str(ex):
+            pass
+        else:
+            raise ex
     docdb_account = client.get(resource_group_name, account_name)  # Workaround
     return docdb_account
 
