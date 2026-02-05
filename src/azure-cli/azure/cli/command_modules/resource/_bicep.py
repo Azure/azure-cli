@@ -213,9 +213,15 @@ def is_using_none_bicepparam_file(file_path):
             content = f.read()
     except IOError:
         return False
+
+    # Remove block comments (/* ... */) and single-line comments (// ...)
+    # so that the first remaining non-empty line reflects the first statement.
+    content = re.sub(r'/\*.*?\*/', '', content, flags=re.DOTALL)
+    content = re.sub(r'//.*', '', content)
+
     for line in content.splitlines():
         stripped = line.strip()
-        if stripped == '' or stripped.startswith('//'):
+        if not stripped:
             continue
         # The 'using' declaration must be the first non-comment, non-empty statement
         return re.fullmatch(r'using\s+none', stripped, re.IGNORECASE) is not None
