@@ -3688,7 +3688,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 imds_mode=None, add_proxy_agent_extension=None, wire_server_access_control_profile_reference_id=None,
                 imds_access_control_profile_reference_id=None, enable_automatic_zone_balancing=None,
                 automatic_zone_balancing_strategy=None, automatic_zone_balancing_behavior=None,
-                enable_automatic_repairs=None):
+                enable_automatic_repairs=None, zone_placement_policy='auto', include_zones=None,
+                exclude_zones=None, max_zone_count=None, instance_percent_policy=None, max_instance_percent=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -4012,7 +4013,9 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             enable_automatic_zone_balancing=enable_automatic_zone_balancing,
             automatic_zone_balancing_strategy=automatic_zone_balancing_strategy,
             automatic_zone_balancing_behavior=automatic_zone_balancing_behavior,
-            enable_automatic_repairs=enable_automatic_repairs)
+            enable_automatic_repairs=enable_automatic_repairs, zone_placement_policy=zone_placement_policy,
+            include_zones=include_zones, exclude_zones=exclude_zones, max_zone_count=max_zone_count,
+            instance_percent_policy=instance_percent_policy, max_instance_percent=max_instance_percent)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
