@@ -202,6 +202,32 @@ class ContainerAppJobsCRUDOperationsTest(ScenarioTest):
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northcentralus")
+    def test_containerappjob_create_with_default_parallelism_and_completion_count(self, resource_group):
+        """
+        Test that creating a manual trigger job without specifying --parallelism and 
+        --replica-completion-count works correctly and defaults to 1 for both values.
+        Previously these would default to 0 which caused job creation to fail.
+        """
+        self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
+
+        env_id = prepare_containerapp_env_for_app_e2e_tests(self)
+        job = self.create_random_name(prefix='job-defaults', length=24)
+
+        # Create a manual trigger job WITHOUT --parallelism and --replica-completion-count
+        # These should default to 1
+        self.cmd("az containerapp job create --resource-group {} --name {} --environment {} --replica-timeout 200 --replica-retry-limit 2 --trigger-type manual --image mcr.microsoft.com/k8se/quickstart-jobs:latest --cpu '0.25' --memory '0.5Gi'".format(resource_group, job, env_id))
+
+        # Verify the job was created successfully with default values of 1
+        self.cmd("az containerapp job show --resource-group {} --name {}".format(resource_group, job), checks=[
+            JMESPathCheck('name', job),
+            JMESPathCheck('properties.provisioningState', "Succeeded"),
+            JMESPathCheck('properties.configuration.triggerType', "manual", case_sensitive=False),
+            JMESPathCheck('properties.configuration.manualTriggerConfig.parallelism', 1),
+            JMESPathCheck('properties.configuration.manualTriggerConfig.replicaCompletionCount', 1),
+        ])
+
+    @AllowLargeResponse(8192)
+    @ResourceGroupPreparer(location="northcentralus")
     @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
     def test_containerappjob_create_with_environment_id(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
