@@ -3033,11 +3033,7 @@ def _update_vm_nics(cmd, vm, nics, primary_nic, resource_group_name, vm_name):
     vm["resource_group"] = resource_group_name
     vm["vm_name"] = vm_name
 
-    from .operations.vm import VMCreate
-
-    poller = VMCreate(cli_ctx=cmd.cli_ctx)(command_args=vm)
-    result = LongRunningOperation(cmd.cli_ctx)(poller)
-
+    result = set_vm_by_aaz(cmd, vm)
     return (result.get("networkProfile") or {}).get("networkInterfaces") or []
 # endregion
 
