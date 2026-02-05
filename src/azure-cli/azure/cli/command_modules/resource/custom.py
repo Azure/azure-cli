@@ -46,6 +46,7 @@ from ._bicep import (
     run_bicep_command,
     is_bicep_file,
     is_bicepparam_file,
+    is_using_none_bicepparam_file,
     ensure_bicep_installation,
     remove_bicep_installation,
     get_bicep_latest_release_tag,
@@ -1087,10 +1088,26 @@ def _parse_bicepparam_file(cmd, template_file, parameters):
 
     bicepparam_file = _get_bicepparam_file_path(parameters)
 
-    if template_file and not is_bicep_file(template_file):
+    using_none = is_using_none_bicepparam_file(bicepparam_file)
+
+    if not using_none and template_file and not is_bicep_file(template_file):
         raise ArgumentUsageError("Only a .bicep template is allowed with a .bicepparam file")
 
-    template_content, template_spec_id, parameters_content = _build_bicepparam_file(cmd.cli_ctx, bicepparam_file, template_file)
+    if using_none and not template_file:
+        raise ArgumentUsageError(
+            "The .bicepparam file uses 'using none', so a --template-file (-f) must be provided.")
+
+    if using_none:
+        # For 'using none', build params without --bicep-file and build template separately
+        _, _, parameters_content = _build_bicepparam_file(cmd.cli_ctx, bicepparam_file, None)
+        template_content = (
+            run_bicep_command(cmd.cli_ctx, ["build", "--stdout", template_file])
+            if is_bicep_file(template_file)
+            else read_file_content(template_file)
+        )
+        template_spec_id = None
+    else:
+        template_content, template_spec_id, parameters_content = _build_bicepparam_file(cmd.cli_ctx, bicepparam_file, template_file)
 
     if _get_parameter_count(parameters) > 1:
         template_obj = None
@@ -1197,8 +1214,11 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
         if template_spec_id:
             template_link = TemplateLink(id=template_spec_id)
             template_obj = _load_template_spec_template(cmd, template_spec_id)
-        else:
+        elif template_content:
             template_obj = _remove_comments_from_json(template_content)
+        else:
+            # 'using none' with separate template file
+            template_content, template_obj = _process_template_file(cmd, template_file, deployment_scope)
 
         template_schema = template_obj.get('$schema', '')
         validate_bicep_target_scope(template_schema, deployment_scope)
@@ -1397,8 +1417,17 @@ def _prepare_stacks_templates_and_parameters(cmd, rcf, deployment_scope, deploym
         if template_spec_id:
             template_obj = _load_template_spec_template(cmd, template_spec_id)
             deployment_stack_model.template_link = DeploymentStacksTemplateLink(id=template_spec_id)
-        else:
+        elif template_content:
             template_obj = _remove_comments_from_json(template_content)
+            deployment_stack_model.template = json.loads(json.dumps(template_obj))
+        else:
+            # 'using none' with separate template file
+            template_content = (
+                run_bicep_command(cmd.cli_ctx, ["build", "--stdout", template_file])
+                if is_bicep_file(template_file)
+                else read_file_content(template_file)
+            )
+            template_obj = _remove_comments_from_json(template_content, file_path=template_file)
             deployment_stack_model.template = json.loads(json.dumps(template_obj))
 
         template_schema = template_obj.get('$schema', '')

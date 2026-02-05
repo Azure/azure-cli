@@ -206,6 +206,22 @@ def is_bicepparam_file(file_path):
     return file_path.lower().endswith(".bicepparam") if file_path else False
 
 
+def is_using_none_bicepparam_file(file_path):
+    """Check if a .bicepparam file uses 'using none' declaration."""
+    try:
+        with open(file_path, 'r') as f:
+            content = f.read()
+    except IOError:
+        return False
+    for line in content.splitlines():
+        stripped = line.strip()
+        if stripped == '' or stripped.startswith('//'):
+            continue
+        # The 'using' declaration must be the first non-comment, non-empty statement
+        return stripped.lower() == 'using none'
+    return False
+
+
 def get_bicep_available_release_tags():
     try:
         os.environ.setdefault("CURL_CA_BUNDLE", certifi.where())
