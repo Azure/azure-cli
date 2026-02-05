@@ -2884,19 +2884,12 @@ def show_vm_nic(cmd, resource_group_name, vm_name, nic):
     nic_in = (nic or "").strip()
     nic_in_lower = nic_in.lower()
 
-    def _safe_id(item):
-        _id = item.get('id') if isinstance(item, dict) else None
-        return _id.strip() if isinstance(_id, str) else None
-
-    found = next(
-        (n for n in nics if (_safe_id(n) or "").lower() == nic_in_lower),
-        None
-    )
+    found = next((n for n in nics if (n.get('id') or "").lower() == nic_in_lower), None)
 
     if not found:
         raise CLIError("NIC '{}' not found on VM '{}'".format(nic, vm_name))
 
-    found_id = _safe_id(found)
+    found_id = found.get('id') or ""
     if not found_id:
         raise CLIError("NIC '{}' not found on VM '{}'".format(nic, vm_name))
 
@@ -2909,18 +2902,7 @@ def show_vm_nic(cmd, resource_group_name, vm_name, nic):
 
 def list_vm_nics(cmd, resource_group_name, vm_name):
     vm = get_vm_by_aaz(cmd, resource_group_name, vm_name) or {}
-    nics = (vm.get('networkProfile') or {}).get('networkInterfaces') or []
-
-    normalized = []
-    for nic in nics:
-        nic = nic or {}
-        normalized.append({
-            "id": nic.get("id"),
-            "resourceGroup": nic.get("resourceGroup") or resource_group_name,
-            "primary": nic.get("primary"),
-            "deleteOption": nic.get("deleteOption"),
-        })
-    return normalized
+    return (vm.get('networkProfile') or {}).get('networkInterfaces') or []
 
 
 def add_vm_nic(cmd, resource_group_name, vm_name, nics, primary_nic=None):
@@ -3002,9 +2984,6 @@ def _update_vm_nics(cmd, vm, nics, primary_nic, resource_group_name, vm_name):
 
     vm.setdefault("network_profile", {})
     vm["network_profile"]["network_interfaces"] = nics
-
-    vm.pop("resources", None)
-
     vm["resource_group"] = resource_group_name
     vm["vm_name"] = vm_name
 
