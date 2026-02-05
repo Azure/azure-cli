@@ -2779,6 +2779,9 @@ class KeyVaultMHSMRegionScenarioTest(ScenarioTest):
 
 
 class KeyVaultCopyScenarioTest(ScenarioTest):
+    # Filter User-Agent to prevent recording mismatch between recording env (Windows) and CI (Linux)
+    FILTER_HEADERS = ScenarioTest.FILTER_HEADERS + ['user-agent']
+
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_copy')
     @KeyVaultPreparer(name_prefix='cli-test-kv-src-', additional_params='--enable-rbac-authorization false')
     def test_keyvault_secret_copy(self, resource_group, key_vault):
