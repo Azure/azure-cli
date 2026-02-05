@@ -289,8 +289,8 @@ class ResourcePatchTest(ScenarioTest):
 
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('hardwareProfile.vmSize', 'Standard_D2s_v3'),
-            self.check('hardwareProfile.vmSizeProperties.vCpusAvailable', '1'),
-            self.check('hardwareProfile.vmSizeProperties.vCpusPerCore', '1'),
+            self.check('hardwareProfile.vmSizeProperties.vCPUsAvailable', '1'),
+            self.check('hardwareProfile.vmSizeProperties.vCPUsPerCore', '1'),
             self.check('osProfile.adminUsername', 'vmtest'),
             self.check('osProfile.allowExtensionOperations', True),
             self.check('identity', None),
