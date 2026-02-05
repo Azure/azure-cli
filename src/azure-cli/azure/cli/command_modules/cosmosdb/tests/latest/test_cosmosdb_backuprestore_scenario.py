@@ -549,7 +549,7 @@ class CosmosDBRestoreUnitTests(unittest.TestCase):
                     self.response = response
                     self.status_code = kwargs.get('status_code', None)
                 def __str__(self):
-                    return self.message or ""
+                     return self.message or ""
             mock_core_exceptions.HttpResponseError = HttpResponseError
             mock_core_exceptions.ResourceNotFoundError = Exception
             sys.modules['azure.core.exceptions'] = mock_core_exceptions
