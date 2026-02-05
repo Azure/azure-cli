@@ -1575,7 +1575,7 @@ def start_containerappsjob(cmd,
         if image is not None:
             container_def["image"] = image if not is_registry_msi_system(registry_identity) else HELLO_WORLD_IMAGE
         else:
-            Fetch the existing job definition to get the default image
+            # Fetch the existing job definition to get the default image
             try:
                 containerappjob_def = ContainerAppsJobClient.show(cmd=cmd, resource_group_name=resource_group_name, name=name)
             except Exception as e:
