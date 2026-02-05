@@ -574,8 +574,12 @@ def load_arguments(self, _):
                 options_list=['--source-vault'], help='Name of the source Key Vault.', required=True)
         c.extra('destination_vault', vault_name_type, type=get_vault_base_url_type(self.cli_ctx),
                 options_list=['--destination-vault'], help='Name of the destination Key Vault.', required=True)
-        c.argument('name', options_list=['--name', '-n'], help='Name of the secret to copy.', required=False)
-        c.extra('all_secrets', arg_type=get_three_state_flag(), options_list=['--all'], help='Copy all secrets.')
+        c.argument('name', options_list=['--name', '-n'],
+                   help='Name of the secret to copy. Cannot be used with --all. If omitted, you must specify --all.',
+                   required=False)
+        c.extra('all_secrets', arg_type=get_three_state_flag(), options_list=['--all'],
+                help='Copy all secrets from the source vault. Cannot be used with --name. If omitted, you must '
+                     'specify --name.')
         c.extra('overwrite', arg_type=get_three_state_flag(), help='Overwrite existing secrets in destination.')
     # endregion
 
