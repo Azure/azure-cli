@@ -2785,56 +2785,72 @@ class KeyVaultCopyScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_copy')
     @KeyVaultPreparer(name_prefix='cli-test-kv-src-')
     def test_keyvault_secret_copy(self, resource_group, key_vault):
-        src_kv = key_vault
-        dest_kv = self.create_random_name('cli-test-kv-dest-', 24)
-        secret_name = self.create_random_name('secret-', 24)
-        secret_value = 'mysecretvalue'
+        self.kwargs.update({
+            'src_kv': key_vault,
+            'dest_kv': self.create_random_name('cli-test-kv-dest-', 24),
+            'secret_name': self.create_random_name('secret-', 24),
+            'secret_value': 'mysecretvalue',
+            'new_val': 'newval',
+            'secret_name_2': self.create_random_name('secret2-', 24)
+        })
 
         # Create Dest KV
         # Use simple creation to ensure speed and reliability in playback
-        self.cmd('keyvault create -g {rg} -n ' + dest_kv)
+        self.cmd('keyvault create -g {rg} -n {dest_kv}')
+        self.addCleanup(self.cmd, 'keyvault delete -g {rg} -n {dest_kv}')
+        self.addCleanup(self.cmd, 'keyvault purge -n {dest_kv} -l eastus')
 
         # Set secret in Source with tags and content-type
-        self.cmd('keyvault secret set --vault-name {kv} -n ' + secret_name + ' --value ' + secret_value + ' --tags tag1=value1 --content-type text/plain')
+        self.cmd('keyvault secret set --vault-name {kv} -n {secret_name} --value {secret_value} --tags tag1=value1 --content-type text/plain')
 
         # 1. Copy specific secret
-        self.cmd('keyvault secret copy --source-vault {kv} --destination-vault ' + dest_kv + ' --name ' + secret_name)
-        self.cmd('keyvault secret show --vault-name ' + dest_kv + ' -n ' + secret_name, checks=[
-            self.check('value', secret_value),
+        self.cmd('keyvault secret copy --source-vault {kv} --destination-vault {dest_kv} --name {secret_name}')
+        self.cmd('keyvault secret show --vault-name {dest_kv} -n {secret_name}', checks=[
+            self.check('value', '{secret_value}'),
             self.check('tags.tag1', 'value1'),
             self.check('contentType', 'text/plain')
         ])
 
         # 2. Copy all secrets
         # Add another secret to source
-        secret_name_2 = self.create_random_name('secret2-', 24)
-        self.cmd('keyvault secret set --vault-name {kv} -n ' + secret_name_2 + ' --value ' + secret_value)
+        self.cmd('keyvault secret set --vault-name {kv} -n {secret_name_2} --value {secret_value}')
         
         # Run copy --all
-        self.cmd('keyvault secret copy --source-vault {kv} --destination-vault ' + dest_kv + ' --all')
+        self.cmd('keyvault secret copy --source-vault {kv} --destination-vault {dest_kv} --all')
         
         # Verify both exist in dest
-        self.cmd('keyvault secret show --vault-name ' + dest_kv + ' -n ' + secret_name_2, checks=[
-            self.check('value', secret_value)
+        self.cmd('keyvault secret show --vault-name {dest_kv} -n {secret_name_2}', checks=[
+            self.check('value', '{secret_value}')
         ])
 
         # 3. Test overwrite protection (default behavior: skip)
-        new_val = 'newval'
         # Update source
-        self.cmd('keyvault secret set --vault-name {kv} -n ' + secret_name + ' --value ' + new_val)
+        self.cmd('keyvault secret set --vault-name {kv} -n {secret_name} --value {new_val}')
         
-        # Copy without rewrite (should skip)
-        self.cmd('keyvault secret copy --source-vault {kv} --destination-vault ' + dest_kv + ' --name ' + secret_name)
+        # Copy without overwrite (should skip)
+        self.cmd('keyvault secret copy --source-vault {kv} --destination-vault {dest_kv} --name {secret_name}')
         
         # Verify destination still has old value
-        self.cmd('keyvault secret show --vault-name ' + dest_kv + ' -n ' + secret_name, checks=[
-            self.check('value', secret_value) 
+        self.cmd('keyvault secret show --vault-name {dest_kv} -n {secret_name}', checks=[
+            self.check('value', '{secret_value}') 
         ])
 
-        # 4. Test Rewrite
-        self.cmd('keyvault secret copy --source-vault {kv} --destination-vault ' + dest_kv + ' --name ' + secret_name + ' --overwrite')
+        # 4. Test overwrite
+        self.cmd('keyvault secret copy --source-vault {kv} --destination-vault {dest_kv} --name {secret_name} --overwrite')
         
         # Verify destination has new value
-        self.cmd('keyvault secret show --vault-name ' + dest_kv + ' -n ' + secret_name, checks=[
-            self.check('value', new_val)
+        self.cmd('keyvault secret show --vault-name {dest_kv} -n {secret_name}', checks=[
+            self.check('value', '{new_val}')
         ])
+
+        # 5. Test Mutual Exclusivity
+        self.cmd('keyvault secret copy --source-vault {kv} --destination-vault {dest_kv} --name {secret_name} --all', expect_failure=True)
+
+        # 6. Test Source == Destination (Should fail)
+        self.cmd('keyvault secret copy --source-vault {kv} --destination-vault {kv} --name {secret_name}', expect_failure=True)
+
+        # 7. Test Non-existent Destination (Should fail fast)
+        self.cmd('keyvault secret copy --source-vault {kv} --destination-vault non_existent_kv_12345 --name {secret_name}', expect_failure=True)
+
+        # 8. Test Non-existent Secret in Source (Should fail)
+        self.cmd('keyvault secret copy --source-vault {kv} --destination-vault {dest_kv} --name non_existent_secret_123', expect_failure=True)

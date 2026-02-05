@@ -2525,11 +2525,15 @@ def copy_secret(cmd, client, destination_vault, name=None, all_secrets=False, ov
     from azure.cli.core._profile import Profile
     from azure.cli.core.commands.client_factory import prepare_client_kwargs_track2
 
-    if not name:
+    from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
+
+    # If neither a specific secret name nor --all is provided, default to copying all secrets.
+    if not name and not all_secrets:
         all_secrets = True
 
+    # A specific secret name and --all are mutually exclusive.
     if name and all_secrets:
-        all_secrets = False
+        raise MutuallyExclusiveArgumentError("Specify either a secret name or --all, but not both.")
     
     # Validation
     if client.vault_url.rstrip('/') == destination_vault.rstrip('/'):
@@ -2543,6 +2547,16 @@ def copy_secret(cmd, client, destination_vault, name=None, all_secrets=False, ov
     client_kwargs.pop('http_logging_policy', None) # KeyVault clients handle this internally or differently sometimes, mimicking _client_factory
 
     dest_client = SecretClient(vault_url=destination_vault, credential=credential, **client_kwargs)
+
+    # Fail fast if destination vault is not accessible or does not exist
+    try:
+        # Force a call to the service; if the vault is empty this will raise StopIteration, which is fine
+        next(dest_client.list_properties_of_secrets())
+    except StopIteration:
+        # Vault is accessible but has no secrets yet
+        pass
+    except HttpResponseError as e:
+        raise CLIError(f"Failed to access destination Key Vault '{destination_vault}': {str(e)}")
 
     secrets_to_copy = []
     if name:
@@ -2590,7 +2604,7 @@ def copy_secret(cmd, client, destination_vault, name=None, all_secrets=False, ov
                 expires_on=s.properties.expires_on
             )
             
-            logger.warning(f"Successfully copied secret: {secret_name}")
+            logger.info(f"Successfully copied secret: {secret_name}")
             copied_secrets.append({'name': new_secret.name, 'id': new_secret.id})
 
         except HttpResponseError as e:
