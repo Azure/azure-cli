@@ -412,7 +412,11 @@ def _create_database_account(client,
     try:
         docdb_account = async_docdb_create.result()
     except HttpResponseError as ex:
-        if is_restore_request and ex.status_code == 403 and "does not exist" in str(ex):
+        message = str(ex)
+        if (is_restore_request
+                and ex.status_code == 403
+                and "does not exist" in message
+                and ("Database Account" in message or "Forbidden" in message)):
             pass
         else:
             raise ex
