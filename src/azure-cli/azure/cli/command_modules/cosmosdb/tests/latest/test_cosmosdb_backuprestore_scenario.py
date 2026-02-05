@@ -539,20 +539,20 @@ class CosmosDBRestoreUnitTests(unittest.TestCase):
 
         # Ensure Azure Core Exceptions are available
         try:
-             import azure.core.exceptions
+            import azure.core.exceptions
         except ImportError:
-             mock_core_exceptions = mock.MagicMock()
-             # Define minimal exception class
-             class HttpResponseError(Exception):
-                 def __init__(self, message=None, response=None, **kwargs):
-                     self.message = message
-                     self.response = response
-                     self.status_code = kwargs.get('status_code', None)
-                 def __str__(self):
-                    return self.message or ""
-             mock_core_exceptions.HttpResponseError = HttpResponseError
-             mock_core_exceptions.ResourceNotFoundError = Exception
-             sys.modules['azure.core.exceptions'] = mock_core_exceptions
+            mock_core_exceptions = mock.MagicMock()
+            # Define minimal exception class
+            class HttpResponseError(Exception):
+                def __init__(self, message=None, response=None, **kwargs):
+                    self.message = message
+                    self.response = response
+                    self.status_code = kwargs.get('status_code', None)
+                def __str__(self):
+                     return self.message or ""
+            mock_core_exceptions.HttpResponseError = HttpResponseError
+            mock_core_exceptions.ResourceNotFoundError = Exception
+            sys.modules['azure.core.exceptions'] = mock_core_exceptions
 
     def test_restore_handles_forbidden_error(self):
         from azure.core.exceptions import HttpResponseError
