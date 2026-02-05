@@ -2519,6 +2519,57 @@ def set_attributes_certificate(client, certificate_name, version=None, policy=No
     return client.get_certificate(certificate_name=certificate_name)
 
 
+def _copy_single_secret(source_client, dest_client, secret_name, overwrite, is_single_mode):
+    from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
+
+    try:
+        # Check destination
+        if not overwrite:
+            try:
+                dest_client.get_secret(secret_name)
+                logger.warning("Secret '%s' already exists in destination. Skipping.", secret_name)
+                return None  # Skipped
+            except ResourceNotFoundError:
+                pass
+            except HttpResponseError as e:
+                logger.warning("Error checking secret '%s' in destination: %s", secret_name, str(e))
+                if e.status_code == 403:
+                    logger.error("Access denied checking secret '%s' in destination.", secret_name)
+                return False  # Failed
+
+        # Copy
+        logger.info("Copying secret: %s", secret_name)
+        s = source_client.get_secret(secret_name)
+
+        new_secret = dest_client.set_secret(
+            s.name,
+            s.value,
+            content_type=s.properties.content_type,
+            tags=s.properties.tags,
+            enabled=s.properties.enabled,
+            not_before=s.properties.not_before,
+            expires_on=s.properties.expires_on
+        )
+
+        logger.info("Successfully copied secret: %s", secret_name)
+        return {'name': new_secret.name, 'id': new_secret.id}
+
+    except ResourceNotFoundError:
+        if is_single_mode:
+            raise CLIError("Secret '{}' not found in source vault.".format(secret_name))
+        logger.error("Secret '%s' not found in source vault.", secret_name)
+        return False
+    except HttpResponseError as e:
+        if is_single_mode:
+            raise CLIError("Failed to copy secret '{}': {}".format(secret_name, str(e)))
+
+        if e.status_code == 403:  # Forbidden
+            logger.error("Access denied (403) for secret '%s': %s", secret_name, str(e))
+        else:
+            logger.error("Failed to copy secret '%s': %s", secret_name, str(e))
+        return False
+
+
 def copy_secret(cmd, client, destination_vault, name=None, all_secrets=None, overwrite=False):
     from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
     from azure.keyvault.secrets import SecretClient
@@ -2541,7 +2592,8 @@ def copy_secret(cmd, client, destination_vault, name=None, all_secrets=None, ove
 
     # Use standard client kwargs for consistent logging/telemetry
     client_kwargs = prepare_client_kwargs_track2(cmd.cli_ctx)
-    client_kwargs.pop('http_logging_policy', None) # KeyVault clients handle this internally or differently sometimes, mimicking _client_factory
+    # KeyVault clients handle this internally or differently sometimes, mimicking _client_factory
+    client_kwargs.pop('http_logging_policy', None)
 
     dest_client = SecretClient(vault_url=destination_vault, credential=credential, **client_kwargs)
 
@@ -2566,7 +2618,7 @@ def copy_secret(cmd, client, destination_vault, name=None, all_secrets=None, ove
             source_secrets = client.list_properties_of_secrets()
             for s in source_secrets:
                 if s.managed:
-                    logger.warning(f"Skipping managed secret: {s.name}")
+                    logger.warning("Skipping managed secret: %s", s.name)
                     continue
                 secrets_to_copy.append(s.name)
         except HttpResponseError as e:
@@ -2575,54 +2627,14 @@ def copy_secret(cmd, client, destination_vault, name=None, all_secrets=None, ove
     copied_secrets = []
     failed_secrets = []
     for secret_name in secrets_to_copy:
-        try:
-            # Check destination
-            if not overwrite:
-                try:
-                    dest_client.get_secret(secret_name)
-                    logger.warning(f"Secret '{secret_name}' already exists in destination. Skipping.")
-                    continue
-                except ResourceNotFoundError:
-                    pass
-                except HttpResponseError as e:
-                    logger.warning(f"Error checking secret '{secret_name}' in destination: {str(e)}")
-                    failed_secrets.append(secret_name)
-                    if e.status_code == 403:
-                        logger.error(f"Access denied checking secret '{secret_name}' in destination.")
-                    continue
-
-            # Copy
-            logger.info(f"Copying secret: {secret_name}")
-            s = client.get_secret(secret_name)
-
-            new_secret = dest_client.set_secret(
-                s.name,
-                s.value,
-                content_type=s.properties.content_type,
-                tags=s.properties.tags,
-                enabled=s.properties.enabled,
-                not_before=s.properties.not_before,
-                expires_on=s.properties.expires_on
-            )
-            
-            logger.info(f"Successfully copied secret: {secret_name}")
-            copied_secrets.append({'name': new_secret.name, 'id': new_secret.id})
-
-        except ResourceNotFoundError:
-            if name:
-                raise CLIError(f"Secret '{secret_name}' not found in source vault.")
-            logger.error(f"Secret '{secret_name}' not found in source vault.")
+        result = _copy_single_secret(client, dest_client, secret_name, overwrite, bool(name))
+        if result:
+            copied_secrets.append(result)
+        elif result is False:
             failed_secrets.append(secret_name)
-        except HttpResponseError as e:
-            if name:
-                raise CLIError(f"Failed to copy secret '{secret_name}': {str(e)}")
-            failed_secrets.append(secret_name)
-            if e.status_code == 403:  # Forbidden
-                logger.error(f"Access denied (403) for secret '{secret_name}': {str(e)}")
-            else:
-                logger.error(f"Failed to copy secret '{secret_name}': {str(e)}")
-    
+
     if failed_secrets:
-        logger.warning(f"Operation completed with failures. {len(failed_secrets)} secrets failed to copy: {', '.join(failed_secrets)}")
+        logger.warning("Operation completed with failures. %s secrets failed to copy: %s",
+                       len(failed_secrets), ', '.join(failed_secrets))
 
     return copied_secrets
