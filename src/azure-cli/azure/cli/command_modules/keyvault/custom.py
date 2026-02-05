@@ -2574,6 +2574,7 @@ def copy_secret(cmd, client, destination_vault, name=None, all_secrets=False, ov
             raise CLIError(f"Failed to list secrets from source: {str(e)}")
 
     copied_secrets = []
+    failed_secrets = []
     for secret_name in secrets_to_copy:
         try:
             # Check destination
@@ -2586,6 +2587,7 @@ def copy_secret(cmd, client, destination_vault, name=None, all_secrets=False, ov
                     pass
                 except HttpResponseError as e:
                     logger.warning(f"Error checking secret '{secret_name}' in destination: {str(e)}")
+                    failed_secrets.append(secret_name)
                     if e.status_code == 403:
                         logger.error(f"Access denied checking secret '{secret_name}' in destination.")
                     continue
@@ -2607,10 +2609,21 @@ def copy_secret(cmd, client, destination_vault, name=None, all_secrets=False, ov
             logger.info(f"Successfully copied secret: {secret_name}")
             copied_secrets.append({'name': new_secret.name, 'id': new_secret.id})
 
+        except ResourceNotFoundError:
+            if name:
+                raise CLIError(f"Secret '{secret_name}' not found in source vault.")
+            logger.error(f"Secret '{secret_name}' not found in source vault.")
+            failed_secrets.append(secret_name)
         except HttpResponseError as e:
+            if name:
+                raise CLIError(f"Failed to copy secret '{secret_name}': {str(e)}")
+            failed_secrets.append(secret_name)
             if e.status_code == 403:  # Forbidden
                 logger.error(f"Access denied (403) for secret '{secret_name}': {str(e)}")
             else:
                 logger.error(f"Failed to copy secret '{secret_name}': {str(e)}")
     
+    if failed_secrets:
+        logger.warning(f"Operation completed with failures. {len(failed_secrets)} secrets failed to copy: {', '.join(failed_secrets)}")
+
     return copied_secrets

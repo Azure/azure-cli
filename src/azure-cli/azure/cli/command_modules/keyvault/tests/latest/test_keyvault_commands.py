@@ -2778,9 +2778,6 @@ class KeyVaultMHSMRegionScenarioTest(ScenarioTest):
         self.cmd('keyvault region remove -g {rg} --hsm-name {hsm_name} -r uksouth')
 
 
-if __name__ == '__main__':
-    unittest.main()
-
 class KeyVaultCopyScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_copy')
     @KeyVaultPreparer(name_prefix='cli-test-kv-src-')
@@ -2854,3 +2851,6 @@ class KeyVaultCopyScenarioTest(ScenarioTest):
 
         # 8. Test Non-existent Secret in Source (Should fail)
         self.cmd('keyvault secret copy --source-vault {kv} --destination-vault {dest_kv} --name non_existent_secret_123', expect_failure=True)
+
+if __name__ == '__main__':
+    unittest.main()
