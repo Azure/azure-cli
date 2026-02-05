@@ -2544,7 +2544,6 @@ def copy_secret(cmd, client, destination_vault, name=None, all_secrets=False, ov
 
     # Use standard client kwargs for consistent logging/telemetry
     client_kwargs = prepare_client_kwargs_track2(cmd.cli_ctx)
-    client_kwargs.pop('http_logging_policy', None) # KeyVault clients handle this internally or differently sometimes, mimicking _client_factory
 
     dest_client = SecretClient(vault_url=destination_vault, credential=credential, **client_kwargs)
 
