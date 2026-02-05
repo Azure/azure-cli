@@ -324,8 +324,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('account_name', acct_name_type, options_list=['--name', '-n'], local_context_attribute=None)
 
     with self.argument_context('storage account create', resource_type=ResourceType.MGMT_STORAGE) as c:
-        t_account_type, t_sku_name, t_kind, t_tls_version, t_dns_endpoint_type, t_zone_placement_policy = \
-            self.get_models('AccountType', 'SkuName', 'Kind', 'MinimumTlsVersion', 'DnsEndpointType',
+        t_account_type, t_sku_name, t_kind, t_dns_endpoint_type, t_zone_placement_policy = \
+            self.get_models('AccountType', 'SkuName', 'Kind', 'DnsEndpointType',
                             'ZonePlacementPolicy',
                             resource_type=ResourceType.MGMT_STORAGE)
         t_identity_type = self.get_models('IdentityType', resource_type=ResourceType.MGMT_STORAGE)
@@ -467,7 +467,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
             c.argument('description', help='Comments for {} operation.'.format(item))
 
     with self.argument_context('storage account update', resource_type=ResourceType.MGMT_STORAGE) as c:
-        t_tls_version = self.get_models('MinimumTlsVersion', resource_type=ResourceType.MGMT_STORAGE)
         t_identity_type = self.get_models('IdentityType', resource_type=ResourceType.MGMT_STORAGE)
         c.register_common_storage_account_options()
         c.argument('sku', arg_type=get_enum_type(t_sku_name),
