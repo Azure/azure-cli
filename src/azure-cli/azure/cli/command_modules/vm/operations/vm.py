@@ -262,6 +262,8 @@ class VMIdentityRemove(_VMPatch):
 
 def convert_show_result_to_snake_case(result):
     new_result = {}
+    if "id" in result:
+        new_result["id"] = result["id"]
     if "extendedLocation" in result:
         new_result["extended_location"] = result["extendedLocation"]
     if "identity" in result:

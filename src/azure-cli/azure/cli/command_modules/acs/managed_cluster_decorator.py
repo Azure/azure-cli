@@ -97,8 +97,7 @@ from azure.cli.command_modules.acs.agentpool_decorator import (
 from azure.cli.command_modules.acs.azurecontainerstorage.acstor_ops import (
     perform_disable_azure_container_storage_v1,
     perform_enable_azure_container_storage_v1,
-    perform_enable_azure_container_storage,
-    perform_disable_azure_container_storage,
+    perform_azure_container_storage_update,
 )
 from azure.cli.command_modules.acs.azuremonitormetrics.azuremonitorprofile import (
     ensure_azure_monitor_profile_prerequisites
@@ -340,8 +339,7 @@ class AKSManagedClusterContext(BaseAKSContext):
             # azure container storage functions
             external_functions["perform_enable_azure_container_storage_v1"] = perform_enable_azure_container_storage_v1
             external_functions["perform_disable_azure_container_storage_v1"] = perform_disable_azure_container_storage_v1
-            external_functions["perform_enable_azure_container_storage"] = perform_enable_azure_container_storage
-            external_functions["perform_disable_azure_container_storage"] = perform_disable_azure_container_storage
+            external_functions["perform_azure_container_storage_update"] = perform_azure_container_storage_update
             self.__external_functions = SimpleNamespace(**external_functions)
         return self.__external_functions
 
@@ -2595,6 +2593,89 @@ class AKSManagedClusterContext(BaseAKSContext):
                 )
         return self.raw_param.get("acns_advanced_networkpolicies")
 
+    def get_container_network_logs(self, mc: ManagedCluster) -> Union[bool, None]:
+        """Get the enablement of container network logs
+
+        :return: bool or None"""
+        enable_cnl = self.raw_param.get("enable_container_network_logs")
+        disable_cnl = self.raw_param.get("disable_container_network_logs")
+        if enable_cnl is None and disable_cnl is None:
+            return None
+        if enable_cnl and disable_cnl:
+            raise MutuallyExclusiveArgumentError(
+                "Cannot specify --enable-container-network-logs and "
+                "--disable-container-network-logs at the same time."
+            )
+
+        # Check if monitoring is being enabled via enable_addons parameter (for create scenarios)
+        enable_addons = self.raw_param.get("enable_addons")
+        monitoring_via_enable_addons = enable_addons and "monitoring" in enable_addons
+
+        # Check if monitoring is already enabled on the cluster
+        monitoring_on_cluster = (
+            mc.addon_profiles and
+            mc.addon_profiles.get("omsagent") and
+            mc.addon_profiles["omsagent"].enabled
+        )
+
+        # Check if ACNS is being enabled or already enabled
+        acns_enabled = (
+            self.raw_param.get("enable_acns", False) or
+            (mc.network_profile and mc.network_profile.advanced_networking and
+             mc.network_profile.advanced_networking.enabled)
+        )
+
+        # Check if network dataplane is set to cilium (either via parameter or already on the cluster)
+        network_dataplane_param = self.raw_param.get("network_dataplane")
+        network_dataplane_cluster = None
+        if mc.network_profile is not None:
+            network_dataplane_cluster = getattr(mc.network_profile, "network_dataplane", None)
+        network_dataplane = network_dataplane_param or network_dataplane_cluster
+        cilium_enabled = safe_lower(network_dataplane) == "cilium"
+
+        monitoring_enabled = monitoring_via_enable_addons or monitoring_on_cluster
+
+        if enable_cnl and (not acns_enabled or not monitoring_enabled or not cilium_enabled):
+            raise InvalidArgumentValueError(
+                "Container network logs requires ACNS to be enabled, the monitoring addon to be enabled, "
+                "and the cilium network dataplane."
+            )
+        enable_cnl = bool(enable_cnl) if enable_cnl is not None else False
+        disable_cnl = bool(disable_cnl) if disable_cnl is not None else False
+        return enable_cnl or not disable_cnl
+
+    def get_enable_high_log_scale_mode(self) -> Union[bool, None]:
+        """Obtain the value of enable_high_log_scale_mode.
+
+        This method automatically enables high log scale mode when container network logs are enabled.
+        It validates that the user has not explicitly disabled high log scale mode when CNL is enabled.
+
+        Note: ACNS and monitoring addon validation is handled in get_container_network_logs().
+
+        :return: bool or None
+        """
+        # Read the original value passed by the command
+        enable_high_log_scale_mode = self.raw_param.get("enable_high_log_scale_mode")
+
+        # Check if container network logs are being enabled
+        enable_container_network_logs = self.raw_param.get("enable_container_network_logs")
+
+        # If container network logs are being enabled, auto-enable high log scale mode
+        if enable_container_network_logs:
+            # If user explicitly set enable_high_log_scale_mode to False, raise an error
+            if enable_high_log_scale_mode is False:
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot explicitly disable --enable-high-log-scale-mode when "
+                    "--enable-container-network-logs is specified. Container network logs "
+                    "requires high log scale mode to be enabled."
+                )
+
+            # Auto-enable high log scale mode
+            return True
+
+        # If container network logs are not being enabled, return the original value
+        return enable_high_log_scale_mode
+
     def _get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(
         self, enable_validation: bool = False
     ) -> Tuple[
@@ -3026,21 +3107,6 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return enable_syslog
-
-    def get_enable_high_log_scale_mode(self) -> Union[bool, None]:
-        """Obtain the value of enable_high_log_scale_mode.
-
-        Note: The arg type of this parameter supports three states (True, False or None), but the corresponding default
-        value in entry function is not None.
-
-        :return: bool or None
-        """
-        # read the original value passed by the command
-        enable_high_log_scale_mode = self.raw_param.get("enable_high_log_scale_mode")
-
-        # this parameter does not need dynamic completion
-        # this parameter does not need validation
-        return enable_high_log_scale_mode
 
     def get_data_collection_settings(self) -> Union[str, None]:
         """Obtain the value of data_collection_settings.
@@ -6659,6 +6725,22 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             addon_profiles[
                 CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME
             ] = self.build_azure_keyvault_secrets_provider_addon_profile()
+
+        # Set up container network logs if enabled
+        container_network_logs_enabled = self.context.get_container_network_logs(mc)
+        if container_network_logs_enabled is not None:
+            monitoring_addon_profile = addon_profiles.get(CONST_MONITORING_ADDON_NAME)
+            if monitoring_addon_profile:
+                config = monitoring_addon_profile.config or {}
+                config["enableRetinaNetworkFlags"] = str(container_network_logs_enabled)
+                monitoring_addon_profile.config = config
+
+        # Trigger validation for high log scale mode when container network logs are enabled.
+        # This ensures proper error messages are raised before cluster creation if the user
+        # explicitly disables high log scale mode while enabling container network logs.
+        if self.context.raw_param.get("enable_container_network_logs"):
+            self.context.get_enable_high_log_scale_mode()
+
         mc.addon_profiles = addon_profiles
         return mc
 
@@ -6900,13 +6982,14 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         """
         self._ensure_mc(mc)
 
-        if self.context.raw_param.get("enable_azure_container_storage") is not None:
-            self.context.set_intermediate("enable_azure_container_storage", True, overwrite_exists=True)
+        enable_azure_container_storage_param = self.context.raw_param.get("enable_azure_container_storage")
+        if enable_azure_container_storage_param:
+            self.context.set_intermediate("enable_azure_container_storage", enable_azure_container_storage_param, overwrite_exists=True)
             container_storage_version = self.context.raw_param.get("container_storage_version")
 
             if container_storage_version is not None and container_storage_version == CONST_ACSTOR_VERSION_V1:
                 # read the azure container storage values passed
-                pool_type = self.context.raw_param.get("enable_azure_container_storage")
+                pool_type = enable_azure_container_storage_param
                 enable_azure_container_storage = pool_type is not None
                 ephemeral_disk_volume_type = self.context.raw_param.get("ephemeral_disk_volume_type")
                 ephemeral_disk_nvme_perf_tier = self.context.raw_param.get("ephemeral_disk_nvme_perf_tier")
@@ -7000,7 +7083,6 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                         overwrite_exists=True
                     )
             else:
-                enable_azure_container_storage = self.context.raw_param.get("enable_azure_container_storage")
                 storage_pool_name = self.context.raw_param.get("storage_pool_name")
                 pool_sku = self.context.raw_param.get("storage_pool_sku")
                 pool_option = self.context.raw_param.get("storage_pool_option")
@@ -7010,10 +7092,12 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                     validate_enable_azure_container_storage_params,
                 )
                 validate_enable_azure_container_storage_params(
+                    enable_azure_container_storage_param,
+                    False,
+                    False,
                     False,
                     False,
                     "",
-                    enable_azure_container_storage,
                     storage_pool_name,
                     pool_sku,
                     pool_option,
@@ -7547,10 +7631,11 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                         existing_ephemeral_nvme_perf_tier,
                     )
             else:
-                self.context.external_functions.perform_enable_azure_container_storage(
+                self.context.external_functions.perform_azure_container_storage_update(
                     self.cmd,
                     self.context.get_resource_group_name(),
                     self.context.get_name(),
+                    enable_azure_container_storage,
                 )
 
         # Add role assignments for automatic sku
@@ -8230,6 +8315,31 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                     acns.security.advanced_network_policies = acns_advanced_networkpolicies
         if acns_enabled is not None:
             mc.network_profile.advanced_networking = acns
+        return mc
+
+    def update_monitoring_profile_flow_logs(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update monitor profile for the ManagedCluster object for flow logs.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        # Trigger validation for high log scale mode when container network logs are enabled.
+        # This ensures proper error messages are raised before cluster update if the user
+        # explicitly disables high log scale mode while enabling container network logs.
+        if self.context.raw_param.get("enable_container_network_logs"):
+            self.context.get_enable_high_log_scale_mode()
+
+        container_network_logs_enabled = self.context.get_container_network_logs(mc)
+        if container_network_logs_enabled is not None:
+            if mc.addon_profiles:
+                addon_consts = self.context.get_addon_consts()
+                CONST_MONITORING_ADDON_NAME = addon_consts.get("CONST_MONITORING_ADDON_NAME")
+                monitoring_addon_profile = mc.addon_profiles.get(CONST_MONITORING_ADDON_NAME)
+                if monitoring_addon_profile:
+                    config = monitoring_addon_profile.config or {}
+                    config["enableRetinaNetworkFlags"] = str(container_network_logs_enabled)
+                    mc.addon_profiles[CONST_MONITORING_ADDON_NAME].config = config
         return mc
 
     def update_http_proxy_config(self, mc: ManagedCluster) -> ManagedCluster:
@@ -9003,7 +9113,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 pool_sku = self.context.raw_param.get("storage_pool_sku")
                 pool_size = self.context.raw_param.get("storage_pool_size")
                 agentpool_details = {}
-                from azure.cli.command_modules.acs.azurecontainerstorage._helpers import get_extension_installed_and_cluster_configs
+                from azure.cli.command_modules.acs.azurecontainerstorage._helpers import get_extension_installed_and_cluster_configs_v1
                 (
                     is_extension_installed,
                     is_azureDisk_enabled,
@@ -9013,7 +9123,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                     current_core_value,
                     existing_ephemeral_disk_volume_type,
                     existing_perf_tier,
-                ) = get_extension_installed_and_cluster_configs(
+                ) = get_extension_installed_and_cluster_configs_v1(
                     self.cmd,
                     self.context.get_resource_group_name(),
                     self.context.get_name(),
@@ -9223,12 +9333,11 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                         'and --disable-azure-container-storage together.'
                     )
 
-                from azure.cli.command_modules.acs.azurecontainerstorage._helpers import get_container_storage_extension_installed
-                is_extension_installed, _ = get_container_storage_extension_installed(
+                from azure.cli.command_modules.acs.azurecontainerstorage._helpers import get_extension_installed_and_cluster_configs
+                is_extension_installed, is_ephemeralDisk_enabled, is_elasticSan_enabled = get_extension_installed_and_cluster_configs(
                     self.cmd,
                     self.context.get_resource_group_name(),
                     self.context.get_name(),
-                    CONST_ACSTOR_EXT_INSTALLATION_NAME,
                 )
 
                 from azure.cli.command_modules.acs.azurecontainerstorage._helpers import get_container_storage_extension_installed
@@ -9250,10 +9359,12 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                         validate_enable_azure_container_storage_params,
                     )
                     validate_enable_azure_container_storage_params(
+                        enable_azure_container_storage_param,
                         is_extension_installed,
+                        is_ephemeralDisk_enabled,
+                        is_elasticSan_enabled,
                         is_containerstorage_v1_installed,
                         v1_extension_version,
-                        enable_azure_container_storage_param,
                         storage_pool_name,
                         pool_sku,
                         pool_option,
@@ -9268,6 +9379,23 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                         "The PVs and PVCs can only be cleaned up after re-enabling it by running 'az aks update --enable-azure-container-storage'. "
                         "Would you like to proceed with the disabling?"
                     )
+                    from azure.cli.command_modules.acs.azurecontainerstorage._helpers import should_delete_extension
+                    if not should_delete_extension(disable_azure_container_storage_param):
+                        storage_option_display = storage_option_param_str = disable_azure_container_storage_param
+                        if isinstance(disable_azure_container_storage_param, list):
+                            storage_options = disable_azure_container_storage_param
+                            storage_option_param_str = " ".join(storage_options)
+                            if len(storage_options) > 2:
+                                storage_options = [storage_options[:-1].join("', '"), storage_options[-1]]
+                            storage_option_display = "' and '".join(storage_options)
+                        msg = (
+                            "Please make sure there are no existing PVs and PVCs that are provisioned by Azure Container Storage "
+                            f"for '{storage_option_display}' before disabling. If storage options are disabled "
+                            "with remaining PVs and PVCs, any data associated with those PVs and PVCs will not be erased "
+                            "and the nodes will be left in an unclean state. The PVs and PVCs can only be cleaned up "
+                            f"after re-enabling it by running 'az aks update --enable-azure-container-storage {storage_option_param_str}'. "
+                            "Would you like to proceed with the disabling?"
+                        )
                     if not self.context.get_yes() and not prompt_y_n(msg, default="n"):
                         raise DecoratorEarlyExitException()
 
@@ -9275,19 +9403,19 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                         validate_disable_azure_container_storage_params
                     )
                     validate_disable_azure_container_storage_params(
-                        is_extension_installed,
                         disable_azure_container_storage_param,
+                        is_extension_installed,
+                        is_ephemeralDisk_enabled,
+                        is_elasticSan_enabled,
                         storage_pool_name,
                         pool_sku,
                         pool_option,
                         pool_size
                     )
 
-                if enable_azure_container_storage_param:
-                    self.context.set_intermediate("enable_azure_container_storage", True)
-
-                if disable_azure_container_storage_param:
-                    self.context.set_intermediate("disable_azure_container_storage", True)
+                self.context.set_intermediate("enable_azure_container_storage", enable_azure_container_storage_param, overwrite_exists=True)
+                self.context.set_intermediate("disable_azure_container_storage", disable_azure_container_storage_param, overwrite_exists=True)
+                self.context.set_intermediate("is_extension_installed", is_extension_installed, overwrite_exists=True)
 
         return mc
 
@@ -9499,6 +9627,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_network_profile(mc)
         # update network profile with acns
         mc = self.update_network_profile_advanced_networking(mc)
+        # update monitoring profile flow logs
+        mc = self.update_monitoring_profile_flow_logs(mc)
         # update aad profile
         mc = self.update_aad_profile(mc)
         # update oidc issuer profile
@@ -9777,10 +9907,12 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                     current_core_value,
                 )
             else:
-                self.context.external_functions.perform_enable_azure_container_storage(
+                self.context.external_functions.perform_azure_container_storage_update(
                     self.cmd,
                     self.context.get_resource_group_name(),
                     self.context.get_name(),
+                    enable_azure_container_storage,
+                    is_extension_installed,
                 )
 
         # disable azure container storage
@@ -9810,10 +9942,13 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                     )
 
             else:
-                self.context.external_functions.perform_disable_azure_container_storage(
+                self.context.external_functions.perform_azure_container_storage_update(
                     self.cmd,
                     self.context.get_resource_group_name(),
                     self.context.get_name(),
+                    None,
+                    is_extension_installed,
+                    disable_azure_container_storage,
                 )
 
         # attach keyvault to app routing addon
