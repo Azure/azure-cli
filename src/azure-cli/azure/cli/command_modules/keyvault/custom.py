@@ -2519,13 +2519,11 @@ def set_attributes_certificate(client, certificate_name, version=None, policy=No
     return client.get_certificate(certificate_name=certificate_name)
 
 
-def copy_secret(cmd, client, destination_vault, name=None, all_secrets=False, overwrite=False):
+def copy_secret(cmd, client, destination_vault, name=None, all_secrets=None, overwrite=False):
     from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
     from azure.keyvault.secrets import SecretClient
     from azure.cli.core._profile import Profile
     from azure.cli.core.commands.client_factory import prepare_client_kwargs_track2
-
-    from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
 
     # If neither a specific secret name nor --all is provided, default to copying all secrets.
     if not name and not all_secrets:
@@ -2548,13 +2546,15 @@ def copy_secret(cmd, client, destination_vault, name=None, all_secrets=False, ov
 
     # Fail fast if destination vault is not accessible or does not exist
     try:
-        # Force a call to the service; if the vault is empty this will raise StopIteration, which is fine
-        next(dest_client.list_properties_of_secrets())
-    except StopIteration:
-        # Vault is accessible but has no secrets yet
-        pass
+        # Perform a lightweight call to validate vault accessibility.
+        # A 404 for a dummy secret name means the vault is reachable but the secret does not exist.
+        dest_client.get_secret_properties("azure_cli_destination_vault_validation_dummy")
     except HttpResponseError as e:
-        raise CLIError(f"Failed to access destination Key Vault '{destination_vault}': {str(e)}")
+        if getattr(e, "status_code", None) == 404:
+            # Vault is accessible but the dummy secret does not exist, which is expected.
+            pass
+        else:
+            raise CLIError(f"Failed to access destination Key Vault '{destination_vault}': {str(e)}")
 
     secrets_to_copy = []
     if name:
