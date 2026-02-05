@@ -352,6 +352,75 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
+    def test_azconfig_appinsights(self, resource_group, location):
+        """Test linking Application Insights to App Configuration store."""
+        appinsights_prefix = get_resource_name_prefix('AppInsightsTest')
+        config_store_name = self.create_random_name(prefix=appinsights_prefix, length=24)
+
+        location = 'eastus'
+        sku = 'standard'
+
+        self.kwargs.update({
+            'config_store_name': config_store_name,
+            'rg_loc': location,
+            'rg': resource_group,
+            'sku': sku,
+            'retention_days': 1
+        })
+
+        # Create an Application Insights resource
+        app_insights_name = self.create_random_name(prefix='appinsights', length=24)
+        self.kwargs.update({
+            'app_insights_name': app_insights_name
+        })
+
+        app_insights = self.cmd('monitor app-insights component create -g {rg} -a {app_insights_name} -l {rg_loc} --application-type web').get_output_in_json()
+        app_insights_resource_id = app_insights['id']
+
+        self.kwargs.update({
+            'app_insights_resource_id': app_insights_resource_id
+        })
+
+        # Create App Configuration store with Application Insights linked
+        self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --retention-days {retention_days} --appinsights-resource-id {app_insights_resource_id}',
+                 checks=[self.check('name', '{config_store_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('resourceGroup', resource_group),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('sku.name', sku),
+                         self.check('telemetry.resourceId', app_insights_resource_id)])
+
+        # Verify App Insights is linked by showing the store
+        self.cmd('appconfig show -n {config_store_name} -g {rg}',
+                 checks=[self.check('name', '{config_store_name}'),
+                         self.check('telemetry.resourceId', app_insights_resource_id)])
+
+        # Create second App Insights resource to test update
+        app_insights_name_2 = self.create_random_name(prefix='appinsights2', length=24)
+        self.kwargs.update({
+            'app_insights_name_2': app_insights_name_2
+        })
+
+        app_insights_2 = self.cmd('monitor app-insights component create -g {rg} -a {app_insights_name_2} -l {rg_loc} --application-type web').get_output_in_json()
+        app_insights_resource_id_2 = app_insights_2['id']
+
+        self.kwargs.update({
+            'app_insights_resource_id_2': app_insights_resource_id_2
+        })
+
+        # Update store to use a different App Insights resource
+        self.cmd('appconfig update -n {config_store_name} -g {rg} --appinsights-resource-id {app_insights_resource_id_2}',
+                 checks=[self.check('name', '{config_store_name}'),
+                         self.check('telemetry.resourceId', app_insights_resource_id_2)])
+
+        # Verify update
+        self.cmd('appconfig show -n {config_store_name} -g {rg}',
+                 checks=[self.check('telemetry.resourceId', app_insights_resource_id_2)])
+
+        self.cmd('appconfig delete -n {config_store_name} -g {rg} -y')
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_local_auth(self, resource_group, location):
         disable_local_auth_prefix = get_resource_name_prefix('DisableLocalAuth')
         config_store_name = self.create_random_name(prefix=disable_local_auth_prefix, length=24)

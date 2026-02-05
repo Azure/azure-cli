@@ -566,6 +566,82 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         with self.assertRaisesRegex(CLIError, "Feature name cannot contain the following characters: '%', ':'"):
             self.cmd('appconfig feature set -n {config_store_name} --feature {feature}')
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(parameter_name_for_location='location')
+    def test_azconfig_feature_telemetry(self, resource_group, location):
+        """Test feature flag telemetry functionality."""
+        feature_telemetry_store_prefix = get_resource_name_prefix('FeatureTelemetryTest')
+        config_store_name = self.create_random_name(prefix=feature_telemetry_store_prefix, length=24)
+
+        location = 'eastus'
+        sku = 'standard'
+        self.kwargs.update({
+            'config_store_name': config_store_name,
+            'rg_loc': location,
+            'rg': resource_group,
+            'sku': sku
+        })
+        create_config_store(self, self.kwargs)
+
+        # Test creating a feature with telemetry enabled
+        feature_name = 'TelemetryFeature'
+        entry_label = 'v1'
+        default_locked = False
+        default_state = "off"
+
+        self.kwargs.update({
+            'feature': feature_name,
+            'label': entry_label
+        })
+
+        # Create feature with telemetry enabled
+        self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} --telemetry-enabled true -y',
+                 checks=[self.check('locked', default_locked),
+                         self.check('name', feature_name),
+                         self.check('label', entry_label),
+                         self.check('state', default_state),
+                         self.check('telemetry.enabled', True)])
+
+        # Show feature to verify telemetry is persisted
+        self.cmd('appconfig feature show -n {config_store_name} --feature {feature} --label {label}',
+                 checks=[self.check('name', feature_name),
+                         self.check('telemetry.enabled', True)])
+
+        # Update feature to disable telemetry
+        self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} --telemetry-enabled false -y',
+                 checks=[self.check('name', feature_name),
+                         self.check('telemetry.enabled', False)])
+
+        # Verify telemetry is disabled
+        self.cmd('appconfig feature show -n {config_store_name} --feature {feature} --label {label}',
+                 checks=[self.check('name', feature_name),
+                         self.check('telemetry.enabled', False)])
+
+        # Create a new feature with telemetry disabled from the start
+        feature_name_disabled = 'TelemetryDisabledFeature'
+        self.kwargs.update({
+            'feature': feature_name_disabled
+        })
+
+        self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} --telemetry-enabled false -y',
+                 checks=[self.check('name', feature_name_disabled),
+                         self.check('telemetry.enabled', False)])
+
+        # Create feature without telemetry parameter - telemetry should be None
+        feature_name_no_telemetry = 'NoTelemetryFeature'
+        self.kwargs.update({
+            'feature': feature_name_no_telemetry
+        })
+
+        self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} -y',
+                 checks=[self.check('name', feature_name_no_telemetry),
+                         self.check('telemetry', None)])
+
+        # Update existing feature (without telemetry) to enable telemetry
+        self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} --telemetry-enabled true -y',
+                 checks=[self.check('name', feature_name_no_telemetry),
+                         self.check('telemetry.enabled', True)])
+
 
 class AppConfigFeatureFilterScenarioTest(ScenarioTest):
 

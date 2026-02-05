@@ -24,7 +24,8 @@ from azure.mgmt.appconfiguration.models import (ConfigurationStoreUpdateParamete
                                                 AuthenticationMode,
                                                 PublicNetworkAccess,
                                                 PrivateLinkDelegation,
-                                                DataPlaneProxyProperties)
+                                                DataPlaneProxyProperties,
+                                                TelemetryProperties)
 from knack.log import get_logger
 from ._utils import resolve_store_metadata, resolve_deleted_store_metadata
 from ._constants import ARMAuthenticationMode, ProvisioningStatus
@@ -54,6 +55,7 @@ def create_configstore(cmd,  # pylint: disable=too-many-locals
                        no_replica=None,  # pylint: disable=unused-argument
                        arm_auth_mode=None,
                        enable_arm_private_network_access=None,
+                       appinsights_resource_id=None,
                        kv_revision_retention_period=None):
     if assign_identity is not None and not assign_identity:
         assign_identity = [SYSTEM_ASSIGNED_IDENTITY]
@@ -80,6 +82,7 @@ def create_configstore(cmd,  # pylint: disable=too-many-locals
                                             enable_purge_protection=enable_purge_protection,
                                             create_mode=CreateMode.DEFAULT,
                                             default_key_value_revision_retention_period_in_seconds=kv_revision_retention_period,
+                                            telemetry=TelemetryProperties(resource_id=appinsights_resource_id) if appinsights_resource_id is not None else None,
                                             data_plane_proxy=DataPlaneProxyProperties(
                                                 authentication_mode=arm_authentication_mode,
                                                 private_link_delegation=arm_private_link_delegation))
@@ -183,6 +186,7 @@ def update_configstore(cmd,  # pylint: disable=too-many-locals
                        enable_purge_protection=None,
                        arm_auth_mode=None,
                        enable_arm_private_network_access=None,
+                       appinsights_resource_id=None,
                        kv_revision_retention_period=None):
     __validate_cmk(encryption_key_name, encryption_key_vault, encryption_key_version, identity_client_id)
     if resource_group_name is None:
@@ -206,6 +210,7 @@ def update_configstore(cmd,  # pylint: disable=too-many-locals
                                                        disable_local_auth=disable_local_auth,
                                                        enable_purge_protection=enable_purge_protection,
                                                        default_key_value_revision_retention_period_in_seconds=kv_revision_retention_period,
+                                                       telemetry=TelemetryProperties(resource_id=appinsights_resource_id) if appinsights_resource_id is not None else None,
                                                        data_plane_proxy=DataPlaneProxyProperties(
                                                            authentication_mode=arm_authentication_mode,
                                                            private_link_delegation=arm_private_link_delegation))
