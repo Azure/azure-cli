@@ -2534,7 +2534,6 @@ def copy_secret(cmd, client, destination_vault, name=None, all_secrets=False, ov
     # A specific secret name and --all are mutually exclusive.
     if name and all_secrets:
         raise MutuallyExclusiveArgumentError("Specify either a secret name or --all, but not both.")
-    
     # Validation
     if client.vault_url.rstrip('/') == destination_vault.rstrip('/'):
         raise CLIError("Source and destination Key Vaults cannot be the same.")
