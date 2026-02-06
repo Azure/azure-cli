@@ -263,6 +263,7 @@ class VMIdentityRemove(_VMPatch):
 
 class VMImageList(_VMImageList):
     class VirtualMachineImagesList(_VMImageList.VirtualMachineImagesList):
+        @classmethod
         def _build_schema_on_200(cls):
             if cls._schema_on_200 is not None:
                 return cls._schema_on_200

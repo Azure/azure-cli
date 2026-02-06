@@ -81,7 +81,7 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zon
             return
         if offer:
             offers = [o for o in offers if _matched(offer, o['name'])]
-        for o in offers:
+        for o in offers: # pylint: disable=too-many-nested-blocks
             try:
                 if edge_zone is not None:
                     skus = VMImageEdgeZoneListSkus(cli_ctx=cli_ctx)(command_args={
