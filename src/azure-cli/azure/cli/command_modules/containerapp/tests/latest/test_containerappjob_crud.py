@@ -7,6 +7,7 @@ import os
 
 from azure.mgmt.core.tools import parse_resource_id
 
+from azure.cli.core.azclierror import ValidationError
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck, LogAnalyticsWorkspacePreparer)
 
@@ -225,6 +226,16 @@ class ContainerAppJobsCRUDOperationsTest(ScenarioTest):
             JMESPathCheck('properties.configuration.manualTriggerConfig.parallelism', 1),
             JMESPathCheck('properties.configuration.manualTriggerConfig.replicaCompletionCount', 1),
         ])
+
+        # Test that --parallelism must be at least 1
+        job_invalid_parallelism = self.create_random_name(prefix='job-invalid-p', length=24)
+        with self.assertRaisesRegex(ValidationError, '--parallelism must be at least 1'):
+            self.cmd("az containerapp job create --resource-group {} --name {} --environment {} --replica-timeout 200 --replica-retry-limit 2 --trigger-type manual --parallelism 0 --replica-completion-count 1 --image mcr.microsoft.com/k8se/quickstart-jobs:latest --cpu '0.25' --memory '0.5Gi'".format(resource_group, job_invalid_parallelism, env_id))
+
+        # Test that --replica-completion-count must be at least 1
+        job_invalid_completion = self.create_random_name(prefix='job-invalid-c', length=24)
+        with self.assertRaisesRegex(ValidationError, '--replica-completion-count must be at least 1'):
+            self.cmd("az containerapp job create --resource-group {} --name {} --environment {} --replica-timeout 200 --replica-retry-limit 2 --trigger-type manual --parallelism 1 --replica-completion-count 0 --image mcr.microsoft.com/k8se/quickstart-jobs:latest --cpu '0.25' --memory '0.5Gi'".format(resource_group, job_invalid_completion, env_id))
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northcentralus")

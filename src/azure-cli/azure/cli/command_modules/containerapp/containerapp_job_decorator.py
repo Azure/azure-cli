@@ -195,6 +195,12 @@ class ContainerAppJobCreateDecorator(ContainerAppJobDecorator):
 
             if self.get_argument_managed_env() is None:
                 raise RequiredArgumentMissingError('Usage error: --environment is required if not using --yaml')
+        
+        if self.get_argument_parallelism() < 1:
+            raise ValidationError('Usage error: --parallelism must be at least 1')
+        
+        if self.get_argument_replica_completion_count() < 1:
+            raise ValidationError('Usage error: --replica-completion-count must be at least 1')
 
     def create(self):
         try:
@@ -267,15 +273,15 @@ class ContainerAppJobCreateDecorator(ContainerAppJobDecorator):
         if self.get_argument_trigger_type() is not None and self.get_argument_trigger_type().lower() == "manual":
             manualTriggerConfig_def = ManualTriggerModel
             manualTriggerConfig_def[
-                "replicaCompletionCount"] = 1 if self.get_argument_replica_completion_count() is None else self.get_argument_replica_completion_count()
-            manualTriggerConfig_def["parallelism"] = 1 if self.get_argument_parallelism() is None else self.get_argument_parallelism()
+                "replicaCompletionCount"] = self.get_argument_replica_completion_count()
+            manualTriggerConfig_def["parallelism"] = self.get_argument_parallelism()
 
         scheduleTriggerConfig_def = None
         if self.get_argument_trigger_type() is not None and self.get_argument_trigger_type().lower() == "schedule":
             scheduleTriggerConfig_def = ScheduleTriggerModel
             scheduleTriggerConfig_def[
-                "replicaCompletionCount"] = 1 if self.get_argument_replica_completion_count() is None else self.get_argument_replica_completion_count()
-            scheduleTriggerConfig_def["parallelism"] = 1 if self.get_argument_parallelism() is None else self.get_argument_parallelism()
+                "replicaCompletionCount"] = self.get_argument_replica_completion_count()
+            scheduleTriggerConfig_def["parallelism"] = self.get_argument_parallelism()
             scheduleTriggerConfig_def["cronExpression"] = self.get_argument_cron_expression()
 
         eventTriggerConfig_def = None
