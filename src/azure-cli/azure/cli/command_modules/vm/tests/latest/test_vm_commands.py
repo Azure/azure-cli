@@ -13833,8 +13833,8 @@ class VMUltraSSDLivedataDiskIopsMbpsScenarioTest(ScenarioTest):
         self.cmd(
             'vm show -g {rg} -n {vm}',
             checks=[
-                self.check('storageProfile.dataDisks[0].diskSizeGb', '{disk_size}'),
-                self.check('storageProfile.dataDisks[0].diskIopsReadWrite', '{disk_iops}'),
+                self.check('storageProfile.dataDisks[0].diskSizeGB', '{disk_size}'),
+                self.check('storageProfile.dataDisks[0].diskIOPSReadWrite', '{disk_iops}'),
                 self.check('storageProfile.dataDisks[0].diskMBpsReadWrite', '{disk_mbps}'),
                 self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'UltraSSD_LRS')
             ]
