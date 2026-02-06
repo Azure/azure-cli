@@ -992,7 +992,9 @@ type: command
 short-summary: Copy files to and from a virtual machine.
 long-summary: >
     This command uses an Azure Storage blob container as an intermediary bridge to transfer files.
-    It requires 'az vm run-command' capability on the target VM.
+    It requires that the target VM is running and accessible via 'az vm run-command'. On Linux VMs, 'curl'
+    must be installed and available on the PATH. The identity used to run this command must have sufficient
+    permissions both on the VM (to execute run-command) and on the storage account/container (to read and write blobs).
 examples:
   - name: Upload a local file to a VM.
     text: az vm cp --source /path/to/local/file --destination my-rg:my-vm:/path/to/remote/file

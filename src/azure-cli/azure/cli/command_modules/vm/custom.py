@@ -6875,6 +6875,22 @@ def _parse_vm_file_path(path):
     return rg_name, vm_name, vm_path
 
 
+def _get_vm_and_rg(cmd, vm_name, rg=None):
+    client = _compute_client_factory(cmd.cli_ctx)
+    if rg:
+        vm = client.virtual_machines.get(rg, vm_name)
+        return vm, rg
+
+    # Search for VM across all RGs
+    vms = client.virtual_machines.list_all()
+    vm = next((v for v in vms if v.name.lower() == vm_name.lower()), None)
+    if not vm:
+        raise ResourceNotFoundError("VM '{}' not found.".format(vm_name))
+    # parse RG from ID
+    rg = vm.id.split('/')[4]
+    return vm, rg
+
+
 def vm_cp(cmd, source, destination, storage_account=None, container_name='azvmcp'):
     from .aaz.latest.vm.run_command import Invoke
 
@@ -6889,18 +6905,10 @@ def vm_cp(cmd, source, destination, storage_account=None, container_name='azvmcp
     # 1. Prepare Storage Account
     if not storage_account:
         # Try to find a storage account in the VM's resource group
-        rg = (source_vm[0] if source_vm else dest_vm[0])
+        rg_provided = (source_vm[0] if source_vm else dest_vm[0])
         vm_name = (source_vm[1] if source_vm else dest_vm[1])
 
-        if not rg:
-            # Get RG of the VM
-            client = _compute_client_factory(cmd.cli_ctx)
-            vms = client.virtual_machines.list_all()
-            vm = next((v for v in vms if v.name.lower() == vm_name.lower()), None)
-            if not vm:
-                raise ResourceNotFoundError("VM '{}' not found.".format(vm_name))
-            # parse RG from ID
-            rg = vm.id.split('/')[4]
+        _, rg = _get_vm_and_rg(cmd, vm_name, rg_provided)
 
         from azure.cli.command_modules.storage._client_factory import cf_sa
         sa_client = cf_sa(cmd.cli_ctx, None)
@@ -6949,13 +6957,8 @@ def vm_cp(cmd, source, destination, storage_account=None, container_name='azvmcp
     try:
         if dest_vm:
             # UPLOAD: Local -> VM
-            rg, vm_name, vm_path = dest_vm
-            if not rg:
-                # find VM RG
-                client = _compute_client_factory(cmd.cli_ctx)
-                vms = client.virtual_machines.list_all()
-                vm = next((v for v in vms if v.name.lower() == vm_name.lower()), None)
-                rg = vm.id.split('/')[4]
+            rg_provided, vm_name, vm_path = dest_vm
+            vm_obj, rg = _get_vm_and_rg(cmd, vm_name, rg_provided)
 
             logger.info("Uploading local file to bridge storage...")
             upload_blob(cmd, blob_client, file_path=source)
@@ -6966,7 +6969,6 @@ def vm_cp(cmd, source, destination, storage_account=None, container_name='azvmcp
 
             # VM run-command to download
             # Check OS type
-            vm_obj = _compute_client_factory(cmd.cli_ctx).virtual_machines.get(rg, vm_name)
             is_linux = vm_obj.storage_profile.os_disk.os_type.lower() == 'linux'
 
             if is_linux:
@@ -6993,13 +6995,8 @@ def vm_cp(cmd, source, destination, storage_account=None, container_name='azvmcp
 
         else:
             # DOWNLOAD: VM -> Local
-            rg, vm_name, vm_path = source_vm
-            if not rg:
-                # find VM RG
-                client = _compute_client_factory(cmd.cli_ctx)
-                vms = client.virtual_machines.list_all()
-                vm = next((v for v in vms if v.name.lower() == vm_name.lower()), None)
-                rg = vm.id.split('/')[4]
+            rg_provided, vm_name, vm_path = source_vm
+            vm_obj, rg = _get_vm_and_rg(cmd, vm_name, rg_provided)
 
             # Get SAS with WRITE permission (2 hours expiry)
             t_sas = cmd.get_models('_shared_access_signature#BlobSharedAccessSignature',
@@ -7012,7 +7009,6 @@ def vm_cp(cmd, source, destination, storage_account=None, container_name='azvmcp
                                           expiry=expiry, protocol='https')
             blob_url = "https://{}.blob.{}/{}/{}?{}".format(sa_name, cmd.cli_ctx.cloud.suffixes.storage_endpoint, container_name, blob_name, sas_token)
 
-            vm_obj = _compute_client_factory(cmd.cli_ctx).virtual_machines.get(rg, vm_name)
             is_linux = vm_obj.storage_profile.os_disk.os_type.lower() == 'linux'
 
             if is_linux:
@@ -7022,10 +7018,10 @@ def vm_cp(cmd, source, destination, storage_account=None, container_name='azvmcp
                 escaped_vm_path = vm_path.replace("'", "''")
                 escaped_blob_url = blob_url.replace("'", "''")
                 # Cross-version compatible Get-Content as suggested by Copilot
-                script = ("$body = if ($PSVersionTable.PSVersion.Major -ge 6) {{ Get-Content -Path '{}' -AsByteStream }} "
-                          "else {{ Get-Content -Path '{}' -Encoding Byte }}; "
-                          "Invoke-RestMethod -Uri '{}' -Method Put -Headers @{{'x-ms-blob-type'='BlockBlob'}} -Body $body").format(
-                              escaped_vm_path, escaped_vm_path, escaped_blob_url)
+                script = ("$body = if ($PSVersionTable.PSVersion.Major -ge 6) {{ Get-Content -Path '{path}' -AsByteStream }} "
+                          "else {{ Get-Content -Path '{path}' -Encoding Byte }}; "
+                          "Invoke-RestMethod -Uri '{url}' -Method Put -Headers @{{'x-ms-blob-type'='BlockBlob'}} -Body $body").format(
+                              path=escaped_vm_path, url=escaped_blob_url)
                 command_id = 'RunPowerShellScript'
 
             logger.info("Executing upload script in VM...")
