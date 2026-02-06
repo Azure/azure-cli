@@ -325,7 +325,7 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                       ):
     # Check if target resource is blocked
     target_type = get_target_resource_name(cmd)
-    if target_type in TARGET_RESOURCES_BLOCKED:
+    if target_type and target_type in TARGET_RESOURCES_BLOCKED:
         raise ValidationError(f"Creating connections to '{target_type.value}' is no longer supported. "
                               "This resource type has been deprecated and blocked.")
 
@@ -714,7 +714,7 @@ def connection_update(cmd, client,  # pylint: disable=too-many-locals, too-many-
                       ):
     # Check if target resource is blocked
     target_type = get_target_resource_name(cmd)
-    if target_type in TARGET_RESOURCES_BLOCKED:
+    if target_type and target_type in TARGET_RESOURCES_BLOCKED:
         raise ValidationError(f"Updating connections to '{target_type.value}' is no longer supported. "
                               "This resource type has been deprecated and blocked.")
 
