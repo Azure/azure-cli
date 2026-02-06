@@ -15,6 +15,7 @@
 import json
 import os
 import uuid
+import shlex
 from datetime import datetime, timedelta
 
 import requests
@@ -24,6 +25,7 @@ from urllib.request import urlopen  # noqa, pylint: disable=import-error,unused-
 
 from knack.log import get_logger
 from knack.util import CLIError
+from azure.core.exceptions import ResourceExistsError
 from azure.cli.core.azclierror import (
     ResourceNotFoundError,
     ValidationError,
@@ -6874,8 +6876,7 @@ def _parse_vm_file_path(path):
 
 
 def vm_cp(cmd, source, destination, storage_account=None, container_name='azvmcp'):
-    from azure.core.exceptions import ResourceExistsError
-    import shlex
+    from .aaz.latest.vm.run_command import Invoke
 
     source_vm = _parse_vm_file_path(source)
     dest_vm = _parse_vm_file_path(destination)
@@ -6979,7 +6980,6 @@ def vm_cp(cmd, source, destination, storage_account=None, container_name='azvmcp
                 command_id = 'RunPowerShellScript'
 
             logger.info("Executing download script in VM...")
-            from .aaz.latest.vm.run_command import Invoke
             result = Invoke(cli_ctx=cmd.cli_ctx)(command_args={
                 'resource_group': rg,
                 'vm_name': vm_name,
@@ -7029,7 +7029,6 @@ def vm_cp(cmd, source, destination, storage_account=None, container_name='azvmcp
                 command_id = 'RunPowerShellScript'
 
             logger.info("Executing upload script in VM...")
-            from .aaz.latest.vm.run_command import Invoke
             result = Invoke(cli_ctx=cmd.cli_ctx)(command_args={
                 'resource_group': rg,
                 'vm_name': vm_name,
