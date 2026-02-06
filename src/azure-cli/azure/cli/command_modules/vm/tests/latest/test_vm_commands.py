@@ -1253,7 +1253,7 @@ class VMOSDiskSize(ScenarioTest):
         self.cmd('vm create -g {rg} -n vm1 --image OpenLogic:CentOS:7.5:latest --admin-username centosadmin --admin-password testPassword0 '
                  '--authentication-type password --os-disk-size-gb 75 --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
         self.cmd('vm show -g {rg} -n vm1',
-                 checks=self.check('storageProfile.osDisk.diskSizeGb', 75))
+                 checks=self.check('storageProfile.osDisk.diskSizeGB', 75))
 
 
 class VMManagedDiskScenarioTest(ScenarioTest):
@@ -1520,17 +1520,17 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         self.cmd('vm show -g {rg} -n {vm_name}', checks=[
             self.check('storageProfile.dataDisks[1].sourceResource.id', '{copy_resource1_id}'),
             self.check('storageProfile.dataDisks[1].createOption', 'Copy'),
-            self.check('storageProfile.dataDisks[1].diskSizeGb', 20),
+            self.check('storageProfile.dataDisks[1].diskSizeGB', 20),
             self.check('storageProfile.dataDisks[1].name', '{disk_name6}'),
             self.check('storageProfile.dataDisks[1].managedDisk.storageAccountType', 'Standard_LRS'),
             self.check('storageProfile.dataDisks[2].sourceResource.id', '{copy_resource2_id}'),
             self.check('storageProfile.dataDisks[2].createOption', 'Copy'),
-            self.check('storageProfile.dataDisks[2].diskSizeGb', 20),
+            self.check('storageProfile.dataDisks[2].diskSizeGB', 20),
             self.check('storageProfile.dataDisks[2].name', '{disk_name7}'),
             self.check('storageProfile.dataDisks[2].managedDisk.storageAccountType', 'Standard_LRS'),
             self.check('storageProfile.dataDisks[3].sourceResource.id', '{disk_restore_point_id}'),
             self.check('storageProfile.dataDisks[3].createOption', 'Restore'),
-            self.check('storageProfile.dataDisks[3].diskSizeGb', 20),
+            self.check('storageProfile.dataDisks[3].diskSizeGB', 20),
             self.check('storageProfile.dataDisks[3].name', '{disk_name8}'),
             self.check('storageProfile.dataDisks[3].managedDisk.storageAccountType', 'Standard_LRS')
         ])
@@ -3529,13 +3529,13 @@ class VMCreateExistingOptions(ScenarioTest):
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
         self.cmd('vm show -g {rg} -n {vm1}', checks=[
-            self.check('osProfile.linuxConfiguration.provisionVmAgent', True)
+            self.check('osProfile.linuxConfiguration.provisionVMAgent', True)
         ])
 
         self.cmd('vm create -g {rg} -n {vm2} --image Win2022Datacenter --admin-username azureuser --admin-password {pswd} '
                  '--authentication-type password --enable-agent false --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
         self.cmd('vm show -g {rg} -n {vm2}', checks=[
-            self.check('osProfile.windowsConfiguration.provisionVmAgent', False)
+            self.check('osProfile.windowsConfiguration.provisionVMAgent', False)
         ])
 
     @AllowLargeResponse(size_kb=99999)
@@ -4195,7 +4195,7 @@ class VMUnmanagedDataDiskTest(ScenarioTest):
             self.check('length(storageProfile.dataDisks)', 1),
             self.check('storageProfile.dataDisks[0].caching', 'ReadWrite'),
             self.check('storageProfile.dataDisks[0].lun', 1),
-            self.check('storageProfile.dataDisks[0].diskSizeGb', 8),
+            self.check('storageProfile.dataDisks[0].diskSizeGB', 8),
             self.check('storageProfile.dataDisks[0].createOption', 'Empty'),
             self.check('storageProfile.dataDisks[0].vhd.uri', '{vhd_uri}'),
             self.check('storageProfile.dataDisks[0].name', '{disk}')
@@ -4249,7 +4249,7 @@ class VMUnmanagedDataDiskTest(ScenarioTest):
             self.check('length(storageProfile.dataDisks)', 1),
             self.check('storageProfile.dataDisks[0].caching', 'ReadWrite'),
             self.check('storageProfile.dataDisks[0].lun', 1),
-            self.check('storageProfile.dataDisks[0].diskSizeGb', 8),
+            self.check('storageProfile.dataDisks[0].diskSizeGB', 8),
             self.check('storageProfile.dataDisks[0].createOption', 'Empty'),
             self.check('storageProfile.dataDisks[0].vhd.uri', '{vhd_uri}'),
             self.check('storageProfile.dataDisks[0].name', '{disk}')
@@ -6815,7 +6815,7 @@ class VMSecurityProfileTestForDiskEncryption(ScenarioTest):
         self.assertIsNotNone(virtualMachine['identity'])
         self.assertTrue(encryptionIdentityId.lower() in (k.lower() for k in virtualMachine['identity']['userAssignedIdentities'].keys()))
         self.assertIsNotNone(virtualMachine['securityProfile'])
-        self.assertIsNone(virtualMachine['securityProfile']['encryptionIdentity'])    
+        self.assertIsNone(virtualMachine.get('securityProfile', {}).get('encryptionIdentity'))
         
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='test_vmss_encryption_identity_for_disk_encryption', location='westus')
@@ -11632,7 +11632,7 @@ class VMPlacementScenarioTest(ScenarioTest):
         self.cmd('vm show -g {rg} -n {vm1}', checks=[
             self.check('placement.zonePlacementPolicy', 'Any'),
             self.check('placement.includeZones', ['1', '3']),
-            self.check('storageProfile.alignRegionalDisksToVmZone', True),
+            self.check('storageProfile.alignRegionalDisksToVMZone', True),
         ])
         self.cmd('vm update -g {rg} -n {vm1} --align-regional-disks-to-vm-zone False', checks=[
             self.check('storageProfile.alignRegionalDisksToVMZone', False)
@@ -11641,7 +11641,7 @@ class VMPlacementScenarioTest(ScenarioTest):
         self.cmd('vm show -g {rg} -n {vm2}', checks=[
             self.check('placement.zonePlacementPolicy', 'Any'),
             self.check('placement.excludeZones', ['2']),
-            self.check('storageProfile.alignRegionalDisksToVmZone', False),
+            self.check('storageProfile.alignRegionalDisksToVMZone', False),
         ])
         self.cmd('vm update -g {rg} -n {vm2} --align-regional-disks-to-vm-zone True', checks=[
             self.check('storageProfile.alignRegionalDisksToVMZone', True)
