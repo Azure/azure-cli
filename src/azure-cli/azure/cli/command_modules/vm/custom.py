@@ -193,7 +193,7 @@ def _get_disk_lun(data_disks):
                 lun = d.get('lun') if isinstance(d, dict) else getattr(d, 'lun', None)
                 if lun is not None:
                     existing_luns.append(lun)
-            except Exception:
+            except (AttributeError, TypeError, ValueError, KeyError):
                 pass
         existing_luns = sorted(existing_luns)
 
@@ -2343,7 +2343,7 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
         if lun:
             disk_lun = lun
         else:
-            disk_lun = _get_disk_lun(vm.storage_profile.data_disks)
+            disk_lun = _get_disk_lun(vm.get('storage_profile', {}).get('data_disks') or [])
 
         data_disks = []
         for disk_item in disk_ids:
