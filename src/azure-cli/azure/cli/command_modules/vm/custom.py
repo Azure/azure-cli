@@ -14,6 +14,8 @@
 # pylint: disable=protected-access
 import json
 import os
+import uuid
+from datetime import datetime, timedelta
 
 import requests
 
@@ -6826,7 +6828,7 @@ def list_vm_sizes(cmd, location):
 def _parse_vm_file_path(path):
     if ':' not in path:
         return None
-    
+
     parts = path.split(':')
     if len(parts) == 2:
         # vm-name:path
@@ -6840,18 +6842,18 @@ def _parse_vm_file_path(path):
 def vm_cp(cmd, source, destination, storage_account=None, container_name='azvmcp'):
     source_vm = _parse_vm_file_path(source)
     dest_vm = _parse_vm_file_path(destination)
-    
+
     if source_vm and dest_vm:
         raise ValidationError("Both source and destination cannot be VM paths.")
     if not source_vm and not dest_vm:
         raise ValidationError("Either source or destination must be a VM path (format: [rg:]vm:path).")
-    
+
     # 1. Prepare Storage Account
     if not storage_account:
         # Try to find a storage account in the VM's resource group
         rg = (source_vm[0] if source_vm else dest_vm[0])
         vm_name = (source_vm[1] if source_vm else dest_vm[1])
-        
+
         if not rg:
             # Get RG of the VM
             client = _compute_client_factory(cmd.cli_ctx)
@@ -6861,7 +6863,7 @@ def vm_cp(cmd, source, destination, storage_account=None, container_name='azvmcp
                 raise ResourceNotFoundError("VM '{}' not found.".format(vm_name))
             # parse RG from ID
             rg = vm.id.split('/')[4]
-        
+
         from azure.cli.command_modules.storage._client_factory import cf_sa
         sa_client = cf_sa(cmd.cli_ctx, None)
         accounts = list(sa_client.list())
@@ -6890,7 +6892,7 @@ def vm_cp(cmd, source, destination, storage_account=None, container_name='azvmcp
             raise ResourceNotFoundError("Storage account '{}' not found.".format(storage_account))
         sa_rg = account.id.split('/')[4]
         sa_name = account.name
-    
+
     keys = sa_keys_client.list_keys(sa_rg, sa_name).keys
     account_key = keys[0].value
 
@@ -6900,10 +6902,9 @@ def vm_cp(cmd, source, destination, storage_account=None, container_name='azvmcp
     container_client = blob_service_client.get_container_client(container_name)
     try:
         container_client.create_container()
-    except Exception: # Already exists or other error
+    except Exception: # Already exists or other error  # pylint: disable=broad-except
         pass
 
-    import uuid
     blob_name = str(uuid.uuid4())
 
     blob_client = container_client.get_blob_client(blob_name)
@@ -6920,7 +6921,7 @@ def vm_cp(cmd, source, destination, storage_account=None, container_name='azvmcp
 
         logger.info("Uploading local file to bridge storage...")
         upload_blob(cmd, blob_client, file_path=source)
-        
+
         # Get SAS for VM to download
         sas_token = create_short_lived_blob_sas_v2(cmd, sa_name, container_name, blob_name, account_key=account_key)
         blob_url = "https://{}.blob.{}/{}/{}?{}".format(sa_name, cmd.cli_ctx.cloud.suffixes.storage_endpoint, container_name, blob_name, sas_token)
@@ -6929,14 +6930,14 @@ def vm_cp(cmd, source, destination, storage_account=None, container_name='azvmcp
         # Check OS type
         vm_obj = _compute_client_factory(cmd.cli_ctx).virtual_machines.get(rg, vm_name)
         is_linux = vm_obj.storage_profile.os_disk.os_type.lower() == 'linux'
-        
+
         if is_linux:
             script = "curl -L -o '{}' '{}'".format(vm_path, blob_url)
             command_id = 'RunShellScript'
         else:
             script = "Invoke-WebRequest -Uri '{}' -OutFile '{}'".format(blob_url, vm_path)
             command_id = 'RunPowerShellScript'
-            
+
         logger.info("Executing download script in VM...")
         from .aaz.latest.vm.run_command import Invoke
         Invoke(cli_ctx=cmd.cli_ctx)(command_args={
@@ -6945,11 +6946,11 @@ def vm_cp(cmd, source, destination, storage_account=None, container_name='azvmcp
             'command_id': command_id,
             'script': [script]
         })
-        
+
         # Cleanup
         logger.info("Cleaning up bridge storage...")
         blob_client.delete_blob()
-        
+
     else:
         # DOWNLOAD: VM -> Local
         rg, vm_name, vm_path = source_vm
@@ -6961,14 +6962,14 @@ def vm_cp(cmd, source, destination, storage_account=None, container_name='azvmcp
             rg = vm.id.split('/')[4]
 
         # Get SAS with WRITE permission
-        from datetime import datetime, timedelta
-        from azure.cli.core.profiles import ResourceType
         t_sas = cmd.get_models('_shared_access_signature#BlobSharedAccessSignature',
                                resource_type=ResourceType.DATA_STORAGE_BLOB)
         t_blob_permissions = cmd.get_models('_models#BlobSasPermissions', resource_type=ResourceType.DATA_STORAGE_BLOB)
         expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
         sas = t_sas(sa_name, account_key=account_key)
-        sas_token = sas.generate_blob(container_name, blob_name, permission=t_blob_permissions(write=True), expiry=expiry, protocol='https')
+        sas_token = sas.generate_blob(container_name, blob_name,
+                                      permission=t_blob_permissions(write=True),
+                                      expiry=expiry, protocol='https')
         blob_url = "https://{}.blob.{}/{}/{}?{}".format(sa_name, cmd.cli_ctx.cloud.suffixes.storage_endpoint, container_name, blob_name, sas_token)
 
         vm_obj = _compute_client_factory(cmd.cli_ctx).virtual_machines.get(rg, vm_name)
