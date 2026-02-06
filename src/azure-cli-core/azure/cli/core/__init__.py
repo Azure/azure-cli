@@ -595,23 +595,32 @@ class MainCommandsLoader(CLICommandsLoader):
             future_to_module = {executor.submit(self._load_single_module, mod, args): mod
                                 for mod in command_modules if mod not in BLOCKED_MODS}
 
-            for future in concurrent.futures.as_completed(future_to_module):
-                try:
-                    result = future.result(timeout=MODULE_LOAD_TIMEOUT_SECONDS)
-                    results.append(result)
-                except concurrent.futures.TimeoutError:
-                    mod = future_to_module[future]
-                    logger.warning("Module '%s' load timeout after %s seconds", mod, MODULE_LOAD_TIMEOUT_SECONDS)
-                    results.append(ModuleLoadResult(mod, {}, {}, 0,
-                                                    Exception(f"Module '{mod}' load timeout")))
-                except (ImportError, AttributeError, TypeError, ValueError) as ex:
-                    mod = future_to_module[future]
-                    logger.warning("Module '%s' load failed: %s", mod, ex)
-                    results.append(ModuleLoadResult(mod, {}, {}, 0, ex))
-                except Exception as ex:  # pylint: disable=broad-exception-caught
-                    mod = future_to_module[future]
-                    logger.warning("Module '%s' load failed with unexpected exception: %s", mod, ex)
-                    results.append(ModuleLoadResult(mod, {}, {}, 0, ex))
+            try:
+                for future in concurrent.futures.as_completed(future_to_module, timeout=MODULE_LOAD_TIMEOUT_SECONDS):
+                    try:
+                        result = future.result()
+                        results.append(result)
+                    except (ImportError, AttributeError, TypeError, ValueError) as ex:
+                        mod = future_to_module[future]
+                        logger.warning("Module '%s' load failed: %s", mod, ex)
+                        results.append(ModuleLoadResult(mod, {}, {}, 0, ex))
+                    except Exception as ex:  # pylint: disable=broad-exception-caught
+                        mod = future_to_module[future]
+                        logger.warning("Module '%s' load failed with unexpected exception: %s", mod, ex)
+                        results.append(ModuleLoadResult(mod, {}, {}, 0, ex))
+            except concurrent.futures.TimeoutError:
+                for future, mod in future_to_module.items():
+                    if future.done():
+                        try:
+                            result = future.result()
+                            results.append(result)
+                        except Exception as ex:  # pylint: disable=broad-exception-caught
+                            logger.warning("Module '%s' load failed: %s", mod, ex)
+                            results.append(ModuleLoadResult(mod, {}, {}, 0, ex))
+                    else:
+                        logger.warning("Module '%s' load timeout after %s seconds", mod, MODULE_LOAD_TIMEOUT_SECONDS)
+                        results.append(ModuleLoadResult(mod, {}, {}, 0,
+                                                        Exception(f"Module '{mod}' load timeout")))
 
         return results
 
