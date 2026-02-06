@@ -843,8 +843,8 @@ def flexible_server_restore(cmd, client, resource_group_name, server_name, sourc
         else:
             parameters.network = source_server_object.network
 
-    except Exception as e:
-        raise ResourceNotFoundError(e)
+    except HttpResponseError as exc:
+        raise ResourceNotFoundError(exc) from exc
 
     def _begin_network_update():
         restore_server_object = client.get(resource_group_name, server_name)
@@ -858,7 +858,7 @@ def flexible_server_restore(cmd, client, resource_group_name, server_name, sourc
         def _post_create_update(poller):
             try:
                 _begin_network_update()
-            except Exception as ex:
+            except (HttpResponseError, CLIError) as ex:
                 logger.warning('Skipping post-restore network update: %s', ex)
 
         create_poller.add_done_callback(_post_create_update)
