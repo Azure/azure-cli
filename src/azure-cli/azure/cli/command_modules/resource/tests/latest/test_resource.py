@@ -5967,6 +5967,150 @@ class DeploymentWithBicepScenarioTest(LiveScenarioTest):
         with self.assertRaisesRegex(CLIError, "Please enter one of the following: template file, template spec, template url, or Bicep parameters file."):
             self.cmd('deployment group create --resource-group {rg} --parameters {params}')
 
+    def test_is_using_none_bicepparam_file(self):
+        from azure.cli.command_modules.resource._bicep import is_using_none_bicepparam_file
+        import tempfile
+
+        def _write_temp(content):
+            f = tempfile.NamedTemporaryFile(mode='w', suffix='.bicepparam', delete=False)
+            f.write(content)
+            f.close()
+            return f.name
+
+        # Basic 'using none'
+        path = _write_temp("using none\nparam location = 'westus2'\n")
+        self.assertTrue(is_using_none_bicepparam_file(path))
+        os.unlink(path)
+
+        # With leading comments
+        path = _write_temp("// comment\n// another\nusing none\nparam location = 'westus2'\n")
+        self.assertTrue(is_using_none_bicepparam_file(path))
+        os.unlink(path)
+
+        # With leading blank lines
+        path = _write_temp("\n\n  \nusing none\nparam location = 'westus2'\n")
+        self.assertTrue(is_using_none_bicepparam_file(path))
+        os.unlink(path)
+
+        # Case insensitive
+        path = _write_temp("Using None\nparam location = 'westus2'\n")
+        self.assertTrue(is_using_none_bicepparam_file(path))
+        os.unlink(path)
+
+        path = _write_temp("USING NONE\nparam location = 'westus2'\n")
+        self.assertTrue(is_using_none_bicepparam_file(path))
+        os.unlink(path)
+
+        # Normal using declaration
+        path = _write_temp("using './main.bicep'\nparam location = 'westus2'\n")
+        self.assertFalse(is_using_none_bicepparam_file(path))
+        os.unlink(path)
+
+        # Using with another path
+        path = _write_temp("using 'other.bicep'\nparam location = 'westus2'\n")
+        self.assertFalse(is_using_none_bicepparam_file(path))
+        os.unlink(path)
+
+        # Block comment before using none
+        path = _write_temp("/* header comment */\nusing none\nparam location = 'westus2'\n")
+        self.assertTrue(is_using_none_bicepparam_file(path))
+        os.unlink(path)
+
+        # Multi-line block comment before using none
+        path = _write_temp("/*\n * Multi-line\n * comment\n */\nusing none\nparam location = 'westus2'\n")
+        self.assertTrue(is_using_none_bicepparam_file(path))
+        os.unlink(path)
+
+        # Block comment on same line as using none (should not match)
+        path = _write_temp("/* comment */ using './main.bicep'\nparam location = 'westus2'\n")
+        self.assertFalse(is_using_none_bicepparam_file(path))
+        os.unlink(path)
+
+        # Test data file with comments (on-disk fixture)
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        comments_file = os.path.join(curr_dir, 'data', 'bicepparam', 'using_none_with_comments_params.bicepparam')
+        self.assertTrue(is_using_none_bicepparam_file(comments_file))
+
+        # Non-existent file
+        self.assertFalse(is_using_none_bicepparam_file('/nonexistent/path.bicepparam'))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_with_bicepparam_using_none')
+    def test_resource_group_level_deployment_with_bicepparam_using_none(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'data', 'bicepparam', 'storage_account_template.bicep'),
+            'params': os.path.join(curr_dir, 'data', 'bicepparam', 'using_none_params.bicepparam')
+        })
+
+        self.cmd('deployment group validate --resource-group {rg} --template-file "{tf}" --parameters {params}', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment group what-if --resource-group {rg} --template-file "{tf}" --parameters {params} --no-pretty-print', checks=[
+            self.check('status', 'Succeeded'),
+        ])
+
+        self.cmd('deployment group create --resource-group {rg} --template-file "{tf}" --parameters {params}', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_deployment_with_bicepparam_using_none_json')
+    def test_resource_group_level_deployment_with_bicepparam_using_none_and_json_template(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'data', 'bicepparam', 'storage_account_template.json'),
+            'params': os.path.join(curr_dir, 'data', 'bicepparam', 'using_none_params.bicepparam')
+        })
+
+        self.cmd('deployment group validate --resource-group {rg} --template-file "{tf}" --parameters {params}', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment group what-if --resource-group {rg} --template-file "{tf}" --parameters {params} --no-pretty-print', checks=[
+            self.check('status', 'Succeeded'),
+        ])
+
+        self.cmd('deployment group create --resource-group {rg} --template-file "{tf}" --parameters {params}', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+    def test_resource_deployment_with_bicepparam_using_none_and_no_template(self):
+        import tempfile
+
+        f = tempfile.NamedTemporaryFile(mode='w', suffix='.bicepparam', delete=False)
+        f.write("using none\nparam location = 'westus2'\n")
+        f.close()
+
+        self.kwargs.update({
+            'rg': "exampleGroup",
+            'params': f.name
+        })
+
+        # The bicepparam file uses 'using none', so the CLI requires --template-file.
+        with self.assertRaisesRegex(CLIError, "The .bicepparam file uses 'using none', so a --template-file"):
+            self.cmd('deployment group create --resource-group {rg} --parameters {params}')
+
+        os.unlink(f.name)
+
+    def test_resource_deployment_with_bicepparam_and_json_template_still_fails_without_using_none(self):
+        """Ensure existing behavior: non-using-none bicepparam + .json template still errors."""
+        import tempfile
+
+        f = tempfile.NamedTemporaryFile(mode='w', suffix='.bicepparam', delete=False)
+        f.write("using './something.bicep'\nparam location = 'westus2'\n")
+        f.close()
+
+        self.kwargs.update({
+            'rg': "exampleGroup",
+            'tf': "./main.json",
+            'params': f.name
+        })
+
+        with self.assertRaisesRegex(CLIError, "Only a .bicep template is allowed with a .bicepparam file"):
+            self.cmd('deployment group create --resource-group {rg} --template-file "{tf}" --parameters {params}')
+
+        os.unlink(f.name)
+
     def test_subscription_level_deployment_with_bicep(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({

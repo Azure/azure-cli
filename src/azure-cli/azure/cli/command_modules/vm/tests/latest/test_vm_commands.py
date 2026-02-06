@@ -13801,5 +13801,80 @@ class VMResizeScenarioTest(ScenarioTest):
         )
 
 
+class VMUltraSSDLivedataDiskIopsMbpsScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_ultrassd_live', location='eastus2')
+    @AllowLargeResponse(size_kb=99999)
+    def test_vm_create_ultrassd_data_disk_iops_mbps(self, resource_group):
+
+        self.kwargs.update({
+            'vm': 'vm1',
+            'vnet': 'vnet1',
+            'subnet': 'subnet1',
+            'username': 'admin123',
+            'password': 'testPassword0',
+            'size': 'Standard_D2s_v3',
+            'image': 'Debian:debian-10:10:latest',
+            'disk_size': 4,
+            'disk_iops': 100,
+            'disk_mbps': 10,
+            'zone': 2,
+            'loc': 'eastus2'
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet} -l {loc}')
+        self.cmd(
+            'vm create -g {rg} -n {vm} --admin-username {username} --admin-password {password} '
+            '--image {image} --size {size} --storage-sku UltraSSD_LRS --data-disk-sizes-gb {disk_size} '
+            '--data-disk-iops {disk_iops} --data-disk-mbps {disk_mbps} --zone {zone} --vnet-name {vnet} --subnet {subnet} -l {loc}'
+        )
+
+        # verify the created vm carries UltraSSD data disk properties (IOPS/MBps)
+        self.cmd(
+            'vm show -g {rg} -n {vm}',
+            checks=[
+                self.check('storageProfile.dataDisks[0].diskSizeGb', '{disk_size}'),
+                self.check('storageProfile.dataDisks[0].diskIopsReadWrite', '{disk_iops}'),
+                self.check('storageProfile.dataDisks[0].diskMBpsReadWrite', '{disk_mbps}'),
+                self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'UltraSSD_LRS')
+            ]
+        )
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_ultrassd_live', location='eastus2')
+    @AllowLargeResponse(size_kb=99999)
+    def test_vm_create_ultrassd_data_disk_iops_mbps_invalid_iops(self, resource_group):
+        self.kwargs.update({
+            'vm': 'vm1',
+            'loc': 'eastus2',
+            'username': 'admin123',
+            'password': 'testPassword0',
+            'size': 'Standard_D2s_v3',
+            'image': 'Debian:debian-10:10:latest',
+            'vnet': 'vnet1',
+            'subnet': 'subnet1',
+            'disk_size': 4,
+            'disk_iops_invalid': 5000,
+            'disk_mbps': 10,
+            'zone': 2,
+        })
+
+        self.cmd(
+            'network vnet create -g {rg} -n {vnet} --subnet-name {subnet} -l {loc}'
+        )
+
+        r = self.cmd(
+            'vm create -g {rg} -n {vm} --admin-username {username} --admin-password {password} '
+            '--image {image} --size {size} --location {loc} --zone {zone} '
+            '--storage-sku UltraSSD_LRS '
+            '--data-disk-sizes-gb {disk_size} '
+            '--data-disk-iops {disk_iops_invalid} '
+            '--data-disk-mbps {disk_mbps} '
+            '--vnet-name {vnet} --subnet {subnet}',
+            expect_failure=True
+        )
+
+        self.assertNotEqual(r.exit_code, 0)
+
+
 if __name__ == '__main__':
     unittest.main()
