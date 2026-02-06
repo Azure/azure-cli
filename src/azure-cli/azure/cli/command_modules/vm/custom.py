@@ -2449,12 +2449,12 @@ def detach_unmanaged_data_disk(cmd, resource_group_name, vm_name, disk_name):
     # here we handle unmanaged disk
     vm = get_vm_to_update_by_aaz(cmd, resource_group_name, vm_name)
     vm = convert_show_result_to_snake_case(vm)
-    leftovers = [d for d in vm.get('storage_profile', {}).get('data_disks', []) if d.get('name').lower() != disk_name.lower()]
+    leftovers = [d for d in vm.get('storage_profile', {}).get('data_disks', []) if
+                 d.get('name', '').lower() != disk_name.lower()]
     if len(vm.get('storage_profile', {}).get('data_disks', [])) == len(leftovers):
         raise CLIError("No disk with the name '{}' was found".format(disk_name))
 
-    if vm.get('storage_profile', {}).get('data_disks'):
-        vm['storage_profile']['data_disks'] = leftovers
+    vm['storage_profile']['data_disks'] = leftovers
 
     set_vm_by_aaz(cmd, vm)
 # endregion
