@@ -195,10 +195,10 @@ class ContainerAppJobCreateDecorator(ContainerAppJobDecorator):
 
             if self.get_argument_managed_env() is None:
                 raise RequiredArgumentMissingError('Usage error: --environment is required if not using --yaml')
-        
+
         if self.get_argument_parallelism() < 1:
             raise ValidationError('Usage error: --parallelism must be at least 1')
-        
+
         if self.get_argument_replica_completion_count() < 1:
             raise ValidationError('Usage error: --replica-completion-count must be at least 1')
 

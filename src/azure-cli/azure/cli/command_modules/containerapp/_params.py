@@ -469,7 +469,7 @@ def load_arguments(self, _):
         c.argument('max_executions', type=int, help="Maximum number of job executions to run per polling interval.")
         c.argument('polling_interval', type=int, help="Interval to check each event source in seconds. Defaults to 30s.")
         c.argument('scale_rule_type', options_list=['--scale-rule-type', '--srt'], help="The type of the scale rule.")
-    
+
     with self.argument_context('containerapp job update') as c:
         c.argument('parallelism', type=int, help='Maximum number of replicas to run per execution.')
         c.argument('replica_completion_count', type=int, options_list=['--replica-completion-count', '--rcc'], help='Number of replicas that need to complete successfully for execution to succeed.')
