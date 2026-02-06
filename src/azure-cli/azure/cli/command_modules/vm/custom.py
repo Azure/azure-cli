@@ -117,7 +117,6 @@ def _construct_identity_info(identity_scope, identity_role, implicit_identity, e
 
 # for injecting test seams to produce predicatable role assignment id for playback
 def _gen_guid():
-    import uuid
     return uuid.uuid4()
 
 
@@ -3489,8 +3488,7 @@ def attach_unmanaged_data_disk(cmd, resource_group_name, vm_name, new=False, vhd
     vm = get_vm_to_update_by_aaz(cmd, resource_group_name, vm_name)
     vm = convert_show_result_to_snake_case(vm)
     if disk_name is None:
-        import datetime
-        disk_name = vm_name + '-' + datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+        disk_name = vm_name + '-' + datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
     # pylint: disable=no-member
     if vhd_uri is None:
         if not vm.get('storage_profile', {}).get('os_disk', {}).get('vhd'):
@@ -6842,37 +6840,28 @@ def _is_windows_absolute_path(path):
 
 
 def _parse_vm_file_path(path):
-    # If there is no colon, this cannot be a VM path.
-    if ':' not in path:
+    if ':' not in path or _is_windows_absolute_path(path):
         return None
 
-    # Do not treat Windows absolute paths like 'C:\\path\\to\\file' as VM paths.
-    if _is_windows_absolute_path(path):
-        return None
-
-    # VM path format is [resource-group-name:]vm-name:path-on-vm
-    # Only the first two colons separate components; any remaining colons belong to the path.
     first_colon = path.find(':')
+    # second_colon - find the next colon after the first one
     second_colon = path.find(':', first_colon + 1)
-
-    if first_colon == -1:
-        return None
 
     if second_colon == -1:
         # vm-name:path
         vm_name = path[:first_colon]
         vm_path = path[first_colon + 1:]
-        if not vm_name or not vm_path:
-            return None
-        return None, vm_name, vm_path
+        if vm_name and vm_path:
+            return None, vm_name, vm_path
+    else:
+        # rg:vm-name:path...
+        rg_name = path[:first_colon]
+        vm_name = path[first_colon + 1:second_colon]
+        vm_path = path[second_colon + 1:]
+        if rg_name and vm_name and vm_path:
+            return rg_name, vm_name, vm_path
 
-    # rg:vm-name:path...
-    rg_name = path[:first_colon]
-    vm_name = path[first_colon + 1:second_colon]
-    vm_path = path[second_colon + 1:]
-    if not rg_name or not vm_name or not vm_path:
-        return None
-    return rg_name, vm_name, vm_path
+    return None
 
 
 def _get_vm_and_rg(cmd, vm_name, rg=None):
