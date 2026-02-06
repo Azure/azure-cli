@@ -2364,91 +2364,110 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
     else:
         # attach multiple managed disks using vm PUT API
         from azure.mgmt.core.tools import parse_resource_id
-        from .operations.vm import VMUpdate as _VMUpdate
 
-        class VMUpdate(_VMUpdate):
-            def pre_instance_update(self, instance):
-                storage_profile = instance.properties.storage_profile
-                data_disks = storage_profile.data_disks
-                data_disks_list = data_disks.to_serialized_data() if hasattr(data_disks, 'to_serialized_data') \
-                    else data_disks
-                if size_gb is None:
-                    default_size_gb = 1023
+        if size_gb is None:
+            default_size_gb = 1023
 
-                disks_to_process = disk_ids if disk_ids is not None else disks
-                # attach existing / new disks
-                if disks_to_process:
-                    for disk_item in disks_to_process:
-                        if lun:
-                            disk_lun = lun
-                        else:
-                            disk_lun = _get_disk_lun(data_disks_list)
-                        if new:
-                            disk_name = parse_resource_id(disk_item)['name']
-                            disk_obj = {
-                                'name': disk_name,
-                                'lun': disk_lun,
-                                'createOption': 'Empty',
-                                'diskSizeGb': size_gb if size_gb else default_size_gb,
-                                'caching': caching
-                            }
-                            if sku:
-                                disk_obj['managedDisk'] = {'storageAccountType': sku}
-                        else:
-                            disk_obj = {
-                                'lun': disk_lun,
-                                'createOption': 'Attach',
-                                'caching': caching,
-                                'managedDisk': {'id': disk_item}
-                            }
-                            if sku:
-                                disk_obj['managedDisk']['storageAccountType'] = sku
-                        if enable_write_accelerator:
-                            disk_obj['writeAcceleratorEnabled'] = True
-                        data_disks.append(disk_obj)
-                # snapshot / copy
-                disk_lun = _get_disk_lun(data_disks_list)
-                if source_snapshots_or_disks:
-                    _new_names = new_names_of_source_snapshots_or_disks or [None] * len(source_snapshots_or_disks)
-                    for src_id, name in zip(source_snapshots_or_disks, _new_names):
-                        disk_obj = {
-                            'name': name,
-                            'lun': disk_lun,
-                            'createOption': 'Copy',
-                            'sourceResource': {'id': src_id},
-                            'caching': caching,
-                            'writeAcceleratorEnabled': enable_write_accelerator
+        if disk_ids is not None:
+            disks = disk_ids
+
+        storage_profile = vm.get('storage_profile', {})
+        data_disks = storage_profile.get('data_disks')
+        if data_disks is None:
+            data_disks = []
+            storage_profile['data_disks'] = data_disks
+            vm['storage_profile'] = storage_profile
+
+        for disk_item in disks:
+            if lun:
+                disk_lun = lun
+            else:
+                disk_lun = _get_disk_lun(data_disks)
+
+            if new:
+                data_disk = {
+                    'lun': disk_lun,
+                    'create_option': 'Empty',
+                    'name': parse_resource_id(disk_item)['name'],
+                    'diskSizeGb': size_gb if size_gb else default_size_gb,
+                    'caching': caching,
+                    'managedDisk': {
+                        'storageAccountType': sku
+                    } if sku else None
+                }
+            else:
+                data_disk = {
+                    'lun': disk_lun,
+                    'create_option': 'Attach',
+                    'managedDisk': {
+                        'id': disk_item,
+                        'storageAccountType': sku
+                    } if sku else {
+                        'id': disk_item
+                    },
+                    'caching': caching
+                }
+
+            if enable_write_accelerator:
+                data_disk['writeAcceleratorEnabled'] = enable_write_accelerator
+
+            data_disks.append(data_disk)
+
+        disk_lun = _get_disk_lun(data_disks)
+        if source_snapshots_or_disks is not None:
+            if new_names_of_source_snapshots_or_disks is None:
+                new_names_of_source_snapshots_or_disks = [None] * len(source_snapshots_or_disks)
+            for disk_id, disk_name in zip(source_snapshots_or_disks, new_names_of_source_snapshots_or_disks):
+                disk = {
+                    'name': disk_name,
+                    'create_option': 'Copy',
+                    'caching': caching,
+                    'lun': disk_lun,
+                    'writeAcceleratorEnabled': enable_write_accelerator,
+                    "sourceResource": {
+                        "id": disk_id
+                    }
+                }
+                if size_gb is not None:
+                    disk.update({
+                        'diskSizeGb': size_gb
+                    })
+                if sku is not None:
+                    disk.update({
+                        "managedDisk": {
+                            "storageAccountType": sku
                         }
-                        if size_gb is not None:
-                            disk_obj['diskSizeGb'] = size_gb
-                        if sku is not None:
-                            disk_obj['managedDisk'] = {'storageAccountType': sku}
-                        data_disks.append(disk_obj)
-                        disk_lun += 1
-                # restore point
-                if source_disk_restore_point:
-                    _new_names_rp = new_names_of_source_disk_restore_point or [None] * len(source_disk_restore_point)
-                    for src_id, name in zip(source_disk_restore_point, _new_names_rp):
-                        disk_obj = {
-                            'name': name,
-                            'lun': disk_lun,
-                            'createOption': 'Restore',
-                            'sourceResource': {'id': src_id},
-                            'caching': caching,
-                            'writeAcceleratorEnabled': enable_write_accelerator
+                    })
+                disk_lun += 1
+                data_disks.append(disk)
+        if source_disk_restore_point is not None:
+            if new_names_of_source_disk_restore_point is None:
+                new_names_of_source_disk_restore_point = [None] * len(source_disk_restore_point)
+            for disk_id, disk_name in zip(source_disk_restore_point, new_names_of_source_disk_restore_point):
+                disk = {
+                    'name': disk_name,
+                    'create_option': 'Restore',
+                    'caching': caching,
+                    'lun': disk_lun,
+                    'writeAcceleratorEnabled': enable_write_accelerator,
+                    "sourceResource": {
+                        "id": disk_id
+                    }
+                }
+                if size_gb is not None:
+                    disk.update({
+                        'diskSizeGb': size_gb
+                    })
+                if sku is not None:
+                    disk.update({
+                        "managedDisk": {
+                            "storageAccountType": sku
                         }
-                        if size_gb is not None:
-                            disk_obj['diskSizeGb'] = size_gb
-                        if sku is not None:
-                            disk_obj['managedDisk'] = {'storageAccountType': sku}
-                        data_disks.append(disk_obj)
-                        disk_lun += 1
+                    })
+                disk_lun += 1
+                data_disks.append(disk)
 
-        args = {
-            'resource_group': resource_group_name,
-            'vm_name': vm_name,
-        }
-        return VMUpdate(cli_ctx=cmd.cli_ctx)(command_args=args)
+        set_vm_by_aaz(cmd, vm)
 
 
 def detach_unmanaged_data_disk(cmd, resource_group_name, vm_name, disk_name):
