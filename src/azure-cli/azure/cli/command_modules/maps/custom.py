@@ -13,7 +13,7 @@ logger = get_logger(__name__)
 def maps_account_create(client,
                         resource_group_name,
                         account_name,
-                        name,
+                        name=None,
                         tags=None,
                         kind=None,
                         location=None,
@@ -60,7 +60,7 @@ def maps_account_create(client,
     if user_assigned_identities is not None:
         maps_account['identity']['user_assigned_identities'] = user_assigned_identities
     maps_account['sku'] = {}
-    maps_account['sku']['name'] = name
+    maps_account['sku']['name'] = name or 'G2'
     return client.create_or_update(resource_group_name=resource_group_name,
                                    account_name=account_name,
                                    maps_account=maps_account)
