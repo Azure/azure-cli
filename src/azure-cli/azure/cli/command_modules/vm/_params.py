@@ -517,6 +517,12 @@ def load_arguments(self, _):
         with self.argument_context(scope) as c:
             c.ignore('include_user_data')
 
+    with self.argument_context('vm cp') as c:
+        c.argument('source', help='The source path. Use [resource-group:]vm-name:path for VM files, or a local path.')
+        c.argument('destination', help='The destination path. Use [resource-group:]vm-name:path for VM files, or a local path.')
+        c.argument('storage_account', help='The name or ID of the storage account to use as a bridge.')
+        c.argument('container_name', help='The name of the container to use in the storage account. Default: azvmcp')
+
     with self.argument_context('vm diagnostics') as c:
         c.argument('vm_name', arg_type=existing_vm_name, options_list=['--vm-name'])
 

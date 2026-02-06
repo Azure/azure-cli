@@ -987,6 +987,21 @@ examples:
     text: az vm list-sizes -l westus
 """
 
+helps['vm cp'] = """
+type: command
+short-summary: Copy files to and from a virtual machine.
+long-summary: >
+    This command uses an Azure Storage blob container as an intermediary bridge to transfer files.
+    It requires 'az vm run-command' capability on the target VM.
+examples:
+  - name: Upload a local file to a VM.
+    text: az vm cp --source /path/to/local/file --destination my-rg:my-vm:/path/to/remote/file
+  - name: Download a file from a VM to local.
+    text: az vm cp --source my-rg:my-vm:/path/to/remote/file --destination /path/to/local/file
+  - name: Upload a local file to a VM using a specific storage account.
+    text: az vm cp --source /path/to/local/file --destination my-vm:/path/to/remote/file --storage-account mystorageaccount
+"""
+
 helps['vm availability-set create'] = """
 type: command
 short-summary: Create an Azure Availability Set.
