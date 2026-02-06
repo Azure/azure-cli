@@ -780,3 +780,11 @@ class IdentityType(Enum):
     USER_ASSIGNED = 'UserAssigned'
     SYSTEM_ASSIGNED_USER_ASSIGNED = 'SystemAssigned, UserAssigned'
     NONE = 'None'
+
+
+class DiskCreateOptionTypes(Enum):
+    ATTACH = 'Attach'
+    COPY = 'Copy'
+    EMPTY = 'Empty'
+    FROM_IMAGE = 'FromImage'
+    RESTORE = 'Restore'
