@@ -55,8 +55,8 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zon
                                                 List as VMImageEdgeZoneList)
     from .aaz.latest.vm.image import (ListPublishers as VMImageListPublishers,
                                       ListOffers as VMImageListOffers,
-                                      ListSkus as VMImageListSkus,
-                                      List as VMImageList)
+                                      ListSkus as VMImageListSkus)
+    from .operations.vm import VMImageList
 
     all_images = []
     if location is None:

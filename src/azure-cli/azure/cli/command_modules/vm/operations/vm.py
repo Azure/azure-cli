@@ -7,9 +7,10 @@ import json
 
 from knack.log import get_logger
 
-from azure.cli.core.aaz import AAZStrType
+from azure.cli.core.aaz import AAZStrType, AAZListType, AAZObjectType, AAZDictType, AAZBoolType, AAZIntType
 from ..aaz.latest.vm import (Show as _VMShow, ListSizes as _VMListSizes, Patch as _VMPatch,
                              Update as _VMUpdate, Capture as _VMCapture, Create as _VMCreate)
+from ..aaz.latest.vm.image import List as _VMImageList
 from .._vm_utils import IdentityType
 
 logger = get_logger(__name__)
@@ -258,6 +259,122 @@ class VMIdentityRemove(_VMPatch):
                 )
 
             return self.on_error(session.http_response)
+
+
+class VMImageList(_VMImageList):
+    class VirtualMachineImagesList(_VMImageList.VirtualMachineImagesList):
+        def _build_schema_on_200(cls):
+            if cls._schema_on_200 is not None:
+                return cls._schema_on_200
+
+            cls._schema_on_200 = AAZListType()
+
+            _schema_on_200 = cls._schema_on_200
+            _schema_on_200.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.Element
+            _element.extended_location = AAZObjectType(
+                serialized_name="extendedLocation",
+            )
+            _element.id = AAZStrType()
+            _element.location = AAZStrType(
+                flags={"required": True},
+            )
+            _element.name = AAZStrType(
+                flags={"required": True},
+            )
+            _element.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
+            _element.tags = AAZDictType()
+
+            extended_location = cls._schema_on_200.Element.extended_location
+            extended_location.name = AAZStrType()
+            extended_location.type = AAZStrType()
+
+            properties = cls._schema_on_200.Element.properties
+            properties.architecture = AAZStrType()
+            properties.automatic_os_upgrade_properties = AAZObjectType(
+                serialized_name="automaticOSUpgradeProperties",
+            )
+            properties.data_disk_images = AAZListType(
+                serialized_name="dataDiskImages",
+            )
+            properties.disallowed = AAZObjectType()
+            properties.features = AAZListType()
+            properties.hyper_v_generation = AAZStrType(
+                serialized_name="hyperVGeneration",
+            )
+            properties.image_deprecation_status = AAZObjectType(
+                serialized_name="imageDeprecationStatus",
+            )
+            properties.os_disk_image = AAZObjectType(
+                serialized_name="osDiskImage",
+            )
+            properties.plan = AAZObjectType()
+
+            automatic_os_upgrade_properties = cls._schema_on_200.Element.properties.automatic_os_upgrade_properties
+            automatic_os_upgrade_properties.automatic_os_upgrade_supported = AAZBoolType(
+                serialized_name="automaticOSUpgradeSupported",
+                flags={"required": True},
+            )
+
+            data_disk_images = cls._schema_on_200.Element.properties.data_disk_images
+            data_disk_images.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.Element.properties.data_disk_images.Element
+            _element.lun = AAZIntType(
+                flags={"read_only": True},
+            )
+
+            disallowed = cls._schema_on_200.Element.properties.disallowed
+            disallowed.vm_disk_type = AAZStrType(
+                serialized_name="vmDiskType",
+            )
+
+            features = cls._schema_on_200.Element.properties.features
+            features.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.Element.properties.features.Element
+            _element.name = AAZStrType()
+            _element.value = AAZStrType()
+
+            image_deprecation_status = cls._schema_on_200.Element.properties.image_deprecation_status
+            image_deprecation_status.alternative_option = AAZObjectType(
+                serialized_name="alternativeOption",
+            )
+            image_deprecation_status.image_state = AAZStrType(
+                serialized_name="imageState",
+            )
+            image_deprecation_status.scheduled_deprecation_time = AAZStrType(
+                serialized_name="scheduledDeprecationTime",
+            )
+
+            alternative_option = cls._schema_on_200.Element.properties.image_deprecation_status.alternative_option
+            alternative_option.type = AAZStrType()
+            alternative_option.value = AAZStrType()
+
+            os_disk_image = cls._schema_on_200.Element.properties.os_disk_image
+            os_disk_image.operating_system = AAZStrType(
+                serialized_name="operatingSystem",
+                flags={"required": True},
+            )
+
+            plan = cls._schema_on_200.Element.properties.plan
+            plan.name = AAZStrType(
+                flags={"required": True},
+            )
+            plan.product = AAZStrType(
+                flags={"required": True},
+            )
+            plan.publisher = AAZStrType(
+                flags={"required": True},
+            )
+
+            tags = cls._schema_on_200.Element.tags
+            tags.Element = AAZStrType()
+
+            return cls._schema_on_200
 
 
 def convert_show_result_to_snake_case(result):
