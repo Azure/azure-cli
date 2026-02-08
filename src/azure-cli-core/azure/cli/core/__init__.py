@@ -290,13 +290,17 @@ class MainCommandsLoader(CLICommandsLoader):
                 except ImportError as e:
                     logger.warning(e)
 
+            start_time = timeit.default_timer()
+            logger.debug("Loading command modules...")
             results = self._load_modules(args, command_modules)
 
-            count, cumulative_elapsed_time, cumulative_group_count, cumulative_command_count = \
+            count, cumulative_group_count, cumulative_command_count = \
                 self._process_results_with_timing(results)
+
+            total_elapsed_time = timeit.default_timer() - start_time
             # Summary line
             logger.debug(self.item_format_string,
-                         "Total ({})".format(count), cumulative_elapsed_time,
+                         "Total ({})".format(count), total_elapsed_time,
                          cumulative_group_count, cumulative_command_count)
 
         def _update_command_table_from_extensions(ext_suppressions, extension_modname=None):
@@ -670,11 +674,10 @@ class MainCommandsLoader(CLICommandsLoader):
 
     def _process_results_with_timing(self, results):
         """Process pre-loaded module results with timing and progress reporting."""
-        logger.debug("Loading command modules:")
+        logger.debug("Loaded command modules in parallel:")
         logger.debug(self.header_mod)
 
         count = 0
-        cumulative_elapsed_time = 0
         cumulative_group_count = 0
         cumulative_command_count = 0
 
@@ -684,11 +687,10 @@ class MainCommandsLoader(CLICommandsLoader):
             else:
                 self._process_successful_load(result)
                 count += 1
-                cumulative_elapsed_time += result.elapsed_time
                 cumulative_group_count += len(result.group_table)
                 cumulative_command_count += len(result.command_table)
 
-        return count, cumulative_elapsed_time, cumulative_group_count, cumulative_command_count
+        return count, cumulative_group_count, cumulative_command_count
 
 
 class CommandIndex:
