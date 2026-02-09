@@ -50,7 +50,6 @@ from ._client_factory import (_compute_client_factory, cf_vm_image_term)
 
 from .aaz.latest.vm.disk import AttachDetachDataDisk
 from .aaz.latest.vm import Update as UpdateVM
-from .aaz.latest.vm.run_command import Invoke
 
 from .generated.custom import *  # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
 
@@ -6889,6 +6888,7 @@ def vm_cp(cmd, source, destination, storage_account=None, container_name='azvmcp
     from azure.cli.command_modules.storage.operations.blob import upload_blob, download_blob
     from azure.cli.command_modules.storage.util import create_short_lived_blob_sas_v2
     from azure.cli.command_modules.storage._client_factory import cf_sa, cf_sa_for_keys, cf_blob_service
+    from .aaz.latest.vm.run_command import Invoke
 
     source_vm = _parse_vm_file_path(source)
     dest_vm = _parse_vm_file_path(destination)
@@ -7019,12 +7019,9 @@ def vm_cp(cmd, source, destination, storage_account=None, container_name='azvmcp
             message = result['value'][0]['message']
             if 'failed' in message.lower() or 'error' in message.lower():
                 raise CLIError("VM execution failed: {}".format(message))
-
         if not dest_vm:
             logger.info("Downloading from bridge storage to local...")
             download_blob(blob_client, file_path=destination)
-
-
     finally:
         # Cleanup bridge storage
         try:
