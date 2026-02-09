@@ -44,9 +44,6 @@ from azure.cli.core.util import sdk_no_wait
 from ._vm_utils import read_content_if_is_file, import_aaz_by_profile, IdentityType
 from ._vm_diagnostics_templates import get_default_diag_config
 
-from azure.cli.command_modules.storage.operations.blob import upload_blob, download_blob
-from azure.cli.command_modules.storage.util import create_short_lived_blob_sas_v2
-
 from ._actions import (load_images_from_aliases_doc, load_extension_images_thru_services,
                        load_images_thru_services, _get_latest_image_version_by_aaz)
 from ._client_factory import (_compute_client_factory, cf_vm_image_term)
@@ -55,7 +52,6 @@ from .aaz.latest.vm.disk import AttachDetachDataDisk
 from .aaz.latest.vm import Update as UpdateVM
 from .aaz.latest.vm.run_command import Invoke
 
-from azure.cli.command_modules.storage._client_factory import cf_sa, cf_sa_for_keys, cf_blob_service
 from .generated.custom import *  # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
 
 try:
@@ -6890,6 +6886,9 @@ def _get_vm_and_rg(cmd, vm_name, rg=None):
 
 
 def vm_cp(cmd, source, destination, storage_account=None, container_name='azvmcp'):
+    from azure.cli.command_modules.storage.operations.blob import upload_blob, download_blob
+    from azure.cli.command_modules.storage.util import create_short_lived_blob_sas_v2
+    from azure.cli.command_modules.storage._client_factory import cf_sa, cf_sa_for_keys, cf_blob_service
 
     source_vm = _parse_vm_file_path(source)
     dest_vm = _parse_vm_file_path(destination)
@@ -6974,8 +6973,14 @@ def vm_cp(cmd, source, destination, storage_account=None, container_name='azvmcp
                                           permission=t_blob_permissions(write=True),
                                           expiry=expiry, protocol='https')
 
+        storage_suffix = getattr(cmd.cli_ctx.cloud.suffixes, 'storage_endpoint', None)
+        if not storage_suffix:
+            raise CLIError("The storage endpoint suffix for the current cloud is not configured.")
+        # Normalize to avoid leading dots or slashes that would break the URL host
+        storage_suffix = str(storage_suffix).lstrip("./").strip()
+
         blob_url = "https://{}.blob.{}/{}/{}?{}".format(
-            sa_name, cmd.cli_ctx.cloud.suffixes.storage_endpoint, container_name, blob_name, sas_token)
+            sa_name, storage_suffix, container_name, blob_name, sas_token)
 
         if dest_vm:
             # Script for VM to download from blob

@@ -27,11 +27,11 @@ class TestVmCp(unittest.TestCase):
         self.assertEqual(_parse_vm_file_path("rg:vm:C:\\remote\\path"), ("rg", "vm", "C:\\remote\\path"))
 
     @mock.patch('azure.cli.command_modules.vm.custom._compute_client_factory')
-    @mock.patch('azure.cli.command_modules.vm.custom.cf_sa')
-    @mock.patch('azure.cli.command_modules.vm.custom.cf_sa_for_keys')
-    @mock.patch('azure.cli.command_modules.vm.custom.cf_blob_service')
-    @mock.patch('azure.cli.command_modules.vm.custom.create_short_lived_blob_sas_v2')
-    @mock.patch('azure.cli.command_modules.vm.custom.upload_blob')
+    @mock.patch('azure.cli.command_modules.storage._client_factory.cf_sa')
+    @mock.patch('azure.cli.command_modules.storage._client_factory.cf_sa_for_keys')
+    @mock.patch('azure.cli.command_modules.storage._client_factory.cf_blob_service')
+    @mock.patch('azure.cli.command_modules.storage.util.create_short_lived_blob_sas_v2')
+    @mock.patch('azure.cli.command_modules.storage.operations.blob.upload_blob')
     def test_vm_cp_upload_basic(self, mock_upload, mock_sas, mock_blob_factory, mock_keys_factory, mock_sa_factory, mock_compute_factory):
         cmd = mock.MagicMock()
         cmd.cli_ctx.cloud.suffixes.storage_endpoint = 'core.windows.net'
@@ -81,10 +81,10 @@ class TestVmCp(unittest.TestCase):
             mock_blob.delete_blob.assert_called_once()
 
     @mock.patch('azure.cli.command_modules.vm.custom._compute_client_factory')
-    @mock.patch('azure.cli.command_modules.vm.custom.cf_sa')
-    @mock.patch('azure.cli.command_modules.vm.custom.cf_sa_for_keys')
-    @mock.patch('azure.cli.command_modules.vm.custom.cf_blob_service')
-    @mock.patch('azure.cli.command_modules.vm.custom.download_blob')
+    @mock.patch('azure.cli.command_modules.storage._client_factory.cf_sa')
+    @mock.patch('azure.cli.command_modules.storage._client_factory.cf_sa_for_keys')
+    @mock.patch('azure.cli.command_modules.storage._client_factory.cf_blob_service')
+    @mock.patch('azure.cli.command_modules.storage.operations.blob.download_blob')
     def test_vm_cp_download_basic(self, mock_download, mock_blob_factory, mock_keys_factory, mock_sa_factory, mock_compute_factory):
         cmd = mock.MagicMock()
         cmd.cli_ctx.cloud.suffixes.storage_endpoint = 'core.windows.net'
