@@ -99,14 +99,7 @@ class VMSSIdentityRemove(_VMSSPatch):
             return result
 
         if not identity.get('userAssignedIdentities'):
-            identity['userAssignedIdentities'] = None
             return result
-
-        for user_identity in identity.get('userAssignedIdentities', {}).keys():
-            if not identity['userAssignedIdentities'][user_identity].get('clientId'):
-                identity['userAssignedIdentities'][user_identity]['clientId'] = None
-            if not identity['userAssignedIdentities'][user_identity].get('principalId'):
-                identity['userAssignedIdentities'][user_identity]['principalId'] = None
 
         return result
 
@@ -129,9 +122,6 @@ class VMSSIdentityRemove(_VMSSPatch):
 
                 for key in list(identities.keys()):
                     identities[key] = None
-
-            if not content.get('identity', {}).get('userAssignedIdentities', {}):
-                content['identity']['userAssignedIdentities'] = None
 
             return json.dumps(content)
 

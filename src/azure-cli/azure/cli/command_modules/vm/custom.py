@@ -843,30 +843,7 @@ def show_vm_identity(cmd, resource_group_name, vm_name):
 
 def show_vmss_identity(cmd, resource_group_name, vm_name):
     vm = get_vmss_by_aaz(cmd, resource_group_name, vm_name)
-
-    identity = vm.get("identity", {}) if vm else None
-
-    if not identity:
-        return None
-
-    user_assigned = identity.get('userAssignedIdentities', {})
-
-    if not user_assigned:
-        identity['userAssignedIdentities'] = None
-    else:
-        for user_identity in user_assigned.keys():
-            if not user_assigned.get(user_identity).get('clientId'):
-                user_assigned[user_identity]['clientId'] = None
-            if not user_assigned.get(user_identity).get('principalId'):
-                user_assigned[user_identity]['principalId'] = None
-
-    if not identity.get('principalId'):
-        identity['principalId'] = None
-
-    if not identity.get('tenantId'):
-        identity['tenantId'] = None
-
-    return identity or None
+    return vm.get("identity", {}) if vm else None
 
 
 def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, identity_role=None,
@@ -3628,22 +3605,11 @@ def assign_vmss_identity(cmd, resource_group_name, vmss_name, assign_identity=No
         logger.warning("With manual upgrade mode, you will need to run 'az vmss update-instances -g %s -n %s "
                        "--instance-ids *' to propagate the change", resource_group_name, vmss_name)
 
-    info = _construct_identity_info(
+    return _construct_identity_info(
         identity_scope,
         identity_role,
         vmss.get('identity').get('principalId') if vmss.get('identity') else None,
         vmss.get('identity').get('userAssignedIdentities') if vmss.get('identity') else None)
-
-    if not info.get('userAssignedIdentities'):
-        return info
-
-    for user_identity in info.get('userAssignedIdentities', {}).keys():
-        if not info['userAssignedIdentities'][user_identity].get('clientId'):
-            info['userAssignedIdentities'][user_identity]['clientId'] = None
-        if not info['userAssignedIdentities'][user_identity].get('principalId'):
-            info['userAssignedIdentities'][user_identity]['principalId'] = None
-
-    return info
 
 
 # pylint: disable=too-many-locals, too-many-statements
