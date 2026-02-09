@@ -199,6 +199,22 @@ class KeyVaultEkmCertificateSerializationUnitTest(unittest.TestCase):
         self.assertEqual(result.get('format'), 'der')
         self.assertIsInstance(result.get('cer'), str)
 
+    def test_get_ekm_certificate_handles_subject_cn_and_ca_list(self):
+        from azure.cli.command_modules.keyvault.custom import get_ekm_certificate
+
+        class SdkModel:
+            def __init__(self, subject_common_name, ca_certificates):
+                self.subject_common_name = subject_common_name
+                self.ca_certificates = ca_certificates
+
+        class DummyClient:
+            def get_ekm_certificate(self):
+                return SdkModel('*.managedhsm-int.azure-int.net', [b'\x01\x02'])
+
+        result = get_ekm_certificate(DummyClient())
+        self.assertEqual(result.get('subjectCommonName'), '*.managedhsm-int.azure-int.net')
+        self.assertEqual(result.get('caCertificates'), ['AQI='])
+
     def test_get_ekm_certificate_fallback_json_safe_dict(self):
         from azure.cli.command_modules.keyvault.custom import get_ekm_certificate
 

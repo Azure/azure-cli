@@ -1128,6 +1128,20 @@ def get_ekm_connection(client):
 def get_ekm_certificate(client):
     certificate = client.get_ekm_certificate()
 
+    # Latest preview SDK mirrors the connection payload (subject_common_name + ca_certificates list).
+    subject_common_name = getattr(certificate, 'subject_common_name', None)
+    ca_certificates = getattr(certificate, 'ca_certificates', None)
+    if isinstance(ca_certificates, (list, tuple)) and ca_certificates:
+        encoded_certs = []
+        for cert_bytes in ca_certificates:
+            if isinstance(cert_bytes, (bytes, bytearray, memoryview)):
+                encoded_certs.append(base64.b64encode(bytes(cert_bytes)).decode('ascii'))
+        if encoded_certs or subject_common_name:
+            return {
+                'subjectCommonName': subject_common_name,
+                'caCertificates': encoded_certs
+            }
+
     def _extract_der_bytes(obj):
         if isinstance(obj, (bytes, bytearray, memoryview)):
             return bytes(obj)
