@@ -865,6 +865,28 @@ def load_arguments(self, _):
         c.argument('skuprofile_vmsizes', nargs='+', min_api='2024-07-01', help='A list of VM sizes in the scale set. See https://azure.microsoft.com/pricing/details/virtual-machines/ for size info.')
         c.argument('skuprofile_allostrat', options_list=['--skuprofile-allocation-strategy', '--sku-allocat-strat'], arg_type=get_enum_type(['LowestPrice', 'CapacityOptimized', 'Prioritized']), min_api='2024-07-01', help='Allocation strategy for vm sizes in SKU profile.')
         c.argument('skuprofile_rank', nargs='+', min_api='2024-11-01', help='A list for ranks associated with the SKU profile vm sizes.')
+        c.argument(
+            'max_zone_count',
+            type=int,
+            help='Specify the maximum number of availability zones to use when '
+                 '--zone-placement-policy is set to Auto. '
+                 'If not specified, all available zones in the region may be used.'
+        )
+        c.argument(
+            'instance_percent_policy',
+            options_list=['--instance-percent-policy', '--enable-max-instance-percent-per-zone'],
+            arg_type=get_three_state_flag(),
+            help='Specify whether maximum percentage of virtual machine instances per zone policy '
+                 'should be enabled on the virtual machine scale set.'
+        )
+        c.argument(
+            'max_instance_percent',
+            options_list=['--max-instance-percent', '--value-max-instance-percent-per-zone'],
+            type=int,
+            help='Specify the maximum percentage of virtual machine instances that can be allocated '
+                 'to a single availability zone in the virtual machine scale set. '
+                 'Valid values are integers between 1 and 100.'
+        )
 
     with self.argument_context('vmss update', min_api='2018-10-01', arg_group='Automatic Repairs') as c:
 

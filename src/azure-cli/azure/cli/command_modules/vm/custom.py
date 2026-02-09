@@ -3688,7 +3688,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 imds_mode=None, add_proxy_agent_extension=None, wire_server_access_control_profile_reference_id=None,
                 imds_access_control_profile_reference_id=None, enable_automatic_zone_balancing=None,
                 automatic_zone_balancing_strategy=None, automatic_zone_balancing_behavior=None,
-                enable_automatic_repairs=None, zone_placement_policy='auto', include_zones=None,
+                enable_automatic_repairs=None, zone_placement_policy=None, include_zones=None,
                 exclude_zones=None, max_zone_count=None, instance_percent_policy=None, max_instance_percent=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
@@ -4533,7 +4533,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 wire_server_mode=None, imds_mode=None, add_proxy_agent_extension=None,
                 wire_server_access_control_profile_reference_id=None,
                 imds_access_control_profile_reference_id=None, enable_automatic_zone_balancing=None,
-                automatic_zone_balancing_strategy=None, automatic_zone_balancing_behavior=None, **kwargs):
+                automatic_zone_balancing_strategy=None, automatic_zone_balancing_behavior=None, max_zone_count=None,
+                instance_percent_policy=None, max_instance_percent=None, **kwargs):
     from .operations.vmss_vms import convert_show_result_to_snake_case as vmss_vms_convert_show_result_to_snake_case
     from .operations.vmss import convert_show_result_to_snake_case as vmss_convert_show_result_to_snake_case
     vmss = kwargs['parameters']
@@ -4990,6 +4991,24 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
     vmss["resource_group"] = resource_group_name
     vmss["vm_scale_set_name"] = name
     vmss["no_wait"] = no_wait
+
+    zone_allocation_policy = {}
+    if max_zone_count is not None:
+        zone_allocation_policy['max_zone_count'] = max_zone_count
+
+    if instance_percent_policy is not None or max_instance_percent is not None:
+        policy = {}
+
+        if instance_percent_policy is not None:
+            policy['enabled'] = instance_percent_policy
+
+        if max_instance_percent is not None:
+            policy['value'] = max_instance_percent
+
+        zone_allocation_policy['max_instance_percent_per_zone_policy'] = policy
+
+    if zone_allocation_policy:
+        vmss["resiliency_policy"]["zone_allocation_policy"] = zone_allocation_policy
 
     from .operations.vmss import VMSSCreate
     return VMSSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss)
