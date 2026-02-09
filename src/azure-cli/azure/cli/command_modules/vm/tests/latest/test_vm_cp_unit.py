@@ -41,6 +41,7 @@ class TestVmCp(unittest.TestCase):
         mock_compute_factory.return_value = mock_compute
         
         vm_obj = mock.MagicMock()
+        vm_obj.name = "myvm"
         vm_obj.storage_profile.os_disk.os_type.lower.return_value = 'linux'
         vm_obj.id = "/subscriptions/sub/resourceGroups/myrg/providers/Microsoft.Compute/virtualMachines/myvm"
         mock_compute.virtual_machines.get.return_value = vm_obj
@@ -72,7 +73,7 @@ class TestVmCp(unittest.TestCase):
         # Execute
         with mock.patch('azure.cli.command_modules.vm.custom.Invoke') as mock_invoke:
             mock_invoke.return_value.return_value = {'value': [{'message': 'success'}]}
-            vm_cp(cmd, source="local.txt", destination="myvm:/tmp/remote.txt")
+            vm_cp(cmd, source="local.txt", destination="myrg:myvm:/tmp/remote.txt")
             
             # Verify
             mock_upload.assert_called_once()

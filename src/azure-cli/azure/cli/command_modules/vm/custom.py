@@ -53,7 +53,9 @@ from ._client_factory import (_compute_client_factory, cf_vm_image_term)
 
 from .aaz.latest.vm.disk import AttachDetachDataDisk
 from .aaz.latest.vm import Update as UpdateVM
+from .aaz.latest.vm.run_command import Invoke
 
+from azure.cli.command_modules.storage._client_factory import cf_sa, cf_sa_for_keys, cf_blob_service
 from .generated.custom import *  # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
 
 try:
@@ -6854,6 +6856,13 @@ def _parse_vm_file_path(path):
         if vm_name and vm_path:
             return None, vm_name, vm_path
     else:
+        # Check if it's vm:C:\path (second colon is a drive letter)
+        if second_colon - first_colon == 2 and path[first_colon + 1].isalpha():
+            vm_name = path[:first_colon]
+            vm_path = path[first_colon + 1:]
+            if vm_name and vm_path:
+                return None, vm_name, vm_path
+
         # rg:vm-name:path...
         rg_name = path[:first_colon]
         vm_name = path[first_colon + 1:second_colon]
@@ -6881,7 +6890,6 @@ def _get_vm_and_rg(cmd, vm_name, rg=None):
 
 
 def vm_cp(cmd, source, destination, storage_account=None, container_name='azvmcp'):
-    from .aaz.latest.vm.run_command import Invoke
 
     source_vm = _parse_vm_file_path(source)
     dest_vm = _parse_vm_file_path(destination)
@@ -6899,7 +6907,6 @@ def vm_cp(cmd, source, destination, storage_account=None, container_name='azvmcp
 
         _, rg = _get_vm_and_rg(cmd, vm_name, rg_provided)
 
-        from azure.cli.command_modules.storage._client_factory import cf_sa
         sa_client = cf_sa(cmd.cli_ctx, None)
         accounts = list(sa_client.list())
         # Filter by RG if possible
@@ -6912,7 +6919,6 @@ def vm_cp(cmd, source, destination, storage_account=None, container_name='azvmcp
             raise RequiredArgumentMissingError("No storage account found in the subscription. Please provide one with --storage-account.")
 
     # Get account key
-    from azure.cli.command_modules.storage._client_factory import cf_sa_for_keys
     sa_keys_client = cf_sa_for_keys(cmd.cli_ctx, None)
     # Check if storage_account is name or ID
     if '/' in storage_account:
@@ -6932,7 +6938,6 @@ def vm_cp(cmd, source, destination, storage_account=None, container_name='azvmcp
     account_key = keys[0].value
 
     # Ensure container exists
-    from azure.cli.command_modules.storage._client_factory import cf_blob_service
     blob_service_client = cf_blob_service(cmd.cli_ctx, {'account_name': sa_name, 'account_key': account_key})
     container_client = blob_service_client.get_container_client(container_name)
     try:
