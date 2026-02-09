@@ -479,6 +479,37 @@ class CosmosDBTests(ScenarioTest):
         # Test delete
         self.cmd('cosmosdb private-endpoint-connection delete --id {pec_id}')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
+    def test_cosmosdb_network_acl_bypass(self, resource_group):
+        network_acl_bypass_resource_id = '/subscriptions/subId/resourcegroups/rgName/providers/Microsoft.Synapse/workspaces/workspaceName'
+        fabric_network_acl_bypass_resource_id = '/tenants/72f988bf-86f1-41af-91ab-2d7cd011db47/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Fabric/providers/Microsoft.Fabric/workspaces/3e83f2c3-5a1e-45c3-95f3-53f3a1794e6f'
+
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=40),
+            'network_acl_bypass_resource_id': network_acl_bypass_resource_id,
+            'fabric_network_acl_bypass_resource_id': fabric_network_acl_bypass_resource_id
+        })
+
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --disable-local-auth true')
+        account = self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
+            self.check('networkAclBypass', 'None'),
+        ]).get_output_in_json()
+        assert len(account['networkAclBypassResourceIds']) == 0
+
+        self.cmd('az cosmosdb update -n {acc} -g {rg} --network-acl-bypass AzureServices --network-acl-bypass-resource-ids {network_acl_bypass_resource_id}')
+        self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
+            self.check('networkAclBypass', 'AzureServices'),
+            self.check('networkAclBypassResourceIds[0]', network_acl_bypass_resource_id)
+        ])
+
+        self.cmd('az cosmosdb update -n {acc} -g {rg} --capabilities EnableFabricNetworkAclBypass --network-acl-bypass AzureServices --network-acl-bypass-resource-ids {fabric_network_acl_bypass_resource_id}')
+        account = self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
+            self.check('networkAclBypass', 'AzureServices'),
+            self.check('networkAclBypassResourceIds[0]', fabric_network_acl_bypass_resource_id),
+        ]).get_output_in_json()
+        assert len(account['capabilities']) == 1
+        assert account['capabilities'][0]['name'] == "EnableFabricNetworkAclBypass"
+
     @unittest.skip('Skipping old test due to secrets in response')
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_database')
     def test_cosmosdb_database(self, resource_group):
