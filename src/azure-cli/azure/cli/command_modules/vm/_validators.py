@@ -1497,12 +1497,13 @@ def _validate_generation_version_and_trusted_launch(cmd, namespace):
             vm_image_info = VmImageShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
             if vm_image_info.get('imageDeprecationStatus', {}).get('imageState') == 'ScheduledForDeprecation':
+                from datetime import datetime
+                dt = datetime.fromisoformat(vm_image_info['imageDeprecationStatus']['scheduledDeprecationTime'])
                 logger.warning(
                     'Warning: This image %s is scheduled for deprecation and will be blocked after %s.\n'
                     'VM / VMSS creation is allowed temporarily, but future deployments, redeployments, or '
                     'scale‑out operations may fail after this date.\n'
-                    'Consider switching to a supported image now.', namespace.image,
-                    vm_image_info['imageDeprecationStatus']['scheduledDeprecationTime'].strftime("%B %d, %Y"))
+                    'Consider switching to a supported image now.', namespace.image, dt.strftime("%B %d, %Y"))
             generation_version = vm_image_info.get('hyperVGeneration', None)
             features = vm_image_info.get('features', [])
 
