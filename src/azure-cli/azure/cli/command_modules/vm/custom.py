@@ -6948,50 +6948,22 @@ def vm_cp(cmd, source, destination, storage_account=None, container_name='azvmcp
     blob_name = str(uuid.uuid4())
     blob_client = container_client.get_blob_client(blob_name)
 
+    # Common VM info
+    vm_info = dest_vm if dest_vm else source_vm
+    rg_provided, vm_name, vm_path = vm_info
+    vm_obj, rg = _get_vm_and_rg(cmd, vm_name, rg_provided)
+    is_linux = vm_obj.storage_profile.os_disk.os_type.lower() == 'linux'
+
     try:
         if dest_vm:
             # UPLOAD: Local -> VM
-            rg_provided, vm_name, vm_path = dest_vm
-            vm_obj, rg = _get_vm_and_rg(cmd, vm_name, rg_provided)
-
             logger.info("Uploading local file to bridge storage...")
             upload_blob(cmd, blob_client, file_path=source)
 
-            # Get SAS for VM to download (2 hours expiry)
+            # Get SAS with READ permission (2 hours expiry)
             sas_token = create_short_lived_blob_sas_v2(cmd, sa_name, container_name, blob_name, account_key=account_key)
-            blob_url = "https://{}.blob.{}/{}/{}?{}".format(sa_name, cmd.cli_ctx.cloud.suffixes.storage_endpoint, container_name, blob_name, sas_token)
-
-            # VM run-command to download
-            # Check OS type
-            is_linux = vm_obj.storage_profile.os_disk.os_type.lower() == 'linux'
-
-            if is_linux:
-                script = "curl -L -f -s -S -o {} {}".format(shlex.quote(vm_path), shlex.quote(blob_url))
-                command_id = 'RunShellScript'
-            else:
-                # Escape single quotes for PowerShell
-                escaped_vm_path = vm_path.replace("'", "''")
-                escaped_blob_url = blob_url.replace("'", "''")
-                script = "Invoke-WebRequest -Uri '{}' -OutFile '{}'".format(escaped_blob_url, escaped_vm_path)
-                command_id = 'RunPowerShellScript'
-
-            logger.info("Executing download script in VM...")
-            result = Invoke(cli_ctx=cmd.cli_ctx)(command_args={
-                'resource_group': rg,
-                'vm_name': vm_name,
-                'command_id': command_id,
-                'script': [script]
-            })
-            if result.get('value') and result['value'][0].get('message'):
-                message = result['value'][0]['message']
-                if 'failed' in message.lower() or 'error' in message.lower():
-                    raise CLIError("VM execution failed: {}".format(message))
-
         else:
             # DOWNLOAD: VM -> Local
-            rg_provided, vm_name, vm_path = source_vm
-            vm_obj, rg = _get_vm_and_rg(cmd, vm_name, rg_provided)
-
             # Get SAS with WRITE permission (2 hours expiry)
             t_sas = cmd.get_models('_shared_access_signature#BlobSharedAccessSignature',
                                    resource_type=ResourceType.DATA_STORAGE_BLOB)
@@ -7001,10 +6973,22 @@ def vm_cp(cmd, source, destination, storage_account=None, container_name='azvmcp
             sas_token = sas.generate_blob(container_name, blob_name,
                                           permission=t_blob_permissions(write=True),
                                           expiry=expiry, protocol='https')
-            blob_url = "https://{}.blob.{}/{}/{}?{}".format(sa_name, cmd.cli_ctx.cloud.suffixes.storage_endpoint, container_name, blob_name, sas_token)
 
-            is_linux = vm_obj.storage_profile.os_disk.os_type.lower() == 'linux'
+        blob_url = "https://{}.blob.{}/{}/{}?{}".format(
+            sa_name, cmd.cli_ctx.cloud.suffixes.storage_endpoint, container_name, blob_name, sas_token)
 
+        if dest_vm:
+            # Script for VM to download from blob
+            if is_linux:
+                script = "curl -L -f -s -S -o {} {}".format(shlex.quote(vm_path), shlex.quote(blob_url))
+                command_id = 'RunShellScript'
+            else:
+                escaped_vm_path = vm_path.replace("'", "''")
+                escaped_blob_url = blob_url.replace("'", "''")
+                script = "Invoke-WebRequest -Uri '{}' -OutFile '{}'".format(escaped_blob_url, escaped_vm_path)
+                command_id = 'RunPowerShellScript'
+        else:
+            # Script for VM to upload to blob
             if is_linux:
                 script = "curl -X PUT -T {} -H 'x-ms-blob-type: BlockBlob' {}".format(shlex.quote(vm_path), shlex.quote(blob_url))
                 command_id = 'RunShellScript'
@@ -7018,20 +7002,23 @@ def vm_cp(cmd, source, destination, storage_account=None, container_name='azvmcp
                               path=escaped_vm_path, url=escaped_blob_url)
                 command_id = 'RunPowerShellScript'
 
-            logger.info("Executing upload script in VM...")
-            result = Invoke(cli_ctx=cmd.cli_ctx)(command_args={
-                'resource_group': rg,
-                'vm_name': vm_name,
-                'command_id': command_id,
-                'script': [script]
-            })
-            if result.get('value') and result['value'][0].get('message'):
-                message = result['value'][0]['message']
-                if 'failed' in message.lower() or 'error' in message.lower():
-                    raise CLIError("VM execution failed: {}".format(message))
+        logger.info("Executing transfer script in VM...")
+        result = Invoke(cli_ctx=cmd.cli_ctx)(command_args={
+            'resource_group': rg,
+            'vm_name': vm_name,
+            'command_id': command_id,
+            'script': [script]
+        })
 
+        if result.get('value') and result['value'][0].get('message'):
+            message = result['value'][0]['message']
+            if 'failed' in message.lower() or 'error' in message.lower():
+                raise CLIError("VM execution failed: {}".format(message))
+
+        if not dest_vm:
             logger.info("Downloading from bridge storage to local...")
             download_blob(blob_client, file_path=destination)
+
 
     finally:
         # Cleanup bridge storage
