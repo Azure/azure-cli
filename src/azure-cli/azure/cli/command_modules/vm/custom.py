@@ -48,6 +48,8 @@ from .aaz.latest.vm.disk import AttachDetachDataDisk
 from .aaz.latest.vm import Update as UpdateVM
 
 from .generated.custom import *  # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
+from ..resource.commands import resource_privatelinksassociation_sdk
+
 try:
     from .manual.custom import *   # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
 except ImportError:
@@ -5963,15 +5965,34 @@ def show_disk_encryption_set_identity(cmd, resource_group_name, disk_encryption_
 
 
 # region install patches
-def install_vm_patches(cmd, client, resource_group_name, vm_name, maximum_duration, reboot_setting, classifications_to_include_win=None, classifications_to_include_linux=None, kb_numbers_to_include=None, kb_numbers_to_exclude=None,
-                       exclude_kbs_requiring_reboot=None, package_name_masks_to_include=None, package_name_masks_to_exclude=None, max_patch_publish_date=None, no_wait=False):
-    VMInstallPatchesParameters, WindowsParameters, LinuxParameters = cmd.get_models('VirtualMachineInstallPatchesParameters', 'WindowsParameters', 'LinuxParameters')
-    windows_parameters = WindowsParameters(classifications_to_include=classifications_to_include_win, kb_numbers_to_include=kb_numbers_to_include, kb_numbers_to_exclude=kb_numbers_to_exclude, exclude_kbs_requiring_reboot=exclude_kbs_requiring_reboot, max_patch_publish_date=max_patch_publish_date)
-    linux_parameters = LinuxParameters(classifications_to_include=classifications_to_include_linux, package_name_masks_to_include=package_name_masks_to_include, package_name_masks_to_exclude=package_name_masks_to_exclude)
-    install_patches_input = VMInstallPatchesParameters(maximum_duration=maximum_duration, reboot_setting=reboot_setting, linux_parameters=linux_parameters, windows_parameters=windows_parameters)
+def install_vm_patches(cmd, resource_group_name, vm_name, maximum_duration, reboot_setting,
+                       classifications_to_include_win=None, classifications_to_include_linux=None,
+                       kb_numbers_to_include=None, kb_numbers_to_exclude=None, exclude_kbs_requiring_reboot=None,
+                       package_name_masks_to_include=None, package_name_masks_to_exclude=None,
+                       max_patch_publish_date=None, no_wait=False):
+    from .aaz.latest.vm import InstallPatches as VmInstallPatches
 
-    return sdk_no_wait(no_wait, client.begin_install_patches, resource_group_name=resource_group_name, vm_name=vm_name, install_patches_input=install_patches_input)
+    command_args = {
+        'resource_group': resource_group_name,
+        'name': vm_name,
+        'maximum_duration': maximum_duration,
+        'reboot_setting': reboot_setting,
+        'linux_parameters': {
+            'classifications_to_include': classifications_to_include_linux,
+            'package_name_masks_to_exclude': package_name_masks_to_exclude,
+            'package_name_masks_to_include': package_name_masks_to_include
+        },
+        'windows_parameters': {
+            'classifications_to_include': classifications_to_include_win,
+            'exclude_kbs_requiring_reboot': exclude_kbs_requiring_reboot,
+            'kb_numbers_to_exclude': kb_numbers_to_exclude,
+            'kb_numbers_to_include': kb_numbers_to_include,
+            'max_patch_publish_date': max_patch_publish_date
+        },
+        'no_wait': no_wait
+    }
 
+    return VmInstallPatches(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 # endregion
 
 
