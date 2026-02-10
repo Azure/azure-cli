@@ -48,7 +48,6 @@ from .aaz.latest.vm.disk import AttachDetachDataDisk
 from .aaz.latest.vm import Update as UpdateVM
 
 from .generated.custom import *  # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
-from ..resource.commands import resource_privatelinksassociation_sdk
 
 try:
     from .manual.custom import *   # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import

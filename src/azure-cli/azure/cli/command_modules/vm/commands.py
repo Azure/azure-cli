@@ -305,7 +305,7 @@ def load_command_table(self, _):
         self.command_table['vm capture'] = VMCapture(loader=self)
 
     with self.command_group('vm') as g:
-        g.custom_command('install-patches', 'install_vm_patches', supports_no_wait=True)
+        g.custom_command('install-patches', 'install_vm_patches', supports_no_wait=True, min_api='2020-12-01')
 
     with self.command_group('vm availability-set', compute_availset_profile) as g:
         g.custom_command('create', 'create_av_set', table_transformer=deployment_validate_table_format, supports_no_wait=True, exception_handler=handle_template_based_exception)
