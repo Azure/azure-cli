@@ -313,7 +313,7 @@ def load_command_table(self, _):
         self.command_table['vm availability-set update'] = AvailabilitySetUpdate(loader=self)
         self.command_table['vm availability-set convert'] = AvailabilitySetConvert(loader=self)
 
-    with self.command_group('vm boot-diagnostics', compute_vm_sdk) as g:
+    with self.command_group('vm boot-diagnostics') as g:
         g.custom_command('disable', 'disable_boot_diagnostics')
         g.custom_command('enable', 'enable_boot_diagnostics')
         g.custom_command('get-boot-log', 'get_boot_log')

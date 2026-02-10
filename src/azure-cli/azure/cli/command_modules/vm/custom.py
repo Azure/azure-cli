@@ -2228,21 +2228,24 @@ def get_boot_log(cmd, resource_group_name, vm_name):
     import sys
     from azure.cli.core.profiles import get_sdk
     from azure.core.exceptions import HttpResponseError
+    from .aaz.latest.vm.boot_diagnostics import GetBootLogUris as VmGetBootLogUris
     BlobClient = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB, '_blob_client#BlobClient')
-    client = _compute_client_factory(cmd.cli_ctx)
 
-    virtual_machine = client.virtual_machines.get(resource_group_name, vm_name, expand='instanceView')
-    # pylint: disable=no-member
+    virtual_machine = get_instance_view(cmd, resource_group_name, vm_name)
 
     blob_uri = None
-    if virtual_machine.instance_view and virtual_machine.instance_view.boot_diagnostics:
-        blob_uri = virtual_machine.instance_view.boot_diagnostics.serial_console_log_blob_uri
+    if virtual_machine.get('instanceView', {}).get('bootDiagnostics'):
+        blob_uri = virtual_machine['instanceView']['bootDiagnostics'].get('serialConsoleLogBlobUri')
 
     # Managed storage
     if blob_uri is None:
         try:
-            boot_diagnostics_data = client.virtual_machines.retrieve_boot_diagnostics_data(resource_group_name, vm_name)
-            blob_uri = boot_diagnostics_data.serial_console_log_blob_uri
+            command_args = {
+                'resource_group': resource_group_name,
+                'name': vm_name
+            }
+            boot_diagnostics_data = VmGetBootLogUris(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+            blob_uri = boot_diagnostics_data.get('serialConsoleLogBlobUri')
         except HttpResponseError:
             pass
         if blob_uri is None:
