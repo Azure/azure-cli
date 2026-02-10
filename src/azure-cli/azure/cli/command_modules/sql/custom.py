@@ -4809,7 +4809,7 @@ def _get_server_key_name_from_uri(uri):
     '''
     import re
 
-    match = re.match(r'^https://(?!.*\.\.)[a-zA-Z0-9][a-zA-Z0-9.-]+[a-zA-Z0-9]\.(managedhsm.azure.net|managedhsm-preview.azure.net|vault.azure.net|vault-int.azure-int.net|vault.azure.cn|managedhsm.azure.cn|vault.usgovcloudapi.net|managedhsm.usgovcloudapi.net|vault.microsoftazure.de|managedhsm.microsoftazure.de|mdep.azure.net|vault.cloudapi.!AZURE_ZONE!)(:443)?\/keys/[^\/]+(\/[0-9a-zA-Z]+|\/|)$', uri)
+    match = re.match(r'^https://(?!.*\.\.)[a-zA-Z0-9][a-zA-Z0-9.-]+[a-zA-Z0-9]\.(managedhsm.azure.net|managedhsm-preview.azure.net|vault.azure.net|vault-int.azure-int.net|vault.azure.cn|managedhsm.azure.cn|vault.usgovcloudapi.net|managedhsm.usgovcloudapi.net|vault.microsoftazure.de|managedhsm.microsoftazure.de|vault.cloudapi.eaglex.ic.gov|vault.cloudapi.microsoft.scloud|mdep.azure.net)(:443)?\/keys/[^\/]+(\/[0-9a-zA-Z]+|\/|)$', uri)
 
     if match is None:
         raise CLIError('The provided uri is invalid. Please provide a valid Azure Key Vault key id.  For example: '
