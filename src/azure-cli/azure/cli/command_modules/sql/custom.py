@@ -4809,17 +4809,29 @@ def _get_server_key_name_from_uri(uri):
     '''
     import re
 
-    match = re.match(r'https://(.)+\.(managedhsm.azure.net|managedhsm-preview.azure.net|vault.azure.net|vault-int.azure-int.net|vault.azure.cn|managedhsm.azure.cn|vault.usgovcloudapi.net|managedhsm.usgovcloudapi.net|vault.microsoftazure.de|managedhsm.microsoftazure.de|vault.cloudapi.eaglex.ic.gov|vault.cloudapi.microsoft.scloud)(:443)?\/keys/[^\/]+\/[0-9a-zA-Z]+$', uri)
+    match = re.match(r'^https://(?!.*\.\.)[a-zA-Z0-9][a-zA-Z0-9.-]+[a-zA-Z0-9]\.(managedhsm.azure.net|managedhsm-preview.azure.net|vault.azure.net|vault-int.azure-int.net|vault.azure.cn|managedhsm.azure.cn|vault.usgovcloudapi.net|managedhsm.usgovcloudapi.net|vault.microsoftazure.de|managedhsm.microsoftazure.de|mdep.azure.net|vault.cloudapi.!AZURE_ZONE!)(:443)?\/keys/[^\/]+(\/[0-9a-zA-Z]+|\/|)$', uri)
 
     if match is None:
         raise CLIError('The provided uri is invalid. Please provide a valid Azure Key Vault key id.  For example: '
                        '"https://YourVaultName.vault.azure.net/keys/YourKeyName/01234567890123456789012345678901" '
-                       'or "https://YourManagedHsmRegion.YourManagedHsmName.managedhsm.azure.net/keys/YourKeyName/01234567890123456789012345678901"')
+                       'or "https://YourManagedHsmRegion.YourManagedHsmName.managedhsm.azure.net/keys/YourKeyName/01234567890123456789012345678901" '
+                       'for versioned key or "https://YourVaultName.vault.azure.net/keys/YourKeyName" for a versionless key.')
 
     vault = uri.split('.')[0].split('/')[-1]
     key = uri.split('/')[-2]
     version = uri.split('/')[-1]
-    return '{}_{}_{}'.format(vault, key, version)
+
+    # The AKV segments is an array of the uri components.
+    # For AKV uri "https://someVault.vault.azure.net/keys/someKey/01234567890123456789012345678901", the segment contents are as follows:
+    # Segments = ["/", "keys/", "someKey/", "01234567890123456789012345678901"]
+    # Therefore, a versionless key uri will have a segment array of length 3 and a versioned key uri will have a segment array of length 4.
+    #
+    isVersionlessKeyId = uri.Segments.Length == 3
+
+    if isVersionlessKeyId:
+        return '{}_{}'.format(vault, key)
+    else:
+        return '{}_{}_{}'.format(vault, key, version)
 
 
 #####

@@ -4628,6 +4628,67 @@ class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
                  .format(resource_group, server),
                  checks=[JMESPathCheck('length(@)', 1)])
 
+        # create a versionless key
+        versionless_key_name = self.create_random_name(resource_prefix + 'vless', 32)
+        versionless_key_resp = self.cmd('keyvault key create -n {} -p software --vault-name {}'
+                                        .format(versionless_key_name, key_vault)).get_output_in_json()
+        versioned_kid = versionless_key_resp['key']['kid']
+        
+        # extract versionless key identifier (remove the version part)
+        # kid format: https://{vault}.vault.azure.net/keys/{keyname}/{version}
+        versionless_kid = '/'.join(versioned_kid.split('/')[:-1])
+
+        # add versionless server key
+        versionless_server_key_resp = self.cmd('sql server key create -g {} -s {} -k {}'
+                                               .format(resource_group, server, versionless_kid),
+                                               checks=[
+                                                   JMESPathCheck('uri', versionless_kid),
+                                                   JMESPathCheck('serverKeyType', 'AzureKeyVault')])
+        versionless_server_key_name = versionless_server_key_resp.get_output_in_json()['name']
+
+        # validate show versionless key
+        self.cmd('sql server key show -g {} -s {} -k {}'
+                 .format(resource_group, server, versionless_kid),
+                 checks=[
+                     JMESPathCheck('uri', versionless_kid),
+                     JMESPathCheck('serverKeyType', 'AzureKeyVault'),
+                     JMESPathCheck('name', versionless_server_key_name)])
+
+        # update encryption protector to versionless akv key
+        self.cmd('sql server tde-key set -g {} -s {} -t AzureKeyVault -k {} --auto-rotation-enabled'
+                 .format(resource_group, server, versionless_kid),
+                 checks=[
+                     JMESPathCheck('serverKeyType', 'AzureKeyVault'),
+                     JMESPathCheck('serverKeyName', versionless_server_key_name),
+                     JMESPathCheck('uri', versionless_kid)])
+
+        # validate encryption protector is using versionless key via show
+        self.cmd('sql server tde-key show -g {} -s {}'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('serverKeyType', 'AzureKeyVault'),
+                     JMESPathCheck('serverKeyName', versionless_server_key_name),
+                     JMESPathCheck('uri', versionless_kid)])
+
+        # update encryption protector back to service managed
+        self.cmd('sql server tde-key set -g {} -s {} -t ServiceManaged'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('serverKeyType', 'ServiceManaged'),
+                     JMESPathCheck('serverKeyName', 'ServiceManaged')])
+
+        # delete versionless server key
+        self.cmd('sql server key delete -g {} -s {} -k {}'
+                 .format(resource_group, server, versionless_kid))
+
+        # wait for key to be deleted
+        time.sleep(10)
+
+        # validate deleted versionless server key via list (should return 1 item)
+        self.cmd('sql server key list -g {} -s {}'
+                 .format(resource_group, server),
+                 checks=[JMESPathCheck('length(@)', 1)])
+
 
 class SqlServerIdentityTest(ScenarioTest):
 
