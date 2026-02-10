@@ -56,7 +56,7 @@ def create_configstore(cmd,  # pylint: disable=too-many-locals
                        arm_auth_mode=None,
                        enable_arm_private_network_access=None,
                        kv_revision_retention_period=None,
-                       azure_front_door_profile_resource_id=None):
+                       azure_front_door_profile=None):
     if assign_identity is not None and not assign_identity:
         assign_identity = [SYSTEM_ASSIGNED_IDENTITY]
 
@@ -73,8 +73,8 @@ def create_configstore(cmd,  # pylint: disable=too-many-locals
         arm_authentication_mode = AuthenticationMode.LOCAL if arm_auth_mode == ARMAuthenticationMode.LOCAL else AuthenticationMode.PASS_THROUGH
 
     azure_front_door = None
-    if azure_front_door_profile_resource_id is not None:
-        azure_front_door = AzureFrontDoorProperties(resource_id=azure_front_door_profile_resource_id)
+    if azure_front_door_profile is not None:
+        azure_front_door = AzureFrontDoorProperties(resource_id=azure_front_door_profile if azure_front_door_profile else None)
 
     configstore_params = ConfigurationStore(location=location.lower(),
                                             identity=__get_resource_identity(assign_identity) if assign_identity else None,
@@ -191,7 +191,7 @@ def update_configstore(cmd,  # pylint: disable=too-many-locals
                        arm_auth_mode=None,
                        enable_arm_private_network_access=None,
                        kv_revision_retention_period=None,
-                       azure_front_door_profile_resource_id=None):
+                       azure_front_door_profile=None):
     __validate_cmk(encryption_key_name, encryption_key_vault, encryption_key_version, identity_client_id)
     if resource_group_name is None:
         resource_group_name, _ = resolve_store_metadata(cmd, name)
@@ -209,8 +209,8 @@ def update_configstore(cmd,  # pylint: disable=too-many-locals
         arm_authentication_mode = AuthenticationMode.LOCAL if arm_auth_mode == ARMAuthenticationMode.LOCAL else AuthenticationMode.PASS_THROUGH
 
     azure_front_door = None
-    if azure_front_door_profile_resource_id is not None:
-        azure_front_door = AzureFrontDoorProperties(resource_id=azure_front_door_profile_resource_id if azure_front_door_profile_resource_id else None)
+    if azure_front_door_profile is not None:
+        azure_front_door = AzureFrontDoorProperties(resource_id=azure_front_door_profile if azure_front_door_profile else None)
 
     update_params = ConfigurationStoreUpdateParameters(tags=tags,
                                                        sku=Sku(name=sku) if sku else None,

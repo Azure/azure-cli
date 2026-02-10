@@ -535,7 +535,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
         })
 
         # Create App Configuration store with Front Door profile linked
-        self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --retention-days {retention_days} --azure-front-door-profile-resource-id {front_door_profile_id}',
+        self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --retention-days {retention_days} --azure-front-door-profile {front_door_profile_id}',
                  checks=[self.check('name', '{config_store_name}'),
                          self.check('location', '{rg_loc}'),
                          self.check('resourceGroup', resource_group),
@@ -553,7 +553,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
             'empty_front_door_id': ''
         })
 
-        self.cmd('appconfig update -n {config_store_name} -g {rg} --azure-front-door-profile-resource-id "{empty_front_door_id}"',
+        self.cmd('appconfig update -n {config_store_name} -g {rg} --azure-front-door-profile "{empty_front_door_id}"',
                  checks=[self.check('name', '{config_store_name}'),
                          self.check('location', '{rg_loc}'),
                          self.check('resourceGroup', resource_group),
@@ -561,16 +561,12 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('azureFrontDoor.resourceId', None)])
 
         # Update store to link Front Door profile again
-        self.cmd('appconfig update -n {config_store_name} -g {rg} --azure-front-door-profile-resource-id {front_door_profile_id}',
+        self.cmd('appconfig update -n {config_store_name} -g {rg} --azure-front-door-profile {front_door_profile_id}',
                  checks=[self.check('name', '{config_store_name}'),
                          self.check('location', '{rg_loc}'),
                          self.check('resourceGroup', resource_group),
                          self.check('provisioningState', 'Succeeded'),
                          self.check('azureFrontDoor.resourceId', front_door_profile_id)])
-
-        # Clean up
-        self.cmd('appconfig delete -n {config_store_name} -g {rg} -y')
-        self.cmd('afd profile delete -g {rg} --profile-name {front_door_profile_name} -y')
 
 
 def _setup_key_vault(test, kwargs):
