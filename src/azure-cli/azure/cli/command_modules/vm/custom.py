@@ -4992,23 +4992,27 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
     vmss["vm_scale_set_name"] = name
     vmss["no_wait"] = no_wait
 
-    zone_allocation_policy = {}
-    if max_zone_count is not None:
-        zone_allocation_policy['max_zone_count'] = max_zone_count
+    if max_zone_count is not None or instance_percent_policy is not None or max_instance_percent is not None:
+        if vmss.get("resiliency_policy", None) is None:
+            vmss["resiliency_policy"] = {}
+        if vmss["resiliency_policy"].get("zone_allocation_policy", None) is None:
+            vmss["resiliency_policy"]["zone_allocation_policy"] = {}
 
-    if instance_percent_policy is not None or max_instance_percent is not None:
-        policy = {}
+        if max_zone_count is not None:
+            vmss["resiliency_policy"]["zone_allocation_policy"]["max_zone_count"] = max_zone_count
 
-        if instance_percent_policy is not None:
-            policy['enabled'] = instance_percent_policy
+        if instance_percent_policy is not None or max_instance_percent is not None:
+            if vmss["resiliency_policy"]["zone_allocation_policy"].get("max_instance_percent_per_zone_policy",
+                                                                       None) is None:
+                vmss["resiliency_policy"]["zone_allocation_policy"]["max_instance_percent_per_zone_policy"] = {}
 
-        if max_instance_percent is not None:
-            policy['value'] = max_instance_percent
+            if instance_percent_policy is not None:
+                vmss["resiliency_policy"]["zone_allocation_policy"]["max_instance_percent_per_zone_policy"][
+                    "enabled"] = instance_percent_policy
 
-        zone_allocation_policy['max_instance_percent_per_zone_policy'] = policy
-
-    if zone_allocation_policy:
-        vmss["resiliency_policy"]["zone_allocation_policy"] = zone_allocation_policy
+            if max_instance_percent is not None:
+                vmss["resiliency_policy"]["zone_allocation_policy"]["max_instance_percent_per_zone_policy"][
+                    "value"] = max_instance_percent
 
     from .operations.vmss import VMSSCreate
     return VMSSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss)

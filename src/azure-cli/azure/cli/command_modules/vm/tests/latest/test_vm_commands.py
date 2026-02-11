@@ -13843,7 +13843,7 @@ class VMSSAutomaticZonePlacementTest(ScenarioTest):
     def test_vmss_zone_placement_policy_with_exclude_zones(self, resource_group):
         self.kwargs.update({
             'vmss': 'vmss-zone-placement-exclude',
-            'location': 'eastus2',
+            'location': 'eastus2euap',
             'image': 'Debian:debian-10:10:latest',
             'admin_username': 'testadmin',
             'admin_password': 'testPassword0',
@@ -13866,7 +13866,7 @@ class VMSSAutomaticZonePlacementTest(ScenarioTest):
         # verify the vmss was created with correct placement configuration
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('placement.zonePlacementPolicy', 'Auto'),
-            self.check('placement.excludeZones', ['0']),
+            self.check('placement.excludeZones', ['1']),
             self.check('provisioningState', 'Succeeded')
         ])
 
@@ -13904,7 +13904,7 @@ class VMSSAutomaticZonePlacementTest(ScenarioTest):
     def test_vmss_zone_placement_policy_with_max_instance_percent(self, resource_group):
         self.kwargs.update({
             'vmss': 'vmss-zone-placement-003',
-            'location': 'eastus2',
+            'location': 'eastus2euap',
             'image': 'Debian:debian-10:10:latest',
             'admin_username': 'testadmin',
             'admin_password': 'testPassword0',
@@ -14072,7 +14072,7 @@ class VMSSUpdateZoneAllocationPolicyTest(ScenarioTest):
     def test_vmss_update_max_zone_count(self, resource_group):
         self.kwargs.update({
             'vmss': 'vmss-update-zone-count',
-            'location': 'eastus2',
+            'location': 'eastus2euap',
             'image': 'OpenLogic:CentOS:7.5:latest',
             'admin_username': 'testadmin',
             'admin_password': 'testPassword0!@#',
@@ -14087,6 +14087,7 @@ class VMSSUpdateZoneAllocationPolicyTest(ScenarioTest):
             '--upgrade-policy-mode Manual '
             '--zone-placement-policy Auto '
             '--max-zone-count 3 '
+            '--vm-sku {vm_sku} '
         )
 
         # update vmss with max zone count
@@ -14105,7 +14106,7 @@ class VMSSUpdateZoneAllocationPolicyTest(ScenarioTest):
     def test_vmss_update_max_instance_percent_per_zone(self, resource_group):
         self.kwargs.update({
             'vmss': 'vmss-update-instance-percent',
-            'location': 'eastus2',
+            'location': 'eastus2euap',
             'image': 'OpenLogic:CentOS:7.5:latest',
             'admin_username': 'testadmin',
             'admin_password': 'testPassword0!@#',
@@ -14164,7 +14165,7 @@ class VMSSUpdateZoneAllocationPolicyTest(ScenarioTest):
     def test_vmss_update_combined_zone_allocation_policies(self, resource_group):
         self.kwargs.update({
             'vmss': 'vmss-update-combined',
-            'location': 'eastus2',
+            'location': 'eastus2euap',
             'image': 'MicrosoftWindowsServer:WindowsServer:2016-Datacenter:latest',
             'admin_username': 'testadmin',
             'admin_password': 'testPassword0!@#',
