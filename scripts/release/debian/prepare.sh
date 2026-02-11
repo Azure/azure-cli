@@ -53,6 +53,7 @@ Section: python
 Priority: extra
 Maintainer: Azure Python CLI Team <azpycli@microsoft.com>
 Build-Depends: debhelper (>= 9), libssl-dev, libffi-dev, python3-dev
+Depends: libwebkit2gtk-4.1-0
 Standards-Version: 3.9.5
 Homepage: https://github.com/azure/azure-cli
 
