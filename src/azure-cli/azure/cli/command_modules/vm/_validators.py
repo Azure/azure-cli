@@ -2589,6 +2589,7 @@ def _validate_vmss_create_host_group(cmd, namespace):
                 namespace='Microsoft.Compute', type='hostGroups', name=namespace.host_group
             )
 
+
 def _validate_vmss_create_auto_zone_placement(cmd, namespace):
     zpp = getattr(namespace, 'zone_placement_policy', None)
     zones = getattr(namespace, 'zones', None)

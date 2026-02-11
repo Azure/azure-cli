@@ -808,7 +808,7 @@ def load_arguments(self, _):
         )
         c.argument(
             'instance_percent_policy',
-            options_list=['--instance-percent-policy'],
+            options_list=['--instance-percent-policy', '--ipp'],
             arg_type=get_three_state_flag(),
             min_api='2024-07-01',
             help='Specify whether maximum percentage of virtual machine instances per zone policy '
@@ -883,7 +883,7 @@ def load_arguments(self, _):
         )
         c.argument(
             'instance_percent_policy',
-            options_list=['--instance-percent-policy'],
+            options_list=['--instance-percent-policy', '--ipp'],
             arg_type=get_three_state_flag(),
             min_api='2024-07-01',
             help='Specify whether maximum percentage of virtual machine instances per zone policy '
