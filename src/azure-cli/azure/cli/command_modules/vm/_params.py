@@ -431,6 +431,8 @@ def load_arguments(self, _):
         c.argument('name', name_arg_type, validator=_resource_not_exists(self.cli_ctx, 'Microsoft.Compute/virtualMachines'))
         c.argument('vm_name', name_arg_type, id_part=None, help='Name of the virtual machine.', completer=None)
         c.argument('os_disk_size_gb', type=int, help='the size of the os disk in GB', arg_group='Storage')
+        c.argument('disk_iops_read_write', options_list=['--data-disk-iops'], type=int, help='Specify the Read-Write IOPS for the managed disk when storage account type is UltraSSD_LRS.')
+        c.argument('disk_mbps_read_write', options_list=['--data-disk-mbps'], type=int, help='Specify the bandwidth in MB per second for the managed disk when storage account type is UltraSSD_LRS.')
         c.argument('availability_set', help='Name or ID of an existing availability set to add the VM to. None by default.')
         c.argument('vmss', help='Name or ID of an existing virtual machine scale set that the virtual machine should be assigned to. None by default.')
         c.argument('nsg', help='The name to use when creating a new Network Security Group (default) or referencing an existing one. Can also reference an existing NSG by ID or specify "" for none (\'""\' in Azure CLI using PowerShell or --% operator).', arg_group='Network')
