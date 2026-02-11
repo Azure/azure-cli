@@ -293,7 +293,6 @@ def load_command_table(self, _):
         g.command('list-usage', 'list', command_type=compute_vm_usage_sdk, transform=transform_vm_usage_list, table_transformer='[].{Name:localName, CurrentValue:currentValue, Limit:limit}')
         g.custom_command('open-port', 'open_vm_port')
         g.custom_command('resize', 'resize_vm', supports_no_wait=True)
-        g.custom_command('restart', 'restart_vm', supports_no_wait=True)
         g.custom_show_command('show', 'show_vm', table_transformer=transform_vm)
         g.command('stop', 'begin_power_off', supports_no_wait=True, validator=process_vm_vmss_stop)
         g.generic_update_command('update', getter_name='get_vm_to_update_by_aaz', setter_name='update_vm', setter_type=compute_custom, command_type=compute_custom, supports_no_wait=True, validator=process_vm_update_namespace)
@@ -303,6 +302,9 @@ def load_command_table(self, _):
 
         from .operations.vm import VMCapture
         self.command_table['vm capture'] = VMCapture(loader=self)
+
+    with self.command_group('vm', compute_vm_sdk) as g:
+        g.custom_command('restart', 'restart_vm', supports_no_wait=True)
 
     with self.command_group('vm', compute_vm_sdk, client_factory=cf_vm) as g:
         g.custom_command('install-patches', 'install_vm_patches', supports_no_wait=True, min_api='2020-12-01')
