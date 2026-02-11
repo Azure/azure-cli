@@ -2278,18 +2278,20 @@ def get_boot_log(cmd, resource_group_name, vm_name):
 # region VirtualMachines Diagnostics
 def set_diagnostics_extension(cmd, resource_group_name, vm_name, settings, protected_settings=None, version=None,
                               no_auto_upgrade=False):
-    from .aaz.latest.vm.extension import Delete as VmExtentionDelete
+    from .aaz.latest.vm.extension import Delete as VmExtensionDelete
+    from .operations.vm import convert_show_result_to_snake_case
     vm = get_instance_view(cmd, resource_group_name, vm_name)
+    vm = convert_show_result_to_snake_case(vm)
     is_linux_os = _is_linux_os_by_aaz(vm)
     vm_extension_name = _LINUX_DIAG_EXT if is_linux_os else _WINDOWS_DIAG_EXT
     if is_linux_os:  # check incompatible version
-        exts = vm.get('instanceView', {}).get('extensions', [])
+        exts = vm.get('instance_view', {}).get('extensions', [])
         major_ver = extension_mappings[_LINUX_DIAG_EXT]['version'].split('.', maxsplit=1)[0]
         if next((e for e in exts if e.get('name') == vm_extension_name and
-                 not e.get('typeHandlerVersion', '').startswith(major_ver + '.')), None):
+                 not e.get('type_handler_version', '').startswith(major_ver + '.')), None):
             logger.warning('There is an incompatible version of diagnostics extension installed. '
                            'We will update it with a new version')
-            poller = VmExtentionDelete(cmd.cli_ctx)(command_args={
+            poller = VmExtensionDelete(cli_ctx=cmd.cli_ctx)(command_args={
                 'resource_group': resource_group_name,
                 'vm_extension_name': vm_extension_name,
                 'vm_name': vm_name

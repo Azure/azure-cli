@@ -322,6 +322,8 @@ def convert_show_result_to_snake_case(result):
         new_result["host"] = result["host"]
     if "hostGroup" in result:
         new_result["host_group"] = result["hostGroup"]
+    if "instanceView" in result:
+        new_result["instance_view"] = result["instanceView"]
     if "licenseType" in result:
         new_result["license_type"] = result["licenseType"]
     if "networkProfile" in result:
@@ -413,6 +415,246 @@ def convert_show_result_to_snake_case(result):
     if "vCPUsPerCore" in vm_size_properties:
         vm_size_properties["v_cp_us_per_core"] = vm_size_properties["vCPUsPerCore"]
         vm_size_properties.pop("vCPUsPerCore")
+
+    instance_view_properties = new_result.get("instance_view", {}) or {}
+    if "assignedHost" in instance_view_properties:
+        instance_view_properties['assigned_host'] = instance_view_properties['assignedHost']
+        instance_view_properties.pop("assignedHost")
+    if "bootDiagnostics" in instance_view_properties:
+        instance_view_properties['boot_diagnostics'] = instance_view_properties['bootDiagnostics']
+        instance_view_properties.pop("bootDiagnostics")
+    if "computerName" in instance_view_properties:
+        instance_view_properties['computer_name'] = instance_view_properties['computerName']
+        instance_view_properties.pop("computerName")
+
+    disks_properties = instance_view_properties.get("disks", []) or []
+    for disks_property in disks_properties:
+        if "encryptionSettings" in disks_property:
+            disks_property['encryption_settings'] = disks_property['encryptionSettings']
+            disks_property.pop("encryptionSettings")
+
+        es_properties = disks_property.get("encryption_settings", []) or []
+        for es_property in es_properties:
+            if "diskEncryptionKey" in es_property:
+                es_property['disk_encryption_key'] = es_property['diskEncryptionKey']
+                es_property.pop("diskEncryptionKey")
+
+            dek_properties = es_property.get("disk_encryption_key", {}) or {}
+            if "secretUrl" in dek_properties:
+                dek_properties['secret_url'] = dek_properties['secretUrl']
+                dek_properties.pop("secretUrl")
+            if "sourceVault" in dek_properties:
+                dek_properties['source_vault'] = dek_properties['sourceVault']
+                dek_properties.pop("sourceVault")
+
+            if "keyEncryptionKey" in es_property:
+                es_property['key_encryption_key'] = es_property['keyEncryptionKey']
+                es_property.pop("keyEncryptionKey")
+
+            kek_properties = es_property.get("key_encryption_key", {}) or {}
+            if "keyUrl" in kek_properties:
+                kek_properties['key_url'] = kek_properties['keyUrl']
+                kek_properties.pop("keyUrl")
+            if "sourceVault" in kek_properties:
+                kek_properties['source_vault'] = kek_properties['sourceVault']
+                kek_properties.pop("sourceVault")
+
+        statuses_properties = disks_property.get("statuses", []) or []
+        for statuses_property in statuses_properties:
+            if "displayStatus" in statuses_property:
+                statuses_property['display_status'] = statuses_property['displayStatus']
+                statuses_property.pop("displayStatus")
+
+    extensions_properties = instance_view_properties.get("extensions", []) or []
+    for extensions_property in extensions_properties:
+        if "typeHandlerVersion" in extensions_property:
+            extensions_property['type_handler_version'] = extensions_property['typeHandlerVersion']
+            extensions_property.pop("typeHandlerVersion")
+
+        statuses_properties = extensions_property.get("statuses", []) or []
+        for statuses_property in statuses_properties:
+            if "displayStatus" in statuses_property:
+                statuses_property['display_status'] = statuses_property['displayStatus']
+                statuses_property.pop("displayStatus")
+
+        substatuses_properties = extensions_property.get("substatuses", []) or []
+        for substatuses_property in substatuses_properties:
+            if "displayStatus" in substatuses_property:
+                substatuses_property['display_status'] = substatuses_property['displayStatus']
+                substatuses_property.pop("displayStatus")
+
+    if "hyperVGeneration" in instance_view_properties:
+        instance_view_properties['hyper_v_generation'] = instance_view_properties['hyperVGeneration']
+        instance_view_properties.pop("hyperVGeneration")
+    if "isVMInStandbyPool" in instance_view_properties:
+        instance_view_properties['is_vm_in_standby_pool'] = instance_view_properties['isVMInStandbyPool']
+        instance_view_properties.pop("isVMInStandbyPool")
+    if "maintenanceRedeployStatus" in instance_view_properties:
+        instance_view_properties['maintenance_redeploy_status'] = instance_view_properties['maintenanceRedeployStatus']
+        instance_view_properties.pop("maintenanceRedeployStatus")
+    if "osName" in instance_view_properties:
+        instance_view_properties['os_name'] = instance_view_properties['osName']
+        instance_view_properties.pop("osName")
+    if "osVersion" in instance_view_properties:
+        instance_view_properties['os_version'] = instance_view_properties['osVersion']
+        instance_view_properties.pop("osVersion")
+    if "patchStatus" in instance_view_properties:
+        instance_view_properties['patch_status'] = instance_view_properties['patchStatus']
+        instance_view_properties.pop("patchStatus")
+    if "platformFaultDomain" in instance_view_properties:
+        instance_view_properties['platform_fault_domain'] = instance_view_properties['platformFaultDomain']
+        instance_view_properties.pop("platformFaultDomain")
+    if "platformUpdateDomain" in instance_view_properties:
+        instance_view_properties['platform_update_domain'] = instance_view_properties['platformUpdateDomain']
+        instance_view_properties.pop("platformUpdateDomain")
+    if "rdpThumbPrint" in instance_view_properties:
+        instance_view_properties['rdp_thumb_print'] = instance_view_properties['rdpThumbPrint']
+        instance_view_properties.pop("rdpThumbPrint")
+
+    statuses_properties = instance_view_properties.get("statuses", []) or []
+    for statuses_property in statuses_properties:
+        if "displayStatus" in statuses_property:
+            statuses_property['display_status'] = statuses_property['displayStatus']
+            statuses_property.pop("displayStatus")
+
+    if "vmAgent" in instance_view_properties:
+        instance_view_properties['vm_agent'] = instance_view_properties['vmAgent']
+        instance_view_properties.pop("vmAgent")
+    if "vmHealth" in instance_view_properties:
+        instance_view_properties['vm_health'] = instance_view_properties['vmHealth']
+        instance_view_properties.pop("vmHealth")
+
+    bd_properties = instance_view_properties.get("boot_diagnostics", {}) or {}
+    if "consoleScreenshotBlobUri" in bd_properties:
+        bd_properties['console_screenshot_blob_uri'] = bd_properties['consoleScreenshotBlobUri']
+        bd_properties.pop("consoleScreenshotBlobUri")
+    if "serialConsoleLogBlobUri" in bd_properties:
+        bd_properties['serial_console_log_blob_uri'] = bd_properties['serialConsoleLogBlobUri']
+        bd_properties.pop("serialConsoleLogBlobUri")
+    status_properties = bd_properties.get("status", {}) or {}
+    if "displayStatus" in status_properties:
+        status_properties['display_status'] = status_properties['displayStatus']
+        status_properties.pop("displayStatus")
+
+    mrs_properties = instance_view_properties.get("maintenance_redeploy_status", {}) or {}
+    if "isCustomerInitiatedMaintenanceAllowed" in mrs_properties:
+        mrs_properties['is_customer_initiated_maintenance_allowed'] = mrs_properties['isCustomerInitiatedMaintenanceAllowed']
+        mrs_properties.pop("isCustomerInitiatedMaintenanceAllowed")
+    if "lastOperationMessage" in mrs_properties:
+        mrs_properties['last_operation_message'] = mrs_properties['lastOperationMessage']
+        mrs_properties.pop("lastOperationMessage")
+    if "lastOperationResultCode" in mrs_properties:
+        mrs_properties['last_operation_result_code'] = mrs_properties['lastOperationResultCode']
+        mrs_properties.pop("lastOperationResultCode")
+    if "maintenanceWindowEndTime" in mrs_properties:
+        mrs_properties['maintenance_window_end_time'] = mrs_properties['maintenanceWindowEndTime']
+        mrs_properties.pop("maintenanceWindowEndTime")
+    if "maintenanceWindowStartTime" in mrs_properties:
+        mrs_properties['maintenance_window_start_time'] = mrs_properties['maintenanceWindowStartTime']
+        mrs_properties.pop("maintenanceWindowStartTime")
+    if "preMaintenanceWindowEndTime" in mrs_properties:
+        mrs_properties['pre_maintenance_window_end_time'] = mrs_properties['preMaintenanceWindowEndTime']
+        mrs_properties.pop("preMaintenanceWindowEndTime")
+    if "preMaintenanceWindowStartTime" in mrs_properties:
+        mrs_properties['pre_maintenance_window_start_time'] = mrs_properties['preMaintenanceWindowStartTime']
+        mrs_properties.pop("preMaintenanceWindowStartTime")
+
+    ps_properties = instance_view_properties.get("patch_status", {}) or {}
+    if "availablePatchSummary" in ps_properties:
+        ps_properties['available_patch_summary'] = ps_properties['availablePatchSummary']
+        ps_properties.pop("availablePatchSummary")
+    if "configurationStatuses" in ps_properties:
+        ps_properties['configuration_statuses'] = ps_properties['configurationStatuses']
+        ps_properties.pop("configurationStatuses")
+    if "lastPatchInstallationSummary" in ps_properties:
+        ps_properties['last_patch_installation_summary'] = ps_properties['lastPatchInstallationSummary']
+        ps_properties.pop("lastPatchInstallationSummary")
+
+    va_properties = instance_view_properties.get("vm_agent", {}) or {}
+    if "extensionHandlers" in va_properties:
+        va_properties['extension_handlers'] = va_properties['extensionHandlers']
+        va_properties.pop("extensionHandlers")
+    if "vmAgentVersion" in va_properties:
+        va_properties['vm_agent_version'] = va_properties['vmAgentVersion']
+        va_properties.pop("vmAgentVersion")
+
+    vh_properties = instance_view_properties.get("vm_health", {}) or {}
+    status_properties = vh_properties.get("status", {}) or {}
+    if "displayStatus" in status_properties:
+        status_properties['display_status'] = status_properties['displayStatus']
+        status_properties.pop("displayStatus")
+
+    aps_properties = ps_properties.get("available_patch_summary", {}) or {}
+    if "assessmentActivityId" in aps_properties:
+        aps_properties['assessment_activity_id'] = aps_properties['assessmentActivityId']
+        aps_properties.pop("assessmentActivityId")
+    if "criticalAndSecurityPatchCount" in aps_properties:
+        aps_properties['critical_and_security_patch_count'] = aps_properties['criticalAndSecurityPatchCount']
+        aps_properties.pop("criticalAndSecurityPatchCount")
+    if "lastModifiedTime" in aps_properties:
+        aps_properties['last_modified_time'] = aps_properties['lastModifiedTime']
+        aps_properties.pop("lastModifiedTime")
+    if "otherPatchCount" in aps_properties:
+        aps_properties['other_patch_count'] = aps_properties['otherPatchCount']
+        aps_properties.pop("otherPatchCount")
+    if "rebootPending" in aps_properties:
+        aps_properties['reboot_pending'] = aps_properties['rebootPending']
+        aps_properties.pop("rebootPending")
+    if "startTime" in aps_properties:
+        aps_properties['start_time'] = aps_properties['startTime']
+        aps_properties.pop("startTime")
+
+    cs_properties = ps_properties.get("configuration_statuses", []) or []
+    for cs_property in cs_properties:
+        if "displayStatus" in cs_property:
+            cs_property['display_status'] = cs_property['displayStatus']
+            cs_property.pop("displayStatus")
+
+    lpis_properties = ps_properties.get("last_patch_installation_summary", {}) or {}
+    if "excludedPatchCount" in lpis_properties:
+        lpis_properties['excluded_patch_count'] = lpis_properties['excludedPatchCount']
+        lpis_properties.pop("excludedPatchCount")
+    if "failedPatchCount" in lpis_properties:
+        lpis_properties['failed_patch_count'] = lpis_properties['failedPatchCount']
+        lpis_properties.pop("failedPatchCount")
+    if "installationActivityId" in lpis_properties:
+        lpis_properties['installation_activity_id'] = lpis_properties['installationActivityId']
+        lpis_properties.pop("installationActivityId")
+    if "installedPatchCount" in lpis_properties:
+        lpis_properties['installed_patch_count'] = lpis_properties['installedPatchCount']
+        lpis_properties.pop("installedPatchCount")
+    if "lastModifiedTime" in lpis_properties:
+        lpis_properties['last_modified_time'] = lpis_properties['lastModifiedTime']
+        lpis_properties.pop("lastModifiedTime")
+    if "maintenanceWindowExceeded" in lpis_properties:
+        lpis_properties['maintenance_window_exceeded'] = lpis_properties['maintenanceWindowExceeded']
+        lpis_properties.pop("maintenanceWindowExceeded")
+    if "notSelectedPatchCount" in lpis_properties:
+        lpis_properties['not_selected_patch_count'] = lpis_properties['notSelectedPatchCount']
+        lpis_properties.pop("notSelectedPatchCount")
+    if "pendingPatchCount" in lpis_properties:
+        lpis_properties['pending_patch_count'] = lpis_properties['pendingPatchCount']
+        lpis_properties.pop("pendingPatchCount")
+    if "startTime" in lpis_properties:
+        lpis_properties['start_time'] = lpis_properties['startTime']
+        lpis_properties.pop("startTime")
+
+    eh_properties = va_properties.get("extension_handlers", []) or []
+    for eh_property in eh_properties:
+        status_properties = eh_property.get("status", {}) or {}
+        if "displayStatus" in status_properties:
+            status_properties['display_status'] = status_properties['displayStatus']
+            status_properties.pop("displayStatus")
+
+        if "typeHandlerVersion" in eh_property:
+            eh_property['type_handler_version'] = eh_property['typeHandlerVersion']
+            eh_property.pop("typeHandlerVersion")
+
+    statuses_properties = va_properties.get("statuses", []) or []
+    for statuses_property in statuses_properties:
+        if "displayStatus" in statuses_property:
+            statuses_property['display_status'] = statuses_property['displayStatus']
+            statuses_property.pop("displayStatus")
 
     network_profile = new_result.get("network_profile", {}) or {}
     if "networkApiVersion" in network_profile:
