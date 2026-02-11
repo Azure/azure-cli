@@ -78,6 +78,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         self.user_agent = None
         # authentication-related
         self.enable_broker_on_windows = None
+        self.enable_broker_on_mac = None
         self.msal_telemetry = None
         self.login_experience_v2 = None
 
@@ -237,6 +238,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'SecretNames', ','.join(self.secret_names or []))
         # authentication-related
         set_custom_properties(result, 'EnableBrokerOnWindows', str(self.enable_broker_on_windows))
+        set_custom_properties(result, 'EnableBrokerOnMac', str(self.enable_broker_on_mac))
         set_custom_properties(result, 'MsalTelemetry', self.msal_telemetry)
         set_custom_properties(result, 'LoginExperienceV2', str(self.login_experience_v2))
 
@@ -484,9 +486,10 @@ def set_region_identified(region_input, region_identified):
 
 # region authentication-related
 @decorators.suppress_all_exceptions()
-def set_broker_info(enable_broker_on_windows):
-    # Log the value of `enable_broker_on_windows`
+def set_broker_info(enable_broker_on_windows, enable_broker_on_mac=None):
+    # Log the value of `enable_broker_on_windows` and `enable_broker_on_mac`
     _session.enable_broker_on_windows = enable_broker_on_windows
+    _session.enable_broker_on_mac = enable_broker_on_mac
 
 
 @decorators.suppress_all_exceptions()
