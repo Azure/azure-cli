@@ -11,9 +11,6 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "vmss extension-rolling-upgrade",
-)
 class ExtensionRollingUpgrade(AAZCommand):
     """Starts a rolling upgrade to move all extensions for all virtual machine scale set instances to the latest available extension version.
     Instances which are already running the latest extension versions are not affected.

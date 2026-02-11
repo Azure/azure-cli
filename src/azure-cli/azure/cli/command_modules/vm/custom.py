@@ -5103,110 +5103,59 @@ def detach_disk_from_vmss(cmd, resource_group_name, vmss_name, lun, instance_id=
 
 
 # region VirtualMachineScaleSets Extensions
-def delete_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, no_wait=False):
-    from azure.cli.command_modules.vm.aaz.latest.vmss import Update as VMSSUpdate
-    from azure.cli.core.aaz import has_value
-
-    vmss = get_vmss_modified_by_aaz(cmd, resource_group_name, vmss_name) or {}
-    extensions = (vmss.get('virtualMachineProfile', {}).get('extensionProfile', {}).get('extensions') or [])
-
-    if not extensions:
-        raise CLIError('Scale set has no extensions to delete')
-
-    target = (extension_name or "").lower()
-    if not any((e.get('name') or "").lower() == target for e in extensions):
-        raise CLIError(f'Extension {extension_name} not found')
-
-    class DeleteExtensionUpdate(VMSSUpdate):
-        def pre_operations(self):
-            self.ctx.args.no_wait = no_wait
-
-        def pre_instance_update(self, instance):
-            vmp = instance.properties.virtual_machine_profile
-            ep = getattr(vmp, "extension_profile", None)
-
-            if not ep or not has_value(ep.extensions):
-                raise CLIError('Scale set has no extensions to delete')
-
-            exts = list(ep.extensions)
-            if not exts:
-                raise CLIError('Scale set has no extensions to delete')
-
-            filtered_exts = []
-            for e in exts:
-                name_value = getattr(e, "name", None)
-                if not has_value(name_value):
-                    name_str = ""
-                elif hasattr(name_value, "to_serialized_data"):
-                    try:
-                        x = name_value.to_serialized_data()
-                        name_str = "" if x is None else str(x)
-                    except Exception:
-                        name_str = str(name_value)
-                elif hasattr(name_value, "value"):
-                    try:
-                        x = name_value.value
-                        name_str = "" if x is None else str(x)
-                    except Exception:
-                        name_str = str(name_value)
-                else:
-                    name_str = str(name_value)
-                if name_str.lower() != target:
-                    filtered_exts.append(e)
-            ep.extensions = filtered_exts
-
-            sp = getattr(vmp, "storage_profile", None)
-            if sp and has_value(getattr(sp, "image_reference", None)):
-                sp.image_reference = None
-
-    return DeleteExtensionUpdate(cli_ctx=cmd.cli_ctx)(command_args={
+def delete_vmss_extension(cmd, resource_group_name, vmss_name, extension_name):
+    from .operations.vmss import VMSSShow
+    vmss = VMSSShow(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "vm_scale_set_name": vmss_name,
     })
+    # Avoid unnecessary permission error
+    vmss["virtualMachineProfile"]["storageProfile"]["imageReference"] = None
+
+    if not vmss.get("virtualMachineProfile", {}).get("extensionProfile", {}).get("extensions", []):
+        raise CLIError('Scale set has no extensions to delete')
+
+    keep_list = [e for e in vmss.get("virtualMachineProfile", {}).get("extensionProfile", {}).get("extensions", [])
+                 if e["name"] != extension_name]
+    if len(keep_list) == len(vmss.get("virtualMachineProfile", {}).get("extensionProfile", {}).get("extensions", [])):
+        raise CLIError('Extension {} not found'.format(extension_name))
+
+    vmss["virtualMachineProfile"]["extensionProfile"]["extensions"] = keep_list
+    vmss["resource_group"] = resource_group_name
+    vmss["vm_scale_set_name"] = vmss_name
+
+    from .operations.vmss import VMSSCreate
+    return VMSSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss)
 
 
 # pylint: disable=inconsistent-return-statements
 def get_vmss_extension(cmd, resource_group_name, vmss_name, extension_name):
-    vmss = get_vmss_modified_by_aaz(cmd, resource_group_name, vmss_name) or {}
-    extensions = (vmss.get('virtualMachineProfile', {}).get('extensionProfile', {}).get('extensions') or [])
+    from .operations.vmss import VMSSShow
+    vmss = VMSSShow(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "vm_scale_set_name": vmss_name,
+    })
 
-    ext_name = (extension_name or "").lower()
-    ext = next(
-        (e for e in extensions if (e.get('name') or "").lower() == ext_name),
-        None
-    )
-
-    # normalize extension output
-    if ext:
-        if ext.get('typePropertiesType') is None and ext.get('type') is not None:
-            ext['typePropertiesType'] = ext['type']
-        ext.pop('type', None)
-    return ext
+    if not vmss.get("virtualMachineProfile", {}).get("extensionProfile", {}).get("extensions", []):
+        return
+    return next((e for e in vmss.get("virtualMachineProfile", {}).get("extensionProfile", {}).get("extensions", [])
+                 if e["name"] == extension_name), None)
 
 
 def list_vmss_extensions(cmd, resource_group_name, vmss_name):
-    vmss = get_vmss_modified_by_aaz(cmd, resource_group_name, vmss_name) or {}
-    extensions = (vmss.get('virtualMachineProfile', {}).get('extensionProfile', {}).get('extensions') or [])
+    from .operations.vmss import VMSSShow
+    vmss = VMSSShow(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "vm_scale_set_name": vmss_name,
+    })
 
-    # normalize each extension output
-    result = []
-    for ext in extensions:
-        if ext:
-            if ext.get('typePropertiesType') is None and ext.get('type') is not None:
-                ext['typePropertiesType'] = ext['type']
-            ext.pop('type', None)
-        result.append(ext)
-
-    return result
+    return vmss.get("virtualMachineProfile", {}).get("extensionProfile", {}).get("extensions", None)
 
 
 def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publisher, version=None,
                        settings=None, protected_settings=None, no_auto_upgrade=False, force_update=False,
                        no_wait=False, extension_instance_name=None, provision_after_extensions=None,
                        enable_auto_upgrade=None):
-    from azure.cli.command_modules.vm.aaz.latest.vmss import Update as _VMSSUpdate
-    from azure.cli.core.aaz import has_value
-
     if not extension_instance_name:
         extension_instance_name = extension_name
 
@@ -5214,106 +5163,66 @@ def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publ
     if extension_name in auto_upgrade_extensions and enable_auto_upgrade is None:
         enable_auto_upgrade = True
 
-    vmss = get_vmss_modified_by_aaz(cmd, resource_group_name, vmss_name) or {}
-    location = vmss.get('location')
-
-    version = _normalize_extension_version(
-        cmd.cli_ctx, publisher, extension_name, version, location
-    )
-
-    target_type = (extension_name or "").lower()
-    target_pub = (publisher or "").lower()
-
-    new_ext = {
-        "name": extension_instance_name,
-        "properties": {
-            "publisher": publisher,
-            "type": extension_name,
-            "type_handler_version": version,
-            "settings": settings,
-            "protected_settings": protected_settings,
-            "auto_upgrade_minor_version": not no_auto_upgrade,
-            "provision_after_extensions": provision_after_extensions,
-            "enable_automatic_upgrade": enable_auto_upgrade,
-        }
-    }
-
-    if force_update:
-        new_ext["properties"]["force_update_tag"] = str(_gen_guid())
-
-    class SetVMSSExtension(_VMSSUpdate):
-        def pre_operations(self):
-            self.ctx.args.no_wait = no_wait
-
-        def pre_instance_update(self, instance):
-            vmp = instance.properties.virtual_machine_profile
-
-            sp = getattr(vmp, "storage_profile", None)
-            if sp and has_value(getattr(sp, "image_reference", None)):
-                sp.image_reference = None
-
-            ep = getattr(vmp, "extension_profile", None)
-            if not ep:
-                vmp.extension_profile = {"extensions": []}
-                ep = vmp.extension_profile
-
-            exts = list(ep.extensions) if has_value(getattr(ep, "extensions", None)) else []
-
-            keep = []
-            for e in exts:
-                props = getattr(e, "properties", None)
-                if not props:
-                    keep.append(e)
-                    continue
-
-                pub_value = getattr(props, "publisher", None)
-                if not has_value(pub_value):
-                    e_pub = ""
-                elif hasattr(pub_value, "to_serialized_data"):
-                    try:
-                        x = pub_value.to_serialized_data()
-                        e_pub = ("" if x is None else str(x)).lower()
-                    except Exception:
-                        e_pub = str(pub_value).lower()
-                elif hasattr(pub_value, "value"):
-                    try:
-                        x = pub_value.value
-                        e_pub = ("" if x is None else str(x)).lower()
-                    except Exception:
-                        e_pub = str(pub_value).lower()
-                else:
-                    e_pub = str(pub_value).lower()
-
-                type_value = getattr(props, "type_properties_type", None)
-                if not has_value(type_value):
-                    type_value = getattr(props, "type", None)
-                if not has_value(type_value):
-                    e_type = ""
-                elif hasattr(type_value, "to_serialized_data"):
-                    try:
-                        x = type_value.to_serialized_data()
-                        e_type = ("" if x is None else str(x)).lower()
-                    except Exception:
-                        e_type = str(type_value).lower()
-                elif hasattr(type_value, "value"):
-                    try:
-                        x = type_value.value
-                        e_type = ("" if x is None else str(x)).lower()
-                    except Exception:
-                        e_type = str(type_value).lower()
-                else:
-                    e_type = str(type_value).lower()
-                if e_pub == target_pub and e_type == target_type:
-                    continue
-                keep.append(e)
-
-            ep.extensions = keep
-            ep.extensions.append(new_ext)
-
-    return SetVMSSExtension(cli_ctx=cmd.cli_ctx)(command_args={
+    from .operations.vmss import VMSSShow
+    vmss = VMSSShow(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "vm_scale_set_name": vmss_name,
     })
+    # Avoid unnecessary permission error
+    vmss["virtualMachineProfile"]["storageProfile"]["imageReference"] = None
+
+    # pylint: disable=no-member
+    version = _normalize_extension_version(cmd.cli_ctx, publisher, extension_name, version, vmss.get("location"))
+    extension_profile = vmss.get("virtualMachineProfile", {}).get("extensionProfile", {})
+    if extension_profile:
+        extensions = extension_profile.get("extensions", [])
+        if extensions:
+            extension_profile["extensions"] = [x for x in extensions if
+                                               x["name"].lower() != extension_name.lower() or x["publisher"].lower() != publisher.lower()]  # pylint: disable=line-too-long
+
+    if cmd.supported_api_version(min_api='2025-04-01', operation_group='virtual_machine_scale_sets'):
+        ext = {
+            "autoUpgradeMinorVersion": not no_auto_upgrade,
+            "enableAutomaticUpgrade": enable_auto_upgrade,
+            "name": extension_instance_name,
+            "publisher": publisher,
+            "typePropertiesType": extension_name,
+            "typeHandlerVersion": version,
+            "settings": settings,
+            "protectedSettings": protected_settings,
+            "provisionAfterExtensions": provision_after_extensions,
+        }
+    else:
+        ext = {
+            "autoUpgradeMinorVersion": not no_auto_upgrade,
+            "enableAutomaticUpgrade": enable_auto_upgrade,
+            "name": extension_instance_name,
+            "publisher": publisher,
+            "type": extension_name,
+            "typeHandlerVersion": version,
+            "settings": settings,
+            "protectedSettings": protected_settings,
+            "provisionAfterExtensions": provision_after_extensions,
+        }
+
+    if force_update:
+        ext["forceUpdateTag"] = str(_gen_guid())
+
+    if no_wait:
+        vmss["no_wait"] = no_wait
+
+    if not vmss.get("virtualMachineProfile", {}).get("extensionProfile", {}).get("extensions", []):
+        vmss.setdefault("virtualMachineProfile", {}) \
+            .setdefault("extensionProfile", {}) \
+            .setdefault("extensions", [])
+
+    vmss["virtualMachineProfile"]["extensionProfile"]["extensions"].append(ext)
+
+    vmss["resource_group"] = resource_group_name
+    vmss["vm_scale_set_name"] = vmss_name
+
+    from .operations.vmss import VMSSCreate
+    return VMSSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss)
 
 
 def set_orchestration_service_state(cmd, resource_group_name, vm_scale_set_name, service_name, action, no_wait=False):

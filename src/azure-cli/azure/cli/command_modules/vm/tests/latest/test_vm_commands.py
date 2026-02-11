@@ -3355,12 +3355,12 @@ class VMSSExtensionInstallTest(ScenarioTest):
         })
 
         self.cmd('vmss create -n {vmss} -g {rg} --image OpenLogic:CentOS:7.5:latest --authentication-type password '
-                 '--admin-username admin123 --admin-password testPassword0 --vm-sku Standard_B2ms')
+                 '--admin-username admin123 --admin-password testPassword0 --vm-sku Standard_B2ms -l eastus2')
         self.cmd('vmss extension set -n {ext_type} --publisher {pub} --version 1.4  --vmss-name {vmss} --resource-group {rg} '
                  '--protected-settings "{config_file}" --extension-instance-name {ext_name}')
         self.cmd('vmss extension show --resource-group {rg} --vmss-name {vmss} --name {ext_name}', checks=[
             self.check('name', '{ext_name}'),
-            self.check('typePropertiesType', '{ext_type}')
+            self.check('type', '{ext_type}')
         ])
         self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {ext_name}')
 
@@ -10974,7 +10974,7 @@ class VMSSAutomaticRepairsScenarioTest(ScenarioTest):
                      self.check('automaticRepairsPolicy.repairAction', 'Restart')
                  ])
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_automatic_repairs_with_health_extension_')
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_automatic_repairs_with_health_extension_', location='eastus2euap')
     def test_vmss_update_automatic_repairs_with_health_extension(self, resource_group):
         self.kwargs.update({
             'vmss': 'vmss1'
@@ -11711,7 +11711,7 @@ class VMSSPatchModeScenarioTest(ScenarioTest):
             self.check('osProfile.windowsConfiguration.patchSettings.patchMode', 'Manual')
         ])
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vmss_linux_patch_mode_')
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_linux_patch_mode_', location='eastus2euap')
     def test_vmss_linux_patch_mode(self, resource_group):
         self.kwargs.update({
             'vmss': self.create_random_name('clitestvmss', 20),
