@@ -39,6 +39,7 @@ make
 make install
 
 $WORKDIR/python_env/bin/python3 -m pip install --upgrade pip setuptools
+$WORKDIR/python_env/bin/python3 -m pip install setuptools==81.0.0
 
 export PATH=$PATH:$WORKDIR/python_env/bin
 
