@@ -2615,7 +2615,7 @@ def _validate_vmss_create_auto_zone_placement(cmd, namespace):
         )
 
     # max-zone-count must be positive
-    if max_zone_count and int(max_zone_count) <= 0:
+    if max_zone_count is not None and max_zone_count <= 0:
         raise CLIError(
             "usage error: --max-zone-count must be a positive integer."
         )
@@ -2650,7 +2650,7 @@ def _validate_vmss_create_auto_zone_placement(cmd, namespace):
         # enable=true requires value
         if instance_percent_policy is True and max_instance_percent is None:
             raise CLIError(
-                "usage error: (--instance-percent-policy / --enable-max-instance-percent-per-zone) true requires "
+                "usage error: --instance-percent-policy true requires "
                 "(--max-instance-percent / --value-max-instance-percent-per-zone)."
             )
 
@@ -2658,7 +2658,7 @@ def _validate_vmss_create_auto_zone_placement(cmd, namespace):
         if instance_percent_policy is False and max_instance_percent is not None:
             raise CLIError(
                 "usage error: (--max-instance-percent / --value-max-instance-percent-per-zone) cannot be used when "
-                "(--instance-percent-policy / --enable-max-instance-percent-per-zone) is false."
+                "--instance-percent-policy is false."
             )
 
     # value range
@@ -2666,7 +2666,7 @@ def _validate_vmss_create_auto_zone_placement(cmd, namespace):
         if instance_percent_policy is None:
             raise CLIError(
                 "usage error: (--max-instance-percent / --value-max-instance-percent-per-zone) cannot be used when "
-                "(--instance-percent-policy / --enable-max-instance-percent-per-zone) is not set."
+                "--instance-percent-policy is not set."
             )
 
         if max_instance_percent < 1 or max_instance_percent > 100:

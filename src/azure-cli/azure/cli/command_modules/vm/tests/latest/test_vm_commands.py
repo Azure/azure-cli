@@ -13876,5 +13876,418 @@ class VMUltraSSDLivedataDiskIopsMbpsScenarioTest(ScenarioTest):
         self.assertNotEqual(r.exit_code, 0)
 
 
+class VMSSAutomaticZonePlacementTest(ScenarioTest):
+    """
+    Test suite for VMSS Automatic Zone Placement Policy feature.
+    This feature allows the platform to automatically select the best availability zones
+    for VMSS deployments.
+    """
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_zone_placement_include_zones_')
+    def test_vmss_zone_placement_policy_with_include_zones(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss-zone-placement-001',
+            'location': 'eastus2',
+            'image': 'MicrosoftWindowsServer:WindowsServer:2016-Datacenter:latest',
+            'admin_username': 'testadmin',
+            'admin_password': 'testPassword0',
+            'vm_sku': 'Standard_B2ms'
+        })
+
+        # create VMSS with zone placement policy and include zones
+        self.cmd(
+            'vmss create -g {rg} -n {vmss} -l {location} '
+            '--instance-count 3 '
+            '--image {image} '
+            '--admin-username {admin_username} '
+            '--admin-password {admin_password} '
+            '--upgrade-policy-mode Manual '
+            '--zone-placement-policy Auto '
+            '--include-zones 1 2 '
+            '--vm-sku {vm_sku} '
+        )
+
+        # verify the vmss was created with correct placement configuration
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('placement.zonePlacementPolicy', 'Auto'),
+            self.check('placement.includeZones', ['1', '2']),
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_zone_placement_exclude_zones_')
+    def test_vmss_zone_placement_policy_with_exclude_zones(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss-zone-placement-exclude',
+            'location': 'eastus2euap',
+            'image': 'Debian:debian-10:10:latest',
+            'admin_username': 'testadmin',
+            'admin_password': 'testPassword0',
+            'vm_sku': 'Standard_B1ms'
+        })
+
+        # create vmss with zone placement policy and exclude zones
+        self.cmd(
+            'vmss create -g {rg} -n {vmss} -l {location} '
+            '--image {image} '
+            '--admin-username {admin_username} '
+            '--admin-password {admin_password} '
+            '--instance-count 3 '
+            '--upgrade-policy-mode Manual '
+            '--zone-placement-policy Auto '
+            '--exclude-zones 1 '
+            '--vm-sku {vm_sku} '
+        )
+
+        # verify the vmss was created with correct placement configuration
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('placement.zonePlacementPolicy', 'Auto'),
+            self.check('placement.excludeZones', ['1']),
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_zone_placement_max_zone_count_')
+    def test_vmss_zone_placement_policy_with_max_zone_count(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss-zone-placement-002',
+            'location': 'eastus2',
+            'image': 'MicrosoftWindowsServer:WindowsServer:2016-Datacenter:latest',
+            'admin_username': 'testadmin',
+            'admin_password': 'testPassword0',
+            'vm_sku': 'Standard_B2ms'
+        })
+
+        # create vmss with zone placement policy and max zone count
+        self.cmd(
+            'vmss create -g {rg} -n {vmss} -l {location} '
+            '--image {image} '
+            '--admin-username {admin_username} '
+            '--admin-password {admin_password} '
+            '--upgrade-policy-mode Manual '
+            '--max-zone-count 3 '
+            '--zone-placement-policy Auto '
+            '--exclude-zones 4 '
+            '--vm-sku {vm_sku} '
+        )
+
+        # verify the vmss was created with correct zone allocation policy
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('resiliencyPolicy.zoneAllocationPolicy.maxZoneCount', 3),
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_zone_placement_instance_percent_')
+    def test_vmss_zone_placement_policy_with_max_instance_percent(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss-zone-placement-003',
+            'location': 'eastus2euap',
+            'image': 'Debian:debian-10:10:latest',
+            'admin_username': 'testadmin',
+            'admin_password': 'testPassword0',
+            'vm_sku': 'Standard_B2ms'
+        })
+
+        # create vmss with instance percent policy
+        self.cmd(
+            'vmss create -g {rg} -n {vmss} -l {location} '
+            '--image {image} '
+            '--admin-username {admin_username} '
+            '--admin-password {admin_password} '
+            '--vm-sku {vm_sku} '
+            '--zone-placement-policy Auto '
+            '--instance-percent-policy true '
+            '--max-instance-percent 50 '
+        )
+
+        # verify the vmss was created with correct max instance percent policy
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('resiliencyPolicy.zoneAllocationPolicy.maxInstancePercentPerZonePolicy.enabled', True),
+            self.check('resiliencyPolicy.zoneAllocationPolicy.maxInstancePercentPerZonePolicy.value', 50),
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_zone_placement_combined_')
+    def test_vmss_zone_placement_policy_with_combined_parameters(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss-zone-placement-combined',
+            'location': 'westus2',
+            'image': 'MicrosoftWindowsServer:WindowsServer:2016-Datacenter:latest',
+            'admin_username': 'testadmin',
+            'admin_password': 'testPassword0',
+            'vm_sku': 'Standard_B2ms'
+        })
+
+        # create vmss with combined zone placement parameters
+        self.cmd(
+            'vmss create -g {rg} -n {vmss} -l {location} '
+            '--instance-count 3 '
+            '--image {image} '
+            '--admin-username {admin_username} '
+            '--admin-password {admin_password} '
+            '--upgrade-policy-mode Manual '
+            '--zone-placement-policy Auto '
+            '--include-zones 1 2 3 '
+            '--max-zone-count 2 '
+            '--instance-percent-policy true '
+            '--max-instance-percent 80 '
+            '--vm-sku {vm_sku} '
+        )
+
+        # verify all configurations are correctly set
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('placement.zonePlacementPolicy', 'Auto'),
+            self.check('placement.includeZones', ['1', '2', '3']),
+            self.check('resiliencyPolicy.zoneAllocationPolicy.maxZoneCount', 2),
+            self.check('resiliencyPolicy.zoneAllocationPolicy.maxInstancePercentPerZonePolicy.enabled', True),
+            self.check('resiliencyPolicy.zoneAllocationPolicy.maxInstancePercentPerZonePolicy.value', 80),
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_zone_placement_validation_')
+    def test_vmss_zone_placement_policy_validation_zones_conflict(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss-zone-placement-invalid',
+            'location': 'eastus2',
+            'image': 'MicrosoftWindowsServer:WindowsServer:2016-Datacenter:latest',
+            'admin_username': 'testadmin',
+            'admin_password': 'testPassword0',
+            'vm_sku': 'Standard_B2ms'
+        })
+
+        # this should fail because --zones and --zone-placement-policy are mutually exclusive
+        with self.assertRaisesRegex(Exception, 'zone-placement-policy cannot be used with --zones'):
+            self.cmd(
+                'vmss create -g {rg} -n {vmss} -l {location} '
+                '--instance-count 3 '
+                '--image {image} '
+                '--admin-username {admin_username} '
+                '--admin-password {admin_password} '
+                '--upgrade-policy-mode Manual '
+                '--zone-placement-policy Auto '
+                '--zones 1 2 '
+                '--vm-sku {vm_sku} '
+            )
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_zone_placement_overprovision_')
+    def test_vmss_zone_placement_policy_validation_overprovision_uniform(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss-zone-placement-overprovision',
+            'location': 'eastus2',
+            'image': 'MicrosoftWindowsServer:WindowsServer:2016-Datacenter:latest',
+            'admin_username': 'testadmin',
+            'admin_password': 'testPassword0',
+            'vm_sku': 'Standard_B2ms'
+        })
+
+        # this should fail for Uniform mode without --disable-overprovision
+        with self.assertRaisesRegex(Exception, 'zone placement policy does not support overprovisioning'):
+            self.cmd(
+                'vmss create -g {rg} -n {vmss} -l {location} '
+                '--instance-count 3 '
+                '--image {image} '
+                '--admin-username {admin_username} '
+                '--admin-password {admin_password} '
+                '--upgrade-policy-mode Manual '
+                '--zone-placement-policy Auto '
+                '--vm-sku {vm_sku} '
+                '--orchestration-mode Uniform'
+            )
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_zone_placement_instance_percent_validation_')
+    def test_vmss_zone_placement_instance_percent_validation(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss-zone-placement-percent-invalid',
+            'location': 'eastus2',
+            'image': 'MicrosoftWindowsServer:WindowsServer:2016-Datacenter:latest',
+            'admin_username': 'testadmin',
+            'admin_password': 'testPassword0',
+            'vm_sku': 'Standard_B2ms'
+        })
+
+        # this should fail because --instance-percent-policy true requires --max-instance-percent
+        with self.assertRaisesRegex(Exception, 'requires.*max-instance-percent'):
+            self.cmd(
+                'vmss create -g {rg} -n {vmss} -l {location} '
+                '--instance-count 3 '
+                '--image {image} '
+                '--admin-username {admin_username} '
+                '--admin-password {admin_password} '
+                '--upgrade-policy-mode Manual '
+                '--vm-sku {vm_sku} '
+                '--instance-percent-policy true '
+            )
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_zone_placement_percent_range_')
+    def test_vmss_zone_placement_instance_percent_range_validation(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss-zone-placement-percent-range',
+            'location': 'eastus2',
+            'image': 'MicrosoftWindowsServer:WindowsServer:2016-Datacenter:latest',
+            'admin_username': 'testadmin',
+            'admin_password': 'testPassword0',
+            'vm_sku': 'Standard_B2ms'
+        })
+
+        # this should fail because --max-instance-percent must be between 1 and 100
+        with self.assertRaisesRegex(Exception, 'must be an integer between 1 and 100'):
+            self.cmd(
+                'vmss create -g {rg} -n {vmss} -l {location} '
+                '--instance-count 3 '
+                '--image {image} '
+                '--admin-username {admin_username} '
+                '--admin-password {admin_password} '
+                '--upgrade-policy-mode Manual '
+                '--vm-sku {vm_sku} '
+                '--instance-percent-policy true '
+                '--max-instance-percent 150 '
+            )
+
+
+class VMSSUpdateZoneAllocationPolicyTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_max_zone_count_')
+    def test_vmss_update_max_zone_count(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss-update-zone-count',
+            'location': 'eastus2euap',
+            'image': 'OpenLogic:CentOS:7.5:latest',
+            'admin_username': 'testadmin',
+            'admin_password': 'testPassword0!@#',
+            'vm_sku': 'Standard_B2ms'
+        })
+
+        self.cmd(
+            'vmss create -g {rg} -n {vmss} -l {location} '
+            '--image {image} '
+            '--admin-username {admin_username} '
+            '--admin-password {admin_password} '
+            '--upgrade-policy-mode Manual '
+            '--zone-placement-policy Auto '
+            '--max-zone-count 3 '
+            '--vm-sku {vm_sku} '
+        )
+
+        # update vmss with max zone count
+        self.cmd(
+            'vmss update -g {rg} -n {vmss} '
+            '--max-zone-count 2'
+        )
+
+        # verify the VMSS was updated with correct max zone count
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('resiliencyPolicy.zoneAllocationPolicy.maxZoneCount', 2)
+        ])
+
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_instance_percent_')
+    def test_vmss_update_max_instance_percent_per_zone(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss-update-instance-percent',
+            'location': 'eastus2euap',
+            'image': 'OpenLogic:CentOS:7.5:latest',
+            'admin_username': 'testadmin',
+            'admin_password': 'testPassword0!@#',
+            'vm_sku': 'Standard_B2ms'
+        })
+
+        # create vmss without instance percent policy
+        self.cmd(
+            'vmss create -g {rg} -n {vmss} -l {location} '
+            '--image {image} '
+            '--admin-username {admin_username} '
+            '--admin-password {admin_password} '
+            '--upgrade-policy-mode Manual '
+            '--zone-placement-policy Auto '
+            '--vm-sku {vm_sku} '
+        )
+
+        # update vmss with instance percent policy
+        self.cmd(
+            'vmss update -g {rg} -n {vmss} '
+            '--instance-percent-policy true '
+            '--max-instance-percent 80'
+        )
+
+        # verify the policy was enabled with correct value
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('resiliencyPolicy.zoneAllocationPolicy.maxInstancePercentPerZonePolicy.enabled', True),
+            self.check('resiliencyPolicy.zoneAllocationPolicy.maxInstancePercentPerZonePolicy.value', 80)
+        ])
+
+        # update the percent value
+        self.cmd(
+            'vmss update -g {rg} -n {vmss} '
+            '--instance-percent-policy true '
+            '--max-instance-percent 90'
+        )
+
+        # verify the value was updated
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('resiliencyPolicy.zoneAllocationPolicy.maxInstancePercentPerZonePolicy.enabled', True),
+            self.check('resiliencyPolicy.zoneAllocationPolicy.maxInstancePercentPerZonePolicy.value', 90)
+        ])
+
+        # disable the policy
+        self.cmd(
+            'vmss update -g {rg} -n {vmss} '
+            '--instance-percent-policy false'
+        )
+
+        # verify the policy was disabled
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('resiliencyPolicy.zoneAllocationPolicy.maxInstancePercentPerZonePolicy.enabled', False)
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_combined_')
+    def test_vmss_update_combined_zone_allocation_policies(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss-update-combined',
+            'location': 'eastus2euap',
+            'image': 'MicrosoftWindowsServer:WindowsServer:2016-Datacenter:latest',
+            'admin_username': 'testadmin',
+            'admin_password': 'testPassword0!@#',
+            'vm_sku': 'Standard_B2ms'
+        })
+
+        # create vmss
+        self.cmd(
+            'vmss create -g {rg} -n {vmss} -l {location} '
+            '--image {image} '
+            '--admin-username {admin_username} '
+            '--admin-password {admin_password} '
+            '--upgrade-policy-mode Manual '
+            '--zone-placement-policy Auto '
+            '--vm-sku {vm_sku} '
+        )
+
+        # update with both max zone count and instance percent policy
+        self.cmd(
+            'vmss update -g {rg} -n {vmss} '
+            '--max-zone-count 2 '
+            '--instance-percent-policy true '
+            '--max-instance-percent 80'
+        )
+
+        # update both policies are set correctly
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('resiliencyPolicy.zoneAllocationPolicy.maxZoneCount', 2),
+            self.check('resiliencyPolicy.zoneAllocationPolicy.maxInstancePercentPerZonePolicy.enabled', True),
+            self.check('resiliencyPolicy.zoneAllocationPolicy.maxInstancePercentPerZonePolicy.value', 80)
+        ])
+
+        # update both values again
+        self.cmd(
+            'vmss update -g {rg} -n {vmss} '
+            '--max-zone-count 3 '
+            '--instance-percent-policy true '
+            '--max-instance-percent 70'
+        )
+
+        # verify the updates
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('resiliencyPolicy.zoneAllocationPolicy.maxZoneCount', 3),
+            self.check('resiliencyPolicy.zoneAllocationPolicy.maxInstancePercentPerZonePolicy.enabled', True),
+            self.check('resiliencyPolicy.zoneAllocationPolicy.maxInstancePercentPerZonePolicy.value', 70)
+        ])
+
+
 if __name__ == '__main__':
     unittest.main()
