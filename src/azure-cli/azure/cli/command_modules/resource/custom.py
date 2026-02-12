@@ -1382,11 +1382,11 @@ def _build_stacks_confirmation_string(
     return build_confirmation_string
 
 
-def _prepare_stacks_templates_and_parameters(cmd, rcf, deployment_scope, deployment_stack_model, template_file, template_spec, template_uri, parameters, query_string):
+def _prepare_stacks_templates_and_parameters(
+    cmd, deployment_scope, deployment_stack_model, template_file, template_spec, template_uri, parameters, query_string
+):
     t_spec, t_uri = None, None
     template_obj = None
-
-    DeploymentStacksTemplateLink = cmd.get_models('DeploymentStacksTemplateLink')
 
     if template_file:
         pass
@@ -1401,23 +1401,23 @@ def _prepare_stacks_templates_and_parameters(cmd, rcf, deployment_scope, deploym
             "Please enter one of the following: template file, template spec, template url, or Bicep parameters file.")
 
     if t_spec:
-        deployment_stack_model.template_link = DeploymentStacksTemplateLink(id=t_spec)
+        deployment_stack_model.template_link = StackModels.DeploymentStacksTemplateLink(id=t_spec)
         template_obj = _load_template_spec_template(cmd, template_spec)
     elif t_uri:
         if query_string:
-            deployment_stacks_template_link = DeploymentStacksTemplateLink(
+            deployment_stacks_template_link = StackModels.DeploymentStacksTemplateLink(
                 uri=t_uri, query_string=query_string)
             t_uri = _prepare_template_uri_with_query_string(
                 template_uri=t_uri, input_query_string=query_string)
         else:
-            deployment_stacks_template_link = DeploymentStacksTemplateLink(uri=t_uri)
+            deployment_stacks_template_link = StackModels.DeploymentStacksTemplateLink(uri=t_uri)
         deployment_stack_model.template_link = deployment_stacks_template_link
         template_obj = _remove_comments_from_json(_urlretrieve(t_uri).decode('utf-8'), file_path=t_uri)
     elif _is_bicepparam_file_provided(parameters):
         template_content, template_spec_id, bicepparam_json_content = _parse_bicepparam_file(cmd, template_file, parameters)
         if template_spec_id:
             template_obj = _load_template_spec_template(cmd, template_spec_id)
-            deployment_stack_model.template_link = DeploymentStacksTemplateLink(id=template_spec_id)
+            deployment_stack_model.template_link = StackModels.DeploymentStacksTemplateLink(id=template_spec_id)
         elif template_content:
             template_obj = _remove_comments_from_json(template_content)
             deployment_stack_model.template = json.loads(json.dumps(template_obj))
@@ -2526,7 +2526,7 @@ def create_deployment_stack_at_subscription(
         deployment_scope = 'subscription'
 
     deployment_stack_model = _prepare_stacks_templates_and_parameters(
-        cmd, rcf, deployment_scope, deployment_stack_model, template_file, template_spec, template_uri, parameters, query_string)
+        cmd, deployment_scope, deployment_stack_model, template_file, template_spec, template_uri, parameters, query_string)
 
     # run validate
     from azure.core.exceptions import HttpResponseError
@@ -2662,7 +2662,7 @@ def create_deployment_stack_at_resource_group(
 
     # validate and prepare template & paramaters
     deployment_stack_model = _prepare_stacks_templates_and_parameters(
-        cmd, rcf, 'resourceGroup', deployment_stack_model, template_file, template_spec, template_uri, parameters, query_string)
+        cmd, 'resourceGroup', deployment_stack_model, template_file, template_spec, template_uri, parameters, query_string)
 
     # run validate
     from azure.core.exceptions import HttpResponseError
@@ -2908,7 +2908,7 @@ def _prepare_validate_stack_at_scope(
         deployment_scope = 'resourceGroup'
 
     deployment_stack_model = _prepare_stacks_templates_and_parameters(
-        cmd, rcf, deployment_scope, deployment_stack_model, template_file, template_spec, template_uri, parameters, query_string)
+        cmd, deployment_scope, deployment_stack_model, template_file, template_spec, template_uri, parameters, query_string)
 
     return deployment_stack_model
 
@@ -2961,7 +2961,7 @@ def create_deployment_stack_at_management_group(
         deployment_scope = 'managementGroup'
 
     deployment_stack_model = _prepare_stacks_templates_and_parameters(
-        cmd, rcf, deployment_scope, deployment_stack_model, template_file, template_spec, template_uri, parameters, query_string)
+        cmd, deployment_scope, deployment_stack_model, template_file, template_spec, template_uri, parameters, query_string)
 
     # run validate
     from azure.core.exceptions import HttpResponseError
