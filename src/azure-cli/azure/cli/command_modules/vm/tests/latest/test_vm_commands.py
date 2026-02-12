@@ -6283,8 +6283,10 @@ class MSIScenarioTest(ScenarioTest):
         emsi2_result = self.cmd('identity create -g {rg} -n {emsi2}').get_output_in_json()
 
         # create a vmss with system + user assigned identities
-        result = self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --assign-identity {emsi} [system] '
-                          '--role reader --scope {scope} --instance-count 1 --generate-ssh-keys --admin-username ubuntuadmin --orchestration-mode Uniform --lb-sku Standard').get_output_in_json()
+        result = self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:16.04-LTS:latest '
+                          '--assign-identity {emsi} [system] --role reader --scope {scope} --instance-count 1 '
+                          '--generate-ssh-keys --admin-username ubuntuadmin --orchestration-mode Uniform '
+                          '--lb-sku Standard --vm-sku Standard_B1ls').get_output_in_json()
         emsis = [x.lower() for x in result['vmss']['identity']['userAssignedIdentities'].keys()]
         self.assertEqual(emsis, [emsi_result['id'].lower()])
 
