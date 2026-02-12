@@ -2486,7 +2486,8 @@ def detach_managed_data_disk(cmd, resource_group_name, vm_name, disk_name=None, 
         vm = get_vm_to_update_by_aaz(cmd, resource_group_name, vm_name)
         if not force_detach:
             # pylint: disable=no-member
-            leftovers = [d for d in vm.get("storageProfile", {}).get("dataDisks", []) if d["name"].lower() != disk_name.lower()]
+            leftovers = [d for d in vm.get("storageProfile", {}).get("dataDisks", [])
+                         if d["name"].lower() != disk_name.lower()]
             if len(vm.get("storageProfile", {}).get("dataDisks", [])) == len(leftovers):
                 raise ResourceNotFoundError("No disk with the name '{}' was found".format(disk_name))
         else:
