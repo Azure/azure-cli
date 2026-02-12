@@ -512,7 +512,8 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
             from .aaz.latest.image import Show as ImageShow
             command_args = {
                 'image_name': res['name'],
-                'resource_group': res['resource_group']
+                'resource_group': res['resource_group'],
+                'subscription': res['subscription']
             }
             image_info = ImageShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
