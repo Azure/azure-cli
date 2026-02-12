@@ -597,7 +597,7 @@ class MainCommandsLoader(CLICommandsLoader):
             tags = item.get('tags', '')
             commands_items.append((name, tags, item.get('summary', '')))
             max_line_len = max(max_line_len, _get_line_len(name, tags))
-        
+
         # Display groups
         if groups_items:
             print("\nSubgroups:")
@@ -613,7 +613,7 @@ class MainCommandsLoader(CLICommandsLoader):
                     summary=summary
                 )
                 _print_indent(line, indent, _get_hanging_indent(max_line_len, indent))
-        
+
         # Display commands
         if commands_items:
             print("\nCommands:")
@@ -629,23 +629,23 @@ class MainCommandsLoader(CLICommandsLoader):
                     summary=summary
                 )
                 _print_indent(line, indent, _get_hanging_indent(max_line_len, indent))
-        
+
         print("\nTo search AI knowledge base for examples, use: az find \"az \"")
-        
+
         # Show update notification
         from azure.cli.core.util import show_updates_available
         show_updates_available(new_line_after=True)
-    
+
     def _cache_help_index(self, command_index):
         """Cache help summary for top-level (root) help only."""
         try:
             from azure.cli.core.parser import AzCliCommandParser
             from azure.cli.core._help import CliGroupHelpFile
-            
+
             # Create a temporary parser to extract help information
             parser = AzCliCommandParser(self.cli_ctx)
             parser.load_command_table(self)
-            
+
             # Helper to build tag string for an item
             def _get_tags(item):
                 tags = []
@@ -656,40 +656,40 @@ class MainCommandsLoader(CLICommandsLoader):
                 if hasattr(item, 'experimental_info') and item.experimental_info:
                     tags.append(str(item.experimental_info.tag))
                 return ' '.join(tags)
-            
+
             # Only cache root level help
             subparser = parser.subparsers.get(tuple())
             if subparser:
                 help_file = CliGroupHelpFile(self.cli_ctx.invocation.help, '', subparser)
                 help_file.load(subparser)
-                
+
                 groups = {}
                 commands = {}
-                
+
                 for child in help_file.children:
                     if hasattr(child, 'name') and hasattr(child, 'short_summary'):
                         # Only include top-level items (no spaces in name)
                         child_name = child.name
                         if ' ' in child_name:
                             continue
-                        
+
                         tags = _get_tags(child)
                         item_data = {
                             'summary': child.short_summary,
                             'tags': tags
                         }
-                        
+
                         if child.type == 'group':
                             groups[child_name] = item_data
                         else:
                             commands[child_name] = item_data
-                
+
                 # Store only root level help
                 if groups or commands:
                     help_index_data = {'root': {'groups': groups, 'commands': commands}}
                     command_index.INDEX[command_index._HELP_INDEX] = help_index_data
                     logger.debug("Cached top-level help with %d groups and %d commands", len(groups), len(commands))
-        
+
         except Exception as ex:  # pylint: disable=broad-except
             logger.debug("Failed to cache help data: %s", ex)
 
@@ -954,7 +954,7 @@ class CommandIndex:
 
     def get_help_index(self):
         """Get the help index for top-level help display.
-        
+
         :return: Dictionary mapping top-level commands to their short summaries, or None if not available
         """
         # Check if index is valid
@@ -963,12 +963,12 @@ class CommandIndex:
         if not (index_version and index_version == self.version and
                 cloud_profile and cloud_profile == self.cloud_profile):
             return None
-        
+
         help_index = self.INDEX.get(self._HELP_INDEX, {})
         if help_index:
             logger.debug("Using cached help index with %d entries", len(help_index))
             return help_index
-        
+
         return None
 
     def update(self, command_table):
@@ -991,7 +991,7 @@ class CommandIndex:
             module_name = command.loader.__module__
             if module_name not in index[top_command]:
                 index[top_command].append(module_name)
-        
+
         elapsed_time = timeit.default_timer() - start_time
         self.INDEX[self._COMMAND_INDEX] = index
         # Note: helpIndex is populated separately when az --help is displayed
