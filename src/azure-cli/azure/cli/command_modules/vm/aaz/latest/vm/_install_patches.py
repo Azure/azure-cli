@@ -11,9 +11,6 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "vm install-patches",
-)
 class InstallPatches(AAZCommand):
     """Installs patches on the VM.
 
