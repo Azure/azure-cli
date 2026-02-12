@@ -788,3 +788,9 @@ class DiskCreateOptionTypes(Enum):
     EMPTY = 'Empty'
     FROM_IMAGE = 'FromImage'
     RESTORE = 'Restore'
+
+
+class UpgradeMode(Enum):
+    AUTOMATIC = 'Automatic'
+    MANUAL = 'Manual'
+    ROLLING = 'Rolling'

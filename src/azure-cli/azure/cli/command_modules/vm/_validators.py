@@ -1452,6 +1452,15 @@ def _validate_generation_version_and_trusted_launch(cmd, namespace):
                                                        namespace.os_offer, namespace.os_sku)
             vm_image_info = client.get(namespace.location, namespace.os_publisher, namespace.os_offer,
                                        namespace.os_sku, os_version)
+
+            if vm_image_info.image_deprecation_status.image_state == 'ScheduledForDeprecation':
+                logger.warning(
+                    'Warning: This image %s is scheduled for deprecation and will be blocked after %s.\n'
+                    'VM / VMSS creation is allowed temporarily, but future deployments, redeployments, or '
+                    'scale‑out operations may fail after this date.\n'
+                    'Consider switching to a supported image now.', namespace.image,
+                    vm_image_info.image_deprecation_status.scheduled_deprecation_time.strftime("%B %d, %Y"))
+
             generation_version = vm_image_info.hyper_v_generation if hasattr(vm_image_info,
                                                                              'hyper_v_generation') else None
             features = vm_image_info.features if hasattr(vm_image_info, 'features') and vm_image_info.features else []
