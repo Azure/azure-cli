@@ -53,7 +53,7 @@ Section: python
 Priority: extra
 Maintainer: Azure Python CLI Team <azpycli@microsoft.com>
 Build-Depends: debhelper (>= 9), libssl-dev, libffi-dev, python3-dev
-Depends: libwebkit2gtk-4.1-0
+Depends: libwebkit2gtk-4.1-dev
 Standards-Version: 3.9.5
 Homepage: https://github.com/azure/azure-cli
 
@@ -105,6 +105,9 @@ ${TAB}dh \$@ --sourcedirectory $source_dir
 
 override_dh_clean:
 ${TAB}dh_clean --exclude=__pycache__
+
+override_dh_shlibdeps:
+${TAB}dh_shlibdeps -X */site-packages/pymsalruntime/*
 
 override_dh_install:
 ${TAB}mkdir -p debian/azure-cli/opt/az
