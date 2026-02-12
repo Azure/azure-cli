@@ -803,3 +803,9 @@ class VMGuestPatchClassificationLinux(Enum):
     CRITICAL = 'Critical'
     OTHER = 'Other'
     SECURITY = 'Security'
+
+
+class UpgradeMode(Enum):
+    AUTOMATIC = 'Automatic'
+    MANUAL = 'Manual'
+    ROLLING = 'Rolling'
