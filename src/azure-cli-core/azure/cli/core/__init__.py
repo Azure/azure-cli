@@ -453,35 +453,6 @@ class MainCommandsLoader(CLICommandsLoader):
         # Set fallback=False to turn off command index in case of regression
         use_command_index = self.cli_ctx.config.getboolean('core', 'use_command_index', fallback=True)
         
-        # Fast path for top-level help only (az --help or az with no args)
-        # Only use cache for root level, not for modules/commands
-        if use_command_index and args and ('--help' in args or '-h' in args or args[-1] == 'help'):
-            # Check if this is top-level help request (no command path)
-            has_command_path = False
-            for arg in args:
-                if arg in ('--help', '-h', 'help'):
-                    break
-                if not arg.startswith('-'):
-                    has_command_path = True
-                    break
-            
-            # Only use cache for top-level help (no command arguments before --help)
-            if not has_command_path:
-                command_index = CommandIndex(self.cli_ctx)
-                help_index = command_index.get_help_index()
-                if help_index and 'root' in help_index:
-                    logger.debug("Using cached help index for root, skipping module loading")
-                    self._display_cached_help(help_index['root'], 'root')
-                    sys.exit(0)
-        # Fast path for top-level with no args (az with no arguments)
-        elif use_command_index and not args:
-            command_index = CommandIndex(self.cli_ctx)
-            help_index = command_index.get_help_index()
-            if help_index and 'root' in help_index:
-                logger.debug("Using cached help index for root, skipping module loading")
-                self._display_cached_help(help_index['root'], 'root')
-                sys.exit(0)
-        
         if use_command_index:
             command_index = CommandIndex(self.cli_ctx)
             index_result = command_index.get(args)
