@@ -1327,8 +1327,7 @@ def _prepare_stacks_action_on_unmanage(action_on_unmanage):
 
     return StackModels.ActionOnUnmanage(
         resources=aou_resources_action_enum, resource_groups=aou_resource_groups_action_enum,
-        management_groups=aou_management_groups_action_enum,
-        resources_without_delete_support=None)
+        management_groups=aou_management_groups_action_enum)
 
 def _prepare_stacks_excluded_actions(deny_settings_excluded_actions):
     excluded_actions_array = []
@@ -2605,7 +2604,7 @@ def delete_deployment_stack_at_subscription(
             delete_name, unmanage_action_resources=action_on_unmanage_model.resources,
             unmanage_action_resource_groups=action_on_unmanage_model.resource_groups,
             unmanage_action_management_groups=action_on_unmanage_model.management_groups,
-            unmanage_action_resources_without_delete_support=action_on_unmanage_model.resources_without_delete_support,
+            # unmanage_action_resources_without_delete_support=action_on_unmanage_model.resources_without_delete_support,
             bypass_stack_out_of_sync_error=bypass_stack_out_of_sync_error)
     raise InvalidArgumentValueError("Please enter the stack name or stack resource id")
 
@@ -2740,7 +2739,7 @@ def delete_deployment_stack_at_resource_group(
             unmanage_action_resources=action_on_unmanage_model.resources,
             unmanage_action_resource_groups=action_on_unmanage_model.resource_groups,
             unmanage_action_management_groups=action_on_unmanage_model.management_groups,
-            unmanage_action_resources_without_delete_support=action_on_unmanage_model.resources_without_delete_support,
+            # unmanage_action_resources_without_delete_support=action_on_unmanage_model.resources_without_delete_support,
             bypass_stack_out_of_sync_error=bypass_stack_out_of_sync_error)
     if id:
         stack_arr = id.split('/')
@@ -2757,7 +2756,7 @@ def delete_deployment_stack_at_resource_group(
             unmanage_action_resources=action_on_unmanage_model.resources,
             unmanage_action_resource_groups=action_on_unmanage_model.resource_groups,
             unmanage_action_management_groups=action_on_unmanage_model.management_groups,
-            unmanage_action_resources_without_delete_support=action_on_unmanage_model.resources_without_delete_support,
+            # unmanage_action_resources_without_delete_support=action_on_unmanage_model.resources_without_delete_support,
             bypass_stack_out_of_sync_error=bypass_stack_out_of_sync_error)
     raise InvalidArgumentValueError("Please enter the (stack name and resource group) or stack resource id")
 
@@ -3042,7 +3041,7 @@ def delete_deployment_stack_at_management_group(
             management_group_id, delete_name, unmanage_action_resources=action_on_unmanage_model.resources,
             unmanage_action_resource_groups=action_on_unmanage_model.resource_groups,
             unmanage_action_management_groups=action_on_unmanage_model.management_groups,
-            unmanage_action_resources_without_delete_support=action_on_unmanage_model.resources_without_delete_support,
+            # unmanage_action_resources_without_delete_support=action_on_unmanage_model.resources_without_delete_support,
             bypass_stack_out_of_sync_error=bypass_stack_out_of_sync_error)
     raise InvalidArgumentValueError("Please enter the stack name or stack resource id")
 
