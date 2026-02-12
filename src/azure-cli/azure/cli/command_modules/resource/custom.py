@@ -21,7 +21,7 @@ from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
 from azure.mgmt.resource.resources.models import GenericResource
 from azure.mgmt.resource.deployments.models import DeploymentMode
 from azure.mgmt.resource.deploymentstacks.models import (
-    ActionOnUnmanage, DenySettings, DenySettingsMode, DenyStatusMode, UnmanageActionManagementGroupMode, UnmanageActionResourceMode, UnmanageActionResourceGroupMode, ResourcesWithoutDeleteSupportAction
+    ActionOnUnmanage, DenySettings, DenySettingsMode, DenyStatusMode, DeploymentStack, DeploymentStackProperties, UnmanageActionManagementGroupMode, UnmanageActionResourceMode, UnmanageActionResourceGroupMode, ResourcesWithoutDeleteSupportAction
 )
 
 from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueError, ResourceNotFoundError
@@ -2513,9 +2513,10 @@ def create_deployment_stack_at_subscription(
     apply_to_child_scopes = deny_settings_apply_to_child_scopes
     deny_settings_model = DenySettings(
         mode=deny_settings_enum, excluded_principals=excluded_principals_array, excluded_actions=excluded_actions_array, apply_to_child_scopes=apply_to_child_scopes)
-    deployment_stack_model = rcf.deployment_stacks.models.DeploymentStack(
-        description=description, location=location, action_on_unmanage=action_on_unmanage_model, deny_settings=deny_settings_model,
-        bypass_stack_out_of_sync_error=bypass_stack_out_of_sync_error, tags=tags)
+    deployment_stack_properties_model = DeploymentStackProperties(
+        action_on_unmanage=action_on_unmanage_model, bypass_stack_out_of_sync_error=bypass_stack_out_of_sync_error,
+        deny_settings=deny_settings_model, description=description)
+    deployment_stack_model = DeploymentStack(location=location, tags=tags, properties=deployment_stack_properties_model)
 
     if deployment_resource_group:
         deployment_stack_model.deployment_scope = "/subscriptions/" + \
@@ -2654,9 +2655,10 @@ def create_deployment_stack_at_resource_group(
     apply_to_child_scopes = deny_settings_apply_to_child_scopes
     deny_settings_model = DenySettings(
         mode=deny_settings_enum, excluded_principals=excluded_principals_array, excluded_actions=excluded_actions_array, apply_to_child_scopes=apply_to_child_scopes)
-    deployment_stack_model = rcf.deployment_stacks.models.DeploymentStack(
-        description=description, action_on_unmanage=action_on_unmanage_model, deny_settings=deny_settings_model,
-        bypass_stack_out_of_sync_error=bypass_stack_out_of_sync_error, tags=tags)
+    deployment_stack_properties_model = DeploymentStackProperties(
+        action_on_unmanage=action_on_unmanage_model, bypass_stack_out_of_sync_error=bypass_stack_out_of_sync_error,
+        deny_settings=deny_settings_model, description=description)
+    deployment_stack_model = DeploymentStack(tags=tags, properties=deployment_stack_properties_model)
 
     # validate and prepare template & paramaters
     deployment_stack_model = _prepare_stacks_templates_and_parameters(
@@ -2891,9 +2893,10 @@ def _prepare_validate_stack_at_scope(
     deny_settings_model = DenySettings(
         mode=deny_settings_enum, excluded_principals=excluded_principals_array, excluded_actions=excluded_actions_array,
         apply_to_child_scopes=apply_to_child_scopes)
-    deployment_stack_model = rcf.deployment_stacks.models.DeploymentStack(
-        description=description, location=location, action_on_unmanage=action_on_unmanage_model, deny_settings=deny_settings_model,
-        tags=tags, bypass_stack_out_of_sync_error=bypass_stack_out_of_sync_error)
+    deployment_stack_properties_model = DeploymentStackProperties(
+        action_on_unmanage=action_on_unmanage_model, bypass_stack_out_of_sync_error=bypass_stack_out_of_sync_error,
+        deny_settings=deny_settings_model, description=description)
+    deployment_stack_model = DeploymentStack(location=location, tags=tags, properties=deployment_stack_properties_model)
 
     if deployment_scope == 'managementGroup' and deployment_subscription:
         deployment_stack_model.deployment_scope = f"/subscriptions/{deployment_subscription}"
@@ -2945,9 +2948,10 @@ def create_deployment_stack_at_management_group(
     apply_to_child_scopes = deny_settings_apply_to_child_scopes
     deny_settings_model = DenySettings(
         mode=deny_settings_enum, excluded_principals=excluded_principals_array, excluded_actions=excluded_actions_array, apply_to_child_scopes=apply_to_child_scopes)
-    deployment_stack_model = rcf.deployment_stacks.models.DeploymentStack(
-        description=description, location=location, action_on_unmanage=action_on_unmanage_model, deny_settings=deny_settings_model,
-        bypass_stack_out_of_sync_error=bypass_stack_out_of_sync_error, tags=tags)
+    deployment_stack_properties_model = DeploymentStackProperties(
+        action_on_unmanage=action_on_unmanage_model, bypass_stack_out_of_sync_error=bypass_stack_out_of_sync_error,
+        deny_settings=deny_settings_model, description=description)
+    deployment_stack_model = DeploymentStack(location=location, tags=tags, properties=deployment_stack_properties_model)
 
     if deployment_subscription:
         deployment_stack_model.deployment_scope = "/subscriptions/" + deployment_subscription
