@@ -20,9 +20,7 @@ from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
 
 from azure.mgmt.resource.resources.models import GenericResource
 from azure.mgmt.resource.deployments.models import DeploymentMode
-from azure.mgmt.resource.deploymentstacks.models import (
-    ActionOnUnmanage, DenySettings, DenySettingsMode, DenyStatusMode, DeploymentStack, DeploymentStackProperties, UnmanageActionManagementGroupMode, UnmanageActionResourceMode, UnmanageActionResourceGroupMode, ResourcesWithoutDeleteSupportAction
-)
+import azure.mgmt.resource.deploymentstacks.models as StackModels
 
 from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueError, ResourceNotFoundError
 from azure.cli.core.parser import IncorrectUsageError
@@ -1293,12 +1291,12 @@ def _get_deployment_management_client(cli_ctx, aux_subscriptions=None, aux_tenan
 
 def _prepare_stacks_deny_settings(deny_settings_mode):
     deny_settings_mode = None if deny_settings_mode.lower() == "none" else deny_settings_mode
-    deny_settings_enum = DenySettingsMode.NONE
+    deny_settings_enum = StackModels.DenySettingsMode.NONE
     if deny_settings_mode:
-        if deny_settings_mode.lower().replace(' ', '') == DenyStatusMode.DENY_DELETE:
-            deny_settings_enum = DenyStatusMode.DENY_DELETE
-        elif deny_settings_mode.lower().replace(' ', '') == DenyStatusMode.DENY_WRITE_AND_DELETE:
-            deny_settings_enum = DenyStatusMode.DENY_WRITE_AND_DELETE
+        if deny_settings_mode.lower().replace(' ', '') == StackModels.DenyStatusMode.DENY_DELETE:
+            deny_settings_enum = StackModels.DenyStatusMode.DENY_DELETE
+        elif deny_settings_mode.lower().replace(' ', '') == StackModels.DenyStatusMode.DENY_WRITE_AND_DELETE:
+            deny_settings_enum = StackModels.DenyStatusMode.DENY_WRITE_AND_DELETE
         else:
             raise InvalidArgumentValueError("Please enter only one of the following: denyDelete, or denyWriteAndDelete")
 
@@ -1318,17 +1316,17 @@ def _prepare_stacks_excluded_principals(deny_settings_excluded_principals):
 
 def _prepare_stacks_action_on_unmanage(action_on_unmanage):
     # TODO(kylealbert): resource without delete support
-    aou_resources_action_enum, aou_resource_groups_action_enum, aou_management_groups_action_enum = UnmanageActionResourceMode.DETACH, UnmanageActionResourceGroupMode.DETACH, UnmanageActionManagementGroupMode.DETACH
+    aou_resources_action_enum, aou_resource_groups_action_enum, aou_management_groups_action_enum = None, None, None
 
     if action_on_unmanage == StacksActionOnUnmanage.DELETE_RESOURCES:
-        aou_resources_action_enum = UnmanageActionResourceMode.DELETE
+        aou_resources_action_enum = StackModels.UnmanageActionResourceMode.DELETE
     elif action_on_unmanage == StacksActionOnUnmanage.DELETE_ALL:
-        aou_resources_action_enum, aou_resource_groups_action_enum, aou_management_groups_action_enum = UnmanageActionResourceMode.DELETE, UnmanageActionResourceGroupMode.DELETE, UnmanageActionManagementGroupMode.DELETE
+        aou_resources_action_enum, aou_resource_groups_action_enum, aou_management_groups_action_enum = StackModels.UnmanageActionResourceMode.DELETE, StackModels.UnmanageActionResourceGroupMode.DELETE, StackModels.UnmanageActionManagementGroupMode.DELETE
 
-    return ActionOnUnmanage(
+    return StackModels.ActionOnUnmanage(
         resources=aou_resources_action_enum, resource_groups=aou_resource_groups_action_enum,
         management_groups=aou_management_groups_action_enum,
-        resources_without_delete_support=ResourcesWithoutDeleteSupportAction.FAIL)
+        resources_without_delete_support=None)
 
 def _prepare_stacks_excluded_actions(deny_settings_excluded_actions):
     excluded_actions_array = []
@@ -2511,12 +2509,12 @@ def create_deployment_stack_at_subscription(
         pass
 
     apply_to_child_scopes = deny_settings_apply_to_child_scopes
-    deny_settings_model = DenySettings(
+    deny_settings_model = StackModels.DenySettings(
         mode=deny_settings_enum, excluded_principals=excluded_principals_array, excluded_actions=excluded_actions_array, apply_to_child_scopes=apply_to_child_scopes)
-    deployment_stack_properties_model = DeploymentStackProperties(
+    deployment_stack_properties_model = StackModels.DeploymentStackProperties(
         action_on_unmanage=action_on_unmanage_model, bypass_stack_out_of_sync_error=bypass_stack_out_of_sync_error,
         deny_settings=deny_settings_model, description=description)
-    deployment_stack_model = DeploymentStack(location=location, tags=tags, properties=deployment_stack_properties_model)
+    deployment_stack_model = StackModels.DeploymentStack(location=location, tags=tags, properties=deployment_stack_properties_model)
 
     if deployment_resource_group:
         deployment_stack_model.deployment_scope = "/subscriptions/" + \
@@ -2568,11 +2566,11 @@ def delete_deployment_stack_at_subscription(
     action_on_unmanage_model = _prepare_stacks_action_on_unmanage(action_on_unmanage)
 
     delete_list = []
-    if action_on_unmanage_model.resources == UnmanageActionResourceMode.DELETE:
+    if action_on_unmanage_model.resources == StackModels.UnmanageActionResourceMode.DELETE:
         delete_list.append("resources")
-    if action_on_unmanage_model.resource_groups == UnmanageActionResourceGroupMode.DELETE:
+    if action_on_unmanage_model.resource_groups == StackModels.UnmanageActionResourceGroupMode.DELETE:
         delete_list.append("resource groups")
-    if action_on_unmanage_model.management_groups == UnmanageActionManagementGroupMode.DELETE:
+    if action_on_unmanage_model.management_groups == StackModels.UnmanageActionManagementGroupMode.DELETE:
         delete_list.append("management groups")
 
     # build confirmation string
@@ -2653,12 +2651,12 @@ def create_deployment_stack_at_resource_group(
         pass
 
     apply_to_child_scopes = deny_settings_apply_to_child_scopes
-    deny_settings_model = DenySettings(
+    deny_settings_model = StackModels.DenySettings(
         mode=deny_settings_enum, excluded_principals=excluded_principals_array, excluded_actions=excluded_actions_array, apply_to_child_scopes=apply_to_child_scopes)
-    deployment_stack_properties_model = DeploymentStackProperties(
+    deployment_stack_properties_model = StackModels.DeploymentStackProperties(
         action_on_unmanage=action_on_unmanage_model, bypass_stack_out_of_sync_error=bypass_stack_out_of_sync_error,
         deny_settings=deny_settings_model, description=description)
-    deployment_stack_model = DeploymentStack(tags=tags, properties=deployment_stack_properties_model)
+    deployment_stack_model = StackModels.DeploymentStack(tags=tags, properties=deployment_stack_properties_model)
 
     # validate and prepare template & paramaters
     deployment_stack_model = _prepare_stacks_templates_and_parameters(
@@ -2710,11 +2708,11 @@ def delete_deployment_stack_at_resource_group(
     action_on_unmanage_model = _prepare_stacks_action_on_unmanage(action_on_unmanage)
 
     delete_list = []
-    if action_on_unmanage_model.resources == UnmanageActionResourceMode.DELETE:
+    if action_on_unmanage_model.resources == StackModels.UnmanageActionResourceMode.DELETE:
         delete_list.append("resources")
-    if action_on_unmanage_model.resource_groups == UnmanageActionResourceGroupMode.DELETE:
+    if action_on_unmanage_model.resource_groups == StackModels.UnmanageActionResourceGroupMode.DELETE:
         delete_list.append("resource groups")
-    if action_on_unmanage_model.management_groups == UnmanageActionManagementGroupMode.DELETE:
+    if action_on_unmanage_model.management_groups == StackModels.UnmanageActionManagementGroupMode.DELETE:
         delete_list.append("management groups")
 
     # build confirmation string
@@ -2890,13 +2888,13 @@ def _prepare_validate_stack_at_scope(
             "Please enter only one of the following: template file, template spec, or template url")
 
     apply_to_child_scopes = deny_settings_apply_to_child_scopes
-    deny_settings_model = DenySettings(
+    deny_settings_model = StackModels.DenySettings(
         mode=deny_settings_enum, excluded_principals=excluded_principals_array, excluded_actions=excluded_actions_array,
         apply_to_child_scopes=apply_to_child_scopes)
-    deployment_stack_properties_model = DeploymentStackProperties(
+    deployment_stack_properties_model = StackModels.DeploymentStackProperties(
         action_on_unmanage=action_on_unmanage_model, bypass_stack_out_of_sync_error=bypass_stack_out_of_sync_error,
         deny_settings=deny_settings_model, description=description)
-    deployment_stack_model = DeploymentStack(location=location, tags=tags, properties=deployment_stack_properties_model)
+    deployment_stack_model = StackModels.DeploymentStack(location=location, tags=tags, properties=deployment_stack_properties_model)
 
     if deployment_scope == 'managementGroup' and deployment_subscription:
         deployment_stack_model.deployment_scope = f"/subscriptions/{deployment_subscription}"
@@ -2946,12 +2944,12 @@ def create_deployment_stack_at_management_group(
         pass
 
     apply_to_child_scopes = deny_settings_apply_to_child_scopes
-    deny_settings_model = DenySettings(
+    deny_settings_model = StackModels.DenySettings(
         mode=deny_settings_enum, excluded_principals=excluded_principals_array, excluded_actions=excluded_actions_array, apply_to_child_scopes=apply_to_child_scopes)
-    deployment_stack_properties_model = DeploymentStackProperties(
+    deployment_stack_properties_model = StackModels.DeploymentStackProperties(
         action_on_unmanage=action_on_unmanage_model, bypass_stack_out_of_sync_error=bypass_stack_out_of_sync_error,
         deny_settings=deny_settings_model, description=description)
-    deployment_stack_model = DeploymentStack(location=location, tags=tags, properties=deployment_stack_properties_model)
+    deployment_stack_model = StackModels.DeploymentStack(location=location, tags=tags, properties=deployment_stack_properties_model)
 
     if deployment_subscription:
         deployment_stack_model.deployment_scope = "/subscriptions/" + deployment_subscription
@@ -3003,11 +3001,11 @@ def delete_deployment_stack_at_management_group(
     action_on_unmanage_model = _prepare_stacks_action_on_unmanage(action_on_unmanage)
 
     delete_list = []
-    if action_on_unmanage_model.resources == UnmanageActionResourceMode.DELETE:
+    if action_on_unmanage_model.resources == StackModels.UnmanageActionResourceMode.DELETE:
         delete_list.append("resources")
-    if action_on_unmanage_model.resource_groups == UnmanageActionResourceGroupMode.DELETE:
+    if action_on_unmanage_model.resource_groups == StackModels.UnmanageActionResourceGroupMode.DELETE:
         delete_list.append("resource groups")
-    if action_on_unmanage_model.management_groups == UnmanageActionManagementGroupMode.DELETE:
+    if action_on_unmanage_model.management_groups == StackModels.UnmanageActionManagementGroupMode.DELETE:
         delete_list.append("management groups")
 
     # build confirmation string
