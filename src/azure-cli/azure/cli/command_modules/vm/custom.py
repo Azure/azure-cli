@@ -6278,12 +6278,16 @@ def set_vmss_applications(cmd, vmss_name, resource_group_name, application_versi
 
 
 def list_vmss_applications(cmd, vmss_name, resource_group_name):
-    client = _compute_client_factory(cmd.cli_ctx)
+    from .aaz.latest.vmss import Show as VmssShow
     try:
-        vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+        command_args = {
+            'resource_group': resource_group_name,
+            'vm_scale_set_name': vmss_name
+        }
+        vmss = VmssShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
     except ResourceNotFoundError:
         raise ResourceNotFoundError('Could not find vmss {}.'.format(vmss_name))
-    return vmss.virtual_machine_profile.application_profile
+    return vmss.get('virtualMachineProfile', {}).get('applicationProfile')
 
 
 # region Restore point collection
