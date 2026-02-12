@@ -11,7 +11,7 @@ def load_arguments(self, _):
 
     from azure.mgmt.resource.locks.models import LockLevel
     from azure.mgmt.resource.managedapplications.models import ApplicationLockLevel
-    from azure.mgmt.resource.deploymentstacks.models import DenySettingsMode
+    from azure.mgmt.resource.deploymentstacks.models import DenySettingsMode, ResourcesWithoutDeleteSupportAction
     from azure.cli.core.commands.validators import get_default_location_from_resource_group
 
     from azure.cli.core.api import get_subscription_id_list
@@ -104,6 +104,7 @@ def load_arguments(self, _):
     stacks_stack_deployment_resource_group = CLIArgumentType(options_list=['--deployment-resource-group', '--dr'], help='The scope at which the initial deployment should be created. If a scope is not specified, it will default to the scope of the deployment stack.')
     stacks_stack_deployment_subscription = CLIArgumentType(options_list=['--deployment-subscription', '--ds'], help='The scope at which the initial deployment should be created. If a scope is not specified, it will default to the scope of the deployment stack.')
     stacks_action_on_unmanage_type = CLIArgumentType(arg_type=get_enum_type(StacksActionOnUnmanage), options_list=['--action-on-unmanage', '--aou'], help='Defines what happens to resources that are no longer managed after the stack is updated or deleted.')
+    stacks_resources_without_delete_support_type = CLIArgumentType(arg_type=get_enum_type(ResourcesWithoutDeleteSupportAction), options_list=['--resources-without-delete-support', '--rwd'], help='Defines what happens to resources that do not support deletion when they are no longer managed by the stack.')
     stacks_deny_settings_mode = CLIArgumentType(arg_type=get_enum_type(DenySettingsMode), options_list=['--deny-settings-mode', '--dm'], help='Define which operations are denied on resources managed by the stack.')
     stacks_excluded_principals = CLIArgumentType(options_list=['--deny-settings-excluded-principals', '--ep'], help='List of AAD principal IDs excluded from the lock. Up to 5 principals are permitted.')
     stacks_excluded_actions = CLIArgumentType(options_list=['--deny-settings-excluded-actions', '--ea'], help="List of role-based management operations that are excluded from the denySettings. Up to 200 actions are permitted.")
@@ -624,6 +625,7 @@ def load_arguments(self, _):
         c.argument('id', arg_type=stacks_stack_type)
         c.argument('subscription', arg_type=subscription_type)
         c.argument('action_on_unmanage', arg_type=stacks_action_on_unmanage_type)
+        c.argument('resources_without_delete_support', arg_type=stacks_resources_without_delete_support_type)
         c.argument('bypass_stack_out_of_sync_error', arg_type=stacks_bypass_stack_out_of_sync_error_type)
         c.argument('yes', help='Do not prompt for confirmation')
 
@@ -641,6 +643,7 @@ def load_arguments(self, _):
         c.argument('id', arg_type=stacks_stack_type)
         c.argument('subscription', arg_type=subscription_type)
         c.argument('action_on_unmanage', arg_type=stacks_action_on_unmanage_type)
+        c.argument('resources_without_delete_support', arg_type=stacks_resources_without_delete_support_type)
         c.argument('bypass_stack_out_of_sync_error', arg_type=stacks_bypass_stack_out_of_sync_error_type)
         c.argument('yes', help='Do not prompt for confirmation')
 
@@ -667,6 +670,7 @@ def load_arguments(self, _):
                 c.argument('description', arg_type=stacks_description_type)
                 c.argument('subscription', arg_type=subscription_type)
                 c.argument('action_on_unmanage', arg_type=stacks_action_on_unmanage_type)
+                c.argument('resources_without_delete_support', arg_type=stacks_resources_without_delete_support_type)
                 c.argument('deny_settings_mode', arg_type=stacks_deny_settings_mode)
                 c.argument('deny_settings_excluded_principals', arg_type=stacks_excluded_principals)
                 c.argument('deny_settings_excluded_actions', arg_type=stacks_excluded_actions)
@@ -694,6 +698,7 @@ def load_arguments(self, _):
         c.argument('id', arg_type=stacks_stack_type)
         c.argument('subscription', arg_type=subscription_type)
         c.argument('action_on_unmanage', arg_type=stacks_action_on_unmanage_type)
+        c.argument('resources_without_delete_support', arg_type=stacks_resources_without_delete_support_type)
         c.argument('bypass_stack_out_of_sync_error', arg_type=stacks_bypass_stack_out_of_sync_error_type)
         c.argument('yes', help='Do not prompt for confirmation')
 

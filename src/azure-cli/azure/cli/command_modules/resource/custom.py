@@ -1314,8 +1314,7 @@ def _prepare_stacks_excluded_principals(deny_settings_excluded_principals):
     return excluded_principals_array
 
 
-def _prepare_stacks_action_on_unmanage(action_on_unmanage):
-    # TODO(kylealbert): resource without delete support
+def _prepare_stacks_action_on_unmanage(action_on_unmanage, resources_without_delete_support):
     aou_resources_action_enum, aou_resource_groups_action_enum, aou_management_groups_action_enum = StackModels.UnmanageActionResourceMode.DETACH, None, None
 
     if action_on_unmanage == StacksActionOnUnmanage.DETACH_ALL:
@@ -1327,7 +1326,7 @@ def _prepare_stacks_action_on_unmanage(action_on_unmanage):
 
     return StackModels.ActionOnUnmanage(
         resources=aou_resources_action_enum, resource_groups=aou_resource_groups_action_enum,
-        management_groups=aou_management_groups_action_enum)
+        management_groups=aou_management_groups_action_enum, resources_without_delete_support=resources_without_delete_support)
 
 def _prepare_stacks_excluded_actions(deny_settings_excluded_actions):
     excluded_actions_array = []
@@ -2476,12 +2475,12 @@ def list_template_specs(cmd, resource_group_name=None, name=None):
 def create_deployment_stack_at_subscription(
     cmd, name, location, deny_settings_mode, action_on_unmanage, deployment_resource_group=None, template_file=None, template_spec=None,
     template_uri=None, query_string=None, parameters=None, description=None, deny_settings_excluded_principals=None,
-    deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False, bypass_stack_out_of_sync_error=False, tags=None,
-    yes=False, no_wait=False
+    deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False, bypass_stack_out_of_sync_error=False,
+    resources_without_delete_support=None, tags=None, yes=False, no_wait=False
 ):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
-    action_on_unmanage_model = _prepare_stacks_action_on_unmanage(action_on_unmanage)
+    action_on_unmanage_model = _prepare_stacks_action_on_unmanage(action_on_unmanage, resources_without_delete_support)
     deny_settings_enum = _prepare_stacks_deny_settings(deny_settings_mode)
 
     excluded_principals_array = _prepare_stacks_excluded_principals(deny_settings_excluded_principals)
@@ -2560,11 +2559,11 @@ def list_deployment_stack_at_subscription(cmd):
 
 
 def delete_deployment_stack_at_subscription(
-    cmd, action_on_unmanage, name=None, id=None, bypass_stack_out_of_sync_error=False, yes=False
+    cmd, action_on_unmanage, name=None, id=None, bypass_stack_out_of_sync_error=False, resources_without_delete_support=None, yes=False
 ):  # pylint: disable=redefined-builtin
     confirmation = "Are you sure you want to delete this stack"
 
-    action_on_unmanage_model = _prepare_stacks_action_on_unmanage(action_on_unmanage)
+    action_on_unmanage_model = _prepare_stacks_action_on_unmanage(action_on_unmanage, resources_without_delete_support)
 
     delete_list = []
     if action_on_unmanage_model.resources == StackModels.UnmanageActionResourceMode.DELETE:
@@ -2604,7 +2603,7 @@ def delete_deployment_stack_at_subscription(
             delete_name, unmanage_action_resources=action_on_unmanage_model.resources,
             unmanage_action_resource_groups=action_on_unmanage_model.resource_groups,
             unmanage_action_management_groups=action_on_unmanage_model.management_groups,
-            # unmanage_action_resources_without_delete_support=action_on_unmanage_model.resources_without_delete_support,
+            unmanage_action_resources_without_delete_support=action_on_unmanage_model.resources_without_delete_support,
             bypass_stack_out_of_sync_error=bypass_stack_out_of_sync_error)
     raise InvalidArgumentValueError("Please enter the stack name or stack resource id")
 
@@ -2621,11 +2620,12 @@ def export_template_deployment_stack_at_subscription(cmd, name=None, id=None):  
 def create_deployment_stack_at_resource_group(
     cmd, name, resource_group, deny_settings_mode, action_on_unmanage, template_file=None, template_spec=None, template_uri=None,
     query_string=None, parameters=None, description=None, deny_settings_excluded_principals=None, deny_settings_excluded_actions=None,
-    deny_settings_apply_to_child_scopes=False, bypass_stack_out_of_sync_error=False, yes=False, tags=None, no_wait=False
+    deny_settings_apply_to_child_scopes=False, bypass_stack_out_of_sync_error=False, resources_without_delete_support=None, yes=False,
+    tags=None, no_wait=False
 ):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
-    action_on_unmanage_model = _prepare_stacks_action_on_unmanage(action_on_unmanage)
+    action_on_unmanage_model = _prepare_stacks_action_on_unmanage(action_on_unmanage, resources_without_delete_support)
     deny_settings_enum = _prepare_stacks_deny_settings(deny_settings_mode)
 
     excluded_principals_array = _prepare_stacks_excluded_principals(deny_settings_excluded_principals)
@@ -2701,12 +2701,13 @@ def list_deployment_stack_at_resource_group(cmd, resource_group):
 
 
 def delete_deployment_stack_at_resource_group(
-    cmd, action_on_unmanage, name=None, resource_group=None, id=None, bypass_stack_out_of_sync_error=False, yes=False
+    cmd, action_on_unmanage, name=None, resource_group=None, id=None, bypass_stack_out_of_sync_error=False,
+    resources_without_delete_support=None, yes=False
 ):  # pylint: disable=redefined-builtin
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
     confirmation = "Are you sure you want to delete this stack"
 
-    action_on_unmanage_model = _prepare_stacks_action_on_unmanage(action_on_unmanage)
+    action_on_unmanage_model = _prepare_stacks_action_on_unmanage(action_on_unmanage, resources_without_delete_support)
 
     delete_list = []
     if action_on_unmanage_model.resources == StackModels.UnmanageActionResourceMode.DELETE:
@@ -2756,7 +2757,7 @@ def delete_deployment_stack_at_resource_group(
             unmanage_action_resources=action_on_unmanage_model.resources,
             unmanage_action_resource_groups=action_on_unmanage_model.resource_groups,
             unmanage_action_management_groups=action_on_unmanage_model.management_groups,
-            # unmanage_action_resources_without_delete_support=action_on_unmanage_model.resources_without_delete_support,
+            unmanage_action_resources_without_delete_support=action_on_unmanage_model.resources_without_delete_support,
             bypass_stack_out_of_sync_error=bypass_stack_out_of_sync_error)
     raise InvalidArgumentValueError("Please enter the (stack name and resource group) or stack resource id")
 
@@ -2776,17 +2777,18 @@ def export_template_deployment_stack_at_resource_group(cmd, name=None, resource_
 def validate_deployment_stack_at_resource_group(
     cmd, name, resource_group, deny_settings_mode, action_on_unmanage, template_file=None, template_spec=None, template_uri=None,
     query_string=None, parameters=None, description=None, deny_settings_excluded_principals=None, deny_settings_excluded_actions=None,
-    deny_settings_apply_to_child_scopes=False, bypass_stack_out_of_sync_error=False, tags=None
+    deny_settings_apply_to_child_scopes=False, bypass_stack_out_of_sync_error=False, resources_without_delete_support=None, tags=None
 ):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
     deployment_stack_model = _prepare_validate_stack_at_scope(
-        rcf=rcf, deployment_scope='resourceGroup', cmd=cmd, deny_settings_mode=deny_settings_mode, action_on_unmanage=action_on_unmanage,
+        deployment_scope='resourceGroup', cmd=cmd, deny_settings_mode=deny_settings_mode, action_on_unmanage=action_on_unmanage,
         template_file=template_file, template_spec=template_spec, template_uri=template_uri, query_string=query_string,
         parameters=parameters, description=description, deny_settings_excluded_principals=deny_settings_excluded_principals,
         deny_settings_excluded_actions=deny_settings_excluded_actions,
         deny_settings_apply_to_child_scopes=deny_settings_apply_to_child_scopes,
-        bypass_stack_out_of_sync_error=bypass_stack_out_of_sync_error, tags=tags)
+        bypass_stack_out_of_sync_error=bypass_stack_out_of_sync_error, resources_without_delete_support=resources_without_delete_support,
+        tags=tags)
 
     from azure.core.exceptions import HttpResponseError
     try:
@@ -2807,17 +2809,19 @@ def validate_deployment_stack_at_resource_group(
 def validate_deployment_stack_at_subscription(
     cmd, name, location, deny_settings_mode, action_on_unmanage, deployment_resource_group=None, template_file=None, template_spec=None,
     template_uri=None, query_string=None, parameters=None, description=None, deny_settings_excluded_principals=None,
-    deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False, bypass_stack_out_of_sync_error=False, tags=None
+    deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False, bypass_stack_out_of_sync_error=False,
+    resources_without_delete_support=None, tags=None
 ):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
     deployment_stack_model = _prepare_validate_stack_at_scope(
-        rcf=rcf, deployment_scope='subscription', cmd=cmd, location=location, deny_settings_mode=deny_settings_mode,
-        action_on_unmanage=action_on_unmanage, deployment_resource_group=deployment_resource_group, template_file=template_file,
-        template_spec=template_spec, template_uri=template_uri, query_string=query_string, parameters=parameters, description=description,
+        deployment_scope='subscription', cmd=cmd, deny_settings_mode=deny_settings_mode, action_on_unmanage=action_on_unmanage,
+        location=location, deployment_resource_group=deployment_resource_group, template_file=template_file, template_spec=template_spec,
+        template_uri=template_uri, query_string=query_string, parameters=parameters, description=description,
         deny_settings_excluded_principals=deny_settings_excluded_principals, deny_settings_excluded_actions=deny_settings_excluded_actions,
         deny_settings_apply_to_child_scopes=deny_settings_apply_to_child_scopes,
-        bypass_stack_out_of_sync_error=bypass_stack_out_of_sync_error, tags=tags)
+        bypass_stack_out_of_sync_error=bypass_stack_out_of_sync_error, resources_without_delete_support=resources_without_delete_support,
+        tags=tags)
 
     from azure.core.exceptions import HttpResponseError
     try:
@@ -2839,17 +2843,18 @@ def validate_deployment_stack_at_management_group(
     cmd, management_group_id, name, location, deny_settings_mode, action_on_unmanage, deployment_subscription=None,
     template_file=None, template_spec=None, template_uri=None, query_string=None, parameters=None, description=None,
     deny_settings_excluded_principals=None, deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False,
-    bypass_stack_out_of_sync_error=False, tags=None
+    bypass_stack_out_of_sync_error=False, resources_without_delete_support=None, tags=None
 ):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
     deployment_stack_model = _prepare_validate_stack_at_scope(
-        rcf=rcf, deployment_scope='managementGroup', cmd=cmd, location=location, deny_settings_mode=deny_settings_mode,
-        action_on_unmanage=action_on_unmanage, deployment_subscription=deployment_subscription, template_file=template_file,
-        template_spec=template_spec, template_uri=template_uri, query_string=query_string, parameters=parameters, description=description,
+        deployment_scope='managementGroup', cmd=cmd, deny_settings_mode=deny_settings_mode, action_on_unmanage=action_on_unmanage,
+        location=location, deployment_subscription=deployment_subscription, template_file=template_file, template_spec=template_spec,
+        template_uri=template_uri, query_string=query_string, parameters=parameters, description=description,
         deny_settings_excluded_principals=deny_settings_excluded_principals, deny_settings_excluded_actions=deny_settings_excluded_actions,
         deny_settings_apply_to_child_scopes=deny_settings_apply_to_child_scopes,
-        bypass_stack_out_of_sync_error=bypass_stack_out_of_sync_error, tags=tags)
+        bypass_stack_out_of_sync_error=bypass_stack_out_of_sync_error, resources_without_delete_support=resources_without_delete_support,
+        tags=tags)
 
     from azure.core.exceptions import HttpResponseError
     try:
@@ -2868,12 +2873,12 @@ def validate_deployment_stack_at_management_group(
 
 
 def _prepare_validate_stack_at_scope(
-    rcf, deployment_scope, cmd, deny_settings_mode, action_on_unmanage, location=None, deployment_subscription=None,
+    deployment_scope, cmd, deny_settings_mode, action_on_unmanage, location=None, deployment_subscription=None,
     deployment_resource_group=None, template_file=None, template_spec=None, template_uri=None, query_string=None, parameters=None,
     description=None, deny_settings_excluded_principals=None, deny_settings_excluded_actions=None,
-    deny_settings_apply_to_child_scopes=False, bypass_stack_out_of_sync_error=False, tags=None
+    deny_settings_apply_to_child_scopes=False, bypass_stack_out_of_sync_error=False, resources_without_delete_support=None, tags=None
 ):
-    action_on_unmanage_model = _prepare_stacks_action_on_unmanage(action_on_unmanage)
+    action_on_unmanage_model = _prepare_stacks_action_on_unmanage(action_on_unmanage, resources_without_delete_support)
     deny_settings_enum = _prepare_stacks_deny_settings(deny_settings_mode)
 
     excluded_principals_array = _prepare_stacks_excluded_principals(deny_settings_excluded_principals)
@@ -2915,12 +2920,12 @@ def _prepare_validate_stack_at_scope(
 def create_deployment_stack_at_management_group(
     cmd, management_group_id, name, location, deny_settings_mode, action_on_unmanage, deployment_subscription=None, template_file=None,
     template_spec=None, template_uri=None, query_string=None, parameters=None, description=None, deny_settings_excluded_principals=None,
-    deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False, bypass_stack_out_of_sync_error=False, yes=False,
-    tags=None, no_wait=False
+    deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False, bypass_stack_out_of_sync_error=False,
+    resources_without_delete_support=None, yes=False, tags=None, no_wait=False
 ):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
-    action_on_unmanage_model = _prepare_stacks_action_on_unmanage(action_on_unmanage)
+    action_on_unmanage_model = _prepare_stacks_action_on_unmanage(action_on_unmanage, resources_without_delete_support)
     deny_settings_enum = _prepare_stacks_deny_settings(deny_settings_mode)
 
     excluded_principals_array = _prepare_stacks_excluded_principals(deny_settings_excluded_principals)
@@ -2996,11 +3001,12 @@ def list_deployment_stack_at_management_group(cmd, management_group_id):
 
 
 def delete_deployment_stack_at_management_group(
-    cmd, management_group_id, action_on_unmanage, name=None, id=None, bypass_stack_out_of_sync_error=False, yes=False
+    cmd, management_group_id, action_on_unmanage, name=None, id=None, bypass_stack_out_of_sync_error=False,
+    resources_without_delete_support=None, yes=False
 ):  # pylint: disable=redefined-builtin
     confirmation = "Are you sure you want to delete this stack"
 
-    action_on_unmanage_model = _prepare_stacks_action_on_unmanage(action_on_unmanage)
+    action_on_unmanage_model = _prepare_stacks_action_on_unmanage(action_on_unmanage, resources_without_delete_support)
 
     delete_list = []
     if action_on_unmanage_model.resources == StackModels.UnmanageActionResourceMode.DELETE:
@@ -3041,7 +3047,7 @@ def delete_deployment_stack_at_management_group(
             management_group_id, delete_name, unmanage_action_resources=action_on_unmanage_model.resources,
             unmanage_action_resource_groups=action_on_unmanage_model.resource_groups,
             unmanage_action_management_groups=action_on_unmanage_model.management_groups,
-            # unmanage_action_resources_without_delete_support=action_on_unmanage_model.resources_without_delete_support,
+            unmanage_action_resources_without_delete_support=action_on_unmanage_model.resources_without_delete_support,
             bypass_stack_out_of_sync_error=bypass_stack_out_of_sync_error)
     raise InvalidArgumentValueError("Please enter the stack name or stack resource id")
 
