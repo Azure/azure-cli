@@ -4144,21 +4144,30 @@ def _build_identities_info(identities):
 
 
 def deallocate_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False, hibernate=None):
-    client = _compute_client_factory(cmd.cli_ctx)
+    from .aaz.latest.vmss import Deallocate as VmssDeallocate
+    from .aaz.latest.vmss.vms import Deallocate as VmssVmsDeallocate
     # This is a walkaround because the REST service of `VirtualMachineScaleSetVMs#begin_deallocate`
     # does not accept `hibernate` at present
     if instance_ids and len(instance_ids) == 1 and hibernate is None:
-        return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.begin_deallocate,
-                           resource_group_name, vm_scale_set_name, instance_ids[0])
+        command_args = {
+            'instance_id': instance_ids[0],
+            'resource_group': resource_group_name,
+            'vm_scale_set_name': vm_scale_set_name,
+            'no_wait': no_wait
+        }
+        return VmssVmsDeallocate(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
-    VirtualMachineScaleSetVMInstanceIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceIDs')
-    vm_instance_i_ds = VirtualMachineScaleSetVMInstanceIDs(instance_ids=instance_ids)
+    command_args = {
+        'resource_group': resource_group_name,
+        'vm_scale_set_name': vm_scale_set_name,
+        'instance_ids': instance_ids,
+        'no_wait': no_wait
+    }
     if hibernate is not None:
-        return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_deallocate,
-                           resource_group_name, vm_scale_set_name, vm_instance_i_ds, hibernate=hibernate)
+        command_args['hibernate'] = hibernate
+        return VmssDeallocate(cli_ctx=cmd.cli_ctx)(command_args=command_args)
     else:
-        return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_deallocate,
-                           resource_group_name, vm_scale_set_name, vm_instance_i_ds)
+        return VmssDeallocate(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
 def get_vmss(cmd, resource_group_name, name, instance_id=None, include_user_data=False):
