@@ -4146,7 +4146,7 @@ def _build_identities_info(identities):
 def deallocate_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False, hibernate=None):
     from .aaz.latest.vmss import Deallocate as VmssDeallocate
     from .aaz.latest.vmss.vms import Deallocate as VmssVmsDeallocate
-    # This is a walkaround because the REST service of `VirtualMachineScaleSetVMs#begin_deallocate`
+    # This is a workaround because the REST service of `VirtualMachineScaleSetVMs#begin_deallocate`
     # does not accept `hibernate` at present
     if instance_ids and len(instance_ids) == 1 and hibernate is None:
         command_args = {
@@ -4165,9 +4165,8 @@ def deallocate_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=No
     }
     if hibernate is not None:
         command_args['hibernate'] = hibernate
-        return VmssDeallocate(cli_ctx=cmd.cli_ctx)(command_args=command_args)
-    else:
-        return VmssDeallocate(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+
+    return VmssDeallocate(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
 def get_vmss(cmd, resource_group_name, name, instance_id=None, include_user_data=False):
