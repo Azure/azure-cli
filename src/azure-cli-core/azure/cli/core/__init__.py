@@ -452,7 +452,7 @@ class MainCommandsLoader(CLICommandsLoader):
         command_index = None
         # Set fallback=False to turn off command index in case of regression
         use_command_index = self.cli_ctx.config.getboolean('core', 'use_command_index', fallback=True)
-        
+
         if use_command_index:
             command_index = CommandIndex(self.cli_ctx)
             index_result = command_index.get(args)
@@ -526,32 +526,32 @@ class MainCommandsLoader(CLICommandsLoader):
 
         if use_command_index:
             command_index.update(self.command_table)
-            
+
             # Also cache help data for fast az --help in future
             # This is done after loading all modules when help data is available
             self._cache_help_index(command_index)
 
         return self.command_table
-    
+
     def _display_cached_help(self, help_data, command_path='root'):
         """Display help from cached help index without loading modules."""
         from azure.cli.core._help import WELCOME_MESSAGE, PRIVACY_STATEMENT
         import re
-        
+
         def _strip_ansi(text):
             """Remove ANSI color codes from text for length calculation."""
             ansi_escape = re.compile(r'\x1b\[[0-9;]*m')
             return ansi_escape.sub('', text)
-        
+
         # Show privacy statement if first run
         ran_before = self.cli_ctx.config.getboolean('core', 'first_run', fallback=False)
         if not ran_before:
             print(PRIVACY_STATEMENT)
             self.cli_ctx.config.set_value('core', 'first_run', 'yes')
-        
+
         # Show welcome message
         print(WELCOME_MESSAGE)
-        
+
         # Display the group breadcrumb
         if command_path == 'root':
             print("\nGroup")
@@ -559,19 +559,19 @@ class MainCommandsLoader(CLICommandsLoader):
         else:
             print("\nGroup")
             print(f"    az {command_path}")
-        
+
         # Import knack's formatting functions
         from knack.help import _print_indent, FIRST_LINE_PREFIX, _get_hanging_indent
-        
+
         # Separate groups and commands
         groups_data = help_data.get('groups', {})
         commands_data = help_data.get('commands', {})
-        
+
         # Helper function matching knack's _get_line_len
         def _get_line_len(name, tags):
             tags_len = len(_strip_ansi(tags))
             return len(name) + tags_len + (2 if tags_len else 1)
-        
+
         # Helper function matching knack's _get_padding_len
         def _get_padding_len(max_len, name, tags):
             line_len = _get_line_len(name, tags)
@@ -580,7 +580,7 @@ class MainCommandsLoader(CLICommandsLoader):
             else:
                 pad_len = max_len - line_len
             return pad_len
-        
+
         # Build items lists and calculate max_line_len across ALL items (groups + commands)
         # This ensures colons align across both sections
         max_line_len = 0
@@ -590,7 +590,7 @@ class MainCommandsLoader(CLICommandsLoader):
             tags = item.get('tags', '')
             groups_items.append((name, tags, item.get('summary', '')))
             max_line_len = max(max_line_len, _get_line_len(name, tags))
-        
+
         commands_items = []
         for name in sorted(commands_data.keys()):
             item = commands_data[name]
