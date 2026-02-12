@@ -1863,7 +1863,7 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
     def test_vm_create_state_modifications(self, resource_group):
 
         self.kwargs.update({
-            'loc': 'eastus',
+            'loc': 'westus',
             'vm': 'vm-state-mod',
             'nsg': 'mynsg',
             'ip': 'mypubip',
@@ -1875,7 +1875,10 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
         # Expecting no results
         self.cmd('vm list --resource-group {rg}',
                  checks=self.is_empty())
-        self.cmd('vm create --resource-group {rg} --location {loc} --name {vm} --admin-username azureuser --image OpenLogic:CentOS:7.5:latest --admin-password testPassword0 --authentication-type password --tags firsttag=1 secondtag=2 thirdtag --nsg {nsg} --public-ip-address {ip} --subnet {subnet} --vnet-name {vnet} --storage-account {sa} --use-unmanaged-disk --nsg-rule NONE --size Standard_B2s')
+        self.cmd('vm create --resource-group {rg} --location {loc} --name {vm} --admin-username azureuser '
+                 '--image OpenLogic:CentOS:7.5:latest --admin-password testPassword0 --authentication-type password '
+                 '--tags firsttag=1 secondtag=2 thirdtag --nsg {nsg} --public-ip-address {ip} --subnet {subnet} '
+                 '--vnet-name {vnet} --storage-account {sa} --use-unmanaged-disk --nsg-rule NONE --size Standard_B2s')
 
         # Disable default outbound access
         self.cmd(
