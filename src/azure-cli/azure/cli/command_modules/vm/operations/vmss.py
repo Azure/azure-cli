@@ -92,16 +92,7 @@ class VMSSIdentityRemove(_VMSSPatch):
                 if has_value(extension.type):
                     extension.type = AAZUndefined
 
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-
-        identity = result.get('identity')
-        if not identity:
-            return result
-
-        if not identity.get('userAssignedIdentities'):
-            return result
-
-        return result
+        return self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
 
     class VirtualMachineScaleSetsUpdate(_VMSSPatch.VirtualMachineScaleSetsUpdate):
         def _format_content(self, content):
