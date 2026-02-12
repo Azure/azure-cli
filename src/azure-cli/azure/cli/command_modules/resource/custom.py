@@ -1339,9 +1339,9 @@ def _prepare_stacks_excluded_actions(deny_settings_excluded_actions):
     return excluded_actions_array
 
 
-def _build_stacks_confirmation_string(rcf, yes, name, stack_scope, delete_resources_enum, delete_resource_groups_enum, delete_management_groups_enum):
-    detach_model = rcf.deployment_stacks.models.DeploymentStacksDeleteDetachEnum.Detach
-
+def _build_stacks_confirmation_string(
+    yes, name, stack_scope, delete_resources_enum, delete_resource_groups_enum, delete_management_groups_enum
+):
     if not yes:
         from knack.prompting import prompt_y_n
 
@@ -1351,17 +1351,17 @@ def _build_stacks_confirmation_string(rcf, yes, name, stack_scope, delete_resour
         detaching_entities = []
         deleting_entities = []
 
-        if delete_resources_enum == detach_model:
+        if delete_resources_enum == StackModels.UnmanageActionResourceMode.DETACH:
             detaching_entities.append("resources")
         else:
             deleting_entities.append("resources")
 
-        if delete_resource_groups_enum == detach_model:
+        if delete_resource_groups_enum == StackModels.UnmanageActionResourceGroupMode.DETACH:
             detaching_entities.append("resource groups")
         else:
             deleting_entities.append("resource groups")
 
-        if delete_management_groups_enum == detach_model:
+        if delete_management_groups_enum == StackModels.UnmanageActionManagementGroupMode.DETACH:
             detaching_entities.append("management groups")
         else:
             deleting_entities.append("management groups")
@@ -2501,7 +2501,7 @@ def create_deployment_stack_at_subscription(
                 raise CLIError("Cannot change location of an already existing stack at subscription scope.")
             # bypass if yes flag is true
             built_string = _build_stacks_confirmation_string(
-                rcf, yes, name, "subscription", action_on_unmanage_model.resources, action_on_unmanage_model.resource_groups,
+                yes, name, "subscription", action_on_unmanage_model.resources, action_on_unmanage_model.resource_groups,
                 action_on_unmanage_model.management_groups)
             if not built_string:
                 return
@@ -2643,7 +2643,7 @@ def create_deployment_stack_at_resource_group(
     try:
         if rcf.deployment_stacks.get_at_resource_group(resource_group, name):
             built_string = _build_stacks_confirmation_string(
-                rcf, yes, name, "resource group", action_on_unmanage_model.resources, action_on_unmanage_model.resource_groups,
+                yes, name, "resource group", action_on_unmanage_model.resources, action_on_unmanage_model.resource_groups,
                 action_on_unmanage_model.management_groups)
             if not built_string:
                 return
@@ -2937,7 +2937,8 @@ def create_deployment_stack_at_management_group(
         get_mg_response = rcf.deployment_stacks.get_at_management_group(management_group_id, name)
         if get_mg_response:
             built_string = _build_stacks_confirmation_string(
-                rcf, yes, name, "management group", action_on_unmanage_model.resources, action_on_unmanage_model.resource_groups, action_on_unmanage_model.management_groups)
+                yes, name, "management group", action_on_unmanage_model.resources, action_on_unmanage_model.resource_groups,
+                action_on_unmanage_model.management_groups)
             if not built_string:
                 return
     except:  # pylint: disable=bare-except
