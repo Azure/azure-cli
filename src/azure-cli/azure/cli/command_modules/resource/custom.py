@@ -21,7 +21,7 @@ from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
 from azure.mgmt.resource.resources.models import GenericResource
 from azure.mgmt.resource.deployments.models import DeploymentMode
 from azure.mgmt.resource.deploymentstacks.models import (
-    ActionOnUnmanage, UnmanageActionManagementGroupMode, UnmanageActionResourceMode, UnmanageActionResourceGroupMode, ResourcesWithoutDeleteSupportAction
+    ActionOnUnmanage, DenySettings, DenySettingsMode, DenyStatusMode, UnmanageActionManagementGroupMode, UnmanageActionResourceMode, UnmanageActionResourceGroupMode, ResourcesWithoutDeleteSupportAction
 )
 
 from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueError, ResourceNotFoundError
@@ -1291,14 +1291,14 @@ def _get_deployment_management_client(cli_ctx, aux_subscriptions=None, aux_tenan
     return deployment_client
 
 
-def _prepare_stacks_deny_settings(rcf, deny_settings_mode):
+def _prepare_stacks_deny_settings(deny_settings_mode):
     deny_settings_mode = None if deny_settings_mode.lower() == "none" else deny_settings_mode
-    deny_settings_enum = rcf.deployment_stacks.models.DenySettingsMode.none
+    deny_settings_enum = DenySettingsMode.NONE
     if deny_settings_mode:
-        if deny_settings_mode.lower().replace(' ', '') == "denydelete":
-            deny_settings_enum = rcf.deployment_stacks.models.DenySettingsMode.deny_delete
-        elif deny_settings_mode.lower().replace(' ', '') == "denywriteanddelete":
-            deny_settings_enum = rcf.deployment_stacks.models.DenySettingsMode.deny_write_and_delete
+        if deny_settings_mode.lower().replace(' ', '') == DenyStatusMode.DENY_DELETE:
+            deny_settings_enum = DenyStatusMode.DENY_DELETE
+        elif deny_settings_mode.lower().replace(' ', '') == DenyStatusMode.DENY_WRITE_AND_DELETE:
+            deny_settings_enum = DenyStatusMode.DENY_WRITE_AND_DELETE
         else:
             raise InvalidArgumentValueError("Please enter only one of the following: denyDelete, or denyWriteAndDelete")
 
@@ -2483,7 +2483,7 @@ def create_deployment_stack_at_subscription(
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
     action_on_unmanage_model = _prepare_stacks_action_on_unmanage(action_on_unmanage)
-    deny_settings_enum = _prepare_stacks_deny_settings(rcf, deny_settings_mode)
+    deny_settings_enum = _prepare_stacks_deny_settings(deny_settings_mode)
 
     excluded_principals_array = _prepare_stacks_excluded_principals(deny_settings_excluded_principals)
     excluded_actions_array = _prepare_stacks_excluded_actions(deny_settings_excluded_actions)
@@ -2511,7 +2511,7 @@ def create_deployment_stack_at_subscription(
         pass
 
     apply_to_child_scopes = deny_settings_apply_to_child_scopes
-    deny_settings_model = rcf.deployment_stacks.models.DenySettings(
+    deny_settings_model = DenySettings(
         mode=deny_settings_enum, excluded_principals=excluded_principals_array, excluded_actions=excluded_actions_array, apply_to_child_scopes=apply_to_child_scopes)
     deployment_stack_model = rcf.deployment_stacks.models.DeploymentStack(
         description=description, location=location, action_on_unmanage=action_on_unmanage_model, deny_settings=deny_settings_model,
@@ -2626,7 +2626,7 @@ def create_deployment_stack_at_resource_group(
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
     action_on_unmanage_model = _prepare_stacks_action_on_unmanage(action_on_unmanage)
-    deny_settings_enum = _prepare_stacks_deny_settings(rcf, deny_settings_mode)
+    deny_settings_enum = _prepare_stacks_deny_settings(deny_settings_mode)
 
     excluded_principals_array = _prepare_stacks_excluded_principals(deny_settings_excluded_principals)
     excluded_actions_array = _prepare_stacks_excluded_actions(deny_settings_excluded_actions)
@@ -2652,7 +2652,7 @@ def create_deployment_stack_at_resource_group(
         pass
 
     apply_to_child_scopes = deny_settings_apply_to_child_scopes
-    deny_settings_model = rcf.deployment_stacks.models.DenySettings(
+    deny_settings_model = DenySettings(
         mode=deny_settings_enum, excluded_principals=excluded_principals_array, excluded_actions=excluded_actions_array, apply_to_child_scopes=apply_to_child_scopes)
     deployment_stack_model = rcf.deployment_stacks.models.DeploymentStack(
         description=description, action_on_unmanage=action_on_unmanage_model, deny_settings=deny_settings_model,
@@ -2873,7 +2873,7 @@ def _prepare_validate_stack_at_scope(
     deny_settings_apply_to_child_scopes=False, bypass_stack_out_of_sync_error=False, tags=None
 ):
     action_on_unmanage_model = _prepare_stacks_action_on_unmanage(action_on_unmanage)
-    deny_settings_enum = _prepare_stacks_deny_settings(rcf, deny_settings_mode)
+    deny_settings_enum = _prepare_stacks_deny_settings(deny_settings_mode)
 
     excluded_principals_array = _prepare_stacks_excluded_principals(deny_settings_excluded_principals)
     excluded_actions_array = _prepare_stacks_excluded_actions(deny_settings_excluded_actions)
@@ -2888,7 +2888,7 @@ def _prepare_validate_stack_at_scope(
             "Please enter only one of the following: template file, template spec, or template url")
 
     apply_to_child_scopes = deny_settings_apply_to_child_scopes
-    deny_settings_model = rcf.deployment_stacks.models.DenySettings(
+    deny_settings_model = DenySettings(
         mode=deny_settings_enum, excluded_principals=excluded_principals_array, excluded_actions=excluded_actions_array,
         apply_to_child_scopes=apply_to_child_scopes)
     deployment_stack_model = rcf.deployment_stacks.models.DeploymentStack(
@@ -2919,7 +2919,7 @@ def create_deployment_stack_at_management_group(
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
     action_on_unmanage_model = _prepare_stacks_action_on_unmanage(action_on_unmanage)
-    deny_settings_enum = _prepare_stacks_deny_settings(rcf, deny_settings_mode)
+    deny_settings_enum = _prepare_stacks_deny_settings(deny_settings_mode)
 
     excluded_principals_array = _prepare_stacks_excluded_principals(deny_settings_excluded_principals)
     excluded_actions_array = _prepare_stacks_excluded_actions(deny_settings_excluded_actions)
@@ -2943,7 +2943,7 @@ def create_deployment_stack_at_management_group(
         pass
 
     apply_to_child_scopes = deny_settings_apply_to_child_scopes
-    deny_settings_model = rcf.deployment_stacks.models.DenySettings(
+    deny_settings_model = DenySettings(
         mode=deny_settings_enum, excluded_principals=excluded_principals_array, excluded_actions=excluded_actions_array, apply_to_child_scopes=apply_to_child_scopes)
     deployment_stack_model = rcf.deployment_stacks.models.DeploymentStack(
         description=description, location=location, action_on_unmanage=action_on_unmanage_model, deny_settings=deny_settings_model,
