@@ -11,7 +11,7 @@ def load_arguments(self, _):
 
     from azure.mgmt.resource.locks.models import LockLevel
     from azure.mgmt.resource.managedapplications.models import ApplicationLockLevel
-    from azure.mgmt.resource.deploymentstacks.models import DenySettingsMode, ResourcesWithoutDeleteSupportAction
+    from azure.mgmt.resource.deploymentstacks.models import DenySettingsMode, ResourcesWithoutDeleteSupportAction, ValidationLevel as StacksValidationLevel
     from azure.cli.core.commands.validators import get_default_location_from_resource_group
 
     from azure.cli.core.api import get_subscription_id_list
@@ -25,7 +25,7 @@ def load_arguments(self, _):
     from azure.cli.command_modules.resource._completers import (
         get_resource_types_completion_list, get_providers_completion_list)
     from azure.cli.command_modules.resource._validators import (
-        validate_lock_parameters, validate_resource_lock, validate_group_lock, validate_subscription_lock, RollbackAction)
+        validate_lock_parameters, validate_resource_lock, validate_group_lock, validate_subscription_lock, RollbackAction, duration_format)
     from azure.cli.command_modules.resource.parameters import TagUpdateOperation, StacksActionOnUnmanage
 
     DeploymentMode, WhatIfResultFormat, ChangeType, ValidationLevel = self.get_models('DeploymentMode', 'WhatIfResultFormat', 'ChangeType', 'ValidationLevel')
@@ -112,6 +112,13 @@ def load_arguments(self, _):
     stacks_bypass_stack_out_of_sync_error_type = CLIArgumentType(
         arg_type=get_three_state_flag(), options_list=['--bypass-stack-out-of-sync-error', '--bse'],
         help='Flag to bypass service errors that indicate the stack resource list is not correctly synchronized.')
+    stacks_validation_level_type = CLIArgumentType(
+        arg_type=get_enum_type(StacksValidationLevel), options_list=['--validation-level', '--vl'], help="Validation level for the deployment stack. The default is 'Provider'.")
+
+    stacks_whatif_stack_id_type = CLIArgumentType(options_list=['--stack'], help='The fully-qualified ID of the deployment stack to perform a what-if operation on.')
+    stacks_whatif_retention_interval_type = CLIArgumentType(
+        options_list=['--retention-interval', '--ri'], type=duration_format,
+        help='The retention interval for What-If results. The value must be in ISO 8601 format and between 1 day and 30 days.')
 
     bicep_file_type = CLIArgumentType(options_list=['--file', '-f'], completer=FilesCompleter(), type=file_type)
     bicep_force_type = CLIArgumentType(options_list=['--force'], action='store_true')
@@ -647,8 +654,13 @@ def load_arguments(self, _):
                         c.argument('deny_settings_excluded_principals', arg_type=stacks_excluded_principals)
                         c.argument('deny_settings_excluded_actions', arg_type=stacks_excluded_actions)
                         c.argument('deny_settings_apply_to_child_scopes', arg_type=stacks_apply_to_child_scopes)
-                        c.argument('bypass_stack_out_of_sync_error', arg_type=stacks_bypass_stack_out_of_sync_error_type)
+                        c.argument('validation_level', arg_type=stacks_validation_level_type)
                         c.argument('tags', tags_type)
+                        if resource_type == 'stack':
+                            c.argument('bypass_stack_out_of_sync_error', arg_type=stacks_bypass_stack_out_of_sync_error_type)
+                        elif resource_type == 'stack-whatif':
+                            c.argument('stack_id', arg_type=stacks_whatif_stack_id_type)
+                            c.argument('retention_interval', arg_type=stacks_whatif_retention_interval_type)
                         if action == 'create' and resource_type == 'stack':
                             c.argument('yes', help='Do not prompt for confirmation')
                     elif action == 'delete':
