@@ -4336,7 +4336,7 @@ def get_vmss_instance_view(cmd, resource_group_name, vm_scale_set_name, instance
 
 def list_vmss_instance_connection_info(cmd, resource_group_name, vm_scale_set_name):
     from azure.mgmt.core.tools import parse_resource_id
-    from .aaz.latest.vmss import Show as VmssShow
+    from .operations.vmss import VMSSShow
 
     LBShow = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.lb").Show
     PublicIPAddress = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.public_ip").Show
@@ -4345,7 +4345,7 @@ def list_vmss_instance_connection_info(cmd, resource_group_name, vm_scale_set_na
         'resource_group': resource_group_name,
         'vm_scale_set_name': vm_scale_set_name
     }
-    vmss = VmssShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+    vmss = VMSSShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
     from ._vm_utils import raise_unsupported_error_for_flex_vmss_by_aaz
     raise_unsupported_error_for_flex_vmss_by_aaz(
@@ -4428,14 +4428,14 @@ def list_vmss_instance_connection_info(cmd, resource_group_name, vm_scale_set_na
 
 
 def list_vmss_instance_public_ips(cmd, resource_group_name, vm_scale_set_name):
-    from .aaz.latest.vmss import Show as VmssShow
+    from .operations.vmss import VMSSShow
     ListInstancePublicIps = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "vmss").ListInstancePublicIps
 
     command_args = {
         'resource_group': resource_group_name,
         'vm_scale_set_name': vm_scale_set_name
     }
-    vmss = VmssShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+    vmss = VMSSShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
     from ._vm_utils import raise_unsupported_error_for_flex_vmss_by_aaz
     raise_unsupported_error_for_flex_vmss_by_aaz(
         vmss, 'This command is not available for VMSS in Flex mode. '
