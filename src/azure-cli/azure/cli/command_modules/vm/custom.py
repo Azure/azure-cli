@@ -2995,6 +2995,8 @@ def _get_existing_nics(vm):
 
 
 def _update_vm_nics(cmd, vm, nics, primary_nic):
+    from .operations.vm import convert_show_result_to_snake_case
+
     if primary_nic:
         try:
             _, primary_nic_name = _parse_rg_name(primary_nic)
@@ -3013,7 +3015,10 @@ def _update_vm_nics(cmd, vm, nics, primary_nic):
         if not [n for n in nics if n["primary"]]:
             nics[0]["primary"] = True
 
+    if "networkProfile" not in vm:
+        vm["networkProfile"] = {}
     vm["networkProfile"]["networkInterfaces"] = nics
+    vm = convert_show_result_to_snake_case(vm)
     result = set_vm_by_aaz(cmd, vm)
     return (result.get("networkProfile") or {}).get("networkInterfaces") or []
 # endregion
