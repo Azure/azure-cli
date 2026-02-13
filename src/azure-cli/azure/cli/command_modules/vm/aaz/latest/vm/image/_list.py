@@ -59,6 +59,7 @@ class List(AAZCommand):
         _args_schema.expand = AAZStrArg(
             options=["--expand"],
             help="The expand expression to apply on the operation.",
+            required=True,
             default="properties",
         )
         _args_schema.orderby = AAZStrArg(
@@ -71,7 +72,7 @@ class List(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        self.VirtualMachineImagesList(ctx=self.ctx)()
+        self.VirtualMachineImagesListWithProperties(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -86,7 +87,7 @@ class List(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class VirtualMachineImagesList(AAZHttpOperation):
+    class VirtualMachineImagesListWithProperties(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -143,6 +144,7 @@ class List(AAZCommand):
             parameters = {
                 **self.serialize_query_param(
                     "$expand", self.ctx.args.expand,
+                    required=True,
                 ),
                 **self.serialize_query_param(
                     "$orderby", self.ctx.args.orderby,
@@ -197,11 +199,93 @@ class List(AAZCommand):
             _element.name = AAZStrType(
                 flags={"required": True},
             )
+            _element.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
             _element.tags = AAZDictType()
 
             extended_location = cls._schema_on_200.Element.extended_location
             extended_location.name = AAZStrType()
             extended_location.type = AAZStrType()
+
+            properties = cls._schema_on_200.Element.properties
+            properties.architecture = AAZStrType()
+            properties.automatic_os_upgrade_properties = AAZObjectType(
+                serialized_name="automaticOSUpgradeProperties",
+            )
+            properties.data_disk_images = AAZListType(
+                serialized_name="dataDiskImages",
+            )
+            properties.disallowed = AAZObjectType()
+            properties.features = AAZListType()
+            properties.hyper_v_generation = AAZStrType(
+                serialized_name="hyperVGeneration",
+            )
+            properties.image_deprecation_status = AAZObjectType(
+                serialized_name="imageDeprecationStatus",
+            )
+            properties.os_disk_image = AAZObjectType(
+                serialized_name="osDiskImage",
+            )
+            properties.plan = AAZObjectType()
+
+            automatic_os_upgrade_properties = cls._schema_on_200.Element.properties.automatic_os_upgrade_properties
+            automatic_os_upgrade_properties.automatic_os_upgrade_supported = AAZBoolType(
+                serialized_name="automaticOSUpgradeSupported",
+                flags={"required": True},
+            )
+
+            data_disk_images = cls._schema_on_200.Element.properties.data_disk_images
+            data_disk_images.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.Element.properties.data_disk_images.Element
+            _element.lun = AAZIntType(
+                flags={"read_only": True},
+            )
+
+            disallowed = cls._schema_on_200.Element.properties.disallowed
+            disallowed.vm_disk_type = AAZStrType(
+                serialized_name="vmDiskType",
+            )
+
+            features = cls._schema_on_200.Element.properties.features
+            features.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.Element.properties.features.Element
+            _element.name = AAZStrType()
+            _element.value = AAZStrType()
+
+            image_deprecation_status = cls._schema_on_200.Element.properties.image_deprecation_status
+            image_deprecation_status.alternative_option = AAZObjectType(
+                serialized_name="alternativeOption",
+            )
+            image_deprecation_status.image_state = AAZStrType(
+                serialized_name="imageState",
+            )
+            image_deprecation_status.scheduled_deprecation_time = AAZStrType(
+                serialized_name="scheduledDeprecationTime",
+            )
+
+            alternative_option = cls._schema_on_200.Element.properties.image_deprecation_status.alternative_option
+            alternative_option.type = AAZStrType()
+            alternative_option.value = AAZStrType()
+
+            os_disk_image = cls._schema_on_200.Element.properties.os_disk_image
+            os_disk_image.operating_system = AAZStrType(
+                serialized_name="operatingSystem",
+                flags={"required": True},
+            )
+
+            plan = cls._schema_on_200.Element.properties.plan
+            plan.name = AAZStrType(
+                flags={"required": True},
+            )
+            plan.product = AAZStrType(
+                flags={"required": True},
+            )
+            plan.publisher = AAZStrType(
+                flags={"required": True},
+            )
 
             tags = cls._schema_on_200.Element.tags
             tags.Element = AAZStrType()
