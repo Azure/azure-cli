@@ -18,11 +18,12 @@ from azure.cli.core.azclierror import (
 )
 from azure.core.exceptions import HttpResponseError, ResourceNotFoundError
 from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
-from knack.log import get_logger
 from azure.cli.command_modules.aro._validators import validate_vnet, validate_cidr
 from azure.cli.command_modules.aro._rbac import has_role_assignment_on_resource
 from azure.cli.command_modules.aro.aaz.latest.network.vnet.subnet import Show as subnet_show
 from azure.cli.command_modules.aro.aaz.latest.network.vnet import Show as vnet_show
+
+from knack.log import get_logger
 
 
 logger = get_logger(__name__)

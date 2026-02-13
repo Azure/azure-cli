@@ -20,8 +20,9 @@ from azure.cli.core.azclierror import (
 )
 from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
 from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id, resource_id
-from knack.log import get_logger
 from azure.cli.command_modules.aro.aaz.latest.network.vnet.subnet import Show as subnet_show
+
+from knack.log import get_logger
 
 logger = get_logger(__name__)
 
@@ -130,8 +131,8 @@ def validate_pull_secret(namespace):
                 namespace.pull_secret = file.read().rstrip('\n')
 
         if not isinstance(json.loads(namespace.pull_secret), dict):
-            raise Exception()
-    except Exception as e:
+            raise ValueError("Pull secret must be a valid JSON object")
+    except (ValueError, json.JSONDecodeError) as e:
         raise InvalidArgumentValueError("Invalid --pull-secret.") from e
 
 
