@@ -53,13 +53,12 @@ Section: python
 Priority: extra
 Maintainer: Azure Python CLI Team <azpycli@microsoft.com>
 Build-Depends: debhelper (>= 9), libssl-dev, libffi-dev, python3-dev
-Depends: libwebkit2gtk-4.1-dev
 Standards-Version: 3.9.5
 Homepage: https://github.com/azure/azure-cli
 
 Package: azure-cli
 Architecture: any
-Depends: \${shlibs:Depends}, \${misc:Depends}
+Depends: \${shlibs:Depends}, \${misc:Depends}, libwebkit2gtk-4.1-dev
 Description: Azure CLI
  A great cloud needs great tools; we're excited to introduce Azure CLI,
  our next generation multi-platform command line experience for Azure.
