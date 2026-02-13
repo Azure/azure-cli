@@ -521,36 +521,17 @@ class AzCliCommandInvoker(CommandInvoker):
         # Fast path for top-level help only (az --help or az with no args)
         # Check cache before loading command table to avoid loading modules
         use_command_index = self.cli_ctx.config.getboolean('core', 'use_command_index', fallback=True)
-        if use_command_index:
-            is_help_request = args and ('--help' in args or '-h' in args or args[-1] == 'help')
-            is_top_level = True
+        if use_command_index and self._is_top_level_help_request(args):
+            from azure.cli.core import CommandIndex
+            command_index = CommandIndex(self.cli_ctx)
+            help_index = command_index.get_help_index()
 
-            if is_help_request:
-                # Check if there's a command path before the help flag
-                for arg in args:
-                    if arg in ('--help', '-h', 'help'):
-                        break
-                    if not arg.startswith('-'):
-                        is_top_level = False
-                        break
-            elif not args:
-                # No args means show top-level help
-                is_top_level = True
-            else:
-                is_top_level = False
-
-            # Only use cache for top-level help requests
-            if is_top_level and (is_help_request or not args):
-                from azure.cli.core import CommandIndex
-                command_index = CommandIndex(self.cli_ctx)
-                help_index = command_index.get_help_index()
-
-                if help_index and 'root' in help_index:
-                    # Display cached help using the help system
-                    self.help.show_cached_help(help_index['root'], 'root')
-                    telemetry.set_command_details('az', command_preserve_casing=command_preserve_casing)
-                    telemetry.set_success(summary='cached-help')
-                    return CommandResultItem(None, exit_code=0)
+            if help_index and 'root' in help_index:
+                # Display cached help using the help system
+                self.help.show_cached_help(help_index['root'], 'root')
+                telemetry.set_command_details('az', command_preserve_casing=command_preserve_casing)
+                telemetry.set_success(summary='cached-help')
+                return CommandResultItem(None, exit_code=0)
 
         self.cli_ctx.raise_event(EVENT_INVOKER_PRE_CMD_TBL_CREATE, args=args)
         self.commands_loader.load_command_table(args)
@@ -785,6 +766,35 @@ class AzCliCommandInvoker(CommandInvoker):
         # note: name start with more than 2 '-' will be treated as value e.g. certs in PEM format
         return [(p.split('=', 1)[0] if p.startswith('--') else p[:2]) for p in args if
                 (p.startswith('-') and not p.startswith('---') and len(p) > 1)]
+
+    @staticmethod
+    def _is_top_level_help_request(args):
+        """Determine if this is a top-level help request (az --help or just az).
+        
+        Returns True for:
+        - No arguments (just 'az')
+        - Help request with no command path (az --help, az -h, az help)
+        
+        Returns False for:
+        - Commands with help (az network --help)
+        - Any non-help request
+        """
+        if not args:
+            return True
+
+        is_help_request = '--help' in args or '-h' in args or args[-1] == 'help'
+        if not is_help_request:
+            return False
+
+        # Check if there's a command path before the help flag
+        for arg in args:
+            if arg in ('--help', '-h', 'help'):
+                break
+            if not arg.startswith('-'):
+                # Found a command name before help flag
+                return False
+
+        return True
 
     def _run_job(self, expanded_arg, cmd_copy):
         params = self._filter_params(expanded_arg)
