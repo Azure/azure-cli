@@ -157,7 +157,7 @@ DEPENDENCIES = [
     # selection
     'tabulate',
     'urllib3',
-    'websocket-client~=1.3.1',
+    'websocket-client~=1.8.0',
     'xmltodict~=0.12'
 ]
 
