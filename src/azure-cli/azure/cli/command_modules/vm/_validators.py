@@ -1776,7 +1776,7 @@ def process_vmss_create_namespace(cmd, namespace):
             raise ArgumentUsageError('usage error: please specify the --image when you want to specify the VM SKU')
 
         _validate_trusted_launch(namespace)
-        _validate_vmss_create_auto_zone_placement(cmd, namespace)
+        _validate_vmss_create_auto_zone_placement(namespace)
         if namespace.image:
 
             if namespace.vm_sku is None:
@@ -1873,7 +1873,7 @@ def process_vmss_create_namespace(cmd, namespace):
     _validate_vmss_terminate_notification(cmd, namespace)
     _validate_vmss_create_automatic_repairs(cmd, namespace)
     _validate_vmss_create_host_group(cmd, namespace)
-    _validate_vmss_create_auto_zone_placement(cmd, namespace)
+    _validate_vmss_create_auto_zone_placement(namespace)
 
     if namespace.secrets:
         _validate_secrets(namespace.secrets, namespace.os_type)
@@ -2590,7 +2590,7 @@ def _validate_vmss_create_host_group(cmd, namespace):
             )
 
 
-def _validate_vmss_create_auto_zone_placement(cmd, namespace):
+def _validate_vmss_create_auto_zone_placement(namespace):
     zpp = getattr(namespace, 'zone_placement_policy', None)
     zones = getattr(namespace, 'zones', None)
     zone_balance = getattr(namespace, 'zone_balance', None)

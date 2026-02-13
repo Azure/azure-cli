@@ -4590,12 +4590,12 @@ class VMSSCreateOptions(ScenarioTest):
             self.check('resiliencyPolicy.resilientVmDeletionPolicy.enabled', True),
         ])
 
-    @ResourceGroupPreparer(name_prefix='test_vmss_with_automatic_zone_rebalancing_policy', location='eastus2')
+    @ResourceGroupPreparer(name_prefix='test_vmss_with_automatic_zone_rebalancing_policy', location='eastus2euap')
     def test_vmss_with_automatic_zone_rebalancing_policy(self, resource_group):
         self.kwargs.update({
             'vmss1': self.create_random_name('vmss', 10),
             'vmss2': self.create_random_name('vmss', 10),
-            'image': 'Debian:debian-10:10:latest',
+            'image': 'MicrosoftWindowsServer:WindowsServer:2016-Datacenter:latest',
             'nsg': self.create_random_name('nsg', 10),
             'lb1': self.create_random_name('lb', 10),
             'probe1': self.create_random_name('probe', 10),
@@ -4608,9 +4608,8 @@ class VMSSCreateOptions(ScenarioTest):
         self.cmd('network lb create -g {rg} -n {lb1}')
         self.cmd('network lb probe create -g {rg} --lb-name {lb1} -n {probe1} --protocol http --port 80 --path /')
         self.cmd('network lb rule create -g {rg} --lb-name {lb1} -n {rule1} --probe-name {probe1} --protocol tcp --frontend-port 80 --backend-port 80')
-        self.cmd('vmss create -g {rg} -n {vmss1} --image {image} --vm-sku Standard_B2ms --load-balancer {lb1} --health-probe {probe1} '
-                 '--zone-balance true --zone-placement-policy Auto --max-zone-count 3 --orchestration-mode Uniform --disable-overprovision --admin-username vmtest --admin-password Test123456789# --nsg {nsg} '
-                 '--enable-automatic-zone-balancing True --automatic-zone-balancing-strategy Recreate --automatic-zone-balancing-behavior CreateBeforeDelete --location eastus2')
+        self.cmd('vmss create -g {rg} -n {vmss1} --image {image} --vm-sku Standard_D1_v2 --load-balancer {lb1} --health-probe {probe1} --zone-balance true --zone-placement-policy Auto --max-zone-count 2 --disable-overprovision --orchestration-mode Uniform --admin-username vmtest --admin-password Test123456789# --nsg {nsg} '
+                 '--enable-automatic-zone-balancing True --automatic-zone-balancing-strategy Recreate --automatic-zone-balancing-behavior CreateBeforeDelete --location eastus2euap')
         self.cmd('vmss show -g {rg} -n {vmss1}', checks=[
             self.check('resiliencyPolicy.automaticZoneRebalancingPolicy.enabled', True),
             self.check('resiliencyPolicy.automaticZoneRebalancingPolicy.rebalanceStrategy', 'Recreate'),
@@ -4626,9 +4625,7 @@ class VMSSCreateOptions(ScenarioTest):
         self.cmd('network lb create -g {rg} -n {lb2}')
         self.cmd('network lb probe create -g {rg} --lb-name {lb2} -n {probe2} --protocol http --port 80 --path /')
         self.cmd('network lb rule create -g {rg} --lb-name {lb2} -n {rule2} --probe-name {probe2} --protocol tcp --frontend-port 80 --backend-port 80')
-        self.cmd('vmss create -g {rg} -n {vmss2} --image {image} --vm-sku Standard_B2ms --load-balancer {lb2} --health-probe {probe2} '
-                 '--zone-balance true --zone-placement-policy Auto --max-zone-count 3 --orchestration-mode Uniform --disable-overprovision --admin-username vmtest '
-                 '--admin-password Test123456789# --nsg {nsg} --location eastus2')
+        self.cmd('vmss create -g {rg} -n {vmss2} --image {image} --vm-sku Standard_D1_v2 --load-balancer {lb2} --health-probe {probe2} --zone-balance true --zone-placement-policy Auto --disable-overprovision --orchestration-mode Uniform --admin-username vmtest --admin-password Test123456789# --nsg {nsg} --location eastus2euap')
 
         self.cmd('vmss update -g {rg} -n {vmss2} --enable-automatic-zone-balancing True --automatic-zone-balancing-strategy Recreate')
         self.cmd('vmss show -g {rg} -n {vmss2}', checks=[
@@ -5000,7 +4997,7 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
         self.cmd('vmss list-instance-connection-info -n {vmss6} -g {rg}')
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(name_prefix='cli_test_vmss_zone_balance', location='eastus2')
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_zone_balance', location='eastus2euap')
     def test_vmss_zone_balance(self, resource_group):
         self.kwargs.update({
             'nsg': self.create_random_name('nsg', 10),
@@ -5009,17 +5006,15 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
             'vmss2': self.create_random_name('vmss', 15)
         })
         self.cmd('network nsg create -g {rg} -n {nsg}')
-        self.cmd('vmss create -n {vmss1} -g {rg} --image Debian:debian-10:10:latest --zone-balance true '
-                 '--zone-placement-policy Auto --max-zone-count 3 --vm-sku Standard_B2ms --lb-sku standard --public-ip-per-vm --dns-servers 10.0.0.6 10.0.0.5 --nsg {nsg} --admin-username vmsstest '
-                 '--admin-password Test123456789# --orchestration-mode Uniform --disable-overprovision --ssh-key-value "{ssh_key}" -l eastus2', checks=[
+        self.cmd('vmss create -n {vmss1} -g {rg} --image Debian:debian-10:10:latest --vm-sku Standard_B2ms --zone-placement-policy Auto --zone-balance true --max-zone-count 2 --disable-overprovision --admin-username clittester --lb-sku standard --public-ip-per-vm --dns-servers 10.0.0.6 10.0.0.5 --nsg {nsg} --admin-username vmsstest --admin-password Test123456789# --orchestration-mode Uniform  --ssh-key-value "{ssh_key}" -l eastus2euap', checks=[
             self.check('vmss.zoneBalance', True),
         ])
         self.cmd('vmss update -n {vmss1} -g {rg} --zone-balance false', checks=[
             self.check('zoneBalance', False)
         ])
 
-        self.cmd('vmss create -n {vmss2} -g {rg} --image Debian:debian-10:10:latest --vm-sku Standard_B2ms --admin-username vmsstest --admin-password Test123456789# -l eastus2')
-        self.cmd('vmss update -n {vmss2} -g {rg} --zone-balance true --max-zone-count 3', checks=[
+        self.cmd('vmss create -n {vmss2} -g {rg} --image Debian:debian-10:10:latest --vm-sku Standard_B2ms --admin-username clittester --lb-sku standard --public-ip-per-vm --dns-servers 10.0.0.6 10.0.0.5 --nsg {nsg} --admin-username vmsstest --admin-password Test123456789# --orchestration-mode Uniform  --ssh-key-value "{ssh_key}"  --zones 1 2 -l eastus2euap')
+        self.cmd('vmss update -n {vmss2} -g {rg} --zone-balance true', checks=[
             self.check('zoneBalance', True)
         ])
 
