@@ -2927,7 +2927,7 @@ def create_deployment_stack_whatif_at_resource_group(
 ):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
-    deployment_stack_model = _prepare_whatif_stack_at_scope(
+    deployment_stack_whatif_model = _prepare_whatif_stack_at_scope(
         deployment_scope='resourceGroup', cmd=cmd, deny_settings_mode=deny_settings_mode, action_on_unmanage=action_on_unmanage,
         template_file=template_file, template_spec=template_spec, template_uri=template_uri, query_string=query_string,
         parameters=parameters, description=description, deny_settings_excluded_principals=deny_settings_excluded_principals,
@@ -2938,18 +2938,19 @@ def create_deployment_stack_whatif_at_resource_group(
 
     from azure.core.exceptions import HttpResponseError
     try:
-        validation_poller = rcf.deployment_stacks.begin_validate_stack_at_resource_group(resource_group, name, deployment_stack_model)
+        # TODO(kylealbert): verify params
+        whatif_poller = rcf.deployment_stacks_what_if_results_at_resource_group.begin_create_or_update(resource_group, name, deployment_stack_whatif_model)
     except HttpResponseError as err:
         err_message = _build_http_response_error_message(err)
         raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
 
-    validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
+    whatif_result = LongRunningOperation(cmd.cli_ctx)(whatif_poller)
 
-    if validation_result and validation_result.error:
-        err_message = _build_preflight_error_message(validation_result.error)
+    if whatif_result and whatif_result.error:
+        err_message = _build_preflight_error_message(whatif_result.error)
         raise_subdivision_deployment_error(err_message)
 
-    return validation_result
+    return whatif_result
 
 
 def create_deployment_stack_whatif_at_subscription(
@@ -2960,7 +2961,7 @@ def create_deployment_stack_whatif_at_subscription(
 ):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
-    deployment_stack_model = _prepare_whatif_stack_at_scope(
+    deployment_stack_whatif_model = _prepare_whatif_stack_at_scope(
         deployment_scope='subscription', cmd=cmd, deny_settings_mode=deny_settings_mode, action_on_unmanage=action_on_unmanage,
         location=location, deployment_resource_group=deployment_resource_group, template_file=template_file, template_spec=template_spec,
         template_uri=template_uri, query_string=query_string, parameters=parameters, description=description,
@@ -2971,18 +2972,19 @@ def create_deployment_stack_whatif_at_subscription(
 
     from azure.core.exceptions import HttpResponseError
     try:
-        validation_poller = rcf.deployment_stacks_what_if_results_at_management_group.begin_create_or_update(name, deployment_stack_model)
+        # TODO(kylealbert): verify params
+        whatif_poller = rcf.deployment_stacks_what_if_results_at_subscription.begin_create_or_update(name, deployment_stack_whatif_model)
     except HttpResponseError as err:
         err_message = _build_http_response_error_message(err)
         raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
 
-    validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
+    whatif_result = LongRunningOperation(cmd.cli_ctx)(whatif_poller)
 
-    if validation_result and validation_result.error:
-        err_message = _build_preflight_error_message(validation_result.error)
+    if whatif_result and whatif_result.error:
+        err_message = _build_preflight_error_message(whatif_result.error)
         raise_subdivision_deployment_error(err_message)
 
-    return validation_result
+    return whatif_result
 
 
 def create_deployment_stack_whatif_at_management_group(
@@ -2993,7 +2995,7 @@ def create_deployment_stack_whatif_at_management_group(
 ):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
-    deployment_stack_model = _prepare_whatif_stack_at_scope(
+    deployment_stack_whatif_model = _prepare_whatif_stack_at_scope(
         deployment_scope='managementGroup', cmd=cmd, deny_settings_mode=deny_settings_mode, action_on_unmanage=action_on_unmanage,
         location=location, deployment_subscription=deployment_subscription, template_file=template_file, template_spec=template_spec,
         template_uri=template_uri, query_string=query_string, parameters=parameters, description=description,
@@ -3004,19 +3006,20 @@ def create_deployment_stack_whatif_at_management_group(
 
     from azure.core.exceptions import HttpResponseError
     try:
-        validation_poller = rcf.deployment_stacks.begin_validate_stack_at_management_group(
-            management_group_id, name, deployment_stack_model)
+        # TODO(kylealbert): verify params
+        whatif_poller = rcf.deployment_stacks_what_if_results_at_management_group.begin_create_or_update(
+            management_group_id, name, deployment_stack_whatif_model)
     except HttpResponseError as err:
         err_message = _build_http_response_error_message(err)
         raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
 
-    validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
+    whatif_result = LongRunningOperation(cmd.cli_ctx)(whatif_poller)
 
-    if validation_result and validation_result.error:
-        err_message = _build_preflight_error_message(validation_result.error)
+    if whatif_result and whatif_result.error:
+        err_message = _build_preflight_error_message(whatif_result.error)
         raise_subdivision_deployment_error(err_message)
 
-    return validation_result
+    return whatif_result
 
 
 def _prepare_whatif_stack_at_scope(
@@ -3025,6 +3028,7 @@ def _prepare_whatif_stack_at_scope(
     description=None, deny_settings_excluded_principals=None, deny_settings_excluded_actions=None,
     deny_settings_apply_to_child_scopes=False, bypass_stack_out_of_sync_error=False, resources_without_delete_support=None, tags=None
 ):
+    # TODO(kylealbert): verify model
     action_on_unmanage_model = _prepare_stacks_action_on_unmanage(action_on_unmanage, resources_without_delete_support)
     deny_settings_enum = _prepare_stacks_deny_settings(deny_settings_mode)
 
