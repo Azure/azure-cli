@@ -11,9 +11,6 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "vm restart",
-)
 class Restart(AAZCommand):
     """Restart an existing VM.
 
