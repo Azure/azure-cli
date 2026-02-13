@@ -2360,6 +2360,8 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
     else:
         # attach multiple managed disks using vm PUT API
         from azure.mgmt.core.tools import parse_resource_id
+        from .operations.vm import convert_show_result_to_snake_case
+
         if size_gb is None:
             default_size_gb = 1023
 
@@ -2454,6 +2456,7 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
                 disk_lun += 1
                 vm["storageProfile"]["dataDisks"].append(disk)
 
+        vm = convert_show_result_to_snake_case(vm)
         set_vm_by_aaz(cmd, vm)
 
 
@@ -2470,6 +2473,8 @@ def detach_unmanaged_data_disk(cmd, resource_group_name, vm_name, disk_name):
 
 
 def detach_managed_data_disk(cmd, resource_group_name, vm_name, disk_name=None, force_detach=None, disk_ids=None):
+    from .operations.vm import convert_show_result_to_snake_case
+
     if disk_ids is not None:
         data_disks = []
         for disk_item in disk_ids:
@@ -2502,6 +2507,7 @@ def detach_managed_data_disk(cmd, resource_group_name, vm_name, disk_name=None, 
             if not is_contains:
                 raise ResourceNotFoundError("No disk with the name '{}' was found".format(disk_name))
         vm["storageProfile"]["dataDisks"] = leftovers
+        vm = convert_show_result_to_snake_case(vm)
         set_vm_by_aaz(cmd, vm)
 # endregion
 
