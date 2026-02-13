@@ -401,6 +401,8 @@ def load_command_table(self, _):
         g.custom_command('identity remove', 'remove_vmss_identity', validator=process_remove_identity_namespace, is_preview=True)
         g.custom_show_command('identity show', 'show_vmss_identity')
 
+        g.custom_command('scale', 'scale_vmss', supports_no_wait=True)
+
     with self.command_group('vmss', compute_vmss_sdk, operation_group='virtual_machine_scale_sets') as g:
         g.custom_command('application set', 'set_vmss_applications', validator=process_set_applications_namespace, min_api='2021-07-01')
         g.custom_command('application list', 'list_vmss_applications', min_api='2021-07-01')
@@ -412,7 +414,6 @@ def load_command_table(self, _):
         g.custom_command('list-instances', 'get_instances_list')
         g.custom_command('reimage', 'reimage_vmss', supports_no_wait=True, min_api='2017-03-30')
         g.custom_command('restart', 'restart_vmss', supports_no_wait=True)
-        g.custom_command('scale', 'scale_vmss', supports_no_wait=True)
         g.custom_show_command('show', 'get_vmss', table_transformer=get_vmss_table_output_transformer(self, False))
         g.custom_command('stop', 'stop_vmss', supports_no_wait=True, validator=process_vm_vmss_stop)
         g.generic_update_command('update', getter_name='get_vmss_modified_by_aaz', setter_name='update_vmss', supports_no_wait=True, command_type=compute_custom, validator=validate_vmss_update_namespace)

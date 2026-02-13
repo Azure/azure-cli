@@ -4493,19 +4493,20 @@ def restart_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None,
 
 # pylint: disable=inconsistent-return-statements
 def scale_vmss(cmd, resource_group_name, vm_scale_set_name, new_capacity, no_wait=False):
-    VirtualMachineScaleSet = cmd.get_models('VirtualMachineScaleSet')
-    client = _compute_client_factory(cmd.cli_ctx)
-    vmss = client.virtual_machine_scale_sets.get(resource_group_name, vm_scale_set_name)
-    # pylint: disable=no-member
-    if vmss.sku.capacity == new_capacity:
+    from .operations.vmss import VMSSCreate, VMSSShow, convert_show_result_to_snake_case
+    vmss = VMSSShow(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'vm_scale_set_name': vm_scale_set_name
+    })
+    vmss = convert_show_result_to_snake_case(vmss)
+
+    if vmss.get('sku', {}).get('capacity') == new_capacity:
         return
 
-    vmss.sku.capacity = new_capacity
-    vmss_new = VirtualMachineScaleSet(location=vmss.location, sku=vmss.sku)
-    if vmss.extended_location is not None:
-        vmss_new.extended_location = vmss.extended_location
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update,
-                       resource_group_name, vm_scale_set_name, vmss_new)
+    vmss['sku']['capacity'] = new_capacity
+    vmss['no_wait'] = no_wait
+
+    VMSSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss)
 
 
 def stop_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False, skip_shutdown=False):
