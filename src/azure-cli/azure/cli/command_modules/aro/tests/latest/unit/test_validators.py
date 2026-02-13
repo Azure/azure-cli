@@ -1,5 +1,7 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the Apache License 2.0.
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
 
 from unittest.mock import Mock, patch
 from azure.cli.command_modules.aro._validators import (
@@ -243,7 +245,7 @@ test_validate_cluster_resource_group_data = [
     test_validate_cluster_resource_group_data,
     ids=[i[0] for i in test_validate_cluster_resource_group_data]
 )
-@patch('azext_aro._validators.get_mgmt_service_client')
+@patch('azure.cli.command_modules.aro._validators.get_mgmt_service_client')
 def test_validate_cluster_resource_group(get_mgmt_service_client_mock, test_description, client_mock, cmd_mock, namespace, expected_exception):
     get_mgmt_service_client_mock.return_value = client_mock
     if expected_exception is None:
@@ -289,9 +291,9 @@ test_validate_disk_encryption_set_data = [
     test_validate_disk_encryption_set_data,
     ids=[i[0] for i in test_validate_disk_encryption_set_data]
 )
-@patch('azext_aro._validators.get_mgmt_service_client')
-@patch('azext_aro._validators.parse_resource_id')
-@patch('azext_aro._validators.is_valid_resource_id')
+@patch('azure.cli.command_modules.aro._validators.get_mgmt_service_client')
+@patch('azure.cli.command_modules.aro._validators.parse_resource_id')
+@patch('azure.cli.command_modules.aro._validators.is_valid_resource_id')
 def test_validate_disk_encryption_set(
     # Mocks:
     is_valid_resource_id_mock,
@@ -574,10 +576,10 @@ test_validate_subnet_data = [
     test_validate_subnet_data,
     ids=[i[0] for i in test_validate_subnet_data]
 )
-@patch('azext_aro._validators.subnet_show')
-@patch('azext_aro._validators.get_subscription_id')
-@patch('azext_aro._validators.parse_resource_id')
-@patch('azext_aro._validators.is_valid_resource_id')
+@patch('azure.cli.command_modules.aro._validators.subnet_show')
+@patch('azure.cli.command_modules.aro._validators.get_subscription_id')
+@patch('azure.cli.command_modules.aro._validators.parse_resource_id')
+@patch('azure.cli.command_modules.aro._validators.is_valid_resource_id')
 def test_validate_subnet(
     # Mocked functions:
     is_valid_resource_id_mock, parse_resource_id_mock, get_subscription_id_mock, get_network_vnet_subnet_show_mock,
@@ -642,7 +644,7 @@ test_validate_subnets_data = [
     test_validate_subnets_data,
     ids=[i[0] for i in test_validate_subnets_data]
 )
-@patch('azext_aro._validators.parse_resource_id')
+@patch('azure.cli.command_modules.aro._validators.parse_resource_id')
 def test_validate_subnets(parse_resource_id_mock, test_description, parse_resource_id_mock_tc, expected_exception):
     parse_resource_id_mock.side_effect = parse_resource_id_mock_tc
 

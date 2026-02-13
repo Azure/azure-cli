@@ -10,10 +10,6 @@
 
 from azure.cli.core.aaz import *
 
-
-@register_command_group(
-    "identity",
-)
 class __CMDGroup(AAZCommandGroup):
     """Manage Managed Identity
     """

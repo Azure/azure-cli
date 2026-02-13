@@ -1,5 +1,7 @@
-# Copyright (c) Microsoft Corporation.
-# Licensed under the Apache License 2.0.
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
 
 import collections
 import ipaddress
@@ -21,7 +23,6 @@ from azure.cli.command_modules.aro._validators import validate_vnet, validate_ci
 from azure.cli.command_modules.aro._rbac import has_role_assignment_on_resource
 from azure.cli.command_modules.aro.aaz.latest.network.vnet.subnet import Show as subnet_show
 from azure.cli.command_modules.aro.aaz.latest.network.vnet import Show as vnet_show
-import azure.cli.command_modules.aro.custom
 
 
 logger = get_logger(__name__)
@@ -332,7 +333,8 @@ def dyn_validate_version():
         if namespace.location is None:
             get_default_location_from_resource_group(cmd, namespace)
 
-        versions = azext_aro.custom.aro_get_versions(namespace.client, namespace.location)
+        from azure.cli.command_modules.aro.custom import aro_get_versions
+        versions = aro_get_versions(namespace.client, namespace.location)
 
         found = False
         for version in versions:

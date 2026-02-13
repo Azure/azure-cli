@@ -10,10 +10,6 @@
 
 from azure.cli.core.aaz import *
 
-
-@register_command(
-    "identity create",
-)
 class Create(AAZCommand):
     """Create an identity in the specified subscription and resource group.
     """
