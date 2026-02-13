@@ -1826,7 +1826,7 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
               wire_server_access_control_profile_reference_id=None, imds_access_control_profile_reference_id=None,
               key_incarnation_id=None, **kwargs):
     from azure.mgmt.core.tools import parse_resource_id, resource_id, is_valid_resource_id
-    from ._vm_utils import update_write_accelerator_settings, update_disk_caching
+    from ._vm_utils import update_write_accelerator_settings, update_disk_caching_by_aaz
     from .operations.vm import convert_show_result_to_snake_case as vm_convert_show_result_to_snake_case
     vm = kwargs['parameters']
     vm = vm_convert_show_result_to_snake_case(vm)
@@ -1926,7 +1926,7 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
     if disk_caching is not None:
         if vm.get("storage_profile", None) is None:
             vm["storage_profile"] = {}
-        update_disk_caching(vm["storage_profile"], disk_caching)
+        update_disk_caching_by_aaz(vm["storage_profile"], disk_caching)
 
     if license_type is not None:
         vm["license_type"] = license_type

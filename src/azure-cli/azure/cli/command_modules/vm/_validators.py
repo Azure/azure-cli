@@ -526,7 +526,8 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
             command_args = {
                 'gallery_image_definition': res['child_name_1'],
                 'gallery_name': res['name'],
-                'resource_group': res['resource_group']
+                'resource_group': res['resource_group'],
+                'subscription': res['subscription']
             }
             image_info = SigImageDefinitionShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
             namespace.os_type = image_info.get('osType')
@@ -538,7 +539,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                     "resource_group": res['resource_group'],
                     "gallery_name": res['name'],
                     "gallery_image_definition": res['child_name_1'],
-                    "subscription": res['subscription']
+                    "subscription": res['subscription'],
                 })
                 image_version_infos = [x for x in image_version_infos
                                        if not x.get("publishingProfile", {}).get("excludeFromLatest", None)]
@@ -588,7 +589,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
         command_args = {
             'gallery_image_definition': image_info[1],
             'gallery_unique_name': image_info[0],
-            'location': namespace.location
+            'location': namespace.location,
         }
         shared_gallery_image_info = SigImageDefinitionShowShared(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
