@@ -198,7 +198,6 @@ class VMIdentityRemove(_VMPatch):
 
         return self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
 
-
     class VirtualMachinesUpdate(_VMPatch.VirtualMachinesUpdate):
         # Override to solve key conflict of _schema_on_200.resources.Element.properties.type when deserializing
         @classmethod
