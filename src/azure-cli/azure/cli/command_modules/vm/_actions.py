@@ -55,8 +55,8 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zon
                                                 List as VMImageEdgeZoneList)
     from .aaz.latest.vm.image import (ListPublishers as VMImageListPublishers,
                                       ListOffers as VMImageListOffers,
-                                      ListSkus as VMImageListSkus)
-    from .operations.vm import VMImageList
+                                      ListSkus as VMImageListSkus,
+                                      List as VMImageList)
 
     all_images = []
     if location is None:
@@ -364,8 +364,7 @@ def _get_latest_image_version_by_aaz(cli_ctx, location, publisher, offer, sku, e
             'publisher': publisher,
             'sku': sku,
             'orderby': 'name desc',
-            'top': 1,
-            'expand': 'properties'
+            'top': 1
         }
         top_one = VmImageList(cli_ctx=cli_ctx)(command_args=command_args)
         if not top_one:
