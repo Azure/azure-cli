@@ -1,14 +1,16 @@
-# --------------------------------------------------------------------------------------------
-# Copyright (c) Microsoft Corporation. All rights reserved.
-# Licensed under the MIT License. See License.txt in the project root for license information.
-# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation.
+# Licensed under the Apache License 2.0.
 
 import uuid
 
-from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from azure.cli.core.commands.client_factory import get_subscription_id
-from azure.cli.core.profiles import get_sdk
-from azure.cli.core.profiles import ResourceType
+from azure.cli.core.commands.client_factory import (
+    get_mgmt_service_client,
+    get_subscription_id
+)
+from azure.cli.core.profiles import (
+    get_sdk,
+    ResourceType
+)
 from azure.mgmt.core.tools import resource_id
 from knack.log import get_logger
 from msrest.exceptions import ValidationError

@@ -106,7 +106,7 @@ DEPENDENCIES = [
     'azure-mgmt-mysqlflexibleservers==1.1.0b2',
     'azure-mgmt-recoveryservicesbackup~=9.2.0',
     'azure-mgmt-recoveryservices~=4.0.0',
-    'azure-mgmt-redhatopenshift~=1.5.0',
+    'azure-mgmt-redhatopenshift~=3.0.0',
     'azure-mgmt-redis~=14.5.0',
     'azure-mgmt-resource==23.3.0',
     'azure-mgmt-resource-deployments==1.0.0b1',

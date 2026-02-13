@@ -1,7 +1,5 @@
-# --------------------------------------------------------------------------------------------
-# Copyright (c) Microsoft Corporation. All rights reserved.
-# Licensed under the MIT License. See License.txt in the project root for license information.
-# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation.
+# Licensed under the Apache License 2.0.
 
 from azure.cli.testsdk.preparers import RoleBasedServicePrincipalPreparer
 from azure.cli.testsdk.scenario_tests.utilities import is_text_payload
@@ -23,7 +21,7 @@ class AROClusterServicePrincipalPreparer(RoleBasedServicePrincipalPreparer):
         dev_setting_sp_password="AZURE_CLI_TEST_DEV_SP_PASSWORD",
         key="aro_csp",
     ):
-        super().__init__(
+        super(AROClusterServicePrincipalPreparer, self).__init__(
             name_prefix,
             skip_assignment,
             parameter_name,

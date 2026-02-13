@@ -1,13 +1,13 @@
-# --------------------------------------------------------------------------------------------
-# Copyright (c) Microsoft Corporation. All rights reserved.
-# Licensed under the MIT License. See License.txt in the project root for license information.
-# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation.
+# Licensed under the Apache License 2.0.
 
 from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.aro._client_factory import cf_aro
-from azure.cli.command_modules.aro._format import aro_show_table_format
-from azure.cli.command_modules.aro._format import aro_list_table_format
-from azure.cli.command_modules.aro._format import aro_version_table_format
+from azure.cli.command_modules.aro._format import (
+    aro_show_table_format,
+    aro_list_table_format,
+    aro_version_table_format
+)
 from azure.cli.command_modules.aro._help import helps  # pylint: disable=unused-import
 
 
