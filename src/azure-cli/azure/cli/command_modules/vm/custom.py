@@ -5104,13 +5104,14 @@ def detach_disk_from_vmss(cmd, resource_group_name, vmss_name, lun, instance_id=
 
 # region VirtualMachineScaleSets Extensions
 def delete_vmss_extension(cmd, resource_group_name, vmss_name, extension_name):
-    from .operations.vmss import VMSSShow
+    from .operations.vmss import VMSSShow, convert_show_result_to_snake_case
     vmss = VMSSShow(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "vm_scale_set_name": vmss_name,
     })
     # Avoid unnecessary permission error
-    vmss["virtualMachineProfile"]["storageProfile"]["imageReference"] = None
+    if vmss.get("virtualMachineProfile", {}).get("storageProfile", None) is not None:
+        vmss["virtualMachineProfile"]["storageProfile"]["imageReference"] = None
 
     if not vmss.get("virtualMachineProfile", {}).get("extensionProfile", {}).get("extensions", []):
         raise CLIError('Scale set has no extensions to delete')
@@ -5120,10 +5121,12 @@ def delete_vmss_extension(cmd, resource_group_name, vmss_name, extension_name):
     if len(keep_list) == len(vmss.get("virtualMachineProfile", {}).get("extensionProfile", {}).get("extensions", [])):
         raise CLIError('Extension {} not found'.format(extension_name))
 
-    vmss["virtualMachineProfile"]["extensionProfile"]["extensions"] = keep_list
+    if vmss.get("virtualMachineProfile", {}).get("extensionProfile", None) is not None:
+        vmss["virtualMachineProfile"]["extensionProfile"]["extensions"] = keep_list
     vmss["resource_group"] = resource_group_name
     vmss["vm_scale_set_name"] = vmss_name
 
+    vmss = convert_show_result_to_snake_case(vmss)
     from .operations.vmss import VMSSCreate
     return VMSSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss)
 
@@ -5163,13 +5166,14 @@ def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publ
     if extension_name in auto_upgrade_extensions and enable_auto_upgrade is None:
         enable_auto_upgrade = True
 
-    from .operations.vmss import VMSSShow
+    from .operations.vmss import VMSSShow, convert_show_result_to_snake_case
     vmss = VMSSShow(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "vm_scale_set_name": vmss_name,
     })
     # Avoid unnecessary permission error
-    vmss["virtualMachineProfile"]["storageProfile"]["imageReference"] = None
+    if vmss.get("virtualMachineProfile", {}).get("storageProfile", None) is not None:
+        vmss["virtualMachineProfile"]["storageProfile"]["imageReference"] = None
 
     # pylint: disable=no-member
     version = _normalize_extension_version(cmd.cli_ctx, publisher, extension_name, version, vmss.get("location"))
@@ -5180,30 +5184,17 @@ def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publ
             extension_profile["extensions"] = [x for x in extensions if
                                                x["name"].lower() != extension_name.lower() or x["publisher"].lower() != publisher.lower()]  # pylint: disable=line-too-long
 
-    if cmd.supported_api_version(min_api='2025-04-01', operation_group='virtual_machine_scale_sets'):
-        ext = {
-            "autoUpgradeMinorVersion": not no_auto_upgrade,
-            "enableAutomaticUpgrade": enable_auto_upgrade,
-            "name": extension_instance_name,
-            "publisher": publisher,
-            "typePropertiesType": extension_name,
-            "typeHandlerVersion": version,
-            "settings": settings,
-            "protectedSettings": protected_settings,
-            "provisionAfterExtensions": provision_after_extensions,
-        }
-    else:
-        ext = {
-            "autoUpgradeMinorVersion": not no_auto_upgrade,
-            "enableAutomaticUpgrade": enable_auto_upgrade,
-            "name": extension_instance_name,
-            "publisher": publisher,
-            "type": extension_name,
-            "typeHandlerVersion": version,
-            "settings": settings,
-            "protectedSettings": protected_settings,
-            "provisionAfterExtensions": provision_after_extensions,
-        }
+    ext = {
+        "autoUpgradeMinorVersion": not no_auto_upgrade,
+        "enableAutomaticUpgrade": enable_auto_upgrade,
+        "name": extension_instance_name,
+        "publisher": publisher,
+        "type": extension_name,
+        "typeHandlerVersion": version,
+        "settings": settings,
+        "protectedSettings": protected_settings,
+        "provisionAfterExtensions": provision_after_extensions,
+    }
 
     if force_update:
         ext["forceUpdateTag"] = str(_gen_guid())
@@ -5215,11 +5206,12 @@ def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publ
         vmss.setdefault("virtualMachineProfile", {}) \
             .setdefault("extensionProfile", {}) \
             .setdefault("extensions", [])
-
-    vmss["virtualMachineProfile"]["extensionProfile"]["extensions"].append(ext)
+    if vmss.get("virtualMachineProfile", {}).get("extensionProfile", None) is not None:
+        vmss["virtualMachineProfile"]["extensionProfile"]["extensions"].append(ext)
 
     vmss["resource_group"] = resource_group_name
     vmss["vm_scale_set_name"] = vmss_name
+    vmss = convert_show_result_to_snake_case(vmss)
 
     from .operations.vmss import VMSSCreate
     return VMSSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss)
