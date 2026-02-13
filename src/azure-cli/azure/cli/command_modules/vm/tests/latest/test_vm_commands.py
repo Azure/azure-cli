@@ -1009,15 +1009,15 @@ class VMConvertTest(ScenarioTest):
         self.cmd('vm unmanaged-disk attach -g {rg} --vm-name {vm} --new --size-gb 1')
 
         output = self.cmd('vm unmanaged-disk list --vm-name {vm} -g {rg}').get_output_in_json()
-        self.assertFalse(output[0]['managedDisk'])
+        self.assertIsNone(output[0].get('managedDisk'))
         self.assertTrue(output[0]['vhd'])
 
         self.cmd('vm deallocate -n {vm} -g {rg}')
         self.cmd('vm convert -n {vm} -g {rg}')
         
         converted = self.cmd('vm unmanaged-disk list --vm-name {vm} -g {rg}').get_output_in_json()
-        self.assertTrue(converted[0]['managedDisk'])
-        self.assertFalse(converted[0]['vhd'])
+        self.assertIsNotNone(converted[0].get('managedDisk'))
+        self.assertIsNone(converted[0].get('vhd'))
 
 
 class TestSnapShotAccess(ScenarioTest):
@@ -4173,7 +4173,7 @@ class VMUnmanagedDataDiskTest(ScenarioTest):
         })
 
         self.cmd('vm create -g {rg} --location {loc} -n {vm} --admin-username ubuntu --image OpenLogic:CentOS:7.5:latest '
-                 '--admin-password testPassword0 --authentication-type password --use-unmanaged-disk --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+                 '--admin-password testPassword0 --authentication-type password --use-unmanaged-disk --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --size Standard_B2ms')
 
         # Disable default outbound access
         self.cmd(
@@ -4227,7 +4227,7 @@ class VMUnmanagedDataDiskTest(ScenarioTest):
         })
 
         self.cmd('vm create -g {rg} --location {loc} -n {vm} --admin-username debian --image Debian:debian-10:10:latest --admin-password testPassword0 '
-                 '--authentication-type password --use-unmanaged-disk --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+                 '--authentication-type password --use-unmanaged-disk --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --size Standard_B2ms')
 
         # Disable default outbound access
         self.cmd(
