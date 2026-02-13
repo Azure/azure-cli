@@ -2950,8 +2950,8 @@ def create_deployment_stack_whatif_at_resource_group(
 
     whatif_result = LongRunningOperation(cmd.cli_ctx)(whatif_poller)
 
-    if whatif_result and whatif_result.error:
-        err_message = _build_preflight_error_message(whatif_result.error)
+    if whatif_result and whatif_result.properties and whatif_result.properties.error:
+        err_message = _build_preflight_error_message(whatif_result.properties.error)
         raise_subdivision_deployment_error(err_message)
 
     return whatif_result
@@ -2984,8 +2984,8 @@ def create_deployment_stack_whatif_at_subscription(
 
     whatif_result = LongRunningOperation(cmd.cli_ctx)(whatif_poller)
 
-    if whatif_result and whatif_result.error:
-        err_message = _build_preflight_error_message(whatif_result.error)
+    if whatif_result and whatif_result.properties and whatif_result.properties.error:
+        err_message = _build_preflight_error_message(whatif_result.properties.error)
         raise_subdivision_deployment_error(err_message)
 
     return whatif_result
@@ -3019,8 +3019,8 @@ def create_deployment_stack_whatif_at_management_group(
 
     whatif_result = LongRunningOperation(cmd.cli_ctx)(whatif_poller)
 
-    if whatif_result and whatif_result.error:
-        err_message = _build_preflight_error_message(whatif_result.error)
+    if whatif_result and whatif_result.properties and whatif_result.properties.error:
+        err_message = _build_preflight_error_message(whatif_result.properties.error)
         raise_subdivision_deployment_error(err_message)
 
     return whatif_result

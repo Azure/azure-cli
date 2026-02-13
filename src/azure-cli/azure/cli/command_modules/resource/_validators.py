@@ -274,7 +274,7 @@ class RollbackAction(argparse.Action):
         setattr(namespace, 'rollback_on_error', '' if not values else values)
 
 
-def duration_format(value):
+def iso_8601_duration(value):
     """Validate the correct format of a timespan string and deserialize."""
     from msrest.serialization import Deserializer
     from msrest.exceptions import DeserializationError

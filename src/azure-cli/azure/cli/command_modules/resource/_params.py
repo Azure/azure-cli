@@ -25,7 +25,7 @@ def load_arguments(self, _):
     from azure.cli.command_modules.resource._completers import (
         get_resource_types_completion_list, get_providers_completion_list)
     from azure.cli.command_modules.resource._validators import (
-        validate_lock_parameters, validate_resource_lock, validate_group_lock, validate_subscription_lock, RollbackAction, duration_format)
+        validate_lock_parameters, validate_resource_lock, validate_group_lock, validate_subscription_lock, RollbackAction, iso_8601_duration)
     from azure.cli.command_modules.resource.parameters import TagUpdateOperation, StacksActionOnUnmanage
 
     DeploymentMode, WhatIfResultFormat, ChangeType, ValidationLevel = self.get_models('DeploymentMode', 'WhatIfResultFormat', 'ChangeType', 'ValidationLevel')
@@ -117,7 +117,7 @@ def load_arguments(self, _):
 
     stacks_whatif_stack_id_type = CLIArgumentType(options_list=['--stack'], help='The fully-qualified ID of the deployment stack to perform a what-if operation on.')
     stacks_whatif_retention_interval_type = CLIArgumentType(
-        options_list=['--retention-interval', '--ri'], type=duration_format,
+        options_list=['--retention-interval', '--ri'], type=iso_8601_duration,
         help='The retention interval for What-If results. The value must be in ISO 8601 format and between 1 day and 30 days.')
 
     bicep_file_type = CLIArgumentType(options_list=['--file', '-f'], completer=FilesCompleter(), type=file_type)
