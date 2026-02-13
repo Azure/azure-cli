@@ -364,7 +364,8 @@ def _get_latest_image_version_by_aaz(cli_ctx, location, publisher, offer, sku, e
             'publisher': publisher,
             'sku': sku,
             'orderby': 'name desc',
-            'top': 1
+            'top': 1,
+            'expand': 'properties'
         }
         top_one = VmImageList(cli_ctx=cli_ctx)(command_args=command_args)
         if not top_one:
