@@ -611,8 +611,7 @@ def _is_valid_guid(value):
     """Check if a string is a valid GUID."""
     import uuid
     try:
-        uuid.UUID(value)
-        return True
+        return str(uuid.UUID(value)) == value.lower()
     except ValueError:
         return False
 
