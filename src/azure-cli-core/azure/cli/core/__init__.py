@@ -1307,4 +1307,3 @@ def get_default_cli():
                  logging_cls=AzCliLogging,
                  output_cls=AzOutputProducer,
                  help_cls=AzCliHelp)
-

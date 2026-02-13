@@ -524,7 +524,7 @@ class AzCliCommandInvoker(CommandInvoker):
         if use_command_index:
             is_help_request = args and ('--help' in args or '-h' in args or args[-1] == 'help')
             is_top_level = True
-            
+
             if is_help_request:
                 # Check if there's a command path before the help flag
                 for arg in args:
@@ -538,47 +538,47 @@ class AzCliCommandInvoker(CommandInvoker):
                 is_top_level = True
             else:
                 is_top_level = False
-            
+
             # Only use cache for top-level help requests
             if is_top_level and (is_help_request or not args):
                 from azure.cli.core import CommandIndex
                 command_index = CommandIndex(self.cli_ctx)
                 help_index = command_index.get_help_index()
-                
+
                 if help_index and 'root' in help_index:
                     from azure.cli.core._help import WELCOME_MESSAGE, PRIVACY_STATEMENT
                     import re
-                    
+
                     # Show privacy statement if first run
                     ran_before = self.cli_ctx.config.getboolean('core', 'first_run', fallback=False)
                     if not ran_before:
                         print(PRIVACY_STATEMENT)
                         self.cli_ctx.config.set_value('core', 'first_run', 'yes')
-                    
+
                     # Show welcome message
                     print(WELCOME_MESSAGE)
-                    
+
                     # Display cached help
                     root_help = help_index['root']
                     print("\nGroup")
                     print("    az")
-                    
+
                     # Import knack's formatting functions
                     from knack.help import _print_indent, FIRST_LINE_PREFIX, _get_hanging_indent
-                    
+
                     groups_data = root_help.get('groups', {})
                     commands_data = root_help.get('commands', {})
-                    
+
                     # Calculate max line length for alignment
                     max_line_len = 0
                     for name in groups_data.keys():
                         max_line_len = max(max_line_len, len(name))
                     for name in commands_data.keys():
                         max_line_len = max(max_line_len, len(name))
-                    
+
                     indent = 1
                     LINE_FORMAT = '{name}{padding}{separator}{summary}'
-                    
+
                     # Display subgroups
                     if groups_data:
                         print("\nSubgroups:")
@@ -596,7 +596,7 @@ class AzCliCommandInvoker(CommandInvoker):
                                 summary=summary
                             )
                             _print_indent(line, indent, _get_hanging_indent(max_line_len, indent))
-                    
+
                     # Display commands
                     if commands_data:
                         print("\nCommands:")
@@ -614,7 +614,7 @@ class AzCliCommandInvoker(CommandInvoker):
                                 summary=summary
                             )
                             _print_indent(line, indent, _get_hanging_indent(max_line_len, indent))
-                    
+
                     print()
                     telemetry.set_command_details('az', command_preserve_casing=command_preserve_casing)
                     telemetry.set_success(summary='cached-help')
@@ -680,7 +680,7 @@ class AzCliCommandInvoker(CommandInvoker):
             self.parser.enable_autocomplete()
             subparser = self.parser.subparsers[tuple()]
             self.help.show_welcome(subparser)
-            
+
             # After showing help, cache the help summaries for future fast access
             # This allows subsequent `az --help` calls to skip module loading
             use_command_index = self.cli_ctx.config.getboolean('core', 'use_command_index', fallback=True)
@@ -693,7 +693,7 @@ class AzCliCommandInvoker(CommandInvoker):
                     from azure.cli.core._help import CliGroupHelpFile
                     help_file = CliGroupHelpFile(self.cli_ctx.help, '', subparser)
                     help_file.load(subparser)
-                    
+
                     # Helper to build tag string for an item
                     def _get_tags(item):
                         tags = []
@@ -704,11 +704,11 @@ class AzCliCommandInvoker(CommandInvoker):
                         if hasattr(item, 'experimental_info') and item.experimental_info:
                             tags.append(str(item.experimental_info.tag))
                         return ' '.join(tags)
-                    
+
                     # Separate groups and commands
                     groups = {}
                     commands = {}
-                    
+
                     for child in help_file.children:
                         if hasattr(child, 'name') and hasattr(child, 'short_summary'):
                             if ' ' not in child.name:  # Only top-level items
@@ -722,7 +722,7 @@ class AzCliCommandInvoker(CommandInvoker):
                                     groups[child.name] = item_data
                                 else:
                                     commands[child.name] = item_data
-                    
+
                     # Store in the command index
                     help_index_data = {'groups': groups, 'commands': commands}
                     if groups or commands:
