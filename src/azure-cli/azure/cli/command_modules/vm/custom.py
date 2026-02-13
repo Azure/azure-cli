@@ -4347,8 +4347,8 @@ def list_vmss_instance_connection_info(cmd, resource_group_name, vm_scale_set_na
     }
     vmss = VmssShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
-    from ._vm_utils import raise_unsupported_error_for_flex_vmss
-    raise_unsupported_error_for_flex_vmss(
+    from ._vm_utils import raise_unsupported_error_for_flex_vmss_by_aaz
+    raise_unsupported_error_for_flex_vmss_by_aaz(
         vmss, 'This command is not available for VMSS in Flex mode. '
               'Please use the "az network public-ip list/show" to retrieve networking information.')
 
@@ -4360,7 +4360,7 @@ def list_vmss_instance_connection_info(cmd, resource_group_name, vm_scale_set_na
         raise CLIError('could not find a primary NIC which is needed to search to load balancer')
 
     res_id = None
-    for ip in primary_nic_config.get('ipConfigurations'):
+    for ip in primary_nic_config.get('ipConfigurations', []):
         if len(ip.get('loadBalancerInboundNatPools', [])) > 0:
             res_id = ip['loadBalancerInboundNatPools'][0].get('id')
             break
@@ -4436,8 +4436,8 @@ def list_vmss_instance_public_ips(cmd, resource_group_name, vm_scale_set_name):
         'vm_scale_set_name': vm_scale_set_name
     }
     vmss = VmssShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
-    from ._vm_utils import raise_unsupported_error_for_flex_vmss
-    raise_unsupported_error_for_flex_vmss(
+    from ._vm_utils import raise_unsupported_error_for_flex_vmss_by_aaz
+    raise_unsupported_error_for_flex_vmss_by_aaz(
         vmss, 'This command is not available for VMSS in Flex mode. '
               'Please use the "az network public-ip list/show" to retrieve networking information.')
 
