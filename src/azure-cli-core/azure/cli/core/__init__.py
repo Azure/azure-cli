@@ -981,7 +981,6 @@ class CommandIndex:
         self.INDEX[self._COMMAND_INDEX_CLOUD_PROFILE] = self.cloud_profile
         from collections import defaultdict
         index = defaultdict(list)
-        help_index = {}  # Maps top-level command to short summary
 
         # self.cli_ctx.invocation.commands_loader.command_table doesn't exist in DummyCli due to the lack of invocation
         for command_name, command in command_table.items():

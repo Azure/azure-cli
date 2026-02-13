@@ -163,6 +163,10 @@ class TestHelpLoads(unittest.TestCase):
         # delete temporary directory to be used for temp files.
         shutil.rmtree(self._tempdirName)
         self.helps.clear()
+        # Invalidate help cache to prevent test data from polluting production cache
+        from azure.cli.core._session import INDEX
+        if 'helpIndex' in INDEX:
+            del INDEX['helpIndex']
 
     def set_help_py(self):
         self.helps['test'] = """
