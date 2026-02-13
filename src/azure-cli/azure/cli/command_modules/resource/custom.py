@@ -2740,7 +2740,7 @@ def delete_deployment_stack_at_resource_group(
             unmanage_action_resources=action_on_unmanage_model.resources,
             unmanage_action_resource_groups=action_on_unmanage_model.resource_groups,
             unmanage_action_management_groups=action_on_unmanage_model.management_groups,
-            # unmanage_action_resources_without_delete_support=action_on_unmanage_model.resources_without_delete_support,
+            unmanage_action_resources_without_delete_support=action_on_unmanage_model.resources_without_delete_support,
             bypass_stack_out_of_sync_error=bypass_stack_out_of_sync_error)
     if id:
         stack_arr = id.split('/')
