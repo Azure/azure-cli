@@ -2920,6 +2920,150 @@ def _prepare_validate_stack_at_scope(
     return deployment_stack_model
 
 
+def create_deployment_stack_whatif_at_resource_group(
+    cmd, name, resource_group, deny_settings_mode, action_on_unmanage, template_file=None, template_spec=None, template_uri=None,
+    query_string=None, parameters=None, description=None, deny_settings_excluded_principals=None, deny_settings_excluded_actions=None,
+    deny_settings_apply_to_child_scopes=False, bypass_stack_out_of_sync_error=False, resources_without_delete_support=None, tags=None
+):
+    rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
+
+    deployment_stack_model = _prepare_whatif_stack_at_scope(
+        deployment_scope='resourceGroup', cmd=cmd, deny_settings_mode=deny_settings_mode, action_on_unmanage=action_on_unmanage,
+        template_file=template_file, template_spec=template_spec, template_uri=template_uri, query_string=query_string,
+        parameters=parameters, description=description, deny_settings_excluded_principals=deny_settings_excluded_principals,
+        deny_settings_excluded_actions=deny_settings_excluded_actions,
+        deny_settings_apply_to_child_scopes=deny_settings_apply_to_child_scopes,
+        bypass_stack_out_of_sync_error=bypass_stack_out_of_sync_error, resources_without_delete_support=resources_without_delete_support,
+        tags=tags)
+
+    from azure.core.exceptions import HttpResponseError
+    try:
+        validation_poller = rcf.deployment_stacks.begin_validate_stack_at_resource_group(resource_group, name, deployment_stack_model)
+    except HttpResponseError as err:
+        err_message = _build_http_response_error_message(err)
+        raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
+
+    validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
+
+    if validation_result and validation_result.error:
+        err_message = _build_preflight_error_message(validation_result.error)
+        raise_subdivision_deployment_error(err_message)
+
+    return validation_result
+
+
+def create_deployment_stack_whatif_at_subscription(
+    cmd, name, location, deny_settings_mode, action_on_unmanage, deployment_resource_group=None, template_file=None, template_spec=None,
+    template_uri=None, query_string=None, parameters=None, description=None, deny_settings_excluded_principals=None,
+    deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False, bypass_stack_out_of_sync_error=False,
+    resources_without_delete_support=None, tags=None
+):
+    rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
+
+    deployment_stack_model = _prepare_whatif_stack_at_scope(
+        deployment_scope='subscription', cmd=cmd, deny_settings_mode=deny_settings_mode, action_on_unmanage=action_on_unmanage,
+        location=location, deployment_resource_group=deployment_resource_group, template_file=template_file, template_spec=template_spec,
+        template_uri=template_uri, query_string=query_string, parameters=parameters, description=description,
+        deny_settings_excluded_principals=deny_settings_excluded_principals, deny_settings_excluded_actions=deny_settings_excluded_actions,
+        deny_settings_apply_to_child_scopes=deny_settings_apply_to_child_scopes,
+        bypass_stack_out_of_sync_error=bypass_stack_out_of_sync_error, resources_without_delete_support=resources_without_delete_support,
+        tags=tags)
+
+    from azure.core.exceptions import HttpResponseError
+    try:
+        validation_poller = rcf.deployment_stacks_what_if_results_at_management_group.begin_create_or_update(name, deployment_stack_model)
+    except HttpResponseError as err:
+        err_message = _build_http_response_error_message(err)
+        raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
+
+    validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
+
+    if validation_result and validation_result.error:
+        err_message = _build_preflight_error_message(validation_result.error)
+        raise_subdivision_deployment_error(err_message)
+
+    return validation_result
+
+
+def create_deployment_stack_whatif_at_management_group(
+    cmd, management_group_id, name, location, deny_settings_mode, action_on_unmanage, deployment_subscription=None,
+    template_file=None, template_spec=None, template_uri=None, query_string=None, parameters=None, description=None,
+    deny_settings_excluded_principals=None, deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False,
+    bypass_stack_out_of_sync_error=False, resources_without_delete_support=None, tags=None
+):
+    rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
+
+    deployment_stack_model = _prepare_whatif_stack_at_scope(
+        deployment_scope='managementGroup', cmd=cmd, deny_settings_mode=deny_settings_mode, action_on_unmanage=action_on_unmanage,
+        location=location, deployment_subscription=deployment_subscription, template_file=template_file, template_spec=template_spec,
+        template_uri=template_uri, query_string=query_string, parameters=parameters, description=description,
+        deny_settings_excluded_principals=deny_settings_excluded_principals, deny_settings_excluded_actions=deny_settings_excluded_actions,
+        deny_settings_apply_to_child_scopes=deny_settings_apply_to_child_scopes,
+        bypass_stack_out_of_sync_error=bypass_stack_out_of_sync_error, resources_without_delete_support=resources_without_delete_support,
+        tags=tags)
+
+    from azure.core.exceptions import HttpResponseError
+    try:
+        validation_poller = rcf.deployment_stacks.begin_validate_stack_at_management_group(
+            management_group_id, name, deployment_stack_model)
+    except HttpResponseError as err:
+        err_message = _build_http_response_error_message(err)
+        raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
+
+    validation_result = LongRunningOperation(cmd.cli_ctx)(validation_poller)
+
+    if validation_result and validation_result.error:
+        err_message = _build_preflight_error_message(validation_result.error)
+        raise_subdivision_deployment_error(err_message)
+
+    return validation_result
+
+
+def _prepare_whatif_stack_at_scope(
+    deployment_scope, cmd, deny_settings_mode, action_on_unmanage, location=None, deployment_subscription=None,
+    deployment_resource_group=None, template_file=None, template_spec=None, template_uri=None, query_string=None, parameters=None,
+    description=None, deny_settings_excluded_principals=None, deny_settings_excluded_actions=None,
+    deny_settings_apply_to_child_scopes=False, bypass_stack_out_of_sync_error=False, resources_without_delete_support=None, tags=None
+):
+    action_on_unmanage_model = _prepare_stacks_action_on_unmanage(action_on_unmanage, resources_without_delete_support)
+    deny_settings_enum = _prepare_stacks_deny_settings(deny_settings_mode)
+
+    excluded_principals_array = _prepare_stacks_excluded_principals(deny_settings_excluded_principals)
+    excluded_actions_array = _prepare_stacks_excluded_actions(deny_settings_excluded_actions)
+
+    tags = tags or {}
+
+    if query_string and not template_uri:
+        raise IncorrectUsageError('please provide --template-uri if --query-string is specified')
+
+    if [template_file, template_spec, template_uri].count(None) < 2:
+        raise InvalidArgumentValueError(
+            "Please enter only one of the following: template file, template spec, or template url")
+
+    apply_to_child_scopes = deny_settings_apply_to_child_scopes
+    deny_settings_model = StackModels.DenySettings(
+        mode=deny_settings_enum, excluded_principals=excluded_principals_array, excluded_actions=excluded_actions_array,
+        apply_to_child_scopes=apply_to_child_scopes)
+    stack_properties_model = StackModels.DeploymentStacksWhatIfResultProperties(
+        action_on_unmanage=action_on_unmanage_model, bypass_stack_out_of_sync_error=bypass_stack_out_of_sync_error,
+        deny_settings=deny_settings_model, deployment_stack_resource_id="TODO", description=description, retention_interval="TODO")
+    deployment_stack_whatif_model = StackModels.DeploymentStacksWhatIfResult(location=location, tags=tags, properties=stack_properties_model)
+
+    if deployment_scope == 'managementGroup' and deployment_subscription:
+        stack_properties_model.deployment_scope = f"/subscriptions/{deployment_subscription}"
+        deployment_scope = 'subscription'
+    elif deployment_scope == 'subscription' and deployment_resource_group:
+        deployment_subscription_id = get_subscription_id(cmd.cli_ctx)
+
+        stack_properties_model.deployment_scope = f"/subscriptions/{deployment_subscription_id}/resourceGroups/{deployment_resource_group}"
+        deployment_scope = 'resourceGroup'
+
+    _prepare_stacks_templates_and_parameters(
+        cmd, deployment_scope, stack_properties_model, template_file, template_spec, template_uri, parameters, query_string)
+
+    return deployment_stack_whatif_model
+
+
 def create_deployment_stack_at_management_group(
     cmd, management_group_id, name, location, deny_settings_mode, action_on_unmanage, deployment_subscription=None, template_file=None,
     template_spec=None, template_uri=None, query_string=None, parameters=None, description=None, deny_settings_excluded_principals=None,
