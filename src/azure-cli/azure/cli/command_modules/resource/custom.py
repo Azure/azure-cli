@@ -12,6 +12,7 @@ import json
 import os
 import re
 import ssl
+import typing as t
 
 from urllib.request import urlopen
 from urllib.parse import urlparse, unquote
@@ -1381,7 +1382,9 @@ def _build_stacks_confirmation_string(
 
 
 def _prepare_stacks_templates_and_parameters(
-    cmd, deployment_scope, deployment_stack_model, template_file, template_spec, template_uri, parameters, query_string
+    cmd, deployment_scope,
+    stack_properties_model: t.Union[StackModels.DeploymentStackProperties, StackModels.DeploymentStacksWhatIfResultProperties],
+    template_file, template_spec, template_uri, parameters, query_string
 ):
     t_spec, t_uri = None, None
     template_obj = None
@@ -1399,7 +1402,7 @@ def _prepare_stacks_templates_and_parameters(
             "Please enter one of the following: template file, template spec, template url, or Bicep parameters file.")
 
     if t_spec:
-        deployment_stack_model.template_link = StackModels.DeploymentStacksTemplateLink(id=t_spec)
+        stack_properties_model.template_link = StackModels.DeploymentStacksTemplateLink(id=t_spec)
         template_obj = _load_template_spec_template(cmd, template_spec)
     elif t_uri:
         if query_string:
@@ -1409,16 +1412,16 @@ def _prepare_stacks_templates_and_parameters(
                 template_uri=t_uri, input_query_string=query_string)
         else:
             deployment_stacks_template_link = StackModels.DeploymentStacksTemplateLink(uri=t_uri)
-        deployment_stack_model.template_link = deployment_stacks_template_link
+        stack_properties_model.template_link = deployment_stacks_template_link
         template_obj = _remove_comments_from_json(_urlretrieve(t_uri).decode('utf-8'), file_path=t_uri)
     elif _is_bicepparam_file_provided(parameters):
         template_content, template_spec_id, bicepparam_json_content = _parse_bicepparam_file(cmd, template_file, parameters)
         if template_spec_id:
             template_obj = _load_template_spec_template(cmd, template_spec_id)
-            deployment_stack_model.template_link = StackModels.DeploymentStacksTemplateLink(id=template_spec_id)
+            stack_properties_model.template_link = StackModels.DeploymentStacksTemplateLink(id=template_spec_id)
         elif template_content:
             template_obj = _remove_comments_from_json(template_content)
-            deployment_stack_model.template = json.loads(json.dumps(template_obj))
+            stack_properties_model.template = json.loads(json.dumps(template_obj))
         else:
             # 'using none' with separate template file
             template_content = (
@@ -1427,7 +1430,7 @@ def _prepare_stacks_templates_and_parameters(
                 else read_file_content(template_file)
             )
             template_obj = _remove_comments_from_json(template_content, file_path=template_file)
-            deployment_stack_model.template = json.loads(json.dumps(template_obj))
+            stack_properties_model.template = json.loads(json.dumps(template_obj))
 
         template_schema = template_obj.get('$schema', '')
         validate_bicep_target_scope(template_schema, deployment_scope)
@@ -1444,9 +1447,9 @@ def _prepare_stacks_templates_and_parameters(
             template_schema = template_obj.get('$schema', '')
             validate_bicep_target_scope(template_schema, deployment_scope)
 
-            deployment_stack_model.template = json.loads(json.dumps(template_obj))
+            stack_properties_model.template = json.loads(json.dumps(template_obj))
         else:
-            deployment_stack_model.template = json.load(open(template_file))
+            stack_properties_model.template = json.load(open(template_file))
 
     template_obj['resources'] = template_obj.get('resources', [])
 
@@ -1457,9 +1460,9 @@ def _prepare_stacks_templates_and_parameters(
         parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters, False)
         parameters = json.loads(json.dumps(parameters))
 
-    deployment_stack_model.parameters = parameters
+    stack_properties_model.parameters = parameters
 
-    return deployment_stack_model
+    return stack_properties_model
 
 
 def _list_resources_odata_filter_builder(resource_group_name=None, resource_provider_namespace=None,
@@ -2511,20 +2514,20 @@ def create_deployment_stack_at_subscription(
     apply_to_child_scopes = deny_settings_apply_to_child_scopes
     deny_settings_model = StackModels.DenySettings(
         mode=deny_settings_enum, excluded_principals=excluded_principals_array, excluded_actions=excluded_actions_array, apply_to_child_scopes=apply_to_child_scopes)
-    deployment_stack_properties_model = StackModels.DeploymentStackProperties(
+    stack_properties_model = StackModels.DeploymentStackProperties(
         action_on_unmanage=action_on_unmanage_model, bypass_stack_out_of_sync_error=bypass_stack_out_of_sync_error,
         deny_settings=deny_settings_model, description=description)
-    deployment_stack_model = StackModels.DeploymentStack(location=location, tags=tags, properties=deployment_stack_properties_model)
+    deployment_stack_model = StackModels.DeploymentStack(location=location, tags=tags, properties=stack_properties_model)
 
     if deployment_resource_group:
-        deployment_stack_model.deployment_scope = "/subscriptions/" + \
+        stack_properties_model.deployment_scope = "/subscriptions/" + \
             get_subscription_id(cmd.cli_ctx) + "/resourceGroups/" + deployment_resource_group
         deployment_scope = 'resourceGroup'
     else:
         deployment_scope = 'subscription'
 
-    deployment_stack_model = _prepare_stacks_templates_and_parameters(
-        cmd, deployment_scope, deployment_stack_model, template_file, template_spec, template_uri, parameters, query_string)
+    _prepare_stacks_templates_and_parameters(
+        cmd, deployment_scope, stack_properties_model, template_file, template_spec, template_uri, parameters, query_string)
 
     # run validate
     from azure.core.exceptions import HttpResponseError
@@ -2654,14 +2657,14 @@ def create_deployment_stack_at_resource_group(
     apply_to_child_scopes = deny_settings_apply_to_child_scopes
     deny_settings_model = StackModels.DenySettings(
         mode=deny_settings_enum, excluded_principals=excluded_principals_array, excluded_actions=excluded_actions_array, apply_to_child_scopes=apply_to_child_scopes)
-    deployment_stack_properties_model = StackModels.DeploymentStackProperties(
+    stack_properties_model = StackModels.DeploymentStackProperties(
         action_on_unmanage=action_on_unmanage_model, bypass_stack_out_of_sync_error=bypass_stack_out_of_sync_error,
         deny_settings=deny_settings_model, description=description)
-    deployment_stack_model = StackModels.DeploymentStack(tags=tags, properties=deployment_stack_properties_model)
+    deployment_stack_model = StackModels.DeploymentStack(tags=tags, properties=stack_properties_model)
 
     # validate and prepare template & paramaters
-    deployment_stack_model = _prepare_stacks_templates_and_parameters(
-        cmd, 'resourceGroup', deployment_stack_model, template_file, template_spec, template_uri, parameters, query_string)
+    _prepare_stacks_templates_and_parameters(
+        cmd, 'resourceGroup', stack_properties_model, template_file, template_spec, template_uri, parameters, query_string)
 
     # run validate
     from azure.core.exceptions import HttpResponseError
@@ -2897,22 +2900,22 @@ def _prepare_validate_stack_at_scope(
     deny_settings_model = StackModels.DenySettings(
         mode=deny_settings_enum, excluded_principals=excluded_principals_array, excluded_actions=excluded_actions_array,
         apply_to_child_scopes=apply_to_child_scopes)
-    deployment_stack_properties_model = StackModels.DeploymentStackProperties(
+    stack_properties_model = StackModels.DeploymentStackProperties(
         action_on_unmanage=action_on_unmanage_model, bypass_stack_out_of_sync_error=bypass_stack_out_of_sync_error,
         deny_settings=deny_settings_model, description=description)
-    deployment_stack_model = StackModels.DeploymentStack(location=location, tags=tags, properties=deployment_stack_properties_model)
+    deployment_stack_model = StackModels.DeploymentStack(location=location, tags=tags, properties=stack_properties_model)
 
     if deployment_scope == 'managementGroup' and deployment_subscription:
-        deployment_stack_model.deployment_scope = f"/subscriptions/{deployment_subscription}"
+        stack_properties_model.deployment_scope = f"/subscriptions/{deployment_subscription}"
         deployment_scope = 'subscription'
     elif deployment_scope == 'subscription' and deployment_resource_group:
         deployment_subscription_id = get_subscription_id(cmd.cli_ctx)
 
-        deployment_stack_model.deployment_scope = f"/subscriptions/{deployment_subscription_id}/resourceGroups/{deployment_resource_group}"
+        stack_properties_model.deployment_scope = f"/subscriptions/{deployment_subscription_id}/resourceGroups/{deployment_resource_group}"
         deployment_scope = 'resourceGroup'
 
-    deployment_stack_model = _prepare_stacks_templates_and_parameters(
-        cmd, deployment_scope, deployment_stack_model, template_file, template_spec, template_uri, parameters, query_string)
+    _prepare_stacks_templates_and_parameters(
+        cmd, deployment_scope, stack_properties_model, template_file, template_spec, template_uri, parameters, query_string)
 
     return deployment_stack_model
 
@@ -2953,19 +2956,19 @@ def create_deployment_stack_at_management_group(
     apply_to_child_scopes = deny_settings_apply_to_child_scopes
     deny_settings_model = StackModels.DenySettings(
         mode=deny_settings_enum, excluded_principals=excluded_principals_array, excluded_actions=excluded_actions_array, apply_to_child_scopes=apply_to_child_scopes)
-    deployment_stack_properties_model = StackModels.DeploymentStackProperties(
+    stack_properties_model = StackModels.DeploymentStackProperties(
         action_on_unmanage=action_on_unmanage_model, bypass_stack_out_of_sync_error=bypass_stack_out_of_sync_error,
         deny_settings=deny_settings_model, description=description)
-    deployment_stack_model = StackModels.DeploymentStack(location=location, tags=tags, properties=deployment_stack_properties_model)
+    deployment_stack_model = StackModels.DeploymentStack(location=location, tags=tags, properties=stack_properties_model)
 
     if deployment_subscription:
-        deployment_stack_model.deployment_scope = "/subscriptions/" + deployment_subscription
+        stack_properties_model.deployment_scope = "/subscriptions/" + deployment_subscription
         deployment_scope = 'subscription'
     else:
         deployment_scope = 'managementGroup'
 
-    deployment_stack_model = _prepare_stacks_templates_and_parameters(
-        cmd, deployment_scope, deployment_stack_model, template_file, template_spec, template_uri, parameters, query_string)
+    _prepare_stacks_templates_and_parameters(
+        cmd, deployment_scope, stack_properties_model, template_file, template_spec, template_uri, parameters, query_string)
 
     # run validate
     from azure.core.exceptions import HttpResponseError
@@ -4036,8 +4039,8 @@ class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
         # If available, we will use parent resource's api-version
         resource_type_str = (parent_resource_path.split('/')[0] if parent_resource_path else resource_type)
 
-        rt = [t for t in provider.resource_types
-              if t.resource_type.lower() == resource_type_str.lower()]
+        rt = [prt for prt in provider.resource_types
+              if prt.resource_type.lower() == resource_type_str.lower()]
         if not rt:
             raise IncorrectUsageError('Resource type {} not found.'.format(resource_type_str))
         if len(rt) == 1 and rt[0].api_versions:
