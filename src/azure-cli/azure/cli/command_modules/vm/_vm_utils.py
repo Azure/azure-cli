@@ -613,8 +613,7 @@ class ArmTemplateBuilder20190401(ArmTemplateBuilder):
 
 
 def raise_unsupported_error_for_flex_vmss(vmss, error_message):
-    if hasattr(vmss, 'orchestration_mode') and vmss.orchestration_mode \
-            and vmss.orchestration_mode.lower() == 'flexible':
+    if vmss.get('orchestrationMode', '').lower() == 'flexible':
         from azure.cli.core.azclierror import ArgumentUsageError
         raise ArgumentUsageError(error_message)
 
