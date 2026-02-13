@@ -19,6 +19,7 @@ from ._list_instances import *
 from ._list_skus import *
 from ._patch import *
 from ._perform_maintenance import *
+from ._restart import *
 from ._show import *
 from ._simulate_eviction import *
 from ._start import *
