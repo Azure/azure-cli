@@ -4353,7 +4353,8 @@ def list_vmss_instance_connection_info(cmd, resource_group_name, vm_scale_set_na
               'Please use the "az network public-ip list/show" to retrieve networking information.')
 
     # find the load balancer
-    nic_configs = vmss.get('virtualMachineProfile', {}).get('networkProfile', {}).get('networkInterfaceConfigurations', [])
+    nic_configs = \
+        vmss.get('virtualMachineProfile', {}).get('networkProfile', {}).get('networkInterfaceConfigurations', [])
     primary_nic_config = next((n for n in nic_configs if n.get('primary')), None)
     if primary_nic_config is None:
         raise CLIError('could not find a primary NIC which is needed to search to load balancer')
