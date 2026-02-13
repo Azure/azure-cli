@@ -782,6 +782,14 @@ class IdentityType(Enum):
     NONE = 'None'
 
 
+class DiskCreateOptionTypes(Enum):
+    ATTACH = 'Attach'
+    COPY = 'Copy'
+    EMPTY = 'Empty'
+    FROM_IMAGE = 'FromImage'
+    RESTORE = 'Restore'
+
+
 class UpgradeMode(Enum):
     AUTOMATIC = 'Automatic'
     MANUAL = 'Manual'

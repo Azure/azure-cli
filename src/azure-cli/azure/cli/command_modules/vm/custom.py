@@ -188,6 +188,18 @@ def _get_disk_lun(data_disks):
     return len(existing_luns)
 
 
+def _get_disk_lun_by_aaz(data_disks):
+    # start from 0, search for unused int for lun
+    if not data_disks:
+        return 0
+
+    existing_luns = sorted([d['lun'] for d in data_disks])
+    for i, current in enumerate(existing_luns):
+        if current != i:
+            return i
+    return len(existing_luns)
+
+
 def _get_private_config(cli_ctx, resource_group_name, storage_account):
     storage_mgmt_client = _get_storage_management_client(cli_ctx)
     # pylint: disable=no-member
@@ -2433,14 +2445,18 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
 
 
 def detach_unmanaged_data_disk(cmd, resource_group_name, vm_name, disk_name):
+    from .operations.vm import convert_show_result_to_snake_case
     # here we handle unmanaged disk
-    vm = get_vm_to_update(cmd, resource_group_name, vm_name)
-    # pylint: disable=no-member
-    leftovers = [d for d in vm.storage_profile.data_disks if d.name.lower() != disk_name.lower()]
-    if len(vm.storage_profile.data_disks) == len(leftovers):
+    vm = get_vm_to_update_by_aaz(cmd, resource_group_name, vm_name)
+    vm = convert_show_result_to_snake_case(vm)
+    leftovers = [d for d in vm.get('storage_profile', {}).get('data_disks', []) if
+                 d.get('name', '').lower() != disk_name.lower()]
+    if len(vm.get('storage_profile', {}).get('data_disks', [])) == len(leftovers):
         raise CLIError("No disk with the name '{}' was found".format(disk_name))
-    vm.storage_profile.data_disks = leftovers
-    set_vm(cmd, vm)
+
+    vm['storage_profile']['data_disks'] = leftovers
+
+    set_vm_by_aaz(cmd, vm)
 # endregion
 
 
@@ -3382,37 +3398,44 @@ def remove_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate=No
 # region VirtualMachines UnmanagedDisks
 def attach_unmanaged_data_disk(cmd, resource_group_name, vm_name, new=False, vhd_uri=None, lun=None,
                                disk_name=None, size_gb=1023, caching=None):
-    DataDisk, DiskCreateOptionTypes, VirtualHardDisk = cmd.get_models(
-        'DataDisk', 'DiskCreateOptionTypes', 'VirtualHardDisk')
+    from .operations.vm import convert_show_result_to_snake_case
+    from ._vm_utils import DiskCreateOptionTypes
     if not new and not disk_name:
         raise CLIError('Please provide the name of the existing disk to attach')
-    create_option = DiskCreateOptionTypes.empty if new else DiskCreateOptionTypes.attach
 
-    vm = get_vm_to_update(cmd, resource_group_name, vm_name)
+    vm = get_vm_to_update_by_aaz(cmd, resource_group_name, vm_name)
+    vm = convert_show_result_to_snake_case(vm)
     if disk_name is None:
         import datetime
         disk_name = vm_name + '-' + datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
     # pylint: disable=no-member
     if vhd_uri is None:
-        if not hasattr(vm.storage_profile.os_disk, 'vhd') or not vm.storage_profile.os_disk.vhd:
+        if not vm.get('storage_profile', {}).get('os_disk', {}).get('vhd'):
             raise CLIError('Adding unmanaged disks to a VM with managed disks is not supported')
-        blob_uri = vm.storage_profile.os_disk.vhd.uri
+        blob_uri = vm['storage_profile']['os_disk']['vhd']['uri']
         vhd_uri = blob_uri[0:blob_uri.rindex('/') + 1] + disk_name + '.vhd'
 
     if lun is None:
-        lun = _get_disk_lun(vm.storage_profile.data_disks)
-    disk = DataDisk(lun=lun, vhd=VirtualHardDisk(uri=vhd_uri), name=disk_name,
-                    create_option=create_option,
-                    caching=caching, disk_size_gb=size_gb if new else None)
-    if vm.storage_profile.data_disks is None:
-        vm.storage_profile.data_disks = []
-    vm.storage_profile.data_disks.append(disk)
-    return set_vm(cmd, vm)
+        lun = _get_disk_lun_by_aaz(vm.get('storage_profile', {}).get('data_disks'))
+    disk = {
+        'caching': caching,
+        'create_option': DiskCreateOptionTypes.EMPTY.value if new else DiskCreateOptionTypes.ATTACH.value,
+        'disk_size_gb': size_gb if new else None,
+        'lun': lun,
+        'name': disk_name,
+        'vhd': {
+            'uri': vhd_uri
+        }
+    }
+    if not vm.get('storage_profile', {}).get('data_disks'):
+        vm['storage_profile']['data_disks'] = []
+    vm['storage_profile']['data_disks'].append(disk)
+    return set_vm_by_aaz(cmd, vm)
 
 
 def list_unmanaged_disks(cmd, resource_group_name, vm_name):
-    vm = get_vm(cmd, resource_group_name, vm_name)
-    return vm.storage_profile.data_disks  # pylint: disable=no-member
+    vm = get_vm_by_aaz(cmd, resource_group_name, vm_name)
+    return vm.get('storageProfile', {}).get('dataDisks')
 # endregion
 
 

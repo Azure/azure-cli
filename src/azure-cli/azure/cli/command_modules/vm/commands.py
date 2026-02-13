@@ -374,7 +374,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_vm_secrets')
         g.custom_command('remove', 'remove_vm_secret')
 
-    with self.command_group('vm unmanaged-disk', compute_vm_sdk) as g:
+    with self.command_group('vm unmanaged-disk') as g:
         g.custom_command('attach', 'attach_unmanaged_data_disk')
         g.custom_command('detach', 'detach_unmanaged_data_disk')
         g.custom_command('list', 'list_unmanaged_disks')
