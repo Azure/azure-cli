@@ -546,76 +546,8 @@ class AzCliCommandInvoker(CommandInvoker):
                 help_index = command_index.get_help_index()
 
                 if help_index and 'root' in help_index:
-                    from azure.cli.core._help import WELCOME_MESSAGE, PRIVACY_STATEMENT
-                    import re
-
-                    # Show privacy statement if first run
-                    ran_before = self.cli_ctx.config.getboolean('core', 'first_run', fallback=False)
-                    if not ran_before:
-                        print(PRIVACY_STATEMENT)
-                        self.cli_ctx.config.set_value('core', 'first_run', 'yes')
-
-                    # Show welcome message
-                    print(WELCOME_MESSAGE)
-
-                    # Display cached help
-                    root_help = help_index['root']
-                    print("\nGroup")
-                    print("    az")
-
-                    # Import knack's formatting functions
-                    from knack.help import _print_indent, FIRST_LINE_PREFIX, _get_hanging_indent
-
-                    groups_data = root_help.get('groups', {})
-                    commands_data = root_help.get('commands', {})
-
-                    # Calculate max line length for alignment
-                    max_line_len = 0
-                    for name in groups_data.keys():
-                        max_line_len = max(max_line_len, len(name))
-                    for name in commands_data.keys():
-                        max_line_len = max(max_line_len, len(name))
-
-                    indent = 1
-                    LINE_FORMAT = '{name}{padding}{separator}{summary}'
-
-                    # Display subgroups
-                    if groups_data:
-                        print("\nSubgroups:")
-                        for name in sorted(groups_data.keys()):
-                            item = groups_data[name]
-                            summary = item.get('summary', '')
-                            tags = item.get('tags', '')
-                            if tags:
-                                summary = f"{tags}  {summary}"
-                            padding = ' ' * (max_line_len - len(name))
-                            line = LINE_FORMAT.format(
-                                name=name,
-                                padding=padding,
-                                separator=FIRST_LINE_PREFIX if summary else '',
-                                summary=summary
-                            )
-                            _print_indent(line, indent, _get_hanging_indent(max_line_len, indent))
-
-                    # Display commands
-                    if commands_data:
-                        print("\nCommands:")
-                        for name in sorted(commands_data.keys()):
-                            item = commands_data[name]
-                            summary = item.get('summary', '')
-                            tags = item.get('tags', '')
-                            if tags:
-                                summary = f"{tags}  {summary}"
-                            padding = ' ' * (max_line_len - len(name))
-                            line = LINE_FORMAT.format(
-                                name=name,
-                                padding=padding,
-                                separator=FIRST_LINE_PREFIX if summary else '',
-                                summary=summary
-                            )
-                            _print_indent(line, indent, _get_hanging_indent(max_line_len, indent))
-
-                    print()
+                    # Display cached help using the help system
+                    self.help.show_cached_help(help_index['root'], 'root')
                     telemetry.set_command_details('az', command_preserve_casing=command_preserve_casing)
                     telemetry.set_success(summary='cached-help')
                     return CommandResultItem(None, exit_code=0)
