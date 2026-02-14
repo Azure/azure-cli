@@ -1381,6 +1381,7 @@ def _build_stacks_confirmation_string(rcf, yes, name, stack_scope, delete_resour
     return build_confirmation_string
 
 
+# pylint: disable=unused-argument
 def _prepare_stacks_templates_and_parameters(cmd, rcf, deployment_scope, deployment_stack_model, template_file, template_spec, template_uri, parameters, query_string):
     t_spec, t_uri = None, None
     template_obj = None

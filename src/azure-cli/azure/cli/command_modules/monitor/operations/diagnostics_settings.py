@@ -232,7 +232,7 @@ class DiagnosticSettingsCategoryShow(_DiagnosticSettingsCategoryShow):
         update_resource_parameters(ctx)
 
 
-# pylint: disable=unused-argument, line-too-long
+# pylint: disable=line-too-long
 def create_diagnostics_settings(client, name, resource_uri,
                                 logs=None,
                                 metrics=None,

@@ -142,7 +142,6 @@ def get_key_value_pair(string):
     return result
 
 
-# pylint: disable=unused-argument
 def cli_redis_create_server_link(cmd, client, resource_group_name, name, server_to_link, replication_role):
     redis_client = cf_redis(cmd.cli_ctx)
     from azure.cli.core.commands.client_factory import get_subscription_id

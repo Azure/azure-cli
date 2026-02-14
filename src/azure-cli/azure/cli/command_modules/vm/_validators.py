@@ -2212,7 +2212,7 @@ def process_remove_identity_namespace(cmd, namespace):
                                                            'Microsoft.ManagedIdentity')
 
 
-def process_set_applications_namespace(cmd, namespace):  # pylint: disable=unused-argument
+def process_set_applications_namespace(cmd, namespace):
     _validate_vm_vmss_set_applications(cmd, namespace)
 
 

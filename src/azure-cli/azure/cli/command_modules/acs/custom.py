@@ -3252,7 +3252,7 @@ def aks_agentpool_operation_abort(cmd,
     return sdk_no_wait(no_wait, client.begin_abort_latest_operation, resource_group_name, cluster_name, nodepool_name)
 
 
-def aks_operation_abort(cmd,   # pylint: disable=unused-argument
+def aks_operation_abort(cmd,
                         client,
                         resource_group_name,
                         name,
@@ -3272,7 +3272,7 @@ def aks_operation_abort(cmd,   # pylint: disable=unused-argument
     return sdk_no_wait(no_wait, client.begin_abort_latest_operation, resource_group_name, name)
 
 
-def aks_agentpool_delete_machines(cmd,   # pylint: disable=unused-argument
+def aks_agentpool_delete_machines(cmd,
                                   client,
                                   resource_group_name,
                                   cluster_name,
@@ -3487,7 +3487,7 @@ def aks_nodepool_snapshot_create(cmd,    # pylint: disable=too-many-locals,too-m
     return client.create_or_update(resource_group_name, snapshot_name, snapshot, headers=aks_custom_headers)
 
 
-def aks_nodepool_snapshot_update(cmd, client, resource_group_name, snapshot_name, tags):   # pylint: disable=unused-argument
+def aks_nodepool_snapshot_update(cmd, client, resource_group_name, snapshot_name, tags):
     TagsObject = cmd.get_models(
         "TagsObject",
         resource_type=ResourceType.MGMT_CONTAINERSERVICE,
@@ -4005,7 +4005,6 @@ def aks_approuting_zone_list(
     raise CLIError('App routing addon is not enabled')
 
 
-# pylint: disable=unused-argument
 def _aks_approuting_update(
         cmd,
         client,
