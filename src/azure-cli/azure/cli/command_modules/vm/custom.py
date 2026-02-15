@@ -4483,16 +4483,15 @@ def reimage_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None,
 
 def restart_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False):
     from .aaz.latest.vmss import Restart as VmssRestart
-
-    if instance_ids is None:
-        instance_ids = ['*']
     command_args = {
         'resource_group': resource_group_name,
         'vm_scale_set_name': vm_scale_set_name,
-        'instance_ids': instance_ids,
         'no_wait': no_wait
     }
+    if instance_ids:
+        command_args['instance_ids'] = instance_ids
     return VmssRestart(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+
 
 # pylint: disable=inconsistent-return-statements
 def scale_vmss(cmd, resource_group_name, vm_scale_set_name, new_capacity, no_wait=False):
