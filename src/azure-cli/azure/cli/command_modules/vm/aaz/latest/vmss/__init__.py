@@ -22,6 +22,7 @@ from ._perform_maintenance import *
 from ._show import *
 from ._simulate_eviction import *
 from ._start import *
+from ._stop import *
 from ._update import *
 from ._update_domain_walk import *
 from ._wait import *
