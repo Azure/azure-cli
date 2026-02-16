@@ -1214,18 +1214,12 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     enable_local_identity = None
     if assign_identity is not None:
         vm_resource['identity'], _, _, enable_local_identity = _build_identities_info(assign_identity)
-        role_assignment_guid = None
         if identity_scope:
             role_assignment_guid = str(_gen_guid())
             master_template.add_resource(build_msi_role_assignment(vm_name, vm_id, identity_role_id,
                                                                    role_assignment_guid, identity_scope))
 
     if encryption_identity:
-        if not cmd.supported_api_version(min_api='2023-09-01', resource_type=ResourceType.MGMT_COMPUTE):
-            raise CLIError("Usage error: Encryption Identity required API version 2023-09-01 or higher."
-                           "You can set the cloud's profile to use the required API Version with:"
-                           "az cloud set --profile latest --name <cloud name>")
-
         if 'identity' in vm_resource and 'userAssignedIdentities' in vm_resource['identity'] \
             and encryption_identity.lower() in \
                 (k.lower() for k in vm_resource['identity']['userAssignedIdentities'].keys()):
@@ -1294,25 +1288,34 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         enable_vtpm and enable_secure_boot
     is_confidential_vm = security_type and security_type.lower() == 'confidentialvm'
     if (is_trusted_launch or is_confidential_vm) and enable_integrity_monitoring:
-        vm = get_vm(cmd, resource_group_name, vm_name, 'instanceView')
-        client = _compute_client_factory(cmd.cli_ctx)
-        if vm.storage_profile.os_disk.os_type == 'Linux':
+        vm = get_vm_by_aaz(cmd, resource_group_name, vm_name, 'instanceView')
+
+        publisher = ''
+        if vm.get('storageProfile', {}).get('osDisk', {}).get('osType', '') == 'Linux':
             publisher = 'Microsoft.Azure.Security.LinuxAttestation'
-        if vm.storage_profile.os_disk.os_type == 'Windows':
+        elif vm.get('storageProfile', {}).get('osDisk', {}).get('osType', '') == 'Windows':
             publisher = 'Microsoft.Azure.Security.WindowsAttestation'
-        version = _normalize_extension_version(cmd.cli_ctx, publisher, 'GuestAttestation', None, vm.location)
-        VirtualMachineExtension = cmd.get_models('VirtualMachineExtension')
-        ext = VirtualMachineExtension(location=vm.location,
-                                      publisher=publisher,
-                                      type_properties_type='GuestAttestation',
-                                      protected_settings=None,
-                                      type_handler_version=version,
-                                      settings=None,
-                                      auto_upgrade_minor_version=True,
-                                      enable_automatic_upgrade=not disable_integrity_monitoring_autoupgrade)
+
+        version = _normalize_extension_version(cmd.cli_ctx, publisher, 'GuestAttestation', None, vm['location'])
+
+        vm_extension_args = {
+            'resource_group': resource_group_name,
+            'vm_extension_name': 'GuestAttestation',
+            'vm_name': vm_name,
+            'location': vm['location'],
+            'auto_upgrade_minor_version': True,
+            'enable_automatic_upgrade': not disable_integrity_monitoring_autoupgrade,
+            'protected_settings': None,
+            'publisher': publisher,
+            'settings': None,
+            'type': 'GuestAttestation',
+            'type_handler_version': version
+        }
+
         try:
-            LongRunningOperation(cmd.cli_ctx)(client.virtual_machine_extensions.begin_create_or_update(
-                resource_group_name, vm_name, 'GuestAttestation', ext))
+            from .operations.vm_extension import VMExtensionCreate
+            create_vm_extension = VMExtensionCreate(cli_ctx=cmd.cli_ctx)(command_args=vm_extension_args)
+            LongRunningOperation(cmd.cli_ctx)(create_vm_extension)
             logger.info('Guest Attestation Extension has been successfully installed by default '
                         'when Trusted Launch configuration is met')
         except Exception as e:
@@ -1807,7 +1810,7 @@ def show_vm(cmd, resource_group_name, vm_name, show_details=False, include_user_
     expand = None
     if include_user_data:
         expand = "userData"
-    return get_vm(cmd, resource_group_name, vm_name, expand)
+    return get_vm_by_aaz(cmd, resource_group_name, vm_name, expand)
 
 
 def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None,
