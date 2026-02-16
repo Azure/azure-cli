@@ -185,6 +185,28 @@ AzureUSSecRegionToOmsRegionMap = {
     "ussecwest": "ussecwest",
 }
 
+# mapping for azure bleu cloud
+AzureBleuLocationToOmsRegionCodeMap = {
+    "bleufrancecentral": "BLEUC",
+    "bleufrancesouth": "BLEUS",
+}
+
+AzureBleuRegionToOmsRegionMap = {
+    "bleufrancecentral": "bleufrancecentral",
+    "bleufrancesouth": "bleufrancesouth",
+}
+
+# mapping for azure delos cloud
+AzureDelosLocationToOmsRegionCodeMap = {
+    "deloscloudgermanycentral": "DELOSC",
+    "deloscloudgermanynorth": "DELOSN",
+}
+
+AzureDelosRegionToOmsRegionMap = {
+    "deloscloudgermanycentral": "deloscloudgermanycentral",
+    "deloscloudgermanynorth": "deloscloudgermanynorth",
+}
+
 ContainerInsightsStreams = [
     "Microsoft-ContainerLog",
     "Microsoft-ContainerLogV2-HighScale",
@@ -245,7 +267,20 @@ def ensure_default_log_analytics_workspace_for_monitoring(
         workspace_region_code = AzureUSSecLocationToOmsRegionCodeMap.get(
             workspace_region, "USSW"
         )
-
+    elif cloud_name.lower() == "azurebleucloud":
+        workspace_region = AzureBleuRegionToOmsRegionMap.get(
+            rg_location, "bleufrancecentral"
+        )
+        workspace_region_code = AzureBleuLocationToOmsRegionCodeMap.get(
+            workspace_region, "BLEUC"
+        )
+    elif cloud_name.lower() == "azuredeloscloud":
+        workspace_region = AzureDelosRegionToOmsRegionMap.get(
+            rg_location, "deloscloudgermanycentral"
+        )
+        workspace_region_code = AzureDelosLocationToOmsRegionCodeMap.get(
+            workspace_region, "DELOSC"
+        )
     else:
         logger.error(
             "AKS Monitoring addon not supported in cloud : %s", cloud_name
