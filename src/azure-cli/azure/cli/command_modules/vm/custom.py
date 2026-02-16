@@ -188,6 +188,18 @@ def _get_disk_lun(data_disks):
     return len(existing_luns)
 
 
+def _get_disk_lun_by_aaz(data_disks):
+    # start from 0, search for unused int for lun
+    if not data_disks:
+        return 0
+
+    existing_luns = sorted([d['lun'] for d in data_disks])
+    for i, current in enumerate(existing_luns):
+        if current != i:
+            return i
+    return len(existing_luns)
+
+
 def _get_private_config(cli_ctx, resource_group_name, storage_account):
     storage_mgmt_client = _get_storage_management_client(cli_ctx)
     # pylint: disable=no-member
@@ -1202,18 +1214,12 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     enable_local_identity = None
     if assign_identity is not None:
         vm_resource['identity'], _, _, enable_local_identity = _build_identities_info(assign_identity)
-        role_assignment_guid = None
         if identity_scope:
             role_assignment_guid = str(_gen_guid())
             master_template.add_resource(build_msi_role_assignment(vm_name, vm_id, identity_role_id,
                                                                    role_assignment_guid, identity_scope))
 
     if encryption_identity:
-        if not cmd.supported_api_version(min_api='2023-09-01', resource_type=ResourceType.MGMT_COMPUTE):
-            raise CLIError("Usage error: Encryption Identity required API version 2023-09-01 or higher."
-                           "You can set the cloud's profile to use the required API Version with:"
-                           "az cloud set --profile latest --name <cloud name>")
-
         if 'identity' in vm_resource and 'userAssignedIdentities' in vm_resource['identity'] \
             and encryption_identity.lower() in \
                 (k.lower() for k in vm_resource['identity']['userAssignedIdentities'].keys()):
@@ -1282,25 +1288,34 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         enable_vtpm and enable_secure_boot
     is_confidential_vm = security_type and security_type.lower() == 'confidentialvm'
     if (is_trusted_launch or is_confidential_vm) and enable_integrity_monitoring:
-        vm = get_vm(cmd, resource_group_name, vm_name, 'instanceView')
-        client = _compute_client_factory(cmd.cli_ctx)
-        if vm.storage_profile.os_disk.os_type == 'Linux':
+        vm = get_vm_by_aaz(cmd, resource_group_name, vm_name, 'instanceView')
+
+        publisher = ''
+        if vm.get('storageProfile', {}).get('osDisk', {}).get('osType', '') == 'Linux':
             publisher = 'Microsoft.Azure.Security.LinuxAttestation'
-        if vm.storage_profile.os_disk.os_type == 'Windows':
+        elif vm.get('storageProfile', {}).get('osDisk', {}).get('osType', '') == 'Windows':
             publisher = 'Microsoft.Azure.Security.WindowsAttestation'
-        version = _normalize_extension_version(cmd.cli_ctx, publisher, 'GuestAttestation', None, vm.location)
-        VirtualMachineExtension = cmd.get_models('VirtualMachineExtension')
-        ext = VirtualMachineExtension(location=vm.location,
-                                      publisher=publisher,
-                                      type_properties_type='GuestAttestation',
-                                      protected_settings=None,
-                                      type_handler_version=version,
-                                      settings=None,
-                                      auto_upgrade_minor_version=True,
-                                      enable_automatic_upgrade=not disable_integrity_monitoring_autoupgrade)
+
+        version = _normalize_extension_version(cmd.cli_ctx, publisher, 'GuestAttestation', None, vm['location'])
+
+        vm_extension_args = {
+            'resource_group': resource_group_name,
+            'vm_extension_name': 'GuestAttestation',
+            'vm_name': vm_name,
+            'location': vm['location'],
+            'auto_upgrade_minor_version': True,
+            'enable_automatic_upgrade': not disable_integrity_monitoring_autoupgrade,
+            'protected_settings': None,
+            'publisher': publisher,
+            'settings': None,
+            'type': 'GuestAttestation',
+            'type_handler_version': version
+        }
+
         try:
-            LongRunningOperation(cmd.cli_ctx)(client.virtual_machine_extensions.begin_create_or_update(
-                resource_group_name, vm_name, 'GuestAttestation', ext))
+            from .operations.vm_extension import VMExtensionCreate
+            create_vm_extension = VMExtensionCreate(cli_ctx=cmd.cli_ctx)(command_args=vm_extension_args)
+            LongRunningOperation(cmd.cli_ctx)(create_vm_extension)
             logger.info('Guest Attestation Extension has been successfully installed by default '
                         'when Trusted Launch configuration is met')
         except Exception as e:
@@ -1795,7 +1810,7 @@ def show_vm(cmd, resource_group_name, vm_name, show_details=False, include_user_
     expand = None
     if include_user_data:
         expand = "userData"
-    return get_vm(cmd, resource_group_name, vm_name, expand)
+    return get_vm_by_aaz(cmd, resource_group_name, vm_name, expand)
 
 
 def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None,
@@ -2433,14 +2448,18 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
 
 
 def detach_unmanaged_data_disk(cmd, resource_group_name, vm_name, disk_name):
+    from .operations.vm import convert_show_result_to_snake_case
     # here we handle unmanaged disk
-    vm = get_vm_to_update(cmd, resource_group_name, vm_name)
-    # pylint: disable=no-member
-    leftovers = [d for d in vm.storage_profile.data_disks if d.name.lower() != disk_name.lower()]
-    if len(vm.storage_profile.data_disks) == len(leftovers):
+    vm = get_vm_to_update_by_aaz(cmd, resource_group_name, vm_name)
+    vm = convert_show_result_to_snake_case(vm)
+    leftovers = [d for d in vm.get('storage_profile', {}).get('data_disks', []) if
+                 d.get('name', '').lower() != disk_name.lower()]
+    if len(vm.get('storage_profile', {}).get('data_disks', [])) == len(leftovers):
         raise CLIError("No disk with the name '{}' was found".format(disk_name))
-    vm.storage_profile.data_disks = leftovers
-    set_vm(cmd, vm)
+
+    vm['storage_profile']['data_disks'] = leftovers
+
+    set_vm_by_aaz(cmd, vm)
 # endregion
 
 
@@ -3382,37 +3401,44 @@ def remove_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate=No
 # region VirtualMachines UnmanagedDisks
 def attach_unmanaged_data_disk(cmd, resource_group_name, vm_name, new=False, vhd_uri=None, lun=None,
                                disk_name=None, size_gb=1023, caching=None):
-    DataDisk, DiskCreateOptionTypes, VirtualHardDisk = cmd.get_models(
-        'DataDisk', 'DiskCreateOptionTypes', 'VirtualHardDisk')
+    from .operations.vm import convert_show_result_to_snake_case
+    from ._vm_utils import DiskCreateOptionTypes
     if not new and not disk_name:
         raise CLIError('Please provide the name of the existing disk to attach')
-    create_option = DiskCreateOptionTypes.empty if new else DiskCreateOptionTypes.attach
 
-    vm = get_vm_to_update(cmd, resource_group_name, vm_name)
+    vm = get_vm_to_update_by_aaz(cmd, resource_group_name, vm_name)
+    vm = convert_show_result_to_snake_case(vm)
     if disk_name is None:
         import datetime
         disk_name = vm_name + '-' + datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
     # pylint: disable=no-member
     if vhd_uri is None:
-        if not hasattr(vm.storage_profile.os_disk, 'vhd') or not vm.storage_profile.os_disk.vhd:
+        if not vm.get('storage_profile', {}).get('os_disk', {}).get('vhd'):
             raise CLIError('Adding unmanaged disks to a VM with managed disks is not supported')
-        blob_uri = vm.storage_profile.os_disk.vhd.uri
+        blob_uri = vm['storage_profile']['os_disk']['vhd']['uri']
         vhd_uri = blob_uri[0:blob_uri.rindex('/') + 1] + disk_name + '.vhd'
 
     if lun is None:
-        lun = _get_disk_lun(vm.storage_profile.data_disks)
-    disk = DataDisk(lun=lun, vhd=VirtualHardDisk(uri=vhd_uri), name=disk_name,
-                    create_option=create_option,
-                    caching=caching, disk_size_gb=size_gb if new else None)
-    if vm.storage_profile.data_disks is None:
-        vm.storage_profile.data_disks = []
-    vm.storage_profile.data_disks.append(disk)
-    return set_vm(cmd, vm)
+        lun = _get_disk_lun_by_aaz(vm.get('storage_profile', {}).get('data_disks'))
+    disk = {
+        'caching': caching,
+        'create_option': DiskCreateOptionTypes.EMPTY.value if new else DiskCreateOptionTypes.ATTACH.value,
+        'disk_size_gb': size_gb if new else None,
+        'lun': lun,
+        'name': disk_name,
+        'vhd': {
+            'uri': vhd_uri
+        }
+    }
+    if not vm.get('storage_profile', {}).get('data_disks'):
+        vm['storage_profile']['data_disks'] = []
+    vm['storage_profile']['data_disks'].append(disk)
+    return set_vm_by_aaz(cmd, vm)
 
 
 def list_unmanaged_disks(cmd, resource_group_name, vm_name):
-    vm = get_vm(cmd, resource_group_name, vm_name)
-    return vm.storage_profile.data_disks  # pylint: disable=no-member
+    vm = get_vm_by_aaz(cmd, resource_group_name, vm_name)
+    return vm.get('storageProfile', {}).get('dataDisks')
 # endregion
 
 
