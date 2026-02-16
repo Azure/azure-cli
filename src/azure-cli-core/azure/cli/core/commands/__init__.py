@@ -769,16 +769,7 @@ class AzCliCommandInvoker(CommandInvoker):
 
     @staticmethod
     def _is_top_level_help_request(args):
-        """Determine if this is a top-level help request (az --help or just az).
-        
-        Returns True for:
-        - No arguments (just 'az')
-        - Help request with no command path (az --help, az -h, az help)
-        
-        Returns False for:
-        - Commands with help (az network --help)
-        - Any non-help request
-        """
+        """Determine if this is a top-level help request (az --help or just az)."""
         if not args:
             return True
 
