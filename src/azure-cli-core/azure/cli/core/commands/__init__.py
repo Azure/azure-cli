@@ -743,8 +743,8 @@ class AzCliCommandInvoker(CommandInvoker):
         if help_index and 'root' in help_index:
             # Display cached help using the help system
             self.help.show_cached_help(help_index['root'], 'root')
-            telemetry.set_command_details('az', command_preserve_casing=command_preserve_casing)
-            telemetry.set_success(summary='cached-help')
+            telemetry.set_command_details('az', command_preserve_casing=command_preserve_casing, parameters=['--help'])
+            telemetry.set_success(summary='show help')
             return CommandResultItem(None, exit_code=0)
 
         return None
