@@ -2602,8 +2602,14 @@ def copy_secret(cmd, client, destination_vault, name=None, all_secrets=None, ove
     if client.vault_url.rstrip('/') == destination_vault.rstrip('/'):
         raise CLIError("Source and destination Key Vaults cannot be the same.")
 
-    profile = Profile(cli_ctx=cmd.cli_ctx)
-    credential, _, _ = profile.get_login_credentials(subscription_id=cmd.cli_ctx.data.get('subscription_id'))
+    credential = None
+    # Try to reuse the credential from the source client if available
+    if hasattr(client, '_credential'):
+        credential = client._credential
+
+    if not credential:
+        profile = Profile(cli_ctx=cmd.cli_ctx)
+        credential, _, _ = profile.get_login_credentials(subscription_id=cmd.cli_ctx.data.get('subscription_id'))
 
     # Use standard client kwargs for consistent logging/telemetry
     client_kwargs = prepare_client_kwargs_track2(cmd.cli_ctx)
