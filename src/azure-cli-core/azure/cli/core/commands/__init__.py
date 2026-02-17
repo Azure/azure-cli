@@ -719,17 +719,13 @@ class AzCliCommandInvoker(CommandInvoker):
         if not args:
             return True
 
-        is_help_request = '--help' in args or '-h' in args or args[-1] == 'help'
-        if not is_help_request:
-            return False
-
         for arg in args:
             if arg in ('--help', '-h', 'help'):
-                break
+                return True
             if not arg.startswith('-'):
                 return False
 
-        return True
+        return False
 
     def _should_use_command_index(self):
         """Check if command index optimization is enabled."""
