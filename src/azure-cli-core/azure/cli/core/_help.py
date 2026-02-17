@@ -71,10 +71,10 @@ def get_help_item_tags(item):
 
 def extract_help_index_data(help_file):
     """Extract groups and commands from help file children for caching.
-    
+
     Processes help file children and builds dictionaries of groups and commands
     with their summaries and tags for top-level help display.
-    
+
     :param help_file: Help file with loaded children
     :return: Tuple of (groups_dict, commands_dict)
     """
