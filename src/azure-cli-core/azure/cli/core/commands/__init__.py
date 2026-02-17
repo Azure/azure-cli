@@ -759,7 +759,7 @@ class AzCliCommandInvoker(CommandInvoker):
         from azure.cli.core._help import CliGroupHelpFile
 
         command_index = CommandIndex(self.cli_ctx)
-        help_file = CliGroupHelpFile(self.cli_ctx.help, '', subparser)
+        help_file = CliGroupHelpFile(self.help, '', subparser)
         help_file.load(subparser)
 
         # Helper to build tag string for an item
@@ -792,7 +792,7 @@ class AzCliCommandInvoker(CommandInvoker):
                         commands[child.name] = item_data
 
         # Store in the command index
-        help_index_data = {'groups': groups, 'commands': commands}
+        help_index_data = {'root': {'groups': groups, 'commands': commands}}
         if groups or commands:
             command_index.set_help_index(help_index_data)
             logger.debug("Cached %d groups and %d commands for fast access", len(groups), len(commands))
