@@ -268,7 +268,7 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
             print(f"    az {command_path}")
 
         # Import knack's formatting functions
-        from knack.help import _print_indent, FIRST_LINE_PREFIX, _get_hanging_indent
+        from knack.help import FIRST_LINE_PREFIX, _get_hanging_indent
 
         # Separate groups and commands
         groups_data = help_data.get('groups', {})
