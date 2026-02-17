@@ -518,18 +518,10 @@ class AzCliCommandInvoker(CommandInvoker):
         command_preserve_casing = roughly_parse_command_with_casing(args)
         args = _pre_command_table_create(self.cli_ctx, args)
 
-        # Fast path for top-level help only (az --help or az with no args)
         if self._should_use_command_index() and self._is_top_level_help_request(args):
-            from azure.cli.core import CommandIndex
-            command_index = CommandIndex(self.cli_ctx)
-            help_index = command_index.get_help_index()
-
-            if help_index and 'root' in help_index:
-                # Display cached help using the help system
-                self.help.show_cached_help(help_index['root'], 'root')
-                telemetry.set_command_details('az', command_preserve_casing=command_preserve_casing)
-                telemetry.set_success(summary='cached-help')
-                return CommandResultItem(None, exit_code=0)
+            result = self._try_show_cached_help(command_preserve_casing)
+            if result:
+                return result
 
         self.cli_ctx.raise_event(EVENT_INVOKER_PRE_CMD_TBL_CREATE, args=args)
         self.commands_loader.load_command_table(args)
@@ -785,6 +777,24 @@ class AzCliCommandInvoker(CommandInvoker):
     def _should_use_command_index(self):
         """Check if command index optimization is enabled."""
         return self.cli_ctx.config.getboolean('core', 'use_command_index', fallback=True)
+
+    def _try_show_cached_help(self, command_preserve_casing):
+        """Try to show cached help for top-level help request.
+
+        Returns CommandResultItem if cached help was shown, None otherwise.
+        """
+        from azure.cli.core import CommandIndex
+        command_index = CommandIndex(self.cli_ctx)
+        help_index = command_index.get_help_index()
+
+        if help_index and 'root' in help_index:
+            # Display cached help using the help system
+            self.help.show_cached_help(help_index['root'], 'root')
+            telemetry.set_command_details('az', command_preserve_casing=command_preserve_casing)
+            telemetry.set_success(summary='cached-help')
+            return CommandResultItem(None, exit_code=0)
+        
+        return None
 
     def _run_job(self, expanded_arg, cmd_copy):
         params = self._filter_params(expanded_arg)
