@@ -543,6 +543,7 @@ class TestHelpLoads(unittest.TestCase):
     def test_help_cache_storage_and_retrieval(self):
         """Test that help cache is stored and can be retrieved."""
         from azure.cli.core import CommandIndex
+        from azure.cli.core._session import INDEX
 
         test_help_data = {
             'root': {
@@ -558,7 +559,7 @@ class TestHelpLoads(unittest.TestCase):
         command_index = CommandIndex(self.test_cli)
         command_index.set_help_index(test_help_data)
 
-        retrieved = command_index.get_help_index()
+        retrieved = INDEX.get('helpIndex')
 
         self.assertIsNotNone(retrieved)
         self.assertIn('root', retrieved)
