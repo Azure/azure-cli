@@ -69,6 +69,39 @@ def get_help_item_tags(item):
     return ' '.join(tags)
 
 
+def extract_help_index_data(help_file):
+    """Extract groups and commands from help file children for caching.
+    
+    Processes help file children and builds dictionaries of groups and commands
+    with their summaries and tags for top-level help display.
+    
+    :param help_file: Help file with loaded children
+    :return: Tuple of (groups_dict, commands_dict)
+    """
+    groups = {}
+    commands = {}
+
+    for child in help_file.children:
+        if hasattr(child, 'name') and hasattr(child, 'short_summary'):
+            child_name = child.name
+            # Only include top-level items (no spaces in name)
+            if ' ' in child_name:
+                continue
+
+            tags = get_help_item_tags(child)
+            item_data = {
+                'summary': child.short_summary,
+                'tags': tags
+            }
+
+            if child.type == 'group':
+                groups[child_name] = item_data
+            else:
+                commands[child_name] = item_data
+
+    return groups, commands
+
+
 # PrintMixin class to decouple printing functionality from AZCLIHelp class.
 # Most of these methods override print methods in CLIHelp
 class CLIPrintMixin(CLIHelp):

@@ -752,29 +752,13 @@ class AzCliCommandInvoker(CommandInvoker):
     def _save_help_to_command_index(self, subparser):
         """Extract help data from parser and save to command index for future fast access."""
         from azure.cli.core import CommandIndex
-        from azure.cli.core._help import CliGroupHelpFile, get_help_item_tags
+        from azure.cli.core._help import CliGroupHelpFile, extract_help_index_data
 
         command_index = CommandIndex(self.cli_ctx)
         help_file = CliGroupHelpFile(self.help, '', subparser)
         help_file.load(subparser)
 
-        # Separate groups and commands
-        groups = {}
-        commands = {}
-
-        for child in help_file.children:
-            if hasattr(child, 'name') and hasattr(child, 'short_summary'):
-                if ' ' not in child.name:  # Only top-level items
-                    tags = get_help_item_tags(child)
-                    item_data = {
-                        'summary': child.short_summary,
-                        'tags': tags
-                    }
-                    # Check if it's a group or command
-                    if child.type == 'group':
-                        groups[child.name] = item_data
-                    else:
-                        commands[child.name] = item_data
+        groups, commands = extract_help_index_data(help_file)
 
         # Store in the command index
         help_index_data = {'root': {'groups': groups, 'commands': commands}}

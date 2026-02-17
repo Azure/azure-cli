@@ -539,7 +539,7 @@ class MainCommandsLoader(CLICommandsLoader):
         """Cache help summary for top-level (root) help only."""
         try:
             from azure.cli.core.parser import AzCliCommandParser
-            from azure.cli.core._help import CliGroupHelpFile, get_help_item_tags
+            from azure.cli.core._help import CliGroupHelpFile, extract_help_index_data
 
             parser = AzCliCommandParser(self.cli_ctx)
             parser.load_command_table(self)
@@ -549,25 +549,7 @@ class MainCommandsLoader(CLICommandsLoader):
                 help_file = CliGroupHelpFile(self.cli_ctx.invocation.help, '', subparser)
                 help_file.load(subparser)
 
-                groups = {}
-                commands = {}
-
-                for child in help_file.children:
-                    if hasattr(child, 'name') and hasattr(child, 'short_summary'):
-                        child_name = child.name
-                        if ' ' in child_name:
-                            continue
-
-                        tags = get_help_item_tags(child)
-                        item_data = {
-                            'summary': child.short_summary,
-                            'tags': tags
-                        }
-
-                        if child.type == 'group':
-                            groups[child_name] = item_data
-                        else:
-                            commands[child_name] = item_data
+                groups, commands = extract_help_index_data(help_file)
 
                 if groups or commands:
                     help_index_data = {'root': {'groups': groups, 'commands': commands}}
