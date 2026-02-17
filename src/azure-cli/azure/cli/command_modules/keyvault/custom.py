@@ -2627,7 +2627,11 @@ def copy_secret(cmd, client, destination_vault, name=None, all_secrets=None, ove
         # Vault is accessible but the dummy secret does not exist, which is expected.
         pass
     except HttpResponseError as e:
-        raise CLIError(f"Failed to access destination Key Vault '{destination_vault}': {str(e)}")
+        if e.status_code == 404:
+            # Vault is accessible but the dummy secret does not exist, which is expected.
+            pass
+        else:
+            raise CLIError(f"Failed to access destination Key Vault '{destination_vault}': {str(e)}")
 
     secrets_to_copy = []
     if name:
