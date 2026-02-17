@@ -35,7 +35,7 @@ from ._flexible_server_util import generate_missing_parameters, resolve_poller, 
     generate_password, parse_maintenance_window, get_current_time, build_identity_and_data_encryption, \
     _is_resource_name, get_tenant_id, get_case_insensitive_key_value, get_enum_value_true_false, \
     get_postgres_tiers, get_postgres_skus
-from ._flexible_server_location_capabilities_util import get_postgres_location_capability_info
+from ._flexible_server_location_capabilities_util import get_postgres_location_capability_info, get_postgres_server_capability_info
 from ._util import get_autonomous_tuning_settings_map
 from .flexible_server_custom_common import create_firewall_rule
 from .flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone, prepare_public_network
@@ -479,8 +479,8 @@ def flexible_server_update_custom_func(cmd, client, instance,
         if zonal_resiliency.lower() == 'disabled':
             high_availability = 'Disabled'
         else:
-            list_location_capability_info = get_postgres_location_capability_info(cmd, location)
-            single_az = list_location_capability_info['single_az']
+            list_capability_info = get_postgres_server_capability_info(cmd, resource_group_name, server_name)
+            single_az = list_capability_info['single_az']
             high_availability = 'SameZone' if single_az and allow_same_zone else 'ZoneRedundant'
     if high_availability:
         high_availability_param.mode = high_availability
@@ -1658,12 +1658,8 @@ def index_tuning_update(cmd, client, resource_group_name, server_name, index_tun
     source = "user-override"
 
     if index_tuning_enabled == "True":
-        subscription = get_subscription_id(cmd.cli_ctx)
-        postgres_source_client = get_postgresql_flexible_management_client(cmd.cli_ctx, subscription)
-        source_server_object = postgres_source_client.servers.get(resource_group_name, server_name)
-        location = ''.join(source_server_object.location.lower().split())
-        list_location_capability_info = get_postgres_location_capability_info(cmd, location, is_offer_restriction_check_required=True)
-        autonomous_tuning_supported = list_location_capability_info['autonomous_tuning_supported']
+        list_capability_info = get_postgres_server_capability_info(cmd, resource_group_name, server_name, is_offer_restriction_check_required=True)
+        autonomous_tuning_supported = list_capability_info['autonomous_tuning_supported']
         if not autonomous_tuning_supported:
             raise CLIError("Index tuning is not supported for the server.")
 
