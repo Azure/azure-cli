@@ -4818,20 +4818,21 @@ def _get_server_key_name_from_uri(uri):
                        'for versioned key or "https://YourVaultName.vault.azure.net/keys/YourKeyName" for a versionless key.')
 
     vault = uri.split('.')[0].split('/')[-1]
-    key = uri.split('/')[-2]
-    version = uri.split('/')[-1]
 
-    # The AKV segments is an array of the uri components.
-    # For AKV uri "https://someVault.vault.azure.net/keys/someKey/01234567890123456789012345678901", the segment contents are as follows:
-    # Segments = ["/", "keys/", "someKey/", "01234567890123456789012345678901"]
-    # Therefore, a versionless key uri will have a segment array of length 3 and a versioned key uri will have a segment array of length 4.
-    #
-    isVersionlessKeyId = uri.Segments.Length == 3
+    # uri.split('/') returns the output as ['https:', '', 'yourVaultName.vault.azure.net', 'keys', 'yourKey', ''] for versionless key
+    # and ['https:', '', 'yourVaultName.vault.azure.net', 'keys', 'yourKey', '01234567890123456789012345678901'] for versioned key
+    # In both cases, the value at index 4 is always the key name and index 5 is the key version.
+    key = uri.split('/')[4]
+    version = uri.split('/')[-1]
+    isVersionlessKeyId = False
+
+    if version is None or version == "" or version == key:
+        isVersionlessKeyId = True
 
     if isVersionlessKeyId:
         return '{}_{}'.format(vault, key)
-    else:
-        return '{}_{}_{}'.format(vault, key, version)
+
+    return '{}_{}_{}'.format(vault, key, version)
 
 
 #####
