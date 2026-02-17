@@ -750,14 +750,14 @@ class AzCliCommandInvoker(CommandInvoker):
             telemetry.set_command_details('az', command_preserve_casing=command_preserve_casing)
             telemetry.set_success(summary='cached-help')
             return CommandResultItem(None, exit_code=0)
-        
+
         return None
 
     def _save_help_to_command_index(self, subparser):
         """Extract help data from parser and save to command index for future fast access."""
         from azure.cli.core import CommandIndex
         from azure.cli.core._help import CliGroupHelpFile
-        
+
         command_index = CommandIndex(self.cli_ctx)
         help_file = CliGroupHelpFile(self.cli_ctx.help, '', subparser)
         help_file.load(subparser)
