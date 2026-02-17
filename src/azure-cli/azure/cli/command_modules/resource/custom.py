@@ -2922,7 +2922,7 @@ def _prepare_validate_stack_at_scope(
     return deployment_stack_model
 
 
-def create_deployment_stack_whatif_at_resource_group(
+def create_deployment_stack_what_if_at_resource_group(
     cmd, name, resource_group, stack_id, deny_settings_mode, action_on_unmanage, retention_interval, template_file=None, template_spec=None,
     template_uri=None, query_string=None, parameters=None, description=None, deny_settings_excluded_principals=None,
     deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False, resources_without_delete_support=None,
@@ -2930,7 +2930,7 @@ def create_deployment_stack_whatif_at_resource_group(
 ):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
-    deployment_stack_whatif_model = _prepare_whatif_stack_at_scope(
+    deployment_stack_what_if_model = _prepare_whatif_stack_at_scope(
         deployment_scope='resourceGroup', cmd=cmd, deny_settings_mode=deny_settings_mode, action_on_unmanage=action_on_unmanage,
         template_file=template_file, template_spec=template_spec, template_uri=template_uri, query_string=query_string,
         parameters=parameters, description=description, deny_settings_excluded_principals=deny_settings_excluded_principals,
@@ -2943,7 +2943,7 @@ def create_deployment_stack_whatif_at_resource_group(
     try:
         # TODO(kylealbert): verify params
         whatif_poller = rcf.deployment_stacks_what_if_results_at_resource_group.begin_create_or_update(
-            resource_group, name, deployment_stack_whatif_model)
+            resource_group, name, deployment_stack_what_if_model)
     except HttpResponseError as err:
         err_message = _build_http_response_error_message(err)
         raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
@@ -2954,10 +2954,63 @@ def create_deployment_stack_whatif_at_resource_group(
         err_message = _build_preflight_error_message(whatif_result.properties.error)
         raise_subdivision_deployment_error(err_message)
 
+    # TODO(kylealbert): Return formatted view
     return whatif_result
 
 
-def create_deployment_stack_whatif_at_subscription(
+def show_deployment_stack_what_if_at_resource_group(cmd, name=None, resource_group=None, id=None):  # pylint: disable=redefined-builtin
+    rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
+    if name and resource_group:
+        return rcf.deployment_stacks_what_if_results_at_resource_group.get(resource_group, name)
+    if id:
+        stack_arr = id.split('/')
+        if len(stack_arr) < 5:
+            raise InvalidArgumentValueError("Please enter a valid id")
+        return rcf.deployment_stacks_what_if_results_at_resource_group.get(stack_arr[4], stack_arr[-1])
+    raise InvalidArgumentValueError("Please enter the (stack name and resource group) or stack resource id")
+
+
+def list_deployment_stack_what_if_at_resource_group(cmd, resource_group):
+    if not resource_group:
+        raise InvalidArgumentValueError("Please enter the resource group")
+
+    rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
+    return rcf.deployment_stacks_what_if_results_at_resource_group.list(resource_group)
+
+
+def delete_deployment_stack_what_if_at_resource_group(
+    cmd, name=None, resource_group=None, id=None, yes=False
+):  # pylint: disable=redefined-builtin
+    # confirm
+    if not yes:
+        from knack.prompting import prompt_y_n
+        response = prompt_y_n("Are you sure you want to delete this stack what-if result?")
+        if not response:
+            return None
+
+    rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
+
+    if name and resource_group:
+        try:
+            rcf.deployment_stacks.get_at_resource_group(resource_group, name)
+        except:
+            raise ResourceNotFoundError("DeploymentStack " + name + " not found in the current resource group scope.")
+        return rcf.deployment_stacks_what_if_results_at_resource_group.delete(resource_group, name)
+    if id:
+        stack_arr = id.split('/')
+        if len(stack_arr) < 5:
+            raise InvalidArgumentValueError("Please enter a valid id")
+        name = stack_arr[-1]
+        stack_rg = stack_arr[-5]
+        try:
+            rcf.deployment_stacks.get_at_resource_group(stack_rg, name)
+        except:
+            raise ResourceNotFoundError("DeploymentStack " + name + " not found in the current resource group scope.")
+        return rcf.deployment_stacks_what_if_results_at_resource_group.delete(stack_rg, name)
+    raise InvalidArgumentValueError("Please enter the (stack name and resource group) or stack resource id")
+
+
+def create_deployment_stack_what_if_at_subscription(
     cmd, name, location, stack_id, deny_settings_mode, action_on_unmanage, retention_interval, deployment_resource_group=None,
     template_file=None, template_spec=None, template_uri=None, query_string=None, parameters=None, description=None,
     deny_settings_excluded_principals=None, deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False,
@@ -2965,7 +3018,7 @@ def create_deployment_stack_whatif_at_subscription(
 ):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
-    deployment_stack_whatif_model = _prepare_whatif_stack_at_scope(
+    deployment_stack_what_if_model = _prepare_whatif_stack_at_scope(
         deployment_scope='subscription', cmd=cmd, deny_settings_mode=deny_settings_mode, action_on_unmanage=action_on_unmanage,
         location=location, deployment_resource_group=deployment_resource_group, template_file=template_file, template_spec=template_spec,
         template_uri=template_uri, query_string=query_string, parameters=parameters, description=description,
@@ -2977,7 +3030,7 @@ def create_deployment_stack_whatif_at_subscription(
     from azure.core.exceptions import HttpResponseError
     try:
         # TODO(kylealbert): verify params
-        whatif_poller = rcf.deployment_stacks_what_if_results_at_subscription.begin_create_or_update(name, deployment_stack_whatif_model)
+        whatif_poller = rcf.deployment_stacks_what_if_results_at_subscription.begin_create_or_update(name, deployment_stack_what_if_model)
     except HttpResponseError as err:
         err_message = _build_http_response_error_message(err)
         raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
@@ -2988,10 +3041,50 @@ def create_deployment_stack_whatif_at_subscription(
         err_message = _build_preflight_error_message(whatif_result.properties.error)
         raise_subdivision_deployment_error(err_message)
 
+    # TODO(kylealbert): Return formatted view
     return whatif_result
 
 
-def create_deployment_stack_whatif_at_management_group(
+def show_deployment_stack_what_if_at_subscription(cmd, name=None, id=None):  # pylint: disable=redefined-builtin
+    rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
+    if name or id:
+        if name:
+            return rcf.deployment_stacks_what_if_results_at_subscription.get(name)
+        return rcf.deployment_stacks_what_if_results_at_subscription.get_at_subscription(id.split('/')[-1])
+    raise InvalidArgumentValueError("Please enter the stack what-if result name or stack resource id.")
+
+
+def list_deployment_stack_what_if_at_subscription(cmd):
+    rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
+    return rcf.deployment_stacks_what_if_results_at_subscription.list()
+
+
+def delete_deployment_stack_what_if_at_subscription(cmd, name=None, id=None, yes=False):  # pylint: disable=redefined-builtin
+    # confirm
+    if not yes:
+        from knack.prompting import prompt_y_n
+        response = prompt_y_n("Are you sure you want to delete this stack what-if result?")
+        if not response:
+            return None
+
+    if name or id:
+        rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
+        delete_name = None
+        try:
+            if name:
+                delete_name = name
+                rcf.deployment_stacks.get_at_subscription(name)
+            else:
+                name = id.split('/')[-1]
+                delete_name = name
+                rcf.deployment_stacks.get_at_subscription(name)
+        except:
+            raise ResourceNotFoundError("DeploymentStack " + delete_name + " not found in the current subscription scope.")
+        return rcf.deployment_stacks_what_if_results_at_subscription.delete(delete_name)
+    raise InvalidArgumentValueError("Please enter the stack name or stack resource id")
+
+
+def create_deployment_stack_what_if_at_management_group(
     cmd, management_group_id, name, location, stack_id, deny_settings_mode, action_on_unmanage, retention_interval,
     deployment_subscription=None, template_file=None, template_spec=None, template_uri=None, query_string=None, parameters=None,
     description=None, deny_settings_excluded_principals=None, deny_settings_excluded_actions=None,
@@ -2999,7 +3092,7 @@ def create_deployment_stack_whatif_at_management_group(
 ):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
-    deployment_stack_whatif_model = _prepare_whatif_stack_at_scope(
+    deployment_stack_what_if_model = _prepare_whatif_stack_at_scope(
         deployment_scope='managementGroup', cmd=cmd, deny_settings_mode=deny_settings_mode, action_on_unmanage=action_on_unmanage,
         location=location, deployment_subscription=deployment_subscription, template_file=template_file, template_spec=template_spec,
         template_uri=template_uri, query_string=query_string, parameters=parameters, description=description,
@@ -3012,7 +3105,7 @@ def create_deployment_stack_whatif_at_management_group(
     try:
         # TODO(kylealbert): verify params
         whatif_poller = rcf.deployment_stacks_what_if_results_at_management_group.begin_create_or_update(
-            management_group_id, name, deployment_stack_whatif_model)
+            management_group_id, name, deployment_stack_what_if_model)
     except HttpResponseError as err:
         err_message = _build_http_response_error_message(err)
         raise_subdivision_deployment_error(err_message, err.error.code if err.error else None)
@@ -3023,7 +3116,51 @@ def create_deployment_stack_whatif_at_management_group(
         err_message = _build_preflight_error_message(whatif_result.properties.error)
         raise_subdivision_deployment_error(err_message)
 
+    # TODO(kylealbert): Return formatted view
     return whatif_result
+
+
+def show_deployment_stack_what_if_at_management_group(cmd, management_group_id, name=None, id=None):  # pylint: disable=redefined-builtin
+    if name or id:
+        rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
+        if name:
+            return rcf.deployment_stacks_what_if_results_at_management_group.get(management_group_id, name)
+        return rcf.deployment_stacks_what_if_results_at_management_group.get(management_group_id, id.split('/')[-1])
+    raise InvalidArgumentValueError("Please enter the stack name or stack resource id.")
+
+
+def list_deployment_stack_what_if_at_management_group(cmd, management_group_id):
+    rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
+    return rcf.deployment_stacks_what_if_results_at_management_group.list(management_group_id)
+
+
+def delete_deployment_stack_what_if_at_management_group(
+    cmd, management_group_id, name=None, id=None, yes=False
+):  # pylint: disable=redefined-builtin
+    # confirm
+    if not yes:
+        from knack.prompting import prompt_y_n
+        response = prompt_y_n("Are you sure you want to delete this stack what-if result?")
+        if not response:
+            return None
+
+    if name or id:
+        rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
+        delete_name = None
+        try:
+            if name:
+                delete_name = name
+                rcf.deployment_stacks.get_at_management_group(management_group_id, name)
+            else:
+                name = id.split('/')[-1]
+                delete_name = name
+                rcf.deployment_stacks.get_at_management_group(management_group_id, name)
+        except:
+            raise ResourceNotFoundError(
+                "DeploymentStack " + delete_name +
+                " not found in the current management group scope.")
+        return rcf.deployment_stacks_what_if_results_at_management_group.delete(management_group_id, delete_name)
+    raise InvalidArgumentValueError("Please enter the stack name or stack resource id")
 
 
 def _prepare_whatif_stack_at_scope(
@@ -3055,7 +3192,7 @@ def _prepare_whatif_stack_at_scope(
     stack_properties_model = StackModels.DeploymentStacksWhatIfResultProperties(
         action_on_unmanage=action_on_unmanage_model, deny_settings=deny_settings_model, deployment_stack_resource_id=stack_id,
         description=description, retention_interval=retention_interval, validation_level=validation_level)
-    deployment_stack_whatif_model = StackModels.DeploymentStacksWhatIfResult(location=location, tags=tags, properties=stack_properties_model)
+    deployment_stack_what_if_model = StackModels.DeploymentStacksWhatIfResult(location=location, tags=tags, properties=stack_properties_model)
 
     if deployment_scope == 'managementGroup' and deployment_subscription:
         stack_properties_model.deployment_scope = f"/subscriptions/{deployment_subscription}"
@@ -3069,7 +3206,7 @@ def _prepare_whatif_stack_at_scope(
     _prepare_stacks_templates_and_parameters(
         cmd, deployment_scope, stack_properties_model, template_file, template_spec, template_uri, parameters, query_string)
 
-    return deployment_stack_whatif_model
+    return deployment_stack_what_if_model
 
 
 def create_deployment_stack_at_management_group(
