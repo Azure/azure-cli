@@ -422,6 +422,7 @@ def _create_database_account(client,
                 "in resource group '%s'. Using client.get() as a workaround. Raw error: %s",
                 account_name, resource_group_name, ex
             )
+            docdb_account = client.get(resource_group_name, account_name)
         else:
             raise ex
     return docdb_account
