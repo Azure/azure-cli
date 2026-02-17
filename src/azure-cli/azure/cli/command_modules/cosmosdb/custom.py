@@ -413,10 +413,10 @@ def _create_database_account(client,
         docdb_account = async_docdb_create.result()
     except HttpResponseError as ex:
         message = str(ex)
-        if (is_restore_request
-                and ex.status_code == 403
-                and "does not exist" in message
-                and ("Database Account" in message or "Forbidden" in message)):
+        if (is_restore_request and
+                ex.status_code == 403 and
+                "does not exist" in message and
+                ("Database Account" in message or "Forbidden" in message)):
             logger.warning(
                 "Encountered known service issue (403 'does not exist') while restoring Cosmos DB account '%s' "
                 "in resource group '%s'. Using client.get() as a workaround. Raw error: %s",
