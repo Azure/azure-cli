@@ -519,9 +519,7 @@ class AzCliCommandInvoker(CommandInvoker):
         args = _pre_command_table_create(self.cli_ctx, args)
 
         # Fast path for top-level help only (az --help or az with no args)
-        # Check cache before loading command table to avoid loading modules
-        use_command_index = self.cli_ctx.config.getboolean('core', 'use_command_index', fallback=True)
-        if use_command_index and self._is_top_level_help_request(args):
+        if self._should_use_command_index() and self._is_top_level_help_request(args):
             from azure.cli.core import CommandIndex
             command_index = CommandIndex(self.cli_ctx)
             help_index = command_index.get_help_index()
@@ -595,8 +593,7 @@ class AzCliCommandInvoker(CommandInvoker):
             self.help.show_welcome(subparser)
 
             # After showing help, cache the help summaries for future fast access
-            # This allows subsequent `az --help` calls to skip module loading
-            use_command_index = self.cli_ctx.config.getboolean('core', 'use_command_index', fallback=True)
+            use_command_index = self._should_use_command_index()
             logger.debug("About to cache help data, use_command_index=%s", use_command_index)
             if use_command_index:
                 try:
@@ -784,6 +781,10 @@ class AzCliCommandInvoker(CommandInvoker):
                 return False
 
         return True
+
+    def _should_use_command_index(self):
+        """Check if command index optimization is enabled."""
+        return self.cli_ctx.config.getboolean('core', 'use_command_index', fallback=True)
 
     def _run_job(self, expanded_arg, cmd_copy):
         params = self._filter_params(expanded_arg)
