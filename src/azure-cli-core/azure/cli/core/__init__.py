@@ -589,7 +589,7 @@ class MainCommandsLoader(CLICommandsLoader):
                 # Store only root level help
                 if groups or commands:
                     help_index_data = {'root': {'groups': groups, 'commands': commands}}
-                    command_index.INDEX[command_index._HELP_INDEX] = help_index_data
+                    command_index.set_help_index(help_index_data)
                     logger.debug("Cached top-level help with %d groups and %d commands", len(groups), len(commands))
 
         except Exception as ex:  # pylint: disable=broad-except
@@ -875,6 +875,13 @@ class CommandIndex:
             return help_index
 
         return None
+
+    def set_help_index(self, help_data):
+        """Set the help index data.
+
+        :param help_data: Help index data structure containing groups and commands
+        """
+        self.INDEX[self._HELP_INDEX] = help_data
 
     def update(self, command_table):
         """Update the command index according to the given command table.
