@@ -2536,10 +2536,10 @@ def _copy_single_secret(source_client, dest_client, secret_name, overwrite, is_s
                 if status_code == 403:
                     logger.error("Access denied (403) checking secret '%s' in destination: %s", secret_name, str(e))
                 elif status_code is not None and 400 <= status_code < 500:
-                    logger.warning("Client error (%s) checking secret '%s' in destination: %s", 
+                    logger.warning("Client error (%s) checking secret '%s' in destination: %s",
                                    status_code, secret_name, str(e))
                 elif status_code is not None and status_code >= 500:
-                    logger.error("Server error (%s) checking secret '%s' in destination: %s", 
+                    logger.error("Server error (%s) checking secret '%s' in destination: %s",
                                  status_code, secret_name, str(e))
                 else:
                     logger.error("Unexpected error checking secret '%s' in destination: %s", secret_name, str(e))
@@ -2560,10 +2560,9 @@ def _copy_single_secret(source_client, dest_client, secret_name, overwrite, is_s
                 expires_on=s.properties.expires_on
             )
         except HttpResponseError as e:
-            from azure.cli.core.azclierror import CLIError
             if is_single_mode:
                 raise CLIError(f"Failed to copy secret '{secret_name}': {str(e)}")
-            
+
             logger.error("Failed to copy secret '%s': %s", secret_name, str(e))
             return False
 
