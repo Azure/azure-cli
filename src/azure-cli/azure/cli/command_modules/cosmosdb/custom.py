@@ -273,6 +273,11 @@ def _create_database_account(client,
         locations = []
         locations.append(Location(location_name=arm_location, failover_priority=0, is_zone_redundant=False))
 
+    for loc in locations:
+        if loc.failover_priority == 0:
+            arm_location = loc.location_name
+            break
+
     managed_service_identity = None
     SYSTEM_ID = '[system]'
     enable_system = False
