@@ -312,7 +312,8 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
         self._print_cached_help_section(groups_items, "Subgroups:", max_line_len)
         self._print_cached_help_section(commands_items, "Commands:", max_line_len)
 
-        print("\nTo search AI knowledge base for examples, use: az find \"az \"")
+        command = '' if command_path == 'root' else command_path
+        self._print_az_find_message(command)
 
         from azure.cli.core.util import show_updates_available
         show_updates_available(new_line_after=True)
