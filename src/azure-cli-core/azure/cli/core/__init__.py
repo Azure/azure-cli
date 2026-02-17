@@ -539,20 +539,10 @@ class MainCommandsLoader(CLICommandsLoader):
         """Cache help summary for top-level (root) help only."""
         try:
             from azure.cli.core.parser import AzCliCommandParser
-            from azure.cli.core._help import CliGroupHelpFile
+            from azure.cli.core._help import CliGroupHelpFile, get_help_item_tags
 
             parser = AzCliCommandParser(self.cli_ctx)
             parser.load_command_table(self)
-
-            def _get_tags(item):
-                tags = []
-                if hasattr(item, 'deprecate_info') and item.deprecate_info:
-                    tags.append(str(item.deprecate_info.tag))
-                if hasattr(item, 'preview_info') and item.preview_info:
-                    tags.append(str(item.preview_info.tag))
-                if hasattr(item, 'experimental_info') and item.experimental_info:
-                    tags.append(str(item.experimental_info.tag))
-                return ' '.join(tags)
 
             subparser = parser.subparsers.get(tuple())
             if subparser:
@@ -568,7 +558,7 @@ class MainCommandsLoader(CLICommandsLoader):
                         if ' ' in child_name:
                             continue
 
-                        tags = _get_tags(child)
+                        tags = get_help_item_tags(child)
                         item_data = {
                             'summary': child.short_summary,
                             'tags': tags

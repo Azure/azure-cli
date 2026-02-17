@@ -752,22 +752,11 @@ class AzCliCommandInvoker(CommandInvoker):
     def _save_help_to_command_index(self, subparser):
         """Extract help data from parser and save to command index for future fast access."""
         from azure.cli.core import CommandIndex
-        from azure.cli.core._help import CliGroupHelpFile
+        from azure.cli.core._help import CliGroupHelpFile, get_help_item_tags
 
         command_index = CommandIndex(self.cli_ctx)
         help_file = CliGroupHelpFile(self.help, '', subparser)
         help_file.load(subparser)
-
-        # Helper to build tag string for an item
-        def _get_tags(item):
-            tags = []
-            if hasattr(item, 'deprecate_info') and item.deprecate_info:
-                tags.append(str(item.deprecate_info.tag))
-            if hasattr(item, 'preview_info') and item.preview_info:
-                tags.append(str(item.preview_info.tag))
-            if hasattr(item, 'experimental_info') and item.experimental_info:
-                tags.append(str(item.experimental_info.tag))
-            return ' '.join(tags)
 
         # Separate groups and commands
         groups = {}
@@ -776,7 +765,7 @@ class AzCliCommandInvoker(CommandInvoker):
         for child in help_file.children:
             if hasattr(child, 'name') and hasattr(child, 'short_summary'):
                 if ' ' not in child.name:  # Only top-level items
-                    tags = _get_tags(child)
+                    tags = get_help_item_tags(child)
                     item_data = {
                         'summary': child.short_summary,
                         'tags': tags

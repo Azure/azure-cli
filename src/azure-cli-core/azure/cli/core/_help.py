@@ -46,6 +46,29 @@ Here are the base commands:
 """
 
 
+def get_help_item_tags(item):
+    """Extract status tags from a help item (group or command).
+
+    Returns a space-separated string of plain text tags like '[Deprecated] [Preview]'.
+    """
+    tags = []
+    if hasattr(item, 'deprecate_info') and item.deprecate_info:
+        # Get plain text tag by accessing the underlying message
+        tag_obj = item.deprecate_info.tag
+        # ColorizedString's _message has the plain text, str() would include ANSI codes
+        tag_text = tag_obj._message if hasattr(tag_obj, '_message') else str(tag_obj)
+        tags.append(tag_text)
+    if hasattr(item, 'preview_info') and item.preview_info:
+        tag_obj = item.preview_info.tag
+        tag_text = tag_obj._message if hasattr(tag_obj, '_message') else str(tag_obj)
+        tags.append(tag_text)
+    if hasattr(item, 'experimental_info') and item.experimental_info:
+        tag_obj = item.experimental_info.tag
+        tag_text = tag_obj._message if hasattr(tag_obj, '_message') else str(tag_obj)
+        tags.append(tag_text)
+    return ' '.join(tags)
+
+
 # PrintMixin class to decouple printing functionality from AZCLIHelp class.
 # Most of these methods override print methods in CLIHelp
 class CLIPrintMixin(CLIHelp):
@@ -242,23 +265,45 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
         pass
 
     @staticmethod
-    def _strip_ansi(text):
-        """Remove ANSI color codes from text for length calculation."""
-        import re
-        ansi_escape = re.compile(r'\x1b\[[0-9;]*m')
-        return ansi_escape.sub('', text)
+    def _colorize_tag(tag_text, enable_color):
+        """Add color to a plain text tag based on its content."""
+        if not enable_color or not tag_text:
+            return tag_text
+
+        from knack.util import color_map
+
+        tag_lower = tag_text.lower()
+        if 'preview' in tag_lower:
+            color = color_map['preview']
+        elif 'experimental' in tag_lower:
+            color = color_map['experimental']
+        elif 'deprecat' in tag_lower:
+            color = color_map['deprecation']
+        else:
+            return tag_text
+
+        return f"{color}{tag_text}{color_map['reset']}"
 
     @staticmethod
-    def _build_cached_help_items(data):
+    def _build_cached_help_items(data, enable_color=False):
         """Process help items from cache and return list with calculated line lengths."""
         from knack.help import _get_line_len
         items = []
         for name in sorted(data.keys()):
             item = data[name]
-            tags = item.get('tags', '')
-            tags_len = len(AzCliHelp._strip_ansi(tags))
+            plain_tags = item.get('tags', '')
+
+            # Colorize each tag individually if needed
+            if plain_tags and enable_color:
+                # Split multiple tags and colorize each
+                tag_parts = plain_tags.split()
+                colored_tags = ' '.join(AzCliHelp._colorize_tag(tag, enable_color) for tag in tag_parts)
+            else:
+                colored_tags = plain_tags
+
+            tags_len = len(plain_tags)
             line_len = _get_line_len(name, tags_len)
-            items.append((name, tags, line_len, item.get('summary', '')))
+            items.append((name, colored_tags, line_len, item.get('summary', '')))
         return items
 
     @staticmethod
@@ -302,8 +347,8 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
         groups_data = help_data.get('groups', {})
         commands_data = help_data.get('commands', {})
 
-        groups_items = self._build_cached_help_items(groups_data)
-        commands_items = self._build_cached_help_items(commands_data)
+        groups_items = self._build_cached_help_items(groups_data, self.cli_ctx.enable_color)
+        commands_items = self._build_cached_help_items(commands_data, self.cli_ctx.enable_color)
         max_line_len = max(
             (line_len for _, _, line_len, _ in groups_items + commands_items),
             default=0
