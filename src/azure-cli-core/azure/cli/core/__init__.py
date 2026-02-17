@@ -526,9 +526,6 @@ class MainCommandsLoader(CLICommandsLoader):
 
         if use_command_index:
             command_index.update(self.command_table)
-
-            # Also cache help data for fast az --help in future
-            # This is done after loading all modules when help data is available
             self._cache_help_index(command_index)
 
         return self.command_table
@@ -544,11 +541,9 @@ class MainCommandsLoader(CLICommandsLoader):
             from azure.cli.core.parser import AzCliCommandParser
             from azure.cli.core._help import CliGroupHelpFile
 
-            # Create a temporary parser to extract help information
             parser = AzCliCommandParser(self.cli_ctx)
             parser.load_command_table(self)
 
-            # Helper to build tag string for an item
             def _get_tags(item):
                 tags = []
                 if hasattr(item, 'deprecate_info') and item.deprecate_info:
@@ -559,7 +554,6 @@ class MainCommandsLoader(CLICommandsLoader):
                     tags.append(str(item.experimental_info.tag))
                 return ' '.join(tags)
 
-            # Only cache root level help
             subparser = parser.subparsers.get(tuple())
             if subparser:
                 help_file = CliGroupHelpFile(self.cli_ctx.invocation.help, '', subparser)
@@ -570,7 +564,6 @@ class MainCommandsLoader(CLICommandsLoader):
 
                 for child in help_file.children:
                     if hasattr(child, 'name') and hasattr(child, 'short_summary'):
-                        # Only include top-level items (no spaces in name)
                         child_name = child.name
                         if ' ' in child_name:
                             continue
@@ -586,7 +579,6 @@ class MainCommandsLoader(CLICommandsLoader):
                         else:
                             commands[child_name] = item_data
 
-                # Store only root level help
                 if groups or commands:
                     help_index_data = {'root': {'groups': groups, 'commands': commands}}
                     command_index.set_help_index(help_index_data)
@@ -905,7 +897,6 @@ class CommandIndex:
 
         elapsed_time = timeit.default_timer() - start_time
         self.INDEX[self._COMMAND_INDEX] = index
-        # Note: helpIndex is populated by _cache_help_index() when all modules are loaded
         logger.debug("Updated command index in %.3f seconds.", elapsed_time)
 
     def invalidate(self):

@@ -777,12 +777,10 @@ class AzCliCommandInvoker(CommandInvoker):
         if not is_help_request:
             return False
 
-        # Check if there's a command path before the help flag
         for arg in args:
             if arg in ('--help', '-h', 'help'):
                 break
             if not arg.startswith('-'):
-                # Found a command name before help flag
                 return False
 
         return True

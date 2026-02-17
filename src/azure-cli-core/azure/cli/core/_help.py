@@ -241,25 +241,57 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
     def update_examples(help_file):
         pass
 
+    @staticmethod
+    def _strip_ansi(text):
+        """Remove ANSI color codes from text for length calculation."""
+        import re
+        ansi_escape = re.compile(r'\x1b\[[0-9;]*m')
+        return ansi_escape.sub('', text)
+
+    @staticmethod
+    def _build_cached_help_items(data):
+        """Process help items from cache and return list with calculated line lengths."""
+        from knack.help import _get_line_len
+        items = []
+        for name in sorted(data.keys()):
+            item = data[name]
+            tags = item.get('tags', '')
+            tags_len = len(AzCliHelp._strip_ansi(tags))
+            line_len = _get_line_len(name, tags_len)
+            items.append((name, tags, line_len, item.get('summary', '')))
+        return items
+
+    @staticmethod
+    def _print_cached_help_section(items, header, max_line_len):
+        """Display cached help items with consistent formatting."""
+        from knack.help import FIRST_LINE_PREFIX, _get_hanging_indent, _get_padding_len
+        if not items:
+            return
+        print(f"\n{header}")
+        indent = 1
+        LINE_FORMAT = '{name}{padding}{tags}{separator}{summary}'
+        for name, tags, line_len, summary in items:
+            layout = {'line_len': line_len, 'tags': tags}
+            padding = ' ' * _get_padding_len(max_line_len, layout)
+            line = LINE_FORMAT.format(
+                name=name,
+                padding=padding,
+                tags=tags,
+                separator=FIRST_LINE_PREFIX if summary else '',
+                summary=summary
+            )
+            _print_indent(line, indent, _get_hanging_indent(max_line_len, indent))
+
     def show_cached_help(self, help_data, command_path='root'):
         """Display help from cached help index without loading modules."""
-        import re
 
-        def _strip_ansi(text):
-            """Remove ANSI color codes from text for length calculation."""
-            ansi_escape = re.compile(r'\x1b\[[0-9;]*m')
-            return ansi_escape.sub('', text)
-
-        # Show privacy statement if first run
         ran_before = self.cli_ctx.config.getboolean('core', 'first_run', fallback=False)
         if not ran_before:
             print(PRIVACY_STATEMENT)
             self.cli_ctx.config.set_value('core', 'first_run', 'yes')
 
-        # Show welcome message
         print(WELCOME_MESSAGE)
 
-        # Display the group breadcrumb
         if command_path == 'root':
             print("\nGroup")
             print("    az")
@@ -267,79 +299,21 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
             print("\nGroup")
             print(f"    az {command_path}")
 
-        # Import knack's formatting functions
-        from knack.help import FIRST_LINE_PREFIX, _get_hanging_indent
-
-        # Separate groups and commands
         groups_data = help_data.get('groups', {})
         commands_data = help_data.get('commands', {})
 
-        # Helper function matching knack's _get_line_len
-        def _get_line_len(name, tags):
-            tags_len = len(_strip_ansi(tags))
-            return len(name) + tags_len + (2 if tags_len else 1)
+        groups_items = self._build_cached_help_items(groups_data)
+        commands_items = self._build_cached_help_items(commands_data)
+        max_line_len = max(
+            (line_len for _, _, line_len, _ in groups_items + commands_items),
+            default=0
+        )
 
-        # Helper function matching knack's _get_padding_len
-        def _get_padding_len(max_len, name, tags):
-            line_len = _get_line_len(name, tags)
-            if tags:
-                pad_len = max_len - line_len + 1
-            else:
-                pad_len = max_len - line_len
-            return pad_len
-
-        # Build items lists and calculate max_line_len across ALL items (groups + commands)
-        # This ensures colons align across both sections
-        max_line_len = 0
-        groups_items = []
-        for name in sorted(groups_data.keys()):
-            item = groups_data[name]
-            tags = item.get('tags', '')
-            groups_items.append((name, tags, item.get('summary', '')))
-            max_line_len = max(max_line_len, _get_line_len(name, tags))
-
-        commands_items = []
-        for name in sorted(commands_data.keys()):
-            item = commands_data[name]
-            tags = item.get('tags', '')
-            commands_items.append((name, tags, item.get('summary', '')))
-            max_line_len = max(max_line_len, _get_line_len(name, tags))
-
-        # Display groups
-        if groups_items:
-            print("\nSubgroups:")
-            indent = 1
-            LINE_FORMAT = '{name}{padding}{tags}{separator}{summary}'
-            for name, tags, summary in groups_items:
-                padding = ' ' * _get_padding_len(max_line_len, name, tags)
-                line = LINE_FORMAT.format(
-                    name=name,
-                    padding=padding,
-                    tags=tags,
-                    separator=FIRST_LINE_PREFIX if summary else '',
-                    summary=summary
-                )
-                _print_indent(line, indent, _get_hanging_indent(max_line_len, indent))
-
-        # Display commands
-        if commands_items:
-            print("\nCommands:")
-            indent = 1
-            LINE_FORMAT = '{name}{padding}{tags}{separator}{summary}'
-            for name, tags, summary in commands_items:
-                padding = ' ' * _get_padding_len(max_line_len, name, tags)
-                line = LINE_FORMAT.format(
-                    name=name,
-                    padding=padding,
-                    tags=tags,
-                    separator=FIRST_LINE_PREFIX if summary else '',
-                    summary=summary
-                )
-                _print_indent(line, indent, _get_hanging_indent(max_line_len, indent))
+        self._print_cached_help_section(groups_items, "Subgroups:", max_line_len)
+        self._print_cached_help_section(commands_items, "Commands:", max_line_len)
 
         print("\nTo search AI knowledge base for examples, use: az find \"az \"")
 
-        # Show update notification
         from azure.cli.core.util import show_updates_available
         show_updates_available(new_line_after=True)
 
