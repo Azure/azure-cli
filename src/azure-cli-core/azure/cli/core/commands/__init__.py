@@ -584,54 +584,11 @@ class AzCliCommandInvoker(CommandInvoker):
             subparser = self.parser.subparsers[tuple()]
             self.help.show_welcome(subparser)
 
-            # After showing help, cache the help summaries for future fast access
             use_command_index = self._should_use_command_index()
             logger.debug("About to cache help data, use_command_index=%s", use_command_index)
             if use_command_index:
                 try:
-                    from azure.cli.core import CommandIndex
-                    command_index = CommandIndex(self.cli_ctx)
-                    # Extract help data from the parser that was just used
-                    from azure.cli.core._help import CliGroupHelpFile
-                    help_file = CliGroupHelpFile(self.cli_ctx.help, '', subparser)
-                    help_file.load(subparser)
-
-                    # Helper to build tag string for an item
-                    def _get_tags(item):
-                        tags = []
-                        if hasattr(item, 'deprecate_info') and item.deprecate_info:
-                            tags.append(str(item.deprecate_info.tag))
-                        if hasattr(item, 'preview_info') and item.preview_info:
-                            tags.append(str(item.preview_info.tag))
-                        if hasattr(item, 'experimental_info') and item.experimental_info:
-                            tags.append(str(item.experimental_info.tag))
-                        return ' '.join(tags)
-
-                    # Separate groups and commands
-                    groups = {}
-                    commands = {}
-
-                    for child in help_file.children:
-                        if hasattr(child, 'name') and hasattr(child, 'short_summary'):
-                            if ' ' not in child.name:  # Only top-level items
-                                tags = _get_tags(child)
-                                item_data = {
-                                    'summary': child.short_summary,
-                                    'tags': tags
-                                }
-                                # Check if it's a group or command
-                                if child.type == 'group':
-                                    groups[child.name] = item_data
-                                else:
-                                    commands[child.name] = item_data
-
-                    # Store in the command index
-                    help_index_data = {'groups': groups, 'commands': commands}
-                    if groups or commands:
-                        from azure.cli.core._session import INDEX
-                        from azure.cli.core import __version__
-                        INDEX['helpIndex'] = help_index_data
-                        logger.debug("Cached %d groups and %d commands for fast access", len(groups), len(commands))
+                    self._save_help_to_command_index(subparser)
                 except Exception as ex:  # pylint: disable=broad-except
                     logger.debug("Failed to cache help data: %s", ex)
 
@@ -795,6 +752,50 @@ class AzCliCommandInvoker(CommandInvoker):
             return CommandResultItem(None, exit_code=0)
         
         return None
+
+    def _save_help_to_command_index(self, subparser):
+        """Extract help data from parser and save to command index for future fast access."""
+        from azure.cli.core import CommandIndex
+        from azure.cli.core._help import CliGroupHelpFile
+        
+        command_index = CommandIndex(self.cli_ctx)
+        help_file = CliGroupHelpFile(self.cli_ctx.help, '', subparser)
+        help_file.load(subparser)
+
+        # Helper to build tag string for an item
+        def _get_tags(item):
+            tags = []
+            if hasattr(item, 'deprecate_info') and item.deprecate_info:
+                tags.append(str(item.deprecate_info.tag))
+            if hasattr(item, 'preview_info') and item.preview_info:
+                tags.append(str(item.preview_info.tag))
+            if hasattr(item, 'experimental_info') and item.experimental_info:
+                tags.append(str(item.experimental_info.tag))
+            return ' '.join(tags)
+
+        # Separate groups and commands
+        groups = {}
+        commands = {}
+
+        for child in help_file.children:
+            if hasattr(child, 'name') and hasattr(child, 'short_summary'):
+                if ' ' not in child.name:  # Only top-level items
+                    tags = _get_tags(child)
+                    item_data = {
+                        'summary': child.short_summary,
+                        'tags': tags
+                    }
+                    # Check if it's a group or command
+                    if child.type == 'group':
+                        groups[child.name] = item_data
+                    else:
+                        commands[child.name] = item_data
+
+        # Store in the command index
+        help_index_data = {'groups': groups, 'commands': commands}
+        if groups or commands:
+            command_index.set_help_index(help_index_data)
+            logger.debug("Cached %d groups and %d commands for fast access", len(groups), len(commands))
 
     def _run_job(self, expanded_arg, cmd_copy):
         params = self._filter_params(expanded_arg)

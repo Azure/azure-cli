@@ -312,6 +312,8 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
         self._print_cached_help_section(groups_items, "Subgroups:", max_line_len)
         self._print_cached_help_section(commands_items, "Commands:", max_line_len)
 
+        # Use same az find message as non-cached path
+        print()  # Blank line before the message
         command = '' if command_path == 'root' else command_path
         self._print_az_find_message(command)
 
