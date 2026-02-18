@@ -2193,7 +2193,7 @@ def update_webapp(cmd, instance, client_affinity_enabled=None, https_only=None, 
 
     if platform_release_channel is not None:
         use_additional_properties(instance)
-        instance.additional_properties["properties"]["platformReleaseChannel"] = platform_release_channel.capitalize()
+        instance.additional_properties["properties"]["platformReleaseChannel"] = platform_release_channel
 
     return instance
 
