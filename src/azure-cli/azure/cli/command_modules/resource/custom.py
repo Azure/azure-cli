@@ -2941,7 +2941,6 @@ def create_deployment_stack_what_if_at_resource_group(
 
     from azure.core.exceptions import HttpResponseError
     try:
-        # TODO(kylealbert): verify params
         whatif_poller = rcf.deployment_stacks_what_if_results_at_resource_group.begin_create_or_update(
             resource_group, name, deployment_stack_what_if_model)
     except HttpResponseError as err:
@@ -2967,7 +2966,7 @@ def show_deployment_stack_what_if_at_resource_group(cmd, name=None, resource_gro
         if len(stack_arr) < 5:
             raise InvalidArgumentValueError("Please enter a valid id")
         return rcf.deployment_stacks_what_if_results_at_resource_group.get(stack_arr[4], stack_arr[-1])
-    raise InvalidArgumentValueError("Please enter the (stack name and resource group) or stack resource id")
+    raise InvalidArgumentValueError("Please enter the (stack what-if result name and resource group) or stack what-if resource id")
 
 
 def list_deployment_stack_what_if_at_resource_group(cmd, resource_group):
@@ -2992,22 +2991,22 @@ def delete_deployment_stack_what_if_at_resource_group(
 
     if name and resource_group:
         try:
-            rcf.deployment_stacks.get_at_resource_group(resource_group, name)
+            rcf.deployment_stacks_what_if_results_at_resource_group.get(resource_group, name)
         except:
-            raise ResourceNotFoundError("DeploymentStack " + name + " not found in the current resource group scope.")
+            raise ResourceNotFoundError(f"Deployment stack what-if result '{name}' was not found in the current resource group scope.")
         return rcf.deployment_stacks_what_if_results_at_resource_group.delete(resource_group, name)
     if id:
-        stack_arr = id.split('/')
-        if len(stack_arr) < 5:
+        id_arr = id.split('/')
+        if len(id_arr) < 5:
             raise InvalidArgumentValueError("Please enter a valid id")
-        name = stack_arr[-1]
-        stack_rg = stack_arr[-5]
+        name = id_arr[-1]
+        rg_in_id = id_arr[-5]
         try:
-            rcf.deployment_stacks.get_at_resource_group(stack_rg, name)
+            rcf.deployment_stacks_what_if_results_at_resource_group.get(rg_in_id, name)
         except:
-            raise ResourceNotFoundError("DeploymentStack " + name + " not found in the current resource group scope.")
-        return rcf.deployment_stacks_what_if_results_at_resource_group.delete(stack_rg, name)
-    raise InvalidArgumentValueError("Please enter the (stack name and resource group) or stack resource id")
+            raise ResourceNotFoundError(f"Deployment stack what-if result '{name}' was not found in the current resource group scope.")
+        return rcf.deployment_stacks_what_if_results_at_resource_group.delete(rg_in_id, name)
+    raise InvalidArgumentValueError("Please enter the (stack what-if result name and resource group) or stack what-if result resource id")
 
 
 def create_deployment_stack_what_if_at_subscription(
@@ -3029,7 +3028,6 @@ def create_deployment_stack_what_if_at_subscription(
 
     from azure.core.exceptions import HttpResponseError
     try:
-        # TODO(kylealbert): verify params
         whatif_poller = rcf.deployment_stacks_what_if_results_at_subscription.begin_create_or_update(name, deployment_stack_what_if_model)
     except HttpResponseError as err:
         err_message = _build_http_response_error_message(err)
@@ -3050,8 +3048,8 @@ def show_deployment_stack_what_if_at_subscription(cmd, name=None, id=None):  # p
     if name or id:
         if name:
             return rcf.deployment_stacks_what_if_results_at_subscription.get(name)
-        return rcf.deployment_stacks_what_if_results_at_subscription.get_at_subscription(id.split('/')[-1])
-    raise InvalidArgumentValueError("Please enter the stack what-if result name or stack resource id.")
+        return rcf.deployment_stacks_what_if_results_at_subscription.get(id.split('/')[-1])
+    raise InvalidArgumentValueError("Please enter the stack what-if result name or stack what-if result resource id.")
 
 
 def list_deployment_stack_what_if_at_subscription(cmd):
@@ -3073,15 +3071,15 @@ def delete_deployment_stack_what_if_at_subscription(cmd, name=None, id=None, yes
         try:
             if name:
                 delete_name = name
-                rcf.deployment_stacks.get_at_subscription(name)
+                rcf.deployment_stacks_what_if_results_at_subscription.get(name)
             else:
                 name = id.split('/')[-1]
                 delete_name = name
-                rcf.deployment_stacks.get_at_subscription(name)
+                rcf.deployment_stacks_what_if_results_at_subscription.get(name)
         except:
-            raise ResourceNotFoundError("DeploymentStack " + delete_name + " not found in the current subscription scope.")
+            raise ResourceNotFoundError(f"Deployment stack what-if result '{delete_name}' was not found in the current subscription scope.")
         return rcf.deployment_stacks_what_if_results_at_subscription.delete(delete_name)
-    raise InvalidArgumentValueError("Please enter the stack name or stack resource id")
+    raise InvalidArgumentValueError("Please enter the stack what-if result name or stack what-if result resource id")
 
 
 def create_deployment_stack_what_if_at_management_group(
@@ -3103,7 +3101,6 @@ def create_deployment_stack_what_if_at_management_group(
 
     from azure.core.exceptions import HttpResponseError
     try:
-        # TODO(kylealbert): verify params
         whatif_poller = rcf.deployment_stacks_what_if_results_at_management_group.begin_create_or_update(
             management_group_id, name, deployment_stack_what_if_model)
     except HttpResponseError as err:
@@ -3126,7 +3123,7 @@ def show_deployment_stack_what_if_at_management_group(cmd, management_group_id, 
         if name:
             return rcf.deployment_stacks_what_if_results_at_management_group.get(management_group_id, name)
         return rcf.deployment_stacks_what_if_results_at_management_group.get(management_group_id, id.split('/')[-1])
-    raise InvalidArgumentValueError("Please enter the stack name or stack resource id.")
+    raise InvalidArgumentValueError("Please enter the stack what-if result name or stack what-if result resource id.")
 
 
 def list_deployment_stack_what_if_at_management_group(cmd, management_group_id):
@@ -3150,15 +3147,13 @@ def delete_deployment_stack_what_if_at_management_group(
         try:
             if name:
                 delete_name = name
-                rcf.deployment_stacks.get_at_management_group(management_group_id, name)
+                rcf.deployment_stacks_what_if_results_at_management_group.get(management_group_id, name)
             else:
                 name = id.split('/')[-1]
                 delete_name = name
-                rcf.deployment_stacks.get_at_management_group(management_group_id, name)
+                rcf.deployment_stacks_what_if_results_at_management_group.get(management_group_id, name)
         except:
-            raise ResourceNotFoundError(
-                "DeploymentStack " + delete_name +
-                " not found in the current management group scope.")
+            raise ResourceNotFoundError(f"Deployment stack what-if result '{delete_name}' was not found in the current management group scope.")
         return rcf.deployment_stacks_what_if_results_at_management_group.delete(management_group_id, delete_name)
     raise InvalidArgumentValueError("Please enter the stack name or stack resource id")
 
@@ -3169,7 +3164,6 @@ def _prepare_whatif_stack_at_scope(
     description=None, deny_settings_excluded_principals=None, deny_settings_excluded_actions=None,
     deny_settings_apply_to_child_scopes=False, resources_without_delete_support=None, validation_level=None, tags=None
 ):
-    # TODO(kylealbert): verify model
     action_on_unmanage_model = _prepare_stacks_action_on_unmanage(action_on_unmanage, resources_without_delete_support)
     deny_settings_enum = _prepare_stacks_deny_settings(deny_settings_mode)
 
