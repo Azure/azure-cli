@@ -3537,6 +3537,24 @@ def cli_offline_region(client,
                        resource_group_name,
                        region):
 
+    # Function to normalize region name
+    def _normalize_region(region_name):
+        return region_name.replace(' ', '').lower()
+
+    # Get the account to check for the region name
+    account = client.get(resource_group_name, account_name)
+    input_region_normalized = _normalize_region(region)
+    matched_region = None
+
+    # Check matches in both read and write locations
+    for loc in account.locations:
+        if _normalize_region(loc.location_name) == input_region_normalized:
+            matched_region = loc.location_name
+            break
+
+    if matched_region:
+        region = matched_region
+    
     region_parameter_for_offline = RegionForOnlineOffline(region=region)
     return client.begin_offline_region(
         resource_group_name=resource_group_name,
