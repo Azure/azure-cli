@@ -41,6 +41,7 @@ ASE_LOADBALANCER_MODES = ['Internal', 'External']
 ASE_KINDS = ['ASEv3']
 PUBLIC_NETWORK_ACCESS_MODES = ['Enabled', 'Disabled']
 BASIC_AUTH_TYPES = ['Enabled', 'Disabled']
+PLATFORM_RELEASE_CHANNEL_TYPES = ['Standard', 'Latest', 'Extended']
 DAPR_LOG_LEVELS = ['debug', 'error', 'info', 'warn']
 INSTALL_SCRIPT_TYPES = ['RemoteAzureBlob', 'PlatformStorage']
 STORAGE_MOUNT_TYPES = ['AzureFiles', 'LocalStorage', 'FileShare']
@@ -454,6 +455,9 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('end_to_end_encryption_enabled', options_list=['--end-to-end-encryption-enabled', '-e'],
                    help='Enable or disable end-to-end encryption between the Front End and the Workers.',
                    arg_type=get_three_state_flag(return_label=True))
+        c.argument('platform_release_channel', options_list=['--platform-release-channel'],
+                   help='Set the platform release channel for the web app. Possible values: Latest, Standard, Extended.',
+                   arg_type=get_enum_type(PLATFORM_RELEASE_CHANNEL_TYPES))
 
     with self.argument_context('webapp browse') as c:
         c.argument('logs', options_list=['--logs', '-l'], action='store_true',
