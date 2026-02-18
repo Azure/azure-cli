@@ -2846,7 +2846,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.kwargs.update({'template-spec-id': template_spec_id})
 
         # create deployment stack with template file and parameter file
-        self.cmd('stack group create --name {name} --resource-group {resource-group}  --template-file "{template-file}" --deny-settings-mode "none" --parameters "{parameter-file}" --yes --description "stack deployment" --aou deleteAll --deny-settings-excluded-principals "principal1 principal2" --deny-settings-excluded-actions "action1 action2" --deny-settings-apply-to-child-scopes', checks=self.check('provisioningState', 'succeeded'))
+        self.cmd('stack group create --name {name} --resource-group {resource-group}  --template-file "{template-file}" --deny-settings-mode "none" --parameters "{parameter-file}" --yes --description "stack deployment" --aou deleteAll --deny-settings-excluded-principals "principal1 principal2" --deny-settings-excluded-actions "action1 action2" --deny-settings-apply-to-child-scopes --vl ProviderNoRbac', checks=self.check('provisioningState', 'succeeded'))
 
         # cleanup
         self.cmd('stack group delete --name {name} --resource-group {resource-group} --action-on-unmanage detachAll --yes')
@@ -3488,7 +3488,7 @@ class DeploymentStacksTest(ScenarioTest):
 
         # validate deployment stack with template file and parameter file: success
         self.cmd(
-            'stack sub validate --name {name} --location {location} --template-file "{template-file}" --deny-settings-mode "none" --parameters "{parameter-file}" --description "stack deployment" --aou detachAll',
+            'stack sub validate --name {name} --location {location} --template-file "{template-file}" --deny-settings-mode "none" --parameters "{parameter-file}" --description "stack deployment" --aou detachAll --vl ProviderNoRbac',
             checks=self.check_pattern(
                 'properties.validatedResources[0].id', r'^/subscriptions/.*/resourceGroups/[^/]+$'))
 
