@@ -3554,7 +3554,7 @@ def cli_offline_region(client,
 
     if matched_region:
         region = matched_region
-    
+
     region_parameter_for_offline = RegionForOnlineOffline(region=region)
     return client.begin_offline_region(
         resource_group_name=resource_group_name,
