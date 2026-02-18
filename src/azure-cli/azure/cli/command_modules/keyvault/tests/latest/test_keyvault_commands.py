@@ -2783,12 +2783,17 @@ class KeyVaultCopyScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_copy')
     @KeyVaultPreparer(name_prefix='cli-test-kv-src-', location='eastus', additional_params='--enable-rbac-authorization false')
-    def test_keyvault_secret_copy(self, resource_group, key_vault):
-        patcher = mock.patch('azure.cli.core._profile.Profile')
-        mock_profile = patcher.start()
-        self.addCleanup(patcher.stop)
-        mock_profile.return_value.get_login_credentials.return_value = (mock.Mock(), mock.Mock(), mock.Mock())
+    def setUp(self):
+        super().setUp()
+        self.patcher = mock.patch('azure.cli.core._profile.Profile')
+        self.mock_profile = self.patcher.start()
+        self.addCleanup(self.patcher.stop)
+        self.mock_profile.return_value.get_login_credentials.return_value = (mock.Mock(), mock.Mock(), mock.Mock())
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_keyvault_copy')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-src-', location='eastus', additional_params='--enable-rbac-authorization false')
+    def test_keyvault_secret_copy(self, key_vault):
         self.kwargs.update({
             'kv': key_vault,
             'dest_kv': self.create_random_name('cli-test-kv-dest-', 24),
