@@ -1,0 +1,188 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appservice plan create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --sku
+      User-Agent:
+      - AZURECLI/2.83.0 azsdk-python-core/1.38.0 Python/3.13.12 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2024-11-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","test":"test_logicapp_unique_domain_name","date":"2026-02-18T11:41:13Z","module":"appservice"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '374'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 18 Feb 2026 11:41:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 038DF29863A54E86B66B813FA570C5B3 Ref B: PNQ231110908042 Ref C: 2026-02-18T11:41:46Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appservice plan create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --sku
+      User-Agent:
+      - AZURECLI/2.83.0 azsdk-python-core/1.38.0 Python/3.13.12 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/logic-e2e-plan000004?api-version=2024-11-01
+  response:
+    body:
+      string: '{"error":{"code":"ResourceNotFound","message":"The Resource ''Microsoft.Web/serverFarms/logic-e2e-plan000004''
+        under resource group ''clitest.rg000001'' was not found. For more details
+        please go to https://aka.ms/ARMResourceNotFoundFix"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '234'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 18 Feb 2026 11:41:47 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
+      x-msedge-ref:
+      - 'Ref A: F89F69E9627D413396F192227546CA94 Ref B: PNQ231110907060 Ref C: 2026-02-18T11:41:46Z'
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: '{"location": "westus", "properties": {"perSiteScaling": false}, "sku":
+      {"capacity": 1, "name": "WS1", "tier": "WorkflowStandard"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appservice plan create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '130'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --sku
+      User-Agent:
+      - AZURECLI/2.83.0 azsdk-python-core/1.38.0 Python/3.13.12 (Windows-11-10.0.26200-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/logic-e2e-plan000004?api-version=2025-03-01
+  response:
+    body:
+      string: '{"Code":"Unauthorized","Message":"Operation cannot be completed without
+        additional quota. See https://aka.ms/antquotahelp for instructions on requesting
+        limit increases. \r\nAdditional details - Location:  \r\nCurrent Limit (WorkflowStandard
+        VMs): 0 \r\nCurrent Usage: 0\r\nAmount required for this deployment (WorkflowStandard
+        VMs): 1 \r\n(Minimum) New Limit that you should request to enable this deployment:
+        1. \r\nNote that if you experience multiple scaling operations failing (in
+        addition to this one) and need to accommodate the aggregate quota requirements
+        of these operations, you will need to request a higher quota limit than the
+        one currently displayed.","Target":null,"Details":[{"Message":"Operation cannot
+        be completed without additional quota. See https://aka.ms/antquotahelp for
+        instructions on requesting limit increases. \r\nAdditional details - Location:  \r\nCurrent
+        Limit (WorkflowStandard VMs): 0 \r\nCurrent Usage: 0\r\nAmount required for
+        this deployment (WorkflowStandard VMs): 1 \r\n(Minimum) New Limit that you
+        should request to enable this deployment: 1. \r\nNote that if you experience
+        multiple scaling operations failing (in addition to this one) and need to
+        accommodate the aggregate quota requirements of these operations, you will
+        need to request a higher quota limit than the one currently displayed."},{"Code":"Unauthorized"},{"ErrorEntity":{"ExtendedCode":"70002","MessageTemplate":"Operation
+        cannot be completed without additional quota. See https://aka.ms/antquotahelp
+        for instructions on requesting limit increases. \r\nAdditional details - Location:
+        {0} \r\nCurrent Limit ({1}): {2} \r\nCurrent Usage: {3}\r\nAmount required
+        for this deployment ({1}): {4} \r\n(Minimum) New Limit that you should request
+        to enable this deployment: {5}. \r\nNote that if you experience multiple scaling
+        operations failing (in addition to this one) and need to accommodate the aggregate
+        quota requirements of these operations, you will need to request a higher
+        quota limit than the one currently displayed.","Parameters":["","WorkflowStandard
+        VMs","0","0","1","1"],"Code":"Unauthorized","Message":"Operation cannot be
+        completed without additional quota. See https://aka.ms/antquotahelp for instructions
+        on requesting limit increases. \r\nAdditional details - Location:  \r\nCurrent
+        Limit (WorkflowStandard VMs): 0 \r\nCurrent Usage: 0\r\nAmount required for
+        this deployment (WorkflowStandard VMs): 1 \r\n(Minimum) New Limit that you
+        should request to enable this deployment: 1. \r\nNote that if you experience
+        multiple scaling operations failing (in addition to this one) and need to
+        accommodate the aggregate quota requirements of these operations, you will
+        need to request a higher quota limit than the one currently displayed."}}],"Innererror":null}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2774'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 18 Feb 2026 11:41:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=ed41882f-f46e-4692-a8f3-d447bc8397e5/westus/18fa173c-6148-406b-a70f-31d04872280c
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 36196E0066DC4364BEE3DA0C2A8FF9B3 Ref B: PNQ231110906029 Ref C: 2026-02-18T11:41:48Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 401
+      message: Unauthorized
+version: 1
