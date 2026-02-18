@@ -239,7 +239,13 @@ class CosmosDBTests(ScenarioTest):
         assert account1['readLocations'][0]['failoverPriority'] == 1 or account1['readLocations'][1]['failoverPriority'] == 1
 
         self.cmd('az cosmosdb failover-priority-change -n {acc} -g {rg} --failover-policies {read_location}=0 {write_location}=1')
-        account2 = self.cmd('az cosmosdb show -n {acc} -g {rg}').get_output_in_json()
+        import time
+        for _ in range(0, 10):
+            account2 = self.cmd('az cosmosdb show -n {acc} -g {rg}').get_output_in_json()
+            if account2['writeLocations'][0]['locationName'] == "West US":
+                break
+            time.sleep(5)
+
         assert len(account2['writeLocations']) == 1
         assert len(account2['readLocations']) == 2
 
