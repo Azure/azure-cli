@@ -22,7 +22,7 @@ examples:
         az logicapp create -g myRG --subscription mySubscription -p MyPlan -n myLogicApp -s myStorageAccount
   - name: Create a logic app with a unique domain name scope.
     text: >
-        az logicapp create -g myRG --subscription mySubscription -p MyPlan -n myLogicApp -s myStorageAccount --domain-name-scope SubscriptionReuse
+        az logicapp create -g myRG --subscription mySubscription -p MyPlan -n myLogicApp -s myStorageAccount --domain-name-scope TenantReuse
 """
 
 helps['logicapp delete'] = """
