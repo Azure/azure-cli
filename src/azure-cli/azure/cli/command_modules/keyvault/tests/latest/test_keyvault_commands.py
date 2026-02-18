@@ -2780,14 +2780,12 @@ class KeyVaultMHSMRegionScenarioTest(ScenarioTest):
 
 
 class KeyVaultCopyScenarioTest(ScenarioTest):
-    # Filter User-Agent to prevent recording mismatch between recording env (Windows) and CI (Linux)
-    FILTER_HEADERS = ScenarioTest.FILTER_HEADERS + ['user-agent']
-
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_copy')
-    @KeyVaultPreparer(name_prefix='cli-test-kv-src-', additional_params='--enable-rbac-authorization false')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-src-', location='eastus', additional_params='--enable-rbac-authorization false')
     def test_keyvault_secret_copy(self, resource_group, key_vault):
         self.kwargs.update({
-            'src_kv': key_vault,
+            'kv': key_vault,
             'dest_kv': self.create_random_name('cli-test-kv-dest-', 24),
             'secret_name': self.create_random_name('secret-', 24),
             'secret_value': 'mysecretvalue',
@@ -2797,7 +2795,7 @@ class KeyVaultCopyScenarioTest(ScenarioTest):
 
         # Create Dest KV
         # Use simple creation to ensure speed and reliability in playback
-        self.cmd('keyvault create -g {rg} -n {dest_kv} --enable-rbac-authorization false')
+        self.cmd('keyvault create -g {rg} -n {dest_kv} --location eastus --enable-rbac-authorization false')
         self.addCleanup(self.cmd, 'keyvault delete -g {rg} -n {dest_kv}')
         self.addCleanup(self.cmd, 'keyvault purge -n {dest_kv}')
 
