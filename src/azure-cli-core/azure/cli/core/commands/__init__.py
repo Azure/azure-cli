@@ -519,7 +519,7 @@ class AzCliCommandInvoker(CommandInvoker):
         args = _pre_command_table_create(self.cli_ctx, args)
 
         if self._should_use_command_index() and self._is_top_level_help_request(args):
-            result = self._try_show_cached_help(command_preserve_casing)
+            result = self._try_show_cached_help(command_preserve_casing, args)
             if result:
                 return result
 
@@ -715,7 +715,11 @@ class AzCliCommandInvoker(CommandInvoker):
 
     @staticmethod
     def _is_top_level_help_request(args):
-        """Determine if this is a top-level help request (az --help or just az)."""
+        """Determine if this is a top-level help request (az --help or just az).
+
+        Returns True for both 'az' with no args and 'az --help' so we can use
+        cached data without loading all modules.
+        """
         if not args:
             return True
 
@@ -731,7 +735,7 @@ class AzCliCommandInvoker(CommandInvoker):
         """Check if command index optimization is enabled."""
         return self.cli_ctx.config.getboolean('core', 'use_command_index', fallback=True)
 
-    def _try_show_cached_help(self, command_preserve_casing):
+    def _try_show_cached_help(self, command_preserve_casing, args):
         """Try to show cached help for top-level help request.
 
         Returns CommandResultItem if cached help was shown, None otherwise.
@@ -742,7 +746,7 @@ class AzCliCommandInvoker(CommandInvoker):
 
         if help_index and 'root' in help_index:
             # Display cached help using the help system
-            self.help.show_cached_help(help_index['root'], 'root')
+            self.help.show_cached_help(help_index['root'], 'root', args)
             telemetry.set_command_details('az', command_preserve_casing=command_preserve_casing, parameters=['--help'])
             telemetry.set_success(summary='show help')
             return CommandResultItem(None, exit_code=0)

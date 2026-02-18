@@ -371,15 +371,21 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
             )
             _print_indent(line, indent, _get_hanging_indent(max_line_len, indent))
 
-    def show_cached_help(self, help_data, command_path='root'):
-        """Display help from cached help index without loading modules."""
+    def show_cached_help(self, help_data, command_path='root', args=None):
+        """Display help from cached help index without loading modules.
 
+        Args:
+            help_data: Cached help data dictionary
+            command_path: Path to command (e.g., 'root' or 'vm disk')
+            args: Original command line args. If empty/None, shows welcome banner.
+        """
         ran_before = self.cli_ctx.config.getboolean('core', 'first_run', fallback=False)
         if not ran_before:
             print(PRIVACY_STATEMENT)
             self.cli_ctx.config.set_value('core', 'first_run', 'yes')
 
-        print(WELCOME_MESSAGE)
+        if not args:
+            print(WELCOME_MESSAGE)
 
         if command_path == 'root':
             print("\nGroup")
