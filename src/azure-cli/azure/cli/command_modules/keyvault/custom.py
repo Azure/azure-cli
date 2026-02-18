@@ -2603,13 +2603,8 @@ def copy_secret(cmd, client, destination_vault, name=None, all_secrets=None, ove
         raise CLIError("Source and destination Key Vaults cannot be the same.")
 
     credential = None
-    # Try to reuse the credential from the source client if available
-    if hasattr(client, '_credential'):
-        credential = client._credential
-    elif hasattr(client, 'credential'):
+    if hasattr(client, 'credential'):
         credential = client.credential
-    elif hasattr(client, '_config') and hasattr(client._config, 'credential'):
-        credential = client._config.credential
 
     if not credential:
         logger.warning("Credential not found on source client. Falling back to Profile.")
