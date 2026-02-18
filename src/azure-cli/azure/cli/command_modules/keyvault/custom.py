@@ -2606,8 +2606,14 @@ def copy_secret(cmd, client, destination_vault, name=None, all_secrets=None, ove
     # Try to reuse the credential from the source client if available
     if hasattr(client, '_credential'):
         credential = client._credential
+    elif hasattr(client, 'credential'):
+        credential = client.credential
+    elif hasattr(client, '_config') and hasattr(client._config, 'credential'):
+        credential = client._config.credential
 
     if not credential:
+        logger.warning("Credential not found on source client. Falling back to Profile.")
+        from azure.cli.core._profile import Profile
         profile = Profile(cli_ctx=cmd.cli_ctx)
         credential, _, _ = profile.get_login_credentials(subscription_id=cmd.cli_ctx.data.get('subscription_id'))
 
