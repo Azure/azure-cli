@@ -46,6 +46,22 @@ Here are the base commands:
 """
 
 
+def _get_tag_plain_text(tag_obj):
+    """Extract plain text from a tag object (typically ColorizedString).
+
+    ColorizedString objects store plain text in _message and add ANSI codes via __str__.
+    For caching, we need plain text only. This function safely extracts it.
+
+    :param tag_obj: Tag object (ColorizedString or other)
+    :return: Plain text string without ANSI codes
+    """
+    # ColorizedString stores plain text in _message attribute
+    if hasattr(tag_obj, '_message'):
+        return tag_obj._message  # pylint: disable=protected-access
+    # Fallback for non-ColorizedString objects
+    return str(tag_obj)
+
+
 def get_help_item_tags(item):
     """Extract status tags from a help item (group or command).
 
@@ -53,19 +69,14 @@ def get_help_item_tags(item):
     """
     tags = []
     if hasattr(item, 'deprecate_info') and item.deprecate_info:
-        # Get plain text tag by accessing the underlying message
         tag_obj = item.deprecate_info.tag
-        # ColorizedString's _message has the plain text, str() would include ANSI codes
-        tag_text = tag_obj._message if hasattr(tag_obj, '_message') else str(tag_obj)
-        tags.append(tag_text)
+        tags.append(_get_tag_plain_text(tag_obj))
     if hasattr(item, 'preview_info') and item.preview_info:
         tag_obj = item.preview_info.tag
-        tag_text = tag_obj._message if hasattr(tag_obj, '_message') else str(tag_obj)
-        tags.append(tag_text)
+        tags.append(_get_tag_plain_text(tag_obj))
     if hasattr(item, 'experimental_info') and item.experimental_info:
         tag_obj = item.experimental_info.tag
-        tag_text = tag_obj._message if hasattr(tag_obj, '_message') else str(tag_obj)
-        tags.append(tag_text)
+        tags.append(_get_tag_plain_text(tag_obj))
     return ' '.join(tags)
 
 
