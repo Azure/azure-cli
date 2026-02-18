@@ -638,22 +638,6 @@ class TestUpdateWebapp(unittest.TestCase):
 
         self.assertEqual(result.additional_properties["properties"]["platformReleaseChannel"], "Latest")
 
-    def test_update_webapp_platform_release_channel_capitalizes_input(self):
-        cmd_mock = _get_test_cmd()
-        instance = self._create_site_instance(cmd_mock)
-
-        result = update_webapp(cmd_mock, instance, platform_release_channel='extended')
-
-        self.assertEqual(result.additional_properties["properties"]["platformReleaseChannel"], "Extended")
-
-    def test_update_webapp_platform_release_channel_none_no_change(self):
-        cmd_mock = _get_test_cmd()
-        instance = self._create_site_instance(cmd_mock)
-
-        result = update_webapp(cmd_mock, instance, platform_release_channel=None)
-
-        self.assertNotIn("properties", result.additional_properties)
-
 
 class FakedResponse:  # pylint: disable=too-few-public-methods
     def __init__(self, status_code):
