@@ -260,7 +260,7 @@ class CosmosDBTests(ScenarioTest):
             'read_location': read_location
         })
 
-        account_pre_offline = self.cmd('az cosmosdb create -n {acc} -g {rg} --locations regionName={write_location} failoverPriority=0 --locations regionName={read_location} failoverPriority=1').get_output_in_json()
+        account_pre_offline = self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-automatic-failover --locations regionName={write_location} failoverPriority=0 --locations regionName={read_location} failoverPriority=1').get_output_in_json()
 
         assert account_pre_offline['writeLocations'][0]['locationName'] == "East US"
 
