@@ -152,7 +152,7 @@ class LogicappBasicE2ETest(ScenarioTest):
         self.cmd(f'logicapp create -g {resource_group} -n {logicapp_name} -p {plan} -s {storage_account} --https-only', checks=[JMESPathCheck('httpsOnly', True)])
         self.cmd('logicapp create -g {} -n {} -p {} -s {}'.format(resource_group, logicapp_name, plan, storage_account), checks=[JMESPathCheck('httpsOnly', False)])
 
-    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_LOGICAPP)
+    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
     @StorageAccountPreparer()
     def test_logicapp_unique_domain_name(self, resource_group, storage_account):
         logicapp_name = self.create_random_name(prefix='logicappudom', length=24)
