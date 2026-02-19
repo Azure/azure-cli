@@ -33,3 +33,4 @@ from ._simulate_eviction import *
 from ._start import *
 from ._update import *
 from ._wait import *
+from ._restart import *

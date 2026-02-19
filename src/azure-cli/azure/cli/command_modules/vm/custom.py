@@ -1737,10 +1737,18 @@ def resize_vm(cmd, resource_group_name, vm_name, size, no_wait=False):
 
 
 def restart_vm(cmd, resource_group_name, vm_name, no_wait=False, force=False):
-    client = _compute_client_factory(cmd.cli_ctx)
+    from .aaz.latest.vm import Redeploy as _VMRedeploy, Restart as _VMRestart
+
+    command_args = {
+        "resource_group": resource_group_name,
+        "vm_name": vm_name,
+        "no_wait": no_wait,
+    }
+
     if force:
-        return sdk_no_wait(no_wait, client.virtual_machines.begin_redeploy, resource_group_name, vm_name)
-    return sdk_no_wait(no_wait, client.virtual_machines.begin_restart, resource_group_name, vm_name)
+        return _VMRedeploy(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+
+    return _VMRestart(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
 def set_vm(cmd, instance, lro_operation=None, no_wait=False):

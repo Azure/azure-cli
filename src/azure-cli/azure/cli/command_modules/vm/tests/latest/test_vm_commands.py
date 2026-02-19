@@ -1863,7 +1863,7 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
     def test_vm_create_state_modifications(self, resource_group):
 
         self.kwargs.update({
-            'loc': 'eastus',
+            'loc': 'westus',
             'vm': 'vm-state-mod',
             'nsg': 'mynsg',
             'ip': 'mypubip',
