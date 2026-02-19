@@ -16,6 +16,7 @@ from ._create import *
 from ._deallocate import *
 from ._delete import *
 from ._generalize import *
+from ._install_patches import *
 from ._list import *
 from ._list_all import *
 from ._list_sizes import *
