@@ -621,7 +621,7 @@ class VMCustomImageTest(ScenarioTest):
         ])
 
     @AllowLargeResponse(size_kb=99999)
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_custom_image_debian', location='eastus2euap')
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_custom_image_debian', location='westus')
     def test_vm_custom_image_debian(self, resource_group):
         self.kwargs.update({
             'vm1': 'vm-unmanaged-disk',
