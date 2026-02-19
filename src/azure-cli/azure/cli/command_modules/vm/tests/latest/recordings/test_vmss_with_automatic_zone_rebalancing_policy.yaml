@@ -1043,7 +1043,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.83.0 azsdk-python-core/1.38.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2euap/publishers/MicrosoftWindowsServer/artifacttypes/vmimage/offers/WindowsServer/skus/2016-Datacenter/versions?$top=1&$orderby=name%20desc&api-version=2024-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/publishers/MicrosoftWindowsServer/artifacttypes/vmimage/offers/WindowsServer/skus/2016-Datacenter/versions?$expand=properties&$orderby=name%20desc&$top=1&api-version=2024-11-01
   response:
     body:
       string: "[\r\n  {\r\n    \"location\": \"EastUS2EUAP\",\r\n    \"name\": \"14393.8868.260206\",\r\n
@@ -1320,7 +1320,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.83.0 azsdk-python-core/1.38.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2euap/publishers/MicrosoftWindowsServer/artifacttypes/vmimage/offers/WindowsServer/skus/2016-Datacenter/versions?$top=1&$orderby=name%20desc&api-version=2024-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/publishers/MicrosoftWindowsServer/artifacttypes/vmimage/offers/WindowsServer/skus/2016-Datacenter/versions?$expand=properties&$orderby=name%20desc&$top=1&api-version=2024-11-01
   response:
     body:
       string: "[\r\n  {\r\n    \"location\": \"EastUS2EUAP\",\r\n    \"name\": \"14393.8868.260206\",\r\n
@@ -1442,7 +1442,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.83.0 azsdk-python-core/1.38.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2euap/publishers/MicrosoftWindowsServer/artifacttypes/vmimage/offers/WindowsServer/skus/2016-Datacenter/versions?$top=1&$orderby=name%20desc&api-version=2024-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/publishers/MicrosoftWindowsServer/artifacttypes/vmimage/offers/WindowsServer/skus/2016-Datacenter/versions?$expand=properties&$orderby=name%20desc&$top=1&api-version=2024-11-01
   response:
     body:
       string: "[\r\n  {\r\n    \"location\": \"EastUS2EUAP\",\r\n    \"name\": \"14393.8868.260206\",\r\n
@@ -1630,8 +1630,1963 @@ interactions:
       x-msedge-ref:
       - 'Ref A: A46ECF2FDF3747E0B559FCE4EE81CF9C Ref B: SG2AA1070301062 Ref C: 2026-02-13T06:55:58Z'
     status:
-      code: 503
-      message: Service Unavailable
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --vm-sku --load-balancer --health-probe --zone-balance --orchestration-mode
+        --admin-username --admin-password --nsg --zones --enable-automatic-zone-balancing
+        --automatic-zone-balancing-strategy --automatic-zone-balancing-behavior --location
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08584557779188979410?api-version=2024-11-01&t=638814257755740209&c=MIIHpTCCBo2gAwIBAgITOgWXBJzHWActAOyA9gAEBZcEnDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjUwNDE4MDkxNjUyWhcNMjUxMDE1MDkxNjUyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJ4tFzYjQAGXlMN4RVSj_Zp98bnnigeY99sbhZrAOQOjxR_04cAp0TrBwLXaA2b6MkNp3EWrqmwj8LAHlmiUmx_C5YeMG8WQUVkZMbfJNmAjSKJvmH2VO_H9OVOiiWemCFWlBXZMT6O1LsK-KI4EQtlTwXEv4-zXiqUQqjqHZQX6IJGxxcuw3R6KS00hFc9B4Ve9K9uvRk3OzuC_2evEuKFQfmIkhFu9gMtFnEBgp0E5Srek5Sh6WRO2V6wjcdtrFJ2dMStIbypiaJysxjNaLwTxBjKAJiyxkrxbuS0IPj2v4oOwkFSl9khCWu-ivje49N19yGiq_5BL-QYySfUPF0CAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQpIRfJ6SPCR16Dy9sN1AQtQKjWNDAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBACBpx57mqT5wt5VuFMhMv-QcXTs5QrWkz021CcXp44eWUSJBLP35O0JDRyA13V3zowD9Dkl6HKRosiwIhfUwb1VWxMZt1K97bfrlhekU_IFyRNImksBTl4Hg5mL7M4PQvDu_hNxb1NW9JnL8B4LEl-FVcKtOFC8R2wp_2vglSGujfVsEzQMXxCECc_j-T0saauGgdaItgRGQ-1JrKdhZ1FvHWU2eeab0zXatBPn7nyaNmU7DK2icP38PQp3g8yPPlpv1joUzz1GMBJXhtHRWCv93tVfT5q9DZQ-_S2H_1Y2raeucg8kUfGEvVuQ27w1bGi2QRDLtEtuNHgzpR3RB7os&s=FZQf_wsRZFk6f10U2N2hPaf_Jg5M6E6Wmgb-cBtePUuEiNlE3wOI0ec6ISaCPmRXdKs-2GAS9oDJudCaI3C6PRyLR1j6PPWsQx4WxaazCe15WOlVZ393Y_EktFA2ssG1t2weiUrMHz48pDN09Dx4c5baiyPETRZBVrkMn-ADfS53JEMKzotRIDySfPK1wl4W811IpyH_5P0Ll2XyUiXOQwtK2lnbfrOE72cqch5sy_HFiW0nsLbqR-yfGcEOfMjMCMk7-YOYW3OWJpcnwr7EwU-k6eZ38joEmXp4KFIk8mKX4O1Lvm2iES5jHpqwCZ-ubDidbuiArjSH8yZqjEOMrA&h=cvfBcxHsbWvQYdScl9edYU-gWShIkvQMMXE1F-tYDqE
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Apr 2025 08:29:36 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 539E61F0A2C543EEAE77050346AF4BD4 Ref B: TYO201151003034 Ref C: 2025-04-28T08:29:35Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --vm-sku --load-balancer --health-probe --zone-balance --orchestration-mode
+        --admin-username --admin-password --nsg --zones --enable-automatic-zone-balancing
+        --automatic-zone-balancing-strategy --automatic-zone-balancing-behavior --location
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08584557779188979410?api-version=2024-11-01&t=638814257755740209&c=MIIHpTCCBo2gAwIBAgITOgWXBJzHWActAOyA9gAEBZcEnDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjUwNDE4MDkxNjUyWhcNMjUxMDE1MDkxNjUyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJ4tFzYjQAGXlMN4RVSj_Zp98bnnigeY99sbhZrAOQOjxR_04cAp0TrBwLXaA2b6MkNp3EWrqmwj8LAHlmiUmx_C5YeMG8WQUVkZMbfJNmAjSKJvmH2VO_H9OVOiiWemCFWlBXZMT6O1LsK-KI4EQtlTwXEv4-zXiqUQqjqHZQX6IJGxxcuw3R6KS00hFc9B4Ve9K9uvRk3OzuC_2evEuKFQfmIkhFu9gMtFnEBgp0E5Srek5Sh6WRO2V6wjcdtrFJ2dMStIbypiaJysxjNaLwTxBjKAJiyxkrxbuS0IPj2v4oOwkFSl9khCWu-ivje49N19yGiq_5BL-QYySfUPF0CAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQpIRfJ6SPCR16Dy9sN1AQtQKjWNDAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBACBpx57mqT5wt5VuFMhMv-QcXTs5QrWkz021CcXp44eWUSJBLP35O0JDRyA13V3zowD9Dkl6HKRosiwIhfUwb1VWxMZt1K97bfrlhekU_IFyRNImksBTl4Hg5mL7M4PQvDu_hNxb1NW9JnL8B4LEl-FVcKtOFC8R2wp_2vglSGujfVsEzQMXxCECc_j-T0saauGgdaItgRGQ-1JrKdhZ1FvHWU2eeab0zXatBPn7nyaNmU7DK2icP38PQp3g8yPPlpv1joUzz1GMBJXhtHRWCv93tVfT5q9DZQ-_S2H_1Y2raeucg8kUfGEvVuQ27w1bGi2QRDLtEtuNHgzpR3RB7os&s=FZQf_wsRZFk6f10U2N2hPaf_Jg5M6E6Wmgb-cBtePUuEiNlE3wOI0ec6ISaCPmRXdKs-2GAS9oDJudCaI3C6PRyLR1j6PPWsQx4WxaazCe15WOlVZ393Y_EktFA2ssG1t2weiUrMHz48pDN09Dx4c5baiyPETRZBVrkMn-ADfS53JEMKzotRIDySfPK1wl4W811IpyH_5P0Ll2XyUiXOQwtK2lnbfrOE72cqch5sy_HFiW0nsLbqR-yfGcEOfMjMCMk7-YOYW3OWJpcnwr7EwU-k6eZ38joEmXp4KFIk8mKX4O1Lvm2iES5jHpqwCZ-ubDidbuiArjSH8yZqjEOMrA&h=cvfBcxHsbWvQYdScl9edYU-gWShIkvQMMXE1F-tYDqE
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Apr 2025 08:30:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 828333A408544D6E9FE13845C6FDA9EF Ref B: TYO201151003034 Ref C: 2025-04-28T08:30:07Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --vm-sku --load-balancer --health-probe --zone-balance --orchestration-mode
+        --admin-username --admin-password --nsg --zones --enable-automatic-zone-balancing
+        --automatic-zone-balancing-strategy --automatic-zone-balancing-behavior --location
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08584557779188979410?api-version=2024-11-01&t=638814257755740209&c=MIIHpTCCBo2gAwIBAgITOgWXBJzHWActAOyA9gAEBZcEnDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjUwNDE4MDkxNjUyWhcNMjUxMDE1MDkxNjUyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJ4tFzYjQAGXlMN4RVSj_Zp98bnnigeY99sbhZrAOQOjxR_04cAp0TrBwLXaA2b6MkNp3EWrqmwj8LAHlmiUmx_C5YeMG8WQUVkZMbfJNmAjSKJvmH2VO_H9OVOiiWemCFWlBXZMT6O1LsK-KI4EQtlTwXEv4-zXiqUQqjqHZQX6IJGxxcuw3R6KS00hFc9B4Ve9K9uvRk3OzuC_2evEuKFQfmIkhFu9gMtFnEBgp0E5Srek5Sh6WRO2V6wjcdtrFJ2dMStIbypiaJysxjNaLwTxBjKAJiyxkrxbuS0IPj2v4oOwkFSl9khCWu-ivje49N19yGiq_5BL-QYySfUPF0CAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQpIRfJ6SPCR16Dy9sN1AQtQKjWNDAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBACBpx57mqT5wt5VuFMhMv-QcXTs5QrWkz021CcXp44eWUSJBLP35O0JDRyA13V3zowD9Dkl6HKRosiwIhfUwb1VWxMZt1K97bfrlhekU_IFyRNImksBTl4Hg5mL7M4PQvDu_hNxb1NW9JnL8B4LEl-FVcKtOFC8R2wp_2vglSGujfVsEzQMXxCECc_j-T0saauGgdaItgRGQ-1JrKdhZ1FvHWU2eeab0zXatBPn7nyaNmU7DK2icP38PQp3g8yPPlpv1joUzz1GMBJXhtHRWCv93tVfT5q9DZQ-_S2H_1Y2raeucg8kUfGEvVuQ27w1bGi2QRDLtEtuNHgzpR3RB7os&s=FZQf_wsRZFk6f10U2N2hPaf_Jg5M6E6Wmgb-cBtePUuEiNlE3wOI0ec6ISaCPmRXdKs-2GAS9oDJudCaI3C6PRyLR1j6PPWsQx4WxaazCe15WOlVZ393Y_EktFA2ssG1t2weiUrMHz48pDN09Dx4c5baiyPETRZBVrkMn-ADfS53JEMKzotRIDySfPK1wl4W811IpyH_5P0Ll2XyUiXOQwtK2lnbfrOE72cqch5sy_HFiW0nsLbqR-yfGcEOfMjMCMk7-YOYW3OWJpcnwr7EwU-k6eZ38joEmXp4KFIk8mKX4O1Lvm2iES5jHpqwCZ-ubDidbuiArjSH8yZqjEOMrA&h=cvfBcxHsbWvQYdScl9edYU-gWShIkvQMMXE1F-tYDqE
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Apr 2025 08:30:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 6034A10C45374C43ABE7DEC979F73617 Ref B: TYO201151003034 Ref C: 2025-04-28T08:30:39Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --vm-sku --load-balancer --health-probe --zone-balance --orchestration-mode
+        --admin-username --admin-password --nsg --zones --enable-automatic-zone-balancing
+        --automatic-zone-balancing-strategy --automatic-zone-balancing-behavior --location
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2024-11-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Resources/deployments/vmss_deploy_1MP1fJ7ruUozZRTOGrWczYBsW8Ibv3Pp","name":"vmss_deploy_1MP1fJ7ruUozZRTOGrWczYBsW8Ibv3Pp","type":"Microsoft.Resources/deployments","properties":{"templateHash":"13999016797016220150","parameters":{"adminPassword":{"type":"SecureString"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2025-04-28T08:30:10.6808787Z","duration":"PT44.1069197S","correlationId":"45db4100-46ad-489d-89fd-523f2ab24e81","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["eastus2"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachineScaleSets","locations":["eastus2"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/virtualNetworks/vmss000002VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vmss000002VNET"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss000002","resourceType":"Microsoft.Compute/virtualMachineScaleSets","resourceName":"vmss000002"}],"outputs":{"vmss":{"type":"Object","value":{"singlePlacementGroup":false,"orchestrationMode":"Uniform","upgradePolicy":{"mode":"Manual"},"resiliencyPolicy":{"automaticZoneRebalancingPolicy":{"enabled":true,"rebalanceStrategy":"Recreate","rebalanceBehavior":"CreateBeforeDelete"}},"virtualMachineProfile":{"osProfile":{"computerNamePrefix":"vmssk1565","adminUsername":"vmtest","windowsConfiguration":{"provisionVMAgent":true,"enableAutomaticUpdates":true},"secrets":[],"allowExtensionOperations":true,"requireGuestProvisionSignal":true},"storageProfile":{"osDisk":{"osType":"Windows","createOption":"FromImage","caching":"ReadWrite","managedDisk":{"storageAccountType":"Standard_LRS"},"diskSizeGB":127},"imageReference":{"publisher":"MicrosoftWindowsServer","offer":"WindowsServer","sku":"2016-Datacenter","version":"latest"}},"networkProfile":{"healthProbe":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000005/probes/probe000006"},"networkInterfaceConfigurations":[{"name":"vmssk1565Nic","properties":{"primary":true,"enableAcceleratedNetworking":false,"disableTcpStateTracking":false,"networkSecurityGroup":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/networkSecurityGroups/nsg000004"},"dnsSettings":{"dnsServers":[]},"enableIPForwarding":false,"ipConfigurations":[{"name":"vmssk1565IPConfig","properties":{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/virtualNetworks/vmss000002VNET/subnets/vmss000002Subnet"},"privateIPAddressVersion":"IPv4","loadBalancerBackendAddressPools":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000005/backendAddressPools/lb000005bepool"}]}}]}}]},"timeCreated":"2025-04-28T08:29:41.7829129+00:00"},"provisioningState":"Succeeded","overprovision":true,"doNotRunExtensionsOnOverprovisionedVMs":false,"uniqueId":"104b0e63-7f47-4821-8a00-863a72f70893","zoneBalance":true,"platformFaultDomainCount":1,"timeCreated":"2025-04-28T08:29:41.7829129+00:00"}}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss000002"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/virtualNetworks/vmss000002VNET"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '4198'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Apr 2025 08:30:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3748'
+      x-msedge-ref:
+      - 'Ref A: B5733AAB666E4FC797817A5756F24829 Ref B: TYO201151003034 Ref C: 2025-04-28T08:30:41Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss000002?api-version=2024-11-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"vmss000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss000002\",\r\n
+        \ \"type\": \"Microsoft.Compute/virtualMachineScaleSets\",\r\n  \"location\":
+        \"eastus2\",\r\n  \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Standard_D1_v2\",\r\n
+        \   \"tier\": \"Standard\",\r\n    \"capacity\": 2\r\n  },\r\n  \"etag\":
+        \"\\\"3\\\"\",\r\n  \"properties\": {\r\n    \"singlePlacementGroup\": false,\r\n
+        \   \"orchestrationMode\": \"Uniform\",\r\n    \"upgradePolicy\": {\r\n      \"mode\":
+        \"Manual\"\r\n    },\r\n    \"resiliencyPolicy\": {\r\n      \"automaticZoneRebalancingPolicy\":
+        {\r\n        \"enabled\": true,\r\n        \"rebalanceStrategy\": \"Recreate\",\r\n
+        \       \"rebalanceBehavior\": \"CreateBeforeDelete\"\r\n      }\r\n    },\r\n
+        \   \"virtualMachineProfile\": {\r\n      \"osProfile\": {\r\n        \"computerNamePrefix\":
+        \"vmssk1565\",\r\n        \"adminUsername\": \"vmtest\",\r\n        \"windowsConfiguration\":
+        {\r\n          \"provisionVMAgent\": true,\r\n          \"enableAutomaticUpdates\":
+        true\r\n        },\r\n        \"secrets\": [],\r\n        \"allowExtensionOperations\":
+        true,\r\n        \"requireGuestProvisionSignal\": true\r\n      },\r\n      \"storageProfile\":
+        {\r\n        \"osDisk\": {\r\n          \"osType\": \"Windows\",\r\n          \"createOption\":
+        \"FromImage\",\r\n          \"caching\": \"ReadWrite\",\r\n          \"managedDisk\":
+        {\r\n            \"storageAccountType\": \"Standard_LRS\"\r\n          },\r\n
+        \         \"diskSizeGB\": 127\r\n        },\r\n        \"imageReference\":
+        {\r\n          \"publisher\": \"MicrosoftWindowsServer\",\r\n          \"offer\":
+        \"WindowsServer\",\r\n          \"sku\": \"2016-Datacenter\",\r\n          \"version\":
+        \"latest\"\r\n        }\r\n      },\r\n      \"networkProfile\": {\"healthProbe\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000005/probes/probe000006\"},\"networkInterfaceConfigurations\":[{\"name\":\"vmssk1565Nic\",\"properties\":{\"primary\":true,\"enableAcceleratedNetworking\":false,\"disableTcpStateTracking\":false,\"networkSecurityGroup\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/networkSecurityGroups/nsg000004\"},\"dnsSettings\":{\"dnsServers\":[]},\"enableIPForwarding\":false,\"ipConfigurations\":[{\"name\":\"vmssk1565IPConfig\",\"properties\":{\"subnet\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/virtualNetworks/vmss000002VNET/subnets/vmss000002Subnet\"},\"privateIPAddressVersion\":\"IPv4\",\"loadBalancerBackendAddressPools\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000005/backendAddressPools/lb000005bepool\"}]}}]}}]},\r\n
+        \     \"timeCreated\": \"2025-04-28T08:29:41.7829129+00:00\"\r\n    },\r\n
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"overprovision\": true,\r\n
+        \   \"doNotRunExtensionsOnOverprovisionedVMs\": false,\r\n    \"uniqueId\":
+        \"104b0e63-7f47-4821-8a00-863a72f70893\",\r\n    \"zoneBalance\": true,\r\n
+        \   \"platformFaultDomainCount\": 1,\r\n    \"timeCreated\": \"2025-04-28T08:29:41.7829129+00:00\"\r\n
+        \ },\r\n  \"zones\": [\r\n    \"1\",\r\n    \"2\",\r\n    \"3\"\r\n  ]\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3329'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Apr 2025 08:30:42 GMT
+      etag:
+      - '"3"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-need-to-refresh-epl-cache:
+      - 'False'
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetVMScaleSetSubscriptionMaximum;2399,Microsoft.Compute/GetVMScaleSetResource;32
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: ECE1DF5869DB44CFAA8EA9289615F800 Ref B: TYO201100117031 Ref C: 2025-04-28T08:30:42Z'
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --enable-automatic-zone-balancing
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss000002?api-version=2025-04-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"vmss000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss000002\",\r\n
+        \ \"type\": \"Microsoft.Compute/virtualMachineScaleSets\",\r\n  \"location\":
+        \"eastus2\",\r\n  \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Standard_D1_v2\",\r\n
+        \   \"tier\": \"Standard\",\r\n    \"capacity\": 2\r\n  },\r\n  \"etag\":
+        \"\\\"3\\\"\",\r\n  \"properties\": {\r\n    \"singlePlacementGroup\": false,\r\n
+        \   \"orchestrationMode\": \"Uniform\",\r\n    \"upgradePolicy\": {\r\n      \"mode\":
+        \"Manual\"\r\n    },\r\n    \"resiliencyPolicy\": {\r\n      \"automaticZoneRebalancingPolicy\":
+        {\r\n        \"enabled\": true,\r\n        \"rebalanceStrategy\": \"Recreate\",\r\n
+        \       \"rebalanceBehavior\": \"CreateBeforeDelete\"\r\n      }\r\n    },\r\n
+        \   \"virtualMachineProfile\": {\r\n      \"osProfile\": {\r\n        \"computerNamePrefix\":
+        \"vmssk1565\",\r\n        \"adminUsername\": \"vmtest\",\r\n        \"windowsConfiguration\":
+        {\r\n          \"provisionVMAgent\": true,\r\n          \"enableAutomaticUpdates\":
+        true\r\n        },\r\n        \"secrets\": [],\r\n        \"allowExtensionOperations\":
+        true,\r\n        \"requireGuestProvisionSignal\": true\r\n      },\r\n      \"storageProfile\":
+        {\r\n        \"osDisk\": {\r\n          \"osType\": \"Windows\",\r\n          \"createOption\":
+        \"FromImage\",\r\n          \"caching\": \"ReadWrite\",\r\n          \"managedDisk\":
+        {\r\n            \"storageAccountType\": \"Standard_LRS\"\r\n          },\r\n
+        \         \"diskSizeGB\": 127\r\n        },\r\n        \"imageReference\":
+        {\r\n          \"publisher\": \"MicrosoftWindowsServer\",\r\n          \"offer\":
+        \"WindowsServer\",\r\n          \"sku\": \"2016-Datacenter\",\r\n          \"version\":
+        \"latest\"\r\n        }\r\n      },\r\n      \"networkProfile\": {\"healthProbe\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000005/probes/probe000006\"},\"networkInterfaceConfigurations\":[{\"name\":\"vmssk1565Nic\",\"properties\":{\"primary\":true,\"enableAcceleratedNetworking\":false,\"disableTcpStateTracking\":false,\"networkSecurityGroup\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/networkSecurityGroups/nsg000004\"},\"dnsSettings\":{\"dnsServers\":[]},\"enableIPForwarding\":false,\"ipConfigurations\":[{\"name\":\"vmssk1565IPConfig\",\"properties\":{\"subnet\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/virtualNetworks/vmss000002VNET/subnets/vmss000002Subnet\"},\"privateIPAddressVersion\":\"IPv4\",\"loadBalancerBackendAddressPools\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000005/backendAddressPools/lb000005bepool\"}]}}]}}]},\r\n
+        \     \"timeCreated\": \"2025-04-28T08:29:41.7829129+00:00\"\r\n    },\r\n
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"overprovision\": true,\r\n
+        \   \"doNotRunExtensionsOnOverprovisionedVMs\": false,\r\n    \"uniqueId\":
+        \"104b0e63-7f47-4821-8a00-863a72f70893\",\r\n    \"zoneBalance\": true,\r\n
+        \   \"platformFaultDomainCount\": 1,\r\n    \"timeCreated\": \"2025-04-28T08:29:41.7829129+00:00\"\r\n
+        \ },\r\n  \"zones\": [\r\n    \"1\",\r\n    \"2\",\r\n    \"3\"\r\n  ]\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3329'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Apr 2025 08:30:43 GMT
+      etag:
+      - '"3"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-need-to-refresh-epl-cache:
+      - 'False'
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetVMScaleSetSubscriptionMaximum;2398,Microsoft.Compute/GetVMScaleSetResource;31
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 9BB4702979904A7BAB1AE713EAD7C77C Ref B: TYO201100116025 Ref C: 2025-04-28T08:30:43Z'
+    status:
+      code: 200
+      message: ''
+- request:
+    body: '{"location": "eastus2", "tags": {}, "sku": {"name": "Standard_D1_v2", "tier":
+      "Standard", "capacity": 2}, "zones": ["1", "2", "3"], "properties": {"upgradePolicy":
+      {"mode": "Manual"}, "virtualMachineProfile": {"osProfile": {"computerNamePrefix":
+      "vmssk1565", "adminUsername": "vmtest", "windowsConfiguration": {"provisionVMAgent":
+      true, "enableAutomaticUpdates": true}, "secrets": [], "allowExtensionOperations":
+      true, "requireGuestProvisionSignal": true}, "storageProfile": {"osDisk": {"caching":
+      "ReadWrite", "createOption": "FromImage", "diskSizeGB": 127, "osType": "Windows",
+      "managedDisk": {"storageAccountType": "Standard_LRS"}}}, "networkProfile": {"healthProbe":
+      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000005/probes/probe000006"},
+      "networkInterfaceConfigurations": [{"name": "vmssk1565Nic", "properties": {"primary":
+      true, "enableAcceleratedNetworking": false, "disableTcpStateTracking": false,
+      "networkSecurityGroup": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/networkSecurityGroups/nsg000004"},
+      "dnsSettings": {"dnsServers": []}, "ipConfigurations": [{"name": "vmssk1565IPConfig",
+      "properties": {"subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/virtualNetworks/vmss000002VNET/subnets/vmss000002Subnet"},
+      "privateIPAddressVersion": "IPv4", "loadBalancerBackendAddressPools": [{"id":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000005/backendAddressPools/lb000005bepool"}]}}],
+      "enableIPForwarding": false}}]}}, "overprovision": true, "doNotRunExtensionsOnOverprovisionedVMs":
+      false, "singlePlacementGroup": false, "zoneBalance": true, "platformFaultDomainCount":
+      1, "orchestrationMode": "Uniform", "resiliencyPolicy": {"automaticZoneRebalancingPolicy":
+      {"enabled": false, "rebalanceStrategy": "Recreate", "rebalanceBehavior": "CreateBeforeDelete"}}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2250'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --enable-automatic-zone-balancing
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss000002?api-version=2025-04-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"vmss000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss000002\",\r\n
+        \ \"type\": \"Microsoft.Compute/virtualMachineScaleSets\",\r\n  \"location\":
+        \"eastus2\",\r\n  \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Standard_D1_v2\",\r\n
+        \   \"tier\": \"Standard\",\r\n    \"capacity\": 2\r\n  },\r\n  \"etag\":
+        \"\\\"4\\\"\",\r\n  \"properties\": {\r\n    \"singlePlacementGroup\": false,\r\n
+        \   \"orchestrationMode\": \"Uniform\",\r\n    \"upgradePolicy\": {\r\n      \"mode\":
+        \"Manual\"\r\n    },\r\n    \"resiliencyPolicy\": {\r\n      \"automaticZoneRebalancingPolicy\":
+        {\r\n        \"enabled\": false,\r\n        \"rebalanceStrategy\": \"Recreate\",\r\n
+        \       \"rebalanceBehavior\": \"CreateBeforeDelete\"\r\n      }\r\n    },\r\n
+        \   \"virtualMachineProfile\": {\r\n      \"osProfile\": {\r\n        \"computerNamePrefix\":
+        \"vmssk1565\",\r\n        \"adminUsername\": \"vmtest\",\r\n        \"windowsConfiguration\":
+        {\r\n          \"provisionVMAgent\": true,\r\n          \"enableAutomaticUpdates\":
+        true\r\n        },\r\n        \"secrets\": [],\r\n        \"allowExtensionOperations\":
+        true,\r\n        \"requireGuestProvisionSignal\": true\r\n      },\r\n      \"storageProfile\":
+        {\r\n        \"osDisk\": {\r\n          \"osType\": \"Windows\",\r\n          \"createOption\":
+        \"FromImage\",\r\n          \"caching\": \"ReadWrite\",\r\n          \"managedDisk\":
+        {\r\n            \"storageAccountType\": \"Standard_LRS\"\r\n          },\r\n
+        \         \"diskSizeGB\": 127\r\n        },\r\n        \"imageReference\":
+        {\r\n          \"publisher\": \"MicrosoftWindowsServer\",\r\n          \"offer\":
+        \"WindowsServer\",\r\n          \"sku\": \"2016-Datacenter\",\r\n          \"version\":
+        \"latest\"\r\n        }\r\n      },\r\n      \"networkProfile\": {\"healthProbe\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000005/probes/probe000006\"},\"networkInterfaceConfigurations\":[{\"name\":\"vmssk1565Nic\",\"properties\":{\"primary\":true,\"enableAcceleratedNetworking\":false,\"disableTcpStateTracking\":false,\"networkSecurityGroup\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/networkSecurityGroups/nsg000004\"},\"dnsSettings\":{\"dnsServers\":[]},\"enableIPForwarding\":false,\"ipConfigurations\":[{\"name\":\"vmssk1565IPConfig\",\"properties\":{\"subnet\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/virtualNetworks/vmss000002VNET/subnets/vmss000002Subnet\"},\"privateIPAddressVersion\":\"IPv4\",\"loadBalancerBackendAddressPools\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000005/backendAddressPools/lb000005bepool\"}]}}]}}]},\r\n
+        \     \"timeCreated\": \"2025-04-28T08:29:41.7829129+00:00\"\r\n    },\r\n
+        \   \"provisioningState\": \"Updating\",\r\n    \"overprovision\": true,\r\n
+        \   \"doNotRunExtensionsOnOverprovisionedVMs\": false,\r\n    \"uniqueId\":
+        \"104b0e63-7f47-4821-8a00-863a72f70893\",\r\n    \"zoneBalance\": true,\r\n
+        \   \"platformFaultDomainCount\": 1,\r\n    \"timeCreated\": \"2025-04-28T08:29:41.7829129+00:00\"\r\n
+        \ },\r\n  \"zones\": [\r\n    \"1\",\r\n    \"2\",\r\n    \"3\"\r\n  ]\r\n}"
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/operations/7fd907de-b95e-4966-9178-47b0365eb9d7?p=4da1aac7-dfbb-41ae-bded-ca0db7baa978&api-version=2024-11-01&t=638814258508305390&c=MIIHpTCCBo2gAwIBAgITOgWXBJzHWActAOyA9gAEBZcEnDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjUwNDE4MDkxNjUyWhcNMjUxMDE1MDkxNjUyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJ4tFzYjQAGXlMN4RVSj_Zp98bnnigeY99sbhZrAOQOjxR_04cAp0TrBwLXaA2b6MkNp3EWrqmwj8LAHlmiUmx_C5YeMG8WQUVkZMbfJNmAjSKJvmH2VO_H9OVOiiWemCFWlBXZMT6O1LsK-KI4EQtlTwXEv4-zXiqUQqjqHZQX6IJGxxcuw3R6KS00hFc9B4Ve9K9uvRk3OzuC_2evEuKFQfmIkhFu9gMtFnEBgp0E5Srek5Sh6WRO2V6wjcdtrFJ2dMStIbypiaJysxjNaLwTxBjKAJiyxkrxbuS0IPj2v4oOwkFSl9khCWu-ivje49N19yGiq_5BL-QYySfUPF0CAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQpIRfJ6SPCR16Dy9sN1AQtQKjWNDAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBACBpx57mqT5wt5VuFMhMv-QcXTs5QrWkz021CcXp44eWUSJBLP35O0JDRyA13V3zowD9Dkl6HKRosiwIhfUwb1VWxMZt1K97bfrlhekU_IFyRNImksBTl4Hg5mL7M4PQvDu_hNxb1NW9JnL8B4LEl-FVcKtOFC8R2wp_2vglSGujfVsEzQMXxCECc_j-T0saauGgdaItgRGQ-1JrKdhZ1FvHWU2eeab0zXatBPn7nyaNmU7DK2icP38PQp3g8yPPlpv1joUzz1GMBJXhtHRWCv93tVfT5q9DZQ-_S2H_1Y2raeucg8kUfGEvVuQ27w1bGi2QRDLtEtuNHgzpR3RB7os&s=Q-fqVgWOl_5x-1yawK4jrqcJPM6vDaKdHCuY3yQiiB16AJIzRXyjxl_nVS8tX-g9KGHPhgHXRlTo79_rp1w0n2M4BYCdam3laVAiNz-gDbFnDYutLtaTTuZuFa1Iy1Ekdk829Ioh6VenDHJnf261oC4EnbUXTLwWzH5FAgU9KtiJWJMk0Fcg47irajeq-7_0iUQ54qnee7Ae-q1coVhhs_J9W8SMSx0D_bzKp59GZsx-R4s1KW1q7u_rVQksD6ItnYXg1N_F-1NZoBnYdlRv1I5cdYqSYZqCKEYot-JITiipCkly0nT7NlqNstgOmxoGpUwz9uxzEhApbp5uft0VSQ&h=HHLUaC-ibDp7MLXNDiiRltqGzS3BmRq8MI8Z_qM3fqM
+      cache-control:
+      - no-cache
+      content-length:
+      - '3329'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Apr 2025 08:30:50 GMT
+      etag:
+      - '"4"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-need-to-refresh-epl-cache:
+      - 'False'
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=d44a2991-98c6-47c3-b59b-2b30d72cfcc2/japaneast/ef1822f1-f2db-4892-b097-585fe0cf93bb
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/CreateVMScaleSetSubscriptionMaximum;374,Microsoft.Compute/CreateVMScaleSetResource;11,Microsoft.Compute/VMScaleSetBatchedVMRequestsSubscriptionMaximum;6000,Microsoft.Compute/VmssQueuedVMOperations;0
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '199'
+      x-ms-request-charge:
+      - '0'
+      x-msedge-ref:
+      - 'Ref A: DF6B9F72F2874A609A5E1DEC36B67D42 Ref B: TYO201100116021 Ref C: 2025-04-28T08:30:44Z'
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --enable-automatic-zone-balancing
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/operations/7fd907de-b95e-4966-9178-47b0365eb9d7?p=4da1aac7-dfbb-41ae-bded-ca0db7baa978&api-version=2024-11-01&t=638814258508305390&c=MIIHpTCCBo2gAwIBAgITOgWXBJzHWActAOyA9gAEBZcEnDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjUwNDE4MDkxNjUyWhcNMjUxMDE1MDkxNjUyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJ4tFzYjQAGXlMN4RVSj_Zp98bnnigeY99sbhZrAOQOjxR_04cAp0TrBwLXaA2b6MkNp3EWrqmwj8LAHlmiUmx_C5YeMG8WQUVkZMbfJNmAjSKJvmH2VO_H9OVOiiWemCFWlBXZMT6O1LsK-KI4EQtlTwXEv4-zXiqUQqjqHZQX6IJGxxcuw3R6KS00hFc9B4Ve9K9uvRk3OzuC_2evEuKFQfmIkhFu9gMtFnEBgp0E5Srek5Sh6WRO2V6wjcdtrFJ2dMStIbypiaJysxjNaLwTxBjKAJiyxkrxbuS0IPj2v4oOwkFSl9khCWu-ivje49N19yGiq_5BL-QYySfUPF0CAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQpIRfJ6SPCR16Dy9sN1AQtQKjWNDAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBACBpx57mqT5wt5VuFMhMv-QcXTs5QrWkz021CcXp44eWUSJBLP35O0JDRyA13V3zowD9Dkl6HKRosiwIhfUwb1VWxMZt1K97bfrlhekU_IFyRNImksBTl4Hg5mL7M4PQvDu_hNxb1NW9JnL8B4LEl-FVcKtOFC8R2wp_2vglSGujfVsEzQMXxCECc_j-T0saauGgdaItgRGQ-1JrKdhZ1FvHWU2eeab0zXatBPn7nyaNmU7DK2icP38PQp3g8yPPlpv1joUzz1GMBJXhtHRWCv93tVfT5q9DZQ-_S2H_1Y2raeucg8kUfGEvVuQ27w1bGi2QRDLtEtuNHgzpR3RB7os&s=Q-fqVgWOl_5x-1yawK4jrqcJPM6vDaKdHCuY3yQiiB16AJIzRXyjxl_nVS8tX-g9KGHPhgHXRlTo79_rp1w0n2M4BYCdam3laVAiNz-gDbFnDYutLtaTTuZuFa1Iy1Ekdk829Ioh6VenDHJnf261oC4EnbUXTLwWzH5FAgU9KtiJWJMk0Fcg47irajeq-7_0iUQ54qnee7Ae-q1coVhhs_J9W8SMSx0D_bzKp59GZsx-R4s1KW1q7u_rVQksD6ItnYXg1N_F-1NZoBnYdlRv1I5cdYqSYZqCKEYot-JITiipCkly0nT7NlqNstgOmxoGpUwz9uxzEhApbp5uft0VSQ&h=HHLUaC-ibDp7MLXNDiiRltqGzS3BmRq8MI8Z_qM3fqM
+  response:
+    body:
+      string: "{\r\n  \"startTime\": \"2025-04-28T08:30:50.3784902+00:00\",\r\n  \"endTime\":
+        \"2025-04-28T08:30:50.8472511+00:00\",\r\n  \"status\": \"Succeeded\",\r\n
+        \ \"name\": \"7fd907de-b95e-4966-9178-47b0365eb9d7\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '184'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Apr 2025 08:30:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-need-to-refresh-epl-cache:
+      - 'False'
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=d44a2991-98c6-47c3-b59b-2b30d72cfcc2/japaneast/fe08ca6c-e884-49f0-abc5-3d27c5435bb5
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetOperationResource;44,Microsoft.Compute/GetOperationSubscriptionMaximum;14999
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 3EE9380EFF784B1CB3E219182C185EAB Ref B: TYO201100116021 Ref C: 2025-04-28T08:30:51Z'
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --enable-automatic-zone-balancing
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss000002?api-version=2025-04-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"vmss000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss000002\",\r\n
+        \ \"type\": \"Microsoft.Compute/virtualMachineScaleSets\",\r\n  \"location\":
+        \"eastus2\",\r\n  \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Standard_D1_v2\",\r\n
+        \   \"tier\": \"Standard\",\r\n    \"capacity\": 2\r\n  },\r\n  \"etag\":
+        \"\\\"4\\\"\",\r\n  \"properties\": {\r\n    \"singlePlacementGroup\": false,\r\n
+        \   \"orchestrationMode\": \"Uniform\",\r\n    \"upgradePolicy\": {\r\n      \"mode\":
+        \"Manual\"\r\n    },\r\n    \"resiliencyPolicy\": {\r\n      \"automaticZoneRebalancingPolicy\":
+        {\r\n        \"enabled\": false,\r\n        \"rebalanceStrategy\": \"Recreate\",\r\n
+        \       \"rebalanceBehavior\": \"CreateBeforeDelete\"\r\n      }\r\n    },\r\n
+        \   \"virtualMachineProfile\": {\r\n      \"osProfile\": {\r\n        \"computerNamePrefix\":
+        \"vmssk1565\",\r\n        \"adminUsername\": \"vmtest\",\r\n        \"windowsConfiguration\":
+        {\r\n          \"provisionVMAgent\": true,\r\n          \"enableAutomaticUpdates\":
+        true\r\n        },\r\n        \"secrets\": [],\r\n        \"allowExtensionOperations\":
+        true,\r\n        \"requireGuestProvisionSignal\": true\r\n      },\r\n      \"storageProfile\":
+        {\r\n        \"osDisk\": {\r\n          \"osType\": \"Windows\",\r\n          \"createOption\":
+        \"FromImage\",\r\n          \"caching\": \"ReadWrite\",\r\n          \"managedDisk\":
+        {\r\n            \"storageAccountType\": \"Standard_LRS\"\r\n          },\r\n
+        \         \"diskSizeGB\": 127\r\n        },\r\n        \"imageReference\":
+        {\r\n          \"publisher\": \"MicrosoftWindowsServer\",\r\n          \"offer\":
+        \"WindowsServer\",\r\n          \"sku\": \"2016-Datacenter\",\r\n          \"version\":
+        \"latest\"\r\n        }\r\n      },\r\n      \"networkProfile\": {\"healthProbe\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000005/probes/probe000006\"},\"networkInterfaceConfigurations\":[{\"name\":\"vmssk1565Nic\",\"properties\":{\"primary\":true,\"enableAcceleratedNetworking\":false,\"disableTcpStateTracking\":false,\"networkSecurityGroup\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/networkSecurityGroups/nsg000004\"},\"dnsSettings\":{\"dnsServers\":[]},\"enableIPForwarding\":false,\"ipConfigurations\":[{\"name\":\"vmssk1565IPConfig\",\"properties\":{\"subnet\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/virtualNetworks/vmss000002VNET/subnets/vmss000002Subnet\"},\"privateIPAddressVersion\":\"IPv4\",\"loadBalancerBackendAddressPools\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000005/backendAddressPools/lb000005bepool\"}]}}]}}]},\r\n
+        \     \"timeCreated\": \"2025-04-28T08:29:41.7829129+00:00\"\r\n    },\r\n
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"overprovision\": true,\r\n
+        \   \"doNotRunExtensionsOnOverprovisionedVMs\": false,\r\n    \"uniqueId\":
+        \"104b0e63-7f47-4821-8a00-863a72f70893\",\r\n    \"zoneBalance\": true,\r\n
+        \   \"platformFaultDomainCount\": 1,\r\n    \"timeCreated\": \"2025-04-28T08:29:41.7829129+00:00\"\r\n
+        \ },\r\n  \"zones\": [\r\n    \"1\",\r\n    \"2\",\r\n    \"3\"\r\n  ]\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3330'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Apr 2025 08:30:51 GMT
+      etag:
+      - '"4"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-need-to-refresh-epl-cache:
+      - 'False'
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetVMScaleSetSubscriptionMaximum;2395,Microsoft.Compute/GetVMScaleSetResource;28
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 7EBC3F8026A5477FA023EA06BEE2EF0C Ref B: TYO201100116021 Ref C: 2025-04-28T08:30:51Z'
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss000002?api-version=2024-11-01
+  response:
+    body:
+      string: "{\r\n  \"name\": \"vmss000002\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Compute/virtualMachineScaleSets/vmss000002\",\r\n
+        \ \"type\": \"Microsoft.Compute/virtualMachineScaleSets\",\r\n  \"location\":
+        \"eastus2\",\r\n  \"tags\": {},\r\n  \"sku\": {\r\n    \"name\": \"Standard_D1_v2\",\r\n
+        \   \"tier\": \"Standard\",\r\n    \"capacity\": 2\r\n  },\r\n  \"etag\":
+        \"\\\"4\\\"\",\r\n  \"properties\": {\r\n    \"singlePlacementGroup\": false,\r\n
+        \   \"orchestrationMode\": \"Uniform\",\r\n    \"upgradePolicy\": {\r\n      \"mode\":
+        \"Manual\"\r\n    },\r\n    \"resiliencyPolicy\": {\r\n      \"automaticZoneRebalancingPolicy\":
+        {\r\n        \"enabled\": false,\r\n        \"rebalanceStrategy\": \"Recreate\",\r\n
+        \       \"rebalanceBehavior\": \"CreateBeforeDelete\"\r\n      }\r\n    },\r\n
+        \   \"virtualMachineProfile\": {\r\n      \"osProfile\": {\r\n        \"computerNamePrefix\":
+        \"vmssk1565\",\r\n        \"adminUsername\": \"vmtest\",\r\n        \"windowsConfiguration\":
+        {\r\n          \"provisionVMAgent\": true,\r\n          \"enableAutomaticUpdates\":
+        true\r\n        },\r\n        \"secrets\": [],\r\n        \"allowExtensionOperations\":
+        true,\r\n        \"requireGuestProvisionSignal\": true\r\n      },\r\n      \"storageProfile\":
+        {\r\n        \"osDisk\": {\r\n          \"osType\": \"Windows\",\r\n          \"createOption\":
+        \"FromImage\",\r\n          \"caching\": \"ReadWrite\",\r\n          \"managedDisk\":
+        {\r\n            \"storageAccountType\": \"Standard_LRS\"\r\n          },\r\n
+        \         \"diskSizeGB\": 127\r\n        },\r\n        \"imageReference\":
+        {\r\n          \"publisher\": \"MicrosoftWindowsServer\",\r\n          \"offer\":
+        \"WindowsServer\",\r\n          \"sku\": \"2016-Datacenter\",\r\n          \"version\":
+        \"latest\"\r\n        }\r\n      },\r\n      \"networkProfile\": {\"healthProbe\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000005/probes/probe000006\"},\"networkInterfaceConfigurations\":[{\"name\":\"vmssk1565Nic\",\"properties\":{\"primary\":true,\"enableAcceleratedNetworking\":false,\"disableTcpStateTracking\":false,\"networkSecurityGroup\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/networkSecurityGroups/nsg000004\"},\"dnsSettings\":{\"dnsServers\":[]},\"enableIPForwarding\":false,\"ipConfigurations\":[{\"name\":\"vmssk1565IPConfig\",\"properties\":{\"subnet\":{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/virtualNetworks/vmss000002VNET/subnets/vmss000002Subnet\"},\"privateIPAddressVersion\":\"IPv4\",\"loadBalancerBackendAddressPools\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000005/backendAddressPools/lb000005bepool\"}]}}]}}]},\r\n
+        \     \"timeCreated\": \"2025-04-28T08:29:41.7829129+00:00\"\r\n    },\r\n
+        \   \"provisioningState\": \"Succeeded\",\r\n    \"overprovision\": true,\r\n
+        \   \"doNotRunExtensionsOnOverprovisionedVMs\": false,\r\n    \"uniqueId\":
+        \"104b0e63-7f47-4821-8a00-863a72f70893\",\r\n    \"zoneBalance\": true,\r\n
+        \   \"platformFaultDomainCount\": 1,\r\n    \"timeCreated\": \"2025-04-28T08:29:41.7829129+00:00\"\r\n
+        \ },\r\n  \"zones\": [\r\n    \"1\",\r\n    \"2\",\r\n    \"3\"\r\n  ]\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3330'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Apr 2025 08:30:52 GMT
+      etag:
+      - '"4"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-need-to-refresh-epl-cache:
+      - 'False'
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetVMScaleSetSubscriptionMaximum;2394,Microsoft.Compute/GetVMScaleSetResource;27
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 9227D4C688764720BCA5597F6F54E736 Ref B: TYO201151001060 Ref C: 2025-04-28T08:30:52Z'
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network lb create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_vmss_with_automatic_zone_rebalancing_policy000001?api-version=2024-11-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001","name":"test_vmss_with_automatic_zone_rebalancing_policy000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2","tags":{"product":"azurecli","cause":"automation","test":"test_vmss_with_automatic_zone_rebalancing_policy","date":"2025-04-28T08:28:01Z","module":"vm","Creator":"test@example.com","DateCreated":"2025-04-28T08:28:06Z"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '525'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Apr 2025 08:30:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: EC0A0EE1DF4F4E6382F76C4D1857F694 Ref B: TYO201100115019 Ref C: 2025-04-28T08:30:53Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network lb create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceGroup%20eq%20%27test_vmss_with_automatic_zone_rebalancing_policy000001%27%20and%20name%20eq%20%27None%27%20and%20resourceType%20eq%20%27Microsoft.Network%2FpublicIPAddresses%27&api-version=2024-11-01
+  response:
+    body:
+      string: '{"value":[],"nextLink":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?%24filter=resourceGroup+eq+%27test_vmss_with_automatic_zone_rebalancing_policy000001%27+and+name+eq+%27None%27+and+resourceType+eq+%27Microsoft.Network%2fpublicIPAddresses%27&api-version=2024-11-01&%24skiptoken=rY9BC4IwGIb%2fy3f2YFaXoIuYZDilstbGLqPENnOFTsiJ%2f70VQacu0eGDl%2b%2fwvO%2fTg8rvOhaqbGDWQ84b3doEebdq6eHsZjjsuLfvInkVSVZ0pArLBEeaVMRQ4bqJR0yMQ0mDQhMTnpEpxqTaC2SOo0i5c3BA8htXT%2fAXLDHlhJidvaNGeH2nW4ut1tMYL7w0QzoNNoLinZdIX6LAv7ywg%2fMZnqrl9XKy899PxOsyr21bz95CDGY2%2fkmJgcM%2bUl%2fRv2gxGGB4AA%3d%3d"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '619'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Apr 2025 08:30:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 1F3FE1B0F8654CFD9F9E5EA57C209808 Ref B: TYO201151005023 Ref C: 2025-04-28T08:30:53Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network lb create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resources?$filter=resourceGroup%20eq%20%27test_vmss_with_automatic_zone_rebalancing_policy000001%27%20and%20name%20eq%20%27None%27%20and%20resourceType%20eq%20%27Microsoft.Network/publicIPAddresses%27&api-version=2024-11-01&$skiptoken=rY9BC4IwGIb/y3f2YFaXoIuYZDilstbGLqPENnOFTsiJ/70VQacu0eGDl%2B/wvO/Tg8rvOhaqbGDWQ84b3doEebdq6eHsZjjsuLfvInkVSVZ0pArLBEeaVMRQ4bqJR0yMQ0mDQhMTnpEpxqTaC2SOo0i5c3BA8htXT/AXLDHlhJidvaNGeH2nW4ut1tMYL7w0QzoNNoLinZdIX6LAv7ywg/MZnqrl9XKy899PxOsyr21bz95CDGY2/kmJgcM%2BUl/Rv2gxGGB4AA%3D%3D
+  response:
+    body:
+      string: '{"value":[]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '12'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Apr 2025 08:30:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 8E5CD85A5608457FB733AD7F03417689 Ref B: TYO201151005023 Ref C: 2025-04-28T08:30:54Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+      "contentVersion": "1.0.0.0", "parameters": {}, "variables": {}, "resources":
+      [{"apiVersion": "2022-05-01", "type": "Microsoft.Network/publicIPAddresses",
+      "name": "PublicIPlb000008", "location": "eastus2", "tags": {}, "dependsOn":
+      [], "properties": {"publicIPAllocationMethod": "Static"}, "sku": {"name": "Standard"}},
+      {"type": "Microsoft.Network/loadBalancers", "name": "lb000008", "location":
+      "eastus2", "tags": {}, "apiVersion": "2023-04-01", "dependsOn": ["Microsoft.Network/publicIpAddresses/PublicIPlb000008"],
+      "properties": {"backendAddressPools": [{"name": "lb000008bepool"}], "frontendIPConfigurations":
+      [{"name": "LoadBalancerFrontEnd", "properties": {"publicIPAddress": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb000008"},
+      "privateIPAddressVersion": "IPv4"}}]}, "sku": {"name": "Standard"}}], "outputs":
+      {"loadBalancer": {"type": "object", "value": "[reference(''lb000008'')]"}}},
+      "parameters": {}, "mode": "incremental"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network lb create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1196'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2024-11-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Resources/deployments/lb_deploy_Sr2DcoJyaTe3dbonKgOpDFKPd0NnP6yn","name":"lb_deploy_Sr2DcoJyaTe3dbonKgOpDFKPd0NnP6yn","type":"Microsoft.Resources/deployments","properties":{"templateHash":"6811987010540710969","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2025-04-28T08:30:56.2368076Z","duration":"PT0.0002979S","correlationId":"0207a1d9-93b3-41ff-8e33-a2e81088a01d","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"publicIPAddresses","locations":["eastus2"]},{"resourceType":"loadBalancers","locations":["eastus2"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb000008","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"PublicIPlb000008"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008","resourceType":"Microsoft.Network/loadBalancers","resourceName":"lb000008"}]}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Resources/deployments/lb_deploy_Sr2DcoJyaTe3dbonKgOpDFKPd0NnP6yn/operationStatuses/08584557778292293928?api-version=2024-11-01&t=638814258608775089&c=MIIHpTCCBo2gAwIBAgITOgWXBJzHWActAOyA9gAEBZcEnDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjUwNDE4MDkxNjUyWhcNMjUxMDE1MDkxNjUyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJ4tFzYjQAGXlMN4RVSj_Zp98bnnigeY99sbhZrAOQOjxR_04cAp0TrBwLXaA2b6MkNp3EWrqmwj8LAHlmiUmx_C5YeMG8WQUVkZMbfJNmAjSKJvmH2VO_H9OVOiiWemCFWlBXZMT6O1LsK-KI4EQtlTwXEv4-zXiqUQqjqHZQX6IJGxxcuw3R6KS00hFc9B4Ve9K9uvRk3OzuC_2evEuKFQfmIkhFu9gMtFnEBgp0E5Srek5Sh6WRO2V6wjcdtrFJ2dMStIbypiaJysxjNaLwTxBjKAJiyxkrxbuS0IPj2v4oOwkFSl9khCWu-ivje49N19yGiq_5BL-QYySfUPF0CAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQpIRfJ6SPCR16Dy9sN1AQtQKjWNDAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBACBpx57mqT5wt5VuFMhMv-QcXTs5QrWkz021CcXp44eWUSJBLP35O0JDRyA13V3zowD9Dkl6HKRosiwIhfUwb1VWxMZt1K97bfrlhekU_IFyRNImksBTl4Hg5mL7M4PQvDu_hNxb1NW9JnL8B4LEl-FVcKtOFC8R2wp_2vglSGujfVsEzQMXxCECc_j-T0saauGgdaItgRGQ-1JrKdhZ1FvHWU2eeab0zXatBPn7nyaNmU7DK2icP38PQp3g8yPPlpv1joUzz1GMBJXhtHRWCv93tVfT5q9DZQ-_S2H_1Y2raeucg8kUfGEvVuQ27w1bGi2QRDLtEtuNHgzpR3RB7os&s=jVHD8Q2TitnoF6yuC46GhwC-5_GAoc08aDMMS5yfF_rr4MnQLvSROwbMt-sGJ1dVyVxU2N2qi0KwpfjgYyvj8oDhzUVtJqOg8belvK5EXP0_79KZrvho4_x3eK9Moefgn-UyfVNijuOAJI_0AAYX-kBpl-WNsfuqJ-_ByOx2htofOkTNuiYoI_ABcuuKdxpax9TNsTeRQxNpCOhMoCNQRMPPfaYVI1ZpGPg_i2x_ay43wJpmh5dMetsip6wGWd5lJ7NIh20BPM8dMU1Foqf7nufLK2RJ3q5QjQebekkYqgYwEmbw8NwuWyar95QFu9DaWt_QKPkLf_gQO3ZEuZodKg&h=i5Yja-1mUUqK3bkOCBJyGCtyqJLd6BH1VTPOEbObKls
+      cache-control:
+      - no-cache
+      content-length:
+      - '1305'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Apr 2025 08:31:00 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-deployment-engine-version:
+      - 1.309.0
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2998'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '198'
+      x-msedge-ref:
+      - 'Ref A: 8D71E9D553244A0C971E6CF938B68EF0 Ref B: TYO201100114017 Ref C: 2025-04-28T08:30:55Z'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network lb create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08584557778292293928?api-version=2024-11-01&t=638814258608775089&c=MIIHpTCCBo2gAwIBAgITOgWXBJzHWActAOyA9gAEBZcEnDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjUwNDE4MDkxNjUyWhcNMjUxMDE1MDkxNjUyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJ4tFzYjQAGXlMN4RVSj_Zp98bnnigeY99sbhZrAOQOjxR_04cAp0TrBwLXaA2b6MkNp3EWrqmwj8LAHlmiUmx_C5YeMG8WQUVkZMbfJNmAjSKJvmH2VO_H9OVOiiWemCFWlBXZMT6O1LsK-KI4EQtlTwXEv4-zXiqUQqjqHZQX6IJGxxcuw3R6KS00hFc9B4Ve9K9uvRk3OzuC_2evEuKFQfmIkhFu9gMtFnEBgp0E5Srek5Sh6WRO2V6wjcdtrFJ2dMStIbypiaJysxjNaLwTxBjKAJiyxkrxbuS0IPj2v4oOwkFSl9khCWu-ivje49N19yGiq_5BL-QYySfUPF0CAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQpIRfJ6SPCR16Dy9sN1AQtQKjWNDAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBACBpx57mqT5wt5VuFMhMv-QcXTs5QrWkz021CcXp44eWUSJBLP35O0JDRyA13V3zowD9Dkl6HKRosiwIhfUwb1VWxMZt1K97bfrlhekU_IFyRNImksBTl4Hg5mL7M4PQvDu_hNxb1NW9JnL8B4LEl-FVcKtOFC8R2wp_2vglSGujfVsEzQMXxCECc_j-T0saauGgdaItgRGQ-1JrKdhZ1FvHWU2eeab0zXatBPn7nyaNmU7DK2icP38PQp3g8yPPlpv1joUzz1GMBJXhtHRWCv93tVfT5q9DZQ-_S2H_1Y2raeucg8kUfGEvVuQ27w1bGi2QRDLtEtuNHgzpR3RB7os&s=jVHD8Q2TitnoF6yuC46GhwC-5_GAoc08aDMMS5yfF_rr4MnQLvSROwbMt-sGJ1dVyVxU2N2qi0KwpfjgYyvj8oDhzUVtJqOg8belvK5EXP0_79KZrvho4_x3eK9Moefgn-UyfVNijuOAJI_0AAYX-kBpl-WNsfuqJ-_ByOx2htofOkTNuiYoI_ABcuuKdxpax9TNsTeRQxNpCOhMoCNQRMPPfaYVI1ZpGPg_i2x_ay43wJpmh5dMetsip6wGWd5lJ7NIh20BPM8dMU1Foqf7nufLK2RJ3q5QjQebekkYqgYwEmbw8NwuWyar95QFu9DaWt_QKPkLf_gQO3ZEuZodKg&h=i5Yja-1mUUqK3bkOCBJyGCtyqJLd6BH1VTPOEbObKls
+  response:
+    body:
+      string: '{"status":"Accepted"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '21'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Apr 2025 08:31:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: C40FCCE14675498C99F8DC98A742FDF7 Ref B: TYO201100114017 Ref C: 2025-04-28T08:31:01Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network lb create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08584557778292293928?api-version=2024-11-01&t=638814258608775089&c=MIIHpTCCBo2gAwIBAgITOgWXBJzHWActAOyA9gAEBZcEnDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjUwNDE4MDkxNjUyWhcNMjUxMDE1MDkxNjUyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJ4tFzYjQAGXlMN4RVSj_Zp98bnnigeY99sbhZrAOQOjxR_04cAp0TrBwLXaA2b6MkNp3EWrqmwj8LAHlmiUmx_C5YeMG8WQUVkZMbfJNmAjSKJvmH2VO_H9OVOiiWemCFWlBXZMT6O1LsK-KI4EQtlTwXEv4-zXiqUQqjqHZQX6IJGxxcuw3R6KS00hFc9B4Ve9K9uvRk3OzuC_2evEuKFQfmIkhFu9gMtFnEBgp0E5Srek5Sh6WRO2V6wjcdtrFJ2dMStIbypiaJysxjNaLwTxBjKAJiyxkrxbuS0IPj2v4oOwkFSl9khCWu-ivje49N19yGiq_5BL-QYySfUPF0CAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQpIRfJ6SPCR16Dy9sN1AQtQKjWNDAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBACBpx57mqT5wt5VuFMhMv-QcXTs5QrWkz021CcXp44eWUSJBLP35O0JDRyA13V3zowD9Dkl6HKRosiwIhfUwb1VWxMZt1K97bfrlhekU_IFyRNImksBTl4Hg5mL7M4PQvDu_hNxb1NW9JnL8B4LEl-FVcKtOFC8R2wp_2vglSGujfVsEzQMXxCECc_j-T0saauGgdaItgRGQ-1JrKdhZ1FvHWU2eeab0zXatBPn7nyaNmU7DK2icP38PQp3g8yPPlpv1joUzz1GMBJXhtHRWCv93tVfT5q9DZQ-_S2H_1Y2raeucg8kUfGEvVuQ27w1bGi2QRDLtEtuNHgzpR3RB7os&s=jVHD8Q2TitnoF6yuC46GhwC-5_GAoc08aDMMS5yfF_rr4MnQLvSROwbMt-sGJ1dVyVxU2N2qi0KwpfjgYyvj8oDhzUVtJqOg8belvK5EXP0_79KZrvho4_x3eK9Moefgn-UyfVNijuOAJI_0AAYX-kBpl-WNsfuqJ-_ByOx2htofOkTNuiYoI_ABcuuKdxpax9TNsTeRQxNpCOhMoCNQRMPPfaYVI1ZpGPg_i2x_ay43wJpmh5dMetsip6wGWd5lJ7NIh20BPM8dMU1Foqf7nufLK2RJ3q5QjQebekkYqgYwEmbw8NwuWyar95QFu9DaWt_QKPkLf_gQO3ZEuZodKg&h=i5Yja-1mUUqK3bkOCBJyGCtyqJLd6BH1VTPOEbObKls
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Apr 2025 08:31:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 713A55D2386B4A4C9B752B3D7153175B Ref B: TYO201100114017 Ref C: 2025-04-28T08:31:32Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network lb create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2024-11-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Resources/deployments/lb_deploy_Sr2DcoJyaTe3dbonKgOpDFKPd0NnP6yn","name":"lb_deploy_Sr2DcoJyaTe3dbonKgOpDFKPd0NnP6yn","type":"Microsoft.Resources/deployments","properties":{"templateHash":"6811987010540710969","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2025-04-28T08:31:09.5596531Z","duration":"PT13.3228455S","correlationId":"0207a1d9-93b3-41ff-8e33-a2e81088a01d","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"publicIPAddresses","locations":["eastus2"]},{"resourceType":"loadBalancers","locations":["eastus2"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb000008","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"PublicIPlb000008"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008","resourceType":"Microsoft.Network/loadBalancers","resourceName":"lb000008"}],"outputs":{"loadBalancer":{"type":"Object","value":{"provisioningState":"Succeeded","resourceGuid":"7e8d3d17-863f-4db9-91eb-36d61d90c03d","frontendIPConfigurations":[{"name":"LoadBalancerFrontEnd","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/frontendIPConfigurations/LoadBalancerFrontEnd","etag":"W/\"8d7d3159-0d6e-45d1-8af9-3c9217420d5f\"","type":"Microsoft.Network/loadBalancers/frontendIPConfigurations","properties":{"provisioningState":"Succeeded","privateIPAllocationMethod":"Dynamic","publicIPAddress":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb000008"}}}],"backendAddressPools":[{"name":"lb000008bepool","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/backendAddressPools/lb000008bepool","etag":"W/\"8d7d3159-0d6e-45d1-8af9-3c9217420d5f\"","properties":{"provisioningState":"Succeeded","loadBalancerBackendAddresses":[]},"type":"Microsoft.Network/loadBalancers/backendAddressPools"}],"loadBalancingRules":[],"probes":[],"inboundNatRules":[],"outboundRules":[],"inboundNatPools":[]}}},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb000008"}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3102'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Apr 2025 08:31:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 57D22B6D709E4318BF8FA24402D3DD74 Ref B: TYO201100114017 Ref C: 2025-04-28T08:31:33Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network lb probe create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --lb-name -n --protocol --port --path
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008?api-version=2023-04-01
+  response:
+    body:
+      string: '{"name":"lb000008","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008","etag":"W/\"8d7d3159-0d6e-45d1-8af9-3c9217420d5f\"","type":"Microsoft.Network/loadBalancers","location":"eastus2","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"7e8d3d17-863f-4db9-91eb-36d61d90c03d","frontendIPConfigurations":[{"name":"LoadBalancerFrontEnd","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/frontendIPConfigurations/LoadBalancerFrontEnd","etag":"W/\"8d7d3159-0d6e-45d1-8af9-3c9217420d5f\"","type":"Microsoft.Network/loadBalancers/frontendIPConfigurations","properties":{"provisioningState":"Succeeded","privateIPAllocationMethod":"Dynamic","publicIPAddress":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb000008"}}}],"backendAddressPools":[{"name":"lb000008bepool","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/backendAddressPools/lb000008bepool","etag":"W/\"8d7d3159-0d6e-45d1-8af9-3c9217420d5f\"","properties":{"provisioningState":"Succeeded","loadBalancerBackendAddresses":[]},"type":"Microsoft.Network/loadBalancers/backendAddressPools"}],"loadBalancingRules":[],"probes":[],"inboundNatRules":[],"outboundRules":[],"inboundNatPools":[]},"sku":{"name":"Standard","tier":"Regional"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1726'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Apr 2025 08:31:34 GMT
+      etag:
+      - W/"8d7d3159-0d6e-45d1-8af9-3c9217420d5f"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - ac3f3db7-934b-46f7-ad86-88649003f767
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 2162B6515E9D4D1983B53AC7A36545C0 Ref B: TYO201151004036 Ref C: 2025-04-28T08:31:34Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008",
+      "location": "eastus2", "properties": {"backendAddressPools": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/backendAddressPools/lb000008bepool",
+      "name": "lb000008bepool", "properties": {"loadBalancerBackendAddresses": []}}],
+      "frontendIPConfigurations": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/frontendIPConfigurations/LoadBalancerFrontEnd",
+      "name": "LoadBalancerFrontEnd", "properties": {"privateIPAllocationMethod":
+      "Dynamic", "publicIPAddress": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb000008"}}}],
+      "inboundNatPools": [], "inboundNatRules": [], "loadBalancingRules": [], "outboundRules":
+      [], "probes": [{"name": "probe000009", "properties": {"port": 80, "protocol":
+      "Http", "requestPath": "/"}}]}, "sku": {"name": "Standard", "tier": "Regional"},
+      "tags": {}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network lb probe create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1365'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --lb-name -n --protocol --port --path
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008?api-version=2023-04-01
+  response:
+    body:
+      string: '{"name":"lb000008","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008","etag":"W/\"b601734f-70b8-418b-804e-438332f397fc\"","type":"Microsoft.Network/loadBalancers","location":"eastus2","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"7e8d3d17-863f-4db9-91eb-36d61d90c03d","frontendIPConfigurations":[{"name":"LoadBalancerFrontEnd","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/frontendIPConfigurations/LoadBalancerFrontEnd","etag":"W/\"b601734f-70b8-418b-804e-438332f397fc\"","type":"Microsoft.Network/loadBalancers/frontendIPConfigurations","properties":{"provisioningState":"Succeeded","privateIPAllocationMethod":"Dynamic","publicIPAddress":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb000008"}}}],"backendAddressPools":[{"name":"lb000008bepool","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/backendAddressPools/lb000008bepool","etag":"W/\"b601734f-70b8-418b-804e-438332f397fc\"","properties":{"provisioningState":"Succeeded","loadBalancerBackendAddresses":[]},"type":"Microsoft.Network/loadBalancers/backendAddressPools"}],"loadBalancingRules":[],"probes":[{"name":"probe000009","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/probes/probe000009","etag":"W/\"b601734f-70b8-418b-804e-438332f397fc\"","properties":{"provisioningState":"Succeeded","protocol":"Http","port":80,"requestPath":"/","intervalInSeconds":15,"numberOfProbes":2,"probeThreshold":1},"type":"Microsoft.Network/loadBalancers/probes"}],"inboundNatRules":[],"outboundRules":[],"inboundNatPools":[]},"sku":{"name":"Standard","tier":"Regional"}}'
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/aac9d30f-c55b-4f62-9153-dcd2c12df4d9?api-version=2023-04-01&t=638814258986928195&c=MIIHpTCCBo2gAwIBAgITOgWXBJzHWActAOyA9gAEBZcEnDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjUwNDE4MDkxNjUyWhcNMjUxMDE1MDkxNjUyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJ4tFzYjQAGXlMN4RVSj_Zp98bnnigeY99sbhZrAOQOjxR_04cAp0TrBwLXaA2b6MkNp3EWrqmwj8LAHlmiUmx_C5YeMG8WQUVkZMbfJNmAjSKJvmH2VO_H9OVOiiWemCFWlBXZMT6O1LsK-KI4EQtlTwXEv4-zXiqUQqjqHZQX6IJGxxcuw3R6KS00hFc9B4Ve9K9uvRk3OzuC_2evEuKFQfmIkhFu9gMtFnEBgp0E5Srek5Sh6WRO2V6wjcdtrFJ2dMStIbypiaJysxjNaLwTxBjKAJiyxkrxbuS0IPj2v4oOwkFSl9khCWu-ivje49N19yGiq_5BL-QYySfUPF0CAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQpIRfJ6SPCR16Dy9sN1AQtQKjWNDAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBACBpx57mqT5wt5VuFMhMv-QcXTs5QrWkz021CcXp44eWUSJBLP35O0JDRyA13V3zowD9Dkl6HKRosiwIhfUwb1VWxMZt1K97bfrlhekU_IFyRNImksBTl4Hg5mL7M4PQvDu_hNxb1NW9JnL8B4LEl-FVcKtOFC8R2wp_2vglSGujfVsEzQMXxCECc_j-T0saauGgdaItgRGQ-1JrKdhZ1FvHWU2eeab0zXatBPn7nyaNmU7DK2icP38PQp3g8yPPlpv1joUzz1GMBJXhtHRWCv93tVfT5q9DZQ-_S2H_1Y2raeucg8kUfGEvVuQ27w1bGi2QRDLtEtuNHgzpR3RB7os&s=dpiLfsh_1gn4ys6Owdd9izyTJYE2SRKDcm26GZyKi6bUSTZanpL22SoggxuVVZXV63cQqlQ7Z-rYZpReXzjghWPT-qiUTILCEFK650ETA_8sr9loqJGhxMU2aUwW4kMOfkdHN53EFQabpRnTUly7R5w-bPaPvUPk_LnyQIOu2ALWWwcZ5hpX431zHrkq8UMlvAGEJJ8BUXsrB17Qjg4eO7AW0oL6an8luNtJi4N9vXpw23GjRiwpGnSj7DfmkT6v52hcRnKV5AcTiCb0t60Q5D9L8CZhLaa9weRWTW4gaIn5UaH3KWAXTX4NhxQPVEsGEtC8JdSh0kcM3fT3e9Gmaw&h=4sGZAqci6H-09gVofl_mIbUGP2jmp_fPLzXncJIG81w
+      cache-control:
+      - no-cache
+      content-length:
+      - '2201'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Apr 2025 08:31:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - c9d56d75-27f1-40c3-86c7-9c51a107b1b6
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=d44a2991-98c6-47c3-b59b-2b30d72cfcc2/japaneast/2f49330e-aaac-4531-9bb4-237e4128cddb
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: E009BBA56C904D19BBDE40A02384AF1B Ref B: TYO201151004036 Ref C: 2025-04-28T08:31:35Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network lb probe create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --lb-name -n --protocol --port --path
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/aac9d30f-c55b-4f62-9153-dcd2c12df4d9?api-version=2023-04-01&t=638814258986928195&c=MIIHpTCCBo2gAwIBAgITOgWXBJzHWActAOyA9gAEBZcEnDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjUwNDE4MDkxNjUyWhcNMjUxMDE1MDkxNjUyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJ4tFzYjQAGXlMN4RVSj_Zp98bnnigeY99sbhZrAOQOjxR_04cAp0TrBwLXaA2b6MkNp3EWrqmwj8LAHlmiUmx_C5YeMG8WQUVkZMbfJNmAjSKJvmH2VO_H9OVOiiWemCFWlBXZMT6O1LsK-KI4EQtlTwXEv4-zXiqUQqjqHZQX6IJGxxcuw3R6KS00hFc9B4Ve9K9uvRk3OzuC_2evEuKFQfmIkhFu9gMtFnEBgp0E5Srek5Sh6WRO2V6wjcdtrFJ2dMStIbypiaJysxjNaLwTxBjKAJiyxkrxbuS0IPj2v4oOwkFSl9khCWu-ivje49N19yGiq_5BL-QYySfUPF0CAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQpIRfJ6SPCR16Dy9sN1AQtQKjWNDAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBACBpx57mqT5wt5VuFMhMv-QcXTs5QrWkz021CcXp44eWUSJBLP35O0JDRyA13V3zowD9Dkl6HKRosiwIhfUwb1VWxMZt1K97bfrlhekU_IFyRNImksBTl4Hg5mL7M4PQvDu_hNxb1NW9JnL8B4LEl-FVcKtOFC8R2wp_2vglSGujfVsEzQMXxCECc_j-T0saauGgdaItgRGQ-1JrKdhZ1FvHWU2eeab0zXatBPn7nyaNmU7DK2icP38PQp3g8yPPlpv1joUzz1GMBJXhtHRWCv93tVfT5q9DZQ-_S2H_1Y2raeucg8kUfGEvVuQ27w1bGi2QRDLtEtuNHgzpR3RB7os&s=dpiLfsh_1gn4ys6Owdd9izyTJYE2SRKDcm26GZyKi6bUSTZanpL22SoggxuVVZXV63cQqlQ7Z-rYZpReXzjghWPT-qiUTILCEFK650ETA_8sr9loqJGhxMU2aUwW4kMOfkdHN53EFQabpRnTUly7R5w-bPaPvUPk_LnyQIOu2ALWWwcZ5hpX431zHrkq8UMlvAGEJJ8BUXsrB17Qjg4eO7AW0oL6an8luNtJi4N9vXpw23GjRiwpGnSj7DfmkT6v52hcRnKV5AcTiCb0t60Q5D9L8CZhLaa9weRWTW4gaIn5UaH3KWAXTX4NhxQPVEsGEtC8JdSh0kcM3fT3e9Gmaw&h=4sGZAqci6H-09gVofl_mIbUGP2jmp_fPLzXncJIG81w
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Apr 2025 08:31:38 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 3ffcb3d3-8f28-4e12-9348-79f4d379a3b0
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=d44a2991-98c6-47c3-b59b-2b30d72cfcc2/japaneast/ccb3c037-1912-452b-8079-56af198c9f60
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 8C5032F3AFA94754BAC948C0E0C9EF11 Ref B: TYO201151004036 Ref C: 2025-04-28T08:31:38Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network lb probe create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --lb-name -n --protocol --port --path
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008?api-version=2023-04-01
+  response:
+    body:
+      string: '{"name":"lb000008","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008","etag":"W/\"b601734f-70b8-418b-804e-438332f397fc\"","type":"Microsoft.Network/loadBalancers","location":"eastus2","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"7e8d3d17-863f-4db9-91eb-36d61d90c03d","frontendIPConfigurations":[{"name":"LoadBalancerFrontEnd","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/frontendIPConfigurations/LoadBalancerFrontEnd","etag":"W/\"b601734f-70b8-418b-804e-438332f397fc\"","type":"Microsoft.Network/loadBalancers/frontendIPConfigurations","properties":{"provisioningState":"Succeeded","privateIPAllocationMethod":"Dynamic","publicIPAddress":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb000008"}}}],"backendAddressPools":[{"name":"lb000008bepool","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/backendAddressPools/lb000008bepool","etag":"W/\"b601734f-70b8-418b-804e-438332f397fc\"","properties":{"provisioningState":"Succeeded","loadBalancerBackendAddresses":[]},"type":"Microsoft.Network/loadBalancers/backendAddressPools"}],"loadBalancingRules":[],"probes":[{"name":"probe000009","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/probes/probe000009","etag":"W/\"b601734f-70b8-418b-804e-438332f397fc\"","properties":{"provisioningState":"Succeeded","protocol":"Http","port":80,"requestPath":"/","intervalInSeconds":15,"numberOfProbes":2,"probeThreshold":1},"type":"Microsoft.Network/loadBalancers/probes"}],"inboundNatRules":[],"outboundRules":[],"inboundNatPools":[]},"sku":{"name":"Standard","tier":"Regional"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2201'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Apr 2025 08:31:39 GMT
+      etag:
+      - W/"b601734f-70b8-418b-804e-438332f397fc"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - dcdb6a92-fb6e-4bf6-97af-5cce50c41ecb
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 718F4B1B6F3949A086E7DA98EC54FA7F Ref B: TYO201151004036 Ref C: 2025-04-28T08:31:39Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network lb rule create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --lb-name -n --probe-name --protocol --frontend-port --backend-port
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008?api-version=2023-04-01
+  response:
+    body:
+      string: '{"name":"lb000008","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008","etag":"W/\"b601734f-70b8-418b-804e-438332f397fc\"","type":"Microsoft.Network/loadBalancers","location":"eastus2","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"7e8d3d17-863f-4db9-91eb-36d61d90c03d","frontendIPConfigurations":[{"name":"LoadBalancerFrontEnd","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/frontendIPConfigurations/LoadBalancerFrontEnd","etag":"W/\"b601734f-70b8-418b-804e-438332f397fc\"","type":"Microsoft.Network/loadBalancers/frontendIPConfigurations","properties":{"provisioningState":"Succeeded","privateIPAllocationMethod":"Dynamic","publicIPAddress":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb000008"}}}],"backendAddressPools":[{"name":"lb000008bepool","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/backendAddressPools/lb000008bepool","etag":"W/\"b601734f-70b8-418b-804e-438332f397fc\"","properties":{"provisioningState":"Succeeded","loadBalancerBackendAddresses":[]},"type":"Microsoft.Network/loadBalancers/backendAddressPools"}],"loadBalancingRules":[],"probes":[{"name":"probe000009","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/probes/probe000009","etag":"W/\"b601734f-70b8-418b-804e-438332f397fc\"","properties":{"provisioningState":"Succeeded","protocol":"Http","port":80,"requestPath":"/","intervalInSeconds":15,"numberOfProbes":2,"probeThreshold":1},"type":"Microsoft.Network/loadBalancers/probes"}],"inboundNatRules":[],"outboundRules":[],"inboundNatPools":[]},"sku":{"name":"Standard","tier":"Regional"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2201'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Apr 2025 08:31:41 GMT
+      etag:
+      - W/"b601734f-70b8-418b-804e-438332f397fc"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - e92f7252-0e2b-4d31-82a8-fdf373ffea62
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3748'
+      x-msedge-ref:
+      - 'Ref A: 08501EA00B2C4EE3A6B53E4275525E33 Ref B: TYO201151001040 Ref C: 2025-04-28T08:31:41Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008",
+      "location": "eastus2", "properties": {"backendAddressPools": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/backendAddressPools/lb000008bepool",
+      "name": "lb000008bepool", "properties": {"loadBalancerBackendAddresses": []}}],
+      "frontendIPConfigurations": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/frontendIPConfigurations/LoadBalancerFrontEnd",
+      "name": "LoadBalancerFrontEnd", "properties": {"privateIPAllocationMethod":
+      "Dynamic", "publicIPAddress": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb000008"}}}],
+      "inboundNatPools": [], "inboundNatRules": [], "loadBalancingRules": [{"name":
+      "rule000010", "properties": {"backendAddressPools": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/backendAddressPools/lb000008bepool"}],
+      "backendPort": 80, "frontendIPConfiguration": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/frontendIPConfigurations/LoadBalancerFrontEnd"},
+      "frontendPort": 80, "loadDistribution": "Default", "probe": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/probes/probe000009"},
+      "protocol": "Tcp"}}], "outboundRules": [], "probes": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/probes/probe000009",
+      "name": "probe000009", "properties": {"intervalInSeconds": 15, "numberOfProbes":
+      2, "port": 80, "probeThreshold": 1, "protocol": "Http", "requestPath": "/"}}]},
+      "sku": {"name": "Standard", "tier": "Regional"}, "tags": {}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network lb rule create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2473'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --lb-name -n --probe-name --protocol --frontend-port --backend-port
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008?api-version=2023-04-01
+  response:
+    body:
+      string: '{"name":"lb000008","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008","etag":"W/\"64e9d2d0-f361-4b04-b51b-70c1f90282b4\"","type":"Microsoft.Network/loadBalancers","location":"eastus2","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"7e8d3d17-863f-4db9-91eb-36d61d90c03d","frontendIPConfigurations":[{"name":"LoadBalancerFrontEnd","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/frontendIPConfigurations/LoadBalancerFrontEnd","etag":"W/\"64e9d2d0-f361-4b04-b51b-70c1f90282b4\"","type":"Microsoft.Network/loadBalancers/frontendIPConfigurations","properties":{"provisioningState":"Succeeded","privateIPAllocationMethod":"Dynamic","publicIPAddress":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb000008"},"loadBalancingRules":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/loadBalancingRules/rule000010"}]}}],"backendAddressPools":[{"name":"lb000008bepool","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/backendAddressPools/lb000008bepool","etag":"W/\"64e9d2d0-f361-4b04-b51b-70c1f90282b4\"","properties":{"provisioningState":"Succeeded","loadBalancerBackendAddresses":[],"loadBalancingRules":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/loadBalancingRules/rule000010"}]},"type":"Microsoft.Network/loadBalancers/backendAddressPools"}],"loadBalancingRules":[{"name":"rule000010","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/loadBalancingRules/rule000010","etag":"W/\"64e9d2d0-f361-4b04-b51b-70c1f90282b4\"","type":"Microsoft.Network/loadBalancers/loadBalancingRules","properties":{"provisioningState":"Succeeded","frontendIPConfiguration":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/frontendIPConfigurations/LoadBalancerFrontEnd"},"frontendPort":80,"backendPort":80,"enableFloatingIP":false,"idleTimeoutInMinutes":4,"protocol":"Tcp","enableDestinationServiceEndpoint":false,"enableTcpReset":false,"allowBackendPortConflict":false,"loadDistribution":"Default","disableOutboundSnat":false,"backendAddressPool":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/backendAddressPools/lb000008bepool"},"backendAddressPools":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/backendAddressPools/lb000008bepool"}],"probe":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/probes/probe000009"}}}],"probes":[{"name":"probe000009","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/probes/probe000009","etag":"W/\"64e9d2d0-f361-4b04-b51b-70c1f90282b4\"","properties":{"provisioningState":"Succeeded","protocol":"Http","port":80,"requestPath":"/","intervalInSeconds":15,"numberOfProbes":2,"probeThreshold":1,"loadBalancingRules":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/loadBalancingRules/rule000010"}]},"type":"Microsoft.Network/loadBalancers/probes"}],"inboundNatRules":[],"outboundRules":[],"inboundNatPools":[]},"sku":{"name":"Standard","tier":"Regional"}}'
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/fb8f46fd-5282-4176-a3b7-8ead8749f7a0?api-version=2023-04-01&t=638814259058241386&c=MIIHpTCCBo2gAwIBAgITOgWXBJzHWActAOyA9gAEBZcEnDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjUwNDE4MDkxNjUyWhcNMjUxMDE1MDkxNjUyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJ4tFzYjQAGXlMN4RVSj_Zp98bnnigeY99sbhZrAOQOjxR_04cAp0TrBwLXaA2b6MkNp3EWrqmwj8LAHlmiUmx_C5YeMG8WQUVkZMbfJNmAjSKJvmH2VO_H9OVOiiWemCFWlBXZMT6O1LsK-KI4EQtlTwXEv4-zXiqUQqjqHZQX6IJGxxcuw3R6KS00hFc9B4Ve9K9uvRk3OzuC_2evEuKFQfmIkhFu9gMtFnEBgp0E5Srek5Sh6WRO2V6wjcdtrFJ2dMStIbypiaJysxjNaLwTxBjKAJiyxkrxbuS0IPj2v4oOwkFSl9khCWu-ivje49N19yGiq_5BL-QYySfUPF0CAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQpIRfJ6SPCR16Dy9sN1AQtQKjWNDAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBACBpx57mqT5wt5VuFMhMv-QcXTs5QrWkz021CcXp44eWUSJBLP35O0JDRyA13V3zowD9Dkl6HKRosiwIhfUwb1VWxMZt1K97bfrlhekU_IFyRNImksBTl4Hg5mL7M4PQvDu_hNxb1NW9JnL8B4LEl-FVcKtOFC8R2wp_2vglSGujfVsEzQMXxCECc_j-T0saauGgdaItgRGQ-1JrKdhZ1FvHWU2eeab0zXatBPn7nyaNmU7DK2icP38PQp3g8yPPlpv1joUzz1GMBJXhtHRWCv93tVfT5q9DZQ-_S2H_1Y2raeucg8kUfGEvVuQ27w1bGi2QRDLtEtuNHgzpR3RB7os&s=Uvhxt9YSv4or-EybUhDbQnXIBNMvfAlin29H4iZn7VH7cmQDI2ZcUHGiMSNbwQKwGngfdLotSoLXkNS46z_E0MpbVYp6Ldw6nF02YYj27Ztxkz1-J95rZj9bdFcGKHSY1uorKDWC9fAMW3ODOGDB_3QhuQROZzaoC705vF9bpy-yJ4LHCCt-DhOx7W9oKgC8lwhfBZvy82Gpqklx7EzTx0X8fDWs1eWZLbEYXeHEP0s8a36tOXMoIGY7VgkedWnG1ONH0E_M7uF-Z-pWbOO0A53vrxzi-wm-XxNo0EsKd3bnH0gKab_G7zl5zRxR7Oq9o0jKcr0BXyOz5ARynBo-tg&h=1Q5PWfAPEclBxhQZIv5rEh6v3YOaIqrz94UckV9F3yw
+      cache-control:
+      - no-cache
+      content-length:
+      - '4494'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Apr 2025 08:31:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - d419b455-a149-4115-ac4b-d4383fc4a3f3
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=d44a2991-98c6-47c3-b59b-2b30d72cfcc2/japaneast/7985b7bf-0dd8-41b6-904c-a3bdd39545d4
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: 83C47A5A1A54461E8D9DFA8748FFCC2E Ref B: TYO201151001040 Ref C: 2025-04-28T08:31:42Z'
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network lb rule create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --lb-name -n --probe-name --protocol --frontend-port --backend-port
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/eastus2/operations/fb8f46fd-5282-4176-a3b7-8ead8749f7a0?api-version=2023-04-01&t=638814259058241386&c=MIIHpTCCBo2gAwIBAgITOgWXBJzHWActAOyA9gAEBZcEnDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjUwNDE4MDkxNjUyWhcNMjUxMDE1MDkxNjUyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJ4tFzYjQAGXlMN4RVSj_Zp98bnnigeY99sbhZrAOQOjxR_04cAp0TrBwLXaA2b6MkNp3EWrqmwj8LAHlmiUmx_C5YeMG8WQUVkZMbfJNmAjSKJvmH2VO_H9OVOiiWemCFWlBXZMT6O1LsK-KI4EQtlTwXEv4-zXiqUQqjqHZQX6IJGxxcuw3R6KS00hFc9B4Ve9K9uvRk3OzuC_2evEuKFQfmIkhFu9gMtFnEBgp0E5Srek5Sh6WRO2V6wjcdtrFJ2dMStIbypiaJysxjNaLwTxBjKAJiyxkrxbuS0IPj2v4oOwkFSl9khCWu-ivje49N19yGiq_5BL-QYySfUPF0CAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQpIRfJ6SPCR16Dy9sN1AQtQKjWNDAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBACBpx57mqT5wt5VuFMhMv-QcXTs5QrWkz021CcXp44eWUSJBLP35O0JDRyA13V3zowD9Dkl6HKRosiwIhfUwb1VWxMZt1K97bfrlhekU_IFyRNImksBTl4Hg5mL7M4PQvDu_hNxb1NW9JnL8B4LEl-FVcKtOFC8R2wp_2vglSGujfVsEzQMXxCECc_j-T0saauGgdaItgRGQ-1JrKdhZ1FvHWU2eeab0zXatBPn7nyaNmU7DK2icP38PQp3g8yPPlpv1joUzz1GMBJXhtHRWCv93tVfT5q9DZQ-_S2H_1Y2raeucg8kUfGEvVuQ27w1bGi2QRDLtEtuNHgzpR3RB7os&s=Uvhxt9YSv4or-EybUhDbQnXIBNMvfAlin29H4iZn7VH7cmQDI2ZcUHGiMSNbwQKwGngfdLotSoLXkNS46z_E0MpbVYp6Ldw6nF02YYj27Ztxkz1-J95rZj9bdFcGKHSY1uorKDWC9fAMW3ODOGDB_3QhuQROZzaoC705vF9bpy-yJ4LHCCt-DhOx7W9oKgC8lwhfBZvy82Gpqklx7EzTx0X8fDWs1eWZLbEYXeHEP0s8a36tOXMoIGY7VgkedWnG1ONH0E_M7uF-Z-pWbOO0A53vrxzi-wm-XxNo0EsKd3bnH0gKab_G7zl5zRxR7Oq9o0jKcr0BXyOz5ARynBo-tg&h=1Q5PWfAPEclBxhQZIv5rEh6v3YOaIqrz94UckV9F3yw
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Apr 2025 08:31:46 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 3909fa0e-08f7-4149-b790-258c7c6346d9
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=d44a2991-98c6-47c3-b59b-2b30d72cfcc2/japaneast/6fa83d30-32c3-4296-a5f4-1b6d7138ce86
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 498864D6E86F4ADCB3D91F1585776E1D Ref B: TYO201151001040 Ref C: 2025-04-28T08:31:46Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network lb rule create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --lb-name -n --probe-name --protocol --frontend-port --backend-port
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008?api-version=2023-04-01
+  response:
+    body:
+      string: '{"name":"lb000008","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008","etag":"W/\"64e9d2d0-f361-4b04-b51b-70c1f90282b4\"","type":"Microsoft.Network/loadBalancers","location":"eastus2","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"7e8d3d17-863f-4db9-91eb-36d61d90c03d","frontendIPConfigurations":[{"name":"LoadBalancerFrontEnd","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/frontendIPConfigurations/LoadBalancerFrontEnd","etag":"W/\"64e9d2d0-f361-4b04-b51b-70c1f90282b4\"","type":"Microsoft.Network/loadBalancers/frontendIPConfigurations","properties":{"provisioningState":"Succeeded","privateIPAllocationMethod":"Dynamic","publicIPAddress":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb000008"},"loadBalancingRules":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/loadBalancingRules/rule000010"}]}}],"backendAddressPools":[{"name":"lb000008bepool","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/backendAddressPools/lb000008bepool","etag":"W/\"64e9d2d0-f361-4b04-b51b-70c1f90282b4\"","properties":{"provisioningState":"Succeeded","loadBalancerBackendAddresses":[],"loadBalancingRules":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/loadBalancingRules/rule000010"}]},"type":"Microsoft.Network/loadBalancers/backendAddressPools"}],"loadBalancingRules":[{"name":"rule000010","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/loadBalancingRules/rule000010","etag":"W/\"64e9d2d0-f361-4b04-b51b-70c1f90282b4\"","type":"Microsoft.Network/loadBalancers/loadBalancingRules","properties":{"provisioningState":"Succeeded","frontendIPConfiguration":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/frontendIPConfigurations/LoadBalancerFrontEnd"},"frontendPort":80,"backendPort":80,"enableFloatingIP":false,"idleTimeoutInMinutes":4,"protocol":"Tcp","enableDestinationServiceEndpoint":false,"enableTcpReset":false,"allowBackendPortConflict":false,"loadDistribution":"Default","disableOutboundSnat":false,"backendAddressPool":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/backendAddressPools/lb000008bepool"},"backendAddressPools":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/backendAddressPools/lb000008bepool"}],"probe":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/probes/probe000009"}}}],"probes":[{"name":"probe000009","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/probes/probe000009","etag":"W/\"64e9d2d0-f361-4b04-b51b-70c1f90282b4\"","properties":{"provisioningState":"Succeeded","protocol":"Http","port":80,"requestPath":"/","intervalInSeconds":15,"numberOfProbes":2,"probeThreshold":1,"loadBalancingRules":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/loadBalancingRules/rule000010"}]},"type":"Microsoft.Network/loadBalancers/probes"}],"inboundNatRules":[],"outboundRules":[],"inboundNatPools":[]},"sku":{"name":"Standard","tier":"Regional"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '4494'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Apr 2025 08:31:46 GMT
+      etag:
+      - W/"64e9d2d0-f361-4b04-b51b-70c1f90282b4"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - c1643aaa-9ff9-44bb-9e57-97e588f7ab4c
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3748'
+      x-msedge-ref:
+      - 'Ref A: 8A21EF7E05EB47FDAA70C2A2959FE904 Ref B: TYO201151001040 Ref C: 2025-04-28T08:31:46Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --vm-sku --load-balancer --health-probe --zone-balance --orchestration-mode
+        --admin-username --admin-password --nsg --zones --location
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/publishers/MicrosoftWindowsServer/artifacttypes/vmimage/offers/WindowsServer/skus/2016-Datacenter/versions?$expand=properties&$orderby=name%20desc&$top=1&api-version=2024-11-01
+  response:
+    body:
+      string: "[\r\n  {\r\n    \"location\": \"eastus2\",\r\n    \"name\": \"14393.7973.250409\",\r\n
+        \   \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/eastus2/Publishers/MicrosoftWindowsServer/ArtifactTypes/VMImage/Offers/WindowsServer/Skus/2016-Datacenter/Versions/14393.7973.250409\"\r\n
+        \ }\r\n]"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '312'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Apr 2025 08:31:47 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=d44a2991-98c6-47c3-b59b-2b30d72cfcc2/japaneast/55982295-4411-47f1-96bc-b00773d9b337
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/ListVMImagesVersionsFromLocation3Min;15995,Microsoft.Compute/ListVMImagesVersionsFromLocation30Min;43987
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: CAD8BAD1D93D4EDD839B662F911B1552 Ref B: TYO201151005062 Ref C: 2025-04-28T08:31:47Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --vm-sku --load-balancer --health-probe --zone-balance --orchestration-mode
+        --admin-username --admin-password --nsg --zones --location
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/publishers/MicrosoftWindowsServer/artifacttypes/vmimage/offers/WindowsServer/skus/2016-Datacenter/versions/14393.7973.250409?api-version=2024-11-01
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"architecture\":
+        \"x64\",\r\n    \"replicaType\": \"Unmanaged\",\r\n    \"disallowed\": {\r\n
+        \     \"vmDiskType\": \"None\"\r\n    },\r\n    \"automaticOSUpgradeProperties\":
+        {\r\n      \"automaticOSUpgradeSupported\": true\r\n    },\r\n    \"imageDeprecationStatus\":
+        {\r\n      \"imageState\": \"Active\"\r\n    },\r\n    \"features\": [\r\n
+        \     {\r\n        \"name\": \"IsAcceleratedNetworkSupported\",\r\n        \"value\":
+        \"True\"\r\n      },\r\n      {\r\n        \"name\": \"DiskControllerTypes\",\r\n
+        \       \"value\": \"SCSI\"\r\n      },\r\n      {\r\n        \"name\": \"IsHibernateSupported\",\r\n
+        \       \"value\": \"False\"\r\n      }\r\n    ],\r\n    \"osDiskImage\":
+        {\r\n      \"operatingSystem\": \"Windows\",\r\n      \"sizeInBytes\": 136367309312\r\n
+        \   },\r\n    \"dataDiskImages\": [],\r\n    \"goLiveDate\": \"2025-04-12T00:00:00+00:00\"\r\n
+        \ },\r\n  \"location\": \"eastus2\",\r\n  \"name\": \"14393.7973.250409\",\r\n
+        \ \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/eastus2/Publishers/MicrosoftWindowsServer/ArtifactTypes/VMImage/Offers/WindowsServer/Skus/2016-Datacenter/Versions/14393.7973.250409\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1097'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Apr 2025 08:31:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=d44a2991-98c6-47c3-b59b-2b30d72cfcc2/japaneast/f7cc88a0-e963-44d3-a004-37a7e419d6c9
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetVMImageFromLocation3Min;12996,Microsoft.Compute/GetVMImageFromLocation30Min;73989
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3748'
+      x-msedge-ref:
+      - 'Ref A: 243EAC8831C6440490CA26B650D3148D Ref B: TYO201151002052 Ref C: 2025-04-28T08:31:48Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --vm-sku --load-balancer --health-probe --zone-balance --orchestration-mode
+        --admin-username --admin-password --nsg --zones --location
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/virtualNetworks?api-version=2022-01-01
+  response:
+    body:
+      string: '{"value":[{"name":"vmss000002VNET","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/virtualNetworks/vmss000002VNET","etag":"W/\"146703e9-a415-40f7-a659-b5e1c38435e6\"","type":"Microsoft.Network/virtualNetworks","location":"eastus2","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"60f600c6-a9da-43bb-a860-6606bef507ba","addressSpace":{"addressPrefixes":["10.0.0.0/16"]},"subnets":[{"name":"vmss000002Subnet","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/virtualNetworks/vmss000002VNET/subnets/vmss000002Subnet","etag":"W/\"146703e9-a415-40f7-a659-b5e1c38435e6\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","ipConfigurations":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/TEST_VMSS_WITH_AUTOMATIC_ZONE_REBALANCING_POLICYSCHWL5WTCWFSQFSXHSM2CIXE7H2/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/VMSSKDWAK6/VIRTUALMACHINES/2/NETWORKINTERFACES/VMSSK1565NIC/ipConfigurations/VMSSK1565IPCONFIG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/TEST_VMSS_WITH_AUTOMATIC_ZONE_REBALANCING_POLICYSCHWL5WTCWFSQFSXHSM2CIXE7H2/PROVIDERS/MICROSOFT.COMPUTE/VIRTUALMACHINESCALESETS/VMSSKDWAK6/VIRTUALMACHINES/3/NETWORKINTERFACES/VMSSK1565NIC/ipConfigurations/VMSSK1565IPCONFIG"}],"delegations":[],"privateEndpointNetworkPolicies":"Disabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false}}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1719'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Apr 2025 08:31:50 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - d48a0478-a4d9-461f-b2ad-6dcbf7b09a03
+      x-ms-original-request-ids:
+      - 69dc2bdc-cd61-4b38-95e9-2c360187bb26
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: C0F60F6D34834132A5D7EC28D752E932 Ref B: TYO201100115049 Ref C: 2025-04-28T08:31:50Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --vm-sku --load-balancer --health-probe --zone-balance --orchestration-mode
+        --admin-username --admin-password --nsg --zones --location
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008?api-version=2022-01-01
+  response:
+    body:
+      string: '{"name":"lb000008","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008","etag":"W/\"64e9d2d0-f361-4b04-b51b-70c1f90282b4\"","type":"Microsoft.Network/loadBalancers","location":"eastus2","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"7e8d3d17-863f-4db9-91eb-36d61d90c03d","frontendIPConfigurations":[{"name":"LoadBalancerFrontEnd","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/frontendIPConfigurations/LoadBalancerFrontEnd","etag":"W/\"64e9d2d0-f361-4b04-b51b-70c1f90282b4\"","type":"Microsoft.Network/loadBalancers/frontendIPConfigurations","properties":{"provisioningState":"Succeeded","privateIPAllocationMethod":"Dynamic","publicIPAddress":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb000008"},"loadBalancingRules":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/loadBalancingRules/rule000010"}]}}],"backendAddressPools":[{"name":"lb000008bepool","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/backendAddressPools/lb000008bepool","etag":"W/\"64e9d2d0-f361-4b04-b51b-70c1f90282b4\"","properties":{"provisioningState":"Succeeded","loadBalancerBackendAddresses":[],"loadBalancingRules":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/loadBalancingRules/rule000010"}]},"type":"Microsoft.Network/loadBalancers/backendAddressPools"}],"loadBalancingRules":[{"name":"rule000010","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/loadBalancingRules/rule000010","etag":"W/\"64e9d2d0-f361-4b04-b51b-70c1f90282b4\"","type":"Microsoft.Network/loadBalancers/loadBalancingRules","properties":{"provisioningState":"Succeeded","frontendIPConfiguration":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/frontendIPConfigurations/LoadBalancerFrontEnd"},"frontendPort":80,"backendPort":80,"enableFloatingIP":false,"idleTimeoutInMinutes":4,"protocol":"Tcp","enableDestinationServiceEndpoint":false,"enableTcpReset":false,"allowBackendPortConflict":false,"loadDistribution":"Default","disableOutboundSnat":false,"backendAddressPool":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/backendAddressPools/lb000008bepool"},"backendAddressPools":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/backendAddressPools/lb000008bepool"}],"probe":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/probes/probe000009"}}}],"probes":[{"name":"probe000009","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/probes/probe000009","etag":"W/\"64e9d2d0-f361-4b04-b51b-70c1f90282b4\"","properties":{"provisioningState":"Succeeded","protocol":"Http","port":80,"requestPath":"/","intervalInSeconds":15,"numberOfProbes":2,"probeThreshold":1,"loadBalancingRules":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/loadBalancingRules/rule000010"}]},"type":"Microsoft.Network/loadBalancers/probes"}],"inboundNatRules":[],"outboundRules":[],"inboundNatPools":[]},"sku":{"name":"Standard","tier":"Regional"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '4494'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Apr 2025 08:31:51 GMT
+      etag:
+      - W/"64e9d2d0-f361-4b04-b51b-70c1f90282b4"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 4851ad22-5e8f-4882-a279-660b7d4cf7ae
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 8EBBC5F75D744899A7B1151D56C7A2B9 Ref B: TYO201151004054 Ref C: 2025-04-28T08:31:51Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --vm-sku --load-balancer --health-probe --zone-balance --orchestration-mode
+        --admin-username --admin-password --nsg --zones --location
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008?api-version=2022-01-01
+  response:
+    body:
+      string: '{"name":"lb000008","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008","etag":"W/\"64e9d2d0-f361-4b04-b51b-70c1f90282b4\"","type":"Microsoft.Network/loadBalancers","location":"eastus2","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"7e8d3d17-863f-4db9-91eb-36d61d90c03d","frontendIPConfigurations":[{"name":"LoadBalancerFrontEnd","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/frontendIPConfigurations/LoadBalancerFrontEnd","etag":"W/\"64e9d2d0-f361-4b04-b51b-70c1f90282b4\"","type":"Microsoft.Network/loadBalancers/frontendIPConfigurations","properties":{"provisioningState":"Succeeded","privateIPAllocationMethod":"Dynamic","publicIPAddress":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/publicIPAddresses/PublicIPlb000008"},"loadBalancingRules":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/loadBalancingRules/rule000010"}]}}],"backendAddressPools":[{"name":"lb000008bepool","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/backendAddressPools/lb000008bepool","etag":"W/\"64e9d2d0-f361-4b04-b51b-70c1f90282b4\"","properties":{"provisioningState":"Succeeded","loadBalancerBackendAddresses":[],"loadBalancingRules":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/loadBalancingRules/rule000010"}]},"type":"Microsoft.Network/loadBalancers/backendAddressPools"}],"loadBalancingRules":[{"name":"rule000010","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/loadBalancingRules/rule000010","etag":"W/\"64e9d2d0-f361-4b04-b51b-70c1f90282b4\"","type":"Microsoft.Network/loadBalancers/loadBalancingRules","properties":{"provisioningState":"Succeeded","frontendIPConfiguration":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/frontendIPConfigurations/LoadBalancerFrontEnd"},"frontendPort":80,"backendPort":80,"enableFloatingIP":false,"idleTimeoutInMinutes":4,"protocol":"Tcp","enableDestinationServiceEndpoint":false,"enableTcpReset":false,"allowBackendPortConflict":false,"loadDistribution":"Default","disableOutboundSnat":false,"backendAddressPool":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/backendAddressPools/lb000008bepool"},"backendAddressPools":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/backendAddressPools/lb000008bepool"}],"probe":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/probes/probe000009"}}}],"probes":[{"name":"probe000009","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/probes/probe000009","etag":"W/\"64e9d2d0-f361-4b04-b51b-70c1f90282b4\"","properties":{"provisioningState":"Succeeded","protocol":"Http","port":80,"requestPath":"/","intervalInSeconds":15,"numberOfProbes":2,"probeThreshold":1,"loadBalancingRules":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_vmss_with_automatic_zone_rebalancing_policy000001/providers/Microsoft.Network/loadBalancers/lb000008/loadBalancingRules/rule000010"}]},"type":"Microsoft.Network/loadBalancers/probes"}],"inboundNatRules":[],"outboundRules":[],"inboundNatPools":[]},"sku":{"name":"Standard","tier":"Regional"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '4494'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Apr 2025 08:31:52 GMT
+      etag:
+      - W/"64e9d2d0-f361-4b04-b51b-70c1f90282b4"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 3de0537d-454d-4faf-9c04-8c9037e3af8f
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 3368BFA3A0094AAFB049437850D3E461 Ref B: TYO201151003029 Ref C: 2025-04-28T08:31:52Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --vm-sku --load-balancer --health-probe --zone-balance --orchestration-mode
+        --admin-username --admin-password --nsg --zones --location
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/publishers/MicrosoftWindowsServer/artifacttypes/vmimage/offers/WindowsServer/skus/2016-Datacenter/versions?$expand=properties&$orderby=name%20desc&$top=1&api-version=2024-11-01
+  response:
+    body:
+      string: "[\r\n  {\r\n    \"location\": \"eastus2\",\r\n    \"name\": \"14393.7973.250409\",\r\n
+        \   \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/eastus2/Publishers/MicrosoftWindowsServer/ArtifactTypes/VMImage/Offers/WindowsServer/Skus/2016-Datacenter/Versions/14393.7973.250409\"\r\n
+        \ }\r\n]"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '312'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Apr 2025 08:31:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=d44a2991-98c6-47c3-b59b-2b30d72cfcc2/japaneast/f999f513-9d0b-4978-95d6-a946c41b03af
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/ListVMImagesVersionsFromLocation3Min;15994,Microsoft.Compute/ListVMImagesVersionsFromLocation30Min;43986
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: D269CEFC305A423FA9F79B3BC21DC04C Ref B: TYO201100115023 Ref C: 2025-04-28T08:31:52Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --vm-sku --load-balancer --health-probe --zone-balance --orchestration-mode
+        --admin-username --admin-password --nsg --zones --location
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/publishers/MicrosoftWindowsServer/artifacttypes/vmimage/offers/WindowsServer/skus/2016-Datacenter/versions/14393.7973.250409?api-version=2024-11-01
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"architecture\":
+        \"x64\",\r\n    \"replicaType\": \"Unmanaged\",\r\n    \"disallowed\": {\r\n
+        \     \"vmDiskType\": \"None\"\r\n    },\r\n    \"automaticOSUpgradeProperties\":
+        {\r\n      \"automaticOSUpgradeSupported\": true\r\n    },\r\n    \"imageDeprecationStatus\":
+        {\r\n      \"imageState\": \"Active\"\r\n    },\r\n    \"features\": [\r\n
+        \     {\r\n        \"name\": \"IsAcceleratedNetworkSupported\",\r\n        \"value\":
+        \"True\"\r\n      },\r\n      {\r\n        \"name\": \"DiskControllerTypes\",\r\n
+        \       \"value\": \"SCSI\"\r\n      },\r\n      {\r\n        \"name\": \"IsHibernateSupported\",\r\n
+        \       \"value\": \"False\"\r\n      }\r\n    ],\r\n    \"osDiskImage\":
+        {\r\n      \"operatingSystem\": \"Windows\",\r\n      \"sizeInBytes\": 136367309312\r\n
+        \   },\r\n    \"dataDiskImages\": [],\r\n    \"goLiveDate\": \"2025-04-12T00:00:00+00:00\"\r\n
+        \ },\r\n  \"location\": \"eastus2\",\r\n  \"name\": \"14393.7973.250409\",\r\n
+        \ \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/eastus2/Publishers/MicrosoftWindowsServer/ArtifactTypes/VMImage/Offers/WindowsServer/Skus/2016-Datacenter/Versions/14393.7973.250409\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1097'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Apr 2025 08:31:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=d44a2991-98c6-47c3-b59b-2b30d72cfcc2/japaneast/7276eb69-fb85-496a-ac02-8689ec02093b
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetVMImageFromLocation3Min;12995,Microsoft.Compute/GetVMImageFromLocation30Min;73988
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 44E17E2007C943F9B734A8225D0D88A6 Ref B: TYO201151006034 Ref C: 2025-04-28T08:31:53Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --vm-sku --load-balancer --health-probe --zone-balance --orchestration-mode
+        --admin-username --admin-password --nsg --zones --location
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/publishers/MicrosoftWindowsServer/artifacttypes/vmimage/offers/WindowsServer/skus/2016-Datacenter/versions?$expand=properties&$orderby=name%20desc&$top=1&api-version=2024-11-01
+  response:
+    body:
+      string: "[\r\n  {\r\n    \"location\": \"eastus2\",\r\n    \"name\": \"14393.7973.250409\",\r\n
+        \   \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/eastus2/Publishers/MicrosoftWindowsServer/ArtifactTypes/VMImage/Offers/WindowsServer/Skus/2016-Datacenter/Versions/14393.7973.250409\"\r\n
+        \ }\r\n]"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '312'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Apr 2025 08:31:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=d44a2991-98c6-47c3-b59b-2b30d72cfcc2/japaneast/bd6fc69a-1399-4fd0-ac3d-7a8cd6233326
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/ListVMImagesVersionsFromLocation3Min;15993,Microsoft.Compute/ListVMImagesVersionsFromLocation30Min;43985
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 42808F37983043D08AE3B88067BFF15A Ref B: TYO201100114023 Ref C: 2025-04-28T08:31:54Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - vmss create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --image --vm-sku --load-balancer --health-probe --zone-balance --orchestration-mode
+        --admin-username --admin-password --nsg --zones --location
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus2/publishers/MicrosoftWindowsServer/artifacttypes/vmimage/offers/WindowsServer/skus/2016-Datacenter/versions/14393.7973.250409?api-version=2024-11-01
+  response:
+    body:
+      string: "{\r\n  \"properties\": {\r\n    \"hyperVGeneration\": \"V1\",\r\n    \"architecture\":
+        \"x64\",\r\n    \"replicaType\": \"Unmanaged\",\r\n    \"disallowed\": {\r\n
+        \     \"vmDiskType\": \"None\"\r\n    },\r\n    \"automaticOSUpgradeProperties\":
+        {\r\n      \"automaticOSUpgradeSupported\": true\r\n    },\r\n    \"imageDeprecationStatus\":
+        {\r\n      \"imageState\": \"Active\"\r\n    },\r\n    \"features\": [\r\n
+        \     {\r\n        \"name\": \"IsAcceleratedNetworkSupported\",\r\n        \"value\":
+        \"True\"\r\n      },\r\n      {\r\n        \"name\": \"DiskControllerTypes\",\r\n
+        \       \"value\": \"SCSI\"\r\n      },\r\n      {\r\n        \"name\": \"IsHibernateSupported\",\r\n
+        \       \"value\": \"False\"\r\n      }\r\n    ],\r\n    \"osDiskImage\":
+        {\r\n      \"operatingSystem\": \"Windows\",\r\n      \"sizeInBytes\": 136367309312\r\n
+        \   },\r\n    \"dataDiskImages\": [],\r\n    \"goLiveDate\": \"2025-04-12T00:00:00+00:00\"\r\n
+        \ },\r\n  \"location\": \"eastus2\",\r\n  \"name\": \"14393.7973.250409\",\r\n
+        \ \"id\": \"/Subscriptions/00000000-0000-0000-0000-000000000000/Providers/Microsoft.Compute/Locations/eastus2/Publishers/MicrosoftWindowsServer/ArtifactTypes/VMImage/Offers/WindowsServer/Skus/2016-Datacenter/Versions/14393.7973.250409\"\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1097'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Apr 2025 08:31:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=d44a2991-98c6-47c3-b59b-2b30d72cfcc2/japaneast/2447405f-1d59-45b2-83e8-662e80fa872e
+      x-ms-ratelimit-remaining-resource:
+      - Microsoft.Compute/GetVMImageFromLocation3Min;12994,Microsoft.Compute/GetVMImageFromLocation30Min;73987
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: B4B65CB3735D4612ACCD832AC2DCA41A Ref B: TYO201151002040 Ref C: 2025-04-28T08:31:55Z'
+    status:
+      code: 200
+      message: OK
 - request:
     body: '{"properties": {"template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
       "contentVersion": "1.0.0.0", "parameters": {"adminPassword": {"type": "securestring",
