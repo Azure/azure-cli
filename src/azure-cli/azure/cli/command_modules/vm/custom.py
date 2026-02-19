@@ -48,6 +48,7 @@ from .aaz.latest.vm.disk import AttachDetachDataDisk
 from .aaz.latest.vm import Update as UpdateVM
 
 from .generated.custom import *  # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
+
 try:
     from .manual.custom import *   # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
 except ImportError:
@@ -2251,21 +2252,24 @@ def get_boot_log(cmd, resource_group_name, vm_name):
     import sys
     from azure.cli.core.profiles import get_sdk
     from azure.core.exceptions import HttpResponseError
+    from .aaz.latest.vm.boot_diagnostics import GetBootLogUris as VmGetBootLogUris
     BlobClient = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB, '_blob_client#BlobClient')
-    client = _compute_client_factory(cmd.cli_ctx)
 
-    virtual_machine = client.virtual_machines.get(resource_group_name, vm_name, expand='instanceView')
-    # pylint: disable=no-member
+    virtual_machine = get_instance_view(cmd, resource_group_name, vm_name)
 
     blob_uri = None
-    if virtual_machine.instance_view and virtual_machine.instance_view.boot_diagnostics:
-        blob_uri = virtual_machine.instance_view.boot_diagnostics.serial_console_log_blob_uri
+    if virtual_machine.get('instanceView', {}).get('bootDiagnostics'):
+        blob_uri = virtual_machine['instanceView']['bootDiagnostics'].get('serialConsoleLogBlobUri')
 
     # Managed storage
     if blob_uri is None:
         try:
-            boot_diagnostics_data = client.virtual_machines.retrieve_boot_diagnostics_data(resource_group_name, vm_name)
-            blob_uri = boot_diagnostics_data.serial_console_log_blob_uri
+            command_args = {
+                'resource_group': resource_group_name,
+                'name': vm_name
+            }
+            boot_diagnostics_data = VmGetBootLogUris(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+            blob_uri = boot_diagnostics_data.get('serialConsoleLogBlobUri')
         except HttpResponseError:
             pass
         if blob_uri is None:
@@ -2918,13 +2922,14 @@ def show_vm_nic(cmd, resource_group_name, vm_name, nic):
 
     NicShow = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.nic").Show
 
-    vm = get_vm(cmd, resource_group_name, vm_name)
+    vm = get_vm_by_aaz(cmd, resource_group_name, vm_name)
+
     found = next(
-        (n for n in vm.network_profile.network_interfaces if nic.lower() == n.id.lower()), None
+        (n for n in vm.get("networkProfile", {}).get("networkInterfaces", []) if nic.lower() == n["id"].lower()), None
         # pylint: disable=no-member
     )
     if found:
-        nic_name = parse_resource_id(found.id)['name']
+        nic_name = parse_resource_id(found["id"])['name']
         return NicShow(cli_ctx=cmd.cli_ctx)(command_args={
             'name': nic_name,
             'resource_group': resource_group_name
@@ -2933,12 +2938,12 @@ def show_vm_nic(cmd, resource_group_name, vm_name, nic):
 
 
 def list_vm_nics(cmd, resource_group_name, vm_name):
-    vm = get_vm(cmd, resource_group_name, vm_name)
-    return vm.network_profile.network_interfaces  # pylint: disable=no-member
+    vm = get_vm_by_aaz(cmd, resource_group_name, vm_name)
+    return vm.get("networkProfile", {}).get("networkInterfaces", [])  # pylint: disable=no-member
 
 
 def add_vm_nic(cmd, resource_group_name, vm_name, nics, primary_nic=None):
-    vm = get_vm_to_update(cmd, resource_group_name, vm_name)
+    vm = get_vm_to_update_by_aaz(cmd, resource_group_name, vm_name)
     new_nics = _build_nic_list(cmd, nics)
     existing_nics = _get_existing_nics(vm)
     return _update_vm_nics(cmd, vm, existing_nics + new_nics, primary_nic)
@@ -2947,25 +2952,25 @@ def add_vm_nic(cmd, resource_group_name, vm_name, nics, primary_nic=None):
 def remove_vm_nic(cmd, resource_group_name, vm_name, nics, primary_nic=None):
 
     def to_delete(nic_id):
-        return [n for n in nics_to_delete if n.id.lower() == nic_id.lower()]
+        return [n for n in nics_to_delete if n["id"].lower() == nic_id.lower()]
 
-    vm = get_vm_to_update(cmd, resource_group_name, vm_name)
+    vm = get_vm_to_update_by_aaz(cmd, resource_group_name, vm_name)
     nics_to_delete = _build_nic_list(cmd, nics)
     existing_nics = _get_existing_nics(vm)
-    survived = [x for x in existing_nics if not to_delete(x.id)]
+
+    survived = [x for x in existing_nics if not to_delete(x["id"])]
+
     return _update_vm_nics(cmd, vm, survived, primary_nic)
 
 
 def set_vm_nic(cmd, resource_group_name, vm_name, nics, primary_nic=None):
-    vm = get_vm_to_update(cmd, resource_group_name, vm_name)
+    vm = get_vm_to_update_by_aaz(cmd, resource_group_name, vm_name)
     nics = _build_nic_list(cmd, nics)
     return _update_vm_nics(cmd, vm, nics, primary_nic)
 
 
 def _build_nic_list(cmd, nic_ids):
     NicShow = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.nic").Show
-
-    NetworkInterfaceReference = cmd.get_models('NetworkInterfaceReference')
     nic_list = []
     if nic_ids:
         # pylint: disable=no-member
@@ -2975,20 +2980,20 @@ def _build_nic_list(cmd, nic_ids):
                 'name': name,
                 'resource_group': rg
             })
-            nic_list.append(NetworkInterfaceReference(id=nic['id'], primary=False))
+            nic_list.append({"id": nic["id"], "primary": False})
     return nic_list
 
 
 def _get_existing_nics(vm):
-    network_profile = getattr(vm, 'network_profile', None)
+    network_profile = vm.get("networkProfile", None)
     nics = []
     if network_profile is not None:
-        nics = network_profile.network_interfaces or []
+        nics = network_profile.get("networkInterfaces", [])
     return nics
 
 
 def _update_vm_nics(cmd, vm, nics, primary_nic):
-    NetworkProfile = cmd.get_models('NetworkProfile')
+    from .operations.vm import convert_show_result_to_snake_case
 
     if primary_nic:
         try:
@@ -2996,25 +3001,24 @@ def _update_vm_nics(cmd, vm, nics, primary_nic):
         except IndexError:
             primary_nic_name = primary_nic
 
-        matched = [n for n in nics if _parse_rg_name(n.id)[1].lower() == primary_nic_name.lower()]
+        matched = [n for n in nics if _parse_rg_name(n["id"])[1].lower() == primary_nic_name.lower()]
         if not matched:
             raise CLIError('Primary Nic {} is not found'.format(primary_nic))
         if len(matched) > 1:
             raise CLIError('Duplicate Nic entries with name {}'.format(primary_nic))
         for n in nics:
-            n.primary = False
-        matched[0].primary = True
+            n["primary"] = False
+        matched[0]["primary"] = True
     elif nics:
-        if not [n for n in nics if n.primary]:
-            nics[0].primary = True
+        if not [n for n in nics if n["primary"]]:
+            nics[0]["primary"] = True
 
-    network_profile = getattr(vm, 'network_profile', None)
-    if network_profile is None:
-        vm.network_profile = NetworkProfile(network_interfaces=nics)
-    else:
-        network_profile.network_interfaces = nics
-
-    return set_vm(cmd, vm).network_profile.network_interfaces
+    if "networkProfile" not in vm:
+        vm["networkProfile"] = {}
+    vm["networkProfile"]["networkInterfaces"] = nics
+    vm = convert_show_result_to_snake_case(vm)
+    result = set_vm_by_aaz(cmd, vm)
+    return (result.get("networkProfile") or {}).get("networkInterfaces") or []
 # endregion
 
 
@@ -4178,21 +4182,29 @@ def _build_identities_info(identities):
 
 
 def deallocate_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False, hibernate=None):
-    client = _compute_client_factory(cmd.cli_ctx)
-    # This is a walkaround because the REST service of `VirtualMachineScaleSetVMs#begin_deallocate`
+    from .aaz.latest.vmss import Deallocate as VmssDeallocate
+    from .aaz.latest.vmss.vms import Deallocate as VmssVmsDeallocate
+    # This is a workaround because the REST service of `VirtualMachineScaleSetVMs#begin_deallocate`
     # does not accept `hibernate` at present
     if instance_ids and len(instance_ids) == 1 and hibernate is None:
-        return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.begin_deallocate,
-                           resource_group_name, vm_scale_set_name, instance_ids[0])
+        command_args = {
+            'instance_id': instance_ids[0],
+            'resource_group': resource_group_name,
+            'vm_scale_set_name': vm_scale_set_name,
+            'no_wait': no_wait
+        }
+        return VmssVmsDeallocate(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
-    VirtualMachineScaleSetVMInstanceIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceIDs')
-    vm_instance_i_ds = VirtualMachineScaleSetVMInstanceIDs(instance_ids=instance_ids)
+    command_args = {
+        'resource_group': resource_group_name,
+        'vm_scale_set_name': vm_scale_set_name,
+        'instance_ids': instance_ids,
+        'no_wait': no_wait
+    }
     if hibernate is not None:
-        return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_deallocate,
-                           resource_group_name, vm_scale_set_name, vm_instance_i_ds, hibernate=hibernate)
-    else:
-        return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_deallocate,
-                           resource_group_name, vm_scale_set_name, vm_instance_i_ds)
+        command_args['hibernate'] = hibernate
+
+    return VmssDeallocate(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
 def get_vmss(cmd, resource_group_name, name, instance_id=None, include_user_data=False):
@@ -6006,15 +6018,34 @@ def show_disk_encryption_set_identity(cmd, resource_group_name, disk_encryption_
 
 
 # region install patches
-def install_vm_patches(cmd, client, resource_group_name, vm_name, maximum_duration, reboot_setting, classifications_to_include_win=None, classifications_to_include_linux=None, kb_numbers_to_include=None, kb_numbers_to_exclude=None,
-                       exclude_kbs_requiring_reboot=None, package_name_masks_to_include=None, package_name_masks_to_exclude=None, max_patch_publish_date=None, no_wait=False):
-    VMInstallPatchesParameters, WindowsParameters, LinuxParameters = cmd.get_models('VirtualMachineInstallPatchesParameters', 'WindowsParameters', 'LinuxParameters')
-    windows_parameters = WindowsParameters(classifications_to_include=classifications_to_include_win, kb_numbers_to_include=kb_numbers_to_include, kb_numbers_to_exclude=kb_numbers_to_exclude, exclude_kbs_requiring_reboot=exclude_kbs_requiring_reboot, max_patch_publish_date=max_patch_publish_date)
-    linux_parameters = LinuxParameters(classifications_to_include=classifications_to_include_linux, package_name_masks_to_include=package_name_masks_to_include, package_name_masks_to_exclude=package_name_masks_to_exclude)
-    install_patches_input = VMInstallPatchesParameters(maximum_duration=maximum_duration, reboot_setting=reboot_setting, linux_parameters=linux_parameters, windows_parameters=windows_parameters)
+def install_vm_patches(cmd, resource_group_name, vm_name, maximum_duration, reboot_setting,
+                       classifications_to_include_win=None, classifications_to_include_linux=None,
+                       kb_numbers_to_include=None, kb_numbers_to_exclude=None, exclude_kbs_requiring_reboot=None,
+                       package_name_masks_to_include=None, package_name_masks_to_exclude=None,
+                       max_patch_publish_date=None, no_wait=False):
+    from .aaz.latest.vm import InstallPatches as VmInstallPatches
 
-    return sdk_no_wait(no_wait, client.begin_install_patches, resource_group_name=resource_group_name, vm_name=vm_name, install_patches_input=install_patches_input)
+    command_args = {
+        'resource_group': resource_group_name,
+        'name': vm_name,
+        'maximum_duration': maximum_duration,
+        'reboot_setting': reboot_setting,
+        'linux_parameters': {
+            'classifications_to_include': classifications_to_include_linux,
+            'package_name_masks_to_exclude': package_name_masks_to_exclude,
+            'package_name_masks_to_include': package_name_masks_to_include
+        },
+        'windows_parameters': {
+            'classifications_to_include': classifications_to_include_win,
+            'exclude_kbs_requiring_reboot': exclude_kbs_requiring_reboot,
+            'kb_numbers_to_exclude': kb_numbers_to_exclude,
+            'kb_numbers_to_include': kb_numbers_to_include,
+            'max_patch_publish_date': max_patch_publish_date
+        },
+        'no_wait': no_wait
+    }
 
+    return VmInstallPatches(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 # endregion
 
 
