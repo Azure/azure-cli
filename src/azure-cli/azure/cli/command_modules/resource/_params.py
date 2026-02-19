@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 
-# pylint: disable=too-many-locals, too-many-statements, line-too-long
+# pylint: disable=too-many-locals, too-many-statements, line-too-long, too-many-branches
 def load_arguments(self, _):
     from argcomplete.completers import FilesCompleter
     from argcomplete.completers import DirectoriesCompleter
