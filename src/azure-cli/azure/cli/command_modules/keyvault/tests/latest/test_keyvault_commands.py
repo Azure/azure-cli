@@ -2779,279 +2779,531 @@ class KeyVaultMHSMRegionScenarioTest(ScenarioTest):
         self.cmd('keyvault region remove -g {rg} --hsm-name {hsm_name} -r uksouth')
 
 
-class KeyVaultCopyScenarioTest(ScenarioTest):
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(name_prefix='cli_test_keyvault_copy')
-    @KeyVaultPreparer(name_prefix='cli-test-kv-src-', location='eastus', additional_params='--enable-rbac-authorization false')
-    def setUp(self):
-        super().setUp()
-        self.patcher = mock.patch('azure.cli.core._profile.Profile')
-        self.mock_profile = self.patcher.start()
-        self.addCleanup(self.patcher.stop)
-        self.mock_profile.return_value.get_login_credentials.return_value = (mock.Mock(), mock.Mock(), mock.Mock())
+class KeyVaultSecretCopyScenarioTest(ScenarioTest):
+    """Test suite for keyvault secret copy functionality.
+    
+    This test class validates the secret copy command across different scenarios including
+    single secret copy, bulk copy, overwrite behavior, and error handling.
+    """
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(name_prefix='cli_test_keyvault_copy')
-    @KeyVaultPreparer(name_prefix='cli-test-kv-src-', location='eastus', additional_params='--enable-rbac-authorization false')
-    def test_keyvault_secret_copy(self, key_vault):
+    @ResourceGroupPreparer(name_prefix='cli_test_kv_secret_copy', location='eastus2')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-src-', location='eastus2', 
+                     additional_params='--enable-rbac-authorization false')
+    def test_keyvault_secret_copy_single(self, resource_group, key_vault):
+        """Test copying a single secret between key vaults."""
         self.kwargs.update({
-            'kv': key_vault,
-            'dest_kv': self.create_random_name('cli-test-kv-dest-', 24),
-            'secret_name': self.create_random_name('secret-', 24),
-            'secret_value': 'mysecretvalue',
-            'new_val': 'newval',
-            'secret_name_2': self.create_random_name('secret2-', 24)
+            'src_kv': key_vault,
+            'dest_kv': self.create_random_name('cli-test-kv-dst-', 24),
+            'secret1': self.create_random_name('secret-', 24),
+            'secret_value': 'TestSecretValue123',
+            'loc': 'eastus2'
         })
 
-        # Create Dest KV
-        # Use simple creation to ensure speed and reliability in playback
-        self.cmd('keyvault create -g {rg} -n {dest_kv} --location eastus --enable-rbac-authorization false')
-        self.addCleanup(self.cmd, 'keyvault delete -g {rg} -n {dest_kv}')
-        self.addCleanup(self.cmd, 'keyvault purge -n {dest_kv}')
+        # Create destination vault
+        self.cmd('keyvault create -g {rg} -n {dest_kv} -l {loc} --enable-rbac-authorization false',
+                 checks=[
+                     self.check('name', '{dest_kv}'),
+                     self.check('properties.enableSoftDelete', True)
+                 ])
 
-        # Set secret in Source with tags and content-type
-        self.cmd('keyvault secret set --vault-name {kv} -n {secret_name} --value {secret_value} --tags tag1=value1 --content-type text/plain')
+        # Create secret in source vault with metadata
+        self.cmd('keyvault secret set --vault-name {src_kv} -n {secret1} --value {secret_value} '
+                 '--tags environment=test owner=cli --content-type text/plain',
+                 checks=[
+                     self.check('value', '{secret_value}'),
+                     self.check('contentType', 'text/plain'),
+                     self.check('tags.environment', 'test'),
+                     self.check('tags.owner', 'cli')
+                 ])
 
-        # 1. Copy specific secret
-        self.cmd('keyvault secret copy --source-vault {kv} --destination-vault {dest_kv} --name {secret_name}')
-        self.cmd('keyvault secret show --vault-name {dest_kv} -n {secret_name}', checks=[
-            self.check('value', '{secret_value}'),
-            self.check('tags.tag1', 'value1'),
-            self.check('contentType', 'text/plain')
-        ])
+        # Copy single secret to destination vault
+        self.cmd('keyvault secret copy --source-vault {src_kv} --destination-vault {dest_kv} --name {secret1}')
 
-        # 2. Copy all secrets
-        # Add another secret to source
-        self.cmd('keyvault secret set --vault-name {kv} -n {secret_name_2} --value {secret_value}')
-        
-        # Run copy --all
-        self.cmd('keyvault secret copy --source-vault {kv} --destination-vault {dest_kv} --all')
-        
-        # Verify both exist in dest
-        self.cmd('keyvault secret show --vault-name {dest_kv} -n {secret_name_2}', checks=[
-            self.check('value', '{secret_value}')
-        ])
+        # Verify secret was copied with all properties
+        self.cmd('keyvault secret show --vault-name {dest_kv} -n {secret1}',
+                 checks=[
+                     self.check('value', '{secret_value}'),
+                     self.check('contentType', 'text/plain'),
+                     self.check('tags.environment', 'test'),
+                     self.check('tags.owner', 'cli'),
+                     self.check('name', '{secret1}')
+                 ])
 
-        # 3. Test overwrite protection (default behavior: skip)
-        # Update source
-        self.cmd('keyvault secret set --vault-name {kv} -n {secret_name} --value {new_val}')
-        
-        # Copy without overwrite (should skip)
-        self.cmd('keyvault secret copy --source-vault {kv} --destination-vault {dest_kv} --name {secret_name}')
-        
-        # Verify destination still has old value
-        self.cmd('keyvault secret show --vault-name {dest_kv} -n {secret_name}', checks=[
-            self.check('value', '{secret_value}')
-        ])
+        # Verify source secret still exists
+        self.cmd('keyvault secret show --vault-name {src_kv} -n {secret1}',
+                 checks=[
+                     self.check('value', '{secret_value}'),
+                     self.check('name', '{secret1}')
+                 ])
 
-        # 4. Test overwrite
-        self.cmd('keyvault secret copy --source-vault {kv} --destination-vault {dest_kv} --name {secret_name} --overwrite')
-        
-        # Verify destination has new value
-        self.cmd('keyvault secret show --vault-name {dest_kv} -n {secret_name}', checks=[
-            self.check('value', '{new_val}')
-        ])
+        # Cleanup
+        self.cmd('keyvault delete -g {rg} -n {dest_kv}')
+        self.cmd('keyvault purge -n {dest_kv}')
 
-        # 5. Test Mutual Exclusivity
-        self.cmd('keyvault secret copy --source-vault {kv} --destination-vault {dest_kv} --name {secret_name} --all', expect_failure=True)
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_kv_secret_copy', location='eastus2')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-src-', location='eastus2',
+                     additional_params='--enable-rbac-authorization false')
+    def test_keyvault_secret_copy_all(self, resource_group, key_vault):
+        """Test copying all secrets from source to destination vault."""
+        self.kwargs.update({
+            'src_kv': key_vault,
+            'dest_kv': self.create_random_name('cli-test-kv-dst-', 24),
+            'secret1': self.create_random_name('secret1-', 24),
+            'secret2': self.create_random_name('secret2-', 24),
+            'secret3': self.create_random_name('secret3-', 24),
+            'value1': 'Value1',
+            'value2': 'Value2',
+            'value3': 'Value3',
+            'loc': 'eastus2'
+        })
 
-        # 6. Test Source == Destination (Should fail)
-        self.cmd('keyvault secret copy --source-vault {kv} --destination-vault {kv} --name {secret_name}', expect_failure=True)
+        # Create destination vault
+        self.cmd('keyvault create -g {rg} -n {dest_kv} -l {loc} --enable-rbac-authorization false')
 
-        # 7. Test Non-existent Destination (Should fail fast)
-        self.cmd('keyvault secret copy --source-vault {kv} --destination-vault non_existent_kv_12345 --name {secret_name}', expect_failure=True)
+        # Create multiple secrets in source vault
+        self.cmd('keyvault secret set --vault-name {src_kv} -n {secret1} --value {value1}',
+                 checks=self.check('value', '{value1}'))
+        self.cmd('keyvault secret set --vault-name {src_kv} -n {secret2} --value {value2}',
+                 checks=self.check('value', '{value2}'))
+        self.cmd('keyvault secret set --vault-name {src_kv} -n {secret3} --value {value3}',
+                 checks=self.check('value', '{value3}'))
 
-        # 8. Test Non-existent Secret in Source (Should fail)
-        self.cmd('keyvault secret copy --source-vault {kv} --destination-vault {dest_kv} --name non_existent_secret_123', expect_failure=True)
+        # Copy all secrets to destination
+        self.cmd('keyvault secret copy --source-vault {src_kv} --destination-vault {dest_kv} --all')
 
-        # 9. Test Default Behavior (Implicit --all)
-        # Add a unique secret to check implicit copy
-        secret_name_3 = self.create_random_name('secret3-', 24)
-        self.kwargs['secret_name_3'] = secret_name_3
-        self.cmd('keyvault secret set --vault-name {kv} -n {secret_name_3} --value {secret_value}')
-        
-        # Run copy without --name or --all
-        self.cmd('keyvault secret copy --source-vault {kv} --destination-vault {dest_kv}')
-        
-        # Verify it was copied
-        self.cmd('keyvault secret show --vault-name {dest_kv} -n {secret_name_3}', checks=[
-            self.check('value', '{secret_value}')
-        ])
+        # Verify all secrets were copied
+        self.cmd('keyvault secret show --vault-name {dest_kv} -n {secret1}',
+                 checks=self.check('value', '{value1}'))
+        self.cmd('keyvault secret show --vault-name {dest_kv} -n {secret2}',
+                 checks=self.check('value', '{value2}'))
+        self.cmd('keyvault secret show --vault-name {dest_kv} -n {secret3}',
+                 checks=self.check('value', '{value3}'))
+
+        # Verify source secrets still exist
+        self.cmd('keyvault secret list --vault-name {src_kv}',
+                 checks=self.check('length(@)', 3))
+
+        # Cleanup
+        self.cmd('keyvault delete -g {rg} -n {dest_kv}')
+        self.cmd('keyvault purge -n {dest_kv}')
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_kv_secret_copy', location='eastus2')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-src-', location='eastus2',
+                     additional_params='--enable-rbac-authorization false')
+    def test_keyvault_secret_copy_overwrite_behavior(self, resource_group, key_vault):
+        """Test overwrite behavior when copying secrets that already exist."""
+        self.kwargs.update({
+            'src_kv': key_vault,
+            'dest_kv': self.create_random_name('cli-test-kv-dst-', 24),
+            'secret': self.create_random_name('secret-', 24),
+            'original_value': 'OriginalValue',
+            'updated_value': 'UpdatedValue',
+            'loc': 'eastus2'
+        })
+
+        # Create destination vault
+        self.cmd('keyvault create -g {rg} -n {dest_kv} -l {loc} --enable-rbac-authorization false')
+
+        # Create secret in source vault
+        self.cmd('keyvault secret set --vault-name {src_kv} -n {secret} --value {original_value}')
+
+        # Copy secret to destination
+        self.cmd('keyvault secret copy --source-vault {src_kv} --destination-vault {dest_kv} --name {secret}')
+
+        # Verify secret was copied
+        self.cmd('keyvault secret show --vault-name {dest_kv} -n {secret}',
+                 checks=self.check('value', '{original_value}'))
+
+        # Update secret in source vault
+        self.cmd('keyvault secret set --vault-name {src_kv} -n {secret} --value {updated_value}')
+
+        # Copy again without overwrite flag (should skip)
+        self.cmd('keyvault secret copy --source-vault {src_kv} --destination-vault {dest_kv} --name {secret}')
+
+        # Verify destination still has original value
+        self.cmd('keyvault secret show --vault-name {dest_kv} -n {secret}',
+                 checks=self.check('value', '{original_value}'))
+
+        # Copy with overwrite flag (should update)
+        self.cmd('keyvault secret copy --source-vault {src_kv} --destination-vault {dest_kv} '
+                 '--name {secret} --overwrite')
+
+        # Verify destination now has updated value
+        self.cmd('keyvault secret show --vault-name {dest_kv} -n {secret}',
+                 checks=self.check('value', '{updated_value}'))
+
+        # Cleanup
+        self.cmd('keyvault delete -g {rg} -n {dest_kv}')
+        self.cmd('keyvault purge -n {dest_kv}')
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_kv_secret_copy', location='eastus2')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-src-', location='eastus2',
+                     additional_params='--enable-rbac-authorization false')
+    def test_keyvault_secret_copy_error_cases(self, resource_group, key_vault):
+        """Test error handling for invalid copy operations."""
+        self.kwargs.update({
+            'src_kv': key_vault,
+            'dest_kv': self.create_random_name('cli-test-kv-dst-', 24),
+            'nonexistent_kv': 'nonexistent-kv-' + self.create_random_name('', 10),
+            'secret': self.create_random_name('secret-', 24),
+            'nonexistent_secret': 'nonexistent-secret-' + self.create_random_name('', 10),
+            'secret_value': 'TestValue',
+            'loc': 'eastus2'
+        })
+
+        # Create destination vault and a secret
+        self.cmd('keyvault create -g {rg} -n {dest_kv} -l {loc} --enable-rbac-authorization false')
+        self.cmd('keyvault secret set --vault-name {src_kv} -n {secret} --value {secret_value}')
+
+        # Test 1: Copy to non-existent destination vault (should fail)
+        self.cmd('keyvault secret copy --source-vault {src_kv} --destination-vault {nonexistent_kv} '
+                 '--name {secret}',
+                 expect_failure=True)
+
+        # Test 2: Copy non-existent secret (should fail)
+        self.cmd('keyvault secret copy --source-vault {src_kv} --destination-vault {dest_kv} '
+                 '--name {nonexistent_secret}',
+                 expect_failure=True)
+
+        # Test 3: Source and destination are the same (should fail)
+        self.cmd('keyvault secret copy --source-vault {src_kv} --destination-vault {src_kv} '
+                 '--name {secret}',
+                 expect_failure=True)
+
+        # Test 4: Using both --name and --all flags (should fail due to mutual exclusivity)
+        self.cmd('keyvault secret copy --source-vault {src_kv} --destination-vault {dest_kv} '
+                 '--name {secret} --all',
+                 expect_failure=True)
+
+        # Cleanup
+        self.cmd('keyvault delete -g {rg} -n {dest_kv}')
+        self.cmd('keyvault purge -n {dest_kv}')
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_kv_secret_copy', location='eastus2')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-src-', location='eastus2',
+                     additional_params='--enable-rbac-authorization false')
+    def test_keyvault_secret_copy_default_behavior(self, resource_group, key_vault):
+        """Test default behavior when neither --name nor --all is specified."""
+        self.kwargs.update({
+            'src_kv': key_vault,
+            'dest_kv': self.create_random_name('cli-test-kv-dst-', 24),
+            'secret1': self.create_random_name('secret1-', 24),
+            'secret2': self.create_random_name('secret2-', 24),
+            'value1': 'DefaultValue1',
+            'value2': 'DefaultValue2',
+            'loc': 'eastus2'
+        })
+
+        # Create destination vault
+        self.cmd('keyvault create -g {rg} -n {dest_kv} -l {loc} --enable-rbac-authorization false')
+
+        # Create secrets in source vault
+        self.cmd('keyvault secret set --vault-name {src_kv} -n {secret1} --value {value1}')
+        self.cmd('keyvault secret set --vault-name {src_kv} -n {secret2} --value {value2}')
+
+        # Copy without specifying --name or --all (should default to --all)
+        self.cmd('keyvault secret copy --source-vault {src_kv} --destination-vault {dest_kv}')
+
+        # Verify all secrets were copied
+        self.cmd('keyvault secret show --vault-name {dest_kv} -n {secret1}',
+                 checks=self.check('value', '{value1}'))
+        self.cmd('keyvault secret show --vault-name {dest_kv} -n {secret2}',
+                 checks=self.check('value', '{value2}'))
+
+        # Cleanup
+        self.cmd('keyvault delete -g {rg} -n {dest_kv}')
+        self.cmd('keyvault purge -n {dest_kv}')
 
 
-class KeyVaultCopySecretTest(unittest.TestCase):
+class KeyVaultSecretCopyUnitTest(unittest.TestCase):
+    """Unit tests for the copy_secret function with mocked dependencies."""
+
     def setUp(self):
+        """Set up test fixtures and mocks."""
+        # Create mock command context
         self.cmd = mock.MagicMock()
         self.cmd.cli_ctx = mock.MagicMock()
         self.cmd.cli_ctx.data = {
-            'subscription_id': 'sub_id',
+            'subscription_id': 'test-subscription-id',
             'headers': {},
             'completer_active': False,
             'command': 'keyvault secret copy'
         }
 
-        # Patches
+        # Mock Profile for authentication
         self.patcher_profile = mock.patch('azure.cli.core._profile.Profile')
-        self.mock_profile = self.patcher_profile.start()
+        self.mock_profile_class = self.patcher_profile.start()
         self.mock_profile_instance = mock.MagicMock()
-        self.mock_profile.return_value = self.mock_profile_instance
-        self.mock_profile_instance.get_login_credentials.return_value = (mock.Mock(), mock.Mock(), mock.Mock())
+        self.mock_profile_class.return_value = self.mock_profile_instance
+        self.mock_profile_instance.get_login_credentials.return_value = (
+            mock.Mock(), mock.Mock(), mock.Mock()
+        )
 
+        # Mock SecretClient
         self.patcher_secret_client = mock.patch('azure.keyvault.secrets.SecretClient')
-        self.mock_secret_client_cls = self.patcher_secret_client.start()
-        
-        # Source Client Mock (passed as argument)
+        self.mock_secret_client_class = self.patcher_secret_client.start()
+
+        # Create source and destination client mocks
         self.source_client = mock.MagicMock()
-        self.source_client.vault_url = "https://source-kv.vault.azure.net/"
-        
-        # Dest Client Mock (instantiated inside function)
+        self.source_client.vault_url = "https://source-vault.vault.azure.net/"
+
         self.dest_client = mock.MagicMock()
-        self.mock_secret_client_cls.return_value = self.dest_client
+        self.dest_client.vault_url = "https://destination-vault.vault.azure.net/"
+        self.mock_secret_client_class.return_value = self.dest_client
 
     def tearDown(self):
+        """Clean up mocks."""
         self.patcher_profile.stop()
         self.patcher_secret_client.stop()
 
+    def _create_mock_secret(self, name, value, content_type=None, tags=None, enabled=True,
+                           not_before=None, expires_on=None):
+        """Helper method to create a mock secret object."""
+        secret = mock.Mock()
+        secret.name = name
+        secret.value = value
+        secret.properties = mock.Mock()
+        secret.properties.content_type = content_type
+        secret.properties.tags = tags or {}
+        secret.properties.enabled = enabled
+        secret.properties.not_before = not_before
+        secret.properties.expires_on = expires_on
+        secret.properties.managed = False
+        return secret
+
     def test_copy_single_secret_success(self):
-        # Setup
-        secret_name = "mysecret"
-        destination_vault = "https://dest-kv.vault.azure.net/"
-        
-        # Mocks for verification check
-        # Dummy check raises 404 which is expected/success path for connectivity check
+        """Test successful copy of a single secret."""
+        secret_name = "test-secret"
+        destination_vault = "https://destination-vault.vault.azure.net/"
+
+        # Mock destination vault connectivity check
         not_found_error = HttpResponseError(message="Not Found")
         not_found_error.status_code = 404
-        self.dest_client.get_secret.side_effect = [not_found_error, ResourceNotFoundError] 
-        # First call is dummy check (fails with 404), second is check existence (fails with ResourceNotFoundError -> OK to copy)
 
-        # Source secret
-        secret_obj = mock.Mock()
-        secret_obj.name = secret_name
-        secret_obj.value = "secret_value"
-        secret_obj.properties.content_type = "text/plain"
-        secret_obj.properties.tags = {}
-        secret_obj.properties.enabled = True
-        secret_obj.properties.not_before = None
-        secret_obj.properties.expires_on = None
-        
-        self.source_client.get_secret.return_value = secret_obj
-
-        # Result of set_secret
-        new_secret = mock.Mock()
-        new_secret.name = secret_name
-        new_secret.id = destination_vault + "/secrets/" + secret_name
-        self.dest_client.set_secret.return_value = new_secret
-
-        # Act
-        result = copy_secret(self.cmd, self.source_client, destination_vault, name=secret_name)
-
-        # Assert
-        self.assertEqual(len(result), 1)
-        self.assertEqual(result[0]['name'], secret_name)
-        self.dest_client.set_secret.assert_called_with(
-            secret_name, "secret_value", content_type="text/plain", tags={},
-            enabled=True, not_before=None, expires_on=None
-        )
-
-    def test_copy_secret_already_exists_no_overwrite(self):
-        # Setup
-        secret_name = "mysecret"
-        destination_vault = "https://dest-kv.vault.azure.net/"
-        
-        # Dummy check 404
-        not_found_error = HttpResponseError(message="Not Found")
-        not_found_error.status_code = 404
-        
-        # Pre-check existence returns Success (means it exists)
-        self.dest_client.get_secret.side_effect = [not_found_error, mock.Mock()]
-
-        # Act
-        result = copy_secret(self.cmd, self.source_client, destination_vault, name=secret_name, overwrite=False)
-
-        # Assert
-        self.assertEqual(len(result), 0) # Should be empty list as it was skipped
-        self.dest_client.set_secret.assert_not_called()
-
-    def test_copy_secret_already_exists_with_overwrite(self):
-        # Setup
-        secret_name = "mysecret"
-        destination_vault = "https://dest-kv.vault.azure.net/"
-        
-        # Dummy check 404
-        not_found_error = HttpResponseError(message="Not Found")
-        not_found_error.status_code = 404
-        self.dest_client.get_secret.side_effect = [not_found_error] # No second call because overwrite=True skips check
-
-        # Source secret
-        secret_obj = mock.Mock()
-        secret_obj.name = secret_name
-        secret_obj.value = "val"
-        secret_obj.properties.content_type = None
-        secret_obj.properties.tags = None
-        secret_obj.properties.enabled = True
-        secret_obj.properties.not_before = None
-        secret_obj.properties.expires_on = None
-        self.source_client.get_secret.return_value = secret_obj
-
-        new_secret = mock.Mock()
-        new_secret.name = secret_name
-        new_secret.id = destination_vault + "/secrets/" + secret_name
-        self.dest_client.set_secret.return_value = new_secret
-
-        # Act
-        result = copy_secret(self.cmd, self.source_client, destination_vault, name=secret_name, overwrite=True)
-
-        # Assert
-        self.assertEqual(len(result), 1)
-        self.dest_client.set_secret.assert_called()
-
-    def test_copy_all_secrets(self):
-        # Setup
-        destination_vault = "https://dest-kv.vault.azure.net/"
-        
-        # Dummy check 404
-        not_found_error = HttpResponseError(message="Not Found")
-        not_found_error.status_code = 404
-        # We have 2 secrets. For each, we check existence (fails -> copy). 
-        # Side effect sequence: DummyCheck -> Check(sec1) -> Check(sec2)
+        # Mock sequence: connectivity check (404), then existence check (not found)
         self.dest_client.get_secret.side_effect = [
-            not_found_error, 
-            ResourceNotFoundError, 
-            ResourceNotFoundError
+            not_found_error,
+            ResourceNotFoundError("Secret not found")
         ]
 
-        # List secrets source
-        s1 = mock.Mock(); s1.name = "sec1"; s1.managed = False
-        s2 = mock.Mock(); s2.name = "sec2"; s2.managed = False
-        s3 = mock.Mock(); s3.name = "mgd1"; s3.managed = True # Should be skipped
-        self.source_client.list_properties_of_secrets.return_value = [s1, s2, s3]
+        # Mock source secret
+        source_secret = self._create_mock_secret(
+            name=secret_name,
+            value="secret-value-123",
+            content_type="application/json",
+            tags={"env": "test", "version": "1.0"}
+        )
+        self.source_client.get_secret.return_value = source_secret
 
-        # Get secret details
+        # Mock successful set operation
+        dest_secret = self._create_mock_secret(
+            name=secret_name,
+            value="secret-value-123"
+        )
+        dest_secret.id = f"{destination_vault}/secrets/{secret_name}"
+        self.dest_client.set_secret.return_value = dest_secret
+
+        # Execute copy operation
+        result = copy_secret(self.cmd, self.source_client, destination_vault, name=secret_name)
+
+        # Verify results
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]['name'], secret_name)
+        self.assertIn('id', result[0])
+
+        # Verify set_secret was called with correct parameters
+        self.dest_client.set_secret.assert_called_once()
+        call_args = self.dest_client.set_secret.call_args
+        self.assertEqual(call_args[0][0], secret_name)
+        self.assertEqual(call_args[0][1], "secret-value-123")
+        self.assertEqual(call_args[1]['content_type'], "application/json")
+        self.assertEqual(call_args[1]['tags'], {"env": "test", "version": "1.0"})
+
+    def test_copy_secret_already_exists_skip(self):
+        """Test that existing secrets are skipped when overwrite is False."""
+        secret_name = "existing-secret"
+        destination_vault = "https://destination-vault.vault.azure.net/"
+
+        # Mock destination vault connectivity check
+        not_found_error = HttpResponseError(message="Not Found")
+        not_found_error.status_code = 404
+
+        # Mock sequence: connectivity check (404), then existence check (found)
+        existing_secret = self._create_mock_secret(name=secret_name, value="existing-value")
+        self.dest_client.get_secret.side_effect = [not_found_error, existing_secret]
+
+        # Execute copy operation without overwrite
+        result = copy_secret(
+            self.cmd,
+            self.source_client,
+            destination_vault,
+            name=secret_name,
+            overwrite=False
+        )
+
+        # Verify secret was skipped
+        self.assertEqual(len(result), 0)
+        self.dest_client.set_secret.assert_not_called()
+
+    def test_copy_secret_overwrite_enabled(self):
+        """Test that existing secrets are overwritten when overwrite is True."""
+        secret_name = "overwrite-secret"
+        destination_vault = "https://destination-vault.vault.azure.net/"
+
+        # Mock destination vault connectivity check only (skip existence check)
+        not_found_error = HttpResponseError(message="Not Found")
+        not_found_error.status_code = 404
+        self.dest_client.get_secret.side_effect = [not_found_error]
+
+        # Mock source secret with new value
+        source_secret = self._create_mock_secret(
+            name=secret_name,
+            value="new-overwrite-value",
+            tags={"updated": "true"}
+        )
+        self.source_client.get_secret.return_value = source_secret
+
+        # Mock successful set operation
+        dest_secret = self._create_mock_secret(name=secret_name, value="new-overwrite-value")
+        dest_secret.id = f"{destination_vault}/secrets/{secret_name}"
+        self.dest_client.set_secret.return_value = dest_secret
+
+        # Execute copy operation with overwrite
+        result = copy_secret(
+            self.cmd,
+            self.source_client,
+            destination_vault,
+            name=secret_name,
+            overwrite=True
+        )
+
+        # Verify secret was overwritten
+        self.assertEqual(len(result), 1)
+        self.dest_client.set_secret.assert_called_once()
+
+    def test_copy_all_secrets_success(self):
+        """Test copying all secrets from source to destination."""
+        destination_vault = "https://destination-vault.vault.azure.net/"
+
+        # Mock destination vault connectivity check
+        not_found_error = HttpResponseError(message="Not Found")
+        not_found_error.status_code = 404
+
+        # Mock list of secrets in source vault
+        secret_props_1 = mock.Mock()
+        secret_props_1.name = "secret-one"
+        secret_props_1.managed = False
+
+        secret_props_2 = mock.Mock()
+        secret_props_2.name = "secret-two"
+        secret_props_2.managed = False
+
+        secret_props_3 = mock.Mock()
+        secret_props_3.name = "managed-secret"
+        secret_props_3.managed = True  # This should be skipped
+
+        self.source_client.list_properties_of_secrets.return_value = [
+            secret_props_1,
+            secret_props_2,
+            secret_props_3
+        ]
+
+        # Mock destination vault checks (connectivity + existence for each secret)
+        self.dest_client.get_secret.side_effect = [
+            not_found_error,  # Connectivity check
+            ResourceNotFoundError("Not found"),  # secret-one doesn't exist
+            ResourceNotFoundError("Not found")   # secret-two doesn't exist
+        ]
+
+        # Mock get_secret for source secrets
         def get_secret_side_effect(name):
-            m = mock.Mock()
-            m.name = name
-            m.value = "val"
-            m.properties.content_type = None
-            m.properties.tags = None
-            m.properties.enabled = True
-            m.properties.not_before = None
-            m.properties.expires_on = None
-            return m
+            return self._create_mock_secret(name=name, value=f"value-for-{name}")
+
         self.source_client.get_secret.side_effect = get_secret_side_effect
 
-        new_secret = mock.Mock()
-        new_secret.name = "sec"
-        new_secret.id = "id"
-        self.dest_client.set_secret.return_value = new_secret
+        # Mock set_secret responses
+        def set_secret_side_effect(name, value, **kwargs):
+            secret = self._create_mock_secret(name=name, value=value)
+            secret.id = f"{destination_vault}/secrets/{name}"
+            return secret
 
-        # Act
+        self.dest_client.set_secret.side_effect = set_secret_side_effect
+
+        # Execute copy all operation
         result = copy_secret(self.cmd, self.source_client, destination_vault, all_secrets=True)
 
-        # Assert
+        # Verify only non-managed secrets were copied
         self.assertEqual(len(result), 2)
-        call_args = self.dest_client.set_secret.call_args_list
-        self.assertEqual(call_args[0][0][0], "sec1")
-        self.assertEqual(call_args[1][0][0], "sec2")
+        copied_names = {r['name'] for r in result}
+        self.assertEqual(copied_names, {"secret-one", "secret-two"})
+
+        # Verify set_secret was called twice (not for managed secret)
+        self.assertEqual(self.dest_client.set_secret.call_count, 2)
+
+    def test_copy_all_secrets_with_some_existing(self):
+        """Test copying all secrets when some already exist in destination."""
+        destination_vault = "https://destination-vault.vault.azure.net/"
+
+        # Mock destination vault connectivity check
+        not_found_error = HttpResponseError(message="Not Found")
+        not_found_error.status_code = 404
+
+        # Mock list of secrets in source vault
+        secret_props_1 = mock.Mock()
+        secret_props_1.name = "secret-new"
+        secret_props_1.managed = False
+
+        secret_props_2 = mock.Mock()
+        secret_props_2.name = "secret-existing"
+        secret_props_2.managed = False
+
+        self.source_client.list_properties_of_secrets.return_value = [
+            secret_props_1,
+            secret_props_2
+        ]
+
+        # Mock destination vault checks
+        existing_secret = self._create_mock_secret(name="secret-existing", value="old-value")
+        self.dest_client.get_secret.side_effect = [
+            not_found_error,  # Connectivity check
+            ResourceNotFoundError("Not found"),  # secret-new doesn't exist
+            existing_secret  # secret-existing exists
+        ]
+
+        # Mock get_secret for source secrets
+        def get_secret_side_effect(name):
+            return self._create_mock_secret(name=name, value=f"value-for-{name}")
+
+        self.source_client.get_secret.side_effect = get_secret_side_effect
+
+        # Mock set_secret response
+        def set_secret_side_effect(name, value, **kwargs):
+            secret = self._create_mock_secret(name=name, value=value)
+            secret.id = f"{destination_vault}/secrets/{name}"
+            return secret
+
+        self.dest_client.set_secret.side_effect = set_secret_side_effect
+
+        # Execute copy all operation without overwrite
+        result = copy_secret(
+            self.cmd,
+            self.source_client,
+            destination_vault,
+            all_secrets=True,
+            overwrite=False
+        )
+
+        # Verify only the new secret was copied
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]['name'], "secret-new")
+
+        # Verify set_secret was called only once
+        self.assertEqual(self.dest_client.set_secret.call_count, 1)
 
 
 if __name__ == '__main__':
