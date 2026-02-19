@@ -1329,6 +1329,7 @@ def _prepare_stacks_action_on_unmanage(action_on_unmanage, resources_without_del
         resources=aou_resources_action_enum, resource_groups=aou_resource_groups_action_enum,
         management_groups=aou_management_groups_action_enum, resources_without_delete_support=resources_without_delete_support)
 
+
 def _prepare_stacks_excluded_actions(deny_settings_excluded_actions):
     excluded_actions_array = []
     if deny_settings_excluded_actions:

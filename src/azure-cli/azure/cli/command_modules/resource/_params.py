@@ -621,7 +621,8 @@ def load_arguments(self, _):
     with self.argument_context('stack mg') as c:
         c.argument('management_group_id', arg_type=management_group_id_type, help='The management group id to create stack at.')
 
-    for resource_type in ['stack', 'stack-whatif']:
+    # TODO(kylealbert): add "stack-whatif"
+    for resource_type in ['stack']:
         for scope in ['group', 'sub', 'mg']:
             for action in ['create', 'validate', 'delete', 'show', 'list', 'export']:
                 if resource_type == 'stack-whatif' and (action == 'validate' or action == 'export'):
@@ -681,7 +682,7 @@ def load_arguments(self, _):
                             c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the deployment stack exists')
                     elif action == 'list':
                         if scope == 'sub':
-                            pass # only uses global arguments
+                            pass  # only uses global arguments
                         c.argument('subscription', arg_type=subscription_type)
                         if scope == 'group':
                             c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the deployment stack exists')
