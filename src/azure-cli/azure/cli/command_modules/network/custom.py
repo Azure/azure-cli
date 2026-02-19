@@ -61,6 +61,7 @@ from .aaz.latest.network.application_gateway.waf_policy.custom_rule.match_condit
     Add as _WAFCustomRuleMatchConditionAdd
 from .aaz.latest.network.application_gateway.waf_policy.policy_setting import Update as _WAFPolicySettingUpdate
 from .aaz.latest.network.custom_ip.prefix import Create as _CustomIpPrefixCreate, Update as _CustomIpPrefixUpdate
+from .aaz.latest.network.ddos_custom_policy import Update as _DdosCustomPolicyUpdate
 from .aaz.latest.network.dns.record_set import List as _DNSRecordSetListByZone
 from .aaz.latest.network.dns.zone import Create as _DNSZoneCreate
 from .aaz.latest.network.express_route import Create as _ExpressRouteCreate, Update as _ExpressRouteUpdate
@@ -6718,3 +6719,40 @@ class CustomIpPrefixUpdate(_CustomIpPrefixUpdate):
         args_schema.state.enum = AAZArgEnum({"commission": "Commissioning", "decommission": "Decommissioning", "deprovision": "Deprovisioning", "provision": "Provisioning"})
 
         return args_schema
+
+
+def create_ddos_custom_policy(cmd, ddos_custom_policy_name, resource_group_name, location=None, tags=None,
+                              detection_rule_name=None, detection_mode=None, traffic_type=None,
+                              packets_per_second=None, no_wait=None):
+    from .aaz.latest.network.ddos_custom_policy import Create as DdosCustomPolicyCreate, Show as DdosCustomPolicyShow
+    from .operations.ddos_custom_policy import convert_ddos_custom_policy_to_snake_case, combine_old_and_new_custom_policy
+    from ._template_builder import build_ddos_custom_policy
+
+    existing_policy = None
+
+    try:
+        existing_policy = DdosCustomPolicyShow(cli_ctx=cmd.cli_ctx)(command_args={
+            'ddos_custom_policy_name': ddos_custom_policy_name,
+            'resource_group': resource_group_name
+        })
+
+        existing_policy = convert_ddos_custom_policy_to_snake_case(existing_policy)
+    except ResourceNotFoundError:
+        # No existing DDoS custom policy; proceed with creation.
+        logger.debug("DDoS custom policy '%s' not found in resource group '%s'.",
+                     ddos_custom_policy_name, resource_group_name)
+    except Exception as err:  # pylint: disable=broad-except
+        # Log unexpected errors while preserving previous behavior of not failing the command.
+        logger.warning("Failed to retrieve existing DDoS custom policy '%s' in resource group '%s': %s",
+                       ddos_custom_policy_name, resource_group_name, err)
+
+    policy = build_ddos_custom_policy(cmd, ddos_custom_policy_name, location, tags, detection_rule_name, detection_mode,
+                                      packets_per_second, traffic_type)
+
+    if existing_policy:
+        policy = combine_old_and_new_custom_policy(existing_policy, policy)
+
+    policy['resource_group'] = resource_group_name
+    policy['no_wait'] = no_wait
+
+    return DdosCustomPolicyCreate(cli_ctx=cmd.cli_ctx)(command_args=policy)

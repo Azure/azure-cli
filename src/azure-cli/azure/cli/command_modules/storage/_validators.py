@@ -2122,22 +2122,41 @@ def validate_fs_file_set_expiry(namespace):
         pass
 
 
-def validate_ip_address(namespace):
-    # if there are overlapping ip ranges, throw an exception
-    ip_address = namespace.ip_address
-
+def _find_ip_address_overlap(ip_address, ipv6=False):
     if not ip_address:
         return
 
+    from azure.cli.core.azclierror import InvalidArgumentValueError
     ip_address_networks = [ip_network(ip) for ip in ip_address]
+    if ipv6:
+        ipv4_address_in_ipv6 = [ip for ip in ip_address_networks if ip.version != 6]
+        if ipv4_address_in_ipv6:
+            raise InvalidArgumentValueError(f"ipv4 addresses {ipv4_address_in_ipv6} found in --ipv6-address")
+    else:
+        ipv6_address_in_ipv4 = [ip for ip in ip_address_networks if ip.version == 6]
+        if ipv6_address_in_ipv4:
+            raise InvalidArgumentValueError(f"ipv6 addresses {ipv6_address_in_ipv4} found in --ip-address")
+
+    error_str = "ipv6 addresses {} and {} provided are overlapping: --ipv6-address ip1 [ip2]..." if ipv6 else \
+        "ip addresses {} and {} provided are overlapping: --ip-address ip1 [ip2]..."
     for idx, ip_address_network in enumerate(ip_address_networks):
         for idx2, ip_address_network2 in enumerate(ip_address_networks):
             if idx == idx2:
                 continue
             if ip_address_network.overlaps(ip_address_network2):
-                from azure.cli.core.azclierror import InvalidArgumentValueError
-                raise InvalidArgumentValueError(f"ip addresses {ip_address_network} and {ip_address_network2} "
-                                                f"provided are overlapping: --ip_address ip1 [ip2]...")
+                raise InvalidArgumentValueError(error_str.format(ip_address_network, ip_address_network2))
+
+
+def validate_ip_address(namespace):
+    # if there are overlapping ip ranges, throw an exception
+    ip_address = namespace.ip_address
+    _find_ip_address_overlap(ip_address=ip_address, ipv6=False)
+
+
+def validate_ipv6_address(namespace):
+    # if there are overlapping ip ranges, throw an exception
+    ipv6_address = namespace.ipv6_address
+    _find_ip_address_overlap(ip_address=ipv6_address, ipv6=True)
 
 
 # pylint: disable=too-few-public-methods

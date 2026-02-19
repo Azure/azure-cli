@@ -107,6 +107,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_MAPS = ('azure.mgmt.maps', None)
     MGMT_POLICYINSIGHTS = ('azure.mgmt.policyinsights', None)
     MGMT_RDBMS = ('azure.mgmt.rdbms', None)
+    MGMT_POSTGRESQL = ('azure.mgmt.postgresql', None)
     MGMT_REDIS = ('azure.mgmt.redis', None)
     MGMT_SEARCH = ('azure.mgmt.search', None)
     MGMT_SERVICEFABRIC = ('azure.mgmt.servicefabric', None)

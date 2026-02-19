@@ -41,13 +41,14 @@ from ._vm_utils import read_content_if_is_file, import_aaz_by_profile, IdentityT
 from ._vm_diagnostics_templates import get_default_diag_config
 
 from ._actions import (load_images_from_aliases_doc, load_extension_images_thru_services,
-                       load_images_thru_services, _get_latest_image_version)
+                       load_images_thru_services, _get_latest_image_version, _get_latest_image_version_by_aaz)
 from ._client_factory import (_compute_client_factory, cf_vm_image_term)
 
 from .aaz.latest.vm.disk import AttachDetachDataDisk
 from .aaz.latest.vm import Update as UpdateVM
 
 from .generated.custom import *  # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
+
 try:
     from .manual.custom import *   # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
 except ImportError:
@@ -182,6 +183,18 @@ def _get_disk_lun(data_disks):
         return 0
 
     existing_luns = sorted([d.lun for d in data_disks])
+    for i, current in enumerate(existing_luns):
+        if current != i:
+            return i
+    return len(existing_luns)
+
+
+def _get_disk_lun_by_aaz(data_disks):
+    # start from 0, search for unused int for lun
+    if not data_disks:
+        return 0
+
+    existing_luns = sorted([d['lun'] for d in data_disks])
     for i, current in enumerate(existing_luns):
         if current != i:
             return i
@@ -484,8 +497,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
             if len(terms) == 4:  # URN
                 disk_publisher, disk_offer, disk_sku, disk_version = terms[0], terms[1], terms[2], terms[3]
                 if disk_version.lower() == 'latest':
-                    disk_version = _get_latest_image_version(cmd.cli_ctx, location, disk_publisher, disk_offer,
-                                                             disk_sku)
+                    disk_version = _get_latest_image_version_by_aaz(cmd.cli_ctx, location, disk_publisher, disk_offer,
+                                                                    disk_sku)
             else:  # error
                 raise CLIError('usage error: --image-reference should be ID or URN (publisher:offer:sku:version).')
         else:
@@ -494,14 +507,20 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
             disk_publisher, disk_offer, disk_sku, disk_version = \
                 terms['child_name_1'], terms['child_name_3'], terms['child_name_4'], terms['child_name_5']
 
-        client = _compute_client_factory(cmd.cli_ctx)
-        response = client.virtual_machine_images.get(location=location, publisher_name=disk_publisher,
-                                                     offer=disk_offer, skus=disk_sku, version=disk_version)
+        from .aaz.latest.vm.image import Show as VmImageShow
+        command_args = {
+            'location': location,
+            'offer': disk_offer,
+            'publisher': disk_publisher,
+            'sku': disk_sku,
+            'version': disk_version,
+        }
+        response = VmImageShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
-        if hasattr(response, 'hyper_v_generation'):
-            if response.hyper_v_generation == 'V1':
+        if response.get('hyper_v_generation'):
+            if response.get('hyper_v_generation') == 'V1':
                 logger.warning(UPGRADE_SECURITY_HINT)
-            elif response.hyper_v_generation == 'V2':
+            elif response.get('hyper_v_generation') == 'V2':
                 # set default value of hyper_v_generation
                 if hyper_v_generation == 'V1':
                     hyper_v_generation = 'V2'
@@ -512,7 +531,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                     logger.warning(UPGRADE_SECURITY_HINT)
 
         # image_reference is an ID now
-        image_reference = {'id': response.id}
+        image_reference = {'id': response.get('id')}
         if image_reference_lun is not None:
             image_reference['lun'] = image_reference_lun
 
@@ -836,8 +855,8 @@ def show_vm_identity(cmd, resource_group_name, vm_name):
 
 
 def show_vmss_identity(cmd, resource_group_name, vm_name):
-    client = _compute_client_factory(cmd.cli_ctx)
-    return client.virtual_machine_scale_sets.get(resource_group_name, vm_name).identity
+    vm = get_vmss_by_aaz(cmd, resource_group_name, vm_name)
+    return vm.get("identity", {}) if vm else None
 
 
 def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, identity_role=None,
@@ -949,7 +968,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               enable_user_redeploy_scheduled_events=None, zone_placement_policy=None, include_zones=None,
               exclude_zones=None, align_regional_disks_to_vm_zone=None, wire_server_mode=None, imds_mode=None,
               wire_server_access_control_profile_reference_id=None, imds_access_control_profile_reference_id=None,
-              key_incarnation_id=None, add_proxy_agent_extension=None):
+              key_incarnation_id=None, add_proxy_agent_extension=None, disk_iops_read_write=None,
+              disk_mbps_read_write=None):
 
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
@@ -1150,7 +1170,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         secrets = _merge_secrets([validate_file_or_dict(secret) for secret in secrets])
 
     vm_resource = build_vm_resource(
-        cmd=cmd, name=vm_name, location=location, tags=tags, size=size, storage_profile=storage_profile, nics=nics,
+        name=vm_name, location=location, tags=tags, size=size, storage_profile=storage_profile, nics=nics,
         admin_username=admin_username, availability_set_id=availability_set, admin_password=admin_password,
         ssh_key_values=ssh_key_value, ssh_key_path=ssh_dest_key_path, image_reference=image,
         os_disk_name=os_disk_name, custom_image_os_type=os_type, authentication_type=authentication_type,
@@ -1179,7 +1199,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         imds_mode=imds_mode,
         wire_server_access_control_profile_reference_id=wire_server_access_control_profile_reference_id,
         imds_access_control_profile_reference_id=imds_access_control_profile_reference_id,
-        key_incarnation_id=key_incarnation_id, add_proxy_agent_extension=add_proxy_agent_extension)
+        key_incarnation_id=key_incarnation_id, add_proxy_agent_extension=add_proxy_agent_extension,
+        disk_iops_read_write=disk_iops_read_write, disk_mbps_read_write=disk_mbps_read_write)
 
     vm_resource['dependsOn'] = vm_dependencies
 
@@ -1194,18 +1215,12 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     enable_local_identity = None
     if assign_identity is not None:
         vm_resource['identity'], _, _, enable_local_identity = _build_identities_info(assign_identity)
-        role_assignment_guid = None
         if identity_scope:
             role_assignment_guid = str(_gen_guid())
             master_template.add_resource(build_msi_role_assignment(vm_name, vm_id, identity_role_id,
                                                                    role_assignment_guid, identity_scope))
 
     if encryption_identity:
-        if not cmd.supported_api_version(min_api='2023-09-01', resource_type=ResourceType.MGMT_COMPUTE):
-            raise CLIError("Usage error: Encryption Identity required API version 2023-09-01 or higher."
-                           "You can set the cloud's profile to use the required API Version with:"
-                           "az cloud set --profile latest --name <cloud name>")
-
         if 'identity' in vm_resource and 'userAssignedIdentities' in vm_resource['identity'] \
             and encryption_identity.lower() in \
                 (k.lower() for k in vm_resource['identity']['userAssignedIdentities'].keys()):
@@ -1274,25 +1289,34 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         enable_vtpm and enable_secure_boot
     is_confidential_vm = security_type and security_type.lower() == 'confidentialvm'
     if (is_trusted_launch or is_confidential_vm) and enable_integrity_monitoring:
-        vm = get_vm(cmd, resource_group_name, vm_name, 'instanceView')
-        client = _compute_client_factory(cmd.cli_ctx)
-        if vm.storage_profile.os_disk.os_type == 'Linux':
+        vm = get_vm_by_aaz(cmd, resource_group_name, vm_name, 'instanceView')
+
+        publisher = ''
+        if vm.get('storageProfile', {}).get('osDisk', {}).get('osType', '') == 'Linux':
             publisher = 'Microsoft.Azure.Security.LinuxAttestation'
-        if vm.storage_profile.os_disk.os_type == 'Windows':
+        elif vm.get('storageProfile', {}).get('osDisk', {}).get('osType', '') == 'Windows':
             publisher = 'Microsoft.Azure.Security.WindowsAttestation'
-        version = _normalize_extension_version(cmd.cli_ctx, publisher, 'GuestAttestation', None, vm.location)
-        VirtualMachineExtension = cmd.get_models('VirtualMachineExtension')
-        ext = VirtualMachineExtension(location=vm.location,
-                                      publisher=publisher,
-                                      type_properties_type='GuestAttestation',
-                                      protected_settings=None,
-                                      type_handler_version=version,
-                                      settings=None,
-                                      auto_upgrade_minor_version=True,
-                                      enable_automatic_upgrade=not disable_integrity_monitoring_autoupgrade)
+
+        version = _normalize_extension_version(cmd.cli_ctx, publisher, 'GuestAttestation', None, vm['location'])
+
+        vm_extension_args = {
+            'resource_group': resource_group_name,
+            'vm_extension_name': 'GuestAttestation',
+            'vm_name': vm_name,
+            'location': vm['location'],
+            'auto_upgrade_minor_version': True,
+            'enable_automatic_upgrade': not disable_integrity_monitoring_autoupgrade,
+            'protected_settings': None,
+            'publisher': publisher,
+            'settings': None,
+            'type': 'GuestAttestation',
+            'type_handler_version': version
+        }
+
         try:
-            LongRunningOperation(cmd.cli_ctx)(client.virtual_machine_extensions.begin_create_or_update(
-                resource_group_name, vm_name, 'GuestAttestation', ext))
+            from .operations.vm_extension import VMExtensionCreate
+            create_vm_extension = VMExtensionCreate(cli_ctx=cmd.cli_ctx)(command_args=vm_extension_args)
+            LongRunningOperation(cmd.cli_ctx)(create_vm_extension)
             logger.info('Guest Attestation Extension has been successfully installed by default '
                         'when Trusted Launch configuration is met')
         except Exception as e:
@@ -1413,12 +1437,12 @@ def get_vm_to_update_by_aaz(cmd, resource_group_name, vm_name):
     from .operations.vm import VMShow
 
     vm = VMShow(cli_ctx=cmd.cli_ctx)(command_args={
-        'resource_group': resource_group_name,
+        "resource_group": resource_group_name,
         "vm_name": vm_name
     })
 
     # To avoid unnecessary permission check of image
-    storage_profile = vm.get('storageProfile', {})
+    storage_profile = vm.get("storageProfile", {})
     storage_profile["imageReference"] = None
 
     return vm
@@ -1691,20 +1715,40 @@ def open_vm_port(cmd, resource_group_name, vm_name, port, priority=900, network_
 
 
 def resize_vm(cmd, resource_group_name, vm_name, size, no_wait=False):
-    vm = get_vm_to_update(cmd, resource_group_name, vm_name)
-    if vm.hardware_profile.vm_size == size:
+    from .operations.vm import VMCreate, convert_show_result_to_snake_case as to_snake_case
+
+    vm = to_snake_case(get_vm_to_update_by_aaz(cmd, resource_group_name, vm_name) or {}) or {}
+    current_size = (vm.get("hardware_profile") or {}).get("vm_size")
+    if current_size == size:
         logger.warning("VM is already %s", size)
         return None
 
-    vm.hardware_profile.vm_size = size  # pylint: disable=no-member
-    return set_vm(cmd, vm, no_wait=no_wait)
+    vm.pop("resources", None)
+
+    if vm.get("hardware_profile") is None:
+        vm["hardware_profile"] = {}
+    vm["hardware_profile"]["vm_size"] = size
+
+    vm["resource_group"] = resource_group_name
+    vm["vm_name"] = vm_name
+    vm["no_wait"] = no_wait
+
+    return VMCreate(cli_ctx=cmd.cli_ctx)(command_args=vm)
 
 
 def restart_vm(cmd, resource_group_name, vm_name, no_wait=False, force=False):
-    client = _compute_client_factory(cmd.cli_ctx)
+    from .aaz.latest.vm import Redeploy as _VMRedeploy, Restart as _VMRestart
+
+    command_args = {
+        "resource_group": resource_group_name,
+        "vm_name": vm_name,
+        "no_wait": no_wait,
+    }
+
     if force:
-        return sdk_no_wait(no_wait, client.virtual_machines.begin_redeploy, resource_group_name, vm_name)
-    return sdk_no_wait(no_wait, client.virtual_machines.begin_restart, resource_group_name, vm_name)
+        return _VMRedeploy(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+
+    return _VMRestart(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
 def set_vm(cmd, instance, lro_operation=None, no_wait=False):
@@ -1719,6 +1763,40 @@ def set_vm(cmd, instance, lro_operation=None, no_wait=False):
         return lro_operation(poller)
 
     return LongRunningOperation(cmd.cli_ctx)(poller)
+
+
+# Notes: vm format is in snake_case
+def set_vm_by_aaz(cmd, vm, no_wait=False):
+    from .aaz.latest.vm import Create as _VMCreate
+
+    parsed_id = _parse_rg_name(vm["id"])
+    vm["resource_group"] = parsed_id[0]
+    vm["vm_name"] = parsed_id[1]
+    vm["no_wait"] = no_wait
+
+    class SetVM(_VMCreate):
+        def _output(self, *args, **kwargs):
+            from azure.cli.core.aaz import AAZUndefined, has_value
+
+            # Resolve flatten conflict
+            # When the type field conflicts, the type in inner layer is ignored and the outer layer is applied
+            if has_value(self.ctx.vars.instance.resources):
+                for resource in self.ctx.vars.instance.resources:
+                    if has_value(resource.type):
+                        resource.type = AAZUndefined
+
+            result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+            if result.get('osProfile', {}).get('secrets', []):
+                for secret in result['osProfile']['secrets']:
+                    for cert in secret.get('vaultCertificates', []):
+                        if not cert.get('certificateStore'):
+                            cert['certificateStore'] = None
+            return result
+
+    vm = LongRunningOperation(cmd.cli_ctx)(
+        SetVM(cli_ctx=cmd.cli_ctx)(command_args=vm))
+
+    return vm
 
 
 def patch_vm(cmd, resource_group_name, vm_name, vm):
@@ -1741,7 +1819,7 @@ def show_vm(cmd, resource_group_name, vm_name, show_details=False, include_user_
     expand = None
     if include_user_data:
         expand = "userData"
-    return get_vm(cmd, resource_group_name, vm_name, expand)
+    return get_vm_by_aaz(cmd, resource_group_name, vm_name, expand)
 
 
 def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None,
@@ -2174,21 +2252,24 @@ def get_boot_log(cmd, resource_group_name, vm_name):
     import sys
     from azure.cli.core.profiles import get_sdk
     from azure.core.exceptions import HttpResponseError
+    from .aaz.latest.vm.boot_diagnostics import GetBootLogUris as VmGetBootLogUris
     BlobClient = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB, '_blob_client#BlobClient')
-    client = _compute_client_factory(cmd.cli_ctx)
 
-    virtual_machine = client.virtual_machines.get(resource_group_name, vm_name, expand='instanceView')
-    # pylint: disable=no-member
+    virtual_machine = get_instance_view(cmd, resource_group_name, vm_name)
 
     blob_uri = None
-    if virtual_machine.instance_view and virtual_machine.instance_view.boot_diagnostics:
-        blob_uri = virtual_machine.instance_view.boot_diagnostics.serial_console_log_blob_uri
+    if virtual_machine.get('instanceView', {}).get('bootDiagnostics'):
+        blob_uri = virtual_machine['instanceView']['bootDiagnostics'].get('serialConsoleLogBlobUri')
 
     # Managed storage
     if blob_uri is None:
         try:
-            boot_diagnostics_data = client.virtual_machines.retrieve_boot_diagnostics_data(resource_group_name, vm_name)
-            blob_uri = boot_diagnostics_data.serial_console_log_blob_uri
+            command_args = {
+                'resource_group': resource_group_name,
+                'name': vm_name
+            }
+            boot_diagnostics_data = VmGetBootLogUris(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+            blob_uri = boot_diagnostics_data.get('serialConsoleLogBlobUri')
         except HttpResponseError:
             pass
         if blob_uri is None:
@@ -2379,14 +2460,18 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
 
 
 def detach_unmanaged_data_disk(cmd, resource_group_name, vm_name, disk_name):
+    from .operations.vm import convert_show_result_to_snake_case
     # here we handle unmanaged disk
-    vm = get_vm_to_update(cmd, resource_group_name, vm_name)
-    # pylint: disable=no-member
-    leftovers = [d for d in vm.storage_profile.data_disks if d.name.lower() != disk_name.lower()]
-    if len(vm.storage_profile.data_disks) == len(leftovers):
+    vm = get_vm_to_update_by_aaz(cmd, resource_group_name, vm_name)
+    vm = convert_show_result_to_snake_case(vm)
+    leftovers = [d for d in vm.get('storage_profile', {}).get('data_disks', []) if
+                 d.get('name', '').lower() != disk_name.lower()]
+    if len(vm.get('storage_profile', {}).get('data_disks', [])) == len(leftovers):
         raise CLIError("No disk with the name '{}' was found".format(disk_name))
-    vm.storage_profile.data_disks = leftovers
-    set_vm(cmd, vm)
+
+    vm['storage_profile']['data_disks'] = leftovers
+
+    set_vm_by_aaz(cmd, vm)
 # endregion
 
 
@@ -2510,45 +2595,6 @@ def list_vm_extension_images(
 
 
 # region VirtualMachines Identity
-def _remove_identities(cmd, resource_group_name, name, identities, getter, setter):
-    from ._vm_utils import MSI_LOCAL_ID
-    ResourceIdentityType = cmd.get_models('ResourceIdentityType', operation_group='virtual_machines')
-    remove_system_assigned_identity = False
-    if MSI_LOCAL_ID in identities:
-        remove_system_assigned_identity = True
-        identities.remove(MSI_LOCAL_ID)
-    resource = getter(cmd, resource_group_name, name)
-    if resource.identity is None:
-        return None
-    emsis_to_remove = []
-    if identities:
-        existing_emsis = {x.lower() for x in (resource.identity.user_assigned_identities or {}).keys()}
-        emsis_to_remove = {x.lower() for x in identities}
-        non_existing = emsis_to_remove.difference(existing_emsis)
-        if non_existing:
-            raise CLIError("'{}' are not associated with '{}'".format(','.join(non_existing), name))
-        if not list(existing_emsis - emsis_to_remove):  # if all emsis are gone, we need to update the type
-            if resource.identity.type == ResourceIdentityType.user_assigned:
-                resource.identity.type = ResourceIdentityType.none
-            elif resource.identity.type == ResourceIdentityType.system_assigned_user_assigned:
-                resource.identity.type = ResourceIdentityType.system_assigned
-
-    resource.identity.user_assigned_identities = None
-    if remove_system_assigned_identity:
-        resource.identity.type = (ResourceIdentityType.none
-                                  if resource.identity.type == ResourceIdentityType.system_assigned
-                                  else ResourceIdentityType.user_assigned)
-
-    if emsis_to_remove:
-        if resource.identity.type not in [ResourceIdentityType.none, ResourceIdentityType.system_assigned]:
-            resource.identity.user_assigned_identities = {}
-            for identity in emsis_to_remove:
-                resource.identity.user_assigned_identities[identity] = None
-
-    result = LongRunningOperation(cmd.cli_ctx)(setter(resource_group_name, name, resource))
-    return result.identity
-
-
 def _remove_identities_by_aaz(cmd, resource_group_name, name, identities, getter, setter):
     from ._vm_utils import MSI_LOCAL_ID
 
@@ -2593,6 +2639,10 @@ def _remove_identities_by_aaz(cmd, resource_group_name, name, identities, getter
             existing_identity['type'] = IdentityType.NONE.value
 
     result = LongRunningOperation(cmd.cli_ctx)(setter(resource_group_name, name, resource))
+
+    if not result:
+        return None
+
     return result.get('identity') or None
 
 
@@ -2872,13 +2922,14 @@ def show_vm_nic(cmd, resource_group_name, vm_name, nic):
 
     NicShow = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.nic").Show
 
-    vm = get_vm(cmd, resource_group_name, vm_name)
+    vm = get_vm_by_aaz(cmd, resource_group_name, vm_name)
+
     found = next(
-        (n for n in vm.network_profile.network_interfaces if nic.lower() == n.id.lower()), None
+        (n for n in vm.get("networkProfile", {}).get("networkInterfaces", []) if nic.lower() == n["id"].lower()), None
         # pylint: disable=no-member
     )
     if found:
-        nic_name = parse_resource_id(found.id)['name']
+        nic_name = parse_resource_id(found["id"])['name']
         return NicShow(cli_ctx=cmd.cli_ctx)(command_args={
             'name': nic_name,
             'resource_group': resource_group_name
@@ -2887,12 +2938,12 @@ def show_vm_nic(cmd, resource_group_name, vm_name, nic):
 
 
 def list_vm_nics(cmd, resource_group_name, vm_name):
-    vm = get_vm(cmd, resource_group_name, vm_name)
-    return vm.network_profile.network_interfaces  # pylint: disable=no-member
+    vm = get_vm_by_aaz(cmd, resource_group_name, vm_name)
+    return vm.get("networkProfile", {}).get("networkInterfaces", [])  # pylint: disable=no-member
 
 
 def add_vm_nic(cmd, resource_group_name, vm_name, nics, primary_nic=None):
-    vm = get_vm_to_update(cmd, resource_group_name, vm_name)
+    vm = get_vm_to_update_by_aaz(cmd, resource_group_name, vm_name)
     new_nics = _build_nic_list(cmd, nics)
     existing_nics = _get_existing_nics(vm)
     return _update_vm_nics(cmd, vm, existing_nics + new_nics, primary_nic)
@@ -2901,25 +2952,25 @@ def add_vm_nic(cmd, resource_group_name, vm_name, nics, primary_nic=None):
 def remove_vm_nic(cmd, resource_group_name, vm_name, nics, primary_nic=None):
 
     def to_delete(nic_id):
-        return [n for n in nics_to_delete if n.id.lower() == nic_id.lower()]
+        return [n for n in nics_to_delete if n["id"].lower() == nic_id.lower()]
 
-    vm = get_vm_to_update(cmd, resource_group_name, vm_name)
+    vm = get_vm_to_update_by_aaz(cmd, resource_group_name, vm_name)
     nics_to_delete = _build_nic_list(cmd, nics)
     existing_nics = _get_existing_nics(vm)
-    survived = [x for x in existing_nics if not to_delete(x.id)]
+
+    survived = [x for x in existing_nics if not to_delete(x["id"])]
+
     return _update_vm_nics(cmd, vm, survived, primary_nic)
 
 
 def set_vm_nic(cmd, resource_group_name, vm_name, nics, primary_nic=None):
-    vm = get_vm_to_update(cmd, resource_group_name, vm_name)
+    vm = get_vm_to_update_by_aaz(cmd, resource_group_name, vm_name)
     nics = _build_nic_list(cmd, nics)
     return _update_vm_nics(cmd, vm, nics, primary_nic)
 
 
 def _build_nic_list(cmd, nic_ids):
     NicShow = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.nic").Show
-
-    NetworkInterfaceReference = cmd.get_models('NetworkInterfaceReference')
     nic_list = []
     if nic_ids:
         # pylint: disable=no-member
@@ -2929,20 +2980,20 @@ def _build_nic_list(cmd, nic_ids):
                 'name': name,
                 'resource_group': rg
             })
-            nic_list.append(NetworkInterfaceReference(id=nic['id'], primary=False))
+            nic_list.append({"id": nic["id"], "primary": False})
     return nic_list
 
 
 def _get_existing_nics(vm):
-    network_profile = getattr(vm, 'network_profile', None)
+    network_profile = vm.get("networkProfile", None)
     nics = []
     if network_profile is not None:
-        nics = network_profile.network_interfaces or []
+        nics = network_profile.get("networkInterfaces", [])
     return nics
 
 
 def _update_vm_nics(cmd, vm, nics, primary_nic):
-    NetworkProfile = cmd.get_models('NetworkProfile')
+    from .operations.vm import convert_show_result_to_snake_case
 
     if primary_nic:
         try:
@@ -2950,25 +3001,24 @@ def _update_vm_nics(cmd, vm, nics, primary_nic):
         except IndexError:
             primary_nic_name = primary_nic
 
-        matched = [n for n in nics if _parse_rg_name(n.id)[1].lower() == primary_nic_name.lower()]
+        matched = [n for n in nics if _parse_rg_name(n["id"])[1].lower() == primary_nic_name.lower()]
         if not matched:
             raise CLIError('Primary Nic {} is not found'.format(primary_nic))
         if len(matched) > 1:
             raise CLIError('Duplicate Nic entries with name {}'.format(primary_nic))
         for n in nics:
-            n.primary = False
-        matched[0].primary = True
+            n["primary"] = False
+        matched[0]["primary"] = True
     elif nics:
-        if not [n for n in nics if n.primary]:
-            nics[0].primary = True
+        if not [n for n in nics if n["primary"]]:
+            nics[0]["primary"] = True
 
-    network_profile = getattr(vm, 'network_profile', None)
-    if network_profile is None:
-        vm.network_profile = NetworkProfile(network_interfaces=nics)
-    else:
-        network_profile.network_interfaces = nics
-
-    return set_vm(cmd, vm).network_profile.network_interfaces
+    if "networkProfile" not in vm:
+        vm["networkProfile"] = {}
+    vm["networkProfile"]["networkInterfaces"] = nics
+    vm = convert_show_result_to_snake_case(vm)
+    result = set_vm_by_aaz(cmd, vm)
+    return (result.get("networkProfile") or {}).get("networkInterfaces") or []
 # endregion
 
 
@@ -3270,9 +3320,9 @@ def get_vm_format_secret(cmd, secrets, certificate_store=None, keyvault=None, re
 def add_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate, certificate_store=None):
     from azure.mgmt.core.tools import parse_resource_id
     from ._vm_utils import create_data_plane_keyvault_certificate_client, get_key_vault_base_url
-    VaultSecretGroup, SubResource, VaultCertificate = cmd.get_models(
-        'VaultSecretGroup', 'SubResource', 'VaultCertificate')
-    vm = get_vm_to_update(cmd, resource_group_name, vm_name)
+    from .operations.vm import convert_show_result_to_snake_case
+    vm = get_vm_to_update_by_aaz(cmd, resource_group_name, vm_name)
+    vm = convert_show_result_to_snake_case(vm)
 
     if '://' not in certificate:  # has a cert name rather a full url?
         keyvault_client = create_data_plane_keyvault_certificate_client(
@@ -3280,41 +3330,65 @@ def add_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate, cert
         cert_info = keyvault_client.get_certificate(certificate)
         certificate = cert_info.secret_id
 
-    if not _is_linux_os(vm):
+    if not _is_linux_os_by_aaz(vm):
         certificate_store = certificate_store or 'My'
     elif certificate_store:
         raise CLIError('Usage error: --certificate-store is only applicable on Windows VM')
-    vault_cert = VaultCertificate(certificate_url=certificate, certificate_store=certificate_store)
-    vault_secret_group = next((x for x in vm.os_profile.secrets
-                               if x.source_vault and x.source_vault.id.lower() == keyvault.lower()), None)
+    vault_cert = {
+        'certificate_store': certificate_store,
+        'certificate_url': certificate
+    }
+    vault_secret_group = next((x for x in vm.get('os_profile', {}).get('secrets', [])
+                               if x.get('source_vault', {}).get('id', '').lower() == keyvault.lower()), None)
     if vault_secret_group:
-        vault_secret_group.vault_certificates.append(vault_cert)
+        certs = vault_secret_group.get('vault_certificates', [])
+        certs.append(vault_cert)
+        vault_secret_group['vault_certificates'] = certs
     else:
-        vault_secret_group = VaultSecretGroup(source_vault=SubResource(id=keyvault), vault_certificates=[vault_cert])
-        vm.os_profile.secrets.append(vault_secret_group)
-    vm = set_vm(cmd, vm)
-    return vm.os_profile.secrets
+        vault_secret_group = {
+            'source_vault': {
+                'id': keyvault
+            },
+            'vault_certificates': [vault_cert]
+        }
+
+        if not vm.get('os_profile'):
+            vm['os_profile'] = {'secret': []}
+
+        if not vm.get('os_profile').get('secrets'):
+            vm['os_profile']['secrets'] = []
+
+        vm['os_profile']['secrets'].append(vault_secret_group)
+
+    vm = set_vm_by_aaz(cmd, vm)
+    return vm.get('osProfile', {}).get('secrets', [])
 
 
 def list_vm_secrets(cmd, resource_group_name, vm_name):
-    vm = get_vm(cmd, resource_group_name, vm_name)
-    if vm.os_profile:
-        return vm.os_profile.secrets
-    return []
+    vm = get_vm_by_aaz(cmd, resource_group_name, vm_name)
+
+    if vm.get('osProfile', {}).get('secrets', []):
+        for secret in vm['osProfile']['secrets']:
+            for cert in secret.get('vaultCertificates', []):
+                if not cert.get('certificateStore'):
+                    cert['certificateStore'] = None
+
+    return vm.get('osProfile', {}).get('secrets', [])
 
 
 def remove_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate=None):
-    vm = get_vm_to_update(cmd, resource_group_name, vm_name)
+    from .operations.vm import convert_show_result_to_snake_case
+    vm = get_vm_to_update_by_aaz(cmd, resource_group_name, vm_name)
 
     # support 2 kinds of filter:
     # a. if only keyvault is supplied, we delete its whole vault group.
     # b. if both keyvault and certificate are supplied, we only delete the specific cert entry.
 
-    to_keep = vm.os_profile.secrets
+    to_keep = vm.get('osProfile', {}).get('secrets', [])
     keyvault_matched = []
     if keyvault:
         keyvault = keyvault.lower()
-        keyvault_matched = [x for x in to_keep if x.source_vault and x.source_vault.id.lower() == keyvault]
+        keyvault_matched = [x for x in to_keep if x.get('sourceVault', {}).get('id', '').lower() == keyvault]
 
     if keyvault and not certificate:
         to_keep = [x for x in to_keep if x not in keyvault_matched]
@@ -3324,50 +3398,59 @@ def remove_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate=No
         if '://' not in cert_url_pattern:  # just a cert name?
             cert_url_pattern = '/' + cert_url_pattern + '/'
         for x in temp:
-            x.vault_certificates = ([v for v in x.vault_certificates
-                                     if not (v.certificate_url and cert_url_pattern in v.certificate_url.lower())])
-        to_keep = [x for x in to_keep if x.vault_certificates]  # purge all groups w/o any cert entries
+            x['vaultCertificates'] = [v for v in x.get('vaultCertificates')
+                                      if not (v.get('certificateUrl') and
+                                              cert_url_pattern in v.get('certificateUrl', '').lower())]
+        to_keep = [x for x in to_keep if x.get('vaultCertificates')]  # purge all groups w/o any cert entries
 
-    vm.os_profile.secrets = to_keep
-    vm = set_vm(cmd, vm)
-    return vm.os_profile.secrets
+    vm['osProfile']['secrets'] = to_keep
+    vm = convert_show_result_to_snake_case(vm)
+    vm = set_vm_by_aaz(cmd, vm)
+    return vm.get('osProfile', {}).get('secrets', [])
 # endregion
 
 
 # region VirtualMachines UnmanagedDisks
 def attach_unmanaged_data_disk(cmd, resource_group_name, vm_name, new=False, vhd_uri=None, lun=None,
                                disk_name=None, size_gb=1023, caching=None):
-    DataDisk, DiskCreateOptionTypes, VirtualHardDisk = cmd.get_models(
-        'DataDisk', 'DiskCreateOptionTypes', 'VirtualHardDisk')
+    from .operations.vm import convert_show_result_to_snake_case
+    from ._vm_utils import DiskCreateOptionTypes
     if not new and not disk_name:
         raise CLIError('Please provide the name of the existing disk to attach')
-    create_option = DiskCreateOptionTypes.empty if new else DiskCreateOptionTypes.attach
 
-    vm = get_vm_to_update(cmd, resource_group_name, vm_name)
+    vm = get_vm_to_update_by_aaz(cmd, resource_group_name, vm_name)
+    vm = convert_show_result_to_snake_case(vm)
     if disk_name is None:
         import datetime
         disk_name = vm_name + '-' + datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
     # pylint: disable=no-member
     if vhd_uri is None:
-        if not hasattr(vm.storage_profile.os_disk, 'vhd') or not vm.storage_profile.os_disk.vhd:
+        if not vm.get('storage_profile', {}).get('os_disk', {}).get('vhd'):
             raise CLIError('Adding unmanaged disks to a VM with managed disks is not supported')
-        blob_uri = vm.storage_profile.os_disk.vhd.uri
+        blob_uri = vm['storage_profile']['os_disk']['vhd']['uri']
         vhd_uri = blob_uri[0:blob_uri.rindex('/') + 1] + disk_name + '.vhd'
 
     if lun is None:
-        lun = _get_disk_lun(vm.storage_profile.data_disks)
-    disk = DataDisk(lun=lun, vhd=VirtualHardDisk(uri=vhd_uri), name=disk_name,
-                    create_option=create_option,
-                    caching=caching, disk_size_gb=size_gb if new else None)
-    if vm.storage_profile.data_disks is None:
-        vm.storage_profile.data_disks = []
-    vm.storage_profile.data_disks.append(disk)
-    return set_vm(cmd, vm)
+        lun = _get_disk_lun_by_aaz(vm.get('storage_profile', {}).get('data_disks'))
+    disk = {
+        'caching': caching,
+        'create_option': DiskCreateOptionTypes.EMPTY.value if new else DiskCreateOptionTypes.ATTACH.value,
+        'disk_size_gb': size_gb if new else None,
+        'lun': lun,
+        'name': disk_name,
+        'vhd': {
+            'uri': vhd_uri
+        }
+    }
+    if not vm.get('storage_profile', {}).get('data_disks'):
+        vm['storage_profile']['data_disks'] = []
+    vm['storage_profile']['data_disks'].append(disk)
+    return set_vm_by_aaz(cmd, vm)
 
 
 def list_unmanaged_disks(cmd, resource_group_name, vm_name):
-    vm = get_vm(cmd, resource_group_name, vm_name)
-    return vm.storage_profile.data_disks  # pylint: disable=no-member
+    vm = get_vm_by_aaz(cmd, resource_group_name, vm_name)
+    return vm.get('storageProfile', {}).get('dataDisks')
 # endregion
 
 
@@ -3509,49 +3592,64 @@ def reset_linux_ssh(cmd, resource_group_name, vm_name, no_wait=False):
 # region VirtualMachineScaleSets
 def assign_vmss_identity(cmd, resource_group_name, vmss_name, assign_identity=None, identity_role=None,
                          identity_role_id=None, identity_scope=None):
-    VirtualMachineScaleSetIdentity, UpgradeMode, ResourceIdentityType, VirtualMachineScaleSetUpdate = cmd.get_models(
-        'VirtualMachineScaleSetIdentity', 'UpgradeMode', 'ResourceIdentityType', 'VirtualMachineScaleSetUpdate')
-    IdentityUserAssignedIdentitiesValue = cmd.get_models(
-        'VirtualMachineScaleSetIdentityUserAssignedIdentitiesValue') or cmd.get_models('UserAssignedIdentitiesValue')
-    from azure.cli.core.commands.arm import assign_identity as assign_identity_helper
-    client = _compute_client_factory(cmd.cli_ctx)
-    _, _, external_identities, enable_local_identity = _build_identities_info(assign_identity)
+    identity, _, external_identities, enable_local_identity = _build_identities_info(assign_identity)
+    from ._vm_utils import assign_identity as assign_identity_helper, UpgradeMode
+
+    command_args = {'resource_group': resource_group_name, 'vm_scale_set_name': vmss_name}
 
     def getter():
-        return client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+        return get_vmss_by_aaz(cmd, resource_group_name, vmss_name)
 
     def setter(vmss, external_identities=external_identities):
-
-        if vmss.identity and vmss.identity.type == ResourceIdentityType.system_assigned_user_assigned:
-            identity_types = ResourceIdentityType.system_assigned_user_assigned
-        elif vmss.identity and vmss.identity.type == ResourceIdentityType.system_assigned and external_identities:
-            identity_types = ResourceIdentityType.system_assigned_user_assigned
-        elif vmss.identity and vmss.identity.type == ResourceIdentityType.user_assigned and enable_local_identity:
-            identity_types = ResourceIdentityType.system_assigned_user_assigned
+        if vmss.get('identity', {}).get('type', None) == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value:
+            identity_types = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value
+        elif vmss.get('identity', {}).get('type', None) == IdentityType.SYSTEM_ASSIGNED.value and external_identities:
+            identity_types = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value
+        elif vmss.get('identity', {}).get('type', None) == IdentityType.USER_ASSIGNED.value and enable_local_identity:
+            identity_types = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value
         elif external_identities and enable_local_identity:
-            identity_types = ResourceIdentityType.system_assigned_user_assigned
+            identity_types = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value
         elif external_identities:
-            identity_types = ResourceIdentityType.user_assigned
+            identity_types = IdentityType.USER_ASSIGNED.value
         else:
-            identity_types = ResourceIdentityType.system_assigned
-        vmss.identity = VirtualMachineScaleSetIdentity(type=identity_types)
-        if external_identities:
-            vmss.identity.user_assigned_identities = {}
-            for identity in external_identities:
-                vmss.identity.user_assigned_identities[identity] = IdentityUserAssignedIdentitiesValue()
-        vmss_patch = VirtualMachineScaleSetUpdate()
-        vmss_patch.identity = vmss.identity
-        poller = client.virtual_machine_scale_sets.begin_update(resource_group_name, vmss_name, vmss_patch)
-        return LongRunningOperation(cmd.cli_ctx)(poller)
+            identity_types = IdentityType.SYSTEM_ASSIGNED.value
+
+        if identity_types == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value:
+            command_args['mi_system_assigned'] = "True"
+            command_args['mi_user_assigned'] = []
+        elif identity_types == IdentityType.USER_ASSIGNED.value:
+            command_args['mi_user_assigned'] = []
+        else:
+            command_args['mi_system_assigned'] = "True"
+            command_args['mi_user_assigned'] = []
+
+        if vmss.get('identity', {}).get('userAssignedIdentities', None):
+            for key in vmss.get('identity').get('userAssignedIdentities').keys():
+                command_args['mi_user_assigned'].append(key)
+
+        if identity.get('userAssignedIdentities'):
+            for key in identity.get('userAssignedIdentities', {}).keys():
+                if key not in command_args['mi_user_assigned']:
+                    command_args['mi_user_assigned'].append(key)
+
+        from .operations.vmss import VMSSPatch
+        update_vmss_identity = VMSSPatch(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+        LongRunningOperation(cmd.cli_ctx)(update_vmss_identity)
+        result = update_vmss_identity.result()
+        return result
 
     assign_identity_helper(cmd.cli_ctx, getter, setter, identity_role=identity_role_id, identity_scope=identity_scope)
-    vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
-    if vmss.upgrade_policy.mode == UpgradeMode.manual:
+
+    vmss = getter()
+    if vmss.get('upgradePolicy', {}).get('mode', '') == UpgradeMode.MANUAL.value:
         logger.warning("With manual upgrade mode, you will need to run 'az vmss update-instances -g %s -n %s "
                        "--instance-ids *' to propagate the change", resource_group_name, vmss_name)
 
-    return _construct_identity_info(identity_scope, identity_role, vmss.identity.principal_id,
-                                    vmss.identity.user_assigned_identities)
+    return _construct_identity_info(
+        identity_scope,
+        identity_role,
+        vmss.get('identity').get('principalId') if vmss.get('identity') else None,
+        vmss.get('identity').get('userAssignedIdentities') if vmss.get('identity') else None)
 
 
 # pylint: disable=too-many-locals, too-many-statements
@@ -4084,21 +4182,29 @@ def _build_identities_info(identities):
 
 
 def deallocate_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False, hibernate=None):
-    client = _compute_client_factory(cmd.cli_ctx)
-    # This is a walkaround because the REST service of `VirtualMachineScaleSetVMs#begin_deallocate`
+    from .aaz.latest.vmss import Deallocate as VmssDeallocate
+    from .aaz.latest.vmss.vms import Deallocate as VmssVmsDeallocate
+    # This is a workaround because the REST service of `VirtualMachineScaleSetVMs#begin_deallocate`
     # does not accept `hibernate` at present
     if instance_ids and len(instance_ids) == 1 and hibernate is None:
-        return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.begin_deallocate,
-                           resource_group_name, vm_scale_set_name, instance_ids[0])
+        command_args = {
+            'instance_id': instance_ids[0],
+            'resource_group': resource_group_name,
+            'vm_scale_set_name': vm_scale_set_name,
+            'no_wait': no_wait
+        }
+        return VmssVmsDeallocate(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
-    VirtualMachineScaleSetVMInstanceIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceIDs')
-    vm_instance_i_ds = VirtualMachineScaleSetVMInstanceIDs(instance_ids=instance_ids)
+    command_args = {
+        'resource_group': resource_group_name,
+        'vm_scale_set_name': vm_scale_set_name,
+        'instance_ids': instance_ids,
+        'no_wait': no_wait
+    }
     if hibernate is not None:
-        return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_deallocate,
-                           resource_group_name, vm_scale_set_name, vm_instance_i_ds, hibernate=hibernate)
-    else:
-        return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_deallocate,
-                           resource_group_name, vm_scale_set_name, vm_instance_i_ds)
+        command_args['hibernate'] = hibernate
+
+    return VmssDeallocate(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
 def get_vmss(cmd, resource_group_name, name, instance_id=None, include_user_data=False):
@@ -4119,6 +4225,24 @@ def get_vmss(cmd, resource_group_name, name, instance_id=None, include_user_data
     if cmd.supported_api_version(min_api='2021-03-01', operation_group='virtual_machine_scale_sets'):
         return client.virtual_machine_scale_sets.get(resource_group_name, name, expand=expand)
     return client.virtual_machine_scale_sets.get(resource_group_name, name)
+
+
+def get_vmss_by_aaz(cmd, resource_group_name, name, instance_id=None, include_user_data=False):
+    from .operations.vmss import VMSSShow
+    from .operations.vmss_vms import VMSSVMSShow
+
+    command_args = {
+        'resource_group': resource_group_name,
+        'vm_scale_set_name': name,
+    }
+
+    if include_user_data:
+        command_args['expand'] = 'userData'
+
+    if instance_id is not None:
+        command_args['instance_id'] = instance_id
+        return VMSSVMSShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+    return VMSSShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
 def _check_vmss_hyper_v_generation(cli_ctx, vmss):
@@ -5325,24 +5449,35 @@ def vmss_run_command_show(cmd,
 
 # region VirtualMachineScaleSets Identity
 def remove_vmss_identity(cmd, resource_group_name, vmss_name, identities=None):
-    client = _compute_client_factory(cmd.cli_ctx)
+    def setter(resource_group_name, vmss_name, vmss):
+        command_args = {
+            'resource_group': resource_group_name,
+            'vm_scale_set_name': vmss_name
+        }
 
-    def _get_vmss(_, resource_group_name, vmss_name):
-        return client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+        if vmss.get('identity') and vmss['identity'].get('type') == IdentityType.USER_ASSIGNED.value:
+            # NOTE: The literal 'UserAssigned' is intentionally appended as a marker for
+            # VMSSIdentityRemove._format_content, which uses it to apply special handling
+            # for purely user-assigned identities. It is not a real identity resource ID.
+            command_args['mi_user_assigned'] = \
+                list(vmss.get('identity', {}).get('userAssignedIdentities', {}).keys()) + ['UserAssigned']
+        elif vmss.get('identity') and vmss['identity'].get('type') == IdentityType.SYSTEM_ASSIGNED.value:
+            command_args['mi_user_assigned'] = []
+            command_args['mi_system_assigned'] = 'True'
+        elif vmss.get('identity') and vmss['identity'].get('type') == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value:
+            command_args['mi_user_assigned'] = list(vmss.get('identity', {}).get('userAssignedIdentities', {}).keys())
+            command_args['mi_system_assigned'] = 'True'
+        else:
+            command_args['mi_user_assigned'] = []
 
-    def _set_vmss(resource_group_name, name, vmss_instance):
-        VirtualMachineScaleSetUpdate = cmd.get_models('VirtualMachineScaleSetUpdate',
-                                                      operation_group='virtual_machine_scale_sets')
-        vmss_update = VirtualMachineScaleSetUpdate(identity=vmss_instance.identity)
-        return client.virtual_machine_scale_sets.begin_update(resource_group_name, vmss_name, vmss_update)
+        from .operations.vmss import VMSSIdentityRemove
+        return VMSSIdentityRemove(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
     if identities is None:
         from ._vm_utils import MSI_LOCAL_ID
         identities = [MSI_LOCAL_ID]
 
-    return _remove_identities(cmd, resource_group_name, vmss_name, identities,
-                              _get_vmss,
-                              _set_vmss)
+    return _remove_identities_by_aaz(cmd, resource_group_name, vmss_name, identities, get_vmss_by_aaz, setter)
 # endregion
 
 
@@ -5883,15 +6018,34 @@ def show_disk_encryption_set_identity(cmd, resource_group_name, disk_encryption_
 
 
 # region install patches
-def install_vm_patches(cmd, client, resource_group_name, vm_name, maximum_duration, reboot_setting, classifications_to_include_win=None, classifications_to_include_linux=None, kb_numbers_to_include=None, kb_numbers_to_exclude=None,
-                       exclude_kbs_requiring_reboot=None, package_name_masks_to_include=None, package_name_masks_to_exclude=None, max_patch_publish_date=None, no_wait=False):
-    VMInstallPatchesParameters, WindowsParameters, LinuxParameters = cmd.get_models('VirtualMachineInstallPatchesParameters', 'WindowsParameters', 'LinuxParameters')
-    windows_parameters = WindowsParameters(classifications_to_include=classifications_to_include_win, kb_numbers_to_include=kb_numbers_to_include, kb_numbers_to_exclude=kb_numbers_to_exclude, exclude_kbs_requiring_reboot=exclude_kbs_requiring_reboot, max_patch_publish_date=max_patch_publish_date)
-    linux_parameters = LinuxParameters(classifications_to_include=classifications_to_include_linux, package_name_masks_to_include=package_name_masks_to_include, package_name_masks_to_exclude=package_name_masks_to_exclude)
-    install_patches_input = VMInstallPatchesParameters(maximum_duration=maximum_duration, reboot_setting=reboot_setting, linux_parameters=linux_parameters, windows_parameters=windows_parameters)
+def install_vm_patches(cmd, resource_group_name, vm_name, maximum_duration, reboot_setting,
+                       classifications_to_include_win=None, classifications_to_include_linux=None,
+                       kb_numbers_to_include=None, kb_numbers_to_exclude=None, exclude_kbs_requiring_reboot=None,
+                       package_name_masks_to_include=None, package_name_masks_to_exclude=None,
+                       max_patch_publish_date=None, no_wait=False):
+    from .aaz.latest.vm import InstallPatches as VmInstallPatches
 
-    return sdk_no_wait(no_wait, client.begin_install_patches, resource_group_name=resource_group_name, vm_name=vm_name, install_patches_input=install_patches_input)
+    command_args = {
+        'resource_group': resource_group_name,
+        'name': vm_name,
+        'maximum_duration': maximum_duration,
+        'reboot_setting': reboot_setting,
+        'linux_parameters': {
+            'classifications_to_include': classifications_to_include_linux,
+            'package_name_masks_to_exclude': package_name_masks_to_exclude,
+            'package_name_masks_to_include': package_name_masks_to_include
+        },
+        'windows_parameters': {
+            'classifications_to_include': classifications_to_include_win,
+            'exclude_kbs_requiring_reboot': exclude_kbs_requiring_reboot,
+            'kb_numbers_to_exclude': kb_numbers_to_exclude,
+            'kb_numbers_to_include': kb_numbers_to_include,
+            'max_patch_publish_date': max_patch_publish_date
+        },
+        'no_wait': no_wait
+    }
 
+    return VmInstallPatches(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 # endregion
 
 
