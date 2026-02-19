@@ -10,6 +10,7 @@
 
 from .__cmd_group import *
 from ._create import *
+from ._deallocate import *
 from ._delete import *
 from ._delete_instances import *
 from ._get_os_upgrade_history import *

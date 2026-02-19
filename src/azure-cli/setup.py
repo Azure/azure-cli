@@ -17,7 +17,7 @@ except ImportError:
     logging.warning("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.82.0"
+VERSION = "2.83.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -157,7 +157,7 @@ DEPENDENCIES = [
     # selection
     'tabulate',
     'urllib3',
-    'websocket-client~=1.3.1',
+    'websocket-client~=1.8.0',
     'xmltodict~=0.12'
 ]
 
