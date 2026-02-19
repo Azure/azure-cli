@@ -2386,11 +2386,11 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
                     'lun': disk_lun,
                     'createOption': 'Empty',
                     'name': parse_resource_id(disk_item)['name'],
-                    'diskSizeGb': size_gb if size_gb else default_size_gb,
+                    'diskSizeGB': size_gb if size_gb else default_size_gb,
                     'caching': caching,
                     'managedDisk': {
                         'storageAccountType': sku
-                    } if sku else None
+                    }
                 }
             else:
                 data_disk = {
@@ -2399,8 +2399,6 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
                     'managedDisk': {
                         'id': disk_item,
                         'storageAccountType': sku
-                    } if sku else {
-                        'id': disk_item
                     },
                     'caching': caching
                 }
@@ -2426,7 +2424,7 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
                 }
                 if size_gb is not None:
                     disk.update({
-                        'diskSizeGb': size_gb
+                        'diskSizeGB': size_gb
                     })
                 if sku is not None:
                     disk.update({
@@ -2452,7 +2450,7 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
                 }
                 if size_gb is not None:
                     disk.update({
-                        'diskSizeGb': size_gb
+                        'diskSizeGB': size_gb
                     })
                 if sku is not None:
                     disk.update({
