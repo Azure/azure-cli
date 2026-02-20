@@ -1291,17 +1291,9 @@ def _get_deployment_management_client(cli_ctx, aux_subscriptions=None, aux_tenan
 
 
 def _prepare_stacks_deny_settings(deny_settings_mode):
-    deny_settings_mode = None if deny_settings_mode.lower() == "none" else deny_settings_mode
-    deny_settings_enum = StackModels.DenySettingsMode.NONE
-    if deny_settings_mode:
-        if deny_settings_mode.lower().replace(' ', '') == StackModels.DenyStatusMode.DENY_DELETE:
-            deny_settings_enum = StackModels.DenyStatusMode.DENY_DELETE
-        elif deny_settings_mode.lower().replace(' ', '') == StackModels.DenyStatusMode.DENY_WRITE_AND_DELETE:
-            deny_settings_enum = StackModels.DenyStatusMode.DENY_WRITE_AND_DELETE
-        else:
-            raise InvalidArgumentValueError("Please enter only one of the following: denyDelete, or denyWriteAndDelete")
-
-    return deny_settings_enum
+    if deny_settings_mode is None:
+        return StackModels.DenySettingsMode.NONE
+    return deny_settings_mode
 
 
 def _prepare_stacks_excluded_principals(deny_settings_excluded_principals):
