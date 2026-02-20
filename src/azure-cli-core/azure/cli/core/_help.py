@@ -371,12 +371,11 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
             )
             _print_indent(line, indent, _get_hanging_indent(max_line_len, indent))
 
-    def show_cached_help(self, help_data, command_path='root', args=None):
+    def show_cached_help(self, help_data, args=None):
         """Display help from cached help index without loading modules.
 
         Args:
             help_data: Cached help data dictionary
-            command_path: Path to command (e.g., 'root' or 'vm disk')
             args: Original command line args. If empty/None, shows welcome banner.
         """
         ran_before = self.cli_ctx.config.getboolean('core', 'first_run', fallback=False)
@@ -387,12 +386,8 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
         if not args:
             print(WELCOME_MESSAGE)
 
-        if command_path == 'root':
-            print("\nGroup")
-            print("    az")
-        else:
-            print("\nGroup")
-            print(f"    az {command_path}")
+        print("\nGroup")
+        print("    az")
 
         groups_data = help_data.get('groups', {})
         commands_data = help_data.get('commands', {})
@@ -409,8 +404,7 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
 
         # Use same az find message as non-cached path
         print()  # Blank line before the message
-        command = '' if command_path == 'root' else command_path
-        self._print_az_find_message(command)
+        self._print_az_find_message('')
 
         from azure.cli.core.util import show_updates_available
         show_updates_available(new_line_after=True)

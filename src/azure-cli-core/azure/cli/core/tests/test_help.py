@@ -605,7 +605,7 @@ class TestHelpLoads(unittest.TestCase):
         sys.stdout = captured_output
 
         try:
-            help_obj.show_cached_help(test_help_data, command_path='root')
+            help_obj.show_cached_help(test_help_data)
             output = captured_output.getvalue()
 
             self.assertIn('Subgroups:', output)
