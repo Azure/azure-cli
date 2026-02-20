@@ -134,7 +134,7 @@ def flexible_firewall_rule_custom_setter(client, resource_group_name, server_nam
 
     endIpAddress = parameters.get('properties', {}).get('endIpAddress')
     startIpAddress = parameters.get('properties', {}).get('startIpAddress')
-    parameters={"properties": {"endIpAddress": endIpAddress, "startIpAddress": startIpAddress}}
+    parameters = {"properties": {"endIpAddress": endIpAddress, "startIpAddress": startIpAddress}}
 
     return client.begin_create_or_update(
         resource_group_name,
