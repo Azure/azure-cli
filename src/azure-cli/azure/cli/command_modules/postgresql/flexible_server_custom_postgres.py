@@ -1057,7 +1057,7 @@ def flexible_server_identity_remove(cmd, client, resource_group_name, server_nam
     for identity in identities:
         identities_map[identity] = None
 
-    system_assigned_identity = instance.identity and 'principalId' in instance.identity.additional_properties and instance.identity.additional_properties['principalId'] is not None
+    system_assigned_identity = instance.identity and instance.identity.principal_id is not None
 
     # if there are no user-assigned identities or all user-assigned identities are already removed
     if not (instance.identity and instance.identity.user_assigned_identities) or \
@@ -1134,9 +1134,11 @@ def flexible_server_microsoft_entra_admin_set(cmd, client, resource_group_name, 
 # Create Microsoft Entra admin
 def _create_admin(client, resource_group_name, server_name, principal_name, sid, principal_type=None, no_wait=False):
     parameters = {
-        'principal_name': principal_name,
-        'tenant_id': get_tenant_id(),
-        'principal_type': principal_type
+        'properties': {
+            'principalName': principal_name,
+            'tenantId': get_tenant_id(),
+            'principalType': principal_type
+        }
     }
 
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, server_name, sid, parameters)
@@ -1831,6 +1833,12 @@ def autonomous_tuning_table_recommendations_list(cmd, resource_group_name, serve
         tuning_option="table",
         recommendation_type=recommendation_type
     )
+
+
+def flexible_server_migrate_network(client, resource_group_name, server_name, no_wait=False):
+    validate_resource_group(resource_group_name)
+
+    return sdk_no_wait(no_wait, client.begin_migrate_network_mode, resource_group_name, server_name)
 
 
 def _update_private_endpoint_connection_status(cmd, client, resource_group_name, server_name,
