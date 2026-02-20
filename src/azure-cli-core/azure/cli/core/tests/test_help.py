@@ -546,13 +546,11 @@ class TestHelpLoads(unittest.TestCase):
         from azure.cli.core._session import INDEX
 
         test_help_data = {
-            'root': {
-                'groups': {
-                    'test-group': {'summary': 'Test group summary', 'tags': '[Preview]'}
-                },
-                'commands': {
-                    'test-cmd': {'summary': 'Test command summary', 'tags': ''}
-                }
+            'groups': {
+                'test-group': {'summary': 'Test group summary', 'tags': '[Preview]'}
+            },
+            'commands': {
+                'test-cmd': {'summary': 'Test command summary', 'tags': ''}
             }
         }
 
@@ -562,7 +560,6 @@ class TestHelpLoads(unittest.TestCase):
         retrieved = INDEX.get('helpIndex')
 
         self.assertIsNotNone(retrieved)
-        self.assertIn('root', retrieved)
         self.assertIn('groups', retrieved)
         self.assertIn('commands', retrieved)
         self.assertEqual(retrieved['groups']['test-group']['summary'], 'Test group summary')
