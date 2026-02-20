@@ -1312,7 +1312,7 @@ def _prepare_stacks_action_on_unmanage(action_on_unmanage, resources_without_del
 
     if action_on_unmanage == StacksActionOnUnmanage.DETACH_ALL:
         aou_resources_action_enum, aou_resource_groups_action_enum, aou_management_groups_action_enum = StackModels.UnmanageActionResourceMode.DETACH, StackModels.UnmanageActionResourceGroupMode.DETACH, StackModels.UnmanageActionManagementGroupMode.DETACH
-    if action_on_unmanage == StacksActionOnUnmanage.DELETE_RESOURCES:
+    elif action_on_unmanage == StacksActionOnUnmanage.DELETE_RESOURCES:
         aou_resources_action_enum, aou_resource_groups_action_enum, aou_management_groups_action_enum = StackModels.UnmanageActionResourceMode.DELETE, StackModels.UnmanageActionResourceGroupMode.DETACH, StackModels.UnmanageActionManagementGroupMode.DETACH
     elif action_on_unmanage == StacksActionOnUnmanage.DELETE_ALL:
         aou_resources_action_enum, aou_resource_groups_action_enum, aou_management_groups_action_enum = StackModels.UnmanageActionResourceMode.DELETE, StackModels.UnmanageActionResourceGroupMode.DELETE, StackModels.UnmanageActionManagementGroupMode.DELETE
