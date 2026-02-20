@@ -621,8 +621,7 @@ def load_arguments(self, _):
     with self.argument_context('stack mg') as c:
         c.argument('management_group_id', arg_type=management_group_id_type, help='The management group id to create stack at.')
 
-    # TODO(kylealbert): add "stack-whatif"
-    for resource_type in ['stack']:
+    for resource_type in ['stack', 'stack-whatif']:
         for scope in ['group', 'sub', 'mg']:
             for action in ['create', 'validate', 'delete', 'show', 'list', 'export']:
                 if resource_type == 'stack-whatif' and (action == 'validate' or action == 'export'):

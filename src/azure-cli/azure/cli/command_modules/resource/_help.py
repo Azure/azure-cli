@@ -2460,6 +2460,12 @@ short-summary: A deployment stack is a native Azure resource type that enables y
 long-summary: Deployment stacks are defined in ARM as the type Microsoft.Resources/deploymentStacks.
 """
 
+helps['stack-whatif'] = """
+type: group
+short-summary: A deployment stack What-If is a preview of an operation to be performed on a new or existing deployment stack.
+long-summary: Deployment stacks What-Ifs are defined in ARM as the type Microsoft.Resources/deploymentStacksWhatIfResults.
+"""
+
 helps['stack mg'] = """
 type: group
 short-summary: Manage Deployment Stacks at management group.
@@ -2545,6 +2551,34 @@ examples:
     text: az stack mg delete --name StackName --management-group-id myMg --action-on-unmanage detachAll
   - name: Delete stack by stack resource id.
     text: az stack mg delete --id /providers/Microsoft.Management/managementGroups/myMg/providers/Microsoft.Resources/deploymentStacks/StackName --management-group-id myMg --action-on-unmanage deleteAll
+"""
+
+helps['stack-whatif mg'] = """
+type: group
+short-summary: Manage Deployment Stacks What-Ifs at management group.
+"""
+
+# TODO(kylealbert): params in examples
+helps['stack-whatif mg create'] = """
+type: command
+short-summary: Preview a deployment stack operation at management group scope.
+examples:
+  - name: Perform a what-if on a deployment stack using template file and detach all resources on unmanage.
+    text: az stack-whatif mg create --name StackName --management-group-id myMg --template-file simpleTemplate.json --location westus2 --description description --deny-settings-mode None --action-on-unmanage detachAll
+  - name: Perform a what-if on a deployment stack with parameter file and delete resources on unmanage.
+    text: az stack-whatif mg create --name StackName --management-group-id myMg --action-on-unmanage deleteResources --template-file simpleTemplate.json --parameters simpleTemplateParams.json --location westus2 --description description --deny-settings-mode None
+  - name: Perform a what-if on a deployment stack with template spec.
+    text: az stack-whatif mg create --name StackName --management-group-id myMg --template-spec TemplateSpecResourceIDWithVersion --location westus2 --description description --deny-settings-mode None --action-on-unmanage deleteResources
+  - name: Perform a what-if on a deployment stack using bicep file and delete all resources on unmanage.
+    text: az stack-whatif mg create --name StackName --management-group-id myMg --action-on-unmanage deleteAll --template-file simple.bicep --location westus2 --description description --deny-settings-mode None
+  - name: Perform a what-if on a deployment stack using parameters from key/value pairs.
+    text: az stack-whatif mg create --name StackName --management-group-id myMg --template-file simpleTemplate.json --location westus --description description --parameters simpleTemplateParams.json value1=foo value2=bar --deny-settings-mode None --action-on-unmanage deleteResources
+  - name: Perform a what-if on a deployment stack from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
+    text: az stack-whatif mg create --name StackName --management-group-id myMg --template-file azuredeploy.json --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json --location westus --deny-settings-mode None --action-on-unmanage deleteResources
+  - name: Perform a what-if on a deployment stack from a local template, using deny settings.
+    text: az stack-whatif mg create --name StackName --management-group-id myMg --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-excluded-principals "test1 test2" --location westus --action-on-unmanage deleteResources
+  - name: Perform a what-if on a deployment stack from a local template, apply deny settings to child scope.
+    text: az stack-whatif mg create --name StackName --management-group-id myMg --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-apply-to-child-scopes --location westus --action-on-unmanage deleteResources
 """
 
 helps['stack sub'] = """
@@ -2642,6 +2676,38 @@ examples:
     text: az stack sub delete --id /subscriptions/111111111111/providers/Microsoft.Resources/deploymentStacks/StackName --action-on-unmanage detachAll
 """
 
+helps['stack-whatif sub'] = """
+type: group
+short-summary: Manage Deployment Stacks What-Ifs at subscription.
+"""
+
+# TODO(kylealbert): params in examples
+helps['stack-whatif sub create'] = """
+type: command
+short-summary: Preview a deployment stack operation at subscription scope.
+examples:
+  - name: Perform a what-if on a deployment stack using template file and detach all resources on unmanage.
+    text: az stack-whatif sub create --name StackName --template-file simpleTemplate.json --location westus2 --description description --deny-settings-mode None --action-on-unmanage detachAll
+  - name: Perform a what-if on a deployment stack with parameter file and delete resources on unmanage.
+    text: az stack-whatif sub create --name StackName --action-on-unmanage deleteResources --template-file simpleTemplate.json --parameters simpleTemplateParams.json --location westus2 --description description --deny-settings-mode None
+  - name: Perform a what-if on a deployment stack with template spec.
+    text: az stack-whatif sub create --name StackName --template-spec TemplateSpecResourceIDWithVersion --location westus2 --description description --deny-settings-mode None --action-on-unmanage deleteResources
+  - name: Perform a what-if on a deployment stack using bicep file and delete all resources on unmanage.
+    text: az stack-whatif sub create --name StackName --action-on-unmanage deleteAll --template-file simple.bicep --location westus2 --description description --deny-settings-mode None
+  - name: Perform a what-if on a deployment stack at a different subscription.
+    text: az stack-whatif sub create --name StackName --template-file simpleTemplate.json --location westus2 --description description --subscription subscriptionId --deny-settings-mode None --action-on-unmanage deleteResources
+  - name: Perform a what-if on a deployment stack and deploy at the resource group scope.
+    text: az stack-whatif sub create --name StackName --template-file simpleTemplate.json --location westus --deployment-resource-group ResourceGroup --description description --deny-settings-mode None --action-on-unmanage deleteResources
+  - name: Perform a what-if on a deployment stack using parameters from key/value pairs.
+    text: az stack-whatif sub create --name StackName --template-file simpleTemplate.json --location westus --description description --parameters simpleTemplateParams.json value1=foo value2=bar --deny-settings-mode None --action-on-unmanage deleteResources
+  - name: Perform a what-if on a deployment stack from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
+    text: az stack-whatif sub create --name StackName --template-file azuredeploy.json --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json --location westus --deny-settings-mode None --action-on-unmanage deleteResources
+  - name: Perform a what-if on a deployment stack from a local template, using deny settings.
+    text: az stack-whatif sub create --name StackName --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-excluded-principals "test1 test2" --location westus --action-on-unmanage deleteResources
+  - name: Perform a what-if on a deployment stack from a local template, apply deny settings to child scopes.
+    text: az stack-whatif sub create --name StackName --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-apply-to-child-scopes --location westus --action-on-unmanage deleteResources
+"""
+
 helps['stack group'] = """
 type: group
 short-summary: Manage Deployment Stacks at resource group.
@@ -2731,6 +2797,36 @@ examples:
     text: az stack group delete --name StackName --resource-group ResourceGroup --action-on-unmanage deleteResources
   - name: Delete stack by stack resource id.
     text: az stack group delete --id /subscriptions/111111111111/resourceGroups/ResourceGroup/providers/Microsoft.Resources/deploymentStacks/StackName --action-on-unmanage detachAll
+"""
+
+helps['stack-whatif group'] = """
+type: group
+short-summary: Manage Deployment Stacks What-Ifs at resource group.
+"""
+
+# TODO(kylealbert): params in examples
+helps['stack-whatif group create'] = """
+type: command
+short-summary: Preview a deployment stack operation at resource group scope.
+examples:
+  - name: Perform a what-if on a deployment stack using template file and delete resources on unmanage.
+    text: az stack-whatif group create --name StackName --resource-group ResourceGroup --action-on-unmanage deleteResources --template-file simpleTemplate.json --description description --deny-settings-mode None
+  - name: Perform a what-if on a deployment stack with parameter file and detach all resources on unmanage.
+    text: az stack-whatif group create --name StackName --resource-group ResourceGroup --action-on-unmanage detachAll --template-file simpleTemplate.json --parameters simpleTemplateParams.json --description description --deny-settings-mode None
+  - name: Perform a what-if on a deployment stack with template spec and delete all resources on unmanage.
+    text: az stack-whatif group create --name StackName --resource-group ResourceGroup --action-on-unmanage deleteAll --template-spec TemplateSpecResourceIDWithVersion --description description --deny-settings-mode None
+  - name: Perform a what-if on a deployment stack using bicep file.
+    text: az stack-whatif group create --name StackName --resource-group ResourceGroup --template-file simple.bicep --description description --deny-settings-mode None --action-on-unmanage deleteResources
+  - name: Perform a what-if on a deployment stack at a different subscription.
+    text: az stack-whatif group create --name StackName --resource-group ResourceGroup --template-file simpleTemplate.json --description description --subscription subscriptionId --deny-settings-mode None --action-on-unmanage deleteResources
+  - name: Perform a what-if on a deployment stack using parameters from key/value pairs.
+    text: az stack-whatif group create --name StackName --template-file simpleTemplate.json --resource-group ResourceGroup --description description --parameters simpleTemplateParams.json value1=foo value2=bar --deny-settings-mode None --action-on-unmanage deleteResources
+  - name: Perform a what-if on a deployment stack from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
+    text: az stack-whatif group create --name StackName --template-file azuredeploy.json --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json --resource-group ResourceGroup --deny-settings-mode None --action-on-unmanage deleteResources
+  - name: Perform a what-if on a deployment stack from a local template, using deny settings.
+    text: az stack-whatif group create --name StackName --resource-group ResourceGroup --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-excluded-principals "test1 test2" --action-on-unmanage deleteResources
+  - name: Perform a what-if on a deployment stack from a local template, apply deny setting to child scopes.
+    text: az stack-whatif group create --name StackName --resource-group ResourceGroup --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-apply-to-child-scopes --action-on-unmanage deleteResources
 """
 
 helps['bicep generate-params'] = """
