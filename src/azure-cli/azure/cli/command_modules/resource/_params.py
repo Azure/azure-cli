@@ -661,6 +661,7 @@ def load_arguments(self, _):
                         elif resource_type == 'stack-whatif':
                             c.argument('stack_id', arg_type=stacks_whatif_stack_id_type)
                             c.argument('retention_interval', arg_type=stacks_whatif_retention_interval_type)
+                            c.argument('no_pretty_print', arg_type=deployment_what_if_no_pretty_print_type)
                         if action == 'create' and resource_type == 'stack':
                             c.argument('yes', help='Do not prompt for confirmation')
                     elif action == 'delete':
@@ -679,6 +680,8 @@ def load_arguments(self, _):
                         c.argument('subscription', arg_type=subscription_type)
                         if scope == 'group':
                             c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the deployment stack exists')
+                        if resource_type == 'stack-whatif':
+                            c.argument('no_pretty_print', arg_type=deployment_what_if_no_pretty_print_type)
                     elif action == 'list':
                         if scope == 'sub':
                             continue  # only uses global arguments
