@@ -563,10 +563,10 @@ class TestHelpLoads(unittest.TestCase):
 
         self.assertIsNotNone(retrieved)
         self.assertIn('root', retrieved)
-        self.assertIn('groups', retrieved['root'])
-        self.assertIn('commands', retrieved['root'])
-        self.assertEqual(retrieved['root']['groups']['test-group']['summary'], 'Test group summary')
-        self.assertEqual(retrieved['root']['commands']['test-cmd']['summary'], 'Test command summary')
+        self.assertIn('groups', retrieved)
+        self.assertIn('commands', retrieved)
+        self.assertEqual(retrieved['groups']['test-group']['summary'], 'Test group summary')
+        self.assertEqual(retrieved['commands']['test-cmd']['summary'], 'Test command summary')
 
     def test_help_cache_invalidation(self):
         """Test that cache is invalidated correctly."""

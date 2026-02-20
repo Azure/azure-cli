@@ -552,7 +552,7 @@ class MainCommandsLoader(CLICommandsLoader):
                 groups, commands = extract_help_index_data(help_file)
 
                 if groups or commands:
-                    help_index_data = {'root': {'groups': groups, 'commands': commands}}
+                    help_index_data = {'groups': groups, 'commands': commands}
                     command_index.set_help_index(help_index_data)
                     logger.debug("Cached top-level help with %d groups and %d commands", len(groups), len(commands))
 

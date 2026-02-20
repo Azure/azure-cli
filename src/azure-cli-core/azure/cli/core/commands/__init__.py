@@ -744,9 +744,9 @@ class AzCliCommandInvoker(CommandInvoker):
         command_index = CommandIndex(self.cli_ctx)
         help_index = command_index.get_help_index()
 
-        if help_index and 'root' in help_index:
+        if help_index:
             # Display cached help using the help system
-            self.help.show_cached_help(help_index['root'], 'root', args)
+            self.help.show_cached_help(help_index, 'root', args)
             telemetry.set_command_details('az', command_preserve_casing=command_preserve_casing, parameters=['--help'])
             telemetry.set_success(summary='show help')
             return CommandResultItem(None, exit_code=0)
@@ -765,7 +765,7 @@ class AzCliCommandInvoker(CommandInvoker):
         groups, commands = extract_help_index_data(help_file)
 
         # Store in the command index
-        help_index_data = {'root': {'groups': groups, 'commands': commands}}
+        help_index_data = {'groups': groups, 'commands': commands}
         if groups or commands:
             command_index.set_help_index(help_index_data)
             logger.debug("Cached %d groups and %d commands for fast access", len(groups), len(commands))
