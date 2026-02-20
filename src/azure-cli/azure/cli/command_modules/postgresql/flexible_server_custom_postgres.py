@@ -1418,9 +1418,10 @@ def virtual_endpoint_create_func(cmd, client, resource_group_name, server_name, 
     validate_virtual_endpoint_name_availability(cmd, virtual_endpoint_name)
 
     parameters = {
-        'name': virtual_endpoint_name,
-        'endpoint_type': endpoint_type,
-        'members': [members]
+        'properties': {
+            'endpointType': endpoint_type,
+            'members': [members]
+        }
     }
 
     return client.begin_create(
@@ -1469,9 +1470,10 @@ def virtual_endpoint_update_func(cmd, client, resource_group_name, server_name, 
     validate_citus_cluster(cmd, resource_group_name, server_name)
 
     parameters = {
-        'name': virtual_endpoint_name,
-        'endpoint_type': endpoint_type,
-        'members': [members]
+        'properties': {
+            'endpointType': endpoint_type,
+            'members': [members]
+        }
     }
 
     return client.begin_update(
@@ -1497,7 +1499,7 @@ def ltr_precheck_func(client, resource_group_name, server_name, backup_name):
     return client.check_prerequisites(
         resource_group_name=resource_group_name,
         server_name=server_name,
-        parameters={"backup_settings": {"backup_name": backup_name}}
+        parameters={"backupSettings": {"backupName": backup_name}}
     )
 
 
@@ -1505,11 +1507,11 @@ def ltr_start_func(client, resource_group_name, server_name, backup_name, sas_ur
     validate_resource_group(resource_group_name)
 
     parameters = {
-        "backup_settings": {
-            "backup_name": backup_name
+        "backupSettings": {
+            "backupName": backup_name
         },
-        "target_details": {
-            "sas_uri_list": [sas_url]
+        "targetDetails": {
+            "sasUriList": [sas_url]
         }
     }
 
