@@ -1291,9 +1291,7 @@ def _get_deployment_management_client(cli_ctx, aux_subscriptions=None, aux_tenan
 
 
 def _prepare_stacks_deny_settings(deny_settings_mode):
-    if deny_settings_mode is None:
-        return StackModels.DenySettingsMode.NONE
-    return deny_settings_mode
+    return deny_settings_mode or StackModels.DenySettingsMode.NONE
 
 
 def _prepare_stacks_excluded_principals(deny_settings_excluded_principals):
