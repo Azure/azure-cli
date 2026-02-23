@@ -39,6 +39,12 @@ def show_version(cmd):  # pylint: disable=unused-argument
     return versions
 
 
+def rebuild_index(cmd):
+    from azure.cli.core import CommandIndex
+    CommandIndex(cmd.cli_ctx).rebuild()
+    return {'status': 'rebuilt'}
+
+
 def upgrade_version(cmd, update_all=None, yes=None, allow_preview=None):  # pylint: disable=too-many-locals, too-many-statements, too-many-branches, no-member, unused-argument
     import platform
     import sys

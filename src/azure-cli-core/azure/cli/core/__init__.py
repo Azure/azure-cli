@@ -517,7 +517,7 @@ class MainCommandsLoader(CLICommandsLoader):
             else:
                 logger.debug("No module found from index for '%s'", args)
                 if command_index_is_valid and command_index_has_entries and args and not args[0].startswith('-') and \
-                        not self.cli_ctx.data['completer_active']:
+                    not self.cli_ctx.data['completer_active'] and args[0] != 'rebuild-index':
                     logger.debug("Valid command index has no entry for '%s'. Skip full reload and fail fast.",
                                  args[0])
                     return self.command_table
@@ -894,6 +894,28 @@ class CommandIndex:
         self.INDEX[self._COMMAND_INDEX] = {}
         self.INDEX[self._HELP_INDEX] = {}
         logger.debug("Command index has been invalidated.")
+
+    def rebuild(self):
+        """Invalidate command index and rebuild it if command index is enabled."""
+        self.invalidate()
+
+        if not self.cli_ctx:
+            return
+
+        if not self.cli_ctx.config.getboolean('core', 'use_command_index', fallback=True):
+            return
+
+        invocation = getattr(self.cli_ctx, 'invocation', None)
+        commands_loader = getattr(invocation, 'commands_loader', None) if invocation else None
+        if not commands_loader:
+            logger.debug('Skipping command index rebuild because commands_loader is unavailable.')
+            return
+
+        try:
+            logger.debug('Rebuilding command index after extension operation.')
+            commands_loader.load_command_table(None)
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.warning('Failed to rebuild command index after extension operation: %s', ex)
 
 
 class ModExtensionSuppress:  # pylint: disable=too-few-public-methods

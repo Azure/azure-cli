@@ -57,6 +57,11 @@ type: command
 short-summary: Upgrade Azure CLI and extensions
 """
 
+helps['rebuild-index'] = """
+type: command
+short-summary: Rebuild the Azure CLI command index cache.
+"""
+
 helps['demo'] = """
 type: group
 short-summary: Demos for designing, developing and demonstrating Azure CLI.
