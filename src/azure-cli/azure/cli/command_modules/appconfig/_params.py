@@ -189,7 +189,7 @@ def load_arguments(self, _):
         c.argument('no_replica', help='Proceed without replica creation for premium tier store.', arg_type=get_three_state_flag())
         c.argument('arm_auth_mode', arg_type=arm_auth_mode_arg_type)
         c.argument('enable_arm_private_network_access', arg_type=enable_arm_private_network_access_arg_type)
-        c.argument('appinsights_resource_id', options_list=['--appinsights-resource-id'], help='Resource ID of the Application Insights resource to link with this App Configuration store.')
+        c.argument('appinsights_resource', help='Resource ID of the Application Insights resource to link with this App Configuration store.')
         c.argument('kv_revision_retention_period', arg_type=kv_revision_retention_period_arg_type)
 
     with self.argument_context('appconfig update') as c:
@@ -201,7 +201,7 @@ def load_arguments(self, _):
         c.argument('enable_purge_protection', options_list=['--enable-purge-protection', '-p'], arg_type=get_three_state_flag(), help='Property specifying whether protection against purge is enabled for this App Configuration store. Setting this property to true activates protection against purge for this App Configuration store and its contents. Enabling this functionality is irreversible.')
         c.argument('arm_auth_mode', arg_type=arm_auth_mode_arg_type)
         c.argument('enable_arm_private_network_access', arg_type=enable_arm_private_network_access_arg_type)
-        c.argument('appinsights_resource_id', options_list=['--appinsights-resource-id'], help='Resource ID of the Application Insights resource to link with this App Configuration store.')
+        c.argument('appinsights_resource', help='Resource ID of the Application Insights resource to link with this App Configuration store.')
         c.argument('kv_revision_retention_period', arg_type=kv_revision_retention_period_arg_type)
 
     with self.argument_context('appconfig recover') as c:

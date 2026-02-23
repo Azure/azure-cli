@@ -51,14 +51,7 @@ def warn_if_app_insights_not_linked(cmd, store_name):
     try:
         from ._client_factory import cf_configstore
 
-        try:
-            resource_group_name, _ = resolve_store_metadata(cmd, store_name)
-        except:
-            logger.warning(
-                "Unable to resolve store metadata due to insufficient permissions. "
-                "Ensure you have the required permissions to access the App Configuration store."
-            )
-
+        resource_group_name, _ = resolve_store_metadata(cmd, store_name)
         configstore_client = cf_configstore(cmd.cli_ctx)
         store = configstore_client.get(resource_group_name, store_name)
 
@@ -68,13 +61,13 @@ def warn_if_app_insights_not_linked(cmd, store_name):
         if not is_linked:
             logger.warning(
                 "Application Insights is not linked to this App Configuration store. "
-                "To enable telemetry, link an Application Insights resource to the store."
+                "To collect telemetry, link an Application Insights resource to the store."
             )
 
-    except Exception as ex:
+    except Exception as ex:  # pylint: disable=broad-except
         logger.warning(
-            "Unable to verify Application Insights linkage due to insufficient permissions. "
-            "Ensure the store is linked to Application Insights for telemetry collection."
+            "Application Insights linkage could not be verified due to insufficient permissions. "
+            "Ensure the store is linked to an Application Insights resource to collect telemetry."
         )
         logger.debug("Error checking App Insights linkage: %s", str(ex))
 
@@ -125,7 +118,7 @@ def set_feature(cmd,
 
     # Add telemetry if telemetry_enabled is specified
     if telemetry_enabled is not None:
-        default_value[FeatureFlagConstants.TELEMETRY] = FeatureTelemetry(enabled=telemetry_enabled)
+        default_value[FeatureFlagConstants.TELEMETRY] = {FeatureFlagConstants.ENABLED: telemetry_enabled}
         if telemetry_enabled:
             warn_if_app_insights_not_linked(cmd, name)
 
@@ -186,6 +179,7 @@ def set_feature(cmd,
                         feature_flag_value.telemetry = FeatureTelemetry(enabled=telemetry_enabled)
                     else:
                         feature_flag_value.telemetry.enabled = telemetry_enabled
+
                     if telemetry_enabled:
                         warn_if_app_insights_not_linked(cmd, name)
 

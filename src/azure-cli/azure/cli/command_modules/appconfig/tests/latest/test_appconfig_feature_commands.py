@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+from unittest import mock
 
 from knack.util import CLIError
 from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest)
@@ -566,7 +567,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         with self.assertRaisesRegex(CLIError, "Feature name cannot contain the following characters: '%', ':'"):
             self.cmd('appconfig feature set -n {config_store_name} --feature {feature}')
 
-    @AllowLargeResponse()
+    @AllowLargeResponse(size_kb=8192)
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_feature_telemetry(self, resource_group, location):
         """Test feature flag telemetry functionality."""
@@ -617,30 +618,36 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
                  checks=[self.check('name', feature_name),
                          self.check('telemetry.enabled', False)])
 
-        # Create a new feature with telemetry disabled from the start
-        feature_name_disabled = 'TelemetryDisabledFeature'
+        # Verify warning is emitted when enabling telemetry without App Insights linked
+        with mock.patch('azure.cli.command_modules.appconfig.feature.logger') as mock_logger:
+            self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} --telemetry-enabled true -y',
+                     checks=[self.check('name', feature_name),
+                             self.check('telemetry.enabled', True)])
+            mock_logger.warning.assert_any_call(
+                "Application Insights is not linked to this App Configuration store. To collect telemetry, link an Application Insights resource to the store."
+            )
+
+        # Link App Insights to the store
+        app_insights_name = self.create_random_name(prefix='appinsights', length=24)
         self.kwargs.update({
-            'feature': feature_name_disabled
+            'app_insights_name': app_insights_name
         })
-
-        self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} --telemetry-enabled false -y',
-                 checks=[self.check('name', feature_name_disabled),
-                         self.check('telemetry.enabled', False)])
-
-        # Create feature without telemetry parameter - telemetry should be None
-        feature_name_no_telemetry = 'NoTelemetryFeature'
+        app_insights_id = self.cmd('monitor app-insights component create -g {rg} -a {app_insights_name} -l {rg_loc} --application-type web --query id -o tsv').output.strip()
         self.kwargs.update({
-            'feature': feature_name_no_telemetry
+            'app_insights_resource_id': app_insights_id
         })
+        self.cmd('appconfig update -n {config_store_name} -g {rg} --appinsights-resource-id {app_insights_resource_id}',
+                 checks=[self.check('telemetry.resourceId', app_insights_id)])
 
-        self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} -y',
-                 checks=[self.check('name', feature_name_no_telemetry),
-                         self.check('telemetry', None)])
-
-        # Update existing feature (without telemetry) to enable telemetry
-        self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} --telemetry-enabled true -y',
-                 checks=[self.check('name', feature_name_no_telemetry),
-                         self.check('telemetry.enabled', True)])
+        # Verify no warning when enabling telemetry with App Insights linked
+        with mock.patch('azure.cli.command_modules.appconfig.feature.logger') as mock_logger:
+            self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} --telemetry-enabled true -y',
+                     checks=[self.check('name', feature_name),
+                             self.check('telemetry.enabled', True)])
+            # The "not linked" warning should not have been emitted
+            warning_calls = [str(c) for c in mock_logger.warning.call_args_list]
+            assert not any("Application Insights is not linked" in w for w in warning_calls), \
+                "Expected no App Insights linkage warning after linking, but warning was emitted"
 
 
 class AppConfigFeatureFilterScenarioTest(ScenarioTest):
@@ -900,3 +907,4 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
         self.cmd('appconfig feature filter add -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} --filter-parameters {filter_parameters} -y',
                  checks=[self.check('name', filter_name),
                          self.check('parameters', filter_params_output)])
+
