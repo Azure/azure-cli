@@ -579,7 +579,7 @@ def process_nw_cm_v2_create_namespace(cmd):
             raise ValidationError('usage error: "{}" is not a valid resource id'.format(endpoint_source_resource_id))
 
         resource = parse_resource_id(endpoint_source_resource_id)
-        resource_client = get_mgmt_service_client(cmd.cli_ctx, ResourceManagementClient)
+        resource_client = get_mgmt_service_client(cmd.cli_ctx, ResourceManagementClient, api_version='2024-11-01')
         resource_api_version = _resolve_api_version(resource_client,
                                                     resource['namespace'],
                                                     resource['resource_parent'],
