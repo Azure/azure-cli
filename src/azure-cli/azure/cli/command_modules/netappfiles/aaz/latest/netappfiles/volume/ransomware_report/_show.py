@@ -15,12 +15,15 @@ from azure.cli.core.aaz import *
     "netappfiles volume ransomware-report show",
 )
 class Show(AAZCommand):
-    """Get details of the specified ransomware report (ARP)
-ARP reports are created with a list of suspected files when it detects any combination of high data entropy, abnormal volume activity with data encryption, and unusual file extensions.
-ARP creates snapshots named Anti_ransomware_backup when it detects a potential ransomware threat. You can use one of these ARP snapshots or another snapshot of your volume to restore data.
+    """Get details of the specified ransomware report (ARP) `current` gets the latest active report if there is an active event.
+
+    Get details of the specified ransomware report (ARP)ARP reports are created with a list of suspected files when it detects any combination of high data entropy, abnormal volume activity with data encryption, and unusual file extensions.ARP creates snapshots named Anti_ransomware_backup when it detects a potential ransomware threat. You can use one of these ARP snapshots or another snapshot of your volume to restore data.
 
     :example: RansomwareReports_Get
         az netappfiles volume ransomware-report show --resource-group myRG --account-name account1 --pool-name pool1 --volume-name volume1 --ransomware-report-name ransomwareReport1
+
+    :example: RansomwareReports_Get current report
+        az netappfiles volume ransomware-report show --resource-group myRG --account-name account1 --pool-name pool1 --volume-name volume1 --ransomware-report-name current
     """
 
     _aaz_info = {

@@ -15,6 +15,7 @@ from ._delete import *
 from ._finalize_relocation import *
 from ._get_groupid_list_for_ldapuser import *
 from ._list import *
+from ._list_quota_report import *
 from ._migrate_backup import *
 from ._pool_change import *
 from ._populate_availability_zone import *
