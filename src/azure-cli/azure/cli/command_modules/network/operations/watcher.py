@@ -19,45 +19,55 @@ from azure.cli.core.commands.validators import validate_tags
 from azure.cli.command_modules.network._validators import validate_managed_identity_resource_id
 from .._validators import _resolve_api_version
 
-from ..aaz.latest.network.watcher import RunConfigurationDiagnostic as _RunConfigurationDiagnostic
-from ..aaz.latest.network.watcher import ShowNextHop as _ShowNextHop, ShowSecurityGroupView as _ShowSecurityGroupView, \
-    ShowTopology as _ShowTopology
-from ..aaz.latest.network.watcher import TestConnectivity as _TestConnectivity, TestIpFlow as _TestIPFlow
+from ..aaz.latest.network.watcher._run_configuration_diagnostic import RunConfigurationDiagnostic as _RunConfigurationDiagnostic
+from ..aaz.latest.network.watcher._show_next_hop import ShowNextHop as _ShowNextHop
+from ..aaz.latest.network.watcher._show_security_group_view import ShowSecurityGroupView as _ShowSecurityGroupView
+from ..aaz.latest.network.watcher._show_topology import ShowTopology as _ShowTopology
+from ..aaz.latest.network.watcher._test_connectivity import TestConnectivity as _TestConnectivity
+from ..aaz.latest.network.watcher._test_ip_flow import TestIpFlow as _TestIPFlow
 
-from ..aaz.latest.network.watcher.flow_log import Create as _NwFlowLogCreate, Update as _NwFlowLogUpdate, \
-    List as _NwFlowLogList, Delete as _NwFlowLogDelete
-from ..aaz.latest.network.watcher.troubleshooting import Start as _NwTroubleshootingStart, \
-    Show as _NwTroubleshootingShow
-from ..aaz.latest.network.watcher.packet_capture import Create as _PacketCaptureCreate
-from ..aaz.latest.network.watcher.packet_capture import Delete as _PacketCaptureDelete, List as _PacketCaptureList, \
-    Show as _PacketCaptureShow, ShowStatus as _PacketCaptureShowStatus, Stop as _PacketCaptureStop
+from ..aaz.latest.network.watcher.flow_log._create import Create as _NwFlowLogCreate
+from ..aaz.latest.network.watcher.flow_log._update import Update as _NwFlowLogUpdate
+from ..aaz.latest.network.watcher.flow_log._list import List as _NwFlowLogList
+from ..aaz.latest.network.watcher.flow_log._delete import Delete as _NwFlowLogDelete
+from ..aaz.latest.network.watcher.troubleshooting._start import Start as _NwTroubleshootingStart
+from ..aaz.latest.network.watcher.troubleshooting._show import Show as _NwTroubleshootingShow
+from ..aaz.latest.network.watcher.packet_capture._create import Create as _PacketCaptureCreate
+from ..aaz.latest.network.watcher.packet_capture._delete import Delete as _PacketCaptureDelete
+from ..aaz.latest.network.watcher.packet_capture._list import List as _PacketCaptureList
+from ..aaz.latest.network.watcher.packet_capture._show import Show as _PacketCaptureShow
+from ..aaz.latest.network.watcher.packet_capture._show_status import ShowStatus as _PacketCaptureShowStatus
+from ..aaz.latest.network.watcher.packet_capture._stop import Stop as _PacketCaptureStop
 
-from ..aaz.latest.network.watcher.connection_monitor import Create as _WatcherConnectionMonitorCreate
-from ..aaz.latest.network.watcher.connection_monitor import Start as _WatcherConnectionMonitorStart
-from ..aaz.latest.network.watcher.connection_monitor import Stop as _WatcherConnectionMonitorStop
-from ..aaz.latest.network.watcher.connection_monitor import Show as _WatcherConnectionMonitorShow
-from ..aaz.latest.network.watcher.connection_monitor import List as _WatcherConnectionMonitorList
-from ..aaz.latest.network.watcher.connection_monitor import Delete as _WatcherConnectionMonitorDelete
-from ..aaz.latest.network.watcher.connection_monitor import Query as _WatcherConnectionMonitorQuery
-from ..aaz.latest.network.watcher.connection_monitor import Update as _WatcherConnectionMonitorUpdate
-from ..aaz.latest.network.watcher.connection_monitor.output import Add as _WatcherConnectionMonitorOutputAdd, \
-    List as _WatcherConnectionMonitorOutputList
-from ..aaz.latest.network.watcher.connection_monitor.endpoint import Show as _WatcherConnectionMonitorEndpointShow, \
-    Remove as _WatcherConnectionMonitorEndpointRemove, List as _WatcherConnectionMonitorEndpointList, \
-    Add as _WatcherConnectionMonitorEndpointAdd
+from ..aaz.latest.network.watcher.connection_monitor._create import Create as _WatcherConnectionMonitorCreate
+from ..aaz.latest.network.watcher.connection_monitor._start import Start as _WatcherConnectionMonitorStart
+from ..aaz.latest.network.watcher.connection_monitor._stop import Stop as _WatcherConnectionMonitorStop
+from ..aaz.latest.network.watcher.connection_monitor._show import Show as _WatcherConnectionMonitorShow
+from ..aaz.latest.network.watcher.connection_monitor._list import List as _WatcherConnectionMonitorList
+from ..aaz.latest.network.watcher.connection_monitor._delete import Delete as _WatcherConnectionMonitorDelete
+from ..aaz.latest.network.watcher.connection_monitor._query import Query as _WatcherConnectionMonitorQuery
+from ..aaz.latest.network.watcher.connection_monitor._update import Update as _WatcherConnectionMonitorUpdate
+from ..aaz.latest.network.watcher.connection_monitor.output._add import Add as _WatcherConnectionMonitorOutputAdd
+from ..aaz.latest.network.watcher.connection_monitor.output._list import List as _WatcherConnectionMonitorOutputList
+from ..aaz.latest.network.watcher.connection_monitor.endpoint._show import Show as _WatcherConnectionMonitorEndpointShow
+from ..aaz.latest.network.watcher.connection_monitor.endpoint._remove import Remove as _WatcherConnectionMonitorEndpointRemove
+from ..aaz.latest.network.watcher.connection_monitor.endpoint._list import List as _WatcherConnectionMonitorEndpointList
+from ..aaz.latest.network.watcher.connection_monitor.endpoint._add import Add as _WatcherConnectionMonitorEndpointAdd
 
-from ..aaz.latest.network.watcher.connection_monitor.test_configuration import Add as _MonitorTestConfigurationAdd, \
-    Show as _MonitorTestConfigurationShow, List as _MonitorTestConfigurationList, \
-    Remove as _MonitorTestConfigurationRemove
+from ..aaz.latest.network.watcher.connection_monitor.test_configuration._add import Add as _MonitorTestConfigurationAdd
+from ..aaz.latest.network.watcher.connection_monitor.test_configuration._show import Show as _MonitorTestConfigurationShow
+from ..aaz.latest.network.watcher.connection_monitor.test_configuration._list import List as _MonitorTestConfigurationList
+from ..aaz.latest.network.watcher.connection_monitor.test_configuration._remove import Remove as _MonitorTestConfigurationRemove
 
-from ..aaz.latest.network.watcher.connection_monitor.test_group import Add as _WatcherConnectionMonitorTestGroupAdd, \
-    Show as _WatcherConnectionMonitorTestGroupShow, List as _WatcherConnectionMonitorTestGroupList
+from ..aaz.latest.network.watcher.connection_monitor.test_group._add import Add as _WatcherConnectionMonitorTestGroupAdd
+from ..aaz.latest.network.watcher.connection_monitor.test_group._show import Show as _WatcherConnectionMonitorTestGroupShow
+from ..aaz.latest.network.watcher.connection_monitor.test_group._list import List as _WatcherConnectionMonitorTestGroupList
 
 logger = get_logger(__name__)
 
 
 def get_network_watcher_from_location(cmd, watcher_name="watcher_name", rg_name="watcher_rg"):
-    from ..aaz.latest.network.watcher import List
+    from ..aaz.latest.network.watcher._list import List
 
     args = cmd.ctx.args
     location = args.location.to_serialized_data()

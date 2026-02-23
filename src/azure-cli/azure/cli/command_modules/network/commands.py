@@ -441,7 +441,7 @@ def load_command_table(self, _):
     with self.command_group('network cross-region-lb') as g:
         g.custom_command('create', 'create_cross_region_load_balancer', transform=DeploymentOutputLongRunningOperation(self.cli_ctx), supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_cross_region_lb_create_namespace, exception_handler=handle_template_based_exception)
 
-        from .aaz.latest.network.lb import Wait
+        from .aaz.latest.network.lb._wait import Wait
         from .operations.load_balancer import CrossRegionLoadBalancerShow, CrossRegionLoadBalancerDelete, CrossRegionLoadBalancerUpdate, CrossRegionLoadBalancerList
         self.command_table['network cross-region-lb show'] = CrossRegionLoadBalancerShow(loader=self)
         self.command_table['network cross-region-lb delete'] = CrossRegionLoadBalancerDelete(loader=self)
@@ -484,13 +484,14 @@ def load_command_table(self, _):
 
     # region LocalGateways
     with self.command_group('network local-gateway'):
-        from .aaz.latest.network.local_gateway import List
+        from .aaz.latest.network.local_gateway._list import List
         self.command_table['network local-gateway list'] = List(loader=self, table_transformer=transform_local_gateway_table_output)
     # endregion
 
     # region NetworkInterfaces: (NIC)
     with self.command_group("network nic"):
-        from .aaz.latest.network.nic import ListEffectiveNsg, ShowEffectiveRouteTable
+        from .aaz.latest.network.nic._list_effective_nsg import ListEffectiveNsg
+        from .aaz.latest.network.nic._show_effective_route_table import ShowEffectiveRouteTable
         from .custom import NICCreate, NICUpdate
         self.command_table["network nic create"] = NICCreate(loader=self)
         self.command_table["network nic update"] = NICUpdate(loader=self)
@@ -516,7 +517,7 @@ def load_command_table(self, _):
 
     with self.command_group("network nsg rule") as g:
         from .custom import NSGRuleCreate, NSGRuleUpdate
-        from .aaz.latest.network.nsg.rule import Show
+        from .aaz.latest.network.nsg.rule._show import Show
         self.command_table["network nsg rule create"] = NSGRuleCreate(loader=self)
         self.command_table["network nsg rule update"] = NSGRuleUpdate(loader=self)
         self.command_table["network nsg rule show"] = Show(loader=self, table_transformer=transform_nsg_rule_table_output)
@@ -610,7 +611,8 @@ def load_command_table(self, _):
     public_ip_show_table_transform = public_ip_show_table_transform.replace('$zone$', 'Zones: (!zones && \' \') || join(` `, zones), ')
 
     with self.command_group('network public-ip') as g:
-        from .aaz.latest.network.public_ip import List, Show
+        from .aaz.latest.network.public_ip._list import List
+        from .aaz.latest.network.public_ip._show import Show
         from .custom import PublicIPUpdate
         self.command_table['network public-ip update'] = PublicIPUpdate(loader=self)
         self.command_table['network public-ip list'] = List(loader=self, table_transformer='[].' + public_ip_show_table_transform)
@@ -623,7 +625,7 @@ def load_command_table(self, _):
     # endregion
 
     # region RouteFilters
-    from azure.cli.command_modules.network.aaz.latest.network.route_filter.rule import ListServiceCommunities
+    from .aaz.latest.network.route_filter.rule._list_service_communities import ListServiceCommunities
     self.command_table['network route-filter rule list-service-communities'] = ListServiceCommunities(loader=self, table_transformer=transform_service_community_table_output)
     # endregion
 
@@ -637,13 +639,13 @@ def load_command_table(self, _):
         g.custom_command('update', 'update_traffic_manager_endpoint')
         g.custom_command('list', 'list_traffic_manager_endpoints')
 
-    from azure.cli.command_modules.network.aaz.latest.network.traffic_manager.endpoint import ShowGeographicHierarchy
+    from .aaz.latest.network.traffic_manager.endpoint._show_geographic_hierarchy import ShowGeographicHierarchy
     self.command_table['network traffic-manager endpoint show-geographic-hierarchy'] = ShowGeographicHierarchy(loader=self, table_transformer=transform_geographic_hierachy_table_output)
     # endregion
 
     # region VirtualNetworks
     with self.command_group("network vnet") as g:
-        from .aaz.latest.network.vnet import List
+        from .aaz.latest.network.vnet._list import List
         from .custom import VNetCreate, VNetUpdate
         self.command_table["network vnet create"] = VNetCreate(loader=self)
         self.command_table["network vnet update"] = VNetUpdate(loader=self)
@@ -665,7 +667,9 @@ def load_command_table(self, _):
     # region VirtualNetworkGateways
     with self.command_group('network vnet-gateway'):
         from .custom import VnetGatewayCreate, VnetGatewayUpdate, VnetGatewayVpnConnectionsDisconnect, VNetGatewayShow, VNetGatewayList
-        from .aaz.latest.network.vnet_gateway import ListBgpPeerStatus, ListAdvertisedRoutes, ListLearnedRoutes
+        from .aaz.latest.network.vnet_gateway._list_bgp_peer_status import ListBgpPeerStatus
+        from .aaz.latest.network.vnet_gateway._list_advertised_routes import ListAdvertisedRoutes
+        from .aaz.latest.network.vnet_gateway._list_learned_routes import ListLearnedRoutes
         self.command_table['network vnet-gateway create'] = VnetGatewayCreate(loader=self)
         self.command_table['network vnet-gateway update'] = VnetGatewayUpdate(loader=self)
         self.command_table['network vnet-gateway disconnect-vpn-connections'] = VnetGatewayVpnConnectionsDisconnect(loader=self)
@@ -684,14 +688,14 @@ def load_command_table(self, _):
         self.command_table['network vnet-gateway migration prepare'] = VNetGatewayMigrationPrepare(loader=self)
 
     with self.command_group('network vnet-gateway packet-capture'):
-        from .aaz.latest.network.vnet_gateway import Wait
+        from .aaz.latest.network.vnet_gateway._wait import Wait
         self.command_table['network vnet-gateway packet-capture wait'] = Wait(loader=self)
 
     with self.command_group('network vnet-gateway vpn-client') as g:
         g.custom_command('generate', 'generate_vpn_client')
 
     with self.command_group('network vnet-gateway vpn-client ipsec-policy'):
-        from .aaz.latest.network.vnet_gateway import Wait
+        from .aaz.latest.network.vnet_gateway._wait import Wait
         self.command_table['network vnet-gateway vpn-client ipsec-policy wait'] = Wait(loader=self)
 
     with self.command_group('network vnet-gateway revoked-cert'):
@@ -738,7 +742,7 @@ def load_command_table(self, _):
 
     with self.command_group('network vpn-connection packet-capture'):
         from .custom import VpnConnPackageCaptureStop
-        from .aaz.latest.network.vpn_connection import Wait
+        from .aaz.latest.network.vpn_connection._wait import Wait
         self.command_table['network vpn-connection packet-capture stop'] = VpnConnPackageCaptureStop(loader=self)
         self.command_table['network vpn-connection packet-capture wait'] = Wait(loader=self)
     # endregion

@@ -8,9 +8,12 @@ from knack.log import get_logger
 
 from azure.cli.core.aaz import has_value, register_command, AAZResourceIdArgFormat, AAZListArg, AAZResourceIdArg
 from azure.cli.core.aaz.utils import assign_aaz_list_arg
-from ..aaz.latest.network.dns.record_set import Update as _RecordSetUpdate, Show as _RecordSetShow, \
-    ListByType as _RecordSetListByType, Delete as _RecordSetDelete, Create as _RecordSetCreate
-from ..aaz.latest.network.dns import ListReferences as _DNSListReferences
+from ..aaz.latest.network.dns.record_set._update import Update as _RecordSetUpdate
+from ..aaz.latest.network.dns.record_set._show import Show as _RecordSetShow
+from ..aaz.latest.network.dns.record_set._list_by_type import ListByType as _RecordSetListByType
+from ..aaz.latest.network.dns.record_set._delete import Delete as _RecordSetDelete
+from ..aaz.latest.network.dns.record_set._create import Create as _RecordSetCreate
+from ..aaz.latest.network.dns._list_references import ListReferences as _DNSListReferences
 
 logger = get_logger(__name__)
 

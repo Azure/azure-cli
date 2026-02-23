@@ -5,8 +5,10 @@
 
 # pylint: disable=protected-access, line-too-long
 
-from ..aaz.latest.network.vnet_gateway.migration import Prepare as _VNetGatewayMigrationPrepare, \
-    Execute as _VNetGatewayMigrationExecute, Commit as _VNetGatewayMigrationCommit, Abort as _VNetGatewayMigrationAbort
+from ..aaz.latest.network.vnet_gateway.migration._prepare import Prepare as _VNetGatewayMigrationPrepare
+from ..aaz.latest.network.vnet_gateway.migration._execute import Execute as _VNetGatewayMigrationExecute
+from ..aaz.latest.network.vnet_gateway.migration._commit import Commit as _VNetGatewayMigrationCommit
+from ..aaz.latest.network.vnet_gateway.migration._abort import Abort as _VNetGatewayMigrationAbort
 
 
 class VNetGatewayMigrationPrepare(_VNetGatewayMigrationPrepare):

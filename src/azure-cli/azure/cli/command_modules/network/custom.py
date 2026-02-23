@@ -25,93 +25,115 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
 
-from .aaz.latest.network import ListUsages as _UsagesList
-from .aaz.latest.network.application_gateway import Update as _ApplicationGatewayUpdate
-from .aaz.latest.network.application_gateway.address_pool import Create as _AddressPoolCreate, \
-    Update as _AddressPoolUpdate
-from .aaz.latest.network.application_gateway.auth_cert import Create as _AuthCertCreate, Update as _AuthCertUpdate
-from .aaz.latest.network.application_gateway.client_cert import Add as _ClientCertAdd, Update as _ClientCertUpdate
-from .aaz.latest.network.application_gateway.frontend_ip import Create as _FrontendIPCreate, Update as _FrontendIPUpdate
-from .aaz.latest.network.application_gateway.http_listener import Create as _HTTPListenerCreate, \
-    Update as _HTTPListenerUpdate
-from .aaz.latest.network.application_gateway.http_settings import Create as _HTTPSettingsCreate, \
-    Update as _HTTPSettingsUpdate
-from .aaz.latest.network.application_gateway.identity import Assign as _IdentityAssign
-from .aaz.latest.network.application_gateway.private_link import Add as _AGPrivateLinkAdd, \
-    Remove as _AGPrivateLinkRemove
-from .aaz.latest.network.application_gateway.private_link.ip_config import Add as _AGPrivateLinkIPConfigAdd
-from .aaz.latest.network.application_gateway.listener import Create as _ListenerCreate, Update as _ListenerUpdate
-from .aaz.latest.network.application_gateway.redirect_config import Create as _RedirectConfigCreate, \
-    Update as _RedirectConfigUpdate
-from .aaz.latest.network.application_gateway.rewrite_rule import Create as _AGRewriteRuleCreate, \
-    Update as _AGRewriteRuleUpdate
-from .aaz.latest.network.application_gateway.root_cert import Create as _RootCertCreate, Update as _RootCertUpdate
-from .aaz.latest.network.application_gateway.routing_rule import Create as _RoutingRuleCreate, \
-    Update as _RoutingRuleUpdate
-from .aaz.latest.network.application_gateway.rule import Create as _RuleCreate, Update as _RuleUpdate
-from .aaz.latest.network.application_gateway.settings import Create as _SettingsCreate, Update as _SettingsUpdate
-from .aaz.latest.network.application_gateway.ssl_cert import Create as _SSLCertCreate, Update as _SSLCertUpdate
-from .aaz.latest.network.application_gateway.ssl_policy import Set as _SSLPolicySet
-from .aaz.latest.network.application_gateway.ssl_profile import Add as _SSLProfileAdd, Update as _SSLProfileUpdate
-from .aaz.latest.network.application_gateway.url_path_map import Create as _URLPathMapCreate, \
-    Update as _URLPathMapUpdate
-from .aaz.latest.network.application_gateway.url_path_map.rule import Create as _URLPathMapRuleCreate
-from .aaz.latest.network.application_gateway.waf_policy import Create as _WAFCreate
-from .aaz.latest.network.application_gateway.waf_policy.custom_rule.match_condition import \
-    Add as _WAFCustomRuleMatchConditionAdd
-from .aaz.latest.network.application_gateway.waf_policy.policy_setting import Update as _WAFPolicySettingUpdate
-from .aaz.latest.network.custom_ip.prefix import Create as _CustomIpPrefixCreate, Update as _CustomIpPrefixUpdate
-from .aaz.latest.network.ddos_custom_policy import Update as _DdosCustomPolicyUpdate
-from .aaz.latest.network.dns.record_set import List as _DNSRecordSetListByZone
-from .aaz.latest.network.dns.zone import Create as _DNSZoneCreate
-from .aaz.latest.network.express_route import Create as _ExpressRouteCreate, Update as _ExpressRouteUpdate
-from .aaz.latest.network.express_route.gateway import Create as _ExpressRouteGatewayCreate, \
-    Update as _ExpressRouteGatewayUpdate
-from .aaz.latest.network.express_route.gateway.connection import Create as _ExpressRouteConnectionCreate, \
-    Update as _ExpressRouteConnectionUpdate
-from .aaz.latest.network.express_route.peering import Create as _ExpressRoutePeeringCreate, \
-    Update as _ExpressRoutePeeringUpdate
-from .aaz.latest.network.express_route.peering.connection import Create as _ExpressRoutePeeringConnectionCreate
-from .aaz.latest.network.express_route.port import Create as _ExpressRoutePortCreate
-from .aaz.latest.network.express_route.port.identity import Assign as _ExpressRoutePortIdentityAssign
-from .aaz.latest.network.express_route.port.link import Update as _ExpressRoutePortLinkUpdate
-from .aaz.latest.network.nic import Create as _NICCreate, Update as _NICUpdate
-from .aaz.latest.network.nic.ip_config import Create as _NICIPConfigCreate, Update as _NICIPConfigUpdate
-from .aaz.latest.network.nic.ip_config.inbound_nat_rule import Add as _NICIPConfigNATAdd, \
-    Remove as _NICIPConfigNATRemove
-from .aaz.latest.network.nsg import Create as _NSGCreate
-from .aaz.latest.network.nsg.rule import Create as _NSGRuleCreate, Update as _NSGRuleUpdate
-from .aaz.latest.network.public_ip import Create as _PublicIPCreate, Update as _PublicIPUpdate
-from .aaz.latest.network.private_endpoint import Create as _PrivateEndpointCreate, Update as _PrivateEndpointUpdate
-from .aaz.latest.network.private_endpoint.asg import Add as _PrivateEndpointAsgAdd
-from .aaz.latest.network.private_endpoint.dns_zone_group import Create as _PrivateEndpointPrivateDnsZoneGroupCreate, \
-    Add as _PrivateEndpointPrivateDnsZoneAdd
-from .aaz.latest.network.private_endpoint.ip_config import Add as _PrivateEndpointIpConfigAdd
-from .aaz.latest.network.private_link_service import Create as _PrivateLinkServiceCreate, \
-    Update as _PrivateLinkServiceUpdate
-from .aaz.latest.network.private_link_service.connection import Update as _PrivateEndpointConnectionUpdate
-from .aaz.latest.network.public_ip.prefix import Create as _PublicIpPrefixCreate
-from .aaz.latest.network.security_partner_provider import Create as _SecurityPartnerProviderCreate, \
-    Update as _SecurityPartnerProviderUpdate
-from .aaz.latest.network.virtual_appliance import Create as _VirtualApplianceCreate, Update as _VirtualApplianceUpdate
-from .aaz.latest.network.vnet import Create as _VNetCreate, Update as _VNetUpdate
-from .aaz.latest.network.vnet.peering import Create as _VNetPeeringCreate
-from .aaz.latest.network.vnet.subnet import Create as _VNetSubnetCreate, Update as _VNetSubnetUpdate
-from .aaz.latest.network.vnet_gateway import Create as _VnetGatewayCreate, Update as _VnetGatewayUpdate, \
-    DisconnectVpnConnections as _VnetGatewayVpnConnectionsDisconnect, Show as _VNetGatewayShow, List as _VNetGatewayList
-from .aaz.latest.network.vnet_gateway.aad import Assign as _VnetGatewayAadAssign
-from .aaz.latest.network.vnet_gateway.ipsec_policy import Add as _VnetGatewayIpsecPolicyAdd
-from .aaz.latest.network.vnet_gateway.nat_rule import Add as _VnetGatewayNatRuleAdd, List as _VnetGatewayNatRuleShow, \
-    Remove as _VnetGatewayNatRuleRemove
-from .aaz.latest.network.vnet_gateway.revoked_cert import Create as _VnetGatewayRevokedCertCreate
-from .aaz.latest.network.vnet_gateway.root_cert import Create as _VnetGatewayRootCertCreate
-from .aaz.latest.network.vnet_gateway.vpn_client import GenerateVpnProfile as _VpnProfileGenerate, \
-    Generate as _VpnClientPackageGenerate
-from .aaz.latest.network.vpn_connection import Update as _VpnConnectionUpdate, \
-    ShowDeviceConfigScript as _VpnConnectionDeviceConfigScriptShow
-from .aaz.latest.network.vpn_connection.ipsec_policy import Add as _VpnConnIpsecPolicyAdd
-from .aaz.latest.network.vpn_connection.packet_capture import Stop as _VpnConnPackageCaptureStop
-from .aaz.latest.network.vpn_connection.shared_key import Update as _VpnConnSharedKeyUpdate
+from .aaz.latest.network._list_usages import ListUsages as _UsagesList
+from .aaz.latest.network.application_gateway._update import Update as _ApplicationGatewayUpdate
+from .aaz.latest.network.application_gateway.address_pool._create import Create as _AddressPoolCreate
+from .aaz.latest.network.application_gateway.address_pool._update import Update as _AddressPoolUpdate
+from .aaz.latest.network.application_gateway.auth_cert._create import Create as _AuthCertCreate
+from .aaz.latest.network.application_gateway.auth_cert._update import Update as _AuthCertUpdate
+from .aaz.latest.network.application_gateway.client_cert._add import Add as _ClientCertAdd
+from .aaz.latest.network.application_gateway.client_cert._update import Update as _ClientCertUpdate
+from .aaz.latest.network.application_gateway.frontend_ip._create import Create as _FrontendIPCreate
+from .aaz.latest.network.application_gateway.frontend_ip._update import Update as _FrontendIPUpdate
+from .aaz.latest.network.application_gateway.http_listener._create import Create as _HTTPListenerCreate
+from .aaz.latest.network.application_gateway.http_listener._update import Update as _HTTPListenerUpdate
+from .aaz.latest.network.application_gateway.http_settings._create import Create as _HTTPSettingsCreate
+from .aaz.latest.network.application_gateway.http_settings._update import Update as _HTTPSettingsUpdate
+from .aaz.latest.network.application_gateway.identity._assign import Assign as _IdentityAssign
+from .aaz.latest.network.application_gateway.private_link._add import Add as _AGPrivateLinkAdd
+from .aaz.latest.network.application_gateway.private_link._remove import Remove as _AGPrivateLinkRemove
+from .aaz.latest.network.application_gateway.private_link.ip_config._add import Add as _AGPrivateLinkIPConfigAdd
+from .aaz.latest.network.application_gateway.listener._create import Create as _ListenerCreate
+from .aaz.latest.network.application_gateway.listener._update import Update as _ListenerUpdate
+from .aaz.latest.network.application_gateway.redirect_config._create import Create as _RedirectConfigCreate
+from .aaz.latest.network.application_gateway.redirect_config._update import Update as _RedirectConfigUpdate
+from .aaz.latest.network.application_gateway.rewrite_rule._create import Create as _AGRewriteRuleCreate
+from .aaz.latest.network.application_gateway.rewrite_rule._update import Update as _AGRewriteRuleUpdate
+from .aaz.latest.network.application_gateway.root_cert._create import Create as _RootCertCreate
+from .aaz.latest.network.application_gateway.root_cert._update import Update as _RootCertUpdate
+from .aaz.latest.network.application_gateway.routing_rule._create import Create as _RoutingRuleCreate
+from .aaz.latest.network.application_gateway.routing_rule._update import Update as _RoutingRuleUpdate
+from .aaz.latest.network.application_gateway.rule._create import Create as _RuleCreate
+from .aaz.latest.network.application_gateway.rule._update import Update as _RuleUpdate
+from .aaz.latest.network.application_gateway.settings._create import Create as _SettingsCreate
+from .aaz.latest.network.application_gateway.settings._update import Update as _SettingsUpdate
+from .aaz.latest.network.application_gateway.ssl_cert._create import Create as _SSLCertCreate
+from .aaz.latest.network.application_gateway.ssl_cert._update import Update as _SSLCertUpdate
+from .aaz.latest.network.application_gateway.ssl_policy._set import Set as _SSLPolicySet
+from .aaz.latest.network.application_gateway.ssl_profile._add import Add as _SSLProfileAdd
+from .aaz.latest.network.application_gateway.ssl_profile._update import Update as _SSLProfileUpdate
+from .aaz.latest.network.application_gateway.url_path_map._create import Create as _URLPathMapCreate
+from .aaz.latest.network.application_gateway.url_path_map._update import Update as _URLPathMapUpdate
+from .aaz.latest.network.application_gateway.url_path_map.rule._create import Create as _URLPathMapRuleCreate
+from .aaz.latest.network.application_gateway.waf_policy._create import Create as _WAFCreate
+from .aaz.latest.network.application_gateway.waf_policy.custom_rule.match_condition._add import Add as _WAFCustomRuleMatchConditionAdd
+from .aaz.latest.network.application_gateway.waf_policy.policy_setting._update import Update as _WAFPolicySettingUpdate
+from .aaz.latest.network.custom_ip.prefix._create import Create as _CustomIpPrefixCreate
+from .aaz.latest.network.custom_ip.prefix._update import Update as _CustomIpPrefixUpdate
+from .aaz.latest.network.ddos_custom_policy._update import Update as _DdosCustomPolicyUpdate
+from .aaz.latest.network.dns.record_set._list import List as _DNSRecordSetListByZone
+from .aaz.latest.network.dns.zone._create import Create as _DNSZoneCreate
+from .aaz.latest.network.express_route._create import Create as _ExpressRouteCreate
+from .aaz.latest.network.express_route._update import Update as _ExpressRouteUpdate
+from .aaz.latest.network.express_route.gateway._create import Create as _ExpressRouteGatewayCreate
+from .aaz.latest.network.express_route.gateway._update import Update as _ExpressRouteGatewayUpdate
+from .aaz.latest.network.express_route.gateway.connection._create import Create as _ExpressRouteConnectionCreate
+from .aaz.latest.network.express_route.gateway.connection._update import Update as _ExpressRouteConnectionUpdate
+from .aaz.latest.network.express_route.peering._create import Create as _ExpressRoutePeeringCreate
+from .aaz.latest.network.express_route.peering._update import Update as _ExpressRoutePeeringUpdate
+from .aaz.latest.network.express_route.peering.connection._create import Create as _ExpressRoutePeeringConnectionCreate
+from .aaz.latest.network.express_route.port._create import Create as _ExpressRoutePortCreate
+from .aaz.latest.network.express_route.port.identity._assign import Assign as _ExpressRoutePortIdentityAssign
+from .aaz.latest.network.express_route.port.link._update import Update as _ExpressRoutePortLinkUpdate
+from .aaz.latest.network.nic._create import Create as _NICCreate
+from .aaz.latest.network.nic._update import Update as _NICUpdate
+from .aaz.latest.network.nic.ip_config._create import Create as _NICIPConfigCreate
+from .aaz.latest.network.nic.ip_config._update import Update as _NICIPConfigUpdate
+from .aaz.latest.network.nic.ip_config.inbound_nat_rule._add import Add as _NICIPConfigNATAdd
+from .aaz.latest.network.nic.ip_config.inbound_nat_rule._remove import Remove as _NICIPConfigNATRemove
+from .aaz.latest.network.nsg._create import Create as _NSGCreate
+from .aaz.latest.network.nsg.rule._create import Create as _NSGRuleCreate
+from .aaz.latest.network.nsg.rule._update import Update as _NSGRuleUpdate
+from .aaz.latest.network.public_ip._create import Create as _PublicIPCreate
+from .aaz.latest.network.public_ip._update import Update as _PublicIPUpdate
+from .aaz.latest.network.private_endpoint._create import Create as _PrivateEndpointCreate
+from .aaz.latest.network.private_endpoint._update import Update as _PrivateEndpointUpdate
+from .aaz.latest.network.private_endpoint.asg._add import Add as _PrivateEndpointAsgAdd
+from .aaz.latest.network.private_endpoint.dns_zone_group._create import Create as _PrivateEndpointPrivateDnsZoneGroupCreate
+from .aaz.latest.network.private_endpoint.dns_zone_group._add import Add as _PrivateEndpointPrivateDnsZoneAdd
+from .aaz.latest.network.private_endpoint.ip_config._add import Add as _PrivateEndpointIpConfigAdd
+from .aaz.latest.network.private_link_service._create import Create as _PrivateLinkServiceCreate
+from .aaz.latest.network.private_link_service._update import Update as _PrivateLinkServiceUpdate
+from .aaz.latest.network.private_link_service.connection._update import Update as _PrivateEndpointConnectionUpdate
+from .aaz.latest.network.public_ip.prefix._create import Create as _PublicIpPrefixCreate
+from .aaz.latest.network.security_partner_provider._create import Create as _SecurityPartnerProviderCreate
+from .aaz.latest.network.security_partner_provider._update import Update as _SecurityPartnerProviderUpdate
+from .aaz.latest.network.virtual_appliance._create import Create as _VirtualApplianceCreate
+from .aaz.latest.network.virtual_appliance._update import Update as _VirtualApplianceUpdate
+from .aaz.latest.network.vnet._create import Create as _VNetCreate
+from .aaz.latest.network.vnet._update import Update as _VNetUpdate
+from .aaz.latest.network.vnet.peering._create import Create as _VNetPeeringCreate
+from .aaz.latest.network.vnet.subnet._create import Create as _VNetSubnetCreate
+from .aaz.latest.network.vnet.subnet._update import Update as _VNetSubnetUpdate
+from .aaz.latest.network.vnet_gateway._create import Create as _VnetGatewayCreate
+from .aaz.latest.network.vnet_gateway._update import Update as _VnetGatewayUpdate
+from .aaz.latest.network.vnet_gateway._disconnect_vpn_connections import DisconnectVpnConnections as _VnetGatewayVpnConnectionsDisconnect
+from .aaz.latest.network.vnet_gateway._show import Show as _VNetGatewayShow
+from .aaz.latest.network.vnet_gateway._list import List as _VNetGatewayList
+from .aaz.latest.network.vnet_gateway.aad._assign import Assign as _VnetGatewayAadAssign
+from .aaz.latest.network.vnet_gateway.ipsec_policy._add import Add as _VnetGatewayIpsecPolicyAdd
+from .aaz.latest.network.vnet_gateway.nat_rule._add import Add as _VnetGatewayNatRuleAdd
+from .aaz.latest.network.vnet_gateway.nat_rule._list import List as _VnetGatewayNatRuleShow
+from .aaz.latest.network.vnet_gateway.nat_rule._remove import Remove as _VnetGatewayNatRuleRemove
+from .aaz.latest.network.vnet_gateway.revoked_cert._create import Create as _VnetGatewayRevokedCertCreate
+from .aaz.latest.network.vnet_gateway.root_cert._create import Create as _VnetGatewayRootCertCreate
+from .aaz.latest.network.vnet_gateway.vpn_client._generate_vpn_profile import GenerateVpnProfile as _VpnProfileGenerate
+from .aaz.latest.network.vnet_gateway.vpn_client._generate import Generate as _VpnClientPackageGenerate
+from .aaz.latest.network.vpn_connection._update import Update as _VpnConnectionUpdate
+from .aaz.latest.network.vpn_connection._show_device_config_script import ShowDeviceConfigScript as _VpnConnectionDeviceConfigScriptShow
+from .aaz.latest.network.vpn_connection.ipsec_policy._add import Add as _VpnConnIpsecPolicyAdd
+from .aaz.latest.network.vpn_connection.packet_capture._stop import Stop as _VpnConnPackageCaptureStop
+from .aaz.latest.network.vpn_connection.shared_key._update import Update as _VpnConnSharedKeyUpdate
 from .operations.dns import (RecordSetAShow as DNSRecordSetAShow, RecordSetAAAAShow as DNSRecordSetAAAAShow,  # pylint: disable=unused-import
                              RecordSetDSShow as DNSRecordSetDSShow, RecordSetMXShow as DNSRecordSetMXShow,
                              RecordSetNAPTRShow as DNSRecordSetNAPTRShow, RecordSetNSShow as DNSRecordSetNSShow,

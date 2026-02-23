@@ -8,26 +8,42 @@ from azure.cli.core.azclierror import ArgumentUsageError
 from azure.cli.core.aaz import register_command, AAZResourceIdArgFormat, has_value, AAZListArg, AAZResourceIdArg, \
     AAZStrArg, AAZArgEnum
 from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
-from ..aaz.latest.network.lb import Delete as _LBDelete, Update as _LBUpdate, List as _LBList, Show as _LBShow
-from ..aaz.latest.network.lb.frontend_ip import Create as _LBFrontendIPCreate, Update as _LBFrontendIPUpdate, \
-    Show as _LBFrontendIPShow, Delete as _LBFrontendIPDelete, List as _LBFrontendIPList
-from ..aaz.latest.network.lb.inbound_nat_pool import Create as _LBInboundNatPoolCreate, \
-    Update as _LBInboundNatPoolUpdate
-from ..aaz.latest.network.lb.inbound_nat_rule import Create as _LBInboundNatRuleCreate, \
-    Update as _LBInboundNatRuleUpdate
-from ..aaz.latest.network.lb.rule import Create as _LBRuleCreate, Update as _LBRuleUpdate, Show as _LBRuleShow, \
-    Delete as _LBRuleDelete, List as _LBRuleList
-from ..aaz.latest.network.lb.outbound_rule import Create as _LBOutboundRuleCreate, Update as _LBOutboundRuleUpdate
-from ..aaz.latest.network.lb.address_pool import Create as _LBAddressPoolCreate, Update as _LBAddressPoolUpdate, \
-    Show as _LBAddressPoolShow, Delete as _LBAddressPoolDelete, List as _LBAddressPoolList
-from ..aaz.latest.network.lb.address_pool.address import Add as _LBAddressPoolAddressAdd, \
-    Update as _LBAddressPoolAddressUpdate, Show as _LBAddressPoolAddressShow, \
-    Remove as _LBAddressPoolAddressRemove, List as _LBAddressPoolAddressList
-from ..aaz.latest.network.lb.address_pool.basic import Create as _LBAddressPoolBasicCreate, \
-    Delete as _LBAddressPoolBasicDelete
-from ..aaz.latest.network.lb.address_pool.tunnel_interface import Add as _LBAddressPoolTunnelInterfaceAdd, \
-    Update as _LBAddressPoolTunnelInterfaceUpdate
-from ..aaz.latest.network.lb.probe import Create as _LBProbeCreate, Update as _LBProbeUpdate
+from ..aaz.latest.network.lb._delete import Delete as _LBDelete
+from ..aaz.latest.network.lb._update import Update as _LBUpdate
+from ..aaz.latest.network.lb._list import List as _LBList
+from ..aaz.latest.network.lb._show import Show as _LBShow
+from ..aaz.latest.network.lb.frontend_ip._create import Create as _LBFrontendIPCreate
+from ..aaz.latest.network.lb.frontend_ip._update import Update as _LBFrontendIPUpdate
+from ..aaz.latest.network.lb.frontend_ip._show import Show as _LBFrontendIPShow
+from ..aaz.latest.network.lb.frontend_ip._delete import Delete as _LBFrontendIPDelete
+from ..aaz.latest.network.lb.frontend_ip._list import List as _LBFrontendIPList
+from ..aaz.latest.network.lb.inbound_nat_pool._create import Create as _LBInboundNatPoolCreate
+from ..aaz.latest.network.lb.inbound_nat_pool._update import Update as _LBInboundNatPoolUpdate
+from ..aaz.latest.network.lb.inbound_nat_rule._create import Create as _LBInboundNatRuleCreate
+from ..aaz.latest.network.lb.inbound_nat_rule._update import Update as _LBInboundNatRuleUpdate
+from ..aaz.latest.network.lb.rule._create import Create as _LBRuleCreate
+from ..aaz.latest.network.lb.rule._update import Update as _LBRuleUpdate
+from ..aaz.latest.network.lb.rule._show import Show as _LBRuleShow
+from ..aaz.latest.network.lb.rule._delete import Delete as _LBRuleDelete
+from ..aaz.latest.network.lb.rule._list import List as _LBRuleList
+from ..aaz.latest.network.lb.outbound_rule._create import Create as _LBOutboundRuleCreate
+from ..aaz.latest.network.lb.outbound_rule._update import Update as _LBOutboundRuleUpdate
+from ..aaz.latest.network.lb.address_pool._create import Create as _LBAddressPoolCreate
+from ..aaz.latest.network.lb.address_pool._update import Update as _LBAddressPoolUpdate
+from ..aaz.latest.network.lb.address_pool._show import Show as _LBAddressPoolShow
+from ..aaz.latest.network.lb.address_pool._delete import Delete as _LBAddressPoolDelete
+from ..aaz.latest.network.lb.address_pool._list import List as _LBAddressPoolList
+from ..aaz.latest.network.lb.address_pool.address._add import Add as _LBAddressPoolAddressAdd
+from ..aaz.latest.network.lb.address_pool.address._update import Update as _LBAddressPoolAddressUpdate
+from ..aaz.latest.network.lb.address_pool.address._show import Show as _LBAddressPoolAddressShow
+from ..aaz.latest.network.lb.address_pool.address._remove import Remove as _LBAddressPoolAddressRemove
+from ..aaz.latest.network.lb.address_pool.address._list import List as _LBAddressPoolAddressList
+from ..aaz.latest.network.lb.address_pool.basic._create import Create as _LBAddressPoolBasicCreate
+from ..aaz.latest.network.lb.address_pool.basic._delete import Delete as _LBAddressPoolBasicDelete
+from ..aaz.latest.network.lb.address_pool.tunnel_interface._add import Add as _LBAddressPoolTunnelInterfaceAdd
+from ..aaz.latest.network.lb.address_pool.tunnel_interface._update import Update as _LBAddressPoolTunnelInterfaceUpdate
+from ..aaz.latest.network.lb.probe._create import Create as _LBProbeCreate
+from ..aaz.latest.network.lb.probe._update import Update as _LBProbeUpdate
 
 
 logger = get_logger(__name__)
