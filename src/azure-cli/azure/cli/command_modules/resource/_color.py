@@ -49,6 +49,9 @@ class ColoredStringBuilder:
     def new_color_scope(self, color):
         return self.ColorScope(self, color)
 
+    def clear(self):
+        self._contents = []
+
     def _push_color(self, color):
         if not self._enable_color:
             return
