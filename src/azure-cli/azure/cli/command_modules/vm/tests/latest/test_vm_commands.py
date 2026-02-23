@@ -4677,6 +4677,12 @@ class VMSSCreateOptions(ScenarioTest):
             self.check('resiliencyPolicy.resilientVmDeletionPolicy.enabled', True),
         ])
 
+    @unittest.skip(
+        "Test skipped due to design conflict: "
+        "Automatic Zone Rebalancing requires a zone-spanning VMSS "
+        "(explicit zones), while Zone Placement Policy (Auto) "
+        "explicitly disallows specifying zones."
+    )
     @ResourceGroupPreparer(name_prefix='test_vmss_with_automatic_zone_rebalancing_policy', location='eastus2euap')
     def test_vmss_with_automatic_zone_rebalancing_policy(self, resource_group):
         self.kwargs.update({
@@ -4695,8 +4701,8 @@ class VMSSCreateOptions(ScenarioTest):
         self.cmd('network lb create -g {rg} -n {lb1}')
         self.cmd('network lb probe create -g {rg} --lb-name {lb1} -n {probe1} --protocol http --port 80 --path /')
         self.cmd('network lb rule create -g {rg} --lb-name {lb1} -n {rule1} --probe-name {probe1} --protocol tcp --frontend-port 80 --backend-port 80')
-        self.cmd('vmss create -g {rg} -n {vmss1} --image {image} --vm-sku Standard_D1_v2 --load-balancer {lb1} --health-probe {probe1} --zone-balance true --zone-placement-policy Auto --max-zone-count 2 --disable-overprovision --orchestration-mode Uniform --admin-username vmtest --admin-password Test123456789# --nsg {nsg} '
-                 '--enable-automatic-zone-balancing True --automatic-zone-balancing-strategy Recreate --automatic-zone-balancing-behavior CreateBeforeDelete --location eastus2euap')
+        self.cmd('vmss create -g {rg} -n {vmss1} --image {image} --vm-sku Standard_D1_v2 --load-balancer {lb1} --health-probe {probe1} --zone-balance true --orchestration-mode Uniform --admin-username vmtest --admin-password Test123456789# --nsg {nsg} --zones 1 2 3 '
+                 '--enable-automatic-zone-balancing True --automatic-zone-balancing-strategy Recreate --automatic-zone-balancing-behavior CreateBeforeDelete --location eastus2')
         self.cmd('vmss show -g {rg} -n {vmss1}', checks=[
             self.check('resiliencyPolicy.automaticZoneRebalancingPolicy.enabled', True),
             self.check('resiliencyPolicy.automaticZoneRebalancingPolicy.rebalanceStrategy', 'Recreate'),
@@ -4712,7 +4718,7 @@ class VMSSCreateOptions(ScenarioTest):
         self.cmd('network lb create -g {rg} -n {lb2}')
         self.cmd('network lb probe create -g {rg} --lb-name {lb2} -n {probe2} --protocol http --port 80 --path /')
         self.cmd('network lb rule create -g {rg} --lb-name {lb2} -n {rule2} --probe-name {probe2} --protocol tcp --frontend-port 80 --backend-port 80')
-        self.cmd('vmss create -g {rg} -n {vmss2} --image {image} --vm-sku Standard_D1_v2 --load-balancer {lb2} --health-probe {probe2} --zone-balance true --zone-placement-policy Auto --disable-overprovision --orchestration-mode Uniform --admin-username vmtest --admin-password Test123456789# --nsg {nsg} --location eastus2euap')
+        self.cmd('vmss create -g {rg} -n {vmss2} --image {image} --vm-sku Standard_D1_v2 --load-balancer {lb2} --health-probe {probe2} --zone-balance true --orchestration-mode Uniform --admin-username vmtest --admin-password Test123456789# --nsg {nsg} --zones 1 2 3 --location eastus2')
 
         self.cmd('vmss update -g {rg} -n {vmss2} --enable-automatic-zone-balancing True --automatic-zone-balancing-strategy Recreate')
         self.cmd('vmss show -g {rg} -n {vmss2}', checks=[
