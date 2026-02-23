@@ -14131,9 +14131,9 @@ class VMSSAutomaticZonePlacementTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded')
         ])
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vmss_zone_placement_validation_')
-    def test_vmss_zone_placement_policy_validation_zones_conflict(self, resource_group):
+    def test_vmss_zone_placement_policy_validation_zones_conflict(self):
         self.kwargs.update({
+            'rg': 'rgtest',
             'vmss': 'vmss-zone-placement-invalid',
             'location': 'eastus2',
             'image': 'MicrosoftWindowsServer:WindowsServer:2016-Datacenter:latest',
@@ -14181,9 +14181,9 @@ class VMSSAutomaticZonePlacementTest(ScenarioTest):
                 '--orchestration-mode Uniform'
             )
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vmss_zone_placement_instance_percent_validation_')
-    def test_vmss_zone_placement_instance_percent_validation(self, resource_group):
+    def test_vmss_zone_placement_instance_percent_validation(self):
         self.kwargs.update({
+            'rg': 'rgtest',
             'vmss': 'vmss-zone-placement-percent-invalid',
             'location': 'eastus2',
             'image': 'MicrosoftWindowsServer:WindowsServer:2016-Datacenter:latest',
@@ -14205,9 +14205,9 @@ class VMSSAutomaticZonePlacementTest(ScenarioTest):
                 '--instance-percent-policy true '
             )
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vmss_zone_placement_percent_range_')
-    def test_vmss_zone_placement_instance_percent_range_validation(self, resource_group):
+    def test_vmss_zone_placement_instance_percent_range_validation(self):
         self.kwargs.update({
+            'rg': 'rgtest',
             'vmss': 'vmss-zone-placement-percent-range',
             'location': 'eastus2',
             'image': 'MicrosoftWindowsServer:WindowsServer:2016-Datacenter:latest',
