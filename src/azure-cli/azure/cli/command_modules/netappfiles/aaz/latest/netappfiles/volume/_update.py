@@ -22,9 +22,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-09-01",
+        "version": "2025-12-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2025-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2025-12-01"],
         ]
     }
 
@@ -134,6 +134,24 @@ class Update(AAZCommand):
             arg_group="CMK Encryption",
             help="The resource ID of private endpoint for KeyVault. It must reside in the same VNET as the volume. Only applicable if encryptionKeySource = 'Microsoft.KeyVault'.",
             nullable=True,
+        )
+
+        # define Arg Group "DataProtection"
+
+        _args_schema = cls._args_schema
+        _args_schema.ransomware_protection = AAZObjectArg(
+            options=["--ransomware-protection"],
+            arg_group="DataProtection",
+            help="Advanced Ransomware Protection settings",
+            nullable=True,
+        )
+
+        ransomware_protection = cls._args_schema.ransomware_protection
+        ransomware_protection.desired_ransomware_protection_state = AAZStrArg(
+            options=["desired-ransomware-protection-state"],
+            help="The desired value of the Advanced Ransomware Protection feature state available to the volume",
+            nullable=True,
+            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
 
         # define Arg Group "ExportPolicy"
@@ -537,7 +555,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-09-01",
+                    "api-version", "2025-12-01",
                     required=True,
                 ),
             }
@@ -644,7 +662,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-09-01",
+                    "api-version", "2025-12-01",
                     required=True,
                 ),
             }
@@ -739,6 +757,7 @@ class Update(AAZCommand):
             data_protection = _builder.get(".properties.dataProtection")
             if data_protection is not None:
                 data_protection.set_prop("backup", AAZObjectType)
+                data_protection.set_prop("ransomwareProtection", AAZObjectType, ".ransomware_protection")
                 data_protection.set_prop("replication", AAZObjectType)
                 data_protection.set_prop("snapshot", AAZObjectType)
                 data_protection.set_prop("volumeRelocation", AAZObjectType)
@@ -748,6 +767,10 @@ class Update(AAZCommand):
                 backup.set_prop("backupPolicyId", AAZStrType, ".backup_policy_id")
                 backup.set_prop("backupVaultId", AAZStrType, ".backup_vault_id")
                 backup.set_prop("policyEnforced", AAZBoolType, ".policy_enforced")
+
+            ransomware_protection = _builder.get(".properties.dataProtection.ransomwareProtection")
+            if ransomware_protection is not None:
+                ransomware_protection.set_prop("desiredRansomwareProtectionState", AAZStrType, ".desired_ransomware_protection_state")
 
             replication = _builder.get(".properties.dataProtection.replication")
             if replication is not None:
@@ -1071,6 +1094,9 @@ class _UpdateHelper:
 
         data_protection = _schema_volume_read.properties.data_protection
         data_protection.backup = AAZObjectType()
+        data_protection.ransomware_protection = AAZObjectType(
+            serialized_name="ransomwareProtection",
+        )
         data_protection.replication = AAZObjectType()
         data_protection.snapshot = AAZObjectType()
         data_protection.volume_relocation = AAZObjectType(
@@ -1086,6 +1112,15 @@ class _UpdateHelper:
         )
         backup.policy_enforced = AAZBoolType(
             serialized_name="policyEnforced",
+        )
+
+        ransomware_protection = _schema_volume_read.properties.data_protection.ransomware_protection
+        ransomware_protection.actual_ransomware_protection_state = AAZStrType(
+            serialized_name="actualRansomwareProtectionState",
+            flags={"read_only": True},
+        )
+        ransomware_protection.desired_ransomware_protection_state = AAZStrType(
+            serialized_name="desiredRansomwareProtectionState",
         )
 
         replication = _schema_volume_read.properties.data_protection.replication

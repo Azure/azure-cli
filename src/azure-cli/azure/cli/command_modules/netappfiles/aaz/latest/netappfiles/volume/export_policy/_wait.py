@@ -20,7 +20,7 @@ class Wait(AAZWaitCommand):
 
     _aaz_info = {
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2025-09-01", "properties.exportPolicy.rules[]"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2025-12-01", "properties.exportPolicy.rules[]"],
         ]
     }
 
@@ -149,7 +149,7 @@ class Wait(AAZWaitCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-09-01",
+                    "api-version", "2025-12-01",
                     required=True,
                 ),
             }
@@ -440,6 +440,9 @@ class _WaitHelper:
 
         data_protection = _schema_volume_read.properties.data_protection
         data_protection.backup = AAZObjectType()
+        data_protection.ransomware_protection = AAZObjectType(
+            serialized_name="ransomwareProtection",
+        )
         data_protection.replication = AAZObjectType()
         data_protection.snapshot = AAZObjectType()
         data_protection.volume_relocation = AAZObjectType(
@@ -455,6 +458,15 @@ class _WaitHelper:
         )
         backup.policy_enforced = AAZBoolType(
             serialized_name="policyEnforced",
+        )
+
+        ransomware_protection = _schema_volume_read.properties.data_protection.ransomware_protection
+        ransomware_protection.actual_ransomware_protection_state = AAZStrType(
+            serialized_name="actualRansomwareProtectionState",
+            flags={"read_only": True},
+        )
+        ransomware_protection.desired_ransomware_protection_state = AAZStrType(
+            serialized_name="desiredRansomwareProtectionState",
         )
 
         replication = _schema_volume_read.properties.data_protection.replication
