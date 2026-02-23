@@ -49,6 +49,23 @@ class ColoredStringBuilder:
     def new_color_scope(self, color):
         return self.ColorScope(self, color)
 
+    def insert(self, index, value="", color=None):
+        if self._enable_color:
+            self._contents.insert(index, str(Color.RESET))
+
+        self._contents.insert(index, f"{str(value)}")
+
+        if self._enable_color:
+            self._contents.insert(index, str(color))
+
+        return self
+
+    def insert_line(self, index, value="", color=None):
+        return self.insert(index, f"{str(value)}\n", color)
+
+    def get_current_index(self):
+        return len(self._contents)
+
     def clear(self):
         self._contents = []
 
