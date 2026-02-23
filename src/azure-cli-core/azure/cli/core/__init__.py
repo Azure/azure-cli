@@ -455,6 +455,8 @@ class MainCommandsLoader(CLICommandsLoader):
 
         if use_command_index:
             command_index = CommandIndex(self.cli_ctx)
+            command_index_is_valid = command_index._is_index_valid()  # pylint: disable=protected-access
+            command_index_has_entries = bool(command_index.INDEX.get(CommandIndex._COMMAND_INDEX))
             index_result = command_index.get(args)
             if index_result:
                 index_modules, index_extensions = index_result
@@ -514,6 +516,11 @@ class MainCommandsLoader(CLICommandsLoader):
                              "The index may be outdated.", raw_cmd)
             else:
                 logger.debug("No module found from index for '%s'", args)
+                if command_index_is_valid and command_index_has_entries and args and not args[0].startswith('-') and \
+                        not self.cli_ctx.data['completer_active']:
+                    logger.debug("Valid command index has no entry for '%s'. Skip full reload and fail fast.",
+                                 args[0])
+                    return self.command_table
 
         logger.debug("Loading all modules and extensions")
         _update_command_table_from_modules(args)

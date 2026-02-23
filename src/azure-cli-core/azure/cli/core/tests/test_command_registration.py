@@ -328,10 +328,12 @@ class TestCommandRegistration(unittest.TestCase):
         loader.load_command_table(["hello", "mod-only"])
         _check_index()
 
-        # Test rebuild command index if no module found
-        _set_index({"network": ["azure.cli.command_modules.network"]})
-        loader.load_command_table(["hello", "mod-only"])
-        _check_index()
+        # Test valid command index miss does not trigger rebuild
+        stale_index = {"network": ["azure.cli.command_modules.network"]}
+        _set_index(stale_index)
+        cmd_tbl = loader.load_command_table(["hello", "mod-only"])
+        self.assertDictEqual(INDEX[CommandIndex._COMMAND_INDEX], stale_index)
+        self.assertFalse(cmd_tbl)
 
         with mock.patch.object(cli.cloud, "profile", "2019-03-01-hybrid"):
             def update_and_check_index():
