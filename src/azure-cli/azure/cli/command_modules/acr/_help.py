@@ -364,6 +364,9 @@ examples:
   - name: Add a rule to allow access for a specific IP address-range.
     text: >
         az acr network-rule add -n myregistry --ip-address 23.45.1.0/24
+  - name: Add a rule to allow access for a specific virtual network.
+    text: >
+        az acr network-rule add -n myregistry --subnet $subnetId
 """
 
 helps['acr network-rule list'] = """
