@@ -567,7 +567,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         with self.assertRaisesRegex(CLIError, "Feature name cannot contain the following characters: '%', ':'"):
             self.cmd('appconfig feature set -n {config_store_name} --feature {feature}')
 
-    @AllowLargeResponse(size_kb=8192)
+    @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_feature_telemetry(self, resource_group, location):
         """Test feature flag telemetry functionality."""
@@ -632,11 +632,11 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         self.kwargs.update({
             'app_insights_name': app_insights_name
         })
-        app_insights_id = self.cmd('monitor app-insights component create -g {rg} -a {app_insights_name} -l {rg_loc} --application-type web --query id -o tsv').output.strip()
+        app_insights_id = self.cmd('monitor app-insights component create -g {rg} -a {app_insights_name} -l {rg_loc}').get_output_in_json()['id']
         self.kwargs.update({
             'app_insights_resource_id': app_insights_id
         })
-        self.cmd('appconfig update -n {config_store_name} -g {rg} --appinsights-resource-id {app_insights_resource_id}',
+        self.cmd('appconfig update -n {config_store_name} -g {rg} --appinsights-resource {app_insights_resource_id}',
                  checks=[self.check('telemetry.resourceId', app_insights_id)])
 
         # Verify no warning when enabling telemetry with App Insights linked

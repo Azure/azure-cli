@@ -72,6 +72,10 @@ def create_configstore(cmd,  # pylint: disable=too-many-locals
     if arm_auth_mode is not None:
         arm_authentication_mode = AuthenticationMode.LOCAL if arm_auth_mode == ARMAuthenticationMode.LOCAL else AuthenticationMode.PASS_THROUGH
 
+    telemetry = None
+    if appinsights_resource is not None:
+        telemetry = TelemetryProperties(resource_id=appinsights_resource if appinsights_resource else None)
+
     configstore_params = ConfigurationStore(location=location.lower(),
                                             identity=__get_resource_identity(assign_identity) if assign_identity else None,
                                             sku=Sku(name=sku),
@@ -82,7 +86,7 @@ def create_configstore(cmd,  # pylint: disable=too-many-locals
                                             enable_purge_protection=enable_purge_protection,
                                             create_mode=CreateMode.DEFAULT,
                                             default_key_value_revision_retention_period_in_seconds=kv_revision_retention_period,
-                                            telemetry=TelemetryProperties(resource_id=appinsights_resource) if appinsights_resource is not None else None,
+                                            telemetry=telemetry,
                                             data_plane_proxy=DataPlaneProxyProperties(
                                                 authentication_mode=arm_authentication_mode,
                                                 private_link_delegation=arm_private_link_delegation))
@@ -204,13 +208,17 @@ def update_configstore(cmd,  # pylint: disable=too-many-locals
     if arm_auth_mode is not None:
         arm_authentication_mode = AuthenticationMode.LOCAL if arm_auth_mode == ARMAuthenticationMode.LOCAL else AuthenticationMode.PASS_THROUGH
 
+    telemetry = None
+    if appinsights_resource is not None:
+        telemetry = TelemetryProperties(resource_id=appinsights_resource if appinsights_resource else None)
+
     update_params = ConfigurationStoreUpdateParameters(tags=tags,
                                                        sku=Sku(name=sku) if sku else None,
                                                        public_network_access=public_network_access,
                                                        disable_local_auth=disable_local_auth,
                                                        enable_purge_protection=enable_purge_protection,
                                                        default_key_value_revision_retention_period_in_seconds=kv_revision_retention_period,
-                                                       telemetry=TelemetryProperties(resource_id=appinsights_resource) if appinsights_resource is not None else None,
+                                                       telemetry=telemetry,
                                                        data_plane_proxy=DataPlaneProxyProperties(
                                                            authentication_mode=arm_authentication_mode,
                                                            private_link_delegation=arm_private_link_delegation))

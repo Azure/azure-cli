@@ -37,7 +37,7 @@ examples:
   - name: Create an App Configuration store with a key-value revision retention period of one day (in seconds).
     text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard --kv-revision-retention-period 86400
   - name: Create an App Configuration store with an Application Insights resource linked for telemetry collection.
-    text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard --appinsights-resource /subscriptions/<SUBSCRIPTION ID>/resourceGroups/<RESOURCEGROUP>/providers/microsoft.insights/components/MyAppInsights
+    text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard --appinsights-resource /subscriptions/<SUBSCRIPTIONID>/resourceGroups/<RESOURCEGROUP>/providers/microsoft.insights/components/MyAppInsights
 """
 
 helps['appconfig list-deleted'] = """
@@ -417,7 +417,7 @@ examples:
   - name: Update an App Configuration store to set a key-value revision retention period of one day (in seconds).
     text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --kv-revision-retention-period 86400
   - name: Link an Application Insights resource to an App Configuration store for telemetry collection.
-    text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --appinsights-resource /subscriptions/<SUBSCRIPTION ID>/resourceGroups/<RESOURCEGROUP>/providers/microsoft.insights/components/MyAppInsights
+    text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --appinsights-resource /subscriptions/<SUBSCRIPTIONID>/resourceGroups/<RESOURCEGROUP>/providers/microsoft.insights/components/MyAppInsights
   - name: Unlink Application Insights from an App Configuration store.
     text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --appinsights-resource ""
 """
@@ -448,7 +448,10 @@ helps['appconfig feature set'] = """
             az appconfig feature set -n MyAppConfiguration --feature Beta --key .appconfig.featureflag/MyApp1:Beta --tags tag1=value1 tag2=value2
         - name: Set a feature flag with telemetry enabled.
           text:
-            az appconfig feature set -n MyAppConfiguration --feature color --telemetry-enabled true
+            az appconfig feature set -n MyAppConfiguration --feature color --telemetry-enabled
+        - name: Disable telemetry on a feature flag.
+          text:
+            az appconfig feature set -n MyAppConfiguration --feature color --telemetry-enabled false
     """
 
 helps['appconfig feature delete'] = """

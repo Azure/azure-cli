@@ -350,7 +350,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
         with self.assertRaisesRegex(CLIError, f'Failed to find the deleted App Configuration store \'{config_store_name}\'.'):
             self.cmd('appconfig show-deleted -n {config_store_name}')
 
-    @AllowLargeResponse(size_kb=8192)
+    @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_appinsights(self, resource_group, location):
         """Test linking Application Insights to App Configuration store."""
@@ -374,8 +374,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
             'app_insights_name': app_insights_name
         })
 
-        app_insights_resource_id = self.cmd('monitor app-insights component create -g {rg} -a {app_insights_name} -l {rg_loc} --application-type web --query id -o tsv').output.strip()
-
+        app_insights_resource_id = self.cmd('monitor app-insights component create -g {rg} -a {app_insights_name} -l {rg_loc}').get_output_in_json()['id']
         self.kwargs.update({
             'app_insights_resource_id': app_insights_resource_id
         })
@@ -402,8 +401,6 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
         # Verify App Insights is unlinked
         self.cmd('appconfig show -n {config_store_name} -g {rg}',
                  checks=[self.check('telemetry.resourceId', None)])
-
-        self.cmd('appconfig delete -n {config_store_name} -g {rg} -y')
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
