@@ -96,7 +96,7 @@ class ListQuotaReport(AAZCommand):
             enum={"DefaultGroupQuota": "DefaultGroupQuota", "DefaultUserQuota": "DefaultUserQuota", "IndividualGroupQuota": "IndividualGroupQuota", "IndividualUserQuota": "IndividualUserQuota"},
         )
         _args_schema.usage_threshold_percentage = AAZIntArg(
-            options=["--usage-threshold-percentage"],
+            options=["--usage-threshold-pct", "--usage-threshold-percentage"],
             arg_group="Body",
             help="The usageThresholdPercentage filter takes the usage threshold percentage and returns records where the usage is greater than or equal to the input value. This is an optional property.",
             fmt=AAZIntArgFormat(
