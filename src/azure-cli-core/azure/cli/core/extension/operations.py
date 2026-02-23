@@ -276,6 +276,29 @@ def _augment_telemetry_with_ext_info(extension_name, ext=None):
         pass
 
 
+def _rebuild_command_index(cli_ctx):
+    command_index = CommandIndex(cli_ctx)
+    command_index.invalidate()
+
+    if not cli_ctx:
+        return
+
+    if not cli_ctx.config.getboolean('core', 'use_command_index', fallback=True):
+        return
+
+    invocation = getattr(cli_ctx, 'invocation', None)
+    commands_loader = getattr(invocation, 'commands_loader', None) if invocation else None
+    if not commands_loader:
+        logger.debug('Skipping command index rebuild because commands_loader is unavailable.')
+        return
+
+    try:
+        logger.debug('Rebuilding command index after extension operation.')
+        commands_loader.load_command_table(None)
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.warning('Failed to rebuild command index after extension operation: %s', ex)
+
+
 def check_version_compatibility(azext_metadata):
     is_compatible, cli_core_version, min_required, max_required, min_ext_required = ext_compat_with_cli(azext_metadata)
     # logger.debug("Extension compatibility result: is_compatible=%s cli_core_version=%s min_required=%s "
@@ -349,9 +372,10 @@ def add_extension(cmd=None, source=None, extension_name=None, index_url=None, ye
                            "Please use with discretion.", extension_name)
         elif extension_name and ext.preview:
             logger.warning("The installed extension '%s' is in preview.", extension_name)
-        CommandIndex().invalidate()
     except ExtensionNotInstalledException:
         pass
+
+    _rebuild_command_index(cmd_cli_ctx)
 
 
 def is_cloud_shell_system_extension(ext_path):
@@ -362,7 +386,7 @@ def is_cloud_shell_system_extension(ext_path):
     return False
 
 
-def remove_extension(extension_name):
+def remove_extension(extension_name, cli_ctx=None):
     try:
         # Get the extension and it will raise an error if it doesn't exist
         ext = get_extension(extension_name)
@@ -375,7 +399,7 @@ def remove_extension(extension_name):
         # We call this just before we remove the extension so we can get the metadata before it is gone
         _augment_telemetry_with_ext_info(extension_name, ext)
         rmtree_with_retry(ext.path)
-        CommandIndex().invalidate()
+        _rebuild_command_index(cli_ctx)
     except ExtensionNotInstalledException as e:
         raise CLIError(e)
 
@@ -435,7 +459,7 @@ def update_extension(cmd=None, extension_name=None, index_url=None, pip_extra_in
             logger.debug('Copying %s to %s', backup_dir, extension_path)
             shutil.copytree(backup_dir, extension_path)
             raise CLIError('Failed to update. Rolled {} back to {}.'.format(extension_name, cur_version))
-        CommandIndex().invalidate()
+        _rebuild_command_index(cmd_cli_ctx)
     except ExtensionNotInstalledException as e:
         raise CLIError(e)
 

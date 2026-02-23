@@ -17,6 +17,7 @@ from azure.cli.core.extension import (get_extensions, build_extension_path, exte
                                       EXTENSIONS_MOD_PREFIX, EXT_METADATA_MINCLICOREVERSION, EXT_METADATA_MAXCLICOREVERSION)
 
 from azure.cli.core.extension.operations import list_available_extensions, add_extension, show_extension, remove_extension, list_extensions, update_extension
+from azure.cli.core.extension import operations as extension_operations
 
 # The test extension name
 EXT_NAME = 'myfirstcliextension'
@@ -101,6 +102,41 @@ class TestExtensions(TestExtensionsBase):
         shutil.rmtree(self.ext_dir)
         actual = get_extensions(ext_type=WheelExtension)
         self.assertEqual(len(actual), 0)
+
+    def test_rebuild_command_index_when_enabled(self):
+        cli_ctx = mock.MagicMock()
+        cli_ctx.config.getboolean.return_value = True
+        cli_ctx.invocation.commands_loader = mock.MagicMock()
+
+        with mock.patch('azure.cli.core.extension.operations.CommandIndex') as command_index:
+            extension_operations._rebuild_command_index(cli_ctx)  # pylint: disable=protected-access
+
+        command_index.assert_called_once_with(cli_ctx)
+        command_index.return_value.invalidate.assert_called_once()
+        cli_ctx.invocation.commands_loader.load_command_table.assert_called_once_with(None)
+
+    def test_rebuild_command_index_skips_when_disabled(self):
+        cli_ctx = mock.MagicMock()
+        cli_ctx.config.getboolean.return_value = False
+        cli_ctx.invocation.commands_loader = mock.MagicMock()
+
+        with mock.patch('azure.cli.core.extension.operations.CommandIndex') as command_index:
+            extension_operations._rebuild_command_index(cli_ctx)  # pylint: disable=protected-access
+
+        command_index.assert_called_once_with(cli_ctx)
+        command_index.return_value.invalidate.assert_called_once()
+        cli_ctx.invocation.commands_loader.load_command_table.assert_not_called()
+
+    def test_rebuild_command_index_skips_without_loader(self):
+        cli_ctx = mock.MagicMock()
+        cli_ctx.config.getboolean.return_value = True
+        cli_ctx.invocation = None
+
+        with mock.patch('azure.cli.core.extension.operations.CommandIndex') as command_index:
+            extension_operations._rebuild_command_index(cli_ctx)  # pylint: disable=protected-access
+
+        command_index.assert_called_once_with(cli_ctx)
+        command_index.return_value.invalidate.assert_called_once()
 
     def test_no_extensions_in_dir(self):
         """ Directory exists but there are no extensions """

@@ -18,8 +18,8 @@ def add_extension_cmd(cmd, source=None, extension_name=None, index_url=None, yes
                          version=version, upgrade=upgrade, allow_preview=allow_preview)
 
 
-def remove_extension_cmd(extension_name):
-    return remove_extension(extension_name)
+def remove_extension_cmd(cmd, extension_name):
+    return remove_extension(extension_name, cli_ctx=cmd.cli_ctx)
 
 
 def list_extensions_cmd():
