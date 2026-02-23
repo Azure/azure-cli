@@ -87,7 +87,7 @@ class ListQuotaReport(AAZCommand):
         _args_schema.quota_target = AAZStrArg(
             options=["--quota-target"],
             arg_group="Body",
-            help="UserID/GroupID/SID based on the quota target type. UserID and groupID can be found by running 'id' or 'getent' command for the user or group and SID can be found by running <wmic useraccount where name='user-name' get sid>. If provided, quotaType must also be specified. The quotaType and quotaTarget properties are optional, but when filtering by quota target, quotaType and quotaTarget must be supplied together. Service/API will return an error if only one is provided.",
+            help="UserID/GroupID/SID based on the quota target type. UserID and groupID can be found by running 'id' or 'getent' command for the user or group and SID can be found by running `<wmic useraccount where name='user-name' get sid>`. If provided, quotaType must also be specified. The quotaType and quotaTarget properties are optional, but when filtering by quota target, quotaType and quotaTarget must be supplied together. Service/API will return an error if only one is provided.",
         )
         _args_schema.quota_type = AAZStrArg(
             options=["--quota-type"],
