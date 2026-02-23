@@ -140,7 +140,8 @@ class DeploymentStacksWhatIfResultFormatter:
 
         for delta in delta or []:
             if delta.change_type == StackModels.DeploymentStacksWhatIfPropertyChangeType.MODIFY:
-                if delta
+                pass  # TODO(kylealbert): call right methods
+
             if self._format_property_change(delta, parent_path):
                printed = True
 
@@ -173,4 +174,4 @@ class DeploymentStacksWhatIfResultFormatter:
         return True
 
     def _get_type_from_delta(self, delta: StackModels.DeploymentStacksChangeBase):
-
+        return None

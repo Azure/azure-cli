@@ -44,6 +44,7 @@ from knack.prompting import prompt, prompt_pass, prompt_t_f, prompt_choice_list,
 from knack.util import CLIError
 
 from ._formatters import format_what_if_operation_result
+from ._stacks_formatters import DeploymentStacksWhatIfResultFormatter
 from ._bicep import (
     run_bicep_command,
     is_bicep_file,
@@ -2913,23 +2914,26 @@ def _prepare_validate_stack_at_scope(
     return deployment_stack_model
 
 
-def _print_deployment_stack_what_if_result(what_if_result, no_pretty_print):
+def _print_deployment_stack_what_if_result(what_if_result, no_pretty_print, no_color):
     # Check for an error result.
     if what_if_result and what_if_result.properties and what_if_result.properties.error:
         err_message = _build_preflight_error_message(what_if_result.properties.error)
         raise_subdivision_deployment_error(err_message)
 
-    if no_pretty_print:  # TODO(kylealbert): raw json vs non-colored formatted?
+    if no_pretty_print:
         return what_if_result
 
-    print("TODO")
+    formatter = DeploymentStacksWhatIfResultFormatter(enable_color=not no_color)
+    print(formatter.format(what_if_result))
+
+    return None
 
 
 def create_deployment_stack_what_if_at_resource_group(
     cmd, name, resource_group, stack_id, deny_settings_mode, action_on_unmanage, retention_interval, template_file=None, template_spec=None,
     template_uri=None, query_string=None, parameters=None, description=None, deny_settings_excluded_principals=None,
     deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False, resources_without_delete_support=None,
-    validation_level=None, tags=None, no_pretty_print=None
+    validation_level=None, tags=None, no_pretty_print=None, no_color=None
 ):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
@@ -2952,10 +2956,10 @@ def create_deployment_stack_what_if_at_resource_group(
 
     what_if_result = LongRunningOperation(cmd.cli_ctx)(whatif_poller)
 
-    return _print_deployment_stack_what_if_result(what_if_result, no_pretty_print)
+    return _print_deployment_stack_what_if_result(what_if_result, no_pretty_print, no_color)
 
 
-def show_deployment_stack_what_if_at_resource_group(cmd, name=None, resource_group=None, id=None, no_pretty_print=None):  # pylint: disable=redefined-builtin
+def show_deployment_stack_what_if_at_resource_group(cmd, name=None, resource_group=None, id=None, no_pretty_print=None, no_color=None):  # pylint: disable=redefined-builtin
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
     if id:
@@ -2969,7 +2973,7 @@ def show_deployment_stack_what_if_at_resource_group(cmd, name=None, resource_gro
     else:
         raise InvalidArgumentValueError("Please enter the (stack what-if result name and resource group) or stack what-if result resource id")
 
-    return _print_deployment_stack_what_if_result(what_if_result, no_pretty_print)
+    return _print_deployment_stack_what_if_result(what_if_result, no_pretty_print, no_color)
 
 
 def list_deployment_stack_what_if_at_resource_group(cmd, resource_group):
@@ -3016,7 +3020,7 @@ def create_deployment_stack_what_if_at_subscription(
     cmd, name, location, stack_id, deny_settings_mode, action_on_unmanage, retention_interval, deployment_resource_group=None,
     template_file=None, template_spec=None, template_uri=None, query_string=None, parameters=None, description=None,
     deny_settings_excluded_principals=None, deny_settings_excluded_actions=None, deny_settings_apply_to_child_scopes=False,
-    resources_without_delete_support=None, validation_level=None, tags=None, no_pretty_print=None
+    resources_without_delete_support=None, validation_level=None, tags=None, no_pretty_print=None, no_color=None
 ):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
@@ -3038,10 +3042,10 @@ def create_deployment_stack_what_if_at_subscription(
 
     what_if_result = LongRunningOperation(cmd.cli_ctx)(whatif_poller)
 
-    return _print_deployment_stack_what_if_result(what_if_result, no_pretty_print)
+    return _print_deployment_stack_what_if_result(what_if_result, no_pretty_print, no_color)
 
 
-def show_deployment_stack_what_if_at_subscription(cmd, name=None, id=None, no_pretty_print=None):  # pylint: disable=redefined-builtin
+def show_deployment_stack_what_if_at_subscription(cmd, name=None, id=None, no_pretty_print=None, no_color=None):  # pylint: disable=redefined-builtin
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
     if name:
@@ -3051,7 +3055,7 @@ def show_deployment_stack_what_if_at_subscription(cmd, name=None, id=None, no_pr
     else:
         raise InvalidArgumentValueError("Please enter the stack what-if result name or stack what-if result resource id.")
 
-    return _print_deployment_stack_what_if_result(what_if_result, no_pretty_print)
+    return _print_deployment_stack_what_if_result(what_if_result, no_pretty_print, no_color)
 
 
 def list_deployment_stack_what_if_at_subscription(cmd):
@@ -3088,7 +3092,8 @@ def create_deployment_stack_what_if_at_management_group(
     cmd, management_group_id, name, location, stack_id, deny_settings_mode, action_on_unmanage, retention_interval,
     deployment_subscription=None, template_file=None, template_spec=None, template_uri=None, query_string=None, parameters=None,
     description=None, deny_settings_excluded_principals=None, deny_settings_excluded_actions=None,
-    deny_settings_apply_to_child_scopes=False, resources_without_delete_support=None, validation_level=None, tags=None, no_pretty_print=None
+    deny_settings_apply_to_child_scopes=False, resources_without_delete_support=None, validation_level=None, tags=None,
+    no_pretty_print=None, no_color=None
 ):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
@@ -3111,10 +3116,10 @@ def create_deployment_stack_what_if_at_management_group(
 
     what_if_result = LongRunningOperation(cmd.cli_ctx)(whatif_poller)
 
-    return _print_deployment_stack_what_if_result(what_if_result, no_pretty_print)
+    return _print_deployment_stack_what_if_result(what_if_result, no_pretty_print, no_color)
 
 
-def show_deployment_stack_what_if_at_management_group(cmd, management_group_id, name=None, id=None, no_pretty_print=None):
+def show_deployment_stack_what_if_at_management_group(cmd, management_group_id, name=None, id=None, no_pretty_print=None, no_color=None):
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
     if name:
@@ -3124,7 +3129,7 @@ def show_deployment_stack_what_if_at_management_group(cmd, management_group_id, 
     else:
         raise InvalidArgumentValueError("Please enter the stack what-if result name or stack what-if result resource id.")
 
-    return _print_deployment_stack_what_if_result(what_if_result, no_pretty_print)
+    return _print_deployment_stack_what_if_result(what_if_result, no_pretty_print, no_color=no_color)
 
 
 def list_deployment_stack_what_if_at_management_group(cmd, management_group_id):

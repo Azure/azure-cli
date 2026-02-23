@@ -72,6 +72,8 @@ def load_arguments(self, _):
                                                             min_api='2019-07-01')
     deployment_what_if_no_pretty_print_type = CLIArgumentType(options_list=['--no-pretty-print'], action='store_true',
                                                               help='Disable pretty-print for What-If results. When set, the output format type will be used.')
+    deployment_what_if_no_color_type = CLIArgumentType(options_list=['--no-color'], action='store_true',
+                                                       help='Disable color in pretty-printed what-if results.')
     deployment_what_if_confirmation_type = CLIArgumentType(options_list=['--confirm-with-what-if', '-c'], action='store_true',
                                                            help='Instruct the command to run deployment What-If before executing the deployment. It then prompts you to acknowledge resource changes before it continues.',
                                                            min_api='2019-07-01')
@@ -662,6 +664,7 @@ def load_arguments(self, _):
                             c.argument('stack_id', arg_type=stacks_whatif_stack_id_type)
                             c.argument('retention_interval', arg_type=stacks_whatif_retention_interval_type)
                             c.argument('no_pretty_print', arg_type=deployment_what_if_no_pretty_print_type)
+                            c.argument('no_color', arg_type=deployment_what_if_no_color_type)
                         if action == 'create' and resource_type == 'stack':
                             c.argument('yes', help='Do not prompt for confirmation')
                     elif action == 'delete':
@@ -682,6 +685,7 @@ def load_arguments(self, _):
                             c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the deployment stack exists')
                         if resource_type == 'stack-whatif':
                             c.argument('no_pretty_print', arg_type=deployment_what_if_no_pretty_print_type)
+                            c.argument('no_color', arg_type=deployment_what_if_no_color_type)
                     elif action == 'list':
                         if scope == 'sub':
                             continue  # only uses global arguments
