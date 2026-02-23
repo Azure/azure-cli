@@ -28,8 +28,6 @@ register_argument_deprecate('netappfiles volume create', '--default-user-quota-i
                             redirect='command group az netappfiles volume quota-rule')
 register_argument_deprecate('netappfiles volume update', '--default-user-quota-in-ki-bs',
                             redirect='command group az netappfiles volume quota-rule')
-register_argument_deprecate('netappfiles volume update', '--default-user-quota-in-ki-bs',
-                            redirect='command group az netappfiles volume quota-rule')
 register_default_value_breaking_change('netappfiles volume create', '--network-features', 'Basic', 'Standard')
 register_other_breaking_change('netappfiles volume create',
                                'The basic option will not be accepted, use Standard instead',
