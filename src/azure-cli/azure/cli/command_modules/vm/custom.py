@@ -2529,8 +2529,6 @@ def detach_managed_data_disk(cmd, resource_group_name, vm_name, disk_name=None, 
                 raise ResourceNotFoundError("No disk with the name '{}' was found".format(disk_name))
         if "storageProfile" not in vm:
             vm["storageProfile"] = {}
-        if "dataDisks" not in vm["storageProfile"]:
-            vm["storageProfile"]["dataDisks"] = []
         vm["storageProfile"]["dataDisks"] = leftovers
         vm = convert_show_result_to_snake_case(vm)
         set_vm_by_aaz(cmd, vm)
