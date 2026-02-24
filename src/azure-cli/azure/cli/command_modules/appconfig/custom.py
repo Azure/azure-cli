@@ -72,6 +72,10 @@ def create_configstore(cmd,  # pylint: disable=too-many-locals
     if arm_auth_mode is not None:
         arm_authentication_mode = AuthenticationMode.LOCAL if arm_auth_mode == ARMAuthenticationMode.LOCAL else AuthenticationMode.PASS_THROUGH
 
+    azure_front_door = None
+    if azure_front_door_profile is not None:
+        azure_front_door = AzureFrontDoorProperties(resource_id=azure_front_door_profile if azure_front_door_profile else None)
+
     configstore_params = ConfigurationStore(location=location.lower(),
                                             identity=__get_resource_identity(assign_identity) if assign_identity else None,
                                             sku=Sku(name=sku),
@@ -85,7 +89,7 @@ def create_configstore(cmd,  # pylint: disable=too-many-locals
                                             data_plane_proxy=DataPlaneProxyProperties(
                                                 authentication_mode=arm_authentication_mode,
                                                 private_link_delegation=arm_private_link_delegation),
-                                            azure_front_door=AzureFrontDoorProperties(resource_id=azure_front_door_profile if azure_front_door_profile else None))
+                                            azure_front_door=azure_front_door)
 
     progress = IndeterminateStandardOut()
 
@@ -204,6 +208,10 @@ def update_configstore(cmd,  # pylint: disable=too-many-locals
     if arm_auth_mode is not None:
         arm_authentication_mode = AuthenticationMode.LOCAL if arm_auth_mode == ARMAuthenticationMode.LOCAL else AuthenticationMode.PASS_THROUGH
 
+    azure_front_door = None
+    if azure_front_door_profile is not None:
+        azure_front_door = AzureFrontDoorProperties(resource_id=azure_front_door_profile if azure_front_door_profile else None)
+
     update_params = ConfigurationStoreUpdateParameters(tags=tags,
                                                        sku=Sku(name=sku) if sku else None,
                                                        public_network_access=public_network_access,
@@ -213,7 +221,7 @@ def update_configstore(cmd,  # pylint: disable=too-many-locals
                                                        data_plane_proxy=DataPlaneProxyProperties(
                                                            authentication_mode=arm_authentication_mode,
                                                            private_link_delegation=arm_private_link_delegation),
-                                                       azure_front_door=AzureFrontDoorProperties(resource_id=azure_front_door_profile if azure_front_door_profile else None))
+                                                       azure_front_door=azure_front_door)
 
     if encryption_key_name is not None:
         key_vault_properties = KeyVaultProperties()
