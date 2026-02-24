@@ -462,7 +462,7 @@ def _register_from_module(loader, mod, command_table, command_group_table):
 def _load_aaz_by_path(loader, base_path, base_module, args, command_table, command_group_table):
     """Recursively navigate the AAZ package tree guided by CLI args.
 
-    - args is None  → full recursive load of all commands under this directory.
+    - args is None or empty  → full recursive load of all commands under this directory.
     - args has items → try to match first arg as a command file or sub-directory,
                        recurse with remaining args on match.
     - args exhausted / no match → load current level's commands and sub-group headers.
@@ -513,7 +513,7 @@ def _load_aaz_by_path(loader, base_path, base_module, args, command_table, comma
         # Sub-directories
         elif not entry.startswith('_') and os.path.isdir(entry_path):
             sub_module = f"{base_module}.{entry}"
-            if args is None:
+            if not args:
                 # Full load → recurse into every sub-directory
                 _load_aaz_by_path(loader, entry_path, sub_module, None, command_table, command_group_table)
             else:
