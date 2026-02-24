@@ -1280,10 +1280,13 @@ class NetworkAppGatewayPrivateIpScenarioTest20170601(ScenarioTest):
 
         self.kwargs.update({
             'private_ip': '10.0.0.15',
+            'public_ip': 'pip-ag3',
             'path': os.path.join(TEST_DIR, 'TestCert.pfx'),
             'pass': 'password'
         })
-        self.cmd('network application-gateway create -g {rg} -n ag3 --subnet subnet1 --private-ip-address {private_ip} --cert-file "{path}" --cert-password {pass} --priority 1001 --no-wait')
+        self.cmd('network public-ip create -g {rg} -n {public_ip} --sku Standard')
+        self.cmd('network application-gateway waf-policy create -n waf1 -g {rg}')
+        self.cmd('network application-gateway create -g {rg} -n ag3 --subnet subnet1 --private-ip-address {private_ip} --public-ip-address {public_ip} --sku WAF_v2 --waf-policy waf1 --cert-file "{path}" --cert-password {pass} --priority 1001 --no-wait')
         self.cmd('network application-gateway wait -g {rg} -n ag3 --exists')
         self.cmd('network application-gateway show -g {rg} -n ag3', checks=[
             self.check('frontendIPConfigurations[0].privateIPAddress', '{private_ip}'),
@@ -1314,16 +1317,18 @@ class NetworkAppGatewayPrivateIpScenarioTest20170601(ScenarioTest):
 
         cipher_suite = 'TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256'
         self.kwargs['cipher'] = cipher_suite
-        self.cmd('network application-gateway ssl-policy set -g {rg} --gateway-name ag3 --min-protocol-version TLSv1_0 --cipher-suites {cipher} --no-wait')
+        self.cmd('network application-gateway ssl-policy set -g {rg} --gateway-name ag3 --min-protocol-version TLSv1_2 --cipher-suites {cipher} --no-wait')
         self.cmd('network application-gateway ssl-policy show -g {rg} --gateway-name ag3', checks=[
             self.check('cipherSuites.length(@)', 1),
-            self.check('minProtocolVersion', 'TLSv1_0'),
+            self.check('minProtocolVersion', 'TLSv1_2'),
             self.check('policyType', 'Custom')
         ])
 
-        policy_name = 'AppGwSslPolicy20150501'
+        # supported predefined policy (positive path)
+        policy_name = 'AppGwSslPolicy20220101'
         self.kwargs['policy'] = policy_name
-        self.cmd('network application-gateway ssl-policy set -g {rg} --gateway-name ag3 -n {policy} --no-wait')
+        self.cmd('network application-gateway ssl-policy set -g {rg} --gateway-name ag3 -n {policy} --policy-type Predefined --no-wait')
+        self.cmd('network application-gateway wait -g {rg} -n ag3 --updated')
         self.cmd('network application-gateway ssl-policy show -g {rg} --gateway-name ag3', checks=[
             self.check('policyName', policy_name),
             self.check('policyType', 'Predefined')
