@@ -85,8 +85,7 @@ def create_configstore(cmd,  # pylint: disable=too-many-locals
                                             data_plane_proxy=DataPlaneProxyProperties(
                                                 authentication_mode=arm_authentication_mode,
                                                 private_link_delegation=arm_private_link_delegation),
-                                            azure_front_door=AzureFrontDoorProperties(resource_id=azure_front_door_profile if azure_front_door_profile else None)
-)
+                                            azure_front_door=AzureFrontDoorProperties(resource_id=azure_front_door_profile if azure_front_door_profile else None))
 
     progress = IndeterminateStandardOut()
 
