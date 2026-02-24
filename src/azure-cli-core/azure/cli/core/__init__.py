@@ -452,6 +452,7 @@ class MainCommandsLoader(CLICommandsLoader):
         command_index = None
         # Set fallback=False to turn off command index in case of regression
         use_command_index = self.cli_ctx.config.getboolean('core', 'use_command_index', fallback=True)
+
         if use_command_index:
             command_index = CommandIndex(self.cli_ctx)
             index_result = command_index.get(args)
@@ -525,8 +526,38 @@ class MainCommandsLoader(CLICommandsLoader):
 
         if use_command_index:
             command_index.update(self.command_table)
+            self._cache_help_index(command_index)
 
         return self.command_table
+
+    def _display_cached_help(self, help_data, command_path='root'):
+        """Display help from cached help index without loading modules."""
+        # Delegate to the help system for consistent formatting
+        self.cli_ctx.invocation.help.show_cached_help(help_data, command_path)
+
+    def _cache_help_index(self, command_index):
+        """Cache help summary for top-level (root) help only."""
+        try:
+            from azure.cli.core.parser import AzCliCommandParser
+            from azure.cli.core._help import CliGroupHelpFile, extract_help_index_data
+
+            parser = AzCliCommandParser(self.cli_ctx)
+            parser.load_command_table(self)
+
+            subparser = parser.subparsers.get(tuple())
+            if subparser:
+                help_file = CliGroupHelpFile(self.cli_ctx.invocation.help, '', subparser)
+                help_file.load(subparser)
+
+                groups, commands = extract_help_index_data(help_file)
+
+                if groups or commands:
+                    help_index_data = {'groups': groups, 'commands': commands}
+                    command_index.set_help_index(help_index_data)
+                    logger.debug("Cached top-level help with %d groups and %d commands", len(groups), len(commands))
+
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.debug("Failed to cache help data: %s", ex)
 
     @staticmethod
     def _sort_command_loaders(command_loaders):
@@ -698,6 +729,7 @@ class CommandIndex:
     _COMMAND_INDEX = 'commandIndex'
     _COMMAND_INDEX_VERSION = 'version'
     _COMMAND_INDEX_CLOUD_PROFILE = 'cloudProfile'
+    _HELP_INDEX = 'helpIndex'
 
     def __init__(self, cli_ctx=None):
         """Class to manage command index.
@@ -710,6 +742,16 @@ class CommandIndex:
             self.version = __version__
             self.cloud_profile = cli_ctx.cloud.profile
         self.cli_ctx = cli_ctx
+
+    def _is_index_valid(self):
+        """Check if the command index version and cloud profile are valid.
+
+        :return: True if index is valid, False otherwise
+        """
+        index_version = self.INDEX.get(self._COMMAND_INDEX_VERSION)
+        cloud_profile = self.INDEX.get(self._COMMAND_INDEX_CLOUD_PROFILE)
+        return (index_version and index_version == self.version and
+                cloud_profile and cloud_profile == self.cloud_profile)
 
     def _get_top_level_completion_commands(self):
         """Get top-level command names for tab completion optimization.
@@ -736,10 +778,7 @@ class CommandIndex:
         """
         # If the command index version or cloud profile doesn't match those of the current command,
         # invalidate the command index.
-        index_version = self.INDEX[self._COMMAND_INDEX_VERSION]
-        cloud_profile = self.INDEX[self._COMMAND_INDEX_CLOUD_PROFILE]
-        if not (index_version and index_version == self.version and
-                cloud_profile and cloud_profile == self.cloud_profile):
+        if not self._is_index_valid():
             logger.debug("Command index version or cloud profile is invalid or doesn't match the current command.")
             self.invalidate()
             return None
@@ -786,6 +825,28 @@ class CommandIndex:
 
         return None
 
+    def get_help_index(self):
+        """Get the help index for top-level help display.
+
+        :return: Dictionary mapping top-level commands to their short summaries, or None if not available
+        """
+        if not self._is_index_valid():
+            return None
+
+        help_index = self.INDEX.get(self._HELP_INDEX, {})
+        if help_index:
+            logger.debug("Using cached help index with %d entries", len(help_index))
+            return help_index
+
+        return None
+
+    def set_help_index(self, help_data):
+        """Set the help index data.
+
+        :param help_data: Help index data structure containing groups and commands
+        """
+        self.INDEX[self._HELP_INDEX] = help_data
+
     def update(self, command_table):
         """Update the command index according to the given command table.
 
@@ -805,6 +866,7 @@ class CommandIndex:
             module_name = command.loader.__module__
             if module_name not in index[top_command]:
                 index[top_command].append(module_name)
+
         elapsed_time = timeit.default_timer() - start_time
         self.INDEX[self._COMMAND_INDEX] = index
         logger.debug("Updated command index in %.3f seconds.", elapsed_time)
@@ -823,6 +885,7 @@ class CommandIndex:
         self.INDEX[self._COMMAND_INDEX_VERSION] = ""
         self.INDEX[self._COMMAND_INDEX_CLOUD_PROFILE] = ""
         self.INDEX[self._COMMAND_INDEX] = {}
+        self.INDEX[self._HELP_INDEX] = {}
         logger.debug("Command index has been invalidated.")
 
 
