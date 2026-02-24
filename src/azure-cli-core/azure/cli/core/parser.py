@@ -143,6 +143,16 @@ class AzCliCommandParser(CLICommandParser):
                 _argument_validators=argument_validators,
                 _parser=command_parser)
 
+        # Ensure subparsers are created for all registered command groups, even
+        # those that have no commands in the (possibly truncated) command table.
+        # Without this, empty command groups would not appear in help output.
+        for group_name in grp_tbl:
+            # _get_subparser creates intermediate subparsers for path[:1] through
+            # path[:len-1]. Append a sentinel so the full group path is treated
+            # as an intermediate level and its subparser is created.
+            path = group_name.split() + ['_placeholder']
+            self._get_subparser(path, grp_tbl)
+
     def validation_error(self, message):
         az_error = ValidationError(message)
         az_error.print_error()

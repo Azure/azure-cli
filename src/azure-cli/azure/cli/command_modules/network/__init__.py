@@ -42,6 +42,16 @@ class NetworkCommandsLoader(AzCommandsLoader):
                 aaz_pkg_name=aaz.__name__,
                 args=args
             )
+        try:
+            from . import operations
+        except ImportError:
+            operations = None
+        if operations:
+            load_aaz_command_table(
+                loader=self,
+                aaz_pkg_name=operations.__name__,
+                args=args
+            )
         load_command_table(self, args)
         return self.command_table
 

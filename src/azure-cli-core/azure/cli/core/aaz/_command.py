@@ -474,7 +474,7 @@ def _load_aaz_by_path(loader, base_path, base_module, args, command_table, comma
     if not os.path.isdir(base_path):
         return
 
-    if args is not None and args:
+    if args is not None and args and not args[0].startswith('-'):
         first_arg = args[0].lower().replace('-', '_')
 
         # First arg matches a command file (e.g. "create" → "_create.py")
