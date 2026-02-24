@@ -605,3 +605,40 @@ def validate_fleetspaceAccount_body(cmd, ns):
             raise InvalidArgumentValueError('"armLocation" must be a valid string.')
 
         ns.fleetspace_account_body = body
+
+
+def _is_valid_guid(value):
+    """Check if a string is a valid GUID."""
+    import uuid
+    try:
+        return str(uuid.UUID(value)) == value.lower()
+    except ValueError:
+        return False
+
+
+def is_valid_network_acl_bypass_resource_id(resource_id):
+    """Validates a resource ID for network ACL bypass.
+
+    Supports standard Azure resource IDs and Fabric resource IDs with /tenants/ prefix.
+    Fabric format: /tenants/{tenantId}/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Fabric/providers/Microsoft.Fabric/workspaces/{workspaceGuid}
+
+    :param resource_id: The resource ID to validate.
+    :return: True if valid, False otherwise.
+    """
+    import re
+    from azure.mgmt.core.tools import is_valid_resource_id
+
+    if not resource_id:
+        return False
+
+    if is_valid_resource_id(resource_id):
+        return True
+
+    # Check for Fabric resource ID format - extract GUIDs and validate them
+    pattern = r'^/tenants/(.+)/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Fabric/providers/Microsoft\.Fabric/workspaces/(.+)$'
+    match = re.match(pattern, resource_id, re.IGNORECASE)
+
+    if not match:
+        return False
+
+    return _is_valid_guid(match.group(1)) and _is_valid_guid(match.group(2))
