@@ -53,6 +53,14 @@ $ pip install --no-deps ~/distro-1.3.0-py2.py3-none-any.whl --target ~/.azure/cl
 $ pip install --no-deps ~/python_dateutil-2.7.3-py2.py3-none-any.whl --target ~/.azure/cliextensions/azure-devops
 ```
 
+When extensions are installed, updated, or removed manually (outside `az extension add|update|remove`), run the following command to rebuild the CLI command index so newly added or removed commands are discovered correctly:
+
+```bash
+az rebuild-index
+```
+
+This is especially important in airgapped environments where extension lifecycle actions are frequently performed with local wheel files and direct filesystem operations.
+
 ## Load Cloud Endpoints
 If you are working in an Azure AirGapped Cloud, you should be able to get a cloud metadata URL from its documentation. You can set the environment variable `ARM_CLOUD_METADATA_URL` to this URL with:
 ```bash
