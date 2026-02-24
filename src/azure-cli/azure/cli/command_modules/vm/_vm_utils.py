@@ -782,6 +782,29 @@ class IdentityType(Enum):
     NONE = 'None'
 
 
+class RebootSetting(Enum):
+    ALWAYS = 'Always'
+    IF_REQUIRED = 'IfRequired'
+    NEVER = 'Never'
+
+
+class VMGuestPatchClassificationWindows(Enum):
+    CRITICAL = 'Critical'
+    DEFINITION = 'Definition'
+    FEATURE_PACK = 'FeaturePack'
+    SECURITY = 'Security'
+    SERVICE_PACK = 'ServicePack'
+    TOOLS = 'Tools'
+    UPDATES = 'Updates'
+    UPDATE_ROLL_UP = 'UpdateRollUp'
+
+
+class VMGuestPatchClassificationLinux(Enum):
+    CRITICAL = 'Critical'
+    OTHER = 'Other'
+    SECURITY = 'Security'
+
+
 class DiskCreateOptionTypes(Enum):
     ATTACH = 'Attach'
     COPY = 'Copy'
