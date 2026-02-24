@@ -4401,7 +4401,7 @@ def list_vmss_instance_connection_info(cmd, resource_group_name, vm_scale_set_na
     # find the load balancer
     nic_configs = \
         vmss.get('virtualMachineProfile', {}).get('networkProfile', {}).get('networkInterfaceConfigurations', [])
-    primary_nic_config = next((n for n in nic_configs if n.get('primary')), None)
+    primary_nic_config = next((n for n in nic_configs if n.get('primary')), {})
     if primary_nic_config is None:
         raise CLIError('could not find a primary NIC which is needed to search to load balancer')
 
