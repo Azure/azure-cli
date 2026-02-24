@@ -404,6 +404,7 @@ def load_command_table(self, _):
         g.custom_show_command('identity show', 'show_vmss_identity')
         g.custom_command('deallocate', 'deallocate_vmss', supports_no_wait=True)
         g.custom_command('reimage', 'reimage_vmss', supports_no_wait=True)
+        g.custom_command('set-orchestration-service-state', 'set_orchestration_service_state', supports_no_wait=True)
 
     with self.command_group('vmss application', operation_group='virtual_machine_scale_sets') as g:
         g.custom_command('set', 'set_vmss_applications', validator=process_set_applications_namespace)
@@ -422,7 +423,6 @@ def load_command_table(self, _):
         g.generic_update_command('update', getter_name='get_vmss_modified_by_aaz', setter_name='update_vmss', supports_no_wait=True, command_type=compute_custom, validator=validate_vmss_update_namespace)
         g.custom_command('update-instances', 'update_vmss_instances', supports_no_wait=True)
         g.wait_command('wait', getter_name='get_vmss', getter_type=compute_custom)
-        g.custom_command('set-orchestration-service-state', 'set_orchestration_service_state', supports_no_wait=True)
 
         from .aaz.latest.vmss import List as VMSSList
         self.command_table['vmss list'] = VMSSList(loader=self,
