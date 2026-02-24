@@ -2406,6 +2406,10 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
             if enable_write_accelerator:
                 data_disk["writeAcceleratorEnabled"] = enable_write_accelerator
 
+            if "storageProfile" not in vm:
+                vm["storageProfile"] = {}
+            if "dataDisks" not in vm["storageProfile"]:
+                vm["storageProfile"]["dataDisks"] = []
             vm["storageProfile"]["dataDisks"].append(data_disk)
         disk_lun = _get_disk_lun_by_aaz(vm.get("storageProfile", {}).get("dataDisks", []))
         if source_snapshots_or_disks is not None:
@@ -2433,6 +2437,10 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
                         }
                     })
                 disk_lun += 1
+                if "storageProfile" not in vm:
+                    vm["storageProfile"] = {}
+                if "dataDisks" not in vm["storageProfile"]:
+                    vm["storageProfile"]["dataDisks"] = []
                 vm["storageProfile"]["dataDisks"].append(disk)
         if source_disk_restore_point is not None:
             if new_names_of_source_disk_restore_point is None:
@@ -2459,6 +2467,10 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
                         }
                     })
                 disk_lun += 1
+                if "storageProfile" not in vm:
+                    vm["storageProfile"] = {}
+                if "dataDisks" not in vm["storageProfile"]:
+                    vm["storageProfile"]["dataDisks"] = []
                 vm["storageProfile"]["dataDisks"].append(disk)
 
         vm = convert_show_result_to_snake_case(vm)
@@ -2515,6 +2527,10 @@ def detach_managed_data_disk(cmd, resource_group_name, vm_name, disk_name=None, 
                     break
             if not is_contains:
                 raise ResourceNotFoundError("No disk with the name '{}' was found".format(disk_name))
+        if "storageProfile" not in vm:
+            vm["storageProfile"] = {}
+        if "dataDisks" not in vm["storageProfile"]:
+            vm["storageProfile"]["dataDisks"] = []
         vm["storageProfile"]["dataDisks"] = leftovers
         vm = convert_show_result_to_snake_case(vm)
         set_vm_by_aaz(cmd, vm)
