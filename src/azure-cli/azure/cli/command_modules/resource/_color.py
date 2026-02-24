@@ -26,11 +26,15 @@ class ColoredStringBuilder:
         self._enable_color = enable_color
         self._contents = []
         self._colors = deque()
+        self._indents = []
 
     def build(self):
         return "".join(self._contents)
 
-    def append(self, value, color=None):
+    def append(self, value, color=None, no_indent=False):
+        if not no_indent and len(self._indents) > 0:
+            self._contents.append(''.join(self._indents))
+
         if color:
             self._push_color(color)
 
@@ -41,8 +45,8 @@ class ColoredStringBuilder:
 
         return self
 
-    def append_line(self, value="", color=None):
-        self.append(f"{str(value)}\n", color)
+    def append_line(self, value="", color=None, no_indent=False):
+        self.append(f"{str(value)}\n", color, no_indent)
 
         return self
 
@@ -65,6 +69,12 @@ class ColoredStringBuilder:
 
     def get_current_index(self):
         return len(self._contents)
+
+    def push_indent(self, indent):
+        self._indents.append(indent)
+
+    def pop_indent(self):
+        self._indents.pop()
 
     def clear(self):
         self._contents = []

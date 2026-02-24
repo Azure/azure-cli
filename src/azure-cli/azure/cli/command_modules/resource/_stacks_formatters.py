@@ -22,7 +22,7 @@ ALL_WHAT_IF_CHANGE_TYPES = [
 ]
 
 
-class DeploymentStacksWhatIfResultFormatter:
+class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-methods
     INDENT_SIZE = 2
 
     # NOTE(kylealbert): Some of these overlap with property change types
@@ -44,10 +44,7 @@ class DeploymentStacksWhatIfResultFormatter:
             StackModels.DeploymentStacksWhatIfChangeType.CREATE: Color.GREEN,
             StackModels.DeploymentStacksWhatIfChangeType.DELETE: Color.RED,
             StackModels.DeploymentStacksWhatIfChangeType.DETACH: Color.BLUE,
-            StackModels.DeploymentStacksWhatIfChangeType.MODIFY: Color.PURPLE,
-            StackModels.DeploymentStacksWhatIfChangeType.NO_CHANGE: Color.GRAY,
-            StackModels.DeploymentStacksWhatIfPropertyChangeType.NO_EFFECT: Color.GRAY,
-            StackModels.DeploymentStacksWhatIfChangeType.UNSUPPORTED: Color.GRAY,
+            StackModels.DeploymentStacksWhatIfChangeType.MODIFY: Color.PURPLE
         })
 
 
@@ -71,7 +68,7 @@ class DeploymentStacksWhatIfResultFormatter:
             self._format_new_section()
         if self._format_resource_changes():
             self._format_new_section()
-        if self._format_resource_deletions():
+        if self._format_resource_deletions_summary():
             self._format_new_section()
         self._format_diagnostics()
 
@@ -89,23 +86,21 @@ class DeploymentStacksWhatIfResultFormatter:
         change_type_max_length = 20
 
         self.builder.append_line("Resource and property changes are indicated with these symbols:")
+        self._push_indent()
 
         for i, change_type in enumerate(ALL_WHAT_IF_CHANGE_TYPES):
-            if i % 2 == 0:
-                self.builder.append(" " * DeploymentStacksWhatIfResultFormatter.INDENT_SIZE)
-
             change_type_label = change_type[0].upper() + change_type[1:]
+            symbol, color = self._get_change_type_formatting(change_type)
 
-            (self.builder.append(
-                DeploymentStacksWhatIfResultFormatter.CHANGE_TYPE_SYMBOLS[change_type],
-                DeploymentStacksWhatIfResultFormatter.CHANGE_TYPE_COLORS[change_type])
-             .append(" ").append(change_type_label))
+            self.builder.append(symbol, color).append(" ", no_indent=True).append(change_type_label, no_indent=True)
 
             if i % 2 == 0:
                 remaining_indent = max(1, change_type_max_length - len(change_type_label))
-                self.builder.append(" " * remaining_indent)
+                self.builder.append(" " * remaining_indent, no_indent=True)
             elif i < len(ALL_WHAT_IF_CHANGE_TYPES) - 1:
-                self.builder.append_line()
+                self.builder.append_line(no_indent=True)
+
+        self._pop_indent()
 
         return True
 
@@ -125,16 +120,67 @@ class DeploymentStacksWhatIfResultFormatter:
                 printed = True
 
         if printed:
-            self.builder.insert_line(title_index, f"Changes to Stack {self.what_if_props.deployment_stack_resource_id}:", Color.DARK_YELLOW)
+            self.builder.insert_line(
+                title_index, f"Changes to Stack {self.what_if_props.deployment_stack_resource_id}:", Color.DARK_YELLOW)
 
         return printed
 
 
     def _format_resource_changes(self):
-        pass
+        printed = False
+
+        title_index = self.builder.get_current_index()
+
+        # TODO(kylealbert): sort definite vs potential
+        for change in self.what_if_changes.resource_changes or []:
+            if self._format_resource_change(change):
+                printed = True
+
+        if printed:
+            self.builder.insert_line(title_index, "Changes to Managed Resources:", Color.DARK_YELLOW)
+
+        return printed
 
 
-    def _format_resource_deletions(self):
+    def _format_resource_change(self, resource_change: StackModels.DeploymentStacksWhatIfResourceChange):
+        symbol, color = self._get_change_type_formatting(resource_change.change_type)
+
+        if not resource_change.id:  # is an extensible resource
+            return False  # not yet supported
+
+        all_resource_changes = {
+            "Management Status Change": resource_change.management_status_change,
+            "Deny Status Change": resource_change.deny_status_change,
+        }
+
+        self.builder.append_line(f"{symbol} {resource_change.id}", color)
+        self._push_indent()
+
+        for path, change in all_resource_changes.items():
+            self._format_change(change, path)
+
+        self._format_resource_property_changes(resource_change.resource_configuration_changes)
+        self._pop_indent()
+
+        return True
+
+
+    def _format_resource_property_changes(
+        self, property_changes: t.Optional[StackModels.DeploymentStacksChangeDeltaRecord]
+    ):
+        if not property_changes or not property_changes.delta:
+            return False
+
+        printed = False
+
+        for property_change in property_changes.delta:
+            if self._format_change(property_change):
+                printed = True
+
+        return printed
+
+
+    def _format_resource_deletions_summary(self):
         pass
 
 
@@ -143,10 +189,16 @@ class DeploymentStacksWhatIfResultFormatter:
 
 
     def _format_change(
-        self, change: t.Union[
-            StackModels.DeploymentStacksChangeBase, StackModels.DeploymentStacksChangeDeltaRecord, StackModels.DeploymentStacksWhatIfPropertyChange],
+        self,
+        change: t.Optional[t.Union[
+            StackModels.DeploymentStacksChangeBase,
+            StackModels.DeploymentStacksChangeDeltaRecord,
+            StackModels.DeploymentStacksWhatIfPropertyChange]],
         parent_path: t.Optional[str] = None
     ):
+        if not change:
+            return False
+
         value_type = self._get_value_type_from_change(change)
 
         if value_type is str or value_type is bool or value_type is int:
@@ -163,70 +215,100 @@ class DeploymentStacksWhatIfResultFormatter:
 
 
     def _format_object_change(
-        self, object_change: t.Optional[StackModels.DeploymentStacksChangeDeltaRecord], parent_path: t.Optional[str] = None
+        self, object_change: t.Optional[StackModels.DeploymentStacksChangeDeltaRecord],
+        parent_path: t.Optional[str] = None
     ):
-        if not object_change:
+        if not object_change or not object_change.delta:
             return False
 
         printed = False
-        delta = object_change.delta
 
-        for delta in delta or []:
+        for delta in object_change.delta:
             if self._format_change(delta, parent_path):
                 printed = True
 
         return printed
 
 
-    def _format_array_changes(self, array_change: StackModels.DeploymentStacksWhatIfPropertyChange, parent_path: t.Optional[str] = None):
+    def _format_array_changes(
+        self, array_change: StackModels.DeploymentStacksWhatIfPropertyChange, parent_path: t.Optional[str] = None
+    ):
         if not str_lower_eq(array_change.change_type, StackModels.DeploymentStacksWhatIfPropertyChangeType.ARRAY):
             return False
 
         property_path = self._get_change_path(array_change, parent_path)
-        color = DeploymentStacksWhatIfResultFormatter.CHANGE_TYPE_COLORS[StackModels.DeploymentStacksWhatIfPropertyChangeType.MODIFY]
+        symbol, color = self._get_change_type_formatting(StackModels.DeploymentStacksWhatIfPropertyChangeType.MODIFY)
 
-        self.builder.append_line(f"~ {property_path}: ", color)
+        self.builder.append_line(f"{symbol} {property_path}: ", color)
+        self._push_indent()
 
-        for item_change in array_change.children or []:
-            self._format_array_child_change(item_change)
+        for i, item_change in enumerate(array_change.children or []):
+            if self._format_array_child_change(item_change) and i < len(array_change.children) - 1:
+                self.builder.append_line(no_indent=True)
+
+        self._pop_indent()
 
         return True
 
 
     def _format_array_child_change(self, array_change: StackModels.DeploymentStacksWhatIfPropertyChange):
-        symbol = DeploymentStacksWhatIfResultFormatter.CHANGE_TYPE_SYMBOLS.get(array_change.change_type, None)
-        color = DeploymentStacksWhatIfResultFormatter.CHANGE_TYPE_COLORS.get(array_change.change_type, None)
-        indent = self._get_indent(1)
+        symbol, color = self._get_change_type_formatting(array_change.change_type)
 
-        if str_lower_eq(array_change.change_type, StackModels.DeploymentStacksWhatIfPropertyChangeType.CREATE):
-            self.builder.append_line(f"{indent}{symbol} {self._format_primitive_value(array_change.after)}", color)
-        elif str_lower_eq(array_change.change_type, StackModels.DeploymentStacksWhatIfPropertyChangeType.DELETE):
-            self.builder.append_line(f"{indent}{symbol} {self._format_primitive_value(array_change.before)}", color)
-        elif str_lower_eq(array_change.change_type, StackModels.DeploymentStacksWhatIfPropertyChangeType.NO_EFFECT):
-            self.builder.append_line(f"{indent}{symbol} {self._format_primitive_value(array_change.after)}", color)
+        if str_lower_eq(array_change.change_type, StackModels.DeploymentStacksWhatIfPropertyChangeType.CREATE) or \
+            str_lower_eq(array_change.change_type, StackModels.DeploymentStacksWhatIfPropertyChangeType.NO_EFFECT):
+            self.builder.append(f"{symbol} {self._format_primitive_value(array_change.after)}", color)
+            return True
+        if str_lower_eq(array_change.change_type, StackModels.DeploymentStacksWhatIfPropertyChangeType.DELETE):
+            self.builder.append(f"{symbol} {self._format_primitive_value(array_change.before)}", color)
+            return True
+
+        return False
 
 
     def _format_primitive_change(
         self,
-        primitive_change: t.Optional[t.Union[StackModels.DeploymentStacksChangeBase, StackModels.DeploymentStacksWhatIfPropertyChange]],
+        primitive_change: t.Optional[
+            t.Union[StackModels.DeploymentStacksChangeBase, StackModels.DeploymentStacksWhatIfPropertyChange]],
         parent_path: t.Optional[str] = None
     ):
         if not primitive_change:
             return False
 
         property_path = self._get_change_path(primitive_change, parent_path)
-        color = DeploymentStacksWhatIfResultFormatter.CHANGE_TYPE_COLORS[StackModels.DeploymentStacksWhatIfPropertyChangeType.MODIFY]
+        symbol, color = self._get_change_type_formatting(
+            StackModels.DeploymentStacksWhatIfPropertyChangeType.NO_EFFECT if primitive_change.before == primitive_change.after \
+                else StackModels.DeploymentStacksWhatIfPropertyChangeType.MODIFY)
 
-        self.builder.append(f"~ {property_path}: ", color)
+        self.builder.append(f"{symbol} {property_path}: ", color)
         self.builder.append_line(
-            f"{self._format_primitive_value(primitive_change.before)} => {self._format_primitive_value(primitive_change.after)}")  # TODO(kylealbert): correct arrow symbol?
+            f"{self._format_primitive_value(primitive_change.before)} => {self._format_primitive_value(primitive_change.after)}",
+            no_indent=True)
 
         return True
+
+
+    def _push_indent(self, indent_size=INDENT_SIZE):
+        self.builder.push_indent(" " * indent_size)
+
+
+    def _pop_indent(self):
+        self.builder.pop_indent()
 
 
     @staticmethod
     def _format_primitive_value(value: t.Union[str, bool, int]):
         return f'"{value}"' if isinstance(value, str) else str(value)
+
+
+    @staticmethod
+    def _get_change_type_formatting(
+        change_type: t.Union[
+            StackModels.DeploymentStacksWhatIfChangeType, StackModels.DeploymentStacksWhatIfPropertyChangeType]
+    ):
+        symbol = DeploymentStacksWhatIfResultFormatter.CHANGE_TYPE_SYMBOLS.get(change_type, None)
+        color = DeploymentStacksWhatIfResultFormatter.CHANGE_TYPE_COLORS.get(change_type, None)
+
+        return symbol, color
 
 
     @staticmethod
@@ -237,14 +319,11 @@ class DeploymentStacksWhatIfResultFormatter:
 
 
     @staticmethod
-    def _get_indent(indent_level: int, indent_size: int = INDENT_SIZE):
-        return " " * indent_size * indent_level
-
-
-    @staticmethod
     def _get_value_type_from_change(
         change: t.Union[
-            StackModels.DeploymentStacksChangeBase, StackModels.DeploymentStacksChangeDeltaRecord, StackModels.DeploymentStacksWhatIfPropertyChange]
+            StackModels.DeploymentStacksChangeBase,
+            StackModels.DeploymentStacksChangeDeltaRecord,
+            StackModels.DeploymentStacksWhatIfPropertyChange]
     ):
         if hasattr(change, "change_type"):
             if str_lower_eq(StackModels.DeploymentStacksWhatIfPropertyChangeType.ARRAY, change.change_type):
