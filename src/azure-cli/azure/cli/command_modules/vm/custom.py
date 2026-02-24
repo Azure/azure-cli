@@ -4506,6 +4506,8 @@ def scale_vmss(cmd, resource_group_name, vm_scale_set_name, new_capacity, no_wai
     if vmss.get('sku', {}).get('capacity') == new_capacity:
         return
 
+    vmss['resource_group'] = resource_group_name
+    vmss['vm_scale_set_name'] = vm_scale_set_name
     vmss['sku']['capacity'] = new_capacity
     vmss['no_wait'] = no_wait
 
