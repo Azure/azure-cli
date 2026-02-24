@@ -22,6 +22,7 @@ from ._patch import *
 from ._perform_maintenance import *
 from ._reimage import *
 from ._reimageall import *
+from ._set_orchestration_service_state import *
 from ._show import *
 from ._simulate_eviction import *
 from ._start import *
