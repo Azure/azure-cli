@@ -143,6 +143,11 @@ class PostgreSQLFlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pyli
                     JMESPathCheck('replica.role', primary_role),
                     JMESPathCheck('sourceServerResourceId', 'None')])
 
+        # test replica list
+        self.cmd('postgres flexible-server replica list -g {} --name {}'
+                 .format(resource_group, master_server),
+                 checks=[JMESPathCheck('length(@)', 0)])
+
         # test virtual-endpoint delete
         self.cmd('postgres flexible-server virtual-endpoint delete -g {} --server-name {} --name {} --yes'
                 .format(resource_group, master_server, virtual_endpoint_name))
