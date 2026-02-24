@@ -58,7 +58,7 @@ Release History
 
 **PostgreSQL**
 
-* `az postgres flexible-server migrate-network`: Add new command (#32819)
+* `az postgres flexible-server migrate-network`: Add new command to support migrating the network mode of a flexible server (#32819)
 
 **SQL**
 
