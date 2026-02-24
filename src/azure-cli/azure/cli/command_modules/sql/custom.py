@@ -4809,16 +4809,29 @@ def _get_server_key_name_from_uri(uri):
     '''
     import re
 
-    match = re.match(r'https://(.)+\.(managedhsm.azure.net|managedhsm-preview.azure.net|vault.azure.net|vault-int.azure-int.net|vault.azure.cn|managedhsm.azure.cn|vault.usgovcloudapi.net|managedhsm.usgovcloudapi.net|vault.microsoftazure.de|managedhsm.microsoftazure.de|vault.cloudapi.eaglex.ic.gov|vault.cloudapi.microsoft.scloud)(:443)?\/keys/[^\/]+\/[0-9a-zA-Z]+$', uri)
+    match = re.match(r'^https://(?!.*\.\.)[a-zA-Z0-9][a-zA-Z0-9.-]+[a-zA-Z0-9]\.(managedhsm.azure.net|managedhsm-preview.azure.net|vault.azure.net|vault-int.azure-int.net|vault.azure.cn|managedhsm.azure.cn|vault.usgovcloudapi.net|managedhsm.usgovcloudapi.net|vault.microsoftazure.de|managedhsm.microsoftazure.de|vault.cloudapi.eaglex.ic.gov|vault.cloudapi.microsoft.scloud|mdep.azure.net)(:443)?\/keys/[^\/]+(\/[0-9a-zA-Z]+|\/|)$', uri)
 
     if match is None:
         raise CLIError('The provided uri is invalid. Please provide a valid Azure Key Vault key id.  For example: '
                        '"https://YourVaultName.vault.azure.net/keys/YourKeyName/01234567890123456789012345678901" '
-                       'or "https://YourManagedHsmRegion.YourManagedHsmName.managedhsm.azure.net/keys/YourKeyName/01234567890123456789012345678901"')
+                       'or "https://YourManagedHsmRegion.YourManagedHsmName.managedhsm.azure.net/keys/YourKeyName/01234567890123456789012345678901" '
+                       'for versioned key or "https://YourVaultName.vault.azure.net/keys/YourKeyName" for a versionless key.')
 
     vault = uri.split('.')[0].split('/')[-1]
-    key = uri.split('/')[-2]
+
+    # uri.split('/') returns the output as ['https:', '', 'yourVaultName.vault.azure.net', 'keys', 'yourKey', ''] for versionless key
+    # and ['https:', '', 'yourVaultName.vault.azure.net', 'keys', 'yourKey', '01234567890123456789012345678901'] for versioned key
+    # In both cases, the value at index 4 is always the key name and index 5 is the key version.
+    key = uri.split('/')[4]
     version = uri.split('/')[-1]
+    isVersionlessKeyId = False
+
+    if version is None or version == "" or version == key:
+        isVersionlessKeyId = True
+
+    if isVersionlessKeyId:
+        return '{}_{}'.format(vault, key)
+
     return '{}_{}_{}'.format(vault, key, version)
 
 

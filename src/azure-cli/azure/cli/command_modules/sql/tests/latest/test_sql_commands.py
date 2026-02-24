@@ -934,47 +934,142 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('location', resource_group_location),
                      JMESPathCheck('ledgerOn', True)])
 
-    @unittest.skip('Cannot record as hard-coded resources does not exist anymore. ADO Bug-4599812.')
-    def test_sql_per_db_cmk(self):
-        server = "pstestsvr"
-        resource_group = "pstest"
-        database_name_one = "cliautomationdb042"
-        database_name_two = "cliautomationdb051"
-        encryption_protector = "https://pstestkv2.vault.azure.net/keys/testkey4/3d4947c13419445e9bf97500c8ddde37"
-        encryption_protector2 = "https://pstestkv2.vault.azure.net/keys/testkey5/e73f1a88aa0c4de684af97c90588aac7"
-        umi = "/subscriptions/4aebc079-5ec8-4be9-9f4d-39c38f3707cc/resourceGroups/pstest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi"
+    @ResourceGroupPreparer(name_prefix='perdbcmktest', location='eastus2euap')
+    def test_sql_per_db_cmk(self, resource_group, resource_group_location):
+        # Creating a dynamic UMI, Key vault, and server for test setup
+        # Create a umi
+        umi_name = "testcliumi"
+        umi_result = self.cmd('identity create -g {} -n {}'
+                     .format(resource_group, umi_name),
+                     checks=[
+                         JMESPathCheck('name', umi_name),
+                         JMESPathCheck('resourceGroup', resource_group)]).get_output_in_json()
+        
+        umi = umi_result['id']
+        umi_principal_id = umi_result['principalId']
 
-        # test sql db is created with db level encryption protector and umi
+        # Create a new AKV and create keys
+        vault_name = self.create_random_name('sqltdebyok', 20)
+
+        self.cmd('keyvault create -g {} -n {} --enable-rbac-authorization False --enable-purge-protection True'
+                 .format(resource_group, vault_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', vault_name)])
+        
+        self.cmd('keyvault set-policy -n {} --key-permissions get wrapKey unwrapKey --object-id {}'
+                 .format(vault_name, umi_principal_id),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', vault_name)])
+
+        key_name_in_akv1 = self.create_random_name("testkey1", 20)
+        key_resp1 = self.cmd('keyvault key create -n {} -p software --vault-name {}'
+                            .format(key_name_in_akv1, vault_name)).get_output_in_json()
+        kid1 = key_resp1['key']['kid']
+
+        key_name_in_akv2 = self.create_random_name("testkey2", 20)
+        key_resp = self.cmd('keyvault key create -n {} -p software --vault-name {}'
+                            .format(key_name_in_akv2, vault_name)).get_output_in_json()
+        kid2 = key_resp['key']['kid']
+
+        # Create a server
+        server_name = self.create_random_name('serverfortestcli', 20)
+        self.cmd('sql server create -g {} -n {} -l {} --enable-ad-only-auth --external-admin-principal-type Application --external-admin-name {} --external-admin-sid {}'
+                 .format(resource_group, server_name, resource_group_location, umi_name, umi_principal_id),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', server_name)])
+        
+        # Setup complete. Testing scenarios
+
+        # Test sql db is created with db level encryption protector and umi
+        database_name1 = "DBWithVersionedEP"
 
         # az sql db create -g pstest -ai --server pstestsvr --name clidbwithcmk --encryption-protector "https://pstestkv.vault.azure.net/keys/testkey/f62d937858464f329ab4a8c2dc7e0fa4"  
         # --user-assigned-identity-id "/subscriptions/2c647056-bab2-4175-b172-493ff049eb29/resourceGroups/pstest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi" --yes
         self.cmd('sql db create -g {} --server {} --name {} -i --encryption-protector {} --user-assigned-identity-id {} --encryption-protector-auto-rotation True --yes'
-                 .format(resource_group, server, database_name_two, encryption_protector, umi),
+                 .format(resource_group, server_name, database_name1, kid1, umi),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('name', database_name_two)])
+                     JMESPathCheck('name', database_name1)])
 
         self.cmd('sql db show -g {} -s {} --name {}'
-                 .format(resource_group, server, database_name_two),
+                 .format(resource_group, server_name, database_name1),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('name', database_name_two),
-                     JMESPathCheck('encryptionProtector', encryption_protector),
+                     JMESPathCheck('name', database_name1),
+                     JMESPathCheck('encryptionProtector', kid1),
                      JMESPathCheck('encryptionProtectorAutoRotation', True)])
 
         self.cmd('sql db update -g {} --server {} --name {} -i --encryption-protector {} --epauto False'
-                 .format(resource_group, server, database_name_two, encryption_protector2),
+                 .format(resource_group, server_name, database_name1, kid2),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('name', database_name_two)])
+                     JMESPathCheck('name', database_name1)])
 
         self.cmd('sql db show -g {} -s {} --name {}'
-                 .format(resource_group, server, database_name_two),
+                 .format(resource_group, server_name, database_name1),
                  checks=[
                      JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('name', database_name_two),
-                     JMESPathCheck('encryptionProtector', encryption_protector2),
+                     JMESPathCheck('name', database_name1),
+                     JMESPathCheck('encryptionProtector', kid2),
                      JMESPathCheck('encryptionProtectorAutoRotation', False)])
+        
+        # Test versionless scenarios with per db cmk
+        database_name2 = "DBWithVersionlessEP"
+        versionless_kid1 = '/'.join(kid1.split('/')[:-1])
+
+        self.cmd('sql db create -g {} --server {} --name {} -i --encryption-protector {} --user-assigned-identity-id {} --encryption-protector-auto-rotation True --yes'
+                 .format(resource_group, server_name, database_name2, versionless_kid1, umi),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name2)])
+        
+        self.cmd('sql db show -g {} -s {} --name {}'
+                 .format(resource_group, server_name, database_name2),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name2),
+                     JMESPathCheck('encryptionProtector', kid1),
+                     JMESPathCheck('encryptionProtectorAutoRotation', True)])
+        
+        # Test create DB with versionless encryption protector and additional key as versioned key
+        database_name3 = "DBWithVersionlessEPAndVersionedKey"
+
+        self.cmd('sql db create -g {} --server {} --name {} -i --encryption-protector {} --keys {} --user-assigned-identity-id {} --encryption-protector-auto-rotation True --yes'
+                 .format(resource_group, server_name, database_name3, versionless_kid1, kid2, umi),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name3)])
+        
+        db_response = self.cmd('sql db show -g {} -s {} --name {} --expand-keys'
+                 .format(resource_group, server_name, database_name3),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name3),
+                     JMESPathCheck('encryptionProtector', kid1),
+                     JMESPathCheck('encryptionProtectorAutoRotation', True)]).get_output_in_json()
+        self.assertEqual(len(db_response['keys']), 2)
+
+        # Test create DB with versioned encryption protector and additional key as versionless key
+        database_name4 = "DBWithVersionedEPAndVersionlessKey"
+
+        self.cmd('sql db create -g {} --server {} --name {} -i --encryption-protector {} --keys {} --user-assigned-identity-id {} --encryption-protector-auto-rotation True --yes'
+                 .format(resource_group, server_name, database_name4, kid2, versionless_kid1, umi),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name4)])
+        
+        db_response = self.cmd('sql db show -g {} -s {} --name {} --expand-keys'
+                 .format(resource_group, server_name, database_name4),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name4),
+                     JMESPathCheck('encryptionProtector', kid2),
+                     JMESPathCheck('encryptionProtectorAutoRotation', True)]).get_output_in_json()
+        self.assertEqual(len(db_response['keys']), 2)
+
 
     @ResourceGroupPreparer(location='eastus2euap')
     @SqlServerPreparer(location='eastus2euap')
@@ -4529,104 +4624,160 @@ class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
                  .format(resource_group, sn, db_name),
                  checks=[JMESPathCheck('state', 'Enabled')])
 
-    @ResourceGroupPreparer(location='eastus')
-    @SqlServerPreparer(location='eastus')
-    @KeyVaultPreparer(location='eastus', name_prefix='sqltdebyok')
-    @live_only() # User tried to log in to a device from a platform (Unknown) that's currently not supported through Conditional Access policy. Supported device platforms are: iOS, Android, Mac, and Windows flavors.
-    def test_sql_tdebyok(self, resource_group, server, key_vault):
-        resource_prefix = 'sqltdebyok'
+    @ResourceGroupPreparer(name_prefix='sqlserverbyoktest', location='eastus2euap')
+    def test_sql_tdebyok(self, resource_group, resource_group_location):
+        # Create a umi
+        umi_name = "testcliumi"
+        umi_result = self.cmd('identity create -g {} -n {}'
+                     .format(resource_group, umi_name),
+                     checks=[
+                         JMESPathCheck('name', umi_name),
+                         JMESPathCheck('resourceGroup', resource_group)]).get_output_in_json()
+        
+        umi = umi_result['id']
+        umi_principal_id = umi_result['principalId']
 
-        # add identity to server
-        server_resp = self.cmd('sql server update -g {} -n {} -i'
-                               .format(resource_group, server)).get_output_in_json()
+        # Create a new AKV and create keys
+        vault_name = self.create_random_name('sqltdebyok', 20)
+
+        self.cmd('keyvault create -g {} -n {} --enable-rbac-authorization False --enable-purge-protection True'
+                 .format(resource_group, vault_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', vault_name)])
+
+        key_name_in_akv1 = self.create_random_name("testkey1", 20)
+        key_resp1 = self.cmd('keyvault key create -n {} -p software --vault-name {}'
+                            .format(key_name_in_akv1, vault_name)).get_output_in_json()
+        kid1 = key_resp1['key']['kid']
+        
+        # create server with system assigned identity
+        server_name = self.create_random_name('serverfortestcli', 20)
+        server_resp = self.cmd('sql server create -g {} -n {} -l {} -i --enable-ad-only-auth --external-admin-principal-type Application --external-admin-name {} --external-admin-sid {}'
+                 .format(resource_group, server_name, resource_group_location, umi_name, umi_principal_id),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', server_name)]).get_output_in_json()
+        
         server_identity = server_resp['identity']['principalId']
 
-        # create db
-        db_name = self.create_random_name(resource_prefix, 20)
-        self.cmd('sql db create -g {} --server {} --name {}'
-                 .format(resource_group, server, db_name))
-
-        # create vault and acl server identity
         self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
-                 .format(resource_group, key_vault, server_identity))
-
-        # create key
-        key_name = self.create_random_name(resource_prefix, 32)
-        key_resp = self.cmd('keyvault key create -n {} -p software --vault-name {}'
-                            .format(key_name, key_vault)).get_output_in_json()
-        kid = key_resp['key']['kid']
+                 .format(resource_group, vault_name, server_identity))
 
         # add server key
         server_key_resp = self.cmd('sql server key create -g {} -s {} -k {}'
-                                   .format(resource_group, server, kid),
+                                   .format(resource_group, server_name, kid1),
                                    checks=[
-                                       JMESPathCheck('uri', kid),
+                                       JMESPathCheck('uri', kid1),
                                        JMESPathCheck('serverKeyType', 'AzureKeyVault')])
         server_key_name = server_key_resp.get_output_in_json()['name']
 
         # validate show key
         self.cmd('sql server key show -g {} -s {} -k {}'
-                 .format(resource_group, server, kid),
+                 .format(resource_group, server_name, kid1),
                  checks=[
-                     JMESPathCheck('uri', kid),
+                     JMESPathCheck('uri', kid1),
                      JMESPathCheck('serverKeyType', 'AzureKeyVault'),
                      JMESPathCheck('name', server_key_name)])
 
         # validate list key (should return 2 items)
         self.cmd('sql server key list -g {} -s {}'
-                 .format(resource_group, server),
+                 .format(resource_group, server_name),
                  checks=[JMESPathCheck('length(@)', 2)])
 
         # validate encryption protector is service managed via show
         self.cmd('sql server tde-key show -g {} -s {}'
-                 .format(resource_group, server),
+                 .format(resource_group, server_name),
                  checks=[
                      JMESPathCheck('serverKeyType', 'ServiceManaged'),
                      JMESPathCheck('serverKeyName', 'ServiceManaged')])
 
         # update encryption protector to akv key
         self.cmd('sql server tde-key set -g {} -s {} -t AzureKeyVault -k {} --auto-rotation-enabled'
-                 .format(resource_group, server, kid),
+                 .format(resource_group, server_name, kid1),
                  checks=[
                      JMESPathCheck('serverKeyType', 'AzureKeyVault'),
                      JMESPathCheck('serverKeyName', server_key_name),
-                     JMESPathCheck('uri', kid)])
-                     # JMESPathCheck('autoRotationEnabled', True) - property is removed from backend
-
+                     JMESPathCheck('uri', kid1),
+                     JMESPathCheck('autoRotationEnabled', True)])
 
         # validate encryption protector is akv via show
         self.cmd('sql server tde-key show -g {} -s {}'
-                 .format(resource_group, server),
+                 .format(resource_group, server_name),
                  checks=[
                      JMESPathCheck('serverKeyType', 'AzureKeyVault'),
                      JMESPathCheck('serverKeyName', server_key_name),
-                     JMESPathCheck('uri', kid)])
+                     JMESPathCheck('uri', kid1)])
 
         # update encryption protector to service managed
         self.cmd('sql server tde-key set -g {} -s {} -t ServiceManaged'
-                 .format(resource_group, server),
+                 .format(resource_group, server_name),
                  checks=[
                      JMESPathCheck('serverKeyType', 'ServiceManaged'),
                      JMESPathCheck('serverKeyName', 'ServiceManaged')])
 
         # validate encryption protector is service managed via show
         self.cmd('sql server tde-key show -g {} -s {}'
-                 .format(resource_group, server),
+                 .format(resource_group, server_name),
                  checks=[
                      JMESPathCheck('serverKeyType', 'ServiceManaged'),
                      JMESPathCheck('serverKeyName', 'ServiceManaged')])
 
         # delete server key
         self.cmd('sql server key delete -g {} -s {} -k {}'
-                 .format(resource_group, server, kid))
+                 .format(resource_group, server_name, kid1))
 
         # wait for key to be deleted
         time.sleep(10)
 
         # validate deleted server key via list (should return 1 item)
         self.cmd('sql server key list -g {} -s {}'
-                 .format(resource_group, server),
+                 .format(resource_group, server_name),
                  checks=[JMESPathCheck('length(@)', 1)])
+
+        key_name_in_akv2 = self.create_random_name("testkey2", 20)
+        key_resp = self.cmd('keyvault key create -n {} -p software --vault-name {}'
+                            .format(key_name_in_akv2, vault_name)).get_output_in_json()
+        kid2 = key_resp['key']['kid']
+
+        # extract versionless key identifier (remove the version part)
+        # kid format: https://{vault}.vault.azure.net/keys/{keyname}/{version}
+        versionless_kid2 = '/'.join(kid2.split('/')[:-1])
+
+        # add versionless server key
+        versionless_server_key_resp = self.cmd('sql server key create -g {} -s {} -k {}'
+                .format(resource_group, server_name, versionless_kid2),
+                checks=[
+                JMESPathCheck('uri', kid2),
+                JMESPathCheck('serverKeyType', 'AzureKeyVault')])
+        versionless_server_key_name1 = versionless_server_key_resp.get_output_in_json()['name'] # this is not in a versionless format as the key name is returned with the full version
+
+        # validate show versionless key
+        self.cmd('sql server key show -g {} -s {} -k {}'
+                 .format(resource_group, server_name, versionless_kid2),
+                 checks=[
+                     JMESPathCheck('uri', kid2),
+                     JMESPathCheck('serverKeyType', 'AzureKeyVault'),
+                     JMESPathCheck('name', versionless_server_key_name1)])
+        
+        self.cmd('sql server key list -g {} -s {}'
+                 .format(resource_group, server_name),
+                 checks=[JMESPathCheck('length(@)', 2)])
+
+        # update encryption protector to versionless akv key
+        self.cmd('sql server tde-key set -g {} -s {} -t AzureKeyVault -k {} --auto-rotation-enabled'
+                 .format(resource_group, server_name, versionless_kid2),
+                 checks=[
+                     JMESPathCheck('serverKeyType', 'AzureKeyVault'),
+                     JMESPathCheck('uri', kid2)])
+
+        # validate encryption protector is using versionless key via show
+        self.cmd('sql server tde-key show -g {} -s {}'
+                 .format(resource_group, server_name),
+                 checks=[
+                     JMESPathCheck('serverKeyType', 'AzureKeyVault'),
+                     JMESPathCheck('uri', kid2),
+                     JMESPathCheck('autoRotationEnabled', True)])
 
 
 class SqlServerIdentityTest(ScenarioTest):
