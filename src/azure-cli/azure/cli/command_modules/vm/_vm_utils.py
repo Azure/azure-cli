@@ -821,7 +821,6 @@ class UpgradeMode(Enum):
 
 class OrchestrationServiceNames(Enum):
     AUTOMATIC_REPAIRS = 'AutomaticRepairs'
-    DUMMY_ORCHESTRATION_SERVICE_NAME = 'DummyOrchestrationServiceName'
 
 
 class OrchestrationServiceStateAction(Enum):
