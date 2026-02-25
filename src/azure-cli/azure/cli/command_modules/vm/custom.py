@@ -5977,12 +5977,12 @@ def _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_
 
 def execute_query_for_vm(cmd, client, resource_group_name, vm_name, analytics_query, timespan=None):
     """Executes a query against the Log Analytics workspace linked with a vm."""
-    vm = get_vm(cmd, resource_group_name, vm_name)
+    vm = get_vm_by_aaz(cmd, resource_group_name, vm_name)
     workspace = None
-    extension_resources = vm.resources or []
+    extension_resources = vm.get('resources', [])
     for resource in extension_resources:
-        if resource.name == "MicrosoftMonitoringAgent" or resource.name == "OmsAgentForLinux":
-            workspace = resource.settings.get('workspaceId', None)
+        if resource.get('name') == "MicrosoftMonitoringAgent" or resource.get('name') == "OmsAgentForLinux":
+            workspace = resource.get('settings').get('workspaceId', None)
     if workspace is None:
         raise CLIError('Cannot find the corresponding log analytics workspace. '
                        'Please check the status of log analytics workpsace.')
