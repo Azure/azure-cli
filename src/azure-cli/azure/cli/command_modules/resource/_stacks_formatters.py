@@ -431,7 +431,9 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
 
         if before_type == after_type:
             return before_type
-        if before_type is type(None) or after_type is type(None):
-            return before_type or after_type
+        if after_type is not type(None):
+            return after_type
+        if before_type is not type(None):
+            return before_type
 
         return None
