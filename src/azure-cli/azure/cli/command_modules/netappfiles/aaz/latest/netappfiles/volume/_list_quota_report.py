@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "netappfiles volume list-quota-report",
-    is_preview=True,
 )
 class ListQuotaReport(AAZCommand):
     """Returns report of quotas for the volume
@@ -135,7 +134,7 @@ class ListQuotaReport(AAZCommand):
                     session,
                     self.on_200,
                     self.on_error,
-                    lro_options={"final-state-via": "location"},
+                    lro_options={"final-state-via": "azure-async-operation"},
                     path_format_arguments=self.url_parameters,
                 )
             if session.http_response.status_code in [200]:
@@ -144,7 +143,7 @@ class ListQuotaReport(AAZCommand):
                     session,
                     self.on_200,
                     self.on_error,
-                    lro_options={"final-state-via": "location"},
+                    lro_options={"final-state-via": "azure-async-operation"},
                     path_format_arguments=self.url_parameters,
                 )
 
@@ -244,12 +243,17 @@ class ListQuotaReport(AAZCommand):
             cls._schema_on_200 = AAZObjectType()
 
             _schema_on_200 = cls._schema_on_200
-            _schema_on_200.value = AAZListType()
+            _schema_on_200.properties = AAZObjectType()
 
-            value = cls._schema_on_200.value
-            value.Element = AAZObjectType()
+            properties = cls._schema_on_200.properties
+            properties.quota_report_records = AAZListType(
+                serialized_name="quotaReportRecords",
+            )
 
-            _element = cls._schema_on_200.value.Element
+            quota_report_records = cls._schema_on_200.properties.quota_report_records
+            quota_report_records.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.properties.quota_report_records.Element
             _element.is_derived_quota = AAZBoolType(
                 serialized_name="isDerivedQuota",
             )
