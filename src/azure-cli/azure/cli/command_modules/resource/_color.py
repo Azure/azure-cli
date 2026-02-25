@@ -80,6 +80,19 @@ class ColoredStringBuilder:
     def pop_indent(self):
         self._indents.pop()
 
+    def ensure_num_new_lines(self, num_new_lines):
+        if len(self._contents) == 0:
+            self.append("\n" * num_new_lines)
+            return
+
+        last_entry = self._contents[-1]
+        existing_newlines = len(last_entry) - len(last_entry.rstrip('\n'))
+        remaining_newlines = num_new_lines - existing_newlines
+
+        if remaining_newlines > 0:
+            self._contents.append("\n" * remaining_newlines)
+
+
     def clear(self):
         self._contents = []
 

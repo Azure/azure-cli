@@ -53,6 +53,19 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
             StackModels.DeploymentStacksWhatIfChangeCertainty.POTENTIAL: 1
         })
 
+    DIAGNOSTIC_WEIGHTS = CaseInsensitiveDict(
+        {
+            StackModels.DeploymentStacksDiagnosticLevel.INFO: 1,
+            StackModels.DeploymentStacksDiagnosticLevel.WARNING: 2,
+            StackModels.DeploymentStacksDiagnosticLevel.ERROR: 3,
+        })
+
+    DIAGNOSTIC_COLORS = CaseInsensitiveDict(
+        {
+            StackModels.DeploymentStacksDiagnosticLevel.WARNING: Color.DARK_YELLOW,
+            StackModels.DeploymentStacksDiagnosticLevel.ERROR: Color.RED,
+        })
+
     def __init__(self, enable_color=True):
         self.builder: ColoredStringBuilder = ColoredStringBuilder(enable_color)
         self.what_if_result: t.Optional[StackModels.DeploymentStacksWhatIfResult] = None
@@ -68,11 +81,11 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         self.what_if_changes = self.what_if_props.changes if self.what_if_props else None
 
         if self._format_change_type_legend():
-            self._format_new_section()
+            self._format_section_spacer()
         if self._format_stack_changes():
-            self._format_new_section()
+            self._format_section_spacer()
         if self._format_resource_changes():
-            self._format_new_section()
+            self._format_section_spacer()
         self._format_diagnostics()
 
         result = self.builder.build()
@@ -81,8 +94,8 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         return result
 
 
-    def _format_new_section(self):
-        self.builder.append("\n\n")
+    def _format_section_spacer(self):
+        self.builder.ensure_num_new_lines(2)
 
 
     def _format_change_type_legend(self) -> bool:
@@ -164,7 +177,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
             resource_changes_sorted))
 
         if len(delete_changes) > 0:
-            self._format_new_section()
+            self._format_section_spacer()
             self.builder.append("Deleting - ", Color.RED)
             self.builder.append_line(f"Resources Marked for Deletion {len(delete_changes)} total:")
 
@@ -245,7 +258,27 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
 
 
     def _format_diagnostics(self) -> bool:
-        pass
+        if not self.what_if_props or not self.what_if_props.diagnostics or len(self.what_if_props.diagnostics) == 0:
+            return False
+
+        diagnostics_sorted = sorted(
+            self.what_if_props.diagnostics,
+            key=lambda x: (DeploymentStacksWhatIfResultFormatter.DIAGNOSTIC_WEIGHTS.get(x.level, 0), x.code))
+
+        title_index = self.builder.get_current_index()
+
+        for i, diagnostic in enumerate(diagnostics_sorted):
+            self._format_diagnostic(diagnostic)
+
+        self.builder.insert_line(title_index, f"Diagnostics ({len(diagnostics_sorted)}):")
+
+        return True
+
+
+    def _format_diagnostic(self, diagnostic: StackModels.DeploymentStacksDiagnostic):
+        self.builder.append_line(
+            f"{diagnostic.level.upper()}: [{diagnostic.code}] {diagnostic.message}",
+            DeploymentStacksWhatIfResultFormatter.DIAGNOSTIC_COLORS.get(diagnostic.level, None))
 
 
     def _format_change(
