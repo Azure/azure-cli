@@ -585,6 +585,19 @@ def flexible_server_update_custom_func(cmd, client, instance,
     return params
 
 
+# Common functions used by other providers
+def flexible_server_update_get(client, resource_group_name, server_name):
+    validate_resource_group(resource_group_name)
+
+    return client.get(resource_group_name, server_name)
+
+
+def flexible_server_update_set(client, resource_group_name, server_name, parameters):
+    validate_resource_group(resource_group_name)
+
+    return client.begin_update(resource_group_name, server_name, parameters)
+
+
 def _update_login(server_name, resource_group_name, auth_config, password_auth, administrator_login, administrator_login_password):
     if auth_config.password_auth.lower() == 'disabled' and password_auth.lower() == 'enabled':
         administrator_login = administrator_login if administrator_login else prompt('Please enter administrator username for the server. Once set, it cannot be changed: ')
