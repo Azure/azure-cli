@@ -312,7 +312,9 @@ class ContainerAppJobsExecutionsTest(ScenarioTest):
             self.assertEqual(job in execution['name'], True)
 
         # Get the execution and check if the custom command and args are present
+        # Also validate the image matches the one from 'az containerapp job create'
         self.cmd("az containerapp job execution show --resource-group {} --name {} --job-execution-name {}".format(resource_group, job, execution['name']), checks=[
+            JMESPathCheck('properties.template.containers[0].image', 'mcr.microsoft.com/k8se/quickstart-jobs:latest'),
             JMESPathCheck('properties.template.containers[0].command[0]', customCommand[0]),
             JMESPathCheck('properties.template.containers[0].args[0]', customArgs[0]),
         ])
@@ -326,6 +328,7 @@ class ContainerAppJobsExecutionsTest(ScenarioTest):
             self.assertEqual(job in execution_with_image['name'], True)
 
         self.cmd("az containerapp job execution show --resource-group {} --name {} --job-execution-name {}".format(resource_group, job, execution_with_image['name']), checks=[
+            JMESPathCheck('properties.template.containers[0].image', customContainerImage),
             JMESPathCheck('properties.template.containers[0].command[0]', customCommand[0]),
             JMESPathCheck('properties.template.containers[0].args[0]', customArgs[0]),
         ])
