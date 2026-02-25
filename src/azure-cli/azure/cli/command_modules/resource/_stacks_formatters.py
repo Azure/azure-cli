@@ -184,10 +184,10 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         first_potential_change_index = None
         num_potential_deletions = 0
         for delete_change in delete_changes:
-            if first_potential_change_index is None and str_lower_eq(
-                delete_change.change_certainty, StackModels.DeploymentStacksWhatIfChangeCertainty.POTENTIAL):
-                first_potential_change_index = self.builder.get_current_index()
+            if str_lower_eq(delete_change.change_certainty, StackModels.DeploymentStacksWhatIfChangeCertainty.POTENTIAL):
                 num_potential_deletions += 1
+                if first_potential_change_index is None:
+                    first_potential_change_index = self.builder.get_current_index()
 
             self._format_resource_heading_line(delete_change)
 
