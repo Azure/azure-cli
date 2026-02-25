@@ -1621,7 +1621,7 @@ def open_vm_port(cmd, resource_group_name, vm_name, port, priority=900, network_
 
     vm = get_vm_by_aaz(cmd, resource_group_name, vm_name)
     location = vm.get('location', '')
-    if not vm.network_profile:
+    if not vm.get('networkProfile'):
         raise CLIError("Network profile not found for VM '{}'".format(vm_name))
 
     nic_ids = vm.get('networkProfile', {}).get('networkInterfaces', [])
