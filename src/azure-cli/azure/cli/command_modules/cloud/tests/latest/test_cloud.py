@@ -43,6 +43,11 @@ class CloudTests(ScenarioTest):
         self.cmd('az cloud show -n AzureGermanCloud', checks=[self.check('isActive', True)])
 
     @serial_test()
+    def test_cloud_set_BleuCloud(self):
+        self.cmd('az cloud set -n BleuCloud')
+        self.cmd('az cloud show -n BleuCloud', checks=[self.check('isActive', True)])
+
+    @serial_test()
     def test_cloud_set_azurecloud(self):
         self.cmd('az cloud set -n azurecloud')
         self.cmd('az cloud show -n AzureCloud', checks=[self.check('isActive', True)])
@@ -61,6 +66,11 @@ class CloudTests(ScenarioTest):
     def test_cloud_set_azuregermancloud(self):
         self.cmd('az cloud set -n azuregermancloud')
         self.cmd('az cloud show -n AzureGermanCloud', checks=[self.check('isActive', True)])
+
+    @serial_test()
+    def test_cloud_set_bleucloud(self):
+        self.cmd('az cloud set -n bleucloud')
+        self.cmd('az cloud show -n BleuCloud', checks=[self.check('isActive', True)])
 
     @serial_test()
     def test_cloud_set_unregistered_cloud_name(self):
