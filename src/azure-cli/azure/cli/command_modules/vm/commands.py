@@ -403,6 +403,7 @@ def load_command_table(self, _):
                          transform=DeploymentOutputLongRunningOperation(self.cli_ctx, 'Starting vmss create'),
                          supports_no_wait=True, table_transformer=deployment_validate_table_format,
                          validator=process_vmss_create_namespace, exception_handler=handle_template_based_exception)
+        g.custom_show_command('show', 'get_vmss_by_aaz', table_transformer=get_vmss_table_output_transformer(self, False))
         g.custom_command('identity assign', 'assign_vmss_identity', validator=process_assign_identity_namespace)
         g.custom_command('identity remove', 'remove_vmss_identity', validator=process_remove_identity_namespace, is_preview=True)
         g.custom_show_command('identity show', 'show_vmss_identity')
@@ -420,7 +421,6 @@ def load_command_table(self, _):
         g.custom_command('list-instances', 'get_instances_list')
         g.custom_command('restart', 'restart_vmss', supports_no_wait=True)
         g.custom_command('scale', 'scale_vmss', supports_no_wait=True)
-        g.custom_show_command('show', 'get_vmss', table_transformer=get_vmss_table_output_transformer(self, False))
         g.custom_command('stop', 'stop_vmss', supports_no_wait=True, validator=process_vm_vmss_stop)
         g.generic_update_command('update', getter_name='get_vmss_modified_by_aaz', setter_name='update_vmss', supports_no_wait=True, command_type=compute_custom, validator=validate_vmss_update_namespace)
         g.custom_command('update-instances', 'update_vmss_instances', supports_no_wait=True)
