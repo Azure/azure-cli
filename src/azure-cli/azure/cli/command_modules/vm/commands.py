@@ -404,6 +404,7 @@ def load_command_table(self, _):
                          supports_no_wait=True, table_transformer=deployment_validate_table_format,
                          validator=process_vmss_create_namespace, exception_handler=handle_template_based_exception)
         g.custom_show_command('show', 'get_vmss_by_aaz', table_transformer=get_vmss_table_output_transformer(self, False))
+        g.wait_command('wait', getter_name='get_vmss_by_aaz', getter_type=compute_custom)
         g.custom_command('identity assign', 'assign_vmss_identity', validator=process_assign_identity_namespace)
         g.custom_command('identity remove', 'remove_vmss_identity', validator=process_remove_identity_namespace, is_preview=True)
         g.custom_show_command('identity show', 'show_vmss_identity')
@@ -424,7 +425,6 @@ def load_command_table(self, _):
         g.custom_command('stop', 'stop_vmss', supports_no_wait=True, validator=process_vm_vmss_stop)
         g.generic_update_command('update', getter_name='get_vmss_modified_by_aaz', setter_name='update_vmss', supports_no_wait=True, command_type=compute_custom, validator=validate_vmss_update_namespace)
         g.custom_command('update-instances', 'update_vmss_instances', supports_no_wait=True)
-        g.wait_command('wait', getter_name='get_vmss', getter_type=compute_custom)
         g.custom_command('set-orchestration-service-state', 'set_orchestration_service_state', supports_no_wait=True)
 
         from .aaz.latest.vmss import List as VMSSList
