@@ -4550,12 +4550,12 @@ def stop_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no
 
 
 def update_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_ids, no_wait=False):
-    from azure.cli.command_modules.vm.aaz.latest.vmss import Manualupgrade
+    from .aaz.latest.vmss import Manualupgrade
     return Manualupgrade(cli_ctx=cmd.cli_ctx)(command_args={
-        "resource_group": resource_group_name,
-        "vm_scale_set_name": vm_scale_set_name,
-        "instance_ids": instance_ids,
-        "no_wait": no_wait,
+        'resource_group': resource_group_name,
+        'vm_scale_set_name': vm_scale_set_name,
+        'instance_ids': instance_ids,
+        'no_wait': no_wait,
     })
 
 
