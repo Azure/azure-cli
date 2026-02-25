@@ -58,7 +58,7 @@ Homepage: https://github.com/azure/azure-cli
 
 Package: azure-cli
 Architecture: any
-Depends: \${shlibs:Depends}, \${misc:Depends}, libwebkit2gtk-4.1-dev
+Depends: \${shlibs:Depends}, \${misc:Depends}
 Description: Azure CLI
  A great cloud needs great tools; we're excited to introduce Azure CLI,
  our next generation multi-platform command line experience for Azure.
@@ -106,7 +106,7 @@ override_dh_clean:
 ${TAB}dh_clean --exclude=__pycache__
 
 override_dh_shlibdeps:
-${TAB}dh_shlibdeps -X */site-packages/pymsalruntime/*
+${TAB}dh_shlibdeps --exclude=*/site-packages/pymsalruntime/*
 
 override_dh_install:
 ${TAB}mkdir -p debian/azure-cli/opt/az
