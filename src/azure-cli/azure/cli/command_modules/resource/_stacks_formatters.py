@@ -95,13 +95,13 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
             change_type_label = change_type[0].upper() + change_type[1:]
             symbol, color = self._get_change_type_formatting(change_type)
 
-            self.builder.append(symbol, color).append(" ", no_indent=True).append(change_type_label, no_indent=True)
+            self.builder.append(symbol, color).append(" ").append(change_type_label)
 
             if i % 2 == 0:
                 remaining_indent = max(1, change_type_max_length - len(change_type_label))
-                self.builder.append(" " * remaining_indent, no_indent=True)
+                self.builder.append(" " * remaining_indent)
             elif i < len(ALL_WHAT_IF_TOP_LEVEL_CHANGE_TYPES) - 1:
-                self.builder.append_line(no_indent=True)
+                self.builder.append_line()
 
         self._pop_indent()
 
@@ -166,7 +166,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         if len(delete_changes) > 0:
             self._format_new_section()
             self.builder.append("Deleting - ", Color.RED)
-            self.builder.append_line(f"Resources Marked for Deletion {len(delete_changes)} total:", no_indent=True)
+            self.builder.append_line(f"Resources Marked for Deletion {len(delete_changes)} total:")
 
         first_potential_change_index = None
         num_potential_deletions = 0
@@ -221,12 +221,12 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         # print the change type and resource ID
         if is_potential_change:
             self.builder.append("?", Color.CYAN)
-        self.builder.append(f"{symbol} ", color, no_indent=is_potential_change)
+        self.builder.append(f"{symbol} ", color)
         if is_potential_change:
-            self.builder.append("Potential ?", Color.CYAN, no_indent=True).append(f"{symbol} ", color, no_indent=True)
+            self.builder.append("Potential ?", Color.CYAN).append(f"{symbol} ", color)
 
         api_version_suffix = f" [{resource_change.api_version}]" if resource_change.api_version else ""
-        self.builder.append_line(f"{resource_change.id}{api_version_suffix}", color, no_indent=True)
+        self.builder.append_line(f"{resource_change.id}{api_version_suffix}", color)
 
 
     def _format_resource_property_changes(
@@ -242,11 +242,6 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
                 printed = True
 
         return printed
-
-
-    def _format_resource_deletions_summary(self):
-        if not self.what_if_changes or not self.what_if_changes.resource_changes:
-            return False
 
 
     def _format_diagnostics(self):
@@ -309,7 +304,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
 
         for i, item_change in enumerate(array_change.children or []):
             if self._format_array_child_change(item_change) and i < len(array_change.children) - 1:
-                self.builder.append_line(no_indent=True)
+                self.builder.append_line()
 
         self._pop_indent()
 
@@ -347,8 +342,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
 
         self.builder.append(f"{symbol} {property_path}: ", color)
         self.builder.append_line(
-            f"{self._format_primitive_value(primitive_change.before)} => {self._format_primitive_value(primitive_change.after)}",
-            no_indent=True)
+            f"{self._format_primitive_value(primitive_change.before)} => {self._format_primitive_value(primitive_change.after)}")
 
         return True
 

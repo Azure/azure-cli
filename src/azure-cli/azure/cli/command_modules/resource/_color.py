@@ -33,7 +33,7 @@ class ColoredStringBuilder:
         return "".join(self._contents)
 
     def append(self, value, color=None, no_indent=False):
-        if not no_indent and len(self._indents) > 0:
+        if not no_indent and self._should_indent():
             self._contents.append(''.join(self._indents))
 
         if color:
@@ -47,14 +47,13 @@ class ColoredStringBuilder:
         return self
 
     def append_line(self, value="", color=None, no_indent=False):
-        self.append(f"{str(value)}\n", color, no_indent)
-
-        return self
+        self.append(value, color, no_indent)
+        return self.append("\n", no_indent=True)
 
     def new_color_scope(self, color):
         return self.ColorScope(self, color)
 
-    def insert(self, index, value="", color=None):
+    def insert(self, index, value="", color=None, no_indent=False):
         if color and self._enable_color:
             self._contents.insert(index, str(Color.RESET))
 
@@ -63,10 +62,14 @@ class ColoredStringBuilder:
         if color and self._enable_color:
             self._contents.insert(index, str(color))
 
+        if not no_indent and self._should_indent(index, True):
+            self._contents.insert(index, ''.join(self._indents))
+
         return self
 
-    def insert_line(self, index, value="", color=None):
-        return self.insert(index, f"{str(value)}\n", color)
+    def insert_line(self, index, value="", color=None, no_indent=False):
+        self.insert(index, "\n", no_indent=no_indent)
+        return self.insert(index, value, color, no_indent)
 
     def get_current_index(self):
         return len(self._contents)
@@ -93,6 +96,9 @@ class ColoredStringBuilder:
 
         self._colors.pop()
         self._contents.append(str(self._colors[-1] if self._colors else Color.RESET))
+        
+    def _should_indent(self, index=-1, is_insert=False):
+        return len(self._indents) > 0 and (not self._contents or self._contents[max(index - 1, 0) if is_insert else index].endswith("\n"))
 
     # pylint: disable=protected-access
     class ColorScope:
