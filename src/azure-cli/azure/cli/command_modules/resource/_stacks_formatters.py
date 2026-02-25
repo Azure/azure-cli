@@ -73,8 +73,6 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
             self._format_new_section()
         if self._format_resource_changes():
             self._format_new_section()
-        if self._format_resource_deletions_summary():
-            self._format_new_section()
         self._format_diagnostics()
 
         result = self.builder.build()
@@ -143,6 +141,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
             self.what_if_changes.resource_changes,
             key=lambda x: (DeploymentStacksWhatIfResultFormatter.CHANGE_CERTAINTY_WEIGHTS.get(x.change_certainty, 1), x.id))
 
+        # Print the definite resource changes, followed by the potential changes
         first_potential_change_index = None
         for change in resource_changes_sorted:
             if first_potential_change_index is None and str_lower_eq(
@@ -159,27 +158,42 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         if printed:
             self.builder.insert_line(title_index, "Changes to Managed Resources:", Color.DARK_YELLOW)
 
+        # Summarize the deletions, if any
+        delete_changes = list(filter(
+            lambda x: str_lower_eq(x.change_type, StackModels.DeploymentStacksWhatIfChangeType.DELETE),
+            resource_changes_sorted))
+
+        if len(delete_changes) > 0:
+            self._format_new_section()
+            self.builder.append("Deleting - ", Color.RED)
+            self.builder.append_line(f"Resources Marked for Deletion {len(delete_changes)} total:", no_indent=True)
+
+        first_potential_change_index = None
+        num_potential_deletions = 0
+        for delete_change in delete_changes:
+            if first_potential_change_index is None and str_lower_eq(
+                delete_change.change_certainty, StackModels.DeploymentStacksWhatIfChangeCertainty.POTENTIAL):
+                first_potential_change_index = self.builder.get_current_index()
+                num_potential_deletions += 1
+
+            self._format_resource_heading_line(delete_change)
+
+        if first_potential_change_index is not None:
+            self.builder.insert_line(
+                first_potential_change_index,
+                f"Potential Deletions {num_potential_deletions} total (Learn more at https://aka.ms/whatIfPotentialChanges)",
+                Color.RED)
+            self.builder.insert(first_potential_change_index, ">> ")
+
         return printed
 
 
     def _format_resource_change(self, resource_change: StackModels.DeploymentStacksWhatIfResourceChange):
-        symbol, color = self._get_change_type_formatting(resource_change.change_type)
-
         if not resource_change.id:  # is an extensible resource
             return False  # not yet supported
 
-        is_potential_change = str_lower_eq(
-            resource_change.change_certainty, StackModels.DeploymentStacksWhatIfChangeCertainty.POTENTIAL)
-
-        # print the change type and resource ID
-        if is_potential_change:
-            self.builder.append("?", Color.CYAN)
-        self.builder.append(f"{symbol} ", color, no_indent=is_potential_change)
-        if is_potential_change:
-            self.builder.append("Potential ?", Color.CYAN, no_indent=True).append(f"{symbol} ", color, no_indent=True)
-
-        api_version_suffix = f" [{resource_change.api_version}]" if resource_change.api_version else ""
-        self.builder.append_line(f"{resource_change.id}{api_version_suffix}", color, no_indent=True)
+        # print the resource heading line
+        self._format_resource_heading_line(resource_change)
 
         # print stack management related changes
         self._push_indent()
@@ -196,6 +210,23 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         self._pop_indent()
 
         return True
+
+
+    def _format_resource_heading_line(self, resource_change: StackModels.DeploymentStacksWhatIfResourceChange):
+        symbol, color = self._get_change_type_formatting(resource_change.change_type)
+
+        is_potential_change = str_lower_eq(
+            resource_change.change_certainty, StackModels.DeploymentStacksWhatIfChangeCertainty.POTENTIAL)
+
+        # print the change type and resource ID
+        if is_potential_change:
+            self.builder.append("?", Color.CYAN)
+        self.builder.append(f"{symbol} ", color, no_indent=is_potential_change)
+        if is_potential_change:
+            self.builder.append("Potential ?", Color.CYAN, no_indent=True).append(f"{symbol} ", color, no_indent=True)
+
+        api_version_suffix = f" [{resource_change.api_version}]" if resource_change.api_version else ""
+        self.builder.append_line(f"{resource_change.id}{api_version_suffix}", color, no_indent=True)
 
 
     def _format_resource_property_changes(
