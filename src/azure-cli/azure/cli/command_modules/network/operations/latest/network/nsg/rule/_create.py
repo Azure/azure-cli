@@ -7,6 +7,7 @@
 
 from azure.cli.core.aaz import AAZClientConfiguration, has_value, register_client, AAZFileArgTextFormat
 from azure.cli.command_modules.network.aaz.latest.network.nsg.rule._create import Create as _NSGRuleCreate
+from azure.cli.command_modules.network.custom import _handle_plural_or_singular
 
 
 class NSGRuleCreate(_NSGRuleCreate):

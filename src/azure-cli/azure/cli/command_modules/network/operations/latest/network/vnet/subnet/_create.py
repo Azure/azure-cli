@@ -9,6 +9,11 @@ from azure.cli.core.aaz import AAZClientConfiguration, has_value, register_clien
 from azure.cli.core.aaz.utils import assign_aaz_list_arg
 from azure.cli.core.azclierror import InvalidArgumentValueError, ValidationError, UnrecognizedArgumentError, ResourceNotFoundError, ArgumentUsageError
 from azure.cli.command_modules.network.aaz.latest.network.vnet.subnet._create import Create as _VNetSubnetCreate
+from azure.cli.command_modules.network.custom import _handle_plural_or_singular, subnet_disable_ple_msg, subnet_disable_pls_msg
+
+from knack.log import get_logger
+
+logger = get_logger(__name__)
 
 
 class VNetSubnetCreate(_VNetSubnetCreate):

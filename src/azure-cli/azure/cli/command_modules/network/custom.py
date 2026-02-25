@@ -32,6 +32,8 @@ from .aaz.latest.network.vnet_gateway._update import Update as _VnetGatewayUpdat
 from .aaz.latest.network.vnet_gateway.vpn_client._generate_vpn_profile import GenerateVpnProfile as _VpnProfileGenerate
 from .aaz.latest.network.vnet_gateway.vpn_client._generate import Generate as _VpnClientPackageGenerate
 from .aaz.latest.network.vpn_connection._update import Update as _VpnConnectionUpdate
+from .operations.latest.network.dns.record_set.soa._show import RecordSetSOAShow as DNSRecordSetSOAShow
+from .operations.latest.network.public_ip._create import PublicIPCreate
 
 logger = get_logger(__name__)
 
@@ -279,7 +281,7 @@ def show_ag_backend_health(cmd, resource_group_name, application_gateway_name, e
                 child_name_1=http_settings
             )
 
-        from .aaz.latest.network.application_gateway import HealthOnDemand
+        from .aaz.latest.network.application_gateway._health_on_demand import HealthOnDemand
         return LongRunningOperation(cmd.cli_ctx)(
             HealthOnDemand(cli_ctx=cmd.cli_ctx)(command_args={
                 "name": application_gateway_name,
@@ -297,7 +299,7 @@ def show_ag_backend_health(cmd, resource_group_name, application_gateway_name, e
             })
         )
 
-    from .aaz.latest.network.application_gateway import Health
+    from .aaz.latest.network.application_gateway._health import Health
     return LongRunningOperation(cmd.cli_ctx)(
         Health(cli_ctx=cmd.cli_ctx)(command_args={
             "name": application_gateway_name,
@@ -409,7 +411,7 @@ def list_ag_waf_rule_sets(cmd, _type=None, version=None, group=None):
 
 # region ApplicationGatewayWAFPolicyRules PolicySettings
 def list_waf_policy_setting(cmd, resource_group_name, policy_name):
-    from .aaz.latest.network.application_gateway.waf_policy import Show
+    from .aaz.latest.network.application_gateway.waf_policy._show import Show
     return Show(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "name": policy_name}
@@ -458,7 +460,7 @@ def add_waf_managed_rule_set(cmd, resource_group_name, policy_name,
         "rule_group_overrides": rule_group_overrides
     }
 
-    from .aaz.latest.network.application_gateway.waf_policy import Update
+    from .aaz.latest.network.application_gateway.waf_policy._update import Update
 
     class WAFManagedRuleSetAdd(Update):
         def pre_instance_update(self, instance):
@@ -507,7 +509,7 @@ def update_waf_managed_rule_set(cmd, resource_group_name, policy_name,
         "rule_group_overrides": rule_group_overrides
     }
 
-    from .aaz.latest.network.application_gateway.waf_policy import Update
+    from .aaz.latest.network.application_gateway.waf_policy._update import Update
 
     class WAFManagedRuleSetUpdate(Update):
         def pre_instance_update(self, instance):
@@ -550,7 +552,7 @@ def remove_waf_managed_rule_set(cmd, resource_group_name, policy_name,
     """
     Remove a managed rule set by rule set group name if rule_group_name is specified. Otherwise, remove all rule set.
     """
-    from .aaz.latest.network.application_gateway.waf_policy import Update
+    from .aaz.latest.network.application_gateway.waf_policy._update import Update
 
     class WAFManagedRuleSetRemove(Update):
         def pre_instance_update(self, instance):
@@ -591,7 +593,7 @@ def remove_waf_managed_rule_set(cmd, resource_group_name, policy_name,
 
 
 def list_waf_managed_rules(cmd, resource_group_name, policy_name):
-    from .aaz.latest.network.application_gateway.waf_policy import Show
+    from .aaz.latest.network.application_gateway.waf_policy._show import Show
     return Show(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "name": policy_name
@@ -601,7 +603,7 @@ def list_waf_managed_rules(cmd, resource_group_name, policy_name):
 
 # region ApplicationGatewayWAFPolicy ManagedRule Exception
 def remove_waf_managed_rule_exception(cmd, resource_group_name, policy_name):
-    from .aaz.latest.network.application_gateway.waf_policy import Update
+    from .aaz.latest.network.application_gateway.waf_policy._update import Update
 
     class WAFExceptionRemove(Update):
         def pre_instance_update(self, instance):
@@ -617,7 +619,7 @@ def remove_waf_managed_rule_exception(cmd, resource_group_name, policy_name):
 # region ApplicationGatewayWAFPolicy ManagedRule OwaspCrsExclusionEntry
 # pylint: disable=too-many-nested-blocks
 def remove_waf_managed_rule_exclusion(cmd, resource_group_name, policy_name):
-    from .aaz.latest.network.application_gateway.waf_policy import Update
+    from .aaz.latest.network.application_gateway.waf_policy._update import Update
 
     class WAFExclusionRemove(Update):
         def pre_instance_update(self, instance):
@@ -655,7 +657,7 @@ def add_waf_exclusion_rule_set(cmd, resource_group_name, policy_name,
         "rule_groups": rule_groups,
     }
 
-    from .aaz.latest.network.application_gateway.waf_policy import Update
+    from .aaz.latest.network.application_gateway.waf_policy._update import Update
 
     class WAFExclusionRuleSetAdd(Update):
         def pre_instance_update(self, instance):
@@ -702,7 +704,7 @@ def add_waf_exclusion_rule_set(cmd, resource_group_name, policy_name,
 def remove_waf_exclusion_rule_set(cmd, resource_group_name, policy_name,
                                   rule_set_type, rule_set_version, match_variable, selector_match_operator, selector,
                                   rule_group_name=None):
-    from .aaz.latest.network.application_gateway.waf_policy import Update
+    from .aaz.latest.network.application_gateway.waf_policy._update import Update
 
     class WAFExclusionRuleSetRemove(Update):
         def pre_instance_update(self, instance):
@@ -1233,7 +1235,8 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
             rs["soa_record"]["host"] = root_soa["SOARecord"]["host"]
             rs_name = '@'
         elif rs_name == '@' and rs_type == 'ns':
-            root_ns = DNSRecordSetNSShow(cli_ctx=cmd.cli_ctx)(command_args={
+            _DNSRecordSetNSShow = _record_show_func('ns')
+            root_ns = _DNSRecordSetNSShow(cli_ctx=cmd.cli_ctx)(command_args={
                 'resource_group': resource_group_name,
                 'zone_name': zone_name,
                 'name': '@'
@@ -1243,13 +1246,25 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
         try:
             rs["target_resource"] = rs.get("target_resource").get("id") if rs.get("target_resource") else None
             rs["traffic_management_profile"] = rs.get("traffic_management_profile").get("id") if rs.get("traffic_management_profile") else None
-            _record_create = _record_create_func(rs_type)
-            _record_create(cli_ctx=cmd.cli_ctx)(command_args={
-                'resource_group': resource_group_name,
-                'zone_name': zone_name,
-                'name': rs_name,
-                **rs
-            })
+            if rs_type == 'soa':
+                # SOA records don't have a separate create command; use the base aaz create directly
+                from .aaz.latest.network.dns.record_set._create import Create as _RecordSetCreateBase
+                _RecordSetCreateBase(cli_ctx=cmd.cli_ctx)(command_args={
+                    'resource_group': resource_group_name,
+                    'zone_name': zone_name,
+                    'name': rs_name,
+                    'record_type': 'SOA',
+                    **rs
+                })
+            else:
+                _record_create = _record_create_func(rs_type)
+                _record_create(cli_ctx=cmd.cli_ctx)(command_args={
+                    'resource_group': resource_group_name,
+                    'zone_name': zone_name,
+                    'name': rs_name,
+                    'record_type': rs_type.upper(),
+                    **rs
+                })
 
             cum_records += record_count
             print("({}/{}) Imported {} records of type '{}' and name '{}'"
@@ -1560,20 +1575,31 @@ def _add_record(record_set, record, record_type, is_list=False):
         record_set[record_property] = record
 
 
+def _dns_record_set_import(record_type, operation):
+    """Dynamically import a DNS record set command class from the operations module."""
+    import importlib
+    rt = record_type.lower()
+    op = operation.lower()
+    module_path = f"azure.cli.command_modules.network.operations.latest.network.dns.record_set.{rt}._{op}"
+    class_name = f"RecordSet{record_type.upper()}{operation.capitalize()}"
+    mod = importlib.import_module(module_path)
+    return getattr(mod, class_name)
+
+
 def _record_show_func(record_type):
-    return globals()["DNSRecordSet{}Show".format(record_type.upper())]
+    return _dns_record_set_import(record_type, "show")
 
 
 def _record_create_func(record_type):
-    return globals()["DNSRecordSet{}Create".format(record_type.upper())]
+    return _dns_record_set_import(record_type, "create")
 
 
 def _record_delete_func(record_type):
-    return globals()["DNSRecordSet{}Delete".format(record_type.upper())]
+    return _dns_record_set_import(record_type, "delete")
 
 
 def _record_update_func(record_type):
-    return globals()["DNSRecordSet{}Update".format(record_type.upper())]
+    return _dns_record_set_import(record_type, "update")
 
 
 def _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
@@ -2401,7 +2427,7 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
         public_ip_args["public_ip_prefix"] = public_ip_prefix
 
         # reuse prefix information
-        from .aaz.latest.network.public_ip.prefix import Show
+        from .aaz.latest.network.public_ip.prefix._show import Show
         pip_obj = Show(cli_ctx=cmd.cli_ctx)(command_args={'resource_group': resource_group_name, 'name': public_ip_prefix_name})
         version = pip_obj['publicIPAddressVersion']
         sku = pip_obj['sku']['name']

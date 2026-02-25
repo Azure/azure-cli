@@ -7910,9 +7910,8 @@ class NetworkVirtualNetworkGatewayNatRule(ScenarioTest):
 
 
 class NetworkSecurityPartnerProviderScenarioTest(ScenarioTest):
-    def __init__(self, method_name, config_file=None, recording_dir=None, recording_name=None, recording_processors=None,
-                 replay_processors=None, recording_patches=None, replay_patches=None):
-        super().__init__(method_name)
+    def setUp(self):
+        super().setUp()
         self.cmd('extension add -n virtual-wan')
 
     @unittest.skip('Decouple with virtual-wan bump API version')

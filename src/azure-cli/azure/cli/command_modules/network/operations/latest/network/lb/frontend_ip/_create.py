@@ -9,6 +9,10 @@ from azure.cli.core.azclierror import ArgumentUsageError
 from azure.cli.core.aaz import register_command, AAZResourceIdArgFormat, has_value, AAZListArg, AAZResourceIdArg, AAZStrArg, AAZArgEnum
 from azure.cli.command_modules.network.aaz.latest.network.lb.frontend_ip._create import Create as _LBFrontendIPCreate
 
+from knack.log import get_logger
+
+logger = get_logger(__name__)
+
 
 class LBFrontendIPCreate(_LBFrontendIPCreate):
 
