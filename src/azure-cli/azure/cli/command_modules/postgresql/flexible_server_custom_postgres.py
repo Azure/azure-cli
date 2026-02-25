@@ -37,8 +37,9 @@ from ._flexible_server_util import generate_missing_parameters, resolve_poller, 
     get_postgres_tiers, get_postgres_skus
 from ._flexible_server_location_capabilities_util import get_postgres_location_capability_info, get_postgres_server_capability_info
 from ._util import get_autonomous_tuning_settings_map
+from ._db_context import DbContext
 from .flexible_server_custom_common import create_firewall_rule
-from .flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone, prepare_public_network
+from .flexible_server_network import prepare_private_network, prepare_private_dns_zone, prepare_public_network, flexible_server_provision_network_resource
 from .validators import pg_arguments_validator, validate_server_name, validate_and_format_restore_point_in_time, \
     validate_postgres_replica, validate_georestore_network, pg_byok_validator, validate_migration_runtime_server, \
     validate_resource_group, check_resource_group, validate_citus_cluster, validate_backup_name, \
@@ -1174,45 +1175,6 @@ def flexible_server_microsoft_entra_admin_show(client, resource_group_name, serv
         object_id=sid)
 
 
-def flexible_server_provision_network_resource(cmd, resource_group_name, server_name,
-                                               location, db_context, private_dns_zone_arguments=None, public_access=None,
-                                               vnet=None, subnet=None, vnet_address_prefix=None, subnet_address_prefix=None, yes=False):
-    validate_resource_group(resource_group_name)
-
-    start_ip = -1
-    end_ip = -1
-    network = postgresql_flexibleservers.models.Network()
-
-    if subnet is not None or vnet is not None:
-        subnet_id = prepare_private_network(cmd,
-                                            resource_group_name,
-                                            server_name,
-                                            vnet=vnet,
-                                            subnet=subnet,
-                                            location=location,
-                                            delegation_service_name=DELEGATION_SERVICE_NAME,
-                                            vnet_address_pref=vnet_address_prefix,
-                                            subnet_address_pref=subnet_address_prefix,
-                                            yes=yes)
-        private_dns_zone_id = prepare_private_dns_zone(db_context,
-                                                       resource_group_name,
-                                                       server_name,
-                                                       private_dns_zone=private_dns_zone_arguments,
-                                                       subnet_id=subnet_id,
-                                                       location=location,
-                                                       yes=yes)
-        network.delegated_subnet_resource_id = subnet_id
-        network.private_dns_zone_arm_resource_id = private_dns_zone_id
-    elif subnet is None and vnet is None and private_dns_zone_arguments is not None:
-        raise RequiredArgumentMissingError("Private DNS zone can only be used with private access setting. Use vnet or/and subnet parameters.")
-    else:
-        start_ip, end_ip = prepare_public_network(public_access, yes=yes)
-        if public_access is not None and str(public_access).lower() in ['disabled', 'none']:
-            network.public_network_access = 'Disabled'
-        else:
-            network.public_network_access = 'Enabled'
-
-    return network, start_ip, end_ip
 
 
 def flexible_server_threat_protection_get(
@@ -2066,17 +2028,4 @@ def _confirm_restart_server(instance, sku_name, storage_gb, yes):
 
 
 # pylint: disable=too-many-instance-attributes, too-few-public-methods
-class DbContext:
-    def __init__(self, cmd=None, azure_sdk=None, logging_name=None, cf_firewall=None, cf_db=None,
-                 cf_availability=None, cf_private_dns_zone_suffix=None,
-                 command_group=None, server_client=None, location=None):
-        self.cmd = cmd
-        self.azure_sdk = azure_sdk
-        self.cf_firewall = cf_firewall
-        self.cf_availability = cf_availability
-        self.cf_private_dns_zone_suffix = cf_private_dns_zone_suffix
-        self.logging_name = logging_name
-        self.cf_db = cf_db
-        self.command_group = command_group
-        self.server_client = server_client
-        self.location = location
+
