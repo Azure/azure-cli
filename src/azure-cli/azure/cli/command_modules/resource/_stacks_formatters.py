@@ -60,7 +60,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         self.what_if_changes: t.Optional[StackModels.DeploymentStacksWhatIfChange] = None
 
 
-    def format(self, what_if_result: StackModels.DeploymentStacksWhatIfResult):
+    def format(self, what_if_result: StackModels.DeploymentStacksWhatIfResult) -> str:
         self.builder.clear()
 
         self.what_if_result = what_if_result
@@ -85,7 +85,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         self.builder.append("\n\n")
 
 
-    def _format_change_type_legend(self):
+    def _format_change_type_legend(self) -> bool:
         change_type_max_length = 20
 
         self.builder.append_line("Resource and property changes are indicated with these symbols:")
@@ -108,7 +108,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         return True
 
 
-    def _format_stack_changes(self):
+    def _format_stack_changes(self) -> bool:
         if not self.what_if_changes:
             return False
 
@@ -130,7 +130,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         return printed
 
 
-    def _format_resource_changes(self):
+    def _format_resource_changes(self) -> bool:
         if not self.what_if_changes or not self.what_if_changes.resource_changes:
             return False
 
@@ -188,7 +188,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         return printed
 
 
-    def _format_resource_change(self, resource_change: StackModels.DeploymentStacksWhatIfResourceChange):
+    def _format_resource_change(self, resource_change: StackModels.DeploymentStacksWhatIfResourceChange) -> bool:
         if not resource_change.id:  # is an extensible resource
             return False  # not yet supported
 
@@ -231,7 +231,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
 
     def _format_resource_property_changes(
         self, property_changes: t.Optional[StackModels.DeploymentStacksChangeDeltaRecord]
-    ):
+    ) -> bool:
         if not property_changes or not property_changes.delta:
             return False
 
@@ -244,7 +244,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         return printed
 
 
-    def _format_diagnostics(self):
+    def _format_diagnostics(self) -> bool:
         pass
 
 
@@ -255,7 +255,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
             StackModels.DeploymentStacksChangeDeltaRecord,
             StackModels.DeploymentStacksWhatIfPropertyChange]],
         parent_path: t.Optional[str] = None
-    ):
+    ) -> bool:
         if not change:
             return False
 
@@ -277,7 +277,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
     def _format_object_change(
         self, object_change: t.Optional[StackModels.DeploymentStacksChangeDeltaRecord],
         parent_path: t.Optional[str] = None
-    ):
+    ) -> bool:
         if not object_change or not object_change.delta:
             return False
 
@@ -292,7 +292,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
 
     def _format_array_changes(
         self, array_change: StackModels.DeploymentStacksWhatIfPropertyChange, parent_path: t.Optional[str] = None
-    ):
+    ) -> bool:
         if not str_lower_eq(array_change.change_type, StackModels.DeploymentStacksWhatIfPropertyChangeType.ARRAY):
             return False
 
@@ -311,7 +311,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         return True
 
 
-    def _format_array_child_change(self, array_change: StackModels.DeploymentStacksWhatIfPropertyChange):
+    def _format_array_child_change(self, array_change: StackModels.DeploymentStacksWhatIfPropertyChange) -> bool:
         symbol, color = self._get_change_type_formatting(array_change.change_type)
 
         # TODO(kylealbert): handle non-primitive
@@ -331,7 +331,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         primitive_change: t.Optional[
             t.Union[StackModels.DeploymentStacksChangeBase, StackModels.DeploymentStacksWhatIfPropertyChange]],
         parent_path: t.Optional[str] = None
-    ):
+    ) -> bool:
         if not primitive_change:
             return False
 
@@ -366,7 +366,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
     def _get_change_type_formatting(
         change_type: t.Union[
             StackModels.DeploymentStacksWhatIfChangeType, StackModels.DeploymentStacksWhatIfPropertyChangeType]
-    ):
+    ) -> t.Tuple[t.Optional[str], t.Optional[Color]]:
         symbol = DeploymentStacksWhatIfResultFormatter.CHANGE_TYPE_SYMBOLS.get(change_type, None)
         color = DeploymentStacksWhatIfResultFormatter.CHANGE_TYPE_COLORS.get(change_type, None)
 
@@ -374,7 +374,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
 
 
     @staticmethod
-    def _get_change_path(change, parent_path: t.Optional[str] = None):
+    def _get_change_path(change, parent_path: t.Optional[str] = None) -> str:
         if hasattr(change, "path"):
             return '.'.join([parent_path, change.path]) if parent_path else change.path
         return parent_path
@@ -386,7 +386,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
             StackModels.DeploymentStacksChangeBase,
             StackModels.DeploymentStacksChangeDeltaRecord,
             StackModels.DeploymentStacksWhatIfPropertyChange]
-    ):
+    ) -> t.Optional[t.Type]:
         if hasattr(change, "change_type"):
             if str_lower_eq(StackModels.DeploymentStacksWhatIfPropertyChangeType.ARRAY, change.change_type):
                 return list
