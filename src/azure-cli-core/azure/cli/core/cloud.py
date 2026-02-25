@@ -358,6 +358,7 @@ class CloudNameEnum:  # pylint: disable=too-few-public-methods
     AzureChinaCloud = 'AzureChinaCloud'
     AzureUSGovernment = 'AzureUSGovernment'
     AzureGermanCloud = 'AzureGermanCloud'
+    BleuCloud = 'BleuCloud'
 
 
 AZURE_PUBLIC_CLOUD = Cloud(
