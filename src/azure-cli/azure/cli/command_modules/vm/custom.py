@@ -4116,12 +4116,13 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
         sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, deployment_name, deployment))
 
     if orchestration_mode.lower() == uniform_str.lower() and assign_identity is not None:
-        vmss_info = get_vmss(cmd, resource_group_name, vmss_name)
+        vmss_info = get_vmss_by_aaz(cmd, resource_group_name, vmss_name)
         if enable_local_identity and not identity_scope:
             _show_missing_access_warning(resource_group_name, vmss_name, 'vmss')
-        deployment_result['vmss']['identity'] = _construct_identity_info(identity_scope, identity_role,
-                                                                         vmss_info.identity.principal_id,
-                                                                         vmss_info.identity.user_assigned_identities)
+        deployment_result['vmss']['identity'] = _construct_identity_info(
+            identity_scope, identity_role,
+            vmss_info.get('identity', {}).get('principalId', ''),
+            vmss_info.get('identity', {}).get('userAssignedIdentities', {}))
     # Guest Attestation Extension and enable System Assigned MSI by default
     is_trusted_launch = security_type and security_type.lower() == 'trustedlaunch' and\
         enable_vtpm and enable_secure_boot
