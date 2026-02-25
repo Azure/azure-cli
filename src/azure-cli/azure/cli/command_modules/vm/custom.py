@@ -4127,37 +4127,39 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
         enable_vtpm and enable_secure_boot
     is_confidential_vm = security_type and security_type.lower() == 'confidentialvm'
     if (is_trusted_launch or is_confidential_vm) and enable_integrity_monitoring:
-        client = _compute_client_factory(cmd.cli_ctx)
-        vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
-        vmss.virtual_machine_profile.storage_profile.image_reference = None
-        VirtualMachineScaleSetExtension, VirtualMachineScaleSetExtensionProfile = cmd.get_models(
-            'VirtualMachineScaleSetExtension', 'VirtualMachineScaleSetExtensionProfile')
-        if vmss.virtual_machine_profile.storage_profile.os_disk.os_type == 'Linux':
+        vmss = get_vmss_by_aaz(cmd, resource_group_name, vmss_name)
+        vmss['virtualMachineProfile']['storageProfile']['imageReference'] = None
+        os_type = vmss.get('virtualMachineProfile', {}).get('storageProfile', {}).get('osDisk', {}).get('osType')
+        if os_type == 'Linux':
             publisher = 'Microsoft.Azure.Security.LinuxAttestation'
-        if vmss.virtual_machine_profile.storage_profile.os_disk.os_type == 'Windows':
+        elif os_type == 'Windows':
             publisher = 'Microsoft.Azure.Security.WindowsAttestation'
-        version = _normalize_extension_version(cmd.cli_ctx, publisher, 'GuestAttestation', None, vmss.location)
-        ext = VirtualMachineScaleSetExtension(name='GuestAttestation',
-                                              publisher=publisher,
-                                              type_properties_type='GuestAttestation',
-                                              protected_settings=None,
-                                              type_handler_version=version,
-                                              settings=None,
-                                              auto_upgrade_minor_version=True,
-                                              provision_after_extensions=None,
-                                              enable_automatic_upgrade=not disable_integrity_monitoring_autoupgrade)
-        if not vmss.virtual_machine_profile.extension_profile:
-            vmss.virtual_machine_profile.extension_profile = VirtualMachineScaleSetExtensionProfile(extensions=[])
-        vmss.virtual_machine_profile.extension_profile.extensions.append(ext)
+        else:
+            publisher = ''
+        version = _normalize_extension_version(cmd.cli_ctx, publisher, 'GuestAttestation',
+                                               None, vmss.get('location'))
+        ext = {
+            'name': 'GuestAttestation',
+            'auto_upgrade_minor_version': True,
+            'enable_automatic_upgrade': not disable_integrity_monitoring_autoupgrade,
+            'publisher': publisher,
+            'type_handler_version': version,
+            'type': 'GuestAttestation'
+        }
+        if not vmss.get('virtualMachineProfile', {}).get('extensionProfile'):
+            vmss['virtualMachineProfile']['extensionProfile'] = {'extensions': []}
+        vmss['virtualMachineProfile']['extensionProfile']['extensions'].append(ext)
         try:
-            LongRunningOperation(cmd.cli_ctx)(client.virtual_machine_scale_sets.begin_create_or_update(
-                resource_group_name, vmss_name, vmss))
+            from .operations.vmss import VMSSCreate
+            vmss['resource_group'] = resource_group_name
+            vmss['vm_scale_set_name'] = vmss_name
+            _create_vmss = VMSSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss)
+            LongRunningOperation(cmd.cli_ctx)(_create_vmss)
             logger.info('Guest Attestation Extension has been successfully installed by default'
                         'when Trusted Launch configuration is met')
-            VirtualMachineScaleSetVMInstanceRequiredIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceRequiredIDs')
-            instance_ids = VirtualMachineScaleSetVMInstanceRequiredIDs(instance_ids=['*'])
-            LongRunningOperation(cmd.cli_ctx)(client.virtual_machine_scale_sets.begin_update_instances(
-                resource_group_name, vmss_name, instance_ids))
+
+            _update_vmss = update_vmss_instances(cmd, resource_group_name, vmss_name, ['*'])
+            LongRunningOperation(cmd.cli_ctx)(_update_vmss)
         except Exception as e:
             error_type = "Trusted Launch" if is_trusted_launch else "Confidential VM"
             logger.error('Failed to install Guest Attestation Extension for %s. %s', error_type, e)
