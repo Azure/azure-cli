@@ -12,7 +12,7 @@ import azure.mgmt.resource.deploymentstacks.models as StackModels
 from ._color import Color, ColoredStringBuilder
 from ._utils import str_lower_eq
 
-ALL_WHAT_IF_CHANGE_TYPES = [
+ALL_WHAT_IF_TOP_LEVEL_CHANGE_TYPES = [
     StackModels.DeploymentStacksWhatIfChangeType.CREATE,
     StackModels.DeploymentStacksWhatIfChangeType.UNSUPPORTED,
     StackModels.DeploymentStacksWhatIfChangeType.MODIFY,
@@ -47,6 +47,11 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
             StackModels.DeploymentStacksWhatIfChangeType.MODIFY: Color.PURPLE
         })
 
+    CHANGE_CERTAINTY_WEIGHTS = CaseInsensitiveDict(
+        {
+            StackModels.DeploymentStacksWhatIfChangeCertainty.DEFINITE: 0,
+            StackModels.DeploymentStacksWhatIfChangeCertainty.POTENTIAL: 1
+        })
 
     def __init__(self, enable_color=True):
         self.builder: ColoredStringBuilder = ColoredStringBuilder(enable_color)
@@ -88,7 +93,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         self.builder.append_line("Resource and property changes are indicated with these symbols:")
         self._push_indent()
 
-        for i, change_type in enumerate(ALL_WHAT_IF_CHANGE_TYPES):
+        for i, change_type in enumerate(ALL_WHAT_IF_TOP_LEVEL_CHANGE_TYPES):
             change_type_label = change_type[0].upper() + change_type[1:]
             symbol, color = self._get_change_type_formatting(change_type)
 
@@ -97,7 +102,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
             if i % 2 == 0:
                 remaining_indent = max(1, change_type_max_length - len(change_type_label))
                 self.builder.append(" " * remaining_indent, no_indent=True)
-            elif i < len(ALL_WHAT_IF_CHANGE_TYPES) - 1:
+            elif i < len(ALL_WHAT_IF_TOP_LEVEL_CHANGE_TYPES) - 1:
                 self.builder.append_line(no_indent=True)
 
         self._pop_indent()
@@ -106,10 +111,11 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
 
 
     def _format_stack_changes(self):
+        if not self.what_if_changes:
+            return False
+
         printed = False
-
         title_index = self.builder.get_current_index()
-
         all_stack_changes = {
             "DeploymentScope": self.what_if_changes.deployment_scope_change,
             "DenySettings": self.what_if_changes.deny_settings_change
@@ -127,14 +133,28 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
 
 
     def _format_resource_changes(self):
-        printed = False
+        if not self.what_if_changes or not self.what_if_changes.resource_changes:
+            return False
 
+        printed = False
         title_index = self.builder.get_current_index()
 
-        # TODO(kylealbert): sort definite vs potential
-        for change in self.what_if_changes.resource_changes or []:
+        resource_changes_sorted = sorted(
+            self.what_if_changes.resource_changes,
+            key=lambda x: (DeploymentStacksWhatIfResultFormatter.CHANGE_CERTAINTY_WEIGHTS.get(x.change_certainty, 1), x.id))
+
+        first_potential_change_index = None
+        for change in resource_changes_sorted:
+            if first_potential_change_index is None and str_lower_eq(
+                change.change_certainty, StackModels.DeploymentStacksWhatIfChangeCertainty.POTENTIAL):
+                first_potential_change_index = self.builder.get_current_index()
+
             if self._format_resource_change(change):
                 printed = True
+
+        if first_potential_change_index is not None:
+            self.builder.insert_line(first_potential_change_index, "Potential Resource Changes (Learn more at https://aka.ms/whatIfPotentialChanges)", Color.PURPLE)
+            self.builder.insert(first_potential_change_index, ">> ")
 
         if printed:
             self.builder.insert_line(title_index, "Changes to Managed Resources:", Color.DARK_YELLOW)
@@ -148,17 +168,30 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         if not resource_change.id:  # is an extensible resource
             return False  # not yet supported
 
+        is_potential_change = str_lower_eq(
+            resource_change.change_certainty, StackModels.DeploymentStacksWhatIfChangeCertainty.POTENTIAL)
+
+        # print the change type and resource ID
+        if is_potential_change:
+            self.builder.append("?", Color.CYAN)
+        self.builder.append(f"{symbol} ", color, no_indent=is_potential_change)
+        if is_potential_change:
+            self.builder.append("Potential ?", Color.CYAN, no_indent=True).append(f"{symbol} ", color, no_indent=True)
+
+        api_version_suffix = f" [{resource_change.api_version}]" if resource_change.api_version else ""
+        self.builder.append_line(f"{resource_change.id}{api_version_suffix}", color, no_indent=True)
+
+        # print stack management related changes
+        self._push_indent()
         all_resource_changes = {
             "Management Status Change": resource_change.management_status_change,
             "Deny Status Change": resource_change.deny_status_change,
         }
 
-        self.builder.append_line(f"{symbol} {resource_change.id}", color)
-        self._push_indent()
-
         for path, change in all_resource_changes.items():
             self._format_change(change, path)
 
+        # print resource property changes
         self._format_resource_property_changes(resource_change.resource_configuration_changes)
         self._pop_indent()
 
@@ -181,7 +214,8 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
 
 
     def _format_resource_deletions_summary(self):
-        pass
+        if not self.what_if_changes or not self.what_if_changes.resource_changes:
+            return False
 
 
     def _format_diagnostics(self):
@@ -201,7 +235,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
 
         value_type = self._get_value_type_from_change(change)
 
-        if value_type is str or value_type is bool or value_type is int:
+        if value_type is str or value_type is bool or value_type is int or value_type is float:
             if self._format_primitive_change(change, parent_path):
                 return True
         elif value_type is list:
@@ -254,6 +288,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
     def _format_array_child_change(self, array_change: StackModels.DeploymentStacksWhatIfPropertyChange):
         symbol, color = self._get_change_type_formatting(array_change.change_type)
 
+        # TODO(kylealbert): handle non-primitive
         if str_lower_eq(array_change.change_type, StackModels.DeploymentStacksWhatIfPropertyChangeType.CREATE) or \
             str_lower_eq(array_change.change_type, StackModels.DeploymentStacksWhatIfPropertyChangeType.NO_EFFECT):
             self.builder.append(f"{symbol} {self._format_primitive_value(array_change.after)}", color)
@@ -296,7 +331,9 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
 
 
     @staticmethod
-    def _format_primitive_value(value: t.Union[str, bool, int]):
+    def _format_primitive_value(value: t.Optional[t.Union[str, bool, int, float]]):
+        if value is None:
+            return "null"
         return f'"{value}"' if isinstance(value, str) else str(value)
 
 

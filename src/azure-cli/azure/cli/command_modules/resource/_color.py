@@ -12,6 +12,7 @@ class Color(Enum):
     GREEN = "\033[38;5;77m"
     PURPLE = "\033[38;5;141m"
     BLUE = "\033[38;5;39m"
+    CYAN = "\033[38;5;51m"
     GRAY = "\033[38;5;246m"
     RED = "\033[38;5;203m"
     DARK_YELLOW = "\033[38;5;136m"
@@ -54,12 +55,12 @@ class ColoredStringBuilder:
         return self.ColorScope(self, color)
 
     def insert(self, index, value="", color=None):
-        if self._enable_color:
+        if color and self._enable_color:
             self._contents.insert(index, str(Color.RESET))
 
-        self._contents.insert(index, f"{str(value)}")
+        self._contents.insert(index, str(value))
 
-        if self._enable_color:
+        if color and self._enable_color:
             self._contents.insert(index, str(color))
 
         return self
