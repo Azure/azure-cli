@@ -548,6 +548,12 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                  checks=[self.check('name', '{config_store_name}'),
                          self.check('azureFrontDoor.resourceId', front_door_profile_id)])
 
+        # Update store without specifying --azure-front-door-profile and verify profile is preserved
+        self.cmd('appconfig update -n {config_store_name} -g {rg} --tags key=value',
+                 checks=[self.check('name', '{config_store_name}'),
+                         self.check('azureFrontDoor.resourceId', front_door_profile_id),
+                         self.check('tags.key', 'value')])
+
         # Update store to unlink Front Door profile (pass empty string)
         self.kwargs.update({
             'empty_front_door_id': ''
