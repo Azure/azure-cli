@@ -4124,8 +4124,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             vmss_info.get('identity', {}).get('principalId', ''),
             vmss_info.get('identity', {}).get('userAssignedIdentities', {}))
     # Guest Attestation Extension and enable System Assigned MSI by default
-    is_trusted_launch = security_type and security_type.lower() == 'trustedlaunch' and\
-        enable_vtpm and enable_secure_boot
+    is_trusted_launch = (security_type and security_type.lower() == 'trustedlaunch' and
+                         enable_vtpm and enable_secure_boot)
     is_confidential_vm = security_type and security_type.lower() == 'confidentialvm'
     if (is_trusted_launch or is_confidential_vm) and enable_integrity_monitoring:
         vmss = get_vmss_by_aaz(cmd, resource_group_name, vmss_name)
@@ -4141,10 +4141,10 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                                                None, vmss.get('location'))
         ext = {
             'name': 'GuestAttestation',
-            'auto_upgrade_minor_version': True,
-            'enable_automatic_upgrade': not disable_integrity_monitoring_autoupgrade,
+            'autoUpgradeMinorVersion': True,
+            'enableAutomaticUpgrade': not disable_integrity_monitoring_autoupgrade,
             'publisher': publisher,
-            'type_handler_version': version,
+            'typeHandlerVersion': version,
             'type': 'GuestAttestation'
         }
         if not vmss.get('virtualMachineProfile', {}).get('extensionProfile'):
