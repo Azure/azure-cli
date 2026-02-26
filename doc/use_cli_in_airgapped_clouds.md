@@ -59,8 +59,6 @@ When extensions are installed, updated, or removed manually (outside `az extensi
 az rebuild-index
 ```
 
-This is especially important in airgapped environments where extension lifecycle actions are frequently performed with local wheel files and direct filesystem operations.
-
 ## Load Cloud Endpoints
 If you are working in an Azure AirGapped Cloud, you should be able to get a cloud metadata URL from its documentation. You can set the environment variable `ARM_CLOUD_METADATA_URL` to this URL with:
 ```bash
