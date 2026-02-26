@@ -198,12 +198,10 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
                 last_group = group
                 has_potential_changes = False
 
-            if str_lower_eq(change.change_certainty, StackModels.DeploymentStacksWhatIfChangeCertainty.POTENTIAL):
-                if not has_potential_changes:
-                    self.builder.append(">> ").append_line(
-                        "Potential Resource Changes (Learn more at https://aka.ms/whatIfPotentialChanges)",
-                        Color.PURPLE)
-
+            if not has_potential_changes and str_lower_eq(change.change_certainty, StackModels.DeploymentStacksWhatIfChangeCertainty.POTENTIAL):
+                self.builder.append(">> ").append_line(
+                    "Potential Resource Changes (Learn more at https://aka.ms/whatIfPotentialChanges)",
+                    Color.PURPLE)
                 has_potential_changes = True
 
             self._format_resource_change(change)
@@ -261,14 +259,11 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
                 last_group = group
                 has_potential_deletions = False
 
-            if str_lower_eq(
+            if not has_potential_deletions and str_lower_eq(
                 delete_change.change_certainty, StackModels.DeploymentStacksWhatIfChangeCertainty.POTENTIAL):
-
-                if not has_potential_deletions:
-                    self.builder.append(">> ").append_line(
-                        f"Potential Deletions {self._get_num_potential_resource_changes(delete_changes, i)} total (Learn more at https://aka.ms/whatIfPotentialChanges)",
-                        Color.RED)
-
+                self.builder.append(">> ").append_line(
+                    f"Potential Deletions {self._get_num_potential_resource_changes(delete_changes, i)} total (Learn more at https://aka.ms/whatIfPotentialChanges)",
+                    Color.RED)
                 has_potential_deletions = True
 
             self._format_resource_heading_line(delete_change)
@@ -406,7 +401,8 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
 
         for i, item_change in enumerate(sorted_children):
             if print_array_indices:
-                self.builder.append_line(f"{item_change.path}:")
+                child_symbol, child_color = self._get_change_type_formatting(item_change.change_type)
+                self.builder.append(child_symbol, child_color).append_line(f" {item_change.path}:")
                 self._push_indent()
 
             if self._format_change(item_change, is_array_item=True) and i < len(array_change.children) - 1:
