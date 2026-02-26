@@ -370,7 +370,7 @@ def set_ag_waf_config(cmd, resource_group_name, application_gateway_name, enable
 
 
 def show_ag_waf_config(cmd, resource_group_name, application_gateway_name):
-    from .aaz.latest.network.application_gateway import Show
+    from .aaz.latest.network.application_gateway._show import Show
     return Show(cli_ctx=cmd.cli_ctx)(command_args={
         "name": application_gateway_name,
         "resource_group": resource_group_name
@@ -378,7 +378,7 @@ def show_ag_waf_config(cmd, resource_group_name, application_gateway_name):
 
 
 def list_ag_waf_rule_sets(cmd, _type=None, version=None, group=None):
-    from .aaz.latest.network.application_gateway.waf_config import ListRuleSets
+    from .aaz.latest.network.application_gateway.waf_config._list_rule_sets import ListRuleSets
     rule_sets = ListRuleSets(cli_ctx=cmd.cli_ctx)(command_args={})["value"]
 
     filtered_sets = []
@@ -772,7 +772,7 @@ def remove_waf_exclusion_rule_set(cmd, resource_group_name, policy_name,
 # region DdosProtectionPlans
 def create_ddos_plan(cmd, resource_group_name, ddos_plan_name, location=None, tags=None, vnets=None):
     from azure.cli.core.commands import LongRunningOperation
-    from azure.cli.command_modules.network.aaz.latest.network.ddos_protection import Create
+    from azure.cli.command_modules.network.aaz.latest.network.ddos_protection._create import Create
     Create_Ddos_Protection = Create(cli_ctx=cmd.cli_ctx)
     args = {
         "name": ddos_plan_name,
@@ -803,13 +803,13 @@ def create_ddos_plan(cmd, resource_group_name, ddos_plan_name, location=None, ta
         "name": ddos_plan_name,
         "resource_group": resource_group_name,
     }
-    from azure.cli.command_modules.network.aaz.latest.network.ddos_protection import Show
+    from azure.cli.command_modules.network.aaz.latest.network.ddos_protection._show import Show
     Show_Ddos_Protection = Show(cli_ctx=cmd.cli_ctx)
     return Show_Ddos_Protection(show_args)
 
 
 def update_ddos_plan(cmd, resource_group_name, ddos_plan_name, tags=None, vnets=None):
-    from azure.cli.command_modules.network.aaz.latest.network.ddos_protection import Update
+    from azure.cli.command_modules.network.aaz.latest.network.ddos_protection._update import Update
     Update_Ddos_Protection = Update(cli_ctx=cmd.cli_ctx)
     args = {
         "name": ddos_plan_name,
@@ -818,7 +818,7 @@ def update_ddos_plan(cmd, resource_group_name, ddos_plan_name, tags=None, vnets=
     if tags is not None:
         args['tags'] = tags
     if vnets is not None:
-        from azure.cli.command_modules.network.aaz.latest.network.ddos_protection import Show
+        from azure.cli.command_modules.network.aaz.latest.network.ddos_protection._show import Show
         show_args = {
             "name": ddos_plan_name,
             "resource_group": resource_group_name,
@@ -1794,7 +1794,7 @@ def download_generated_loa_as_pdf(cmd,
         basename = basename + '.pdf'
 
     file_path = os.path.join(dirname, basename)
-    from .aaz.latest.network.express_route.port import GenerateLoa
+    from .aaz.latest.network.express_route.port._generate_loa import GenerateLoa
     response = GenerateLoa(cli_ctx=cmd.cli_ctx)(command_args={'resource_group': resource_group_name,
                                                               'name': express_route_port_name,
                                                               'customer_name': customer_name})
@@ -1941,7 +1941,7 @@ def list_load_balancer_mapping(cmd, resource_group_name, load_balancer_name, bac
         args["ip_configuration"] = {'id': request['ip_configuration']}
     if 'ip_address' in request:
         args["ip_address"] = request['ip_address']
-    from .aaz.latest.network.lb import ListMapping
+    from .aaz.latest.network.lb._list_mapping import ListMapping
     return ListMapping(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 
@@ -2069,8 +2069,8 @@ def _get_nic_ip_config(nic, name):
 
 def add_nic_ip_config_address_pool(cmd, resource_group_name, network_interface_name, ip_config_name,
                                    backend_address_pool, load_balancer_name=None, application_gateway_name=None):
-    from .aaz.latest.network.nic.ip_config.lb_pool import Add as _LBPoolAdd
-    from .aaz.latest.network.nic.ip_config.ag_pool import Add as _AGPoolAdd
+    from .aaz.latest.network.nic.ip_config.lb_pool._add import Add as _LBPoolAdd
+    from .aaz.latest.network.nic.ip_config.ag_pool._add import Add as _AGPoolAdd
 
     class LBPoolAdd(_LBPoolAdd):
         def _output(self, *args, **kwargs):
@@ -2096,8 +2096,8 @@ def add_nic_ip_config_address_pool(cmd, resource_group_name, network_interface_n
 
 def remove_nic_ip_config_address_pool(cmd, resource_group_name, network_interface_name, ip_config_name,
                                       backend_address_pool, load_balancer_name=None, application_gateway_name=None):
-    from .aaz.latest.network.nic.ip_config.lb_pool import Remove as LBPoolRemove
-    from .aaz.latest.network.nic.ip_config.ag_pool import Remove as AGPoolRemove
+    from .aaz.latest.network.nic.ip_config.lb_pool._remove import Remove as LBPoolRemove
+    from .aaz.latest.network.nic.ip_config.ag_pool._remove import Remove as AGPoolRemove
 
     arguments = {
         "ip_config_name": ip_config_name,
@@ -2125,7 +2125,7 @@ def _handle_plural_or_singular(args, plural_name, singular_name):
 
 
 def list_nsg_rules(cmd, resource_group_name, network_security_group_name, include_default=False):
-    from .aaz.latest.network.nsg import Show
+    from .aaz.latest.network.nsg._show import Show
     nsg = Show(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "name": network_security_group_name
@@ -2141,7 +2141,7 @@ def _create_network_watchers(cmd, resource_group_name, locations, tags):
     if resource_group_name is None:
         raise CLIError("usage error: '--resource-group' required when enabling new regions")
 
-    from .aaz.latest.network.watcher import Create
+    from .aaz.latest.network.watcher._create import Create
     for location in locations:
         Create(cli_ctx=cmd.cli_ctx)(command_args={
             'name': 'NetworkWatcher_{}'.format(location),
@@ -2152,7 +2152,7 @@ def _create_network_watchers(cmd, resource_group_name, locations, tags):
 
 
 def _update_network_watchers(cmd, watchers, tags):
-    from .aaz.latest.network.watcher import Update
+    from .aaz.latest.network.watcher._update import Update
     for watcher in watchers:
         id_parts = parse_resource_id(watcher['id'])
         watcher_rg = id_parts['resource_group']
@@ -2167,7 +2167,7 @@ def _update_network_watchers(cmd, watchers, tags):
 
 
 def _delete_network_watchers(cmd, watchers):
-    from .aaz.latest.network.watcher import Delete
+    from .aaz.latest.network.watcher._delete import Delete
     for watcher in watchers:
         from azure.cli.core.commands import LongRunningOperation
         id_parts = parse_resource_id(watcher['id'])
@@ -2184,7 +2184,7 @@ def _delete_network_watchers(cmd, watchers):
 
 
 def configure_network_watcher(cmd, locations, resource_group_name=None, enabled=None, tags=None):
-    from .aaz.latest.network.watcher import List
+    from .aaz.latest.network.watcher._list import List
     watcher_list = List(cli_ctx=cmd.cli_ctx)(command_args={})
     locations_list = [location.lower() for location in locations]
     existing_watchers = [w for w in watcher_list if w["location"] in locations_list]
@@ -2382,13 +2382,13 @@ def show_nw_flow_logging(cmd, watcher_rg, watcher_name, location=None, resource_
                          flow_log_name=None):
     # deprecated approach to show flow log
     if nsg is not None:
-        from .aaz.latest.network.watcher.flow_log import ConfigureFlowLog
+        from .aaz.latest.network.watcher.flow_log._configure_flow_log import ConfigureFlowLog
         return ConfigureFlowLog(cli_ctx=cmd.cli_ctx)(command_args={"network_watcher_name": watcher_name,
                                                                    "resource_group": watcher_rg,
                                                                    "target_resource_id": nsg})
 
     # new approach to show flow log
-    from .aaz.latest.network.watcher.flow_log import Show
+    from .aaz.latest.network.watcher.flow_log._show import Show
     return Show(cli_ctx=cmd.cli_ctx)(command_args={"network_watcher_name": watcher_name,
                                                    "resource_group": watcher_rg,
                                                    "name": flow_log_name})
@@ -2479,7 +2479,7 @@ def create_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_g
                                    profile_status="Enabled",
                                    ttl=30, tags=None, interval=None, timeout=None, max_failures=None,
                                    monitor_custom_headers=None, status_code_ranges=None, max_return=None):
-    from .aaz.latest.network.traffic_manager.profile import Create
+    from .aaz.latest.network.traffic_manager.profile._create import Create
     if monitor_path is None and monitor_protocol == 'HTTP':
         monitor_path = '/'
     args = {
@@ -2510,7 +2510,7 @@ def update_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_g
                                    monitor_protocol=None, monitor_port=None, monitor_path=None,
                                    ttl=None, timeout=None, interval=None, max_failures=None,
                                    monitor_custom_headers=None, status_code_ranges=None, max_return=None):
-    from .aaz.latest.network.traffic_manager.profile import Update
+    from .aaz.latest.network.traffic_manager.profile._update import Update
     args = {
         "name": traffic_manager_profile_name,
         "resource_group": resource_group_name
@@ -2551,7 +2551,7 @@ def create_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
                                     endpoint_location=None, endpoint_monitor_status=None,
                                     min_child_endpoints=None, min_child_ipv4=None, min_child_ipv6=None,
                                     geo_mapping=None, monitor_custom_headers=None, subnets=None, always_serve=None):
-    from .aaz.latest.network.traffic_manager.endpoint import Create
+    from .aaz.latest.network.traffic_manager.endpoint._create import Create
     args = {
         "name": endpoint_name,
         "type": endpoint_type,
@@ -2583,7 +2583,7 @@ def update_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
                                     weight=None, min_child_endpoints=None, min_child_ipv4=None,
                                     min_child_ipv6=None, geo_mapping=None,
                                     subnets=None, monitor_custom_headers=None, always_serve=None):
-    from .aaz.latest.network.traffic_manager.endpoint import Update
+    from .aaz.latest.network.traffic_manager.endpoint._update import Update
     args = {
         "name": endpoint_name,
         "type": endpoint_type,
@@ -2623,7 +2623,7 @@ def update_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
 
 
 def list_traffic_manager_endpoints(cmd, resource_group_name, profile_name, endpoint_type=None):
-    from .aaz.latest.network.traffic_manager.profile import Show
+    from .aaz.latest.network.traffic_manager.profile._show import Show
     profile = Show(cli_ctx=cmd.cli_ctx)(command_args={
         "profile_name": profile_name,
         "resource_group": resource_group_name,
@@ -2635,7 +2635,7 @@ def list_traffic_manager_endpoints(cmd, resource_group_name, profile_name, endpo
 
 # region VirtualNetworks
 def list_available_ips(cmd, resource_group_name, virtual_network_name):
-    from .aaz.latest.network.vnet import Show
+    from .aaz.latest.network.vnet._show import Show
     vnet = Show(cli_ctx=cmd.cli_ctx)(command_args={
         "name": virtual_network_name,
         "resource_group": resource_group_name,
@@ -2643,7 +2643,7 @@ def list_available_ips(cmd, resource_group_name, virtual_network_name):
 
     start_ip = vnet["addressSpace"]["addressPrefixes"][0].split("/")[0]
 
-    from .aaz.latest.network.vnet import CheckIpAddress
+    from .aaz.latest.network.vnet._check_ip_address import CheckIpAddress
     return CheckIpAddress(cli_ctx=cmd.cli_ctx)(command_args={
         "name": virtual_network_name,
         "resource_group": resource_group_name,
@@ -2652,7 +2652,7 @@ def list_available_ips(cmd, resource_group_name, virtual_network_name):
 
 
 def subnet_list_available_ips(cmd, resource_group_name, virtual_network_name, subnet_name):
-    from .aaz.latest.network.vnet.subnet import Show
+    from .aaz.latest.network.vnet.subnet._show import Show
     subnet = Show(cli_ctx=cmd.cli_ctx)(command_args={
         "name": subnet_name,
         "resource_group": resource_group_name,
@@ -2665,7 +2665,7 @@ def subnet_list_available_ips(cmd, resource_group_name, virtual_network_name, su
         address_prefix = subnet["addressPrefix"]
     start_ip = address_prefix.split("/")[0]
 
-    from .aaz.latest.network.vnet import CheckIpAddress
+    from .aaz.latest.network.vnet._check_ip_address import CheckIpAddress
     return CheckIpAddress(cli_ctx=cmd.cli_ctx)(command_args={
         "name": virtual_network_name,
         "resource_group": resource_group_name,
@@ -2674,7 +2674,7 @@ def subnet_list_available_ips(cmd, resource_group_name, virtual_network_name, su
 
 
 def sync_vnet_peering(cmd, resource_group_name, virtual_network_name, virtual_network_peering_name):
-    from .aaz.latest.network.vnet.peering import Show
+    from .aaz.latest.network.vnet.peering._show import Show
     try:
         peering = Show(cli_ctx=cmd.cli_ctx)(command_args={
             "name": virtual_network_peering_name,
@@ -2788,7 +2788,8 @@ def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gatewa
 
 
 def list_vpn_connections(cmd, resource_group_name, virtual_network_gateway_name=None):
-    from .aaz.latest.network.vpn_connection import List, ListConnection
+    from .aaz.latest.network.vpn_connection._list import List
+    from .aaz.latest.network.vpn_connection._list_connection import ListConnection
     if virtual_network_gateway_name:
         return ListConnection(cli_ctx=cmd.cli_ctx)(command_args={"resource_group": resource_group_name,
                                                                  "vnet_gateway": virtual_network_gateway_name})
@@ -2872,8 +2873,8 @@ def create_virtual_hub(cmd,
                        tags=None):
     from azure.core.exceptions import HttpResponseError
     from azure.cli.core.commands import LongRunningOperation
-    from .aaz.latest.network.routeserver import Show
-    from .aaz.latest.network.routeserver import List
+    from .aaz.latest.network.routeserver._show import Show
+    from .aaz.latest.network.routeserver._list import List
 
     list_result = List(cli_ctx=cmd.cli_ctx)(command_args={'resource_group': resource_group_name})
     for x in list_result:
@@ -2890,11 +2891,12 @@ def create_virtual_hub(cmd,
         "hub_routing_preference": hub_routing_preference,
         "auto_scale_config": auto_scale_config
     }
-    from .aaz.latest.network.routeserver import Create
+    from .aaz.latest.network.routeserver._create import Create
     vhub_poller = Create(cli_ctx=cmd.cli_ctx)(command_args=args)
     LongRunningOperation(cmd.cli_ctx)(vhub_poller)
 
-    from .aaz.latest.network.routeserver.ip_config import Create as IPConfigCreate, Delete as IPConfigDelete
+    from .aaz.latest.network.routeserver.ip_config._create import Create as IPConfigCreate
+    from .aaz.latest.network.routeserver.ip_config._delete import Delete as IPConfigDelete
     try:
         create_poller = IPConfigCreate(cli_ctx=cmd.cli_ctx)(command_args={
             'name': 'Default',
@@ -2915,7 +2917,7 @@ def create_virtual_hub(cmd,
             LongRunningOperation(cmd.cli_ctx)(delete_poller)
         except HttpResponseError:
             pass
-        from .aaz.latest.network.routeserver import Delete
+        from .aaz.latest.network.routeserver._delete import Delete
         Delete(cli_ctx=cmd.cli_ctx)(command_args={'resource_group': resource_group_name, 'name': virtual_hub_name})
         raise ex
 
@@ -2924,7 +2926,8 @@ def create_virtual_hub(cmd,
 
 def delete_virtual_hub(cmd, resource_group_name, virtual_hub_name):
     from azure.cli.core.commands import LongRunningOperation
-    from .aaz.latest.network.routeserver.ip_config import List as IPConfigList, Delete as IPConfigDelete
+    from .aaz.latest.network.routeserver.ip_config._list import List as IPConfigList
+    from .aaz.latest.network.routeserver.ip_config._delete import Delete as IPConfigDelete
     ip_configs = IPConfigList(cli_ctx=cmd.cli_ctx)(command_args={
         'vhub_name': virtual_hub_name,
         'resource_group': resource_group_name
@@ -2939,7 +2942,7 @@ def delete_virtual_hub(cmd, resource_group_name, virtual_hub_name):
         LongRunningOperation(cmd.cli_ctx)(poller)
     except StopIteration:
         pass
-    from .aaz.latest.network.routeserver import Delete
+    from .aaz.latest.network.routeserver._delete import Delete
     return Delete(cli_ctx=cmd.cli_ctx)(command_args={'resource_group': resource_group_name, 'name': virtual_hub_name})
 # endregion
 
@@ -2967,7 +2970,8 @@ def remove_nw_connection_monitor_test_group(cmd, connection_monitor_name, locati
 def create_ddos_custom_policy(cmd, ddos_custom_policy_name, resource_group_name, location=None, tags=None,
                               detection_rule_name=None, detection_mode=None, traffic_type=None,
                               packets_per_second=None, no_wait=None):
-    from .aaz.latest.network.ddos_custom_policy import Create as DdosCustomPolicyCreate, Show as DdosCustomPolicyShow
+    from .aaz.latest.network.ddos_custom_policy._create import Create as DdosCustomPolicyCreate
+    from .aaz.latest.network.ddos_custom_policy._show import Show as DdosCustomPolicyShow
     from .operations.ddos_custom_policy import convert_ddos_custom_policy_to_snake_case, combine_old_and_new_custom_policy
     from ._template_builder import build_ddos_custom_policy
 

@@ -713,7 +713,7 @@ def get_network_watcher_from_location(remove=False, watcher_name='watcher_name',
                                       rg_name='watcher_rg'):
     def _validator(cmd, namespace):
         from azure.mgmt.core.tools import parse_resource_id
-        from .aaz.latest.network.watcher import List
+        from .aaz.latest.network.watcher._list import List
 
         location = namespace.location
         watcher_list = List(cli_ctx=cmd.cli_ctx)(command_args={})

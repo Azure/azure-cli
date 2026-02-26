@@ -11,7 +11,7 @@ from azure.cli.command_modules.network.custom import list_traffic_manager_endpoi
 # pylint: disable=inconsistent-return-statements
 @Completer
 def subnet_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
-    from .aaz.latest.network.vnet.subnet import List
+    from .aaz.latest.network.vnet.subnet._list import List
     if namespace.resource_group_name and namespace.virtual_network_name:
         rg = namespace.resource_group_name
         vnet = namespace.virtual_network_name
@@ -27,7 +27,7 @@ def get_lb_subresource_completion_list(prop):
     # pylint: disable=inconsistent-return-statements
     @Completer
     def completer(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
-        from .aaz.latest.network.lb import Show
+        from .aaz.latest.network.lb._show import Show
         try:
             lb_name = namespace.load_balancer_name
         except AttributeError:
@@ -46,7 +46,7 @@ def get_ag_subresource_completion_list(prop):
     # pylint: disable=inconsistent-return-statements
     @Completer
     def completer(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
-        from .aaz.latest.network.application_gateway import Show
+        from .aaz.latest.network.application_gateway._show import Show
         try:
             ag_name = namespace.application_gateway_name
         except AttributeError:
