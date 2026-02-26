@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import typing as t
+
 from requests.structures import CaseInsensitiveDict
 
 import azure.mgmt.resource.deploymentstacks.models as StackModels
@@ -84,7 +85,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
             self._format_section_spacer()
         if self._format_stack_changes():
             self._format_section_spacer()
-        if self._format_resource_changes():
+        if self._format_resource_changes_and_deletion_summary():
             self._format_section_spacer()
         self._format_diagnostics()
 
@@ -143,19 +144,32 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         return printed
 
 
-    def _format_resource_changes(self) -> bool:
+    def _format_resource_changes_and_deletion_summary(self) -> bool:
         if not self.what_if_changes or not self.what_if_changes.resource_changes:
             return False
 
         printed = False
-        title_index = self.builder.get_current_index()
-
         resource_changes_sorted = sorted(
             self.what_if_changes.resource_changes,
-            key=lambda x: (DeploymentStacksWhatIfResultFormatter.CHANGE_CERTAINTY_WEIGHTS.get(x.change_certainty, 1), x.id))
+            key=lambda x: (DeploymentStacksWhatIfResultFormatter.CHANGE_CERTAINTY_WEIGHTS.get(x.change_certainty, 1), x.id or ""))
 
+        if self._format_resource_changes(resource_changes_sorted):
+            printed = True
+        if self._format_resource_deletions_summary(resource_changes_sorted):
+            printed = True
+
+        return printed
+
+
+    def _format_resource_changes(
+        self, resource_changes_sorted: list[StackModels.DeploymentStacksWhatIfResourceChange]
+    ) -> bool:
         # Print the definite resource changes, followed by the potential changes
+        title_index = self.builder.get_current_index()
         first_potential_change_index = None
+
+        printed = False
+
         for change in resource_changes_sorted:
             if first_potential_change_index is None and str_lower_eq(
                 change.change_certainty, StackModels.DeploymentStacksWhatIfChangeCertainty.POTENTIAL):
@@ -165,38 +179,13 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
                 printed = True
 
         if first_potential_change_index is not None:
-            self.builder.insert_line(first_potential_change_index, "Potential Resource Changes (Learn more at https://aka.ms/whatIfPotentialChanges)", Color.PURPLE)
+            self.builder.insert_line(
+                first_potential_change_index,
+                "Potential Resource Changes (Learn more at https://aka.ms/whatIfPotentialChanges)", Color.PURPLE)
             self.builder.insert(first_potential_change_index, ">> ")
 
         if printed:
             self.builder.insert_line(title_index, "Changes to Managed Resources:", Color.DARK_YELLOW)
-
-        # Summarize the deletions, if any
-        delete_changes = list(filter(
-            lambda x: str_lower_eq(x.change_type, StackModels.DeploymentStacksWhatIfChangeType.DELETE),
-            resource_changes_sorted))
-
-        if len(delete_changes) > 0:
-            self._format_section_spacer()
-            self.builder.append("Deleting - ", Color.RED)
-            self.builder.append_line(f"Resources Marked for Deletion {len(delete_changes)} total:")
-
-        first_potential_change_index = None
-        num_potential_deletions = 0
-        for delete_change in delete_changes:
-            if str_lower_eq(delete_change.change_certainty, StackModels.DeploymentStacksWhatIfChangeCertainty.POTENTIAL):
-                num_potential_deletions += 1
-                if first_potential_change_index is None:
-                    first_potential_change_index = self.builder.get_current_index()
-
-            self._format_resource_heading_line(delete_change)
-
-        if first_potential_change_index is not None:
-            self.builder.insert_line(
-                first_potential_change_index,
-                f"Potential Deletions {num_potential_deletions} total (Learn more at https://aka.ms/whatIfPotentialChanges)",
-                Color.RED)
-            self.builder.insert(first_potential_change_index, ">> ")
 
         return printed
 
@@ -223,6 +212,43 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         self._pop_indent()
 
         return True
+
+
+    def _format_resource_deletions_summary(
+        self, resource_changes_sorted: list[StackModels.DeploymentStacksWhatIfResourceChange]
+    ) -> bool:
+        # Summarize the deletions, if any
+        printed = False
+        delete_changes = list(
+            filter(
+                lambda x: str_lower_eq(x.change_type, StackModels.DeploymentStacksWhatIfChangeType.DELETE),
+                resource_changes_sorted))
+
+        if len(delete_changes) > 0:
+            self._format_section_spacer()
+            self.builder.append("Deleting - ", Color.RED)
+            self.builder.append_line(f"Resources Marked for Deletion {len(delete_changes)} total:")
+            printed = True
+
+        first_potential_change_index = None
+        num_potential_deletions = 0
+        for delete_change in delete_changes:
+            if str_lower_eq(
+                delete_change.change_certainty, StackModels.DeploymentStacksWhatIfChangeCertainty.POTENTIAL):
+                num_potential_deletions += 1
+                if first_potential_change_index is None:
+                    first_potential_change_index = self.builder.get_current_index()
+
+            self._format_resource_heading_line(delete_change)
+
+        if first_potential_change_index is not None:
+            self.builder.insert_line(
+                first_potential_change_index,
+                f"Potential Deletions {num_potential_deletions} total (Learn more at https://aka.ms/whatIfPotentialChanges)",
+                Color.RED)
+            self.builder.insert(first_potential_change_index, ">> ")
+
+        return printed
 
 
     def _format_resource_heading_line(self, resource_change: StackModels.DeploymentStacksWhatIfResourceChange):
@@ -263,7 +289,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
 
         diagnostics_sorted = sorted(
             self.what_if_props.diagnostics,
-            key=lambda x: (DeploymentStacksWhatIfResultFormatter.DIAGNOSTIC_WEIGHTS.get(x.level, 0), x.code))
+            key=lambda x: (DeploymentStacksWhatIfResultFormatter.DIAGNOSTIC_WEIGHTS.get(x.level, 0), x.code or ""))
 
         title_index = self.builder.get_current_index()
 
