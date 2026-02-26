@@ -4151,7 +4151,9 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             vmss['virtualMachineProfile']['extensionProfile'] = {'extensions': []}
         vmss['virtualMachineProfile']['extensionProfile']['extensions'].append(ext)
         try:
+            from .operations.vmss import convert_show_result_to_snake_case
             from .operations.vmss import VMSSCreate
+            vmss = convert_show_result_to_snake_case(vmss)
             vmss['resource_group'] = resource_group_name
             vmss['vm_scale_set_name'] = vmss_name
             _create_vmss = VMSSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss)
