@@ -2181,8 +2181,8 @@ class WebappUpdateTest(ScenarioTest):
                  .format(resource_group, webapp_name)).assert_with_checks([
                      JMESPathCheck('name', webapp_name)])
 
-        # Update platform release channel to Standard using shorthand
-        self.cmd('webapp update -g {} -n {} -prc Standard'
+        # Update platform release channel to Standard
+        self.cmd('webapp update -g {} -n {} --platform-release-channel Standard'
                  .format(resource_group, webapp_name)).assert_with_checks([
                      JMESPathCheck('name', webapp_name)])
 
