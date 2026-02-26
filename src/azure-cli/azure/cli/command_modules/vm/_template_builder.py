@@ -768,7 +768,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
     if exclude_zones is not None:
         placement['excludeZones'] = exclude_zones
     if placement:
-        vm['Placement'] = placement
+        vm['placement'] = placement
 
     return vm
 
@@ -1735,7 +1735,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
     if exclude_zones is not None:
         placement['excludeZones'] = exclude_zones
     if placement:
-        vmss['Placement'] = placement
+        vmss['placement'] = placement
 
     return vmss
 

@@ -778,14 +778,12 @@ def load_arguments(self, _):
         c.argument(
             'zone_placement_policy',
             arg_type=get_enum_type(['Auto']),
-            min_api='2024-07-01',
             help='Specify the policy for availability zone placement of the virtual machine scale set. '
                  'When set to Auto, the platform automatically selects the availability zones.'
         )
         c.argument(
             'include_zones',
             nargs='+',
-            min_api='2024-07-01',
             help='Specify a list of availability zones that must be considered for placement when '
                  '--zone-placement-policy is set to Auto. '
                  'If not specified, all availability zones in the region are considered.'
@@ -793,7 +791,6 @@ def load_arguments(self, _):
         c.argument(
             'exclude_zones',
             nargs='+',
-            min_api='2024-07-01',
             help='Specify a list of availability zones that must be excluded from placement when '
                  '--zone-placement-policy is set to Auto. '
                  'If not specified, no availability zones are excluded.'
@@ -801,7 +798,6 @@ def load_arguments(self, _):
         c.argument(
             'max_zone_count',
             type=int,
-            min_api='2024-07-01',
             help='Specify the maximum number of availability zones to use when '
                  '--zone-placement-policy is set to Auto. '
                  'If not specified, all available zones in the region may be used.'
@@ -810,7 +806,6 @@ def load_arguments(self, _):
             'instance_percent_policy',
             options_list=['--instance-percent-policy', '--ipp'],
             arg_type=get_three_state_flag(),
-            min_api='2024-07-01',
             help='Specify whether maximum percentage of virtual machine instances per zone policy '
                  'should be enabled on the virtual machine scale set.'
         )
@@ -818,7 +813,6 @@ def load_arguments(self, _):
             'max_instance_percent',
             options_list=['--max-instance-percent', '--value-max-instance-percent-per-zone'],
             type=int,
-            min_api='2024-07-01',
             help='Specify the maximum percentage of virtual machine instances that can be allocated '
                  'to a single availability zone in the virtual machine scale set. '
                  'Valid values are integers between 1 and 100.'
@@ -876,7 +870,6 @@ def load_arguments(self, _):
         c.argument(
             'max_zone_count',
             type=int,
-            min_api='2024-07-01',
             help='Specify the maximum number of availability zones to use for this scale set. '
                  'This setting is only honored for scale sets that use automatic zone placement. '
                  'If not specified, all available zones in the region may be used.'
@@ -885,7 +878,6 @@ def load_arguments(self, _):
             'instance_percent_policy',
             options_list=['--instance-percent-policy', '--ipp'],
             arg_type=get_three_state_flag(),
-            min_api='2024-07-01',
             help='Specify whether maximum percentage of virtual machine instances per zone policy '
                  'should be enabled on the virtual machine scale set.'
         )
@@ -893,7 +885,6 @@ def load_arguments(self, _):
             'max_instance_percent',
             options_list=['--max-instance-percent', '--value-max-instance-percent-per-zone'],
             type=int,
-            min_api='2024-07-01',
             help='Specify the maximum percentage of virtual machine instances that can be allocated '
                  'to a single availability zone in the virtual machine scale set. '
                  'Valid values are integers between 1 and 100.'
