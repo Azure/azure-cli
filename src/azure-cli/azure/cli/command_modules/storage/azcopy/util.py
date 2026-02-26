@@ -22,7 +22,7 @@ logger = get_logger(__name__)
 
 STORAGE_RESOURCE_ENDPOINT = "https://storage.azure.com"
 SERVICES = {'blob', 'file'}
-AZCOPY_VERSION = '10.13.0'
+AZCOPY_VERSION = '10.32.1'
 
 
 class AzCopy:
@@ -56,22 +56,22 @@ class AzCopy:
         install_dir = os.path.dirname(install_location)
         if not os.path.exists(install_dir):
             os.makedirs(install_dir)
-        base_url = 'https://azcopyvnext-awgzd8g7aagqhzhe.b02.azurefd.net/release20211027/azcopy_{}_{}_{}.{}'
+        base_url = 'https://github.com/Azure/azure-storage-azcopy/releases/download/v{}/azcopy_{}_{}_{}.{}'
         if self.system == 'Windows':
             if platform.machine().endswith('64'):
-                file_url = base_url.format('windows', 'amd64', AZCOPY_VERSION, 'zip')
+                file_url = base_url.format(AZCOPY_VERSION, 'windows', 'amd64', AZCOPY_VERSION, 'zip')
                 if _verify_url(file_url) is None:
                     file_url = _verify_url('https://aka.ms/InstallAzCopyForCLIWindowsX64')
             else:
-                file_url = base_url.format('windows', '386', AZCOPY_VERSION, 'zip')
+                file_url = base_url.format(AZCOPY_VERSION, 'windows', '386', AZCOPY_VERSION, 'zip')
                 if _verify_url(file_url) is None:
                     file_url = _verify_url('https://aka.ms/InstallAzCopyForCLIWindows')
         elif self.system == 'Linux':
-            file_url = base_url.format('linux', 'amd64', AZCOPY_VERSION, 'tar.gz')
+            file_url = base_url.format(AZCOPY_VERSION, 'linux', 'amd64', AZCOPY_VERSION, 'tar.gz')
             if _verify_url(file_url) is None:
                 file_url = _verify_url('https://aka.ms/InstallAzCopyForCLILinux')
         elif self.system == 'Darwin':
-            file_url = base_url.format('darwin', 'amd64', AZCOPY_VERSION, 'zip')
+            file_url = base_url.format(AZCOPY_VERSION, 'darwin', 'amd64', AZCOPY_VERSION, 'zip')
             if _verify_url(file_url) is None:
                 file_url = _verify_url('https://aka.ms/InstallAzCopyForCLIDarwin')
         else:
