@@ -3142,8 +3142,12 @@ def update_long_term_retention(
                            'Valid values are "unlocked" or "locked".')
         if time_based_immutability_mode.lower() == 'locked':
             if not yes:
-                confirmation = prompt_y_n("""Once locked, immutable backups cannot be modified or deleted for the full retention period. There is no extra cost to enable immutability, but standard backup storage charges apply. Note: The logical Azure SQL Server cannot be deleted during the retention period.
-            Do you want to proceed?""")
+                confirmation = prompt_y_n(
+                    "Once locked, immutable backups cannot be modified or deleted for the full "
+                    "retention period. There is no extra cost to enable immutability, but standard "
+                    "backup storage charges apply. Note: The logical Azure SQL Server cannot be "
+                    "deleted during the retention period. Do you want to proceed?",
+                    default='n')
                 if not confirmation:
                     return
 
