@@ -178,15 +178,16 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
     def _format_resource_changes(
         self, resource_changes_sorted: list[StackModels.DeploymentStacksWhatIfResourceChange]
     ) -> bool:
+        if resource_changes_sorted is None or len(resource_changes_sorted) == 0:
+            return False
+
         # Print the definite resource changes, followed by the potential changes
-        title_index = self.builder.get_current_index()
-        first_potential_change_index: t.Optional[int] = None
         last_group: t.Optional[str] = None
-        printed = False
+        has_potential_changes = False
+
+        self.builder.append_line("Changes to Managed Resources:", Color.DARK_YELLOW)
 
         for change in resource_changes_sorted:
-            printed = True
-
             # check if a new section should be started
             group = "Azure" if change.id else (
                 f"{change.extension.name}@{change.extension.version}" if change.extension else "Unknown")
@@ -195,22 +196,19 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
                 self._format_section_spacer()
                 self.builder.append_line(group)
                 last_group = group
-                first_potential_change_index = None
+                has_potential_changes = False
 
-            if first_potential_change_index is None and str_lower_eq(
-                change.change_certainty, StackModels.DeploymentStacksWhatIfChangeCertainty.POTENTIAL):
-                self.builder.append(">> ").append_line(
-                    "Potential Resource Changes (Learn more at https://aka.ms/whatIfPotentialChanges)", Color.PURPLE)
-                first_potential_change_index = self.builder.get_current_index()
+            if str_lower_eq(change.change_certainty, StackModels.DeploymentStacksWhatIfChangeCertainty.POTENTIAL):
+                if not has_potential_changes:
+                    self.builder.append(">> ").append_line(
+                        "Potential Resource Changes (Learn more at https://aka.ms/whatIfPotentialChanges)",
+                        Color.PURPLE)
 
-            if self._format_resource_change(change):
-                printed = True
+                has_potential_changes = True
 
-        if printed:
-            self.builder.insert_line(title_index)
-            self.builder.insert_line(title_index, "Changes to Managed Resources:", Color.DARK_YELLOW)
+            self._format_resource_change(change)
 
-        return printed
+        return True
 
 
     def _format_resource_change(self, resource_change: StackModels.DeploymentStacksWhatIfResourceChange) -> bool:
@@ -250,11 +248,10 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
             self.builder.append_line(f"Resources Marked for Deletion {len(delete_changes)} total:")
             printed = True
 
-        first_potential_change_index: t.Optional[int] = None
         last_group: t.Optional[str] = None
-        num_potential_deletions = 0
+        has_potential_deletions = False
 
-        for delete_change in delete_changes:
+        for i, delete_change in enumerate(delete_changes):
             group = "Azure" if delete_change.id else (
                 f"{delete_change.extension.name}@{delete_change.extension.version}" if delete_change.extension else "Unknown")
 
@@ -262,22 +259,19 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
                 self._format_section_spacer()
                 self.builder.append_line(group)
                 last_group = group
-                first_potential_change_index = None
+                has_potential_deletions = False
 
             if str_lower_eq(
                 delete_change.change_certainty, StackModels.DeploymentStacksWhatIfChangeCertainty.POTENTIAL):
-                num_potential_deletions += 1
-                if first_potential_change_index is None:
-                    first_potential_change_index = self.builder.get_current_index()
+
+                if not has_potential_deletions:
+                    self.builder.append(">> ").append_line(
+                        f"Potential Deletions {self._get_num_potential_resource_changes(delete_changes, i)} total (Learn more at https://aka.ms/whatIfPotentialChanges)",
+                        Color.RED)
+
+                has_potential_deletions = True
 
             self._format_resource_heading_line(delete_change)
-
-        if first_potential_change_index is not None:
-            self.builder.insert_line(
-                first_potential_change_index,
-                f"Potential Deletions {num_potential_deletions} total (Learn more at https://aka.ms/whatIfPotentialChanges)",
-                Color.RED)
-            self.builder.insert(first_potential_change_index, ">> ")
 
         return printed
 
@@ -323,12 +317,10 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
             self.what_if_props.diagnostics,
             key=lambda x: (DeploymentStacksWhatIfResultFormatter.DIAGNOSTIC_LEVEL_PRIORITIES.get(x.level, 0), x.code or ""))
 
-        title_index = self.builder.get_current_index()
+        self.builder.append_line(f"Diagnostics ({len(diagnostics_sorted)}):")
 
         for i, diagnostic in enumerate(diagnostics_sorted):
             self._format_diagnostic(diagnostic)
-
-        self.builder.insert_line(title_index, f"Diagnostics ({len(diagnostics_sorted)}):")
 
         return True
 
@@ -345,7 +337,8 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
             StackModels.DeploymentStacksChangeBase,
             StackModels.DeploymentStacksChangeDeltaRecord,
             StackModels.DeploymentStacksWhatIfPropertyChange]],
-        parent_path: t.Optional[str] = None
+        parent_path: t.Optional[str] = None,
+        is_array_item: bool = False
     ) -> bool:
         if not change:
             return False
@@ -353,7 +346,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         value_type = self._get_value_type_from_change(change)
 
         if value_type is str or value_type is bool or value_type is int or value_type is float:
-            if self._format_primitive_change(change, parent_path):
+            if self._format_primitive_change(change, parent_path, is_array_item):
                 return True
         elif value_type is list:
             if self._format_array_changes(change, parent_path):
@@ -366,16 +359,24 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
 
 
     def _format_object_change(
-        self, object_change: t.Optional[StackModels.DeploymentStacksChangeDeltaRecord],
+        self,
+        object_change: t.Optional[t.Union[
+            StackModels.DeploymentStacksChangeDeltaRecord, StackModels.DeploymentStacksWhatIfPropertyChange]],
         parent_path: t.Optional[str] = None
     ) -> bool:
-        if not object_change or not object_change.delta:
+        if not object_change:
+            return False
+
+        children = object_change.delta if hasattr(object_change, "delta") else (
+            object_change.children if hasattr(object_change, "children") else None)
+
+        if not children or len(children) == 0:
             return False
 
         printed = False
 
-        for delta in object_change.delta:
-            if self._format_change(delta, parent_path):
+        for child in children:
+            if self._format_change(child, parent_path):
                 printed = True
 
         return printed
@@ -387,53 +388,64 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         if not str_lower_eq(array_change.change_type, StackModels.DeploymentStacksWhatIfPropertyChangeType.ARRAY):
             return False
 
+        children = array_change.children
+
+        if not children or len(children) == 0:
+            return False
+
         property_path = self._get_change_path(array_change, parent_path)
         symbol, color = self._get_change_type_formatting(StackModels.DeploymentStacksWhatIfPropertyChangeType.MODIFY)
 
         self.builder.append_line(f"{symbol} {property_path}: ", color)
         self._push_indent()
 
-        for i, item_change in enumerate(array_change.children or []):
-            if self._format_array_child_change(item_change) and i < len(array_change.children) - 1:
-                self.builder.append_line()
+        print_array_indices = all(c.path for c in children)
+        sorted_children = sorted(
+            children,
+            key=lambda x:int(x.path)) if print_array_indices else children
+
+        for i, item_change in enumerate(sorted_children):
+            if print_array_indices:
+                self.builder.append_line(f"{item_change.path}:")
+                self._push_indent()
+
+            if self._format_change(item_change, is_array_item=True) and i < len(array_change.children) - 1:
+                self.builder.ensure_num_new_lines(1)
+
+            if print_array_indices:
+                self._pop_indent()
 
         self._pop_indent()
 
         return True
 
 
-    def _format_array_child_change(self, array_change: StackModels.DeploymentStacksWhatIfPropertyChange) -> bool:
-        symbol, color = self._get_change_type_formatting(array_change.change_type)
-
-        # TODO(kylealbert): handle non-primitive
-        if str_lower_eq(array_change.change_type, StackModels.DeploymentStacksWhatIfPropertyChangeType.CREATE) or \
-            str_lower_eq(array_change.change_type, StackModels.DeploymentStacksWhatIfPropertyChangeType.NO_EFFECT):
-            self.builder.append(f"{symbol} {self._format_primitive_value(array_change.after)}", color)
-            return True
-        if str_lower_eq(array_change.change_type, StackModels.DeploymentStacksWhatIfPropertyChangeType.DELETE):
-            self.builder.append(f"{symbol} {self._format_primitive_value(array_change.before)}", color)
-            return True
-
-        return False
-
-
     def _format_primitive_change(
         self,
         primitive_change: t.Optional[
             t.Union[StackModels.DeploymentStacksChangeBase, StackModels.DeploymentStacksWhatIfPropertyChange]],
-        parent_path: t.Optional[str] = None
+        parent_path: t.Optional[str] = None,
+        is_array_item: bool = False
     ) -> bool:
         if not primitive_change:
             return False
 
-        property_path = self._get_change_path(primitive_change, parent_path)
-        symbol, color = self._get_change_type_formatting(
-            StackModels.DeploymentStacksWhatIfPropertyChangeType.NO_EFFECT if primitive_change.before == primitive_change.after \
-                else StackModels.DeploymentStacksWhatIfPropertyChangeType.MODIFY)
+        change_type = (primitive_change.change_type if hasattr(primitive_change, "change_type") else None) or (
+            StackModels.DeploymentStacksWhatIfPropertyChangeType.NO_EFFECT if primitive_change.before == primitive_change.after
+            else StackModels.DeploymentStacksWhatIfPropertyChangeType.MODIFY)
 
-        self.builder.append(f"{symbol} {property_path}: ", color)
-        self.builder.append_line(
-            f"{self._format_primitive_value(primitive_change.before)} => {self._format_primitive_value(primitive_change.after)}")
+        property_path = self._get_change_path(primitive_change, parent_path)
+        symbol, color = self._get_change_type_formatting(change_type)
+
+        self.builder.append(f"{symbol} " if is_array_item else f"{symbol} {property_path}: ", color)
+        if str_lower_eq(change_type, StackModels.DeploymentStacksWhatIfPropertyChangeType.MODIFY):
+            self.builder.append_line(
+                f"{self._format_primitive_value(primitive_change.before)} => {self._format_primitive_value(primitive_change.after)}")
+        else:
+            value = primitive_change.before if str_lower_eq(
+                change_type, StackModels.DeploymentStacksWhatIfPropertyChangeType.DELETE) else primitive_change.after
+            self.builder.append_line(
+                self._format_primitive_value(value), color if is_array_item else None)
 
         return True
 
@@ -456,8 +468,11 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
     @staticmethod
     def _get_change_type_formatting(
         change_type: t.Union[
-            StackModels.DeploymentStacksWhatIfChangeType, StackModels.DeploymentStacksWhatIfPropertyChangeType]
+            StackModels.DeploymentStacksWhatIfChangeType, StackModels.DeploymentStacksWhatIfPropertyChangeType, str]
     ) -> t.Tuple[t.Optional[str], t.Optional[Color]]:
+        if change_type is None:
+            return None, None
+
         symbol = DeploymentStacksWhatIfResultFormatter.CHANGE_TYPE_SYMBOLS.get(change_type, None)
         color = DeploymentStacksWhatIfResultFormatter.CHANGE_TYPE_COLORS.get(change_type, None)
 
@@ -481,6 +496,8 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         if hasattr(change, "change_type"):
             if str_lower_eq(StackModels.DeploymentStacksWhatIfPropertyChangeType.ARRAY, change.change_type):
                 return list
+            if hasattr(change, "children") and change.children and len(change.children) > 0:
+                return dict
         elif hasattr(change, "delta"):
             return dict
 
@@ -495,3 +512,16 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
             return before_type
 
         return None
+    
+    @staticmethod
+    def _get_num_potential_resource_changes(
+        resource_changes: t.List[StackModels.DeploymentStacksWhatIfResourceChange], start_index: int
+    ) -> int:
+        count = 0
+        for i in range(start_index, len(resource_changes)):
+            if str_lower_eq(
+                resource_changes[i].change_certainty, StackModels.DeploymentStacksWhatIfChangeCertainty.POTENTIAL):
+                count += 1
+            else:
+                break
+        return count
