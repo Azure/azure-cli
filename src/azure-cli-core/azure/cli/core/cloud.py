@@ -520,8 +520,7 @@ BLEU_SOV_CLOUD = Cloud(
         mysql_server_endpoint='.mysql.database.sovcloud-api.fr',
         postgresql_server_endpoint='.postgres.database.sovcloud-api.fr',
         mariadb_server_endpoint='.mariadb.database.sovcloud-api.fr',
-        synapse_analytics_endpoint='.dev.azuresynapse.sovcloud-api.fr')
-    )
+        synapse_analytics_endpoint='.dev.azuresynapse.sovcloud-api.fr'))
 
 HARD_CODED_CLOUD_LIST = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_GERMAN_CLOUD, BLEU_SOV_CLOUD]
 
