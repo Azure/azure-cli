@@ -38,7 +38,7 @@ from ._flexible_server_util import generate_missing_parameters, resolve_poller, 
 from ._flexible_server_location_capabilities_util import get_postgres_location_capability_info, get_postgres_server_capability_info
 from ._util import get_autonomous_tuning_settings_map
 from ._db_context import DbContext
-from .flexible_server_custom_common import create_firewall_rule
+from ._github import create_firewall_rule
 from .flexible_server_network import prepare_private_network, prepare_private_dns_zone, prepare_public_network, flexible_server_provision_network_resource
 from .validators import pg_arguments_validator, validate_server_name, validate_and_format_restore_point_in_time, \
     validate_postgres_replica, validate_georestore_network, pg_byok_validator, validate_migration_runtime_server, \
@@ -52,194 +52,7 @@ DELEGATION_SERVICE_NAME = "Microsoft.DBforPostgreSQL/flexibleServers"
 RESOURCE_PROVIDER = 'Microsoft.DBforPostgreSQL'
 
 
-def database_create_func(cmd, client, resource_group_name, server_name, database_name=None, charset=None, collation=None):
-    validate_database_name(database_name)
-    validate_resource_group(resource_group_name)
-    validate_citus_cluster(cmd, resource_group_name, server_name)
-
-    if charset is None and collation is None:
-        charset = 'utf8'
-        collation = 'en_US.utf8'
-        logger.warning("Creating database with utf8 charset and en_US.utf8 collation")
-    elif (not charset and collation) or (charset and not collation):
-        raise RequiredArgumentMissingError("charset and collation have to be input together.")
-
-    parameters = {
-        'name': database_name,
-        'charset': charset,
-        'collation': collation
-    }
-
-    return client.begin_create(
-        resource_group_name,
-        server_name,
-        database_name,
-        parameters)
-
-
 # Custom functions for server logs
-def backup_create_func(client, resource_group_name, server_name, backup_name):
-    validate_resource_group(resource_group_name)
-    validate_backup_name(backup_name)
-
-    return client.begin_create(
-        resource_group_name,
-        server_name,
-        backup_name)
-
-
-def ltr_precheck_func(client, resource_group_name, server_name, backup_name):
-    validate_resource_group(resource_group_name)
-
-    return client.check_prerequisites(
-        resource_group_name=resource_group_name,
-        server_name=server_name,
-        parameters={"backupSettings": {"backupName": backup_name}}
-    )
-
-
-def ltr_start_func(client, resource_group_name, server_name, backup_name, sas_url):
-    validate_resource_group(resource_group_name)
-
-    parameters = {
-        "backupSettings": {
-            "backupName": backup_name
-        },
-        "targetDetails": {
-            "sasUriList": [sas_url]
-        }
-    }
-
-    return client.begin_start(
-        resource_group_name=resource_group_name,
-        server_name=server_name,
-        parameters=parameters
-    )
-
-
-def backup_delete_func(client, resource_group_name, server_name, backup_name, yes=False):
-    validate_resource_group(resource_group_name)
-
-    if not yes:
-        user_confirmation(
-            "Are you sure you want to delete the backup '{0}' in server '{1}'".format(backup_name, server_name), yes=yes)
-
-    return client.begin_delete(
-        resource_group_name,
-        server_name,
-        backup_name)
-
-
-def flexible_server_approve_private_endpoint_connection(cmd, client, resource_group_name, server_name, private_endpoint_connection_name,
-                                                        description=None):
-    """Approve a private endpoint connection request for a server."""
-    validate_resource_group(resource_group_name)
-
-    return _update_private_endpoint_connection_status(
-        cmd, client, resource_group_name, server_name, private_endpoint_connection_name, is_approved=True,
-        description=description)
-
-
-def flexible_server_reject_private_endpoint_connection(cmd, client, resource_group_name, server_name, private_endpoint_connection_name,
-                                                       description=None):
-    """Reject a private endpoint connection request for a server."""
-    validate_resource_group(resource_group_name)
-
-    return _update_private_endpoint_connection_status(
-        cmd, client, resource_group_name, server_name, private_endpoint_connection_name, is_approved=False,
-        description=description)
-
-
-def flexible_server_private_link_resource_get(
-        client,
-        resource_group_name,
-        server_name):
-    '''
-    Gets a private link resource for a PostgreSQL flexible server.
-    '''
-    validate_resource_group(resource_group_name)
-
-    return client.get(
-        resource_group_name=resource_group_name,
-        server_name=server_name,
-        group_name="postgresqlServer")
-
-
-def flexible_server_fabric_mirroring_start(cmd, client, resource_group_name, server_name, database_names, yes=False):
-    validate_resource_group(resource_group_name)
-    validate_citus_cluster(cmd, resource_group_name, server_name)
-    flexible_servers_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
-    server = flexible_servers_client.get(resource_group_name, server_name)
-
-    if server.high_availability.mode != "Disabled" and server.version not in ["17", "18"]:
-        # disable fabric mirroring on HA server
-        raise CLIError("Fabric mirroring is not supported on servers with high availability enabled.")
-
-    databases = ','.join(database_names)
-    user_confirmation("Are you sure you want to prepare and enable your server" +
-                      " '{0}' in resource group '{1}' for mirroring of databases '{2}'.".format(server_name, resource_group_name, databases) +
-                      " This requires restart.", yes=yes)
-
-    if (server.identity is None or 'SystemAssigned' not in server.identity.type):
-        logger.warning('Enabling system assigned managed identity on the server.')
-        flexible_server_identity_update(cmd, flexible_servers_client, resource_group_name, server_name, 'Enabled')
-
-    logger.warning('Updating necessary server parameters.')
-    source = "user-override"
-    configuration_name = "azure.fabric_mirror_enabled"
-    value = "on"
-    _update_parameters(cmd, client, server_name, configuration_name, resource_group_name, source, value)
-    configuration_name = "azure.mirror_databases"
-    value = databases
-    return _update_parameters(cmd, client, server_name, configuration_name, resource_group_name, source, value)
-
-
-def flexible_server_fabric_mirroring_stop(cmd, client, resource_group_name, server_name, yes=False):
-    validate_resource_group(resource_group_name)
-    validate_citus_cluster(cmd, resource_group_name, server_name)
-
-    flexible_servers_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
-    server = flexible_servers_client.get(resource_group_name, server_name)
-
-    if server.high_availability.mode != "Disabled" and server.version not in ["17", "18"]:
-        # disable fabric mirroring on HA server
-        raise CLIError("Fabric mirroring is not supported on servers with high availability enabled.")
-
-    user_confirmation("Are you sure you want to disable mirroring for server '{0}' in resource group '{1}'".format(server_name, resource_group_name), yes=yes)
-
-    configuration_name = "azure.fabric_mirror_enabled"
-    parameters = postgresql_flexibleservers.models.Configuration(
-        value="off",
-        source="user-override"
-    )
-
-    return client.begin_update(resource_group_name, server_name, configuration_name, parameters)
-
-
-def flexible_server_fabric_mirroring_update_databases(cmd, client, resource_group_name, server_name, database_names, yes=False):
-    validate_resource_group(resource_group_name)
-    validate_citus_cluster(cmd, resource_group_name, server_name)
-
-    flexible_servers_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
-    server = flexible_servers_client.get(resource_group_name, server_name)
-
-    if server.high_availability.mode != "Disabled" and server.version not in ["17", "18"]:
-        # disable fabric mirroring on HA server
-        raise CLIError("Fabric mirroring is not supported on servers with high availability enabled.")
-
-    databases = ','.join(database_names)
-    user_confirmation("Are you sure for server '{0}' in resource group '{1}' you want to update the databases being mirrored to be '{2}'"
-                      .format(server_name, resource_group_name, databases), yes=yes)
-
-    configuration_name = "azure.mirror_databases"
-    parameters = postgresql_flexibleservers.models.Configuration(
-        value=databases,
-        source="user-override"
-    )
-
-    return client.begin_update(resource_group_name, server_name, configuration_name, parameters)
-
-
 def _update_parameters(cmd, client, server_name, configuration_name, resource_group_name, source, value):
     parameters = postgresql_flexibleservers.models.Configuration(
         value=value,
@@ -248,12 +61,6 @@ def _update_parameters(cmd, client, server_name, configuration_name, resource_gr
 
     return resolve_poller(
         client.begin_update(resource_group_name, server_name, configuration_name, parameters), cmd.cli_ctx, 'PostgreSQL Parameter update')
-
-
-def flexible_server_migrate_network(client, resource_group_name, server_name, no_wait=False):
-    validate_resource_group(resource_group_name)
-
-    return sdk_no_wait(no_wait, client.begin_migrate_network_mode, resource_group_name, server_name)
 
 
 def _update_private_endpoint_connection_status(cmd, client, resource_group_name, server_name,

@@ -45,57 +45,68 @@ from .validators import pg_arguments_validator, validate_server_name, validate_a
     validate_resource_group, check_resource_group, validate_citus_cluster, validate_backup_name, \
     validate_virtual_endpoint_name_availability, validate_database_name, compare_sku_names, is_citus_cluster, pg_restore_validator
 
+logger = get_logger(__name__)
+DEFAULT_DB_NAME = 'flexibleserverdb'
+POSTGRES_DB_NAME = 'postgres'
+DELEGATION_SERVICE_NAME = "Microsoft.DBforPostgreSQL/flexibleServers"
+RESOURCE_PROVIDER = 'Microsoft.DBforPostgreSQL'
 
-def flexible_server_microsoft_entra_admin_set(cmd, client, resource_group_name, server_name, login, sid, principal_type=None, no_wait=False):
+
+def flexible_server_approve_private_endpoint_connection(cmd, client, resource_group_name, server_name, private_endpoint_connection_name,
+                                                        description=None):
+    """Approve a private endpoint connection request for a server."""
     validate_resource_group(resource_group_name)
 
-    server_operations_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
-
-    instance = server_operations_client.get(resource_group_name, server_name)
-
-    if 'replica' in instance.replication_role.lower():
-        raise CLIError("Cannot create a Microsoft Entra admin on a server with replication role. Use the primary server instead.")
-
-    return _create_admin(client, resource_group_name, server_name, login, sid, principal_type, no_wait)
+    return _update_private_endpoint_connection_status(
+        cmd, client, resource_group_name, server_name, private_endpoint_connection_name, is_approved=True,
+        description=description)
 
 
-def _create_admin(client, resource_group_name, server_name, principal_name, sid, principal_type=None, no_wait=False):
-    parameters = {
-        'properties': {
-            'principalName': principal_name,
-            'tenantId': get_tenant_id(),
-            'principalType': principal_type
-        }
+def flexible_server_reject_private_endpoint_connection(cmd, client, resource_group_name, server_name, private_endpoint_connection_name,
+                                                       description=None):
+    """Reject a private endpoint connection request for a server."""
+    validate_resource_group(resource_group_name)
+
+    return _update_private_endpoint_connection_status(
+        cmd, client, resource_group_name, server_name, private_endpoint_connection_name, is_approved=False,
+        description=description)
+
+
+def _update_private_endpoint_connection_status(cmd, client, resource_group_name, server_name,
+                                               private_endpoint_connection_name, is_approved=True, description=None):  # pylint: disable=unused-argument
+    validate_resource_group(resource_group_name)
+
+    private_endpoint_connections_client = cf_postgres_flexible_private_endpoint_connections(cmd.cli_ctx, None)
+    private_endpoint_connection = private_endpoint_connections_client.get(resource_group_name=resource_group_name,
+                                                                          server_name=server_name,
+                                                                          private_endpoint_connection_name=private_endpoint_connection_name)
+    new_status = 'Approved' if is_approved else 'Rejected'
+
+    private_link_service_connection_state = {
+        'status': new_status,
+        'description': description
     }
 
-    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, server_name, sid, parameters)
+    private_endpoint_connection.private_link_service_connection_state = private_link_service_connection_state
+
+    return client.begin_update(resource_group_name=resource_group_name,
+                               server_name=server_name,
+                               private_endpoint_connection_name=private_endpoint_connection_name,
+                               parameters=private_endpoint_connection)
 
 
-def flexible_server_microsoft_entra_admin_delete(cmd, client, resource_group_name, server_name, sid, no_wait=False):
-    validate_resource_group(resource_group_name)
-
-    server_operations_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
-
-    instance = server_operations_client.get(resource_group_name, server_name)
-
-    if 'replica' in instance.replication_role.lower():
-        raise CLIError("Cannot delete an Microsoft Entra admin on a server with replication role. Use the primary server instead.")
-
-    return sdk_no_wait(no_wait, client.begin_delete, resource_group_name, server_name, sid)
-
-
-def flexible_server_microsoft_entra_admin_list(client, resource_group_name, server_name):
-    validate_resource_group(resource_group_name)
-
-    return client.list_by_server(
-        resource_group_name=resource_group_name,
-        server_name=server_name)
-
-
-def flexible_server_microsoft_entra_admin_show(client, resource_group_name, server_name, sid):
+def flexible_server_private_link_resource_get(
+        client,
+        resource_group_name,
+        server_name):
+    '''
+    Gets a private link resource for a PostgreSQL flexible server.
+    '''
     validate_resource_group(resource_group_name)
 
     return client.get(
         resource_group_name=resource_group_name,
         server_name=server_name,
-        object_id=sid)
+        group_name="postgresqlServer")
+
+

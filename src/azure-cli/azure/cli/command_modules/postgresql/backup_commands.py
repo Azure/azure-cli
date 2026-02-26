@@ -45,57 +45,61 @@ from .validators import pg_arguments_validator, validate_server_name, validate_a
     validate_resource_group, check_resource_group, validate_citus_cluster, validate_backup_name, \
     validate_virtual_endpoint_name_availability, validate_database_name, compare_sku_names, is_citus_cluster, pg_restore_validator
 
+logger = get_logger(__name__)
+DEFAULT_DB_NAME = 'flexibleserverdb'
+POSTGRES_DB_NAME = 'postgres'
+DELEGATION_SERVICE_NAME = "Microsoft.DBforPostgreSQL/flexibleServers"
+RESOURCE_PROVIDER = 'Microsoft.DBforPostgreSQL'
 
-def flexible_server_microsoft_entra_admin_set(cmd, client, resource_group_name, server_name, login, sid, principal_type=None, no_wait=False):
+
+def backup_create_func(client, resource_group_name, server_name, backup_name):
+    validate_resource_group(resource_group_name)
+    validate_backup_name(backup_name)
+
+    return client.begin_create(
+        resource_group_name,
+        server_name,
+        backup_name)
+
+
+def ltr_precheck_func(client, resource_group_name, server_name, backup_name):
     validate_resource_group(resource_group_name)
 
-    server_operations_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
-
-    instance = server_operations_client.get(resource_group_name, server_name)
-
-    if 'replica' in instance.replication_role.lower():
-        raise CLIError("Cannot create a Microsoft Entra admin on a server with replication role. Use the primary server instead.")
-
-    return _create_admin(client, resource_group_name, server_name, login, sid, principal_type, no_wait)
+    return client.check_prerequisites(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        parameters={"backupSettings": {"backupName": backup_name}}
+    )
 
 
-def _create_admin(client, resource_group_name, server_name, principal_name, sid, principal_type=None, no_wait=False):
+def ltr_start_func(client, resource_group_name, server_name, backup_name, sas_url):
+    validate_resource_group(resource_group_name)
+
     parameters = {
-        'properties': {
-            'principalName': principal_name,
-            'tenantId': get_tenant_id(),
-            'principalType': principal_type
+        "backupSettings": {
+            "backupName": backup_name
+        },
+        "targetDetails": {
+            "sasUriList": [sas_url]
         }
     }
 
-    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, server_name, sid, parameters)
-
-
-def flexible_server_microsoft_entra_admin_delete(cmd, client, resource_group_name, server_name, sid, no_wait=False):
-    validate_resource_group(resource_group_name)
-
-    server_operations_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
-
-    instance = server_operations_client.get(resource_group_name, server_name)
-
-    if 'replica' in instance.replication_role.lower():
-        raise CLIError("Cannot delete an Microsoft Entra admin on a server with replication role. Use the primary server instead.")
-
-    return sdk_no_wait(no_wait, client.begin_delete, resource_group_name, server_name, sid)
-
-
-def flexible_server_microsoft_entra_admin_list(client, resource_group_name, server_name):
-    validate_resource_group(resource_group_name)
-
-    return client.list_by_server(
-        resource_group_name=resource_group_name,
-        server_name=server_name)
-
-
-def flexible_server_microsoft_entra_admin_show(client, resource_group_name, server_name, sid):
-    validate_resource_group(resource_group_name)
-
-    return client.get(
+    return client.begin_start(
         resource_group_name=resource_group_name,
         server_name=server_name,
-        object_id=sid)
+        parameters=parameters
+    )
+
+
+def backup_delete_func(client, resource_group_name, server_name, backup_name, yes=False):
+    validate_resource_group(resource_group_name)
+
+    if not yes:
+        user_confirmation(
+            "Are you sure you want to delete the backup '{0}' in server '{1}'".format(backup_name, server_name), yes=yes)
+
+    return client.begin_delete(
+        resource_group_name,
+        server_name,
+        backup_name)
+

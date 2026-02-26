@@ -9,7 +9,7 @@ from knack.log import get_logger
 from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id, is_valid_resource_name, resource_id  # pylint: disable=import-error
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_subscription_id
-from azure.cli.core.util import CLIError, user_confirmation
+from azure.cli.core.util import CLIError, sdk_no_wait, user_confirmation
 from azure.cli.core.azclierror import ValidationError, RequiredArgumentMissingError
 from azure.mgmt.privatedns.models import PrivateZone
 from azure.mgmt.privatedns.models import SubResource
@@ -28,6 +28,12 @@ DELEGATION_SERVICE_NAME = "Microsoft.DBforPostgreSQL/flexibleServers"
 DEFAULT_VNET_ADDRESS_PREFIX = '10.0.0.0/16'
 DEFAULT_SUBNET_ADDRESS_PREFIX = '10.0.0.0/24'
 IP_ADDRESS_CHECKER = 'https://api.ipify.org'
+
+
+def flexible_server_migrate_network(client, resource_group_name, server_name, no_wait=False):
+    validate_resource_group(resource_group_name)
+
+    return sdk_no_wait(no_wait, client.begin_migrate_network_mode, resource_group_name, server_name)
 
 
 # pylint: disable=too-many-locals, too-many-statements, too-many-branches, import-outside-toplevel

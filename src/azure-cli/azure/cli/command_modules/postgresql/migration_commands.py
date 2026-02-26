@@ -38,8 +38,8 @@ from ._flexible_server_util import generate_missing_parameters, resolve_poller, 
 from ._flexible_server_location_capabilities_util import get_postgres_location_capability_info, get_postgres_server_capability_info
 from ._util import get_autonomous_tuning_settings_map
 from ._db_context import DbContext
-from .flexible_server_custom_common import create_firewall_rule
-from ._network import prepare_private_network, prepare_private_dns_zone, prepare_public_network, flexible_server_provision_network_resource
+from ._github import create_firewall_rule
+from .network_commands import prepare_private_network, prepare_private_dns_zone, prepare_public_network, flexible_server_provision_network_resource
 from .validators import pg_arguments_validator, validate_server_name, validate_and_format_restore_point_in_time, \
     validate_postgres_replica, validate_georestore_network, pg_byok_validator, validate_migration_runtime_server, \
     validate_resource_group, check_resource_group, validate_citus_cluster, validate_backup_name, \

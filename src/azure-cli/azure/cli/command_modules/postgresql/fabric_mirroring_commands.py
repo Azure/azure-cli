@@ -51,74 +51,78 @@ POSTGRES_DB_NAME = 'postgres'
 DELEGATION_SERVICE_NAME = "Microsoft.DBforPostgreSQL/flexibleServers"
 RESOURCE_PROVIDER = 'Microsoft.DBforPostgreSQL'
 
-def virtual_endpoint_create_func(cmd, client, resource_group_name, server_name, virtual_endpoint_name, endpoint_type, members):
+
+def flexible_server_fabric_mirroring_start(cmd, client, resource_group_name, server_name, database_names, yes=False):
     validate_resource_group(resource_group_name)
     validate_citus_cluster(cmd, resource_group_name, server_name)
-    validate_virtual_endpoint_name_availability(cmd, virtual_endpoint_name)
+    flexible_servers_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
+    server = flexible_servers_client.get(resource_group_name, server_name)
 
-    parameters = {
-        'properties': {
-            'endpointType': endpoint_type,
-            'members': [members]
-        }
-    }
+    if server.high_availability.mode != "Disabled" and server.version not in ["17", "18"]:
+        # disable fabric mirroring on HA server
+        raise CLIError("Fabric mirroring is not supported on servers with high availability enabled.")
 
-    return client.begin_create(
-        resource_group_name,
-        server_name,
-        virtual_endpoint_name,
-        parameters)
+    databases = ','.join(database_names)
+    user_confirmation("Are you sure you want to prepare and enable your server" +
+                      " '{0}' in resource group '{1}' for mirroring of databases '{2}'.".format(server_name, resource_group_name, databases) +
+                      " This requires restart.", yes=yes)
 
+    if (server.identity is None or 'SystemAssigned' not in server.identity.type):
+        logger.warning('Enabling system assigned managed identity on the server.')
+        flexible_server_identity_update(cmd, flexible_servers_client, resource_group_name, server_name, 'Enabled')
 
-def virtual_endpoint_show_func(cmd, client, resource_group_name, server_name, virtual_endpoint_name):
-    validate_resource_group(resource_group_name)
-    validate_citus_cluster(cmd, resource_group_name, server_name)
-
-    return client.get(
-        resource_group_name,
-        server_name,
-        virtual_endpoint_name)
-
-
-def virtual_endpoint_list_func(cmd, client, resource_group_name, server_name):
-    validate_resource_group(resource_group_name)
-    validate_citus_cluster(cmd, resource_group_name, server_name)
-
-    return client.list_by_server(
-        resource_group_name,
-        server_name)
+    logger.warning('Updating necessary server parameters.')
+    source = "user-override"
+    configuration_name = "azure.fabric_mirror_enabled"
+    value = "on"
+    _update_parameters(cmd, client, server_name, configuration_name, resource_group_name, source, value)
+    configuration_name = "azure.mirror_databases"
+    value = databases
+    return _update_parameters(cmd, client, server_name, configuration_name, resource_group_name, source, value)
 
 
-def virtual_endpoint_delete_func(cmd, client, resource_group_name, server_name, virtual_endpoint_name, yes=False):
+def flexible_server_fabric_mirroring_stop(cmd, client, resource_group_name, server_name, yes=False):
     validate_resource_group(resource_group_name)
     validate_citus_cluster(cmd, resource_group_name, server_name)
 
-    if not yes:
-        user_confirmation(
-            "Are you sure you want to delete the virtual endpoint '{0}' in resource group '{1}'".format(virtual_endpoint_name,
-                                                                                                        resource_group_name), yes=yes)
+    flexible_servers_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
+    server = flexible_servers_client.get(resource_group_name, server_name)
 
-    return client.begin_delete(
-        resource_group_name,
-        server_name,
-        virtual_endpoint_name)
+    if server.high_availability.mode != "Disabled" and server.version not in ["17", "18"]:
+        # disable fabric mirroring on HA server
+        raise CLIError("Fabric mirroring is not supported on servers with high availability enabled.")
+
+    user_confirmation("Are you sure you want to disable mirroring for server '{0}' in resource group '{1}'".format(server_name, resource_group_name), yes=yes)
+
+    configuration_name = "azure.fabric_mirror_enabled"
+    parameters = postgresql_flexibleservers.models.Configuration(
+        value="off",
+        source="user-override"
+    )
+
+    return client.begin_update(resource_group_name, server_name, configuration_name, parameters)
 
 
-def virtual_endpoint_update_func(cmd, client, resource_group_name, server_name, virtual_endpoint_name, endpoint_type, members):
+def flexible_server_fabric_mirroring_update_databases(cmd, client, resource_group_name, server_name, database_names, yes=False):
     validate_resource_group(resource_group_name)
     validate_citus_cluster(cmd, resource_group_name, server_name)
 
-    parameters = {
-        'properties': {
-            'endpointType': endpoint_type,
-            'members': [members]
-        }
-    }
+    flexible_servers_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
+    server = flexible_servers_client.get(resource_group_name, server_name)
 
-    return client.begin_update(
-        resource_group_name,
-        server_name,
-        virtual_endpoint_name,
-        parameters)
+    if server.high_availability.mode != "Disabled" and server.version not in ["17", "18"]:
+        # disable fabric mirroring on HA server
+        raise CLIError("Fabric mirroring is not supported on servers with high availability enabled.")
 
+    databases = ','.join(database_names)
+    user_confirmation("Are you sure for server '{0}' in resource group '{1}' you want to update the databases being mirrored to be '{2}'"
+                      .format(server_name, resource_group_name, databases), yes=yes)
+
+    configuration_name = "azure.mirror_databases"
+    parameters = postgresql_flexibleservers.models.Configuration(
+        value=databases,
+        source="user-override"
+    )
+
+    return client.begin_update(resource_group_name, server_name, configuration_name, parameters)
 

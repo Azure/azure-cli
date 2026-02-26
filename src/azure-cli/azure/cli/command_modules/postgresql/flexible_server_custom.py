@@ -659,23 +659,6 @@ def flexible_server_postgresql_get(cmd, resource_group_name, server_name):
     return client.servers.get(resource_group_name, server_name)
 
 
-def server_list_custom_func(client, resource_group_name=None, show_cluster=None):
-    if not check_resource_group(resource_group_name):
-        resource_group_name = None
-
-    servers = client.list_by_subscription()
-
-    if resource_group_name:
-        servers = client.list_by_resource_group(resource_group_name)
-
-    if show_cluster:
-        servers = [s for s in servers if s.cluster is not None]
-    else:
-        servers = [s for s in servers if s.cluster is None]
-
-    return servers
-
-
 def flexible_list_skus(cmd, client, location):
     result = client.list(location)
     logger.warning('For prices please refer to https://aka.ms/postgres-pricing')
