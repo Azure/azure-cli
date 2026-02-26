@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import json
 import typing as t
 
 from requests.structures import CaseInsensitiveDict
@@ -48,13 +49,13 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
             StackModels.DeploymentStacksWhatIfChangeType.MODIFY: Color.PURPLE
         })
 
-    CHANGE_CERTAINTY_WEIGHTS = CaseInsensitiveDict(
+    CHANGE_CERTAINTY_PRIORITIES = CaseInsensitiveDict(
         {
             StackModels.DeploymentStacksWhatIfChangeCertainty.DEFINITE: 0,
             StackModels.DeploymentStacksWhatIfChangeCertainty.POTENTIAL: 1
         })
 
-    DIAGNOSTIC_WEIGHTS = CaseInsensitiveDict(
+    DIAGNOSTIC_LEVEL_PRIORITIES = CaseInsensitiveDict(
         {
             StackModels.DeploymentStacksDiagnosticLevel.INFO: 1,
             StackModels.DeploymentStacksDiagnosticLevel.WARNING: 2,
@@ -151,7 +152,20 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         printed = False
         resource_changes_sorted = sorted(
             self.what_if_changes.resource_changes,
-            key=lambda x: (DeploymentStacksWhatIfResultFormatter.CHANGE_CERTAINTY_WEIGHTS.get(x.change_certainty, 1), x.id or ""))
+            key=lambda x: (
+                0 if x.id else 1,  # sort Azure resources before extension resources
+                DeploymentStacksWhatIfResultFormatter.CHANGE_CERTAINTY_PRIORITIES.get(
+                    x.change_certainty, 1) if x.id else 0,  # Azure resources: then by certainty
+                x.id if x.id else "",  # Azure resources: then by ID
+                x.extension.name if x.extension else "",
+                # Extension resources: then by (ext name, ext version, config id)
+                x.extension.version if x.extension else "",
+                (x.extension.config_id if x.extension else "") or "",
+                DeploymentStacksWhatIfResultFormatter.CHANGE_CERTAINTY_PRIORITIES.get(
+                    x.change_certainty, 1) if not x.id else 0,  # Extension resources: then by certainty
+                x.type if x.extension else "",  # Extension resources: then by type
+                json.dumps(x.identifiers) if x.extension else ""  # Extension resources: then by identifiers
+            ))
 
         if self._format_resource_changes(resource_changes_sorted):
             printed = True
@@ -166,34 +180,40 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
     ) -> bool:
         # Print the definite resource changes, followed by the potential changes
         title_index = self.builder.get_current_index()
-        first_potential_change_index = None
-
+        first_potential_change_index: t.Optional[int] = None
+        last_group: t.Optional[str] = None
         printed = False
 
         for change in resource_changes_sorted:
+            printed = True
+
+            # check if a new section should be started
+            group = "Azure" if change.id else (
+                f"{change.extension.name}@{change.extension.version}" if change.extension else "Unknown")
+
+            if group != last_group:
+                self._format_section_spacer()
+                self.builder.append_line(group)
+                last_group = group
+                first_potential_change_index = None
+
             if first_potential_change_index is None and str_lower_eq(
                 change.change_certainty, StackModels.DeploymentStacksWhatIfChangeCertainty.POTENTIAL):
+                self.builder.append(">> ").append_line(
+                    "Potential Resource Changes (Learn more at https://aka.ms/whatIfPotentialChanges)", Color.PURPLE)
                 first_potential_change_index = self.builder.get_current_index()
 
             if self._format_resource_change(change):
                 printed = True
 
-        if first_potential_change_index is not None:
-            self.builder.insert_line(
-                first_potential_change_index,
-                "Potential Resource Changes (Learn more at https://aka.ms/whatIfPotentialChanges)", Color.PURPLE)
-            self.builder.insert(first_potential_change_index, ">> ")
-
         if printed:
+            self.builder.insert_line(title_index)
             self.builder.insert_line(title_index, "Changes to Managed Resources:", Color.DARK_YELLOW)
 
         return printed
 
 
     def _format_resource_change(self, resource_change: StackModels.DeploymentStacksWhatIfResourceChange) -> bool:
-        if not resource_change.id:  # is an extensible resource
-            return False  # not yet supported
-
         # print the resource heading line
         self._format_resource_heading_line(resource_change)
 
@@ -230,9 +250,20 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
             self.builder.append_line(f"Resources Marked for Deletion {len(delete_changes)} total:")
             printed = True
 
-        first_potential_change_index = None
+        first_potential_change_index: t.Optional[int] = None
+        last_group: t.Optional[str] = None
         num_potential_deletions = 0
+
         for delete_change in delete_changes:
+            group = "Azure" if delete_change.id else (
+                f"{delete_change.extension.name}@{delete_change.extension.version}" if delete_change.extension else "Unknown")
+
+            if group != last_group:
+                self._format_section_spacer()
+                self.builder.append_line(group)
+                last_group = group
+                first_potential_change_index = None
+
             if str_lower_eq(
                 delete_change.change_certainty, StackModels.DeploymentStacksWhatIfChangeCertainty.POTENTIAL):
                 num_potential_deletions += 1
@@ -262,10 +293,11 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
             self.builder.append("?", Color.CYAN)
         self.builder.append(f"{symbol} ", color)
         if is_potential_change:
-            self.builder.append("Potential ?", Color.CYAN).append(f"{symbol} ", color)
+            self.builder.append("[Potential] ", Color.CYAN)
 
         api_version_suffix = f" [{resource_change.api_version}]" if resource_change.api_version else ""
-        self.builder.append_line(f"{resource_change.id}{api_version_suffix}", color)
+        resource_id = resource_change.id if resource_change.id else f"{resource_change.type} {json.dumps(resource_change.identifiers)}"
+        self.builder.append_line(f"{resource_id}{api_version_suffix}", color)
 
 
     def _format_resource_property_changes(
@@ -289,7 +321,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
 
         diagnostics_sorted = sorted(
             self.what_if_props.diagnostics,
-            key=lambda x: (DeploymentStacksWhatIfResultFormatter.DIAGNOSTIC_WEIGHTS.get(x.level, 0), x.code or ""))
+            key=lambda x: (DeploymentStacksWhatIfResultFormatter.DIAGNOSTIC_LEVEL_PRIORITIES.get(x.level, 0), x.code or ""))
 
         title_index = self.builder.get_current_index()
 
