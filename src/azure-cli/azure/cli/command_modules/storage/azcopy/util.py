@@ -7,7 +7,6 @@ import os
 import platform
 import subprocess
 import datetime
-import zipfile
 import stat
 from urllib.parse import urlparse
 from urllib.request import urlopen
@@ -82,13 +81,12 @@ class AzCopy:
             raise CLIError('Error while attempting to download azcopy. You could manually install the azcopy '
                            'executable to {} by following the guide here: {}'.format(install_dir,
                                                                                      azcopy_install_guide))
-        from zipfile import BadZipFile
         try:
             os.chmod(install_dir, os.stat(install_dir).st_mode | stat.S_IWUSR)
             _urlretrieve(file_url, install_location, file_extension)
             os.chmod(install_location,
                      os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
-        except (OSError, CLIError, BadZipFile) as err:
+        except (OSError, CLIError) as err:
             raise CLIError('Error while attempting to download azcopy from {}. You could manually install the azcopy '
                            'executable to {} by following the guide here: {} '
                            '({})'.format(file_url, install_dir, azcopy_install_guide, err))
@@ -240,18 +238,25 @@ def _urlretrieve(url, install_location, file_extension):
         raise CLIError('Invalid downloading url {}'.format(url))
     compressedFile = io.BytesIO(res.read())
     if file_extension == 'zip':
-        zip_file = zipfile.ZipFile(compressedFile)
-        for fileName in zip_file.namelist():
-            if fileName.endswith('azcopy') or fileName.endswith('azcopy.exe'):
-                with open(install_location, 'wb') as f:
-                    f.write(zip_file.read(fileName))
-    else:
-        import tarfile
-        with tarfile.open(fileobj=compressedFile, mode="r:gz") as tar:
-            for tarinfo in tar:
-                if tarinfo.isfile() and tarinfo.name.endswith('azcopy'):
+        try:
+            import zipfile
+            zip_file = zipfile.ZipFile(compressedFile)
+            for fileName in zip_file.namelist():
+                if fileName.endswith('azcopy') or fileName.endswith('azcopy.exe'):
                     with open(install_location, 'wb') as f:
-                        f.write(tar.extractfile(tarinfo).read())
+                        f.write(zip_file.read(fileName))
+        except Exception as ex: # pylint: disable=broad-except
+            raise CLIError(ex)
+    else:
+        try:
+            import tarfile
+            with tarfile.open(fileobj=compressedFile, mode="r:gz") as tar:
+                for tarinfo in tar:
+                    if tarinfo.isfile() and tarinfo.name.endswith('azcopy'):
+                        with open(install_location, 'wb') as f:
+                            f.write(tar.extractfile(tarinfo).read())
+        except Exception as ex: # pylint: disable=broad-except
+            raise CLIError(ex)
 
 
 def _verify_url(url):
