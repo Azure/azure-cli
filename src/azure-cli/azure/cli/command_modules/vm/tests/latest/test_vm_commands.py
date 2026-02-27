@@ -499,6 +499,7 @@ class VMWindowsLicenseTest(ScenarioTest):
 
 class VMCustomImageTest(ScenarioTest):
 
+    @unittest.skip('need Microsoft.Network/AllowBringYourOwnPublicIpAddress feature for this scenario')
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vm_custom_image')
     def test_vm_custom_image(self, resource_group):
@@ -620,7 +621,7 @@ class VMCustomImageTest(ScenarioTest):
         ])
 
     @AllowLargeResponse(size_kb=99999)
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_custom_image_debian')
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_custom_image_debian', location='westus')
     def test_vm_custom_image_debian(self, resource_group):
         self.kwargs.update({
             'vm1': 'vm-unmanaged-disk',
@@ -1472,6 +1473,7 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             self.cmd('vm create -g {rg} -n {vm_name2} --image ubuntu2204 --generate-ssh-keys --source-rp-size 5 '
                      '--subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
 
+    @unittest.skip('need Microsoft.Compute/ImplicitDiskCreationFromDiskRestorePoint feature for this scenario')
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer('cli_test_vm_disk_attach_from_copy_and_restore', location='eastus2euap')
     def test_vm_disk_attach_from_copy_and_restore(self):
@@ -3827,7 +3829,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
         })
 
         self.cmd('vm create -g {rg} --location {loc} -n {vm} --admin-username admin123 --image OpenLogic:CentOS:7.5:latest '
-                 '--admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+                 '--admin-password testPassword0 --authentication-type password --size Standard_B2ms --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
 
         # Disable default outbound access
         self.cmd(
@@ -3888,7 +3890,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli-test-disk-attach-detach')
     def test_vm_disk_attach_detach_api(self, resource_group):
         self.kwargs.update({
-            'loc': 'westus',
+            'loc': 'eastus2',
             'vm': self.create_random_name('vm', 10),
             'disk1': self.create_random_name('disk', 10),
             'disk2': self.create_random_name('disk', 10),
@@ -3896,7 +3898,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
             'vnet': self.create_random_name('vnet', 15)
         })
 
-        self.cmd('vm create -g {rg} --location {loc} -n {vm} --admin-username admin123 --image OpenLogic:CentOS:7.5:latest --admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+        self.cmd('vm create -g {rg} --location {loc} -n {vm} --admin-username admin123 --image OpenLogic:CentOS:7.5:latest --admin-password testPassword0 --authentication-type password --size Standard_B2ms --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
         self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk1} --new --size-gb 1 --caching ReadOnly')
@@ -3956,7 +3958,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
         })
 
         self.cmd('vm create -g {rg} --location {loc} -n {vm} --admin-username admin123 --image OpenLogic:CentOS:7.5:latest '
-                 '--admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+                 '--admin-password testPassword0 --authentication-type password --size Standard_B2ms --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
 
         # Disable default outbound access
         self.cmd(
