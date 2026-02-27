@@ -102,6 +102,7 @@ class AGPrivateLinkAdd(_AGPrivateLinkAdd):
             subnet_name = parse_resource_id(args.subnet.to_serialized_data())["child_name_1"]
 
             from azure.cli.core.commands import LongRunningOperation
+            from azure.cli.command_modules.network.aaz.latest.network.vnet.subnet._create import Create as VNetSubnetCreate
             poller = VNetSubnetCreate(cli_ctx=self.cli_ctx)(command_args={
                 "name": subnet_name,
                 "vnet_name": metadata["name"],
