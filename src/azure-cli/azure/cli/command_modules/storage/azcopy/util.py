@@ -21,7 +21,7 @@ logger = get_logger(__name__)
 
 STORAGE_RESOURCE_ENDPOINT = "https://storage.azure.com"
 SERVICES = {'blob', 'file'}
-AZCOPY_VERSION = '10.32.1'
+AZCOPY_VERSION = '10.13.0'
 
 
 class AzCopy:
