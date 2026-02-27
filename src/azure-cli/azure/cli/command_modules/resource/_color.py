@@ -111,7 +111,7 @@ class ColoredStringBuilder:
 
     def _should_indent(self, index=-1, is_insert=False):
         return len(self._indents) > 0 and (
-               not self._contents or self._contents[max(index - 1, 0) if is_insert else index].endswith("\n"))
+            not self._contents or self._contents[max(index - 1, 0) if is_insert else index].endswith("\n"))
 
     # pylint: disable=protected-access
     class ColorScope:

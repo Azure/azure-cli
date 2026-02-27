@@ -159,7 +159,8 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
                 DeploymentStacksWhatIfResultFormatter.CHANGE_CERTAINTY_PRIORITIES.get(
                     x.change_certainty, 1) if not x.id else 0,  # Extension resources: then by certainty
                 x.type if x.extension else "",  # Extension resources: then by type
-                self._format_ext_resource_identifiers(x.identifiers) if x.identifiers else ""  # Extension resources: then by identifiers
+                # Extension resources: then by identifiers
+                self._format_ext_resource_identifiers(x.identifiers) if x.identifiers else ""
             ))
 
         if self._format_resource_changes(resource_changes_sorted):
@@ -253,7 +254,8 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
             if not has_potential_deletions and str_lower_eq(
                     delete_change.change_certainty, StackModels.DeploymentStacksWhatIfChangeCertainty.POTENTIAL):
                 self.builder.append(">> ").append_line(
-                    f"Potential Deletions {self._get_num_potential_resource_changes(delete_changes, i)} total (Learn more at https://aka.ms/whatIfPotentialChanges)",
+                    f"Potential Deletions {self._get_num_potential_resource_changes(delete_changes, i)} total"
+                    " (Learn more at https://aka.ms/whatIfPotentialChanges)",
                     Color.RED)
                 has_potential_deletions = True
 
@@ -299,11 +301,13 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
 
         diagnostics_sorted = sorted(
             self.what_if_props.diagnostics,
-            key=lambda x: (DeploymentStacksWhatIfResultFormatter.DIAGNOSTIC_LEVEL_PRIORITIES.get(x.level, 0), x.code or ""))
+            key=lambda x: (
+                DeploymentStacksWhatIfResultFormatter.DIAGNOSTIC_LEVEL_PRIORITIES.get(x.level, 0),
+                x.code or ""))
 
         self.builder.append_line(f"Diagnostics ({len(diagnostics_sorted)}):")
 
-        for i, diagnostic in enumerate(diagnostics_sorted):
+        for diagnostic in diagnostics_sorted:
             self._format_diagnostic(diagnostic)
 
         return True
@@ -410,9 +414,10 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         if not primitive_change:
             return False
 
-        change_type = (primitive_change.change_type if hasattr(primitive_change, "change_type") else None) or (
-            StackModels.DeploymentStacksWhatIfPropertyChangeType.NO_EFFECT if primitive_change.before == primitive_change.after
-            else StackModels.DeploymentStacksWhatIfPropertyChangeType.MODIFY)
+        change_type = primitive_change.change_type if hasattr(primitive_change, "change_type") else None
+        change_type = (change_type or (StackModels.DeploymentStacksWhatIfPropertyChangeType.NO_EFFECT
+                                       if primitive_change.before == primitive_change.after
+                                       else StackModels.DeploymentStacksWhatIfPropertyChangeType.MODIFY))
 
         property_path = self._get_change_path(primitive_change, parent_path)
         symbol, color = self._get_change_type_formatting(change_type)
@@ -420,7 +425,8 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         self.builder.append(f"{symbol} " if is_array_item else f"{symbol} {property_path}: ", color)
         if str_lower_eq(change_type, StackModels.DeploymentStacksWhatIfPropertyChangeType.MODIFY):
             self.builder.append_line(
-                f"{self._format_primitive_value(primitive_change.before)} => {self._format_primitive_value(primitive_change.after)}")
+                f"{self._format_primitive_value(primitive_change.before)}"
+                f" => {self._format_primitive_value(primitive_change.after)}")
         else:
             value = primitive_change.before if str_lower_eq(
                 change_type, StackModels.DeploymentStacksWhatIfPropertyChangeType.DELETE) else primitive_change.after
@@ -461,7 +467,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         return parent_path
 
     @staticmethod
-    def _get_value_type_from_change(
+    def _get_value_type_from_change(  # pylint: disable=too-many-return-statements
         change: t.Union[
             StackModels.DeploymentStacksChangeBase,
             StackModels.DeploymentStacksChangeDeltaRecord,
@@ -493,7 +499,8 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
     ) -> int:
         count = 0
         for i in range(start_index, len(resource_changes)):
-            if str_lower_eq(resource_changes[i].change_certainty, StackModels.DeploymentStacksWhatIfChangeCertainty.POTENTIAL):
+            if str_lower_eq(
+                    resource_changes[i].change_certainty, StackModels.DeploymentStacksWhatIfChangeCertainty.POTENTIAL):
                 count += 1
             else:
                 break
@@ -527,7 +534,9 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
                             secret_version = item['keyVaultReference'].get('secretVersion', None)
                             kv_id = item['keyVaultReference'].get('keyVault', {}).get('id', None)
                             version_suffix = f"@{secret_version}" if secret_version else ""
-                            config_parts.append(f"{prop}=<Secret '{secret_name}'{version_suffix} in key vault '{kv_id}'>")
+
+                            config_parts.append(
+                                f"{prop}=<Secret '{secret_name}'{version_suffix} in key vault '{kv_id}'>")
                         else:
                             config_parts.append(f"{prop}={json.dumps(item.get('value', None))}")
 
