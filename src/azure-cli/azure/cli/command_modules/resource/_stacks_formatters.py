@@ -151,15 +151,15 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
                 0 if x.id else 1,  # sort Azure resources before extension resources
                 DeploymentStacksWhatIfResultFormatter.CHANGE_CERTAINTY_PRIORITIES.get(
                     x.change_certainty, 1) if x.id else 0,  # Azure resources: then by certainty
-                x.id if x.id else "",  # Azure resources: then by ID
-                x.extension.name if x.extension else "",
+                x.id.lower() if x.id else "",  # Azure resources: then by ID
                 # Extension resources: then by (ext name, ext version, config id)
+                x.extension.name if x.extension else "",
                 x.extension.version if x.extension else "",
                 (x.extension.config_id if x.extension else "") or "",
                 DeploymentStacksWhatIfResultFormatter.CHANGE_CERTAINTY_PRIORITIES.get(
                     x.change_certainty, 1) if not x.id else 0,  # Extension resources: then by certainty
                 x.type if x.extension else "",  # Extension resources: then by type
-                json.dumps(x.identifiers) if x.extension else ""  # Extension resources: then by identifiers
+                self._format_ext_resource_identifiers(x.identifiers) if x.identifiers else ""  # Extension resources: then by identifiers
             ))
 
         if self._format_resource_changes(resource_changes_sorted):
@@ -275,7 +275,8 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
             self.builder.append("[Potential] ", Color.CYAN)
 
         api_version_suffix = f" [{resource_change.api_version}]" if resource_change.api_version else ""
-        resource_id = resource_change.id if resource_change.id else f"{resource_change.type} {json.dumps(resource_change.identifiers)}"
+        resource_id = resource_change.id if resource_change.id else\
+            f"{resource_change.type} {self._format_ext_resource_identifiers(resource_change.identifiers)}"
         self.builder.append_line(f"{resource_id}{api_version_suffix}", color)
 
     def _format_resource_property_changes(
@@ -508,14 +509,34 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
             result = f"{change.extension.name}@{change.extension.version}"
 
             if change.extension.config:
+                # Print the config. Eventually this can be substituted with an optional user-provided "comparison ID"
+                # for brevity.
                 config_items = sorted(
                     change.extension.config.items(),
-                    key=lambda ci: ci[0])
+                    key=lambda ci: ((ci[1] or {}).get('keyVaultReference', None) is not None, ci[0]))
 
                 if len(config_items) > 0:
-                    for prop, item in change.extension.config.items():
-                        result += f"  {prop}={item}\n"
+                    config_parts = []
 
-                    result = result.rstrip("\n")
+                    for prop, item in config_items:
+                        if not item:
+                            continue
+
+                        if item.get('keyVaultReference', None):
+                            secret_name = item['keyVaultReference'].get('secretName', None)
+                            secret_version = item['keyVaultReference'].get('secretVersion', None)
+                            kv_id = item['keyVaultReference'].get('keyVault', {}).get('id', None)
+                            version_suffix = f"@{secret_version}" if secret_version else ""
+                            config_parts.append(f"{prop}=<Secret '{secret_name}'{version_suffix} in key vault '{kv_id}'>")
+                        else:
+                            config_parts.append(f"{prop}={json.dumps(item.get('value', None))}")
+
+                    result += f" {', '.join(config_parts)}"
 
         return result
+
+    @staticmethod
+    def _format_ext_resource_identifiers(identifiers: dict[str, t.Any]) -> str:
+        sorted_items = sorted(identifiers.items(), key=lambda x: x[0])
+
+        return ", ".join(f"{key}={json.dumps(value)}" for key, value in sorted_items)
