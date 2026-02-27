@@ -1742,36 +1742,6 @@ def _validate_ipv6_address_prefixes(prefixes):
 
 
 # region ExpressRoute ports
-
-
-def _validate_bandwidth(bandwidth, mbps=True):
-    unit = 'mbps' if mbps else 'gbps'
-    if bandwidth is None:
-        return
-    if len(bandwidth) == 1:
-        bandwidth_comps = bandwidth[0].to_serialized_data().split(' ')
-    else:
-        bandwidth_comps = bandwidth.to_serialized_data()
-
-    usage_error = InvalidArgumentValueError('--bandwidth INT {Mbps,Gbps}')
-    if len(bandwidth_comps) == 1:
-        bandwidth_comps.append(unit)
-    if len(bandwidth_comps) > 2:
-        raise usage_error
-    input_value = bandwidth_comps[0]
-    input_unit = bandwidth_comps[1].lower()
-    if float(input_value) and input_unit in ['mbps', 'gbps']:
-        if input_unit == unit:
-            converted_bandwidth = float(bandwidth_comps[0])
-        elif input_unit == 'gbps':
-            converted_bandwidth = float(bandwidth_comps[0]) * 1000
-        else:
-            converted_bandwidth = float(bandwidth_comps[0]) / 1000
-    else:
-        raise usage_error
-    return converted_bandwidth
-
-
 def update_express_route_port(cmd, instance, tags=None):
     with cmd.update_context(instance) as c:
         c.set_param('tags', tags, True)
