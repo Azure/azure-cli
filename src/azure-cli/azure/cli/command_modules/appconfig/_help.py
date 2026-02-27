@@ -36,6 +36,8 @@ examples:
     text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --arm-auth-mode pass-through --enable-arm-private-network-access true
   - name: Create an App Configuration store with a key-value revision retention period of one day (in seconds).
     text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard --kv-revision-retention-period 86400
+  - name: Create an App Configuration store linked to an Azure Front Door profile.
+    text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard --azure-front-door-profile /subscriptions/<SUBSCRIPTION_ID>/resourceGroups/<RESOURCEGROUP>/providers/Microsoft.Cdn/profiles/<PROFILE_NAME>
   - name: Create an App Configuration store with an Application Insights resource linked for telemetry collection.
     text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard --appinsights-resource /subscriptions/<SUBSCRIPTIONID>/resourceGroups/<RESOURCEGROUP>/providers/microsoft.insights/components/MyAppInsights
 """
@@ -416,6 +418,10 @@ examples:
     text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --arm-auth-mode pass-through --enable-arm-private-network-access true
   - name: Update an App Configuration store to set a key-value revision retention period of one day (in seconds).
     text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --kv-revision-retention-period 86400
+  - name: Update an App Configuration store to link an Azure Front Door profile.
+    text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --azure-front-door-profile /subscriptions/<SUBSCRIPTION_ID>/resourceGroups/<RESOURCEGROUP>/providers/Microsoft.Cdn/profiles/<PROFILE_NAME>
+  - name: Update an App Configuration store to unlink an Azure Front Door profile.
+    text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --azure-front-door-profile ""
   - name: Link an Application Insights resource to an App Configuration store for telemetry collection.
     text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --appinsights-resource /subscriptions/<SUBSCRIPTIONID>/resourceGroups/<RESOURCEGROUP>/providers/microsoft.insights/components/MyAppInsights
   - name: Unlink Application Insights from an App Configuration store.

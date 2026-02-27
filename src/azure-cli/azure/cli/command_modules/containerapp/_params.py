@@ -450,10 +450,8 @@ def load_arguments(self, _):
         c.argument('name', name_type, metavar='NAME', id_part='name', help=f"The name of the Container Apps Job. A name must consist of lower case alphanumeric characters or '-', start with a letter, end with an alphanumeric character, cannot have '--', and must be less than {MAXIMUM_CONTAINER_APP_NAME_LENGTH} characters.")
         c.argument('cron_expression', help='Cron expression. Only supported for trigger type "Schedule"')
         c.argument('image', help="Container image, e.g. publisher/image-name:tag.")
-        c.argument('replica_completion_count', type=int, options_list=['--replica-completion-count', '--rcc'], help='Number of replicas that need to complete successfully for execution to succeed.')
         c.argument('replica_retry_limit', type=int, help='Maximum number of retries before the replica fails.')
         c.argument('replica_timeout', type=int, help='Maximum number of seconds a replica can execute.')
-        c.argument('parallelism', type=int, help='Maximum number of replicas to run per execution.')
         c.argument('workload_profile_name', options_list=['--workload-profile-name', '-w'], help='The friendly name for the workload profile')
         c.argument('min_executions', type=int, help="Minimum number of job executions that are created for a trigger, default 0.")
         c.argument('max_executions', type=int, help="Maximum number of job executions that are created for a trigger, default 100.")
@@ -463,12 +461,18 @@ def load_arguments(self, _):
         c.argument('system_assigned', options_list=['--mi-system-assigned', c.deprecate(target='--system-assigned', redirect='--mi-system-assigned', hide=True)], help='Boolean indicating whether to assign system-assigned identity.', action='store_true')
         c.argument('trigger_type', help='Trigger type. Schedule | Event | Manual')
         c.argument('user_assigned', options_list=['--mi-user-assigned', c.deprecate(target='--user-assigned', redirect='--mi-user-assigned', hide=True)], nargs='+', help='Space-separated user identities to be assigned.')
+        c.argument('parallelism', type=int, help='Maximum number of replicas to run per execution.', default=1)
+        c.argument('replica_completion_count', type=int, options_list=['--replica-completion-count', '--rcc'], help='Number of replicas that need to complete successfully for execution to succeed.', default=1)
 
     with self.argument_context('containerapp job', arg_group='Scale') as c:
         c.argument('min_executions', type=int, help="Minimum number of job executions to run per polling interval.")
         c.argument('max_executions', type=int, help="Maximum number of job executions to run per polling interval.")
         c.argument('polling_interval', type=int, help="Interval to check each event source in seconds. Defaults to 30s.")
         c.argument('scale_rule_type', options_list=['--scale-rule-type', '--srt'], help="The type of the scale rule.")
+
+    with self.argument_context('containerapp job update') as c:
+        c.argument('parallelism', type=int, help='Maximum number of replicas to run per execution.')
+        c.argument('replica_completion_count', type=int, options_list=['--replica-completion-count', '--rcc'], help='Number of replicas that need to complete successfully for execution to succeed.')
 
     with self.argument_context('containerapp job stop') as c:
         c.argument('job_execution_name', help='name of the specific job execution which needs to be stopped.')
