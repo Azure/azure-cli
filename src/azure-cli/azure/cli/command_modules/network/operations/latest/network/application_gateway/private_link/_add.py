@@ -90,7 +90,7 @@ class AGPrivateLinkAdd(_AGPrivateLinkAdd):
                 child_name_1=args.subnet
             )
 
-        from .aaz.latest.network.vnet import Show
+        from azure.cli.command_modules.network.aaz.latest.network.vnet._show import Show
         vnet = Show(cli_ctx=self.cli_ctx)(command_args={
             "name": metadata["name"],
             "resource_group": metadata["resource_group"]

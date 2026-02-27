@@ -16,7 +16,7 @@ from azure.cli.command_modules.network._validators import _resolve_api_version
 
 
 def get_network_watcher_from_location(cmd, watcher_name="watcher_name", rg_name="watcher_rg"):
-    from ..aaz.latest.network.watcher._list import List
+    from azure.cli.command_modules.network.aaz.latest.network.watcher._list import List
 
     args = cmd.ctx.args
     location = args.location.to_serialized_data()
