@@ -3119,11 +3119,11 @@ def create_deployment_stack_what_if_at_management_group(
     return _print_deployment_stack_what_if_result(what_if_result, no_pretty_print, no_color)
 
 
-def show_deployment_stack_what_if_at_management_group(cmd, management_group_id, name=None, id=None, no_pretty_print=None, no_color=None):
+def show_deployment_stack_what_if_at_management_group(cmd, management_group_id, name=None, id=None, no_pretty_print=None, no_color=None):  # pylint: disable=redefined-builtin
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
     if name:
-        what_if_result =  rcf.deployment_stacks_what_if_results_at_management_group.get(management_group_id, name)
+        what_if_result = rcf.deployment_stacks_what_if_results_at_management_group.get(management_group_id, name)
     elif id:
         what_if_result = rcf.deployment_stacks_what_if_results_at_management_group.get(management_group_id, id.split('/')[-1])
     else:

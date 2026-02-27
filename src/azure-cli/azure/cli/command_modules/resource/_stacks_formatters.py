@@ -74,7 +74,6 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         self.what_if_props: t.Optional[StackModels.DeploymentStacksWhatIfResultProperties] = None
         self.what_if_changes: t.Optional[StackModels.DeploymentStacksWhatIfChange] = None
 
-
     def format(self, what_if_result: StackModels.DeploymentStacksWhatIfResult) -> str:
         self.builder.clear()
 
@@ -95,10 +94,8 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
 
         return result
 
-
     def _format_section_spacer(self):
         self.builder.ensure_num_new_lines(2)
-
 
     def _format_change_type_legend(self) -> bool:
         change_type_max_length = 20
@@ -122,7 +119,6 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
 
         return True
 
-
     def _format_stack_changes(self) -> bool:
         if not self.what_if_changes:
             return False
@@ -143,7 +139,6 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
                 title_index, f"Changes to Stack {self.what_if_props.deployment_stack_resource_id}:", Color.DARK_YELLOW)
 
         return printed
-
 
     def _format_resource_changes_and_deletion_summary(self) -> bool:
         if not self.what_if_changes or not self.what_if_changes.resource_changes:
@@ -174,7 +169,6 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
 
         return printed
 
-
     def _format_resource_changes(
         self, resource_changes_sorted: list[StackModels.DeploymentStacksWhatIfResourceChange]
     ) -> bool:
@@ -189,10 +183,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
 
         for change in resource_changes_sorted:
             # check if a new section should be started
-            group = "Azure" if change.id else (
-                f"{change.extension.name}@{change.extension.version}" if change.extension and not change.extension.config else (
-                    f"{change.extension.name}@{change.extension.version} Config: {json.dumps(change.extension.config)}" if change.extension and change.extension.config else "Unknown"
-                ))
+            group = self._format_resource_class_header(change)
 
             if group != last_group:
                 last_group = group
@@ -200,7 +191,8 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
                 self._format_section_spacer()
                 self.builder.append_line(group)
 
-            if not has_potential_changes and str_lower_eq(change.change_certainty, StackModels.DeploymentStacksWhatIfChangeCertainty.POTENTIAL):
+            if not has_potential_changes and str_lower_eq(
+                    change.change_certainty, StackModels.DeploymentStacksWhatIfChangeCertainty.POTENTIAL):
                 self.builder.append(">> ").append_line(
                     "Potential Resource Changes (Learn more at https://aka.ms/whatIfPotentialChanges)",
                     Color.PURPLE)
@@ -209,7 +201,6 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
             self._format_resource_change(change)
 
         return True
-
 
     def _format_resource_change(self, resource_change: StackModels.DeploymentStacksWhatIfResourceChange) -> bool:
         # print the resource heading line
@@ -231,7 +222,6 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
 
         return True
 
-
     def _format_resource_deletions_summary(
         self, resource_changes_sorted: list[StackModels.DeploymentStacksWhatIfResourceChange]
     ) -> bool:
@@ -252,8 +242,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         has_potential_deletions = False
 
         for i, delete_change in enumerate(delete_changes):
-            group = "Azure" if delete_change.id else (
-                f"{delete_change.extension.name}@{delete_change.extension.version}" if delete_change.extension else "Unknown")
+            group = self._format_resource_class_header(delete_change)
 
             if group != last_group:
                 self._format_section_spacer()
@@ -262,7 +251,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
                 has_potential_deletions = False
 
             if not has_potential_deletions and str_lower_eq(
-                delete_change.change_certainty, StackModels.DeploymentStacksWhatIfChangeCertainty.POTENTIAL):
+                    delete_change.change_certainty, StackModels.DeploymentStacksWhatIfChangeCertainty.POTENTIAL):
                 self.builder.append(">> ").append_line(
                     f"Potential Deletions {self._get_num_potential_resource_changes(delete_changes, i)} total (Learn more at https://aka.ms/whatIfPotentialChanges)",
                     Color.RED)
@@ -271,7 +260,6 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
             self._format_resource_heading_line(delete_change)
 
         return printed
-
 
     def _format_resource_heading_line(self, resource_change: StackModels.DeploymentStacksWhatIfResourceChange):
         symbol, color = self._get_change_type_formatting(resource_change.change_type)
@@ -290,7 +278,6 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         resource_id = resource_change.id if resource_change.id else f"{resource_change.type} {json.dumps(resource_change.identifiers)}"
         self.builder.append_line(f"{resource_id}{api_version_suffix}", color)
 
-
     def _format_resource_property_changes(
         self, property_changes: t.Optional[StackModels.DeploymentStacksChangeDeltaRecord]
     ) -> bool:
@@ -304,7 +291,6 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
                 printed = True
 
         return printed
-
 
     def _format_diagnostics(self) -> bool:
         if not self.what_if_props or not self.what_if_props.diagnostics or len(self.what_if_props.diagnostics) == 0:
@@ -321,12 +307,10 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
 
         return True
 
-
     def _format_diagnostic(self, diagnostic: StackModels.DeploymentStacksDiagnostic):
         self.builder.append_line(
             f"{diagnostic.level.upper()}: [{diagnostic.code}] {diagnostic.message}",
             DeploymentStacksWhatIfResultFormatter.DIAGNOSTIC_COLORS.get(diagnostic.level, None))
-
 
     def _format_change(
         self,
@@ -354,7 +338,6 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
 
         return False
 
-
     def _format_object_change(
         self,
         object_change: t.Optional[t.Union[
@@ -378,7 +361,6 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
 
         return printed
 
-
     def _format_array_changes(
         self, array_change: StackModels.DeploymentStacksWhatIfPropertyChange, parent_path: t.Optional[str] = None
     ) -> bool:
@@ -399,7 +381,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         print_array_indices = all(c.path for c in children)
         sorted_children = sorted(
             children,
-            key=lambda x:int(x.path)) if print_array_indices else children
+            key=lambda x: int(x.path)) if print_array_indices else children
 
         for i, item_change in enumerate(sorted_children):
             if print_array_indices:
@@ -416,7 +398,6 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         self._pop_indent()
 
         return True
-
 
     def _format_primitive_change(
         self,
@@ -447,21 +428,17 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
 
         return True
 
-
     def _push_indent(self, indent_size=INDENT_SIZE):
         self.builder.push_indent(" " * indent_size)
 
-
     def _pop_indent(self):
         self.builder.pop_indent()
-
 
     @staticmethod
     def _format_primitive_value(value: t.Optional[t.Union[str, bool, int, float]]):
         if value is None:
             return "null"
         return f'"{value}"' if isinstance(value, str) else str(value)
-
 
     @staticmethod
     def _get_change_type_formatting(
@@ -476,13 +453,11 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
 
         return symbol, color
 
-
     @staticmethod
     def _get_change_path(change, parent_path: t.Optional[str] = None) -> str:
         if hasattr(change, "path"):
             return '.'.join([parent_path, change.path]) if parent_path else change.path
         return parent_path
-
 
     @staticmethod
     def _get_value_type_from_change(
@@ -510,16 +485,37 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
             return before_type
 
         return None
-    
+
     @staticmethod
     def _get_num_potential_resource_changes(
         resource_changes: t.List[StackModels.DeploymentStacksWhatIfResourceChange], start_index: int
     ) -> int:
         count = 0
         for i in range(start_index, len(resource_changes)):
-            if str_lower_eq(
-                resource_changes[i].change_certainty, StackModels.DeploymentStacksWhatIfChangeCertainty.POTENTIAL):
+            if str_lower_eq(resource_changes[i].change_certainty, StackModels.DeploymentStacksWhatIfChangeCertainty.POTENTIAL):
                 count += 1
             else:
                 break
         return count
+
+    @staticmethod
+    def _format_resource_class_header(change: StackModels.DeploymentStacksWhatIfResourceChange) -> str:
+        if change.id:
+            return "Azure"
+
+        result = "Unknown"
+        if change.extension:
+            result = f"{change.extension.name}@{change.extension.version}"
+
+            if change.extension.config:
+                config_items = sorted(
+                    change.extension.config.items(),
+                    key=lambda ci: ci[0])
+
+                if len(config_items) > 0:
+                    for prop, item in change.extension.config.items():
+                        result += f"  {prop}={item}\n"
+
+                    result = result.rstrip("\n")
+
+        return result

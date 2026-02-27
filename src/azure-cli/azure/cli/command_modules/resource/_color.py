@@ -92,7 +92,6 @@ class ColoredStringBuilder:
         if remaining_newlines > 0:
             self._contents.append("\n" * remaining_newlines)
 
-
     def clear(self):
         self._contents = []
 
@@ -109,9 +108,10 @@ class ColoredStringBuilder:
 
         self._colors.pop()
         self._contents.append(str(self._colors[-1] if self._colors else Color.RESET))
-        
+
     def _should_indent(self, index=-1, is_insert=False):
-        return len(self._indents) > 0 and (not self._contents or self._contents[max(index - 1, 0) if is_insert else index].endswith("\n"))
+        return len(self._indents) > 0 and (
+               not self._contents or self._contents[max(index - 1, 0) if is_insert else index].endswith("\n"))
 
     # pylint: disable=protected-access
     class ColorScope:
