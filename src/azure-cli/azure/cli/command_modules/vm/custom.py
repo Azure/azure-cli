@@ -255,7 +255,6 @@ def get_hyper_v_generation_from_vmss_by_aaz(cli_ctx, image_ref, location):  # py
             return image_info.get('hyperVGeneration')
 
     if image_ref.get("sharedGalleryImageId", None) is not None:
-        from ._client_factory import cf_shared_gallery_image
         from .aaz.latest.sig.image_definition import ShowShared as SigImageDefinitionShowShared
         image_info = parse_shared_gallery_image_id(image_ref["sharedGalleryImageId"])
         command_args = {
