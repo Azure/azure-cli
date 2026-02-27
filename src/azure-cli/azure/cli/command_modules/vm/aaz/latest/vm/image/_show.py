@@ -13,12 +13,15 @@ from azure.cli.core.aaz import *
 
 class Show(AAZCommand):
     """Get a virtual machine image.
+
+    :example: VirtualMachineImage_Get_MaximumSet_Gen
+        az vm image show --location aaaaaa --publisher aaa --offer aaaaaaaaaaaaaaaaaaaaaaaaaaaaa --sku aaaaaaaaaaaaaaaaaaaaaaaaaaa --version aaaaaaaaaaaaaaaaaaa
     """
 
     _aaz_info = {
-        "version": "2024-07-01",
+        "version": "2024-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/locations/{}/publishers/{}/artifacttypes/vmimage/offers/{}/skus/{}/versions/{}", "2024-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/locations/{}/publishers/{}/artifacttypes/vmimage/offers/{}/skus/{}/versions/{}", "2024-11-01"],
         ]
     }
 
@@ -145,7 +148,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-07-01",
+                    "api-version", "2024-11-01",
                     required=True,
                 ),
             }

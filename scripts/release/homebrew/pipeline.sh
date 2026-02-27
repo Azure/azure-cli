@@ -17,7 +17,7 @@ docker run -v $docker_files:/mnt/scripts \
            -e CLI_VERSION=$CLI_VERSION \
            -e HOMEBREW_UPSTREAM_URL=$HOMEBREW_UPSTREAM_URL \
            --name azurecli \
-           python:3.6 \
+           python:3.12-bookworm \
            /mnt/scripts/run.sh
 
 # clean up

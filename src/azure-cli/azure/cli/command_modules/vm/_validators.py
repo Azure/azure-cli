@@ -24,7 +24,7 @@ from azure.cli.core import keys
 from azure.core.exceptions import ResourceNotFoundError
 
 from ._client_factory import _compute_client_factory
-from ._actions import _get_latest_image_version
+from ._actions import _get_latest_image_version_by_aaz
 
 
 logger = get_logger(__name__)
@@ -260,10 +260,10 @@ def _parse_image_argument(cmd, namespace):
 
         if not any([namespace.plan_name, namespace.plan_product, namespace.plan_publisher]):
             image_plan = _get_image_plan_info_if_exists(cmd, namespace)
-            if image_plan:
-                namespace.plan_name = image_plan.name
-                namespace.plan_product = image_plan.product
-                namespace.plan_publisher = image_plan.publisher
+            if image_plan and image_plan.get('name') and image_plan.get('product') and image_plan.get('publisher'):
+                namespace.plan_name = image_plan['name']
+                namespace.plan_product = image_plan['product']
+                namespace.plan_publisher = image_plan['publisher']
 
         return 'urn'
 
@@ -285,18 +285,24 @@ def _parse_image_argument(cmd, namespace):
             namespace.os_version = matched['version']
             if not any([namespace.plan_name, namespace.plan_product, namespace.plan_publisher]):
                 image_plan = _get_image_plan_info_if_exists(cmd, namespace)
-                if image_plan:
-                    namespace.plan_name = image_plan.name
-                    namespace.plan_product = image_plan.product
-                    namespace.plan_publisher = image_plan.publisher
+                if image_plan and image_plan.get('name') and image_plan.get('product') and image_plan.get('publisher'):
+                    namespace.plan_name = image_plan['name']
+                    namespace.plan_product = image_plan['product']
+                    namespace.plan_publisher = image_plan['publisher']
             return 'urn'
     except requests.exceptions.ConnectionError:
         pass
 
     # 5 - check if an existing managed disk image resource
-    compute_client = _compute_client_factory(cmd.cli_ctx)
     try:
-        compute_client.images.get(namespace.resource_group_name, namespace.image)
+        from .aaz.latest.image import Show as ImageShow
+        command_args = {
+            'image_name': namespace.image,
+            'resource_group': namespace.resource_group_name
+        }
+
+        # Purpose of calling ImageShow is just to check its existence
+        ImageShow(cli_ctx=cmd.cli_ctx, command_args=command_args)
         namespace.image = _get_resource_id(cmd.cli_ctx, namespace.image, namespace.resource_group_name,
                                            'images', 'Microsoft.Compute')
         return 'image_id'
@@ -314,21 +320,23 @@ def _parse_image_argument(cmd, namespace):
 
 def _get_image_plan_info_if_exists(cmd, namespace):
     try:
-        compute_client = _compute_client_factory(cmd.cli_ctx)
+        from .aaz.latest.vm.image import Show as VmImageShow
         if namespace.os_version.lower() == 'latest':
-            image_version = _get_latest_image_version(cmd.cli_ctx, namespace.location, namespace.os_publisher,
-                                                      namespace.os_offer, namespace.os_sku)
+            image_version = _get_latest_image_version_by_aaz(cmd.cli_ctx, namespace.location, namespace.os_publisher,
+                                                             namespace.os_offer, namespace.os_sku)
         else:
             image_version = namespace.os_version
 
-        image = compute_client.virtual_machine_images.get(namespace.location,
-                                                          namespace.os_publisher,
-                                                          namespace.os_offer,
-                                                          namespace.os_sku,
-                                                          image_version)
+        command_args = {
+            'location': namespace.location,
+            'offer': namespace.os_offer,
+            'publisher': namespace.os_publisher,
+            'sku': namespace.os_sku,
+            'version': image_version,
+        }
+        image = VmImageShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
-        # pylint: disable=no-member
-        return image.plan
+        return image.get('plan')
     except ResourceNotFoundError as ex:
         logger.warning("Querying the image of '%s' failed for an error '%s'. Configuring plan settings "
                        "will be skipped", namespace.image, ex.message)
@@ -500,18 +508,30 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
         # extract additional information from a managed custom image
         res = parse_resource_id(namespace.image)
         namespace.aux_subscriptions = [res['subscription']]
-        compute_client = _compute_client_factory(cmd.cli_ctx, subscription_id=res['subscription'])
         if res['type'].lower() == 'images':
-            image_info = compute_client.images.get(res['resource_group'], res['name'])
-            namespace.os_type = image_info.storage_profile.os_disk.os_type
-            image_data_disks = image_info.storage_profile.data_disks or []
-            image_data_disks = [{'lun': disk.lun} for disk in image_data_disks]
+            from .aaz.latest.image import Show as ImageShow
+            command_args = {
+                'image_name': res['name'],
+                'resource_group': res['resource_group'],
+                'subscription': res['subscription']
+            }
+            image_info = ImageShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+
+            namespace.os_type = image_info.get('storageProfile', {}).get('osDisk', {}).get('osType')
+            image_data_disks = image_info.get('storageProfile', {}).get('dataDisks', [])
+            image_data_disks = [{'lun': disk.get('lun')} for disk in image_data_disks]
 
         elif res['type'].lower() == 'galleries':
-            image_info = compute_client.gallery_images.get(resource_group_name=res['resource_group'],
-                                                           gallery_name=res['name'],
-                                                           gallery_image_name=res['child_name_1'])
-            namespace.os_type = image_info.os_type
+            from .aaz.latest.sig.image_definition import Show as SigImageDefinitionShow
+            command_args = {
+                'gallery_image_definition': res['child_name_1'],
+                'gallery_name': res['name'],
+                'resource_group': res['resource_group'],
+                'subscription': res['subscription']
+            }
+            image_info = SigImageDefinitionShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+            namespace.os_type = image_info.get('osType')
+
             gallery_image_version = res.get('child_name_2', '')
             if gallery_image_version.lower() in ['latest', '']:
                 from .aaz.latest.sig.image_version import List as _SigImageVersionList
@@ -519,7 +539,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                     "resource_group": res['resource_group'],
                     "gallery_name": res['name'],
                     "gallery_image_definition": res['child_name_1'],
-                    "subscription": res['subscription']
+                    "subscription": res['subscription'],
                 })
                 image_version_infos = [x for x in image_version_infos
                                        if not x.get("publishingProfile", {}).get("excludeFromLatest", None)]
@@ -565,14 +585,19 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
         from ._vm_utils import parse_shared_gallery_image_id
         image_info = parse_shared_gallery_image_id(namespace.image)
 
-        from ._client_factory import cf_shared_gallery_image
-        shared_gallery_image_info = cf_shared_gallery_image(cmd.cli_ctx).get(
-            location=namespace.location, gallery_unique_name=image_info[0], gallery_image_name=image_info[1])
+        from .aaz.latest.sig.image_definition import ShowShared as SigImageDefinitionShowShared
+        command_args = {
+            'gallery_image_definition': image_info[1],
+            'gallery_unique_name': image_info[0],
+            'location': namespace.location,
+        }
+        shared_gallery_image_info = SigImageDefinitionShowShared(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
-        if namespace.os_type and namespace.os_type.lower() != shared_gallery_image_info.os_type.lower():
+        if namespace.os_type and namespace.os_type.lower() != shared_gallery_image_info.get('osType', '').lower():
             raise ArgumentUsageError("The --os-type is not the correct os type of this shared gallery image, "
-                                     "the os type of this image should be {}".format(shared_gallery_image_info.os_type))
-        namespace.os_type = shared_gallery_image_info.os_type
+                                     "the os type of this image should be {}"
+                                     .format(shared_gallery_image_info.get('osType', '')))
+        namespace.os_type = shared_gallery_image_info['osType']
 
     if namespace.storage_profile == StorageProfile.CommunityGalleryImage:
 
@@ -583,15 +608,19 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
         from ._vm_utils import parse_community_gallery_image_id
         image_info = parse_community_gallery_image_id(namespace.image)
 
-        from ._client_factory import cf_community_gallery_image
-        community_gallery_image_info = cf_community_gallery_image(cmd.cli_ctx).get(
-            location=namespace.location, public_gallery_name=image_info[0], gallery_image_name=image_info[1])
+        from .aaz.latest.sig.image_definition import ShowCommunity as SigImageDefinitionShowCommunity
+        command_args = {
+            'gallery_image_definition': image_info[1],
+            'public_gallery_name': image_info[0],
+            'location': namespace.location
+        }
+        community_gallery_image_info = SigImageDefinitionShowCommunity(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
-        if namespace.os_type and namespace.os_type.lower() != community_gallery_image_info.os_type.lower():
+        if namespace.os_type and namespace.os_type.lower() != community_gallery_image_info.get('osType', '').lower():
             raise ArgumentUsageError(
                 "The --os-type is not the correct os type of this community gallery image, "
-                "the os type of this image should be {}".format(community_gallery_image_info.os_type))
-        namespace.os_type = community_gallery_image_info.os_type
+                "the os type of this image should be {}".format(community_gallery_image_info.get('osType', '')))
+        namespace.os_type = community_gallery_image_info['osType']
 
     if getattr(namespace, 'security_type', None) == 'ConfidentialVM' and \
             not getattr(namespace, 'os_disk_security_encryption_type', None):
@@ -918,10 +947,14 @@ def _validate_vm_vmss_accelerated_networking(cli_ctx, namespace):
                            'Standard_D8s_v3']
         new_4core_sizes = [x.lower() for x in new_4core_sizes]
         if size not in new_4core_sizes:
-            compute_client = _compute_client_factory(cli_ctx)
-            sizes = compute_client.virtual_machine_sizes.list(namespace.location)
-            size_info = next((s for s in sizes if s.name.lower() == size), None)
-            if size_info is None or size_info.number_of_cores < 8:
+            from .aaz.latest.vm import ListSizes
+
+            sizes = ListSizes(cli_ctx=cli_ctx)(command_args={
+                'location': namespace.location
+            })
+
+            size_info = next((s for s in sizes if s.get('name', '').lower() == size), None)
+            if size_info is None or size_info.get('numberOfCores') < 8:
                 return
 
         # VMs need to be a supported image in the marketplace
@@ -1243,28 +1276,36 @@ def _validate_admin_password(password, os_type):
 
 def validate_ssh_key(namespace, cmd=None):
     from azure.core.exceptions import HttpResponseError
+    from .aaz.latest.sshkey import Show as SSHKeyShow, Create as SSHKeyCreate
     ssh_key_type = namespace.ssh_key_type if hasattr(namespace, 'ssh_key_type') else 'RSA'
     if hasattr(namespace, 'ssh_key_name') and namespace.ssh_key_name:
-        client = _compute_client_factory(cmd.cli_ctx)
         # --ssh-key-name
         if not namespace.ssh_key_value and not namespace.generate_ssh_keys:
             # Use existing key, key must exist
             try:
-                ssh_key_resource = client.ssh_public_keys.get(namespace.resource_group_name, namespace.ssh_key_name)
+                command_args = {
+                    'resource_group': namespace.resource_group_name,
+                    'ssh_public_key_name': namespace.ssh_key_name
+                }
+                ssh_key_resource = SSHKeyShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
             except HttpResponseError:
                 raise ValidationError('SSH key {} does not exist!'.format(namespace.ssh_key_name))
-            namespace.ssh_key_value = [ssh_key_resource.public_key]
+            if ssh_key_resource.get('publicKey'):
+                namespace.ssh_key_value = [ssh_key_resource['publicKey']]
+            else:
+                namespace.ssh_key_value = []
             logger.info('Get a key from --ssh-key-name successfully')
         elif namespace.ssh_key_value:
             raise ValidationError('--ssh-key-name and --ssh-key-values cannot be used together')
         elif namespace.generate_ssh_keys:
-            parameters = {}
-            parameters['location'] = namespace.location
             public_key = _validate_ssh_key_helper("", namespace.generate_ssh_keys, ssh_key_type)
-            parameters['public_key'] = public_key
-            client.ssh_public_keys.create(resource_group_name=namespace.resource_group_name,
-                                          ssh_public_key_name=namespace.ssh_key_name,
-                                          parameters=parameters)
+            parameters = {
+                'location': namespace.location,
+                'resource_group': namespace.resource_group_name,
+                'ssh_public_key_name': namespace.ssh_key_name,
+                'public_key': public_key
+            }
+            SSHKeyCreate(cli_ctx=cmd.cli_ctx)(command_args=parameters)
             namespace.ssh_key_value = [public_key]
     elif namespace.ssh_key_value:
         if namespace.generate_ssh_keys and len(namespace.ssh_key_value) > 1:
@@ -1420,9 +1461,6 @@ def trusted_launch_set_default(namespace, generation_version, features):
 
 
 def _validate_generation_version_and_trusted_launch(cmd, namespace):
-    from azure.cli.core.profiles import ResourceType
-    if not cmd.supported_api_version(resource_type=ResourceType.MGMT_COMPUTE, min_api='2020-12-01'):
-        return
     from ._vm_utils import validate_image_trusted_launch, validate_vm_disk_trusted_launch
     if namespace.image is not None:
         image_type = _parse_image_argument(cmd, namespace)
@@ -1445,25 +1483,31 @@ def _validate_generation_version_and_trusted_launch(cmd, namespace):
             return
 
         if image_type == 'urn':
-            client = _compute_client_factory(cmd.cli_ctx).virtual_machine_images
+            from .aaz.latest.vm.image import Show as VmImageShow
             os_version = namespace.os_version
             if os_version.lower() == 'latest':
-                os_version = _get_latest_image_version(cmd.cli_ctx, namespace.location, namespace.os_publisher,
-                                                       namespace.os_offer, namespace.os_sku)
-            vm_image_info = client.get(namespace.location, namespace.os_publisher, namespace.os_offer,
-                                       namespace.os_sku, os_version)
+                os_version = _get_latest_image_version_by_aaz(cmd.cli_ctx, namespace.location, namespace.os_publisher,
+                                                              namespace.os_offer, namespace.os_sku)
 
-            if vm_image_info.image_deprecation_status.image_state == 'ScheduledForDeprecation':
+            command_args = {
+                'location': namespace.location,
+                'offer': namespace.os_offer,
+                'publisher': namespace.os_publisher,
+                'sku': namespace.os_sku,
+                'version': os_version
+            }
+            vm_image_info = VmImageShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+
+            if vm_image_info.get('imageDeprecationStatus', {}).get('imageState') == 'ScheduledForDeprecation':
+                from datetime import datetime
+                dt = datetime.fromisoformat(vm_image_info['imageDeprecationStatus']['scheduledDeprecationTime'])
                 logger.warning(
                     'Warning: This image %s is scheduled for deprecation and will be blocked after %s.\n'
                     'VM / VMSS creation is allowed temporarily, but future deployments, redeployments, or '
                     'scale‑out operations may fail after this date.\n'
-                    'Consider switching to a supported image now.', namespace.image,
-                    vm_image_info.image_deprecation_status.scheduled_deprecation_time.strftime("%B %d, %Y"))
-
-            generation_version = vm_image_info.hyper_v_generation if hasattr(vm_image_info,
-                                                                             'hyper_v_generation') else None
-            features = vm_image_info.features if hasattr(vm_image_info, 'features') and vm_image_info.features else []
+                    'Consider switching to a supported image now.', namespace.image, dt.strftime("%B %d, %Y"))
+            generation_version = vm_image_info.get('hyperVGeneration', None)
+            features = vm_image_info.get('features', [])
 
             trusted_launch_set_default(namespace, generation_version, features)
             return
@@ -1474,11 +1518,15 @@ def _validate_generation_version_and_trusted_launch(cmd, namespace):
         if urlparse(namespace.attach_os_disk).scheme and "://" in namespace.attach_os_disk:
             # vhd does not support trusted launch
             return
-        client = _compute_client_factory(cmd.cli_ctx).disks
+
+        from .aaz.latest.disk import Show as DiskShow
         attach_os_disk_name = parse_resource_id(namespace.attach_os_disk)['name']
-        attach_os_disk_info = client.get(namespace.resource_group_name, attach_os_disk_name)
-        disk_security_profile = attach_os_disk_info.security_profile if hasattr(attach_os_disk_info,
-                                                                                'security_profile') else None
+        command_args = {
+            'disk_name': attach_os_disk_name,
+            'resource_group': namespace.resource_group_name
+        }
+        attach_os_disk_info = DiskShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+        disk_security_profile = attach_os_disk_info.get('securityProfile')
         validate_vm_disk_trusted_launch(namespace, disk_security_profile)
 
 
