@@ -27,7 +27,6 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.commands.validators import get_default_location_from_resource_group, validate_tags
 from azure.cli.core.azclierror import RequiredArgumentMissingError, ResourceNotFoundError
 
-from azure.cli.command_modules.vm._client_factory import _compute_client_factory
 from azure.cli.command_modules.vm._validators import _get_resource_id
 
 logger = get_logger(__name__)
