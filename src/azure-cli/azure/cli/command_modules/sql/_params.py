@@ -73,7 +73,8 @@ from ._validators import (
     create_args_for_complex_type,
     validate_managed_instance_storage_size,
     validate_backup_storage_redundancy,
-    validate_subnet
+    validate_subnet,
+    validate_soft_delete_retention_days
 )
 
 #####
@@ -1914,6 +1915,17 @@ def load_arguments(self, _):
                    options_list=['--federated-client-id', '--fid'],
                    help='The federated client id used in cross tenant CMK scenario.')
 
+        c.argument('soft_delete_retention_days',
+                   options_list=['--soft-delete-retention-days', '--sdrd'],
+                   type=int,
+                   validator=validate_soft_delete_retention_days,
+                   is_preview=True,
+                   help='Specify the number of days to retain soft deleted server (0-7). '
+                   'Set to 0 to disable soft delete. '
+                   'Set to 1-7 days to enable soft delete with the specified retention period. '
+                   'During the retention period, the server can be restored using '
+                   'az sql server restore.')
+
     with self.argument_context('sql server create') as c:
         c.argument('location',
                    arg_type=get_location_type_with_default_from_resource_group(self.cli_ctx))
@@ -1960,10 +1972,25 @@ def load_arguments(self, _):
         c.argument('administrator_login_password',
                    help='The administrator login password.')
 
+        c.argument('soft_delete_retention_days',
+                   options_list=['--soft-delete-retention-days', '--sdrd'],
+                   type=int,
+                   validator=validate_soft_delete_retention_days,
+                   is_preview=True,
+                   help='Specify the number of days to retain soft deleted server (0-7). '
+                   'Set to 0 to disable soft delete. '
+                   'Set to 1-7 days to enable soft delete with the specified retention period.')
+
     with self.argument_context('sql server show') as c:
         c.argument('expand_ad_admin',
                    options_list=['--expand-ad-admin'],
                    help='Expand the Active Directory Administrator for the server.')
+
+    with self.argument_context('sql server restore') as c:
+        c.argument('location',
+                   arg_type=get_location_type(self.cli_ctx),
+                   required=True,
+                   help='Location where the deleted server was originally located.')
 
     with self.argument_context('sql server list') as c:
         c.argument('expand_ad_admin',
@@ -2284,6 +2311,25 @@ def load_arguments(self, _):
         c.argument('instance_name',
                    help='Managed Instance name.',
                    arg_group='List By Instance')
+
+    ###############################################
+    #         sql server deleted-server           #
+    ###############################################
+
+    with self.argument_context('sql server deleted-server') as c:
+        c.argument('server_name', options_list=['--name', '-n'], help='Name of the deleted server.')
+        c.argument('location', arg_type=get_location_type(self.cli_ctx),
+                   help='Location where the deleted server was originally located.')
+
+    with self.argument_context('sql server deleted-server show') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx),
+                   required=True,
+                   help='Location where the deleted server was originally located.')
+
+    with self.argument_context('sql server deleted-server list') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx),
+                   required=True,
+                   help='Location where the deleted servers were originally located.')
 
     ###############################################
     #                sql managed instance         #

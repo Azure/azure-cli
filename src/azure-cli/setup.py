@@ -17,7 +17,7 @@ except ImportError:
     logging.warning("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.83.0"
+VERSION = "2.84.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -65,7 +65,7 @@ DEPENDENCIES = [
     'azure-keyvault-securitydomain==1.0.0b1',
     'azure-mgmt-advisor==9.0.0',
     'azure-mgmt-apimanagement==4.0.0',
-    'azure-mgmt-appconfiguration==5.0.0',
+    'azure-mgmt-appconfiguration==6.0.0b1',
     'azure-mgmt-appcontainers==2.0.0',
     'azure-mgmt-applicationinsights~=1.0.0',
     'azure-mgmt-authorization==5.0.0b1',
@@ -100,18 +100,18 @@ DEPENDENCIES = [
     'azure-mgmt-msi~=7.1.0',
     'azure-mgmt-netapp~=10.1.0',
     'azure-mgmt-policyinsights==1.1.0b4',
-    'azure-mgmt-postgresqlflexibleservers==2.0.0',
+    'azure-mgmt-postgresqlflexibleservers==3.0.0b1',
     'azure-mgmt-privatedns~=1.0.0',
     'azure-mgmt-rdbms==10.2.0b17',
     'azure-mgmt-mysqlflexibleservers==1.1.0b2',
     'azure-mgmt-recoveryservicesbackup~=9.2.0',
     'azure-mgmt-recoveryservices~=4.0.0',
-    'azure-mgmt-redhatopenshift~=1.5.0',
+    'azure-mgmt-redhatopenshift~=3.0.0',
     'azure-mgmt-redis~=14.5.0',
-    'azure-mgmt-resource==23.3.0',
+    'azure-mgmt-resource==24.0.0',
     'azure-mgmt-resource-deployments==1.0.0b1',
     'azure-mgmt-resource-deploymentscripts==1.0.0b1',
-    'azure-mgmt-resource-deploymentstacks==1.0.0b1',
+    'azure-mgmt-resource-deploymentstacks==1.0.0',
     'azure-mgmt-resource-templatespecs==1.0.0b1',
     'azure-mgmt-search~=9.0',
     'azure-mgmt-security==6.0.0',
