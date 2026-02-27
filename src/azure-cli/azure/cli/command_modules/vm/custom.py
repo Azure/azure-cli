@@ -226,97 +226,74 @@ def _get_sku_object(cmd, sku):
     return sku
 
 
-def get_hyper_v_generation_from_vmss(cli_ctx, image_ref, location):  # pylint: disable=too-many-return-statements
-    from ._vm_utils import (is_valid_image_version_id, parse_gallery_image_id, is_valid_vm_image_id, parse_vm_image_id,
-                            parse_shared_gallery_image_id, parse_community_gallery_image_id)
-    if image_ref is None:
-        return None
-    if image_ref.id:
-        from ._client_factory import _compute_client_factory
-        if is_valid_image_version_id(image_ref.id):
-            image_info = parse_gallery_image_id(image_ref.id)
-            client = _compute_client_factory(cli_ctx, subscription_id=image_info[0]).gallery_images
-            gallery_image_info = client.get(
-                resource_group_name=image_info[1], gallery_name=image_info[2], gallery_image_name=image_info[3])
-            return gallery_image_info.hyper_v_generation if hasattr(gallery_image_info, 'hyper_v_generation') else None
-        if is_valid_vm_image_id(image_ref.id):
-            sub, rg, image_name = parse_vm_image_id(image_ref.id)
-            client = _compute_client_factory(cli_ctx, subscription_id=sub).images
-            image_info = client.get(rg, image_name)
-            return image_info.hyper_v_generation if hasattr(image_info, 'hyper_v_generation') else None
-
-    if image_ref.shared_gallery_image_id is not None:
-        from ._client_factory import cf_shared_gallery_image
-        image_info = parse_shared_gallery_image_id(image_ref.shared_gallery_image_id)
-        gallery_image_info = cf_shared_gallery_image(cli_ctx).get(
-            location=location, gallery_unique_name=image_info[0], gallery_image_name=image_info[1])
-        return gallery_image_info.hyper_v_generation if hasattr(gallery_image_info, 'hyper_v_generation') else None
-
-    if image_ref.community_gallery_image_id is not None:
-        from ._client_factory import cf_community_gallery_image
-        image_info = parse_community_gallery_image_id(image_ref.community_gallery_image_id)
-        gallery_image_info = cf_community_gallery_image(cli_ctx).get(
-            location=location, public_gallery_name=image_info[0], gallery_image_name=image_info[1])
-        return gallery_image_info.hyper_v_generation if hasattr(gallery_image_info, 'hyper_v_generation') else None
-
-    if image_ref.offer and image_ref.publisher and image_ref.sku and image_ref.version:
-        from ._client_factory import cf_vm_image
-        version = image_ref.version
-        if version.lower() == 'latest':
-            from ._actions import _get_latest_image_version
-            version = _get_latest_image_version(cli_ctx, location, image_ref.publisher, image_ref.offer,
-                                                image_ref.sku)
-        vm_image_info = cf_vm_image(cli_ctx, '').get(
-            location, image_ref.publisher, image_ref.offer, image_ref.sku, version)
-        return vm_image_info.hyper_v_generation if hasattr(vm_image_info, 'hyper_v_generation') else None
-
-    return None
-
-
 def get_hyper_v_generation_from_vmss_by_aaz(cli_ctx, image_ref, location):  # pylint: disable=too-many-return-statements
     from ._vm_utils import (is_valid_image_version_id, parse_gallery_image_id, is_valid_vm_image_id, parse_vm_image_id,
                             parse_shared_gallery_image_id, parse_community_gallery_image_id)
     if image_ref is None:
         return None
     if image_ref.get("id", None) is not None:
-        from ._client_factory import _compute_client_factory
         if is_valid_image_version_id(image_ref["id"]):
+            from .aaz.latest.sig.image_definition import Show as SigImageDefinitionShow
             image_info = parse_gallery_image_id(image_ref["id"])
-            client = _compute_client_factory(cli_ctx, subscription_id=image_info[0]).gallery_images
-            gallery_image_info = client.get(
-                resource_group_name=image_info[1], gallery_name=image_info[2], gallery_image_name=image_info[3])
-            return gallery_image_info.hyper_v_generation if hasattr(gallery_image_info, 'hyper_v_generation') else None
+            command_args = {
+                'gallery_image_definition': image_info[3],
+                'gallery_name': image_info[2],
+                'resource_group': image_info[1],
+                'subscription': image_info[0]
+            }
+            gallery_image_info = SigImageDefinitionShow(cli_ctx=cli_ctx)(command_args=command_args)
+            return gallery_image_info.get('hyperVGeneration')
         if is_valid_vm_image_id(image_ref["id"]):
+            from .aaz.latest.image import Show as ImageShow
             sub, rg, image_name = parse_vm_image_id(image_ref["id"])
-            client = _compute_client_factory(cli_ctx, subscription_id=sub).images
-            image_info = client.get(rg, image_name)
-            return image_info.hyper_v_generation if hasattr(image_info, 'hyper_v_generation') else None
+            command_args = {
+                'image_name': image_name,
+                'resource_group': rg,
+                'subscription': sub
+            }
+            image_info = ImageShow(cli_ctx=cli_ctx)(command_args=command_args)
+            return image_info.get('hyperVGeneration')
 
     if image_ref.get("sharedGalleryImageId", None) is not None:
         from ._client_factory import cf_shared_gallery_image
+        from .aaz.latest.sig.image_definition import ShowShared as SigImageDefinitionShowShared
         image_info = parse_shared_gallery_image_id(image_ref["sharedGalleryImageId"])
-        gallery_image_info = cf_shared_gallery_image(cli_ctx).get(
-            location=location, gallery_unique_name=image_info[0], gallery_image_name=image_info[1])
-        return gallery_image_info.hyper_v_generation if hasattr(gallery_image_info, 'hyper_v_generation') else None
+        command_args = {
+            'gallery_image_definition': image_info[1],
+            'gallery_unique_name': image_info[0],
+            'location': location
+        }
+        gallery_image_info = SigImageDefinitionShowShared(cli_ctx=cli_ctx)(command_args=command_args)
+        return gallery_image_info.get('hyperVGeneration')
 
     if image_ref.get("communityGalleryImageId", None) is not None:
-        from ._client_factory import cf_community_gallery_image
+        from .aaz.latest.sig.image_definition import ShowCommunity as SigImageDefinitionShowCommunity
         image_info = parse_community_gallery_image_id(image_ref["communityGalleryImageId"])
-        gallery_image_info = cf_community_gallery_image(cli_ctx).get(
-            location=location, public_gallery_name=image_info[0], gallery_image_name=image_info[1])
-        return gallery_image_info.hyper_v_generation if hasattr(gallery_image_info, 'hyper_v_generation') else None
+        command_args = {
+            'gallery_image_definition': image_info[1],
+            'location': location,
+            'public_gallery_name': image_info[0]
+        }
+        gallery_image_info = SigImageDefinitionShowCommunity(cli_ctx=cli_ctx)(command_args=command_args)
+        return gallery_image_info.get('hyperVGeneration')
 
     if image_ref.get("offer", None) is not None and image_ref.get("publisher", None) is not None \
             and image_ref.get("sku", None) is not None and image_ref.get("version", None) is not None:
-        from ._client_factory import cf_vm_image
+        from .aaz.latest.vm.image import Show as VmImageShow
         version = image_ref["version"]
         if version.lower() == 'latest':
-            from ._actions import _get_latest_image_version
-            version = _get_latest_image_version(cli_ctx, location, image_ref["publisher"], image_ref["offer"],
-                                                image_ref["sku"])
-        vm_image_info = cf_vm_image(cli_ctx, '').get(
-            location, image_ref["publisher"], image_ref["offer"], image_ref["sku"], version)
-        return vm_image_info.hyper_v_generation if hasattr(vm_image_info, 'hyper_v_generation') else None
+            from ._actions import _get_latest_image_version_by_aaz
+            version = _get_latest_image_version_by_aaz(cli_ctx, location, image_ref["publisher"], image_ref["offer"],
+                                                       image_ref["sku"])
+        command_args = {
+            'location': location,
+            'offer': image_ref["offer"],
+            'publisher': image_ref["publisher"],
+            'sku': image_ref["sku"],
+            'version': version
+        }
+        vm_image_info = VmImageShow(cli_ctx=cli_ctx)(command_args=command_args)
+        return vm_image_info.get('hyperVGeneration')
 
     return None
 
@@ -4250,23 +4227,6 @@ def get_vmss_by_aaz(cmd, resource_group_name, name, instance_id=None, include_us
     return VMSSShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
-def _check_vmss_hyper_v_generation(cli_ctx, vmss):
-    hyper_v_generation = get_hyper_v_generation_from_vmss(
-        cli_ctx, vmss.virtual_machine_profile.storage_profile.image_reference, vmss.location)
-    security_profile = vmss.virtual_machine_profile.security_profile
-    security_type = security_profile.security_type if security_profile else None
-
-    if hyper_v_generation == "V1" or (hyper_v_generation == "V2" and security_type is None):
-        logger.warning("Trusted Launch security type is supported on Hyper-V Generation 2 OS Images. "
-                       "To know more please visit "
-                       "https://learn.microsoft.com/en-us/azure/virtual-machines/trusted-launch")
-    elif hyper_v_generation == "V2" and security_type == "ConfidentialVM":
-        from azure.cli.core.azclierror import InvalidArgumentValueError
-        raise InvalidArgumentValueError("{} is already configured with {}. "
-                                        "Security Configuration cannot be updated from ConfidentialVM to "
-                                        "TrustedLaunch.".format(vmss.name, security_type))
-
-
 def _check_vmss_hyper_v_generation_by_aaz(cli_ctx, vmss):
     hyper_v_generation = get_hyper_v_generation_from_vmss_by_aaz(
         cli_ctx, vmss.get("virtualMachineProfile", {}).get("storageProfile", {}).get("imageReference", {}), vmss["location"])  # pylint: disable=line-too-long
@@ -4282,26 +4242,6 @@ def _check_vmss_hyper_v_generation_by_aaz(cli_ctx, vmss):
         raise InvalidArgumentValueError("{} is already configured with {}. "
                                         "Security Configuration cannot be updated from ConfidentialVM to "
                                         "TrustedLaunch.".format(vmss["name"], security_type))
-
-
-def get_vmss_modified(cmd, resource_group_name, name, instance_id=None, security_type=None):
-    client = _compute_client_factory(cmd.cli_ctx)
-    if instance_id is not None:
-        vms = client.virtual_machine_scale_set_vms.get(resource_group_name=resource_group_name,
-                                                       vm_scale_set_name=name, instance_id=instance_id)
-        # To avoid unnecessary permission check of image
-        if hasattr(vms, "storage_profile") and vms.storage_profile:
-            vms.storage_profile.image_reference = None
-        return vms
-
-    vmss = client.virtual_machine_scale_sets.get(resource_group_name, name)
-    if security_type == 'TrustedLaunch':
-        _check_vmss_hyper_v_generation(cmd.cli_ctx, vmss)
-    # To avoid unnecessary permission check of image
-    if hasattr(vmss, "virtual_machine_profile") and vmss.virtual_machine_profile \
-            and vmss.virtual_machine_profile.storage_profile:
-        vmss.virtual_machine_profile.storage_profile.image_reference = None
-    return vmss
 
 
 def get_vmss_modified_by_aaz(cmd, resource_group_name, name, instance_id=None, security_type=None):
