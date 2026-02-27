@@ -2303,30 +2303,30 @@ def get_boot_log(cmd, resource_group_name, vm_name):
 
 
 # region VirtualMachines Diagnostics
-def set_diagnostics_extension(
-        cmd, resource_group_name, vm_name, settings, protected_settings=None, version=None,
-        no_auto_upgrade=False):
-    client = _compute_client_factory(cmd.cli_ctx)
-    vm = client.virtual_machines.get(resource_group_name, vm_name, expand='instanceView')
-    # pylint: disable=no-member
-    is_linux_os = _is_linux_os(vm)
+def set_diagnostics_extension(cmd, resource_group_name, vm_name, settings, protected_settings=None, version=None,
+                              no_auto_upgrade=False):
+    from .aaz.latest.vm.extension import Delete as VmExtensionDelete
+    vm = get_instance_view(cmd, resource_group_name, vm_name)
+    is_linux_os = _is_linux_os_aaz(vm)
     vm_extension_name = _LINUX_DIAG_EXT if is_linux_os else _WINDOWS_DIAG_EXT
     if is_linux_os:  # check incompatible version
-        exts = vm.instance_view.extensions or []
+        exts = vm.get('instanceView', {}).get('extensions', [])
         major_ver = extension_mappings[_LINUX_DIAG_EXT]['version'].split('.', maxsplit=1)[0]
-        if next((e for e in exts if e.name == vm_extension_name and
-                 not e.type_handler_version.startswith(major_ver + '.')), None):
+        if next((e for e in exts if e.get('name') == vm_extension_name and
+                 not e.get('typeHandlerVersion', '').startswith(major_ver + '.')), None):
             logger.warning('There is an incompatible version of diagnostics extension installed. '
                            'We will update it with a new version')
-            poller = client.virtual_machine_extensions.begin_delete(resource_group_name, vm_name, vm_extension_name)
+            poller = VmExtensionDelete(cli_ctx=cmd.cli_ctx)(command_args={
+                'resource_group': resource_group_name,
+                'vm_extension_name': vm_extension_name,
+                'vm_name': vm_name
+            })
             LongRunningOperation(cmd.cli_ctx)(poller)
 
     return set_extension(cmd, resource_group_name, vm_name, vm_extension_name,
                          extension_mappings[vm_extension_name]['publisher'],
                          version or extension_mappings[vm_extension_name]['version'],
-                         settings,
-                         protected_settings,
-                         no_auto_upgrade)
+                         settings, protected_settings, no_auto_upgrade)
 
 
 def show_default_diagnostics_configuration(is_windows_os=False):
