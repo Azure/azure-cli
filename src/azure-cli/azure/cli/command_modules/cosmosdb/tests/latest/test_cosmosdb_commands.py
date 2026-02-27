@@ -239,7 +239,13 @@ class CosmosDBTests(ScenarioTest):
         assert account1['readLocations'][0]['failoverPriority'] == 1 or account1['readLocations'][1]['failoverPriority'] == 1
 
         self.cmd('az cosmosdb failover-priority-change -n {acc} -g {rg} --failover-policies {read_location}=0 {write_location}=1')
-        account2 = self.cmd('az cosmosdb show -n {acc} -g {rg}').get_output_in_json()
+        import time
+        for _ in range(0, 10):
+            account2 = self.cmd('az cosmosdb show -n {acc} -g {rg}').get_output_in_json()
+            if account2['writeLocations'][0]['locationName'] == "West US":
+                break
+            time.sleep(5)
+
         assert len(account2['writeLocations']) == 1
         assert len(account2['readLocations']) == 2
 
@@ -260,7 +266,7 @@ class CosmosDBTests(ScenarioTest):
             'read_location': read_location
         })
 
-        account_pre_offline = self.cmd('az cosmosdb create -n {acc} -g {rg} --locations regionName={write_location} failoverPriority=0 --locations regionName={read_location} failoverPriority=1').get_output_in_json()
+        account_pre_offline = self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-automatic-failover --locations regionName={write_location} failoverPriority=0 --locations regionName={read_location} failoverPriority=1').get_output_in_json()
 
         assert account_pre_offline['writeLocations'][0]['locationName'] == "East US"
 
@@ -478,6 +484,37 @@ class CosmosDBTests(ScenarioTest):
 
         # Test delete
         self.cmd('cosmosdb private-endpoint-connection delete --id {pec_id}')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
+    def test_cosmosdb_network_acl_bypass(self, resource_group):
+        network_acl_bypass_resource_id = '/subscriptions/subId/resourcegroups/rgName/providers/Microsoft.Synapse/workspaces/workspaceName'
+        fabric_network_acl_bypass_resource_id = '/tenants/72f988bf-86f1-41af-91ab-2d7cd011db47/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/Fabric/providers/Microsoft.Fabric/workspaces/3e83f2c3-5a1e-45c3-95f3-53f3a1794e6f'
+
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=40),
+            'network_acl_bypass_resource_id': network_acl_bypass_resource_id,
+            'fabric_network_acl_bypass_resource_id': fabric_network_acl_bypass_resource_id
+        })
+
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --disable-local-auth true')
+        account = self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
+            self.check('networkAclBypass', 'None'),
+        ]).get_output_in_json()
+        assert len(account['networkAclBypassResourceIds']) == 0
+
+        self.cmd('az cosmosdb update -n {acc} -g {rg} --network-acl-bypass AzureServices --network-acl-bypass-resource-ids {network_acl_bypass_resource_id}')
+        self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
+            self.check('networkAclBypass', 'AzureServices'),
+            self.check('networkAclBypassResourceIds[0]', network_acl_bypass_resource_id)
+        ])
+
+        self.cmd('az cosmosdb update -n {acc} -g {rg} --capabilities EnableFabricNetworkAclBypass --network-acl-bypass AzureServices --network-acl-bypass-resource-ids {fabric_network_acl_bypass_resource_id}')
+        account = self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
+            self.check('networkAclBypass', 'AzureServices'),
+            self.check('networkAclBypassResourceIds[0]', fabric_network_acl_bypass_resource_id),
+        ]).get_output_in_json()
+        assert len(account['capabilities']) == 1
+        assert account['capabilities'][0]['name'] == "EnableFabricNetworkAclBypass"
 
     @unittest.skip('Skipping old test due to secrets in response')
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_database')
