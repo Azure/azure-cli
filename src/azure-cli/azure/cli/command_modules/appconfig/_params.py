@@ -190,6 +190,7 @@ def load_arguments(self, _):
         c.argument('arm_auth_mode', arg_type=arm_auth_mode_arg_type)
         c.argument('enable_arm_private_network_access', arg_type=enable_arm_private_network_access_arg_type)
         c.argument('kv_revision_retention_period', arg_type=kv_revision_retention_period_arg_type)
+        c.argument('azure_front_door_profile', help='Resource ID of an Azure Front Door profile to link to this App Configuration store.', is_preview=True)
 
     with self.argument_context('appconfig update') as c:
         c.argument('sku', help='The sku of the App Configuration store', arg_type=get_enum_type(['Free', 'Developer', 'Premium', 'Standard']))
@@ -201,6 +202,7 @@ def load_arguments(self, _):
         c.argument('arm_auth_mode', arg_type=arm_auth_mode_arg_type)
         c.argument('enable_arm_private_network_access', arg_type=enable_arm_private_network_access_arg_type)
         c.argument('kv_revision_retention_period', arg_type=kv_revision_retention_period_arg_type)
+        c.argument('azure_front_door_profile', help='Resource ID of an Azure Front Door profile to link to this App Configuration store. Pass "" to unlink a Front Door profile.', is_preview=True)
 
     with self.argument_context('appconfig recover') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), help='Location of the deleted App Configuration store. Can be viewed using command `az appconfig show-deleted`.')
