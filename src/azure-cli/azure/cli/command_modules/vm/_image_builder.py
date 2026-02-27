@@ -284,10 +284,16 @@ def process_image_template_create_namespace(cmd, namespace):  # pylint: disable=
 
     # 5 - check if source is an existing managed disk image resource
     if not source:
-        compute_client = _compute_client_factory(cmd.cli_ctx)
         try:
+            from .aaz.latest.image import Show as ImageShow
+            command_args = {
+                'image_name': namespace.source,
+                'resource_group': namespace.resource_group_name
+            }
+
+            # Purpose of calling ImageShow is just to check its existence
+            ImageShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
             image_name = namespace.source
-            compute_client.images.get(namespace.resource_group_name, namespace.source)
             namespace.source = _get_resource_id(cmd.cli_ctx, namespace.source, namespace.resource_group_name,
                                                 'images', 'Microsoft.Compute')
             source = {
