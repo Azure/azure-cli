@@ -190,13 +190,15 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         for change in resource_changes_sorted:
             # check if a new section should be started
             group = "Azure" if change.id else (
-                f"{change.extension.name}@{change.extension.version}" if change.extension else "Unknown")
+                f"{change.extension.name}@{change.extension.version}" if change.extension and not change.extension.config else (
+                    f"{change.extension.name}@{change.extension.version} Config: {json.dumps(change.extension.config)}" if change.extension and change.extension.config else "Unknown"
+                ))
 
             if group != last_group:
-                self._format_section_spacer()
-                self.builder.append_line(group)
                 last_group = group
                 has_potential_changes = False
+                self._format_section_spacer()
+                self.builder.append_line(group)
 
             if not has_potential_changes and str_lower_eq(change.change_certainty, StackModels.DeploymentStacksWhatIfChangeCertainty.POTENTIAL):
                 self.builder.append(">> ").append_line(
@@ -216,8 +218,8 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         # print stack management related changes
         self._push_indent()
         all_resource_changes = {
-            "Management Status Change": resource_change.management_status_change,
-            "Deny Status Change": resource_change.deny_status_change,
+            "Management Status": resource_change.management_status_change,
+            "Deny Status": resource_change.deny_status_change,
         }
 
         for path, change in all_resource_changes.items():
