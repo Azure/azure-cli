@@ -2532,17 +2532,7 @@ def _copy_single_secret(source_client, dest_client, secret_name, overwrite, is_s
             except ResourceNotFoundError:
                 pass
             except HttpResponseError as e:
-                status_code = getattr(e, "status_code", None)
-                if status_code == 403:
-                    logger.error("Access denied (403) checking secret '%s' in destination: %s", secret_name, str(e))
-                elif status_code is not None and 400 <= status_code < 500:
-                    logger.warning("Client error (%s) checking secret '%s' in destination: %s",
-                                   status_code, secret_name, str(e))
-                elif status_code is not None and status_code >= 500:
-                    logger.error("Server error (%s) checking secret '%s' in destination: %s",
-                                 status_code, secret_name, str(e))
-                else:
-                    logger.error("Unexpected error checking secret '%s' in destination: %s", secret_name, str(e))
+                logger.warning("Error checking secret '%s' in destination: %s", secret_name, str(e))
                 return False  # Failed
 
         # Copy
@@ -2561,7 +2551,7 @@ def _copy_single_secret(source_client, dest_client, secret_name, overwrite, is_s
             )
         except HttpResponseError as e:
             if is_single_mode:
-                raise CLIError(f"Failed to copy secret '{secret_name}': {str(e)}")
+                raise e
 
             logger.error("Failed to copy secret '%s': %s", secret_name, str(e))
             return False
@@ -2569,27 +2559,21 @@ def _copy_single_secret(source_client, dest_client, secret_name, overwrite, is_s
         logger.info("Successfully copied secret: %s", secret_name)
         return {'name': new_secret.name, 'id': new_secret.id}
 
-    except ResourceNotFoundError:
+    except ResourceNotFoundError as e:
         if is_single_mode:
-            raise CLIError("Secret '{}' not found in source vault.".format(secret_name))
+            raise e
         logger.error("Secret '%s' not found in source vault.", secret_name)
         return False
     except HttpResponseError as e:
         if is_single_mode:
-            raise CLIError("Failed to copy secret '{}': {}".format(secret_name, str(e)))
-
-        if e.status_code == 403:  # Forbidden
-            logger.error("Access denied (403) for secret '%s': %s", secret_name, str(e))
-        else:
-            logger.error("Failed to copy secret '%s': %s", secret_name, str(e))
+            raise e
+        logger.error("Failed to copy secret '%s': %s", secret_name, str(e))
         return False
 
 
 def copy_secret(cmd, client, destination_vault, name=None, all_secrets=None, overwrite=False):
     from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
-    from azure.keyvault.secrets import SecretClient
-    from azure.cli.core._profile import Profile
-    from azure.cli.core.commands.client_factory import prepare_client_kwargs_track2
+    from azure.cli.command_modules.keyvault._client_factory import data_plane_azure_keyvault_secret_client
 
     # If neither a specific secret name nor --all is provided, default to copying all secrets.
     if not name and not all_secrets:
@@ -2602,43 +2586,24 @@ def copy_secret(cmd, client, destination_vault, name=None, all_secrets=None, ove
     if client.vault_url.rstrip('/') == destination_vault.rstrip('/'):
         raise CLIError("Source and destination Key Vaults cannot be the same.")
 
-    credential = None
-    if hasattr(client, 'credential'):
-        credential = client.credential
+    command_args = {'vault_base_url': destination_vault}
+    dest_client = data_plane_azure_keyvault_secret_client(cmd.cli_ctx, command_args)
 
-    if not credential:
-        logger.warning("Credential not found on source client. Falling back to Profile.")
-        from azure.cli.core._profile import Profile
-        profile = Profile(cli_ctx=cmd.cli_ctx)
-        credential, _, _ = profile.get_login_credentials(subscription_id=cmd.cli_ctx.data.get('subscription_id'))
-
-    # Use standard client kwargs for consistent logging/telemetry
-    client_kwargs = prepare_client_kwargs_track2(cmd.cli_ctx)
-    # KeyVault clients handle this internally or differently sometimes, mimicking _client_factory
-    client_kwargs.pop('http_logging_policy', None)
-
-    dest_client = SecretClient(
-        vault_url=destination_vault,
-        credential=credential,
-        api_version='7.4',
-        verify_challenge_resource=False,
-        **client_kwargs
-    )
-
-    # Fail fast if destination vault is not accessible or does not exist
-    try:
-        # Perform a lightweight call to validate vault accessibility.
-        # A 404 for a dummy secret name means the vault is reachable but the secret does not exist.
-        dest_client.get_secret("azure-cli-validation-dummy")
-    except ResourceNotFoundError:
-        # Vault is accessible but the dummy secret does not exist, which is expected.
-        pass
-    except HttpResponseError as e:
-        if e.status_code == 404:
+    # Fail fast if source or destination vault is not accessible or does not exist
+    for c, vault_url in [(client, client.vault_url), (dest_client, destination_vault)]:
+        try:
+            # Perform a lightweight call to validate vault accessibility.
+            # A 404 for a dummy secret name means the vault is reachable but the secret does not exist.
+            c.get_secret("azure-cli-validation-dummy")
+        except ResourceNotFoundError:
             # Vault is accessible but the dummy secret does not exist, which is expected.
             pass
-        else:
-            raise CLIError(f"Failed to access destination Key Vault '{destination_vault}': {str(e)}")
+        except HttpResponseError as e:
+            if e.status_code == 404:
+                # Vault is accessible but the dummy secret does not exist, which is expected.
+                pass
+            else:
+                raise CLIError(f"Failed to access Key Vault '{vault_url}': {str(e)}")
 
     secrets_to_copy = []
     if name:
