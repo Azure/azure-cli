@@ -320,7 +320,7 @@ def load_command_table(self, _):
         g.custom_command('enable', 'enable_boot_diagnostics')
         g.custom_command('get-boot-log', 'get_boot_log')
 
-    with self.command_group('vm diagnostics', compute_vm_sdk) as g:
+    with self.command_group('vm diagnostics') as g:
         g.custom_command('set', 'set_diagnostics_extension')
         g.custom_command('get-default-config', 'show_default_diagnostics_configuration')
 
