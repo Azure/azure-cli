@@ -2969,6 +2969,11 @@ class KeyVaultSecretCopyScenarioTest(ScenarioTest):
                  '--name {nonexistent_secret}',
                  expect_failure=True)
 
+        # Test 2.5: Copy from non-existent source vault (should fail)
+        self.cmd('keyvault secret copy --source-vault {nonexistent_kv} --destination-vault {dest_kv} '
+                 '--name {secret}',
+                 expect_failure=True)
+
         # Test 3: Source and destination are the same (should fail)
         self.cmd('keyvault secret copy --source-vault {src_kv} --destination-vault {src_kv} '
                  '--name {secret}',
@@ -3035,18 +3040,9 @@ class KeyVaultSecretCopyUnitTest(unittest.TestCase):
             'command': 'keyvault secret copy'
         }
 
-        # Mock Profile for authentication
-        self.patcher_profile = mock.patch('azure.cli.core._profile.Profile')
-        self.mock_profile_class = self.patcher_profile.start()
-        self.mock_profile_instance = mock.MagicMock()
-        self.mock_profile_class.return_value = self.mock_profile_instance
-        self.mock_profile_instance.get_login_credentials.return_value = (
-            mock.Mock(), mock.Mock(), mock.Mock()
-        )
-
-        # Mock SecretClient
-        self.patcher_secret_client = mock.patch('azure.keyvault.secrets.SecretClient')
-        self.mock_secret_client_class = self.patcher_secret_client.start()
+        # Mock data_plane_azure_keyvault_secret_client
+        self.patcher_secret_client = mock.patch('azure.cli.command_modules.keyvault._client_factory.data_plane_azure_keyvault_secret_client')
+        self.mock_secret_client_factory = self.patcher_secret_client.start()
 
         # Create source and destination client mocks
         self.source_client = mock.MagicMock()
@@ -3054,11 +3050,10 @@ class KeyVaultSecretCopyUnitTest(unittest.TestCase):
 
         self.dest_client = mock.MagicMock()
         self.dest_client.vault_url = "https://destination-vault.vault.azure.net/"
-        self.mock_secret_client_class.return_value = self.dest_client
+        self.mock_secret_client_factory.return_value = self.dest_client
 
     def tearDown(self):
         """Clean up mocks."""
-        self.patcher_profile.stop()
         self.patcher_secret_client.stop()
 
     def _create_mock_secret(self, name, value, content_type=None, tags=None, enabled=True,
@@ -3090,15 +3085,15 @@ class KeyVaultSecretCopyUnitTest(unittest.TestCase):
             not_found_error,
             ResourceNotFoundError("Secret not found")
         ]
-
-        # Mock source secret
-        source_secret = self._create_mock_secret(
-            name=secret_name,
-            value="secret-value-123",
-            content_type="application/json",
-            tags={"env": "test", "version": "1.0"}
-        )
-        self.source_client.get_secret.return_value = source_secret
+        self.source_client.get_secret.side_effect = [
+            not_found_error,
+            self._create_mock_secret(
+                name=secret_name,
+                value="secret-value-123",
+                content_type="application/json",
+                tags={"env": "test", "version": "1.0"}
+            )
+        ]
 
         # Mock successful set operation
         dest_secret = self._create_mock_secret(
@@ -3136,6 +3131,7 @@ class KeyVaultSecretCopyUnitTest(unittest.TestCase):
         # Mock sequence: connectivity check (404), then existence check (found)
         existing_secret = self._create_mock_secret(name=secret_name, value="existing-value")
         self.dest_client.get_secret.side_effect = [not_found_error, existing_secret]
+        self.source_client.get_secret.side_effect = [not_found_error, existing_secret]
 
         # Execute copy operation without overwrite
         result = copy_secret(
@@ -3160,13 +3156,14 @@ class KeyVaultSecretCopyUnitTest(unittest.TestCase):
         not_found_error.status_code = 404
         self.dest_client.get_secret.side_effect = [not_found_error]
 
-        # Mock source secret with new value
-        source_secret = self._create_mock_secret(
-            name=secret_name,
-            value="new-overwrite-value",
-            tags={"updated": "true"}
-        )
-        self.source_client.get_secret.return_value = source_secret
+        self.source_client.get_secret.side_effect = [
+            not_found_error,
+            self._create_mock_secret(
+                name=secret_name,
+                value="new-overwrite-value",
+                tags={"updated": "true"}
+            )
+        ]
 
         # Mock successful set operation
         dest_secret = self._create_mock_secret(name=secret_name, value="new-overwrite-value")
