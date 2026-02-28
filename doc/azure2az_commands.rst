@@ -1,4 +1,3 @@
-
 Azure classic CLI to Azure CLI commands
 =========================================
 Below is a list of common Azure classic CLI commands and their Azure CLI equivalent.
