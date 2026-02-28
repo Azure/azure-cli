@@ -1555,12 +1555,7 @@ def start_containerappsjob(cmd,
 
     template_def = None
 
-    # Check if any container override parameters are provided
-    has_container_overrides = (image is not None or container_name is not None or
-                               env_vars is not None or startup_command is not None or
-                               args is not None or cpu is not None or memory is not None)
-
-    if has_container_overrides:
+    if image is not None:
         template_def = JobExecutionTemplateModel
         container_def = ContainerModel
         resources_def = None
@@ -1570,11 +1565,7 @@ def start_containerappsjob(cmd,
             resources_def["memory"] = memory
 
         container_def["name"] = container_name if container_name else name
-
-        # If no image is provided, fetch the existing job's image
-        if image is not None:
-            container_def["image"] = image if not is_registry_msi_system(registry_identity) else HELLO_WORLD_IMAGE
-
+        container_def["image"] = image if not is_registry_msi_system(registry_identity) else HELLO_WORLD_IMAGE
         if env_vars is not None:
             container_def["env"] = parse_env_var_flags(env_vars)
         if startup_command is not None:

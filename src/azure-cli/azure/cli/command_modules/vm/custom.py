@@ -2303,30 +2303,30 @@ def get_boot_log(cmd, resource_group_name, vm_name):
 
 
 # region VirtualMachines Diagnostics
-def set_diagnostics_extension(cmd, resource_group_name, vm_name, settings, protected_settings=None, version=None,
-                              no_auto_upgrade=False):
-    from .aaz.latest.vm.extension import Delete as VmExtensionDelete
-    vm = get_instance_view(cmd, resource_group_name, vm_name)
-    is_linux_os = _is_linux_os_aaz(vm)
+def set_diagnostics_extension(
+        cmd, resource_group_name, vm_name, settings, protected_settings=None, version=None,
+        no_auto_upgrade=False):
+    client = _compute_client_factory(cmd.cli_ctx)
+    vm = client.virtual_machines.get(resource_group_name, vm_name, expand='instanceView')
+    # pylint: disable=no-member
+    is_linux_os = _is_linux_os(vm)
     vm_extension_name = _LINUX_DIAG_EXT if is_linux_os else _WINDOWS_DIAG_EXT
     if is_linux_os:  # check incompatible version
-        exts = vm.get('instanceView', {}).get('extensions', [])
+        exts = vm.instance_view.extensions or []
         major_ver = extension_mappings[_LINUX_DIAG_EXT]['version'].split('.', maxsplit=1)[0]
-        if next((e for e in exts if e.get('name') == vm_extension_name and
-                 not e.get('typeHandlerVersion', '').startswith(major_ver + '.')), None):
+        if next((e for e in exts if e.name == vm_extension_name and
+                 not e.type_handler_version.startswith(major_ver + '.')), None):
             logger.warning('There is an incompatible version of diagnostics extension installed. '
                            'We will update it with a new version')
-            poller = VmExtensionDelete(cli_ctx=cmd.cli_ctx)(command_args={
-                'resource_group': resource_group_name,
-                'vm_extension_name': vm_extension_name,
-                'vm_name': vm_name
-            })
+            poller = client.virtual_machine_extensions.begin_delete(resource_group_name, vm_name, vm_extension_name)
             LongRunningOperation(cmd.cli_ctx)(poller)
 
     return set_extension(cmd, resource_group_name, vm_name, vm_extension_name,
                          extension_mappings[vm_extension_name]['publisher'],
                          version or extension_mappings[vm_extension_name]['version'],
-                         settings, protected_settings, no_auto_upgrade)
+                         settings,
+                         protected_settings,
+                         no_auto_upgrade)
 
 
 def show_default_diagnostics_configuration(is_windows_os=False):
@@ -2348,13 +2348,12 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
                              source_snapshots_or_disks=None, source_disk_restore_point=None,
                              new_names_of_source_snapshots_or_disks=None, new_names_of_source_disk_restore_point=None):
     # attach multiple managed disks using disk attach API
-    vm = get_vm_to_update_by_aaz(cmd, resource_group_name, vm_name)
-
+    vm = get_vm_to_update(cmd, resource_group_name, vm_name)
     if not new and not sku and not size_gb and disk_ids is not None:
         if lun:
             disk_lun = lun
         else:
-            disk_lun = _get_disk_lun_by_aaz(vm.get("storageProfile", {}).get("dataDisks", []))
+            disk_lun = _get_disk_lun(vm.storage_profile.data_disks)
 
         data_disks = []
         for disk_item in disk_ids:
@@ -2375,8 +2374,8 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
     else:
         # attach multiple managed disks using vm PUT API
         from azure.mgmt.core.tools import parse_resource_id
-        from .operations.vm import convert_show_result_to_snake_case
-
+        DataDisk, ManagedDiskParameters, DiskCreateOption = cmd.get_models(
+            'DataDisk', 'ManagedDiskParameters', 'DiskCreateOptionTypes')
         if size_gb is None:
             default_size_gb = 1023
 
@@ -2387,46 +2386,30 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
             if lun:
                 disk_lun = lun
             else:
-                disk_lun = _get_disk_lun_by_aaz(vm.get("storageProfile", {}).get("dataDisks", []))
+                disk_lun = _get_disk_lun(vm.storage_profile.data_disks)
 
             if new:
-                data_disk = {
-                    'lun': disk_lun,
-                    'createOption': 'Empty',
-                    'name': parse_resource_id(disk_item)['name'],
-                    'diskSizeGB': size_gb if size_gb else default_size_gb,
-                    'caching': caching,
-                    'managedDisk': {
-                        'storageAccountType': sku
-                    }
-                }
+                data_disk = DataDisk(lun=disk_lun, create_option=DiskCreateOption.empty,
+                                     name=parse_resource_id(disk_item)['name'],
+                                     disk_size_gb=size_gb if size_gb else default_size_gb, caching=caching,
+                                     managed_disk=ManagedDiskParameters(storage_account_type=sku))
             else:
-                data_disk = {
-                    'lun': disk_lun,
-                    'createOption': 'Attach',
-                    'managedDisk': {
-                        'id': disk_item,
-                        'storageAccountType': sku
-                    },
-                    'caching': caching
-                }
+                params = ManagedDiskParameters(id=disk_item, storage_account_type=sku)
+                data_disk = DataDisk(lun=disk_lun, create_option=DiskCreateOption.attach, managed_disk=params,
+                                     caching=caching)
 
             if enable_write_accelerator:
-                data_disk["writeAcceleratorEnabled"] = enable_write_accelerator
+                data_disk.write_accelerator_enabled = enable_write_accelerator
 
-            if "storageProfile" not in vm:
-                vm["storageProfile"] = {}
-            if "dataDisks" not in vm["storageProfile"]:
-                vm["storageProfile"]["dataDisks"] = []
-            vm["storageProfile"]["dataDisks"].append(data_disk)
-        disk_lun = _get_disk_lun_by_aaz(vm.get("storageProfile", {}).get("dataDisks", []))
+            vm.storage_profile.data_disks.append(data_disk)
+        disk_lun = _get_disk_lun(vm.storage_profile.data_disks)
         if source_snapshots_or_disks is not None:
             if new_names_of_source_snapshots_or_disks is None:
                 new_names_of_source_snapshots_or_disks = [None] * len(source_snapshots_or_disks)
             for disk_id, disk_name in zip(source_snapshots_or_disks, new_names_of_source_snapshots_or_disks):
                 disk = {
                     'name': disk_name,
-                    'createOption': 'Copy',
+                    'create_option': 'Copy',
                     'caching': caching,
                     'lun': disk_lun,
                     'writeAcceleratorEnabled': enable_write_accelerator,
@@ -2436,7 +2419,7 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
                 }
                 if size_gb is not None:
                     disk.update({
-                        'diskSizeGB': size_gb
+                        'diskSizeGb': size_gb
                     })
                 if sku is not None:
                     disk.update({
@@ -2445,18 +2428,14 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
                         }
                     })
                 disk_lun += 1
-                if "storageProfile" not in vm:
-                    vm["storageProfile"] = {}
-                if "dataDisks" not in vm["storageProfile"]:
-                    vm["storageProfile"]["dataDisks"] = []
-                vm["storageProfile"]["dataDisks"].append(disk)
+                vm.storage_profile.data_disks.append(disk)
         if source_disk_restore_point is not None:
             if new_names_of_source_disk_restore_point is None:
                 new_names_of_source_disk_restore_point = [None] * len(source_disk_restore_point)
             for disk_id, disk_name in zip(source_disk_restore_point, new_names_of_source_disk_restore_point):
                 disk = {
                     'name': disk_name,
-                    'createOption': 'Restore',
+                    'create_option': 'Restore',
                     'caching': caching,
                     'lun': disk_lun,
                     'writeAcceleratorEnabled': enable_write_accelerator,
@@ -2466,7 +2445,7 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
                 }
                 if size_gb is not None:
                     disk.update({
-                        'diskSizeGB': size_gb
+                        'diskSizeGb': size_gb
                     })
                 if sku is not None:
                     disk.update({
@@ -2475,14 +2454,9 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
                         }
                     })
                 disk_lun += 1
-                if "storageProfile" not in vm:
-                    vm["storageProfile"] = {}
-                if "dataDisks" not in vm["storageProfile"]:
-                    vm["storageProfile"]["dataDisks"] = []
-                vm["storageProfile"]["dataDisks"].append(disk)
+                vm.storage_profile.data_disks.append(disk)
 
-        vm = convert_show_result_to_snake_case(vm)
-        set_vm_by_aaz(cmd, vm)
+        set_vm(cmd, vm)
 
 
 def detach_unmanaged_data_disk(cmd, resource_group_name, vm_name, disk_name):
@@ -2502,8 +2476,6 @@ def detach_unmanaged_data_disk(cmd, resource_group_name, vm_name, disk_name):
 
 
 def detach_managed_data_disk(cmd, resource_group_name, vm_name, disk_name=None, force_detach=None, disk_ids=None):
-    from .operations.vm import convert_show_result_to_snake_case
-
     if disk_ids is not None:
         data_disks = []
         for disk_item in disk_ids:
@@ -2517,29 +2489,27 @@ def detach_managed_data_disk(cmd, resource_group_name, vm_name, disk_name=None, 
         return result
     else:
         # here we handle managed disk
-        vm = get_vm_to_update_by_aaz(cmd, resource_group_name, vm_name)
+        vm = get_vm_to_update(cmd, resource_group_name, vm_name)
         if not force_detach:
             # pylint: disable=no-member
-            leftovers = [d for d in vm.get("storageProfile", {}).get("dataDisks", [])
-                         if d["name"].lower() != disk_name.lower()]
-            if len(vm.get("storageProfile", {}).get("dataDisks", [])) == len(leftovers):
+            leftovers = [d for d in vm.storage_profile.data_disks if d.name.lower() != disk_name.lower()]
+            if len(vm.storage_profile.data_disks) == len(leftovers):
                 raise ResourceNotFoundError("No disk with the name '{}' was found".format(disk_name))
         else:
-            leftovers = vm.get("storageProfile", {}).get("dataDisks", [])
+            DiskDetachOptionTypes = cmd.get_models('DiskDetachOptionTypes', resource_type=ResourceType.MGMT_COMPUTE,
+                                                   operation_group='virtual_machines')
+            leftovers = vm.storage_profile.data_disks
             is_contains = False
             for d in leftovers:
-                if d["name"].lower() == disk_name.lower():
-                    d["toBeDetached"] = True
-                    d["detachOption"] = "ForceDetach"
+                if d.name.lower() == disk_name.lower():
+                    d.to_be_detached = True
+                    d.detach_option = DiskDetachOptionTypes.FORCE_DETACH
                     is_contains = True
                     break
             if not is_contains:
                 raise ResourceNotFoundError("No disk with the name '{}' was found".format(disk_name))
-        if "storageProfile" not in vm:
-            vm["storageProfile"] = {}
-        vm["storageProfile"]["dataDisks"] = leftovers
-        vm = convert_show_result_to_snake_case(vm)
-        set_vm_by_aaz(cmd, vm)
+        vm.storage_profile.data_disks = leftovers
+        set_vm(cmd, vm)
 # endregion
 
 
