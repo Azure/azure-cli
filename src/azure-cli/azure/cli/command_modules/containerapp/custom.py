@@ -5035,7 +5035,7 @@ def set_workload_profile(cmd, resource_group_name, env_name, workload_profile_na
     return update_managed_environment(cmd, env_name, resource_group_name, workload_profile_type=workload_profile_type, workload_profile_name=workload_profile_name, min_nodes=min_nodes, max_nodes=max_nodes)
 
 
-def add_workload_profile(cmd, resource_group_name, env_name, workload_profile_name, workload_profile_type=None, min_nodes=None, max_nodes=None):
+def add_workload_profile(cmd, resource_group_name, env_name, workload_profile_name=None, workload_profile_type=None, min_nodes=None, max_nodes=None):
     r = None
     try:
         r = ManagedEnvironmentClient.show(cmd=cmd, resource_group_name=resource_group_name, name=env_name)
@@ -5050,7 +5050,7 @@ def add_workload_profile(cmd, resource_group_name, env_name, workload_profile_na
 
     workload_profiles_lower = [p["name"].lower() for p in workload_profiles]
 
-    if workload_profile_name.lower() in workload_profiles_lower:
+    if workload_profile_name and workload_profile_name.lower() in workload_profiles_lower:
         raise ValidationError(f"Cannot add workload profile with name {workload_profile_name} because it already exists in this environment")
 
     return update_managed_environment(cmd, env_name, resource_group_name, workload_profile_type=workload_profile_type, workload_profile_name=workload_profile_name, min_nodes=min_nodes, max_nodes=max_nodes)
