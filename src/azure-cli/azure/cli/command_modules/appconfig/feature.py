@@ -43,33 +43,31 @@ logger = get_logger(__name__)
 # Feature commands #
 
 
-def warn_if_app_insights_not_linked(cmd, store_name):
+def warn_if_app_insights_not_set(cmd, store_name):
     """
-    Check if Application Insights resource ID is linked to the App Configuration store.
-    Emits a warning if not linked or if permissions are insufficient.
+    Check if Application Insights resource is set for the App Configuration store.
+    Emits a warning if not set or if the check cannot be completed.
     """
-    try:
-        from ._client_factory import cf_configstore
+    from ._client_factory import cf_configstore
 
+    try:
         resource_group_name, _ = resolve_store_metadata(cmd, store_name)
         configstore_client = cf_configstore(cmd.cli_ctx)
         store = configstore_client.get(resource_group_name, store_name)
 
-        telemetry = getattr(store, 'telemetry', None)
-        is_linked = bool(getattr(telemetry, 'resource_id', None)) if telemetry else False
+        telemetry = getattr(store, "telemetry", None)
+        is_linked = bool(getattr(telemetry, "resource_id", None)) if telemetry else False
 
         if not is_linked:
             logger.warning(
-                "Application Insights is not linked to this App Configuration store. "
-                "To collect telemetry, link an Application Insights resource to the store."
+                "App Insights resource for the App Configuration store is not set."
+                "To collect telemetry, connect to an App Insights resource."
             )
 
     except Exception as ex:  # pylint: disable=broad-except
         logger.warning(
-            "Application Insights linkage could not be verified due to insufficient permissions. "
-            "Ensure the store is linked to an Application Insights resource to collect telemetry."
+            "Unable to verify App Insights resource for the App Configuration store: %s", str(ex)
         )
-        logger.debug("Error checking App Insights linkage: %s", str(ex))
 
 
 def set_feature(cmd,
@@ -120,7 +118,7 @@ def set_feature(cmd,
     if telemetry_enabled is not None:
         default_value[FeatureFlagConstants.TELEMETRY] = {FeatureFlagConstants.ENABLED: telemetry_enabled}
         if telemetry_enabled:
-            warn_if_app_insights_not_linked(cmd, name)
+            warn_if_app_insights_not_set(cmd, name)
 
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
@@ -181,7 +179,7 @@ def set_feature(cmd,
                         feature_flag_value.telemetry.enabled = telemetry_enabled
 
                     if telemetry_enabled:
-                        warn_if_app_insights_not_linked(cmd, name)
+                        warn_if_app_insights_not_set(cmd, name)
 
                 set_kv = KeyValue(key=key,
                                   label=label,

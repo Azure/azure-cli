@@ -624,7 +624,8 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
                      checks=[self.check('name', feature_name),
                              self.check('telemetry.enabled', True)])
             mock_logger.warning.assert_any_call(
-                "Application Insights is not linked to this App Configuration store. To collect telemetry, link an Application Insights resource to the store."
+                "App Insights resource for the App Configuration store is not set."
+                "To collect telemetry, connect to an App Insights resource."
             )
 
         # Link App Insights to the store
@@ -644,10 +645,10 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
             self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} --telemetry-enabled true -y',
                      checks=[self.check('name', feature_name),
                              self.check('telemetry.enabled', True)])
-            # The "not linked" warning should not have been emitted
+            # The "not set" warning should not have been emitted
             warning_calls = [str(c) for c in mock_logger.warning.call_args_list]
-            assert not any("Application Insights is not linked" in w for w in warning_calls), \
-                "Expected no App Insights linkage warning after linking, but warning was emitted"
+            assert not any("App Insights resource for the App Configuration store is not set" in w for w in warning_calls), \
+                "Expected no App Insights warning after linking, but warning was emitted"
 
 
 class AppConfigFeatureFilterScenarioTest(ScenarioTest):
