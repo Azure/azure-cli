@@ -4570,7 +4570,7 @@ def scale_vmss(cmd, resource_group_name, vm_scale_set_name, new_capacity, no_wai
     if vmss.get('extended_location'):
         vmss_new['extended_location'] = vmss.get('extendedLocation')
 
-    return VMSSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss)
+    return VMSSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss_new)
 
 
 def stop_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False, skip_shutdown=False):
