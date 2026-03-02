@@ -1,0 +1,115 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+
+import json
+import os
+import unittest
+
+import azure.mgmt.resource.deploymentstacks.models as StackModels
+
+from azure.cli.command_modules.resource._color import Color
+from azure.cli.command_modules.resource._stacks_formatters import DeploymentStacksWhatIfResultFormatter
+
+
+class TestStacksWhatIfResultFormatter(unittest.TestCase):
+
+    def test_what_if_1(self):
+        what_if_result = self._get_stacks_what_if_result("what-if-1.json")
+
+        self.assertEqual(self.EXPECTED_STACKS_WHAT_IF_1, DeploymentStacksWhatIfResultFormatter().format(what_if_result))
+
+        expected_no_color_result = self.EXPECTED_STACKS_WHAT_IF_1
+        for color in list(Color):
+            expected_no_color_result = expected_no_color_result.replace(str(color), '')
+
+        self.assertEqual(
+            expected_no_color_result, DeploymentStacksWhatIfResultFormatter(enable_color=False).format(what_if_result))
+
+    def _get_stacks_what_if_result(self, file_name: str):
+        return StackModels.DeploymentStacksWhatIfResult(self._get_stacks_what_if_json(file_name))
+
+    @staticmethod
+    def _get_stacks_what_if_json(file_name: str):
+        with open(TestStacksWhatIfResultFormatter._get_stacks_what_if_test_file_path(file_name), 'r') as f:
+            return json.load(f)
+
+    @staticmethod
+    def _get_stacks_what_if_test_file_path(file_name: str):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        return os.path.join(os.path.join(curr_dir, 'data\\stacks-what-if'), file_name).replace('\\', '\\\\')
+
+    EXPECTED_STACKS_WHAT_IF_1 = f"""Resource and property changes are indicated with these symbols:
+  {Color.GREEN}+{Color.RESET} Create              ! Unsupported
+  {Color.PURPLE}~{Color.RESET} Modify              {Color.RED}-{Color.RESET} Delete
+  = NoChange            {Color.BLUE}v{Color.RESET} Detach
+
+{Color.DARK_YELLOW}Changes to Stack /subscriptions/6d41d86d-eb6b-473a-b31d-bbd084e1814d/resourceGroups/503ace4c-9b1c-4059-a3e9-09553d24e9e1/providers/Microsoft.Resources/deploymentStacks/testStack_9ef16884f0dad7d0e5de3d3ec57:{Color.RESET}
+{Color.PURPLE}~ DeploymentScope: {Color.RESET}"ThisIsBefore" => "ThisIsAfter"
+{Color.PURPLE}~ DenySettings.Mode: {Color.RESET}"None" => "DenyDelete"
+{Color.PURPLE}~ DenySettings.ApplyToChildScopes: {Color.RESET}"False" => "True"
+{Color.PURPLE}~ DenySettings.ExcludedPrincipals: {Color.RESET}
+  {Color.GREEN}+ {Color.RESET}{Color.GREEN}"004afc20-146e-4932-a8b5-3098461c46a5"{Color.RESET}
+  {Color.GREEN}+ {Color.RESET}{Color.GREEN}"e6a513a0-b872-4355-82b9-47645fb30d3a"{Color.RESET}
+{Color.PURPLE}~ DenySettings.ArrayOfMixed: {Color.RESET}
+  {Color.PURPLE}~{Color.RESET} 0:
+    {Color.PURPLE}~ properties.something: {Color.RESET}"B4" => "Now"
+  {Color.GREEN}+{Color.RESET} 1:
+    {Color.GREEN}+ {Color.RESET}{Color.GREEN}"now"{Color.RESET}
+  {Color.RED}-{Color.RESET} 2:
+    {Color.RED}- {Color.RESET}{Color.RED}"iWasDeleted"{Color.RESET}
+
+{Color.DARK_YELLOW}Changes to Managed Resources:{Color.RESET}
+
+Azure
+{Color.PURPLE}~ {Color.RESET}{Color.PURPLE}/subscriptions/6d41d86d-eb6b-473a-b31d-bbd084e1814d/resourceGroups/503ace4c-9b1c-4059-a3e9-09553d24e9e1/providers/Microsoft.Test/testA/resourceA{Color.RESET}
+  = Management Status: "Managed"
+  {Color.PURPLE}~ Deny Status: {Color.RESET}"None" => "DenyDelete"
+  {Color.PURPLE}~ properties.properties1: {Color.RESET}"resourceA-before" => "resourceA-after"
+= /subscriptions/6d41d86d-eb6b-473a-b31d-bbd084e1814d/resourceGroups/503ace4c-9b1c-4059-a3e9-09553d24e9e1/providers/Microsoft.Test/testB/resourceB
+  = Management Status: "Managed"
+  {Color.PURPLE}~ Deny Status: {Color.RESET}"None" => "DenyDelete"
+{Color.GREEN}+ {Color.RESET}{Color.GREEN}/subscriptions/6d41d86d-eb6b-473a-b31d-bbd084e1814d/resourceGroups/503ace4c-9b1c-4059-a3e9-09553d24e9e1/providers/Microsoft.Test/testD/resourceD{Color.RESET}
+  {Color.PURPLE}~ Management Status: {Color.RESET}"NotManaged" => "Managed"
+  {Color.PURPLE}~ Deny Status: {Color.RESET}"None" => "DenyDelete"
+>> {Color.PURPLE}Potential Resource Changes (Learn more at https://aka.ms/whatIfPotentialChanges){Color.RESET}
+{Color.CYAN}?{Color.RESET}{Color.PURPLE}~ {Color.RESET}{Color.CYAN}[Potential] {Color.RESET}{Color.PURPLE}/subscriptions/6d41d86d-eb6b-473a-b31d-bbd084e1814d/resourceGroups/503ace4c-9b1c-4059-a3e9-09553d24e9e1/providers/Microsoft.Test/testC/resourceC{Color.RESET}
+  = Management Status: "Managed"
+  {Color.PURPLE}~ Deny Status: {Color.RESET}"None" => "DenyDelete"
+  {Color.PURPLE}~ properties.properties1: {Color.RESET}"resourceC-before" => "resourceC-potential-after"
+{Color.CYAN}?{Color.RESET}{Color.RED}- {Color.RESET}{Color.CYAN}[Potential] {Color.RESET}{Color.RED}/subscriptions/6d41d86d-eb6b-473a-b31d-bbd084e1814d/resourceGroups/503ace4c-9b1c-4059-a3e9-09553d24e9e1/providers/Microsoft.Test/testC/resourceC{Color.RESET}
+  {Color.PURPLE}~ Management Status: {Color.RESET}"Managed" => "NotManaged"
+  = Deny Status: "None"
+
+Contoso@2.0.0
+{Color.PURPLE}~ {Color.RESET}{Color.PURPLE}Contoso/example name="abcResource"{Color.RESET}
+  {Color.PURPLE}~ Management Status: {Color.RESET}null => "Managed"
+  {Color.PURPLE}~ Deny Status: {Color.RESET}null => "NotApplicable"
+  {Color.PURPLE}~ properties.properties1: {Color.RESET}"resourceA-before" => "resourceA-after"
+{Color.RED}- {Color.RESET}{Color.RED}Contoso/example name="defResource"{Color.RESET}
+  {Color.PURPLE}~ Management Status: {Color.RESET}null => "Managed"
+  {Color.PURPLE}~ Deny Status: {Color.RESET}null => "NotApplicable"
+  {Color.PURPLE}~ properties.properties1: {Color.RESET}"resourceA-before" => "resourceA-after"
+
+Kubernetes@2.0.0 namespace="myNs", kubeconfig=<Secret 'mySecret' in key vault '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.KeyVault/vaults/myKeyVault'>
+{Color.GREEN}+ {Color.RESET}{Color.GREEN}app/Deployment name="abcResource"{Color.RESET}
+  {Color.PURPLE}~ Management Status: {Color.RESET}null => "Managed"
+  {Color.PURPLE}~ Deny Status: {Color.RESET}null => "NotApplicable"
+  {Color.PURPLE}~ properties.properties1: {Color.RESET}"resourceA-before" => "resourceA-after"
+
+{Color.RED}Deleting - {Color.RESET}Resources Marked for Deletion 2 total:
+
+Azure
+>> {Color.RED}Potential Deletions 1 total (Learn more at https://aka.ms/whatIfPotentialChanges){Color.RESET}
+{Color.CYAN}?{Color.RESET}{Color.RED}- {Color.RESET}{Color.CYAN}[Potential] {Color.RESET}{Color.RED}/subscriptions/6d41d86d-eb6b-473a-b31d-bbd084e1814d/resourceGroups/503ace4c-9b1c-4059-a3e9-09553d24e9e1/providers/Microsoft.Test/testC/resourceC{Color.RESET}
+
+Contoso@2.0.0
+{Color.RED}- {Color.RESET}{Color.RED}Contoso/example name="defResource"{Color.RESET}
+
+Diagnostics (4):
+INFO: [InfoCode] InfoMessage
+{Color.DARK_YELLOW}WARNING: [Abc] Xyz{Color.RESET}
+{Color.DARK_YELLOW}WARNING: [NoSupportForExtensibleResources] Extensible resources are currently not supported{Color.RESET}
+{Color.RED}ERROR: [ErrorCode] ErrorMessage{Color.RESET}
+"""
