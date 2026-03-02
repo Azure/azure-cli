@@ -23,7 +23,7 @@ Archive Contents:
     ├── bin/
     │   └── az (entry script - Homebrew or AZ_PYTHON)
     ├── lib/
-    │   └── python3.13/
+    │   └── python3.13
     │       └── site-packages/
     │           ├── azure/
     │           ├── msal/
@@ -32,10 +32,10 @@ Archive Contents:
 ```
 
 Usage:
-    python build_binary_tar_gz_v3.py --help
-    python build_binary_tar_gz_v3.py --platform-tag macos-arm64
-    python build_binary_tar_gz_v3.py --platform-tag macos-arm64 --output-dir ./dist/custom
-    python build_binary_tar_gz_v3.py --platform-tag macos-arm64 --keep-temp    
+    python build_binary_tar_gz.py --help
+    python build_binary_tar_gz.py --platform-tag macos-arm64
+    python build_binary_tar_gz.py --platform-tag macos-arm64 --output-dir ./dist/custom
+    python build_binary_tar_gz.py --platform-tag macos-arm64 --keep-temp    
 
 Requirements:
     - Homebrew python@x.yz installed: brew install python@x.yz
