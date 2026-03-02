@@ -203,6 +203,10 @@ If you would like to get builds of arbitrary commit or PR, see:
 
 [Try new features before release](doc/try_new_features_before_release.md)
 
+### Non-interactive authentication for automation
+
+We've added a short guide and helper script for non-interactive authentication (service principal, managed identity, workload identity) used by CI/CD and headless servers. See `doc/non_interactive_auth.md` and `scripts/non_interactive_login.py` for examples and secure patterns.
+
 ## Developer setup
 
 If you would like to setup a development environment and contribute to the CLI, see:
