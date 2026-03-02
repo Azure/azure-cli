@@ -272,3 +272,15 @@ def validate_msi(cmd, namespace, from_identity_command=False):
 class RollbackAction(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
         setattr(namespace, 'rollback_on_error', '' if not values else values)
+
+
+def iso_8601_duration(value):
+    """Validate the correct format of a timespan string and deserialize."""
+    from msrest.serialization import Deserializer
+    from msrest.exceptions import DeserializationError
+    try:
+        duration_obj = Deserializer.deserialize_duration(value)
+    except DeserializationError:
+        message = "Argument {} is not in a valid ISO-8601 duration format"
+        raise ValueError(message.format(value))
+    return duration_obj

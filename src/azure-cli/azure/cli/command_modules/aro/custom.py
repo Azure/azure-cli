@@ -8,25 +8,41 @@ import random
 from base64 import b64decode
 import textwrap
 
-from azure.core.exceptions import HttpResponseError, \
-    ResourceNotFoundError as CoreResourceNotFoundError
-from azure.mgmt.core.tools import resource_id, parse_resource_id
 import azure.mgmt.redhatopenshift.models as openshiftcluster
 
-from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from azure.cli.core.commands.client_factory import get_subscription_id
+from azure.cli.command_modules.role import GraphError
+from azure.cli.core.commands import LongRunningOperation
+from azure.cli.core.commands.client_factory import (
+    get_mgmt_service_client,
+    get_subscription_id
+)
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import sdk_no_wait
-from azure.cli.core.azclierror import FileOperationError, ResourceNotFoundError, \
-    UnauthorizedError, ValidationError
+from azure.cli.core.azclierror import (
+    FileOperationError,
+    ResourceNotFoundError,
+    InvalidArgumentValueError,
+    UnauthorizedError,
+    ValidationError
+)
+from azure.core.exceptions import HttpResponseError, ResourceNotFoundError as CoreResourceNotFoundError
+from azure.mgmt.core.tools import (
+    resource_id,
+    parse_resource_id
+)
 from azure.cli.command_modules.aro._aad import AADManager
-from azure.cli.command_modules.aro._rbac import assign_role_to_resource, \
+from azure.cli.command_modules.aro._rbac import (
+    assign_role_to_resource,
     has_role_assignment_on_resource
-from azure.cli.command_modules.aro._rbac import ROLE_NETWORK_CONTRIBUTOR, ROLE_READER
+)
+from azure.cli.command_modules.aro._rbac import (
+    ROLE_NETWORK_CONTRIBUTOR,
+    ROLE_READER
+)
 from azure.cli.command_modules.aro._validators import validate_subnets
-from azure.cli.command_modules.aro._dynamic_validators import validate_cluster_create
+from azure.cli.command_modules.aro._dynamic_validators import validate_cluster_create, validate_cluster_delete
+from azure.cli.command_modules.aro.aaz.latest.identity import Delete as identity_delete
 from azure.cli.command_modules.aro.aaz.latest.network.vnet.subnet import Show as subnet_show
-from azure.cli.command_modules.role import GraphError
 
 from knack.log import get_logger
 
@@ -39,7 +55,8 @@ logger = get_logger(__name__)
 FP_CLIENT_ID = 'f1dd0a37-89c6-4e07-bcd1-ffd3d43d8875'
 
 
-def aro_create(cmd,  # pylint: disable=too-many-locals
+def aro_create(*,  # pylint: disable=too-many-locals
+               cmd,
                client,
                resource_group_name,
                resource_name,
@@ -47,31 +64,33 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
                worker_subnet,
                vnet=None,  # pylint: disable=unused-argument
                vnet_resource_group_name=None,  # pylint: disable=unused-argument
-               enable_preconfigured_nsg=False,
+               enable_preconfigured_nsg=None,
                location=None,
                pull_secret=None,
                domain=None,
                cluster_resource_group=None,
-               fips_validated_modules=False,
+               fips_validated_modules=None,
                client_id=None,
                client_secret=None,
-               pod_cidr='10.128.0.0/14',
-               service_cidr='172.30.0.0/16',
-               outbound_type='Loadbalancer',
+               pod_cidr=None,
+               service_cidr=None,
+               outbound_type=None,
                disk_encryption_set=None,
                master_encryption_at_host=False,
-               master_vm_size='Standard_D8s_v5',
+               master_vm_size=None,
                worker_encryption_at_host=False,
-               worker_vm_size='Standard_D4s_v5',
-               worker_vm_disk_size_gb='128',
-               worker_count='3',
-               apiserver_visibility='Public',
-               ingress_visibility='Public',
+               worker_vm_size=None,
+               worker_vm_disk_size_gb=None,
+               worker_count=None,
+               apiserver_visibility=None,
+               ingress_visibility=None,
                load_balancer_managed_outbound_ip_count=None,
+               enable_managed_identity=False,
+               platform_workload_identities=None,
+               mi_user_assigned=None,
                tags=None,
                version=None,
                no_wait=False):
-
     resource_client = get_mgmt_service_client(
         cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
     provider = resource_client.providers.get('Microsoft.RedHatOpenShift')
@@ -81,12 +100,12 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
 
     validate_subnets(master_subnet, worker_subnet)
 
-    validate(cmd,
-             client,
-             resource_group_name,
-             resource_name,
-             master_subnet,
-             worker_subnet,
+    validate(cmd=cmd,
+             client=client,
+             resource_group_name=resource_group_name,
+             resource_name=resource_name,
+             master_subnet=master_subnet,
+             worker_subnet=worker_subnet,
              vnet=vnet,
              enable_preconfigured_nsg=enable_preconfigured_nsg,
              cluster_resource_group=cluster_resource_group,
@@ -98,6 +117,7 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
              version=version,
              pod_cidr=pod_cidr,
              service_cidr=service_cidr,
+             enable_managed_identity=enable_managed_identity,
              warnings_as_text=True)
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -105,18 +125,18 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
     random_id = generate_random_id()
 
     aad = AADManager(cmd.cli_ctx)
-    if client_id is None:
-        client_id, client_secret = aad.create_application(cluster_resource_group or 'aro-' + random_id)
 
-    client_sp_id = aad.get_service_principal_id(client_id)
-    if not client_sp_id:
-        client_sp_id = aad.create_service_principal(client_id)
+    if not enable_managed_identity:
+        if client_id is None:
+            client_id, client_secret = aad.create_application(cluster_resource_group or 'aro-' + random_id)
 
-    rp_client_sp_id = aad.get_service_principal_id(resolve_rp_client_id())
-    if not rp_client_sp_id:
-        raise ResourceNotFoundError("RP service principal not found.")
+        client_sp_id = aad.get_service_principal_id(client_id)
+        if not client_sp_id:
+            client_sp_id = aad.create_service_principal(client_id)
 
-    worker_vm_size = worker_vm_size or 'Standard_D4s_v5'
+        rp_client_sp_id = aad.get_service_principal_id(resolve_rp_client_id())
+        if not rp_client_sp_id:
+            raise ResourceNotFoundError("RP service principal not found.")
 
     if apiserver_visibility is not None:
         apiserver_visibility = apiserver_visibility.capitalize()
@@ -140,10 +160,6 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
                                f"/resourceGroups/{cluster_resource_group or 'aro-' + random_id}"),
             fips_validated_modules='Enabled' if fips_validated_modules else 'Disabled',
             version=version or '',
-        ),
-        service_principal_profile=openshiftcluster.ServicePrincipalProfile(
-            client_id=client_id,
-            client_secret=client_secret,
         ),
         network_profile=openshiftcluster.NetworkProfile(
             pod_cidr=pod_cidr or '10.128.0.0/14',
@@ -178,10 +194,28 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
                 visibility=ingress_visibility or 'Public',
             )
         ],
+        service_principal_profile=None,
+        platform_workload_identity_profile=None,
     )
 
-    sp_obj_ids = [client_sp_id, rp_client_sp_id]
-    ensure_resource_permissions(cmd.cli_ctx, oc, True, sp_obj_ids)
+    if enable_managed_identity is True:
+        oc.platform_workload_identity_profile = openshiftcluster.PlatformWorkloadIdentityProfile(
+            platform_workload_identities=dict(platform_workload_identities)
+        )
+
+        oc.identity = openshiftcluster.ManagedServiceIdentity(
+            type='UserAssigned',
+            user_assigned_identities={mi_user_assigned: {}}
+        )
+
+    else:
+        oc.service_principal_profile = openshiftcluster.ServicePrincipalProfile(
+            client_id=client_id,
+            client_secret=client_secret,
+        )
+
+        sp_obj_ids = [client_sp_id, rp_client_sp_id]
+        ensure_resource_permissions(cmd.cli_ctx, oc, True, sp_obj_ids)
 
     return sdk_no_wait(no_wait, client.open_shift_clusters.begin_create_or_update,
                        resource_group_name=resource_group_name,
@@ -189,7 +223,35 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
                        parameters=oc)
 
 
-def validate(cmd,  # pylint: disable=too-many-locals,too-many-statements
+def _report_validation_issues(errors_and_warnings, warnings_as_text):
+    warnings = [issue for issue in errors_and_warnings if issue[2] == "Warning"]
+    errors = [issue for issue in errors_and_warnings if issue[2] != "Warning"]
+
+    if not warnings and not errors:
+        logger.info("No validation errors or warnings")
+        return
+
+    if warnings:
+        if len(errors) == 0 and warnings_as_text:
+            full_msg = ""
+            for warning in warnings:
+                full_msg += f"{warning[3]}\n"
+        else:
+            headers = ["Type", "Name", "Severity", "Description"]
+            table = tabulate(warnings, headers=headers, tablefmt="grid")
+            full_msg = f"The following issues will have a minor impact on cluster creation:\n{table}"
+        logger.warning(full_msg)
+
+    if errors:
+        full_msg = "\n" if warnings else ""
+        headers = ["Type", "Name", "Severity", "Description"]
+        table = tabulate(errors, headers=headers, tablefmt="grid")
+        full_msg += f"The following errors are fatal and will block cluster creation:\n{table}"
+        raise ValidationError(full_msg)
+
+
+def validate(*,  # pylint: disable=too-many-locals
+             cmd,
              client,  # pylint: disable=unused-argument
              resource_group_name,  # pylint: disable=unused-argument
              resource_name,  # pylint: disable=unused-argument
@@ -206,6 +268,9 @@ def validate(cmd,  # pylint: disable=too-many-locals,too-many-statements
              version=None,
              pod_cidr=None,  # pylint: disable=unused-argument
              service_cidr=None,  # pylint: disable=unused-argument
+             enable_managed_identity=False,
+             platform_workload_identities=None,  # pylint: disable=unused-argument
+             mi_user_assigned=None,  # pylint: disable=unused-argument
              warnings_as_text=False):
 
     class mockoc:  # pylint: disable=too-few-public-methods
@@ -224,14 +289,15 @@ def validate(cmd,  # pylint: disable=too-many-locals,too-many-statements
 
     aad = AADManager(cmd.cli_ctx)
 
-    rp_client_sp_id = aad.get_service_principal_id(resolve_rp_client_id())
-    if not rp_client_sp_id:
-        raise ResourceNotFoundError("RP service principal not found.")
+    sp_obj_ids = []
+    if not enable_managed_identity:
+        rp_client_sp_id = aad.get_service_principal_id(resolve_rp_client_id())
+        if not rp_client_sp_id:
+            raise ResourceNotFoundError("RP service principal not found.")
+        sp_obj_ids.append(rp_client_sp_id)
 
-    sp_obj_ids = [rp_client_sp_id]
-
-    if client_id is not None:
-        sp_obj_ids.append(aad.get_service_principal_id(client_id))
+        if client_id is not None:
+            sp_obj_ids.append(aad.get_service_principal_id(client_id))
 
     cluster = mockoc(disk_encryption_set, master_subnet, worker_subnet, enable_preconfigured_nsg)
     try:
@@ -259,72 +325,43 @@ def validate(cmd,  # pylint: disable=too-many-locals,too-many-statements
     for error_func in error_objects:
         namespace = collections.namedtuple("Namespace", locals().keys())(*locals().values())
         error_obj = error_func(cmd, namespace)
-        if error_obj != []:
+        if error_obj:
             for err in error_obj:
                 # Wrap text so tabulate returns a pretty table
-                new_err = []
-                for txt in err:
-                    new_err.append(textwrap.fill(txt, width=160))
+                new_err = [textwrap.fill(txt, width=160) for txt in err]
                 errors_and_warnings.append(new_err)
 
-    warnings = []
-    errors = []
-    if len(errors_and_warnings) > 0:
-        # Separate errors and warnings into separate arrays
-        for issue in errors_and_warnings:
-            if issue[2] == "Warning":
-                warnings.append(issue)
-            else:
-                errors.append(issue)
-    else:
-        logger.info("No validation errors or warnings")
-
-    if len(warnings) > 0:
-        if len(errors) == 0 and warnings_as_text:
-            full_msg = ""
-            for warning in warnings:
-                full_msg = full_msg + f"{warning[3]}\n"
-        else:
-            headers = ["Type", "Name", "Severity", "Description"]
-            table = tabulate(warnings, headers=headers, tablefmt="grid")
-            full_msg = f"The following issues will have a minor impact on cluster creation:\n{table}"
-        logger.warning(full_msg)
-
-    if len(errors) > 0:
-        if len(warnings) > 0:
-            full_msg = "\n"
-        else:
-            full_msg = ""
-        headers = ["Type", "Name", "Severity", "Description"]
-        table = tabulate(errors, headers=headers, tablefmt="grid")
-        full_msg = full_msg + f"The following errors are fatal and will block cluster creation:\n{table}"
-        raise ValidationError(full_msg)
+    _report_validation_issues(errors_and_warnings, warnings_as_text)
 
 
-def aro_validate(cmd,  # pylint: disable=too-many-locals,too-many-statements
-                 client,  # pylint: disable=unused-argument
-                 resource_group_name,  # pylint: disable=unused-argument
-                 resource_name,  # pylint: disable=unused-argument
+def aro_validate(*,  # pylint: disable=too-many-locals,too-many-statements
+                 cmd,
+                 client,
+                 resource_group_name,
+                 resource_name,
                  master_subnet,
                  worker_subnet,
                  vnet=None,
-                 cluster_resource_group=None,  # pylint: disable=unused-argument
+                 cluster_resource_group=None,
                  client_id=None,
-                 client_secret=None,  # pylint: disable=unused-argument
-                 vnet_resource_group_name=None,  # pylint: disable=unused-argument
+                 client_secret=None,
+                 vnet_resource_group_name=None,
                  disk_encryption_set=None,
-                 location=None,  # pylint: disable=unused-argument
+                 location=None,
                  version=None,
-                 pod_cidr=None,  # pylint: disable=unused-argument
-                 service_cidr=None,  # pylint: disable=unused-argument
+                 pod_cidr=None,
+                 service_cidr=None,
+                 enable_managed_identity=False,
+                 platform_workload_identities=None,
+                 mi_user_assigned=None,
                  ):
 
-    validate(cmd,
-             client,
-             resource_group_name,
-             resource_name,
-             master_subnet,
-             worker_subnet,
+    validate(cmd=cmd,
+             client=client,
+             resource_group_name=resource_group_name,
+             resource_name=resource_name,
+             master_subnet=master_subnet,
+             worker_subnet=worker_subnet,
              vnet=vnet,
              cluster_resource_group=cluster_resource_group,
              client_id=client_id,
@@ -335,10 +372,13 @@ def aro_validate(cmd,  # pylint: disable=too-many-locals,too-many-statements
              version=version,
              pod_cidr=pod_cidr,
              service_cidr=service_cidr,
+             enable_managed_identity=enable_managed_identity,
+             platform_workload_identities=platform_workload_identities,
+             mi_user_assigned=mi_user_assigned,
              warnings_as_text=False)
 
 
-def aro_delete(cmd, client, resource_group_name, resource_name, no_wait=False):
+def aro_delete(*, cmd, client, resource_group_name, resource_name, no_wait=False, delete_identities=None):
     # TODO: clean up rbac
     rp_client_sp_id = None
 
@@ -350,6 +390,34 @@ def aro_delete(cmd, client, resource_group_name, resource_name, no_wait=False):
         logger.info(e.message)
     except HttpOperationError as e:
         logger.info(e.message)
+
+    if delete_identities and oc.service_principal_profile is not None:
+        raise InvalidArgumentValueError(
+            "Cannot delete managed identities for a non-managed identity cluster"
+        )
+
+    # Since we delete the managed identities only after deleting the cluster,
+    # it is critical that we log the list of managed identities while we're
+    # still able to get it from the cluster doc. This way, if the CLI fails in
+    # the middle of cluster deletion, etc., the customer will still have access
+    # to the list in case they want to know which identities to delete.
+    managed_identities = []
+    if oc.identity is not None and oc.identity.user_assigned_identities is not None:
+        managed_identities += list(oc.identity.user_assigned_identities)
+    if oc.platform_workload_identity_profile is not None:
+        managed_identities += [pwi.resource_id for _, pwi in oc.platform_workload_identity_profile.platform_workload_identities.items()]  # pylint: disable=line-too-long
+
+    errors = validate_cluster_delete(cmd, delete_identities, managed_identities)
+    if errors:
+        error_messages = "- " + "\n- ".join(errors)
+        raise UnauthorizedError(f"Pre-delete validation failed with the following issues:\n{error_messages}")
+
+    if delete_identities:
+        bulleted_mi_list = "\n".join([f"- {mi}" for mi in managed_identities])
+        logger.warning("After deleting the ARO cluster, will delete the following set of managed identities that was associated with it:\n%s", bulleted_mi_list)  # pylint: disable=line-too-long
+    elif oc.platform_workload_identity_profile is not None:
+        bulleted_delete_command_list = "\n".join([f"- az identity delete -g {parse_resource_id(mi)['resource_group']} -n {parse_resource_id(mi)['name']}" for mi in managed_identities])  # pylint: disable=line-too-long
+        logger.warning("The cluster's managed identities will still need to be deleted once cluster deletion completes. You can use the following commands to delete them:\n%s", bulleted_delete_command_list)  # pylint: disable=line-too-long
 
     aad = AADManager(cmd.cli_ctx)
 
@@ -365,6 +433,28 @@ def aro_delete(cmd, client, resource_group_name, resource_name, no_wait=False):
     # Attempt to fix this before performing any action against the cluster
     if rp_client_sp_id:
         ensure_resource_permissions(cmd.cli_ctx, oc, False, [rp_client_sp_id])
+
+    if delete_identities:
+        # Note that because we need to confirm the cluster's successful deletion before
+        # deleting the managed identities, we must wait for the asynchronous operation
+        # to complete here and handle the result rather than using sdk_no_wait.
+        result = LongRunningOperation(cmd.cli_ctx)(client.open_shift_clusters.begin_delete(resource_group_name=resource_group_name,  # pylint: disable=line-too-long
+                                                   resource_name=resource_name,
+                                                   polling=True))
+        logger.warning("Successfully deleted ARO cluster; deleting managed identities...")
+        for mi in managed_identities:
+            mi_resource_id = parse_resource_id(mi)
+
+            # You might think we'd want to log a different message in the case where
+            # the identity is not found, but the delete command is idempotent and
+            # will not raise 404 exceptions. We want all other exceptions to be raised
+            # directly to the user though, hence the lack of a try/except.
+            identity_delete(cli_ctx=cmd.cli_ctx)(command_args={
+                'resource_name': mi_resource_id['name'],
+                'resource_group': mi_resource_id['resource_group'],
+            })
+            logger.warning("Successfully deleted managed identity %s", mi)
+        return result
 
     return sdk_no_wait(no_wait, client.open_shift_clusters.begin_delete,
                        resource_group_name=resource_group_name,
@@ -405,42 +495,72 @@ def aro_get_versions(client, location):
     return sorted(versions)
 
 
-def aro_update(cmd,
+def aro_update(cmd,  # pylint: disable=too-many-positional-arguments
                client,
                resource_group_name,
                resource_name,
                refresh_cluster_credentials=False,
                client_id=None,
                client_secret=None,
+               mi_user_assigned=None,
+               platform_workload_identities=None,
                load_balancer_managed_outbound_ip_count=None,
+               upgradeable_to=None,
                no_wait=False):
     # if we can't read cluster spec, we will not be able to do much. Fail.
     oc = client.open_shift_clusters.get(resource_group_name, resource_name)
 
-    ocUpdate = openshiftcluster.OpenShiftClusterUpdate()
+    oc_update = openshiftcluster.OpenShiftClusterUpdate()
 
-    client_id, client_secret = cluster_application_update(cmd.cli_ctx, oc, client_id, client_secret, refresh_cluster_credentials)  # pylint: disable=line-too-long
+    if platform_workload_identities is not None and oc.service_principal_profile is not None:
+        raise InvalidArgumentValueError(
+            "Cannot assign platform workload identities to a cluster with service principal"
+        )
 
-    if client_id is not None or client_secret is not None:
-        # construct update payload
-        ocUpdate.service_principal_profile = openshiftcluster.ServicePrincipalProfile()
+    if mi_user_assigned is not None and oc.service_principal_profile is not None:
+        raise InvalidArgumentValueError(
+            "Cannot assign platform workload identities to a cluster with service principal"
+        )
 
-        if client_secret is not None:
-            ocUpdate.service_principal_profile.client_secret = client_secret
+    if oc.service_principal_profile is not None:
+        client_id, client_secret = cluster_application_update(cmd.cli_ctx, oc, client_id, client_secret, refresh_cluster_credentials)  # pylint: disable=line-too-long
 
-        if client_id is not None:
-            ocUpdate.service_principal_profile.client_id = client_id
+        if client_id is not None or client_secret is not None:
+            # construct update payload
+            oc_update.service_principal_profile = openshiftcluster.ServicePrincipalProfile()
+
+            if client_secret is not None:
+                oc_update.service_principal_profile.client_secret = client_secret
+
+            if client_id is not None:
+                oc_update.service_principal_profile.client_id = client_id
+
+    if mi_user_assigned is not None:
+        oc_update.identity = openshiftcluster.ManagedServiceIdentity(
+            type='UserAssigned',
+            user_assigned_identities={mi_user_assigned: {}}
+        )
+
+    if oc.platform_workload_identity_profile is not None:
+        if platform_workload_identities is not None or upgradeable_to is not None:
+            oc_update.platform_workload_identity_profile = openshiftcluster.PlatformWorkloadIdentityProfile()
+
+        if platform_workload_identities is not None:
+            oc_update.platform_workload_identity_profile.platform_workload_identities = dict(platform_workload_identities)  # pylint: disable=line-too-long
+
+        if upgradeable_to is not None:
+            oc_update.platform_workload_identity_profile.upgradeable_to = upgradeable_to
 
     if load_balancer_managed_outbound_ip_count is not None:
-        ocUpdate.network_profile = openshiftcluster.NetworkProfile()
-        ocUpdate.network_profile.load_balancer_profile = openshiftcluster.LoadBalancerProfile()
-        ocUpdate.network_profile.load_balancer_profile.managed_outbound_ips = openshiftcluster.ManagedOutboundIPs()
-        ocUpdate.network_profile.load_balancer_profile.managed_outbound_ips.count = load_balancer_managed_outbound_ip_count  # pylint: disable=line-too-long
+        oc_update.network_profile = openshiftcluster.NetworkProfile()
+        oc_update.network_profile.load_balancer_profile = openshiftcluster.LoadBalancerProfile()
+        oc_update.network_profile.load_balancer_profile.managed_outbound_ips = openshiftcluster.ManagedOutboundIPs()
+        oc_update.network_profile.load_balancer_profile.managed_outbound_ips.count = load_balancer_managed_outbound_ip_count  # pylint: disable=line-too-long
 
     return sdk_no_wait(no_wait, client.open_shift_clusters.begin_update,
                        resource_group_name=resource_group_name,
                        resource_name=resource_name,
-                       parameters=ocUpdate)
+                       parameters=oc_update)
 
 
 def generate_random_id():
@@ -451,7 +571,6 @@ def generate_random_id():
 
 
 def get_network_resources_from_subnets(cli_ctx, subnets, fail, oc):
-
     subnet_resources = set()
     subnets_with_no_nsg_attached = set()
     for sn in subnets:
@@ -473,10 +592,10 @@ def get_network_resources_from_subnets(cli_ctx, subnets, fail, oc):
             continue
 
         if subnet.get("routeTable", None):
-            subnet_resources.add(subnet["routeTable"]["id"])
+            subnet_resources.add(subnet['routeTable']['id'])
 
         if subnet.get("natGateway", None):
-            subnet_resources.add(subnet["natGateway"]["id"])
+            subnet_resources.add(subnet['natGateway']['id'])
 
         if oc.network_profile.preconfigured_nsg == 'Enabled':
             if subnet.get("networkSecurityGroup", None):
