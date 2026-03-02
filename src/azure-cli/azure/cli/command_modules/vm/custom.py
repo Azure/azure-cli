@@ -4561,14 +4561,16 @@ def scale_vmss(cmd, resource_group_name, vm_scale_set_name, new_capacity, no_wai
     vmss_new = {
         'resource_group': resource_group_name,
         'vm_scale_set_name': vm_scale_set_name,
-        'sku': {
-            'capacity': new_capacity
-        },
         'no_wait': no_wait
     }
 
     if vmss.get('extended_location'):
         vmss_new['extended_location'] = vmss.get('extendedLocation')
+
+    if vmss.get('sku'):
+        vmss_new['sku'] = vmss['sku']
+
+    vmss_new['sku']['capacity'] = new_capacity
 
     return VMSSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss_new)
 
