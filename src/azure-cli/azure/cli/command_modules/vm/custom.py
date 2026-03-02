@@ -4550,20 +4550,25 @@ def restart_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None,
 
 # pylint: disable=inconsistent-return-statements
 def scale_vmss(cmd, resource_group_name, vm_scale_set_name, new_capacity, no_wait=False):
-    from .operations.vmss import VMSSCreate, VMSSShow, convert_show_result_to_snake_case
+    from .operations.vmss import VMSSCreate, VMSSShow
     vmss = VMSSShow(cli_ctx=cmd.cli_ctx)(command_args={
         'resource_group': resource_group_name,
         'vm_scale_set_name': vm_scale_set_name
     })
-    vmss = convert_show_result_to_snake_case(vmss)
-
     if vmss.get('sku', {}).get('capacity') == new_capacity:
         return
 
-    vmss['resource_group'] = resource_group_name
-    vmss['vm_scale_set_name'] = vm_scale_set_name
-    vmss['sku']['capacity'] = new_capacity
-    vmss['no_wait'] = no_wait
+    vmss_new = {
+        'resource_group': resource_group_name,
+        'vm_scale_set_name': vm_scale_set_name,
+        'sku': {
+            'capacity': new_capacity
+        },
+        'no_wait': no_wait
+    }
+
+    if vmss.get('extended_location'):
+        vmss_new['extended_location'] = vmss.get('extendedLocation')
 
     return VMSSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss)
 
