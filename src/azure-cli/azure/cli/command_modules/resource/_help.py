@@ -2563,19 +2563,19 @@ type: command
 short-summary: Create a deployment stack what-if result at management group scope.
 examples:
   - name: Perform a what-if on a deployment stack using template file and detach all unmanaged resources.
-    text: az stack-whatif mg create --name StackName --management-group-id myMg --template-file simpleTemplate.json --parameters simpleTemplateParams.json --location westus2 --description description --deny-settings-mode None --action-on-unmanage detachAll --ri P5D --stack /providers/Microsoft.Management/myMg/providers/Microsoft.Resources/deploymentStacks/myMgStack 
+    text: az stack-whatif mg create --name StackName --management-group-id myMg --template-file simpleTemplate.json --parameters simpleTemplateParams.json --location westus2 --description description --deny-settings-mode None --action-on-unmanage detachAll --ri P5D --stack /providers/Microsoft.Management/myMg/providers/Microsoft.Resources/deploymentStacks/myMgStack
   - name: Perform a what-if on a deployment stack with template spec.
-    text: az stack-whatif mg create --name StackName --management-group-id myMg --template-spec TemplateSpecResourceIDWithVersion --location westus2 --description description --deny-settings-mode None --action-on-unmanage deleteResources --ri P5D --stack /providers/Microsoft.Management/myMg/providers/Microsoft.Resources/deploymentStacks/myMgStack 
+    text: az stack-whatif mg create --name StackName --management-group-id myMg --template-spec TemplateSpecResourceIDWithVersion --location westus2 --description description --deny-settings-mode None --action-on-unmanage deleteResources --ri P5D --stack /providers/Microsoft.Management/myMg/providers/Microsoft.Resources/deploymentStacks/myMgStack
   - name: Perform a what-if on a deployment stack using bicep file, delete all resources on unmanage, and remove color from the output.
-    text: az stack-whatif mg create --name StackName --management-group-id myMg --no-color --action-on-unmanage deleteAll --template-file simple.bicep --location westus2 --description description --deny-settings-mode None --ri P5D --stack /providers/Microsoft.Management/myMg/providers/Microsoft.Resources/deploymentStacks/myMgStack 
+    text: az stack-whatif mg create --name StackName --management-group-id myMg --no-color --action-on-unmanage deleteAll --template-file simple.bicep --location westus2 --description description --deny-settings-mode None --ri P5D --stack /providers/Microsoft.Management/myMg/providers/Microsoft.Resources/deploymentStacks/myMgStack
   - name: Perform a what-if on a deployment stack using parameters from key/value pairs.
-    text: az stack-whatif mg create --name StackName --management-group-id myMg --template-file simpleTemplate.json --location westus --description description --parameters simpleTemplateParams.json value1=foo value2=bar --deny-settings-mode None --action-on-unmanage deleteResources --ri P5D --stack /providers/Microsoft.Management/myMg/providers/Microsoft.Resources/deploymentStacks/myMgStack 
+    text: az stack-whatif mg create --name StackName --management-group-id myMg --template-file simpleTemplate.json --location westus --description description --parameters simpleTemplateParams.json value1=foo value2=bar --deny-settings-mode None --action-on-unmanage deleteResources --ri P5D --stack /providers/Microsoft.Management/myMg/providers/Microsoft.Resources/deploymentStacks/myMgStack
   - name: Perform a what-if on a deployment stack from a local template, using a parameter file, a remote parameter file, and selectively overriding key/value pairs.
-    text: az stack-whatif mg create --name StackName --management-group-id myMg --template-file azuredeploy.json --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json --location westus --deny-settings-mode None --action-on-unmanage deleteResources --ri P5D --stack /providers/Microsoft.Management/myMg/providers/Microsoft.Resources/deploymentStacks/myMgStack 
+    text: az stack-whatif mg create --name StackName --management-group-id myMg --template-file azuredeploy.json --parameters @params.json --parameters https://mysite/params.json --parameters MyValue=This MyArray=@array.json --location westus --deny-settings-mode None --action-on-unmanage deleteResources --ri P5D --stack /providers/Microsoft.Management/myMg/providers/Microsoft.Resources/deploymentStacks/myMgStack
   - name: Perform a what-if on a deployment stack from a local template, using deny settings.
-    text: az stack-whatif mg create --name StackName --management-group-id myMg --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-excluded-principals "test1 test2" --location westus --action-on-unmanage deleteResources --ri P5D --stack /providers/Microsoft.Management/myMg/providers/Microsoft.Resources/deploymentStacks/myMgStack 
+    text: az stack-whatif mg create --name StackName --management-group-id myMg --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-excluded-principals "test1 test2" --location westus --action-on-unmanage deleteResources --ri P5D --stack /providers/Microsoft.Management/myMg/providers/Microsoft.Resources/deploymentStacks/myMgStack
   - name: Perform a what-if on a deployment stack from a local template, apply deny settings to child scope.
-    text: az stack-whatif mg create --name StackName --management-group-id myMg --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-apply-to-child-scopes --location westus --action-on-unmanage deleteResources --ri P5D --stack /providers/Microsoft.Management/myMg/providers/Microsoft.Resources/deploymentStacks/myMgStack 
+    text: az stack-whatif mg create --name StackName --management-group-id myMg --template-file azuredeploy.json --deny-settings-mode denyDelete --deny-settings-excluded-actions Microsoft.Compute/virtualMachines/write --deny-settings-apply-to-child-scopes --location westus --action-on-unmanage deleteResources --ri P5D --stack /providers/Microsoft.Management/myMg/providers/Microsoft.Resources/deploymentStacks/myMgStack
 """
 
 helps['stack-whatif mg list'] = """
@@ -2905,7 +2905,7 @@ examples:
   - name: Get a stack what-if result by name without color.
     text: az stack-whatif group show --name ResultName --resource-group ResourceGroup --no-color
   - name: Get JSON for a stack what-if result by name.
-    text: az stack-whatif group show --name ResultName --resource-group ResourceGroup --no-pretty-print      
+    text: az stack-whatif group show --name ResultName --resource-group ResourceGroup --no-pretty-print
   - name: Get a stack what-if result by resource id.
     text: az stack-whatif group show --id /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ResourceGroup/providers/Microsoft.Resources/deploymentStacksWhatIfResults/ResultName
 """
