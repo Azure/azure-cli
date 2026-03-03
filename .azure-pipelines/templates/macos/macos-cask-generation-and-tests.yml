@@ -172,11 +172,11 @@ jobs:
       git config --global user.email "test@pipeline.local"
       git config --global user.name "Test Pipeline"
       
-      # Create a temporary tap
-      brew tap-new test/azure-cli
+      # Create a temporary tap (named distinctly to avoid conflict with real Azure/homebrew-azure-cli)
+      brew tap-new test/azure-cli-pipeline-test
       
       # Get tap path
-      TAP_PATH="$(brew --repository)/Library/Taps/test/homebrew-azure-cli"
+      TAP_PATH="$(brew --repository)/Library/Taps/test/homebrew-azure-cli-pipeline-test"
       echo "Tap path: $TAP_PATH"
       
       # Create Casks directory and copy cask
@@ -209,7 +209,7 @@ jobs:
       fi
       
       # Install the cask from our temporary tap
-      brew install --cask test/azure-cli/azure-cli
+      brew install --cask test/azure-cli-pipeline-test/azure-cli
       
       # Verify installation
       echo "=== Verifying Installation ==="
@@ -230,7 +230,7 @@ jobs:
       brew uninstall --cask azure-cli 2>/dev/null || true
       
       # Remove temporary tap
-      brew untap test/azure-cli 2>/dev/null || true
+      brew untap test/azure-cli-pipeline-test 2>/dev/null || true
       
       echo "Cleanup complete"
     displayName: 'Cleanup'
