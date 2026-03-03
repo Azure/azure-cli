@@ -32,6 +32,9 @@ parameters:
   - name: GitHubRepo
     type: string
     default: ''
+  - name: GitHubServiceConnection
+    type: string
+    default: 'Azure'
   - name: HomebrewTapRepo
     type: string
     default: ''
@@ -114,7 +117,7 @@ jobs:
       displayName: 'Delete existing release if present'
       continueOnError: true
       inputs:
-        gitHubConnection: 'Azure'
+        gitHubConnection: '${{ parameters.GitHubServiceConnection }}'
         repositoryName: '${{ parameters.GitHubRepo }}'
         action: 'delete'
         tag: '$(ReleaseTag)'
@@ -122,7 +125,7 @@ jobs:
     - task: GitHubRelease@1
       displayName: 'Create GitHub Release'
       inputs:
-        gitHubConnection: 'Azure'
+        gitHubConnection: '${{ parameters.GitHubServiceConnection }}'
         repositoryName: '${{ parameters.GitHubRepo }}'
         action: 'create'
         target: '$(Build.SourceVersion)'

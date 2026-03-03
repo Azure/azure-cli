@@ -49,6 +49,16 @@ parameters:
     type: string
     default: 'Azure/homebrew-azure-cli'
   
+  - name: GitHubServiceConnection
+    displayName: 'GitHub Service Connection'
+    type: string
+    default: 'Azure'
+  
+  - name: ESRPServiceConnection
+    displayName: 'ESRP Service Connection'
+    type: string
+    default: 'ame_esrp_connection'
+  
   - name: Debug
     displayName: 'Enable debug diagnostics'
     type: boolean
@@ -118,6 +128,7 @@ jobs:
     PythonVersion: ${{ parameters.PythonVersion }}
     MacosArm64Image: ${{ variables.macos_arm64_pool }}
     MacosIntelImage: ${{ variables.macos_intel_pool }}
+    ESRPServiceConnection: ${{ parameters.ESRPServiceConnection }}
     UseCurrentPipelineArtifacts: true
     dependsOn:
     - VerifyMacOSCli
@@ -156,6 +167,7 @@ jobs:
     UpdateHomebrew: ${{ parameters.UpdateHomebrew }}
     TestAfterPublish: false
     GitHubRepo: $(GitHubRepo)
+    GitHubServiceConnection: ${{ parameters.GitHubServiceConnection }}
     HomebrewTapRepo: ${{ parameters.HomebrewTapRepo }}
     MacosArm64Image: ${{ variables.macos_arm64_pool }}
     MacosIntelImage: ${{ variables.macos_intel_pool }}

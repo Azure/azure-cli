@@ -16,6 +16,7 @@ pr:
 
 variables:
 - template: ${{ variables.Pipeline.Workspace }}/.azure-pipelines/templates/variables.yml
+- group: 'AME ESRP Variable Group'
 - name: Codeql.Enabled
   value: false
 - name: ComponentDetection.ForceScan
@@ -735,6 +736,7 @@ jobs:
     MacosIntelImage: ${{ variables.macos_pool }}
     BundleId: 'com.microsoft.azure.cli'
     PythonVersion: $(macos_cask_python_version)
+    ESRPServiceConnection: 'ame_esrp_connection'
     UseCurrentPipelineArtifacts: true
     dependsOn: ['VerifyMacOSCli']
 
