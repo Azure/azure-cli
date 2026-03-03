@@ -152,8 +152,6 @@ if %errorlevel% neq 0 goto ERROR
 
 
 pushd %BUILDING_DIR%
-%BUILDING_DIR%\python.exe -I %REPO_ROOT%\scripts\compact_aaz.py
-if %errorlevel% neq 0 goto ERROR
 %BUILDING_DIR%\python.exe -I %REPO_ROOT%\scripts\trim_sdk.py
 if %errorlevel% neq 0 goto ERROR
 popd
