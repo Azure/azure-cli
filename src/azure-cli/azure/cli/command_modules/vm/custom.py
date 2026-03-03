@@ -4580,11 +4580,13 @@ def stop_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no
 
 
 def update_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_ids, no_wait=False):
-    client = _compute_client_factory(cmd.cli_ctx)
-    VirtualMachineScaleSetVMInstanceRequiredIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceRequiredIDs')
-    instance_ids = VirtualMachineScaleSetVMInstanceRequiredIDs(instance_ids=instance_ids)
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_update_instances,
-                       resource_group_name, vm_scale_set_name, instance_ids)
+    from .aaz.latest.vmss import Manualupgrade
+    return Manualupgrade(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'vm_scale_set_name': vm_scale_set_name,
+        'instance_ids': instance_ids,
+        'no_wait': no_wait,
+    })
 
 
 def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False, instance_id=None,
