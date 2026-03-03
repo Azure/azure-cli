@@ -11,20 +11,14 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "eventhubs namespace delete",
-)
-class Delete(AAZCommand):
-    """Delete an existing namespace. This operation also removes all associated resources under the namespace.
-
-    :example: Delete the Namespace
-        az eventhubs namespace delete --resource-group myresourcegroup --name mynamespace
+class Manualupgrade(AAZCommand):
+    """Upgrades one or more virtual machines to the latest SKU set in the VM scale set model.
     """
 
     _aaz_info = {
-        "version": "2024-05-01-preview",
+        "version": "2024-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}", "2024-05-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/virtualmachinescalesets/{}/manualupgrade", "2024-11-01"],
         ]
     }
 
@@ -45,25 +39,33 @@ class Delete(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.namespace_name = AAZStrArg(
-            options=["-n", "--name", "--namespace-name"],
-            help="The Namespace name",
-            required=True,
-            id_part="name",
-            fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z][a-zA-Z0-9-]{4,48}[a-zA-Z0-9]$",
-                max_length=50,
-                min_length=6,
-            ),
-        )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
+        _args_schema.vm_scale_set_name = AAZStrArg(
+            options=["--vm-scale-set-name"],
+            help="The name of the VM scale set.",
+            required=True,
+            id_part="name",
+        )
+
+        # define Arg Group "VmInstanceIDs"
+
+        _args_schema = cls._args_schema
+        _args_schema.instance_ids = AAZListArg(
+            options=["--instance-ids"],
+            arg_group="VmInstanceIDs",
+            help="The virtual machine scale set instance ids.",
+            required=True,
+        )
+
+        instance_ids = cls._args_schema.instance_ids
+        instance_ids.Element = AAZStrArg()
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.NamespacesDelete(ctx=self.ctx)()
+        yield self.VirtualMachineScaleSetsUpdateInstances(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -74,7 +76,7 @@ class Delete(AAZCommand):
     def post_operations(self):
         pass
 
-    class NamespacesDelete(AAZHttpOperation):
+    class VirtualMachineScaleSetsUpdateInstances(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -86,7 +88,7 @@ class Delete(AAZCommand):
                     session,
                     self.on_200,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
             if session.http_response.status_code in [200]:
@@ -95,16 +97,7 @@ class Delete(AAZCommand):
                     session,
                     self.on_200,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
-                    path_format_arguments=self.url_parameters,
-                )
-            if session.http_response.status_code in [204]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_204,
-                    self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
 
@@ -113,31 +106,31 @@ class Delete(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.EventHub/namespaces/{namespaceName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/virtualMachineScaleSets/{vmScaleSetName}/manualupgrade",
                 **self.url_parameters
             )
 
         @property
         def method(self):
-            return "DELETE"
+            return "POST"
 
         @property
         def error_format(self):
-            return "MgmtErrorFormat"
+            return "ODataV4Format"
 
         @property
         def url_parameters(self):
             parameters = {
-                **self.serialize_url_param(
-                    "namespaceName", self.ctx.args.namespace_name,
-                    required=True,
-                ),
                 **self.serialize_url_param(
                     "resourceGroupName", self.ctx.args.resource_group,
                     required=True,
                 ),
                 **self.serialize_url_param(
                     "subscriptionId", self.ctx.subscription_id,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "vmScaleSetName", self.ctx.args.vm_scale_set_name,
                     required=True,
                 ),
             }
@@ -147,21 +140,42 @@ class Delete(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-05-01-preview",
+                    "api-version", "2024-11-01",
                     required=True,
                 ),
             }
             return parameters
 
+        @property
+        def header_parameters(self):
+            parameters = {
+                **self.serialize_header_param(
+                    "Content-Type", "application/json",
+                ),
+            }
+            return parameters
+
+        @property
+        def content(self):
+            _content_value, _builder = self.new_content_builder(
+                self.ctx.args,
+                typ=AAZObjectType,
+                typ_kwargs={"flags": {"required": True, "client_flatten": True}}
+            )
+            _builder.set_prop("instanceIds", AAZListType, ".instance_ids", typ_kwargs={"flags": {"required": True}})
+
+            instance_ids = _builder.get(".instanceIds")
+            if instance_ids is not None:
+                instance_ids.set_elements(AAZStrType, ".")
+
+            return self.serialize_content(_content_value)
+
         def on_200(self, session):
             pass
 
-        def on_204(self, session):
-            pass
+
+class _ManualupgradeHelper:
+    """Helper class for Manualupgrade"""
 
 
-class _DeleteHelper:
-    """Helper class for Delete"""
-
-
-__all__ = ["Delete"]
+__all__ = ["Manualupgrade"]
