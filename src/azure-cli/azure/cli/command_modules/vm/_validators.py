@@ -2174,7 +2174,7 @@ def process_image_create_namespace(cmd, namespace):
 
     if source_from_vm:
         # pylint: disable=no-member
-        namespace.os_type = vm_info.get('storageProfile', {}).get('osDisk', {}).get('osType', '')
+        namespace.os_type = vm_info.get('storageProfile', {}).get('osDisk', {}).get('osType')
         namespace.source_virtual_machine = res_id
         if namespace.data_disk_sources:
             raise CLIError("'--data-disk-sources' is not allowed when capturing "
