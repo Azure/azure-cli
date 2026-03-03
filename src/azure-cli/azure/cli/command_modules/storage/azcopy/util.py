@@ -245,7 +245,7 @@ def _urlretrieve(url, install_location, file_extension):
                 if fileName.endswith('azcopy') or fileName.endswith('azcopy.exe'):
                     with open(install_location, 'wb') as f:
                         f.write(zip_file.read(fileName))
-        except Exception as ex: # pylint: disable=broad-except
+        except Exception as ex:  # pylint: disable=broad-except
             raise CLIError(ex)
     else:
         try:
@@ -255,7 +255,7 @@ def _urlretrieve(url, install_location, file_extension):
                     if tarinfo.isfile() and tarinfo.name.endswith('azcopy'):
                         with open(install_location, 'wb') as f:
                             f.write(tar.extractfile(tarinfo).read())
-        except Exception as ex: # pylint: disable=broad-except
+        except Exception as ex:  # pylint: disable=broad-except
             raise CLIError(ex)
 
 
