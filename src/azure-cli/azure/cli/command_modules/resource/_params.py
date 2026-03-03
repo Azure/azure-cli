@@ -620,9 +620,6 @@ def load_arguments(self, _):
     with self.argument_context('ts list') as c:
         c.argument('resource_group', arg_type=resource_group_name_type)
 
-    with self.argument_context('stack mg') as c:
-        c.argument('management_group_id', arg_type=management_group_id_type, help='The management group id to create stack at.')
-
     for resource_type in ['stack', 'stack-whatif']:
         for scope in ['group', 'sub', 'mg']:
             for action in ['create', 'validate', 'delete', 'show', 'list', 'export']:
@@ -631,6 +628,11 @@ def load_arguments(self, _):
 
                 with self.argument_context(f'{resource_type} {scope} {action}') as c:
                     entity_type = "deployment stack what-if result" if resource_type == 'stack-whatif' else "deployment stack"
+
+                    if scope == 'group':
+                        c.argument('resource_group', arg_type=resource_group_name_type, help=f'The resource group where the {entity_type} exists.')
+                    elif scope == 'mg':
+                        c.argument('management_group_id', arg_type=management_group_id_type, help=f'The management group ID to create a {entity_type} in.')
 
                     if action == 'create' or action == 'validate':
                         c.argument('name', arg_type=stacks_name_type, help=f'The name of the {entity_type}.')
@@ -674,8 +676,6 @@ def load_arguments(self, _):
                         c.argument('id', arg_type=stacks_stack_type, help=f'The {entity_type} resource ID.')
                         c.argument('subscription', arg_type=subscription_type)
                         c.argument('yes', help='Do not prompt for confirmation.')
-                        if scope == 'group':
-                            c.argument('resource_group', arg_type=resource_group_name_type, help=f'The resource group where the {entity_type} exists.')
                         if resource_type == 'stack':
                             c.argument('action_on_unmanage', arg_type=stacks_action_on_unmanage_type)
                             c.argument('resources_without_delete_support', arg_type=stacks_resources_without_delete_support_type)
@@ -684,8 +684,6 @@ def load_arguments(self, _):
                         c.argument('name', options_list=['--name', '-n'], arg_type=stacks_stack_name_type, help=f'The name of the {entity_type}.')
                         c.argument('id', arg_type=stacks_stack_type, help=f'The {entity_type} resource ID.')
                         c.argument('subscription', arg_type=subscription_type)
-                        if scope == 'group':
-                            c.argument('resource_group', arg_type=resource_group_name_type, help=f'The resource group where the {entity_type} exists.')
                         if resource_type == 'stack-whatif':
                             c.argument('no_pretty_print', arg_type=deployment_what_if_no_pretty_print_type)
                             c.argument('no_color', arg_type=deployment_what_if_no_color_type)
@@ -693,8 +691,6 @@ def load_arguments(self, _):
                         if scope == 'sub':
                             continue  # only uses global arguments
                         c.argument('subscription', arg_type=subscription_type)
-                        if scope == 'group':
-                            c.argument('resource_group', arg_type=resource_group_name_type, help=f'The resource group where the {entity_type} exists.')
 
     with self.argument_context('bicep build') as c:
         c.argument('file', arg_type=bicep_file_type, help="The path to the Bicep file to build in the file system.")
