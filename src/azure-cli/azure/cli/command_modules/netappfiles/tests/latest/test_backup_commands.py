@@ -58,7 +58,7 @@ class AzureNetAppFilesBackupServiceScenarioTest(ScenarioTest):
             backup_vault = self.cmd("az netappfiles account backup-vault create -g {rg} -a {account_name} -n {vault_name} -l {location} --tags {tags}").get_output_in_json()
             # volume update with backup policy
             if self.is_live or self.in_recording:
-                time.sleep(60)
+                time.sleep(140)
             self.cmd("az netappfiles volume update -g {rg} -a %s -p %s -v %s --backup-vault-id %s " %
                      (account_name, pool_name, volume_name, backup_vault['id']))
 
