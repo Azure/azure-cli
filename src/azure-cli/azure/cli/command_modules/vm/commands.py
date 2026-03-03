@@ -221,7 +221,7 @@ def load_command_table(self, _):
         self.command_table['disk-encryption-set identity remove'] = DiskEncryptionSetIdentityRemove(loader=self)
         g.custom_show_command('show', 'show_disk_encryption_set_identity')
 
-    with self.command_group('image', compute_image_sdk) as g:
+    with self.command_group('image') as g:
         g.custom_command('create', 'create_image', validator=process_image_create_namespace)
 
     with self.command_group('image builder', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
