@@ -8,32 +8,16 @@
 
 from collections import Counter, OrderedDict
 
-import socket
 from knack.log import get_logger
 from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id, resource_id
 
 from azure.cli.core.aaz import AAZClientConfiguration, has_value, register_client, AAZFileArgTextFormat
 from azure.cli.core.aaz._client import AAZMgmtClient
-from azure.cli.core.aaz.utils import assign_aaz_list_arg
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 
 from azure.cli.core.util import CLIError, sdk_no_wait
-from azure.cli.core.azclierror import InvalidArgumentValueError, ValidationError, \
-    UnrecognizedArgumentError, ResourceNotFoundError, ArgumentUsageError
+from azure.cli.core.azclierror import UnrecognizedArgumentError, ResourceNotFoundError
 from azure.cli.core.profiles import ResourceType
-
-from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
-from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
-
-from .aaz.latest.network.application_gateway._update import Update as _ApplicationGatewayUpdate
-from .aaz.latest.network.dns.record_set._list import List as _DNSRecordSetListByZone
-from .aaz.latest.network.dns.zone._create import Create as _DNSZoneCreate
-from .aaz.latest.network.vnet_gateway._update import Update as _VnetGatewayUpdate
-from .aaz.latest.network.vnet_gateway.vpn_client._generate_vpn_profile import GenerateVpnProfile as _VpnProfileGenerate
-from .aaz.latest.network.vnet_gateway.vpn_client._generate import Generate as _VpnClientPackageGenerate
-from .aaz.latest.network.vpn_connection._update import Update as _VpnConnectionUpdate
-from .operations.latest.network.dns.record_set.soa._show import RecordSetSOAShow as DNSRecordSetSOAShow
-from .operations.latest.network.public_ip._create import PublicIPCreate
 
 logger = get_logger(__name__)
 
