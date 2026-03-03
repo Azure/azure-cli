@@ -3,9 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.command_modules.postgresql.validators import validate_private_endpoint_connection_id
 from azure.cli.core.commands import CliCommandType
-
 from azure.cli.command_modules.postgresql._client_factory import (
     cf_postgres_flexible_servers,
     cf_postgres_flexible_firewall_rules,
@@ -23,8 +21,8 @@ from azure.cli.command_modules.postgresql._client_factory import (
     cf_postgres_flexible_server_threat_protection_settings,
     cf_postgres_flexible_advanced_threat_protection_settings,
     cf_postgres_flexible_server_log_files)
-
-from ._transformers import (
+from azure.cli.command_modules.postgresql.utils.validators import validate_private_endpoint_connection_id
+from azure.cli.command_modules.postgresql.utils._transformers import (
     table_transform_output,
     table_transform_output_list_servers,
     postgres_table_transform_output_list_skus,
@@ -32,8 +30,8 @@ from ._transformers import (
     transform_backup,
     transform_backups_list)
 
-# from .transformers import table_transform_connection_string
-# from .validators import db_up_namespace_processor
+# from azure.cli.command_modules.postgresql.utils._transformers import table_transform_connection_string
+# from azure.cli.command_modules.postgresql.utils.validators import db_up_namespace_processor
 
 
 # pylint: disable=too-many-locals, too-many-statements, line-too-long

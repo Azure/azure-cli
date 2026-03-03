@@ -25,22 +25,22 @@ from azure.core.exceptions import HttpResponseError, ResourceNotFoundError
 from azure.mgmt.core.tools import resource_id, is_valid_resource_id, parse_resource_id
 from azure.cli.core.azclierror import BadRequestError, FileOperationError, MutuallyExclusiveArgumentError, RequiredArgumentMissingError, ArgumentUsageError, InvalidArgumentValueError, ValidationError
 from azure.mgmt import postgresqlflexibleservers as postgresql_flexibleservers
-from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client, \
+from azure.cli.command_modules.postgresql._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client, \
     cf_postgres_flexible_db, cf_postgres_check_resource_availability, cf_postgres_flexible_servers, \
     cf_postgres_flexible_private_dns_zone_suffix_operations, \
     cf_postgres_flexible_private_endpoint_connections, \
     cf_postgres_flexible_tuning_options, \
     cf_postgres_flexible_config, cf_postgres_flexible_admin
-from ._flexible_server_util import generate_missing_parameters, resolve_poller, \
+from azure.cli.command_modules.postgresql.utils._flexible_server_util import generate_missing_parameters, resolve_poller, \
     generate_password, parse_maintenance_window, get_current_time, build_identity_and_data_encryption, \
     _is_resource_name, get_tenant_id, get_case_insensitive_key_value, get_enum_value_true_false, \
     get_postgres_tiers, get_postgres_skus
-from ._flexible_server_location_capabilities_util import get_postgres_location_capability_info, get_postgres_server_capability_info
-from ._util import get_autonomous_tuning_settings_map
-from ._db_context import DbContext
+from azure.cli.command_modules.postgresql.utils._flexible_server_location_capabilities_util import get_postgres_location_capability_info, get_postgres_server_capability_info
+from azure.cli.command_modules.postgresql.utils._util import get_autonomous_tuning_settings_map
+from azure.cli.command_modules.postgresql._db_context import DbContext
 from .deploy_commands import create_firewall_rule
-from .flexible_server_network import prepare_private_network, prepare_private_dns_zone, prepare_public_network, flexible_server_provision_network_resource
-from .validators import pg_arguments_validator, validate_server_name, validate_and_format_restore_point_in_time, \
+from .network_commands import prepare_private_network, prepare_private_dns_zone, prepare_public_network, flexible_server_provision_network_resource
+from azure.cli.command_modules.postgresql.utils.validators import pg_arguments_validator, validate_server_name, validate_and_format_restore_point_in_time, \
     validate_postgres_replica, validate_georestore_network, pg_byok_validator, validate_migration_runtime_server, \
     validate_resource_group, check_resource_group, validate_citus_cluster, validate_backup_name, \
     validate_virtual_endpoint_name_availability, validate_database_name, compare_sku_names, is_citus_cluster, pg_restore_validator
@@ -51,55 +51,74 @@ POSTGRES_DB_NAME = 'postgres'
 DELEGATION_SERVICE_NAME = "Microsoft.DBforPostgreSQL/flexibleServers"
 RESOURCE_PROVIDER = 'Microsoft.DBforPostgreSQL'
 
-
-def backup_create_func(client, resource_group_name, server_name, backup_name):
+def virtual_endpoint_create_func(cmd, client, resource_group_name, server_name, virtual_endpoint_name, endpoint_type, members):
     validate_resource_group(resource_group_name)
-    validate_backup_name(backup_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
+    validate_virtual_endpoint_name_availability(cmd, virtual_endpoint_name)
+
+    parameters = {
+        'properties': {
+            'endpointType': endpoint_type,
+            'members': [members]
+        }
+    }
 
     return client.begin_create(
         resource_group_name,
         server_name,
-        backup_name)
+        virtual_endpoint_name,
+        parameters)
 
 
-def ltr_precheck_func(client, resource_group_name, server_name, backup_name):
+def virtual_endpoint_show_func(cmd, client, resource_group_name, server_name, virtual_endpoint_name):
     validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
 
-    return client.check_prerequisites(
-        resource_group_name=resource_group_name,
-        server_name=server_name,
-        parameters={"backupSettings": {"backupName": backup_name}}
-    )
+    return client.get(
+        resource_group_name,
+        server_name,
+        virtual_endpoint_name)
 
 
-def ltr_start_func(client, resource_group_name, server_name, backup_name, sas_url):
+def virtual_endpoint_list_func(cmd, client, resource_group_name, server_name):
     validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
 
-    parameters = {
-        "backupSettings": {
-            "backupName": backup_name
-        },
-        "targetDetails": {
-            "sasUriList": [sas_url]
-        }
-    }
-
-    return client.begin_start(
-        resource_group_name=resource_group_name,
-        server_name=server_name,
-        parameters=parameters
-    )
+    return client.list_by_server(
+        resource_group_name,
+        server_name)
 
 
-def backup_delete_func(client, resource_group_name, server_name, backup_name, yes=False):
+def virtual_endpoint_delete_func(cmd, client, resource_group_name, server_name, virtual_endpoint_name, yes=False):
     validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
 
     if not yes:
         user_confirmation(
-            "Are you sure you want to delete the backup '{0}' in server '{1}'".format(backup_name, server_name), yes=yes)
+            "Are you sure you want to delete the virtual endpoint '{0}' in resource group '{1}'".format(virtual_endpoint_name,
+                                                                                                        resource_group_name), yes=yes)
 
     return client.begin_delete(
         resource_group_name,
         server_name,
-        backup_name)
+        virtual_endpoint_name)
+
+
+def virtual_endpoint_update_func(cmd, client, resource_group_name, server_name, virtual_endpoint_name, endpoint_type, members):
+    validate_resource_group(resource_group_name)
+    validate_citus_cluster(cmd, resource_group_name, server_name)
+
+    parameters = {
+        'properties': {
+            'endpointType': endpoint_type,
+            'members': [members]
+        }
+    }
+
+    return client.begin_update(
+        resource_group_name,
+        server_name,
+        virtual_endpoint_name,
+        parameters)
+
 

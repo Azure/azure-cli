@@ -26,7 +26,7 @@ from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgum
 from azure.cli.command_modules.role.custom import create_service_principal_for_rbac
 from azure.mgmt import postgresqlflexibleservers as postgresql_flexibleservers
 from azure.mgmt.resource.resources.models import ResourceGroup
-from ._client_factory import resource_client_factory
+from .._client_factory import resource_client_factory
 
 logger = get_logger(__name__)
 

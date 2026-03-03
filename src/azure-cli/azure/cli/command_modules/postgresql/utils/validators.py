@@ -17,7 +17,7 @@ from azure.cli.core.commands.validators import (
 from azure.cli.core.util import parse_proxy_resource_id
 from azure.cli.core.profiles import ResourceType
 from azure.core.exceptions import HttpResponseError
-from ._client_factory import (cf_postgres_flexible_servers,
+from .._client_factory import (cf_postgres_flexible_servers,
                               cf_postgres_check_resource_availability)
 from ._flexible_server_util import (get_postgres_skus, get_postgres_storage_sizes, get_postgres_tiers,
                                     _is_resource_name)

@@ -15,10 +15,10 @@ from azure.mgmt.privatedns.models import PrivateZone
 from azure.mgmt.privatedns.models import SubResource
 from azure.mgmt.privatedns.models import VirtualNetworkLink
 from azure.mgmt import postgresqlflexibleservers as postgresql_flexibleservers
-from ._client_factory import resource_client_factory, private_dns_client_factory, private_dns_link_client_factory
+from azure.cli.command_modules.postgresql._client_factory import resource_client_factory, private_dns_client_factory, private_dns_link_client_factory
 from ._config_reader import get_cloud_cluster
-from ._flexible_server_util import get_id_components, check_existence, _is_resource_name, parse_public_access_input, get_user_confirmation, _check_resource_group_existence
-from .validators import validate_private_dns_zone, validate_vnet_location, validate_resource_group
+from azure.cli.command_modules.postgresql.utils._flexible_server_util import get_id_components, check_existence, _is_resource_name, parse_public_access_input, get_user_confirmation, _check_resource_group_existence
+from azure.cli.command_modules.postgresql.utils.validators import validate_private_dns_zone, validate_vnet_location, validate_resource_group
 
 from .aaz.latest.network.vnet import Create as VNetCreate, Show as VNetShow, Update as _VNetUpdate
 from .aaz.latest.network.vnet.subnet import Create as SubnetCreate, Show as SubnetShow, Update as SubnetUpdate
