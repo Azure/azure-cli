@@ -9,23 +9,15 @@ from knack.log import get_logger
 from azure.cli.core.util import CLIError
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
-from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
-from azure.cli.core.aaz import register_command
-from azure.core.exceptions import HttpResponseError
-
-from .aaz.latest.network.private_dns.link.vnet import Create as _PrivateDNSLinkVNetCreate
-from .aaz.latest.network.private_dns.zone import Create as _PrivateDNSZoneCreate, Show as PrivateDNSZoneShow
-from .aaz.latest.network.private_dns.record_set import Create as _RecordSetCreate, Delete as _RecordSetDelete, \
-    ListByType as _RecordSetList, Show as _RecordSetShow, Update as _RecordSetUpdate
 
 logger = get_logger(__name__)
 
 
 # pylint: disable=too-many-statements, too-many-locals, too-many-branches
 def import_zone(cmd, resource_group_name, private_zone_name, file_name):
-    from azure.cli.core.util import read_file_content
     import sys
+    from azure.cli.core.util import read_file_content
+    from azure.core.exceptions import HttpResponseError
     from azure.mgmt.privatedns.models import RecordSet
 
     from azure.cli.core.azclierror import FileOperationError, UnclassifiedUserFault
@@ -39,6 +31,8 @@ def import_zone(cmd, resource_group_name, private_zone_name, file_name):
         raise FileOperationError("Permission denied: " + str(file_name))
     except OSError as e:
         raise UnclassifiedUserFault(e)
+
+    from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
 
     zone_obj = parse_zone_file(file_text, private_zone_name)
     origin = private_zone_name
@@ -94,6 +88,9 @@ def import_zone(cmd, resource_group_name, private_zone_name, file_name):
     client = get_mgmt_service_client(cmd.cli_ctx, PrivateDnsManagementClient)
 
     print('== BEGINNING ZONE IMPORT: {} ==\n'.format(private_zone_name), file=sys.stderr)
+
+    from .aaz.latest.network.private_dns.zone._show import Show as PrivateDNSZoneShow
+    from .operations.latest.network.private_dns.zone._create import PrivateDNSZoneCreate
 
     try:
         PrivateDNSZoneShow(cli_ctx=cmd.cli_ctx)(command_args={
@@ -224,6 +221,8 @@ def export_zone(cmd, resource_group_name, private_zone_name, file_name=None):
 
             zone_obj[record_set_name][record_type].append(record_obj)
 
+    from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
+
     zone_file_content = make_zone_file(zone_obj)
     print(zone_file_content)
     if file_name:
@@ -263,580 +262,6 @@ def _build_record(cmd, data):
     except KeyError as ke:
         raise CLIError("The {} record '{}' is missing a property.  {}"
                        .format(record_type, data['name'], ke))
-
-
-class PrivateDNSZoneCreate(_PrivateDNSZoneCreate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.if_none_match._registered = False
-        args_schema.location._registered = False
-
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        if args.name.to_serialized_data().endswith(".local"):
-            logger.warning(
-                "Please be aware that DNS names ending with `.local` are reserved for use with multicast DNS and "
-                "may not work as expected with some operating systems. "
-                "For details refer to your operating systems documentation."
-            )
-        args.location = "global"
-        args.if_none_match = "*"
-
-
-class PrivateDNSLinkVNetCreate(_PrivateDNSLinkVNetCreate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.virtual_network._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/virtualNetworks/{}"
-        )
-        args_schema.registration_enabled._required = True
-        args_schema.virtual_network._required = True
-        args_schema.if_none_match._registered = False
-        args_schema.location._registered = False
-
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        args.location = "global"
-        args.if_none_match = "*"
-
-
-# region RecordSetCreate
-class RecordSetCreate(_RecordSetCreate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.record_type._required = False
-        args_schema.record_type._registered = False
-        args_schema.if_none_match._registered = False
-        args_schema.a_records._registered = False
-        args_schema.aaaa_records._registered = False
-        args_schema.cname_record._registered = False
-        args_schema.mx_records._registered = False
-        args_schema.ptr_records._registered = False
-        args_schema.soa_record._registered = False
-        args_schema.srv_records._registered = False
-        args_schema.txt_records._registered = False
-
-        return args_schema
-
-
-@register_command("network private-dns record-set a create")
-class RecordSetACreate(RecordSetCreate):
-    """ Create an empty A record set.
-
-    :example: Create an empty A record set.
-        az network private-dns record-set a create -g MyResourceGroup -z www.mysite.com -n MyRecordSet
-    """
-    def pre_operations(self):
-        args = self.ctx.args
-        args.record_type = "A"
-        args.if_none_match = "*"
-
-
-@register_command("network private-dns record-set aaaa create")
-class RecordSetAAAACreate(RecordSetCreate):
-    """ Create an empty AAAA record set.
-
-    :example: Create an empty AAAA record set.
-        az network private-dns record-set aaaa create -g MyResourceGroup -z www.mysite.com -n MyRecordSet
-    """
-    def pre_operations(self):
-        args = self.ctx.args
-        args.record_type = "AAAA"
-        args.if_none_match = "*"
-
-
-@register_command("network private-dns record-set cname create")
-class RecordSetCNAMECreate(RecordSetCreate):
-    """ Create an empty CNAME record set.
-
-    :example: Create an empty CNAME record set.
-        az network private-dns record-set cname create -g MyResourceGroup -z www.mysite.com -n MyRecordSet
-    """
-    def pre_operations(self):
-        args = self.ctx.args
-        args.record_type = "CNAME"
-        args.if_none_match = "*"
-
-
-@register_command("network private-dns record-set mx create")
-class RecordSetMXCreate(RecordSetCreate):
-    """ Create an empty MX record set.
-
-    :example: Create an empty MX record set.
-        az network private-dns record-set mx create -g MyResourceGroup -z www.mysite.com -n MyRecordSet
-    """
-    def pre_operations(self):
-        args = self.ctx.args
-        args.record_type = "MX"
-        args.if_none_match = "*"
-
-
-@register_command("network private-dns record-set ptr create")
-class RecordSetPTRCreate(RecordSetCreate):
-    """ Create an empty PTR record set.
-
-    :example: Create an empty PTR record set.
-        az network private-dns record-set ptr create -g MyResourceGroup -z www.mysite.com -n MyRecordSet
-    """
-    def pre_operations(self):
-        args = self.ctx.args
-        args.record_type = "PTR"
-        args.if_none_match = "*"
-
-
-@register_command("network private-dns record-set srv create")
-class RecordSetSRVCreate(RecordSetCreate):
-    """ Create an empty SRV record set.
-
-    :example: Create an empty SRV record set.
-        az network private-dns record-set srv create -g MyResourceGroup -z www.mysite.com -n MyRecordSet
-    """
-    def pre_operations(self):
-        args = self.ctx.args
-        args.record_type = "SRV"
-        args.if_none_match = "*"
-
-
-@register_command("network private-dns record-set txt create")
-class RecordSetTXTCreate(RecordSetCreate):
-    """ Create an empty TXT record set.
-
-    :example: Create an empty TXT record set.
-        az network private-dns record-set txt create -g MyResourceGroup -z www.mysite.com -n MyRecordSet
-    """
-    def pre_operations(self):
-        args = self.ctx.args
-        args.record_type = "TXT"
-        args.if_none_match = "*"
-# endregion RecordSetCreate
-
-
-# region RecordSetDelete
-class RecordSetDelete(_RecordSetDelete):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.record_type._required = False
-        args_schema.record_type._registered = False
-
-        return args_schema
-
-
-@register_command("network private-dns record-set a delete", confirmation="Are you sure you want to perform this operation?")
-class RecordSetADelete(RecordSetDelete):
-    """ Delete an A record set and all associated records.
-
-    :example: Delete an A record set and all associated records.
-        az network private-dns record-set a delete -g MyResourceGroup -z www.mysite.com -n MyRecordSet
-    """
-    def pre_operations(self):
-        args = self.ctx.args
-        args.record_type = "A"
-
-
-@register_command("network private-dns record-set aaaa delete", confirmation="Are you sure you want to perform this operation?")
-class RecordSetAAAADelete(RecordSetDelete):
-    """ Delete an AAAA record set and all associated records.
-
-    :example: Delete an AAAA record set and all associated records.
-        az network private-dns record-set aaaa delete -g MyResourceGroup -z www.mysite.com -n MyRecordSet
-    """
-    def pre_operations(self):
-        args = self.ctx.args
-        args.record_type = "AAAA"
-
-
-@register_command("network private-dns record-set cname delete", confirmation="Are you sure you want to perform this operation?")
-class RecordSetCNAMEDelete(RecordSetDelete):
-    """ Delete a CNAME record set and its associated record.
-
-    :example: Delete a CNAME record set and its associated record.
-        az network private-dns record-set cname delete -g MyResourceGroup -z www.mysite.com -n MyRecordSet
-    """
-    def pre_operations(self):
-        args = self.ctx.args
-        args.record_type = "CNAME"
-
-
-@register_command("network private-dns record-set mx delete", confirmation="Are you sure you want to perform this operation?")
-class RecordSetMXDelete(RecordSetDelete):
-    """ Delete an MX record set and all associated records.
-
-    :example: Delete an MX record set and all associated records.
-        az network private-dns record-set mx delete -g MyResourceGroup -z www.mysite.com -n MyRecordSet
-    """
-    def pre_operations(self):
-        args = self.ctx.args
-        args.record_type = "MX"
-
-
-@register_command("network private-dns record-set ptr delete", confirmation="Are you sure you want to perform this operation?")
-class RecordSetPTRDelete(RecordSetDelete):
-    """ Delete a PTR record set and all associated records.
-
-    :example: Delete a PTR record set and all associated records.
-        az network private-dns record-set ptr delete -g MyResourceGroup -z www.mysite.com -n MyRecordSet
-    """
-    def pre_operations(self):
-        args = self.ctx.args
-        args.record_type = "PTR"
-
-
-@register_command("network private-dns record-set srv delete", confirmation="Are you sure you want to perform this operation?")
-class RecordSetSRVDelete(RecordSetDelete):
-    """ Delete an SRV record set and all associated records.
-
-    :example: Delete an SRV record set and all associated records.
-        az network private-dns record-set srv delete -g MyResourceGroup -z www.mysite.com -n MyRecordSet
-    """
-    def pre_operations(self):
-        args = self.ctx.args
-        args.record_type = "SRV"
-
-
-@register_command("network private-dns record-set txt delete", confirmation="Are you sure you want to perform this operation?")
-class RecordSetTXTDelete(RecordSetDelete):
-    """ Delete a TXT record set and all associated records.
-
-    :example: Delete a TXT record set and all associated records.
-        az network private-dns record-set txt delete -g MyResourceGroup -z www.mysite.com -n MyRecordSet
-    """
-    def pre_operations(self):
-        args = self.ctx.args
-        args.record_type = "TXT"
-# endregion RecordSetDelete
-
-
-# region RecordSetList
-class RecordSetList(_RecordSetList):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.record_type._required = False
-        args_schema.record_type._registered = False
-
-        return args_schema
-
-
-@register_command("network private-dns record-set a list")
-class RecordSetAList(RecordSetList):
-    """ List all A record sets in a zone.
-
-    :example: List all A record sets in a zone.
-        az network private-dns record-set a list -g MyResourceGroup -z www.mysite.com
-    """
-    def pre_operations(self):
-        args = self.ctx.args
-        args.record_type = "A"
-
-
-@register_command("network private-dns record-set aaaa list")
-class RecordSetAAAAList(RecordSetList):
-    """ List all AAAA record sets in a zone.
-
-    :example: List all AAAA record sets in a zone.
-        az network private-dns record-set aaaa list -g MyResourceGroup -z www.mysite.com
-    """
-    def pre_operations(self):
-        args = self.ctx.args
-        args.record_type = "AAAA"
-
-
-@register_command("network private-dns record-set cname list")
-class RecordSetCNAMEList(RecordSetList):
-    """ List the CNAME record set in a zone.
-
-    :example: List the CNAME record set in a zone.
-        az network private-dns record-set cname list -g MyResourceGroup -z www.mysite.com
-    """
-    def pre_operations(self):
-        args = self.ctx.args
-        args.record_type = "CNAME"
-
-
-@register_command("network private-dns record-set mx list")
-class RecordSetMXList(RecordSetList):
-    """ List all MX record sets in a zone.
-
-    :example: List all MX record sets in a zone.
-        az network private-dns record-set mx list -g MyResourceGroup -z www.mysite.com
-    """
-    def pre_operations(self):
-        args = self.ctx.args
-        args.record_type = "MX"
-
-
-@register_command("network private-dns record-set ptr list")
-class RecordSetPTRList(RecordSetList):
-    """ List all PTR record sets in a zone.
-
-    :example: List all PTR record sets in a zone.
-        az network private-dns record-set ptr list -g MyResourceGroup -z www.mysite.com
-    """
-    def pre_operations(self):
-        args = self.ctx.args
-        args.record_type = "PTR"
-
-
-@register_command("network private-dns record-set srv list")
-class RecordSetSRVList(RecordSetList):
-    """ List all SRV record sets in a zone.
-
-    :example: List all SRV record sets in a zone.
-        az network private-dns record-set srv list -g MyResourceGroup -z www.mysite.com
-    """
-    def pre_operations(self):
-        args = self.ctx.args
-        args.record_type = "SRV"
-
-
-@register_command("network private-dns record-set txt list")
-class RecordSetTXTList(RecordSetList):
-    """ List all TXT record sets in a zone.
-
-    :example: List all TXT record sets in a zone.
-        az network private-dns record-set txt list -g MyResourceGroup -z www.mysite.com
-    """
-    def pre_operations(self):
-        args = self.ctx.args
-        args.record_type = "TXT"
-# endregion RecordSetList
-
-
-# region RecordSetShow
-class RecordSetShow(_RecordSetShow):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.record_type._required = False
-        args_schema.record_type._registered = False
-
-        return args_schema
-
-
-@register_command("network private-dns record-set a show")
-class RecordSetAShow(RecordSetShow):
-    """ Get the details of an A record set.
-
-    :example: Get the details of an A record set.
-        az network private-dns record-set a show -g MyResourceGroup -n MyRecordSet -z www.mysite.com
-    """
-    def pre_operations(self):
-        args = self.ctx.args
-        args.record_type = "A"
-
-
-@register_command("network private-dns record-set aaaa show")
-class RecordSetAAAAShow(RecordSetShow):
-    """ Get the details of an AAAA record set.
-
-    :example: Get the details of an AAAA record set.
-        az network private-dns record-set aaaa show -g MyResourceGroup -z www.mysite.com -n MyRecordSet
-    """
-    def pre_operations(self):
-        args = self.ctx.args
-        args.record_type = "AAAA"
-
-
-@register_command("network private-dns record-set cname show")
-class RecordSetCNAMEShow(RecordSetShow):
-    """ Get the details of a CNAME record set.
-
-    :example: Get the details of a CNAME record set.
-        az network private-dns record-set cname show -g MyResourceGroup -z www.mysite.com -n MyRecordSet
-    """
-    def pre_operations(self):
-        args = self.ctx.args
-        args.record_type = "CNAME"
-
-
-@register_command("network private-dns record-set mx show")
-class RecordSetMXShow(RecordSetShow):
-    """ Get the details of an MX record set.
-
-    :example: Get the details of an MX record set.
-        az network private-dns record-set mx show -g MyResourceGroup -z www.mysite.com -n MyRecordSet
-    """
-    def pre_operations(self):
-        args = self.ctx.args
-        args.record_type = "MX"
-
-
-@register_command("network private-dns record-set ptr show")
-class RecordSetPTRShow(RecordSetShow):
-    """ Get the details of a PTR record set.
-
-    :example: Get the details of a PTR record set.
-        az network private-dns record-set ptr show -g MyResourceGroup -z www.mysite.com -n MyRecordSet
-    """
-    def pre_operations(self):
-        args = self.ctx.args
-        args.record_type = "PTR"
-
-
-@register_command("network private-dns record-set soa show")
-class RecordSetSOAShow(RecordSetShow):
-    """ Get the details of an SOA record.
-
-    :example: Get the details of an SOA record.
-        az network private-dns record-set soa show -g MyResourceGroup -z www.mysite.com
-    """
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.name._required = False
-        args_schema.name._registered = False
-
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        args.name = "@"
-        args.record_type = "SOA"
-
-
-@register_command("network private-dns record-set srv show")
-class RecordSetSRVShow(RecordSetShow):
-    """ Get the details of an SRV record set.
-
-    :example: Get the details of an SRV record set.
-        az network private-dns record-set srv show -g MyResourceGroup -z www.mysite.com -n MyRecordSet
-    """
-    def pre_operations(self):
-        args = self.ctx.args
-        args.record_type = "SRV"
-
-
-@register_command("network private-dns record-set txt show")
-class RecordSetTXTShow(RecordSetShow):
-    """ Get the details of a TXT record set.
-
-    :example: Get the details of a TXT record set.
-        az network private-dns record-set txt show -g MyResourceGroup -z www.mysite.com -n MyRecordSet
-    """
-    def pre_operations(self):
-        args = self.ctx.args
-        args.record_type = "TXT"
-# endregion RecordSetShow
-
-
-# region RecordSetUpdate
-class RecordSetUpdate(_RecordSetUpdate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.record_type._required = False
-        args_schema.record_type._registered = False
-        args_schema.a_records._registered = False
-        args_schema.aaaa_records._registered = False
-        args_schema.cname_record._registered = False
-        args_schema.mx_records._registered = False
-        args_schema.ptr_records._registered = False
-        args_schema.soa_record._registered = False
-        args_schema.srv_records._registered = False
-        args_schema.txt_records._registered = False
-
-        return args_schema
-
-
-@register_command("network private-dns record-set a update")
-class RecordSetAUpdate(RecordSetUpdate):
-    """ Update an A record set.
-
-    :example: Update an A record set.
-        az network private-dns record-set a update -g MyResourceGroup -n MyRecordSet -z www.mysite.com --metadata owner=WebTeam
-    """
-    def pre_operations(self):
-        args = self.ctx.args
-        args.record_type = "A"
-
-
-@register_command("network private-dns record-set aaaa update")
-class RecordSetAAAAUpdate(RecordSetUpdate):
-    """ Update an AAAA record set.
-
-    :example: Update an AAAA record set.
-        az network private-dns record-set aaaa update -g MyResourceGroup -z www.mysite.com -n MyRecordSet --metadata owner=WebTeam
-    """
-    def pre_operations(self):
-        args = self.ctx.args
-        args.record_type = "AAAA"
-
-
-@register_command("network private-dns record-set cname update")
-class RecordSetCNAMEUpdate(RecordSetUpdate):
-    """ Update a CNAME record set.
-
-    :example: Update a CNAME record set.
-        az network private-dns record-set cname update -g MyResourceGroup -z www.mysite.com -n MyRecordSet --metadata owner=WebTeam
-    """
-    def pre_operations(self):
-        args = self.ctx.args
-        args.record_type = "CNAME"
-
-
-@register_command("network private-dns record-set mx update")
-class RecordSetMXUpdate(RecordSetUpdate):
-    """ Update an MX record set.
-
-    :example: Update an MX record set.
-        az network private-dns record-set mx update -g MyResourceGroup -z www.mysite.com -n MyRecordSet --metadata owner=WebTeam
-    """
-    def pre_operations(self):
-        args = self.ctx.args
-        args.record_type = "MX"
-
-
-@register_command("network private-dns record-set ptr update")
-class RecordSetPTRUpdate(RecordSetUpdate):
-    """ Update a PTR record set.
-
-    :example: Update a PTR record set.
-        az network private-dns record-set ptr update -g MyResourceGroup -z www.mysite.com -n MyRecordSet --metadata owner=WebTeam
-    """
-    def pre_operations(self):
-        args = self.ctx.args
-        args.record_type = "PTR"
-
-
-class RecordSetSOAUpdate(RecordSetUpdate):
-    def pre_operations(self):
-        args = self.ctx.args
-        args.record_type = "SOA"
-
-
-@register_command("network private-dns record-set srv update")
-class RecordSetSRVUpdate(RecordSetUpdate):
-    """ Update an SRV record set.
-
-    :example: Update an SRV record set.
-        az network private-dns record-set srv update -g MyResourceGroup -z www.mysite.com -n MyRecordSet --metadata owner=WebTeam
-    """
-    def pre_operations(self):
-        args = self.ctx.args
-        args.record_type = "SRV"
-
-
-@register_command("network private-dns record-set txt update")
-class RecordSetTXTUpdate(RecordSetUpdate):
-    """ Update a TXT record set.
-
-    :example: Update a TXT record set.
-        az network private-dns record-set txt update -g MyResourceGroup -z www.mysite.com -n MyRecordSet --metadata owner=WebTeam
-    """
-    def pre_operations(self):
-        args = self.ctx.args
-        args.record_type = "TXT"
-# endregion RecordSetUpdate
 
 
 def _type_to_property_name(key):
@@ -888,19 +313,43 @@ def _convert_to_snake_case(element):
 
 
 def _record_show_func(record_type):
-    return globals()["RecordSet{}Show".format(record_type.upper())]
+    import importlib
+    mod = importlib.import_module(
+        ".operations.latest.network.private_dns.record_set.{}._{}"
+        .format(record_type.lower(), "show"),
+        package="azure.cli.command_modules.privatedns"
+    )
+    return getattr(mod, "RecordSet{}Show".format(record_type.upper()))
 
 
 def _record_create_func(record_type):
-    return globals()["RecordSet{}Create".format(record_type.upper())]
+    import importlib
+    mod = importlib.import_module(
+        ".operations.latest.network.private_dns.record_set.{}._{}"
+        .format(record_type.lower(), "create"),
+        package="azure.cli.command_modules.privatedns"
+    )
+    return getattr(mod, "RecordSet{}Create".format(record_type.upper()))
 
 
 def _record_delete_func(record_type):
-    return globals()["RecordSet{}Delete".format(record_type.upper())]
+    import importlib
+    mod = importlib.import_module(
+        ".operations.latest.network.private_dns.record_set.{}._{}"
+        .format(record_type.lower(), "delete"),
+        package="azure.cli.command_modules.privatedns"
+    )
+    return getattr(mod, "RecordSet{}Delete".format(record_type.upper()))
 
 
 def _record_update_func(record_type):
-    return globals()["RecordSet{}Update".format(record_type.upper())]
+    import importlib
+    mod = importlib.import_module(
+        ".operations.latest.network.private_dns.record_set.{}._{}"
+        .format(record_type.lower(), "update"),
+        package="azure.cli.command_modules.privatedns"
+    )
+    return getattr(mod, "RecordSet{}Update".format(record_type.upper()))
 
 
 def _privatedns_type_to_property_name(key):
@@ -929,6 +378,7 @@ def _privatedns_add_record(record_set, record, record_type, is_list=False):
 
 
 def _privatedns_add_save_record(cmd, record, record_type, relative_record_set_name, resource_group_name, private_zone_name, is_list=True):
+    from azure.core.exceptions import HttpResponseError
     record_snake, record_camel = _privatedns_type_to_property_name(record_type)
     is_empty = False
 
@@ -1028,6 +478,7 @@ def update_privatedns_soa_record(cmd, resource_group_name, private_zone_name, ho
     relative_record_set_name = '@'
     record_type = 'soa'
 
+    from .operations.latest.network.private_dns.record_set.soa._show import RecordSetSOAShow
     record_set = RecordSetSOAShow(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "zone_name": private_zone_name,

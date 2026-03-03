@@ -236,6 +236,8 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
 
 
 def remove_ag_identity(cmd, resource_group_name, application_gateway_name, no_wait=False):
+    from .aaz.latest.network.application_gateway._update import Update as _ApplicationGatewayUpdate
+
     class IdentityRemove(_ApplicationGatewayUpdate):
         def pre_operations(self):
             args = self.ctx.args
@@ -326,6 +328,8 @@ def set_ag_waf_config(cmd, resource_group_name, application_gateway_name, enable
         "rule_set_type": rule_set_type,
         "rule_set_version": rule_set_version
     }
+
+    from .aaz.latest.network.application_gateway._update import Update as _ApplicationGatewayUpdate
 
     class WAFConfigSet(_ApplicationGatewayUpdate):
         def pre_operations(self):
@@ -913,6 +917,8 @@ def add_dns_delegation(cmd, child_zone, parent_zone, child_rg, child_zone_name):
 
 
 def create_dns_zone(cmd, resource_group_name, zone_name, parent_zone_name=None, tags=None, if_none_match=False):
+    from .aaz.latest.network.dns.zone._create import Create as _DNSZoneCreate
+
     created_zone = _DNSZoneCreate(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "zone_name": zone_name,
@@ -928,6 +934,8 @@ def create_dns_zone(cmd, resource_group_name, zone_name, parent_zone_name=None, 
 
 
 def show_dns_soa_record_set(cmd, resource_group_name, zone_name, record_type):
+    from .operations.latest.network.dns.record_set.soa._show import RecordSetSOAShow as DNSRecordSetSOAShow
+
     return DNSRecordSetSOAShow(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "zone_name": zone_name
@@ -939,6 +947,8 @@ def update_dns_soa_record(cmd, resource_group_name, zone_name, host=None, email=
                           minimum_ttl=3600, if_none_match=None):
     record_set_name = '@'
     record_type = 'soa'
+
+    from .operations.latest.network.dns.record_set.soa._show import RecordSetSOAShow as DNSRecordSetSOAShow
 
     record_set = DNSRecordSetSOAShow(cli_ctx=cmd.cli_ctx)(command_args={
         "zone_name": zone_name,
@@ -983,6 +993,8 @@ def _type_to_property_name(key):
 
 def export_zone(cmd, resource_group_name, zone_name, file_name=None):  # pylint: disable=too-many-branches
     from time import localtime, strftime
+    from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
+    from .aaz.latest.network.dns.record_set._list import List as _DNSRecordSetListByZone
 
     record_sets = _DNSRecordSetListByZone(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
@@ -1144,6 +1156,9 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
     except OSError as e:
         raise UnclassifiedUserFault(e)
 
+    from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
+    from .operations.latest.network.dns.record_set.soa._show import RecordSetSOAShow as DNSRecordSetSOAShow
+
     zone_obj = parse_zone_file(file_text, zone_name)
 
     origin = zone_name
@@ -1207,6 +1222,8 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
     cum_records = 0
 
     print('== BEGINNING ZONE IMPORT: {} ==\n'.format(zone_name), file=sys.stderr)
+
+    from .aaz.latest.network.dns.zone._create import Create as _DNSZoneCreate
 
     _DNSZoneCreate(cli_ctx=cmd.cli_ctx)(command_args={
         'resource_group': resource_group_name,
@@ -2436,6 +2453,8 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
     if ddos_protection_plan:
         public_ip_args['ddos_protection_plan'] = ddos_protection_plan
 
+    from .operations.latest.network.public_ip._create import PublicIPCreate
+
     return PublicIPCreate(cli_ctx=cmd.cli_ctx)(command_args=public_ip_args)
 
 
@@ -2689,8 +2708,12 @@ def generate_vpn_client(cmd, resource_group_name, virtual_network_gateway_name, 
         generate_args['authentication_method'] = authentication_method
         generate_args['radius_server_auth_certificate'] = radius_server_auth_certificate
         generate_args['client_root_certificates'] = client_root_certificates
+        from .aaz.latest.network.vnet_gateway.vpn_client._generate_vpn_profile import GenerateVpnProfile as _VpnProfileGenerate
+
         return _VpnProfileGenerate(cli_ctx=cmd.cli_ctx)(command_args=generate_args)
     # legacy implementation
+    from .aaz.latest.network.vnet_gateway.vpn_client._generate import Generate as _VpnClientPackageGenerate
+
     return _VpnClientPackageGenerate(cli_ctx=cmd.cli_ctx)(command_args=generate_args)
 # endregion
 
@@ -2769,6 +2792,7 @@ def list_vpn_connections(cmd, resource_group_name, virtual_network_gateway_name=
 
 # region IPSec Policy Commands
 def clear_vnet_gateway_ipsec_policies(cmd, resource_group_name, gateway_name, no_wait=False):
+    from .aaz.latest.network.vnet_gateway._update import Update as _VnetGatewayUpdate
 
     class VnetGatewayIpsecPoliciesClear(_VnetGatewayUpdate):
 
@@ -2792,6 +2816,8 @@ def clear_vnet_gateway_ipsec_policies(cmd, resource_group_name, gateway_name, no
 
 
 def clear_vpn_conn_ipsec_policies(cmd, resource_group_name, connection_name, no_wait=False):
+    from .aaz.latest.network.vpn_connection._update import Update as _VpnConnectionUpdate
+
     class VpnConnIpsecPoliciesClear(_VpnConnectionUpdate):
 
         def _output(self, *args, **kwargs):
@@ -2812,6 +2838,8 @@ def clear_vpn_conn_ipsec_policies(cmd, resource_group_name, connection_name, no_
 
 
 def remove_vnet_gateway_aad(cmd, resource_group_name, gateway_name, no_wait=False):
+    from .aaz.latest.network.vnet_gateway._update import Update as _VnetGatewayUpdate
+
     class VnetGatewayAadRemove(_VnetGatewayUpdate):
         def pre_operations(self):
             args = self.ctx.args
