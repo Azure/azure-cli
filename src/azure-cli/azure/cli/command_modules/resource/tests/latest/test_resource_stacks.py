@@ -53,7 +53,7 @@ class DeploymentStacksWhatIfTest(ScenarioTest):
         })
 
         self.cmd(
-            'stack-whatif sub create --name {name} --location {location} --template-file "{template-file}" --dm denyDelete --parameters "{parameter-file}" --yes --description "stack deployment" --aou deleteAll --deny-settings-excluded-principals "principal1 principal2" --deny-settings-excluded-actions "action1 action2" --deny-settings-apply-to-child-scopes --vl ProviderNoRbac --ri P1D --stack "{stack-id}"',
+            'stack-whatif sub create --name {name} --location {location} --template-file "{template-file}" --dm denyDelete --parameters "{parameter-file}" --yes --description "stack deployment" --aou deleteAll --deny-settings-excluded-principals "principal1 principal2" --deny-settings-excluded-actions "action1 action2" --deny-settings-apply-to-child-scopes --vl ProviderNoRbac --ri P1D --stack "{stack-id}" --no-color',
             checks=self.check('provisioningState', 'succeeded'))
 
         self.cmd(
@@ -84,7 +84,7 @@ class DeploymentStacksWhatIfTest(ScenarioTest):
             checks=self.check('provisioningState', 'succeeded'))
 
         self.cmd(
-            'stack-whatif mg show --name {name} --management-group-id {management-group}',
+            'stack-whatif mg show --name {name} --management-group-id {management-group} --no-pretty-print',
             checks=self.check('provisioningState', 'succeeded'))
 
         self.cmd(
