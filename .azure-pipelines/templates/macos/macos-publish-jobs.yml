@@ -181,21 +181,24 @@ jobs:
         echo "=== Updating Homebrew Cask from artifact ==="
         
         cd $(Pipeline.Workspace)/homebrew-tap
-        mkdir -p Casks
+        
+        # Homebrew uses sharded cask layout: Casks/<first-letter>/<name>.rb
+        CASK_DIR="Casks/a"
+        mkdir -p "$CASK_DIR"
         
         # Copy the pre-generated cask from artifact
-        cp $(Pipeline.Workspace)/macos-cask-definition/azure-cli.rb Casks/azure-cli.rb
+        cp $(Pipeline.Workspace)/macos-cask-definition/azure-cli.rb "$CASK_DIR/azure-cli.rb"
         
         echo "=== Cask Definition ==="
-        cat Casks/azure-cli.rb
+        cat "$CASK_DIR/azure-cli.rb"
         
         # Extract version from cask for commit message
-        VERSION=$(grep -oP 'version "\K[^"]+' Casks/azure-cli.rb | head -1)
+        VERSION=$(grep -oP 'version "\K[^"]+' "$CASK_DIR/azure-cli.rb" | head -1)
         echo "Version: $VERSION"
         
         git config user.name "Azure Pipeline"
         git config user.email "azure-pipeline@microsoft.com"
-        git add Casks/azure-cli.rb
+        git add "$CASK_DIR/azure-cli.rb"
         git commit -m "Update azure-cli to $VERSION" || echo "No changes"
         git pull --rebase origin main
         git push origin HEAD:main
