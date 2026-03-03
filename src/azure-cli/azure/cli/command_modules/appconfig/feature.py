@@ -178,9 +178,6 @@ def set_feature(cmd,
                     else:
                         feature_flag_value.telemetry.enabled = telemetry_enabled
 
-                    if telemetry_enabled:
-                        warn_if_app_insights_not_set(cmd, name)
-
                 set_kv = KeyValue(key=key,
                                   label=label,
                                   value=json.dumps(feature_flag_value, default=lambda o: {k: v for k, v in o.__dict__.items() if v is not None}, ensure_ascii=False),

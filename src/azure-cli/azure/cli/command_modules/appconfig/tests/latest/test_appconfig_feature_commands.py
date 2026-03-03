@@ -629,6 +629,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
             )
 
         # Link App Insights to the store
+        self.cmd('extension add -n application-insights')
         app_insights_name = self.create_random_name(prefix='appinsights', length=24)
         self.kwargs.update({
             'app_insights_name': app_insights_name
