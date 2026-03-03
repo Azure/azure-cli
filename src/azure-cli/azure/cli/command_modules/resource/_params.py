@@ -630,18 +630,20 @@ def load_arguments(self, _):
                     continue
 
                 with self.argument_context(f'{resource_type} {scope} {action}') as c:
+                    entity_type = "deployment stack what-if result" if resource_type == 'stack-whatif' else "deployment stack"
+
                     if action == 'create' or action == 'validate':
-                        c.argument('name', arg_type=stacks_name_type)
+                        c.argument('name', arg_type=stacks_name_type, help=f'The name of the {entity_type}.')
 
                         if scope == 'group':
-                            c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the deployment stack will be created.')
+                            c.argument('resource_group', arg_type=resource_group_name_type, help=f'The resource group where the {entity_type} will be created.')
                         elif scope == 'sub':
                             c.argument('deployment_resource_group', arg_type=stacks_stack_deployment_resource_group)
                         elif scope == 'mg':
                             c.argument('deployment_subscription', arg_type=stacks_stack_deployment_subscription)
 
                         if scope != 'group':
-                            c.argument('location', arg_type=get_location_type(self.cli_ctx), help='The location to store deployment stack.')
+                            c.argument('location', arg_type=get_location_type(self.cli_ctx), help=f'The location to store the {entity_type}.')
 
                         c.argument('template_file', arg_type=deployment_template_file_type)
                         c.argument('template_spec', arg_type=deployment_template_spec_type)
@@ -666,23 +668,24 @@ def load_arguments(self, _):
                             c.argument('no_pretty_print', arg_type=deployment_what_if_no_pretty_print_type)
                             c.argument('no_color', arg_type=deployment_what_if_no_color_type)
                         if action == 'create' and resource_type == 'stack':
-                            c.argument('yes', help='Do not prompt for confirmation')
+                            c.argument('yes', help='Do not prompt for confirmation.')
                     elif action == 'delete':
-                        c.argument('name', options_list=['--name', '-n'], arg_type=stacks_stack_name_type)
-                        c.argument('id', arg_type=stacks_stack_type)
+                        c.argument('name', options_list=['--name', '-n'], arg_type=stacks_stack_name_type, help=f'The name of the {entity_type}.')
+                        c.argument('id', arg_type=stacks_stack_type, help=f'The {entity_type} resource ID.')
                         c.argument('subscription', arg_type=subscription_type)
-                        c.argument('action_on_unmanage', arg_type=stacks_action_on_unmanage_type)
-                        c.argument('resources_without_delete_support', arg_type=stacks_resources_without_delete_support_type)
-                        c.argument('bypass_stack_out_of_sync_error', arg_type=stacks_bypass_stack_out_of_sync_error_type)
-                        c.argument('yes', help='Do not prompt for confirmation')
+                        c.argument('yes', help='Do not prompt for confirmation.')
                         if scope == 'group':
-                            c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the deployment stack exists')
+                            c.argument('resource_group', arg_type=resource_group_name_type, help=f'The resource group where the {entity_type} exists.')
+                        if resource_type == 'stack':
+                            c.argument('action_on_unmanage', arg_type=stacks_action_on_unmanage_type)
+                            c.argument('resources_without_delete_support', arg_type=stacks_resources_without_delete_support_type)
+                            c.argument('bypass_stack_out_of_sync_error', arg_type=stacks_bypass_stack_out_of_sync_error_type)
                     elif action == 'show' or action == 'export':
-                        c.argument('name', options_list=['--name', '-n'], arg_type=stacks_stack_name_type)
-                        c.argument('id', arg_type=stacks_stack_type)
+                        c.argument('name', options_list=['--name', '-n'], arg_type=stacks_stack_name_type, help=f'The name of the {entity_type}.')
+                        c.argument('id', arg_type=stacks_stack_type, help=f'The {entity_type} resource ID.')
                         c.argument('subscription', arg_type=subscription_type)
                         if scope == 'group':
-                            c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the deployment stack exists')
+                            c.argument('resource_group', arg_type=resource_group_name_type, help=f'The resource group where the {entity_type} exists.')
                         if resource_type == 'stack-whatif':
                             c.argument('no_pretty_print', arg_type=deployment_what_if_no_pretty_print_type)
                             c.argument('no_color', arg_type=deployment_what_if_no_color_type)
@@ -691,7 +694,7 @@ def load_arguments(self, _):
                             continue  # only uses global arguments
                         c.argument('subscription', arg_type=subscription_type)
                         if scope == 'group':
-                            c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the deployment stack exists')
+                            c.argument('resource_group', arg_type=resource_group_name_type, help=f'The resource group where the {entity_type} exists.')
 
     with self.argument_context('bicep build') as c:
         c.argument('file', arg_type=bicep_file_type, help="The path to the Bicep file to build in the file system.")
