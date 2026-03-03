@@ -40,6 +40,9 @@ parameters:
   - name: MacosIntelImage
     type: string
     default: 'macos-15'
+  - name: ESRPServiceConnection
+    type: string
+    default: 'ame_esrp_connection'
 
 jobs:
 # ============================================================================
@@ -220,7 +223,7 @@ jobs:
   - task: EsrpCodeSigning@5
     displayName: 'ESRP - Sign binaries (Developer ID Application)'
     inputs:
-      ConnectedServiceName: 'ame_esrp_connection'
+      ConnectedServiceName: '${{ parameters.ESRPServiceConnection }}'
       AppRegistrationClientId: '$(ESRPAppClientId)'
       AppRegistrationTenantId: '$(ESRPAppTenantId)'
       AuthAKVName: '$(ESRPKVName)'
@@ -439,7 +442,7 @@ jobs:
   - task: EsrpCodeSigning@5
     displayName: 'ESRP - Notarize with Apple ($(Architecture))'
     inputs:
-      ConnectedServiceName: 'ame_esrp_connection'
+      ConnectedServiceName: '${{ parameters.ESRPServiceConnection }}'
       AppRegistrationClientId: '$(ESRPAppClientId)'
       AppRegistrationTenantId: '$(ESRPAppTenantId)'
       AuthAKVName: '$(ESRPKVName)'
