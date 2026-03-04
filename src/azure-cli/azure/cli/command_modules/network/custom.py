@@ -761,6 +761,7 @@ def remove_waf_exclusion_rule_set(cmd, resource_group_name, policy_name,
 def create_ddos_plan(cmd, resource_group_name, ddos_plan_name, location=None, tags=None, vnets=None):
     from azure.cli.core.commands import LongRunningOperation
     from azure.cli.command_modules.network.aaz.latest.network.ddos_protection._create import Create
+    from azure.cli.command_modules.network.operations.latest.network.vnet._update import VNetUpdate
     Create_Ddos_Protection = Create(cli_ctx=cmd.cli_ctx)
     args = {
         "name": ddos_plan_name,
@@ -807,6 +808,7 @@ def update_ddos_plan(cmd, resource_group_name, ddos_plan_name, tags=None, vnets=
         args['tags'] = tags
     if vnets is not None:
         from azure.cli.command_modules.network.aaz.latest.network.ddos_protection._show import Show
+        from azure.cli.command_modules.network.operations.latest.network.vnet._update import VNetUpdate
         show_args = {
             "name": ddos_plan_name,
             "resource_group": resource_group_name,
@@ -2648,6 +2650,7 @@ def subnet_list_available_ips(cmd, resource_group_name, virtual_network_name, su
 
 def sync_vnet_peering(cmd, resource_group_name, virtual_network_name, virtual_network_peering_name):
     from .aaz.latest.network.vnet.peering._show import Show
+    from .operations.latest.network.vnet.peering._create import VNetPeeringCreate
     try:
         peering = Show(cli_ctx=cmd.cli_ctx)(command_args={
             "name": virtual_network_peering_name,

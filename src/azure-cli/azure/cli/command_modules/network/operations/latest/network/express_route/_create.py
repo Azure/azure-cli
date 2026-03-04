@@ -5,11 +5,13 @@
 
 # pylint: disable=line-too-long, protected-access, too-few-public-methods
 
-from azure.cli.core.aaz import AAZClientConfiguration, has_value, register_client, AAZFileArgTextFormat
+from azure.cli.core.aaz import has_value
 from azure.cli.command_modules.network.aaz.latest.network.express_route._create import Create as _ExpressRouteCreate
 
 
 def _validate_bandwidth(bandwidth, mbps=True):
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+
     unit = 'mbps' if mbps else 'gbps'
     if bandwidth is None:
         return

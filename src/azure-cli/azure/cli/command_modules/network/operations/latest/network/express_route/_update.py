@@ -10,6 +10,8 @@ from azure.cli.command_modules.network.aaz.latest.network.express_route._update 
 
 
 def _validate_bandwidth(bandwidth, mbps=True):
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+
     unit = 'mbps' if mbps else 'gbps'
     if bandwidth is None:
         return

@@ -4,9 +4,12 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long, protected-access, too-few-public-methods
+import logging
 
-from azure.cli.core.aaz import register_command, AAZResourceIdArgFormat, has_value, AAZListArg, AAZResourceIdArg, AAZStrArg, AAZArgEnum
+from azure.cli.core.aaz import has_value
 from azure.cli.command_modules.network.aaz.latest.network.lb.probe._update import Update as _LBProbeUpdate
+
+logger = logging.getLogger(__name__)
 
 
 class LBProbeUpdate(_LBProbeUpdate):
