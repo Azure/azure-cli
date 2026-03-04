@@ -43,8 +43,8 @@ def transform_web_list_output(webs):
 def transform_runtime_list_output(result):
     from collections import OrderedDict
     return [OrderedDict([
-        ('OS', r['OS']), ('runtime', r['runtime']), ('version', r['version']),
-        ('config', r['config']), ('support', r['support']), ('End of Life', r['end_of_life'])
+        ('OS', r['os']), ('Runtime', r['runtime']), ('Version', r['version']),
+        ('Config', r['config']), ('Support', r['support']), ('End of Life', r['end_of_life'])
     ]) for r in result]
 
 

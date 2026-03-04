@@ -6260,7 +6260,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                         continue
 
             results.append({
-                'OS': stack.os,
+                'os': stack.os,
                 'runtime': stack.runtime_family,
                 'version': stack.version_label or '',
                 'config': stack.display_name,
