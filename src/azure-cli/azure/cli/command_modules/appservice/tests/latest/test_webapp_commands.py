@@ -137,6 +137,11 @@ class WebappBasicE2ETest(ScenarioTest):
         self.cmd('webapp list-runtimes')
         self.cmd('webapp list-runtimes --os windows')
         self.cmd('webapp list-runtimes --os linux')
+        self.cmd('webapp list-runtimes --runtime python')
+        self.cmd('webapp list-runtimes --runtime java')
+        self.cmd('webapp list-runtimes --support active')
+        self.cmd('webapp list-runtimes --support near')
+        self.cmd('webapp list-runtimes --os linux --runtime dotnet --support near')
 
 
 class WebappQuickCreateTest(ScenarioTest):
