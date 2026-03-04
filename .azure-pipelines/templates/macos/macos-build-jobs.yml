@@ -93,6 +93,8 @@ jobs:
       cp dist/binary_tar_gz/*.sha256 $(Build.ArtifactStagingDirectory)/cli-build/
       
     displayName: 'Build Azure CLI Tarball'
+    env:
+      PYTHON_MAJOR_MINOR: ${{ parameters.PythonVersion }}
   
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'Generate SBOM'
