@@ -5982,7 +5982,7 @@ def execute_query_for_vm(cmd, client, resource_group_name, vm_name, analytics_qu
     extension_resources = vm.get('resources', [])
     for resource in extension_resources:
         if resource.get('name') in (_WINDOWS_OMS_AGENT_EXT, _LINUX_OMS_AGENT_EXT):
-            workspace = resource.get('settings').get('workspaceId', None)
+            workspace = resource.get('settings', {}).get('workspaceId', None)
     if workspace is None:
         raise CLIError('Cannot find the corresponding log analytics workspace. '
                        'Please check the status of log analytics workspace.')
