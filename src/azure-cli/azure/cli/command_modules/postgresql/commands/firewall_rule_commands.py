@@ -4,20 +4,11 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
-
-import re
-from datetime import datetime, timedelta
-from dateutil.tz import tzutc
+from azure.cli.command_modules.postgresql.utils.validators import validate_public_access_server, validate_resource_group
+from azure.cli.core.util import user_confirmation
+from datetime import datetime
 from knack.log import get_logger
 from knack.util import CLIError
-from urllib.request import urlretrieve
-from azure.cli.core.util import sdk_no_wait, user_confirmation, run_cmd
-from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissingError
-from azure.cli.command_modules.postgresql._client_factory import cf_postgres_flexible_replica
-from azure.cli.command_modules.postgresql.utils._flexible_server_util import run_subprocess, \
-    fill_action_template, get_git_root_dir, resolve_poller, GITHUB_ACTION_PATH
-from azure.cli.command_modules.postgresql.utils._flexible_server_location_capabilities_util import get_postgres_server_capability_info
-from azure.cli.command_modules.postgresql.utils.validators import validate_public_access_server, validate_resource_group, check_resource_group, validate_citus_cluster
 
 logger = get_logger(__name__)
 # pylint: disable=raise-missing-from
@@ -135,5 +126,3 @@ def create_firewall_rule(db_context, cmd, resource_group_name, server_name, star
                                          server_name=server_name,
                                          start_ip_address=start_ip, end_ip_address=end_ip)
     return firewall.result().name
-
-

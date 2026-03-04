@@ -4,24 +4,51 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long, import-outside-toplevel
-from requests import get
-from knack.log import get_logger
-from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id, is_valid_resource_name, resource_id  # pylint: disable=import-error
+from azure.cli.command_modules.postgresql._client_factory import (
+    private_dns_client_factory,
+    private_dns_link_client_factory,
+    resource_client_factory,
+)
+from azure.cli.command_modules.postgresql._config_reader import get_cloud_cluster
+from azure.cli.command_modules.postgresql.aaz.latest.network.vnet import (
+    Create as VNetCreate,
+    Show as VNetShow,
+    Update as _VNetUpdate,
+)
+from azure.cli.command_modules.postgresql.aaz.latest.network.vnet.subnet import (
+    Create as SubnetCreate,
+    Show as SubnetShow,
+    Update as SubnetUpdate,
+)
+from azure.cli.command_modules.postgresql.utils._flexible_server_util import (
+    _check_resource_group_existence,
+    _is_resource_name,
+    check_existence,
+    get_id_components,
+    get_user_confirmation,
+    parse_public_access_input,
+)
+from azure.cli.command_modules.postgresql.utils.validators import (
+    validate_private_dns_zone,
+    validate_resource_group,
+    validate_vnet_location,
+)
+from azure.cli.core.azclierror import RequiredArgumentMissingError, ValidationError
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError, sdk_no_wait, user_confirmation
-from azure.cli.core.azclierror import ValidationError, RequiredArgumentMissingError
+from azure.mgmt import postgresqlflexibleservers as postgresql_flexibleservers
+from azure.mgmt.core.tools import (  # pylint: disable=import-error
+    is_valid_resource_id,
+    is_valid_resource_name,
+    parse_resource_id,
+    resource_id,
+)
 from azure.mgmt.privatedns.models import PrivateZone
 from azure.mgmt.privatedns.models import SubResource
 from azure.mgmt.privatedns.models import VirtualNetworkLink
-from azure.mgmt import postgresqlflexibleservers as postgresql_flexibleservers
-from azure.cli.command_modules.postgresql._client_factory import resource_client_factory, private_dns_client_factory, private_dns_link_client_factory
-from ._config_reader import get_cloud_cluster
-from azure.cli.command_modules.postgresql.utils._flexible_server_util import get_id_components, check_existence, _is_resource_name, parse_public_access_input, get_user_confirmation, _check_resource_group_existence
-from azure.cli.command_modules.postgresql.utils.validators import validate_private_dns_zone, validate_vnet_location, validate_resource_group
-
-from .aaz.latest.network.vnet import Create as VNetCreate, Show as VNetShow, Update as _VNetUpdate
-from .aaz.latest.network.vnet.subnet import Create as SubnetCreate, Show as SubnetShow, Update as SubnetUpdate
+from knack.log import get_logger
+from requests import get
 
 logger = get_logger(__name__)
 DELEGATION_SERVICE_NAME = "Microsoft.DBforPostgreSQL/flexibleServers"

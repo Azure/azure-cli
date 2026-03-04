@@ -4,9 +4,10 @@
 # --------------------------------------------------------------------------------------------
 
 
+# pylint: disable=too-many-instance-attributes, too-few-public-methods
 class DbContext:
     """Database context class for PostgreSQL flexible server operations.
-    
+
     This class serves as a context container for various database-related configurations,
     factory functions, and clients used throughout PostgreSQL command operations.
     """
