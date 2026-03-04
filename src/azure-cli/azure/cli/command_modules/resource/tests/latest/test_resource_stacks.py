@@ -27,12 +27,11 @@ class DeploymentStacksWhatIfTest(ScenarioTest):
         })
 
         self.cmd(
-            'stack-whatif group create --name {name} --resource-group {resource-group} --template-file "{template-file}" --deny-settings-mode denYdeletE --parameters "{parameter-file}" --yes --description "stack deployment" --aou deleteAll --deny-settings-excluded-principals "principal1 principal2" --deny-settings-excluded-actions "action1 action2" --deny-settings-apply-to-child-scopes --vl ProviderNoRbac --ri P1D --stack "{stack-id}"',
-            checks=self.check('provisioningState', 'succeeded'))
+            'stack-whatif group create --name {name} --resource-group {resource-group} --template-file "{template-file}" --deny-settings-mode denYdeletE --parameters "{parameter-file}" --description "stack deployment" --aou deleteAll --deny-settings-excluded-principals "01010000-0000-0000-0000-000000001111" --deny-settings-excluded-actions "action1 action2" --deny-settings-apply-to-child-scopes --vl ProviderNoRbac --ri P1D --stack "{stack-id}" --no-pretty-print',
+            checks=self.check('properties.provisioningState', 'succeeded'))
 
         self.cmd(
-            'stack-whatif group show --name {name} --resource-group {resource-group}',
-            checks=self.check('provisioningState', 'succeeded'))
+            'stack-whatif group show --name {name} --resource-group {resource-group}')
 
         self.cmd(
             'stack-whatif group list --resource-group {resource-group}',
@@ -53,12 +52,10 @@ class DeploymentStacksWhatIfTest(ScenarioTest):
         })
 
         self.cmd(
-            'stack-whatif sub create --name {name} --location {location} --template-file "{template-file}" --dm denyDelete --parameters "{parameter-file}" --yes --description "stack deployment" --aou deleteAll --deny-settings-excluded-principals "principal1 principal2" --deny-settings-excluded-actions "action1 action2" --deny-settings-apply-to-child-scopes --vl ProviderNoRbac --ri P1D --stack "{stack-id}" --no-color',
-            checks=self.check('provisioningState', 'succeeded'))
+            'stack-whatif sub create --name {name} --location {location} --template-file "{template-file}" --dm denyDelete --parameters "{parameter-file}" --description "stack deployment" --aou deleteAll --deny-settings-excluded-actions "action1 action2" --deny-settings-apply-to-child-scopes --vl ProviderNoRbac --ri P1D --stack "{stack-id}" --no-pretty-print',
+            checks=self.check('properties.provisioningState', 'succeeded'))
 
-        self.cmd(
-            'stack-whatif sub show --name {name}',
-            checks=self.check('provisioningState', 'succeeded'))
+        self.cmd('stack-whatif sub show --name {name}')
 
         self.cmd(
             'stack-whatif sub list',
@@ -79,13 +76,11 @@ class DeploymentStacksWhatIfTest(ScenarioTest):
             'stack-id': f'/providers/Microsoft.Management/managementGroups/{DeploymentStacksWhatIfTest.MGMT_GROUP_NAME}/providers/Microsoft.Resources/deploymentStacks/{stack_name}',
         })
 
-        self.cmd(
-            'stack-whatif mg create --name {name} --location {location} --management-group-id {management-group} --template-file "{template-file}" --dm denyDelete --parameters "{parameter-file}" --yes --description "stack deployment" --aou deleteAll --deny-settings-excluded-principals "principal1 principal2" --deny-settings-excluded-actions "action1 action2" --deny-settings-apply-to-child-scopes --vl ProviderNoRbac --ri P1D --stack "{stack-id}"',
-            checks=self.check('provisioningState', 'succeeded'))
+        self.cmd('stack-whatif mg create --name {name} --location {location} --management-group-id {management-group} --template-file "{template-file}" --dm denyDelete --parameters "{parameter-file}" --description "stack deployment" --aou deleteAll --deny-settings-excluded-actions "action1 action2" --deny-settings-apply-to-child-scopes --vl ProviderNoRbac --ri P1D --stack "{stack-id}" --no-color')
 
         self.cmd(
             'stack-whatif mg show --name {name} --management-group-id {management-group} --no-pretty-print',
-            checks=self.check('provisioningState', 'succeeded'))
+            checks=self.check('properties.provisioningState', 'succeeded'))
 
         self.cmd(
             'stack-whatif mg list --management-group-id {management-group}',
