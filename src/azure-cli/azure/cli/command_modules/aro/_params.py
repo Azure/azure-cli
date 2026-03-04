@@ -137,17 +137,17 @@ def load_arguments(self, _):
                    validator=validate_load_balancer_managed_outbound_ip_count,
                    options_list=['--load-balancer-managed-outbound-ip-count', '--lb-ip-count'])
 
-        c.argument('enable_managed_identity', arg_group='Identity', is_preview=True, arg_type=get_three_state_flag(),
+        c.argument('enable_managed_identity', arg_group='Identity', arg_type=get_three_state_flag(),
                    help='Enable managed identity for this cluster.',
                    options_list=['--enable-managed-identity', '--enable-mi'],
                    validator=validate_enable_managed_identity)
-        c.argument('platform_workload_identities', arg_group='Identity', is_preview=True,
+        c.argument('platform_workload_identities', arg_group='Identity',
                    help='Assign a platform workload identity used within the cluster. Requires two values: \
                            an operator name and either the name or resource ID of the Azure identity to use for it.',
                    options_list=['--assign-platform-workload-identity', '--assign-platform-wi'],
                    validator=validate_platform_workload_identities(isCreate=True),
                    action=AROPlatformWorkloadIdentityAddAction, nargs='+')
-        c.argument('mi_user_assigned', arg_group='Identity', is_preview=True,
+        c.argument('mi_user_assigned', arg_group='Identity',
                    help='Set the user managed identity on the cluster. Value must be an identity name or resource ID.',
                    options_list=['--mi-user-assigned', '--assign-cluster-identity'],
                    validator=validate_cluster_identity)
@@ -164,18 +164,18 @@ def load_arguments(self, _):
                    help='Refresh cluster application credentials.',
                    options_list=['--refresh-credentials'],
                    validator=validate_refresh_cluster_credentials)
-        c.argument('mi_user_assigned', arg_group='Identity', is_preview=True,
+        c.argument('mi_user_assigned', arg_group='Identity',
                    help='Set the user managed identity on the cluster. Value must be an identity name or resource ID.',
                    options_list=['--mi-user-assigned', '--assign-cluster-identity'],
                    validator=validate_cluster_identity_update)
-        c.argument('platform_workload_identities', arg_group='Identity', is_preview=True,
+        c.argument('platform_workload_identities', arg_group='Identity',
                    help='Assign a platform workload identity used within the cluster. Requires two values: \
                            an operator name and either the name or resource ID of the Azure identity to use for it.',
                    options_list=['--assign-platform-workload-identity', '--assign-platform-wi'],
                    validator=validate_platform_workload_identities(isCreate=False),
                    action=AROPlatformWorkloadIdentityAddAction, nargs='+')
         c.argument('upgradeable_to', arg_group='Identity', options_list=['--upgradeable-to'],
-                   help='OpenShift version to upgrade to.', is_preview=True,
+                   help='OpenShift version to upgrade to.',
                    validator=validate_upgradeable_to_format)
 
     with self.argument_context('aro get-admin-kubeconfig') as c:
@@ -185,7 +185,6 @@ def load_arguments(self, _):
 
     with self.argument_context('aro delete') as c:
         c.argument('delete_identities',
-                   is_preview=True,
                    arg_group='Identity',
                    arg_type=get_three_state_flag(),
                    validator=validate_delete_identities,
