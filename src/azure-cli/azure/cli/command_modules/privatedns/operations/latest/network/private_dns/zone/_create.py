@@ -3,9 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=protected-access
 from knack.log import get_logger
 
-from azure.cli.command_modules.privatedns.aaz.latest.network.private_dns.zone._create import Create as _PrivateDNSZoneCreate
+from azure.cli.command_modules.privatedns.aaz.latest.network.private_dns.zone._create import (
+    Create as _PrivateDNSZoneCreate
+)
 
 logger = get_logger(__name__)
 

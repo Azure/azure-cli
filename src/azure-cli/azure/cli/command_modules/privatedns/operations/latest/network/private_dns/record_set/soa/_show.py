@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=protected-access
 from azure.cli.core.aaz import register_command
 
 from azure.cli.command_modules.privatedns.operations.latest.network.private_dns.record_set._base import RecordSetShow

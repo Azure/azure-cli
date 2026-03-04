@@ -3,7 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.command_modules.privatedns.aaz.latest.network.private_dns.link.vnet._create import Create as _PrivateDNSLinkVNetCreate
+# pylint: disable=protected-access
+from azure.cli.command_modules.privatedns.aaz.latest.network.private_dns.link.vnet._create import (
+    Create as _PrivateDNSLinkVNetCreate
+)
 
 
 class PrivateDNSLinkVNetCreate(_PrivateDNSLinkVNetCreate):

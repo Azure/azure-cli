@@ -8,7 +8,10 @@ from azure.cli.core.aaz import register_command
 from azure.cli.command_modules.privatedns.operations.latest.network.private_dns.record_set._base import RecordSetDelete
 
 
-@register_command("network private-dns record-set txt delete", confirmation="Are you sure you want to perform this operation?")
+@register_command(
+    "network private-dns record-set txt delete",
+    confirmation="Are you sure you want to perform this operation?"
+)
 class RecordSetTXTDelete(RecordSetDelete):
     """ Delete a TXT record set and all associated records.
 

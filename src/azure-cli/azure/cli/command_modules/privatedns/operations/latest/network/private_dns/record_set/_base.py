@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=too-few-public-methods, no-self-use, line-too-long, protected-access, unused-argument
 from azure.cli.command_modules.privatedns.aaz.latest.network.private_dns.record_set._create import Create as _RecordSetCreate
 from azure.cli.command_modules.privatedns.aaz.latest.network.private_dns.record_set._delete import Delete as _RecordSetDelete
 from azure.cli.command_modules.privatedns.aaz.latest.network.private_dns.record_set._list_by_type import ListByType as _RecordSetList
