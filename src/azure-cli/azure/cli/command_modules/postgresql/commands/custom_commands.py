@@ -833,3 +833,53 @@ def flexible_server_revivedropped(cmd, client, resource_group_name, server_name,
                                                                                          backup_byok_key=backup_byok_key)
 
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, server_name, parameters)
+
+
+def flexible_server_connection_string(
+        server_name='{server}',
+        database_name='{database}',
+        administrator_login='{login}',
+        administrator_login_password='{password}',
+        show_pg_bouncer=False):
+    host = '{}.postgres.database.azure.com'.format(server_name)
+    port = 5432
+    if show_pg_bouncer is True:
+        port = 6432
+
+    return {
+        'connectionStrings': _create_postgresql_connection_strings(host, administrator_login,
+                                                                   administrator_login_password, database_name, port)
+    }
+
+
+def _create_postgresql_connection_strings(host, user, password, database, port):
+
+    result = {
+        'psql_cmd': "postgresql://{user}:{password}@{host}/{database}?sslmode=require",
+        'ado.net': "Server={host};Database={database};Port={port};User Id={user};Password={password};Ssl Mode=Require;",
+        'jdbc': "jdbc:postgresql://{host}:{port}/{database}?user={user}&password={password}&sslmode=require",
+        'jdbc Spring': "spring.datasource.url=jdbc:postgresql://{host}:{port}/{database}  "
+                       "spring.datasource.username={user}  "
+                       "spring.datasource.password={password}",
+        'node.js': "var conn= new Client({open_brace}host:'{host}', user:'{user}', password:'{password}', database:'{database}', port:{port}, ssl:{open_brace}ca:fs.readFileSync(\"{ca-cert filename}\"){close_brace}{close_brace});",
+        'php': "pg_connect(\"host={host} port={port} dbname={database} user={user} password={password}\");",
+        'python': "cnx = psycopg2.connect(user='{user}', password='{password}', host='{host}', "
+                  "port={port}, database='{database}')",
+        'ruby': "connection = PG::Connection.new(user => \"{user}\", password => \"{password}\", database => \"{database}\", host => \"{host}\", "
+                "port => '{port}')",
+    }
+
+    connection_kwargs = {
+        'host': host,
+        'user': user,
+        'password': password if password is not None else '{password}',
+        'database': database,
+        'port': port,
+        'open_brace': '{',
+        'close_brace': '}',
+        'ca-cert filename': '{ca-cert filename}'
+    }
+
+    for k, v in result.items():
+        result[k] = v.format(**connection_kwargs)
+    return result
