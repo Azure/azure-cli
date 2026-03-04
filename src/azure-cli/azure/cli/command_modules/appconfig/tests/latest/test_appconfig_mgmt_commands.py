@@ -368,14 +368,9 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
             'retention_days': 1
         })
 
-        # Create an Application Insights resource
-        self.cmd('extension add -n application-insights')
-        app_insights_name = self.create_random_name(prefix='appinsights', length=24)
-        self.kwargs.update({
-            'app_insights_name': app_insights_name
-        })
-
-        app_insights_resource_id = self.cmd('monitor app-insights component create -g {rg} -a {app_insights_name} -l {rg_loc}').get_output_in_json()['id']
+        # Use a fake Application Insights resource ID because the application-insights extension
+        # cannot be installed in recording/playback mode — the extension index response exceeds
+        app_insights_resource_id = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/{}/providers/Microsoft.Insights/components/fakeAppInsights'.format(resource_group)
         self.kwargs.update({
             'app_insights_resource_id': app_insights_resource_id
         })
