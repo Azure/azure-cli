@@ -1619,12 +1619,12 @@ def open_vm_port(cmd, resource_group_name, vm_name, port, priority=900, network_
     NSGShow, NSGCreate = _nsg.Show, _nsg.Create
     NSGRuleCreate = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.nsg.rule").Create
 
-    vm = get_vm(cmd, resource_group_name, vm_name)
-    location = vm.location
-    if not vm.network_profile:
+    vm = get_vm_by_aaz(cmd, resource_group_name, vm_name)
+    location = vm.get('location', '')
+    if not vm.get('networkProfile'):
         raise CLIError("Network profile not found for VM '{}'".format(vm_name))
 
-    nic_ids = list(vm.network_profile.network_interfaces)
+    nic_ids = vm.get('networkProfile', {}).get('networkInterfaces', [])
     if len(nic_ids) > 1:
         raise CLIError('Multiple NICs is not supported for this command. Create rules on the NSG '
                        'directly.')
@@ -1634,7 +1634,7 @@ def open_vm_port(cmd, resource_group_name, vm_name, port, priority=900, network_
     # get existing NSG or create a new one
     created_nsg = False
     nic = NicShow(cli_ctx=cmd.cli_ctx)(command_args={
-        'name': os.path.split(nic_ids[0].id)[1],
+        'name': os.path.split(nic_ids[0].get('id'))[1],
         'resource_group': resource_group_name
     })
     if not apply_to_subnet:
