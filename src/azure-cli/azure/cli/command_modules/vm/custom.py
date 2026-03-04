@@ -4548,13 +4548,16 @@ def reimage_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None,
 
 
 def restart_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False):
-    client = _compute_client_factory(cmd.cli_ctx)
-    VirtualMachineScaleSetVMInstanceRequiredIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceRequiredIDs')
-    if instance_ids is None:
+    from .aaz.latest.vmss import Restart as VmssRestart
+    if not instance_ids:
         instance_ids = ['*']
-    instance_ids = VirtualMachineScaleSetVMInstanceRequiredIDs(instance_ids=instance_ids)
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_restart, resource_group_name, vm_scale_set_name,
-                       vm_instance_i_ds=instance_ids)
+    command_args = {
+        'resource_group': resource_group_name,
+        'vm_scale_set_name': vm_scale_set_name,
+        'instance_ids': instance_ids,
+        'no_wait': no_wait
+    }
+    return VmssRestart(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
 # pylint: disable=inconsistent-return-statements
