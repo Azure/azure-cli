@@ -444,7 +444,9 @@ def _try_import_module(relative_name, package):
     try:
         return importlib.import_module(relative_name, package)
     except (ModuleNotFoundError, ImportError):
-        logger.debug('Failed to import module %s relative to %s.', relative_name, package)
+        # Comment the debug log because it may cause confusion
+        # commands from different modules may patch each other.
+        # logger.debug('Failed to import module %s relative to %s.', relative_name, package)
         return None
 
 
