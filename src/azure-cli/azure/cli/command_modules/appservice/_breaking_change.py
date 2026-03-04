@@ -17,7 +17,7 @@ register_output_breaking_change(
           'Use -o table for a human-readable view, or -o json and parse the new structured format.')
 
 # az webapp list-runtimes --linux removal
-register_argument_deprecate('webapp list-runtimes', '--linux', redirect='--os linux')
+register_argument_deprecate('webapp list-runtimes', '--linux', redirect='--os-type')
 
 # az webapp list-runtimes --show-runtime-details removal
 register_argument_deprecate('webapp list-runtimes', '--show-runtime-details')
