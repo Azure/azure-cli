@@ -4412,31 +4412,36 @@ def get_vmss_instance_view(cmd, resource_group_name, vm_scale_set_name, instance
 
 def list_vmss_instance_connection_info(cmd, resource_group_name, vm_scale_set_name):
     from azure.mgmt.core.tools import parse_resource_id
+    from .operations.vmss import VMSSShow
 
     LBShow = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.lb").Show
     PublicIPAddress = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.public_ip").Show
 
-    client = _compute_client_factory(cmd.cli_ctx)
-    vmss = client.virtual_machine_scale_sets.get(resource_group_name, vm_scale_set_name)
+    command_args = {
+        'resource_group': resource_group_name,
+        'vm_scale_set_name': vm_scale_set_name
+    }
+    vmss = VMSSShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
-    from ._vm_utils import raise_unsupported_error_for_flex_vmss
-    raise_unsupported_error_for_flex_vmss(
+    from ._vm_utils import raise_unsupported_error_for_flex_vmss_by_aaz
+    raise_unsupported_error_for_flex_vmss_by_aaz(
         vmss, 'This command is not available for VMSS in Flex mode. '
               'Please use the "az network public-ip list/show" to retrieve networking information.')
 
     # find the load balancer
-    nic_configs = vmss.virtual_machine_profile.network_profile.network_interface_configurations
-    primary_nic_config = next((n for n in nic_configs if n.primary), None)
+    nic_configs = \
+        vmss.get('virtualMachineProfile', {}).get('networkProfile', {}).get('networkInterfaceConfigurations', [])
+    primary_nic_config = next((n for n in nic_configs if n.get('primary')), {})
     if primary_nic_config is None:
         raise CLIError('could not find a primary NIC which is needed to search to load balancer')
 
     res_id = None
-    for ip in primary_nic_config.ip_configurations:
-        if ip.load_balancer_inbound_nat_pools:
-            res_id = ip.load_balancer_inbound_nat_pools[0].id
+    for ip in primary_nic_config.get('ipConfigurations', []):
+        if len(ip.get('loadBalancerInboundNatPools', [])) > 0:
+            res_id = ip['loadBalancerInboundNatPools'][0].get('id')
             break
-        if ip.load_balancer_backend_address_pools:
-            res_id = ip.load_balancer_backend_address_pools[0].id
+        if len(ip.get('loadBalancerBackendAddressPools', [])) > 0:
+            res_id = ip['loadBalancerBackendAddressPools'][0].get('id')
             break
 
     if not res_id:
@@ -4499,12 +4504,16 @@ def list_vmss_instance_connection_info(cmd, resource_group_name, vm_scale_set_na
 
 
 def list_vmss_instance_public_ips(cmd, resource_group_name, vm_scale_set_name):
+    from .operations.vmss import VMSSShow
     ListInstancePublicIps = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "vmss").ListInstancePublicIps
 
-    compute_client = _compute_client_factory(cmd.cli_ctx)
-    vmss = compute_client.virtual_machine_scale_sets.get(resource_group_name, vm_scale_set_name)
-    from ._vm_utils import raise_unsupported_error_for_flex_vmss
-    raise_unsupported_error_for_flex_vmss(
+    command_args = {
+        'resource_group': resource_group_name,
+        'vm_scale_set_name': vm_scale_set_name
+    }
+    vmss = VMSSShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+    from ._vm_utils import raise_unsupported_error_for_flex_vmss_by_aaz
+    raise_unsupported_error_for_flex_vmss_by_aaz(
         vmss, 'This command is not available for VMSS in Flex mode. '
               'Please use the "az network public-ip list/show" to retrieve networking information.')
 
