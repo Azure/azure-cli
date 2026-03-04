@@ -50,6 +50,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import os
 import shutil
 import subprocess
 import sys
@@ -68,8 +69,9 @@ APP_NAME = "azure-cli"
 CLI_EXECUTABLE_NAME = "az"
 TARBALL_NAME_TEMPLATE_DEFAULT = "{APP_NAME}-{VERSION}-{PLATFORM_TAG}-nopython.tar.gz"
 
-# Python version we're building for (must match Homebrew python@3.13)
-PYTHON_MAJOR_MINOR = "3.13"
+# Python version we're building for (must match Homebrew python@X.Y)
+# Can be overridden via --python-version CLI arg or PYTHON_MAJOR_MINOR env var
+PYTHON_MAJOR_MINOR = os.environ.get("PYTHON_MAJOR_MINOR", "3.13")
 PYTHON_BIN = "python3"
 TEMPLATE_DIR = Path(__file__).resolve().parent / "templates"
 LAUNCHER_TEMPLATE_PATH = TEMPLATE_DIR / "az_launcher.sh.in"

@@ -618,26 +618,26 @@ jobs:
         
         # 1. Basic signature check
         if codesign -v "$file" 2>/dev/null; then
-          ((SIGNED_COUNT++))
+          SIGNED_COUNT=$((SIGNED_COUNT + 1))
           [ -z "$FIRST_SIGNED" ] && FIRST_SIGNED="$file"
           
           # 2. Strict verification (only for signed files)
           if codesign --verify --deep --strict "$file" 2>/dev/null; then
-            ((STRICT_PASS++))
+            STRICT_PASS=$((STRICT_PASS + 1))
           else
-            ((STRICT_FAIL++))
+            STRICT_FAIL=$((STRICT_FAIL + 1))
             STRICT_FAILED_FILES+=("$filename")
           fi
           
           # 3. Developer ID check (only for signed files)
           if codesign -dvv "$file" 2>&1 | grep -q "Developer ID"; then
-            ((DEVID_PASS++))
+            DEVID_PASS=$((DEVID_PASS + 1))
           else
-            ((DEVID_FAIL++))
+            DEVID_FAIL=$((DEVID_FAIL + 1))
             DEVID_FAILED_FILES+=("$filename")
           fi
         else
-          ((UNSIGNED_COUNT++))
+          UNSIGNED_COUNT=$((UNSIGNED_COUNT + 1))
           UNSIGNED_FILES+=("$filename")
         fi
       done

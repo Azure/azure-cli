@@ -140,6 +140,7 @@ jobs:
         --arm64-sha "$ARM64_SHA256" \
         --x86-64-sha "$X86_64_SHA256" \
         --github-repo "${{ parameters.GitHubRepo }}" \
+        --python-version "${{ parameters.PythonVersion }}" \
         --template "$REPO_ROOT/scripts/release/macos/templates/azure-cli.rb.in" \
         --output "$(Pipeline.Workspace)/macos-cask-definition/azure-cli.rb"
       
