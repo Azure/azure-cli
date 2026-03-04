@@ -176,7 +176,7 @@ def install_azure_cli(venv_python: Path) -> None:
 
     Mirrors the run.sh approach:
       1. Install all src packages with --no-deps (local source code takes precedence)
-      2. Install pinned dependencies from requirements.py3.MacOS.txt
+      2. Install pinned dependencies from requirements.py3.Darwin.txt
     """
     # Step 1: install every package found under SRC_DIR from source, without pulling
     # transitive deps from PyPI (--no-deps). This ensures the locally-built wheels

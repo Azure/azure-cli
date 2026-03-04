@@ -725,7 +725,7 @@ jobs:
   parameters:
     PythonVersion: $(macos_cask_python_version)
     MacosArm64Image: ${{ variables.macos_arm64_pool }}
-    MacosIntelImage: ${{ variables.macos_pool }}
+    MacosIntelImage: ${{ variables.macos_intel_pool }}
     condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
     dependsOn: ['ExtractMetadata']
 
@@ -733,7 +733,7 @@ jobs:
 - template: .azure-pipelines/templates/macos/macos-sign-notarize-jobs.yml
   parameters:
     MacosArm64Image: ${{ variables.macos_arm64_pool }}
-    MacosIntelImage: ${{ variables.macos_pool }}
+    MacosIntelImage: ${{ variables.macos_intel_pool }}
     BundleId: 'com.microsoft.azure.cli'
     PythonVersion: $(macos_cask_python_version)
     ESRPServiceConnection: 'ame_esrp_connection'
@@ -744,7 +744,7 @@ jobs:
 - template: .azure-pipelines/templates/macos/macos-cask-generation-and-tests.yml
   parameters:
     MacosArm64Image: ${{ variables.macos_arm64_pool }}
-    MacosIntelImage: ${{ variables.macos_pool }}
+    MacosIntelImage: ${{ variables.macos_intel_pool }}
     PythonVersion: $(macos_cask_python_version)
     GitHubRepo: $(Build.Repository.Name)
     Debug: false
