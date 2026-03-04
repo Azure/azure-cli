@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+import sys
 import unittest
 from unittest import mock
 
@@ -519,3 +520,166 @@ class CosmosDBBackupRestoreScenarioTest(ScenarioTest):
         assert restored_account['restoreParameters']['restoreTimestampInUtc'] == restore_ts_string
         assert restored_account['restoreParameters']['sourceBackupLocation'] == source_loc_for_xrr
         assert restored_account['writeLocations'][0]['locationName'] == 'North Central US'
+
+
+class CosmosDBRestoreUnitTests(unittest.TestCase):
+    def setUp(self):
+        # Mock dependencies that might be missing or problematic to import
+        if 'azure.mgmt.cosmosdb.models' not in sys.modules:
+            sys.modules['azure.mgmt.cosmosdb.models'] = mock.MagicMock()
+        if 'azure.cli.core.util' not in sys.modules:
+            sys.modules['azure.cli.core.util'] = mock.MagicMock()
+        if 'knack.log' not in sys.modules:
+            sys.modules['knack.log'] = mock.MagicMock()
+        # Mocking knack.util.CLIError is crucial if it's used in custom.py
+        if 'knack.util' not in sys.modules:
+            mock_knack_util = mock.MagicMock()
+            mock_knack_util.CLIError = Exception
+            sys.modules['knack.util'] = mock_knack_util
+
+        # Ensure Azure Core Exceptions are available
+        try:
+            import azure.core.exceptions
+        except ImportError:
+            mock_core_exceptions = mock.MagicMock()
+            # Define minimal exception class
+            class HttpResponseError(Exception):
+                def __init__(self, message=None, response=None, **kwargs):
+                    self.message = message
+                    self.response = response
+                    self.status_code = kwargs.get('status_code', None)
+                def __str__(self):
+                     return self.message or ""
+            mock_core_exceptions.HttpResponseError = HttpResponseError
+            mock_core_exceptions.ResourceNotFoundError = Exception
+            sys.modules['azure.core.exceptions'] = mock_core_exceptions
+
+    def test_restore_handles_forbidden_error(self):
+        from azure.core.exceptions import HttpResponseError
+        # Lazy import to ensure mocks are applied first
+        from azure.cli.command_modules.cosmosdb.custom import _create_database_account
+
+        # Setup mocks
+        client = mock.MagicMock()
+
+        # Simulate the LRO poller raising the specific error
+        poller = mock.MagicMock()
+        error_json = '{"code":"Forbidden","message":"Database Account riks-models-003-acc-westeurope does not exist"}'
+        exception = HttpResponseError(message=error_json)
+        exception.status_code = 403
+
+        # side_effect raises the exception when called
+        poller.result.side_effect = exception
+        client.begin_create_or_update.return_value = poller
+
+        # Simulate client.get returning the account successfully
+        mock_account = mock.MagicMock()
+        mock_account.provisioning_state = "Succeeded"
+        client.get.return_value = mock_account
+
+        # Parameters
+        resource_group_name = "rg"
+        account_name = "myaccount"
+
+        # Call the private function directly to verify logic
+        result = _create_database_account(
+            client=client,
+            resource_group_name=resource_group_name,
+            account_name=account_name,
+            locations=[],
+            is_restore_request=True,
+            arm_location="westeurope",
+            restore_source="/subscriptions/sub/providers/Microsoft.DocumentDB/locations/westeurope/restorableDatabaseAccounts/source-id",
+            restore_timestamp="2026-01-01T00:00:00+00:00"
+        )
+
+        # Assertions
+        # 1. begin_create_or_update called
+        client.begin_create_or_update.assert_called()
+        # 2. poller.result() called (and raised exception)
+        poller.result.assert_called()
+        # 3. client.get called (recovery mechanism)
+        client.get.assert_called_with(resource_group_name, account_name)
+        # 4. Result is the account returned by get
+        self.assertEqual(result, mock_account)
+
+    def test_restore_raises_other_errors(self):
+        from azure.core.exceptions import HttpResponseError
+        from azure.cli.command_modules.cosmosdb.custom import _create_database_account
+
+        # Setup mocks
+        client = mock.MagicMock()
+        poller = mock.MagicMock()
+
+        # Different error
+        exception = HttpResponseError(message="Some other error")
+        exception.status_code = 500
+        poller.result.side_effect = exception
+        client.begin_create_or_update.return_value = poller
+
+        with self.assertRaises(HttpResponseError):
+             _create_database_account(
+                client=client,
+                resource_group_name="rg",
+                account_name="myaccount",
+                is_restore_request=True,
+                arm_location="westeurope",
+                restore_source="src",
+                restore_timestamp="ts"
+            )
+
+    def test_normal_create_does_not_suppress_error(self):
+        from azure.core.exceptions import HttpResponseError
+        from azure.cli.command_modules.cosmosdb.custom import _create_database_account
+
+        # Setup mocks
+        client = mock.MagicMock()
+        poller = mock.MagicMock()
+
+        # Same error but NOT a restore request
+        error_json = '{"code":"Forbidden","message":"Database Account riks-models-003-acc-westeurope does not exist"}'
+        exception = HttpResponseError(message=error_json)
+        exception.status_code = 403
+        poller.result.side_effect = exception
+        client.begin_create_or_update.return_value = poller
+
+        with self.assertRaises(HttpResponseError):
+             _create_database_account(
+                client=client,
+                resource_group_name="rg",
+                account_name="myaccount",
+                is_restore_request=False, # Normal create
+                arm_location="westeurope"
+            )
+
+    def test_normal_create_success(self):
+        from azure.cli.command_modules.cosmosdb.custom import _create_database_account
+
+        # Setup mocks
+        client = mock.MagicMock()
+        poller = mock.MagicMock()
+        
+        # Simulate successful creation
+        mock_created_account = mock.MagicMock()
+        mock_created_account.provisioning_state = "Succeeded"
+        poller.result.return_value = mock_created_account
+        client.begin_create_or_update.return_value = poller
+
+        # Call the private function
+        result = _create_database_account(
+            client=client,
+            resource_group_name="rg",
+            account_name="myaccount",
+            is_restore_request=False,
+            arm_location="westeurope"
+        )
+
+        # Assertions
+        # 1. begin_create_or_update called
+        client.begin_create_or_update.assert_called()
+        # 2. poller.result() called
+        poller.result.assert_called()
+        # 3. client.get should NOT be called since result() succeeded
+        client.get.assert_not_called()
+        # 4. Result matches
+        self.assertEqual(result, mock_created_account)

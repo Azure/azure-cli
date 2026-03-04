@@ -44,7 +44,7 @@ managed_instance_name_max_length = 20
 
 
 class SqlServerPreparer(AbstractPreparer, SingleValueReplacer):
-    def __init__(self, name_prefix=server_name_prefix, parameter_name='server', location='westus',
+    def __init__(self, name_prefix=server_name_prefix, parameter_name='server', location='eastasia',
                  admin_user='admin123', admin_password='SecretPassword123',
                  resource_group_parameter_name='resource_group', skip_delete=True):
         super().__init__(name_prefix, server_name_max_length)
@@ -9069,3 +9069,780 @@ class SqlManagedInstanceExternalGovernanceTest(ScenarioTest):
                      self.check('status', 'Succeeded'),
                      self.check('requestType', 'UpdatePurviewMetadata')
                  ])
+
+
+class SqlServerSoftDeleteScenarioTest(ScenarioTest):
+    """Test cases for SQL Server Soft Delete functionality"""
+
+    @live_only()
+    def test_sql_server_soft_delete_retention_days_boundary_validation(self):
+        """
+        Test boundary validation for soft-delete-retention-days parameter.
+        Tests invalid values: negative, >7, non-integer, float.
+        This test doesn't require recordings as it validates parameters before API calls.
+        """
+        # Test with negative value - should fail
+        self.cmd('az sql server create -g dummyrg --name dummyserver -l centralus '
+                 '--admin-user admin123 --admin-password SecretPassword123 '
+                 '--soft-delete-retention-days -1',
+                 expect_failure=True)
+        
+        # Test with value > 7 - should fail
+        self.cmd('az sql server create -g dummyrg --name dummyserver -l centralus '
+                 '--admin-user admin123 --admin-password SecretPassword123 '
+                 '--soft-delete-retention-days 8',
+                 expect_failure=True)
+        
+        # Test with value 100 - should fail
+        self.cmd('az sql server create -g dummyrg --name dummyserver -l centralus '
+                 '--admin-user admin123 --admin-password SecretPassword123 '
+                 '--soft-delete-retention-days 100',
+                 expect_failure=True)
+
+    @ResourceGroupPreparer(name_prefix='softdelete', location='centralus')
+    def test_sql_server_soft_delete_boundary_values(self, resource_group, resource_group_location):
+        """
+        Test boundary values for soft-delete-retention-days: 0, 1, and 7.
+        Tests the minimum valid value (0=disabled), minimum enabled (1), and maximum (7).
+        """
+        server_name_0 = self.create_random_name('softdelete', server_name_max_length)
+        server_name_1 = self.create_random_name('softdelete', server_name_max_length)
+        server_name_7 = self.create_random_name('softdelete', server_name_max_length)
+        admin_login = 'admin123'
+        admin_password = 'SecretPassword123'
+        location = 'centralus'
+
+        # Test with retention_days = 0 (disabled)
+        self.cmd('sql server create -g {} --name {} -l {} '
+                 '--admin-user {} --admin-password {} '
+                 '--soft-delete-retention-days 0'
+                 .format(resource_group, server_name_0, location,
+                        admin_login, admin_password),
+                 checks=[
+                     JMESPathCheck('name', server_name_0),
+                     JMESPathCheck('retentionDays', 0)])
+
+        # Test with retention_days = 1 (minimum enabled)
+        self.cmd('sql server create -g {} --name {} -l {} '
+                 '--admin-user {} --admin-password {} '
+                 '--soft-delete-retention-days 1'
+                 .format(resource_group, server_name_1, location,
+                        admin_login, admin_password),
+                 checks=[
+                     JMESPathCheck('name', server_name_1),
+                     JMESPathCheck('retentionDays', 1)])
+
+        # Test with retention_days = 7 (maximum)
+        self.cmd('sql server create -g {} --name {} -l {} '
+                 '--admin-user {} --admin-password {} '
+                 '--soft-delete-retention-days 7'
+                 .format(resource_group, server_name_7, location,
+                        admin_login, admin_password),
+                 checks=[
+                     JMESPathCheck('name', server_name_7),
+                     JMESPathCheck('retentionDays', 7)])
+
+        # Disable soft delete on all servers before cleanup
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 0'
+                 .format(resource_group, server_name_1))
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 0'
+                 .format(resource_group, server_name_7))
+
+    @ResourceGroupPreparer(name_prefix='softdelete', location='centralus')
+    def test_sql_server_create_without_soft_delete(self, resource_group, resource_group_location):
+        """
+        Test creating a server without specifying soft-delete-retention-days.
+        Should use default value (0 = disabled).
+        """
+        server_name = self.create_random_name('softdelete', server_name_max_length)
+        admin_login = 'admin123'
+        admin_password = 'SecretPassword123'
+        location = 'centralus'
+
+        # Create server without soft delete parameter
+        self.cmd('sql server create -g {} --name {} -l {} '
+                 '--admin-user {} --admin-password {}'
+                 .format(resource_group, server_name, location,
+                        admin_login, admin_password),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('location', location),
+                     JMESPathCheck('resourceGroup', resource_group)])
+
+        # Verify soft delete is disabled by default (retentionDays should be 0, -1, or None)
+        result = self.cmd('sql server show -g {} --name {}'
+                         .format(resource_group, server_name)).get_output_in_json()
+        
+        # Azure may return 0, -1, or None for disabled soft delete
+        retention_days = result.get('retentionDays', 0)
+        self.assertIn(retention_days, [0, -1, None], 
+                     f"Expected retentionDays to be 0, -1, or None, but got {retention_days}")
+
+    @ResourceGroupPreparer(name_prefix='softdelete', location='centralus')
+    def test_sql_server_soft_delete_enable_on_create(self, resource_group, resource_group_location):
+        """Test enabling soft delete with retention days on server creation"""
+        server_name = self.create_random_name('softdelete', server_name_max_length)
+        admin_login = 'admin123'
+        admin_password = 'SecretPassword123'
+        retention_days = 5
+        location = 'centralus'
+
+        # Create server with soft delete enabled with retention days
+        server = self.cmd('sql server create -g {} --name {} -l {} '
+                         '--admin-user {} --admin-password {} '
+                         '--soft-delete-retention-days {}'
+                         .format(resource_group, server_name, location, 
+                                admin_login, admin_password, retention_days),
+                         checks=[
+                             JMESPathCheck('name', server_name),
+                             JMESPathCheck('location', location),
+                             JMESPathCheck('resourceGroup', resource_group),
+                             JMESPathCheck('administratorLogin', admin_login),
+                             JMESPathCheck('retentionDays', retention_days)]).get_output_in_json()
+        
+        # Verify server shows soft delete settings
+        self.cmd('sql server show -g {} --name {}'
+                 .format(resource_group, server_name),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('retentionDays', retention_days)])
+
+        # Disable soft delete before cleanup
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 0'
+                 .format(resource_group, server_name))
+
+        # Note: ResourceGroupPreparer automatically handles cleanup
+
+    @ResourceGroupPreparer(name_prefix='softdelete', location='centralus')
+    @SqlServerPreparer(name_prefix='softdelete', location='centralus')
+    def test_sql_server_soft_delete_disable_on_existing(self, resource_group, resource_group_location, server):
+        """Test disabling soft delete on an existing server"""
+        # First enable soft delete on the server with 7 days retention
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 7'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('name', server),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('retentionDays', 7)])
+
+        # Now disable soft delete by setting retention to 0
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 0'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('name', server),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('retentionDays', 0)])
+
+        # Verify server shows soft delete disabled
+        self.cmd('sql server show -g {} --name {}'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('name', server),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('retentionDays', 0)])
+
+    @ResourceGroupPreparer(name_prefix='softdelete', location='centralus')
+    @SqlServerPreparer(name_prefix='softdelete', location='centralus')
+    def test_sql_server_soft_delete_update_retention_existing(self, resource_group, resource_group_location, server):
+        """Test updating retention days on existing server"""
+        retention_days_1 = 3
+        retention_days_2 = 6
+
+        # Enable soft delete with retention days
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days {}'
+                 .format(resource_group, server, retention_days_1),
+                 checks=[
+                     JMESPathCheck('name', server),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('retentionDays', retention_days_1)])
+
+        # Update to new retention days
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days {}'
+                 .format(resource_group, server, retention_days_2),
+                 checks=[
+                     JMESPathCheck('name', server),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('retentionDays', retention_days_2)])
+
+        # Verify server shows updated retention days
+        self.cmd('sql server show -g {} --name {}'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('name', server),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('retentionDays', retention_days_2)])
+
+        # Disable soft delete before cleanup
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 0'
+                 .format(resource_group, server))
+
+    @ResourceGroupPreparer(name_prefix='softdelete', location='centralus')
+    @SqlServerPreparer(name_prefix='softdelete', location='centralus')
+    def test_sql_server_soft_delete_toggle_multiple_times(self, resource_group, resource_group_location, server):
+        """
+        Test toggling soft delete on and off multiple times to ensure state changes work correctly.
+        """
+        # Enable soft delete
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 5'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('retentionDays', 5)])
+
+        # Disable soft delete
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 0'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('retentionDays', 0)])
+
+        # Re-enable with different retention
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 3'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('retentionDays', 3)])
+
+        # Disable again
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 0'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('retentionDays', 0)])
+
+    @ResourceGroupPreparer(name_prefix='softdelete', location='centralus')
+    @SqlServerPreparer(name_prefix='softdelete', location='centralus')
+    def test_sql_server_soft_delete_update_same_value(self, resource_group, resource_group_location, server):
+        """
+        Test updating soft delete retention to the same value (idempotent operation).
+        """
+        retention_days = 4
+
+        # Enable soft delete with retention days
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days {}'
+                 .format(resource_group, server, retention_days),
+                 checks=[
+                     JMESPathCheck('retentionDays', retention_days)])
+
+        # Update to same value - should succeed
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days {}'
+                 .format(resource_group, server, retention_days),
+                 checks=[
+                     JMESPathCheck('retentionDays', retention_days)])
+
+        # Verify it's still the same
+        self.cmd('sql server show -g {} --name {}'
+                 .format(resource_group, server),
+                 checks=[
+                     JMESPathCheck('retentionDays', retention_days)])
+
+        # Disable soft delete before cleanup
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 0'
+                 .format(resource_group, server))
+
+    @ResourceGroupPreparer(name_prefix='softdelete', location='centralus')
+    @AllowLargeResponse(size_kb=9999)
+    def test_sql_server_soft_delete_complete_recovery_workflow(self, resource_group, resource_group_location):
+        """Test complete soft delete workflow: create server with 2-day retention, delete, restore, and cleanup"""
+        server_name = self.create_random_name('softdelete', server_name_max_length)
+        restored_server_name = self.create_random_name('restored', server_name_max_length)
+        admin_login = 'admin123'
+        admin_password = 'SecretPassword123'
+        retention_days = 2
+        location = 'centralus'
+
+        # Create server with soft delete enabled and 2-day retention
+        server = self.cmd('sql server create -g {} --name {} -l {} '
+                         '--admin-user {} --admin-password {} '
+                         '--soft-delete-retention-days {}'
+                         .format(resource_group, server_name, location, 
+                                admin_login, admin_password, retention_days),
+                         checks=[
+                             JMESPathCheck('name', server_name),
+                             JMESPathCheck('location', location),
+                             JMESPathCheck('resourceGroup', resource_group),
+                             JMESPathCheck('administratorLogin', admin_login),
+                             JMESPathCheck('retentionDays', retention_days)]).get_output_in_json()
+
+        # Verify server shows soft delete settings
+        self.cmd('sql server show -g {} --name {}'
+                 .format(resource_group, server_name),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('retentionDays', retention_days)])
+
+        # Delete the server (should go into soft-deleted state due to retention policy)
+        self.cmd('sql server delete -g {} --name {} --yes'
+                 .format(resource_group, server_name))
+
+        # Verify server is deleted (show command should fail with ResourceNotFound)
+        self.cmd('sql server show -g {} --name {}'
+                 .format(resource_group, server_name), expect_failure=True)
+
+        # Restore the deleted server with the same name
+        restored_server = self.cmd('sql server restore -g {} --name {} -l {}'
+                                  .format(resource_group, server_name, location),
+                                  checks=[
+                                      JMESPathCheck('name', server_name),
+                                      JMESPathCheck('location', location),
+                                      JMESPathCheck('resourceGroup', resource_group)]).get_output_in_json()
+
+        # Verify restored server exists and shows it was restored successfully
+        self.cmd('sql server show -g {} --name {}'
+                 .format(resource_group, server_name),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('resourceGroup', resource_group)])
+
+        # Disable soft delete on the restored server
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 0'
+                 .format(resource_group, server_name),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('retentionDays', 0)])
+
+        # Verify soft delete is disabled on restored server
+        self.cmd('sql server show -g {} --name {}'
+                 .format(resource_group, server_name),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('resourceGroup', resource_group)])
+
+        # Note: ResourceGroupPreparer automatically handles cleanup of the resource group
+
+class SqlServerDeletedServerScenarioTest(ScenarioTest):
+
+    def test_sql_server_restore_non_existent_deleted_server(self):
+        """
+        Test attempting to restore a server that doesn't exist in deleted servers.
+        This test doesn't require recordings as it validates existence before API calls.
+        """
+        non_existent_server = 'nonexistentserver' + str(int(time.time()))
+        location = 'centralus'
+        
+        # Attempt to restore non-existent deleted server - should fail with appropriate error
+        self.cmd('sql server restore --name {} -l {}'
+                .format(non_existent_server, location),
+                expect_failure=True)
+
+    @ResourceGroupPreparer(parameter_name='resource_group', location='centralus')
+    @AllowLargeResponse(size_kb=9999)
+    def test_sql_deleted_server_list_and_show(self, resource_group, resource_group_location):
+        '''
+        Test sql server deleted-server list and show commands.
+        This test creates a server with soft delete enabled, deletes it,
+        then verifies it can be listed and shown in deleted servers.
+        '''
+        server_name = self.create_random_name(server_name_prefix, server_name_max_length)
+        admin_login = 'admin123'
+        admin_password = 'SecretPassword123'
+        location = resource_group_location
+        soft_delete_retention_days = 7
+
+        # Create a server with soft delete enabled
+        self.cmd('sql server create -g {} --name {} -l {} '
+                 '--admin-user {} --admin-password {} '
+                 '--soft-delete-retention-days {}'
+                 .format(resource_group, server_name, location,
+                         admin_login, admin_password, soft_delete_retention_days),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('location', location),
+                     JMESPathCheck('resourceGroup', resource_group)])
+
+        # Delete the server (should go into soft-deleted state)
+        self.cmd('sql server delete -g {} --name {} --yes'
+                 .format(resource_group, server_name))
+
+        # Verify server is deleted from active servers
+        self.cmd('sql server show -g {} --name {}'
+                 .format(resource_group, server_name), expect_failure=True)
+
+        # Test deleted-server list command - should show at least one deleted server
+        deleted_servers_list = self.cmd('sql server deleted-server list --location {}'
+                                       .format(location),
+                                       checks=[
+                                           JMESPathCheckGreaterThan('length(@)', 0)
+                                       ]).get_output_in_json()
+
+        # Debug: Print the deleted servers list to understand what's returned
+        print(f"DEBUG: Deleted servers list: {deleted_servers_list}")
+        print(f"DEBUG: Looking for server: {server_name}")
+        print(f"DEBUG: Server names in list: {[s.get('name', 'NO_NAME') for s in deleted_servers_list]}")
+
+        # Verify our deleted server is in the list by checking FQDN
+        # The Azure API returns name=None, so we extract the server name from FQDN
+        # FQDN format: {servername}.{domain}, e.g., servername.sqltest-eg1.mscds.com
+        deleted_server_found = any(s.get('fullyQualifiedDomainName', '').startswith(server_name + '.') 
+                                   for s in deleted_servers_list)
+        self.assertTrue(deleted_server_found, 
+                       f"Deleted server {server_name} not found in deleted servers list")
+
+        # Test deleted-server show command by name
+        deleted_server = self.cmd('sql server deleted-server show --name {} --location {}'
+                                 .format(server_name, location),
+                                 checks=[
+                                     JMESPathCheckExists('fullyQualifiedDomainName'),
+                                     JMESPathCheckExists('deletionTime'),
+                                     JMESPathCheckExists('originalId')
+                                 ]).get_output_in_json()
+        
+        # Verify the returned deleted server matches the expected server name by checking FQDN
+        fqdn = deleted_server.get('fullyQualifiedDomainName', '')
+        self.assertTrue(fqdn.startswith(server_name + '.'),
+                       f"Expected FQDN to start with {server_name}., but got {fqdn}")
+
+    @ResourceGroupPreparer(parameter_name='resource_group', location='centralus')
+    @AllowLargeResponse(size_kb=9999)
+    def test_sql_server_soft_delete_retention_update_scenarios(self, resource_group, resource_group_location):
+        '''
+        Comprehensive test for soft delete retention days with various update scenarios.
+        Tests retention_days behavior when:
+        1. Server created without soft-delete, update password, then enable soft-delete
+        2. Server created without soft-delete, update both soft-delete and password together
+        3. Server created with soft-delete, disable soft-delete, then update password
+        4. Server created with soft-delete disabled, update password, then enable soft-delete
+        '''
+        location = resource_group_location
+        admin_login = 'admin123'
+        base_password = 'SecretPassword123!'
+        new_password = 'NewPassword456!'
+
+        # ===== SCENARIO 1: Create without soft-delete -> Update password -> Enable soft-delete =====
+        server1 = self.create_random_name('sdtest1', server_name_max_length)
+        
+        # Create server without soft-delete parameter
+        result1 = self.cmd('sql server create -g {} --name {} -l {} --admin-user {} --admin-password {}'
+                .format(resource_group, server1, location, admin_login, base_password),
+                checks=[
+                    JMESPathCheck('name', server1)]).get_output_in_json()
+        # Validate retention_days is either -1 or 0 (both indicate not configured)
+        self.assertIn(result1['retentionDays'], [-1, 0], 
+                     f"Expected retentionDays to be -1 or 0, got {result1['retentionDays']}")
+        initial_retention = result1['retentionDays']
+        
+        # Update password only - retention_days should remain unchanged
+        result1_updated = self.cmd('sql server update -g {} --name {} --admin-password {}'
+                .format(resource_group, server1, new_password),
+                checks=[
+                    JMESPathCheck('name', server1)]).get_output_in_json()
+        # Should remain the same as initial value
+        self.assertEqual(result1_updated['retentionDays'], initial_retention,
+                        f"Expected retentionDays to remain {initial_retention}, got {result1_updated['retentionDays']}")
+        
+        # Enable soft-delete with 5 days retention
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 5'
+                .format(resource_group, server1),
+                checks=[
+                    JMESPathCheck('name', server1),
+                    JMESPathCheck('retentionDays', 5)])  # Should be updated to 5
+
+        # ===== SCENARIO 2: Create without soft-delete -> Update soft-delete AND password together =====
+        server2 = self.create_random_name('sdtest2', server_name_max_length)
+        
+        # Create server without soft-delete parameter
+        result2 = self.cmd('sql server create -g {} --name {} -l {} --admin-user {} --admin-password {}'
+                .format(resource_group, server2, location, admin_login, base_password),
+                checks=[
+                    JMESPathCheck('name', server2)]).get_output_in_json()
+        # Validate retention_days is either -1 or 0 (both indicate not configured)
+        self.assertIn(result2['retentionDays'], [-1, 0],
+                     f"Expected retentionDays to be -1 or 0, got {result2['retentionDays']}")
+        
+        # Update both soft-delete (3 days) and password together
+        self.cmd('sql server update -g {} --name {} --admin-password {} --soft-delete-retention-days 3'
+                .format(resource_group, server2, new_password),
+                checks=[
+                    JMESPathCheck('name', server2),
+                    JMESPathCheck('retentionDays', 3)])  # Should be updated to 3
+
+        # ===== SCENARIO 3: Create with soft-delete -> Disable soft-delete -> Update password =====
+        server3 = self.create_random_name('sdtest3', server_name_max_length)
+        
+        # Create server with soft-delete enabled (7 days)
+        self.cmd('sql server create -g {} --name {} -l {} --admin-user {} --admin-password {} --soft-delete-retention-days 7'
+                .format(resource_group, server3, location, admin_login, base_password),
+                checks=[
+                    JMESPathCheck('name', server3),
+                    JMESPathCheck('retentionDays', 7)])
+        
+        # Disable soft-delete (set to 0)
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 0'
+                .format(resource_group, server3),
+                checks=[
+                    JMESPathCheck('name', server3),
+                    JMESPathCheck('retentionDays', 0)])  # Should be disabled
+        
+        # Update password only - retention_days should remain 0
+        self.cmd('sql server update -g {} --name {} --admin-password {}'
+                .format(resource_group, server3, new_password),
+                checks=[
+                    JMESPathCheck('name', server3),
+                    JMESPathCheck('retentionDays', 0)])  # Should remain 0
+
+        # ===== SCENARIO 4: Create with soft-delete disabled -> Update password -> Enable soft-delete =====
+        server4 = self.create_random_name('sdtest4', server_name_max_length)
+        
+        # Create server with soft-delete explicitly disabled (0 days)
+        self.cmd('sql server create -g {} --name {} -l {} --admin-user {} --admin-password {} --soft-delete-retention-days 0'
+                .format(resource_group, server4, location, admin_login, base_password),
+                checks=[
+                    JMESPathCheck('name', server4),
+                    JMESPathCheck('retentionDays', 0)])
+        
+        # Update password only - retention_days should remain 0
+        self.cmd('sql server update -g {} --name {} --admin-password {}'
+                .format(resource_group, server4, new_password),
+                checks=[
+                    JMESPathCheck('name', server4),
+                    JMESPathCheck('retentionDays', 0)])  # Should remain 0
+        
+        # Enable soft-delete (4 days)
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 4'
+                .format(resource_group, server4),
+                checks=[
+                    JMESPathCheck('name', server4),
+                    JMESPathCheck('retentionDays', 4)])  # Should be updated to 4
+
+        # Clean up: Disable soft delete on all servers before deletion
+        for server in [server1, server2, server3, server4]:
+            self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 0'
+                    .format(resource_group, server))
+
+    @ResourceGroupPreparer(parameter_name='resource_group', location='centralus')
+    @AllowLargeResponse(size_kb=9999)
+    def test_sql_deleted_server_list_empty_location(self, resource_group, resource_group_location):
+        '''
+        Test deleted-server list returns empty list for location with no deleted servers.
+        '''
+        location = resource_group_location
+
+        # List deleted servers in a location (may be empty if no servers were deleted)
+        deleted_servers = self.cmd('sql server deleted-server list --location {}'
+                                  .format(location)).get_output_in_json()
+
+        # Verify command succeeds and returns a list (even if empty)
+        self.assertIsInstance(deleted_servers, list)
+
+    @live_only()
+    def test_sql_deleted_server_show_not_found(self):
+        '''
+        Test deleted-server show with non-existent server name returns appropriate error.
+        This test doesn't require recordings as it validates the error handling.
+        '''
+        non_existent_server = 'nonexistentserver123456'
+        location = 'centralus'
+
+        # Attempt to show a deleted server that doesn't exist
+        # Should fail with ResourceNotFoundError
+        self.cmd('sql server deleted-server show --name {} --location {}'
+                .format(non_existent_server, location),
+                expect_failure=True)
+
+    @ResourceGroupPreparer(parameter_name='resource_group', location='centralus')
+    @AllowLargeResponse(size_kb=9999)
+    def test_sql_server_restore_to_existing_live_server_name(self, resource_group, resource_group_location):
+        '''
+        Test attempting to restore a deleted server when a live server with the same name already exists.
+        This validates that the _check_live_server_not_exists validation works correctly.
+        '''
+        server_name = self.create_random_name(server_name_prefix, server_name_max_length)
+        admin_login = 'admin123'
+        admin_password = 'SecretPassword123'
+        location = resource_group_location
+        soft_delete_retention_days = 7
+
+        # Create server with soft delete enabled
+        self.cmd('sql server create -g {} --name {} -l {} '
+                 '--admin-user {} --admin-password {} '
+                 '--soft-delete-retention-days {}'
+                 .format(resource_group, server_name, location,
+                         admin_login, admin_password, soft_delete_retention_days),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('location', location),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('retentionDays', soft_delete_retention_days)])
+
+        # Attempt to restore while the live server still exists with same name
+        # Should fail with ValidationError: "Live server exists in the subscription"
+        self.cmd('sql server restore -g {} --name {} -l {}'
+                 .format(resource_group, server_name, location),
+                 expect_failure=True)
+
+        # Verify the live server still exists (restore didn't affect it)
+        self.cmd('sql server show -g {} --name {}'
+                 .format(resource_group, server_name),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('resourceGroup', resource_group)])
+
+        # Clean up - disable soft delete before deletion
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 0'
+                 .format(resource_group, server_name))
+
+    @ResourceGroupPreparer(parameter_name='resource_group', location='centralus')
+    @ResourceGroupPreparer(parameter_name='resource_group_2', location='centralus')
+    @AllowLargeResponse(size_kb=9999)
+    def test_sql_server_restore_deleted_with_invalid_resource_group(self, resource_group, resource_group_2, resource_group_location):
+        '''
+        Test attempting to restore a deleted server to a different resource group.
+        This validates that the error message correctly identifies the resource group mismatch.
+        '''
+        server_name = self.create_random_name(server_name_prefix, server_name_max_length)
+        admin_login = 'admin123'
+        admin_password = 'SecretPassword123'
+        location = resource_group_location
+        soft_delete_retention_days = 7
+
+        # Create server in first resource group with soft delete enabled
+        self.cmd('sql server create -g {} --name {} -l {} '
+                 '--admin-user {} --admin-password {} '
+                 '--soft-delete-retention-days {}'
+                 .format(resource_group, server_name, location,
+                         admin_login, admin_password, soft_delete_retention_days),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('location', location),
+                     JMESPathCheck('resourceGroup', resource_group)])
+
+        # Delete the server (soft delete)
+        self.cmd('sql server delete -g {} --name {} --yes'
+                 .format(resource_group, server_name))
+
+        # Attempt to restore to a different resource group - should fail with clear error message
+        # Error should explicitly mention both resource groups
+        result = self.cmd('sql server restore -g {} --name {} -l {}'
+                .format(resource_group_2, server_name, location),
+                expect_failure=True)
+
+        # Clean up - restore to correct resource group
+        self.cmd('sql server restore -g {} --name {} -l {}'
+                 .format(resource_group, server_name, location),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('resourceGroup', resource_group)])
+
+        # Disable soft delete before cleanup
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 0'
+                 .format(resource_group, server_name))
+
+    @ResourceGroupPreparer(parameter_name='resource_group', location='centralus')
+    @AllowLargeResponse(size_kb=9999)
+    def test_sql_server_restore_after_resource_group_removal(self, resource_group, resource_group_location):
+        '''
+        Test attempting to restore a deleted server after the resource group has been removed,
+        then recreating the resource group and successfully restoring.
+        '''
+        server_name = self.create_random_name(server_name_prefix, server_name_max_length)
+        admin_login = 'admin123'
+        admin_password = 'SecretPassword123'
+        location = resource_group_location
+        soft_delete_retention_days = 7
+
+        # Create server with soft delete enabled
+        self.cmd('sql server create -g {} --name {} -l {} '
+                 '--admin-user {} --admin-password {} '
+                 '--soft-delete-retention-days {}'
+                 .format(resource_group, server_name, location,
+                         admin_login, admin_password, soft_delete_retention_days),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('location', location),
+                     JMESPathCheck('resourceGroup', resource_group)])
+
+        # Delete the server (soft delete)
+        self.cmd('sql server delete -g {} --name {} --yes'
+                 .format(resource_group, server_name))
+
+        # Delete the resource group
+        self.cmd('group delete -n {} --yes'.format(resource_group))
+
+        # Wait for resource group deletion to complete
+        time.sleep(10)
+
+        # Attempt to restore the deleted server to the now-deleted resource group - should fail
+        self.cmd('sql server restore -g {} --name {} -l {}'
+                .format(resource_group, server_name, location),
+                expect_failure=True)
+
+        # Recreate the same resource group that was deleted
+        self.cmd('group create -n {} -l {}'.format(resource_group, location),
+                 checks=[
+                     JMESPathCheck('name', resource_group),
+                     JMESPathCheck('location', location)])
+
+        # Restore the server to the recreated resource group - should succeed
+        self.cmd('sql server restore -g {} --name {} -l {}'
+                 .format(resource_group, server_name, location),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('location', location)])
+
+        # Disable soft delete before cleanup
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 0'
+                 .format(resource_group, server_name))
+
+    @AllowLargeResponse(size_kb=9999)
+    def test_sql_server_restore_to_different_resource_group(self):
+        '''
+        Test attempting to restore a server to a different resource group than where it was created.
+        This is a negative test scenario that should fail with a validation error.
+        '''
+        rg1_name = self.create_random_name('clitestrg', 24)
+        rg2_name = self.create_random_name('clitestrg', 24)
+        server_name = self.create_random_name(server_name_prefix, server_name_max_length)
+        admin_login = 'admin123'
+        admin_password = 'SecretPassword123'
+        location = 'centralus'
+        soft_delete_retention_days = 7
+
+        try:
+            # Create first resource group
+            self.cmd('group create -n {} -l {}'.format(rg1_name, location),
+                     checks=[
+                         JMESPathCheck('name', rg1_name),
+                         JMESPathCheck('location', location)])
+
+            # Create second resource group
+            self.cmd('group create -n {} -l {}'.format(rg2_name, location),
+                     checks=[
+                         JMESPathCheck('name', rg2_name),
+                         JMESPathCheck('location', location)])
+
+            # Create server in RG1 with soft-delete enabled
+            self.cmd('sql server create -g {} --name {} -l {} '
+                     '--admin-user {} --admin-password {} '
+                     '--soft-delete-retention-days {}'
+                     .format(rg1_name, server_name, location,
+                             admin_login, admin_password, soft_delete_retention_days),
+                     checks=[
+                         JMESPathCheck('name', server_name),
+                         JMESPathCheck('location', location),
+                         JMESPathCheck('resourceGroup', rg1_name)])
+
+            # Delete the server (soft delete)
+            self.cmd('sql server delete -g {} --name {} --yes'
+                     .format(rg1_name, server_name))
+
+            # Attempt to restore to RG2 (different resource group) - should fail with validation error
+            # The error message should indicate the resource group mismatch
+            result = self.cmd('sql server restore -g {} --name {} -l {}'
+                            .format(rg2_name, server_name, location),
+                            expect_failure=True)
+
+            # Clean up - restore to correct RG1
+            self.cmd('sql server restore -g {} --name {} -l {}'
+                     .format(rg1_name, server_name, location),
+                     checks=[
+                         JMESPathCheck('name', server_name),
+                         JMESPathCheck('resourceGroup', rg1_name)])
+
+            # Disable soft delete before cleanup
+            self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 0'
+                     .format(rg1_name, server_name))
+
+        finally:
+            # Clean up both resource groups
+            self.cmd('group delete -n {} --yes --no-wait'.format(rg1_name))
+            self.cmd('group delete -n {} --yes --no-wait'.format(rg2_name))

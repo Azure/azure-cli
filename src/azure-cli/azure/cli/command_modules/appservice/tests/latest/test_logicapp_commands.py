@@ -2,11 +2,11 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-from email import message
 import json
 import unittest
 from unittest import mock
 import os
+import re
 import time
 import tempfile
 import requests
@@ -151,6 +151,26 @@ class LogicappBasicE2ETest(ScenarioTest):
 
         self.cmd(f'logicapp create -g {resource_group} -n {logicapp_name} -p {plan} -s {storage_account} --https-only', checks=[JMESPathCheck('httpsOnly', True)])
         self.cmd('logicapp create -g {} -n {} -p {} -s {}'.format(resource_group, logicapp_name, plan, storage_account), checks=[JMESPathCheck('httpsOnly', False)])
+
+    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
+    @StorageAccountPreparer()
+    def test_logicapp_unique_domain_name(self, resource_group, storage_account):
+        logicapp_name = self.create_random_name(prefix='logicappudom', length=24)
+        plan = self.create_random_name(prefix='logic-e2e-plan', length=24)
+        self.cmd(f'appservice plan create -g {resource_group} -n {plan} --sku WS1').get_output_in_json()['id']
+
+        result = self.cmd(
+            f'logicapp create -g {resource_group} -n {logicapp_name} -p {plan} -s {storage_account} --domain-name-scope SubscriptionReuse'
+        ).get_output_in_json()
+
+        default_hostname = result.get('defaultHostName')
+        pattern = r'^([a-zA-Z0-9\-]+)-([a-z0-9]{16})\.([a-z]+-\d{2})\.azurewebsites\.net$'
+        match = re.match(pattern, default_hostname)
+        self.assertIsNotNone(match, "defaultHostName '{}' does not match expected pattern".format(default_hostname))
+        app_name, hash_part, region = match.groups()
+        self.assertTrue(len(hash_part) == 16 and hash_part.islower(), "Hash is not 16 chars or not lowercase.")
+        self.assertIn('-', region, "Region part does not have '-' separator.")
+        self.assertEqual(app_name, logicapp_name, "App name and defaultHostName app name do not match.")
 
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
     def test_logicapp_config_appsettings_e2e(self, resource_group):

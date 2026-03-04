@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long
 
-__version__ = "2.83.0"
+__version__ = "2.84.0"
 
 import os
 import sys
@@ -37,7 +37,7 @@ ALWAYS_LOADED_MODULES = []
 # Extensions that will always be loaded if installed. They don't expose commands but hook into CLI core.
 ALWAYS_LOADED_EXTENSIONS = ['azext_ai_examples', 'azext_next']
 # Timeout (in seconds) for loading a single module. Acts as a safety valve to prevent indefinite hangs
-MODULE_LOAD_TIMEOUT_SECONDS = 30
+MODULE_LOAD_TIMEOUT_SECONDS = 60
 # Maximum number of worker threads for parallel module loading.
 MAX_WORKER_THREAD_COUNT = 4
 

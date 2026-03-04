@@ -2153,7 +2153,8 @@ def set_webapp(cmd, resource_group_name, name, slot=None, skip_dns_registration=
 
 
 def update_webapp(cmd, instance, client_affinity_enabled=None, https_only=None, minimum_elastic_instance_count=None,
-                  prewarmed_instance_count=None, end_to_end_encryption_enabled=None):
+                  prewarmed_instance_count=None, end_to_end_encryption_enabled=None,
+                  platform_release_channel=None):
     if 'function' in instance.kind:
         raise ValidationError("please use 'az functionapp update' to update this function app")
     if minimum_elastic_instance_count or prewarmed_instance_count:
@@ -2189,6 +2190,10 @@ def update_webapp(cmd, instance, client_affinity_enabled=None, https_only=None, 
 
     if prewarmed_instance_count is not None:
         instance.site_config.pre_warmed_instance_count = prewarmed_instance_count
+
+    if platform_release_channel is not None:
+        use_additional_properties(instance)
+        instance.additional_properties["properties"]["platformReleaseChannel"] = platform_release_channel
 
     return instance
 
