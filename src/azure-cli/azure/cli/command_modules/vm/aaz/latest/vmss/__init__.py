@@ -29,3 +29,4 @@ from ._stop import *
 from ._update import *
 from ._update_domain_walk import *
 from ._wait import *
+from ._manualupgrade import *
