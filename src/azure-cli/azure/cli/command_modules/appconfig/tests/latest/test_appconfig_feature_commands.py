@@ -631,7 +631,9 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         # Link App Insights to the store
         # Use a fake resource ID because the application-insights extension cannot be installed
         # in recording/playback mode — the extension index response exceeds the VCR 1024KB limit.
-        app_insights_id = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/{}/providers/Microsoft.Insights/components/fakeAppInsights'.format(resource_group)
+        app_insights_prefix = get_resource_name_prefix('appinsights')
+        app_insights_name = self.create_random_name(prefix=app_insights_prefix, length=24)
+        app_insights_id = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/{}/providers/microsoft.insights/components/{}'.format(resource_group, app_insights_name)
         self.kwargs.update({
             'app_insights_resource_id': app_insights_id
         })
