@@ -6,7 +6,7 @@
 # pylint: disable=line-too-long, too-many-locals
 from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.privatedns._client_factory import cf_privatedns_mgmt_zones
-from azure.cli.command_modules.privatedns._format import (transform_privatedns_zone_table_output, transform_privatedns_link_table_output, transform_privatedns_record_set_output, transform_privatedns_record_set_table_output)
+from azure.cli.command_modules.privatedns._format import transform_privatedns_record_set_output
 
 
 def load_command_table(self, _):
