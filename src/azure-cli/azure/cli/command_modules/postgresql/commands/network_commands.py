@@ -4,35 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long, import-outside-toplevel
-from azure.cli.command_modules.postgresql._client_factory import (
-    private_dns_client_factory,
-    private_dns_link_client_factory,
-    resource_client_factory,
-)
-from azure.cli.command_modules.postgresql._config_reader import get_cloud_cluster
-from azure.cli.command_modules.postgresql.aaz.latest.network.vnet import (
-    Create as VNetCreate,
-    Show as VNetShow,
-    Update as _VNetUpdate,
-)
-from azure.cli.command_modules.postgresql.aaz.latest.network.vnet.subnet import (
-    Create as SubnetCreate,
-    Show as SubnetShow,
-    Update as SubnetUpdate,
-)
-from azure.cli.command_modules.postgresql.utils._flexible_server_util import (
-    _check_resource_group_existence,
-    _is_resource_name,
-    check_existence,
-    get_id_components,
-    get_user_confirmation,
-    parse_public_access_input,
-)
-from azure.cli.command_modules.postgresql.utils.validators import (
-    validate_private_dns_zone,
-    validate_resource_group,
-    validate_vnet_location,
-)
 from azure.cli.core.azclierror import RequiredArgumentMissingError, ValidationError
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_subscription_id
@@ -44,11 +15,38 @@ from azure.mgmt.core.tools import (  # pylint: disable=import-error
     parse_resource_id,
     resource_id,
 )
-from azure.mgmt.privatedns.models import PrivateZone
-from azure.mgmt.privatedns.models import SubResource
-from azure.mgmt.privatedns.models import VirtualNetworkLink
+from azure.mgmt.privatedns.models import PrivateZone, SubResource, VirtualNetworkLink
 from knack.log import get_logger
 from requests import get
+from .._client_factory import (
+    private_dns_client_factory,
+    private_dns_link_client_factory,
+    resource_client_factory,
+)
+from .._config_reader import get_cloud_cluster
+from ..aaz.latest.network.vnet import (
+    Create as VNetCreate,
+    Show as VNetShow,
+    Update as _VNetUpdate,
+)
+from ..aaz.latest.network.vnet.subnet import (
+    Create as SubnetCreate,
+    Show as SubnetShow,
+    Update as SubnetUpdate,
+)
+from ..utils._flexible_server_util import (
+    _check_resource_group_existence,
+    _is_resource_name,
+    check_existence,
+    get_id_components,
+    get_user_confirmation,
+    parse_public_access_input,
+)
+from ..utils.validators import (
+    validate_private_dns_zone,
+    validate_resource_group,
+    validate_vnet_location,
+)
 
 logger = get_logger(__name__)
 DELEGATION_SERVICE_NAME = "Microsoft.DBforPostgreSQL/flexibleServers"

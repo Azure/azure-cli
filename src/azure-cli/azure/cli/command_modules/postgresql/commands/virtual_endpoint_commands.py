@@ -4,12 +4,12 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
-from azure.cli.command_modules.postgresql.utils.validators import (
+from azure.cli.core.util import user_confirmation
+from ..utils.validators import (
     validate_citus_cluster,
     validate_resource_group,
     validate_virtual_endpoint_name_availability,
 )
-from azure.cli.core.util import user_confirmation
 
 
 def virtual_endpoint_create_func(cmd, client, resource_group_name, server_name, virtual_endpoint_name, endpoint_type, members):

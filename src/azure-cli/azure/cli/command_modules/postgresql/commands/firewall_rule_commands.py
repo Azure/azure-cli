@@ -4,11 +4,11 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
-from azure.cli.command_modules.postgresql.utils.validators import validate_public_access_server, validate_resource_group
 from azure.cli.core.util import user_confirmation
 from datetime import datetime
 from knack.log import get_logger
 from knack.util import CLIError
+from ..utils.validators import validate_public_access_server, validate_resource_group
 
 logger = get_logger(__name__)
 # pylint: disable=raise-missing-from

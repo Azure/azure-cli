@@ -8,16 +8,6 @@ import json
 import os
 import uuid
 
-from azure.cli.command_modules.postgresql.utils._flexible_server_util import (
-    generate_missing_parameters,
-    get_case_insensitive_key_value,
-    get_enum_value_true_false,
-)
-from azure.cli.command_modules.postgresql.utils.validators import (
-    validate_citus_cluster,
-    validate_migration_runtime_server,
-    validate_resource_group,
-)
 from azure.cli.core.azclierror import (
     BadRequestError,
     FileOperationError,
@@ -27,6 +17,16 @@ from azure.cli.core.azclierror import (
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.mgmt import postgresqlflexibleservers as postgresql_flexibleservers
 from knack.log import get_logger
+from ..utils._flexible_server_util import (
+    generate_missing_parameters,
+    get_case_insensitive_key_value,
+    get_enum_value_true_false,
+)
+from ..utils.validators import (
+    validate_citus_cluster,
+    validate_migration_runtime_server,
+    validate_resource_group,
+)
 
 logger = get_logger(__name__)
 

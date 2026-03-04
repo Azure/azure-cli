@@ -4,9 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
-from azure.cli.command_modules.postgresql.utils.validators import validate_resource_group, validate_backup_name
 from azure.cli.core.util import user_confirmation
 from knack.log import get_logger
+from ..utils.validators import validate_resource_group, validate_backup_name
 
 logger = get_logger(__name__)
 

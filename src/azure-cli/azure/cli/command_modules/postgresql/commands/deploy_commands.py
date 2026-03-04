@@ -4,15 +4,15 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
-from azure.cli.command_modules.postgresql.utils._flexible_server_util import \
-    run_subprocess, \
-    fill_action_template, \
-    get_git_root_dir, \
-    GITHUB_ACTION_PATH
-from azure.cli.command_modules.postgresql.utils.validators import validate_resource_group
 from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissingError
 from azure.cli.core.util import run_cmd
 from knack.log import get_logger
+from ..utils._flexible_server_util import (
+    run_subprocess,
+    fill_action_template,
+    get_git_root_dir,
+    GITHUB_ACTION_PATH)
+from ..utils.validators import validate_resource_group
 
 logger = get_logger(__name__)
 # pylint: disable=raise-missing-from

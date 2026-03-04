@@ -4,14 +4,14 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
-from azure.cli.command_modules.postgresql.utils.validators import \
-    validate_resource_group, \
-    check_resource_group, \
-    validate_citus_cluster, \
-    validate_database_name
 from azure.cli.core.azclierror import RequiredArgumentMissingError
 from azure.cli.core.util import CLIError, user_confirmation
 from knack.log import get_logger
+from ..utils.validators import (
+    validate_resource_group,
+    check_resource_group,
+    validate_citus_cluster,
+    validate_database_name)
 
 logger = get_logger(__name__)
 

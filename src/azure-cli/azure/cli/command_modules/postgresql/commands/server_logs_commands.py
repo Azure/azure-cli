@@ -6,15 +6,15 @@
 # pylint: disable=unused-argument, line-too-long
 import re
 
-from azure.cli.command_modules.postgresql._client_factory import cf_postgres_flexible_replica
-from azure.cli.command_modules.postgresql.utils._flexible_server_location_capabilities_util import get_postgres_server_capability_info
-from azure.cli.command_modules.postgresql.utils._flexible_server_util import resolve_poller
-from azure.cli.command_modules.postgresql.utils.validators import validate_citus_cluster, validate_resource_group
 from azure.cli.core.util import CLIError, user_confirmation
 from datetime import datetime, timedelta
 from dateutil.tz import tzutc   # pylint: disable=import-error
 from knack.log import get_logger
 from urllib.request import urlretrieve
+from .._client_factory import cf_postgres_flexible_replica
+from ..utils._flexible_server_location_capabilities_util import get_postgres_server_capability_info
+from ..utils._flexible_server_util import resolve_poller
+from ..utils.validators import validate_citus_cluster, validate_resource_group
 
 logger = get_logger(__name__)
 

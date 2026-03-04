@@ -4,12 +4,12 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
-from azure.cli.command_modules.postgresql.utils._flexible_server_util import resolve_poller
-from azure.cli.command_modules.postgresql.utils.validators import check_resource_group, validate_citus_cluster, validate_resource_group
 from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueError
 from azure.cli.core.util import sdk_no_wait
 from azure.mgmt import postgresqlflexibleservers as postgresql_flexibleservers
 from knack.log import get_logger
+from ..utils._flexible_server_util import resolve_poller
+from ..utils.validators import check_resource_group, validate_citus_cluster, validate_resource_group
 
 logger = get_logger(__name__)
 

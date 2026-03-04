@@ -4,8 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
-from azure.cli.command_modules.postgresql._client_factory import cf_postgres_flexible_private_endpoint_connections
-from azure.cli.command_modules.postgresql.utils.validators import validate_resource_group
+from .._client_factory import cf_postgres_flexible_private_endpoint_connections
+from ..utils.validators import validate_resource_group
 
 
 def flexible_server_approve_private_endpoint_connection(cmd, client, resource_group_name, server_name, private_endpoint_connection_name,

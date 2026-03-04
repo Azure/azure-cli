@@ -4,13 +4,13 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
-from azure.cli.command_modules.postgresql._client_factory import cf_postgres_flexible_servers
-from azure.cli.command_modules.postgresql.utils.validators import validate_resource_group, validate_citus_cluster
 from azure.cli.core.util import CLIError, user_confirmation
 from azure.mgmt import postgresqlflexibleservers as postgresql_flexibleservers
 from knack.log import get_logger
 from .identity_commands import flexible_server_identity_update
 from .parameter_commands import _update_parameters
+from .._client_factory import cf_postgres_flexible_servers
+from ..utils.validators import validate_resource_group, validate_citus_cluster
 
 logger = get_logger(__name__)
 

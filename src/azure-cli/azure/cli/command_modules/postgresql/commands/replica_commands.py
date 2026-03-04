@@ -4,11 +4,11 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
-from azure.cli.command_modules.postgresql.utils.validators import is_citus_cluster, validate_resource_group
 from azure.cli.core.azclierror import ValidationError
 from azure.cli.core.util import CLIError
 from azure.core.exceptions import ResourceNotFoundError
 from azure.mgmt import postgresqlflexibleservers as postgresql_flexibleservers
+from ..utils.validators import is_citus_cluster, validate_resource_group
 
 
 def flexible_replica_promote(cmd, client, resource_group_name, replica_name, promote_mode='standalone', promote_option='planned'):

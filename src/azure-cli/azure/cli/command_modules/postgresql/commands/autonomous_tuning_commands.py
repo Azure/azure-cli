@@ -4,18 +4,18 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
-from azure.cli.command_modules.postgresql._client_factory import \
-    get_postgresql_flexible_management_client, \
-    cf_postgres_flexible_tuning_options
-from azure.cli.command_modules.postgresql.utils._flexible_server_location_capabilities_util import \
-    get_postgres_location_capability_info, \
-    get_postgres_server_capability_info
-from azure.cli.command_modules.postgresql.utils._util import get_autonomous_tuning_settings_map
-from azure.cli.command_modules.postgresql.utils.validators import validate_resource_group
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError
 from knack.log import get_logger
-from .parameter_commands import flexible_parameter_update, _update_parameters
+from .._client_factory import (
+    cf_postgres_flexible_tuning_options,
+    get_postgresql_flexible_management_client)
+from ..utils._flexible_server_location_capabilities_util import (
+    get_postgres_location_capability_info,
+    get_postgres_server_capability_info)
+from ..utils._util import get_autonomous_tuning_settings_map
+from ..utils.validators import validate_resource_group
+from .parameter_commands import _update_parameters, flexible_parameter_update
 
 logger = get_logger(__name__)
 

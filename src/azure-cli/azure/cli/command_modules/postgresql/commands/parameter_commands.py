@@ -4,11 +4,11 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
-from azure.cli.command_modules.postgresql.utils._flexible_server_util import resolve_poller
-from azure.cli.command_modules.postgresql.utils.validators import validate_resource_group
 from azure.cli.core.util import CLIError
 from azure.core.exceptions import HttpResponseError
 from azure.mgmt import postgresqlflexibleservers as postgresql_flexibleservers
+from ..utils._flexible_server_util import resolve_poller
+from ..utils.validators import validate_resource_group
 
 
 def flexible_parameter_update(client, server_name, configuration_name, resource_group_name, source=None, value=None):

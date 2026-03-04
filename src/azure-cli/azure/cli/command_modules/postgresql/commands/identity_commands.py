@@ -4,11 +4,11 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
-from azure.cli.command_modules.postgresql._client_factory import cf_postgres_flexible_config
-from azure.cli.command_modules.postgresql.utils._flexible_server_util import resolve_poller
-from azure.cli.command_modules.postgresql.utils.validators import validate_citus_cluster, validate_resource_group
 from azure.cli.core.util import CLIError
 from azure.mgmt import postgresqlflexibleservers as postgresql_flexibleservers
+from .._client_factory import cf_postgres_flexible_config
+from ..utils._flexible_server_util import resolve_poller
+from ..utils.validators import validate_citus_cluster, validate_resource_group
 
 
 def flexible_server_identity_update(cmd, client, resource_group_name, server_name, system_assigned):

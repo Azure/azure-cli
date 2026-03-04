@@ -4,10 +4,10 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
-from azure.cli.command_modules.postgresql._client_factory import cf_postgres_flexible_servers
-from azure.cli.command_modules.postgresql.utils._flexible_server_util import get_tenant_id
-from azure.cli.command_modules.postgresql.utils.validators import validate_resource_group
 from azure.cli.core.util import CLIError, sdk_no_wait
+from .._client_factory import cf_postgres_flexible_servers
+from ..utils._flexible_server_util import get_tenant_id
+from ..utils.validators import validate_resource_group
 
 
 def flexible_server_microsoft_entra_admin_set(cmd, client, resource_group_name, server_name, login, sid, principal_type=None, no_wait=False):
