@@ -5,14 +5,15 @@
 
 # pylint: disable=line-too-long, protected-access
 
-from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id, resource_id
-from azure.cli.core.azclierror import ValidationError, RequiredArgumentMissingError, MutuallyExclusiveArgumentError
+from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
+from azure.cli.core.azclierror import ValidationError
 from azure.cli.core.commands.arm import get_arm_resource_by_id
-from azure.cli.core.aaz import has_value, AAZResourceLocationArg, AAZResourceLocationArgFormat, AAZListArg, AAZStrArg, AAZBoolArg, AAZFloatArg, AAZIntArg, AAZIntArgFormat, AAZDictArg, AAZResourceIdArg, AAZResourceIdArgFormat
+from azure.cli.core.aaz import has_value, AAZStrArg
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.validators import validate_tags
 from azure.cli.command_modules.network._validators import _resolve_api_version
+from azure.cli.command_modules.network.aaz.latest.network.watcher.connection_monitor._update import Update as _WatcherConnectionMonitorUpdate
 
 
 def get_network_watcher_from_location(cmd, watcher_name="watcher_name", rg_name="watcher_rg"):
@@ -85,13 +86,6 @@ def process_nw_cm_v2_create_namespace(cmd):
 
     if has_value(args.output_type) and not has_value(args.workspace_ids):
         raise ValidationError('usage error: --output-type is specified but no other resource id provided')
-
-
-# These are helper classes used by custom.py functions, not registered commands.
-# They inherit AZ_NAME from the aaz parent but should NOT be auto-registered.
-# They are placed here (not in a _<verb>.py file) to avoid autoloading.
-
-from azure.cli.command_modules.network.aaz.latest.network.watcher.connection_monitor._update import Update as _WatcherConnectionMonitorUpdate
 
 
 class WatcherConnectionMonitorOutputRemove(_WatcherConnectionMonitorUpdate):

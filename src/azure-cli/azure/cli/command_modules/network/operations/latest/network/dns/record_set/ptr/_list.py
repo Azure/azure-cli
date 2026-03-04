@@ -5,7 +5,7 @@
 
 # pylint: disable=line-too-long, protected-access, too-few-public-methods
 
-from azure.cli.core.aaz import has_value, register_command, AAZResourceIdArgFormat, AAZListArg, AAZResourceIdArg
+from azure.cli.core.aaz import register_command
 from azure.cli.command_modules.network.operations.latest.network.dns.record_set._base import RecordSetList
 
 

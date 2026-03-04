@@ -5,9 +5,9 @@
 
 # pylint: disable=line-too-long, protected-access, too-few-public-methods
 
-from azure.cli.core.aaz import AAZClientConfiguration, has_value, register_client, AAZFileArgTextFormat
+from azure.cli.core.aaz import has_value
 from azure.cli.core.aaz.utils import assign_aaz_list_arg
-from azure.cli.core.util import CLIError, sdk_no_wait
+from azure.cli.core.util import CLIError
 from azure.cli.command_modules.network.aaz.latest.network.private_link_service._create import Create as _PrivateLinkServiceCreate
 
 

@@ -5,7 +5,7 @@
 
 # pylint: disable=line-too-long, protected-access, too-few-public-methods
 
-from azure.cli.core.aaz import AAZClientConfiguration, has_value, register_client, AAZFileArgTextFormat
+from azure.cli.core.aaz import has_value
 from azure.cli.core.aaz.utils import assign_aaz_list_arg
 from azure.cli.command_modules.network.aaz.latest.network.express_route.gateway.connection._update import Update as _ExpressRouteConnectionUpdate
 

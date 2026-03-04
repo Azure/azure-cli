@@ -5,7 +5,7 @@
 
 # pylint: disable=line-too-long, protected-access, too-few-public-methods
 
-from azure.cli.core.aaz import has_value, AAZResourceLocationArg, AAZResourceLocationArgFormat, AAZListArg, AAZStrArg, AAZBoolArg, AAZFloatArg, AAZIntArg, AAZIntArgFormat, AAZDictArg, AAZResourceIdArg, AAZResourceIdArgFormat
+from azure.cli.core.aaz import has_value, AAZResourceLocationArg, AAZListArg, AAZStrArg, AAZDictArg
 from azure.cli.command_modules.network.aaz.latest.network.watcher.connection_monitor.test_configuration._add import Add as _MonitorTestConfigurationAdd
 from azure.cli.command_modules.network.operations.latest.network.watcher._helpers import get_network_watcher_from_location
 

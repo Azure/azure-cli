@@ -29,9 +29,6 @@ NETWORK_VROUTER_PEERING_DEPRECATION_INFO = 'network routeserver peering'
 
 # pylint: disable=too-many-locals, too-many-statements
 def load_command_table(self, _):
-    # region NetworkRoot
-    # endregion
-
     # region ApplicationGateways
     with self.command_group("network application-gateway") as g:
         g.custom_command("show-backend-health", "show_ag_backend_health")
@@ -42,12 +39,8 @@ def load_command_table(self, _):
                          validator=process_ag_create_namespace,
                          exception_handler=handle_template_based_exception)
 
-
-
     with self.command_group("network application-gateway identity") as g:
         g.custom_command("remove", "remove_ag_identity", supports_no_wait=True)
-
-
 
     with self.command_group("network application-gateway waf-config") as g:
         g.custom_command("list-rule-sets", "list_ag_waf_rule_sets", table_transformer=transform_waf_rule_sets_table_output)
@@ -56,7 +49,6 @@ def load_command_table(self, _):
     # endregion
 
     # region ApplicationGatewayWAFPolicy
-
     with self.command_group("network application-gateway waf-policy managed-rule exception") as g:
         g.custom_command("remove", "remove_waf_managed_rule_exception")
         g.custom_command("list", "list_waf_managed_rules")
@@ -109,15 +101,8 @@ def load_command_table(self, _):
     # endregion
 
     # region ExpressRoutes
-
     with self.command_group('network express-route port') as g:
         g.custom_command('generate-loa', 'download_generated_loa_as_pdf')
-    # endregion
-
-    # region PrivateEndpoint
-    # endregion
-
-    # region PrivateLinkServices
     # endregion
 
     # region LoadBalancers
@@ -136,9 +121,6 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_cross_region_load_balancer', transform=DeploymentOutputLongRunningOperation(self.cli_ctx), supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_cross_region_lb_create_namespace, exception_handler=handle_template_based_exception)
     # endregion
 
-    # region LocalGateways
-    # endregion
-
     # region NetworkInterfaces: (NIC)
     with self.command_group("network nic ip-config address-pool") as g:
         g.custom_command("add", "add_nic_ip_config_address_pool")
@@ -146,7 +128,6 @@ def load_command_table(self, _):
     # endregion
 
     # region NetworkSecurityGroups
-
     with self.command_group("network nsg rule") as g:
         g.custom_command("list", "list_nsg_rules", table_transformer=lambda x: [transform_nsg_rule_table_output(i) for i in x])
     # endregion
@@ -170,9 +151,6 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_public_ip', transform=transform_public_ip_create_output, validator=process_public_ip_create_namespace)
     # endregion
 
-    # region RouteFilters
-    # endregion
-
     # region TrafficManagers
     with self.command_group('network traffic-manager profile') as g:
         g.custom_command('create', 'create_traffic_manager_profile', transform=transform_traffic_manager_create_output)
@@ -182,7 +160,6 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_traffic_manager_endpoint')
         g.custom_command('update', 'update_traffic_manager_endpoint')
         g.custom_command('list', 'list_traffic_manager_endpoints')
-
     # endregion
 
     # region VirtualNetworks
@@ -214,7 +191,6 @@ def load_command_table(self, _):
 
     with self.command_group('network vpn-connection ipsec-policy') as g:
         g.custom_command('clear', 'clear_vpn_conn_ipsec_policies', supports_no_wait=True)
-
     # endregion
 
     # region VirtualHub
@@ -233,8 +209,6 @@ def load_command_table(self, _):
         g.custom_command('delete', 'remove_private_endpoint_connection', confirmation=True)
         g.custom_show_command('show', 'show_private_endpoint_connection')
         g.custom_command('list', 'list_private_endpoint_connection')
-    # endregion
-
     # endregion
 
     # region DdosCustomPolicy

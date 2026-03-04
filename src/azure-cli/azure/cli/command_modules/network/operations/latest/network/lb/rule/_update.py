@@ -5,7 +5,7 @@
 
 # pylint: disable=line-too-long, protected-access, too-few-public-methods
 
-from azure.cli.core.aaz import register_command, AAZResourceIdArgFormat, has_value, AAZListArg, AAZResourceIdArg, AAZStrArg, AAZArgEnum
+from azure.cli.core.aaz import AAZResourceIdArgFormat, has_value, AAZListArg, AAZResourceIdArg
 from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
 from azure.cli.command_modules.network.aaz.latest.network.lb.rule._update import Update as _LBRuleUpdate
 

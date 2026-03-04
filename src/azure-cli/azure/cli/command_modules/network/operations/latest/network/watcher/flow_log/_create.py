@@ -6,10 +6,10 @@
 # pylint: disable=line-too-long, protected-access, too-few-public-methods
 
 from knack.util import CLIError
-from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id, resource_id
-from azure.cli.core.azclierror import ValidationError, RequiredArgumentMissingError, MutuallyExclusiveArgumentError
+from azure.mgmt.core.tools import is_valid_resource_id
+from azure.cli.core.azclierror import RequiredArgumentMissingError, MutuallyExclusiveArgumentError
 from azure.cli.core.commands.arm import get_arm_resource_by_id
-from azure.cli.core.aaz import has_value, AAZResourceLocationArg, AAZResourceLocationArgFormat, AAZListArg, AAZStrArg, AAZBoolArg, AAZFloatArg, AAZIntArg, AAZIntArgFormat, AAZDictArg, AAZResourceIdArg, AAZResourceIdArgFormat
+from azure.cli.core.aaz import has_value, AAZBoolArg, AAZIntArg, AAZIntArgFormat, AAZResourceIdArg, AAZResourceIdArgFormat
 from azure.cli.command_modules.network._validators import validate_managed_identity_resource_id
 from azure.cli.command_modules.network.aaz.latest.network.watcher.flow_log._create import Create as _NwFlowLogCreate
 from azure.cli.command_modules.network.operations.latest.network.watcher._helpers import get_network_watcher_from_location

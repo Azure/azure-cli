@@ -5,12 +5,11 @@
 
 # pylint: disable=line-too-long, protected-access, too-few-public-methods
 
-import logging
-
 from azure.cli.core.aaz import has_value
 from azure.cli.command_modules.network.aaz.latest.network.lb.probe._create import Create as _LBProbeCreate
+from knack.log import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class LBProbeCreate(_LBProbeCreate):

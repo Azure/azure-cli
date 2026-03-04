@@ -3,9 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long, protected-access, too-few-public-methods
+# pylint: disable=no-self-use, no-member, too-many-lines, unused-argument
 
-from azure.cli.core.aaz import AAZClientConfiguration, has_value, register_client, AAZFileArgTextFormat
+from azure.cli.core.aaz import has_value
 from azure.cli.command_modules.network.aaz.latest.network.vnet_gateway.nat_rule._remove import Remove as _VnetGatewayNatRuleRemove
 
 

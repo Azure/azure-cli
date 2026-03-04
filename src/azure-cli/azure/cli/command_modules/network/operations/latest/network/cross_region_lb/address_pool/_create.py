@@ -5,7 +5,7 @@
 
 # pylint: disable=line-too-long, protected-access, too-few-public-methods
 
-from azure.cli.core.aaz import register_command, AAZResourceIdArgFormat, has_value, AAZListArg, AAZResourceIdArg, AAZStrArg, AAZArgEnum
+from azure.cli.core.aaz import register_command, AAZResourceIdArgFormat, has_value, AAZStrArg
 from azure.cli.command_modules.network.aaz.latest.network.lb.address_pool._create import Create as _LBAddressPoolCreate
 
 

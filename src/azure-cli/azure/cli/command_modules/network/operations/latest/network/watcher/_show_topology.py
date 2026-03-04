@@ -5,8 +5,8 @@
 
 # pylint: disable=line-too-long, protected-access, too-few-public-methods
 
-from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id, resource_id
-from azure.cli.core.aaz import has_value, AAZResourceLocationArg, AAZResourceLocationArgFormat, AAZListArg, AAZStrArg, AAZBoolArg, AAZFloatArg, AAZIntArg, AAZIntArgFormat, AAZDictArg, AAZResourceIdArg, AAZResourceIdArgFormat
+from azure.mgmt.core.tools import parse_resource_id
+from azure.cli.core.aaz import has_value, AAZResourceLocationArg, AAZResourceIdArgFormat
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType
 from azure.cli.command_modules.network.aaz.latest.network.watcher._show_topology import ShowTopology as _ShowTopology

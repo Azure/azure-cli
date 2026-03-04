@@ -5,7 +5,7 @@
 
 # pylint: disable=line-too-long, protected-access, too-few-public-methods
 
-from azure.cli.core.aaz import AAZClientConfiguration, has_value, register_client, AAZFileArgTextFormat
+from azure.cli.core.aaz import has_value
 from azure.cli.command_modules.network.custom import RootCertFormat
 from azure.cli.command_modules.network.aaz.latest.network.vnet_gateway._create import Create as _VnetGatewayCreate
 

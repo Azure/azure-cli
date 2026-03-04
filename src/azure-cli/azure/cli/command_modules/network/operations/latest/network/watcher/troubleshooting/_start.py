@@ -6,7 +6,7 @@
 # pylint: disable=line-too-long, protected-access, too-few-public-methods
 
 from knack.util import CLIError
-from azure.cli.core.aaz import has_value, AAZResourceLocationArg, AAZResourceLocationArgFormat, AAZListArg, AAZStrArg, AAZBoolArg, AAZFloatArg, AAZIntArg, AAZIntArgFormat, AAZDictArg, AAZResourceIdArg, AAZResourceIdArgFormat
+from azure.cli.core.aaz import has_value, AAZResourceLocationArg, AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
 from azure.cli.command_modules.network.aaz.latest.network.watcher.troubleshooting._start import Start as _NwTroubleshootingStart
 from azure.cli.command_modules.network.operations.latest.network.watcher._helpers import get_network_watcher_from_resource
 

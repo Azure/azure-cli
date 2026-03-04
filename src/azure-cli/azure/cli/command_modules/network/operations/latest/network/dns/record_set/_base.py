@@ -5,7 +5,7 @@
 
 # pylint: disable=line-too-long, protected-access, too-few-public-methods
 
-from azure.cli.core.aaz import has_value, register_command, AAZResourceIdArgFormat, AAZListArg, AAZResourceIdArg
+from azure.cli.core.aaz import has_value, AAZResourceIdArgFormat
 from azure.cli.command_modules.network.aaz.latest.network.dns.record_set._update import Update as _RecordSetUpdate
 from azure.cli.command_modules.network.aaz.latest.network.dns.record_set._show import Show as _RecordSetShow
 from azure.cli.command_modules.network.aaz.latest.network.dns.record_set._list_by_type import ListByType as _RecordSetListByType
@@ -15,6 +15,7 @@ from azure.cli.command_modules.network.aaz.latest.network.dns.record_set._create
 
 class RecordSetUpdate(_RecordSetUpdate):
     AZ_NAME = None  # Base class
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
@@ -48,6 +49,7 @@ class RecordSetUpdate(_RecordSetUpdate):
 
 class RecordSetShow(_RecordSetShow):
     AZ_NAME = None  # Base class
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
@@ -60,6 +62,7 @@ class RecordSetShow(_RecordSetShow):
 
 class RecordSetList(_RecordSetListByType):
     AZ_NAME = None  # Base class
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
@@ -72,6 +75,7 @@ class RecordSetList(_RecordSetListByType):
 
 class RecordSetDelete(_RecordSetDelete):
     AZ_NAME = None  # Base class
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
@@ -84,6 +88,7 @@ class RecordSetDelete(_RecordSetDelete):
 
 class RecordSetCreate(_RecordSetCreate):
     AZ_NAME = None  # Base class
+
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
@@ -107,5 +112,3 @@ class RecordSetCreate(_RecordSetCreate):
 
         args_schema.naptr_records._registered = False
         return args_schema
-
-

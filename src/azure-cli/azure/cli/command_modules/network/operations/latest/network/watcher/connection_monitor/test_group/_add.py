@@ -5,9 +5,8 @@
 
 # pylint: disable=line-too-long, protected-access, too-few-public-methods
 
-from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id, resource_id
-from azure.cli.core.azclierror import ValidationError, RequiredArgumentMissingError, MutuallyExclusiveArgumentError
-from azure.cli.core.aaz import has_value, AAZResourceLocationArg, AAZResourceLocationArgFormat, AAZListArg, AAZStrArg, AAZBoolArg, AAZFloatArg, AAZIntArg, AAZIntArgFormat, AAZDictArg, AAZResourceIdArg, AAZResourceIdArgFormat
+from azure.cli.core.azclierror import ValidationError
+from azure.cli.core.aaz import has_value, AAZResourceLocationArg, AAZListArg, AAZStrArg, AAZBoolArg, AAZFloatArg, AAZIntArg
 from azure.cli.command_modules.network.aaz.latest.network.watcher.connection_monitor.test_group._add import Add as _WatcherConnectionMonitorTestGroupAdd
 from azure.cli.command_modules.network.operations.latest.network.watcher._helpers import get_network_watcher_from_location
 

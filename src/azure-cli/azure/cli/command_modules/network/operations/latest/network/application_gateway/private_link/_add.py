@@ -6,8 +6,8 @@
 # pylint: disable=line-too-long, protected-access, too-few-public-methods
 
 from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id, resource_id
-from azure.cli.core.aaz import AAZClientConfiguration, has_value, register_client, AAZFileArgTextFormat
-from azure.cli.core.azclierror import InvalidArgumentValueError, ValidationError, UnrecognizedArgumentError, ResourceNotFoundError, ArgumentUsageError
+from azure.cli.core.aaz import has_value
+from azure.cli.core.azclierror import ValidationError
 from azure.cli.command_modules.network.aaz.latest.network.application_gateway.private_link._add import Add as _AGPrivateLinkAdd
 
 
