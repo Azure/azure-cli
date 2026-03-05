@@ -6285,14 +6285,17 @@ def update_capacity_reservation_group(cmd, resource_group_name, capacity_reserva
     return CapacityReservationGroupUpdate(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
-def show_capacity_reservation_group(client, resource_group_name, capacity_reservation_group_name,
-                                    instance_view=None):
-    expand = None
+def show_capacity_reservation_group(cmd, resource_group_name, capacity_reservation_group_name, instance_view=None):
+    from .aaz.latest.capacity.reservation.group import Show as CapacityReservationGroupShow
+    command_args = {
+        'capacity_reservation_group_name': capacity_reservation_group_name,
+        'resource_group': resource_group_name
+    }
+
     if instance_view:
-        expand = 'instanceView'
-    return client.get(resource_group_name=resource_group_name,
-                      capacity_reservation_group_name=capacity_reservation_group_name,
-                      expand=expand)
+        command_args['expand'] = 'instanceView'
+
+    return CapacityReservationGroupShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
 def set_vm_applications(cmd, vm_name, resource_group_name, application_version_ids, order_applications=False, application_configuration_overrides=None, treat_deployment_as_failure=None, enable_automatic_upgrade=None, no_wait=False):
