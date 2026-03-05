@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update a dedicated host group.
+
+    :example: Create or update a dedicated host group with Ultra SSD support.
+        az vm host group update --resource-group myResourceGroup --name myDedicatedHostGroup --tags "{department:finance}" --zones "[1]" --platform-fault-domain-count 3 --support-automatic-placement True --additional-capabilities "{ultra-ssd-enabled:True}"
     """
 
     _aaz_info = {
