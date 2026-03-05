@@ -46,7 +46,7 @@ class Create(AAZCommand):
         )
         _args_schema.host_name = AAZStrArg(
             options=["-n", "--name", "--host-name"],
-            help="The name of the dedicated host .",
+            help="The name of the dedicated host.",
             required=True,
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
