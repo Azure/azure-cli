@@ -5938,8 +5938,8 @@ def create_dedicated_host(cmd, host_group_name, host_name, resource_group_name, 
         }
     }
 
-    if tags:
-        command_args['tags'] = tags
+    if tags is not None:
+        command_args['tags'] = tags or {}
 
     if auto_replace_on_failure is not None:
         command_args['auto_replace_on_failure'] = auto_replace_on_failure
