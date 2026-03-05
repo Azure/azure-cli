@@ -18,4 +18,3 @@ class VMHostGroupShow(_VMHostGroupShow):
         args_schema.expand._registered = False
 
         return args_schema
-
