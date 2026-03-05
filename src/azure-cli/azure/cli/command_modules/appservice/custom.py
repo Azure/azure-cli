@@ -126,8 +126,9 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                   using_webapp_up=False, language=None, assign_identities=None,
                   role='Contributor', scope=None, vnet=None, subnet=None, https_only=False,
                   public_network_access=None, acr_use_identity=False, acr_identity=None, basic_auth="",
-                  auto_generated_domain_name_label_scope=None):
-    from azure.mgmt.web.models import Site
+                  auto_generated_domain_name_label_scope=None, end_to_end_encryption_enabled=None,
+                  min_tls_version=None, min_tls_cipher_suite=None):
+    from azure.mgmt.web.models import Site, OutboundVnetRouting
     from azure.core.exceptions import ResourceNotFoundError as _ResourceNotFoundError
     SiteConfig, SkuDescription, NameValuePair = cmd.get_models(
         'SiteConfig', 'SkuDescription', 'NameValuePair')
@@ -227,10 +228,10 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                                vnet_name=subnet_info["vnet_name"],
                                subnet_name=subnet_info["subnet_name"])
         subnet_resource_id = subnet_info["subnet_resource_id"]
-        vnet_route_all_enabled = True
+        outbound_vnet_routing = OutboundVnetRouting(application_traffic=True)
     else:
         subnet_resource_id = None
-        vnet_route_all_enabled = None
+        outbound_vnet_routing = None
 
     if using_webapp_up:
         https_only = using_webapp_up
@@ -238,10 +239,17 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     if acr_use_identity:
         site_config.acr_use_managed_identity_creds = acr_use_identity
 
+    if min_tls_version:
+        site_config.min_tls_version = min_tls_version
+
+    if min_tls_cipher_suite:
+        site_config.min_tls_cipher_suite = min_tls_cipher_suite
+
     webapp_def = Site(location=location, site_config=site_config, server_farm_id=plan_info.id, tags=tags,
                       https_only=https_only, virtual_network_subnet_id=subnet_resource_id,
-                      public_network_access=public_network_access, vnet_route_all_enabled=vnet_route_all_enabled,
-                      auto_generated_domain_name_label_scope=auto_generated_domain_name_label_scope)
+                      public_network_access=public_network_access, outbound_vnet_routing=outbound_vnet_routing,
+                      auto_generated_domain_name_label_scope=auto_generated_domain_name_label_scope,
+                      end_to_end_encryption_enabled=end_to_end_encryption_enabled)
     if runtime:
         runtime = _StackRuntimeHelper.remove_delimiters(runtime)
 
@@ -2145,7 +2153,8 @@ def set_webapp(cmd, resource_group_name, name, slot=None, skip_dns_registration=
 
 
 def update_webapp(cmd, instance, client_affinity_enabled=None, https_only=None, minimum_elastic_instance_count=None,
-                  prewarmed_instance_count=None):
+                  prewarmed_instance_count=None, end_to_end_encryption_enabled=None,
+                  platform_release_channel=None):
     if 'function' in instance.kind:
         raise ValidationError("please use 'az functionapp update' to update this function app")
     if minimum_elastic_instance_count or prewarmed_instance_count:
@@ -2169,6 +2178,8 @@ def update_webapp(cmd, instance, client_affinity_enabled=None, https_only=None, 
         instance.client_affinity_enabled = client_affinity_enabled == 'true'
     if https_only is not None:
         instance.https_only = https_only == 'true'
+    if end_to_end_encryption_enabled is not None:
+        instance.end_to_end_encryption_enabled = end_to_end_encryption_enabled == 'true'
 
     if minimum_elastic_instance_count is not None:
         from azure.mgmt.web.models import SiteConfig
@@ -2179,6 +2190,10 @@ def update_webapp(cmd, instance, client_affinity_enabled=None, https_only=None, 
 
     if prewarmed_instance_count is not None:
         instance.site_config.pre_warmed_instance_count = prewarmed_instance_count
+
+    if platform_release_channel is not None:
+        use_additional_properties(instance)
+        instance.additional_properties["properties"]["platformReleaseChannel"] = platform_release_channel
 
     return instance
 
@@ -3161,7 +3176,7 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
     import inspect
     frame = inspect.currentframe()
     bool_flags = ['remote_debugging_enabled', 'web_sockets_enabled', 'always_on',
-                  'auto_heal_enabled', 'use32_bit_worker_process', 'http20_enabled', 'vnet_route_all_enabled']
+                  'auto_heal_enabled', 'use32_bit_worker_process', 'http20_enabled']
     int_flags = ['pre_warmed_instance_count', 'number_of_workers']
     # note: getargvalues is used already in azure.cli.core.commands.
     # and no simple functional replacement for this deprecating method for 3.5
@@ -3169,7 +3184,7 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
     for arg in args[3:]:
         if arg in int_flags and values[arg] is not None:
             values[arg] = validate_and_convert_to_int(arg, values[arg])
-        if arg != 'generic_configurations' and values.get(arg, None):
+        if arg not in ['generic_configurations'] and values.get(arg, None):
             setattr(configs, arg, values[arg] if arg not in bool_flags else values[arg] == 'true')
 
     generic_configurations = generic_configurations or []
@@ -3234,7 +3249,21 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
         if max_replicas is not None:
             setattr(configs, 'function_app_scale_limit', max_replicas)
         return update_configuration_polling(cmd, resource_group_name, name, slot, configs)
-    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
+
+    # Update SiteConfig first
+    result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
+
+    # Handle vnet_route_all_enabled separately using Site-level outbound_vnet_routing property
+    # This is done after SiteConfig update to ensure the Site-level property is not overwritten
+    if vnet_route_all_enabled is not None:
+        from azure.mgmt.web.models import OutboundVnetRouting
+        client = web_client_factory(cmd.cli_ctx)
+        app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot, client=client)
+        app.outbound_vnet_routing = OutboundVnetRouting(application_traffic=vnet_route_all_enabled == 'true')
+        _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'begin_create_or_update', slot,
+                                client=client, extra_parameter=app)
+
+    return result
 
 
 def update_configuration_polling(cmd, resource_group_name, name, slot, configs):
@@ -6190,12 +6219,16 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         return list(self._client.provider.get_web_app_stacks(stack_os_type=None))
 
     def _parse_raw_stacks(self, stacks):
+        # Track seen runtime display names to avoid duplicates in Linux parsing.
+        # Linux Java containers (e.g., JBOSSEAP) can produce duplicate entries across major versions.
+        # Windows parsing doesn't have this issue due to its different structure.
+        seen_runtimes = set()
         for lang in stacks:
             for major_version in lang.major_versions:
                 if self._linux:
                     if lang.display_text.lower() == "java":
                         continue
-                    self._parse_major_version_linux(major_version, self._stacks)
+                    self._parse_major_version_linux(major_version, self._stacks, seen_runtimes)
                 if self._windows:
                     self._parse_major_version_windows(major_version, self._stacks, self.windows_config_mappings)
 
@@ -6340,17 +6373,116 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
             return cls._is_valid_runtime_setting(cls._get_runtime_setting(minor_version, linux, java))
         return [m for m in major_version.minor_versions if _filter(m)]
 
+    @staticmethod
+    def _java_version_sort_key(version):
+        """Sort key for Java versions. Handles formats like "25", "1.8", "11.0", etc.
+        Returns a negative integer representing the version, so sorted() produces descending order (newest first)."""
+        if version == "1.8":
+            return -8  # Treat 1.8 as Java 8
+        if version.startswith("1."):
+            # Handle legacy "1.x" format (e.g., "1.7", "1.9")
+            try:
+                return -int(version.split('.')[1])
+            except (IndexError, ValueError):
+                return 0
+        # Handle "X.Y" format (e.g., "11.0", "17.0") or plain integers ("25", "21")
+        try:
+            return -int(version.split('.')[0])
+        except ValueError:
+            return 0
+
+    @staticmethod
+    def _get_java_versions_from_minor_versions(minor_versions):
+        """Dynamically extract unique Java versions from minor version values.
+        Used for Linux Java SE containers where minor.value is like "25.0.0", "21.0.0".
+        Returns versions sorted in descending order (newest first)."""
+        java_versions = set()
+        for minor in minor_versions:
+            # minor.value is like "25.0.0", "21.0.0", "17.0.0", "11.0.0", "8.0.0" or "1.8.0"
+            value = minor.value
+            if value:
+                # Handle both "1.8" format and newer "25", "21" formats
+                if value.startswith("1.8"):
+                    java_versions.add("1.8")
+                else:
+                    # Extract major version number (e.g., "25" from "25.0.0")
+                    major_ver = value.split('.')[0]
+                    if major_ver.isdigit():
+                        java_versions.add(major_ver)
+        # Sort descending (newest versions first)
+        return sorted(java_versions, key=_StackRuntimeHelper._java_version_sort_key)
+
+    @staticmethod
+    def _get_java_versions_from_windows_container(container_settings):
+        """Dynamically extract Java versions from Windows container settings.
+        Looks at the 'runtimes' array in additional_properties.
+        Returns versions sorted in descending order (newest first)."""
+        java_versions = set()
+        additional_props = getattr(container_settings, 'additional_properties', {}) or {}
+        runtimes_array = additional_props.get('runtimes', [])
+
+        for runtime_info in runtimes_array:
+            version = runtime_info.get('runtimeVersion')
+            if version:
+                # Add version as-is (e.g., "25", "21", "17", "11", "1.8")
+                java_versions.add(version)
+
+        # Sort descending (newest versions first)
+        return sorted(java_versions, key=_StackRuntimeHelper._java_version_sort_key)
+
+    @staticmethod
+    def _get_java_runtimes_from_container_settings(container_settings):
+        """Dynamically extract Java runtimes from container settings.
+        Prefers the 'runtimes' array from the API when available (most future-proof),
+        falls back to individual java*Runtime properties in additional_properties,
+        and finally SDK-defined properties (java8_runtime, java11_runtime).
+        Returns list of tuples: (runtime_name, version, is_auto_update)"""
+        runtimes = []
+        is_auto_update = getattr(container_settings, 'is_auto_update', False)
+        additional_props = getattr(container_settings, 'additional_properties', {}) or {}
+
+        # Prefer the 'runtimes' array if available (cleanest, most future-proof)
+        runtimes_array = additional_props.get('runtimes', [])
+        if runtimes_array:
+            for runtime_info in runtimes_array:
+                runtime_name = runtime_info.get('runtime')
+                version = runtime_info.get('runtimeVersion')
+                if runtime_name and version:
+                    runtimes.append((runtime_name, version, is_auto_update))
+        else:
+            # Fallback: Get runtimes from additional_properties (java*Runtime keys)
+            for key, value in additional_props.items():
+                # Match pattern like "java25Runtime", "java21Runtime", etc.
+                match = re.match(r'^java(\d+)Runtime$', key)
+                if match and value:
+                    version = match.group(1)
+                    runtimes.append((value, version, is_auto_update))
+
+            # Also get runtimes from SDK-defined properties (java8_runtime, java11_runtime)
+            if getattr(container_settings, 'java11_runtime', None):
+                # Avoid duplicates if already found in additional_properties
+                if not any(v == "11" for _, v, _ in runtimes):
+                    runtimes.append((container_settings.java11_runtime, "11", is_auto_update))
+            if getattr(container_settings, 'java8_runtime', None):
+                if not any(v == "8" for _, v, _ in runtimes):
+                    runtimes.append((container_settings.java8_runtime, "8", is_auto_update))
+
+        # Sort by version descending (newest first)
+        runtimes.sort(key=lambda x: _StackRuntimeHelper._java_version_sort_key(x[1]))
+        return runtimes
+
     def _parse_major_version_windows(self, major_version, parsed_results, config_mappings):
         java_container_minor_versions = self._get_valid_minor_versions(major_version, linux=False, java=True)
         if java_container_minor_versions:
-            javas = ["21", "17", "11", "1.8"]
-            if len(java_container_minor_versions) > 0:
-                leng = len(java_container_minor_versions) if len(java_container_minor_versions) < 3 else 3
-                java_container_minor_versions = java_container_minor_versions[:leng]
             for container in java_container_minor_versions:
                 container_settings = container.stack_settings.windows_container_settings
                 java_container = container_settings.java_container
                 container_version = container_settings.java_container_version
+                # Get Java versions from the container's runtimes array
+                javas = self._get_java_versions_from_windows_container(container_settings)
+                if not javas:
+                    logger.debug("No Java versions found in Windows container settings for "
+                                 "container '%s' (version: '%s')", java_container, container_version)
                 for java in javas:
                     runtime = self.get_windows_java_runtime(
                         java,
@@ -6360,10 +6492,6 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                     parsed_results.append(runtime)
         else:
             minor_versions = self._get_valid_minor_versions(major_version, linux=False, java=False)
-            if "Java" in major_version.display_text:
-                if len(minor_versions) > 0:
-                    leng = len(minor_versions) if len(minor_versions) < 3 else 3
-                    minor_versions = minor_versions[1:leng]
             for minor_version in minor_versions:
                 settings = minor_version.stack_settings.windows_runtime_settings
                 if "Java" not in minor_version.display_text:
@@ -6418,28 +6546,28 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                             linux=False,
                             is_auto_update=is_auto_update)
 
-    def _parse_major_version_linux(self, major_version, parsed_results):
+    def _parse_major_version_linux(self, major_version, parsed_results, seen_runtimes):
         minor_java_container_versions = self._get_valid_minor_versions(major_version, linux=True, java=True)
         if "SE" in major_version.display_text:
-            se_containers = [minor_java_container_versions[0]]
-            for java in ["21", "17", "11", "1.8"]:
+            # Dynamically get Java versions from the available minor versions
+            java_versions = self._get_java_versions_from_minor_versions(minor_java_container_versions)
+            se_containers = [minor_java_container_versions[0]] if minor_java_container_versions else []
+            for java in java_versions:
                 se_java_containers = [c for c in minor_java_container_versions if c.value.startswith(java)]
-                se_containers = se_containers + se_java_containers[:len(se_java_containers) if len(se_java_containers) < 2 else 2]    # pylint: disable=line-too-long
+                se_containers = se_containers + se_java_containers
             minor_java_container_versions = se_containers
         if minor_java_container_versions:
-            leng = len(minor_java_container_versions) if \
-                len(minor_java_container_versions) < 3 else 3 if \
-                "SE" not in major_version.display_text else len(minor_java_container_versions)
-            for minor in minor_java_container_versions[:leng]:
+            for minor in minor_java_container_versions:
                 linux_container_settings = minor.stack_settings.linux_container_settings
-                runtimes = [
-                    (linux_container_settings.additional_properties.get("java21Runtime"), "21", linux_container_settings.is_auto_update),    # pylint: disable=line-too-long
-                    (linux_container_settings.additional_properties.get("java17Runtime"), "17", linux_container_settings.is_auto_update),    # pylint: disable=line-too-long
-                    (linux_container_settings.java11_runtime, "11", linux_container_settings.is_auto_update),
-                    (linux_container_settings.java8_runtime, "8", linux_container_settings.is_auto_update)]
-                # Remove the JBoss'_byol' entries from the output
+                # Dynamically get all Java runtimes from container settings
+                runtimes = self._get_java_runtimes_from_container_settings(linux_container_settings)
+                # Remove the 'JBoss _byol' entries from the output
                 runtimes = [(r, v, au) for (r, v, au) in runtimes if r is not None and not r.endswith("_byol")]    # pylint: disable=line-too-long
                 for runtime_name, version, auto_update in [(r, v, au) for (r, v, au) in runtimes if r is not None]:
+                    # Skip duplicates
+                    if runtime_name in seen_runtimes:
+                        continue
+                    seen_runtimes.add(runtime_name)
                     runtime = self.Runtime(display_name=runtime_name,
                                            configs={"linux_fx_version": runtime_name},
                                            github_actions_properties={"github_actions_version": version},
@@ -7238,9 +7366,11 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                                subnet_name=subnet_info["subnet_name"],
                                subnet_service_delegation=FLEX_SUBNET_DELEGATION if flexconsumption_location else None)
         subnet_resource_id = subnet_info["subnet_resource_id"]
-        site_config.vnet_route_all_enabled = True
+        from azure.mgmt.web.models import OutboundVnetRouting
+        outbound_vnet_routing = OutboundVnetRouting(application_traffic=True)
     else:
         subnet_resource_id = None
+        outbound_vnet_routing = None
 
     # if this is a managed function app (Azure Functions on Azure Containers), http20_proxy_flag must be None
     if environment is not None:
@@ -7248,7 +7378,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
 
     functionapp_def = Site(location=None, site_config=site_config, tags=tags,
                            virtual_network_subnet_id=subnet_resource_id, https_only=https_only,
-                           auto_generated_domain_name_label_scope=auto_generated_domain_name_label_scope)
+                           auto_generated_domain_name_label_scope=auto_generated_domain_name_label_scope,
+                           outbound_vnet_routing=outbound_vnet_routing)
 
     plan_info = None
     if runtime is not None:
@@ -8822,7 +8953,8 @@ def _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=Non
                                subnet_service_delegation=FLEX_SUBNET_DELEGATION if is_flex else None)
 
     app.virtual_network_subnet_id = subnet_info["subnet_resource_id"]
-    app.site_config.vnet_route_all_enabled = True
+    from azure.mgmt.web.models import OutboundVnetRouting
+    app.outbound_vnet_routing = OutboundVnetRouting(application_traffic=True)
 
     _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'begin_create_or_update', slot,
                             client=client, extra_parameter=app)

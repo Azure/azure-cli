@@ -268,6 +268,73 @@ class ContainerAppJobsExecutionsTest(ScenarioTest):
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northcentralus")
+    def test_containerappjob_start_with_command_and_args_e2e(self, resource_group):
+        """
+        Test for GitHub issue https://github.com/microsoft/azure-container-apps/issues/1360
+        This test validates that --command and --args are properly applied when using
+        'az containerapp job start' without specifying --image (using the job's default image).
+        """
+
+        TEST_LOCATION = "northcentralusstage"
+        self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
+
+        job = self.create_random_name(prefix='job-cmd', length=24)
+
+        env_id = prepare_containerapp_env_for_app_e2e_tests(self)
+        env_rg = parse_resource_id(env_id).get('resource_group')
+        env_name = parse_resource_id(env_id).get('name')
+
+        # create a container app environment for a Container App Job resource
+        self.cmd('containerapp env show -n {} -g {}'.format(env_name, env_rg), checks=[
+            JMESPathCheck('name', env_name)
+        ])
+
+        # Create a Container App Job resource with a default command
+        # Using an image that supports running custom commands (alpine with sh)
+        self.cmd("az containerapp job create --resource-group {} --name {} --environment {} --replica-timeout 200 --replica-retry-limit 1 --trigger-type manual --replica-completion-count 1 --parallelism 1 --image mcr.microsoft.com/k8se/quickstart-jobs:latest --cpu '0.25' --memory '0.5Gi'".format(resource_group, job, env_id))
+
+        # wait for 60s for the job to be provisioned
+        jobProvisioning = True
+        timeout = time.time() + 60*1   # 1 minutes from now
+        while(jobProvisioning):
+            jobProvisioning = self.cmd("az containerapp job show --resource-group {} --name {}".format(resource_group, job)).get_output_in_json()['properties']['provisioningState'] != "Succeeded"
+            if(time.time() > timeout):
+                break
+
+        # Test 1: Start job execution with --command and --args WITHOUT specifying --image
+        customCommand = ["echo"]
+        customArgs = ["hello-from-custom-command"]
+        execution = self.cmd("az containerapp job start --resource-group {} --name {} --command {} --args {}".format(
+            resource_group, job, " ".join(customCommand), " ".join(customArgs))).get_output_in_json()
+
+        if "name" in execution:
+            # Verify the execution was created
+            self.assertEqual(job in execution['name'], True)
+
+        # Get the execution and check if the custom command and args are present
+        # Also validate the image matches the one from 'az containerapp job create'
+        self.cmd("az containerapp job execution show --resource-group {} --name {} --job-execution-name {}".format(resource_group, job, execution['name']), checks=[
+            JMESPathCheck('properties.template.containers[0].image', 'mcr.microsoft.com/k8se/quickstart-jobs:latest'),
+            JMESPathCheck('properties.template.containers[0].command[0]', customCommand[0]),
+            JMESPathCheck('properties.template.containers[0].args[0]', customArgs[0]),
+        ])
+
+        # Test 2: For comparison, verify that --command and --args work when --image IS specified
+        customContainerImage = "mcr.microsoft.com/k8se/quickstart-jobs:latest"
+        execution_with_image = self.cmd("az containerapp job start --resource-group {} --name {} --image {} --command {} --args {}".format(
+            resource_group, job, customContainerImage, " ".join(customCommand), " ".join(customArgs))).get_output_in_json()
+
+        if "name" in execution_with_image:
+            self.assertEqual(job in execution_with_image['name'], True)
+
+        self.cmd("az containerapp job execution show --resource-group {} --name {} --job-execution-name {}".format(resource_group, job, execution_with_image['name']), checks=[
+            JMESPathCheck('properties.template.containers[0].image', customContainerImage),
+            JMESPathCheck('properties.template.containers[0].command[0]', customCommand[0]),
+            JMESPathCheck('properties.template.containers[0].args[0]', customArgs[0]),
+        ])
+
+    @AllowLargeResponse(8192)
+    @ResourceGroupPreparer(location="northcentralus")
     @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
     def test_containerappjob_create_with_yaml(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))

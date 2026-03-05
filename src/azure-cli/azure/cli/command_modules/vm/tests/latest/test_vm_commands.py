@@ -499,6 +499,7 @@ class VMWindowsLicenseTest(ScenarioTest):
 
 class VMCustomImageTest(ScenarioTest):
 
+    @unittest.skip('need Microsoft.Network/AllowBringYourOwnPublicIpAddress feature for this scenario')
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vm_custom_image')
     def test_vm_custom_image(self, resource_group):
@@ -620,7 +621,7 @@ class VMCustomImageTest(ScenarioTest):
         ])
 
     @AllowLargeResponse(size_kb=99999)
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_custom_image_debian')
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_custom_image_debian', location='westus')
     def test_vm_custom_image_debian(self, resource_group):
         self.kwargs.update({
             'vm1': 'vm-unmanaged-disk',
@@ -1009,15 +1010,15 @@ class VMConvertTest(ScenarioTest):
         self.cmd('vm unmanaged-disk attach -g {rg} --vm-name {vm} --new --size-gb 1')
 
         output = self.cmd('vm unmanaged-disk list --vm-name {vm} -g {rg}').get_output_in_json()
-        self.assertFalse(output[0]['managedDisk'])
+        self.assertIsNone(output[0].get('managedDisk'))
         self.assertTrue(output[0]['vhd'])
 
         self.cmd('vm deallocate -n {vm} -g {rg}')
         self.cmd('vm convert -n {vm} -g {rg}')
         
         converted = self.cmd('vm unmanaged-disk list --vm-name {vm} -g {rg}').get_output_in_json()
-        self.assertTrue(converted[0]['managedDisk'])
-        self.assertFalse(converted[0]['vhd'])
+        self.assertIsNotNone(converted[0].get('managedDisk'))
+        self.assertIsNone(converted[0].get('vhd'))
 
 
 class TestSnapShotAccess(ScenarioTest):
@@ -1253,7 +1254,7 @@ class VMOSDiskSize(ScenarioTest):
         self.cmd('vm create -g {rg} -n vm1 --image OpenLogic:CentOS:7.5:latest --admin-username centosadmin --admin-password testPassword0 '
                  '--authentication-type password --os-disk-size-gb 75 --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
         self.cmd('vm show -g {rg} -n vm1',
-                 checks=self.check('storageProfile.osDisk.diskSizeGb', 75))
+                 checks=self.check('storageProfile.osDisk.diskSizeGB', 75))
 
 
 class VMManagedDiskScenarioTest(ScenarioTest):
@@ -1472,6 +1473,7 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             self.cmd('vm create -g {rg} -n {vm_name2} --image ubuntu2204 --generate-ssh-keys --source-rp-size 5 '
                      '--subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
 
+    @unittest.skip('need Microsoft.Compute/ImplicitDiskCreationFromDiskRestorePoint feature for this scenario')
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer('cli_test_vm_disk_attach_from_copy_and_restore', location='eastus2euap')
     def test_vm_disk_attach_from_copy_and_restore(self):
@@ -1520,17 +1522,17 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         self.cmd('vm show -g {rg} -n {vm_name}', checks=[
             self.check('storageProfile.dataDisks[1].sourceResource.id', '{copy_resource1_id}'),
             self.check('storageProfile.dataDisks[1].createOption', 'Copy'),
-            self.check('storageProfile.dataDisks[1].diskSizeGb', 20),
+            self.check('storageProfile.dataDisks[1].diskSizeGB', 20),
             self.check('storageProfile.dataDisks[1].name', '{disk_name6}'),
             self.check('storageProfile.dataDisks[1].managedDisk.storageAccountType', 'Standard_LRS'),
             self.check('storageProfile.dataDisks[2].sourceResource.id', '{copy_resource2_id}'),
             self.check('storageProfile.dataDisks[2].createOption', 'Copy'),
-            self.check('storageProfile.dataDisks[2].diskSizeGb', 20),
+            self.check('storageProfile.dataDisks[2].diskSizeGB', 20),
             self.check('storageProfile.dataDisks[2].name', '{disk_name7}'),
             self.check('storageProfile.dataDisks[2].managedDisk.storageAccountType', 'Standard_LRS'),
             self.check('storageProfile.dataDisks[3].sourceResource.id', '{disk_restore_point_id}'),
             self.check('storageProfile.dataDisks[3].createOption', 'Restore'),
-            self.check('storageProfile.dataDisks[3].diskSizeGb', 20),
+            self.check('storageProfile.dataDisks[3].diskSizeGB', 20),
             self.check('storageProfile.dataDisks[3].name', '{disk_name8}'),
             self.check('storageProfile.dataDisks[3].managedDisk.storageAccountType', 'Standard_LRS')
         ])
@@ -1863,7 +1865,7 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
     def test_vm_create_state_modifications(self, resource_group):
 
         self.kwargs.update({
-            'loc': 'eastus',
+            'loc': 'westus',
             'vm': 'vm-state-mod',
             'nsg': 'mynsg',
             'ip': 'mypubip',
@@ -2865,6 +2867,91 @@ class VMMultiNicScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance
         ])
 
 
+class VMMultiNicAAZScenarioTest(ScenarioTest):
+    @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_nic_aaz')
+    def test_vm_nic_add_remove_set_aaz(self, resource_group):
+
+        self.kwargs.update({
+            'vnet': 'vnet1',
+            'subnet': 'subnet1',
+            'vm': 'vmnic1',
+            'size': 'Standard_D2s_v3',
+            'username': 'azureuser',
+            'ssh_key': TEST_SSH_KEY_PUB
+        })
+
+        # create vnet + subnet
+        self.cmd(
+            'network vnet create -g {rg} -n {vnet} --subnet-name {subnet}'
+        )
+
+        # disable default outbound access
+        self.cmd(
+            'network vnet subnet update -g {rg} '
+            '--vnet-name {vnet} -n {subnet} '
+            '--default-outbound-access false'
+        )
+
+        # create 3 nics
+        for i in range(1, 4):
+            self.kwargs['nic'] = f'nic{i}'
+            self.cmd(
+                'network nic create -g {rg} -n {nic} '
+                '--subnet {subnet} --vnet-name {vnet}'
+            )
+
+        # create vm with 2 nics
+        self.cmd('vm create -g {rg} -n {vm} --admin-username admin123 --size {size} '
+                 '--admin-password testPassword0 --image Debian:debian-10:10:latest --nics nic1 nic2')
+
+        # cannot alter nics on a running (or even stopped) vm
+        self.cmd('vm deallocate -g {rg} -n {vm}')
+
+        self.cmd(
+            'vm nic list -g {rg} --vm-name {vm}',
+            checks=[
+                self.check('length(@)', 2),
+                self.check('[0].primary', True)
+            ]
+        )
+
+        self.cmd(
+            'vm nic show -g {rg} --vm-name {vm} --nic nic1',
+            checks=[
+                self.check("id.contains(@, 'nic1')", True)
+            ]
+        )
+
+        self.cmd(
+            'vm nic remove -g {rg} --vm-name {vm} '
+            '--nics nic2 --primary-nic nic1',
+            checks=[
+                self.check('length(@)', 1),
+                self.check('[0].primary', True),
+                self.check("[0].id.contains(@, 'nic1')", True)
+            ]
+        )
+
+        self.cmd(
+            'vm nic add -g {rg} --vm-name {vm} --nics nic2',
+            checks=[
+                self.check('length(@)', 2),
+                self.check('[0].primary', True)
+            ]
+        )
+
+        self.cmd(
+            'vm nic set -g {rg} --vm-name {vm} '
+            '--nics nic2 --primary-nic nic2',
+            checks=[
+                self.check('length(@)', 1),
+                self.check('[0].primary', True),
+                self.check("[0].id.contains(@, 'nic2')", True)
+            ]
+        )
+
+
 class VMCreateNoneOptionsTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
 
     @AllowLargeResponse(size_kb=99999)
@@ -3175,8 +3262,9 @@ class VMBootDiagnostics(ScenarioTest):
         })
         self.kwargs['storage_uri'] = 'https://{}.blob.core.windows.net/'.format(self.kwargs['sa'])
 
-        self.cmd('vm create -n {vm} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --subnet {subnet} --vnet-name {vnet} '
-                 '--authentication-type password --admin-username user11 --admin-password testPassword0 --nsg-rule NONE')
+        self.cmd('vm create -n {vm} -g {rg} --image Canonical:UbuntuServer:16.04-LTS:latest --subnet {subnet} '
+                 '--vnet-name {vnet} --authentication-type password --admin-username user11 '
+                 '--admin-password testPassword0 --nsg-rule NONE --size Standard_B2ms')
 
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
@@ -3203,8 +3291,9 @@ class VMBootDiagnostics(ScenarioTest):
                  checks=self.check('diagnosticsProfile.bootDiagnostics.enabled', False))
 
         # try enable it at the create
-        self.cmd('vm create -g {rg} -n {vm2} --image Debian:debian-10:10:latest --admin-username user11 --admin-password testPassword0 '
-                 '--boot-diagnostics-storage {sa} --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+        self.cmd('vm create -g {rg} -n {vm2} --image Debian:debian-10:10:latest --admin-username user11 '
+                 '--admin-password testPassword0 --boot-diagnostics-storage {sa} --subnet {subnet} --vnet-name {vnet} '
+                 '--nsg-rule NONE --size Standard_B2ms')
         self.cmd('vm show -g {rg} -n {vm2}', checks=[
             self.check('diagnosticsProfile.bootDiagnostics.enabled', True),
             self.check('diagnosticsProfile.bootDiagnostics.storageUri', '{storage_uri}')
@@ -3416,10 +3505,12 @@ class DiagnosticsExtensionInstallTest(ScenarioTest):
             'vnet': 'vnet1'
         })
 
-        self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password '
-                 '--lb-sku Standard --admin-username user11 --admin-password TestTest12#$ --orchestration-mode Uniform')
-        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password '
-                 '--admin-username user11 --admin-password TestTest12#$ --use-unmanaged-disk --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+        self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:16.04-LTS:latest '
+                 '--authentication-type password --lb-sku Standard --admin-username user11 '
+                 '--admin-password TestTest12#$ --orchestration-mode Uniform --vm-sku Standard_B1ls')
+        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:16.04-LTS:latest '
+                 '--authentication-type password --admin-username user11 --admin-password TestTest12#$ '
+                 '--use-unmanaged-disk --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --size Standard_B2ms')
 
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
@@ -3529,13 +3620,13 @@ class VMCreateExistingOptions(ScenarioTest):
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
         self.cmd('vm show -g {rg} -n {vm1}', checks=[
-            self.check('osProfile.linuxConfiguration.provisionVmAgent', True)
+            self.check('osProfile.linuxConfiguration.provisionVMAgent', True)
         ])
 
         self.cmd('vm create -g {rg} -n {vm2} --image Win2022Datacenter --admin-username azureuser --admin-password {pswd} '
                  '--authentication-type password --enable-agent false --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
         self.cmd('vm show -g {rg} -n {vm2}', checks=[
-            self.check('osProfile.windowsConfiguration.provisionVmAgent', False)
+            self.check('osProfile.windowsConfiguration.provisionVMAgent', False)
         ])
 
     @AllowLargeResponse(size_kb=99999)
@@ -3738,7 +3829,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
         })
 
         self.cmd('vm create -g {rg} --location {loc} -n {vm} --admin-username admin123 --image OpenLogic:CentOS:7.5:latest '
-                 '--admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+                 '--admin-password testPassword0 --authentication-type password --size Standard_B2ms --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
 
         # Disable default outbound access
         self.cmd(
@@ -3799,7 +3890,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli-test-disk-attach-detach')
     def test_vm_disk_attach_detach_api(self, resource_group):
         self.kwargs.update({
-            'loc': 'westus',
+            'loc': 'eastus2',
             'vm': self.create_random_name('vm', 10),
             'disk1': self.create_random_name('disk', 10),
             'disk2': self.create_random_name('disk', 10),
@@ -3807,7 +3898,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
             'vnet': self.create_random_name('vnet', 15)
         })
 
-        self.cmd('vm create -g {rg} --location {loc} -n {vm} --admin-username admin123 --image OpenLogic:CentOS:7.5:latest --admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+        self.cmd('vm create -g {rg} --location {loc} -n {vm} --admin-username admin123 --image OpenLogic:CentOS:7.5:latest --admin-password testPassword0 --authentication-type password --size Standard_B2ms --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
         self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk1} --new --size-gb 1 --caching ReadOnly')
@@ -3867,7 +3958,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
         })
 
         self.cmd('vm create -g {rg} --location {loc} -n {vm} --admin-username admin123 --image OpenLogic:CentOS:7.5:latest '
-                 '--admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+                 '--admin-password testPassword0 --authentication-type password --size Standard_B2ms --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
 
         # Disable default outbound access
         self.cmd(
@@ -4173,7 +4264,7 @@ class VMUnmanagedDataDiskTest(ScenarioTest):
         })
 
         self.cmd('vm create -g {rg} --location {loc} -n {vm} --admin-username ubuntu --image OpenLogic:CentOS:7.5:latest '
-                 '--admin-password testPassword0 --authentication-type password --use-unmanaged-disk --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+                 '--admin-password testPassword0 --authentication-type password --use-unmanaged-disk --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --size Standard_B2ms')
 
         # Disable default outbound access
         self.cmd(
@@ -4195,7 +4286,7 @@ class VMUnmanagedDataDiskTest(ScenarioTest):
             self.check('length(storageProfile.dataDisks)', 1),
             self.check('storageProfile.dataDisks[0].caching', 'ReadWrite'),
             self.check('storageProfile.dataDisks[0].lun', 1),
-            self.check('storageProfile.dataDisks[0].diskSizeGb', 8),
+            self.check('storageProfile.dataDisks[0].diskSizeGB', 8),
             self.check('storageProfile.dataDisks[0].createOption', 'Empty'),
             self.check('storageProfile.dataDisks[0].vhd.uri', '{vhd_uri}'),
             self.check('storageProfile.dataDisks[0].name', '{disk}')
@@ -4227,7 +4318,7 @@ class VMUnmanagedDataDiskTest(ScenarioTest):
         })
 
         self.cmd('vm create -g {rg} --location {loc} -n {vm} --admin-username debian --image Debian:debian-10:10:latest --admin-password testPassword0 '
-                 '--authentication-type password --use-unmanaged-disk --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+                 '--authentication-type password --use-unmanaged-disk --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --size Standard_B2ms')
 
         # Disable default outbound access
         self.cmd(
@@ -4249,7 +4340,7 @@ class VMUnmanagedDataDiskTest(ScenarioTest):
             self.check('length(storageProfile.dataDisks)', 1),
             self.check('storageProfile.dataDisks[0].caching', 'ReadWrite'),
             self.check('storageProfile.dataDisks[0].lun', 1),
-            self.check('storageProfile.dataDisks[0].diskSizeGb', 8),
+            self.check('storageProfile.dataDisks[0].diskSizeGB', 8),
             self.check('storageProfile.dataDisks[0].createOption', 'Empty'),
             self.check('storageProfile.dataDisks[0].vhd.uri', '{vhd_uri}'),
             self.check('storageProfile.dataDisks[0].name', '{disk}')
@@ -6115,27 +6206,27 @@ class MSIScenarioTest(ScenarioTest):
         })
 
         with self.assertRaisesRegex(ArgumentUsageError, "please specify both --role and --scope"):
-            self.cmd('vmss create -g {rg} -n {vmss1} --image Debian:debian-10:10:latest --instance-count 1 --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope {scope} --orchestration-mode Uniform')
+            self.cmd('vmss create -g {rg} -n {vmss1} --image Debian:debian-10:10:latest --instance-count 1 --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope {scope} --orchestration-mode Uniform --vm-sku Standard_B1ls')
 
         with self.assertRaisesRegex(ArgumentUsageError, "please specify both --role and --scope"):
-            self.cmd('vmss create -g {rg} -n {vmss1} --image Debian:debian-10:10:latest --instance-count 1 --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --role Contributor --orchestration-mode Uniform')
+            self.cmd('vmss create -g {rg} -n {vmss1} --image Debian:debian-10:10:latest --instance-count 1 --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --role Contributor --orchestration-mode Uniform --vm-sku Standard_B1ls')
 
         with mock.patch('azure.cli.core.commands.arm._gen_guid', side_effect=self.create_guid):
             # create linux vm with default configuration
-            self.cmd('vmss create -g {rg} -n {vmss1} --image Debian:debian-10:10:latest --instance-count 1 --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope {scope} --role Contributor --orchestration-mode Uniform --lb-sku Standard', checks=[
+            self.cmd('vmss create -g {rg} -n {vmss1} --image Debian:debian-10:10:latest --instance-count 1 --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope {scope} --role Contributor --orchestration-mode Uniform --lb-sku Standard --vm-sku Standard_B1ls', checks=[
                 self.check('vmss.identity.role', 'Contributor'),
                 self.check('vmss.identity.scope', '/subscriptions/{sub}/resourceGroups/{rg}'),
             ])
 
             # create a windows vm with reader role on the linux vm
-            result = self.cmd('vmss create -g {rg} -n {vmss2} --image Win2022Datacenter --instance-count 1 --assign-identity --scope {vmss1_id} --role reader --admin-username admin123 --admin-password PasswordPassword1! --orchestration-mode Uniform --lb-sku Standard', checks=[
+            result = self.cmd('vmss create -g {rg} -n {vmss2} --image Win2022Datacenter --instance-count 1 --assign-identity --scope {vmss1_id} --role reader --admin-username admin123 --admin-password PasswordPassword1! --orchestration-mode Uniform --lb-sku Standard --vm-sku Standard_B1ls', checks=[
                 self.check('vmss.identity.role', 'reader'),
                 self.check('vmss.identity.scope', '{vmss1_id}'),
             ]).get_output_in_json()
             uuid.UUID(result['vmss']['identity']['systemAssignedIdentity'])
 
             # create a linux vm w/o identity and later enable it
-            result = self.cmd('vmss create -g {rg} -n {vmss3} --image Debian:debian-10:10:latest --instance-count 1 --admin-username admin123 --admin-password PasswordPassword1! --orchestration-mode Uniform --lb-sku Standard').get_output_in_json()['vmss']
+            result = self.cmd('vmss create -g {rg} -n {vmss3} --image Debian:debian-10:10:latest --instance-count 1 --admin-username admin123 --admin-password PasswordPassword1! --orchestration-mode Uniform --lb-sku Standard --vm-sku Standard_B1ls').get_output_in_json()['vmss']
             self.assertIsNone(result.get('identity'))
 
             with self.assertRaisesRegex(ArgumentUsageError, "please specify both --role and --scope when assigning a role to the managed identity"):
@@ -6283,8 +6374,10 @@ class MSIScenarioTest(ScenarioTest):
         emsi2_result = self.cmd('identity create -g {rg} -n {emsi2}').get_output_in_json()
 
         # create a vmss with system + user assigned identities
-        result = self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --assign-identity {emsi} [system] '
-                          '--role reader --scope {scope} --instance-count 1 --generate-ssh-keys --admin-username ubuntuadmin --orchestration-mode Uniform --lb-sku Standard').get_output_in_json()
+        result = self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:16.04-LTS:latest '
+                          '--assign-identity {emsi} [system] --role reader --scope {scope} --instance-count 1 '
+                          '--generate-ssh-keys --admin-username ubuntuadmin --orchestration-mode Uniform '
+                          '--lb-sku Standard --vm-sku Standard_B1ls').get_output_in_json()
         emsis = [x.lower() for x in result['vmss']['identity']['userAssignedIdentities'].keys()]
         self.assertEqual(emsis, [emsi_result['id'].lower()])
 
@@ -6815,7 +6908,7 @@ class VMSecurityProfileTestForDiskEncryption(ScenarioTest):
         self.assertIsNotNone(virtualMachine['identity'])
         self.assertTrue(encryptionIdentityId.lower() in (k.lower() for k in virtualMachine['identity']['userAssignedIdentities'].keys()))
         self.assertIsNotNone(virtualMachine['securityProfile'])
-        self.assertIsNone(virtualMachine['securityProfile']['encryptionIdentity'])    
+        self.assertIsNone(virtualMachine.get('securityProfile', {}).get('encryptionIdentity'))
         
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='test_vmss_encryption_identity_for_disk_encryption', location='westus')
@@ -11632,7 +11725,7 @@ class VMPlacementScenarioTest(ScenarioTest):
         self.cmd('vm show -g {rg} -n {vm1}', checks=[
             self.check('placement.zonePlacementPolicy', 'Any'),
             self.check('placement.includeZones', ['1', '3']),
-            self.check('storageProfile.alignRegionalDisksToVmZone', True),
+            self.check('storageProfile.alignRegionalDisksToVMZone', True),
         ])
         self.cmd('vm update -g {rg} -n {vm1} --align-regional-disks-to-vm-zone False', checks=[
             self.check('storageProfile.alignRegionalDisksToVMZone', False)
@@ -11641,7 +11734,7 @@ class VMPlacementScenarioTest(ScenarioTest):
         self.cmd('vm show -g {rg} -n {vm2}', checks=[
             self.check('placement.zonePlacementPolicy', 'Any'),
             self.check('placement.excludeZones', ['2']),
-            self.check('storageProfile.alignRegionalDisksToVmZone', False),
+            self.check('storageProfile.alignRegionalDisksToVMZone', False),
         ])
         self.cmd('vm update -g {rg} -n {vm2} --align-regional-disks-to-vm-zone True', checks=[
             self.check('storageProfile.alignRegionalDisksToVMZone', True)
@@ -11714,7 +11807,9 @@ class VMSSPatchModeScenarioTest(ScenarioTest):
             'rg': resource_group
         })
 
-        self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --enable-agent --patch-mode ImageDefault --generate-ssh-keys --instance-count 0 --admin-username vmtest --vm-sku Standard_B2ms')
+        self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:16.04-LTS:latest --enable-agent '
+                 '--patch-mode ImageDefault --generate-ssh-keys --instance-count 0 --admin-username vmtest '
+                 '--vm-sku Standard_B1ls')
 
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         health_extension_file = os.path.join(curr_dir, 'health_extension.json').replace('\\', '\\\\')
@@ -13034,7 +13129,7 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
         })
 
         # Prepare VMSS
-        self.cmd('vmss create -l eastus -g {rg} -n {vmss} --authentication-type password --admin-username admin123 '
+        self.cmd('vmss create -l westus -g {rg} -n {vmss} --authentication-type password --admin-username admin123 '
                  '--admin-password PasswordPassword1! --image Win2022Datacenter --orchestration-mode Flexible --vm-sku Standard_D2s_v3')
 
         self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids')
@@ -13799,6 +13894,81 @@ class VMResizeScenarioTest(ScenarioTest):
                 JMESPathCheck('hardwareProfile.vmSize', 'Standard_B2ms')
             ]
         )
+
+
+class VMUltraSSDLivedataDiskIopsMbpsScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_ultrassd_live', location='eastus2')
+    @AllowLargeResponse(size_kb=99999)
+    def test_vm_create_ultrassd_data_disk_iops_mbps(self, resource_group):
+
+        self.kwargs.update({
+            'vm': 'vm1',
+            'vnet': 'vnet1',
+            'subnet': 'subnet1',
+            'username': 'admin123',
+            'password': 'testPassword0',
+            'size': 'Standard_D2s_v3',
+            'image': 'Debian:debian-10:10:latest',
+            'disk_size': 4,
+            'disk_iops': 100,
+            'disk_mbps': 10,
+            'zone': 2,
+            'loc': 'eastus2'
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet} -l {loc}')
+        self.cmd(
+            'vm create -g {rg} -n {vm} --admin-username {username} --admin-password {password} '
+            '--image {image} --size {size} --storage-sku UltraSSD_LRS --data-disk-sizes-gb {disk_size} '
+            '--data-disk-iops {disk_iops} --data-disk-mbps {disk_mbps} --zone {zone} --vnet-name {vnet} --subnet {subnet} -l {loc}'
+        )
+
+        # verify the created vm carries UltraSSD data disk properties (IOPS/MBps)
+        self.cmd(
+            'vm show -g {rg} -n {vm}',
+            checks=[
+                self.check('storageProfile.dataDisks[0].diskSizeGB', '{disk_size}'),
+                self.check('storageProfile.dataDisks[0].diskIOPSReadWrite', '{disk_iops}'),
+                self.check('storageProfile.dataDisks[0].diskMBpsReadWrite', '{disk_mbps}'),
+                self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'UltraSSD_LRS')
+            ]
+        )
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_ultrassd_live', location='eastus2')
+    @AllowLargeResponse(size_kb=99999)
+    def test_vm_create_ultrassd_data_disk_iops_mbps_invalid_iops(self, resource_group):
+        self.kwargs.update({
+            'vm': 'vm1',
+            'loc': 'eastus2',
+            'username': 'admin123',
+            'password': 'testPassword0',
+            'size': 'Standard_D2s_v3',
+            'image': 'Debian:debian-10:10:latest',
+            'vnet': 'vnet1',
+            'subnet': 'subnet1',
+            'disk_size': 4,
+            'disk_iops_invalid': 5000,
+            'disk_mbps': 10,
+            'zone': 2,
+        })
+
+        self.cmd(
+            'network vnet create -g {rg} -n {vnet} --subnet-name {subnet} -l {loc}'
+        )
+
+        r = self.cmd(
+            'vm create -g {rg} -n {vm} --admin-username {username} --admin-password {password} '
+            '--image {image} --size {size} --location {loc} --zone {zone} '
+            '--storage-sku UltraSSD_LRS '
+            '--data-disk-sizes-gb {disk_size} '
+            '--data-disk-iops {disk_iops_invalid} '
+            '--data-disk-mbps {disk_mbps} '
+            '--vnet-name {vnet} --subnet {subnet}',
+            expect_failure=True
+        )
+
+        self.assertNotEqual(r.exit_code, 0)
 
 
 if __name__ == '__main__':

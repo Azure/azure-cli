@@ -32,7 +32,8 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          create_managed_ssl_cert,
                                                          add_github_actions,
                                                          update_app_settings,
-                                                         update_application_settings_polling)
+                                                         update_application_settings_polling,
+                                                         update_webapp)
 
 # pylint: disable=line-too-long
 from azure.cli.core.profiles import ResourceType
@@ -601,6 +602,41 @@ class TestWebappMocked(unittest.TestCase):
         mock_client.web_apps.list_slot_configuration_names.assert_called_once()
         mock_client.web_apps.update_slot_configuration_names.assert_called_once()
         mock_build.assert_called_once()
+
+
+class TestUpdateWebapp(unittest.TestCase):
+
+    def _create_site_instance(self, cmd):
+        Site = cmd.get_models('Site')
+        SiteConfig = cmd.get_models('SiteConfig')
+        site_config = SiteConfig(number_of_workers=1)
+        instance = Site(location='eastus', site_config=site_config)
+        instance.kind = 'app,linux'
+        return instance
+
+    def test_update_webapp_platform_release_channel_extended(self):
+        cmd_mock = _get_test_cmd()
+        instance = self._create_site_instance(cmd_mock)
+
+        result = update_webapp(cmd_mock, instance, platform_release_channel='Extended')
+
+        self.assertEqual(result.additional_properties["properties"]["platformReleaseChannel"], "Extended")
+
+    def test_update_webapp_platform_release_channel_standard(self):
+        cmd_mock = _get_test_cmd()
+        instance = self._create_site_instance(cmd_mock)
+
+        result = update_webapp(cmd_mock, instance, platform_release_channel='Standard')
+
+        self.assertEqual(result.additional_properties["properties"]["platformReleaseChannel"], "Standard")
+
+    def test_update_webapp_platform_release_channel_latest(self):
+        cmd_mock = _get_test_cmd()
+        instance = self._create_site_instance(cmd_mock)
+
+        result = update_webapp(cmd_mock, instance, platform_release_channel='Latest')
+
+        self.assertEqual(result.additional_properties["properties"]["platformReleaseChannel"], "Latest")
 
 
 class FakedResponse:  # pylint: disable=too-few-public-methods

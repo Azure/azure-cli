@@ -2593,6 +2593,89 @@ class AKSManagedClusterContext(BaseAKSContext):
                 )
         return self.raw_param.get("acns_advanced_networkpolicies")
 
+    def get_container_network_logs(self, mc: ManagedCluster) -> Union[bool, None]:
+        """Get the enablement of container network logs
+
+        :return: bool or None"""
+        enable_cnl = self.raw_param.get("enable_container_network_logs")
+        disable_cnl = self.raw_param.get("disable_container_network_logs")
+        if enable_cnl is None and disable_cnl is None:
+            return None
+        if enable_cnl and disable_cnl:
+            raise MutuallyExclusiveArgumentError(
+                "Cannot specify --enable-container-network-logs and "
+                "--disable-container-network-logs at the same time."
+            )
+
+        # Check if monitoring is being enabled via enable_addons parameter (for create scenarios)
+        enable_addons = self.raw_param.get("enable_addons")
+        monitoring_via_enable_addons = enable_addons and "monitoring" in enable_addons
+
+        # Check if monitoring is already enabled on the cluster
+        monitoring_on_cluster = (
+            mc.addon_profiles and
+            mc.addon_profiles.get("omsagent") and
+            mc.addon_profiles["omsagent"].enabled
+        )
+
+        # Check if ACNS is being enabled or already enabled
+        acns_enabled = (
+            self.raw_param.get("enable_acns", False) or
+            (mc.network_profile and mc.network_profile.advanced_networking and
+             mc.network_profile.advanced_networking.enabled)
+        )
+
+        # Check if network dataplane is set to cilium (either via parameter or already on the cluster)
+        network_dataplane_param = self.raw_param.get("network_dataplane")
+        network_dataplane_cluster = None
+        if mc.network_profile is not None:
+            network_dataplane_cluster = getattr(mc.network_profile, "network_dataplane", None)
+        network_dataplane = network_dataplane_param or network_dataplane_cluster
+        cilium_enabled = safe_lower(network_dataplane) == "cilium"
+
+        monitoring_enabled = monitoring_via_enable_addons or monitoring_on_cluster
+
+        if enable_cnl and (not acns_enabled or not monitoring_enabled or not cilium_enabled):
+            raise InvalidArgumentValueError(
+                "Container network logs requires ACNS to be enabled, the monitoring addon to be enabled, "
+                "and the cilium network dataplane."
+            )
+        enable_cnl = bool(enable_cnl) if enable_cnl is not None else False
+        disable_cnl = bool(disable_cnl) if disable_cnl is not None else False
+        return enable_cnl or not disable_cnl
+
+    def get_enable_high_log_scale_mode(self) -> Union[bool, None]:
+        """Obtain the value of enable_high_log_scale_mode.
+
+        This method automatically enables high log scale mode when container network logs are enabled.
+        It validates that the user has not explicitly disabled high log scale mode when CNL is enabled.
+
+        Note: ACNS and monitoring addon validation is handled in get_container_network_logs().
+
+        :return: bool or None
+        """
+        # Read the original value passed by the command
+        enable_high_log_scale_mode = self.raw_param.get("enable_high_log_scale_mode")
+
+        # Check if container network logs are being enabled
+        enable_container_network_logs = self.raw_param.get("enable_container_network_logs")
+
+        # If container network logs are being enabled, auto-enable high log scale mode
+        if enable_container_network_logs:
+            # If user explicitly set enable_high_log_scale_mode to False, raise an error
+            if enable_high_log_scale_mode is False:
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot explicitly disable --enable-high-log-scale-mode when "
+                    "--enable-container-network-logs is specified. Container network logs "
+                    "requires high log scale mode to be enabled."
+                )
+
+            # Auto-enable high log scale mode
+            return True
+
+        # If container network logs are not being enabled, return the original value
+        return enable_high_log_scale_mode
+
     def _get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(
         self, enable_validation: bool = False
     ) -> Tuple[
@@ -3024,21 +3107,6 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return enable_syslog
-
-    def get_enable_high_log_scale_mode(self) -> Union[bool, None]:
-        """Obtain the value of enable_high_log_scale_mode.
-
-        Note: The arg type of this parameter supports three states (True, False or None), but the corresponding default
-        value in entry function is not None.
-
-        :return: bool or None
-        """
-        # read the original value passed by the command
-        enable_high_log_scale_mode = self.raw_param.get("enable_high_log_scale_mode")
-
-        # this parameter does not need dynamic completion
-        # this parameter does not need validation
-        return enable_high_log_scale_mode
 
     def get_data_collection_settings(self) -> Union[str, None]:
         """Obtain the value of data_collection_settings.
@@ -6657,6 +6725,22 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             addon_profiles[
                 CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME
             ] = self.build_azure_keyvault_secrets_provider_addon_profile()
+
+        # Set up container network logs if enabled
+        container_network_logs_enabled = self.context.get_container_network_logs(mc)
+        if container_network_logs_enabled is not None:
+            monitoring_addon_profile = addon_profiles.get(CONST_MONITORING_ADDON_NAME)
+            if monitoring_addon_profile:
+                config = monitoring_addon_profile.config or {}
+                config["enableRetinaNetworkFlags"] = str(container_network_logs_enabled)
+                monitoring_addon_profile.config = config
+
+        # Trigger validation for high log scale mode when container network logs are enabled.
+        # This ensures proper error messages are raised before cluster creation if the user
+        # explicitly disables high log scale mode while enabling container network logs.
+        if self.context.raw_param.get("enable_container_network_logs"):
+            self.context.get_enable_high_log_scale_mode()
+
         mc.addon_profiles = addon_profiles
         return mc
 
@@ -8233,6 +8317,31 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             mc.network_profile.advanced_networking = acns
         return mc
 
+    def update_monitoring_profile_flow_logs(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update monitor profile for the ManagedCluster object for flow logs.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        # Trigger validation for high log scale mode when container network logs are enabled.
+        # This ensures proper error messages are raised before cluster update if the user
+        # explicitly disables high log scale mode while enabling container network logs.
+        if self.context.raw_param.get("enable_container_network_logs"):
+            self.context.get_enable_high_log_scale_mode()
+
+        container_network_logs_enabled = self.context.get_container_network_logs(mc)
+        if container_network_logs_enabled is not None:
+            if mc.addon_profiles:
+                addon_consts = self.context.get_addon_consts()
+                CONST_MONITORING_ADDON_NAME = addon_consts.get("CONST_MONITORING_ADDON_NAME")
+                monitoring_addon_profile = mc.addon_profiles.get(CONST_MONITORING_ADDON_NAME)
+                if monitoring_addon_profile:
+                    config = monitoring_addon_profile.config or {}
+                    config["enableRetinaNetworkFlags"] = str(container_network_logs_enabled)
+                    mc.addon_profiles[CONST_MONITORING_ADDON_NAME].config = config
+        return mc
+
     def update_http_proxy_config(self, mc: ManagedCluster) -> ManagedCluster:
         """Set up http proxy config for the ManagedCluster object.
 
@@ -9518,6 +9627,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_network_profile(mc)
         # update network profile with acns
         mc = self.update_network_profile_advanced_networking(mc)
+        # update monitoring profile flow logs
+        mc = self.update_monitoring_profile_flow_logs(mc)
         # update aad profile
         mc = self.update_aad_profile(mc)
         # update oidc issuer profile

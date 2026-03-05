@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import json
-
 from azure.cli.core.azclierror import (ResourceNotFoundError, ArgumentUsageError, InvalidArgumentValueError,
                                        MutuallyExclusiveArgumentError)
 from azure.cli.core.commands import LongRunningOperation
@@ -24,14 +22,14 @@ ALLOWED_HTTP_HEADER_NAMES = ['x-forwarded-host', 'x-forwarded-for', 'x-azure-fdi
 
 def show_webapp_access_restrictions(cmd, resource_group_name, name, slot=None):
     configs = get_site_configs(cmd, resource_group_name, name, slot)
-    access_restrictions = json.dumps(configs.ip_security_restrictions, default=lambda x: x.__dict__)
-    scm_access_restrictions = json.dumps(configs.scm_ip_security_restrictions, default=lambda x: x.__dict__)
+    access_restrictions = [r.serialize() for r in (configs.ip_security_restrictions or [])]
+    scm_access_restrictions = [r.serialize() for r in (configs.scm_ip_security_restrictions or [])]
     access_rules = {
         "scmIpSecurityRestrictionsUseMain": configs.scm_ip_security_restrictions_use_main,
         "ipSecurityRestrictionsDefaultAction": configs.ip_security_restrictions_default_action,
         "scmIpSecurityRestrictionsDefaultAction": configs.scm_ip_security_restrictions_default_action,
-        "ipSecurityRestrictions": json.loads(access_restrictions),
-        "scmIpSecurityRestrictions": json.loads(scm_access_restrictions)
+        "ipSecurityRestrictions": access_restrictions,
+        "scmIpSecurityRestrictions": scm_access_restrictions
     }
     return access_rules
 

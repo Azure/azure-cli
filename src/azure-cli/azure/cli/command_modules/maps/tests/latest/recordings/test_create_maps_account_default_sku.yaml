@@ -1,0 +1,161 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - maps account create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --accept-tos
+      User-Agent:
+      - AZURECLI/2.83.0 azsdk-python-core/1.38.0 Python/3.12.3 (Linux-6.14.0-1019-oem-x86_64-with-glibc2.39)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2024-11-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"eastus","tags":{"product":"azurecli","cause":"automation","test":"test_create_maps_account_default_sku","date":"2026-01-30T18:42:50Z","module":"maps"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '372'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 30 Jan 2026 18:42:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: CDF1126C1CD2479DA5AB450516F4A8D0 Ref B: CO6AA3150220019 Ref C: 2026-01-30T18:42:51Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "eastus", "sku": {"name": "G2"}, "kind": "Gen2", "properties":
+      {"disableLocalAuth": false}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - maps account create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '104'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --accept-tos
+      User-Agent:
+      - AZURECLI/2.83.0 azsdk-python-core/1.38.0 Python/3.12.3 (Linux-6.14.0-1019-oem-x86_64-with-glibc2.39)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000002?api-version=2021-02-01
+  response:
+    body:
+      string: "{\n  \"kind\": \"Gen2\",\n  \"type\": \"Microsoft.Maps/accounts\",\n
+        \ \"sku\": {\n    \"name\": \"G2\",\n    \"tier\": \"Standard\"\n  },\n  \"properties\":
+        {\n    \"uniqueId\": \"4f0b64d9-9297-4f82-907d-242d9755a479\",\n    \"provisioningState\":
+        \"Succeeded\",\n    \"disableLocalAuth\": false\n  },\n  \"systemData\": {\n
+        \   \"createdBy\": \"test@example.com\",\n    \"createdByType\": \"User\",\n
+        \   \"createdAt\": \"2026-01-30T18:42:52.0356936Z\",\n    \"lastModifiedBy\":
+        \"test@example.com\",\n    \"lastModifiedByType\": \"User\",\n    \"lastModifiedAt\":
+        \"2026-01-30T18:42:52.0356936Z\"\n  },\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000002\",\n
+        \ \"name\": \"cli-000002\",\n  \"location\": \"eastus\"\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '716'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 30 Jan 2026 18:42:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=94556a74-c808-4753-8463-17c50f6f75f7/eastus/89eadfd2-5a0c-4bb6-82b9-82a99e72e7bd
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: ECEBFC9BE5B2474AAB389AA79A323E91 Ref B: CO6AA3150219053 Ref C: 2026-01-30T18:42:51Z'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - maps account delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g
+      User-Agent:
+      - AZURECLI/2.83.0 azsdk-python-core/1.38.0 Python/3.12.3 (Linux-6.14.0-1019-oem-x86_64-with-glibc2.39)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Maps/accounts/cli-000002?api-version=2021-02-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Fri, 30 Jan 2026 18:42:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=94556a74-c808-4753-8463-17c50f6f75f7/eastus/8c565c68-4abc-47e9-9825-637d95898d95
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '799'
+      x-ms-ratelimit-remaining-subscription-global-deletes:
+      - '11999'
+      x-msedge-ref:
+      - 'Ref A: B44CE51390EE480E8D620223DE45AEEF Ref B: MWH011020809025 Ref C: 2026-01-30T18:42:52Z'
+    status:
+      code: 200
+      message: OK
+version: 1
