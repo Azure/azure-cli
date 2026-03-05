@@ -534,8 +534,7 @@ def load_command_table(self, _):
         except APIVersionException:
             pass
 
-    with self.command_group('capacity reservation group', capacity_reservation_groups_sdk, min_api='2021-04-01',
-                            client_factory=cf_capacity_reservation_groups) as g:
+    with self.command_group('capacity reservation group') as g:
         g.custom_command('create', 'create_capacity_reservation_group')
         g.custom_command('update', 'update_capacity_reservation_group')
         g.custom_show_command('show', 'show_capacity_reservation_group')
