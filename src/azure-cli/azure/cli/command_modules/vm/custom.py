@@ -5917,11 +5917,11 @@ def create_dedicated_host_group(cmd, host_group_name, resource_group_name, platf
         'platform_fault_domain_count': platform_fault_domain_count
     }
 
-    if tags:
-        command_args['tags'] = tags
+    if tags is not None:
+        command_args['tags'] = tags or {}
 
-    if zones:
-        command_args['zones'] = zones
+    if zones is not None:
+        command_args['zones'] = zones or []
 
     if ultra_ssd_enabled is not None:
         command_args['additional_capabilities'] = {
