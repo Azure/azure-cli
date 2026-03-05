@@ -408,6 +408,7 @@ def load_command_table(self, _):
         g.custom_command('list-instances', 'get_instances_list')
         g.custom_command('reimage', 'reimage_vmss', supports_no_wait=True)
         g.custom_command('restart', 'restart_vmss', supports_no_wait=True)
+        g.custom_command('scale', 'scale_vmss', supports_no_wait=True)
 
     with self.command_group('vmss application', operation_group='virtual_machine_scale_sets') as g:
         g.custom_command('set', 'set_vmss_applications', validator=process_set_applications_namespace)
@@ -416,7 +417,6 @@ def load_command_table(self, _):
     with self.command_group('vmss', compute_vmss_sdk, operation_group='virtual_machine_scale_sets') as g:
         g.custom_command('create', 'create_vmss', transform=DeploymentOutputLongRunningOperation(self.cli_ctx, 'Starting vmss create'), supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_vmss_create_namespace, exception_handler=handle_template_based_exception)
         g.custom_command('get-instance-view', 'get_vmss_instance_view', table_transformer='{ProvisioningState:statuses[0].displayStatus, PowerState:statuses[1].displayStatus}')
-        g.custom_command('scale', 'scale_vmss', supports_no_wait=True)
         g.custom_show_command('show', 'get_vmss', table_transformer=get_vmss_table_output_transformer(self, False))
         g.custom_command('stop', 'stop_vmss', supports_no_wait=True, validator=process_vm_vmss_stop)
         g.generic_update_command('update', getter_name='get_vmss_modified_by_aaz', setter_name='update_vmss', supports_no_wait=True, command_type=compute_custom, validator=validate_vmss_update_namespace)
