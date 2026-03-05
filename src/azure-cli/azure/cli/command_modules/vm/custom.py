@@ -15,7 +15,6 @@
 import json
 import os
 import uuid
-import shlex
 from datetime import datetime, timedelta
 
 import requests
@@ -25,7 +24,7 @@ from urllib.request import urlopen  # noqa, pylint: disable=import-error,unused-
 
 from knack.log import get_logger
 from knack.util import CLIError
-from azure.core.exceptions import ResourceExistsError
+
 from azure.cli.core.azclierror import (
     ResourceNotFoundError,
     ValidationError,
@@ -6885,6 +6884,8 @@ def _get_vm_and_rg(cmd, vm_name, rg=None):
 
 
 def vm_cp(cmd, source, destination, storage_account=None, container_name='azvmcp'):
+    import shlex
+    from azure.core.exceptions import ResourceExistsError
     from azure.cli.command_modules.storage.operations.blob import upload_blob, download_blob
     from azure.cli.command_modules.storage.util import create_short_lived_blob_sas_v2
     from azure.cli.command_modules.storage._client_factory import cf_sa, cf_sa_for_keys, cf_blob_service

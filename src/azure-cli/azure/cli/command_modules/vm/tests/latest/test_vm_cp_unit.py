@@ -71,7 +71,7 @@ class TestVmCp(unittest.TestCase):
         mock_container.get_blob_client.return_value = mock_blob
         
         # Execute
-        with mock.patch('azure.cli.command_modules.vm.custom.Invoke') as mock_invoke:
+        with mock.patch('azure.cli.command_modules.vm.aaz.latest.vm.run_command.Invoke') as mock_invoke:
             mock_invoke.return_value.return_value = {'value': [{'message': 'success'}]}
             vm_cp(cmd, source="local.txt", destination="myrg:myvm:/tmp/remote.txt")
             
@@ -123,7 +123,7 @@ class TestVmCp(unittest.TestCase):
         mock_container.get_blob_client.return_value = mock_blob
         
         # Execute
-        with mock.patch('azure.cli.command_modules.vm.custom.Invoke') as mock_invoke:
+        with mock.patch('azure.cli.command_modules.vm.aaz.latest.vm.run_command.Invoke') as mock_invoke:
             mock_invoke.return_value.return_value = {'value': [{'message': 'success'}]}
             vm_cp(cmd, source="myrg:myvm:/tmp/remote.txt", destination="local.txt")
             
