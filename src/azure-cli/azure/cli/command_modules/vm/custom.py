@@ -6267,16 +6267,22 @@ def create_capacity_reservation_group(cmd, resource_group_name, capacity_reserva
     return CapacityReservationGroupCreate(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
-def update_capacity_reservation_group(cmd, client, resource_group_name, capacity_reservation_group_name, tags=None,
+def update_capacity_reservation_group(cmd, resource_group_name, capacity_reservation_group_name, tags=None,
                                       sharing_profile=None):
-    CapacityReservationGroupUpdate = cmd.get_models('CapacityReservationGroupUpdate')
+    from .aaz.latest.capacity.reservation.group import Update as CapacityReservationGroupUpdate
+    command_args = {
+        'capacity_reservation_group_name': capacity_reservation_group_name,
+        'resource_group': resource_group_name,
+    }
+
+    if tags:
+        command_args['tags'] = tags
+
     if sharing_profile is not None:
         subscription_ids = [{'id': sub_id} for sub_id in sharing_profile]
-        sharing_profile = {'subscriptionIds': subscription_ids}
-    capacity_reservation_group = CapacityReservationGroupUpdate(tags=tags, sharing_profile=sharing_profile)
-    return client.update(resource_group_name=resource_group_name,
-                         capacity_reservation_group_name=capacity_reservation_group_name,
-                         parameters=capacity_reservation_group)
+        command_args['sharing_profile'] = {'subscription_ids': subscription_ids}
+
+    return CapacityReservationGroupUpdate(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
 def show_capacity_reservation_group(client, resource_group_name, capacity_reservation_group_name,
