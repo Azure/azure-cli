@@ -17,6 +17,11 @@ register_command_group_deprecate(command_group='postgres flexible-server index-t
                                  'other automatically generated recommendations which are covered by the '
                                  'new command.')
 
+# Long term retention  command argument changes
+register_command_group_deprecate(command_group='postgres flexible-server long-term-retention',
+                                 message='Long term retention feature is under development. Moving forward to '
+                                 'access support, please turn to Azure Portal.')
+
 # Upgrade command argument changes
 register_other_breaking_change('postgres flexible-server upgrade',
                                message='The allowed values will be changed from set list to '
