@@ -11,6 +11,9 @@
 from azure.cli.core.aaz import *
 
 
+@register_command(
+    "vm host group update",
+)
 class Update(AAZCommand):
     """Update a dedicated host group.
     """
