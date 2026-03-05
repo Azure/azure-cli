@@ -5923,7 +5923,7 @@ def create_dedicated_host_group(cmd, host_group_name, resource_group_name, platf
     if zones:
         command_args['zones'] = zones
 
-    if ultra_ssd_enabled:
+    if ultra_ssd_enabled is not None:
         command_args['additional_capabilities'] = {
             'ultra_ssd_enabled': ultra_ssd_enabled
         }
