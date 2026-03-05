@@ -19,8 +19,8 @@ register_command_group_deprecate(command_group='postgres flexible-server index-t
 
 # Long term retention  command argument changes
 register_command_group_deprecate(command_group='postgres flexible-server long-term-retention',
-                                 message='Long term retention feature is under development. Moving forward to '
-                                 'access support, please turn to Azure Portal.')
+                                 message='Long term retention command group will be removed. '
+                                 'For more information, open a support incident.')
 
 # Upgrade command argument changes
 register_other_breaking_change('postgres flexible-server upgrade',
