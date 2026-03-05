@@ -395,7 +395,6 @@ def load_command_table(self, _):
     with self.command_group('vm host group') as g:
         g.custom_command('get-instance-view', 'get_dedicated_host_group_instance_view')
         g.custom_command('create', 'create_dedicated_host_group')
-        g.generic_update_command('update')
 
     with self.command_group('vmss') as g:
         g.custom_command('identity assign', 'assign_vmss_identity', validator=process_assign_identity_namespace)
