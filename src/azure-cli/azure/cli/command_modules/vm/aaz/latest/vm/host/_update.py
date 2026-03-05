@@ -16,6 +16,10 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update a dedicated host.
+
+    :example: Update the 'autoReplaceOnFailure' field of a dedicated host.
+        az vm host update --host-group my-host-group --name my-host \\
+            --resource-group my-resource-group --set autoReplaceOnFailure=True
     """
 
     _aaz_info = {
