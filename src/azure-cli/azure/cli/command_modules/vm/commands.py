@@ -9,7 +9,7 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm,
                                                           cf_vmss, cf_images,
                                                           cf_galleries, cf_gallery_images, cf_gallery_image_versions,
                                                           cf_proximity_placement_groups,
-                                                          cf_dedicated_hosts, cf_dedicated_host_groups,
+                                                          cf_dedicated_host_groups,
                                                           cf_log_analytics_data_plane,
                                                           cf_capacity_reservation_groups, cf_capacity_reservations,
                                                           cf_community_gallery)
@@ -136,11 +136,6 @@ def load_command_table(self, _):
 
     compute_proximity_placement_groups_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations#ProximityPlacementGroupsOperations.{}',
-    )
-
-    compute_dedicated_host_sdk = CliCommandType(
-        operations_tmpl="azure.mgmt.compute.operations#DedicatedHostsOperations.{}",
-        client_factory=cf_dedicated_hosts,
     )
 
     compute_dedicated_host_groups_sdk = CliCommandType(
@@ -386,11 +381,12 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_user')
         g.custom_command('reset-ssh', 'reset_linux_ssh')
 
-    with self.command_group('vm host', compute_dedicated_host_sdk, client_factory=cf_dedicated_hosts,
-                            min_api='2019-03-01') as g:
+    with self.command_group('vm host') as g:
         g.custom_command('get-instance-view', 'get_dedicated_host_instance_view')
         g.custom_command('create', 'create_dedicated_host')
-        g.generic_update_command('update', setter_name='begin_create_or_update')
+
+        from .operations.vm_host import VMHostUpdate
+        self.command_table['vm host update'] = VMHostUpdate(loader=self)
 
     with self.command_group('vm host group', compute_dedicated_host_groups_sdk, client_factory=cf_dedicated_host_groups,
                             min_api='2019-03-01') as g:
