@@ -2789,23 +2789,18 @@ class KeyVaultSecretCopyScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_kv_secret_copy', location='eastus2')
     @KeyVaultPreparer(name_prefix='cli-test-kv-src-', location='eastus2', 
-                     additional_params='--enable-rbac-authorization false')
-    def test_keyvault_secret_copy_single(self, resource_group, key_vault):
+                     additional_params='--enable-rbac-authorization false', parameter_name='src_kv')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-dst-', location='eastus2', 
+                     additional_params='--enable-rbac-authorization false', parameter_name='dest_kv')
+    def test_keyvault_secret_copy_single(self, resource_group, src_kv, dest_kv):
         """Test copying a single secret between key vaults."""
         self.kwargs.update({
-            'src_kv': key_vault,
-            'dest_kv': self.create_random_name('cli-test-kv-dst-', 24),
+            'src_kv': src_kv,
+            'dest_kv': dest_kv,
             'secret1': self.create_random_name('secret-', 24),
             'secret_value': 'TestSecretValue123',
             'loc': 'eastus2'
         })
-
-        # Create destination vault
-        self.cmd('keyvault create -g {rg} -n {dest_kv} -l {loc} --enable-rbac-authorization false',
-                 checks=[
-                     self.check('name', '{dest_kv}'),
-                     self.check('properties.enableSoftDelete', True)
-                 ])
 
         # Create secret in source vault with metadata
         self.cmd('keyvault secret set --vault-name {src_kv} -n {secret1} --value {secret_value} '
@@ -2837,19 +2832,17 @@ class KeyVaultSecretCopyScenarioTest(ScenarioTest):
                      self.check('name', '{secret1}')
                  ])
 
-        # Cleanup
-        self.cmd('keyvault delete -g {rg} -n {dest_kv}')
-        self.cmd('keyvault purge -n {dest_kv}')
-
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_kv_secret_copy', location='eastus2')
     @KeyVaultPreparer(name_prefix='cli-test-kv-src-', location='eastus2',
-                     additional_params='--enable-rbac-authorization false')
-    def test_keyvault_secret_copy_all(self, resource_group, key_vault):
+                     additional_params='--enable-rbac-authorization false', parameter_name='src_kv')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-dst-', location='eastus2',
+                     additional_params='--enable-rbac-authorization false', parameter_name='dest_kv')
+    def test_keyvault_secret_copy_all(self, resource_group, src_kv, dest_kv):
         """Test copying all secrets from source to destination vault."""
         self.kwargs.update({
-            'src_kv': key_vault,
-            'dest_kv': self.create_random_name('cli-test-kv-dst-', 24),
+            'src_kv': src_kv,
+            'dest_kv': dest_kv,
             'secret1': self.create_random_name('secret1-', 24),
             'secret2': self.create_random_name('secret2-', 24),
             'secret3': self.create_random_name('secret3-', 24),
@@ -2858,9 +2851,6 @@ class KeyVaultSecretCopyScenarioTest(ScenarioTest):
             'value3': 'Value3',
             'loc': 'eastus2'
         })
-
-        # Create destination vault
-        self.cmd('keyvault create -g {rg} -n {dest_kv} -l {loc} --enable-rbac-authorization false')
 
         # Create multiple secrets in source vault
         self.cmd('keyvault secret set --vault-name {src_kv} -n {secret1} --value {value1}',
@@ -2885,27 +2875,22 @@ class KeyVaultSecretCopyScenarioTest(ScenarioTest):
         self.cmd('keyvault secret list --vault-name {src_kv}',
                  checks=self.check('length(@)', 3))
 
-        # Cleanup
-        self.cmd('keyvault delete -g {rg} -n {dest_kv}')
-        self.cmd('keyvault purge -n {dest_kv}')
-
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_kv_secret_copy', location='eastus2')
     @KeyVaultPreparer(name_prefix='cli-test-kv-src-', location='eastus2',
-                     additional_params='--enable-rbac-authorization false')
-    def test_keyvault_secret_copy_overwrite_behavior(self, resource_group, key_vault):
+                     additional_params='--enable-rbac-authorization false', parameter_name='src_kv')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-dst-', location='eastus2',
+                     additional_params='--enable-rbac-authorization false', parameter_name='dest_kv')
+    def test_keyvault_secret_copy_overwrite_behavior(self, resource_group, src_kv, dest_kv):
         """Test overwrite behavior when copying secrets that already exist."""
         self.kwargs.update({
-            'src_kv': key_vault,
-            'dest_kv': self.create_random_name('cli-test-kv-dst-', 24),
+            'src_kv': src_kv,
+            'dest_kv': dest_kv,
             'secret': self.create_random_name('secret-', 24),
             'original_value': 'OriginalValue',
             'updated_value': 'UpdatedValue',
             'loc': 'eastus2'
         })
-
-        # Create destination vault
-        self.cmd('keyvault create -g {rg} -n {dest_kv} -l {loc} --enable-rbac-authorization false')
 
         # Create secret in source vault
         self.cmd('keyvault secret set --vault-name {src_kv} -n {secret} --value {original_value}')
@@ -2935,19 +2920,17 @@ class KeyVaultSecretCopyScenarioTest(ScenarioTest):
         self.cmd('keyvault secret show --vault-name {dest_kv} -n {secret}',
                  checks=self.check('value', '{updated_value}'))
 
-        # Cleanup
-        self.cmd('keyvault delete -g {rg} -n {dest_kv}')
-        self.cmd('keyvault purge -n {dest_kv}')
-
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_kv_secret_copy', location='eastus2')
     @KeyVaultPreparer(name_prefix='cli-test-kv-src-', location='eastus2',
-                     additional_params='--enable-rbac-authorization false')
-    def test_keyvault_secret_copy_error_cases(self, resource_group, key_vault):
+                     additional_params='--enable-rbac-authorization false', parameter_name='src_kv')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-dst-', location='eastus2',
+                     additional_params='--enable-rbac-authorization false', parameter_name='dest_kv')
+    def test_keyvault_secret_copy_error_cases(self, resource_group, src_kv, dest_kv):
         """Test error handling for invalid copy operations."""
         self.kwargs.update({
-            'src_kv': key_vault,
-            'dest_kv': self.create_random_name('cli-test-kv-dst-', 24),
+            'src_kv': src_kv,
+            'dest_kv': dest_kv,
             'nonexistent_kv': 'nonexistent-kv-' + self.create_random_name('', 10),
             'secret': self.create_random_name('secret-', 24),
             'nonexistent_secret': 'nonexistent-secret-' + self.create_random_name('', 10),
@@ -2955,11 +2938,12 @@ class KeyVaultSecretCopyScenarioTest(ScenarioTest):
             'loc': 'eastus2'
         })
 
-        # Create destination vault and a secret
-        self.cmd('keyvault create -g {rg} -n {dest_kv} -l {loc} --enable-rbac-authorization false')
+        # Create a secret
         self.cmd('keyvault secret set --vault-name {src_kv} -n {secret} --value {secret_value}')
 
-        # Test 1: Copy to non-existent destination vault (should fail)
+        # Test 1: Copy to non-existent destination vault
+        # In playback mode, accessing a non-existent vault triggers an unknown host or similar network error,
+        # but the command should still fail handled. We run this to expect failure.
         self.cmd('keyvault secret copy --source-vault {src_kv} --destination-vault {nonexistent_kv} '
                  '--name {secret}',
                  expect_failure=True)
@@ -2984,28 +2968,23 @@ class KeyVaultSecretCopyScenarioTest(ScenarioTest):
                  '--name {secret} --all',
                  expect_failure=True)
 
-        # Cleanup
-        self.cmd('keyvault delete -g {rg} -n {dest_kv}')
-        self.cmd('keyvault purge -n {dest_kv}')
-
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_kv_secret_copy', location='eastus2')
     @KeyVaultPreparer(name_prefix='cli-test-kv-src-', location='eastus2',
-                     additional_params='--enable-rbac-authorization false')
-    def test_keyvault_secret_copy_default_behavior(self, resource_group, key_vault):
+                     additional_params='--enable-rbac-authorization false', parameter_name='src_kv')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-dst-', location='eastus2',
+                     additional_params='--enable-rbac-authorization false', parameter_name='dest_kv')
+    def test_keyvault_secret_copy_default_behavior(self, resource_group, src_kv, dest_kv):
         """Test default behavior when neither --name nor --all is specified."""
         self.kwargs.update({
-            'src_kv': key_vault,
-            'dest_kv': self.create_random_name('cli-test-kv-dst-', 24),
+            'src_kv': src_kv,
+            'dest_kv': dest_kv,
             'secret1': self.create_random_name('secret1-', 24),
             'secret2': self.create_random_name('secret2-', 24),
             'value1': 'DefaultValue1',
             'value2': 'DefaultValue2',
             'loc': 'eastus2'
         })
-
-        # Create destination vault
-        self.cmd('keyvault create -g {rg} -n {dest_kv} -l {loc} --enable-rbac-authorization false')
 
         # Create secrets in source vault
         self.cmd('keyvault secret set --vault-name {src_kv} -n {secret1} --value {value1}')
@@ -3019,10 +2998,6 @@ class KeyVaultSecretCopyScenarioTest(ScenarioTest):
                  checks=self.check('value', '{value1}'))
         self.cmd('keyvault secret show --vault-name {dest_kv} -n {secret2}',
                  checks=self.check('value', '{value2}'))
-
-        # Cleanup
-        self.cmd('keyvault delete -g {rg} -n {dest_kv}')
-        self.cmd('keyvault purge -n {dest_kv}')
 
 
 class KeyVaultSecretCopyUnitTest(unittest.TestCase):
