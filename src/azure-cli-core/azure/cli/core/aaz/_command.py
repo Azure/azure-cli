@@ -506,8 +506,8 @@ def _load_aaz_by_path(loader, base_path, base_module, args, command_table, comma
         entry_path = os.path.join(base_path, entry)
 
         # Command files: _create.py, _list.py, etc.
-        if (entry.startswith('_') and not entry.startswith('__')
-                and entry.endswith('.py') and os.path.isfile(entry_path)):
+        if (entry.startswith('_') and not entry.startswith('__') and
+                entry.endswith('.py') and os.path.isfile(entry_path)):
             mod = _try_import_module(f'.{entry[:-3]}', base_module)
             if mod:
                 _register_from_module(loader, mod, command_table, command_group_table)
