@@ -6243,13 +6243,13 @@ def gallery_application_version_update(client,
                        gallery_application_version=gallery_application_version)
 
 
-def create_capacity_reservation_group(cmd, resource_group_name, capacity_reservation_group_name, location=None,
-                                      tags=None, zones=None, sharing_profile=None):
+def create_capacity_reservation_group(cmd, resource_group_name, capacity_reservation_group_name, location, tags=None,
+                                      zones=None, sharing_profile=None):
     from .aaz.latest.capacity.reservation.group import Create as CapacityReservationGroupCreate
     command_args = {
         'capacity_reservation_group_name': capacity_reservation_group_name,
         'resource_group': resource_group_name,
-        'location': location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
+        'location': location
     }
 
     if tags is not None:
