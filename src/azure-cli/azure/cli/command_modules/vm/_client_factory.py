@@ -16,14 +16,6 @@ def cf_vm(cli_ctx, _):
     return _compute_client_factory(cli_ctx).virtual_machines
 
 
-def cf_vm_ext(cli_ctx, _):
-    return _compute_client_factory(cli_ctx).virtual_machine_extensions
-
-
-def cf_vm_ext_image(cli_ctx, _):
-    return _compute_client_factory(cli_ctx).virtual_machine_extension_images
-
-
 def cf_vm_image(cli_ctx, _):
     return _compute_client_factory(cli_ctx).virtual_machine_images
 
@@ -43,48 +35,8 @@ def cf_vmss(cli_ctx, _):
     return _compute_client_factory(cli_ctx).virtual_machine_scale_sets
 
 
-def cf_vmss_vm(cli_ctx, _):
-    return _compute_client_factory(cli_ctx).virtual_machine_scale_set_vms
-
-
-def cf_vm_sizes(cli_ctx, _):
-    return _compute_client_factory(cli_ctx).virtual_machine_sizes
-
-
-def cf_disks(cli_ctx, _):
-    return _compute_client_factory(cli_ctx).disks
-
-
-def cf_snapshots(cli_ctx, _):
-    return _compute_client_factory(cli_ctx).snapshots
-
-
-def cf_disk_accesses(cli_ctx, _):
-    return _compute_client_factory(cli_ctx).disk_accesses
-
-
 def cf_images(cli_ctx, _):
     return _compute_client_factory(cli_ctx).images
-
-
-def cf_rolling_upgrade_commands(cli_ctx, _):
-    return _compute_client_factory(cli_ctx).virtual_machine_scale_set_rolling_upgrades
-
-
-def cf_galleries(cli_ctx, _):
-    return _compute_client_factory(cli_ctx).galleries
-
-
-def cf_gallery_images(cli_ctx, _):
-    return _compute_client_factory(cli_ctx).gallery_images
-
-
-def cf_gallery_image_versions(cli_ctx, _):
-    return _compute_client_factory(cli_ctx).gallery_image_versions
-
-
-def cf_proximity_placement_groups(cli_ctx, _):
-    return _compute_client_factory(cli_ctx).proximity_placement_groups
 
 
 def cf_dedicated_hosts(cli_ctx, _):
@@ -127,16 +79,8 @@ def cf_vm_cl(cli_ctx, *_):
                                    ComputeManagementClient)
 
 
-def cf_shared_galleries(cli_ctx, *_):
-    return cf_vm_cl(cli_ctx).shared_galleries
-
-
 def cf_shared_gallery_image(cli_ctx, *_):
     return cf_vm_cl(cli_ctx).shared_gallery_images
-
-
-def cf_shared_gallery_image_version(cli_ctx, *_):
-    return cf_vm_cl(cli_ctx).shared_gallery_image_versions
 
 
 def cf_community_gallery(cli_ctx, *_):
@@ -147,13 +91,5 @@ def cf_community_gallery_image(cli_ctx, *_):
     return cf_vm_cl(cli_ctx).community_gallery_images
 
 
-def cf_community_gallery_image_version(cli_ctx, *_):
-    return cf_vm_cl(cli_ctx).community_gallery_image_versions
-
-
 def cf_capacity_reservation_groups(cli_ctx, *_):
     return cf_vm_cl(cli_ctx).capacity_reservation_groups
-
-
-def cf_capacity_reservations(cli_ctx, *_):
-    return cf_vm_cl(cli_ctx).capacity_reservations
