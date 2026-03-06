@@ -303,8 +303,8 @@ def load_command_table(self, _):
         self.command_table['vm capture'] = VMCapture(loader=self)
         self.command_table['vm list-usage'] = VMListUsage(loader=self)
 
-    with self.command_group('vm', compute_vm_sdk) as g:
-        g.command('stop', 'begin_power_off', supports_no_wait=True, validator=process_vm_vmss_stop)
+        from .aaz.latest.vm import Stop as VMStop
+        self.command_table['vm stop'] = VMStop(loader=self, validator=process_vm_vmss_stop)
 
     with self.command_group('vm availability-set', compute_availset_profile) as g:
         g.custom_command('create', 'create_av_set', table_transformer=deployment_validate_table_format, supports_no_wait=True, exception_handler=handle_template_based_exception)
