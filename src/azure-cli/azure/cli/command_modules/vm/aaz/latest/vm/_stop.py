@@ -23,7 +23,7 @@ class Stop(AAZCommand):
         az vm stop --resource-group MyResourceGroup --name MyVm
 
     :example: Power off a running VM without shutting down.
-        az vm stop --resource-group MyResourceGroup --name MyVm --skip-shutdow
+        az vm stop --resource-group MyResourceGroup --name MyVm --skip-shutdown
 
     :example: Power off VMs in a resource group.
         az vm stop --ids $(az vm list -g MyResourceGroup --query "[].id" -o tsv)
