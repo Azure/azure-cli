@@ -21,6 +21,7 @@ from ._list import *
 from ._list_all import *
 from ._list_sizes import *
 from ._list_skus import *
+from ._list_usage import *
 from ._list_vm_resize_options import *
 from ._migrate_to_vmss import *
 from ._patch import *
