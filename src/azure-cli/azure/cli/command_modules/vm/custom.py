@@ -5132,7 +5132,7 @@ def set_vmss_diagnostics_extension(cmd, resource_group_name, vmss_name, settings
                                 no_auto_upgrade)
 
     result = LongRunningOperation(cmd.cli_ctx)(poller)
-    if vmss.get('upgradePolicy', {}).get('upgradePolicy') == UpgradeMode.MANUAL.value:
+    if vmss.get('upgradePolicy', {}).get('mode') == UpgradeMode.MANUAL.value:
         poller2 = update_vmss_instances(cmd, resource_group_name, vmss_name, ['*'])
         LongRunningOperation(cmd.cli_ctx)(poller2)
     return result
