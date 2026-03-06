@@ -1512,6 +1512,14 @@ def list_skus(cmd, location=None, size=None, zone=None, show_all=None, resource_
     return result
 
 
+def list_usage(cmd, location):
+    from .operations.vm import VMListUsage
+    command_args = {
+        'location': location
+    }
+    return VMListUsage(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+
+
 # pylint: disable=redefined-builtin
 def list_vm(cmd, resource_group_name=None, show_details=False, vmss=None):
     from azure.mgmt.core.tools import resource_id, is_valid_resource_id, parse_resource_id

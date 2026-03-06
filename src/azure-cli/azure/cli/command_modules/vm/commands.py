@@ -292,6 +292,7 @@ def load_command_table(self, _):
         g.custom_command('list-ip-addresses', 'list_vm_ip_addresses', table_transformer=transform_ip_addresses)
         g.custom_command('list-sizes', 'list_vm_sizes', deprecate_info=g.deprecate(redirect='az vm list-skus'))
         g.custom_command('list-skus', 'list_skus', table_transformer=transform_sku_for_table_output)
+        g.custom_command('list-usage', 'list_usage', table_transformer='[].{Name:localName, CurrentValue:currentValue, Limit:limit}')
         g.custom_command('open-port', 'open_vm_port')
         g.custom_command('resize', 'resize_vm', supports_no_wait=True)
         g.custom_command('restart', 'restart_vm', supports_no_wait=True)
@@ -300,9 +301,8 @@ def load_command_table(self, _):
         g.generic_update_command('update', getter_name='get_vm_to_update_by_aaz', setter_name='update_vm', setter_type=compute_custom, command_type=compute_custom, supports_no_wait=True, validator=process_vm_update_namespace)
         g.wait_command('wait', getter_name='get_instance_view', getter_type=compute_custom)
 
-        from .operations.vm import VMCapture, VMListUsage
+        from .operations.vm import VMCapture
         self.command_table['vm capture'] = VMCapture(loader=self)
-        self.command_table['vm list-usage'] = VMListUsage(loader=self, table_transformer='[].{Name:localName, CurrentValue:currentValue, Limit:limit}')
 
     with self.command_group('vm availability-set', compute_availset_profile) as g:
         g.custom_command('create', 'create_av_set', table_transformer=deployment_validate_table_format, supports_no_wait=True, exception_handler=handle_template_based_exception)
