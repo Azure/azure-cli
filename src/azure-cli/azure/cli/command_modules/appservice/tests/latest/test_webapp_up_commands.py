@@ -1374,6 +1374,7 @@ class WebAppUpE2ETests(ScenarioTest):
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(random_name_length=24, name_prefix='clitest', location=LINUX_ASP_LOCATION_WEBAPP)
     def test_webapp_up_with_domain_name_scope(self, resource_group):
+        plan = self.create_random_name('up-dnlplan', 24)
         webapp_name = self.create_random_name('up-dnl-app', 24)
         zip_file_name = os.path.join(TEST_DIR, 'node-Express-up.zip')
 
@@ -1395,8 +1396,8 @@ class WebAppUpE2ETests(ScenarioTest):
         self.assertEqual(result['os'].lower(), 'linux')
 
         # test the full E2E operation works
-        self.cmd('webapp up -n {} -g {} --domain-name-scope TenantReuse'.format(
-            webapp_name, resource_group)).get_output_in_json()
+        self.cmd('webapp up -n {} -g {} --plan {} --domain-name-scope TenantReuse'.format(
+            webapp_name, resource_group, plan)).get_output_in_json()
 
         # Verify app is created with domain name scope
         result = self.cmd('webapp show -n {} -g {}'.format(webapp_name, resource_group), checks=[
@@ -1411,6 +1412,10 @@ class WebAppUpE2ETests(ScenarioTest):
         pattern = r'^([a-zA-Z0-9\-]+)-([a-z0-9]{16})\.([a-z]+-\d{2})\.azurewebsites\.net$'
         match = re.match(pattern, default_hostname)
         self.assertIsNotNone(match, "defaultHostName '{}' does not match expected pattern".format(default_hostname))
+        app_name, hash_part, region = match.groups()
+        self.assertTrue(len(hash_part) == 16 and hash_part.islower(), "Hash is not 16 chars or not lowercase.")
+        self.assertIn('-', region, "Region part does not have '-' separator.")
+        self.assertEqual(app_name, webapp_name, "App name and defaultHostName app name do not match.")
 
         # cleanup
         os.chdir(current_working_dir)
