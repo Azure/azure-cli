@@ -269,7 +269,7 @@ class VMListUsage(_VMListUsage):
         for item in result:
             item['currentValue'] = str(item['currentValue'])
             item['limit'] = str(item['limit'])
-            item['localizedValue'] = item['name']['localizedValue']
+            item['localName'] = item['name']['localizedValue']
 
         return result, next_link
 

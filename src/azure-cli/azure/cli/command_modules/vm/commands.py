@@ -14,7 +14,7 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm,
                                                           cf_capacity_reservation_groups, cf_capacity_reservations,
                                                           cf_community_gallery)
 from azure.cli.command_modules.vm._format import (
-    transform_ip_addresses, transform_vm, transform_vm_create_output, transform_vm_usage_list, transform_vm_list,
+    transform_ip_addresses, transform_vm, transform_vm_create_output, transform_vm_list,
     transform_disk_create_table_output, transform_sku_for_table_output, transform_disk_show_table_output,
     transform_extension_show_table_output, get_vmss_table_output_transformer,
     transform_vm_encryption_show_table_output, transform_log_analytics_query_output,
@@ -301,7 +301,7 @@ def load_command_table(self, _):
 
         from .operations.vm import VMCapture, VMListUsage
         self.command_table['vm capture'] = VMCapture(loader=self)
-        self.command_table['vm list-usage'] = VMListUsage(loader=self)
+        self.command_table['vm list-usage'] = VMListUsage(loader=self, table_transformer='[].{Name:localName, CurrentValue:currentValue, Limit:limit}')
 
         from .aaz.latest.vm import Stop as VMStop
         self.command_table['vm stop'] = VMStop(loader=self, validator=process_vm_vmss_stop)
