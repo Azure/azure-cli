@@ -41,7 +41,7 @@ from ._vm_utils import read_content_if_is_file, import_aaz_by_profile, IdentityT
 from ._vm_diagnostics_templates import get_default_diag_config
 
 from ._actions import (load_images_from_aliases_doc, load_extension_images_thru_services,
-                       load_images_thru_services, _get_latest_image_version, _get_latest_image_version_by_aaz)
+                       load_images_thru_services, _get_latest_image_version_by_aaz)
 from ._client_factory import (_compute_client_factory, cf_vm_image_term)
 
 from .aaz.latest.vm.disk import AttachDetachDataDisk
@@ -2802,7 +2802,7 @@ def show_vm_image(cmd, urn=None, publisher=None, offer=None, sku=None, version=N
         elif len(items) == 4:
             publisher, offer, sku, version = urn.split(":")
         if version.lower() == 'latest':
-            version = _get_latest_image_version(cmd.cli_ctx, location, publisher, offer, sku)
+            version = _get_latest_image_version_by_aaz(cmd.cli_ctx, location, publisher, offer, sku)
     elif not publisher or not offer or not sku or not version:
         raise RequiredArgumentMissingError(error_msg)
     if edge_zone is not None:

@@ -5,7 +5,7 @@
 
 from azure.cli.command_modules.vm._client_factory import (cf_vm,
                                                           cf_vm_ext, cf_vm_ext_image,
-                                                          cf_vm_image, cf_vm_image_term, cf_usage,
+                                                          cf_vm_image_term, cf_usage,
                                                           cf_vmss, cf_images,
                                                           cf_galleries, cf_gallery_images, cf_gallery_image_versions,
                                                           cf_proximity_placement_groups,
@@ -80,11 +80,6 @@ def load_command_table(self, _):
     compute_vm_extension_image_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations#VirtualMachineExtensionImagesOperations.{}',
         client_factory=cf_vm_ext_image
-    )
-
-    compute_vm_image_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#VirtualMachineImagesOperations.{}',
-        client_factory=cf_vm_image
     )
 
     compute_vm_image_term_sdk = CliCommandType(
@@ -341,7 +336,7 @@ def load_command_table(self, _):
     with self.command_group('vm extension image', compute_vm_extension_image_sdk) as g:
         g.custom_command('list', 'list_vm_extension_images')
 
-    with self.command_group('vm image', compute_vm_image_sdk) as g:
+    with self.command_group('vm image') as g:
         g.custom_command('list-offers', 'list_offers')
         g.custom_command('list-publishers', 'list_publishers')
         g.custom_command('list-skus', 'list_sku')
