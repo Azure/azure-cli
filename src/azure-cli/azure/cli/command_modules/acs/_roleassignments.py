@@ -125,6 +125,7 @@ def add_role_assignment(cmd, role, service_principal_msi_id, is_service_principa
             logger.error(str(ex))
         time.sleep(delay + delay * x)
     else:
+        hook.add(message="AAD role propagation failed", value=1.0, total_val=1.0)
         return False
     hook.add(message="AAD role propagation done", value=1.0, total_val=1.0)
     logger.info("AAD role propagation done")
@@ -205,6 +206,7 @@ def delete_role_assignments(cli_ctx, role, service_principal, delay=2, scope=Non
             logger.error(str(ex))
         time.sleep(delay + delay * x)
     else:
+        hook.add(message="AAD role deletion failed", value=1.0, total_val=1.0)
         return False
     hook.add(message="AAD role deletion done", value=1.0, total_val=1.0)
     logger.info("AAD role deletion done")
