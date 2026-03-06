@@ -296,15 +296,13 @@ def load_command_table(self, _):
         g.custom_command('resize', 'resize_vm', supports_no_wait=True)
         g.custom_command('restart', 'restart_vm', supports_no_wait=True)
         g.custom_show_command('show', 'show_vm', table_transformer=transform_vm)
+        g.custom_command('stop', 'stop_vm', validator=process_vm_vmss_stop, supports_no_wait=True)
         g.generic_update_command('update', getter_name='get_vm_to_update_by_aaz', setter_name='update_vm', setter_type=compute_custom, command_type=compute_custom, supports_no_wait=True, validator=process_vm_update_namespace)
         g.wait_command('wait', getter_name='get_instance_view', getter_type=compute_custom)
 
         from .operations.vm import VMCapture, VMListUsage
         self.command_table['vm capture'] = VMCapture(loader=self)
         self.command_table['vm list-usage'] = VMListUsage(loader=self, table_transformer='[].{Name:localName, CurrentValue:currentValue, Limit:limit}')
-
-        from .aaz.latest.vm import Stop as VMStop
-        self.command_table['vm stop'] = VMStop(loader=self, validator=process_vm_vmss_stop)
 
     with self.command_group('vm availability-set', compute_availset_profile) as g:
         g.custom_command('create', 'create_av_set', table_transformer=deployment_validate_table_format, supports_no_wait=True, exception_handler=handle_template_based_exception)
