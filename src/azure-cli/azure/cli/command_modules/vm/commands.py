@@ -286,6 +286,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_vm', table_transformer=transform_vm_list)
         g.custom_show_command('show', 'show_vm', table_transformer=transform_vm)
         g.generic_update_command('update', getter_name='get_vm_to_update_by_aaz', setter_name='update_vm', setter_type=compute_custom, command_type=compute_custom, supports_no_wait=True, validator=process_vm_update_namespace)
+        g.custom_command('open-port', 'open_vm_port')
 
     with self.command_group('vm', compute_vm_sdk) as g:
         g.custom_command('application set', 'set_vm_applications', validator=process_set_applications_namespace, min_api='2021-07-01')
@@ -295,7 +296,6 @@ def load_command_table(self, _):
         g.custom_command('list-ip-addresses', 'list_vm_ip_addresses', table_transformer=transform_ip_addresses)
         g.custom_command('list-skus', 'list_skus', table_transformer=transform_sku_for_table_output, min_api='2017-03-30')
         g.command('list-usage', 'list', command_type=compute_vm_usage_sdk, transform=transform_vm_usage_list, table_transformer='[].{Name:localName, CurrentValue:currentValue, Limit:limit}')
-        g.custom_command('open-port', 'open_vm_port')
         g.custom_command('resize', 'resize_vm', supports_no_wait=True)
         g.custom_command('restart', 'restart_vm', supports_no_wait=True)
         g.command('stop', 'begin_power_off', supports_no_wait=True, validator=process_vm_vmss_stop)
@@ -403,11 +403,14 @@ def load_command_table(self, _):
         g.custom_command('identity remove', 'remove_vmss_identity', validator=process_remove_identity_namespace, is_preview=True)
         g.custom_show_command('identity show', 'show_vmss_identity')
         g.custom_command('deallocate', 'deallocate_vmss', supports_no_wait=True)
-        g.custom_command('reimage', 'reimage_vmss', supports_no_wait=True)
         g.custom_command('list-instance-connection-info', 'list_vmss_instance_connection_info')
         g.custom_command('list-instance-public-ips', 'list_vmss_instance_public_ips')
         g.custom_command('list-instances', 'get_instances_list')
+        g.custom_command('reimage', 'reimage_vmss', supports_no_wait=True)
+        g.custom_command('restart', 'restart_vmss', supports_no_wait=True)
+        g.custom_command('scale', 'scale_vmss', supports_no_wait=True)
         g.custom_command('set-orchestration-service-state', 'set_orchestration_service_state', supports_no_wait=True)
+        g.custom_command('stop', 'stop_vmss', supports_no_wait=True, validator=process_vm_vmss_stop)
 
     with self.command_group('vmss application', operation_group='virtual_machine_scale_sets') as g:
         g.custom_command('set', 'set_vmss_applications', validator=process_set_applications_namespace)
@@ -416,10 +419,7 @@ def load_command_table(self, _):
     with self.command_group('vmss', compute_vmss_sdk, operation_group='virtual_machine_scale_sets') as g:
         g.custom_command('create', 'create_vmss', transform=DeploymentOutputLongRunningOperation(self.cli_ctx, 'Starting vmss create'), supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_vmss_create_namespace, exception_handler=handle_template_based_exception)
         g.custom_command('get-instance-view', 'get_vmss_instance_view', table_transformer='{ProvisioningState:statuses[0].displayStatus, PowerState:statuses[1].displayStatus}')
-        g.custom_command('restart', 'restart_vmss', supports_no_wait=True)
-        g.custom_command('scale', 'scale_vmss', supports_no_wait=True)
         g.custom_show_command('show', 'get_vmss', table_transformer=get_vmss_table_output_transformer(self, False))
-        g.custom_command('stop', 'stop_vmss', supports_no_wait=True, validator=process_vm_vmss_stop)
         g.generic_update_command('update', getter_name='get_vmss_modified_by_aaz', setter_name='update_vmss', supports_no_wait=True, command_type=compute_custom, validator=validate_vmss_update_namespace)
         g.custom_command('update-instances', 'update_vmss_instances', supports_no_wait=True)
         g.wait_command('wait', getter_name='get_vmss', getter_type=compute_custom)

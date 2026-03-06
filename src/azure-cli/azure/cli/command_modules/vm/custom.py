@@ -1619,12 +1619,12 @@ def open_vm_port(cmd, resource_group_name, vm_name, port, priority=900, network_
     NSGShow, NSGCreate = _nsg.Show, _nsg.Create
     NSGRuleCreate = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.nsg.rule").Create
 
-    vm = get_vm(cmd, resource_group_name, vm_name)
-    location = vm.location
-    if not vm.network_profile:
+    vm = get_vm_by_aaz(cmd, resource_group_name, vm_name)
+    location = vm.get('location', '')
+    if not vm.get('networkProfile'):
         raise CLIError("Network profile not found for VM '{}'".format(vm_name))
 
-    nic_ids = list(vm.network_profile.network_interfaces)
+    nic_ids = vm.get('networkProfile', {}).get('networkInterfaces', [])
     if len(nic_ids) > 1:
         raise CLIError('Multiple NICs is not supported for this command. Create rules on the NSG '
                        'directly.')
@@ -1634,7 +1634,7 @@ def open_vm_port(cmd, resource_group_name, vm_name, port, priority=900, network_
     # get existing NSG or create a new one
     created_nsg = False
     nic = NicShow(cli_ctx=cmd.cli_ctx)(command_args={
-        'name': os.path.split(nic_ids[0].id)[1],
+        'name': os.path.split(nic_ids[0].get('id'))[1],
         'resource_group': resource_group_name
     })
     if not apply_to_subnet:
@@ -4548,44 +4548,62 @@ def reimage_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None,
 
 
 def restart_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False):
-    client = _compute_client_factory(cmd.cli_ctx)
-    VirtualMachineScaleSetVMInstanceRequiredIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceRequiredIDs')
-    if instance_ids is None:
+    from .aaz.latest.vmss import Restart as VmssRestart
+    if not instance_ids:
         instance_ids = ['*']
-    instance_ids = VirtualMachineScaleSetVMInstanceRequiredIDs(instance_ids=instance_ids)
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_restart, resource_group_name, vm_scale_set_name,
-                       vm_instance_i_ds=instance_ids)
+    command_args = {
+        'resource_group': resource_group_name,
+        'vm_scale_set_name': vm_scale_set_name,
+        'instance_ids': instance_ids,
+        'no_wait': no_wait
+    }
+    return VmssRestart(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
 # pylint: disable=inconsistent-return-statements
 def scale_vmss(cmd, resource_group_name, vm_scale_set_name, new_capacity, no_wait=False):
-    VirtualMachineScaleSet = cmd.get_models('VirtualMachineScaleSet')
-    client = _compute_client_factory(cmd.cli_ctx)
-    vmss = client.virtual_machine_scale_sets.get(resource_group_name, vm_scale_set_name)
-    # pylint: disable=no-member
-    if vmss.sku.capacity == new_capacity:
+    from .operations.vmss import VMSSCreate, VMSSShow
+    vmss = VMSSShow(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'vm_scale_set_name': vm_scale_set_name
+    })
+    if vmss.get('sku', {}).get('capacity') == new_capacity:
         return
 
-    vmss.sku.capacity = new_capacity
-    vmss_new = VirtualMachineScaleSet(location=vmss.location, sku=vmss.sku)
-    if vmss.extended_location is not None:
-        vmss_new.extended_location = vmss.extended_location
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update,
-                       resource_group_name, vm_scale_set_name, vmss_new)
+    vmss_new = {
+        'resource_group': resource_group_name,
+        'vm_scale_set_name': vm_scale_set_name,
+        'no_wait': no_wait
+    }
+
+    if vmss.get('extended_location'):
+        vmss_new['extended_location'] = vmss['extendedLocation']
+
+    if vmss.get('location'):
+        vmss_new['location'] = vmss['location']
+
+    if vmss.get('sku'):
+        vmss_new['sku'] = vmss['sku']
+    else:
+        vmss_new['sku'] = {}
+
+    vmss_new['sku']['capacity'] = new_capacity
+
+    return VMSSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss_new)
 
 
 def stop_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False, skip_shutdown=False):
-    client = _compute_client_factory(cmd.cli_ctx)
-    VirtualMachineScaleSetVMInstanceRequiredIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceRequiredIDs')
+    from .aaz.latest.vmss import Stop as VmssStop
     if instance_ids is None:
         instance_ids = ['*']
-    instance_ids = VirtualMachineScaleSetVMInstanceRequiredIDs(instance_ids=instance_ids)
-    if cmd.supported_api_version(min_api='2020-06-01', operation_group='virtual_machine_scale_sets'):
-        return sdk_no_wait(
-            no_wait, client.virtual_machine_scale_sets.begin_power_off, resource_group_name, vm_scale_set_name,
-            vm_instance_i_ds=instance_ids, skip_shutdown=skip_shutdown)
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_power_off, resource_group_name,
-                       vm_scale_set_name, vm_instance_i_ds=instance_ids)
+    command_args = {
+        'resource_group': resource_group_name,
+        'vm_scale_set_name': vm_scale_set_name,
+        'skip_shutdown': skip_shutdown,
+        'instance_ids': instance_ids,
+        'no_wait': no_wait
+    }
+    return VmssStop(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
 def update_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_ids, no_wait=False):
@@ -6022,15 +6040,15 @@ def _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_
 
 def execute_query_for_vm(cmd, client, resource_group_name, vm_name, analytics_query, timespan=None):
     """Executes a query against the Log Analytics workspace linked with a vm."""
-    vm = get_vm(cmd, resource_group_name, vm_name)
+    vm = get_vm_by_aaz(cmd, resource_group_name, vm_name)
     workspace = None
-    extension_resources = vm.resources or []
+    extension_resources = vm.get('resources', [])
     for resource in extension_resources:
-        if resource.name == "MicrosoftMonitoringAgent" or resource.name == "OmsAgentForLinux":
-            workspace = resource.settings.get('workspaceId', None)
+        if resource.get('name') in (_WINDOWS_OMS_AGENT_EXT, _LINUX_OMS_AGENT_EXT):
+            workspace = resource.get('settings', {}).get('workspaceId', None)
     if workspace is None:
         raise CLIError('Cannot find the corresponding log analytics workspace. '
-                       'Please check the status of log analytics workpsace.')
+                       'Please check the status of log analytics workspace.')
     return client.query_workspace(workspace, analytics_query, timespan=timespan)
 
 
