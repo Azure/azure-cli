@@ -2049,7 +2049,7 @@ def process_disk_create_namespace(cmd, namespace):
                       '--source VHD_BLOB_URI [--source-storage-account-id ID]'
         try:
             namespace.source_blob_uri, namespace.source_disk, namespace.source_snapshot, \
-                namespace.source_restore_point, _ = _figure_out_storage_source(
+                namespace.source_restore_point, _ = _figure_out_storage_source_by_aaz(
                     cmd.cli_ctx, namespace.resource_group_name, namespace.source)
             if not namespace.source_blob_uri and namespace.source_storage_account_id:
                 raise ArgumentUsageError(usage_error)
@@ -2218,6 +2218,30 @@ def _figure_out_storage_source(cli_ctx, resource_group_name, source):
     return (source_blob_uri, source_disk, source_snapshot, source_restore_point, source_info)
 
 
+def _figure_out_storage_source_by_aaz(cli_ctx, resource_group_name, source):
+    source_blob_uri = None
+    source_disk = None
+    source_snapshot = None
+    source_info = None
+    source_restore_point = None
+    if urlparse(source).scheme:  # a uri?
+        source_blob_uri = source
+    elif '/disks/' in source.lower():
+        source_disk = source
+    elif '/snapshots/' in source.lower():
+        source_snapshot = source
+    elif '/restorepoints/' in source.lower():
+        source_restore_point = source
+    else:
+        source_info, is_snapshot = _get_disk_or_snapshot_info_by_aaz(cli_ctx, resource_group_name, source)
+        if is_snapshot:
+            source_snapshot = source_info.get('id')
+        else:
+            source_disk = source_info.get('id')
+
+    return (source_blob_uri, source_disk, source_snapshot, source_restore_point, source_info)
+
+
 def _get_disk_or_snapshot_info(cli_ctx, resource_group_name, source):
     compute_client = _compute_client_factory(cli_ctx)
     is_snapshot = True
@@ -2227,6 +2251,28 @@ def _get_disk_or_snapshot_info(cli_ctx, resource_group_name, source):
     except ResourceNotFoundError:
         is_snapshot = False
         info = compute_client.disks.get(resource_group_name, source)
+
+    return info, is_snapshot
+
+
+def _get_disk_or_snapshot_info_by_aaz(cli_ctx, resource_group_name, source):
+    from .aaz.latest.snapshot import Show as SnapshotShow
+    from .aaz.latest.disk import Show as DiskShow
+    is_snapshot = True
+
+    try:
+        command_args = {
+            'resource_group': resource_group_name,
+            'snapshot_name': source
+        }
+        info = SnapshotShow(cli_ctx=cli_ctx)(command_args=command_args)
+    except ResourceNotFoundError:
+        command_args = {
+            'resource_group': resource_group_name,
+            'disk_name': source
+        }
+        is_snapshot = False
+        info = DiskShow(cli_ctx=cli_ctx)(command_args=command_args)
 
     return info, is_snapshot
 
