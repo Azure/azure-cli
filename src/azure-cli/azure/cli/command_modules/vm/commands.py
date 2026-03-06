@@ -5,7 +5,7 @@
 
 from azure.cli.command_modules.vm._client_factory import (cf_vm,
                                                           cf_vm_ext, cf_vm_ext_image,
-                                                          cf_vm_image, cf_vm_image_term, cf_usage,
+                                                          cf_vm_image, cf_vm_image_term,
                                                           cf_vmss, cf_images,
                                                           cf_galleries, cf_gallery_images, cf_gallery_image_versions,
                                                           cf_proximity_placement_groups,
@@ -90,11 +90,6 @@ def load_command_table(self, _):
     compute_vm_image_term_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.marketplaceordering.operations#MarketplaceAgreementsOperations.{}',
         client_factory=cf_vm_image_term
-    )
-
-    compute_vm_usage_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#UsageOperations.{}',
-        client_factory=cf_usage
     )
 
     compute_vm_run_profile = CliCommandType(

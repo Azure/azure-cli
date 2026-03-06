@@ -35,10 +35,6 @@ def cf_vm_image_term(cli_ctx, _):
     return market_place_client.marketplace_agreements
 
 
-def cf_usage(cli_ctx, _):
-    return _compute_client_factory(cli_ctx).usage
-
-
 def cf_vmss(cli_ctx, _):
     return _compute_client_factory(cli_ctx).virtual_machine_scale_sets
 
