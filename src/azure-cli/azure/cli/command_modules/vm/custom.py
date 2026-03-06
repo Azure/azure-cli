@@ -6249,16 +6249,14 @@ def create_capacity_reservation_group(cmd, resource_group_name, capacity_reserva
     command_args = {
         'capacity_reservation_group_name': capacity_reservation_group_name,
         'resource_group': resource_group_name,
+        'location': location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     }
 
-    if location:
-        command_args['location'] = location
+    if tags is not None:
+        command_args['tags'] = tags or {}
 
-    if tags:
-        command_args['tags'] = tags
-
-    if zones:
-        command_args['zones'] = zones
+    if zones is not None:
+        command_args['zones'] = zones or []
 
     if sharing_profile is not None:
         subscription_ids = [{'id': sub_id} for sub_id in sharing_profile]
