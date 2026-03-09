@@ -28,6 +28,7 @@ from .._db_context import DbContext
 from .network_commands import flexible_server_provision_network_resource
 
 
+# pylint: disable=too-many-locals
 def flexible_replica_create(cmd, client, resource_group_name, source_server, replica_name=None, name=None, zone=None,
                             location=None, vnet=None, vnet_address_prefix=None, subnet=None,
                             subnet_address_prefix=None, private_dns_zone_arguments=None, no_wait=False,
