@@ -77,11 +77,6 @@ def load_command_table(self, _):
         client_factory=cf_vm_ext_image
     )
 
-    compute_vm_image_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#VirtualMachineImagesOperations.{}',
-        client_factory=cf_vm_image
-    )
-
     compute_vm_image_term_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.marketplaceordering.operations#MarketplaceAgreementsOperations.{}',
         client_factory=cf_vm_image_term
