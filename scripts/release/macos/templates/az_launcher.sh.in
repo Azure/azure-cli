@@ -60,6 +60,6 @@ fi
 [[ -x "$PYTHON" ]] || { echo "Error: Python not found at $PYTHON" >&2; exit 1; }
 [[ -d "$AZURE_CLI_SITE_PACKAGES" ]] || { echo "Error: Azure CLI packages not found at $AZURE_CLI_SITE_PACKAGES" >&2; exit 1; }
 
-export PYTHONPATH="$AZURE_CLI_SITE_PACKAGES${PYTHONPATH:+:$PYTHONPATH}"
+export PYTHONPATH="$AZURE_CLI_SITE_PACKAGES"
 export AZ_INSTALLER="$INSTALLER"
 exec "$PYTHON" -sm azure.cli "$@"
