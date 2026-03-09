@@ -2166,6 +2166,28 @@ class WebappUpdateTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_update_platform_release_channel(self, resource_group):
+        webapp_name = self.create_random_name('webapp-prc-test', 40)
+        plan_name = self.create_random_name('webapp-prc-plan', 40)
+        self.cmd('appservice plan create -g {} -n {} --sku S1'
+                 .format(resource_group, plan_name))
+
+        self.cmd('webapp create -g {} -n {} --plan {}'
+                 .format(resource_group, webapp_name, plan_name))
+
+        # JMESPathCheck is not used here since platformReleaseChannel is not returned in the response of webapp show/list commands and we just want to make sure the update command goes through without any errors
+        # Set platform release channel to Extended
+        self.cmd('webapp update -g {} -n {} --platform-release-channel Extended'
+                 .format(resource_group, webapp_name)).assert_with_checks([
+                     JMESPathCheck('name', webapp_name)])
+
+        # Update platform release channel to Standard
+        self.cmd('webapp update -g {} -n {} --platform-release-channel Standard'
+                 .format(resource_group, webapp_name)).assert_with_checks([
+                     JMESPathCheck('name', webapp_name)])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_update_e2e_encryption(self, resource_group):
         webapp_name = self.create_random_name('webapp-e2e-test', 40)
         plan_name = self.create_random_name('webapp-e2e-plan', 40)
