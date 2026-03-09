@@ -298,7 +298,10 @@ def load_extension_images_thru_services(cli_ctx, publisher, name, version, locat
 
 
 def get_vm_sizes(cli_ctx, location):
-    return list(_compute_client_factory(cli_ctx).virtual_machine_sizes.list(location))
+    from .operations.vm import VMListSizes
+    return VMListSizes(cli_ctx=cli_ctx)(command_args={
+        'location': location
+    })
 
 
 def _matched(pattern, string, partial_match=True):
