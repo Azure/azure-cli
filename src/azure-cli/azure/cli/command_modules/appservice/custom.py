@@ -58,6 +58,7 @@ from ._client_factory import (web_client_factory, ex_handler_factory, providers_
                               appcontainers_client_factory)
 from ._appservice_utils import _generic_site_operation, _generic_settings_operation
 from ._appservice_utils import MSI_LOCAL_ID
+from ._deployment_context_engine import raise_enriched_deployment_error
 from .utils import (_normalize_sku,
                     get_sku_tier,
                     retryable_method,
@@ -9838,15 +9839,25 @@ def _make_onedeploy_request(params):
     if response.status_code == 202 or response.status_code == 200:
         response_body = None
         if poll_async_deployment_for_debugging:
-            if params.track_status is not None and params.track_status:
-                response_body = _check_runtimestatus_with_deploymentstatusapi(params.cmd, params.resource_group_name,
-                                                                              params.webapp_name, params.slot,
-                                                                              deployment_status_url,
-                                                                              params.is_async_deployment,
-                                                                              params.timeout)
-            else:
-                response_body = _check_zip_deployment_status(params.cmd, params.resource_group_name, params.webapp_name,
-                                                             deployment_status_url, params.slot, params.timeout)
+            try:
+                if params.track_status is not None and params.track_status:
+                    response_body = _check_runtimestatus_with_deploymentstatusapi(params.cmd,
+                                                                                  params.resource_group_name,
+                                                                                  params.webapp_name, params.slot,
+                                                                                  deployment_status_url,
+                                                                                  params.is_async_deployment,
+                                                                                  params.timeout)
+                else:
+                    response_body = _check_zip_deployment_status(params.cmd, params.resource_group_name,
+                                                                 params.webapp_name,
+                                                                 deployment_status_url, params.slot, params.timeout)
+            except CLIError as deploy_err:
+                # Enrich the downstream deployment-tracking error with context
+                raise_enriched_deployment_error(
+                    params=params,
+                    error_message=str(deploy_err),
+                    last_known_step="Deployment accepted (HTTP 200/202), tracking status"
+                )
             logger.info('Server response: %s', response_body)
         else:
             if 'application/json' in response.headers.get('content-type', ""):
@@ -9869,14 +9880,15 @@ def _make_onedeploy_request(params):
                               "starting a new deployment. You can track the ongoing deployment at {}"
                               .format(deployment_status_url))
 
-    # check if an error occured during deployment
+    # check if an error occurred during deployment — raise context-enriched error
     if response.status_code:
-        scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
-        latest_deploymentinfo_url = scm_url + "/api/deployments/latest"
-        raise CLIError("An error occurred during deployment. Status Code: {}, {} Please visit {}"
-                       " to get more information about your deployment"
-                       .format(response.status_code, f"Details: {response.text}," if response.text else "",
-                               latest_deploymentinfo_url))
+        raise_enriched_deployment_error(
+            params=params,
+            status_code=response.status_code,
+            error_message=response.text if response.text else None,
+            last_known_step="HTTP request sent to deployment API",
+            kudu_status=str(response.status_code)
+        )
 
 
 # OneDeploy
@@ -9887,8 +9899,37 @@ def _perform_onedeploy_internal(params):
 
     # Now make the OneDeploy API call
     logger.warning("Initiating deployment")
-    response = _make_onedeploy_request(params)
-    return response
+    try:
+        response = _make_onedeploy_request(params)
+        return response
+    except (ValidationError, ResourceNotFoundError):
+        # Known CLI validation errors (e.g. 409 conflict, 404 API not available) — re-raise as-is
+        raise
+    except CLIError as ex:
+        # Check if this is already an enriched error (from raise_enriched_deployment_error)
+        if "COPILOT CONTEXT" in str(ex):
+            raise
+        # Raw CLIError from send_raw_request or other deployment calls — enrich it
+        raise_enriched_deployment_error(
+            params=params,
+            error_message=str(ex),
+            last_known_step="Deployment request"
+        )
+    except HttpResponseError as ex:
+        # Azure SDK errors (e.g. Bad Request from ARM)
+        raise_enriched_deployment_error(
+            params=params,
+            status_code=ex.status_code if hasattr(ex, 'status_code') else None,
+            error_message=str(ex),
+            last_known_step="ARM deployment request"
+        )
+    except Exception as ex:  # pylint: disable=broad-except
+        # Catch-all for unexpected errors (connection errors, timeouts, etc.)
+        raise_enriched_deployment_error(
+            params=params,
+            error_message=str(ex),
+            last_known_step="Deployment request"
+        )
 
 
 def _wait_for_webapp(tunnel_server):
