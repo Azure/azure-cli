@@ -27,7 +27,6 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.commands.validators import get_default_location_from_resource_group, validate_tags
 from azure.cli.core.azclierror import RequiredArgumentMissingError, ResourceNotFoundError
 
-from azure.cli.command_modules.vm._client_factory import _compute_client_factory
 from azure.cli.command_modules.vm._validators import _get_resource_id
 
 logger = get_logger(__name__)
@@ -284,10 +283,16 @@ def process_image_template_create_namespace(cmd, namespace):  # pylint: disable=
 
     # 5 - check if source is an existing managed disk image resource
     if not source:
-        compute_client = _compute_client_factory(cmd.cli_ctx)
         try:
+            from .aaz.latest.image import Show as ImageShow
+            command_args = {
+                'image_name': namespace.source,
+                'resource_group': namespace.resource_group_name
+            }
+
+            # Purpose of calling ImageShow is just to check its existence
+            ImageShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
             image_name = namespace.source
-            compute_client.images.get(namespace.resource_group_name, namespace.source)
             namespace.source = _get_resource_id(cmd.cli_ctx, namespace.source, namespace.resource_group_name,
                                                 'images', 'Microsoft.Compute')
             source = {

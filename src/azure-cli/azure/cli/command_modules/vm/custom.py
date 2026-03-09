@@ -41,7 +41,7 @@ from ._vm_utils import read_content_if_is_file, import_aaz_by_profile, IdentityT
 from ._vm_diagnostics_templates import get_default_diag_config
 
 from ._actions import (load_images_from_aliases_doc, load_extension_images_thru_services,
-                       load_images_thru_services, _get_latest_image_version, _get_latest_image_version_by_aaz)
+                       load_images_thru_services, _get_latest_image_version_by_aaz)
 from ._client_factory import (_compute_client_factory, cf_vm_image_term)
 
 from .aaz.latest.vm.disk import AttachDetachDataDisk
@@ -1619,12 +1619,12 @@ def open_vm_port(cmd, resource_group_name, vm_name, port, priority=900, network_
     NSGShow, NSGCreate = _nsg.Show, _nsg.Create
     NSGRuleCreate = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.nsg.rule").Create
 
-    vm = get_vm(cmd, resource_group_name, vm_name)
-    location = vm.location
-    if not vm.network_profile:
+    vm = get_vm_by_aaz(cmd, resource_group_name, vm_name)
+    location = vm.get('location', '')
+    if not vm.get('networkProfile'):
         raise CLIError("Network profile not found for VM '{}'".format(vm_name))
 
-    nic_ids = list(vm.network_profile.network_interfaces)
+    nic_ids = vm.get('networkProfile', {}).get('networkInterfaces', [])
     if len(nic_ids) > 1:
         raise CLIError('Multiple NICs is not supported for this command. Create rules on the NSG '
                        'directly.')
@@ -1634,7 +1634,7 @@ def open_vm_port(cmd, resource_group_name, vm_name, port, priority=900, network_
     # get existing NSG or create a new one
     created_nsg = False
     nic = NicShow(cli_ctx=cmd.cli_ctx)(command_args={
-        'name': os.path.split(nic_ids[0].id)[1],
+        'name': os.path.split(nic_ids[0].get('id'))[1],
         'resource_group': resource_group_name
     })
     if not apply_to_subnet:
@@ -2303,30 +2303,30 @@ def get_boot_log(cmd, resource_group_name, vm_name):
 
 
 # region VirtualMachines Diagnostics
-def set_diagnostics_extension(
-        cmd, resource_group_name, vm_name, settings, protected_settings=None, version=None,
-        no_auto_upgrade=False):
-    client = _compute_client_factory(cmd.cli_ctx)
-    vm = client.virtual_machines.get(resource_group_name, vm_name, expand='instanceView')
-    # pylint: disable=no-member
-    is_linux_os = _is_linux_os(vm)
+def set_diagnostics_extension(cmd, resource_group_name, vm_name, settings, protected_settings=None, version=None,
+                              no_auto_upgrade=False):
+    from .aaz.latest.vm.extension import Delete as VmExtensionDelete
+    vm = get_instance_view(cmd, resource_group_name, vm_name)
+    is_linux_os = _is_linux_os_aaz(vm)
     vm_extension_name = _LINUX_DIAG_EXT if is_linux_os else _WINDOWS_DIAG_EXT
     if is_linux_os:  # check incompatible version
-        exts = vm.instance_view.extensions or []
+        exts = vm.get('instanceView', {}).get('extensions', [])
         major_ver = extension_mappings[_LINUX_DIAG_EXT]['version'].split('.', maxsplit=1)[0]
-        if next((e for e in exts if e.name == vm_extension_name and
-                 not e.type_handler_version.startswith(major_ver + '.')), None):
+        if next((e for e in exts if e.get('name') == vm_extension_name and
+                 not e.get('typeHandlerVersion', '').startswith(major_ver + '.')), None):
             logger.warning('There is an incompatible version of diagnostics extension installed. '
                            'We will update it with a new version')
-            poller = client.virtual_machine_extensions.begin_delete(resource_group_name, vm_name, vm_extension_name)
+            poller = VmExtensionDelete(cli_ctx=cmd.cli_ctx)(command_args={
+                'resource_group': resource_group_name,
+                'vm_extension_name': vm_extension_name,
+                'vm_name': vm_name
+            })
             LongRunningOperation(cmd.cli_ctx)(poller)
 
     return set_extension(cmd, resource_group_name, vm_name, vm_extension_name,
                          extension_mappings[vm_extension_name]['publisher'],
                          version or extension_mappings[vm_extension_name]['version'],
-                         settings,
-                         protected_settings,
-                         no_auto_upgrade)
+                         settings, protected_settings, no_auto_upgrade)
 
 
 def show_default_diagnostics_configuration(is_windows_os=False):
@@ -2348,12 +2348,13 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
                              source_snapshots_or_disks=None, source_disk_restore_point=None,
                              new_names_of_source_snapshots_or_disks=None, new_names_of_source_disk_restore_point=None):
     # attach multiple managed disks using disk attach API
-    vm = get_vm_to_update(cmd, resource_group_name, vm_name)
+    vm = get_vm_to_update_by_aaz(cmd, resource_group_name, vm_name)
+
     if not new and not sku and not size_gb and disk_ids is not None:
         if lun:
             disk_lun = lun
         else:
-            disk_lun = _get_disk_lun(vm.storage_profile.data_disks)
+            disk_lun = _get_disk_lun_by_aaz(vm.get("storageProfile", {}).get("dataDisks", []))
 
         data_disks = []
         for disk_item in disk_ids:
@@ -2374,8 +2375,8 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
     else:
         # attach multiple managed disks using vm PUT API
         from azure.mgmt.core.tools import parse_resource_id
-        DataDisk, ManagedDiskParameters, DiskCreateOption = cmd.get_models(
-            'DataDisk', 'ManagedDiskParameters', 'DiskCreateOptionTypes')
+        from .operations.vm import convert_show_result_to_snake_case
+
         if size_gb is None:
             default_size_gb = 1023
 
@@ -2386,30 +2387,46 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
             if lun:
                 disk_lun = lun
             else:
-                disk_lun = _get_disk_lun(vm.storage_profile.data_disks)
+                disk_lun = _get_disk_lun_by_aaz(vm.get("storageProfile", {}).get("dataDisks", []))
 
             if new:
-                data_disk = DataDisk(lun=disk_lun, create_option=DiskCreateOption.empty,
-                                     name=parse_resource_id(disk_item)['name'],
-                                     disk_size_gb=size_gb if size_gb else default_size_gb, caching=caching,
-                                     managed_disk=ManagedDiskParameters(storage_account_type=sku))
+                data_disk = {
+                    'lun': disk_lun,
+                    'createOption': 'Empty',
+                    'name': parse_resource_id(disk_item)['name'],
+                    'diskSizeGB': size_gb if size_gb else default_size_gb,
+                    'caching': caching,
+                    'managedDisk': {
+                        'storageAccountType': sku
+                    }
+                }
             else:
-                params = ManagedDiskParameters(id=disk_item, storage_account_type=sku)
-                data_disk = DataDisk(lun=disk_lun, create_option=DiskCreateOption.attach, managed_disk=params,
-                                     caching=caching)
+                data_disk = {
+                    'lun': disk_lun,
+                    'createOption': 'Attach',
+                    'managedDisk': {
+                        'id': disk_item,
+                        'storageAccountType': sku
+                    },
+                    'caching': caching
+                }
 
             if enable_write_accelerator:
-                data_disk.write_accelerator_enabled = enable_write_accelerator
+                data_disk["writeAcceleratorEnabled"] = enable_write_accelerator
 
-            vm.storage_profile.data_disks.append(data_disk)
-        disk_lun = _get_disk_lun(vm.storage_profile.data_disks)
+            if "storageProfile" not in vm:
+                vm["storageProfile"] = {}
+            if "dataDisks" not in vm["storageProfile"]:
+                vm["storageProfile"]["dataDisks"] = []
+            vm["storageProfile"]["dataDisks"].append(data_disk)
+        disk_lun = _get_disk_lun_by_aaz(vm.get("storageProfile", {}).get("dataDisks", []))
         if source_snapshots_or_disks is not None:
             if new_names_of_source_snapshots_or_disks is None:
                 new_names_of_source_snapshots_or_disks = [None] * len(source_snapshots_or_disks)
             for disk_id, disk_name in zip(source_snapshots_or_disks, new_names_of_source_snapshots_or_disks):
                 disk = {
                     'name': disk_name,
-                    'create_option': 'Copy',
+                    'createOption': 'Copy',
                     'caching': caching,
                     'lun': disk_lun,
                     'writeAcceleratorEnabled': enable_write_accelerator,
@@ -2419,7 +2436,7 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
                 }
                 if size_gb is not None:
                     disk.update({
-                        'diskSizeGb': size_gb
+                        'diskSizeGB': size_gb
                     })
                 if sku is not None:
                     disk.update({
@@ -2428,14 +2445,18 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
                         }
                     })
                 disk_lun += 1
-                vm.storage_profile.data_disks.append(disk)
+                if "storageProfile" not in vm:
+                    vm["storageProfile"] = {}
+                if "dataDisks" not in vm["storageProfile"]:
+                    vm["storageProfile"]["dataDisks"] = []
+                vm["storageProfile"]["dataDisks"].append(disk)
         if source_disk_restore_point is not None:
             if new_names_of_source_disk_restore_point is None:
                 new_names_of_source_disk_restore_point = [None] * len(source_disk_restore_point)
             for disk_id, disk_name in zip(source_disk_restore_point, new_names_of_source_disk_restore_point):
                 disk = {
                     'name': disk_name,
-                    'create_option': 'Restore',
+                    'createOption': 'Restore',
                     'caching': caching,
                     'lun': disk_lun,
                     'writeAcceleratorEnabled': enable_write_accelerator,
@@ -2445,7 +2466,7 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
                 }
                 if size_gb is not None:
                     disk.update({
-                        'diskSizeGb': size_gb
+                        'diskSizeGB': size_gb
                     })
                 if sku is not None:
                     disk.update({
@@ -2454,9 +2475,14 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
                         }
                     })
                 disk_lun += 1
-                vm.storage_profile.data_disks.append(disk)
+                if "storageProfile" not in vm:
+                    vm["storageProfile"] = {}
+                if "dataDisks" not in vm["storageProfile"]:
+                    vm["storageProfile"]["dataDisks"] = []
+                vm["storageProfile"]["dataDisks"].append(disk)
 
-        set_vm(cmd, vm)
+        vm = convert_show_result_to_snake_case(vm)
+        set_vm_by_aaz(cmd, vm)
 
 
 def detach_unmanaged_data_disk(cmd, resource_group_name, vm_name, disk_name):
@@ -2476,6 +2502,8 @@ def detach_unmanaged_data_disk(cmd, resource_group_name, vm_name, disk_name):
 
 
 def detach_managed_data_disk(cmd, resource_group_name, vm_name, disk_name=None, force_detach=None, disk_ids=None):
+    from .operations.vm import convert_show_result_to_snake_case
+
     if disk_ids is not None:
         data_disks = []
         for disk_item in disk_ids:
@@ -2489,27 +2517,29 @@ def detach_managed_data_disk(cmd, resource_group_name, vm_name, disk_name=None, 
         return result
     else:
         # here we handle managed disk
-        vm = get_vm_to_update(cmd, resource_group_name, vm_name)
+        vm = get_vm_to_update_by_aaz(cmd, resource_group_name, vm_name)
         if not force_detach:
             # pylint: disable=no-member
-            leftovers = [d for d in vm.storage_profile.data_disks if d.name.lower() != disk_name.lower()]
-            if len(vm.storage_profile.data_disks) == len(leftovers):
+            leftovers = [d for d in vm.get("storageProfile", {}).get("dataDisks", [])
+                         if d["name"].lower() != disk_name.lower()]
+            if len(vm.get("storageProfile", {}).get("dataDisks", [])) == len(leftovers):
                 raise ResourceNotFoundError("No disk with the name '{}' was found".format(disk_name))
         else:
-            DiskDetachOptionTypes = cmd.get_models('DiskDetachOptionTypes', resource_type=ResourceType.MGMT_COMPUTE,
-                                                   operation_group='virtual_machines')
-            leftovers = vm.storage_profile.data_disks
+            leftovers = vm.get("storageProfile", {}).get("dataDisks", [])
             is_contains = False
             for d in leftovers:
-                if d.name.lower() == disk_name.lower():
-                    d.to_be_detached = True
-                    d.detach_option = DiskDetachOptionTypes.FORCE_DETACH
+                if d["name"].lower() == disk_name.lower():
+                    d["toBeDetached"] = True
+                    d["detachOption"] = "ForceDetach"
                     is_contains = True
                     break
             if not is_contains:
                 raise ResourceNotFoundError("No disk with the name '{}' was found".format(disk_name))
-        vm.storage_profile.data_disks = leftovers
-        set_vm(cmd, vm)
+        if "storageProfile" not in vm:
+            vm["storageProfile"] = {}
+        vm["storageProfile"]["dataDisks"] = leftovers
+        vm = convert_show_result_to_snake_case(vm)
+        set_vm_by_aaz(cmd, vm)
 # endregion
 
 
@@ -2772,7 +2802,7 @@ def show_vm_image(cmd, urn=None, publisher=None, offer=None, sku=None, version=N
         elif len(items) == 4:
             publisher, offer, sku, version = urn.split(":")
         if version.lower() == 'latest':
-            version = _get_latest_image_version(cmd.cli_ctx, location, publisher, offer, sku)
+            version = _get_latest_image_version_by_aaz(cmd.cli_ctx, location, publisher, offer, sku)
     elif not publisher or not offer or not sku or not version:
         raise RequiredArgumentMissingError(error_msg)
     if edge_zone is not None:
@@ -4382,31 +4412,36 @@ def get_vmss_instance_view(cmd, resource_group_name, vm_scale_set_name, instance
 
 def list_vmss_instance_connection_info(cmd, resource_group_name, vm_scale_set_name):
     from azure.mgmt.core.tools import parse_resource_id
+    from .operations.vmss import VMSSShow
 
     LBShow = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.lb").Show
     PublicIPAddress = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "network.public_ip").Show
 
-    client = _compute_client_factory(cmd.cli_ctx)
-    vmss = client.virtual_machine_scale_sets.get(resource_group_name, vm_scale_set_name)
+    command_args = {
+        'resource_group': resource_group_name,
+        'vm_scale_set_name': vm_scale_set_name
+    }
+    vmss = VMSSShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
-    from ._vm_utils import raise_unsupported_error_for_flex_vmss
-    raise_unsupported_error_for_flex_vmss(
+    from ._vm_utils import raise_unsupported_error_for_flex_vmss_by_aaz
+    raise_unsupported_error_for_flex_vmss_by_aaz(
         vmss, 'This command is not available for VMSS in Flex mode. '
               'Please use the "az network public-ip list/show" to retrieve networking information.')
 
     # find the load balancer
-    nic_configs = vmss.virtual_machine_profile.network_profile.network_interface_configurations
-    primary_nic_config = next((n for n in nic_configs if n.primary), None)
+    nic_configs = \
+        vmss.get('virtualMachineProfile', {}).get('networkProfile', {}).get('networkInterfaceConfigurations', [])
+    primary_nic_config = next((n for n in nic_configs if n.get('primary')), {})
     if primary_nic_config is None:
         raise CLIError('could not find a primary NIC which is needed to search to load balancer')
 
     res_id = None
-    for ip in primary_nic_config.ip_configurations:
-        if ip.load_balancer_inbound_nat_pools:
-            res_id = ip.load_balancer_inbound_nat_pools[0].id
+    for ip in primary_nic_config.get('ipConfigurations', []):
+        if len(ip.get('loadBalancerInboundNatPools', [])) > 0:
+            res_id = ip['loadBalancerInboundNatPools'][0].get('id')
             break
-        if ip.load_balancer_backend_address_pools:
-            res_id = ip.load_balancer_backend_address_pools[0].id
+        if len(ip.get('loadBalancerBackendAddressPools', [])) > 0:
+            res_id = ip['loadBalancerBackendAddressPools'][0].get('id')
             break
 
     if not res_id:
@@ -4469,12 +4504,16 @@ def list_vmss_instance_connection_info(cmd, resource_group_name, vm_scale_set_na
 
 
 def list_vmss_instance_public_ips(cmd, resource_group_name, vm_scale_set_name):
+    from .operations.vmss import VMSSShow
     ListInstancePublicIps = import_aaz_by_profile(cmd.cli_ctx.cloud.profile, "vmss").ListInstancePublicIps
 
-    compute_client = _compute_client_factory(cmd.cli_ctx)
-    vmss = compute_client.virtual_machine_scale_sets.get(resource_group_name, vm_scale_set_name)
-    from ._vm_utils import raise_unsupported_error_for_flex_vmss
-    raise_unsupported_error_for_flex_vmss(
+    command_args = {
+        'resource_group': resource_group_name,
+        'vm_scale_set_name': vm_scale_set_name
+    }
+    vmss = VMSSShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+    from ._vm_utils import raise_unsupported_error_for_flex_vmss_by_aaz
+    raise_unsupported_error_for_flex_vmss_by_aaz(
         vmss, 'This command is not available for VMSS in Flex mode. '
               'Please use the "az network public-ip list/show" to retrieve networking information.')
 
@@ -4509,52 +4548,72 @@ def reimage_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None,
 
 
 def restart_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False):
-    client = _compute_client_factory(cmd.cli_ctx)
-    VirtualMachineScaleSetVMInstanceRequiredIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceRequiredIDs')
-    if instance_ids is None:
+    from .aaz.latest.vmss import Restart as VmssRestart
+    if not instance_ids:
         instance_ids = ['*']
-    instance_ids = VirtualMachineScaleSetVMInstanceRequiredIDs(instance_ids=instance_ids)
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_restart, resource_group_name, vm_scale_set_name,
-                       vm_instance_i_ds=instance_ids)
+    command_args = {
+        'resource_group': resource_group_name,
+        'vm_scale_set_name': vm_scale_set_name,
+        'instance_ids': instance_ids,
+        'no_wait': no_wait
+    }
+    return VmssRestart(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
 # pylint: disable=inconsistent-return-statements
 def scale_vmss(cmd, resource_group_name, vm_scale_set_name, new_capacity, no_wait=False):
-    VirtualMachineScaleSet = cmd.get_models('VirtualMachineScaleSet')
-    client = _compute_client_factory(cmd.cli_ctx)
-    vmss = client.virtual_machine_scale_sets.get(resource_group_name, vm_scale_set_name)
-    # pylint: disable=no-member
-    if vmss.sku.capacity == new_capacity:
+    from .operations.vmss import VMSSCreate, VMSSShow
+    vmss = VMSSShow(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'vm_scale_set_name': vm_scale_set_name
+    })
+    if vmss.get('sku', {}).get('capacity') == new_capacity:
         return
 
-    vmss.sku.capacity = new_capacity
-    vmss_new = VirtualMachineScaleSet(location=vmss.location, sku=vmss.sku)
-    if vmss.extended_location is not None:
-        vmss_new.extended_location = vmss.extended_location
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update,
-                       resource_group_name, vm_scale_set_name, vmss_new)
+    vmss_new = {
+        'resource_group': resource_group_name,
+        'vm_scale_set_name': vm_scale_set_name,
+        'no_wait': no_wait
+    }
+
+    if vmss.get('extended_location'):
+        vmss_new['extended_location'] = vmss['extendedLocation']
+
+    if vmss.get('location'):
+        vmss_new['location'] = vmss['location']
+
+    if vmss.get('sku'):
+        vmss_new['sku'] = vmss['sku']
+    else:
+        vmss_new['sku'] = {}
+
+    vmss_new['sku']['capacity'] = new_capacity
+
+    return VMSSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss_new)
 
 
 def stop_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False, skip_shutdown=False):
-    client = _compute_client_factory(cmd.cli_ctx)
-    VirtualMachineScaleSetVMInstanceRequiredIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceRequiredIDs')
+    from .aaz.latest.vmss import Stop as VmssStop
     if instance_ids is None:
         instance_ids = ['*']
-    instance_ids = VirtualMachineScaleSetVMInstanceRequiredIDs(instance_ids=instance_ids)
-    if cmd.supported_api_version(min_api='2020-06-01', operation_group='virtual_machine_scale_sets'):
-        return sdk_no_wait(
-            no_wait, client.virtual_machine_scale_sets.begin_power_off, resource_group_name, vm_scale_set_name,
-            vm_instance_i_ds=instance_ids, skip_shutdown=skip_shutdown)
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_power_off, resource_group_name,
-                       vm_scale_set_name, vm_instance_i_ds=instance_ids)
+    command_args = {
+        'resource_group': resource_group_name,
+        'vm_scale_set_name': vm_scale_set_name,
+        'skip_shutdown': skip_shutdown,
+        'instance_ids': instance_ids,
+        'no_wait': no_wait
+    }
+    return VmssStop(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
 def update_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_ids, no_wait=False):
-    client = _compute_client_factory(cmd.cli_ctx)
-    VirtualMachineScaleSetVMInstanceRequiredIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceRequiredIDs')
-    instance_ids = VirtualMachineScaleSetVMInstanceRequiredIDs(instance_ids=instance_ids)
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_update_instances,
-                       resource_group_name, vm_scale_set_name, instance_ids)
+    from .aaz.latest.vmss import Manualupgrade
+    return Manualupgrade(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'vm_scale_set_name': vm_scale_set_name,
+        'instance_ids': instance_ids,
+        'no_wait': no_wait,
+    })
 
 
 def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False, instance_id=None,
@@ -5977,15 +6036,15 @@ def _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_
 
 def execute_query_for_vm(cmd, client, resource_group_name, vm_name, analytics_query, timespan=None):
     """Executes a query against the Log Analytics workspace linked with a vm."""
-    vm = get_vm(cmd, resource_group_name, vm_name)
+    vm = get_vm_by_aaz(cmd, resource_group_name, vm_name)
     workspace = None
-    extension_resources = vm.resources or []
+    extension_resources = vm.get('resources', [])
     for resource in extension_resources:
-        if resource.name == "MicrosoftMonitoringAgent" or resource.name == "OmsAgentForLinux":
-            workspace = resource.settings.get('workspaceId', None)
+        if resource.get('name') in (_WINDOWS_OMS_AGENT_EXT, _LINUX_OMS_AGENT_EXT):
+            workspace = resource.get('settings', {}).get('workspaceId', None)
     if workspace is None:
         raise CLIError('Cannot find the corresponding log analytics workspace. '
-                       'Please check the status of log analytics workpsace.')
+                       'Please check the status of log analytics workspace.')
     return client.query_workspace(workspace, analytics_query, timespan=timespan)
 
 
