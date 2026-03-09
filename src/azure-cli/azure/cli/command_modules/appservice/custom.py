@@ -881,6 +881,9 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     app_is_linux_webapp = is_linux_webapp(app)
     app_is_function_app = is_functionapp(app)
 
+    # Should we enrich deployment errors with context? (webapp only, not functionapp)
+    _should_enrich_errors = not app_is_function_app
+
     # Read file content
     with open(os.path.realpath(os.path.expanduser(src)), 'rb') as fs:
         zip_content = fs.read()
@@ -913,13 +916,26 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     # check the status of async deployment
     if res.status_code == 202:
         response_body = None
-        if track_status:
-            response_body = _check_runtimestatus_with_deploymentstatusapi(cmd, resource_group_name, name, slot,
-                                                                          deployment_status_url, is_async=True,
-                                                                          timeout=timeout)
-        else:
-            response_body = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
-                                                         slot, timeout)
+        try:
+            if track_status:
+                response_body = _check_runtimestatus_with_deploymentstatusapi(cmd, resource_group_name, name, slot,
+                                                                              deployment_status_url, is_async=True,
+                                                                              timeout=timeout)
+            else:
+                response_body = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
+                                                             slot, timeout)
+        except CLIError as deploy_err:
+            if _should_enrich_errors:
+                raise_enriched_deployment_error(
+                    cmd=cmd,
+                    resource_group_name=resource_group_name,
+                    webapp_name=name,
+                    slot=slot,
+                    artifact_type="zip",
+                    error_message=str(deploy_err),
+                    last_known_step="Zip deployment accepted (HTTP 202), tracking status"
+                )
+            raise
         return response_body
 
     # check if there's an ongoing process
@@ -934,6 +950,18 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
 
     # check if an error occured during deployment
     if res.status_code:
+        if _should_enrich_errors:
+            raise_enriched_deployment_error(
+                cmd=cmd,
+                resource_group_name=resource_group_name,
+                webapp_name=name,
+                slot=slot,
+                artifact_type="zip",
+                status_code=res.status_code,
+                error_message=res.text if res.text else None,
+                last_known_step="Zip deployment HTTP request",
+                kudu_status=str(res.status_code)
+            )
         raise AzureInternalError("An error occured during deployment. Status Code: {}, Details: {}"
                                  .format(res.status_code, res.text))
 
@@ -9852,12 +9880,14 @@ def _make_onedeploy_request(params):
                                                                  params.webapp_name,
                                                                  deployment_status_url, params.slot, params.timeout)
             except CLIError as deploy_err:
-                # Enrich the downstream deployment-tracking error with context
-                raise_enriched_deployment_error(
-                    params=params,
-                    error_message=str(deploy_err),
-                    last_known_step="Deployment accepted (HTTP 200/202), tracking status"
-                )
+                if not params.is_functionapp:
+                    # Enrich the downstream deployment-tracking error with context
+                    raise_enriched_deployment_error(
+                        params=params,
+                        error_message=str(deploy_err),
+                        last_known_step="Deployment accepted (HTTP 200/202), tracking status"
+                    )
+                raise
             logger.info('Server response: %s', response_body)
         else:
             if 'application/json' in response.headers.get('content-type', ""):
@@ -9880,15 +9910,22 @@ def _make_onedeploy_request(params):
                               "starting a new deployment. You can track the ongoing deployment at {}"
                               .format(deployment_status_url))
 
-    # check if an error occurred during deployment — raise context-enriched error
+    # check if an error occurred during deployment
     if response.status_code:
-        raise_enriched_deployment_error(
-            params=params,
-            status_code=response.status_code,
-            error_message=response.text if response.text else None,
-            last_known_step="HTTP request sent to deployment API",
-            kudu_status=str(response.status_code)
-        )
+        if not params.is_functionapp:
+            raise_enriched_deployment_error(
+                params=params,
+                status_code=response.status_code,
+                error_message=response.text if response.text else None,
+                last_known_step="HTTP request sent to deployment API",
+                kudu_status=str(response.status_code)
+            )
+        scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
+        latest_deploymentinfo_url = scm_url + "/api/deployments/latest"
+        raise CLIError("An error occurred during deployment. Status Code: {}, {} Please visit {}"
+                       " to get more information about your deployment"
+                       .format(response.status_code, f"Details: {response.text}," if response.text else "",
+                               latest_deploymentinfo_url))
 
 
 # OneDeploy
@@ -9909,27 +9946,33 @@ def _perform_onedeploy_internal(params):
         # Check if this is already an enriched error (from raise_enriched_deployment_error)
         if "COPILOT CONTEXT" in str(ex):
             raise
-        # Raw CLIError from send_raw_request or other deployment calls — enrich it
-        raise_enriched_deployment_error(
-            params=params,
-            error_message=str(ex),
-            last_known_step="Deployment request"
-        )
+        if not params.is_functionapp:
+            # Raw CLIError from send_raw_request or other deployment calls — enrich it
+            raise_enriched_deployment_error(
+                params=params,
+                error_message=str(ex),
+                last_known_step="Deployment request"
+            )
+        raise
     except HttpResponseError as ex:
-        # Azure SDK errors (e.g. Bad Request from ARM)
-        raise_enriched_deployment_error(
-            params=params,
-            status_code=ex.status_code if hasattr(ex, 'status_code') else None,
-            error_message=str(ex),
-            last_known_step="ARM deployment request"
-        )
+        if not params.is_functionapp:
+            # Azure SDK errors (e.g. Bad Request from ARM)
+            raise_enriched_deployment_error(
+                params=params,
+                status_code=ex.status_code if hasattr(ex, 'status_code') else None,
+                error_message=str(ex),
+                last_known_step="ARM deployment request"
+            )
+        raise
     except Exception as ex:  # pylint: disable=broad-except
-        # Catch-all for unexpected errors (connection errors, timeouts, etc.)
-        raise_enriched_deployment_error(
-            params=params,
-            error_message=str(ex),
-            last_known_step="Deployment request"
-        )
+        if not params.is_functionapp:
+            # Catch-all for unexpected errors (connection errors, timeouts, etc.)
+            raise_enriched_deployment_error(
+                params=params,
+                error_message=str(ex),
+                last_known_step="Deployment request"
+            )
+        raise
 
 
 def _wait_for_webapp(tunnel_server):

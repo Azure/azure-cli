@@ -189,6 +189,24 @@ class TestDeploymentContextEngine(unittest.TestCase):
         params = _make_mock_params(artifact_type="war", src_url=None)
         self.assertEqual(_determine_deployment_type(params), "WarDeploy")
 
+    def test_determine_deployment_type_kwargs_zip(self):
+        """kwargs-only calling convention (no params object)."""
+        self.assertEqual(_determine_deployment_type(artifact_type="zip"), "ZipDeploy")
+
+    def test_determine_deployment_type_kwargs_url(self):
+        self.assertEqual(
+            _determine_deployment_type(src_url="https://example.com/app.zip"),
+            "OneDeploy (URL-based)"
+        )
+
+    def test_determine_deployment_type_kwargs_override(self):
+        """Explicit kwargs should override params values."""
+        params = _make_mock_params(artifact_type="war", src_url=None)
+        self.assertEqual(
+            _determine_deployment_type(params, artifact_type="jar"),
+            "JarDeploy"
+        )
+
     def test_build_context_with_known_pattern(self):
         self._patch_app_metadata()
         params = _make_mock_params()
@@ -288,6 +306,41 @@ class TestDeploymentContextEngine(unittest.TestCase):
             )
         self.assertIn("ZipDeployTimeout", str(cm.exception))
         self.assertIn("COPILOT CONTEXT", str(cm.exception))
+
+    def test_raise_enriched_deployment_error_kwargs_only(self):
+        """Call raise_enriched_deployment_error with kwargs instead of params."""
+        self._patch_app_metadata()
+        mock_cmd = MagicMock()
+        mock_cmd.cli_ctx = MagicMock()
+        from knack.util import CLIError
+        with self.assertRaises(CLIError) as cm:
+            raise_enriched_deployment_error(
+                cmd=mock_cmd,
+                resource_group_name="test-rg",
+                webapp_name="test-app",
+                artifact_type="zip",
+                status_code=504,
+                error_message="Gateway Timeout"
+            )
+        self.assertIn("ZipDeployTimeout", str(cm.exception))
+        self.assertIn("COPILOT CONTEXT", str(cm.exception))
+        self.assertIn("ZipDeploy", str(cm.exception))
+
+    def test_build_context_kwargs_only(self):
+        """Call build_enriched_error_context with kwargs instead of params."""
+        self._patch_app_metadata()
+        mock_cmd = MagicMock()
+        mock_cmd.cli_ctx = MagicMock()
+        ctx = build_enriched_error_context(
+            cmd=mock_cmd,
+            resource_group_name="test-rg",
+            webapp_name="test-app",
+            artifact_type="zip",
+            status_code=504,
+            error_message="Gateway Timeout"
+        )
+        self.assertEqual(ctx["errorCode"], "ZipDeployTimeout")
+        self.assertEqual(ctx["deploymentType"], "ZipDeploy")
 
 
 # ---------------------------------------------------------------------------

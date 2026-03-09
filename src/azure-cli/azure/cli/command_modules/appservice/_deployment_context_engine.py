@@ -79,36 +79,51 @@ def _get_app_plan_sku(cmd, resource_group_name, webapp_name):
         return "Unknown"
 
 
-def _determine_deployment_type(params):
-    """Infer the deployment mechanism from the params."""
-    if params.src_url:
+def _determine_deployment_type(params=None, *, src_url=None, artifact_type=None):
+    """Infer the deployment mechanism from params object or explicit kwargs.
+
+    When *params* is supplied the values are read from it; explicit kwargs
+    override the params-derived values when both are provided.
+    """
+    _src_url = src_url if src_url is not None else (getattr(params, 'src_url', None) if params else None)
+    _artifact = artifact_type if artifact_type is not None else (getattr(params, 'artifact_type', None) if params else None)
+
+    if _src_url:
         return "OneDeploy (URL-based)"
-    artifact = getattr(params, 'artifact_type', None)
-    if artifact == 'zip':
+    if _artifact == 'zip':
         return "ZipDeploy"
-    if artifact == 'war':
+    if _artifact == 'war':
         return "WarDeploy"
-    if artifact == 'jar':
+    if _artifact == 'jar':
         return "JarDeploy"
-    if artifact == 'ear':
+    if _artifact == 'ear':
         return "EarDeploy"
-    if artifact == 'startup':
+    if _artifact == 'startup':
         return "StartupFile"
-    if artifact == 'static':
+    if _artifact == 'static':
         return "StaticDeploy"
     return "OneDeploy"
 
 
-def build_enriched_error_context(params, status_code=None, error_message=None,
+def build_enriched_error_context(params=None, *, cmd=None, resource_group_name=None,
+                                 webapp_name=None, slot=None, src_url=None,
+                                 artifact_type=None, status_code=None, error_message=None,
                                  deployment_status=None, deployment_properties=None,
                                  last_known_step=None, kudu_status=None):
     """
     Build a structured context-enriched error dict for a deployment failure.
 
+    Accepts either a *params* object (``OneDeployParams``) **or** individual
+    keyword arguments — callers that already have a params object can keep
+    passing it; callers in code-paths that don't (e.g. zipdeploy) can pass
+    the relevant values directly.  Explicit kwargs override params values.
+
     Parameters
     ----------
-    params : OneDeployParams
+    params : OneDeployParams, optional
         The deployment parameters object.
+    cmd, resource_group_name, webapp_name, slot, src_url, artifact_type :
+        Individual app-context values; used when *params* is not supplied.
     status_code : int, optional
         HTTP status code of the failed response.
     error_message : str, optional
@@ -127,6 +142,14 @@ def build_enriched_error_context(params, status_code=None, error_message=None,
     dict
         Structured error context ready for display.
     """
+    # Normalise — extract from params when available, explicit kwargs win
+    _cmd = cmd or (params.cmd if params else None)
+    _rg = resource_group_name or (params.resource_group_name if params else None)
+    _name = webapp_name or (params.webapp_name if params else None)
+    _slot = slot if slot is not None else (getattr(params, 'slot', None) if params else None)
+    _src_url = src_url if src_url is not None else (getattr(params, 'src_url', None) if params else None)
+    _artifact = artifact_type if artifact_type is not None else (getattr(params, 'artifact_type', None) if params else None)
+
     pattern = match_failure_pattern(
         status_code=status_code,
         error_message=error_message,
@@ -144,11 +167,18 @@ def build_enriched_error_context(params, status_code=None, error_message=None,
         context["stage"] = deployment_status or "Unknown"
 
     # App metadata (best-effort)
-    context["runtime"] = _get_app_runtime(params.cmd, params.resource_group_name,
-                                          params.webapp_name, params.slot)
-    context["deploymentType"] = _determine_deployment_type(params)
-    context["region"] = _get_app_region(params.cmd, params.resource_group_name, params.webapp_name)
-    context["planSku"] = _get_app_plan_sku(params.cmd, params.resource_group_name, params.webapp_name)
+    if _cmd and _rg and _name:
+        context["runtime"] = _get_app_runtime(_cmd, _rg, _name, _slot)
+        context["region"] = _get_app_region(_cmd, _rg, _name)
+        context["planSku"] = _get_app_plan_sku(_cmd, _rg, _name)
+    else:
+        context["runtime"] = "Unknown"
+        context["region"] = "Unknown"
+        context["planSku"] = "Unknown"
+
+    context["deploymentType"] = _determine_deployment_type(
+        params, src_url=_src_url, artifact_type=_artifact
+    )
 
     # Causes and fixes
     if pattern:
@@ -158,9 +188,9 @@ def build_enriched_error_context(params, status_code=None, error_message=None,
         context["commonCauses"] = ["Unrecognised failure — see error details below"]
         context["suggestedFixes"] = [
             "Check deployment logs: 'az webapp log deployment show -n {} -g {}'".format(
-                params.webapp_name, params.resource_group_name),
+                _name or '<app>', _rg or '<rg>'),
             "Check runtime logs: 'az webapp log tail -n {} -g {}'".format(
-                params.webapp_name, params.resource_group_name)
+                _name or '<app>', _rg or '<rg>')
         ]
 
     # Extra diagnostics
@@ -251,16 +281,25 @@ def format_enriched_error_message(context):
     return "\n".join(lines)
 
 
-def raise_enriched_deployment_error(params, status_code=None, error_message=None,
+def raise_enriched_deployment_error(params=None, *, cmd=None, resource_group_name=None,
+                                    webapp_name=None, slot=None, src_url=None,
+                                    artifact_type=None, status_code=None, error_message=None,
                                     deployment_status=None, deployment_properties=None,
                                     last_known_step=None, kudu_status=None):
     """
     Build context-enriched diagnostics and raise a CLIError.
 
     This is the main entry-point called from the deployment code paths.
+    Accepts either a *params* object or individual keyword arguments.
     """
     context = build_enriched_error_context(
         params=params,
+        cmd=cmd,
+        resource_group_name=resource_group_name,
+        webapp_name=webapp_name,
+        slot=slot,
+        src_url=src_url,
+        artifact_type=artifact_type,
         status_code=status_code,
         error_message=error_message,
         deployment_status=deployment_status,
