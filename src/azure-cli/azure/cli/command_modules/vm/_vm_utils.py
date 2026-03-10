@@ -823,3 +823,12 @@ class UpgradeMode(Enum):
     AUTOMATIC = 'Automatic'
     MANUAL = 'Manual'
     ROLLING = 'Rolling'
+
+
+class OrchestrationServiceNames(Enum):
+    AUTOMATIC_REPAIRS = 'AutomaticRepairs'
+
+
+class OrchestrationServiceStateAction(Enum):
+    RESUME = 'Resume'
+    SUSPEND = 'Suspend'

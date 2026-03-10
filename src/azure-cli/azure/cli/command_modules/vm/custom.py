@@ -5315,11 +5315,15 @@ def set_orchestration_service_state(cmd, resource_group_name, vm_scale_set_name,
     # currently service_name has only one available value "AutomaticRepairs". And SDK does not accept service_name,
     # instead SDK assign it to "AutomaticRepairs" in its own logic. As there may be more service name to be supported,
     # we define service_name as a required parameter here to avoid introducing a breaking change in the future.
-    client = _compute_client_factory(cmd.cli_ctx)
-    OrchestrationServiceStateInput = cmd.get_models('OrchestrationServiceStateInput')
-    state_input = OrchestrationServiceStateInput(service_name=service_name, action=action)
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_set_orchestration_service_state,
-                       resource_group_name, vm_scale_set_name, state_input)
+    from .aaz.latest.vmss import SetOrchestrationServiceState as VmssSetOrchestrationServiceState
+    command_args = {
+        'resource_group': resource_group_name,
+        'vm_scale_set_name': vm_scale_set_name,
+        'action': action,
+        'service_name': service_name,
+        'no_wait': no_wait
+    }
+    return VmssSetOrchestrationServiceState(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
 def upgrade_vmss_extension(cmd, resource_group_name, vm_scale_set_name, no_wait=False):
