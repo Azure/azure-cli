@@ -903,7 +903,7 @@ def check_protection_enabled_for_vm(cmd, vm_id=None, vm=None, resource_group_nam
     vm = VMShow(cli_ctx=cmd.cli_ctx)(command_args={
         'resource_group': vm_rg,
         'vm_name': vm_name
-    }).get('id')
+    })
     parameters = BackupStatusRequest(resource_type='VM', resource_id=vm_id)
     return backup_status_cf(cmd.cli_ctx).get(vm.get('location'), parameters).vault_id
 
