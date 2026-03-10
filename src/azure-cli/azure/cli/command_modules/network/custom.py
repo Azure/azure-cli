@@ -6756,3 +6756,19 @@ def create_ddos_custom_policy(cmd, ddos_custom_policy_name, resource_group_name,
     policy['no_wait'] = no_wait
 
     return DdosCustomPolicyCreate(cli_ctx=cmd.cli_ctx)(command_args=policy)
+
+
+def get_vm(cli_ctx, resource_group_name, vm_name):
+    from ..vm.operations.vm import VMShow
+    return VMShow(cli_ctx=cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'vm_name': vm_name
+    })
+
+
+def get_vmss(cli_ctx, resource_group_name, vmss_name):
+    from ..vm.operations.vmss import VMSSShow
+    return VMSSShow(cli_ctx=cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'vm_scale_set_name': vmss_name
+    })
