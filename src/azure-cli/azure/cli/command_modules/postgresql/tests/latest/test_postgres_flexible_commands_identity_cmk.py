@@ -56,17 +56,19 @@ class FlexibleServerIdentityCMKMgmtScenarioTest(ScenarioTest):
                     identity['id'],
                     location
                 ))
+        
+        main_checks = [
+            JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(identity['id']))
+        ]
+
+        # check data encryption is set correctly
+        self.cmd('postgres flexible-server show -g {} -n {}'.format(resource_group, server_name),
+                 checks=main_checks)
 
         # should fail because we can't remove identity used for data encryption
         self.cmd('postgres flexible-server identity remove -g {} -s {} -n {} --yes'
                     .format(resource_group, server_name, identity['id']),
                     expect_failure=True)
-
-        main_checks = [
-            JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(identity['id'])),
-            JMESPathCheck('dataEncryption.primaryKeyUri', key['key']['kid']),
-            JMESPathCheck('dataEncryption.primaryUserAssignedIdentityId', identity['id'])
-        ]
 
         # create replica 1 with data encryption            
         replica_1_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)

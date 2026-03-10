@@ -35,7 +35,7 @@ from ._flexible_server_util import generate_missing_parameters, resolve_poller, 
     generate_password, parse_maintenance_window, get_current_time, build_identity_and_data_encryption, \
     _is_resource_name, get_tenant_id, get_case_insensitive_key_value, get_enum_value_true_false, \
     get_postgres_tiers, get_postgres_skus
-from ._flexible_server_location_capabilities_util import get_postgres_location_capability_info
+from ._flexible_server_location_capabilities_util import get_postgres_location_capability_info, get_postgres_server_capability_info
 from ._util import get_autonomous_tuning_settings_map
 from .flexible_server_custom_common import create_firewall_rule
 from .flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone, prepare_public_network
@@ -479,8 +479,8 @@ def flexible_server_update_custom_func(cmd, client, instance,
         if zonal_resiliency.lower() == 'disabled':
             high_availability = 'Disabled'
         else:
-            list_location_capability_info = get_postgres_location_capability_info(cmd, location)
-            single_az = list_location_capability_info['single_az']
+            list_capability_info = get_postgres_server_capability_info(cmd, resource_group_name, server_name)
+            single_az = list_capability_info['single_az']
             high_availability = 'SameZone' if single_az and allow_same_zone else 'ZoneRedundant'
     if high_availability:
         high_availability_param.mode = high_availability
@@ -1057,7 +1057,7 @@ def flexible_server_identity_remove(cmd, client, resource_group_name, server_nam
     for identity in identities:
         identities_map[identity] = None
 
-    system_assigned_identity = instance.identity and 'principalId' in instance.identity.additional_properties and instance.identity.additional_properties['principalId'] is not None
+    system_assigned_identity = instance.identity and instance.identity.principal_id is not None
 
     # if there are no user-assigned identities or all user-assigned identities are already removed
     if not (instance.identity and instance.identity.user_assigned_identities) or \
@@ -1134,9 +1134,11 @@ def flexible_server_microsoft_entra_admin_set(cmd, client, resource_group_name, 
 # Create Microsoft Entra admin
 def _create_admin(client, resource_group_name, server_name, principal_name, sid, principal_type=None, no_wait=False):
     parameters = {
-        'principal_name': principal_name,
-        'tenant_id': get_tenant_id(),
-        'principal_type': principal_type
+        'properties': {
+            'principalName': principal_name,
+            'tenantId': get_tenant_id(),
+            'principalType': principal_type
+        }
     }
 
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, server_name, sid, parameters)
@@ -1418,9 +1420,10 @@ def virtual_endpoint_create_func(cmd, client, resource_group_name, server_name, 
     validate_virtual_endpoint_name_availability(cmd, virtual_endpoint_name)
 
     parameters = {
-        'name': virtual_endpoint_name,
-        'endpoint_type': endpoint_type,
-        'members': [members]
+        'properties': {
+            'endpointType': endpoint_type,
+            'members': [members]
+        }
     }
 
     return client.begin_create(
@@ -1469,9 +1472,10 @@ def virtual_endpoint_update_func(cmd, client, resource_group_name, server_name, 
     validate_citus_cluster(cmd, resource_group_name, server_name)
 
     parameters = {
-        'name': virtual_endpoint_name,
-        'endpoint_type': endpoint_type,
-        'members': [members]
+        'properties': {
+            'endpointType': endpoint_type,
+            'members': [members]
+        }
     }
 
     return client.begin_update(
@@ -1497,7 +1501,7 @@ def ltr_precheck_func(client, resource_group_name, server_name, backup_name):
     return client.check_prerequisites(
         resource_group_name=resource_group_name,
         server_name=server_name,
-        parameters={"backup_settings": {"backup_name": backup_name}}
+        parameters={"backupSettings": {"backupName": backup_name}}
     )
 
 
@@ -1505,11 +1509,11 @@ def ltr_start_func(client, resource_group_name, server_name, backup_name, sas_ur
     validate_resource_group(resource_group_name)
 
     parameters = {
-        "backup_settings": {
-            "backup_name": backup_name
+        "backupSettings": {
+            "backupName": backup_name
         },
-        "target_details": {
-            "sas_uri_list": [sas_url]
+        "targetDetails": {
+            "sasUriList": [sas_url]
         }
     }
 
@@ -1658,12 +1662,8 @@ def index_tuning_update(cmd, client, resource_group_name, server_name, index_tun
     source = "user-override"
 
     if index_tuning_enabled == "True":
-        subscription = get_subscription_id(cmd.cli_ctx)
-        postgres_source_client = get_postgresql_flexible_management_client(cmd.cli_ctx, subscription)
-        source_server_object = postgres_source_client.servers.get(resource_group_name, server_name)
-        location = ''.join(source_server_object.location.lower().split())
-        list_location_capability_info = get_postgres_location_capability_info(cmd, location, is_offer_restriction_check_required=True)
-        autonomous_tuning_supported = list_location_capability_info['autonomous_tuning_supported']
+        list_capability_info = get_postgres_server_capability_info(cmd, resource_group_name, server_name, is_offer_restriction_check_required=True)
+        autonomous_tuning_supported = list_capability_info['autonomous_tuning_supported']
         if not autonomous_tuning_supported:
             raise CLIError("Index tuning is not supported for the server.")
 
@@ -1833,6 +1833,12 @@ def autonomous_tuning_table_recommendations_list(cmd, resource_group_name, serve
         tuning_option="table",
         recommendation_type=recommendation_type
     )
+
+
+def flexible_server_migrate_network(client, resource_group_name, server_name, no_wait=False):
+    validate_resource_group(resource_group_name)
+
+    return sdk_no_wait(no_wait, client.begin_migrate_network_mode, resource_group_name, server_name)
 
 
 def _update_private_endpoint_connection_status(cmd, client, resource_group_name, server_name,

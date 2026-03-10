@@ -81,7 +81,7 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zon
             return
         if offer:
             offers = [o for o in offers if _matched(offer, o['name'])]
-        for o in offers:
+        for o in offers:  # pylint: disable=too-many-nested-blocks
             try:
                 if edge_zone is not None:
                     skus = VMImageEdgeZoneListSkus(cli_ctx=cli_ctx)(command_args={
@@ -113,6 +113,20 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zon
                             'sku': s['name'],
                             'expand': expand,
                         })
+                        for i in images:
+                            image_info = {
+                                'publisher': publisher,
+                                'offer': o['name'],
+                                'sku': s['name'],
+                                'version': i['name'],
+                                'architecture': i.get("properties", {}).get("architecture", ""),
+                                'imageDeprecationStatus': i.get("properties", {}).get("imageDeprecationStatus", "")
+                            }
+                            if edge_zone is not None:
+                                image_info['edge_zone'] = edge_zone
+                            if architecture and architecture != image_info['architecture']:
+                                continue
+                            all_images.append(image_info)
                     else:
                         images = VMImageList(cli_ctx=cli_ctx)(command_args={
                             'location': location,
@@ -121,23 +135,23 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location, edge_zon
                             'sku': s['name'],
                             'expand': expand,
                         })
+                        for i in images:
+                            image_info = {
+                                'publisher': publisher,
+                                'offer': o['name'],
+                                'sku': s['name'],
+                                'version': i['name'],
+                                'architecture': i.get("architecture", ""),
+                                'imageDeprecationStatus': i.get("imageDeprecationStatus", "")
+                            }
+                            if edge_zone is not None:
+                                image_info['edge_zone'] = edge_zone
+                            if architecture and architecture != image_info['architecture']:
+                                continue
+                            all_images.append(image_info)
                 except ResourceNotFoundError as e:
                     logger.warning(str(e))
                     continue
-                for i in images:
-                    image_info = {
-                        'publisher': publisher,
-                        'offer': o['name'],
-                        'sku': s['name'],
-                        'version': i['name'],
-                        'architecture': i.get("properties", {}).get("architecture", None) or "",
-                        'imageDeprecationStatus': i.get("properties", {}).get("imageDeprecationStatus", {}) or ""
-                    }
-                    if edge_zone is not None:
-                        image_info['edge_zone'] = edge_zone
-                    if architecture and architecture != image_info['architecture']:
-                        continue
-                    all_images.append(image_info)
 
     if edge_zone is not None:
         publishers = VMImageEdgeZoneListPublishers(cli_ctx=cli_ctx)(command_args={
@@ -351,6 +365,7 @@ def _get_latest_image_version_by_aaz(cli_ctx, location, publisher, offer, sku, e
             'sku': sku,
             'orderby': 'name desc',
             'top': 1,
+            'expand': 'properties'
         }
         top_one = VmImageList(cli_ctx=cli_ctx)(command_args=command_args)
         if not top_one:

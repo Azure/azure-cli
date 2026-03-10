@@ -570,7 +570,6 @@ def process_nw_cm_v2_create_namespace(cmd):
     validate_tags(args)
     if not has_value(args.location):  # location is None only occurs in creating a V2 connection monitor
         endpoint_source_resource_id = args.endpoint_source_resource_id.to_serialized_data()
-        from azure.mgmt.resource import ResourceManagementClient
         # parse and verify endpoint_source_resource_id
         if not has_value(args.endpoint_source_resource_id):
             raise ValidationError('usage error: --location/--endpoint-source-resource-id '
@@ -579,7 +578,7 @@ def process_nw_cm_v2_create_namespace(cmd):
             raise ValidationError('usage error: "{}" is not a valid resource id'.format(endpoint_source_resource_id))
 
         resource = parse_resource_id(endpoint_source_resource_id)
-        resource_client = get_mgmt_service_client(cmd.cli_ctx, ResourceManagementClient)
+        resource_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
         resource_api_version = _resolve_api_version(resource_client,
                                                     resource['namespace'],
                                                     resource['resource_parent'],

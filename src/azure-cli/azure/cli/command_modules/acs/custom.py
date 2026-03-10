@@ -934,6 +934,7 @@ def aks_create(
     disable_acns_observability=None,
     disable_acns_security=None,
     acns_advanced_networkpolicies=None,
+    enable_container_network_logs=None,
     # network isoalted cluster
     bootstrap_artifact_source=CONST_ARTIFACT_SOURCE_DIRECT,
     bootstrap_container_registry_resource_id=None,
@@ -941,10 +942,10 @@ def aks_create(
     enable_addons=None,
     workspace_resource_id=None,
     enable_msi_auth_for_monitoring=True,
-    enable_syslog=False,
+    enable_syslog=None,
     data_collection_settings=None,
     ampls_resource_id=None,
-    enable_high_log_scale_mode=False,
+    enable_high_log_scale_mode=None,
     aci_subnet_name=None,
     appgw_name=None,
     appgw_subnet_cidr=None,
@@ -1161,6 +1162,8 @@ def aks_update(
     disable_acns_observability=None,
     disable_acns_security=None,
     acns_advanced_networkpolicies=None,
+    enable_container_network_logs=None,
+    disable_container_network_logs=None,
     # network isoalted cluster
     bootstrap_artifact_source=None,
     bootstrap_container_registry_resource_id=None,
@@ -1557,10 +1560,10 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                       enable_secret_rotation=False,
                       rotation_poll_interval=None,
                       enable_msi_auth_for_monitoring=True,
-                      enable_syslog=False,
+                      enable_syslog=None,
                       data_collection_settings=None,
                       ampls_resource_id=None,
-                      enable_high_log_scale_mode=False,
+                      enable_high_log_scale_mode=None,
                       no_wait=False,):
     instance = client.get(resource_group_name, name)
     msi_auth = False

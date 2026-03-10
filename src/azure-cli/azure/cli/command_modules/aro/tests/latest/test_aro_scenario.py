@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import os
-import unittest
+import re
 from random import randint
 from unittest import mock
 
@@ -19,6 +19,22 @@ logger = get_logger(__name__)
 
 
 class AroScenarioTests(ScenarioTest):
+    def test_aro_get_versions(self):
+        """Test aro get-versions command returns valid version format."""
+
+        # Test get-versions - this is a lightweight test that doesn't create resources
+        versions_output = self.cmd('aro get-versions --location eastus').get_output_in_json()
+
+        # Validate we got a list
+        self.assertTrue(isinstance(versions_output, list), "get-versions should return a list")
+        self.assertGreater(len(versions_output), 0, "get-versions should return at least one version")
+
+        # Validate each version matches semantic versioning format (x.y.z)
+        version_pattern = re.compile(r'^\d+\.\d+\.\d+$')
+        for version in versions_output:
+            self.assertTrue(isinstance(version, str), f"Version {version} should be a string")
+            self.assertTrue(version_pattern.match(version),
+                            f"Version {version} should match x.y.z format")
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(random_name_length=28, name_prefix='cli_test_aro', location='eastus')
@@ -42,48 +58,36 @@ class AroScenarioTests(ScenarioTest):
             'worker_subnet': worker_subnet,
             'master_ip_range': '10.{}.{}.0/24'.format(randint(0, 127), randint(0, 255)),
             'worker_ip_range': '10.{}.{}.0/24'.format(randint(0, 127), randint(0, 255)),
-            'master_subnet_resource': resource_id(subscription=subscription, resource_group=resource_group,
-                                                  namespace='Microsoft.Network', type='virtualNetworks',
-                                                  child_type_1='subnets', name='dev-vnet', child_name_1=master_subnet),
-            'worker_subnet_resource': resource_id(subscription=subscription, resource_group=resource_group,
-                                                  namespace='Microsoft.Network', type='virtualNetworks',
-                                                  child_type_1='subnets', name='dev-vnet', child_name_1=worker_subnet),
+            'master_subnet_resource': resource_id(subscription=subscription, resource_group=resource_group, namespace='Microsoft.Network', type='virtualNetworks', child_type_1='subnets', name='dev-vnet', child_name_1=master_subnet),
+            'worker_subnet_resource': resource_id(subscription=subscription, resource_group=resource_group, namespace='Microsoft.Network', type='virtualNetworks', child_type_1='subnets', name='dev-vnet', child_name_1=worker_subnet),
             'temp_kubeconfig_path': temp_kubeconfig_path,
         })
 
         self.cmd('network vnet create -g {rg} -n dev-vnet --address-prefixes 10.0.0.0/9')
-        self.cmd(
-            'network vnet subnet create -g {rg} --vnet-name dev-vnet -n {master_subnet} --address-prefixes {master_ip_range} --service-endpoints Microsoft.ContainerRegistry --default-outbound false')
-        self.cmd(
-            'network vnet subnet create -g {rg} --vnet-name dev-vnet -n {worker_subnet} --address-prefixes {worker_ip_range} --service-endpoints Microsoft.ContainerRegistry --default-outbound false')
-        self.cmd(
-            'network vnet subnet update -g {rg} --vnet-name dev-vnet -n {master_subnet} --private-link-service-network-policies Disabled')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {master_subnet} --address-prefixes {master_ip_range} --service-endpoints Microsoft.ContainerRegistry --default-outbound false')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name dev-vnet -n {worker_subnet} --address-prefixes {worker_ip_range} --service-endpoints Microsoft.ContainerRegistry --default-outbound false')
+        self.cmd('network vnet subnet update -g {rg} --vnet-name dev-vnet -n {master_subnet} --private-link-service-network-policies Disabled')
 
         # aro validate
         with mock.patch('azure.cli.command_modules.aro._rbac._gen_uuid', side_effect=self.create_guid):
-            self.cmd(
-                'aro validate -g {rg} -n {name} --client-id {aro_csp} --client-secret {aro_csp_pass} --master-subnet {master_subnet_resource} --worker-subnet {worker_subnet_resource} --subscription {subscription}')
+            self.cmd('aro validate -g {rg} -n {name} --client-id {aro_csp} --client-secret {aro_csp_pass} --master-subnet {master_subnet_resource} --worker-subnet {worker_subnet_resource} --subscription {subscription}')
 
         # aro create
         with mock.patch('azure.cli.command_modules.aro._rbac._gen_uuid', side_effect=self.create_guid):
-            self.cmd(
-                'aro create -g {rg} -n {name} --client-id {aro_csp} --client-secret {aro_csp_pass} --master-subnet {master_subnet_resource} --worker-subnet {worker_subnet_resource} --subscription {subscription} --tags test=create',
-                checks=[
-                    self.check('tags.test', 'create'),
-                    self.check('name', '{name}'),
-                    self.check('masterProfile.subnetId', '{master_subnet_resource}'),
-                    self.check('workerProfiles[0].subnetId', '{worker_subnet_resource}'),
-                    self.check('provisioningState', 'Succeeded')
-                ])
+            self.cmd('aro create -g {rg} -n {name} --client-id {aro_csp} --client-secret {aro_csp_pass} --master-subnet {master_subnet_resource} --worker-subnet {worker_subnet_resource} --subscription {subscription} --tags test=create', checks=[
+                self.check('tags.test', 'create'),
+                self.check('name', '{name}'),
+                self.check('masterProfile.subnetId', '{master_subnet_resource}'),
+                self.check('workerProfiles[0].subnetId', '{worker_subnet_resource}'),
+                self.check('provisioningState', 'Succeeded')
+            ])
 
         # aro list-credentials
-        self.cmd('aro list-credentials -g {rg} -n {name} --subscription {subscription}',
-                 checks=[self.check('kubeadminUsername', 'kubeadmin')])
+        self.cmd('aro list-credentials -g {rg} -n {name} --subscription {subscription}', checks=[self.check('kubeadminUsername', 'kubeadmin')])
 
         # aro get-admin-kubeconfig
         try:
-            self.cmd(
-                'aro get-admin-kubeconfig -g {rg} -n {name} --subscription {subscription} -f {temp_kubeconfig_path}')
+            self.cmd('aro get-admin-kubeconfig -g {rg} -n {name} --subscription {subscription} -f {temp_kubeconfig_path}')
             self.assertGreater(os.path.getsize(temp_kubeconfig_path), 0)
         finally:
             os.remove(temp_kubeconfig_path)

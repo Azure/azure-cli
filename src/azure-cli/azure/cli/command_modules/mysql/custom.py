@@ -843,19 +843,29 @@ def flexible_server_restore(cmd, client, resource_group_name, server_name, sourc
         else:
             parameters.network = source_server_object.network
 
-    except Exception as e:
-        raise ResourceNotFoundError(e)
+    except HttpResponseError as exc:
+        raise ResourceNotFoundError(exc) from exc
 
-    resolve_poller(
-        client.begin_create(resource_group_name, server_name, parameters), cmd.cli_ctx,
-        'Restore Server')
+    def _begin_network_update():
+        restore_server_object = client.get(resource_group_name, server_name)
+        restore_server_network = restore_server_object.network
+        restore_server_network.public_network_access = public_access if public_access else source_server_object.network.public_network_access
+        update_parameter = models.ServerForUpdate(network=restore_server_network)
+        return client.begin_update(resource_group_name, server_name, update_parameter)
 
-    restore_server_object = client.get(resource_group_name, server_name)
-    restore_server_network = restore_server_object.network
-    restore_server_network.public_network_access = public_access if public_access else source_server_object.network.public_network_access
-    update_parameter = models.ServerForUpdate(network=restore_server_network)
+    create_poller = sdk_no_wait(no_wait, client.begin_create, resource_group_name, server_name, parameters)
+    if no_wait:
+        def _post_create_update(poller):
+            try:
+                _begin_network_update()
+            except (HttpResponseError, CLIError) as ex:
+                logger.warning('Skipping post-restore network update: %s', ex)
 
-    return sdk_no_wait(no_wait, client.begin_update, resource_group_name, server_name, update_parameter)
+        create_poller.add_done_callback(_post_create_update)
+        return create_poller
+
+    resolve_poller(create_poller, cmd.cli_ctx, 'Restore Server')
+    return sdk_no_wait(no_wait, _begin_network_update)
 
 
 # pylint: disable=too-many-locals, too-many-statements, raise-missing-from

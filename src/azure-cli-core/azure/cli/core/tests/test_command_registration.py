@@ -230,7 +230,7 @@ class TestCommandRegistration(unittest.TestCase):
             if command_table:
                 module_command_table.update(command_table)
                 loader.loaders.append(command_loader)  # this will be used later by the load_arguments method
-        return module_command_table, command_loader.command_group_table
+        return module_command_table, command_loader.command_group_table, command_loader
 
     expected_command_index = {'hello': ['azure.cli.command_modules.hello', 'azext_hello2', 'azext_hello1'],
                               'extra': ['azure.cli.command_modules.extra']}
@@ -259,6 +259,41 @@ class TestCommandRegistration(unittest.TestCase):
 
         self.assertTrue(isinstance(hello_overridden_cmd.command_source, ExtensionCommandSource))
         self.assertTrue(hello_overridden_cmd.command_source.overrides_command)
+
+    @mock.patch('importlib.import_module', _mock_import_lib)
+    @mock.patch('pkgutil.iter_modules', _mock_iter_modules)
+    @mock.patch('azure.cli.core.commands._load_command_loader', _mock_load_command_loader)
+    @mock.patch('azure.cli.core.extension.get_extension_modname', _mock_get_extension_modname)
+    @mock.patch('azure.cli.core.extension.get_extensions', _mock_get_extensions)
+    def test_cmd_to_loader_map_populated_after_parallel_loading(self):
+        """
+        Validates that all commands in command_table have corresponding entries in cmd_to_loader_map.
+        """
+        cli = DummyCli()
+        loader = cli.commands_loader
+
+        # Load all commands (triggers parallel module loading)
+        cmd_tbl = loader.load_command_table(None)
+        
+        # Verify EVERY command in command_table has an entry in cmd_to_loader_map
+        # This is exactly what azdev does before it hits KeyError
+        for cmd_name in cmd_tbl:
+            # This should NOT raise KeyError
+            self.assertIn(cmd_name, loader.cmd_to_loader_map, 
+                         f"Command '{cmd_name}' missing from cmd_to_loader_map - "
+                         f"would cause KeyError in azdev command-change meta-export")
+            
+            # Verify the entry is a list with at least one loader
+            loaders = loader.cmd_to_loader_map[cmd_name]
+            self.assertIsInstance(loaders, list, 
+                                 f"cmd_to_loader_map['{cmd_name}'] should be a list")
+            self.assertGreater(len(loaders), 0, 
+                              f"cmd_to_loader_map['{cmd_name}'] should have at least one loader")
+        
+        # Verify all expected commands are present
+        expected_commands = {'hello mod-only', 'hello overridden', 'extra final', 'hello ext-only'}
+        actual_commands = set(cmd_tbl.keys())
+        self.assertEqual(expected_commands, actual_commands)
 
     @mock.patch('importlib.import_module', _mock_import_lib)
     @mock.patch('pkgutil.iter_modules', _mock_iter_modules)
@@ -432,12 +467,12 @@ class TestCommandRegistration(unittest.TestCase):
         # Test command index is built for command with positional argument
         cmd_tbl = loader.load_command_table(["extra", "extra", "positional_argument"])
         self.assertDictEqual(INDEX[CommandIndex._COMMAND_INDEX], self.expected_command_index)
-        self.assertEqual(list(cmd_tbl), ['hello mod-only', 'hello overridden', 'extra final', 'hello ext-only'])
+        self.assertSetEqual(set(cmd_tbl), {'hello mod-only', 'hello overridden', 'extra final', 'hello ext-only'})
 
         # Test command index is used by command with positional argument
         cmd_tbl = loader.load_command_table(["hello", "mod-only", "positional_argument"])
         self.assertDictEqual(INDEX[CommandIndex._COMMAND_INDEX], self.expected_command_index)
-        self.assertEqual(list(cmd_tbl), ['hello mod-only', 'hello overridden', 'hello ext-only'])
+        self.assertSetEqual(set(cmd_tbl), {'hello mod-only', 'hello overridden', 'hello ext-only'})
 
         # Test command index is used by command with positional argument
         cmd_tbl = loader.load_command_table(["extra", "final", "positional_argument2"])

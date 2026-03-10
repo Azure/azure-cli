@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.84.0
+++++++
+* Minor fixes
+
 2.83.0
 ++++++
 * Resolve CVE-2025-69277 (#32610)

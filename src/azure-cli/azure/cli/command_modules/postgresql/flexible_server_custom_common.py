@@ -110,9 +110,10 @@ def firewall_rule_create_func(cmd, client, resource_group_name, server_name, fir
                            end_ip_address)
 
     parameters = {
-        'name': firewall_rule_name,
-        'start_ip_address': start_ip_address,
-        'end_ip_address': end_ip_address
+        'properties': {
+            'startIpAddress': start_ip_address,
+            'endIpAddress': end_ip_address
+        }
     }
 
     return client.begin_create_or_update(
@@ -130,6 +131,10 @@ def flexible_firewall_rule_custom_getter(cmd, client, resource_group_name, serve
 
 def flexible_firewall_rule_custom_setter(client, resource_group_name, server_name, firewall_rule_name, parameters):
     validate_resource_group(resource_group_name)
+
+    endIpAddress = parameters.get('properties', {}).get('endIpAddress')
+    startIpAddress = parameters.get('properties', {}).get('startIpAddress')
+    parameters = {"properties": {"endIpAddress": endIpAddress, "startIpAddress": startIpAddress}}
 
     return client.begin_create_or_update(
         resource_group_name,
@@ -327,7 +332,9 @@ def flexible_server_version_upgrade(cmd, client, resource_group_name, server_nam
         raise CLIError("Major version upgrade is not yet supported for servers in a read replica setup.")
 
     parameters = {
-        'version': version_mapped
+        'properties': {
+            'version': version_mapped
+        }
     }
 
     return resolve_poller(

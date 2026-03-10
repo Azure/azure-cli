@@ -619,6 +619,12 @@ def raise_unsupported_error_for_flex_vmss(vmss, error_message):
         raise ArgumentUsageError(error_message)
 
 
+def raise_unsupported_error_for_flex_vmss_by_aaz(vmss, error_message):
+    if vmss.get('orchestrationMode', '').lower() == 'flexible':
+        from azure.cli.core.azclierror import ArgumentUsageError
+        raise ArgumentUsageError(error_message)
+
+
 def is_trusted_launch_supported(supported_features):
     if not supported_features:
         return False
@@ -656,7 +662,7 @@ def validate_vm_disk_trusted_launch(namespace, disk_security_profile):
         logger.warning(UPGRADE_SECURITY_HINT)
         return
 
-    security_type = disk_security_profile.security_type if hasattr(disk_security_profile, 'security_type') else None
+    security_type = disk_security_profile.get('securityType')
     if security_type and security_type.lower() == 'trustedlaunch':
         if namespace.enable_secure_boot is None:
             namespace.enable_secure_boot = True
@@ -780,3 +786,40 @@ class IdentityType(Enum):
     USER_ASSIGNED = 'UserAssigned'
     SYSTEM_ASSIGNED_USER_ASSIGNED = 'SystemAssigned, UserAssigned'
     NONE = 'None'
+
+
+class RebootSetting(Enum):
+    ALWAYS = 'Always'
+    IF_REQUIRED = 'IfRequired'
+    NEVER = 'Never'
+
+
+class VMGuestPatchClassificationWindows(Enum):
+    CRITICAL = 'Critical'
+    DEFINITION = 'Definition'
+    FEATURE_PACK = 'FeaturePack'
+    SECURITY = 'Security'
+    SERVICE_PACK = 'ServicePack'
+    TOOLS = 'Tools'
+    UPDATES = 'Updates'
+    UPDATE_ROLL_UP = 'UpdateRollUp'
+
+
+class VMGuestPatchClassificationLinux(Enum):
+    CRITICAL = 'Critical'
+    OTHER = 'Other'
+    SECURITY = 'Security'
+
+
+class DiskCreateOptionTypes(Enum):
+    ATTACH = 'Attach'
+    COPY = 'Copy'
+    EMPTY = 'Empty'
+    FROM_IMAGE = 'FromImage'
+    RESTORE = 'Restore'
+
+
+class UpgradeMode(Enum):
+    AUTOMATIC = 'Automatic'
+    MANUAL = 'Manual'
+    ROLLING = 'Rolling'

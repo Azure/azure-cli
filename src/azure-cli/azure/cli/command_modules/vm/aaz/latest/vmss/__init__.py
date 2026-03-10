@@ -10,6 +10,7 @@
 
 from .__cmd_group import *
 from ._create import *
+from ._deallocate import *
 from ._delete import *
 from ._delete_instances import *
 from ._get_os_upgrade_history import *
@@ -19,9 +20,14 @@ from ._list_instances import *
 from ._list_skus import *
 from ._patch import *
 from ._perform_maintenance import *
+from ._restart import *
+from ._reimage import *
+from ._reimageall import *
 from ._show import *
 from ._simulate_eviction import *
 from ._start import *
+from ._stop import *
 from ._update import *
 from ._update_domain_walk import *
 from ._wait import *
+from ._manualupgrade import *

@@ -119,10 +119,18 @@ def _get_client(client, kwargs):
         dir_client = client.get_directory_client(directory_path=total_path)
         exists = False
         from azure.core.exceptions import ClientAuthenticationError
+        from azure.core.exceptions import ResourceExistsError
         try:
             exists = dir_client.exists()
         except ClientAuthenticationError:
             exists = False
+        except ResourceExistsError as ex:
+            if hasattr(ex, "error_code") and ex.error_code == "DeletePending":
+                # translate delete pending flag as file/dir not exists.
+                exists = False
+            else:
+                raise ex
+
         if not exists:
             dir_client = client.get_directory_client(directory_path=directory_path)
             client = dir_client.get_file_client(file_name=file_name)

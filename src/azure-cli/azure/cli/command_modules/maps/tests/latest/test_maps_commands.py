@@ -9,6 +9,23 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 
 
 class MapsScenarioTests(ScenarioTest):
+    @ResourceGroupPreparer(key='rg', location="eastus")
+    def test_create_maps_account_default_sku(self, resource_group):
+        """Test that creating a maps account without --sku defaults to G2."""
+        self.kwargs.update({
+            'name': self.create_random_name(prefix='cli-', length=20),
+        })
+
+        # Create account without specifying --sku, should default to G2
+        account = self.cmd('az maps account create -n {name} -g {rg} --accept-tos',
+                           checks=[
+                               self.check('name', '{name}'),
+                               self.check('resourceGroup', '{rg}'),
+                               self.check('sku.name', 'G2')
+                           ]).get_output_in_json()
+
+        # Clean up
+        self.cmd('az maps account delete -n {name} -g {rg}')
 
     @ResourceGroupPreparer(key='rg', location="eastus")
     @ResourceGroupPreparer(key='rg1', location="eastus")

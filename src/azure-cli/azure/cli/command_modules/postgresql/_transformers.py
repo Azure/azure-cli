@@ -149,7 +149,10 @@ def transform_backup(result):
         result.name = result.name[62:]
 
     if hasattr(result, 'system_data'):
-        delattr(result, 'system_data')
+        try:
+            delattr(result, 'system_data')
+        except AttributeError:
+            pass  # Attribute cannot be deleted, skip
 
     return result
 

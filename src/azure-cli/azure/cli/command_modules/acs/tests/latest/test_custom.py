@@ -18,6 +18,9 @@ from azure.cli.command_modules.acs._consts import (
     CONST_KUBE_DASHBOARD_ADDON_NAME,
     CONST_MONITORING_ADDON_NAME,
 )
+from azure.cli.command_modules.acs.addonconfiguration import (
+    ensure_default_log_analytics_workspace_for_monitoring,
+)
 from azure.cli.command_modules.acs.custom import (
     _get_command_context,
     _update_addons,
@@ -877,6 +880,296 @@ class TestRunCommand(unittest.TestCase):
         context = _get_command_context(
             [get_test_data_file_path("ns.yaml"), get_test_data_file_path("dummy.json")])
         self.assertNotEqual(context, '')
+
+
+class TestAddonConfigurationAzureBleuCloud(unittest.TestCase):
+    """Test cases for AzureBleu Cloud region mapping in addon configuration."""
+
+    def setUp(self):
+        self.cli = MockCLI()
+        self.cmd = MockCmd(self.cli)
+        # Set cloud name to AzureBleuCloud
+        self.cmd.cli_ctx.cloud.name = 'AzureBleuCloud'
+
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resources_client')
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resource_groups_client')
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_rg_location')
+    def test_bleufrancecentral_region_mapping(self, mock_get_rg_location, mock_get_rg_client, mock_get_resources_client):
+        """Test that bleufrancecentral region maps correctly."""
+        # Arrange
+        mock_get_rg_location.return_value = 'bleufrancecentral'
+        subscription_id = '00000000-0000-0000-0000-000000000000'
+        resource_group_name = 'test-rg'
+        
+        # Mock resource group client
+        mock_rg_client = mock.Mock()
+        mock_rg_client.check_existence.return_value = False
+        mock_rg_client.create_or_update = mock.Mock()
+        mock_get_rg_client.return_value = mock_rg_client
+        
+        # Mock resources client
+        mock_resources_client = mock.Mock()
+        mock_poller = mock.Mock()
+        mock_result = mock.Mock()
+        mock_result.id = f'/subscriptions/{subscription_id}/resourceGroups/DefaultResourceGroup-BLEUC/providers/Microsoft.OperationalInsights/workspaces/DefaultWorkspace-{subscription_id}-BLEUC'
+        mock_poller.result.return_value = mock_result
+        mock_poller.done.return_value = True
+        mock_resources_client.begin_create_or_update_by_id.return_value = mock_poller
+        mock_get_resources_client.return_value = mock_resources_client
+        
+        # Mock get_models for GenericResource
+        self.cmd.get_models = mock.Mock(return_value=mock.Mock)
+        
+        # Act
+        result = ensure_default_log_analytics_workspace_for_monitoring(
+            self.cmd, subscription_id, resource_group_name
+        )
+        
+        # Assert
+        # Verify the resource group was created with correct region
+        mock_rg_client.create_or_update.assert_called_once_with(
+            'DefaultResourceGroup-BLEUC',
+            {'location': 'bleufrancecentral'}
+        )
+        
+        # Verify the workspace resource ID contains the correct region code
+        self.assertIn('DefaultResourceGroup-BLEUC', result)
+        self.assertIn(f'DefaultWorkspace-{subscription_id}-BLEUC', result)
+
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resources_client')
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resource_groups_client')
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_rg_location')
+    def test_bleufrancesouth_region_mapping(self, mock_get_rg_location, mock_get_rg_client, mock_get_resources_client):
+        """Test that bleufrancesouth region maps correctly."""
+        # Arrange
+        mock_get_rg_location.return_value = 'bleufrancesouth'
+        subscription_id = '00000000-0000-0000-0000-000000000000'
+        resource_group_name = 'test-rg'
+        
+        # Mock resource group client
+        mock_rg_client = mock.Mock()
+        mock_rg_client.check_existence.return_value = False
+        mock_rg_client.create_or_update = mock.Mock()
+        mock_get_rg_client.return_value = mock_rg_client
+        
+        # Mock resources client
+        mock_resources_client = mock.Mock()
+        mock_poller = mock.Mock()
+        mock_result = mock.Mock()
+        mock_result.id = f'/subscriptions/{subscription_id}/resourceGroups/DefaultResourceGroup-BLEUS/providers/Microsoft.OperationalInsights/workspaces/DefaultWorkspace-{subscription_id}-BLEUS'
+        mock_poller.result.return_value = mock_result
+        mock_poller.done.return_value = True
+        mock_resources_client.begin_create_or_update_by_id.return_value = mock_poller
+        mock_get_resources_client.return_value = mock_resources_client
+        
+        # Mock get_models for GenericResource
+        self.cmd.get_models = mock.Mock(return_value=mock.Mock)
+        
+        # Act
+        result = ensure_default_log_analytics_workspace_for_monitoring(
+            self.cmd, subscription_id, resource_group_name
+        )
+        
+        # Assert
+        # Verify the resource group was created with correct region
+        mock_rg_client.create_or_update.assert_called_once_with(
+            'DefaultResourceGroup-BLEUS',
+            {'location': 'bleufrancesouth'}
+        )
+        
+        # Verify the workspace resource ID contains the correct region code
+        self.assertIn('DefaultResourceGroup-BLEUS', result)
+        self.assertIn(f'DefaultWorkspace-{subscription_id}-BLEUS', result)
+
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resources_client')
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resource_groups_client')
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_rg_location')
+    def test_unknown_bleu_region_defaults_to_bleufrancecentral(self, mock_get_rg_location, mock_get_rg_client, mock_get_resources_client):
+        """Test that unknown regions in AzureBleu cloud default to bleufrancecentral."""
+        # Arrange
+        mock_get_rg_location.return_value = 'unknownregion'
+        subscription_id = '00000000-0000-0000-0000-000000000000'
+        resource_group_name = 'test-rg'
+        
+        # Mock resource group client
+        mock_rg_client = mock.Mock()
+        mock_rg_client.check_existence.return_value = False
+        mock_rg_client.create_or_update = mock.Mock()
+        mock_get_rg_client.return_value = mock_rg_client
+        
+        # Mock resources client
+        mock_resources_client = mock.Mock()
+        mock_poller = mock.Mock()
+        mock_result = mock.Mock()
+        mock_result.id = f'/subscriptions/{subscription_id}/resourceGroups/DefaultResourceGroup-BLEUC/providers/Microsoft.OperationalInsights/workspaces/DefaultWorkspace-{subscription_id}-BLEUC'
+        mock_poller.result.return_value = mock_result
+        mock_poller.done.return_value = True
+        mock_resources_client.begin_create_or_update_by_id.return_value = mock_poller
+        mock_get_resources_client.return_value = mock_resources_client
+        
+        # Mock get_models for GenericResource
+        self.cmd.get_models = mock.Mock(return_value=mock.Mock)
+        
+        # Act
+        result = ensure_default_log_analytics_workspace_for_monitoring(
+            self.cmd, subscription_id, resource_group_name
+        )
+        
+        # Assert
+        # Verify the resource group was created with default region
+        mock_rg_client.create_or_update.assert_called_once_with(
+            'DefaultResourceGroup-BLEUC',
+            {'location': 'bleufrancecentral'}
+        )
+        
+        # Verify the workspace resource ID contains the default region code
+        self.assertIn('DefaultResourceGroup-BLEUC', result)
+        self.assertIn(f'DefaultWorkspace-{subscription_id}-BLEUC', result)
+
+
+class TestAddonConfigurationAzureDelosCloud(unittest.TestCase):
+    """Test cases for AzureDelos Cloud region mapping in addon configuration."""
+
+    def setUp(self):
+        self.cli = MockCLI()
+        self.cmd = MockCmd(self.cli)
+        # Set cloud name to AzureDelosCloud
+        self.cmd.cli_ctx.cloud.name = 'AzureDelosCloud'
+
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resources_client')
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resource_groups_client')
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_rg_location')
+    def test_deloscloudgermanycentral_region_mapping(self, mock_get_rg_location, mock_get_rg_client, mock_get_resources_client):
+        """Test that deloscloudgermanycentral region maps correctly."""
+        # Arrange
+        mock_get_rg_location.return_value = 'deloscloudgermanycentral'
+        subscription_id = '00000000-0000-0000-0000-000000000000'
+        resource_group_name = 'test-rg'
+        
+        # Mock resource group client
+        mock_rg_client = mock.Mock()
+        mock_rg_client.check_existence.return_value = False
+        mock_rg_client.create_or_update = mock.Mock()
+        mock_get_rg_client.return_value = mock_rg_client
+        
+        # Mock resources client
+        mock_resources_client = mock.Mock()
+        mock_poller = mock.Mock()
+        mock_result = mock.Mock()
+        mock_result.id = f'/subscriptions/{subscription_id}/resourceGroups/DefaultResourceGroup-DELOSC/providers/Microsoft.OperationalInsights/workspaces/DefaultWorkspace-{subscription_id}-DELOSC'
+        mock_poller.result.return_value = mock_result
+        mock_poller.done.return_value = True
+        mock_resources_client.begin_create_or_update_by_id.return_value = mock_poller
+        mock_get_resources_client.return_value = mock_resources_client
+        
+        # Mock get_models for GenericResource
+        self.cmd.get_models = mock.Mock(return_value=mock.Mock)
+        
+        # Act
+        result = ensure_default_log_analytics_workspace_for_monitoring(
+            self.cmd, subscription_id, resource_group_name
+        )
+        
+        # Assert
+        # Verify the resource group was created with correct region
+        mock_rg_client.create_or_update.assert_called_once_with(
+            'DefaultResourceGroup-DELOSC',
+            {'location': 'deloscloudgermanycentral'}
+        )
+        
+        # Verify the workspace resource ID contains the correct region code
+        self.assertIn('DefaultResourceGroup-DELOSC', result)
+        self.assertIn(f'DefaultWorkspace-{subscription_id}-DELOSC', result)
+
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resources_client')
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resource_groups_client')
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_rg_location')
+    def test_deloscloudgermanynorth_region_mapping(self, mock_get_rg_location, mock_get_rg_client, mock_get_resources_client):
+        """Test that deloscloudgermanynorth region maps correctly."""
+        # Arrange
+        mock_get_rg_location.return_value = 'deloscloudgermanynorth'
+        subscription_id = '00000000-0000-0000-0000-000000000000'
+        resource_group_name = 'test-rg'
+        
+        # Mock resource group client
+        mock_rg_client = mock.Mock()
+        mock_rg_client.check_existence.return_value = False
+        mock_rg_client.create_or_update = mock.Mock()
+        mock_get_rg_client.return_value = mock_rg_client
+        
+        # Mock resources client
+        mock_resources_client = mock.Mock()
+        mock_poller = mock.Mock()
+        mock_result = mock.Mock()
+        mock_result.id = f'/subscriptions/{subscription_id}/resourceGroups/DefaultResourceGroup-DELOSN/providers/Microsoft.OperationalInsights/workspaces/DefaultWorkspace-{subscription_id}-DELOSN'
+        mock_poller.result.return_value = mock_result
+        mock_poller.done.return_value = True
+        mock_resources_client.begin_create_or_update_by_id.return_value = mock_poller
+        mock_get_resources_client.return_value = mock_resources_client
+        
+        # Mock get_models for GenericResource
+        self.cmd.get_models = mock.Mock(return_value=mock.Mock)
+        
+        # Act
+        result = ensure_default_log_analytics_workspace_for_monitoring(
+            self.cmd, subscription_id, resource_group_name
+        )
+        
+        # Assert
+        # Verify the resource group was created with correct region
+        mock_rg_client.create_or_update.assert_called_once_with(
+            'DefaultResourceGroup-DELOSN',
+            {'location': 'deloscloudgermanynorth'}
+        )
+        
+        # Verify the workspace resource ID contains the correct region code
+        self.assertIn('DefaultResourceGroup-DELOSN', result)
+        self.assertIn(f'DefaultWorkspace-{subscription_id}-DELOSN', result)
+
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resources_client')
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resource_groups_client')
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_rg_location')
+    def test_unknown_delos_region_defaults_to_deloscloudgermanycentral(self, mock_get_rg_location, mock_get_rg_client, mock_get_resources_client):
+        """Test that unknown regions in AzureDelos cloud default to deloscloudgermanycentral."""
+        # Arrange
+        mock_get_rg_location.return_value = 'unknownregion'
+        subscription_id = '00000000-0000-0000-0000-000000000000'
+        resource_group_name = 'test-rg'
+        
+        # Mock resource group client
+        mock_rg_client = mock.Mock()
+        mock_rg_client.check_existence.return_value = False
+        mock_rg_client.create_or_update = mock.Mock()
+        mock_get_rg_client.return_value = mock_rg_client
+        
+        # Mock resources client
+        mock_resources_client = mock.Mock()
+        mock_poller = mock.Mock()
+        mock_result = mock.Mock()
+        mock_result.id = f'/subscriptions/{subscription_id}/resourceGroups/DefaultResourceGroup-DELOSC/providers/Microsoft.OperationalInsights/workspaces/DefaultWorkspace-{subscription_id}-DELOSC'
+        mock_poller.result.return_value = mock_result
+        mock_poller.done.return_value = True
+        mock_resources_client.begin_create_or_update_by_id.return_value = mock_poller
+        mock_get_resources_client.return_value = mock_resources_client
+        
+        # Mock get_models for GenericResource
+        self.cmd.get_models = mock.Mock(return_value=mock.Mock)
+        
+        # Act
+        result = ensure_default_log_analytics_workspace_for_monitoring(
+            self.cmd, subscription_id, resource_group_name
+        )
+        
+        # Assert
+        # Verify the resource group was created with default region
+        mock_rg_client.create_or_update.assert_called_once_with(
+            'DefaultResourceGroup-DELOSC',
+            {'location': 'deloscloudgermanycentral'}
+        )
+        
+        # Verify the workspace resource ID contains the default region code
+        self.assertIn('DefaultResourceGroup-DELOSC', result)
+        self.assertIn(f'DefaultWorkspace-{subscription_id}-DELOSC', result)
 
 
 if __name__ == "__main__":
