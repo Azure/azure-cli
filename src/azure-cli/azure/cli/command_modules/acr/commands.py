@@ -369,9 +369,10 @@ def load_command_table(self, _):
         g.command('install-cli', 'acr_helm_install_cli', is_preview=True)
 
     with self.command_group('acr network-rule', acr_network_rule_util) as g:
+        from .network_rule import _transform_network_rule_response
         g.command('list', 'acr_network_rule_list')
-        g.command('add', 'acr_network_rule_add')
-        g.command('remove', 'acr_network_rule_remove')
+        g.command('add', 'acr_network_rule_add', transform=_transform_network_rule_response)
+        g.command('remove', 'acr_network_rule_remove', transform=_transform_network_rule_response)
 
     with self.command_group('acr', acr_check_health_util) as g:
         g.command('check-health', 'acr_check_health')
