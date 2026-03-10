@@ -358,7 +358,7 @@ class CloudNameEnum:  # pylint: disable=too-few-public-methods
     AzureChinaCloud = 'AzureChinaCloud'
     AzureUSGovernment = 'AzureUSGovernment'
     AzureGermanCloud = 'AzureGermanCloud'
-    BleuCloud = 'BleuCloud'
+    AzureBleuCloud = 'AzureBleuCloud'
 
 
 AZURE_PUBLIC_CLOUD = Cloud(
@@ -493,8 +493,8 @@ AZURE_GERMAN_CLOUD = Cloud(
         postgresql_server_endpoint='.postgres.database.cloudapi.de',
         mariadb_server_endpoint='.mariadb.database.cloudapi.de'))
 
-BLEU_SOV_CLOUD = Cloud(
-    CloudNameEnum.BleuCloud,
+AZURE_BLEU_CLOUD = Cloud(
+    CloudNameEnum.AzureBleuCloud,
     endpoints=CloudEndpoints(
         management='https://management.sovcloud-api.fr/',
         resource_manager='https://management.sovcloud-api.fr',
@@ -522,7 +522,7 @@ BLEU_SOV_CLOUD = Cloud(
         mariadb_server_endpoint='.mariadb.database.sovcloud-api.fr',
         synapse_analytics_endpoint='.dev.azuresynapse.sovcloud-api.fr'))
 
-HARD_CODED_CLOUD_LIST = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_GERMAN_CLOUD, BLEU_SOV_CLOUD]
+HARD_CODED_CLOUD_LIST = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_GERMAN_CLOUD, AZURE_BLEU_CLOUD]
 
 
 def retrieve_arm_cloud_metadata():
