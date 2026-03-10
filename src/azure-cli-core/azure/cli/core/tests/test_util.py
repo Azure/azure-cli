@@ -154,10 +154,10 @@ class TestUtils(unittest.TestCase):
     @mock.patch('subprocess.Popen', autospec=True)
     def test_open_page_in_browser(self, subprocess_open_mock, webbrowser_open_mock):
         platform = sys.platform.lower()
-        open_page_in_browser('http://foo')
+        open_page_in_browser("http://foo")
         if is_wsl():
             subprocess_open_mock.assert_called_once_with(['powershell.exe', '-NoProfile',
-                                                          '-Command', 'Start-Process "http://foo"'])
+                                                          '-Command', "Start-Process 'http://foo'"])
         elif platform == 'darwin':
             subprocess_open_mock.assert_called_once_with(['open', 'http://foo'])
         else:
