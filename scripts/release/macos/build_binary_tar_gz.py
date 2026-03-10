@@ -23,6 +23,13 @@ Archive Contents:
 ```
 ├── bin/
 │   └── az → ../libexec/bin/az
+├── completions/
+│   ├── zsh/
+│   │   └── _az
+│   ├── bash/
+│   │   └── az
+│   └── fish/
+│       └── az.fish
 └── libexec/
     ├── bin/
     │   └── az (entry script - Homebrew or AZ_PYTHON)
@@ -244,6 +251,8 @@ def create_install_structure(venv_dir: Path, install_dir: Path, version: str, pl
 
     _create_readme(install_dir=libexec_dir, version=version, platform_tag=platform_tag)
 
+    _generate_shell_completions(venv_dir=venv_dir, install_dir=install_dir)
+
     _cleanup_bytecode(root=site_packages)
 
     _report_sizes(install_dir=install_dir)
@@ -281,6 +290,32 @@ def _create_readme(install_dir: Path, version: str, platform_tag: str) -> None:
     readme_path = install_dir / "README.txt"
     readme_path.write_text(readme_content, encoding="utf-8")
     print(f"Created README: {readme_path}")
+
+
+def _generate_shell_completions(venv_dir: Path, install_dir: Path) -> None:
+    """Generate shell completion files using argcomplete from the build venv."""
+    print("\n=== Generating shell completions ===")
+
+    generator = venv_dir / "bin" / "register-python-argcomplete"
+    if not generator.exists():
+        raise BuildError(f"Completion generator not found: {generator}")
+
+    completion_specs = [
+        ("zsh", install_dir / "completions" / "zsh" / "_az"),
+        ("bash", install_dir / "completions" / "bash" / "az"),
+        ("fish", install_dir / "completions" / "fish" / "az.fish"),
+    ]
+
+    for shell, output_path in completion_specs:
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        result = subprocess.run(
+            [str(generator), CLI_EXECUTABLE_NAME, "--shell", shell],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        output_path.write_text(result.stdout, encoding="utf-8")
+        print(f"Generated {shell} completion: {output_path}")
 
 
 def _cleanup_bytecode(root: Path) -> None:
@@ -325,7 +360,14 @@ def _report_sizes(install_dir: Path) -> None:
 
     print(f"  Total: {fmt_size(get_size(install_dir))}")
 
-    for subdir in ["bin", "libexec/bin", "libexec/lib"]:
+    for subdir in [
+        "bin",
+        "libexec/bin",
+        "libexec/lib",
+        "completions/zsh",
+        "completions/bash",
+        "completions/fish",
+    ]:
         path = install_dir / subdir
         if path.exists():
             print(f"  {subdir}: {fmt_size(get_size(path))}")
