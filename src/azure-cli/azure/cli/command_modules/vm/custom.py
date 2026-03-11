@@ -5935,24 +5935,24 @@ def create_dedicated_host_group(cmd, host_group_name, resource_group_name, platf
 
 
 def get_dedicated_host_group_instance_view(cmd, host_group_name, resource_group_name):
+    return get_dedicated_host_group(cmd, host_group_name, resource_group_name, 'instanceView')
+
+
+def get_dedicated_host_group(cmd, host_group_name, resource_group_name, expand=None):
     from .aaz.latest.vm.host.group import Show as VmHostGroupShow
     command_args = {
         'host_group_name': host_group_name,
         'resource_group': resource_group_name,
-        'expand': 'instanceView'
     }
+    if expand:
+        command_args['expand'] = expand
     return VmHostGroupShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
-def update_dedicated_host_group(cmd, host_group_name, resource_group_name):
-    from .aaz.latest.vm.host.group import Update as VmHostGroupUpdate, Show as VmHostGroupShow
+def update_dedicated_host_group(cmd, host_group_name, resource_group_name, **kwargs):
+    from .aaz.latest.vm.host.group import Update as VmHostGroupUpdate
     from .operations.vm_host_group import convert_show_result_to_snake_case
-    command_args = {
-        'host_group_name': host_group_name,
-        'resource_group': resource_group_name,
-        'expand': 'instanceView'
-    }
-    vm_host_group = VmHostGroupShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+    vm_host_group = kwargs['dedicated_host_group']
     vm_host_group = convert_show_result_to_snake_case(vm_host_group)
     vm_host_group['name'] = host_group_name
     vm_host_group['resource_group'] = resource_group_name
