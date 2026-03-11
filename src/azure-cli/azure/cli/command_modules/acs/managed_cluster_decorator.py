@@ -239,7 +239,6 @@ class AKSManagedClusterModels(AKSAgentPoolModels):
             maintenance_configuration_models = {}
             # getting maintenance configuration related models
             maintenance_configuration_models["MaintenanceConfiguration"] = self.MaintenanceConfiguration
-            maintenance_configuration_models["MaintenanceConfigurationListResult"] = self.MaintenanceConfigurationListResult
             maintenance_configuration_models["MaintenanceWindow"] = self.MaintenanceWindow
             maintenance_configuration_models["Schedule"] = self.Schedule
             maintenance_configuration_models["DailySchedule"] = self.DailySchedule
@@ -436,7 +435,7 @@ class AKSManagedClusterContext(BaseAKSContext):
             # verify keys
             # pylint: disable=protected-access
             valid_keys = list(
-                k.replace("_", "-") for k in self.models.ManagedClusterPropertiesAutoScalerProfile._attr_to_rest_field.keys()
+                k.replace("_", "-") for k in self.models.ManagedClusterPropertiesAutoScalerProfile()._attr_to_rest_field.keys()
             )
             for key in cluster_autoscaler_profile.keys():
                 if not key:
@@ -1740,7 +1739,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         enable_managed_identity = self.raw_param.get("enable_managed_identity")
         # In create mode, try to read the property value corresponding to the parameter from the `mc` object
         if self.decorator_mode == DecoratorMode.CREATE:
-            if self.mc and self.mc.identity:
+            if self.mc and self.mc.identity is not None:
                 enable_managed_identity = check_is_msi_cluster(self.mc)
 
         # skip dynamic completion & validation if option read_only is specified
@@ -4555,9 +4554,9 @@ class AKSManagedClusterContext(BaseAKSContext):
         if not read_only and self.decorator_mode == DecoratorMode.UPDATE:
             if cluster_autoscaler_profile and self.mc and self.mc.auto_scaler_profile:
                 # shallow copy should be enough for string-to-string dictionary
-                copy_of_raw_dict = self.mc.auto_scaler_profile.__dict__.copy()
+                copy_of_raw_dict = dict(self.mc.auto_scaler_profile)
                 new_options_dict = {
-                    key.replace("-", "_"): value
+                    key: value
                     for key, value in cluster_autoscaler_profile.items()
                 }
                 copy_of_raw_dict.update(new_options_dict)
@@ -5924,11 +5923,14 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         """
         self._ensure_mc(mc)
 
+        from azure.core.serialization import attribute_list
         defaults_in_mc = {}
-        for attr_name, attr_value in vars(mc).items():
-            if not attr_name.startswith("_") and attr_name != "location" and attr_value is not None:
-                defaults_in_mc[attr_name] = attr_value
-                setattr(mc, attr_name, None)
+        for attr_name in attribute_list(mc):
+            if attr_name != "location":
+                attr_value = getattr(mc, attr_name, None)
+                if attr_value is not None:
+                    defaults_in_mc[attr_name] = attr_value
+                    setattr(mc, attr_name, None)
         self.context.set_intermediate("defaults_in_mc", defaults_in_mc, overwrite_exists=True)
         return mc
 

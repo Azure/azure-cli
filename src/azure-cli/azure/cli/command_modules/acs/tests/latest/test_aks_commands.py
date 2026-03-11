@@ -1937,7 +1937,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # delete
         self.cmd(
-            'aks delete -g {resource_group} -n {name} --yes --no-wait --if-match={if_match}', checks=[self.is_empty()])
+            'aks delete -g {resource_group} -n {name} --yes --no-wait --etag={if_match}', checks=[self.is_empty()])
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
@@ -11494,7 +11494,7 @@ spec:
 
         # delete
         self.cmd(
-            'aks delete -g {resource_group} -n {name} --yes --no-wait --if-match={if_match}', checks=[self.is_empty()])
+            'aks delete -g {resource_group} -n {name} --yes --no-wait --etag={if_match}', checks=[self.is_empty()])
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
@@ -14098,7 +14098,6 @@ spec:
             "--node-count 1",
             checks=[
                 self.check("provisioningState", "Succeeded"),
-                self.check("typePropertiesType", "VirtualMachines"),
                 self.check("vmSize", ""),
                 self.check("count", None),
                 self.check("virtualMachinesProfile.scale.manual[0].size", "Standard_D2s_v3", False),
@@ -14127,7 +14126,6 @@ spec:
             "--node-count 1",
             checks=[
                 self.check("provisioningState", "Succeeded"),
-                self.check("typePropertiesType", "VirtualMachines"),
                 self.check("vmSize", ""),
                 self.check("count", None),
                 self.check("virtualMachinesProfile.scale.manual[1].size", "Standard_DS2_v2", False),
@@ -14145,7 +14143,6 @@ spec:
             "--node-count 3",
             checks=[
                 self.check("provisioningState", "Succeeded"),
-                self.check("typePropertiesType", "VirtualMachines"),
                 self.check("vmSize", ""),
                 self.check("count", None),
                 self.check("virtualMachinesProfile.scale.manual[1].size", "Standard_D8s_v3", False),

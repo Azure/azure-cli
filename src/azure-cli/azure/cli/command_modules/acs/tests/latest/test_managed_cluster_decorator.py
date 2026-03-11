@@ -52,6 +52,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_AZURE_SERVICE_MESH_DEFAULT_EGRESS_NAMESPACE,
     CONST_ARTIFACT_SOURCE_DIRECT,
     CONST_AVAILABILITY_SET,
+    CONST_SCALE_SET_PRIORITY_REGULAR,
     CONST_VIRTUAL_MACHINES,
 )
 from azure.cli.command_modules.acs.agentpool_decorator import AKSAgentPoolContext, AKSAgentPoolParamDict
@@ -2308,12 +2309,12 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         self.assertEqual(ctx_1.get_pod_cidrs(), None)
         mc = self.models.ManagedCluster(
             location="test_location",
-            network_profile=self.models.ContainerServiceNetworkProfile(pod_cidrs="test_pod_cidrs"),
+            network_profile=self.models.ContainerServiceNetworkProfile(pod_cidrs=["test_pod_cidrs"]),
         )
         ctx_1.attach_mc(mc)
         self.assertEqual(
             ctx_1.get_pod_cidrs(),
-            "test_pod_cidrs",
+            ["test_pod_cidrs"],
         )
 
         ctx_2 = AKSManagedClusterContext(
@@ -2343,12 +2344,12 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         self.assertEqual(ctx_1.get_service_cidrs(), None)
         mc = self.models.ManagedCluster(
             location="test_location",
-            network_profile=self.models.ContainerServiceNetworkProfile(service_cidrs="test_service_cidrs"),
+            network_profile=self.models.ContainerServiceNetworkProfile(service_cidrs=["test_service_cidrs"]),
         )
         ctx_1.attach_mc(mc)
         self.assertEqual(
             ctx_1.get_service_cidrs(),
-            "test_service_cidrs",
+            ["test_service_cidrs"],
         )
 
         ctx_2 = AKSManagedClusterContext(
@@ -2378,12 +2379,12 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         self.assertEqual(ctx_1.get_ip_families(), None)
         mc = self.models.ManagedCluster(
             location="test_location",
-            network_profile=self.models.ContainerServiceNetworkProfile(ip_families="test_ip_families"),
+            network_profile=self.models.ContainerServiceNetworkProfile(ip_families=["test_ip_families"]),
         )
         ctx_1.attach_mc(mc)
         self.assertEqual(
             ctx_1.get_ip_families(),
-            "test_ip_families",
+            ["test_ip_families"],
         )
 
         ctx_2 = AKSManagedClusterContext(
@@ -3210,13 +3211,13 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         )
         self.assertEqual(ctx_1.get_aad_admin_group_object_ids(), None)
         aad_profile_1 = self.models.ManagedClusterAADProfile(
-            admin_group_object_i_ds="test_aad_admin_group_object_ids",
+            admin_group_object_i_ds=["test_aad_admin_group_object_ids"],
         )
         mc = self.models.ManagedCluster(location="test_location", aad_profile=aad_profile_1)
         ctx_1.attach_mc(mc)
         self.assertEqual(
             ctx_1.get_aad_admin_group_object_ids(),
-            "test_aad_admin_group_object_ids",
+            ["test_aad_admin_group_object_ids"],
         )
 
         # custom value
@@ -3854,9 +3855,9 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             self.models,
             DecoratorMode.UPDATE,
         )
-        api_server_access_profile_9 = self.models.ManagedClusterAPIServerAccessProfile()
-        api_server_access_profile_9.additional_properties['enableVnetIntegration'] = False
-        api_server_access_profile_9.enable_additional_properties_sending()
+        api_server_access_profile_9 = self.models.ManagedClusterAPIServerAccessProfile(
+            enable_vnet_integration=False,
+        )
         mc_9 = self.models.ManagedCluster(
             location="test_location",
             api_server_access_profile=api_server_access_profile_9,
@@ -3899,9 +3900,9 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             self.models,
             DecoratorMode.UPDATE,
         )
-        api_server_access_profile_11 = self.models.ManagedClusterAPIServerAccessProfile()
-        api_server_access_profile_11.additional_properties['enableVnetIntegration'] = True
-        api_server_access_profile_11.enable_additional_properties_sending()
+        api_server_access_profile_11 = self.models.ManagedClusterAPIServerAccessProfile(
+            enable_vnet_integration=True,
+        )
         mc_11 = self.models.ManagedCluster(
             location="test_location",
             api_server_access_profile=api_server_access_profile_11,
@@ -3965,9 +3966,9 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             self.models,
             DecoratorMode.UPDATE,
         )
-        api_server_access_profile_9 = self.models.ManagedClusterAPIServerAccessProfile()
-        api_server_access_profile_9.additional_properties['enableVnetIntegration'] = False
-        api_server_access_profile_9.enable_additional_properties_sending()
+        api_server_access_profile_9 = self.models.ManagedClusterAPIServerAccessProfile(
+            enable_vnet_integration=False,
+        )
         mc_9 = self.models.ManagedCluster(
             location="test_location",
             api_server_access_profile=api_server_access_profile_9,
@@ -4010,9 +4011,9 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             self.models,
             DecoratorMode.UPDATE,
         )
-        api_server_access_profile_11 = self.models.ManagedClusterAPIServerAccessProfile()
-        api_server_access_profile_11.additional_properties['enableVnetIntegration'] = True
-        api_server_access_profile_11.enable_additional_properties_sending()
+        api_server_access_profile_11 = self.models.ManagedClusterAPIServerAccessProfile(
+            enable_vnet_integration=True,
+        )
         mc_11 = self.models.ManagedCluster(
             location="test_location",
             api_server_access_profile=api_server_access_profile_11,
@@ -4185,10 +4186,10 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
-        api_server_access_profile = self.models.ManagedClusterAPIServerAccessProfile()
-        api_server_access_profile.additional_properties['enableVnetIntegration'] = True
-        api_server_access_profile.enable_additional_properties_sending()
-        api_server_access_profile.enable_private_cluster = True
+        api_server_access_profile = self.models.ManagedClusterAPIServerAccessProfile(
+            enable_vnet_integration=True,
+            enable_private_cluster=True,
+        )
         mc = self.models.ManagedCluster(
             location="test_location",
             api_server_access_profile=api_server_access_profile,
@@ -4233,9 +4234,9 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             decorator_mode=DecoratorMode.UPDATE,
         )
         
-        api_server_access_profile = self.models.ManagedClusterAPIServerAccessProfile()
-        api_server_access_profile.additional_properties['enableVnetIntegration'] = True
-        api_server_access_profile.enable_additional_properties_sending()
+        api_server_access_profile = self.models.ManagedClusterAPIServerAccessProfile(
+            enable_vnet_integration=True,
+        )
         mc = self.models.ManagedCluster(
             location="test_location",
             api_server_access_profile=api_server_access_profile,
@@ -4307,7 +4308,6 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         ctx_2.attach_agentpool_context(agentpool_ctx_2)
         api_server_access_profile = self.models.ManagedClusterAPIServerAccessProfile()
         api_server_access_profile.subnet_id = apiserver_subnet_id
-        api_server_access_profile.enable_additional_properties_sending()
         mc = self.models.ManagedCluster(
             location="test_location",
             api_server_access_profile=api_server_access_profile,
@@ -4700,27 +4700,8 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         self.assertEqual(
             ctx_2.get_cluster_autoscaler_profile(),
             {
-                "additional_properties": {},
-                "balance_similar_node_groups": None,
-                "daemonset_eviction_for_empty_nodes": None,
-                "daemonset_eviction_for_occupied_nodes": None,
-                "ignore_daemonsets_utilization": None,
+                "scan-interval": "30s",
                 "expander": "least-waste",
-                "max_empty_bulk_delete": None,
-                "max_graceful_termination_sec": None,
-                "max_node_provision_time": None,
-                "max_total_unready_percentage": None,
-                "new_pod_scale_up_delay": None,
-                "ok_total_unready_count": None,
-                "scan_interval": "30s",
-                "scale_down_delay_after_add": None,
-                "scale_down_delay_after_delete": None,
-                "scale_down_delay_after_failure": None,
-                "scale_down_unneeded_time": None,
-                "scale_down_unready_time": None,
-                "scale_down_utilization_threshold": None,
-                "skip_nodes_with_local_storage": None,
-                "skip_nodes_with_system_pods": None,
             },
         )
 
@@ -6297,9 +6278,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         dec_1.context.attach_mc(mc_1)
         dec_mc_1 = dec_1._remove_defaults_in_mc(mc_1)
         ground_truth_mc_1 = self.models.ManagedCluster(location="test_location")
-        ground_truth_mc_1.additional_properties = None
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
-        self.assertEqual(dec_1.context.get_intermediate("defaults_in_mc"), {"additional_properties": {}})
 
         dec_mc_2 = dec_1._restore_defaults_in_mc(dec_mc_1)
         ground_truth_mc_2 = self.models.ManagedCluster(location="test_location")
@@ -6400,6 +6379,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             enable_fips=True,
             message_of_the_day="W10=",  # base64 encode of "[]"
             mode=CONST_NODEPOOL_MODE_SYSTEM,
+            scale_set_priority=CONST_SCALE_SET_PRIORITY_REGULAR,
         )
         ground_truth_mc_1 = self.models.ManagedCluster(location="test_location")
         ground_truth_mc_1.agent_pool_profiles = [ground_truth_agentpool_profile_1]
@@ -6901,10 +6881,6 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         dec_mc_1 = dec_1.set_up_network_profile(mc_1)
 
         network_profile_1 = self.models.ContainerServiceNetworkProfile(
-            network_plugin=None,
-            pod_cidr="10.244.0.0/16",  # default value in SDK
-            service_cidr="10.0.0.0/16",  # default value in SDK
-            dns_service_ip="10.0.0.10",  # default value in SDK
             load_balancer_sku="standard",
             outbound_type="loadBalancer",
         )
@@ -6985,13 +6961,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         dec_mc_3 = dec_3.set_up_network_profile(mc_3)
 
         network_profile_3 = self.models.ContainerServiceNetworkProfile(
-            network_plugin=None,  # None is overriden in the CLI because we don't want the default from the SDK
-            pod_cidr="10.244.0.0/16",  # default value in SDK
-            service_cidr="10.0.0.0/16",  # default value in SDK
-            dns_service_ip="10.0.0.10",  # default value in SDK
             load_balancer_sku="basic",
-            outbound_type="loadBalancer",
-            load_balancer_profile=None,  # profile dropped when lb sku is basic
         )
         ground_truth_mc_3 = self.models.ManagedCluster(location="test_location", network_profile=network_profile_3)
         self.assertEqual(dec_mc_3, ground_truth_mc_3)
@@ -7538,6 +7508,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         dec_mc_1 = dec_1.set_up_aad_profile(mc_1)
         ground_truth_mc_1 = self.models.ManagedCluster(
             location="test_location",
+            properties={},
         )
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
 
@@ -7614,6 +7585,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         dec_mc_1 = dec_1.set_up_api_server_access_profile(mc_1)
         ground_truth_mc_1 = self.models.ManagedCluster(
             location="test_location",
+            properties={},
         )
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
 
@@ -7726,9 +7698,9 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         mc_6 = self.models.ManagedCluster(location="test_location")
         dec_6.context.attach_mc(mc_6)
         dec_mc_6 = dec_6.set_up_api_server_access_profile(mc_6)
-        ground_truth_api_server_access_profile_6 = self.models.ManagedClusterAPIServerAccessProfile()
-        ground_truth_api_server_access_profile_6.additional_properties['subnetId'] = apiserver_subnet_id
-        ground_truth_api_server_access_profile_6.enable_additional_properties_sending()
+        ground_truth_api_server_access_profile_6 = self.models.ManagedClusterAPIServerAccessProfile(
+            subnet_id=apiserver_subnet_id,
+        )
 
         ground_truth_mc_6 = self.models.ManagedCluster(
             location="test_location",
@@ -7870,6 +7842,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         dec_mc_1 = dec_1.set_up_identity_profile(mc_1)
         ground_truth_mc_1 = self.models.ManagedCluster(
             location="test_location",
+            properties={},
         )
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
 
@@ -7940,6 +7913,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         dec_mc_1 = dec_1.set_up_auto_upgrade_profile(mc_1)
         ground_truth_mc_1 = self.models.ManagedCluster(
             location="test_location",
+            properties={},
         )
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
 
@@ -7984,6 +7958,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         dec_mc_1 = dec_1.set_up_auto_scaler_profile(mc_1)
         ground_truth_mc_1 = self.models.ManagedCluster(
             location="test_location",
+            properties={},
         )
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
 
@@ -8444,6 +8419,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             enable_ultra_ssd=False,
             enable_fips=False,
             mode=CONST_NODEPOOL_MODE_SYSTEM,
+            scale_set_priority=CONST_SCALE_SET_PRIORITY_REGULAR,
         )
         ssh_config_1 = self.models.ContainerServiceSshConfiguration(
             public_keys=[self.models.ContainerServiceSshPublicKey(key_data=public_key)]
@@ -8452,6 +8428,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         network_profile_1 = self.models.ContainerServiceNetworkProfile(
             load_balancer_sku="standard",
             network_plugin=None,
+            outbound_type="loadBalancer",
         )
         identity_1 = self.models.ManagedClusterIdentity(type="SystemAssigned")
         storage_profile_1 = self.models.ManagedClusterStorageProfile(
@@ -10016,6 +9993,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         dec_mc_1 = dec_1.update_api_server_access_profile(mc_1)
         ground_truth_mc_1 = self.models.ManagedCluster(
             location="test_location",
+            properties={},
         )
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
 
@@ -12302,6 +12280,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         )
         ground_truth_network_profile_1 = self.models.ContainerServiceNetworkProfile(
             load_balancer_sku="standard",
+            outbound_type="loadBalancer",
         )
         ground_truth_identity_1 = self.models.ManagedClusterIdentity(type="SystemAssigned")
         ground_truth_identity_profile_1 = {
