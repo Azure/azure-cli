@@ -19,6 +19,12 @@ class VMHostGroupShow(_VMHostGroupShow):
 
         return args_schema
 
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        if 'tags' not in result:
+            result['tags'] = {}
+        return result
+
 
 def convert_show_result_to_snake_case(result):
     new_result = {}
