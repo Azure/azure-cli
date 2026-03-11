@@ -304,11 +304,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         help_str += ' Default: true.' if 'create' in scope else ''  # suffix help with default if command is for create
 
         with self.argument_context(scope) as c:
-            c.argument('region_endpoint_enabled',
-                       options_list=['--global-endpoint-routing',
-                                     c.deprecate(target='--region-endpoint-enabled',
-                                                 redirect='--global-endpoint-routing')],
-                       arg_type=get_three_state_flag(), help=help_str)
+            c.argument('region_endpoint_enabled', arg_type=get_three_state_flag(), help=help_str)
+            c.argument('global_endpoint_routing', arg_type=get_three_state_flag(), help=help_str)
 
     with self.argument_context('acr run') as c:
         c.argument('registry_name', options_list=['--registry', '-r'])
