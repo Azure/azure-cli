@@ -384,9 +384,7 @@ def load_command_table(self, _):
     with self.command_group('vm host') as g:
         g.custom_command('get-instance-view', 'get_dedicated_host_instance_view')
         g.custom_command('create', 'create_dedicated_host')
-
-        from .operations.vm_host import VMHostUpdate
-        self.command_table['vm host update'] = VMHostUpdate(loader=self)
+        g.generic_update_command('update', getter_name='get_dedicated_host_instance_view', setter_arg_name='dedicated_host', setter_name='update_dedicated_host', setter_type=compute_custom, command_type=compute_custom)
 
     with self.command_group('vm host group', compute_dedicated_host_groups_sdk, client_factory=cf_dedicated_host_groups,
                             min_api='2019-03-01') as g:

@@ -5,24 +5,27 @@
 # pylint: disable=no-self-use, line-too-long, protected-access, too-few-public-methods, unused-argument
 from knack.log import get_logger
 
-from ..aaz.latest.vm.host import Update as _VMHostUpdate
-
 logger = get_logger(__name__)
 
 
-class VMHostUpdate(_VMHostUpdate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
+def convert_show_result_to_snake_case(result):
+    new_result = {}
+    if 'location' in result:
+        new_result['location'] = result['location']
 
-        args_schema.host_group_name._options = ['--host-group']
-        args_schema.host_name._options = ['-n', '--name']
+    if 'sku' in result:
+        new_result['sku'] = result['sku']
 
-        args_schema.location._registered = False
-        args_schema.sku._registered = False
-        args_schema.tags._registered = False
-        args_schema.auto_replace_on_failure._registered = False
-        args_schema.license_type._registered = False
-        args_schema.platform_fault_domain._registered = False
+    if 'tags' in result:
+        new_result['tags'] = result['tags']
 
-        return args_schema
+    if 'autoReplaceOnFailure' in result:
+        new_result['auto_replace_on_failure'] = result['autoReplaceOnFailure']
+
+    if 'licenseType' in result:
+        new_result['license_type'] = result['licenseType']
+
+    if 'platformFaultDomain' in result:
+        new_result['platform_fault_domain'] = result['platformFaultDomain']
+
+    return new_result
