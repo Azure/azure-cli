@@ -17,5 +17,4 @@ from ._redeploy import *
 from ._resize import *
 from ._restart import *
 from ._show import *
-from ._update import *
 from ._wait import *
