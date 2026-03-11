@@ -55,7 +55,60 @@ class Update(AAZCommand):
 
         # define Arg Group "Parameters"
 
+        _args_schema = cls._args_schema
+        _args_schema.tags = AAZDictArg(
+            options=["--tags"],
+            arg_group="Parameters",
+            help="Resource tags",
+            nullable=True,
+        )
+        _args_schema.zones = AAZListArg(
+            options=["--zones"],
+            arg_group="Parameters",
+            help="Availability Zone to use for this host group. Only single zone is supported. The zone can be assigned only during creation. If not provided, the group supports all zones in the region. If provided, enforces each host in the group to be in the same zone.",
+            nullable=True,
+        )
+
+        tags = cls._args_schema.tags
+        tags.Element = AAZStrArg(
+            nullable=True,
+        )
+
+        zones = cls._args_schema.zones
+        zones.Element = AAZStrArg(
+            nullable=True,
+        )
+
         # define Arg Group "Properties"
+
+        _args_schema = cls._args_schema
+        _args_schema.additional_capabilities = AAZObjectArg(
+            options=["--additional-capabilities"],
+            arg_group="Properties",
+            help="Enables or disables a capability on the dedicated host group. Minimum api-version: 2022-03-01.",
+            nullable=True,
+        )
+        _args_schema.platform_fault_domain_count = AAZIntArg(
+            options=["--platform-fault-domain-count"],
+            arg_group="Properties",
+            help="Number of fault domains that the host group can span.",
+            fmt=AAZIntArgFormat(
+                minimum=1,
+            ),
+        )
+        _args_schema.support_automatic_placement = AAZBoolArg(
+            options=["--support-automatic-placement"],
+            arg_group="Properties",
+            help="Specifies whether virtual machines or virtual machine scale sets can be placed automatically on the dedicated host group. Automatic placement means resources are allocated on dedicated hosts, that are chosen by Azure, under the dedicated host group. The value is defaulted to 'false' when not provided. Minimum api-version: 2020-06-01.",
+            nullable=True,
+        )
+
+        additional_capabilities = cls._args_schema.additional_capabilities
+        additional_capabilities.ultra_ssd_enabled = AAZBoolArg(
+            options=["ultra-ssd-enabled"],
+            help="The flag that enables or disables a capability to have UltraSSD Enabled Virtual Machines on Dedicated Hosts of the Dedicated Host Group. For the Virtual Machines to be UltraSSD Enabled, UltraSSDEnabled flag for the resource needs to be set true as well. The value is defaulted to 'false' when not provided. Please refer to https://docs.microsoft.com/en-us/azure/virtual-machines/disks-enable-ultra-ssd for more details on Ultra SSD feature. **Note:** The ultraSSDEnabled setting can only be enabled for Host Groups that are created as zonal. Minimum api-version: 2022-03-01.",
+            nullable=True,
+        )
         return cls._args_schema
 
     def _execute_operations(self):
@@ -278,6 +331,26 @@ class Update(AAZCommand):
                 typ=AAZObjectType
             )
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+            _builder.set_prop("tags", AAZDictType, ".tags")
+            _builder.set_prop("zones", AAZListType, ".zones")
+
+            properties = _builder.get(".properties")
+            if properties is not None:
+                properties.set_prop("additionalCapabilities", AAZObjectType, ".additional_capabilities")
+                properties.set_prop("platformFaultDomainCount", AAZIntType, ".platform_fault_domain_count", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("supportAutomaticPlacement", AAZBoolType, ".support_automatic_placement")
+
+            additional_capabilities = _builder.get(".properties.additionalCapabilities")
+            if additional_capabilities is not None:
+                additional_capabilities.set_prop("ultraSSDEnabled", AAZBoolType, ".ultra_ssd_enabled")
+
+            tags = _builder.get(".tags")
+            if tags is not None:
+                tags.set_elements(AAZStrType, ".")
+
+            zones = _builder.get(".zones")
+            if zones is not None:
+                zones.set_elements(AAZStrType, ".")
 
             return _instance_value
 
