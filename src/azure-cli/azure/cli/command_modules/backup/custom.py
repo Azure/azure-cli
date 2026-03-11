@@ -897,12 +897,14 @@ def check_protection_enabled_for_vm(cmd, vm_id=None, vm=None, resource_group_nam
                                                    "arguments.")
             vm_id = VMShow(cli_ctx=cmd.cli_ctx)(command_args={
                 'resource_group': resource_group_name,
-                'vm_name': vm
+                'vm_name': vm,
+                'expand': 'instanceView'
             }).get('id')
     vm_name, vm_rg = cust_help.get_resource_name_and_rg(resource_group_name, vm_id)
     vm = VMShow(cli_ctx=cmd.cli_ctx)(command_args={
         'resource_group': vm_rg,
-        'vm_name': vm_name
+        'vm_name': vm_name,
+        'expand': 'instanceView'
     })
     parameters = BackupStatusRequest(resource_type='VM', resource_id=vm_id)
     return backup_status_cf(cmd.cli_ctx).get(vm.get('location'), parameters).vault_id
