@@ -5944,13 +5944,19 @@ def get_dedicated_host_group_instance_view(cmd, host_group_name, resource_group_
     return VmHostGroupShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
-def update_dedicated_host_group(cmd, host_group_name, resource_group_name, **kwargs):
-    from .aaz.latest.vm.host.group import Update as VmHostGroupUpdate
+def update_dedicated_host_group(cmd, host_group_name, resource_group_name):
+    from .aaz.latest.vm.host.group import Update as VmHostGroupUpdate, Show as VmHostGroupShow
     from .operations.vm_host_group import convert_show_result_to_snake_case
-    command_args = convert_show_result_to_snake_case(kwargs['dedicated_host_group'])
-    command_args['name'] = host_group_name
-    command_args['resource_group'] = resource_group_name
-    return VmHostGroupUpdate(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+    command_args = {
+        'host_group_name': host_group_name,
+        'resource_group': resource_group_name,
+        'expand': 'instanceView'
+    }
+    vm_host_group = VmHostGroupShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+    vm_host_group = convert_show_result_to_snake_case(vm_host_group)
+    vm_host_group['name'] = host_group_name
+    vm_host_group['resource_group'] = resource_group_name
+    return VmHostGroupUpdate(cli_ctx=cmd.cli_ctx)(command_args=vm_host_group)
 
 def create_dedicated_host(cmd, client, host_group_name, host_name, resource_group_name, sku, platform_fault_domain=None,
                           auto_replace_on_failure=None, license_type=None, location=None, tags=None):

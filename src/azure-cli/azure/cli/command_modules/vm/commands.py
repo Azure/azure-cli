@@ -390,7 +390,7 @@ def load_command_table(self, _):
     with self.command_group('vm host group') as g:
         g.custom_command('get-instance-view', 'get_dedicated_host_group_instance_view')
         g.custom_command('create', 'create_dedicated_host_group')
-        g.generic_update_command('update', getter_name='get_dedicated_host_group_instance_view', setter_arg_name='dedicated_host_group', setter_name='update_dedicated_host_group', setter_type=compute_custom, command_type=compute_custom)
+        g.generic_update_command('update', setter_name='update_dedicated_host_group', setter_type=compute_custom, command_type=compute_custom)
 
         from .operations.vm_host_group import VMHostGroupShow
         self.command_table['vm host group show'] = VMHostGroupShow(loader=self)
