@@ -5965,13 +5965,19 @@ def get_dedicated_host_instance_view(cmd, host_group_name, host_name, resource_g
 
 
 def update_dedicated_host(cmd, host_group_name, host_name, resource_group_name, **kwargs):
-    from .aaz.latest.vm.host import Update as VmHostUpdate
+    from .aaz.latest.vm.host import Update as VmHostUpdate, Show as VmHostShow
     from .operations.vm_host import convert_show_result_to_snake_case
-    command_args = convert_show_result_to_snake_case(kwargs['dedicated_host'])
-    command_args['host_group_name'] = host_group_name
-    command_args['host_name'] = host_name
-    command_args['resource_group'] = resource_group_name
-    return VmHostUpdate(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+    command_args = {
+        'host_group_name': host_group_name,
+        'host_name': host_name,
+        'resource_group': resource_group_name,
+    }
+    vm_host = VmHostShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+    vm_host = convert_show_result_to_snake_case(vm_host)
+    vm_host['host_group_name'] = host_group_name
+    vm_host['host_name'] = host_name
+    vm_host['resource_group'] = resource_group_name
+    return VmHostUpdate(cli_ctx=cmd.cli_ctx)(command_args=vm_host)
 
 # endregion
 
