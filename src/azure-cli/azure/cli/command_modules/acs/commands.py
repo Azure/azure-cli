@@ -39,7 +39,7 @@ def load_command_table(self, _):
 
     managed_clusters_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.containerservice.operations.'
-                        '_managed_clusters_operations#ManagedClustersOperations.{}',
+                        '_operations#ManagedClustersOperations.{}',
         operation_group='managed_clusters',
         resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         client_factory=cf_managed_clusters
@@ -47,7 +47,7 @@ def load_command_table(self, _):
 
     agent_pools_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.containerservice.operations.'
-                        '_agent_pools_operations#AgentPoolsOperations.{}',
+                        '_operations#AgentPoolsOperations.{}',
         operation_group='agent_pools',
         resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         client_factory=cf_managed_clusters

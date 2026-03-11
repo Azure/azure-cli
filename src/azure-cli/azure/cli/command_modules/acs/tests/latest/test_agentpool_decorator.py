@@ -1242,7 +1242,7 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         )
         self.assertEqual(ctx_1.get_vm_set_type(), CONST_VIRTUAL_MACHINE_SCALE_SETS)
         agentpool = self.create_initialized_agentpool_instance(
-            type=CONST_AVAILABILITY_SET, type_properties_type=CONST_AVAILABILITY_SET
+            type=CONST_AVAILABILITY_SET,
         )
         ctx_1.attach_agentpool(agentpool)
         self.assertEqual(ctx_1.get_vm_set_type(), CONST_AVAILABILITY_SET)
@@ -1356,9 +1356,9 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
             self.agentpool_decorator_mode,
         )
         self.assertEqual(ctx_1.get_zones(), None)
-        agentpool = self.create_initialized_agentpool_instance(availability_zones=[1, 2, 3])
+        agentpool = self.create_initialized_agentpool_instance(availability_zones=["1", "2", "3"])
         ctx_1.attach_agentpool(agentpool)
-        self.assertEqual(ctx_1.get_zones(), [1, 2, 3])
+        self.assertEqual(ctx_1.get_zones(), ["1", "2", "3"])
 
     def common_get_max_pods(self):
         # default
@@ -2543,7 +2543,7 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
         if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
             ground_truth_agentpool_1.type = CONST_VIRTUAL_MACHINE_SCALE_SETS
         else:
-            ground_truth_agentpool_1.type_properties_type = CONST_VIRTUAL_MACHINE_SCALE_SETS
+            ground_truth_agentpool_1.type = CONST_VIRTUAL_MACHINE_SCALE_SETS
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 
     def common_set_up_custom_node_config(self):
@@ -2856,12 +2856,13 @@ class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCom
             count=3,
             node_taints=[],
             upgrade_settings=ground_truth_upgrade_settings_1,
-            type_properties_type=CONST_VIRTUAL_MACHINE_SCALE_SETS,
+            type=CONST_VIRTUAL_MACHINE_SCALE_SETS,
             enable_encryption_at_host=False,
             enable_ultra_ssd=False,
             enable_fips=False,
             mode=CONST_NODEPOOL_MODE_USER,
             scale_down_mode=CONST_SCALE_DOWN_MODE_DELETE,
+            scale_set_priority=CONST_SCALE_SET_PRIORITY_REGULAR,
             host_group_id=None,
             capacity_reservation_group_id=None,
         )
@@ -2895,8 +2896,6 @@ class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCom
             "test_cluster_name",
             "test_nodepool_name",
             agentpool_1,
-            if_match=None,
-            if_none_match=None,
             headers={},
         )
 
@@ -3020,6 +3019,7 @@ class AKSAgentPoolAddDecoratorManagedClusterModeTestCase(AKSAgentPoolAddDecorato
             enable_ultra_ssd=False,
             enable_fips=False,
             mode=CONST_NODEPOOL_MODE_SYSTEM,
+            scale_set_priority=CONST_SCALE_SET_PRIORITY_REGULAR,
             host_group_id=None,
             capacity_reservation_group_id=None,
         )
@@ -3583,8 +3583,6 @@ class AKSAgentPoolUpdateDecoratorStandaloneModeTestCase(AKSAgentPoolUpdateDecora
             "test_cluster_name",
             "test_nodepool_name",
             agentpool_1,
-            if_match=None,
-            if_none_match=None,
             headers={},
         )
 
