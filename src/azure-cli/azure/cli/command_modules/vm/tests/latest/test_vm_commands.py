@@ -13971,7 +13971,7 @@ class VMUltraSSDLivedataDiskIopsMbpsScenarioTest(ScenarioTest):
         self.assertNotEqual(r.exit_code, 0)
 
 
-class VmRestorePointInstantAccessScenarioTest(ScenarioTest):
+class VMRestorePointInstantAccessScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_rp_ia', location='eastus2euap')
     @AllowLargeResponse(size_kb=99999)

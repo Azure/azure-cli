@@ -18,7 +18,7 @@ class Create(AAZCommand):
     """Create the restore point. Updating properties of an existing restore point is not allowed.
 
     :example: Create a restore point
-        az az restore-point create --exclude-disks "/subscriptions/{subscription-id}/resourceGroups/myResour ceGroup/providers/Microsoft.Compute/disks/disk123" --resource-group "myResourceGroup" --collection-name "rpcName" --name "rpName" --instant-access-duration-minutes 120
+        az restore-point create --exclude-disks "/subscriptions/{subscription-id}/resourceGroups/myResour ceGroup/providers/Microsoft.Compute/disks/disk123" --resource-group "myResourceGroup" --collection-name "rpcName" --name "rpName" --instant-access-duration-minutes 120
 
     :example: Create a restore point with --consistency-mode CrashConsistent
         az vm create -n vm -g rg --image UbuntuLTS --tag EnableCrashConsistentRestorePoint=True

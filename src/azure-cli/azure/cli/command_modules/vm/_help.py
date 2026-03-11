@@ -2995,7 +2995,7 @@ disks are specified, all disks will be included."
                --resource-group "myResourceGroup" --collection-name "rpcName" --name "rpName"
       - name: Create a restore point with instant-access-duration-minutes
         text: |-
-               az restore-point create --exclude-disks "/subscriptions/{subscription-id}/resourceGroups/myResourceGroup/providers/Microsoft.Compute/disks/disk123" 
+               az restore-point create --exclude-disks "/subscriptions/{subscription-id}/resourceGroups/myResourceGroup/providers/Microsoft.Compute/disks/disk123" \
                --resource-group "myResourceGroup" --collection-name "rpcName" --name "rpName" --instant-access-duration-minutes 120
 """
 

@@ -6450,8 +6450,9 @@ def restore_point_create(cmd,
             instant_access_duration_minutes = int(instant_access_duration_minutes)
         except (TypeError, ValueError):
             raise ArgumentUsageError('--instant-access-duration/--instant-access-duration-minutes must be an integer.')
-        if instant_access_duration_minutes <= 0:
-            raise ArgumentUsageError('--instant-access-duration/--instant-access-duration-minutes must be greater than 0.')
+        if instant_access_duration_minutes < 60 or instant_access_duration_minutes > 300:
+            raise ArgumentUsageError(
+                '--instant-access-duration/--instant-access-duration-minutes must be between 60 and 300 minutes.')
 
         parameters['instant_access_duration_minutes'] = instant_access_duration_minutes
 
