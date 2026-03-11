@@ -34,6 +34,7 @@ from azure.cli.command_modules.acs.azurecontainerstorage._helpers import (
     get_initial_resource_value_args,
     perform_role_operations_on_managed_rg,
     validate_storagepool_creation,
+    should_delete_extension,
 )
 from knack.log import get_logger
 
@@ -682,43 +683,80 @@ def perform_disable_azure_container_storage_v1(  # pylint: disable=too-many-stat
             logger.warning("Azure Container Storage storagepool type %s has been disabled.", storage_pool_type)
 
 
-def perform_enable_azure_container_storage(
+def perform_azure_container_storage_update(
     cmd,
     resource_group,
     cluster_name,
+    storage_options_to_add,
+    is_extension_installed=False,
+    storage_options_to_remove=None,
 ):
     client_factory = get_k8s_extension_module(CONST_K8S_EXTENSION_CLIENT_FACTORY_MOD_NAME)
     client = client_factory.cf_k8s_extension_operation(cmd.cli_ctx)
-
     k8s_extension_custom_mod = get_k8s_extension_module(CONST_K8S_EXTENSION_CUSTOM_MOD_NAME)
-    config_settings = []
-    delete_extension = False
 
-    try:
-        result = k8s_extension_custom_mod.create_k8s_extension(
-            cmd,
-            client,
-            resource_group,
-            cluster_name,
-            CONST_ACSTOR_EXT_INSTALLATION_NAME,
-            "managedClusters",
-            CONST_ACSTOR_K8S_EXTENSION_NAME,
-            auto_upgrade_minor_version=True,
-            release_train="stable",
-            scope="cluster",
-            release_namespace=CONST_ACSTOR_EXT_INSTALLATION_NAMESPACE,
-            configuration_settings=config_settings,
-        )
-        op_text = "Azure Container Storage successfully installed"
-        long_op_result = LongRunningOperation(cmd.cli_ctx)(result)
-        if long_op_result.provisioning_state == "Succeeded":
-            logger.warning(op_text)
-    except Exception as ex:     # pylint: disable=broad-except
-        logger.error("Azure Container Storage failed to install.\nError: %s", ex)
-        delete_extension = True
+    delete_extension = should_delete_extension(storage_options_to_remove)
+    delete_extension_auto = False
 
-    if delete_extension:
-        logger.warning("Cleaning up the cluster by disabling Azure Container Storage")
+    if not delete_extension:
+        config_settings = []
+
+        storage_options_to_add = storage_options_to_add if isinstance(storage_options_to_add, (list, str)) else []
+        storage_options_to_remove = storage_options_to_remove \
+            if isinstance(storage_options_to_remove, (list, str)) else []
+
+        if CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK in storage_options_to_remove:
+            config_settings.append({"csiDriverConfigs.local-csi-driver.enabled": "False"})
+        elif CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK in storage_options_to_add:
+            config_settings.append({"csiDriverConfigs.local-csi-driver.enabled": "True"})
+
+        if CONST_STORAGE_POOL_TYPE_ELASTIC_SAN in storage_options_to_remove:
+            config_settings.append({"csiDriverConfigs.azuresan-csi-driver.enabled": "False"})
+        elif CONST_STORAGE_POOL_TYPE_ELASTIC_SAN in storage_options_to_add:
+            config_settings.append({"csiDriverConfigs.azuresan-csi-driver.enabled": "True"})
+
+        try:
+            if is_extension_installed:
+                result = k8s_extension_custom_mod.update_k8s_extension(
+                    cmd,
+                    client,
+                    resource_group,
+                    cluster_name,
+                    CONST_ACSTOR_EXT_INSTALLATION_NAME,
+                    "managedClusters",
+                    configuration_settings=config_settings,
+                    yes=True,
+                )
+                op_text = "Azure Container Storage successfully updated"
+            else:
+                result = k8s_extension_custom_mod.create_k8s_extension(
+                    cmd,
+                    client,
+                    resource_group,
+                    cluster_name,
+                    CONST_ACSTOR_EXT_INSTALLATION_NAME,
+                    "managedClusters",
+                    CONST_ACSTOR_K8S_EXTENSION_NAME,
+                    auto_upgrade_minor_version=True,
+                    release_train="stable",
+                    scope="cluster",
+                    release_namespace=CONST_ACSTOR_EXT_INSTALLATION_NAMESPACE,
+                    configuration_settings=config_settings,
+                )
+                op_text = "Azure Container Storage successfully installed"
+            long_op_result = LongRunningOperation(cmd.cli_ctx)(result)
+            if long_op_result.provisioning_state == "Succeeded":
+                logger.warning(op_text)
+        except Exception as ex:     # pylint: disable=broad-except
+            if is_extension_installed:
+                logger.error("Azure Container Storage failed to update.\nError: %s.", ex)
+            else:
+                logger.error("Azure Container Storage failed to install.\nError: %s", ex)
+                delete_extension_auto = True
+
+    if delete_extension or delete_extension_auto:
+        if delete_extension_auto:
+            logger.warning("Cleaning up the cluster by disabling Azure Container Storage")
         try:
             delete_op_result = k8s_extension_custom_mod.delete_k8s_extension(
                 cmd,
@@ -732,40 +770,12 @@ def perform_enable_azure_container_storage(
 
             LongRunningOperation(cmd.cli_ctx)(delete_op_result)
             logger.warning("Azure Container Storage has been disabled.")
-            logger.warning(
-                "Please retry enabling Azure Container Storage by running "
-                "`az aks update` along with `--enable-azure-container-storage`"
-            )
+            if delete_extension_auto:
+                logger.warning(
+                    "Please retry enabling Azure Container Storage by running "
+                    "`az aks update` along with `--enable-azure-container-storage`"
+                )
         except Exception as delete_ex:
             raise UnknownError(
                 "Failed to disable Azure Container Storage with error: %s" % delete_ex
             ) from delete_ex
-
-
-def perform_disable_azure_container_storage(
-    cmd,
-    resource_group,
-    cluster_name,
-):
-    client_factory = get_k8s_extension_module(CONST_K8S_EXTENSION_CLIENT_FACTORY_MOD_NAME)
-    client = client_factory.cf_k8s_extension_operation(cmd.cli_ctx)
-    k8s_extension_custom_mod = get_k8s_extension_module(CONST_K8S_EXTENSION_CUSTOM_MOD_NAME)
-
-    try:
-        delete_op_result = k8s_extension_custom_mod.delete_k8s_extension(
-            cmd,
-            client,
-            resource_group,
-            cluster_name,
-            CONST_ACSTOR_EXT_INSTALLATION_NAME,
-            "managedClusters",
-            yes=True,
-            no_wait=False,
-        )
-
-        LongRunningOperation(cmd.cli_ctx)(delete_op_result)
-        logger.warning("Azure Container Storage has been disabled.")
-    except Exception as delete_ex:
-        raise UnknownError(
-            "Failed to disable Azure Container Storage with error: %s" % delete_ex
-        ) from delete_ex

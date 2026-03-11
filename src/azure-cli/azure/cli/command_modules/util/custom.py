@@ -50,8 +50,8 @@ def upgrade_version(cmd, update_all=None, yes=None, allow_preview=None):  # pyli
     from packaging.version import parse
 
     update_cli = True
-    from azure.cli.core.util import get_latest_from_github
-    latest_version = get_latest_from_github()
+    from azure.cli.core.util import get_latest_version_from_ame_storage
+    latest_version = get_latest_version_from_ame_storage()
     if not latest_version:
         logger.warning("Failed to get the latest azure-cli version.")
         update_cli = False

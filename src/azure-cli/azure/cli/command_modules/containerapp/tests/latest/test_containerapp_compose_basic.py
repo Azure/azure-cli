@@ -13,7 +13,7 @@ from azure.cli.command_modules.containerapp.tests.latest.common import (
     clean_up_test_file,
     TEST_DIR, TEST_LOCATION)
 
-from .utils import create_containerapp_env, prepare_containerapp_env_for_app_e2e_tests
+from .utils import prepare_containerapp_env_for_app_e2e_tests
 
 
 # flake8: noqa

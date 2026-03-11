@@ -646,6 +646,13 @@ def process_vpn_connection_create_namespace(cmd, namespace):
         raise ValueError('usage error: --vnet-gateway2 NAME_OR_ID | --local-gateway2 NAME_OR_ID '
                          '| --express-route-circuit2 NAME_OR_ID')
 
+    def _normalize_shared_key_fields(n):
+        # Turn "" into None so the sdk layer won’t serialize them
+        if getattr(n, 'shared_key', None) == '':
+            n.shared_key = None
+        if getattr(n, 'shared_key_keyvault_id', None) == '':
+            n.shared_key_keyvault_id = None
+
     def _validate_name_or_id(value, resource_type):
         if not is_valid_resource_id(value):
             subscription = getattr(namespace, 'subscription', get_subscription_id(cmd.cli_ctx))
@@ -656,6 +663,10 @@ def process_vpn_connection_create_namespace(cmd, namespace):
                 type=resource_type,
                 name=value)
         return value
+
+    auth = (getattr(namespace, 'auth_type', '') or '').strip().lower()
+
+    _normalize_shared_key_fields(namespace)
 
     if (namespace.local_gateway2 or namespace.vnet_gateway2) and not namespace.shared_key:
         raise CLIError('--shared-key is required for VNET-to-VNET or Site-to-Site connections.')
@@ -679,6 +690,14 @@ def process_vpn_connection_create_namespace(cmd, namespace):
         namespace.vnet_gateway2 = \
             _validate_name_or_id(namespace.vnet_gateway2, 'virtualNetworkGateways')
         namespace.connection_type = 'Vnet2Vnet'
+
+    if auth == 'certificate':
+        # SharedKey/SharedKeyKeyvaultId should be empty when AuthenticationType is Certificate.
+        # Follow the link for more details : https://go.microsoft.com/fwlink/?linkid=2208263
+        if getattr(namespace, 'shared_key', None):
+            namespace.shared_key = None
+        if getattr(namespace, 'shared_key_keyvault_id', None):
+            namespace.shared_key_keyvault_id = None
 
 
 def load_cert_file(param_name):

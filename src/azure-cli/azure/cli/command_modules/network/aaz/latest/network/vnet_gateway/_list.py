@@ -22,9 +22,9 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-07-01",
+        "version": "2025-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworkgateways", "2024-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworkgateways", "2025-01-01"],
         ]
     }
 
@@ -112,7 +112,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-07-01",
+                    "api-version", "2025-01-01",
                     required=True,
                 ),
             }
@@ -494,6 +494,7 @@ class List(AAZCommand):
             )
             vpn_client_configuration.radius_server_secret = AAZStrType(
                 serialized_name="radiusServerSecret",
+                flags={"secret": True},
             )
             vpn_client_configuration.radius_servers = AAZListType(
                 serialized_name="radiusServers",
@@ -534,6 +535,7 @@ class List(AAZCommand):
             )
             _element.radius_server_secret = AAZStrType(
                 serialized_name="radiusServerSecret",
+                flags={"secret": True},
             )
 
             vng_client_connection_configurations = cls._schema_on_200.value.Element.properties.vpn_client_configuration.vng_client_connection_configurations
@@ -669,6 +671,7 @@ class _ListHelper:
     def _build_schema_address_space_read(cls, _schema):
         if cls._schema_address_space_read is not None:
             _schema.address_prefixes = cls._schema_address_space_read.address_prefixes
+            _schema.ipam_pool_prefix_allocations = cls._schema_address_space_read.ipam_pool_prefix_allocations
             return
 
         cls._schema_address_space_read = _schema_address_space_read = AAZObjectType()
@@ -677,11 +680,36 @@ class _ListHelper:
         address_space_read.address_prefixes = AAZListType(
             serialized_name="addressPrefixes",
         )
+        address_space_read.ipam_pool_prefix_allocations = AAZListType(
+            serialized_name="ipamPoolPrefixAllocations",
+        )
 
         address_prefixes = _schema_address_space_read.address_prefixes
         address_prefixes.Element = AAZStrType()
 
+        ipam_pool_prefix_allocations = _schema_address_space_read.ipam_pool_prefix_allocations
+        ipam_pool_prefix_allocations.Element = AAZObjectType()
+
+        _element = _schema_address_space_read.ipam_pool_prefix_allocations.Element
+        _element.allocated_address_prefixes = AAZListType(
+            serialized_name="allocatedAddressPrefixes",
+            flags={"read_only": True},
+        )
+        _element.number_of_ip_addresses = AAZStrType(
+            serialized_name="numberOfIpAddresses",
+        )
+        _element.pool = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+
+        allocated_address_prefixes = _schema_address_space_read.ipam_pool_prefix_allocations.Element.allocated_address_prefixes
+        allocated_address_prefixes.Element = AAZStrType()
+
+        pool = _schema_address_space_read.ipam_pool_prefix_allocations.Element.pool
+        pool.id = AAZStrType()
+
         _schema.address_prefixes = cls._schema_address_space_read.address_prefixes
+        _schema.ipam_pool_prefix_allocations = cls._schema_address_space_read.ipam_pool_prefix_allocations
 
     _schema_sub_resource_read = None
 

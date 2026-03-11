@@ -120,14 +120,20 @@ def load_command_table(self, _):
         g.command('list', 'list')
 
     with self.command_group('cognitiveservices agent', client_factory=cf_ai_projects, is_preview=True) as g:
+        g.custom_command('create', 'agent_create')
         g.custom_command('update', 'agent_update')
         g.custom_command('stop', 'agent_stop')
         g.custom_command('start', 'agent_start')
+        g.custom_show_command('status', 'agent_status')
         g.custom_command('delete-deployment', 'agent_delete_deployment')
         g.custom_command('delete', 'agent_delete')
         g.custom_command('list', 'agent_list')
         g.custom_command('list-versions', 'agent_versions_list')
         g.custom_show_command('show', 'agent_show')
+
+    with self.command_group('cognitiveservices agent logs', client_factory=cf_ai_projects, is_preview=True) as g:
+        g.custom_show_command('show', 'agent_logs_show')
+
     with self.command_group(
             'cognitiveservices account project', projects_type,
             client_factory=cf_projects) as g:

@@ -2410,6 +2410,8 @@ examples:
     text: az bicep decompile-params --file {json_template_file}
   - name: Attempts to decompile a parameters .json file to .bicepparam using the bicep file given.
     text: az bicep decompile-params --file {json_template_file} --bicep-file {bicep_file}
+  - name: Attempts to decompile a parameters .json file to .bicepparam and overwrite existing output.
+    text: az bicep decompile-params --file {json_template_file} --force
   - name: Attempts to decompile a parameters .json file to .bicepparam and print all output to stdout.
     text: az bicep decompile-params --file {json_template_file} --stdout
   - name: Attempts to decompile a parameters .json file to .bicepparam and print all output to stdout and save the result to the specified directory.

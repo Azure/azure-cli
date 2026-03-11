@@ -624,8 +624,7 @@ def upload_blob(cmd, client, file_path=None, container_name=None, blob_name=None
     if maxsize_condition:
         upload_args['maxsize_condition'] = maxsize_condition
 
-    if cmd.supported_api_version(min_api='2016-05-31'):
-        upload_args['validate_content'] = validate_content
+    upload_args['validate_content'] = validate_content
 
     if progress_callback:
         upload_args['progress_hook'] = progress_callback
@@ -839,7 +838,8 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
 def generate_sas_blob_uri(cmd, client, permission=None, expiry=None, start=None, id=None, ip=None,  # pylint: disable=redefined-builtin
                           protocol=None, cache_control=None, content_disposition=None,
                           content_encoding=None, content_language=None,
-                          content_type=None, full_uri=False, as_user=False, snapshot=None, **kwargs):
+                          content_type=None, full_uri=False, as_user=False, snapshot=None, user_delegation_oid=None,
+                          **kwargs):
     from ..url_quote_util import encode_url_path
     from urllib.parse import quote
     t_generate_blob_sas = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB,
@@ -875,7 +875,8 @@ def generate_sas_blob_uri(cmd, client, permission=None, expiry=None, start=None,
                                     permission=permission, expiry=expiry, start=start, policy_id=id, ip=ip,
                                     protocol=protocol, cache_control=cache_control,
                                     content_disposition=content_disposition, content_encoding=content_encoding,
-                                    content_language=content_language, content_type=content_type, **kwargs)
+                                    content_language=content_language, content_type=content_type,
+                                    user_delegation_oid=user_delegation_oid, **kwargs)
 
     if full_uri:
         blob_client = t_blob_client(account_url=client.url, container_name=container_name, blob_name=blob_name,
@@ -888,7 +889,7 @@ def generate_sas_blob_uri(cmd, client, permission=None, expiry=None, start=None,
 def generate_container_shared_access_signature(cmd, client, container_name, permission=None, expiry=None,
                                                start=None, id=None, ip=None, protocol=None, cache_control=None,
                                                content_disposition=None, content_encoding=None, content_language=None,
-                                               content_type=None, as_user=False, **kwargs):
+                                               content_type=None, user_delegation_oid=None, as_user=False, **kwargs):
     t_generate_container_sas = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB,
                                        '_shared_access_signature#generate_container_sas')
 
@@ -906,7 +907,8 @@ def generate_container_shared_access_signature(cmd, client, container_name, perm
                                     permission=permission, expiry=expiry, start=start, policy_id=id, ip=ip,
                                     protocol=protocol, cache_control=cache_control,
                                     content_disposition=content_disposition, content_encoding=content_encoding,
-                                    content_language=content_language, content_type=content_type, **kwargs)
+                                    content_language=content_language, content_type=content_type,
+                                    user_delegation_oid=user_delegation_oid, **kwargs)
 
 
 def create_blob_url(client, container_name, blob_name, snapshot, protocol='https'):

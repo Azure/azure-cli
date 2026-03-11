@@ -24,7 +24,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           get_api_version_type, blob_download_file_path_validator, blob_tier_validator, validate_subnet,
                           validate_immutability_arguments, validate_blob_name_for_upload, validate_share_close_handle,
                           blob_tier_validator_track2, services_type_v2, resource_type_type_v2, PermissionScopeAddAction,
-                          SshPublicKeyAddAction)
+                          SshPublicKeyAddAction, user_delegation_oid_validator)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines, too-many-branches, line-too-long
@@ -390,8 +390,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    'public access setting for a container is required to enable anonymous access.')
         c.argument('min_tls_version', arg_type=get_enum_type(t_tls_version),
                    help='The minimum TLS version to be permitted on requests to storage. '
-                        'While the default setting is TLS 1.0 for this property, '
-                        'Microsoft recommends setting MinimumTlsVersion to 1.2 or above.')
+                        ' Values TLS1_0 and TLS1_1 have been retired on 2026/02/03 and will be removed on 2026/03/03.'
+                        ' Microsoft recommends setting MinimumTlsVersion to TLS1_2')
         c.argument('allow_shared_key_access', allow_shared_key_access_type)
         c.argument('edge_zone', edge_zone_type)
         c.argument('identity_type', arg_type=get_enum_type(t_identity_type), arg_group='Identity',
@@ -446,6 +446,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('enable_blob_geo_priority_replication', arg_type=get_three_state_flag(),
                    options_list=['--enable-blob-geo-priority-replication', '--blob-geo-sla'],
                    help='Indicates whether Blob Geo Priority Replication is enabled for the storage account.')
+        c.argument('publish_ipv6_endpoint', arg_type=get_three_state_flag(),
+                   arg_group='IPv6 Endpoint', is_preview=True,
+                   help='A boolean flag which indicates whether IPv6 storage endpoints are to be published.')
 
     with self.argument_context('storage account private-endpoint-connection',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
@@ -506,8 +509,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    'public access setting for a container is required to enable anonymous access.')
         c.argument('min_tls_version', arg_type=get_enum_type(t_tls_version),
                    help='The minimum TLS version to be permitted on requests to storage. '
-                        'While the default setting is TLS 1.0 for this property, '
-                        'Microsoft recommends setting MinimumTlsVersion to 1.2 or above.')
+                        ' Values TLS1_0 and TLS1_1 have been retired on 2026/02/03 and will be removed on 2026/03/03.'
+                        ' Microsoft recommends setting MinimumTlsVersion to TLS1_2')
         c.argument('allow_shared_key_access', allow_shared_key_access_type)
         c.argument('identity_type', arg_type=get_enum_type(t_identity_type), arg_group='Identity',
                    help='The identity type.')
@@ -547,6 +550,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('enable_blob_geo_priority_replication', arg_type=get_three_state_flag(),
                    options_list=['--enable-blob-geo-priority-replication', '--blob-geo-sla'],
                    help='Indicates whether Blob Geo Priority Replication is enabled for the storage account.')
+        c.argument('publish_ipv6_endpoint', arg_type=get_three_state_flag(),
+                   arg_group='IPv6 Endpoint', is_preview=True,
+                   help='A boolean flag which indicates whether IPv6 storage endpoints are to be published.')
 
     for scope in ['storage account create', 'storage account update']:
         with self.argument_context(scope, arg_group='Customer managed key',
@@ -659,10 +665,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('account_name', acct_name_type, id_part=None)
 
     with self.argument_context('storage account network-rule', resource_type=ResourceType.MGMT_STORAGE) as c:
-        from ._validators import validate_ip_address
+        from ._validators import validate_ip_address, validate_ipv6_address
         c.argument('account_name', acct_name_type, id_part=None)
         c.argument('ip_address', nargs='*', help='IPv4 address or CIDR range. Can supply a list: --ip-address ip1 '
                                                  '[ip2]...', validator=validate_ip_address)
+        c.argument('ipv6_address', nargs='*', help='IPv6 address or CIDR range. Can supply a list: --ipv6-address ip1 '
+                                                   '[ip2]...', validator=validate_ipv6_address, is_preview=True)
         c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
         c.argument('vnet_name', help='Name of a virtual network.', validator=validate_subnet)
         c.argument('action', action_type)
@@ -762,6 +770,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('channel_encryption', arg_group='SMB Setting',
                    help="SMB channel encryption supported by server. Valid values are AES-128-CCM, AES-128-GCM, "
                         "AES-256-GCM. Should be passed as a string with delimiter ';' ")
+        c.argument('require_smb_encryption_in_transit', arg_group='SMB Setting',
+                   arg_type=get_three_state_flag(), options_list=['--require-smb-encryption-in-transit', '--smb-eit'],
+                   help="Whether SMB Encryption in transit is required.")
+        c.argument('require_nfs_encryption_in_transit', arg_group='NFS Setting',
+                   arg_type=get_three_state_flag(), options_list=['--require-nfs-encryption-in-transit', '--nfs-eit'],
+                   help="Whether NFS Encryption in transit is required.")
 
     with self.argument_context('storage account generate-sas', resource_type=ResourceType.DATA_STORAGE_BLOB) as c:
         t_account_permissions = self.get_sdk('_shared.models#AccountSasPermissions',
@@ -961,6 +975,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                     'specifies the blob snapshot to grant permission.')
         c.extra('encryption_scope', help='A predefined encryption scope used to encrypt the data on the service.')
         c.ignore('sas_token')
+        c.argument('user_delegation_oid', validator=user_delegation_oid_validator, is_preview=True,
+                   help='Specifies the Entra ID of the user that is authorized to use the resulting SAS URL. '
+                        'The resulting SAS URL must be used in conjunction with an Entra ID token that has been issued '
+                        'to the user specified in this value.')
 
     with self.argument_context('storage blob restore', resource_type=ResourceType.MGMT_STORAGE) as c:
         from ._validators import BlobRangeAddAction
@@ -1680,6 +1698,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                         "The expiry parameter and '--auth-mode login' are required if this argument is specified. ")
         c.extra('encryption_scope', help='A predefined encryption scope used to encrypt the data on the service.')
         c.ignore('sas_token')
+        c.argument('user_delegation_oid', validator=user_delegation_oid_validator, is_preview=True,
+                   help='Specifies the Entra ID of the user that is authorized to use the resulting SAS URL. '
+                        'The resulting SAS URL must be used in conjunction with an Entra ID token that has been issued '
+                        'to the user specified in this value.')
 
     for cmd in ['acquire', 'renew', 'break', 'change', 'release']:
         with self.argument_context(f'storage container lease {cmd}') as c:
@@ -1941,6 +1963,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help=sas_help.format(get_permission_help_string(t_share_permissions)),
                    validator=get_permission_validator(t_share_permissions))
         c.ignore('sas_token')
+        c.argument('as_user', action='store_true', validator=as_user_validator, is_preview=True,
+                   help="Indicates that this command return the SAS signed with the user delegation key. "
+                        "The expiry parameter and '--auth-mode login' are required if this argument is specified. ")
+        c.argument('user_delegation_oid', validator=user_delegation_oid_validator, is_preview=True,
+                   help='Specifies the Entra ID of the user that is authorized to use the resulting SAS URL. '
+                        'The resulting SAS URL must be used in conjunction with an Entra ID token that has been issued '
+                        'to the user specified in this value.')
 
     with self.argument_context('storage share update') as c:
         c.extra('share_name', share_name_type, options_list=('--name', '-n'), required=True)
@@ -2149,6 +2178,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('content_type', help='Response header value for Content-Type when resource is accessed '
                                      'using this shared access signature.')
         c.ignore('sas_token')
+        c.extra('as_user', action='store_true', validator=as_user_validator, is_preview=True,
+                help="Indicates that this command return the SAS signed with the user delegation key. "
+                     "The expiry parameter and '--auth-mode login' are required if this argument is specified. ")
+        c.extra('user_delegation_oid', validator=user_delegation_oid_validator, is_preview=True,
+                help='Specifies the Entra ID of the user that is authorized to use the resulting SAS URL. '
+                     'The resulting SAS URL must be used in conjunction with an Entra ID token that has been issued '
+                     'to the user specified in this value.')
 
     with self.argument_context('storage file list') as c:
         c.extra('share_name', share_name_type, required=True)
@@ -2295,6 +2331,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help=sas_help.format(get_permission_help_string(t_queue_permissions)),
                    validator=get_permission_validator(t_queue_permissions))
         c.ignore('sas_token')
+        c.argument('as_user', action='store_true', validator=as_user_validator, is_preview=True,
+                   help="Indicates that this command return the SAS signed with the user delegation key. "
+                        "The expiry parameter and '--auth-mode login' are required if this argument is specified. ")
+        c.argument('user_delegation_oid', validator=user_delegation_oid_validator, is_preview=True,
+                   help='Specifies the Entra ID of the user that is authorized to use the resulting SAS URL. '
+                        'The resulting SAS URL must be used in conjunction with an Entra ID token that has been issued '
+                        'to the user specified in this value.')
 
     with self.argument_context('storage queue list') as c:
         c.argument('include_metadata', help='Specify that queue metadata be returned in the response.')
@@ -2540,6 +2583,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Indicate that this command return the full blob URI and the shared access signature token.')
         c.argument('encryption_scope', help='Specify the encryption scope for a request made so that all '
                                             'write operations will be service encrypted.')
+        c.argument('user_delegation_oid', validator=user_delegation_oid_validator, is_preview=True,
+                   help='Specifies the Entra ID of the user that is authorized to use the resulting SAS URL. '
+                        'The resulting SAS URL must be used in conjunction with an Entra ID token that has been issued '
+                        'to the user specified in this value.')
 
     with self.argument_context('storage fs list') as c:
         c.argument('include_metadata', arg_type=get_three_state_flag(),
@@ -2666,6 +2713,46 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Indicate that this command return the full blob URI and the shared access signature token.')
         c.argument('encryption_scope', help='Specify the encryption scope for a request made so that all '
                                             'write operations will be service encrypted.')
+        c.argument('user_delegation_oid', validator=user_delegation_oid_validator, is_preview=True,
+                   help='Specifies the Entra ID of the user that is authorized to use the resulting SAS URL. '
+                        'The resulting SAS URL must be used in conjunction with an Entra ID token that has been issued '
+                        'to the user specified in this value.')
+
+    with self.argument_context('storage fs file generate-sas') as c:
+        t_file_system_permissions = self.get_sdk('_models#FileSystemSasPermissions',
+                                                 resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE)
+        c.register_sas_arguments()
+        c.argument('file_system_name', options_list=['-f', '--file-system'],
+                   help='File system name (i.e. container name).', required=True)
+        c.argument('path', options_list=['-p', '--path'], help="The file path in a file system.", required=True)
+        c.argument('id', options_list='--policy-name',
+                   help='The name of a stored access policy.')
+        c.argument('permission', options_list='--permissions',
+                   help=sas_help.format(get_permission_help_string(t_file_system_permissions)),
+                   validator=get_permission_validator(t_file_system_permissions))
+        c.argument('cache_control', help='Response header value for Cache-Control when resource is accessed'
+                                         'using this shared access signature.')
+        c.argument('content_disposition', help='Response header value for Content-Disposition when resource is accessed'
+                                               'using this shared access signature.')
+        c.argument('content_encoding', help='Response header value for Content-Encoding when resource is accessed'
+                                            'using this shared access signature.')
+        c.argument('content_language', help='Response header value for Content-Language when resource is accessed'
+                                            'using this shared access signature.')
+        c.argument('content_type', help='Response header value for Content-Type when resource is accessed'
+                                        'using this shared access signature.')
+        c.argument('as_user', action='store_true',
+                   validator=as_user_validator,
+                   help="Indicates that this command return the SAS signed with the user delegation key. "
+                        "The expiry parameter and '--auth-mode login' are required if this argument is specified. ")
+        c.ignore('sas_token')
+        c.argument('full_uri', action='store_true',
+                   help='Indicate that this command return the full blob URI and the shared access signature token.')
+        c.argument('encryption_scope', help='Specify the encryption scope for a request made so that all '
+                                            'write operations will be service encrypted.')
+        c.argument('user_delegation_oid', validator=user_delegation_oid_validator, is_preview=True,
+                   help='Specifies the Entra ID of the user that is authorized to use the resulting SAS URL. '
+                        'The resulting SAS URL must be used in conjunction with an Entra ID token that has been issued '
+                        'to the user specified in this value.')
 
     with self.argument_context('storage fs file list') as c:
         c.extra('file_system_name', options_list=['-f', '--file-system'],

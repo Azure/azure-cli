@@ -22,9 +22,9 @@ class Delete(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-11-01",
+        "version": "2025-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgateways/{}", "2023-11-01", "properties.sslCertificates[]"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgateways/{}", "2025-05-01", "properties.sslCertificates[]"],
         ]
     }
 
@@ -159,7 +159,7 @@ class Delete(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-11-01",
+                    "api-version", "2025-05-01",
                     required=True,
                 ),
             }
@@ -258,7 +258,7 @@ class Delete(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-11-01",
+                    "api-version", "2025-05-01",
                     required=True,
                 ),
             }
@@ -536,7 +536,8 @@ class _DeleteHelper:
             flags={"read_only": True},
         )
         application_gateway_read.id = AAZStrType()
-        application_gateway_read.identity = AAZObjectType()
+        application_gateway_read.identity = AAZIdentityObjectType()
+        cls._build_schema_managed_service_identity_read(application_gateway_read.identity)
         application_gateway_read.location = AAZStrType()
         application_gateway_read.name = AAZStrType(
             flags={"read_only": True},
@@ -549,33 +550,6 @@ class _DeleteHelper:
             flags={"read_only": True},
         )
         application_gateway_read.zones = AAZListType()
-
-        identity = _schema_application_gateway_read.identity
-        identity.principal_id = AAZStrType(
-            serialized_name="principalId",
-            flags={"read_only": True},
-        )
-        identity.tenant_id = AAZStrType(
-            serialized_name="tenantId",
-            flags={"read_only": True},
-        )
-        identity.type = AAZStrType()
-        identity.user_assigned_identities = AAZDictType(
-            serialized_name="userAssignedIdentities",
-        )
-
-        user_assigned_identities = _schema_application_gateway_read.identity.user_assigned_identities
-        user_assigned_identities.Element = AAZObjectType()
-
-        _element = _schema_application_gateway_read.identity.user_assigned_identities.Element
-        _element.client_id = AAZStrType(
-            serialized_name="clientId",
-            flags={"read_only": True},
-        )
-        _element.principal_id = AAZStrType(
-            serialized_name="principalId",
-            flags={"read_only": True},
-        )
 
         properties = _schema_application_gateway_read.properties
         properties.authentication_certificates = AAZListType(
@@ -605,6 +579,9 @@ class _DeleteHelper:
         )
         properties.enable_http2 = AAZBoolType(
             serialized_name="enableHttp2",
+        )
+        properties.entra_jwt_validation_configs = AAZListType(
+            serialized_name="entraJWTValidationConfigs",
         )
         properties.firewall_policy = AAZObjectType(
             serialized_name="firewallPolicy",
@@ -753,6 +730,9 @@ class _DeleteHelper:
         properties.cookie_based_affinity = AAZStrType(
             serialized_name="cookieBasedAffinity",
         )
+        properties.dedicated_backend_connection = AAZBoolType(
+            serialized_name="dedicatedBackendConnection",
+        )
         properties.host_name = AAZStrType(
             serialized_name="hostName",
         )
@@ -774,8 +754,17 @@ class _DeleteHelper:
         properties.request_timeout = AAZIntType(
             serialized_name="requestTimeout",
         )
+        properties.sni_name = AAZStrType(
+            serialized_name="sniName",
+        )
         properties.trusted_root_certificates = AAZListType(
             serialized_name="trustedRootCertificates",
+        )
+        properties.validate_cert_chain_and_expiry = AAZBoolType(
+            serialized_name="validateCertChainAndExpiry",
+        )
+        properties.validate_sni = AAZBoolType(
+            serialized_name="validateSNI",
         )
 
         authentication_certificates = _schema_application_gateway_read.properties.backend_http_settings_collection.Element.properties.authentication_certificates
@@ -812,6 +801,9 @@ class _DeleteHelper:
         )
 
         properties = _schema_application_gateway_read.properties.backend_settings_collection.Element.properties
+        properties.enable_l4_client_ip_preservation = AAZBoolType(
+            serialized_name="enableL4ClientIpPreservation",
+        )
         properties.host_name = AAZStrType(
             serialized_name="hostName",
         )
@@ -838,6 +830,38 @@ class _DeleteHelper:
         custom_error_configurations = _schema_application_gateway_read.properties.custom_error_configurations
         custom_error_configurations.Element = AAZObjectType()
         cls._build_schema_application_gateway_custom_error_read(custom_error_configurations.Element)
+
+        entra_jwt_validation_configs = _schema_application_gateway_read.properties.entra_jwt_validation_configs
+        entra_jwt_validation_configs.Element = AAZObjectType()
+
+        _element = _schema_application_gateway_read.properties.entra_jwt_validation_configs.Element
+        _element.etag = AAZStrType(
+            flags={"read_only": True},
+        )
+        _element.id = AAZStrType()
+        _element.name = AAZStrType()
+        _element.properties = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+
+        properties = _schema_application_gateway_read.properties.entra_jwt_validation_configs.Element.properties
+        properties.audiences = AAZListType()
+        properties.client_id = AAZStrType(
+            serialized_name="clientId",
+        )
+        properties.provisioning_state = AAZStrType(
+            serialized_name="provisioningState",
+            flags={"read_only": True},
+        )
+        properties.tenant_id = AAZStrType(
+            serialized_name="tenantId",
+        )
+        properties.un_authorized_request_action = AAZStrType(
+            serialized_name="unAuthorizedRequestAction",
+        )
+
+        audiences = _schema_application_gateway_read.properties.entra_jwt_validation_configs.Element.properties.audiences
+        audiences.Element = AAZStrType()
 
         frontend_ip_configurations = _schema_application_gateway_read.properties.frontend_ip_configurations
         frontend_ip_configurations.Element = AAZObjectType()
@@ -1180,6 +1204,9 @@ class _DeleteHelper:
         )
 
         properties = _schema_application_gateway_read.properties.probes.Element.properties
+        properties.enable_probe_proxy_protocol_header = AAZBoolType(
+            serialized_name="enableProbeProxyProtocolHeader",
+        )
         properties.host = AAZStrType()
         properties.interval = AAZIntType()
         properties.match = AAZObjectType()
@@ -1293,6 +1320,10 @@ class _DeleteHelper:
             serialized_name="backendHttpSettings",
         )
         cls._build_schema_sub_resource_read(properties.backend_http_settings)
+        properties.entra_jwt_validation_config = AAZObjectType(
+            serialized_name="entraJWTValidationConfig",
+        )
+        cls._build_schema_sub_resource_read(properties.entra_jwt_validation_config)
         properties.http_listener = AAZObjectType(
             serialized_name="httpListener",
         )
@@ -1504,6 +1535,9 @@ class _DeleteHelper:
         )
 
         client_auth_configuration = _schema_application_gateway_read.properties.ssl_profiles.Element.properties.client_auth_configuration
+        client_auth_configuration.verify_client_auth_mode = AAZStrType(
+            serialized_name="verifyClientAuthMode",
+        )
         client_auth_configuration.verify_client_cert_issuer_dn = AAZBoolType(
             serialized_name="verifyClientCertIssuerDN",
         )
@@ -1963,6 +1997,51 @@ class _DeleteHelper:
         _schema.name = cls._schema_ip_configuration_read.name
         _schema.properties = cls._schema_ip_configuration_read.properties
 
+    _schema_managed_service_identity_read = None
+
+    @classmethod
+    def _build_schema_managed_service_identity_read(cls, _schema):
+        if cls._schema_managed_service_identity_read is not None:
+            _schema.principal_id = cls._schema_managed_service_identity_read.principal_id
+            _schema.tenant_id = cls._schema_managed_service_identity_read.tenant_id
+            _schema.type = cls._schema_managed_service_identity_read.type
+            _schema.user_assigned_identities = cls._schema_managed_service_identity_read.user_assigned_identities
+            return
+
+        cls._schema_managed_service_identity_read = _schema_managed_service_identity_read = AAZIdentityObjectType()
+
+        managed_service_identity_read = _schema_managed_service_identity_read
+        managed_service_identity_read.principal_id = AAZStrType(
+            serialized_name="principalId",
+            flags={"read_only": True},
+        )
+        managed_service_identity_read.tenant_id = AAZStrType(
+            serialized_name="tenantId",
+            flags={"read_only": True},
+        )
+        managed_service_identity_read.type = AAZStrType()
+        managed_service_identity_read.user_assigned_identities = AAZDictType(
+            serialized_name="userAssignedIdentities",
+        )
+
+        user_assigned_identities = _schema_managed_service_identity_read.user_assigned_identities
+        user_assigned_identities.Element = AAZObjectType()
+
+        _element = _schema_managed_service_identity_read.user_assigned_identities.Element
+        _element.client_id = AAZStrType(
+            serialized_name="clientId",
+            flags={"read_only": True},
+        )
+        _element.principal_id = AAZStrType(
+            serialized_name="principalId",
+            flags={"read_only": True},
+        )
+
+        _schema.principal_id = cls._schema_managed_service_identity_read.principal_id
+        _schema.tenant_id = cls._schema_managed_service_identity_read.tenant_id
+        _schema.type = cls._schema_managed_service_identity_read.type
+        _schema.user_assigned_identities = cls._schema_managed_service_identity_read.user_assigned_identities
+
     _schema_network_interface_ip_configuration_read = None
 
     @classmethod
@@ -2083,6 +2162,7 @@ class _DeleteHelper:
         properties.location = AAZStrType()
         properties.outbound_rule = AAZObjectType(
             serialized_name="outboundRule",
+            flags={"read_only": True},
         )
         cls._build_schema_sub_resource_read(properties.outbound_rule)
         properties.outbound_rules = AAZListType(
@@ -2138,6 +2218,7 @@ class _DeleteHelper:
         cls._build_schema_sub_resource_read(properties.load_balancer_frontend_ip_configuration)
         properties.network_interface_ip_configuration = AAZObjectType(
             serialized_name="networkInterfaceIPConfiguration",
+            flags={"read_only": True},
         )
         cls._build_schema_sub_resource_read(properties.network_interface_ip_configuration)
         properties.subnet = AAZObjectType()
@@ -2201,6 +2282,7 @@ class _DeleteHelper:
         cls._build_schema_sub_resource_read(properties.backend_address_pool)
         properties.backend_ip_configuration = AAZObjectType(
             serialized_name="backendIPConfiguration",
+            flags={"read_only": True},
         )
         cls._build_schema_network_interface_ip_configuration_read(properties.backend_ip_configuration)
         properties.backend_port = AAZIntType(
@@ -2348,6 +2430,10 @@ class _DeleteHelper:
         properties.auxiliary_sku = AAZStrType(
             serialized_name="auxiliarySku",
         )
+        properties.default_outbound_connectivity_enabled = AAZBoolType(
+            serialized_name="defaultOutboundConnectivityEnabled",
+            flags={"read_only": True},
+        )
         properties.disable_tcp_state_tracking = AAZBoolType(
             serialized_name="disableTcpStateTracking",
         )
@@ -2356,6 +2442,7 @@ class _DeleteHelper:
         )
         properties.dscp_configuration = AAZObjectType(
             serialized_name="dscpConfiguration",
+            flags={"read_only": True},
         )
         cls._build_schema_sub_resource_read(properties.dscp_configuration)
         properties.enable_accelerated_networking = AAZBoolType(
@@ -2410,6 +2497,7 @@ class _DeleteHelper:
         )
         properties.virtual_machine = AAZObjectType(
             serialized_name="virtualMachine",
+            flags={"read_only": True},
         )
         cls._build_schema_sub_resource_read(properties.virtual_machine)
         properties.vnet_encryption_supported = AAZBoolType(
@@ -2475,11 +2563,17 @@ class _DeleteHelper:
         )
 
         properties = _schema_network_interface_read.properties.private_link_service.properties
+        properties.access_mode = AAZStrType(
+            serialized_name="accessMode",
+        )
         properties.alias = AAZStrType(
             flags={"read_only": True},
         )
         properties.auto_approval = AAZObjectType(
             serialized_name="autoApproval",
+        )
+        properties.destination_ip_address = AAZStrType(
+            serialized_name="destinationIPAddress",
         )
         properties.enable_proxy_protocol = AAZBoolType(
             serialized_name="enableProxyProtocol",
@@ -2696,6 +2790,8 @@ class _DeleteHelper:
             flags={"read_only": True},
         )
         _element.id = AAZStrType()
+        _element.identity = AAZIdentityObjectType()
+        cls._build_schema_managed_service_identity_read(_element.identity)
         _element.location = AAZStrType()
         _element.name = AAZStrType(
             flags={"read_only": True},
@@ -2710,6 +2806,9 @@ class _DeleteHelper:
 
         properties = _schema_network_security_group_read.properties.flow_logs.Element.properties
         properties.enabled = AAZBoolType()
+        properties.enabled_filtering_criteria = AAZStrType(
+            serialized_name="enabledFilteringCriteria",
+        )
         properties.flow_analytics_configuration = AAZObjectType(
             serialized_name="flowAnalyticsConfiguration",
         )
@@ -2717,6 +2816,9 @@ class _DeleteHelper:
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
             flags={"read_only": True},
+        )
+        properties.record_types = AAZStrType(
+            serialized_name="recordTypes",
         )
         properties.retention_policy = AAZObjectType(
             serialized_name="retentionPolicy",
@@ -2840,6 +2942,9 @@ class _DeleteHelper:
         )
         properties.ip_configurations = AAZListType(
             serialized_name="ipConfigurations",
+        )
+        properties.ip_version_type = AAZStrType(
+            serialized_name="ipVersionType",
         )
         properties.manual_private_link_service_connections = AAZListType(
             serialized_name="manualPrivateLinkServiceConnections",
@@ -3062,6 +3167,7 @@ class _DeleteHelper:
         )
         properties.ip_configuration = AAZObjectType(
             serialized_name="ipConfiguration",
+            flags={"read_only": True},
         )
         cls._build_schema_ip_configuration_read(properties.ip_configuration)
         properties.ip_tags = AAZListType(
@@ -3160,13 +3266,27 @@ class _DeleteHelper:
         properties.public_ip_addresses = AAZListType(
             serialized_name="publicIpAddresses",
         )
+        properties.public_ip_addresses_v6 = AAZListType(
+            serialized_name="publicIpAddressesV6",
+        )
         properties.public_ip_prefixes = AAZListType(
             serialized_name="publicIpPrefixes",
+        )
+        properties.public_ip_prefixes_v6 = AAZListType(
+            serialized_name="publicIpPrefixesV6",
         )
         properties.resource_guid = AAZStrType(
             serialized_name="resourceGuid",
             flags={"read_only": True},
         )
+        properties.service_gateway = AAZObjectType(
+            serialized_name="serviceGateway",
+        )
+        cls._build_schema_sub_resource_read(properties.service_gateway)
+        properties.source_virtual_network = AAZObjectType(
+            serialized_name="sourceVirtualNetwork",
+        )
+        cls._build_schema_sub_resource_read(properties.source_virtual_network)
         properties.subnets = AAZListType(
             flags={"read_only": True},
         )
@@ -3175,9 +3295,17 @@ class _DeleteHelper:
         public_ip_addresses.Element = AAZObjectType()
         cls._build_schema_sub_resource_read(public_ip_addresses.Element)
 
+        public_ip_addresses_v6 = _schema_public_ip_address_read.properties.nat_gateway.properties.public_ip_addresses_v6
+        public_ip_addresses_v6.Element = AAZObjectType()
+        cls._build_schema_sub_resource_read(public_ip_addresses_v6.Element)
+
         public_ip_prefixes = _schema_public_ip_address_read.properties.nat_gateway.properties.public_ip_prefixes
         public_ip_prefixes.Element = AAZObjectType()
         cls._build_schema_sub_resource_read(public_ip_prefixes.Element)
+
+        public_ip_prefixes_v6 = _schema_public_ip_address_read.properties.nat_gateway.properties.public_ip_prefixes_v6
+        public_ip_prefixes_v6.Element = AAZObjectType()
+        cls._build_schema_sub_resource_read(public_ip_prefixes_v6.Element)
 
         subnets = _schema_public_ip_address_read.properties.nat_gateway.properties.subnets
         subnets.Element = AAZObjectType()
@@ -3378,6 +3506,9 @@ class _DeleteHelper:
             serialized_name="ipConfigurations",
             flags={"read_only": True},
         )
+        properties.ipam_pool_prefix_allocations = AAZListType(
+            serialized_name="ipamPoolPrefixAllocations",
+        )
         properties.nat_gateway = AAZObjectType(
             serialized_name="natGateway",
         )
@@ -3420,6 +3551,10 @@ class _DeleteHelper:
         properties.service_endpoints = AAZListType(
             serialized_name="serviceEndpoints",
         )
+        properties.service_gateway = AAZObjectType(
+            serialized_name="serviceGateway",
+        )
+        cls._build_schema_sub_resource_read(properties.service_gateway)
         properties.sharing_scope = AAZStrType(
             serialized_name="sharingScope",
         )
@@ -3492,10 +3627,29 @@ class _DeleteHelper:
         ip_configurations.Element = AAZObjectType()
         cls._build_schema_ip_configuration_read(ip_configurations.Element)
 
-        private_endpoints = _schema_subnet_read.properties.private_endpoints
-        private_endpoints.Element = AAZObjectType(
+        ipam_pool_prefix_allocations = _schema_subnet_read.properties.ipam_pool_prefix_allocations
+        ipam_pool_prefix_allocations.Element = AAZObjectType()
+
+        _element = _schema_subnet_read.properties.ipam_pool_prefix_allocations.Element
+        _element.allocated_address_prefixes = AAZListType(
+            serialized_name="allocatedAddressPrefixes",
             flags={"read_only": True},
         )
+        _element.number_of_ip_addresses = AAZStrType(
+            serialized_name="numberOfIpAddresses",
+        )
+        _element.pool = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+
+        allocated_address_prefixes = _schema_subnet_read.properties.ipam_pool_prefix_allocations.Element.allocated_address_prefixes
+        allocated_address_prefixes.Element = AAZStrType()
+
+        pool = _schema_subnet_read.properties.ipam_pool_prefix_allocations.Element.pool
+        pool.id = AAZStrType()
+
+        private_endpoints = _schema_subnet_read.properties.private_endpoints
+        private_endpoints.Element = AAZObjectType()
         cls._build_schema_private_endpoint_read(private_endpoints.Element)
 
         resource_navigation_links = _schema_subnet_read.properties.resource_navigation_links
@@ -3580,6 +3734,7 @@ class _DeleteHelper:
         )
         properties.has_bgp_override = AAZBoolType(
             serialized_name="hasBgpOverride",
+            flags={"read_only": True},
         )
         properties.next_hop_ip_address = AAZStrType(
             serialized_name="nextHopIpAddress",
@@ -3721,6 +3876,10 @@ class _DeleteHelper:
 
         _element = _schema_subnet_read.properties.service_endpoints.Element
         _element.locations = AAZListType()
+        _element.network_identifier = AAZObjectType(
+            serialized_name="networkIdentifier",
+        )
+        cls._build_schema_sub_resource_read(_element.network_identifier)
         _element.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
             flags={"read_only": True},

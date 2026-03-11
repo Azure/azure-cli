@@ -329,7 +329,7 @@ parameters:
     short-summary: Resource ID of Azure Monitor Private Link scope for Monitoring Addon.
   - name: --enable-high-log-scale-mode
     type: bool
-    short-summary: Enable High Log Scale Mode for Container Logs.
+    short-summary: Enable High Log Scale Mode for Container Logs. Auto-enabled when --enable-container-network-logs is specified.
   - name: --sku
     type: string
     short-summary: Specify SKU name for managed clusters. Use '--sku base' enables a base managed cluster. Use '--sku automatic' enables an automatic managed cluster.
@@ -588,6 +588,9 @@ parameters:
   - name: --acns-advanced-networkpolicies
     type: string
     short-summary: Enable advanced network policies (None, FQDN or L7) on a cluster when enabling advanced networking features with "--enable-acns".
+  - name: --enable-container-network-logs
+    type: bool
+    short-summary: Enable container network log collection functionalities on a cluster. Automatically enables --enable-high-log-scale-mode.
   - name: --nrg-lockdown-restriction-level
     type: string
     short-summary: Restriction level on the managed node resource group.
@@ -1089,6 +1092,12 @@ parameters:
   - name: --acns-advanced-networkpolicies
     type: string
     short-summary: Enable advanced network policies (None, FQDN or L7) on a cluster when enabling advanced networking features with "--enable-acns".
+  - name: --enable-container-network-logs
+    type: bool
+    short-summary: Enable container network log collection functionalities on a cluster. Automatically enables --enable-high-log-scale-mode.
+  - name: --disable-container-network-logs
+    type: bool
+    short-summary: Disable container network log collection functionalities on a cluster.
   - name: --nrg-lockdown-restriction-level
     type: string
     short-summary: Restriction level on the managed node resource group.
@@ -1261,7 +1270,7 @@ parameters:
     short-summary: Resource ID of Azure Monitor Private Link scope for Monitoring Addon.
   - name: --enable-high-log-scale-mode
     type: bool
-    short-summary: Enable High Log Scale Mode for Container Logs.
+    short-summary: Enable High Log Scale Mode for Container Logs. Auto-enabled when --enable-container-network-logs is specified.
   - name: --appgw-name
     type: string
     short-summary: Name of the application gateway to create/use in the node resource group. Use with ingress-azure addon.
@@ -1853,7 +1862,7 @@ parameters:
     short-summary: The OS Type. Linux or Windows.
   - name: --os-sku
     type: string
-    short-summary: The OS SKU of the agent node pool. Ubuntu, Ubuntu2204, AzureLinux or AzureLinux3 for Linux. Windows2019 or Windows2022 for Windows.
+    short-summary: The OS SKU of the agent node pool. Ubuntu, Ubuntu2204, Ubuntu2404, AzureLinux or AzureLinux3 for Linux. Windows2019 or Windows2022 for Windows.
   - name: --enable-cluster-autoscaler -e
     type: bool
     short-summary: Enable cluster autoscaler.
@@ -2126,6 +2135,9 @@ parameters:
   - name: --localdns-config
     type: string
     short-summary: Set the localDNS Profile for a nodepool with a JSON config file.
+  - name: --gpu-driver
+    type: string
+    short-summary: Whether to install driver for GPU node pool. Possible values are "Install" or "None".
 examples:
   - name: Reconcile the nodepool back to its current state.
     text: az aks nodepool update -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster

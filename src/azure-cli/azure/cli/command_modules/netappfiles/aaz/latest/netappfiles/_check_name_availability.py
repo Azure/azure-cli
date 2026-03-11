@@ -18,12 +18,15 @@ class CheckNameAvailability(AAZCommand):
     """Check if a resource name is available.
 
     Check if a resource name is available
+
+    :example: CheckNameAvailability
+        az netappfiles check-name-availability --location eastus --name accName --type Microsoft.NetApp/netAppAccounts --resource-group myRG
     """
 
     _aaz_info = {
-        "version": "2025-09-01",
+        "version": "2025-12-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.netapp/locations/{}/checknameavailability", "2025-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.netapp/locations/{}/checknameavailability", "2025-12-01"],
         ]
     }
 
@@ -133,7 +136,7 @@ class CheckNameAvailability(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-09-01",
+                    "api-version", "2025-12-01",
                     required=True,
                 ),
             }

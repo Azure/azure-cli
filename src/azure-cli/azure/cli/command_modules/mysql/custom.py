@@ -23,7 +23,7 @@ from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissin
 from ._client_factory import get_mysql_flexible_management_client, cf_mysql_flexible_firewall_rules, cf_mysql_flexible_db, \
     cf_mysql_check_resource_availability, cf_mysql_check_resource_availability_without_location, cf_mysql_flexible_config, \
     cf_mysql_flexible_servers, cf_mysql_flexible_replica, cf_mysql_flexible_adadmin, cf_mysql_flexible_private_dns_zone_suffix_operations, cf_mysql_servers, \
-    cf_mysql_firewall_rules
+    cf_mysql_firewall_rules, get_mysql_flexible_management_client_by_sub
 from ._util import resolve_poller, generate_missing_parameters, get_mysql_list_skus_info, generate_password, parse_maintenance_window, \
     replace_memory_optimized_tier, build_identity_and_data_encryption, get_identity_and_data_encryption, get_tenant_id, run_subprocess, \
     fill_action_template, get_git_root_dir, get_single_to_flex_sku_mapping, get_firewall_rules_from_paged_response, \
@@ -734,7 +734,9 @@ def flexible_server_restore(cmd, client, resource_group_name, server_name, sourc
 
     try:
         id_parts = parse_resource_id(source_server_id)
-        source_server_object = client.get(id_parts['resource_group'], id_parts['name'])
+        source_client = get_mysql_flexible_management_client_by_sub(cmd.cli_ctx, id_parts['subscription']).servers
+
+        source_server_object = source_client.get(id_parts['resource_group'], id_parts['name'])
         location = ''.join(source_server_object.location.lower().split())
         list_skus_info = get_mysql_list_skus_info(cmd, location)
 
@@ -841,19 +843,29 @@ def flexible_server_restore(cmd, client, resource_group_name, server_name, sourc
         else:
             parameters.network = source_server_object.network
 
-    except Exception as e:
-        raise ResourceNotFoundError(e)
+    except HttpResponseError as exc:
+        raise ResourceNotFoundError(exc) from exc
 
-    resolve_poller(
-        client.begin_create(resource_group_name, server_name, parameters), cmd.cli_ctx,
-        'Restore Server')
+    def _begin_network_update():
+        restore_server_object = client.get(resource_group_name, server_name)
+        restore_server_network = restore_server_object.network
+        restore_server_network.public_network_access = public_access if public_access else source_server_object.network.public_network_access
+        update_parameter = models.ServerForUpdate(network=restore_server_network)
+        return client.begin_update(resource_group_name, server_name, update_parameter)
 
-    restore_server_object = client.get(resource_group_name, server_name)
-    restore_server_network = restore_server_object.network
-    restore_server_network.public_network_access = public_access if public_access else source_server_object.network.public_network_access
-    update_parameter = models.ServerForUpdate(network=restore_server_network)
+    create_poller = sdk_no_wait(no_wait, client.begin_create, resource_group_name, server_name, parameters)
+    if no_wait:
+        def _post_create_update(poller):
+            try:
+                _begin_network_update()
+            except (HttpResponseError, CLIError) as ex:
+                logger.warning('Skipping post-restore network update: %s', ex)
 
-    return sdk_no_wait(no_wait, client.begin_update, resource_group_name, server_name, update_parameter)
+        create_poller.add_done_callback(_post_create_update)
+        return create_poller
+
+    resolve_poller(create_poller, cmd.cli_ctx, 'Restore Server')
+    return sdk_no_wait(no_wait, _begin_network_update)
 
 
 # pylint: disable=too-many-locals, too-many-statements, raise-missing-from
@@ -880,7 +892,9 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
 
     try:
         id_parts = parse_resource_id(source_server_id)
-        source_server_object = client.get(id_parts['resource_group'], id_parts['name'])
+        source_client = get_mysql_flexible_management_client_by_sub(cmd.cli_ctx, id_parts['subscription']).servers
+
+        source_server_object = source_client.get(id_parts['resource_group'], id_parts['name'])
         list_skus_info = get_mysql_list_skus_info(cmd, location)
 
         if not tier:
@@ -1340,7 +1354,8 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
 
     source_server_id_parts = parse_resource_id(source_server_id)
     try:
-        source_server_object = client.get(source_server_id_parts['resource_group'], source_server_id_parts['name'])
+        source_client = get_mysql_flexible_management_client_by_sub(cmd.cli_ctx, source_server_id_parts['subscription']).servers
+        source_server_object = source_client.get(source_server_id_parts['resource_group'], source_server_id_parts['name'])
         validate_mysql_replica(source_server_object)
     except Exception as e:
         raise ResourceNotFoundError(e)
@@ -1975,7 +1990,7 @@ def get_default_flex_configuration(tier, sku_name, storage_gb, auto_grow, backup
     if not storage_gb:
         storage_gb = 32
     if not version:
-        allowed_versions = ['5.7', '8.0.21']
+        allowed_versions = ['5.7', '8.0.21', '8.4']
         raise CLIError('--version is a required parameter for external migrations. Allowed values: {}'.format(allowed_versions))
     if not auto_grow:
         auto_grow = 'Enabled'

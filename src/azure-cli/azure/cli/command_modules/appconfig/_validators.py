@@ -19,8 +19,10 @@ from azure.cli.core.azclierror import (InvalidArgumentValueError,
 from ._utils import (is_valid_connection_string,
                      resolve_store_metadata,
                      get_store_name_from_connection_string,
+                     get_store_endpoint_from_connection_string,
                      validate_feature_flag_name,
-                     validate_feature_flag_key)
+                     validate_feature_flag_key,
+                     is_http_endpoint)
 from ._models import QueryFields
 from ._constants import ImportExportProfiles
 from ._featuremodels import FeatureQueryFields
@@ -64,11 +66,30 @@ Correct format should be Endpoint=https://example.azconfig.io;Id=xxxxx;Secret=xx
 
 def validate_auth_mode(namespace):
     auth_mode = namespace.auth_mode
+    endpoint = getattr(namespace, 'endpoint', None)
+    connection_string = getattr(namespace, 'connection_string', None)
+
+    if auth_mode != "anonymous":
+        # Disallow HTTP endpoints unless explicitly using anonymous mode.
+        if endpoint and is_http_endpoint(endpoint):
+            raise CLIError("HTTP endpoint is only supported when auth mode is 'anonymous'.")
+
+        if connection_string:
+            conn_endpoint = get_store_endpoint_from_connection_string(connection_string)
+            if is_http_endpoint(conn_endpoint):
+                raise CLIError("HTTP endpoint is only supported when auth mode is 'anonymous'.")
+
     if auth_mode == "login":
-        if not namespace.name and not namespace.endpoint:
+        if not namespace.name and not endpoint:
             raise CLIError("App Configuration name or endpoint should be provided if auth mode is 'login'.")
-        if namespace.connection_string:
+        if connection_string:
             raise CLIError("Auth mode should be 'key' when connection string is provided.")
+
+    if auth_mode == "anonymous":
+        if not endpoint:
+            raise RequiredArgumentMissingError("App Configuration endpoint should be provided if auth mode is 'anonymous'.")
+        if connection_string:
+            raise CLIError("Auth mode 'anonymous' only supports the '--endpoint' argument. Connection string is not supported.")
 
 
 def validate_import_depth(namespace):

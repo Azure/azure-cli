@@ -12,12 +12,9 @@ from knack.log import get_logger
 from knack.util import CLIError
 from urllib.request import urlretrieve
 from azure.cli.core.util import sdk_no_wait, user_confirmation, run_cmd
-from azure.cli.core.azclierror import ClientRequestError, RequiredArgumentMissingError
-from ._client_factory import cf_postgres_flexible_replica
-from ._flexible_server_util import run_subprocess, \
-    fill_action_template, get_git_root_dir, resolve_poller, GITHUB_ACTION_PATH
-from ._flexible_server_location_capabilities_util import get_postgres_server_capability_info
-from .validators import validate_public_access_server, validate_resource_group, check_resource_group, validate_citus_cluster
+from azure.cli.core.azclierror import ClientRequestError
+from ._flexible_server_util import run_subprocess
+from .validators import validate_public_access_server, validate_resource_group, check_resource_group
 
 logger = get_logger(__name__)
 # pylint: disable=raise-missing-from
@@ -173,7 +170,6 @@ def database_delete_func(cmd, client, resource_group_name=None, server_name=None
             "Are you sure you want to delete the database '{0}' of server '{1}'".format(database_name,
                                                                                         server_name), yes=yes)
 
-    validate_citus_cluster(cmd, resource_group_name, server_name)
     try:
         result = client.begin_delete(resource_group_name, server_name, database_name)
     except Exception as ex:  # pylint: disable=broad-except
@@ -193,42 +189,6 @@ def create_firewall_rule(db_context, cmd, resource_group_name, server_name, star
                                          server_name=server_name,
                                          start_ip_address=start_ip, end_ip_address=end_ip)
     return firewall.result().name
-
-
-def github_actions_setup(cmd, client, resource_group_name, server_name, database_name, administrator_login, administrator_login_password, sql_file_path, repository, action_name=None, branch=None, allow_push=None):
-    validate_resource_group(resource_group_name)
-
-    server = client.get(resource_group_name, server_name)
-    if server.network.public_network_access == 'Disabled':
-        raise ClientRequestError("This command only works with public access enabled server.")
-    if allow_push and not branch:
-        raise RequiredArgumentMissingError("Provide remote branch name to allow pushing the action file to your remote branch.")
-    if action_name is None:
-        action_name = server.name + '_' + database_name + "_deploy"
-    gitcli_check_and_login()
-
-    database_engine = 'postgresql'
-
-    fill_action_template(cmd,
-                         database_engine=database_engine,
-                         server=server,
-                         database_name=database_name,
-                         administrator_login=administrator_login,
-                         administrator_login_password=administrator_login_password,
-                         file_name=sql_file_path,
-                         repository=repository,
-                         action_name=action_name)
-
-    action_path = get_git_root_dir() + GITHUB_ACTION_PATH + action_name + '.yml'
-    logger.warning("Making git commit for file %s", action_path)
-    run_subprocess("git add {}".format(action_path))
-    run_subprocess("git commit -m \"Add github action file\"")
-
-    if allow_push:
-        logger.warning("Pushing the created action file to origin %s branch", branch)
-        run_subprocess("git push origin {}".format(branch))
-    else:
-        logger.warning('You did not set --allow-push parameter. Please push the prepared file %s to your remote repo and run "deploy run" command to activate the workflow.', action_path)
 
 
 def github_actions_run(action_name, branch):
@@ -282,58 +242,3 @@ def flexible_server_log_list(client, resource_group_name, server_name, filename_
         files.append(f)
 
     return files
-
-
-def flexible_server_version_upgrade(cmd, client, resource_group_name, server_name, version, yes=None):
-    validate_resource_group(resource_group_name)
-    validate_citus_cluster(cmd, resource_group_name, server_name)
-
-    if not yes:
-        user_confirmation(
-            "Upgrading major version in server {} is irreversible. The action you're about to take can't be undone. "
-            "Going further will initiate major version upgrade to the selected version on this server."
-            .format(server_name), yes=yes)
-
-    instance = client.get(resource_group_name, server_name)
-
-    current_version = int(instance.version.split('.')[0])
-    if current_version >= int(version):
-        raise CLIError("The version to upgrade to must be greater than the current version.")
-
-    list_server_capability_info = get_postgres_server_capability_info(cmd, resource_group_name, server_name)
-    eligible_versions = list_server_capability_info['supported_server_versions'][str(current_version)]
-
-    if version == '13':
-        logger.warning("PostgreSQL version 13 will reach end-of-life (EOL) soon. "
-                       "Upgrade to PostgreSQL 14 or later as soon as possible to "
-                       "maintain security, performance, and supportability.")
-
-    if version not in eligible_versions:
-        # version not supported
-        error_message = ""
-        if len(eligible_versions) > 0:
-            error_message = "Server is running version {}. It can only be upgraded to the following versions: {} ".format(str(current_version), eligible_versions)
-        else:
-            error_message = "Server is running version {}. It cannot be upgraded to any higher version. ".format(str(current_version))
-
-        raise CLIError(error_message)
-
-    replica_operations_client = cf_postgres_flexible_replica(cmd.cli_ctx, '_')
-    version_mapped = version
-
-    replicas = replica_operations_client.list_by_server(resource_group_name, server_name)
-
-    if 'replica' in instance.replication_role.lower() or len(list(replicas)) > 0:
-        raise CLIError("Major version upgrade is not yet supported for servers in a read replica setup.")
-
-    parameters = {
-        'version': version_mapped
-    }
-
-    return resolve_poller(
-        client.begin_update(
-            resource_group_name=resource_group_name,
-            server_name=server_name,
-            parameters=parameters),
-        cmd.cli_ctx, 'Upgrading server {} to major version {}'.format(server_name, version)
-    )

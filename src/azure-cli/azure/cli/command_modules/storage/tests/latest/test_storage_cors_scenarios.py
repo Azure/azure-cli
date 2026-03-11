@@ -7,7 +7,7 @@ import time
 from knack.util import CLIError
 
 from azure.cli.testsdk import (ScenarioTest, JMESPathCheck, ResourceGroupPreparer,
-                               StorageAccountPreparer, api_version_constraint)
+                               StorageAccountPreparer)
 from azure.cli.core.profiles import ResourceType
 
 

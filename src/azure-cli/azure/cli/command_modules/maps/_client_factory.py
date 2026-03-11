@@ -16,7 +16,3 @@ def cf_accounts(cli_ctx, *_):
 
 def cf_map(cli_ctx, *_):
     return cf_maps(cli_ctx).maps
-
-
-def cf_creator(cli_ctx, *_):
-    return cf_maps(cli_ctx).creators

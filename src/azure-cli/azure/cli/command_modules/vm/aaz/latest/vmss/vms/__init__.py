@@ -10,4 +10,5 @@
 
 from .__cmd_group import *
 from ._create import *
+from ._deallocate import *
 from ._show import *

@@ -21,7 +21,7 @@ from azure.cli.core.profiles import ResourceType, get_sdk
 from knack.arguments import CLICommandArgument, ignore_type
 from knack.introspection import extract_args_from_signature
 from knack.log import get_logger
-from knack.util import todict, CLIError
+from knack.util import CLIError
 
 logger = get_logger(__name__)
 EXCLUDED_NON_CLIENT_PARAMS = list(set(EXCLUDED_PARAMS) - set(['self', 'client']))
@@ -479,6 +479,7 @@ def show_exception_handler(ex):
 
 
 def verify_property(instance, condition):
+    from azure.cli.core.util import todict
     from jmespath import compile as compile_jmespath
     result = todict(instance)
     jmes_query = compile_jmespath(condition)
@@ -759,9 +760,6 @@ def _find_property(instance, path):
 
 
 def assign_identity(cli_ctx, getter, setter, identity_role=None, identity_scope=None):
-    import time
-    from azure.core.exceptions import HttpResponseError
-
     # get
     resource = getter()
     resource = setter(resource)
@@ -769,34 +767,41 @@ def assign_identity(cli_ctx, getter, setter, identity_role=None, identity_scope=
     # create role assignment:
     if identity_scope:
         principal_id = resource.identity.principal_id
+        create_role_assignment(cli_ctx, principal_id, identity_role, identity_scope)
 
-        identity_role_id = resolve_role_id(cli_ctx, identity_role, identity_scope)
-        assignments_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_AUTHORIZATION).role_assignments
-        RoleAssignmentCreateParameters = get_sdk(cli_ctx, ResourceType.MGMT_AUTHORIZATION,
-                                                 'RoleAssignmentCreateParameters', mod='models',
-                                                 operation_group='role_assignments')
-        parameters = RoleAssignmentCreateParameters(role_definition_id=identity_role_id, principal_id=principal_id,
-                                                    principal_type=None)
-
-        logger.info("Creating an assignment with a role '%s' on the scope of '%s'", identity_role_id, identity_scope)
-        retry_times = 36
-        assignment_name = _gen_guid()
-        for retry_time in range(0, retry_times):
-            try:
-                assignments_client.create(scope=identity_scope, role_assignment_name=assignment_name,
-                                          parameters=parameters)
-                break
-            except HttpResponseError as ex:
-                if ex.error.code == 'RoleAssignmentExists':
-                    logger.info('Role assignment already exists')
-                    break
-                if retry_time < retry_times and ' does not exist in the directory ' in ex.message:
-                    time.sleep(5)
-                    logger.warning('Retrying role assignment creation: %s/%s', retry_time + 1,
-                                   retry_times)
-                    continue
-                raise
     return resource
+
+
+def create_role_assignment(cli_ctx, principal_id, identity_role=None, identity_scope=None):
+    import time
+    from azure.core.exceptions import HttpResponseError
+
+    identity_role_id = resolve_role_id(cli_ctx, identity_role, identity_scope)
+    assignments_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_AUTHORIZATION).role_assignments
+    RoleAssignmentCreateParameters = get_sdk(cli_ctx, ResourceType.MGMT_AUTHORIZATION,
+                                             'RoleAssignmentCreateParameters', mod='models',
+                                             operation_group='role_assignments')
+    parameters = RoleAssignmentCreateParameters(role_definition_id=identity_role_id, principal_id=principal_id,
+                                                principal_type=None)
+
+    logger.info("Creating an assignment with a role '%s' on the scope of '%s'", identity_role_id, identity_scope)
+    retry_times = 36
+    assignment_name = _gen_guid()
+    for retry_time in range(0, retry_times):
+        try:
+            assignments_client.create(scope=identity_scope, role_assignment_name=assignment_name,
+                                      parameters=parameters)
+            break
+        except HttpResponseError as ex:
+            if ex.error.code == 'RoleAssignmentExists':
+                logger.info('Role assignment already exists')
+                break
+            if retry_time < retry_times and ' does not exist in the directory ' in ex.message:
+                time.sleep(5)
+                logger.warning('Retrying role assignment creation: %s/%s', retry_time + 1,
+                               retry_times)
+                continue
+            raise
 
 
 def resolve_role_id(cli_ctx, role, scope):

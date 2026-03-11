@@ -5,8 +5,7 @@
 import os
 import shutil
 from datetime import datetime, timedelta
-from azure.cli.testsdk import (StorageAccountPreparer, LiveScenarioTest, JMESPathCheck, ResourceGroupPreparer,
-                               api_version_constraint)
+from azure.cli.testsdk import (StorageAccountPreparer, LiveScenarioTest, JMESPathCheck, ResourceGroupPreparer)
 from ..storage_test_util import StorageScenarioMixin, StorageTestFilesPreparer
 from knack.util import CLIError
 

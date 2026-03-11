@@ -61,6 +61,7 @@ from .aaz.latest.network.application_gateway.waf_policy.custom_rule.match_condit
     Add as _WAFCustomRuleMatchConditionAdd
 from .aaz.latest.network.application_gateway.waf_policy.policy_setting import Update as _WAFPolicySettingUpdate
 from .aaz.latest.network.custom_ip.prefix import Create as _CustomIpPrefixCreate, Update as _CustomIpPrefixUpdate
+from .aaz.latest.network.ddos_custom_policy import Update as _DdosCustomPolicyUpdate
 from .aaz.latest.network.dns.record_set import List as _DNSRecordSetListByZone
 from .aaz.latest.network.dns.zone import Create as _DNSZoneCreate
 from .aaz.latest.network.express_route import Create as _ExpressRouteCreate, Update as _ExpressRouteUpdate
@@ -6005,8 +6006,6 @@ class VnetGatewayCreate(_VnetGatewayCreate):
         args_schema.enable_bgp._registered = False
         args_schema.nat_rules.Element.external_mappings_ip._registered = False
         args_schema.nat_rules.Element.internal_mappings_ip._registered = False
-        args_schema.mi_system_assigned._registered = False
-        args_schema.mi_user_assigned._registered = False
         return args_schema
 
     def pre_operations(self):
@@ -6249,7 +6248,7 @@ def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gatewa
                           authorization_key=None, enable_bgp=False, routing_weight=10,
                           connection_type=None, shared_key=None,
                           use_policy_based_traffic_selectors=False,
-                          express_route_gateway_bypass=None, ingress_nat_rule=None, egress_nat_rule=None):
+                          express_route_gateway_bypass=None, ingress_nat_rule=None, egress_nat_rule=None, auth_type=None, cert_auth=None):
     from azure.cli.core.util import random_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
     from azure.cli.command_modules.network._template_builder import build_vpn_connection_resource
@@ -6263,7 +6262,7 @@ def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gatewa
         cmd, connection_name, location, tags, vnet_gateway1,
         vnet_gateway2 or local_gateway2 or express_route_circuit2,
         connection_type, authorization_key, enable_bgp, routing_weight, shared_key,
-        use_policy_based_traffic_selectors, express_route_gateway_bypass, ingress_nat_rule, egress_nat_rule)
+        use_policy_based_traffic_selectors, express_route_gateway_bypass, ingress_nat_rule, egress_nat_rule, auth_type, cert_auth)
     master_template.add_resource(vpn_connection_resource)
     master_template.add_output('resource', connection_name, output_type='object')
     if shared_key:
@@ -6720,3 +6719,40 @@ class CustomIpPrefixUpdate(_CustomIpPrefixUpdate):
         args_schema.state.enum = AAZArgEnum({"commission": "Commissioning", "decommission": "Decommissioning", "deprovision": "Deprovisioning", "provision": "Provisioning"})
 
         return args_schema
+
+
+def create_ddos_custom_policy(cmd, ddos_custom_policy_name, resource_group_name, location=None, tags=None,
+                              detection_rule_name=None, detection_mode=None, traffic_type=None,
+                              packets_per_second=None, no_wait=None):
+    from .aaz.latest.network.ddos_custom_policy import Create as DdosCustomPolicyCreate, Show as DdosCustomPolicyShow
+    from .operations.ddos_custom_policy import convert_ddos_custom_policy_to_snake_case, combine_old_and_new_custom_policy
+    from ._template_builder import build_ddos_custom_policy
+
+    existing_policy = None
+
+    try:
+        existing_policy = DdosCustomPolicyShow(cli_ctx=cmd.cli_ctx)(command_args={
+            'ddos_custom_policy_name': ddos_custom_policy_name,
+            'resource_group': resource_group_name
+        })
+
+        existing_policy = convert_ddos_custom_policy_to_snake_case(existing_policy)
+    except ResourceNotFoundError:
+        # No existing DDoS custom policy; proceed with creation.
+        logger.debug("DDoS custom policy '%s' not found in resource group '%s'.",
+                     ddos_custom_policy_name, resource_group_name)
+    except Exception as err:  # pylint: disable=broad-except
+        # Log unexpected errors while preserving previous behavior of not failing the command.
+        logger.warning("Failed to retrieve existing DDoS custom policy '%s' in resource group '%s': %s",
+                       ddos_custom_policy_name, resource_group_name, err)
+
+    policy = build_ddos_custom_policy(cmd, ddos_custom_policy_name, location, tags, detection_rule_name, detection_mode,
+                                      packets_per_second, traffic_type)
+
+    if existing_policy:
+        policy = combine_old_and_new_custom_policy(existing_policy, policy)
+
+    policy['resource_group'] = resource_group_name
+    policy['no_wait'] = no_wait
+
+    return DdosCustomPolicyCreate(cli_ctx=cmd.cli_ctx)(command_args=policy)

@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from knack.util import CLIError
+
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, JMESPathCheck, NoneCheck)
 from azure.cli.command_modules.storage.tests.storage_test_util import StorageScenarioMixin
 
@@ -153,3 +155,61 @@ class StorageShareScenarioTests(StorageScenarioMixin, ScenarioTest):
         acl = self.cmd('storage share policy list -s {} --connection-string {}'.format(share, connection_string)) \
             .get_output_in_json().keys()
         self.assertSetEqual(set(acl), {'test1', 'test2'})
+
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind="StorageV2")
+    def test_storage_share_generate_sas_as_user(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+        share = self.create_share(account_info)
+        local_file = self.create_temp_file(1024)
+
+        from datetime import datetime, timedelta
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+
+        with self.assertRaisesRegex(CLIError, "incorrect usage: specify --as-user when --auth-mode login"):
+            self.cmd('storage share generate-sas --account-name {} -n {} --expiry {} --permissions r --https-only '
+                     '--auth-mode login'.format(storage_account, share, expiry))
+
+        share_sas = self.cmd('storage share generate-sas --account-name {} -n {} --expiry {} --permissions crwld '
+                             '--https-only --as-user --auth-mode login '
+                             '--backup-intent'.format(storage_account, share, expiry)).output
+        self.assertIn('&sig=', share_sas)
+        self.assertIn('skoid=', share_sas)
+        self.assertIn('sktid=', share_sas)
+        self.assertIn('skt=', share_sas)
+        self.assertIn('ske=', share_sas)
+        self.assertIn('sks=', share_sas)
+        self.assertIn('skv=', share_sas)
+
+        if self.is_live:
+            self.cmd('storage file upload --account-name {} --source "{}" -s {} '
+                     '--sas-token {} --backup-intent'.format(storage_account, local_file, share, share_sas))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind="StorageV2")
+    def test_storage_share_generate_sas_with_user_delegation_oid(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+        share = self.create_share(account_info)
+        local_file = self.create_temp_file(1024)
+        logged_in_user = self.cmd('ad signed-in-user show').get_output_in_json()
+        logged_in_user = logged_in_user["id"] if logged_in_user is not None else "2146abed-b993-4a81-a6af-eda7b4524c5e"
+
+        from datetime import datetime, timedelta
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+
+        share_sas = self.cmd('storage share generate-sas --account-name {} -n {} --expiry {} --permissions crwld '
+                             '--https-only --as-user --auth-mode login --backup-intent --user-delegation-oid '
+                             '{}'.format(storage_account, share, expiry, logged_in_user)).output
+        self.assertIn('&sig=', share_sas)
+        self.assertIn('skoid=', share_sas)
+        self.assertIn('sktid=', share_sas)
+        self.assertIn('skt=', share_sas)
+        self.assertIn('ske=', share_sas)
+        self.assertIn('sks=', share_sas)
+        self.assertIn('skv=', share_sas)
+        self.assertIn('sduoid=', share_sas)
+
+        if self.is_live:
+            self.cmd('storage file upload --account-name {} --source "{}" -s {} --sas-token {} '
+                     '--backup-intent --auth-mode login'.format(storage_account, local_file, share, share_sas))

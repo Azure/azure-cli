@@ -1634,26 +1634,37 @@ class TestValidateEnableAzureContainerStorageV1(unittest.TestCase):
         )
 
 class TestValidateDisableAzureContainerStorage(unittest.TestCase):
-    def test_disable_with_storagepool_type_params(self):
+    def test_disable_unsupported_type(self):
         storage_pool_type = acstor_consts.CONST_STORAGE_POOL_TYPE_AZURE_DISK
         with self.assertRaises(InvalidArgumentValueError) as cm:
             acstor_validator.validate_disable_azure_container_storage_params(
-                True, storage_pool_type, "", "", "", "",
+                storage_pool_type, True, False, False, "", "", "", "",
             )
         err = (
-            'The latest version of Azure Container Storage only supports ephemeral nvme storage and does not '
-            'require or support a storage-pool-type value for --disable-azure-container-storage parameter. '
-            f'Please remove {storage_pool_type} from the command and try again.'
+            f"Cannot disable unsupported storage option '{storage_pool_type}'. "
+            "Supported values are 'ephemeralDisk', 'elasticSan' and 'all'."
+        )
+        self.assertEqual(str(cm.exception), err)
+
+    def test_disable_already_disabled_type(self):
+        storage_pool_type = acstor_consts.CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK
+        with self.assertRaises(InvalidArgumentValueError) as cm:
+            acstor_validator.validate_disable_azure_container_storage_params(
+                storage_pool_type, True, False, False, "", "", "", "",
+            )
+        err = (
+            f"Cannot disable the requested storage options ('{storage_pool_type}') "
+            "as they could not be found on the cluster."
         )
         self.assertEqual(str(cm.exception), err)
 
     def test_disable_when_acstor_not_enabled(self):
         with self.assertRaises(InvalidArgumentValueError) as cm:
             acstor_validator.validate_disable_azure_container_storage_params(
-                False, "", "", "", "", "",
+                "", False, False, False, "", "", "", "",
             )
         err = (
-            'Cannot disable Azure Container Storage as it is not enabled on the cluster.'
+            'Cannot disable Azure Container Storage as it could not be found on the cluster.'
         )
         self.assertEqual(str(cm.exception), err)
 
@@ -1661,7 +1672,7 @@ class TestValidateDisableAzureContainerStorage(unittest.TestCase):
         storage_pool_name = "valid-name"
         with self.assertRaises(InvalidArgumentValueError) as cm:
             acstor_validator.validate_disable_azure_container_storage_params(
-                True, True, storage_pool_name, "", "", "",
+                True, True, False, False, storage_pool_name, "", "", "",
             )
         err = (
             'The latest version of Azure Container Storage does not '
@@ -1674,7 +1685,7 @@ class TestValidateDisableAzureContainerStorage(unittest.TestCase):
         storage_pool_sku = "valid-sku"
         with self.assertRaises(InvalidArgumentValueError) as cm:
             acstor_validator.validate_disable_azure_container_storage_params(
-                True, True, None, storage_pool_sku, "", "",
+                True, True, False, False, None, storage_pool_sku, "", "",
             )
         err = (
             'The latest version of Azure Container Storage does not '
@@ -1687,7 +1698,7 @@ class TestValidateDisableAzureContainerStorage(unittest.TestCase):
         storage_pool_option = "valid-option"
         with self.assertRaises(InvalidArgumentValueError) as cm:
             acstor_validator.validate_disable_azure_container_storage_params(
-                True, True, None, None, storage_pool_option, "",
+                True, True, False, False, None, None, storage_pool_option, "",
             )
         err = (
             'The latest version of Azure Container Storage does not '
@@ -1700,7 +1711,7 @@ class TestValidateDisableAzureContainerStorage(unittest.TestCase):
         storage_pool_size = "valid-size"
         with self.assertRaises(InvalidArgumentValueError) as cm:
             acstor_validator.validate_disable_azure_container_storage_params(
-                True, True, None, None, None, storage_pool_size
+                True, True, False, False, None, None, None, storage_pool_size
             )
         err = (
             'The latest version of Azure Container Storage does not '
@@ -1710,10 +1721,15 @@ class TestValidateDisableAzureContainerStorage(unittest.TestCase):
         self.assertEqual(str(cm.exception), err)
 
 class TestValidateEnableAzureContainerStorage(unittest.TestCase):
-    def test_enable_when_already_enabled(self):
+    def test_enable_extension(self):
+        acstor_validator.validate_enable_azure_container_storage_params(
+            True, False, False, False, False, "", None, None, None, None,
+        )
+
+    def test_enable_extension_when_already_enabled(self):
         with self.assertRaises(InvalidArgumentValueError) as cm:
             acstor_validator.validate_enable_azure_container_storage_params(
-                True, "", "", "", "", "", "", "",
+                "", True, False, False, False, "", None, None, None, None,
             )
         err = (
             'Cannot enable Azure Container Storage as it is already enabled on the cluster.'
@@ -1724,7 +1740,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         v1_extension_version = "1.3.0"
         with self.assertRaises(InvalidArgumentValueError) as cm:
             acstor_validator.validate_enable_azure_container_storage_params(
-                False, True, v1_extension_version, "", "", "", "", "",
+                "", False, False, False, True, v1_extension_version, None, None, None, None,
             )
         err = (
             f'Failed to enable the latest version of Azure Container Storage as version {v1_extension_version} '
@@ -1735,16 +1751,77 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         )
         self.assertEqual(str(cm.exception), err)
 
-    def test_enable_with_storagepool_type(self):
-        storage_pool_type = acstor_consts.CONST_STORAGE_POOL_TYPE_AZURE_DISK
+    def test_enable_supported_type_when_extension_disabled(self):
+        storage_type = acstor_consts.CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK
+        acstor_validator.validate_enable_azure_container_storage_params(
+            storage_type, False, False, False, False, "", None, None, None, None,
+        )
+
+    def test_enable_supported_type_when_extension_enabled(self):
+        storage_type = acstor_consts.CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK
+        acstor_validator.validate_enable_azure_container_storage_params(
+            storage_type, True, False, False, False, "", None, None, None, None,
+        )
+
+    def test_enable_supported_type_when_already_enabled(self):
+        storage_type = acstor_consts.CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK
         with self.assertRaises(InvalidArgumentValueError) as cm:
             acstor_validator.validate_enable_azure_container_storage_params(
-                False, False, "", storage_pool_type, None, None, None, None, 
+                storage_type, True, True, False, False, "", None, None, None, None,
             )
         err = (
-            'The latest version of Azure Container Storage only supports ephemeral nvme storage and does not '
-            'require or support a storage-pool-type value for --enable-azure-container-storage parameter. '
-            f'Please remove {storage_pool_type} from the command and try again.'
+            f"Cannot enable the requested storage options ('{storage_type}') "
+            "as they are already enabled on the cluster."
+        )
+        self.assertEqual(str(cm.exception), err)
+
+    def test_enable_multiple_types_when_extension_disabled(self):
+        storage_types = [acstor_consts.CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK, acstor_consts.CONST_STORAGE_POOL_TYPE_ELASTIC_SAN]
+        acstor_validator.validate_enable_azure_container_storage_params(
+            storage_types, False, False, False, False, "", None, None, None, None,
+        )
+
+    def test_enable_multiple_types_when_some_are_not_enabled(self):
+        storage_types = [acstor_consts.CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK, acstor_consts.CONST_STORAGE_POOL_TYPE_ELASTIC_SAN]
+        acstor_validator.validate_enable_azure_container_storage_params(
+            storage_types, True, True, False, False, "", None, None, None, None,
+        )
+
+    def test_enable_multiple_types_when_all_are_already_enabled(self):
+        storage_types = [acstor_consts.CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK, acstor_consts.CONST_STORAGE_POOL_TYPE_ELASTIC_SAN]
+        with self.assertRaises(InvalidArgumentValueError) as cm:
+            acstor_validator.validate_enable_azure_container_storage_params(
+                storage_types, True, True, True, False, "", None, None, None, None,
+            )
+        err = (
+            f"Cannot enable the requested storage options ('{storage_types[0]}', '{storage_types[1]}') "
+            "as they are already enabled on the cluster."
+        )
+        self.assertEqual(str(cm.exception), err)
+
+    def test_enable_multiple_types_when_some_are_unsupported(self):
+        unsupported_storage_type = acstor_consts.CONST_STORAGE_POOL_TYPE_AZURE_DISK
+        supported_storage_type = acstor_consts.CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK
+        storage_types = [supported_storage_type, unsupported_storage_type]
+        with self.assertRaises(InvalidArgumentValueError) as cm:
+            acstor_validator.validate_enable_azure_container_storage_params(
+                storage_types, False, False, False, False, "", None, None, None, None,
+            )
+        err = (
+            f"Unsupported storage option '{unsupported_storage_type}'. "
+            "Supported values are 'ephemeralDisk' and 'elasticSan'."
+        )
+        self.assertEqual(str(cm.exception), err)
+
+    def test_enable_unsupported_type(self):
+        storage_type = acstor_consts.CONST_STORAGE_POOL_TYPE_AZURE_DISK
+        with self.assertRaises(InvalidArgumentValueError) as cm:
+            acstor_validator.validate_enable_azure_container_storage_params(
+                storage_type, False, False, False, False, "", None, None, None, None,
+            )
+        err = (
+            f"Unsupported storage option '{storage_type}'. "
+            "Supported values are 'ephemeralDisk' and 'elasticSan'."
         )
         self.assertEqual(str(cm.exception), err)
 
@@ -1752,7 +1829,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         storage_pool_name = "valid-name"
         with self.assertRaises(InvalidArgumentValueError) as cm:
             acstor_validator.validate_enable_azure_container_storage_params(
-                False, False, "", None, storage_pool_name, None, None, None,
+                None, False, False, False, False, "", storage_pool_name, None, None, None,
             )
         err = (
             'The latest version of Azure Container Storage does not '
@@ -1765,7 +1842,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         storage_pool_sku = "valid-sku"
         with self.assertRaises(InvalidArgumentValueError) as cm:
             acstor_validator.validate_enable_azure_container_storage_params(
-                False, False, "", None, None, storage_pool_sku, None, None,
+                None, False, False, False, False, "", None, storage_pool_sku, None, None,
             )
         err = (
             'The latest version of Azure Container Storage does not '
@@ -1773,12 +1850,12 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
             f'Please remove --storage-pool-sku {storage_pool_sku} from the command and try again.'
         )
         self.assertEqual(str(cm.exception), err)
-        
+
     def test_enable_with_storage_pool_option(self):
         storage_pool_option = "valid-option"
         with self.assertRaises(InvalidArgumentValueError) as cm:
             acstor_validator.validate_enable_azure_container_storage_params(
-                False, False, "", None, None, None, storage_pool_option, None,
+                None, False, False, False, False, "", None, None, storage_pool_option, None,
             )
         err = (
             'The latest version of Azure Container Storage does not '
@@ -1791,7 +1868,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         storage_pool_size = "valid-size"
         with self.assertRaises(InvalidArgumentValueError) as cm:
             acstor_validator.validate_enable_azure_container_storage_params(
-                False, False, "", None, None, None, None, storage_pool_size,
+                None, False, False, False, False, "", None, None, None, storage_pool_size,
             )
         err = (
             'The latest version of Azure Container Storage does not '

@@ -64,3 +64,21 @@ class ArgcompleteScenarioTest(TestCase):
         with open('argcomplete.out') as f:
             self.assertEqual(f.read(), 'dummystorage ')
         os.remove('argcomplete.out')
+
+    def test_top_level_completion(self):
+        """Test that top-level completion (az [tab]) returns command names from index"""
+        import os
+        import sys
+
+        if sys.platform == 'win32':
+            self.skipTest('Skip argcomplete test on Windows')
+
+        run_cmd(['az'], env=self.argcomplete_env('az ', '3'))
+        with open('argcomplete.out') as f:
+            completions = f.read().split()
+            # Verify common top-level commands are present
+            self.assertIn('account', completions)
+            self.assertIn('vm', completions)
+            self.assertIn('network', completions)
+            self.assertIn('storage', completions)
+        os.remove('argcomplete.out')

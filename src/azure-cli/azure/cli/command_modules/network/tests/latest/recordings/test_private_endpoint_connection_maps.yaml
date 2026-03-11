@@ -1,0 +1,2537 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --subnet-name
+      User-Agent:
+      - AZURECLI/2.80.0 azsdk-python-core/1.35.0 Python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_maps_private_endpoint_connection_000001?api-version=2024-11-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001","name":"test_maps_private_endpoint_connection_000001","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","test":"test_private_endpoint_connection_maps","date":"2025-11-12T21:45:24Z","module":"network"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '433'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Nov 2025 21:45:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: F2AC0EF9AAF04A839D86E417D49CE8DE Ref B: CO6AA3150220029 Ref C: 2025-11-12T21:45:25Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus2", "properties": {"addressSpace": {"addressPrefixes":
+      ["10.0.0.0/16"]}, "enableDdosProtection": false, "enableVmProtection": false,
+      "subnets": [{"name": "maps-privatelink-subnet000004", "properties": {"addressPrefix":
+      "10.0.0.0/24"}}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '257'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --subnet-name
+      User-Agent:
+      - AZURECLI/2.80.0 azsdk-python-core/1.35.0 Python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/virtualNetworks/maps-privatelink-vnet000003?api-version=2024-07-01
+  response:
+    body:
+      string: '{"name":"maps-privatelink-vnet000003","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/virtualNetworks/maps-privatelink-vnet000003","etag":"W/\"264710f5-f636-46a1-a262-5617448945c5\"","type":"Microsoft.Network/virtualNetworks","location":"westus2","properties":{"provisioningState":"Updating","resourceGuid":"00911d37-9b3e-4f9f-9918-8b9619f93427","addressSpace":{"addressPrefixes":["10.0.0.0/16"]},"privateEndpointVNetPolicies":"Disabled","subnets":[{"name":"maps-privatelink-subnet000004","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/virtualNetworks/maps-privatelink-vnet000003/subnets/maps-privatelink-subnet000004","etag":"W/\"264710f5-f636-46a1-a262-5617448945c5\"","properties":{"provisioningState":"Updating","addressPrefix":"10.0.0.0/24","delegations":[],"privateEndpointNetworkPolicies":"Disabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false}}'
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/727e919b-7df5-4b90-ad14-939703119fb8?api-version=2024-07-01&t=638985807540960896&c=MIIHhzCCBm-gAwIBAgITfAldUuOkqyWaFWVmdAAACV1S4zANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUxMDIxMDgxMjA1WhcNMjYwNDE5MDgxMjA1WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK6VhHo7SMnPI07xSUC0EKrS_gaAU3t2sorvXTakEJppgrr-M5q-yAFDicwNGCe2zSU9ZvGBPI46D9PesTntz4RhQO5-Dkx5G8vC9lZ0WV6mem5Hsnf78kDXgYxzLyAaMKv9WjuZNcTaFQKdrPAx-ZS-2EebUB404VhX1yJ3S4C3QHTpXASyoAbFfGV8tHPGM7q2s_Qr9qBJ5RUnI0t_oD0IJ_dyn_wQvIsgBjpGMentNk7AKNnJ7dWOCU76BFL9ZQAP9lNuU68JHjdsD1lABOX7Jtcv8FrW2zWgZn6TOHf9rY990h8zyuY_EBAr0xrbFD0i_O184Iy9gHWqScS_2CkCAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBTUpdRlqz5GkJ77fs3HRMz2Z_W49DAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAGQmJdPitlGjIwFSf4WsFmLr4W3CmkUpm4HxfZATnxnP9vV2uH5f01rfg_lA-Q0s4GMqkftMAVNRm0Ta6w_NRSLRZO2GWa65KrQ8ITCuGR12jMTYPqYgqEIaBQAqqxvtTisw6-_rDdMBbWwvTo6h0yR_Rw0GGgX1C4WUYhFJq-o90nFF2qZEFQJht7ni8RYQonaxB281z64rp0rlXCz8r3rJXIR2RLC48IA1los4mZYaxAv_Y_LPYwZUQ_V0_YrSGK5KMJp6exPToKF_DePs6j27AncGilbWo9t96F-yKBPD57WulOVgbYwNKAZ_Klbw0ur-YLdTdCaIbUiNhmGTDvY&s=bimY-ugmYUUHoYbG97j4YAx2xQ91ZVwNodlhu3bGwYm4fvosuzAHo07LWhq6BoYBhVGMOp0riY5-Vv2q__KOdRuQlJstCXwTvwJY8oKplcJpK4SSfHF5IlPdip3fvU2-uVcpiDlyTkVJCXad6tRLB7W5nVNtpGQMg5qAAvMXVrzi4irngKdRXulc4xwo1Wk1m6GINxsnG1Riiybwas8oHoh_AOvU0F-V1m5dEDcJu12oLufVVSlyTzQWxy4v1ivO2AJ60eOkco9UGgNGRITNX7XNbMVOLM57gyM5BlyCW5EWVFiKkbVlsC89O1vfcIzEf1obIolNpEQD4ToEoEaECg&h=vxf7mUCh2_8vOPxxWCzxx4yYjukbhLqXXGbaXsqgayU
+      cache-control:
+      - no-cache
+      content-length:
+      - '1162'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Nov 2025 21:45:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 62cce26b-cd86-4341-b0c7-9b076e4c0a41
+      x-ms-operation-identifier:
+      - tenantId=a1358d2f-a71f-4e96-86b8-33821da3bb29,objectId=1a41d7bc-dc4d-4125-a13e-7c3c9dd0e9e5/westus2/eacd0110-ce47-4626-a714-69398fbc5c0d
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: 0D0823987B2C42498E91A6EDFA09602E Ref B: MWH011020808062 Ref C: 2025-11-12T21:45:40Z'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --subnet-name
+      User-Agent:
+      - AZURECLI/2.80.0 azsdk-python-core/1.35.0 Python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/727e919b-7df5-4b90-ad14-939703119fb8?api-version=2024-07-01&t=638985807540960896&c=MIIHhzCCBm-gAwIBAgITfAldUuOkqyWaFWVmdAAACV1S4zANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUxMDIxMDgxMjA1WhcNMjYwNDE5MDgxMjA1WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK6VhHo7SMnPI07xSUC0EKrS_gaAU3t2sorvXTakEJppgrr-M5q-yAFDicwNGCe2zSU9ZvGBPI46D9PesTntz4RhQO5-Dkx5G8vC9lZ0WV6mem5Hsnf78kDXgYxzLyAaMKv9WjuZNcTaFQKdrPAx-ZS-2EebUB404VhX1yJ3S4C3QHTpXASyoAbFfGV8tHPGM7q2s_Qr9qBJ5RUnI0t_oD0IJ_dyn_wQvIsgBjpGMentNk7AKNnJ7dWOCU76BFL9ZQAP9lNuU68JHjdsD1lABOX7Jtcv8FrW2zWgZn6TOHf9rY990h8zyuY_EBAr0xrbFD0i_O184Iy9gHWqScS_2CkCAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBTUpdRlqz5GkJ77fs3HRMz2Z_W49DAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAGQmJdPitlGjIwFSf4WsFmLr4W3CmkUpm4HxfZATnxnP9vV2uH5f01rfg_lA-Q0s4GMqkftMAVNRm0Ta6w_NRSLRZO2GWa65KrQ8ITCuGR12jMTYPqYgqEIaBQAqqxvtTisw6-_rDdMBbWwvTo6h0yR_Rw0GGgX1C4WUYhFJq-o90nFF2qZEFQJht7ni8RYQonaxB281z64rp0rlXCz8r3rJXIR2RLC48IA1los4mZYaxAv_Y_LPYwZUQ_V0_YrSGK5KMJp6exPToKF_DePs6j27AncGilbWo9t96F-yKBPD57WulOVgbYwNKAZ_Klbw0ur-YLdTdCaIbUiNhmGTDvY&s=bimY-ugmYUUHoYbG97j4YAx2xQ91ZVwNodlhu3bGwYm4fvosuzAHo07LWhq6BoYBhVGMOp0riY5-Vv2q__KOdRuQlJstCXwTvwJY8oKplcJpK4SSfHF5IlPdip3fvU2-uVcpiDlyTkVJCXad6tRLB7W5nVNtpGQMg5qAAvMXVrzi4irngKdRXulc4xwo1Wk1m6GINxsnG1Riiybwas8oHoh_AOvU0F-V1m5dEDcJu12oLufVVSlyTzQWxy4v1ivO2AJ60eOkco9UGgNGRITNX7XNbMVOLM57gyM5BlyCW5EWVFiKkbVlsC89O1vfcIzEf1obIolNpEQD4ToEoEaECg&h=vxf7mUCh2_8vOPxxWCzxx4yYjukbhLqXXGbaXsqgayU
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Nov 2025 21:45:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 3dbbedd5-56c8-4729-83a5-f2779eda4d39
+      x-ms-operation-identifier:
+      - tenantId=a1358d2f-a71f-4e96-86b8-33821da3bb29,objectId=1a41d7bc-dc4d-4125-a13e-7c3c9dd0e9e5/westus2/6675dd6e-c47a-41bc-8659-51c6245c9a69
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: EA6F031ED87F460EAA16FB23541CA7DF Ref B: MWH011020808054 Ref C: 2025-11-12T21:45:54Z'
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --subnet-name
+      User-Agent:
+      - AZURECLI/2.80.0 azsdk-python-core/1.35.0 Python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/727e919b-7df5-4b90-ad14-939703119fb8?api-version=2024-07-01&t=638985807540960896&c=MIIHhzCCBm-gAwIBAgITfAldUuOkqyWaFWVmdAAACV1S4zANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUxMDIxMDgxMjA1WhcNMjYwNDE5MDgxMjA1WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK6VhHo7SMnPI07xSUC0EKrS_gaAU3t2sorvXTakEJppgrr-M5q-yAFDicwNGCe2zSU9ZvGBPI46D9PesTntz4RhQO5-Dkx5G8vC9lZ0WV6mem5Hsnf78kDXgYxzLyAaMKv9WjuZNcTaFQKdrPAx-ZS-2EebUB404VhX1yJ3S4C3QHTpXASyoAbFfGV8tHPGM7q2s_Qr9qBJ5RUnI0t_oD0IJ_dyn_wQvIsgBjpGMentNk7AKNnJ7dWOCU76BFL9ZQAP9lNuU68JHjdsD1lABOX7Jtcv8FrW2zWgZn6TOHf9rY990h8zyuY_EBAr0xrbFD0i_O184Iy9gHWqScS_2CkCAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBTUpdRlqz5GkJ77fs3HRMz2Z_W49DAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAGQmJdPitlGjIwFSf4WsFmLr4W3CmkUpm4HxfZATnxnP9vV2uH5f01rfg_lA-Q0s4GMqkftMAVNRm0Ta6w_NRSLRZO2GWa65KrQ8ITCuGR12jMTYPqYgqEIaBQAqqxvtTisw6-_rDdMBbWwvTo6h0yR_Rw0GGgX1C4WUYhFJq-o90nFF2qZEFQJht7ni8RYQonaxB281z64rp0rlXCz8r3rJXIR2RLC48IA1los4mZYaxAv_Y_LPYwZUQ_V0_YrSGK5KMJp6exPToKF_DePs6j27AncGilbWo9t96F-yKBPD57WulOVgbYwNKAZ_Klbw0ur-YLdTdCaIbUiNhmGTDvY&s=bimY-ugmYUUHoYbG97j4YAx2xQ91ZVwNodlhu3bGwYm4fvosuzAHo07LWhq6BoYBhVGMOp0riY5-Vv2q__KOdRuQlJstCXwTvwJY8oKplcJpK4SSfHF5IlPdip3fvU2-uVcpiDlyTkVJCXad6tRLB7W5nVNtpGQMg5qAAvMXVrzi4irngKdRXulc4xwo1Wk1m6GINxsnG1Riiybwas8oHoh_AOvU0F-V1m5dEDcJu12oLufVVSlyTzQWxy4v1ivO2AJ60eOkco9UGgNGRITNX7XNbMVOLM57gyM5BlyCW5EWVFiKkbVlsC89O1vfcIzEf1obIolNpEQD4ToEoEaECg&h=vxf7mUCh2_8vOPxxWCzxx4yYjukbhLqXXGbaXsqgayU
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Nov 2025 21:46:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 0a953d4f-55d6-4aae-b351-996b806138d8
+      x-ms-operation-identifier:
+      - tenantId=a1358d2f-a71f-4e96-86b8-33821da3bb29,objectId=1a41d7bc-dc4d-4125-a13e-7c3c9dd0e9e5/westus2/a8d9d5b4-c698-42fe-a4c6-65882db84994
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 07495EBC2690451FB5D81CCC180CC638 Ref B: CO6AA3150219017 Ref C: 2025-11-12T21:46:04Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --subnet-name
+      User-Agent:
+      - AZURECLI/2.80.0 azsdk-python-core/1.35.0 Python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/virtualNetworks/maps-privatelink-vnet000003?api-version=2024-07-01
+  response:
+    body:
+      string: '{"name":"maps-privatelink-vnet000003","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/virtualNetworks/maps-privatelink-vnet000003","etag":"W/\"87a75c7b-0a9f-4002-830e-bb9fd46f61e9\"","type":"Microsoft.Network/virtualNetworks","location":"westus2","properties":{"provisioningState":"Succeeded","resourceGuid":"00911d37-9b3e-4f9f-9918-8b9619f93427","addressSpace":{"addressPrefixes":["10.0.0.0/16"]},"privateEndpointVNetPolicies":"Disabled","subnets":[{"name":"maps-privatelink-subnet000004","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/virtualNetworks/maps-privatelink-vnet000003/subnets/maps-privatelink-subnet000004","etag":"W/\"87a75c7b-0a9f-4002-830e-bb9fd46f61e9\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[],"privateEndpointNetworkPolicies":"Disabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1164'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Nov 2025 21:46:40 GMT
+      etag:
+      - W/"87a75c7b-0a9f-4002-830e-bb9fd46f61e9"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 29be1ac5-8e46-4926-8f41-7169a3a6805c
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: F23BC24B203445BB9191757DF4036593 Ref B: MWH011020808052 Ref C: 2025-11-12T21:46:41Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --vnet-name -g --disable-private-endpoint-network-policies
+      User-Agent:
+      - AZURECLI/2.80.0 azsdk-python-core/1.35.0 Python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/virtualNetworks/maps-privatelink-vnet000003/subnets/maps-privatelink-subnet000004?api-version=2024-07-01
+  response:
+    body:
+      string: '{"name":"maps-privatelink-subnet000004","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/virtualNetworks/maps-privatelink-vnet000003/subnets/maps-privatelink-subnet000004","etag":"W/\"87a75c7b-0a9f-4002-830e-bb9fd46f61e9\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[],"privateEndpointNetworkPolicies":"Disabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '556'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Nov 2025 21:46:42 GMT
+      etag:
+      - W/"87a75c7b-0a9f-4002-830e-bb9fd46f61e9"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - eb6d1fc9-9e6c-4ade-a552-dea26414b727
+      x-ms-operation-identifier:
+      - tenantId=a1358d2f-a71f-4e96-86b8-33821da3bb29,objectId=1a41d7bc-dc4d-4125-a13e-7c3c9dd0e9e5/westus2/bbad3eb3-ae85-4ad0-8fec-718251a71ef2
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 268D256D601A4FEDB8E8EADEBCED2730 Ref B: CO6AA3150218021 Ref C: 2025-11-12T21:46:42Z'
+    status:
+      code: 200
+      message: ''
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/virtualNetworks/maps-privatelink-vnet000003/subnets/maps-privatelink-subnet000004",
+      "name": "maps-privatelink-subnet000004", "properties": {"addressPrefix": "10.0.0.0/24",
+      "delegations": [], "privateEndpointNetworkPolicies": "Disabled", "privateLinkServiceNetworkPolicies":
+      "Enabled"}, "type": "Microsoft.Network/virtualNetworks/subnets"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '486'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n --vnet-name -g --disable-private-endpoint-network-policies
+      User-Agent:
+      - AZURECLI/2.80.0 azsdk-python-core/1.35.0 Python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/virtualNetworks/maps-privatelink-vnet000003/subnets/maps-privatelink-subnet000004?api-version=2024-07-01
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Wed, 12 Nov 2025 21:46:49 GMT
+      x-cache:
+      - CONFIG_NOCACHE
+      x-msedge-ref:
+      - 'Ref A: 34650ABA1AB6490B894BFB7F017C41C5 Ref B: CO6AA3150217053 Ref C: 2025-11-12T21:46:43Z'
+    status:
+      code: 503
+      message: Service Unavailable
+- request:
+    body: '{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/virtualNetworks/maps-privatelink-vnet000003/subnets/maps-privatelink-subnet000004",
+      "name": "maps-privatelink-subnet000004", "properties": {"addressPrefix": "10.0.0.0/24",
+      "delegations": [], "privateEndpointNetworkPolicies": "Disabled", "privateLinkServiceNetworkPolicies":
+      "Enabled"}, "type": "Microsoft.Network/virtualNetworks/subnets"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '486'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n --vnet-name -g --disable-private-endpoint-network-policies
+      User-Agent:
+      - AZURECLI/2.80.0 azsdk-python-core/1.35.0 Python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/virtualNetworks/maps-privatelink-vnet000003/subnets/maps-privatelink-subnet000004?api-version=2024-07-01
+  response:
+    body:
+      string: '{"name":"maps-privatelink-subnet000004","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/virtualNetworks/maps-privatelink-vnet000003/subnets/maps-privatelink-subnet000004","etag":"W/\"599256a6-5de7-4ae9-b171-7548a362acfb\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[],"privateEndpointNetworkPolicies":"Disabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}'
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/d925e6ac-09aa-4336-ba34-d03eaf11b6b7?api-version=2024-07-01&t=638985808100194290&c=MIIHhzCCBm-gAwIBAgITfAldUuOkqyWaFWVmdAAACV1S4zANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUxMDIxMDgxMjA1WhcNMjYwNDE5MDgxMjA1WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK6VhHo7SMnPI07xSUC0EKrS_gaAU3t2sorvXTakEJppgrr-M5q-yAFDicwNGCe2zSU9ZvGBPI46D9PesTntz4RhQO5-Dkx5G8vC9lZ0WV6mem5Hsnf78kDXgYxzLyAaMKv9WjuZNcTaFQKdrPAx-ZS-2EebUB404VhX1yJ3S4C3QHTpXASyoAbFfGV8tHPGM7q2s_Qr9qBJ5RUnI0t_oD0IJ_dyn_wQvIsgBjpGMentNk7AKNnJ7dWOCU76BFL9ZQAP9lNuU68JHjdsD1lABOX7Jtcv8FrW2zWgZn6TOHf9rY990h8zyuY_EBAr0xrbFD0i_O184Iy9gHWqScS_2CkCAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBTUpdRlqz5GkJ77fs3HRMz2Z_W49DAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAGQmJdPitlGjIwFSf4WsFmLr4W3CmkUpm4HxfZATnxnP9vV2uH5f01rfg_lA-Q0s4GMqkftMAVNRm0Ta6w_NRSLRZO2GWa65KrQ8ITCuGR12jMTYPqYgqEIaBQAqqxvtTisw6-_rDdMBbWwvTo6h0yR_Rw0GGgX1C4WUYhFJq-o90nFF2qZEFQJht7ni8RYQonaxB281z64rp0rlXCz8r3rJXIR2RLC48IA1los4mZYaxAv_Y_LPYwZUQ_V0_YrSGK5KMJp6exPToKF_DePs6j27AncGilbWo9t96F-yKBPD57WulOVgbYwNKAZ_Klbw0ur-YLdTdCaIbUiNhmGTDvY&s=kp443l_TZl5uXKYFKZ9Zo4dST3uoZOcyQLASXxuhYzSR6Sl1ARtRRPYslKa2snViF_W4i7CTYO7BuQExuvENcG2243Iv7a6_rmbuFCjqby5PAiWP5XBPa7Z8q-LT-HH2A-WHKCf0iNwLn5AgszGEQxS1Q3jMUqTL1xIxaVrizCHosW3kPVFG1QwOlfprBTgm0YfSL3RLbrT-nOyjZifRxCShekXqU20P4efhCRL3kjVXpceM9euKKf0XbiZOlC7qg9BKnlMUH2qnnh2opgalvtpVrqkWu8-b1VmvqumDn6DzpBInC0RD0UMy5H5XMVG-VVsXNiTStb8TvvOlV6uiWw&h=Lkaffv2zgse0Hy8mHHNh7ZsCFLC7ib1Jpcfu_u2yemU
+      cache-control:
+      - no-cache
+      content-length:
+      - '556'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Nov 2025 21:46:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 212eb80d-4d2b-4c53-b3df-5d14b1b072fb
+      x-ms-operation-identifier:
+      - tenantId=a1358d2f-a71f-4e96-86b8-33821da3bb29,objectId=1a41d7bc-dc4d-4125-a13e-7c3c9dd0e9e5/westus2/f97bee4d-195f-4c87-8652-240bb529752f
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: 8805833203974822B012C0C0CF5C6CFE Ref B: MWH011020808023 Ref C: 2025-11-12T21:46:49Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --vnet-name -g --disable-private-endpoint-network-policies
+      User-Agent:
+      - AZURECLI/2.80.0 azsdk-python-core/1.35.0 Python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/d925e6ac-09aa-4336-ba34-d03eaf11b6b7?api-version=2024-07-01&t=638985808100194290&c=MIIHhzCCBm-gAwIBAgITfAldUuOkqyWaFWVmdAAACV1S4zANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUxMDIxMDgxMjA1WhcNMjYwNDE5MDgxMjA1WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK6VhHo7SMnPI07xSUC0EKrS_gaAU3t2sorvXTakEJppgrr-M5q-yAFDicwNGCe2zSU9ZvGBPI46D9PesTntz4RhQO5-Dkx5G8vC9lZ0WV6mem5Hsnf78kDXgYxzLyAaMKv9WjuZNcTaFQKdrPAx-ZS-2EebUB404VhX1yJ3S4C3QHTpXASyoAbFfGV8tHPGM7q2s_Qr9qBJ5RUnI0t_oD0IJ_dyn_wQvIsgBjpGMentNk7AKNnJ7dWOCU76BFL9ZQAP9lNuU68JHjdsD1lABOX7Jtcv8FrW2zWgZn6TOHf9rY990h8zyuY_EBAr0xrbFD0i_O184Iy9gHWqScS_2CkCAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBTUpdRlqz5GkJ77fs3HRMz2Z_W49DAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAGQmJdPitlGjIwFSf4WsFmLr4W3CmkUpm4HxfZATnxnP9vV2uH5f01rfg_lA-Q0s4GMqkftMAVNRm0Ta6w_NRSLRZO2GWa65KrQ8ITCuGR12jMTYPqYgqEIaBQAqqxvtTisw6-_rDdMBbWwvTo6h0yR_Rw0GGgX1C4WUYhFJq-o90nFF2qZEFQJht7ni8RYQonaxB281z64rp0rlXCz8r3rJXIR2RLC48IA1los4mZYaxAv_Y_LPYwZUQ_V0_YrSGK5KMJp6exPToKF_DePs6j27AncGilbWo9t96F-yKBPD57WulOVgbYwNKAZ_Klbw0ur-YLdTdCaIbUiNhmGTDvY&s=kp443l_TZl5uXKYFKZ9Zo4dST3uoZOcyQLASXxuhYzSR6Sl1ARtRRPYslKa2snViF_W4i7CTYO7BuQExuvENcG2243Iv7a6_rmbuFCjqby5PAiWP5XBPa7Z8q-LT-HH2A-WHKCf0iNwLn5AgszGEQxS1Q3jMUqTL1xIxaVrizCHosW3kPVFG1QwOlfprBTgm0YfSL3RLbrT-nOyjZifRxCShekXqU20P4efhCRL3kjVXpceM9euKKf0XbiZOlC7qg9BKnlMUH2qnnh2opgalvtpVrqkWu8-b1VmvqumDn6DzpBInC0RD0UMy5H5XMVG-VVsXNiTStb8TvvOlV6uiWw&h=Lkaffv2zgse0Hy8mHHNh7ZsCFLC7ib1Jpcfu_u2yemU
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Nov 2025 21:46:49 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 97810e19-4757-4367-af20-b6de9a305617
+      x-ms-operation-identifier:
+      - tenantId=a1358d2f-a71f-4e96-86b8-33821da3bb29,objectId=1a41d7bc-dc4d-4125-a13e-7c3c9dd0e9e5/westus2/107f6198-7989-407f-a732-e4584b53f25f
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 0E5F70FB69A74C6EAC144E40B61631AB Ref B: CO6AA3150219023 Ref C: 2025-11-12T21:46:50Z'
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network vnet subnet update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --vnet-name -g --disable-private-endpoint-network-policies
+      User-Agent:
+      - AZURECLI/2.80.0 azsdk-python-core/1.35.0 Python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/virtualNetworks/maps-privatelink-vnet000003/subnets/maps-privatelink-subnet000004?api-version=2024-07-01
+  response:
+    body:
+      string: '{"name":"maps-privatelink-subnet000004","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/virtualNetworks/maps-privatelink-vnet000003/subnets/maps-privatelink-subnet000004","etag":"W/\"599256a6-5de7-4ae9-b171-7548a362acfb\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","delegations":[],"privateEndpointNetworkPolicies":"Disabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '556'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Nov 2025 21:47:04 GMT
+      etag:
+      - W/"599256a6-5de7-4ae9-b171-7548a362acfb"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - c8454ca2-e642-4176-9c1c-a2f6b6e7bd36
+      x-ms-operation-identifier:
+      - tenantId=a1358d2f-a71f-4e96-86b8-33821da3bb29,objectId=1a41d7bc-dc4d-4125-a13e-7c3c9dd0e9e5/westus2/81dfb6db-0418-43ce-aabc-27e322c1b4f0
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 94168CA07CDE4EA4B82BB1F45C840E8D Ref B: CO6AA3150220021 Ref C: 2025-11-12T21:46:50Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus2", "sku": {"name": "G2"}, "kind": "Gen2", "properties":
+      {"disableLocalAuth": false}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - maps account create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '105'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -s --kind -n --accept-tos -l
+      User-Agent:
+      - AZURECLI/2.80.0 azsdk-python-core/1.35.0 Python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002?api-version=2021-02-01
+  response:
+    body:
+      string: "{\n  \"kind\": \"Gen2\",\n  \"type\": \"Microsoft.Maps/accounts\",\n
+        \ \"sku\": {\n    \"name\": \"G2\",\n    \"tier\": \"Standard\"\n  },\n  \"properties\":
+        {\n    \"uniqueId\": \"3bc5698f-6742-4192-9779-b49a7bc8ac5c\",\n    \"provisioningState\":
+        \"Succeeded\",\n    \"disableLocalAuth\": false\n  },\n  \"systemData\": {\n
+        \   \"createdBy\": \"m@microsoft.mbelt.net\",\n    \"createdByType\": \"User\",\n
+        \   \"createdAt\": \"2025-11-12T21:47:05.5716591Z\",\n    \"lastModifiedBy\":
+        \"m@microsoft.mbelt.net\",\n    \"lastModifiedByType\": \"User\",\n    \"lastModifiedAt\":
+        \"2025-11-12T21:47:05.5716591Z\"\n  },\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002\",\n
+        \ \"name\": \"maps-privatelink-account000002\",\n  \"location\": \"westus2\"\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '795'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Nov 2025 21:47:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=a1358d2f-a71f-4e96-86b8-33821da3bb29,objectId=1a41d7bc-dc4d-4125-a13e-7c3c9dd0e9e5/westus2/dda26d46-14de-4cc8-9178-e44e5b9a034f
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: E058469096234586B84AE96746FD56DF Ref B: CO6AA3150219035 Ref C: 2025-11-12T21:47:05Z'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet --connection-name --private-connection-resource-id
+        --group-id --manual-request
+      User-Agent:
+      - AZURECLI/2.80.0 azsdk-python-core/1.35.0 Python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_maps_private_endpoint_connection_000001?api-version=2024-11-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001","name":"test_maps_private_endpoint_connection_000001","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","test":"test_private_endpoint_connection_maps","date":"2025-11-12T21:45:24Z","module":"network"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '433'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Nov 2025 21:47:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 2A787B708A424BD58730D094C6530EE5 Ref B: CO6AA3150219019 Ref C: 2025-11-12T21:47:05Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus2", "properties": {"manualPrivateLinkServiceConnections":
+      [{"name": "maps-privatelink-endpointconn000006", "properties": {"groupIds":
+      ["mapsAccount"], "privateLinkServiceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002"}}],
+      "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/virtualNetworks/maps-privatelink-vnet000003/subnets/maps-privatelink-subnet000004"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '621'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --vnet-name --subnet --connection-name --private-connection-resource-id
+        --group-id --manual-request
+      User-Agent:
+      - AZURECLI/2.80.0 azsdk-python-core/1.35.0 Python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/privateEndpoints/maps-privatelink-endpoint000005?api-version=2022-01-01
+  response:
+    body:
+      string: '{"name":"maps-privatelink-endpoint000005","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/privateEndpoints/maps-privatelink-endpoint000005","etag":"W/\"c2992013-5c8b-483e-8752-ff2ec4f02d3c\"","type":"Microsoft.Network/privateEndpoints","location":"westus2","properties":{"provisioningState":"Updating","resourceGuid":"234b595c-88f1-4d94-a3cb-547bce7555b9","privateLinkServiceConnections":[],"manualPrivateLinkServiceConnections":[{"name":"maps-privatelink-endpointconn000006","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/privateEndpoints/maps-privatelink-endpoint000005/manualPrivateLinkServiceConnections/maps-privatelink-endpointconn000006","etag":"W/\"c2992013-5c8b-483e-8752-ff2ec4f02d3c\"","properties":{"provisioningState":"Succeeded","privateLinkServiceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002","groupIds":["mapsAccount"],"privateLinkServiceConnectionState":{"status":"Pending","description":"Awaiting
+        Approval","actionsRequired":"None"}},"type":"Microsoft.Network/privateEndpoints/manualPrivateLinkServiceConnections"}],"customNetworkInterfaceName":"","subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/virtualNetworks/maps-privatelink-vnet000003/subnets/maps-privatelink-subnet000004"},"ipConfigurations":[],"networkInterfaces":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/networkInterfaces/maps-privatelink-endpoint000005.nic.1cbf47e5-9db7-4d8b-ad44-6a79c526473e"}],"customDnsConfigs":[]}}'
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/88146173-b59d-4697-8d87-392ed5b4354d?api-version=2022-01-01&t=638985808273221429&c=MIIHhzCCBm-gAwIBAgITfAldUuOkqyWaFWVmdAAACV1S4zANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUxMDIxMDgxMjA1WhcNMjYwNDE5MDgxMjA1WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK6VhHo7SMnPI07xSUC0EKrS_gaAU3t2sorvXTakEJppgrr-M5q-yAFDicwNGCe2zSU9ZvGBPI46D9PesTntz4RhQO5-Dkx5G8vC9lZ0WV6mem5Hsnf78kDXgYxzLyAaMKv9WjuZNcTaFQKdrPAx-ZS-2EebUB404VhX1yJ3S4C3QHTpXASyoAbFfGV8tHPGM7q2s_Qr9qBJ5RUnI0t_oD0IJ_dyn_wQvIsgBjpGMentNk7AKNnJ7dWOCU76BFL9ZQAP9lNuU68JHjdsD1lABOX7Jtcv8FrW2zWgZn6TOHf9rY990h8zyuY_EBAr0xrbFD0i_O184Iy9gHWqScS_2CkCAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBTUpdRlqz5GkJ77fs3HRMz2Z_W49DAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAGQmJdPitlGjIwFSf4WsFmLr4W3CmkUpm4HxfZATnxnP9vV2uH5f01rfg_lA-Q0s4GMqkftMAVNRm0Ta6w_NRSLRZO2GWa65KrQ8ITCuGR12jMTYPqYgqEIaBQAqqxvtTisw6-_rDdMBbWwvTo6h0yR_Rw0GGgX1C4WUYhFJq-o90nFF2qZEFQJht7ni8RYQonaxB281z64rp0rlXCz8r3rJXIR2RLC48IA1los4mZYaxAv_Y_LPYwZUQ_V0_YrSGK5KMJp6exPToKF_DePs6j27AncGilbWo9t96F-yKBPD57WulOVgbYwNKAZ_Klbw0ur-YLdTdCaIbUiNhmGTDvY&s=rYDSkomgHLzvjs36oobAeHgZN1JpiiMskW8vVaKl5Z1Dwqcz5ETUFLRsjUK4yoAQT5s5tjc1ZMeLsBl2BAHQEO8qQcpc6vh3TDCmnusk5Cme1Y38Ccb0JXTLO_e9otnVxI3VubQVixrTAb-4u_hFuzVE_f2BieeRzOO3aCbwdwaWD-ohb5njWfmg-Ar1ey6ajNMJKAhb5w2ED3_ncP6DYV4nI75-zAe4vxdgpw6BurT0OymHGpGknmdlXEjrRFWoo6OrpcA28YxtIwujlj7E_iaC9eB2fMmEu893-aVdXzA_FVoi6bf5ZCzLPZ58ThA1kKBxxrl8uz8GtXNI87l7wg&h=YI7KxhriZCP5gU7oFqU-9ubOBOWNFQ6eznx_WpxHY84
+      cache-control:
+      - no-cache
+      content-length:
+      - '1947'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Nov 2025 21:47:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 9e347765-ff19-4b33-bcb1-9613cc1f5824
+      x-ms-operation-identifier:
+      - tenantId=a1358d2f-a71f-4e96-86b8-33821da3bb29,objectId=1a41d7bc-dc4d-4125-a13e-7c3c9dd0e9e5/westus2/b4ab3cce-642b-4a10-a221-9b697c099a55
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: E9AB875BEB7E49F29B02132EFF312DF7 Ref B: CO6AA3150217021 Ref C: 2025-11-12T21:47:06Z'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet --connection-name --private-connection-resource-id
+        --group-id --manual-request
+      User-Agent:
+      - AZURECLI/2.80.0 azsdk-python-core/1.35.0 Python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/88146173-b59d-4697-8d87-392ed5b4354d?api-version=2022-01-01&t=638985808273221429&c=MIIHhzCCBm-gAwIBAgITfAldUuOkqyWaFWVmdAAACV1S4zANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUxMDIxMDgxMjA1WhcNMjYwNDE5MDgxMjA1WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK6VhHo7SMnPI07xSUC0EKrS_gaAU3t2sorvXTakEJppgrr-M5q-yAFDicwNGCe2zSU9ZvGBPI46D9PesTntz4RhQO5-Dkx5G8vC9lZ0WV6mem5Hsnf78kDXgYxzLyAaMKv9WjuZNcTaFQKdrPAx-ZS-2EebUB404VhX1yJ3S4C3QHTpXASyoAbFfGV8tHPGM7q2s_Qr9qBJ5RUnI0t_oD0IJ_dyn_wQvIsgBjpGMentNk7AKNnJ7dWOCU76BFL9ZQAP9lNuU68JHjdsD1lABOX7Jtcv8FrW2zWgZn6TOHf9rY990h8zyuY_EBAr0xrbFD0i_O184Iy9gHWqScS_2CkCAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBTUpdRlqz5GkJ77fs3HRMz2Z_W49DAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAGQmJdPitlGjIwFSf4WsFmLr4W3CmkUpm4HxfZATnxnP9vV2uH5f01rfg_lA-Q0s4GMqkftMAVNRm0Ta6w_NRSLRZO2GWa65KrQ8ITCuGR12jMTYPqYgqEIaBQAqqxvtTisw6-_rDdMBbWwvTo6h0yR_Rw0GGgX1C4WUYhFJq-o90nFF2qZEFQJht7ni8RYQonaxB281z64rp0rlXCz8r3rJXIR2RLC48IA1los4mZYaxAv_Y_LPYwZUQ_V0_YrSGK5KMJp6exPToKF_DePs6j27AncGilbWo9t96F-yKBPD57WulOVgbYwNKAZ_Klbw0ur-YLdTdCaIbUiNhmGTDvY&s=rYDSkomgHLzvjs36oobAeHgZN1JpiiMskW8vVaKl5Z1Dwqcz5ETUFLRsjUK4yoAQT5s5tjc1ZMeLsBl2BAHQEO8qQcpc6vh3TDCmnusk5Cme1Y38Ccb0JXTLO_e9otnVxI3VubQVixrTAb-4u_hFuzVE_f2BieeRzOO3aCbwdwaWD-ohb5njWfmg-Ar1ey6ajNMJKAhb5w2ED3_ncP6DYV4nI75-zAe4vxdgpw6BurT0OymHGpGknmdlXEjrRFWoo6OrpcA28YxtIwujlj7E_iaC9eB2fMmEu893-aVdXzA_FVoi6bf5ZCzLPZ58ThA1kKBxxrl8uz8GtXNI87l7wg&h=YI7KxhriZCP5gU7oFqU-9ubOBOWNFQ6eznx_WpxHY84
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Nov 2025 21:47:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - ba851a96-94fa-4163-8b2c-95fac0df1d6c
+      x-ms-operation-identifier:
+      - tenantId=a1358d2f-a71f-4e96-86b8-33821da3bb29,objectId=1a41d7bc-dc4d-4125-a13e-7c3c9dd0e9e5/westus2/4ab9a90a-6ee1-44c9-a758-d90e07288d89
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: EFF8B4E719184E3FBB679798A887B016 Ref B: MWH011020807034 Ref C: 2025-11-12T21:47:07Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet --connection-name --private-connection-resource-id
+        --group-id --manual-request
+      User-Agent:
+      - AZURECLI/2.80.0 azsdk-python-core/1.35.0 Python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/88146173-b59d-4697-8d87-392ed5b4354d?api-version=2022-01-01&t=638985808273221429&c=MIIHhzCCBm-gAwIBAgITfAldUuOkqyWaFWVmdAAACV1S4zANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUxMDIxMDgxMjA1WhcNMjYwNDE5MDgxMjA1WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK6VhHo7SMnPI07xSUC0EKrS_gaAU3t2sorvXTakEJppgrr-M5q-yAFDicwNGCe2zSU9ZvGBPI46D9PesTntz4RhQO5-Dkx5G8vC9lZ0WV6mem5Hsnf78kDXgYxzLyAaMKv9WjuZNcTaFQKdrPAx-ZS-2EebUB404VhX1yJ3S4C3QHTpXASyoAbFfGV8tHPGM7q2s_Qr9qBJ5RUnI0t_oD0IJ_dyn_wQvIsgBjpGMentNk7AKNnJ7dWOCU76BFL9ZQAP9lNuU68JHjdsD1lABOX7Jtcv8FrW2zWgZn6TOHf9rY990h8zyuY_EBAr0xrbFD0i_O184Iy9gHWqScS_2CkCAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBTUpdRlqz5GkJ77fs3HRMz2Z_W49DAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAGQmJdPitlGjIwFSf4WsFmLr4W3CmkUpm4HxfZATnxnP9vV2uH5f01rfg_lA-Q0s4GMqkftMAVNRm0Ta6w_NRSLRZO2GWa65KrQ8ITCuGR12jMTYPqYgqEIaBQAqqxvtTisw6-_rDdMBbWwvTo6h0yR_Rw0GGgX1C4WUYhFJq-o90nFF2qZEFQJht7ni8RYQonaxB281z64rp0rlXCz8r3rJXIR2RLC48IA1los4mZYaxAv_Y_LPYwZUQ_V0_YrSGK5KMJp6exPToKF_DePs6j27AncGilbWo9t96F-yKBPD57WulOVgbYwNKAZ_Klbw0ur-YLdTdCaIbUiNhmGTDvY&s=rYDSkomgHLzvjs36oobAeHgZN1JpiiMskW8vVaKl5Z1Dwqcz5ETUFLRsjUK4yoAQT5s5tjc1ZMeLsBl2BAHQEO8qQcpc6vh3TDCmnusk5Cme1Y38Ccb0JXTLO_e9otnVxI3VubQVixrTAb-4u_hFuzVE_f2BieeRzOO3aCbwdwaWD-ohb5njWfmg-Ar1ey6ajNMJKAhb5w2ED3_ncP6DYV4nI75-zAe4vxdgpw6BurT0OymHGpGknmdlXEjrRFWoo6OrpcA28YxtIwujlj7E_iaC9eB2fMmEu893-aVdXzA_FVoi6bf5ZCzLPZ58ThA1kKBxxrl8uz8GtXNI87l7wg&h=YI7KxhriZCP5gU7oFqU-9ubOBOWNFQ6eznx_WpxHY84
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Nov 2025 21:47:18 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - b96b0e80-4164-423b-95e4-3c9e8af9af81
+      x-ms-operation-identifier:
+      - tenantId=a1358d2f-a71f-4e96-86b8-33821da3bb29,objectId=1a41d7bc-dc4d-4125-a13e-7c3c9dd0e9e5/westus2/4d1a9ce1-8fd0-44ca-924e-e23f6425709f
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 4C633D4F3DA24A47A95A2258832298AB Ref B: MWH011020809031 Ref C: 2025-11-12T21:47:17Z'
+    status:
+      code: 200
+      message: ''
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet --connection-name --private-connection-resource-id
+        --group-id --manual-request
+      User-Agent:
+      - AZURECLI/2.80.0 azsdk-python-core/1.35.0 Python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/88146173-b59d-4697-8d87-392ed5b4354d?api-version=2022-01-01&t=638985808273221429&c=MIIHhzCCBm-gAwIBAgITfAldUuOkqyWaFWVmdAAACV1S4zANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUxMDIxMDgxMjA1WhcNMjYwNDE5MDgxMjA1WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK6VhHo7SMnPI07xSUC0EKrS_gaAU3t2sorvXTakEJppgrr-M5q-yAFDicwNGCe2zSU9ZvGBPI46D9PesTntz4RhQO5-Dkx5G8vC9lZ0WV6mem5Hsnf78kDXgYxzLyAaMKv9WjuZNcTaFQKdrPAx-ZS-2EebUB404VhX1yJ3S4C3QHTpXASyoAbFfGV8tHPGM7q2s_Qr9qBJ5RUnI0t_oD0IJ_dyn_wQvIsgBjpGMentNk7AKNnJ7dWOCU76BFL9ZQAP9lNuU68JHjdsD1lABOX7Jtcv8FrW2zWgZn6TOHf9rY990h8zyuY_EBAr0xrbFD0i_O184Iy9gHWqScS_2CkCAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBTUpdRlqz5GkJ77fs3HRMz2Z_W49DAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAGQmJdPitlGjIwFSf4WsFmLr4W3CmkUpm4HxfZATnxnP9vV2uH5f01rfg_lA-Q0s4GMqkftMAVNRm0Ta6w_NRSLRZO2GWa65KrQ8ITCuGR12jMTYPqYgqEIaBQAqqxvtTisw6-_rDdMBbWwvTo6h0yR_Rw0GGgX1C4WUYhFJq-o90nFF2qZEFQJht7ni8RYQonaxB281z64rp0rlXCz8r3rJXIR2RLC48IA1los4mZYaxAv_Y_LPYwZUQ_V0_YrSGK5KMJp6exPToKF_DePs6j27AncGilbWo9t96F-yKBPD57WulOVgbYwNKAZ_Klbw0ur-YLdTdCaIbUiNhmGTDvY&s=rYDSkomgHLzvjs36oobAeHgZN1JpiiMskW8vVaKl5Z1Dwqcz5ETUFLRsjUK4yoAQT5s5tjc1ZMeLsBl2BAHQEO8qQcpc6vh3TDCmnusk5Cme1Y38Ccb0JXTLO_e9otnVxI3VubQVixrTAb-4u_hFuzVE_f2BieeRzOO3aCbwdwaWD-ohb5njWfmg-Ar1ey6ajNMJKAhb5w2ED3_ncP6DYV4nI75-zAe4vxdgpw6BurT0OymHGpGknmdlXEjrRFWoo6OrpcA28YxtIwujlj7E_iaC9eB2fMmEu893-aVdXzA_FVoi6bf5ZCzLPZ58ThA1kKBxxrl8uz8GtXNI87l7wg&h=YI7KxhriZCP5gU7oFqU-9ubOBOWNFQ6eznx_WpxHY84
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Nov 2025 21:47:38 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 685cbbe3-8061-409f-9cb6-e736e45b10e2
+      x-ms-operation-identifier:
+      - tenantId=a1358d2f-a71f-4e96-86b8-33821da3bb29,objectId=1a41d7bc-dc4d-4125-a13e-7c3c9dd0e9e5/westus2/48d2d037-de1a-4f76-bcce-e6c82712ad65
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: D865899255C543F7906E58DFF7A14844 Ref B: MWH011020808034 Ref C: 2025-11-12T21:47:38Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet --connection-name --private-connection-resource-id
+        --group-id --manual-request
+      User-Agent:
+      - AZURECLI/2.80.0 azsdk-python-core/1.35.0 Python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/88146173-b59d-4697-8d87-392ed5b4354d?api-version=2022-01-01&t=638985808273221429&c=MIIHhzCCBm-gAwIBAgITfAldUuOkqyWaFWVmdAAACV1S4zANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUxMDIxMDgxMjA1WhcNMjYwNDE5MDgxMjA1WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK6VhHo7SMnPI07xSUC0EKrS_gaAU3t2sorvXTakEJppgrr-M5q-yAFDicwNGCe2zSU9ZvGBPI46D9PesTntz4RhQO5-Dkx5G8vC9lZ0WV6mem5Hsnf78kDXgYxzLyAaMKv9WjuZNcTaFQKdrPAx-ZS-2EebUB404VhX1yJ3S4C3QHTpXASyoAbFfGV8tHPGM7q2s_Qr9qBJ5RUnI0t_oD0IJ_dyn_wQvIsgBjpGMentNk7AKNnJ7dWOCU76BFL9ZQAP9lNuU68JHjdsD1lABOX7Jtcv8FrW2zWgZn6TOHf9rY990h8zyuY_EBAr0xrbFD0i_O184Iy9gHWqScS_2CkCAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBTUpdRlqz5GkJ77fs3HRMz2Z_W49DAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAGQmJdPitlGjIwFSf4WsFmLr4W3CmkUpm4HxfZATnxnP9vV2uH5f01rfg_lA-Q0s4GMqkftMAVNRm0Ta6w_NRSLRZO2GWa65KrQ8ITCuGR12jMTYPqYgqEIaBQAqqxvtTisw6-_rDdMBbWwvTo6h0yR_Rw0GGgX1C4WUYhFJq-o90nFF2qZEFQJht7ni8RYQonaxB281z64rp0rlXCz8r3rJXIR2RLC48IA1los4mZYaxAv_Y_LPYwZUQ_V0_YrSGK5KMJp6exPToKF_DePs6j27AncGilbWo9t96F-yKBPD57WulOVgbYwNKAZ_Klbw0ur-YLdTdCaIbUiNhmGTDvY&s=rYDSkomgHLzvjs36oobAeHgZN1JpiiMskW8vVaKl5Z1Dwqcz5ETUFLRsjUK4yoAQT5s5tjc1ZMeLsBl2BAHQEO8qQcpc6vh3TDCmnusk5Cme1Y38Ccb0JXTLO_e9otnVxI3VubQVixrTAb-4u_hFuzVE_f2BieeRzOO3aCbwdwaWD-ohb5njWfmg-Ar1ey6ajNMJKAhb5w2ED3_ncP6DYV4nI75-zAe4vxdgpw6BurT0OymHGpGknmdlXEjrRFWoo6OrpcA28YxtIwujlj7E_iaC9eB2fMmEu893-aVdXzA_FVoi6bf5ZCzLPZ58ThA1kKBxxrl8uz8GtXNI87l7wg&h=YI7KxhriZCP5gU7oFqU-9ubOBOWNFQ6eznx_WpxHY84
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Nov 2025 21:47:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 18162875-c424-48b7-91d1-d68f2af5c21f
+      x-ms-operation-identifier:
+      - tenantId=a1358d2f-a71f-4e96-86b8-33821da3bb29,objectId=1a41d7bc-dc4d-4125-a13e-7c3c9dd0e9e5/westus2/5afcc6b7-31f4-4a48-a92c-8d6060884ac0
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 6782BB410C684B9BAB7284DC862FB445 Ref B: CO6AA3150219017 Ref C: 2025-11-12T21:47:58Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet --connection-name --private-connection-resource-id
+        --group-id --manual-request
+      User-Agent:
+      - AZURECLI/2.80.0 azsdk-python-core/1.35.0 Python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/privateEndpoints/maps-privatelink-endpoint000005?api-version=2022-01-01
+  response:
+    body:
+      string: '{"name":"maps-privatelink-endpoint000005","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/privateEndpoints/maps-privatelink-endpoint000005","etag":"W/\"43201c56-f38e-4412-ac50-1a234927a4a6\"","type":"Microsoft.Network/privateEndpoints","location":"westus2","properties":{"provisioningState":"Succeeded","resourceGuid":"234b595c-88f1-4d94-a3cb-547bce7555b9","privateLinkServiceConnections":[],"manualPrivateLinkServiceConnections":[{"name":"maps-privatelink-endpointconn000006","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/privateEndpoints/maps-privatelink-endpoint000005/manualPrivateLinkServiceConnections/maps-privatelink-endpointconn000006","etag":"W/\"43201c56-f38e-4412-ac50-1a234927a4a6\"","properties":{"provisioningState":"Succeeded","privateLinkServiceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002","groupIds":["mapsAccount"],"privateLinkServiceConnectionState":{"status":"Pending","description":"","actionsRequired":""}},"type":"Microsoft.Network/privateEndpoints/manualPrivateLinkServiceConnections"}],"customNetworkInterfaceName":"","subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/virtualNetworks/maps-privatelink-vnet000003/subnets/maps-privatelink-subnet000004"},"ipConfigurations":[],"networkInterfaces":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/networkInterfaces/maps-privatelink-endpoint000005.nic.1cbf47e5-9db7-4d8b-ad44-6a79c526473e"}],"customDnsConfigs":[{"fqdn":"3bc5698f-6742-4192-9779-b49a7bc8ac5c.westus2.account.maps.azure.com","ipAddresses":["10.0.0.4"]}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2032'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Nov 2025 21:47:58 GMT
+      etag:
+      - W/"43201c56-f38e-4412-ac50-1a234927a4a6"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 7e2ea73e-589b-4ff0-a71a-6c7cc41c760e
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 6D1B6D93DB224BF4849C4D74A3CD8E3C Ref B: MWH011020806042 Ref C: 2025-11-12T21:47:59Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --type
+      User-Agent:
+      - python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42) AZURECLI/2.80.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections?api-version=2023-12-01-preview
+  response:
+    body:
+      string: "{\n  \"value\": [\n    {\n      \"properties\": {\n        \"privateEndpoint\":
+        {\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/privateEndpoints/maps-privatelink-endpoint000005\"\n
+        \       },\n        \"groupIds\": [\n          \"mapsAccount\"\n        ],\n
+        \       \"privateLinkServiceConnectionState\": {\n          \"status\": \"Pending\"\n
+        \       },\n        \"provisioningState\": \"Succeeded\"\n      },\n      \"type\":
+        \"Microsoft.Maps/accounts/privateEndpointConnections\",\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections/maps-privatelink-endpoint000005.234b595c-88f1-4d94-a3cb-547bce7555b9\",\n
+        \     \"name\": \"maps-privatelink-endpoint000005.234b595c-88f1-4d94-a3cb-547bce7555b9\"\n
+        \   }\n  ]\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '937'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Nov 2025 21:47:59 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=a1358d2f-a71f-4e96-86b8-33821da3bb29,objectId=1a41d7bc-dc4d-4125-a13e-7c3c9dd0e9e5/eastus2/3988162a-08fa-452e-a282-07e07aecd001
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 723A2B5831AB46958C13D4AC392C8A07 Ref B: CO6AA3150217045 Ref C: 2025-11-12T21:47:59Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection approve
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --resource-name -n --type
+      User-Agent:
+      - python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42) AZURECLI/2.80.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections/maps-privatelink-endpoint000005.234b595c-88f1-4d94-a3cb-547bce7555b9?api-version=2023-12-01-preview
+  response:
+    body:
+      string: "{\n  \"properties\": {\n    \"privateEndpoint\": {\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/privateEndpoints/maps-privatelink-endpoint000005\"\n
+        \   },\n    \"groupIds\": [\n      \"mapsAccount\"\n    ],\n    \"privateLinkServiceConnectionState\":
+        {\n      \"status\": \"Pending\"\n    },\n    \"provisioningState\": \"Succeeded\"\n
+        \ },\n  \"type\": \"Microsoft.Maps/accounts/privateEndpointConnections\",\n
+        \ \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections/maps-privatelink-endpoint000005.234b595c-88f1-4d94-a3cb-547bce7555b9\",\n
+        \ \"name\": \"maps-privatelink-endpoint000005.234b595c-88f1-4d94-a3cb-547bce7555b9\",\n
+        \ \"location\": \"westus2\"\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '873'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Nov 2025 21:48:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=a1358d2f-a71f-4e96-86b8-33821da3bb29,objectId=1a41d7bc-dc4d-4125-a13e-7c3c9dd0e9e5/westus2/c1719939-8572-4964-bbde-9f3307160070
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: C7D263A5D8664D0A929FF353468860F4 Ref B: MWH011020807040 Ref C: 2025-11-12T21:48:00Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"privateEndpoint": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/privateEndpoints/maps-privatelink-endpoint000005"},
+      "groupIds": ["mapsAccount"], "privateLinkServiceConnectionState": {"status":
+      "Approved", "description": null}, "provisioningState": "Succeeded"}, "type":
+      "Microsoft.Maps/accounts/privateEndpointConnections", "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections/maps-privatelink-endpoint000005.234b595c-88f1-4d94-a3cb-547bce7555b9",
+      "name": "maps-privatelink-endpoint000005.234b595c-88f1-4d94-a3cb-547bce7555b9",
+      "location": "westus2"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection approve
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '827'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --resource-name -n --type
+      User-Agent:
+      - python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42) AZURECLI/2.80.0
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections/maps-privatelink-endpoint000005.234b595c-88f1-4d94-a3cb-547bce7555b9?api-version=2023-12-01-preview
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com//subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maps/operationStatuses/69e0c68c-1014-4552-badb-698379f37d2d?api-version=2023-12-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Wed, 12 Nov 2025 21:48:43 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com//subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maps/operationResults/69e0c68c-1014-4552-badb-698379f37d2d?api-version=2023-12-01-preview
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=a1358d2f-a71f-4e96-86b8-33821da3bb29,objectId=1a41d7bc-dc4d-4125-a13e-7c3c9dd0e9e5/westus2/674a335a-fec3-41bb-b374-3afc6db35c45
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: 0D3647731F884C318191F44C764A3E0D Ref B: MWH011020807040 Ref C: 2025-11-12T21:48:42Z'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection approve
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --resource-name -n --type
+      User-Agent:
+      - python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42) AZURECLI/2.80.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections/maps-privatelink-endpoint000005.234b595c-88f1-4d94-a3cb-547bce7555b9?api-version=2023-12-01-preview
+  response:
+    body:
+      string: "{\n  \"properties\": {\n    \"privateEndpoint\": {\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/privateEndpoints/maps-privatelink-endpoint000005\"\n
+        \   },\n    \"groupIds\": [\n      \"mapsAccount\"\n    ],\n    \"privateLinkServiceConnectionState\":
+        {\n      \"status\": \"Pending\"\n    },\n    \"provisioningState\": \"Approving\"\n
+        \ },\n  \"type\": \"Microsoft.Maps/accounts/privateEndpointConnections\",\n
+        \ \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections/maps-privatelink-endpoint000005.234b595c-88f1-4d94-a3cb-547bce7555b9\",\n
+        \ \"name\": \"maps-privatelink-endpoint000005.234b595c-88f1-4d94-a3cb-547bce7555b9\",\n
+        \ \"location\": \"westus2\"\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '873'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Nov 2025 21:48:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=a1358d2f-a71f-4e96-86b8-33821da3bb29,objectId=1a41d7bc-dc4d-4125-a13e-7c3c9dd0e9e5/westus2/468d35eb-184b-45be-9c8a-368acadfaac4
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: A8F31806DDC44A5E8B72540FBA342DB5 Ref B: CO6AA3150219051 Ref C: 2025-11-12T21:48:54Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection approve
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --resource-name -n --type
+      User-Agent:
+      - python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42) AZURECLI/2.80.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections/maps-privatelink-endpoint000005.234b595c-88f1-4d94-a3cb-547bce7555b9?api-version=2023-12-01-preview
+  response:
+    body:
+      string: "{\n  \"properties\": {\n    \"privateEndpoint\": {\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/privateEndpoints/maps-privatelink-endpoint000005\"\n
+        \   },\n    \"groupIds\": [\n      \"mapsAccount\"\n    ],\n    \"privateLinkServiceConnectionState\":
+        {\n      \"status\": \"Pending\"\n    },\n    \"provisioningState\": \"Approving\"\n
+        \ },\n  \"type\": \"Microsoft.Maps/accounts/privateEndpointConnections\",\n
+        \ \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections/maps-privatelink-endpoint000005.234b595c-88f1-4d94-a3cb-547bce7555b9\",\n
+        \ \"name\": \"maps-privatelink-endpoint000005.234b595c-88f1-4d94-a3cb-547bce7555b9\",\n
+        \ \"location\": \"westus2\"\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '873'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Nov 2025 21:49:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=a1358d2f-a71f-4e96-86b8-33821da3bb29,objectId=1a41d7bc-dc4d-4125-a13e-7c3c9dd0e9e5/westus2/b657b3f0-1cc4-4805-80d7-df37f47a8a42
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 43E855C9D02C45488B1B1A5D17ACC11C Ref B: MWH011020808031 Ref C: 2025-11-12T21:49:04Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection approve
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --resource-name -n --type
+      User-Agent:
+      - python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42) AZURECLI/2.80.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections/maps-privatelink-endpoint000005.234b595c-88f1-4d94-a3cb-547bce7555b9?api-version=2023-12-01-preview
+  response:
+    body:
+      string: "{\n  \"properties\": {\n    \"privateEndpoint\": {\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/privateEndpoints/maps-privatelink-endpoint000005\"\n
+        \   },\n    \"groupIds\": [\n      \"mapsAccount\"\n    ],\n    \"privateLinkServiceConnectionState\":
+        {\n      \"status\": \"Pending\"\n    },\n    \"provisioningState\": \"Approving\"\n
+        \ },\n  \"type\": \"Microsoft.Maps/accounts/privateEndpointConnections\",\n
+        \ \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections/maps-privatelink-endpoint000005.234b595c-88f1-4d94-a3cb-547bce7555b9\",\n
+        \ \"name\": \"maps-privatelink-endpoint000005.234b595c-88f1-4d94-a3cb-547bce7555b9\",\n
+        \ \"location\": \"westus2\"\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '873'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Nov 2025 21:49:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=a1358d2f-a71f-4e96-86b8-33821da3bb29,objectId=1a41d7bc-dc4d-4125-a13e-7c3c9dd0e9e5/westus2/e930600c-4f77-4d62-8ce4-b59bcd68f8d5
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 5C3C0A8D191C46129A9DC9E3ABEFAB70 Ref B: CO6AA3150220053 Ref C: 2025-11-12T21:49:15Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection approve
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --resource-name -n --type
+      User-Agent:
+      - python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42) AZURECLI/2.80.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections/maps-privatelink-endpoint000005.234b595c-88f1-4d94-a3cb-547bce7555b9?api-version=2023-12-01-preview
+  response:
+    body:
+      string: "{\n  \"properties\": {\n    \"privateEndpoint\": {\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/privateEndpoints/maps-privatelink-endpoint000005\"\n
+        \   },\n    \"groupIds\": [\n      \"mapsAccount\"\n    ],\n    \"requestMessage\":
+        \"\",\n    \"privateLinkServiceConnectionState\": {\n      \"status\": \"Approved\"\n
+        \   },\n    \"provisioningState\": \"Succeeded\"\n  },\n  \"type\": \"Microsoft.Maps/accounts/privateEndpointConnections\",\n
+        \ \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections/maps-privatelink-endpoint000005.234b595c-88f1-4d94-a3cb-547bce7555b9\",\n
+        \ \"name\": \"maps-privatelink-endpoint000005.234b595c-88f1-4d94-a3cb-547bce7555b9\",\n
+        \ \"location\": \"westus2\"\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '900'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Nov 2025 21:49:25 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=a1358d2f-a71f-4e96-86b8-33821da3bb29,objectId=1a41d7bc-dc4d-4125-a13e-7c3c9dd0e9e5/westus2/a0ae3b3e-ca54-4b5e-9ea8-24f9db58593a
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 6CDE24A78F0E46FE9F1A69B9EF42D585 Ref B: MWH011020809023 Ref C: 2025-11-12T21:49:25Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --resource-name -n --type
+      User-Agent:
+      - python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42) AZURECLI/2.80.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections/maps-privatelink-endpoint000005.234b595c-88f1-4d94-a3cb-547bce7555b9?api-version=2023-12-01-preview
+  response:
+    body:
+      string: "{\n  \"properties\": {\n    \"privateEndpoint\": {\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/privateEndpoints/maps-privatelink-endpoint000005\"\n
+        \   },\n    \"groupIds\": [\n      \"mapsAccount\"\n    ],\n    \"requestMessage\":
+        \"\",\n    \"privateLinkServiceConnectionState\": {\n      \"status\": \"Approved\"\n
+        \   },\n    \"provisioningState\": \"Succeeded\"\n  },\n  \"type\": \"Microsoft.Maps/accounts/privateEndpointConnections\",\n
+        \ \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections/maps-privatelink-endpoint000005.234b595c-88f1-4d94-a3cb-547bce7555b9\",\n
+        \ \"name\": \"maps-privatelink-endpoint000005.234b595c-88f1-4d94-a3cb-547bce7555b9\",\n
+        \ \"location\": \"westus2\"\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '900'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Nov 2025 21:49:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=a1358d2f-a71f-4e96-86b8-33821da3bb29,objectId=1a41d7bc-dc4d-4125-a13e-7c3c9dd0e9e5/westus2/ccc0a069-9c09-4f07-8fe8-ae8bc8dba5fe
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 769E15C8EFA348F9843A37F5851B30BD Ref B: MWH011020808052 Ref C: 2025-11-12T21:49:26Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet --connection-name --private-connection-resource-id
+        --group-id --manual-request
+      User-Agent:
+      - AZURECLI/2.80.0 azsdk-python-core/1.35.0 Python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/test_maps_private_endpoint_connection_000001?api-version=2024-11-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001","name":"test_maps_private_endpoint_connection_000001","type":"Microsoft.Resources/resourceGroups","location":"westus2","tags":{"product":"azurecli","cause":"automation","test":"test_private_endpoint_connection_maps","date":"2025-11-12T21:45:24Z","module":"network"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '433'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Nov 2025 21:49:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 228E27363CB44BA3853620CA931B5DBD Ref B: MWH011020808023 Ref C: 2025-11-12T21:49:27Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus2", "properties": {"manualPrivateLinkServiceConnections":
+      [{"name": "maps-privatelink-endpointconn2000008", "properties": {"groupIds":
+      ["mapsAccount"], "privateLinkServiceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002"}}],
+      "subnet": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/virtualNetworks/maps-privatelink-vnet000003/subnets/maps-privatelink-subnet000004"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '622'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --vnet-name --subnet --connection-name --private-connection-resource-id
+        --group-id --manual-request
+      User-Agent:
+      - AZURECLI/2.80.0 azsdk-python-core/1.35.0 Python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/privateEndpoints/maps-privatelink-endpoint2000007?api-version=2022-01-01
+  response:
+    body:
+      string: '{"name":"maps-privatelink-endpoint2000007","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/privateEndpoints/maps-privatelink-endpoint2000007","etag":"W/\"93215127-e16d-4c46-9266-9def0c0f2b92\"","type":"Microsoft.Network/privateEndpoints","location":"westus2","properties":{"provisioningState":"Updating","resourceGuid":"ce042580-b8f6-4aa5-bdce-ff9e1d24cdde","privateLinkServiceConnections":[],"manualPrivateLinkServiceConnections":[{"name":"maps-privatelink-endpointconn2000008","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/privateEndpoints/maps-privatelink-endpoint2000007/manualPrivateLinkServiceConnections/maps-privatelink-endpointconn2000008","etag":"W/\"93215127-e16d-4c46-9266-9def0c0f2b92\"","properties":{"provisioningState":"Succeeded","privateLinkServiceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002","groupIds":["mapsAccount"],"privateLinkServiceConnectionState":{"status":"Pending","description":"Awaiting
+        Approval","actionsRequired":"None"}},"type":"Microsoft.Network/privateEndpoints/manualPrivateLinkServiceConnections"}],"customNetworkInterfaceName":"","subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/virtualNetworks/maps-privatelink-vnet000003/subnets/maps-privatelink-subnet000004"},"ipConfigurations":[],"networkInterfaces":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/networkInterfaces/maps-privatelink-endpoint2000007.nic.91eecd28-9dc4-4dc5-9759-179296f7e57f"}],"customDnsConfigs":[]}}'
+    headers:
+      azure-asyncnotification:
+      - Enabled
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/56ae0dfb-501b-4af4-aa96-2ba9994d777e?api-version=2022-01-01&t=638985809748736784&c=MIIHhzCCBm-gAwIBAgITfAldUuOkqyWaFWVmdAAACV1S4zANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUxMDIxMDgxMjA1WhcNMjYwNDE5MDgxMjA1WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK6VhHo7SMnPI07xSUC0EKrS_gaAU3t2sorvXTakEJppgrr-M5q-yAFDicwNGCe2zSU9ZvGBPI46D9PesTntz4RhQO5-Dkx5G8vC9lZ0WV6mem5Hsnf78kDXgYxzLyAaMKv9WjuZNcTaFQKdrPAx-ZS-2EebUB404VhX1yJ3S4C3QHTpXASyoAbFfGV8tHPGM7q2s_Qr9qBJ5RUnI0t_oD0IJ_dyn_wQvIsgBjpGMentNk7AKNnJ7dWOCU76BFL9ZQAP9lNuU68JHjdsD1lABOX7Jtcv8FrW2zWgZn6TOHf9rY990h8zyuY_EBAr0xrbFD0i_O184Iy9gHWqScS_2CkCAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBTUpdRlqz5GkJ77fs3HRMz2Z_W49DAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAGQmJdPitlGjIwFSf4WsFmLr4W3CmkUpm4HxfZATnxnP9vV2uH5f01rfg_lA-Q0s4GMqkftMAVNRm0Ta6w_NRSLRZO2GWa65KrQ8ITCuGR12jMTYPqYgqEIaBQAqqxvtTisw6-_rDdMBbWwvTo6h0yR_Rw0GGgX1C4WUYhFJq-o90nFF2qZEFQJht7ni8RYQonaxB281z64rp0rlXCz8r3rJXIR2RLC48IA1los4mZYaxAv_Y_LPYwZUQ_V0_YrSGK5KMJp6exPToKF_DePs6j27AncGilbWo9t96F-yKBPD57WulOVgbYwNKAZ_Klbw0ur-YLdTdCaIbUiNhmGTDvY&s=MwuVokkGi9XtVvoZS5wuNpVd-OwkOMkTMQR_rbzM5eC-SyYnkEg76KTJEE9Kje3HQRILO0fmS1382QB5AA2JFgHjl9uGoSbB4V8YcBgYUZ4lyJ3fWkwoMU8jQSUf6R_-uECezkM0nnKp4RI_FkskAQYSkkpiAL6oHc5OlN9066utZ0noHzxU3WAFB3CtFM3f3LmWqLiKaWiyf5xbvGUhfuoaKwAzfEq9td1no2zGljD_d7sm8Vc06mL876KtX1XGzqo-bzMcSTmIZrlq-DkIQIB486Vpv1R8e9aiihiElG6uM82qGJ7Px7MT3TH0KlaEqt-zSBw_tpgA_bVbyLUvzg&h=kUh4VfrpGhWDZQKFanmC3J3ZYDvzqDeTXSGKU__eQgg
+      cache-control:
+      - no-cache
+      content-length:
+      - '1953'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Nov 2025 21:49:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - ceea7d23-78c6-4bf4-bf38-430f8af0d72b
+      x-ms-operation-identifier:
+      - tenantId=a1358d2f-a71f-4e96-86b8-33821da3bb29,objectId=1a41d7bc-dc4d-4125-a13e-7c3c9dd0e9e5/westus2/9739edbe-6fa0-4d7c-b784-2f226c531826
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: 0CA2B8CB4E2B48BDA8073203D23F23EC Ref B: MWH011020809029 Ref C: 2025-11-12T21:49:33Z'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet --connection-name --private-connection-resource-id
+        --group-id --manual-request
+      User-Agent:
+      - AZURECLI/2.80.0 azsdk-python-core/1.35.0 Python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/56ae0dfb-501b-4af4-aa96-2ba9994d777e?api-version=2022-01-01&t=638985809748736784&c=MIIHhzCCBm-gAwIBAgITfAldUuOkqyWaFWVmdAAACV1S4zANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUxMDIxMDgxMjA1WhcNMjYwNDE5MDgxMjA1WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK6VhHo7SMnPI07xSUC0EKrS_gaAU3t2sorvXTakEJppgrr-M5q-yAFDicwNGCe2zSU9ZvGBPI46D9PesTntz4RhQO5-Dkx5G8vC9lZ0WV6mem5Hsnf78kDXgYxzLyAaMKv9WjuZNcTaFQKdrPAx-ZS-2EebUB404VhX1yJ3S4C3QHTpXASyoAbFfGV8tHPGM7q2s_Qr9qBJ5RUnI0t_oD0IJ_dyn_wQvIsgBjpGMentNk7AKNnJ7dWOCU76BFL9ZQAP9lNuU68JHjdsD1lABOX7Jtcv8FrW2zWgZn6TOHf9rY990h8zyuY_EBAr0xrbFD0i_O184Iy9gHWqScS_2CkCAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBTUpdRlqz5GkJ77fs3HRMz2Z_W49DAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAGQmJdPitlGjIwFSf4WsFmLr4W3CmkUpm4HxfZATnxnP9vV2uH5f01rfg_lA-Q0s4GMqkftMAVNRm0Ta6w_NRSLRZO2GWa65KrQ8ITCuGR12jMTYPqYgqEIaBQAqqxvtTisw6-_rDdMBbWwvTo6h0yR_Rw0GGgX1C4WUYhFJq-o90nFF2qZEFQJht7ni8RYQonaxB281z64rp0rlXCz8r3rJXIR2RLC48IA1los4mZYaxAv_Y_LPYwZUQ_V0_YrSGK5KMJp6exPToKF_DePs6j27AncGilbWo9t96F-yKBPD57WulOVgbYwNKAZ_Klbw0ur-YLdTdCaIbUiNhmGTDvY&s=MwuVokkGi9XtVvoZS5wuNpVd-OwkOMkTMQR_rbzM5eC-SyYnkEg76KTJEE9Kje3HQRILO0fmS1382QB5AA2JFgHjl9uGoSbB4V8YcBgYUZ4lyJ3fWkwoMU8jQSUf6R_-uECezkM0nnKp4RI_FkskAQYSkkpiAL6oHc5OlN9066utZ0noHzxU3WAFB3CtFM3f3LmWqLiKaWiyf5xbvGUhfuoaKwAzfEq9td1no2zGljD_d7sm8Vc06mL876KtX1XGzqo-bzMcSTmIZrlq-DkIQIB486Vpv1R8e9aiihiElG6uM82qGJ7Px7MT3TH0KlaEqt-zSBw_tpgA_bVbyLUvzg&h=kUh4VfrpGhWDZQKFanmC3J3ZYDvzqDeTXSGKU__eQgg
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Nov 2025 21:49:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 1c5349d8-e9ff-46fa-b348-56ffaa90c3ed
+      x-ms-operation-identifier:
+      - tenantId=a1358d2f-a71f-4e96-86b8-33821da3bb29,objectId=1a41d7bc-dc4d-4125-a13e-7c3c9dd0e9e5/westus2/96f543f1-2f8d-4f74-a4b7-def842cf7a77
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 145DD056292F4C589B703890BA4BD975 Ref B: MWH011020806029 Ref C: 2025-11-12T21:49:35Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet --connection-name --private-connection-resource-id
+        --group-id --manual-request
+      User-Agent:
+      - AZURECLI/2.80.0 azsdk-python-core/1.35.0 Python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/56ae0dfb-501b-4af4-aa96-2ba9994d777e?api-version=2022-01-01&t=638985809748736784&c=MIIHhzCCBm-gAwIBAgITfAldUuOkqyWaFWVmdAAACV1S4zANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUxMDIxMDgxMjA1WhcNMjYwNDE5MDgxMjA1WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK6VhHo7SMnPI07xSUC0EKrS_gaAU3t2sorvXTakEJppgrr-M5q-yAFDicwNGCe2zSU9ZvGBPI46D9PesTntz4RhQO5-Dkx5G8vC9lZ0WV6mem5Hsnf78kDXgYxzLyAaMKv9WjuZNcTaFQKdrPAx-ZS-2EebUB404VhX1yJ3S4C3QHTpXASyoAbFfGV8tHPGM7q2s_Qr9qBJ5RUnI0t_oD0IJ_dyn_wQvIsgBjpGMentNk7AKNnJ7dWOCU76BFL9ZQAP9lNuU68JHjdsD1lABOX7Jtcv8FrW2zWgZn6TOHf9rY990h8zyuY_EBAr0xrbFD0i_O184Iy9gHWqScS_2CkCAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBTUpdRlqz5GkJ77fs3HRMz2Z_W49DAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAGQmJdPitlGjIwFSf4WsFmLr4W3CmkUpm4HxfZATnxnP9vV2uH5f01rfg_lA-Q0s4GMqkftMAVNRm0Ta6w_NRSLRZO2GWa65KrQ8ITCuGR12jMTYPqYgqEIaBQAqqxvtTisw6-_rDdMBbWwvTo6h0yR_Rw0GGgX1C4WUYhFJq-o90nFF2qZEFQJht7ni8RYQonaxB281z64rp0rlXCz8r3rJXIR2RLC48IA1los4mZYaxAv_Y_LPYwZUQ_V0_YrSGK5KMJp6exPToKF_DePs6j27AncGilbWo9t96F-yKBPD57WulOVgbYwNKAZ_Klbw0ur-YLdTdCaIbUiNhmGTDvY&s=MwuVokkGi9XtVvoZS5wuNpVd-OwkOMkTMQR_rbzM5eC-SyYnkEg76KTJEE9Kje3HQRILO0fmS1382QB5AA2JFgHjl9uGoSbB4V8YcBgYUZ4lyJ3fWkwoMU8jQSUf6R_-uECezkM0nnKp4RI_FkskAQYSkkpiAL6oHc5OlN9066utZ0noHzxU3WAFB3CtFM3f3LmWqLiKaWiyf5xbvGUhfuoaKwAzfEq9td1no2zGljD_d7sm8Vc06mL876KtX1XGzqo-bzMcSTmIZrlq-DkIQIB486Vpv1R8e9aiihiElG6uM82qGJ7Px7MT3TH0KlaEqt-zSBw_tpgA_bVbyLUvzg&h=kUh4VfrpGhWDZQKFanmC3J3ZYDvzqDeTXSGKU__eQgg
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Nov 2025 21:49:45 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 3ec0b7e5-769f-4e69-bfe2-aaae39acf6de
+      x-ms-operation-identifier:
+      - tenantId=a1358d2f-a71f-4e96-86b8-33821da3bb29,objectId=1a41d7bc-dc4d-4125-a13e-7c3c9dd0e9e5/eastus2/758f0781-a6fa-482f-a2a7-80027e705b05
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: BF2E75E9FEA14DDD83326C7E9CF51987 Ref B: MWH011020806029 Ref C: 2025-11-12T21:49:45Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet --connection-name --private-connection-resource-id
+        --group-id --manual-request
+      User-Agent:
+      - AZURECLI/2.80.0 azsdk-python-core/1.35.0 Python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus2/operations/56ae0dfb-501b-4af4-aa96-2ba9994d777e?api-version=2022-01-01&t=638985809748736784&c=MIIHhzCCBm-gAwIBAgITfAldUuOkqyWaFWVmdAAACV1S4zANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUxMDIxMDgxMjA1WhcNMjYwNDE5MDgxMjA1WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAK6VhHo7SMnPI07xSUC0EKrS_gaAU3t2sorvXTakEJppgrr-M5q-yAFDicwNGCe2zSU9ZvGBPI46D9PesTntz4RhQO5-Dkx5G8vC9lZ0WV6mem5Hsnf78kDXgYxzLyAaMKv9WjuZNcTaFQKdrPAx-ZS-2EebUB404VhX1yJ3S4C3QHTpXASyoAbFfGV8tHPGM7q2s_Qr9qBJ5RUnI0t_oD0IJ_dyn_wQvIsgBjpGMentNk7AKNnJ7dWOCU76BFL9ZQAP9lNuU68JHjdsD1lABOX7Jtcv8FrW2zWgZn6TOHf9rY990h8zyuY_EBAr0xrbFD0i_O184Iy9gHWqScS_2CkCAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBTUpdRlqz5GkJ77fs3HRMz2Z_W49DAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAGQmJdPitlGjIwFSf4WsFmLr4W3CmkUpm4HxfZATnxnP9vV2uH5f01rfg_lA-Q0s4GMqkftMAVNRm0Ta6w_NRSLRZO2GWa65KrQ8ITCuGR12jMTYPqYgqEIaBQAqqxvtTisw6-_rDdMBbWwvTo6h0yR_Rw0GGgX1C4WUYhFJq-o90nFF2qZEFQJht7ni8RYQonaxB281z64rp0rlXCz8r3rJXIR2RLC48IA1los4mZYaxAv_Y_LPYwZUQ_V0_YrSGK5KMJp6exPToKF_DePs6j27AncGilbWo9t96F-yKBPD57WulOVgbYwNKAZ_Klbw0ur-YLdTdCaIbUiNhmGTDvY&s=MwuVokkGi9XtVvoZS5wuNpVd-OwkOMkTMQR_rbzM5eC-SyYnkEg76KTJEE9Kje3HQRILO0fmS1382QB5AA2JFgHjl9uGoSbB4V8YcBgYUZ4lyJ3fWkwoMU8jQSUf6R_-uECezkM0nnKp4RI_FkskAQYSkkpiAL6oHc5OlN9066utZ0noHzxU3WAFB3CtFM3f3LmWqLiKaWiyf5xbvGUhfuoaKwAzfEq9td1no2zGljD_d7sm8Vc06mL876KtX1XGzqo-bzMcSTmIZrlq-DkIQIB486Vpv1R8e9aiihiElG6uM82qGJ7Px7MT3TH0KlaEqt-zSBw_tpgA_bVbyLUvzg&h=kUh4VfrpGhWDZQKFanmC3J3ZYDvzqDeTXSGKU__eQgg
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Nov 2025 21:50:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 395d4532-ceed-448a-bd10-4928140fce97
+      x-ms-operation-identifier:
+      - tenantId=a1358d2f-a71f-4e96-86b8-33821da3bb29,objectId=1a41d7bc-dc4d-4125-a13e-7c3c9dd0e9e5/westus2/85c07b5e-20b3-490f-bc36-b2db845bfb1a
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 857A8603B4CF4134AB607811BC8B3E3E Ref B: MWH011020806040 Ref C: 2025-11-12T21:50:06Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --vnet-name --subnet --connection-name --private-connection-resource-id
+        --group-id --manual-request
+      User-Agent:
+      - AZURECLI/2.80.0 azsdk-python-core/1.35.0 Python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/privateEndpoints/maps-privatelink-endpoint2000007?api-version=2022-01-01
+  response:
+    body:
+      string: '{"name":"maps-privatelink-endpoint2000007","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/privateEndpoints/maps-privatelink-endpoint2000007","etag":"W/\"55feb483-0743-4bd6-a4fd-beed18273941\"","type":"Microsoft.Network/privateEndpoints","location":"westus2","properties":{"provisioningState":"Succeeded","resourceGuid":"ce042580-b8f6-4aa5-bdce-ff9e1d24cdde","privateLinkServiceConnections":[],"manualPrivateLinkServiceConnections":[{"name":"maps-privatelink-endpointconn2000008","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/privateEndpoints/maps-privatelink-endpoint2000007/manualPrivateLinkServiceConnections/maps-privatelink-endpointconn2000008","etag":"W/\"55feb483-0743-4bd6-a4fd-beed18273941\"","properties":{"provisioningState":"Succeeded","privateLinkServiceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002","groupIds":["mapsAccount"],"privateLinkServiceConnectionState":{"status":"Pending","description":"","actionsRequired":""}},"type":"Microsoft.Network/privateEndpoints/manualPrivateLinkServiceConnections"}],"customNetworkInterfaceName":"","subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/virtualNetworks/maps-privatelink-vnet000003/subnets/maps-privatelink-subnet000004"},"ipConfigurations":[],"networkInterfaces":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/networkInterfaces/maps-privatelink-endpoint2000007.nic.91eecd28-9dc4-4dc5-9759-179296f7e57f"}],"customDnsConfigs":[{"fqdn":"3bc5698f-6742-4192-9779-b49a7bc8ac5c.westus2.account.maps.azure.com","ipAddresses":["10.0.0.5"]}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2038'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Nov 2025 21:50:06 GMT
+      etag:
+      - W/"55feb483-0743-4bd6-a4fd-beed18273941"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-arm-service-request-id:
+      - 52c9f279-b885-4793-81bc-5860ad8f5a60
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 680B62FB028E48B8AD0CBCB73EA66262 Ref B: MWH011020807031 Ref C: 2025-11-12T21:50:06Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --type
+      User-Agent:
+      - python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42) AZURECLI/2.80.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections?api-version=2023-12-01-preview
+  response:
+    body:
+      string: "{\n  \"value\": [\n    {\n      \"properties\": {\n        \"privateEndpoint\":
+        {\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/privateEndpoints/maps-privatelink-endpoint000005\"\n
+        \       },\n        \"groupIds\": [\n          \"mapsAccount\"\n        ],\n
+        \       \"requestMessage\": \"\",\n        \"privateLinkServiceConnectionState\":
+        {\n          \"status\": \"Approved\"\n        },\n        \"provisioningState\":
+        \"Succeeded\"\n      },\n      \"type\": \"Microsoft.Maps/accounts/privateEndpointConnections\",\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections/maps-privatelink-endpoint000005.234b595c-88f1-4d94-a3cb-547bce7555b9\",\n
+        \     \"name\": \"maps-privatelink-endpoint000005.234b595c-88f1-4d94-a3cb-547bce7555b9\"\n
+        \   },\n    {\n      \"properties\": {\n        \"privateEndpoint\": {\n          \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/privateEndpoints/maps-privatelink-endpoint2000007\"\n
+        \       },\n        \"groupIds\": [\n          \"mapsAccount\"\n        ],\n
+        \       \"privateLinkServiceConnectionState\": {\n          \"status\": \"Pending\"\n
+        \       },\n        \"provisioningState\": \"Succeeded\"\n      },\n      \"type\":
+        \"Microsoft.Maps/accounts/privateEndpointConnections\",\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections/maps-privatelink-endpoint2000007.ce042580-b8f6-4aa5-bdce-ff9e1d24cdde\",\n
+        \     \"name\": \"maps-privatelink-endpoint2000007.ce042580-b8f6-4aa5-bdce-ff9e1d24cdde\"\n
+        \   }\n  ]\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1889'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Nov 2025 21:50:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=a1358d2f-a71f-4e96-86b8-33821da3bb29,objectId=1a41d7bc-dc4d-4125-a13e-7c3c9dd0e9e5/westus2/5708aeb6-78d9-4e49-a97e-c2239e9b0b2f
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: A5141A2BAD1F4B2F869B9A5E3CBCFA18 Ref B: CO6AA3150219017 Ref C: 2025-11-12T21:50:07Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --resource-name -n --type
+      User-Agent:
+      - python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42) AZURECLI/2.80.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections/maps-privatelink-endpoint2000007.ce042580-b8f6-4aa5-bdce-ff9e1d24cdde?api-version=2023-12-01-preview
+  response:
+    body:
+      string: "{\n  \"properties\": {\n    \"privateEndpoint\": {\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/privateEndpoints/maps-privatelink-endpoint2000007\"\n
+        \   },\n    \"groupIds\": [\n      \"mapsAccount\"\n    ],\n    \"privateLinkServiceConnectionState\":
+        {\n      \"status\": \"Pending\"\n    },\n    \"provisioningState\": \"Succeeded\"\n
+        \ },\n  \"type\": \"Microsoft.Maps/accounts/privateEndpointConnections\",\n
+        \ \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections/maps-privatelink-endpoint2000007.ce042580-b8f6-4aa5-bdce-ff9e1d24cdde\",\n
+        \ \"name\": \"maps-privatelink-endpoint2000007.ce042580-b8f6-4aa5-bdce-ff9e1d24cdde\",\n
+        \ \"location\": \"westus2\"\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '876'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Nov 2025 21:50:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=a1358d2f-a71f-4e96-86b8-33821da3bb29,objectId=1a41d7bc-dc4d-4125-a13e-7c3c9dd0e9e5/westus2/26338902-7d1f-4c07-a134-6c455e0f4afe
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 28F2E6A26A314F91818D937F78FE53AE Ref B: CO6AA3150217049 Ref C: 2025-11-12T21:50:07Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"privateEndpoint": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/privateEndpoints/maps-privatelink-endpoint2000007"},
+      "groupIds": ["mapsAccount"], "privateLinkServiceConnectionState": {"status":
+      "Rejected", "description": null}, "provisioningState": "Succeeded"}, "type":
+      "Microsoft.Maps/accounts/privateEndpointConnections", "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections/maps-privatelink-endpoint2000007.ce042580-b8f6-4aa5-bdce-ff9e1d24cdde",
+      "name": "maps-privatelink-endpoint2000007.ce042580-b8f6-4aa5-bdce-ff9e1d24cdde",
+      "location": "westus2"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '830'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --resource-name -n --type
+      User-Agent:
+      - python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42) AZURECLI/2.80.0
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections/maps-privatelink-endpoint2000007.ce042580-b8f6-4aa5-bdce-ff9e1d24cdde?api-version=2023-12-01-preview
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com//subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maps/operationStatuses/659f5ba0-320c-4651-ba54-40c93b862ba2?api-version=2023-12-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Wed, 12 Nov 2025 21:50:09 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com//subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maps/operationResults/659f5ba0-320c-4651-ba54-40c93b862ba2?api-version=2023-12-01-preview
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=a1358d2f-a71f-4e96-86b8-33821da3bb29,objectId=1a41d7bc-dc4d-4125-a13e-7c3c9dd0e9e5/westus2/b4a08749-b51a-435a-9a55-85ccc7b177bd
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: 8BC66AC3AF754F6CA5950E96156A78B4 Ref B: CO6AA3150218047 Ref C: 2025-11-12T21:50:08Z'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --resource-name -n --type
+      User-Agent:
+      - python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42) AZURECLI/2.80.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections/maps-privatelink-endpoint2000007.ce042580-b8f6-4aa5-bdce-ff9e1d24cdde?api-version=2023-12-01-preview
+  response:
+    body:
+      string: "{\n  \"properties\": {\n    \"privateEndpoint\": {\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/privateEndpoints/maps-privatelink-endpoint2000007\"\n
+        \   },\n    \"groupIds\": [\n      \"mapsAccount\"\n    ],\n    \"privateLinkServiceConnectionState\":
+        {\n      \"status\": \"Pending\"\n    },\n    \"provisioningState\": \"Rejecting\"\n
+        \ },\n  \"type\": \"Microsoft.Maps/accounts/privateEndpointConnections\",\n
+        \ \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections/maps-privatelink-endpoint2000007.ce042580-b8f6-4aa5-bdce-ff9e1d24cdde\",\n
+        \ \"name\": \"maps-privatelink-endpoint2000007.ce042580-b8f6-4aa5-bdce-ff9e1d24cdde\",\n
+        \ \"location\": \"westus2\"\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '876'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Nov 2025 21:50:19 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=a1358d2f-a71f-4e96-86b8-33821da3bb29,objectId=1a41d7bc-dc4d-4125-a13e-7c3c9dd0e9e5/westus2/8809874a-dd98-4499-8bfc-47ae082a2449
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 8F4828481C3A4D8AAB8F6BA8899CF998 Ref B: CO6AA3150218009 Ref C: 2025-11-12T21:50:19Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --resource-name -n --type
+      User-Agent:
+      - python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42) AZURECLI/2.80.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections/maps-privatelink-endpoint2000007.ce042580-b8f6-4aa5-bdce-ff9e1d24cdde?api-version=2023-12-01-preview
+  response:
+    body:
+      string: "{\n  \"properties\": {\n    \"privateEndpoint\": {\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/privateEndpoints/maps-privatelink-endpoint2000007\"\n
+        \   },\n    \"groupIds\": [\n      \"mapsAccount\"\n    ],\n    \"privateLinkServiceConnectionState\":
+        {\n      \"status\": \"Pending\"\n    },\n    \"provisioningState\": \"Rejecting\"\n
+        \ },\n  \"type\": \"Microsoft.Maps/accounts/privateEndpointConnections\",\n
+        \ \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections/maps-privatelink-endpoint2000007.ce042580-b8f6-4aa5-bdce-ff9e1d24cdde\",\n
+        \ \"name\": \"maps-privatelink-endpoint2000007.ce042580-b8f6-4aa5-bdce-ff9e1d24cdde\",\n
+        \ \"location\": \"westus2\"\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '876'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Nov 2025 21:50:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=a1358d2f-a71f-4e96-86b8-33821da3bb29,objectId=1a41d7bc-dc4d-4125-a13e-7c3c9dd0e9e5/westus2/e59845ab-9919-4ae4-8765-cfed5e86bd25
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: DBF6ACB3131548F79C584DFAB6D40D44 Ref B: CO6AA3150217035 Ref C: 2025-11-12T21:50:30Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --resource-name -n --type
+      User-Agent:
+      - python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42) AZURECLI/2.80.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections/maps-privatelink-endpoint2000007.ce042580-b8f6-4aa5-bdce-ff9e1d24cdde?api-version=2023-12-01-preview
+  response:
+    body:
+      string: "{\n  \"properties\": {\n    \"privateEndpoint\": {\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/privateEndpoints/maps-privatelink-endpoint2000007\"\n
+        \   },\n    \"groupIds\": [\n      \"mapsAccount\"\n    ],\n    \"privateLinkServiceConnectionState\":
+        {\n      \"status\": \"Pending\"\n    },\n    \"provisioningState\": \"Rejecting\"\n
+        \ },\n  \"type\": \"Microsoft.Maps/accounts/privateEndpointConnections\",\n
+        \ \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections/maps-privatelink-endpoint2000007.ce042580-b8f6-4aa5-bdce-ff9e1d24cdde\",\n
+        \ \"name\": \"maps-privatelink-endpoint2000007.ce042580-b8f6-4aa5-bdce-ff9e1d24cdde\",\n
+        \ \"location\": \"westus2\"\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '876'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Nov 2025 21:50:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=a1358d2f-a71f-4e96-86b8-33821da3bb29,objectId=1a41d7bc-dc4d-4125-a13e-7c3c9dd0e9e5/westus2/c3891993-9e60-4013-9850-8f9f7be913e3
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 981E41302B3040D8A570497DFC1EFB77 Ref B: CO6AA3150219009 Ref C: 2025-11-12T21:50:40Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection reject
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --resource-name -n --type
+      User-Agent:
+      - python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42) AZURECLI/2.80.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections/maps-privatelink-endpoint2000007.ce042580-b8f6-4aa5-bdce-ff9e1d24cdde?api-version=2023-12-01-preview
+  response:
+    body:
+      string: "{\n  \"properties\": {\n    \"privateEndpoint\": {\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/privateEndpoints/maps-privatelink-endpoint2000007\"\n
+        \   },\n    \"groupIds\": [\n      \"mapsAccount\"\n    ],\n    \"requestMessage\":
+        \"\",\n    \"privateLinkServiceConnectionState\": {\n      \"status\": \"Rejected\"\n
+        \   },\n    \"provisioningState\": \"Succeeded\"\n  },\n  \"type\": \"Microsoft.Maps/accounts/privateEndpointConnections\",\n
+        \ \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections/maps-privatelink-endpoint2000007.ce042580-b8f6-4aa5-bdce-ff9e1d24cdde\",\n
+        \ \"name\": \"maps-privatelink-endpoint2000007.ce042580-b8f6-4aa5-bdce-ff9e1d24cdde\",\n
+        \ \"location\": \"westus2\"\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '903'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Nov 2025 21:50:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=a1358d2f-a71f-4e96-86b8-33821da3bb29,objectId=1a41d7bc-dc4d-4125-a13e-7c3c9dd0e9e5/westus2/833f2b7e-3e8b-4263-a165-63075e7bb2f8
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: D78D68AF03794107B492D9124E58CCCC Ref B: CO6AA3150219039 Ref C: 2025-11-12T21:50:51Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --resource-name -n --type
+      User-Agent:
+      - python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42) AZURECLI/2.80.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections/maps-privatelink-endpoint2000007.ce042580-b8f6-4aa5-bdce-ff9e1d24cdde?api-version=2023-12-01-preview
+  response:
+    body:
+      string: "{\n  \"properties\": {\n    \"privateEndpoint\": {\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/privateEndpoints/maps-privatelink-endpoint2000007\"\n
+        \   },\n    \"groupIds\": [\n      \"mapsAccount\"\n    ],\n    \"requestMessage\":
+        \"\",\n    \"privateLinkServiceConnectionState\": {\n      \"status\": \"Rejected\"\n
+        \   },\n    \"provisioningState\": \"Succeeded\"\n  },\n  \"type\": \"Microsoft.Maps/accounts/privateEndpointConnections\",\n
+        \ \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections/maps-privatelink-endpoint2000007.ce042580-b8f6-4aa5-bdce-ff9e1d24cdde\",\n
+        \ \"name\": \"maps-privatelink-endpoint2000007.ce042580-b8f6-4aa5-bdce-ff9e1d24cdde\",\n
+        \ \"location\": \"westus2\"\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '903'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Nov 2025 21:50:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=a1358d2f-a71f-4e96-86b8-33821da3bb29,objectId=1a41d7bc-dc4d-4125-a13e-7c3c9dd0e9e5/westus2/ba28abed-e471-466f-a1f0-67d82f5cbdae
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 720E03142BF942C7BAD765E383FC8943 Ref B: CO6AA3150217017 Ref C: 2025-11-12T21:50:51Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g --resource-name -n --type -y
+      User-Agent:
+      - python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42) AZURECLI/2.80.0
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections/maps-privatelink-endpoint2000007.ce042580-b8f6-4aa5-bdce-ff9e1d24cdde?api-version=2023-12-01-preview
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com//subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maps/operationStatuses/2a2ab703-5af5-44b7-bf42-5cc210d6c886?api-version=2023-12-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Wed, 12 Nov 2025 21:50:53 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com//subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maps/operationResults/2a2ab703-5af5-44b7-bf42-5cc210d6c886?api-version=2023-12-01-preview
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=a1358d2f-a71f-4e96-86b8-33821da3bb29,objectId=1a41d7bc-dc4d-4125-a13e-7c3c9dd0e9e5/westus2/f5935269-50a8-4da9-8555-43b84dbaf1e0
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '199'
+      x-ms-ratelimit-remaining-subscription-global-deletes:
+      - '2999'
+      x-msedge-ref:
+      - 'Ref A: 145E9ACF324344EAB199D065E59EB951 Ref B: CO6AA3150219019 Ref C: 2025-11-12T21:50:52Z'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --type
+      User-Agent:
+      - python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42) AZURECLI/2.80.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections?api-version=2023-12-01-preview
+  response:
+    body:
+      string: "{\n  \"value\": [\n    {\n      \"properties\": {\n        \"privateEndpoint\":
+        {\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/privateEndpoints/maps-privatelink-endpoint000005\"\n
+        \       },\n        \"groupIds\": [\n          \"mapsAccount\"\n        ],\n
+        \       \"requestMessage\": \"\",\n        \"privateLinkServiceConnectionState\":
+        {\n          \"status\": \"Approved\"\n        },\n        \"provisioningState\":
+        \"Succeeded\"\n      },\n      \"type\": \"Microsoft.Maps/accounts/privateEndpointConnections\",\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections/maps-privatelink-endpoint000005.234b595c-88f1-4d94-a3cb-547bce7555b9\",\n
+        \     \"name\": \"maps-privatelink-endpoint000005.234b595c-88f1-4d94-a3cb-547bce7555b9\"\n
+        \   },\n    {\n      \"properties\": {\n        \"privateEndpoint\": {\n          \"id\":
+        \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/privateEndpoints/maps-privatelink-endpoint2000007\"\n
+        \       },\n        \"groupIds\": [\n          \"mapsAccount\"\n        ],\n
+        \       \"requestMessage\": \"\",\n        \"privateLinkServiceConnectionState\":
+        {\n          \"status\": \"Rejected\"\n        },\n        \"provisioningState\":
+        \"Deleting\"\n      },\n      \"type\": \"Microsoft.Maps/accounts/privateEndpointConnections\",\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections/maps-privatelink-endpoint2000007.ce042580-b8f6-4aa5-bdce-ff9e1d24cdde\",\n
+        \     \"name\": \"maps-privatelink-endpoint2000007.ce042580-b8f6-4aa5-bdce-ff9e1d24cdde\"\n
+        \   }\n  ]\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1919'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Nov 2025 21:50:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=a1358d2f-a71f-4e96-86b8-33821da3bb29,objectId=1a41d7bc-dc4d-4125-a13e-7c3c9dd0e9e5/westus2/a8de7bbb-9106-4028-99a8-3659947d2001
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 5C387BE9A2C0462CB586643573844043 Ref B: MWH011020806025 Ref C: 2025-11-12T21:50:53Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --type
+      User-Agent:
+      - python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42) AZURECLI/2.80.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections?api-version=2023-12-01-preview
+  response:
+    body:
+      string: "{\n  \"value\": [\n    {\n      \"properties\": {\n        \"privateEndpoint\":
+        {\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/privateEndpoints/maps-privatelink-endpoint000005\"\n
+        \       },\n        \"groupIds\": [\n          \"mapsAccount\"\n        ],\n
+        \       \"requestMessage\": \"\",\n        \"privateLinkServiceConnectionState\":
+        {\n          \"status\": \"Approved\"\n        },\n        \"provisioningState\":
+        \"Succeeded\"\n      },\n      \"type\": \"Microsoft.Maps/accounts/privateEndpointConnections\",\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections/maps-privatelink-endpoint000005.234b595c-88f1-4d94-a3cb-547bce7555b9\",\n
+        \     \"name\": \"maps-privatelink-endpoint000005.234b595c-88f1-4d94-a3cb-547bce7555b9\"\n
+        \   }\n  ]\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '968'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Nov 2025 21:51:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=a1358d2f-a71f-4e96-86b8-33821da3bb29,objectId=1a41d7bc-dc4d-4125-a13e-7c3c9dd0e9e5/westus2/4ba29b20-c4ce-4b6e-b3d5-ddf8951d1303
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 22F4B5D538644028A77895A419FD0170 Ref B: CO6AA3150218039 Ref C: 2025-11-12T21:51:03Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --resource-name -n --type
+      User-Agent:
+      - python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42) AZURECLI/2.80.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections/maps-privatelink-endpoint000005.234b595c-88f1-4d94-a3cb-547bce7555b9?api-version=2023-12-01-preview
+  response:
+    body:
+      string: "{\n  \"properties\": {\n    \"privateEndpoint\": {\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/privateEndpoints/maps-privatelink-endpoint000005\"\n
+        \   },\n    \"groupIds\": [\n      \"mapsAccount\"\n    ],\n    \"requestMessage\":
+        \"\",\n    \"privateLinkServiceConnectionState\": {\n      \"status\": \"Approved\"\n
+        \   },\n    \"provisioningState\": \"Succeeded\"\n  },\n  \"type\": \"Microsoft.Maps/accounts/privateEndpointConnections\",\n
+        \ \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections/maps-privatelink-endpoint000005.234b595c-88f1-4d94-a3cb-547bce7555b9\",\n
+        \ \"name\": \"maps-privatelink-endpoint000005.234b595c-88f1-4d94-a3cb-547bce7555b9\",\n
+        \ \"location\": \"westus2\"\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '900'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Nov 2025 21:51:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=a1358d2f-a71f-4e96-86b8-33821da3bb29,objectId=1a41d7bc-dc4d-4125-a13e-7c3c9dd0e9e5/westus2/9344749f-8905-464d-9377-a67a51a3c70e
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 4C05E9FD89ED48F98470EF01F932F257 Ref B: CO6AA3150218049 Ref C: 2025-11-12T21:51:04Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g --resource-name -n --type -y
+      User-Agent:
+      - python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42) AZURECLI/2.80.0
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections/maps-privatelink-endpoint000005.234b595c-88f1-4d94-a3cb-547bce7555b9?api-version=2023-12-01-preview
+  response:
+    body:
+      string: ''
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com//subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maps/operationStatuses/53d88f77-8208-495e-bccf-980cc2d2a20a?api-version=2023-12-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Wed, 12 Nov 2025 21:51:05 GMT
+      expires:
+      - '-1'
+      location:
+      - https://management.azure.com//subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Maps/operationResults/53d88f77-8208-495e-bccf-980cc2d2a20a?api-version=2023-12-01-preview
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=a1358d2f-a71f-4e96-86b8-33821da3bb29,objectId=1a41d7bc-dc4d-4125-a13e-7c3c9dd0e9e5/westus2/2bf301eb-3c1e-48e9-8bad-98240239bf56
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '199'
+      x-ms-ratelimit-remaining-subscription-global-deletes:
+      - '2999'
+      x-msedge-ref:
+      - 'Ref A: 319EA395B97E4083B61E429068821F82 Ref B: MWH011020807036 Ref C: 2025-11-12T21:51:05Z'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --type
+      User-Agent:
+      - python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42) AZURECLI/2.80.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections?api-version=2023-12-01-preview
+  response:
+    body:
+      string: "{\n  \"value\": [\n    {\n      \"properties\": {\n        \"privateEndpoint\":
+        {\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Network/privateEndpoints/maps-privatelink-endpoint000005\"\n
+        \       },\n        \"groupIds\": [\n          \"mapsAccount\"\n        ],\n
+        \       \"requestMessage\": \"\",\n        \"privateLinkServiceConnectionState\":
+        {\n          \"status\": \"Approved\"\n        },\n        \"provisioningState\":
+        \"Deleting\"\n      },\n      \"type\": \"Microsoft.Maps/accounts/privateEndpointConnections\",\n
+        \     \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections/maps-privatelink-endpoint000005.234b595c-88f1-4d94-a3cb-547bce7555b9\",\n
+        \     \"name\": \"maps-privatelink-endpoint000005.234b595c-88f1-4d94-a3cb-547bce7555b9\"\n
+        \   }\n  ]\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '967'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Nov 2025 21:51:06 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=a1358d2f-a71f-4e96-86b8-33821da3bb29,objectId=1a41d7bc-dc4d-4125-a13e-7c3c9dd0e9e5/westus2/b452262d-18a4-4b2f-862d-ae415addffc9
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 1099906CE5B243EB8584B29CCDF25038 Ref B: MWH011020806052 Ref C: 2025-11-12T21:51:06Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-endpoint-connection list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --type
+      User-Agent:
+      - python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42) AZURECLI/2.80.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_endpoint_connection_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateEndpointConnections?api-version=2023-12-01-preview
+  response:
+    body:
+      string: '{}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '2'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Nov 2025 21:51:17 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=a1358d2f-a71f-4e96-86b8-33821da3bb29,objectId=1a41d7bc-dc4d-4125-a13e-7c3c9dd0e9e5/westus2/616ff8e2-f3bd-4044-84dc-2cdd179dc24b
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 90418C28F88B4178AD463C134AB23506 Ref B: MWH011020807062 Ref C: 2025-11-12T21:51:17Z'
+    status:
+      code: 200
+      message: OK
+version: 1

@@ -5576,6 +5576,11 @@ examples:
     text: |
         az network vpn-connection create --local-gateway2 MyLocalGateway --location westus2 --name MyConnection --resource-group MyResourceGroup --shared-key Abc123 --vnet-gateway1 MyVnetGateway
     crafted: true
+  - name: Create a VPN connection with Certificate authentication using inline JSON.
+    text: |
+        az network vpn-connection create -g MyResourceGroup -n MyConnection \
+          --vnet-gateway1 MyVnetGateway --local-gateway2 MyLocalGateway \
+          --auth-type Certificate --cert-auth '{"outboundAuthCertificate":"https://customerKv.vault/Certificates/outBoundcert/Version","inboundAuthCertificateChain":["MIIC+TCCAeGgAwIBAgIQFOJUqDaxV5xJcKpTKO..","MIIC+TCCAeGgAwIBAgIQPJerInitNblK7yBgkqh.."],"inboundAuthCertificateSubjectName":"CN=rootCert.com"}'
 """
 
 helps['network vpn-connection delete'] = """
@@ -6238,4 +6243,15 @@ examples:
         az network watcher troubleshooting start -g MyResourceGroup --resource MyVPNConnection \\
             --resource-type vpnConnection --storage-account MyStorageAccount \\
             --storage-path https://{storageAccountName}.blob.core.windows.net/{containerName}
+"""
+
+helps['network ddos-custom-policy create'] = """
+type: command
+short-summary: Create a DDoS custom policy.
+examples:
+  - name: Create DDoS custom policy
+    text: |
+        az network ddos-custom-policy create --resource-group rg1 --ddos-custom-policy-name test-ddos-custom-policy \\
+            --location centraluseuap --detection-rule-name detectionRuleTcp \\
+            --detection-mode TrafficThreshold --traffic-type Tcp --packets-per-second 1000000
 """

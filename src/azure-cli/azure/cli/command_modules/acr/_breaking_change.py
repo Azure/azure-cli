@@ -3,7 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.breaking_change import register_command_group_deprecate
+from azure.cli.core.breaking_change import (
+    register_command_group_deprecate,
+    register_logic_breaking_change
+)
 
 helm_bc_msg = 'In November 2020, Helm 2 reached end of life. ' \
               'Starting on March 30th, 2025 Azure Container Registry will no longer support Helm 2. ' \
@@ -28,3 +31,13 @@ register_command_group_deprecate(command_group='acr helm', redirect='Helm v3 com
                                  target_version='Sept 30th, 2025')
 
 register_command_group_deprecate(command_group='acr config content-trust', message=content_trust_bc_msg)
+
+register_logic_breaking_change('acr check-health', 'Remove Notary client version validation',
+                               detail='The Notary client version check will no longer be performed as part of the '
+                                      'check-health command due to Docker Content Trust deprecation.',
+                               doc_link='https://aka.ms/acr/dctdeprecation')
+
+register_logic_breaking_change('acr config content-trust update', 'Remove content-trust enabled configuration',
+                               detail='The `--status enabled` parameter will no longer be accepted and will result in '
+                                      'an error due to Docker Content Trust deprecation.',
+                               doc_link='https://aka.ms/acr/dctdeprecation')

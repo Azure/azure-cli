@@ -432,10 +432,12 @@ def validate_enable_azure_container_storage_v1_params(  # pylint: disable=too-ma
 
 
 def validate_enable_azure_container_storage_params(
+    enablement_option,
     is_extension_installed,
+    is_ephemeral_disk_enabled,
+    is_elastic_san_enabled,
     is_v1_extension_installed,
     v1_extension_version,
-    storage_pool_type,
     storage_pool_name,
     storage_pool_sku,
     storage_pool_option,
@@ -450,18 +452,28 @@ def validate_enable_azure_container_storage_params(
             'that depend on Azure Container Storage.'
         )
 
-    if is_extension_installed:
-        raise InvalidArgumentValueError(
-            'Cannot enable Azure Container Storage as it is already enabled on the cluster.'
-        )
-
-    # Todo: Remove this for the 2.1.0 release
-    if storage_pool_type is not None and not isinstance(storage_pool_type, bool):
-        raise InvalidArgumentValueError(
-            'The latest version of Azure Container Storage only supports ephemeral nvme storage and does not '
-            'require or support a storage-pool-type value for --enable-azure-container-storage parameter. '
-            f'Please remove {storage_pool_type} from the command and try again.'
-        )
+    if not enablement_option or enablement_option is True:
+        if is_extension_installed:
+            raise InvalidArgumentValueError(
+                'Cannot enable Azure Container Storage as it is already enabled on the cluster.'
+            )
+    else:
+        enablement_option_arr = enablement_option if isinstance(enablement_option, list) else [enablement_option]
+        enable_ephemeral_disk = CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK in enablement_option
+        enable_elastic_san = CONST_STORAGE_POOL_TYPE_ELASTIC_SAN in enablement_option
+        for option in enablement_option_arr:
+            if option not in [CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK, CONST_STORAGE_POOL_TYPE_ELASTIC_SAN]:
+                raise InvalidArgumentValueError(
+                    f"Unsupported storage option '{option}'. "
+                    f"Supported values are '{CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK}' "
+                    f"and '{CONST_STORAGE_POOL_TYPE_ELASTIC_SAN}'."
+                )
+        if is_ephemeral_disk_enabled == enable_ephemeral_disk and is_elastic_san_enabled == enable_elastic_san:
+            options_display = "', '".join(enablement_option_arr)
+            raise InvalidArgumentValueError(
+                f"Cannot enable the requested storage options ('{options_display}') "
+                "as they are already enabled on the cluster."
+            )
 
     if storage_pool_name is not None:
         raise InvalidArgumentValueError(
@@ -493,8 +505,10 @@ def validate_enable_azure_container_storage_params(
 
 
 def validate_disable_azure_container_storage_params(
+    disablement_option,
     is_extension_installed,
-    storage_pool_type,
+    is_ephemeral_disk_enabled,
+    is_elastic_san_enabled,
     storage_pool_name,
     storage_pool_sku,
     storage_pool_option,
@@ -502,16 +516,31 @@ def validate_disable_azure_container_storage_params(
 ):
     if not is_extension_installed:
         raise InvalidArgumentValueError(
-            'Cannot disable Azure Container Storage as it is not enabled on the cluster.'
+            'Cannot disable Azure Container Storage as it could not be found on the cluster.'
         )
 
-    # Todo: Remove this for the 2.1.0 release
-    if storage_pool_type is not None and not isinstance(storage_pool_type, bool):
-        raise InvalidArgumentValueError(
-            'The latest version of Azure Container Storage only supports ephemeral nvme storage and does not '
-            'require or support a storage-pool-type value for --disable-azure-container-storage parameter. '
-            f'Please remove {storage_pool_type} from the command and try again.'
-        )
+    if disablement_option and disablement_option not in [True, CONST_ACSTOR_ALL]:
+        actionable = False
+        disablement_option_arr = disablement_option if isinstance(disablement_option, list) else [disablement_option]
+        for disable_option in disablement_option_arr:
+            if disable_option == CONST_ACSTOR_ALL:
+                actionable = True
+            elif disable_option == CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK:
+                actionable = actionable or is_ephemeral_disk_enabled
+            elif disable_option == CONST_STORAGE_POOL_TYPE_ELASTIC_SAN:
+                actionable = actionable or is_elastic_san_enabled
+            else:
+                raise InvalidArgumentValueError(
+                    f"Cannot disable unsupported storage option '{disable_option}'. "
+                    f"Supported values are '{CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK}', "
+                    f"'{CONST_STORAGE_POOL_TYPE_ELASTIC_SAN}' and '{CONST_ACSTOR_ALL}'."
+                )
+        if not actionable:
+            options_display = "', '".join(disablement_option_arr)
+            raise InvalidArgumentValueError(
+                f"Cannot disable the requested storage options ('{options_display}') "
+                "as they could not be found on the cluster."
+            )
 
     if storage_pool_name is not None:
         raise InvalidArgumentValueError(

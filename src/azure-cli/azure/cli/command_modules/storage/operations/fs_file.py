@@ -4,14 +4,17 @@
 # --------------------------------------------------------------------------------------------
 
 """Custom operations for storage file datalake"""
+# pylint: disable=too-many-locals
 
 import os
+from datetime import datetime
 
 from azure.core.exceptions import HttpResponseError
 from azure.cli.core.profiles import ResourceType
 from azure.cli.command_modules.storage.util import mkdir_p
 from knack.log import get_logger
 from knack.util import CLIError
+from ..util import get_datetime_from_string
 
 logger = get_logger(__name__)
 
@@ -144,3 +147,42 @@ def upload_file(cmd, client, local_path, overwrite=None, content_settings=None, 
     with open(local_path, 'rb') as stream:
         response = client.upload_data(data=stream, length=count, overwrite=overwrite, **upload_file_args)
     return response
+
+
+def generate_sas_file_uri(client, cmd, file_system_name, path, permission=None,
+                          expiry=None, start=None, id=None, ip=None,  # pylint: disable=redefined-builtin
+                          protocol=None, cache_control=None, content_disposition=None,
+                          content_encoding=None, content_language=None,
+                          content_type=None, full_uri=False, as_user=False, encryption_scope=None,
+                          user_delegation_oid=None):
+    from urllib.parse import quote
+    generate_file_sas = cmd.get_models('_shared_access_signature#generate_file_sas')
+
+    sas_kwargs = {}
+    if as_user:
+        user_delegation_key = client.get_user_delegation_key(
+            get_datetime_from_string(start) if start else datetime.utcnow(),
+            get_datetime_from_string(expiry))
+
+    directory_name, file_name = os.path.split(path)
+
+    sas_token = generate_file_sas(account_name=client.account_name,
+                                  file_system_name=file_system_name,
+                                  directory_name=directory_name,
+                                  file_name=file_name,
+                                  credential=user_delegation_key if as_user else client.credential.account_key,
+                                  permission=permission, expiry=expiry, start=start, policy_id=id,
+                                  ip=ip, protocol=protocol,
+                                  cache_control=cache_control, content_disposition=content_disposition,
+                                  content_encoding=content_encoding, content_language=content_language,
+                                  content_type=content_type, encryption_scope=encryption_scope,
+                                  user_delegation_oid=user_delegation_oid, **sas_kwargs)
+    sas_token = quote(sas_token, safe='&%()$=\',~')
+    if full_uri:
+        t_file_client = cmd.get_models('_data_lake_file_client#DataLakeFileClient')
+        file_client = t_file_client(account_url=client.url, file_system_name=file_system_name,
+                                    file_path=path, credential=sas_token)
+        from .fs_directory import fix_url_path
+        return fix_url_path(file_client.url)
+
+    return sas_token

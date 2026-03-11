@@ -85,30 +85,6 @@ def get_mysql_flexible_management_client(cli_ctx, **_):
     return get_mgmt_service_client(cli_ctx, MySQLManagementClient)
 
 
-def get_postgresql_flexible_management_client(cli_ctx, subscription_id=None, **_):
-    from os import getenv
-    from azure.mgmt.postgresqlflexibleservers import PostgreSQLManagementClient
-    # Allow overriding resource manager URI using environment variable
-    # for testing purposes. Subscription id is also determined by environment
-    # variable.
-    rm_uri_override = getenv(RM_URI_OVERRIDE)
-    subscription = subscription_id if subscription_id is not None else getenv(SUB_ID_OVERRIDE)
-    if rm_uri_override:
-        client_id = getenv(AZURE_CLIENT_ID)
-        if client_id:
-            credentials = get_environment_credential()
-        else:
-            from msrest.authentication import Authentication  # pylint: disable=import-error
-            credentials = Authentication()
-
-        return PostgreSQLManagementClient(
-            subscription_id=subscription,
-            base_url=rm_uri_override,
-            credential=credentials)
-    # Normal production scenario.
-    return get_mgmt_service_client(cli_ctx, PostgreSQLManagementClient, subscription_id=subscription)
-
-
 def cf_mariadb_servers(cli_ctx, _):
     return get_mariadb_management_client(cli_ctx).servers
 
@@ -252,90 +228,6 @@ def cf_mysql_check_resource_availability_without_location(cli_ctx, _):
 
 def cf_mysql_flexible_private_dns_zone_suffix_operations(cli_ctx, _):
     return get_mysql_flexible_management_client(cli_ctx).get_private_dns_zone_suffix
-
-
-def cf_postgres_flexible_servers(cli_ctx, _):
-    return get_postgresql_flexible_management_client(cli_ctx).servers
-
-
-def cf_postgres_flexible_firewall_rules(cli_ctx, _):
-    return get_postgresql_flexible_management_client(cli_ctx).firewall_rules
-
-
-def cf_postgres_flexible_virtual_endpoints(cli_ctx, _):
-    return get_postgresql_flexible_management_client(cli_ctx).virtual_endpoints
-
-
-def cf_postgres_flexible_config(cli_ctx, _):
-    return get_postgresql_flexible_management_client(cli_ctx).configurations
-
-
-def cf_postgres_flexible_replica(cli_ctx, _):
-    return get_postgresql_flexible_management_client(cli_ctx).replicas
-
-
-def cf_postgres_flexible_location_capabilities(cli_ctx, _):
-    return get_postgresql_flexible_management_client(cli_ctx).capabilities_by_location
-
-
-def cf_postgres_flexible_server_capabilities(cli_ctx, _):
-    return get_postgresql_flexible_management_client(cli_ctx).capabilities_by_server
-
-
-def cf_postgres_flexible_backups(cli_ctx, _):
-    return get_postgresql_flexible_management_client(cli_ctx).backups_automatic_and_on_demand
-
-
-def cf_postgres_flexible_ltr_backups(cli_ctx, _):
-    return get_postgresql_flexible_management_client(cli_ctx).backups_long_term_retention
-
-
-def cf_postgres_flexible_operations(cli_ctx, _):
-    return get_postgresql_flexible_management_client(cli_ctx).operations
-
-
-def cf_postgres_flexible_admin(cli_ctx, _):
-    return get_postgresql_flexible_management_client(cli_ctx).administrators_microsoft_entra
-
-
-def cf_postgres_flexible_migrations(cli_ctx, _):
-    return get_postgresql_flexible_management_client(cli_ctx).migrations
-
-
-def cf_postgres_flexible_server_threat_protection_settings(cli_ctx, _):
-    return get_postgresql_flexible_management_client(cli_ctx).server_threat_protection_settings
-
-
-def cf_postgres_flexible_advanced_threat_protection_settings(cli_ctx, _):
-    return get_postgresql_flexible_management_client(cli_ctx).advanced_threat_protection_settings
-
-
-def cf_postgres_flexible_server_log_files(cli_ctx, _):
-    return get_postgresql_flexible_management_client(cli_ctx).captured_logs
-
-
-def cf_postgres_check_resource_availability(cli_ctx, _):
-    return get_postgresql_flexible_management_client(cli_ctx).name_availability
-
-
-def cf_postgres_flexible_db(cli_ctx, _):
-    return get_postgresql_flexible_management_client(cli_ctx).databases
-
-
-def cf_postgres_flexible_private_dns_zone_suffix_operations(cli_ctx, _):
-    return get_postgresql_flexible_management_client(cli_ctx).private_dns_zone_suffix
-
-
-def cf_postgres_flexible_private_endpoint_connections(cli_ctx, _):
-    return get_postgresql_flexible_management_client(cli_ctx).private_endpoint_connections
-
-
-def cf_postgres_flexible_private_link_resources(cli_ctx, _):
-    return get_postgresql_flexible_management_client(cli_ctx).private_link_resources
-
-
-def cf_postgres_flexible_tuning_options(cli_ctx, _):
-    return get_postgresql_flexible_management_client(cli_ctx).tuning_options
 
 
 def resource_client_factory(cli_ctx, subscription_id=None):

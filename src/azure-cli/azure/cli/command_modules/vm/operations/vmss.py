@@ -3,13 +3,16 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 # pylint: disable=no-self-use, line-too-long, protected-access, too-few-public-methods, unused-argument, too-many-statements, too-many-branches, too-many-locals
+import json
 from knack.log import get_logger
 
 from ..aaz.latest.vmss import (ListInstances as _VMSSListInstances,
                                Start as _Start,
                                Create as _VMSSCreate,
-                               Show as _VMSSShow)
+                               Show as _VMSSShow,
+                               Patch as _VMSSPatch)
 from azure.cli.core.aaz import AAZUndefined, has_value
+from .._vm_utils import IdentityType
 
 logger = get_logger(__name__)
 
@@ -64,6 +67,70 @@ class VMSSShow(_VMSSShow):
 
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
+
+
+class VMSSPatch(_VMSSPatch):
+
+    def _output(self, *args, **kwargs):
+        # Resolve flatten conflict
+        # When the type field conflicts, the type in inner layer is ignored and the outer layer is applied
+        if has_value(self.ctx.vars.instance.properties.virtual_machine_profile.extension_profile.extensions):
+            for extension in self.ctx.vars.instance.properties.virtual_machine_profile.extension_profile.extensions:
+                if has_value(extension.type):
+                    extension.type = AAZUndefined
+
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+
+class VMSSIdentityRemove(_VMSSPatch):
+    def _output(self, *args, **kwargs):
+        # Resolve flatten conflict
+        # When the type field conflicts, the type in inner layer is ignored and the outer layer is applied
+        if has_value(self.ctx.vars.instance.properties.virtual_machine_profile.extension_profile.extensions):
+            for extension in self.ctx.vars.instance.properties.virtual_machine_profile.extension_profile.extensions:
+                if has_value(extension.type):
+                    extension.type = AAZUndefined
+
+        return self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+
+    class VirtualMachineScaleSetsUpdate(_VMSSPatch.VirtualMachineScaleSetsUpdate):
+        def _format_content(self, content):
+            if isinstance(content, str):
+                content = json.loads(content)
+
+            if not content.get('identity'):
+                content['identity'] = {
+                    'userAssignedIdentities': None,
+                    'type': IdentityType.NONE.value
+                }
+                return json.dumps(content)
+
+            identities = content.get('identity', {}).get('userAssignedIdentities')
+            if identities:
+                if 'UserAssigned' in identities.keys():
+                    identities.pop('UserAssigned')
+
+                for key in list(identities.keys()):
+                    identities[key] = None
+
+            return json.dumps(content)
+
+        def __call__(self, *args, **kwargs):
+            request = self.make_request()
+            request.data = self._format_content(request.data)
+            session = self.client.send_request(request=request, stream=False, **kwargs)
+            if session.http_response.status_code in [200, 202]:
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_200,
+                    self.on_error,
+                    lro_options={"final-state-via": "azure-async-operation"},
+                    path_format_arguments=self.url_parameters,
+                )
+
+            return self.on_error(session.http_response)
 
 
 def convert_show_result_to_snake_case(result):

@@ -3,6 +3,23 @@
 Release History
 ===============
 
+2.84.0
+++++++
+* Minor fixes
+
+2.83.0
+++++++
+* Resolve CVE-2025-69277 (#32610)
+* Resolve CVE-2026-21441 (#32617)
+* Resolve CVE-2025-12084 (#32662)
+* Resolve CVE-2026-21226 (#32635)
+* Replace GitHub URLs with AME Storage for network isolated requirements (#32677)
+
+2.82.0
+++++++
+* Resolve CVE-2025-66418 (#32506)
+* Resolve CVE-2025-66471 (#32506)
+
 2.81.0
 ++++++
 * Minor fixes

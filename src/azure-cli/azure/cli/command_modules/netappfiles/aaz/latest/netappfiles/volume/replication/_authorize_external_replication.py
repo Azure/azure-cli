@@ -16,12 +16,15 @@ from azure.cli.core.aaz import *
 )
 class AuthorizeExternalReplication(AAZCommand):
     """Starts SVM peering and returns a command to be run on the external ONTAP to accept it.  Once the SVM have been peered a SnapMirror will be created
+
+    :example: Volumes_AuthorizeExternalReplication
+        az netappfiles volume replication authorize-external-replication --resource-group myRG --account-name account1 --pool-name pool1 --volume-name volume1
     """
 
     _aaz_info = {
-        "version": "2025-09-01",
+        "version": "2025-12-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/authorizeexternalreplication", "2025-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/authorizeexternalreplication", "2025-12-01"],
         ]
     }
 
@@ -167,7 +170,7 @@ class AuthorizeExternalReplication(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-09-01",
+                    "api-version", "2025-12-01",
                     required=True,
                 ),
             }

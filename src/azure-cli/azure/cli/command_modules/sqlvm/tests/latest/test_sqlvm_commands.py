@@ -48,7 +48,7 @@ class SqlVirtualMachinePreparer(AbstractPreparer, SingleValueReplacer):
     def create_resource(self, name, **kwargs):
         group = self._get_resource_group(**kwargs)
         template = ('az vm create -l {} -g {} -n {} --admin-username {} --admin-password {} --image {}'
-                    ' --size Standard_DS2_v2 --nsg-rule NONE')
+                    ' --size Standard_B2ms --nsg-rule NONE')
         execute(DummyCli(), template.format(self.location, group, name, self.vm_user, self.vm_password, self.image))
         return {self.parameter_name: name}
 

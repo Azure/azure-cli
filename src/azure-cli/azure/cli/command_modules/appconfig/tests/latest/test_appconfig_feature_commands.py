@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+from unittest import mock
 
 from knack.util import CLIError
 from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest)
@@ -566,6 +567,89 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         with self.assertRaisesRegex(CLIError, "Feature name cannot contain the following characters: '%', ':'"):
             self.cmd('appconfig feature set -n {config_store_name} --feature {feature}')
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(parameter_name_for_location='location')
+    def test_azconfig_feature_telemetry(self, resource_group, location):
+        """Test feature flag telemetry functionality."""
+        feature_telemetry_store_prefix = get_resource_name_prefix('FeatureTelemetryTest')
+        config_store_name = self.create_random_name(prefix=feature_telemetry_store_prefix, length=24)
+
+        location = 'eastus'
+        sku = 'standard'
+        self.kwargs.update({
+            'config_store_name': config_store_name,
+            'rg_loc': location,
+            'rg': resource_group,
+            'sku': sku
+        })
+        create_config_store(self, self.kwargs)
+
+        # Test creating a feature with telemetry enabled
+        feature_name = 'TelemetryFeature'
+        entry_label = 'v1'
+        default_locked = False
+        default_state = "off"
+
+        self.kwargs.update({
+            'feature': feature_name,
+            'label': entry_label
+        })
+
+        # Create feature with telemetry enabled
+        self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} --telemetry-enabled true -y',
+                 checks=[self.check('locked', default_locked),
+                         self.check('name', feature_name),
+                         self.check('label', entry_label),
+                         self.check('state', default_state),
+                         self.check('telemetry.enabled', True)])
+
+        # Show feature to verify telemetry is persisted
+        self.cmd('appconfig feature show -n {config_store_name} --feature {feature} --label {label}',
+                 checks=[self.check('name', feature_name),
+                         self.check('telemetry.enabled', True)])
+
+        # Update feature to disable telemetry
+        self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} --telemetry-enabled false -y',
+                 checks=[self.check('name', feature_name),
+                         self.check('telemetry.enabled', False)])
+
+        # Verify telemetry is disabled
+        self.cmd('appconfig feature show -n {config_store_name} --feature {feature} --label {label}',
+                 checks=[self.check('name', feature_name),
+                         self.check('telemetry.enabled', False)])
+
+        # Verify warning is emitted when enabling telemetry without App Insights linked
+        with mock.patch('azure.cli.command_modules.appconfig.feature.logger') as mock_logger:
+            self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} --telemetry-enabled true -y',
+                     checks=[self.check('name', feature_name),
+                             self.check('telemetry.enabled', True)])
+            mock_logger.warning.assert_any_call(
+                "App Insights resource for the App Configuration store is not set."
+                "To collect telemetry, connect to an App Insights resource."
+            )
+
+        # Link App Insights to the store
+        # Use a fake resource ID because the application-insights extension cannot be installed
+        # in recording/playback mode — the extension index response exceeds the VCR 1024KB limit.
+        app_insights_prefix = get_resource_name_prefix('appinsights')
+        app_insights_name = self.create_random_name(prefix=app_insights_prefix, length=24)
+        app_insights_id = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/{}/providers/microsoft.insights/components/{}'.format(resource_group, app_insights_name)
+        self.kwargs.update({
+            'app_insights_resource_id': app_insights_id
+        })
+        self.cmd('appconfig update -n {config_store_name} -g {rg} --appinsights-resource {app_insights_resource_id}',
+                 checks=[self.check('telemetry.resourceId', app_insights_id)])
+
+        # Verify no warning when enabling telemetry with App Insights linked
+        with mock.patch('azure.cli.command_modules.appconfig.feature.logger') as mock_logger:
+            self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} --telemetry-enabled true -y',
+                     checks=[self.check('name', feature_name),
+                             self.check('telemetry.enabled', True)])
+            # The "not set" warning should not have been emitted
+            warning_calls = [str(c) for c in mock_logger.warning.call_args_list]
+            assert not any("App Insights resource for the App Configuration store is not set" in w for w in warning_calls), \
+                "Expected no App Insights warning after linking, but warning was emitted"
+
 
 class AppConfigFeatureFilterScenarioTest(ScenarioTest):
 
@@ -824,3 +908,4 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
         self.cmd('appconfig feature filter add -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} --filter-parameters {filter_parameters} -y',
                  checks=[self.check('name', filter_name),
                          self.check('parameters', filter_params_output)])
+

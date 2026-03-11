@@ -40,10 +40,11 @@ def _resource_deployments_client_factory(cli_ctx, **_):
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_DEPLOYMENTS)
 
 
-def _resource_deploymentscripts_client_factory(cli_ctx, **_):
+def _resource_deploymentscripts_client_factory(cli_ctx, api_version=None, **_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.cli.core.profiles import ResourceType
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_DEPLOYMENTSCRIPTS)
+    kwargs = {'api_version': api_version or '2023-08-01'}
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_DEPLOYMENTSCRIPTS, **kwargs)
 
 
 def _authorization_management_client(cli_ctx, **_):
@@ -64,10 +65,12 @@ def _resource_managementgroups_client_factory(cli_ctx, **_):
     return get_mgmt_service_client(cli_ctx, ManagementGroupsAPI, subscription_bound=False)
 
 
-def _resource_templatespecs_client_factory(cli_ctx, subscription_id=None, **_):
+def _resource_templatespecs_client_factory(cli_ctx, subscription_id=None, api_version=None, **_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.cli.core.profiles import ResourceType
-    kwargs = {'subscription_id': subscription_id} if subscription_id is not None else {}
+    kwargs = {'api_version': api_version or '2022-02-01'}
+    if subscription_id is not None:
+        kwargs['subscription_id'] = subscription_id
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, **kwargs)
 
 

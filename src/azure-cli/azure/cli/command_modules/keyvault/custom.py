@@ -347,9 +347,9 @@ def recover_vault(cmd, client, vault_name, resource_group_name, location, no_wai
     tenant_id = profile.get_subscription(subscription=cmd.cli_ctx.data.get('subscription_id', None))[_TENANT_ID]
 
     params = VaultCreateOrUpdateParameters(location=location,
-                                           properties={'tenant_id': tenant_id,
+                                           properties={'tenantId': tenant_id,
                                                        'sku': Sku(name=SkuName.standard.value, family='A'),
-                                                       'create_mode': CreateMode.recover.value})
+                                                       'createMode': CreateMode.recover.value})
 
     return sdk_no_wait(no_wait, client.begin_create_or_update,
                        resource_group_name=resource_group_name,
@@ -623,7 +623,7 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
     if no_self_perms or enable_rbac_authorization:
         access_policies = []
     else:
-        permissions = Permissions(keys=[KeyPermissions.all],
+        permissions = Permissions(keys_property=[KeyPermissions.all],
                                   secrets=[SecretPermissions.all],
                                   certificates=[CertificatePermissions.all],
                                   storage=[StoragePermissions.all])
@@ -820,19 +820,19 @@ def set_policy(cmd, client, resource_group_name, vault_name,
             tenant_id=vault.properties.tenant_id,
             object_id=object_id,
             application_id=application_id,
-            permissions=Permissions(keys=key_permissions,
+            permissions=Permissions(keys_property=key_permissions,
                                     secrets=secret_permissions,
                                     certificates=certificate_permissions,
                                     storage=storage_permissions)))
     else:
         # Modify existing policy.
         # If key_permissions is not set, use prev. value (similarly with secret_permissions).
-        keys = policy.permissions.keys if key_permissions is None else key_permissions
+        keys = policy.permissions.keys_property if key_permissions is None else key_permissions
         secrets = policy.permissions.secrets if secret_permissions is None else secret_permissions
         certs = policy.permissions.certificates \
             if certificate_permissions is None else certificate_permissions
         storage = policy.permissions.storage if storage_permissions is None else storage_permissions
-        policy.permissions = Permissions(keys=keys, secrets=secrets, certificates=certs, storage=storage)
+        policy.permissions = Permissions(keys_property=keys, secrets=secrets, certificates=certs, storage=storage)
 
     return sdk_no_wait(no_wait, client.begin_create_or_update,
                        resource_group_name=resource_group_name,

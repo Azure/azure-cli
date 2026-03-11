@@ -3241,6 +3241,31 @@ class AKSAgentPoolUpdateDecoratorCommonTestCase(unittest.TestCase):
         )
         self.assertEqual(dec_agentpool_1, grond_truth_agentpool_1)
 
+    def common_update_gpu_profile(self):
+        dec_1 = AKSAgentPoolUpdateDecorator(
+            self.cmd,
+            self.client,
+            {"gpu_driver": "None"},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+        # fail on passing the wrong agentpool object
+        with self.assertRaises(CLIInternalError):
+            dec_1.update_gpu_profile(None)
+        agentpool_1 = self.create_initialized_agentpool_instance(
+            gpu_profile=self.models.GPUProfile(
+                driver="Install",
+            )
+        )
+        dec_1.context.attach_agentpool(agentpool_1)
+        dec_agentpool_1 = dec_1.update_gpu_profile(agentpool_1)
+        ground_truth_agentpool_1 = self.create_initialized_agentpool_instance(
+            gpu_profile=self.models.GPUProfile(
+                driver="None",
+            )
+        )
+        self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)          
+
     def common_update_fips_image(self):
         dec_1 = AKSAgentPoolUpdateDecorator(
             self.cmd,
@@ -3480,6 +3505,9 @@ class AKSAgentPoolUpdateDecoratorStandaloneModeTestCase(AKSAgentPoolUpdateDecora
     
     def test_update_fips_image(self):
         self.common_update_fips_image()
+
+    def test_update_gpu_profile(self):
+        self.common_update_gpu_profile()
 
     def test_update_agentpool_profile_default(self):
         import inspect

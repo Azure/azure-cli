@@ -13,28 +13,33 @@ interactions:
       ParameterSetName:
       - --resource-group --server-name
       User-Agent:
-      - AZURECLI/2.65.0 azsdk-python-core/1.31.0 Python/3.9.13 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.81.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/reschedule-cli-test/providers/Microsoft.DBforMySQL/flexibleServers/azuredbclitest-maintenance/maintenances?api-version=2023-12-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/reschedule-cli-test/providers/Microsoft.DBforMySQL/flexibleServers/azuredbclitest-maintenance/maintenances?api-version=2025-06-01-preview
   response:
     body:
-      string: '{"value":[{"properties":{"maintenanceType":"RoutineMaintenance","maintenanceState":"Scheduled","maintenanceName":"LL8V-NX8","maintenanceStartTime":"2024-10-28T06:00:00+00:00","maintenanceEndTime":"2024-10-28T07:00:00+00:00","maintenanceAvailableScheduleMinTime":"2024-10-21T06:03:12.272305+00:00","maintenanceAvailableScheduleMaxTime":"2024-10-28T06:00:00+00:00","maintenanceTitle":"Routine
-        Maintenance: Scheduled on Mon, 28 Oct 2024 06:00:00 GMT - Mon, 28 Oct 2024
-        07:00:00 GMT","maintenanceDescription":"Your Azure Database For MySQL routine
+      string: '{"value":[{"properties":{"maintenanceType":"RoutineMaintenance","maintenanceState":"ReScheduled","maintenanceName":"MSJS-NRZ","maintenanceStartTime":"2025-12-25T03:41:00+00:00","maintenanceEndTime":"2025-12-25T04:41:00+00:00","maintenanceAvailableScheduleMinTime":"2025-12-16T05:59:51.0496729+00:00","maintenanceAvailableScheduleMaxTime":"2025-12-29T22:59:59+00:00","maintenanceTitle":"Routine
+        Maintenance: Rescheduled to Thu, 25 Dec 2025 03:41:00 GMT","maintenanceDescription":"Your
+        Azure Database For MySQL routine maintenance has been rescheduled. The new
+        maintenance window is scheduled to occur between Thu, 25 Dec 2025 03:41:00
+        GMT and Thu, 25 Dec 2025 04:41:00 GMT. If you have any additional questions
+        or concerns, please contact support."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/reschedule-cli-test/providers/Microsoft.DBforMySQL/flexibleServers/azuredbclitest-maintenance/maintenances/MSJS-NRZ","name":"MSJS-NRZ","type":"Microsoft.DBforMySQL/maintenances"},{"properties":{"maintenanceType":"RoutineMaintenance","maintenanceState":"Scheduled","maintenanceStartTime":"2025-12-17T23:00:00+00:00","maintenanceEndTime":"2025-12-18T00:00:00+00:00","maintenanceAvailableScheduleMinTime":"2025-12-16T05:59:51.0496729+00:00","maintenanceAvailableScheduleMaxTime":"2025-12-29T22:59:59+00:00","maintenanceTitle":"Routine
+        Maintenance: Scheduled on Wed, 17 Dec 2025 23:00:00 GMT - Thu, 18 Dec 2025
+        00:00:00 GMT","maintenanceDescription":"Your Azure Database For MySQL routine
         maintenance will be performed on the scheduled maintenance window between
-        Mon, 28 Oct 2024 06:00:00 GMT and Mon, 28 Oct 2024 07:00:00 GMT. During the
-        maintenance window, your instance may experience temporary service interruption.
-        You can reschedule this upgrade before the maintenance status becoming in
-        prepration. Our team will minimize any impact and ensure a smooth transition."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/reschedule-cli-test/providers/Microsoft.DBforMySQL/flexibleServers/azuredbclitest-maintenance/maintenances/LL8V-NX8","name":"LL8V-NX8","type":"Microsoft.DBforMySQL/maintenances"}]}'
+        Wed, 17 Dec 2025 23:00:00 GMT and Thu, 18 Dec 2025 00:00:00 GMT. You can reschedule
+        this upgrade before the maintenance status becoming in prepration. Release
+        note: https://learn.microsoft.com/en-us/azure/mysql/flexible-server/release-notes/september-2025.
+        Our team will minimize any impact and ensure a smooth transition."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/reschedule-cli-test/providers/Microsoft.DBforMySQL/flexibleServers/azuredbclitest-maintenance/maintenances/","type":"Microsoft.DBforMySQL/maintenances"}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1182'
+      - '2133'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2024 06:03:12 GMT
+      - Tue, 16 Dec 2025 05:59:50 GMT
       expires:
       - '-1'
       pragma:
@@ -45,10 +50,12 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=48686b0d-a3df-4283-9ada-99cbb9e56b4c/southeastasia/341aa976-a737-4fc3-8695-74c0dedf9059
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: FA13CD42F62C4302BB6EF40409E2811B Ref B: MAA201060516053 Ref C: 2024-10-21T06:03:11Z'
+      - 'Ref A: DB5D2AFA0C1C4F859594BE25555240AF Ref B: SG2AA1040515060 Ref C: 2025-12-16T05:59:50Z'
     status:
       code: 200
       message: OK
@@ -66,28 +73,26 @@ interactions:
       ParameterSetName:
       - --resource-group --server-name --maintenance-name
       User-Agent:
-      - AZURECLI/2.65.0 azsdk-python-core/1.31.0 Python/3.9.13 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.81.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/reschedule-cli-test/providers/Microsoft.DBforMySQL/flexibleServers/azuredbclitest-maintenance/maintenances/LL8V-NX8?api-version=2023-12-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/reschedule-cli-test/providers/Microsoft.DBforMySQL/flexibleServers/azuredbclitest-maintenance/maintenances/MSJS-NRZ?api-version=2025-06-01-preview
   response:
     body:
-      string: '{"properties":{"maintenanceType":"RoutineMaintenance","maintenanceState":"Scheduled","maintenanceName":"LL8V-NX8","maintenanceStartTime":"2024-10-28T06:00:00+00:00","maintenanceEndTime":"2024-10-28T07:00:00+00:00","maintenanceAvailableScheduleMinTime":"2024-10-21T06:03:13.5291086+00:00","maintenanceAvailableScheduleMaxTime":"2024-10-28T06:00:00+00:00","maintenanceTitle":"Routine
-        Maintenance: Scheduled on Mon, 28 Oct 2024 06:00:00 GMT - Mon, 28 Oct 2024
-        07:00:00 GMT","maintenanceDescription":"Your Azure Database For MySQL routine
-        maintenance will be performed on the scheduled maintenance window between
-        Mon, 28 Oct 2024 06:00:00 GMT and Mon, 28 Oct 2024 07:00:00 GMT. During the
-        maintenance window, your instance may experience temporary service interruption.
-        You can reschedule this upgrade before the maintenance status becoming in
-        prepration. Our team will minimize any impact and ensure a smooth transition."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/reschedule-cli-test/providers/Microsoft.DBforMySQL/flexibleServers/azuredbclitest-maintenance/maintenances/LL8V-NX8","name":"LL8V-NX8","type":"Microsoft.DBforMySQL/maintenances"}'
+      string: '{"properties":{"maintenanceType":"RoutineMaintenance","maintenanceState":"ReScheduled","maintenanceName":"MSJS-NRZ","maintenanceStartTime":"2025-12-25T03:41:00+00:00","maintenanceEndTime":"2025-12-25T04:41:00+00:00","maintenanceAvailableScheduleMinTime":"2025-12-16T05:59:52.0018967+00:00","maintenanceAvailableScheduleMaxTime":"2025-12-29T22:59:59+00:00","maintenanceTitle":"Routine
+        Maintenance: Rescheduled to Thu, 25 Dec 2025 03:41:00 GMT","maintenanceDescription":"Your
+        Azure Database For MySQL routine maintenance has been rescheduled. The new
+        maintenance window is scheduled to occur between Thu, 25 Dec 2025 03:41:00
+        GMT and Thu, 25 Dec 2025 04:41:00 GMT. If you have any additional questions
+        or concerns, please contact support."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/reschedule-cli-test/providers/Microsoft.DBforMySQL/flexibleServers/azuredbclitest-maintenance/maintenances/MSJS-NRZ","name":"MSJS-NRZ","type":"Microsoft.DBforMySQL/maintenances"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1171'
+      - '990'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2024 06:03:13 GMT
+      - Tue, 16 Dec 2025 05:59:51 GMT
       expires:
       - '-1'
       pragma:
@@ -98,15 +103,17 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=48686b0d-a3df-4283-9ada-99cbb9e56b4c/southeastasia/f8040ca6-3fde-493e-b428-f21a0043d2be
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: C6C614CAAEBF47669217C4D9EE4FE353 Ref B: MAA201060515025 Ref C: 2024-10-21T06:03:12Z'
+      - 'Ref A: 19C25614B3D143ACAF2AA426404D05AC Ref B: SG2AA1040520062 Ref C: 2025-12-16T05:59:51Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"properties": {"maintenanceStartTime": "2024-10-23T03:41:00.000Z"}}'
+    body: '{"properties": {"maintenanceStartTime": "2025-12-25T03:41:00.000Z"}}'
     headers:
       Accept:
       - application/json
@@ -123,27 +130,27 @@ interactions:
       ParameterSetName:
       - --resource-group --server-name --maintenance-name --start-time
       User-Agent:
-      - AZURECLI/2.65.0 azsdk-python-core/1.31.0 Python/3.9.13 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.81.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/reschedule-cli-test/providers/Microsoft.DBforMySQL/flexibleServers/azuredbclitest-maintenance/maintenances/LL8V-NX8?api-version=2023-12-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/reschedule-cli-test/providers/Microsoft.DBforMySQL/flexibleServers/azuredbclitest-maintenance/maintenances/MSJS-NRZ?api-version=2025-06-01-preview
   response:
     body:
-      string: '{"operation":"UpdateMaintenanceManagementOperation","startTime":"2024-10-21T06:03:15.387Z"}'
+      string: '{"operation":"UpdateMaintenanceManagementOperation","startTime":"2025-12-16T05:59:53.8Z"}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/northeurope/azureAsyncOperation/546c4fbf-ed78-4982-9cb8-306347b84d6a?api-version=2023-12-30&t=638650873955372820&c=MIIHhzCCBm-gAwIBAgITfAWQ0hCHZtQ3fJ4PSAAABZDSEDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjQwOTI3MDkwMTAzWhcNMjUwMzI2MDkwMTAzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANt7qVbg97HivqUzi3BPPNiHD4wLqYw03AkBiXDpww3W8iIU6FZbbOXVgCL-rGpnbxPkLEVZ1WtRfvLgR3qDiVRjkSnE2knSE6qtvBRWdqqsD9YiSi5lYW67vgtBA_mHzHNDb0zhZ2iofVE5GjHIKYINZSTo8of54bY_fJe0xenYEq7lMpbffWaoano6LQH1L0hSdzAreTN7T_bTsK7TkXQtx45c1upRueZR1wq4PRd-9AYpkfKHhxnCe5LBeLB-Q88WZbmNxuycYiJZzbEGVcEbg5fYdfYb4QveB2WmK7bCWSEDu7WzRaYN9zfP9ZpVnTHTmRcN-f3uvUzxNBMe26UCAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBT07kfCxeuv0whuO9NP27UpdS8ZAzAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAFB6-4Y-Z7skVWaPi2vBOob5I-JLv_MqkE8tGWMMCFI9McOWBWfeJWV7aA4X4MEwnVfuFzE4mdak49KhEWgAbnGBMMumWJtlE1VDYwoYj3k6VDrhg4K8cRAO24Ezl3_L9yTqPLHhnKpjnjZONChdqvy6tXy9zLDyo9uThhHykSdIVQPaynG83JYpUlN1akyNJVLxae9NCRV251OTh00g9z6gt1b4nk-Nszy6YtF1AoskPTpeZVcsxGTlq3ITXveDCeZrYbQ6EtZf5O8ekTrNsG-8DMSDIgDta1Dud4RchYh74jtodoiwmneC_ZG5VDcpozae4Mh1w3_kD4-E11i1U1U&s=LMv4caJt9wGeriChqzq6pTDk26k3ngTZxCwMP9WOrvlB48K5ysa1a_COWjdGSeTQUSJmq-keKuqyq6aZeEu6exLNIv5OGusRStntnKOUR3Vrq-DtCMTM5bEJXaPn2XuQ-V7q2paqoYYCU1gA_2oH755iqem98EYKeEeQU_QZZfRyMt4_JzlRU4wdMWA7gjY2fQ31w7NhmswirwNxqs6PvHGOmvf9Uliw5TLJNOg96NJwpxnc0TYMZcpxbiADSOfGYP03Um_FmjISIafLM3WsSIq40fCxDRk4z7EigWVSBzS6BgH4nooj6CLeN8786MQDPIS527FyZnOWLXvmYxSLcA&h=7Fiwm9L8qsmh7uS38OGrAzJJ_bR_1j7Q1sumvMeXz98
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/northeurope/azureAsyncOperation/052bac78-6d91-4fb3-b1de-03b6557be6ff?api-version=2025-06-01-preview&t=639014615939427497&c=MIIHhzCCBm-gAwIBAgITHgePNrHnjd12qB0bIgAAB482sTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjUxMDIyMTAyMjQ3WhcNMjYwNDIwMTAyMjQ3WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMa4N6biD4b3y2sbkcnqgvMUgcwQKiAzk6u9JnZaint0OklVT6F5R74wbTDsv_4dzFZJj0B58oOFYbmYdz5UpWx-trcGnzZyXvbpu8L_VPU1RpVCJQ0SRIq-g3rNEXPuVf6evWZVBtz7-MgDAFvnccLefCnMUHp7N4bZqiDsy28OfmRbQzhhoL41JzMdqzFlKgQ-dTsvi0HHLif_Mr07Es0fLchVhsZYkmIgvY9VUQZtZET0We8oF1B2WHHV6sL8vIzsz9jqtH2zdt8MgnznMeILbR56pwInNYirrHezmh8gVBHp_Zl-F56bqZmow4Eu_YTeO_XuWPKCm1F9YaLo0c0CAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBRcVbdaRCO2xc_MBp944xfmCA0TCjAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBALWa0sUBkyggdGJnmhB4J6SrVANSHlycQCHiZlA2U4MwHUJkcgyojUIF5Xw6ZOZvN0ifW5XvRnp2jwnWjABIflBMuxsEFZV3vZM4UEcZVhbmtGa51SkNWjDMEamlhq6Z_36ecuej-YMQzDLG8AYFDMekpXYoO_e-oelBHDIepzFOUagZhG5kH9-tdIkdiy3hQyQgC8qYCj820QAMfjqA2itQaWwrPgmQzmsC4UPQZKd3MgSgpNfpCE0kLGC0paPa3hXtlF25KKEYiLlFkqhiF31gG3922DVrfGHJWIR6bZId54ZuWDj4nkCBCUsu72HLCupMgnOlyV7z9Ff4x1KXE3s&s=UkfiRzhU70NyqrjxeZBlen1QGk8QjE3iJ65DEEk1hnsqAJ7kO_u6L7-E_l9LJWLBuufWwTk6NE_4uj6QsWVDdFidcxBzphBB0NM7WjKFu0FNR5IsvkPbGqSgejDe74A0sqPOpUr6l2Q4wkHBZlR21SJVdXYYoEkzIsk882z7IniAB8yT45Y6tn4vKmOmz3ILH_ghOFQPkRORdQCoSF2SHv7l7f1dFCl952pZdtHwFeuSlsMPBsJqZv3apvtUqwfCIz-80A5KZpigj5nxHtb3xqOONl_r8kz2JGUJ0PGKUXPUrt-4JnQFsRuaEHN6bRy3ZQqnOvKRQsxp1WmZo-dFKg&h=I3XDZav_WRuyO1-u5BWPnrVMYRN2jOQ5V3RFxK5dwBQ
       cache-control:
       - no-cache
       content-length:
-      - '91'
+      - '89'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2024 06:03:15 GMT
+      - Tue, 16 Dec 2025 05:59:53 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/northeurope/operationResults/546c4fbf-ed78-4982-9cb8-306347b84d6a?api-version=2023-12-30&t=638650873955529077&c=MIIHhzCCBm-gAwIBAgITfAWQ0hCHZtQ3fJ4PSAAABZDSEDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjQwOTI3MDkwMTAzWhcNMjUwMzI2MDkwMTAzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANt7qVbg97HivqUzi3BPPNiHD4wLqYw03AkBiXDpww3W8iIU6FZbbOXVgCL-rGpnbxPkLEVZ1WtRfvLgR3qDiVRjkSnE2knSE6qtvBRWdqqsD9YiSi5lYW67vgtBA_mHzHNDb0zhZ2iofVE5GjHIKYINZSTo8of54bY_fJe0xenYEq7lMpbffWaoano6LQH1L0hSdzAreTN7T_bTsK7TkXQtx45c1upRueZR1wq4PRd-9AYpkfKHhxnCe5LBeLB-Q88WZbmNxuycYiJZzbEGVcEbg5fYdfYb4QveB2WmK7bCWSEDu7WzRaYN9zfP9ZpVnTHTmRcN-f3uvUzxNBMe26UCAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBT07kfCxeuv0whuO9NP27UpdS8ZAzAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAFB6-4Y-Z7skVWaPi2vBOob5I-JLv_MqkE8tGWMMCFI9McOWBWfeJWV7aA4X4MEwnVfuFzE4mdak49KhEWgAbnGBMMumWJtlE1VDYwoYj3k6VDrhg4K8cRAO24Ezl3_L9yTqPLHhnKpjnjZONChdqvy6tXy9zLDyo9uThhHykSdIVQPaynG83JYpUlN1akyNJVLxae9NCRV251OTh00g9z6gt1b4nk-Nszy6YtF1AoskPTpeZVcsxGTlq3ITXveDCeZrYbQ6EtZf5O8ekTrNsG-8DMSDIgDta1Dud4RchYh74jtodoiwmneC_ZG5VDcpozae4Mh1w3_kD4-E11i1U1U&s=qW2Kun-0wAsOF4aHN-cQXCgyOKI9WoiN3MVnTcqdpskLUU8kYna8CRjqRyvYfRuzDV2j_0F0aBmnrjOeUKrVsJ9Q2K3F7usxdl9GDwjKZ1a0FOXWZINneVC0RAPRcOO88KBfSgecyJm_KK91X05GsFTvNb7XxXj8yw_H61hf1BLqpLugK1GkXLosJT1HMTZHMtC5PwszLvKhAeWw98JOk9EJKQjxBbxkqsD0OknDZC5zJIcxCaO3BGyw4pVhxJ71vkZMWeXjN_JjkfYX4ibS2W-89hK5-ULuOQNTedwVF1b0lslR4d8ClkZ03n1S-BQXK3u_A_L2uWaLN_3hVfRxxA&h=wRuZdxIoLl_spnmGxdtKZtcbfKX_uUPN1JEJBenFz3E
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/northeurope/operationResults/052bac78-6d91-4fb3-b1de-03b6557be6ff?api-version=2025-06-01-preview&t=639014615939583768&c=MIIHhzCCBm-gAwIBAgITHgePNrHnjd12qB0bIgAAB482sTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjUxMDIyMTAyMjQ3WhcNMjYwNDIwMTAyMjQ3WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMa4N6biD4b3y2sbkcnqgvMUgcwQKiAzk6u9JnZaint0OklVT6F5R74wbTDsv_4dzFZJj0B58oOFYbmYdz5UpWx-trcGnzZyXvbpu8L_VPU1RpVCJQ0SRIq-g3rNEXPuVf6evWZVBtz7-MgDAFvnccLefCnMUHp7N4bZqiDsy28OfmRbQzhhoL41JzMdqzFlKgQ-dTsvi0HHLif_Mr07Es0fLchVhsZYkmIgvY9VUQZtZET0We8oF1B2WHHV6sL8vIzsz9jqtH2zdt8MgnznMeILbR56pwInNYirrHezmh8gVBHp_Zl-F56bqZmow4Eu_YTeO_XuWPKCm1F9YaLo0c0CAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBRcVbdaRCO2xc_MBp944xfmCA0TCjAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBALWa0sUBkyggdGJnmhB4J6SrVANSHlycQCHiZlA2U4MwHUJkcgyojUIF5Xw6ZOZvN0ifW5XvRnp2jwnWjABIflBMuxsEFZV3vZM4UEcZVhbmtGa51SkNWjDMEamlhq6Z_36ecuej-YMQzDLG8AYFDMekpXYoO_e-oelBHDIepzFOUagZhG5kH9-tdIkdiy3hQyQgC8qYCj820QAMfjqA2itQaWwrPgmQzmsC4UPQZKd3MgSgpNfpCE0kLGC0paPa3hXtlF25KKEYiLlFkqhiF31gG3922DVrfGHJWIR6bZId54ZuWDj4nkCBCUsu72HLCupMgnOlyV7z9Ff4x1KXE3s&s=BCu6Tdk3qyEfNTzssjTtg8F6fO47oicHt1RlZZVli996j0Wu72swBm4XDzXWls-zIbbSoekvCl5lRCvQDwkxqthlZ_H3sL6caP5IILykHEdFpU0ZA8rSApIoTUbSo2RNdrLvED4Eopb1t_Z3jKwMw2kWsteyrT49B06KNP_yOteAukkmNubhq6m_3iyM--V1m0fcsnhBId1R8b6BLUZ6rOGKLkL4On1H0dvPfUBb9IsHtQrCDHPn91iyaoNpbgsk3jCV0rOnLGjArXdpPqdJLDeH1ICqaBbXjm99CL7Z6OVEIcvMddBPeAp9_icEnXjNmbebESHXpoBnIKF4D-U0OA&h=zgcun5xNw60358VirbS-ZjqvVC9b1DatMg03aajopNI
       pragma:
       - no-cache
       strict-transport-security:
@@ -152,12 +159,14 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=48686b0d-a3df-4283-9ada-99cbb9e56b4c/southeastasia/1d93d510-11bd-42f1-8cd8-6cc0935231a7
       x-ms-ratelimit-remaining-subscription-global-writes:
       - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
       - '799'
       x-msedge-ref:
-      - 'Ref A: C0D7B3CCFFBE49E2AFC53626F9E07858 Ref B: MAA201060515019 Ref C: 2024-10-21T06:03:14Z'
+      - 'Ref A: 38E6A789D4C9442F8B58DC7940E3DACE Ref B: SG2AA1070301062 Ref C: 2025-12-16T05:59:52Z'
     status:
       code: 202
       message: Accepted
@@ -175,21 +184,21 @@ interactions:
       ParameterSetName:
       - --resource-group --server-name --maintenance-name --start-time
       User-Agent:
-      - AZURECLI/2.65.0 azsdk-python-core/1.31.0 Python/3.9.13 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.81.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/northeurope/azureAsyncOperation/546c4fbf-ed78-4982-9cb8-306347b84d6a?api-version=2023-12-30&t=638650873955372820&c=MIIHhzCCBm-gAwIBAgITfAWQ0hCHZtQ3fJ4PSAAABZDSEDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjQwOTI3MDkwMTAzWhcNMjUwMzI2MDkwMTAzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANt7qVbg97HivqUzi3BPPNiHD4wLqYw03AkBiXDpww3W8iIU6FZbbOXVgCL-rGpnbxPkLEVZ1WtRfvLgR3qDiVRjkSnE2knSE6qtvBRWdqqsD9YiSi5lYW67vgtBA_mHzHNDb0zhZ2iofVE5GjHIKYINZSTo8of54bY_fJe0xenYEq7lMpbffWaoano6LQH1L0hSdzAreTN7T_bTsK7TkXQtx45c1upRueZR1wq4PRd-9AYpkfKHhxnCe5LBeLB-Q88WZbmNxuycYiJZzbEGVcEbg5fYdfYb4QveB2WmK7bCWSEDu7WzRaYN9zfP9ZpVnTHTmRcN-f3uvUzxNBMe26UCAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBT07kfCxeuv0whuO9NP27UpdS8ZAzAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAFB6-4Y-Z7skVWaPi2vBOob5I-JLv_MqkE8tGWMMCFI9McOWBWfeJWV7aA4X4MEwnVfuFzE4mdak49KhEWgAbnGBMMumWJtlE1VDYwoYj3k6VDrhg4K8cRAO24Ezl3_L9yTqPLHhnKpjnjZONChdqvy6tXy9zLDyo9uThhHykSdIVQPaynG83JYpUlN1akyNJVLxae9NCRV251OTh00g9z6gt1b4nk-Nszy6YtF1AoskPTpeZVcsxGTlq3ITXveDCeZrYbQ6EtZf5O8ekTrNsG-8DMSDIgDta1Dud4RchYh74jtodoiwmneC_ZG5VDcpozae4Mh1w3_kD4-E11i1U1U&s=LMv4caJt9wGeriChqzq6pTDk26k3ngTZxCwMP9WOrvlB48K5ysa1a_COWjdGSeTQUSJmq-keKuqyq6aZeEu6exLNIv5OGusRStntnKOUR3Vrq-DtCMTM5bEJXaPn2XuQ-V7q2paqoYYCU1gA_2oH755iqem98EYKeEeQU_QZZfRyMt4_JzlRU4wdMWA7gjY2fQ31w7NhmswirwNxqs6PvHGOmvf9Uliw5TLJNOg96NJwpxnc0TYMZcpxbiADSOfGYP03Um_FmjISIafLM3WsSIq40fCxDRk4z7EigWVSBzS6BgH4nooj6CLeN8786MQDPIS527FyZnOWLXvmYxSLcA&h=7Fiwm9L8qsmh7uS38OGrAzJJ_bR_1j7Q1sumvMeXz98
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforMySQL/locations/northeurope/azureAsyncOperation/052bac78-6d91-4fb3-b1de-03b6557be6ff?api-version=2025-06-01-preview&t=639014615939427497&c=MIIHhzCCBm-gAwIBAgITHgePNrHnjd12qB0bIgAAB482sTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjUxMDIyMTAyMjQ3WhcNMjYwNDIwMTAyMjQ3WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMa4N6biD4b3y2sbkcnqgvMUgcwQKiAzk6u9JnZaint0OklVT6F5R74wbTDsv_4dzFZJj0B58oOFYbmYdz5UpWx-trcGnzZyXvbpu8L_VPU1RpVCJQ0SRIq-g3rNEXPuVf6evWZVBtz7-MgDAFvnccLefCnMUHp7N4bZqiDsy28OfmRbQzhhoL41JzMdqzFlKgQ-dTsvi0HHLif_Mr07Es0fLchVhsZYkmIgvY9VUQZtZET0We8oF1B2WHHV6sL8vIzsz9jqtH2zdt8MgnznMeILbR56pwInNYirrHezmh8gVBHp_Zl-F56bqZmow4Eu_YTeO_XuWPKCm1F9YaLo0c0CAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBRcVbdaRCO2xc_MBp944xfmCA0TCjAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBALWa0sUBkyggdGJnmhB4J6SrVANSHlycQCHiZlA2U4MwHUJkcgyojUIF5Xw6ZOZvN0ifW5XvRnp2jwnWjABIflBMuxsEFZV3vZM4UEcZVhbmtGa51SkNWjDMEamlhq6Z_36ecuej-YMQzDLG8AYFDMekpXYoO_e-oelBHDIepzFOUagZhG5kH9-tdIkdiy3hQyQgC8qYCj820QAMfjqA2itQaWwrPgmQzmsC4UPQZKd3MgSgpNfpCE0kLGC0paPa3hXtlF25KKEYiLlFkqhiF31gG3922DVrfGHJWIR6bZId54ZuWDj4nkCBCUsu72HLCupMgnOlyV7z9Ff4x1KXE3s&s=UkfiRzhU70NyqrjxeZBlen1QGk8QjE3iJ65DEEk1hnsqAJ7kO_u6L7-E_l9LJWLBuufWwTk6NE_4uj6QsWVDdFidcxBzphBB0NM7WjKFu0FNR5IsvkPbGqSgejDe74A0sqPOpUr6l2Q4wkHBZlR21SJVdXYYoEkzIsk882z7IniAB8yT45Y6tn4vKmOmz3ILH_ghOFQPkRORdQCoSF2SHv7l7f1dFCl952pZdtHwFeuSlsMPBsJqZv3apvtUqwfCIz-80A5KZpigj5nxHtb3xqOONl_r8kz2JGUJ0PGKUXPUrt-4JnQFsRuaEHN6bRy3ZQqnOvKRQsxp1WmZo-dFKg&h=I3XDZav_WRuyO1-u5BWPnrVMYRN2jOQ5V3RFxK5dwBQ
   response:
     body:
-      string: '{"name":"546c4fbf-ed78-4982-9cb8-306347b84d6a","status":"Succeeded","startTime":"2024-10-21T06:03:15.387Z"}'
+      string: '{"name":"052bac78-6d91-4fb3-b1de-03b6557be6ff","status":"Succeeded","startTime":"2025-12-16T05:59:53.8Z"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '107'
+      - '105'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2024 06:03:16 GMT
+      - Tue, 16 Dec 2025 05:59:54 GMT
       expires:
       - '-1'
       pragma:
@@ -200,10 +209,12 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=48686b0d-a3df-4283-9ada-99cbb9e56b4c/southeastasia/af2ef774-957f-4cfe-9f50-586da8c2835b
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: AA120F8A02BE4FB3B5DFCB42776803EF Ref B: MAA201060515019 Ref C: 2024-10-21T06:03:15Z'
+      - 'Ref A: 0334F7FDF8454EFABC2E915055E620A7 Ref B: SG2AA1040517052 Ref C: 2025-12-16T05:59:54Z'
     status:
       code: 200
       message: OK
@@ -221,27 +232,26 @@ interactions:
       ParameterSetName:
       - --resource-group --server-name --maintenance-name --start-time
       User-Agent:
-      - AZURECLI/2.65.0 azsdk-python-core/1.31.0 Python/3.9.13 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.81.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/reschedule-cli-test/providers/Microsoft.DBforMySQL/flexibleServers/azuredbclitest-maintenance/maintenances/LL8V-NX8?api-version=2023-12-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/reschedule-cli-test/providers/Microsoft.DBforMySQL/flexibleServers/azuredbclitest-maintenance/maintenances/MSJS-NRZ?api-version=2025-06-01-preview
   response:
     body:
-      string: '{"properties":{"maintenanceType":"RoutineMaintenance","maintenanceState":"ReScheduled","maintenanceName":"LL8V-NX8","maintenanceStartTime":"2024-10-23T03:41:00+00:00","maintenanceEndTime":"2024-10-23T04:41:00+00:00","maintenanceAvailableScheduleMinTime":"2024-10-21T06:03:17.1330315+00:00","maintenanceAvailableScheduleMaxTime":"2024-10-28T06:00:00+00:00","maintenanceTitle":"Routine
-        Maintenance: Rescheduled to Wed, 23 Oct 2024 03:41:00 GMT","maintenanceDescription":"Your
+      string: '{"properties":{"maintenanceType":"RoutineMaintenance","maintenanceState":"ReScheduled","maintenanceName":"MSJS-NRZ","maintenanceStartTime":"2025-12-25T03:41:00+00:00","maintenanceEndTime":"2025-12-25T04:41:00+00:00","maintenanceAvailableScheduleMinTime":"2025-12-16T05:59:55.5114473+00:00","maintenanceAvailableScheduleMaxTime":"2025-12-29T22:59:59+00:00","maintenanceTitle":"Routine
+        Maintenance: Rescheduled to Thu, 25 Dec 2025 03:41:00 GMT","maintenanceDescription":"Your
         Azure Database For MySQL routine maintenance has been rescheduled. The new
-        maintenance window is scheduled to occur between Wed, 23 Oct 2024 03:41:00
-        GMT and Wed, 23 Oct 2024 04:41:00 GMT. During this maintenance, your instance
-        may experience a brief interruption in service. If you have any additional
-        questions or concerns, please contact support."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/reschedule-cli-test/providers/Microsoft.DBforMySQL/flexibleServers/azuredbclitest-maintenance/maintenances/LL8V-NX8","name":"LL8V-NX8","type":"Microsoft.DBforMySQL/maintenances"}'
+        maintenance window is scheduled to occur between Thu, 25 Dec 2025 03:41:00
+        GMT and Thu, 25 Dec 2025 04:41:00 GMT. If you have any additional questions
+        or concerns, please contact support."},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/reschedule-cli-test/providers/Microsoft.DBforMySQL/flexibleServers/azuredbclitest-maintenance/maintenances/MSJS-NRZ","name":"MSJS-NRZ","type":"Microsoft.DBforMySQL/maintenances"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1077'
+      - '990'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 21 Oct 2024 06:03:16 GMT
+      - Tue, 16 Dec 2025 05:59:55 GMT
       expires:
       - '-1'
       pragma:
@@ -252,10 +262,12 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=48686b0d-a3df-4283-9ada-99cbb9e56b4c/southeastasia/2dfb5e3d-f403-4b75-964b-a989385a5b79
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 439912479CF7445FA0B197B01D791FCA Ref B: MAA201060515019 Ref C: 2024-10-21T06:03:16Z'
+      - 'Ref A: 9F90869FE6F8446C87C704C432C4BDBE Ref B: SG2AA1040519062 Ref C: 2025-12-16T05:59:54Z'
     status:
       code: 200
       message: OK

@@ -512,9 +512,16 @@ class AzCliCommandInvoker(CommandInvoker):
                                   EVENT_INVOKER_FILTER_RESULT)
         from azure.cli.core.commands.events import (
             EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE, EVENT_INVOKER_PRE_LOAD_ARGUMENTS, EVENT_INVOKER_POST_LOAD_ARGUMENTS)
+        from azure.cli.core.util import roughly_parse_command_with_casing
 
         # TODO: Can't simply be invoked as an event because args are transformed
+        command_preserve_casing = roughly_parse_command_with_casing(args)
         args = _pre_command_table_create(self.cli_ctx, args)
+
+        if self._should_show_cached_help(args):
+            result = self._try_show_cached_help(command_preserve_casing, args)
+            if result:
+                return result
 
         self.cli_ctx.raise_event(EVENT_INVOKER_PRE_CMD_TBL_CREATE, args=args)
         self.commands_loader.load_command_table(args)
@@ -577,8 +584,16 @@ class AzCliCommandInvoker(CommandInvoker):
             subparser = self.parser.subparsers[tuple()]
             self.help.show_welcome(subparser)
 
+            use_command_index = self._should_use_command_index()
+            logger.debug("About to cache help data, use_command_index=%s", use_command_index)
+            if use_command_index:
+                try:
+                    self._save_help_to_command_index(subparser)
+                except Exception as ex:  # pylint: disable=broad-except
+                    logger.debug("Failed to cache help data: %s", ex)
+
             # TODO: No event in base with which to target
-            telemetry.set_command_details('az')
+            telemetry.set_command_details('az', command_preserve_casing=command_preserve_casing)
             telemetry.set_success(summary='welcome')
             return CommandResultItem(None, exit_code=0)
 
@@ -633,7 +648,8 @@ class AzCliCommandInvoker(CommandInvoker):
             pass
         telemetry.set_command_details(self.cli_ctx.data['command'], self.data['output'],
                                       self.cli_ctx.data['safe_params'],
-                                      extension_name=extension_name, extension_version=extension_version)
+                                      extension_name=extension_name, extension_version=extension_version,
+                                      command_preserve_casing=command_preserve_casing)
         if extension_name:
             self.data['command_extension_name'] = extension_name
             self.cli_ctx.logging.log_cmd_metadata_extension_info(extension_name, extension_version)
@@ -696,6 +712,68 @@ class AzCliCommandInvoker(CommandInvoker):
         # note: name start with more than 2 '-' will be treated as value e.g. certs in PEM format
         return [(p.split('=', 1)[0] if p.startswith('--') else p[:2]) for p in args if
                 (p.startswith('-') and not p.startswith('---') and len(p) > 1)]
+
+    @staticmethod
+    def _is_top_level_help_request(args):
+        """Determine if this is a top-level help request (az --help or just az).
+
+        Returns True for both 'az' with no args and 'az --help' so we can use
+        cached data without loading all modules.
+        """
+        if not args:
+            return True
+
+        for arg in args:
+            if arg in ('--help', '-h', 'help'):
+                return True
+            if not arg.startswith('-'):
+                return False
+
+        return False
+
+    def _should_use_command_index(self):
+        """Check if command index optimization is enabled."""
+        return self.cli_ctx.config.getboolean('core', 'use_command_index', fallback=True)
+
+    def _should_show_cached_help(self, args):
+        return (self._should_use_command_index() and
+                self._is_top_level_help_request(args) and
+                not self.cli_ctx.data.get('completer_active'))
+
+    def _try_show_cached_help(self, command_preserve_casing, args):
+        """Try to show cached help for top-level help request.
+
+        Returns CommandResultItem if cached help was shown, None otherwise.
+        """
+        from azure.cli.core import CommandIndex
+        command_index = CommandIndex(self.cli_ctx)
+        help_index = command_index.get_help_index()
+
+        if help_index:
+            # Display cached help using the help system
+            self.help.show_cached_help(help_index, args)
+            telemetry.set_command_details('az', command_preserve_casing=command_preserve_casing, parameters=['--help'])
+            telemetry.set_success(summary='show help')
+            return CommandResultItem(None, exit_code=0)
+
+        return None
+
+    def _save_help_to_command_index(self, subparser):
+        """Extract help data from parser and save to command index for future fast access."""
+        from azure.cli.core import CommandIndex
+        from azure.cli.core._help import CliGroupHelpFile, extract_help_index_data
+
+        command_index = CommandIndex(self.cli_ctx)
+        help_file = CliGroupHelpFile(self.help, '', subparser)
+        help_file.load(subparser)
+
+        groups, commands = extract_help_index_data(help_file)
+
+        # Store in the command index
+        help_index_data = {'groups': groups, 'commands': commands}
+        if groups or commands:
+            command_index.set_help_index(help_index_data)
+            logger.debug("Cached %d groups and %d commands for fast access", len(groups), len(commands))
 
     def _run_job(self, expanded_arg, cmd_copy):
         params = self._filter_params(expanded_arg)
@@ -1131,22 +1209,17 @@ def _load_command_loader(loader, args, name, prefix):
             logger.debug("Module '%s' is missing `get_command_loader` entry.", name)
 
     command_table = {}
+    command_loader = None
 
     if loader_cls:
         command_loader = loader_cls(cli_ctx=loader.cli_ctx)
-        loader.loaders.append(command_loader)  # This will be used by interactive
         if command_loader.supported_resource_type():
             command_table = command_loader.load_command_table(args)
-            if command_table:
-                for cmd in list(command_table.keys()):
-                    # TODO: If desired to for extension to patch module, this can be uncommented
-                    # if loader.cmd_to_loader_map.get(cmd):
-                    #    loader.cmd_to_loader_map[cmd].append(command_loader)
-                    # else:
-                    loader.cmd_to_loader_map[cmd] = [command_loader]
     else:
         logger.debug("Module '%s' is missing `COMMAND_LOADER_CLS` entry.", name)
-    return command_table, command_loader.command_group_table
+
+    group_table = command_loader.command_group_table if command_loader else {}
+    return command_table, group_table, command_loader
 
 
 def _load_extension_command_loader(loader, args, ext):

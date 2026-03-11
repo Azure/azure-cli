@@ -2681,6 +2681,16 @@ examples:
         az storage fs file upload --source a.txt -p dir/a.txt -f fsname --account-name myadlsaccount --account-key 0000-0000
 """
 
+helps['storage fs file generate-sas'] = """
+type: command
+short-summary: Generate a SAS token for file in ADLS Gen2 account.
+examples:
+  - name: Generate a sas token for file.
+    text: |
+        end=`date -u -d "30 minutes" '+%Y-%m-%dT%H:%MZ'`
+        az storage fs file generate-sas -p dir/a.txt --file-system myfilesystem --https-only --permissions dlrw --expiry $end -o tsv
+"""
+
 helps['storage fs metadata'] = """
 type: group
 short-summary: Manage the metadata for file system.

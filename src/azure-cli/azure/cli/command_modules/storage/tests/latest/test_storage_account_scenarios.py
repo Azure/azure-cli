@@ -7,8 +7,8 @@ import time
 import unittest
 
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, JMESPathCheck, ResourceGroupPreparer,
-                               StorageAccountPreparer, api_version_constraint, live_only, LiveScenarioTest,
-                               record_only, KeyVaultPreparer, JMESPathCheckExists)
+                               StorageAccountPreparer, live_only, LiveScenarioTest,
+                               record_only, KeyVaultPreparer, JMESPathCheckExists, JMESPathCheckNotExists)
 from azure.cli.testsdk.decorators import serial_test
 from azure.cli.core.profiles import ResourceType
 from ..storage_test_util import StorageScenarioMixin
@@ -147,6 +147,68 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('storage account network-rule list -g {rg} --account-name {sa}', checks=[
             JMESPathCheck('length(resourceAccessRules)', 1)
         ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_storage_account_ipv6', location='eastus2euap')
+    def test_storage_account_ipv6(self, resource_group):
+        self.kwargs = {
+            'rg': resource_group,
+            'sa': self.create_random_name('sa', 24),
+            'ip1': '25.1.2.3',
+            'ip2': '25.2.0.0/24',
+            'ipv6_1': 'fe00:0:0:1::92',
+            'ipv6_2': 'fe00::1:0:0:1:92',
+            'ipv6_3': 'fe00:0:0:1::/111',
+        }
+        # test storage account create/update with ipv6 settings
+        self.cmd('storage account create -g {rg} -n {sa} --publish-ipv6-endpoint true',
+                 checks=[
+                     JMESPathCheck('dualStackEndpointPreference.publishIpv6Endpoint', True),
+                     JMESPathCheckExists('primaryEndpoints.blob'),
+                     JMESPathCheckExists('primaryEndpoints.ipv6Endpoints')
+                 ])
+
+        self.cmd('storage account update -g {rg} -n {sa} --publish-ipv6-endpoint false',
+                 checks=[
+                     JMESPathCheck('dualStackEndpointPreference.publishIpv6Endpoint', False),
+                     JMESPathCheckExists('primaryEndpoints.blob'),
+                     JMESPathCheckNotExists('primaryEndpoints.ipv6Endpoints')
+        ])
+
+        # test add ipv4 addresses as ipv6 and ipv6 address as ipv4, should fail
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('storage account network-rule add -g {rg} --account-name {sa} --ip-address {ipv6_1} {ip2} '
+                     '--ipv6-address {ip1} {ipv6_2}')
+
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('storage account network-rule add -g {rg} --account-name {sa} --ip-address {ipv6_1} {ipv6_2} '
+                     '--ipv6-address {ip1} {ip2}')
+
+        # test add both ipv4 and ipv6 addresses
+        self.cmd('storage account network-rule add -g {rg} --account-name {sa} --ip-address {ip1} {ip2} '
+                 '--ipv6-address {ipv6_1} {ipv6_2}')
+        self.cmd('storage account network-rule list -g {rg} --account-name {sa}', checks=[
+            JMESPathCheck('length(ipRules)', 2),
+            JMESPathCheck('length(ipv6Rules)', 2)
+        ])
+
+        # test add multiple ip addresses with overlaps between them
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('storage account network-rule add -g {rg} --account-name {sa} --ipv6-address {ipv6_1} {ipv6_3}')
+        # test add multiple ip addresses with some overlaps with the server
+        self.cmd('storage account network-rule add -g {rg} --account-name {sa} --ipv6-address {ipv6_3}')
+        self.cmd('storage account network-rule list -g {rg} --account-name {sa}', checks=[
+            JMESPathCheck('length(ipRules)', 2),
+            JMESPathCheck('length(ipv6Rules)', 2)
+        ])
+
+        # test remove multiple ip addresses
+        self.cmd('storage account network-rule remove -g {rg} --account-name {sa} --ipv6-address {ipv6_1}')
+        self.cmd('storage account network-rule list -g {rg} --account-name {sa}', checks=[
+            JMESPathCheck('length(ipRules)', 2),
+            JMESPathCheck('length(ipv6Rules)', 1)
+        ])
+
 
     @serial_test()
     @ResourceGroupPreparer(location='southcentralus')
@@ -374,46 +436,43 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('az storage account update -n {} --allow-blob-public-access false'.format(storage_account),
                  checks=[JMESPathCheck('allowBlobPublicAccess', False)])
 
-    @unittest.skip('Failure due to service behavior change')
     @ResourceGroupPreparer(location='eastus', name_prefix='cli_storage_account')
     def test_storage_create_with_min_tls(self, resource_group):
         name1 = self.create_random_name(prefix='cli', length=24)
         name2 = self.create_random_name(prefix='cli', length=24)
         name3 = self.create_random_name(prefix='cli', length=24)
         name4 = self.create_random_name(prefix='cli', length=24)
-        self.cmd('az storage account create -n {} -g {}'.format(name1, resource_group),
-                 checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_0')])
 
-        self.cmd('az storage account create -n {} -g {} --min-tls-version TLS1_0'.format(name2, resource_group),
-                 checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_0')])
-
-        self.cmd('az storage account create -n {} -g {} --min-tls-version TLS1_1'.format(name3, resource_group),
-                 checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_1')])
-
-        self.cmd('az storage account create -n {} -g {} --min-tls-version TLS1_2'.format(name4, resource_group),
+        self.cmd('az storage account create -n {} -g {} --min-tls-version TLS1_0'.format(name1, resource_group),
                  checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_2')])
 
-        self.cmd('az storage account create -n {} -g {} --min-tls-version TLS1_3'.format(name4, resource_group),
-                 checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_3')])
+        self.cmd('az storage account create -n {} -g {} --min-tls-version TLS1_1'.format(name2, resource_group),
+                 checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_2')])
 
-    @unittest.skip('Failure due to service behavior change')
+        self.cmd('az storage account create -n {} -g {} --min-tls-version TLS1_2'.format(name3, resource_group),
+                 checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_2')])
+
+        # setting minimumTlsVersion 1.3 is not supported yet,
+        # https://learn.microsoft.com/en-us/azure/storage/common/transport-layer-security-configure-minimum-version?tabs=portal
+        # self.cmd('az storage account create -n {} -g {} --min-tls-version TLS1_3'.format(name4, resource_group),
+        #          checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_3')])
+
     @ResourceGroupPreparer(location='eastus', name_prefix='cli_storage_account')
     @StorageAccountPreparer(name_prefix='tls')
     def test_storage_update_with_min_tls(self, storage_account, resource_group):
-        self.cmd('az storage account show -n {} -g {}'.format(storage_account, resource_group),
-                 checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_0')])
+        self.cmd('az storage account update -n {} -g {} --min-tls-version TLS1_0'.format(
+            storage_account, resource_group), checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_2')])
 
         self.cmd('az storage account update -n {} -g {} --min-tls-version TLS1_1'.format(
-            storage_account, resource_group), checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_1')])
+            storage_account, resource_group), checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_2')])
 
         self.cmd('az storage account update -n {} -g {} --min-tls-version TLS1_2'.format(
             storage_account, resource_group), checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_2')])
 
-        self.cmd('az storage account update -n {} -g {} --min-tls-version TLS1_3'.format(
-            storage_account, resource_group), checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_3')])
-
-        self.cmd('az storage account update -n {} -g {} --min-tls-version TLS1_0'.format(
-            storage_account, resource_group), checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_0')])
+        # setting minimumTlsVersion 1.3 is not supported yet,
+        # https://learn.microsoft.com/en-us/azure/storage/common/transport-layer-security-configure-minimum-version?tabs=portal
+        # self.cmd('az storage account update -n {} -g {} --min-tls-version TLS1_3'.format(
+        #     storage_account, resource_group), checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_3')])
 
     @ResourceGroupPreparer(location='eastus', name_prefix='cli_storage_account_routing')
     def test_storage_account_with_routing_preference(self, resource_group):
@@ -2276,6 +2335,39 @@ class FileServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('protocolSettings.smb.channelEncryption', "AES-128-CCM;AES-128-GCM;AES-256-GCM"),
             JMESPathCheck('protocolSettings.smb.kerberosTicketEncryption', "RC4-HMAC;AES-256"),
             JMESPathCheck('protocolSettings.smb.versions', "SMB2.1;SMB3.0;SMB3.1.1"))
+
+    @ResourceGroupPreparer(name_prefix='cli_file_eit')
+    @StorageAccountPreparer(name_prefix='fileeit', kind='FileStorage', sku='Premium_LRS', location='eastus2euap')
+    def test_storage_account_file_smb_nfs_encryption_in_transit(self, resource_group, storage_account):
+        self.kwargs.update({
+            'sa': storage_account,
+            'rg': resource_group,
+            'cmd': 'storage account file-service-properties'
+        })
+
+        self.cmd(
+            '{cmd} update --require-smb-encryption-in-transit --require-nfs-encryption-in-transit '
+            '-n {sa} -g {rg}').assert_with_checks(
+            JMESPathCheck('protocolSettings.smb.encryptionInTransit.required', True),
+            JMESPathCheck('protocolSettings.nfs.encryptionInTransit.required', True))
+
+        self.cmd(
+            '{cmd} update --require-smb-encryption-in-transit False --require-nfs-encryption-in-transit False'
+            ' -n {sa} -g {rg}').assert_with_checks(
+            JMESPathCheck('protocolSettings.smb.encryptionInTransit.required', False),
+            JMESPathCheck('protocolSettings.nfs.encryptionInTransit.required', False))
+
+        self.cmd(
+            '{cmd} update --require-smb-encryption-in-transit'
+            ' -n {sa} -g {rg}').assert_with_checks(
+            JMESPathCheck('protocolSettings.smb.encryptionInTransit.required', True),
+            JMESPathCheck('protocolSettings.nfs.encryptionInTransit.required', False))
+
+        self.cmd(
+            '{cmd} update --require-nfs-encryption-in-transit'
+            ' -n {sa} -g {rg}').assert_with_checks(
+            JMESPathCheck('protocolSettings.smb.encryptionInTransit.required', True),
+            JMESPathCheck('protocolSettings.nfs.encryptionInTransit.required', True))
 
 
 class StorageAccountPrivateLinkScenarioTest(ScenarioTest):

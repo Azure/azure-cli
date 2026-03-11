@@ -141,6 +141,7 @@ def load_arguments(self, _):
             c.argument('virtual_network_rules', nargs='+', validator=validate_virtual_network_rules, help='ACL\'s for virtual network')
             c.argument('enable_multiple_write_locations', arg_type=get_three_state_flag(), help="Enable Multiple Write Locations")
             c.argument('disable_key_based_metadata_write_access', arg_type=get_three_state_flag(), help="Disable write operations on metadata resources (databases, containers, throughput) via account keys")
+            c.argument('disable_local_auth', arg_type=get_three_state_flag(), help="Disable key-based authentication on the Cosmos DB account")
             c.argument('public_network_access', options_list=['--public-network-access', '-p'], arg_type=get_enum_type(['ENABLED', 'DISABLED', 'SECUREDBYPERIMETER']), help="Sets public network access in server to either Enabled, Disabled, or SecuredByPerimeter.")
             c.argument('enable_analytical_storage', arg_type=get_three_state_flag(), help="Flag to enable log storage on the account.")
             c.argument('network_acl_bypass', arg_type=get_enum_type(NetworkAclBypass), options_list=['--network-acl-bypass'], help="Flag to enable or disable Network Acl Bypass.")
@@ -441,7 +442,7 @@ def load_arguments(self, _):
         c.argument('default_identity', help="The primary identity to access key vault in CMK related features. e.g. 'FirstPartyIdentity', 'SystemAssignedIdentity' and more.")
         c.argument('public_network_access', options_list=['--public-network-access', '-p'], arg_type=get_enum_type(['ENABLED', 'DISABLED']), help="Sets public network access in server to either Enabled or Disabled.")
         c.argument('disable_ttl', options_list=['--disable-ttl', '-d'], arg_type=get_three_state_flag(), help="Enable or disable restoring with ttl disabled.")
-        c.argument('source_backup_location', help="This is the location of the source account where backups are located. Provide this value if the source and target are in different locations.", is_preview=True)
+        c.argument('source_backup_location', help="This is the location of the source account where backups are located. Provide this value if the source and target are in different locations.")
 
     # Mongo role definition
     with self.argument_context('cosmosdb mongodb role definition') as c:
