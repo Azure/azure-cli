@@ -11,9 +11,6 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "vm host update",
-)
 class Update(AAZCommand):
     """Update a dedicated host.
 
