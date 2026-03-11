@@ -5944,12 +5944,12 @@ def get_dedicated_host_group_instance_view(cmd, host_group_name, resource_group_
     return VmHostGroupShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
-def update_dedicated_host_group(cmd, host_group_name, resource_group_name):
+def update_dedicated_host_group(cmd, host_group_name, resource_group_name, **kwargs):
     from .aaz.latest.vm.host.group import Update as VmHostGroupUpdate
-    command_args = {
-        'name': host_group_name,
-        'resource_group': resource_group_name
-    }
+    from .operations.vm_host_group import convert_show_result_to_snake_case
+    command_args = convert_show_result_to_snake_case(kwargs['dedicated_host_group'])
+    command_args['name'] = host_group_name
+    command_args['resource_group'] = resource_group_name
     return VmHostGroupUpdate(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 def create_dedicated_host(cmd, client, host_group_name, host_name, resource_group_name, sku, platform_fault_domain=None,
