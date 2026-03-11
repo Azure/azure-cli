@@ -5953,32 +5953,31 @@ def create_dedicated_host(cmd, host_group_name, host_name, resource_group_name, 
     return VmHostCreate(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
-def get_dedicated_host_instance_view(cmd, host_group_name, host_name, resource_group_name):
+def get_dedicated_host(cmd, host_group_name, host_name, resource_group_name, expand=None):
     from .aaz.latest.vm.host import Show as VmHostShow
     command_args = {
         'host_group_name': host_group_name,
         'host_name': host_name,
         'resource_group': resource_group_name,
-        'expand': 'instanceView'
     }
+    if expand:
+        command_args['expand'] = expand
     return VmHostShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
+def get_dedicated_host_instance_view(cmd, host_group_name, host_name, resource_group_name):
+    return get_dedicated_host(cmd, host_group_name, host_name, resource_group_name, 'instanceView')
+
+
 def update_dedicated_host(cmd, host_group_name, host_name, resource_group_name, **kwargs):
-    from .aaz.latest.vm.host import Update as VmHostUpdate, Show as VmHostShow
+    from .aaz.latest.vm.host import Update as VmHostUpdate
     from .operations.vm_host import convert_show_result_to_snake_case
-    command_args = {
-        'host_group_name': host_group_name,
-        'host_name': host_name,
-        'resource_group': resource_group_name,
-    }
-    vm_host = VmHostShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+    vm_host = kwargs['dedicated_host']
     vm_host = convert_show_result_to_snake_case(vm_host)
     vm_host['host_group_name'] = host_group_name
     vm_host['host_name'] = host_name
     vm_host['resource_group'] = resource_group_name
     return VmHostUpdate(cli_ctx=cmd.cli_ctx)(command_args=vm_host)
-
 # endregion
 
 
