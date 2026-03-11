@@ -5944,6 +5944,14 @@ def get_dedicated_host_group_instance_view(cmd, host_group_name, resource_group_
     return VmHostGroupShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
+def update_dedicated_host_group(cmd, host_group_name, resource_group_name):
+    from .aaz.latest.vm.host.group import Update as VmHostGroupUpdate
+    command_args = {
+        'name': host_group_name,
+        'resource_group': resource_group_name
+    }
+    return VmHostGroupUpdate(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+
 def create_dedicated_host(cmd, client, host_group_name, host_name, resource_group_name, sku, platform_fault_domain=None,
                           auto_replace_on_failure=None, license_type=None, location=None, tags=None):
     DedicatedHostType = cmd.get_models('DedicatedHost')
