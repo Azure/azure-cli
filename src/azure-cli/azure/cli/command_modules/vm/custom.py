@@ -5119,6 +5119,10 @@ def attach_managed_data_disk_to_vmss(cmd, resource_group_name, vmss_name, size_g
         from .operations.vmss import VMSSCreate, convert_show_result_to_snake_case
         vmss = get_vmss_by_aaz(cmd, resource_group_name, vmss_name)
         # Avoid unnecessary permission error
+        if 'virtualMachineProfile' not in vmss:
+            vmss['virtualMachineProfile'] = {}
+        if 'storageProfile' not in vmss['virtualMachineProfile']:
+            vmss['virtualMachineProfile']['storageProfile'] = {}
         vmss['virtualMachineProfile']['storageProfile']['imageReference'] = None
         # pylint: disable=no-member
         _init_data_disk(vmss['virtualMachineProfile']['storageProfile'], lun)
@@ -5135,6 +5139,8 @@ def attach_managed_data_disk_to_vmss(cmd, resource_group_name, vmss_name, size_g
     }
     vmss_vm = VMSSVMSShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
     # Avoid unnecessary permission error
+    if 'storageProfile' not in vmss_vm:
+        vmss_vm['storageProfile'] = {}
     vmss_vm['storageProfile']['imageReference'] = None
     _init_data_disk(vmss_vm['storageProfile'], lun, disk)
     vmss_vm = convert_show_result_to_snake_case(vmss_vm)
