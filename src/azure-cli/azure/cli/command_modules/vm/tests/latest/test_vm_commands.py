@@ -13974,7 +13974,7 @@ class VMUltraSSDLivedataDiskIopsMbpsScenarioTest(ScenarioTest):
 class VmRestorePointInstantAccessScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_rp_ia', location='eastus2euap')
-    @AllowLargeResponse(size_kb=999999)
+    @AllowLargeResponse(size_kb=99999)
     def test_vm_restore_point_instant_access(self, resource_group):
         self.kwargs.update({
             'vm': 'testVm1',
@@ -13989,7 +13989,7 @@ class VmRestorePointInstantAccessScenarioTest(ScenarioTest):
 
         # Create VM
         vm = self.cmd('vm create -g {rg} -n {vm} --image Win2022Datacenter --admin-username azureuser --admin-password '
-                      '"Password12345!" --size Standard_D2s_v3 --vnet-name {vnet} '
+                      '"Password12345!" --size Standard_D2s_v3 --vnet-name {vnet} -l {location} '
                       '--subnet {subnet} --public-ip-address {pip} --zone 1').get_output_in_json()
 
         self.kwargs.update({
