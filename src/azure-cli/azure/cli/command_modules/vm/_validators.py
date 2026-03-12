@@ -2713,8 +2713,8 @@ def _validate_vmss_create_auto_zone_placement(namespace):
             )
 
         if max_instance_percent < 1 or max_instance_percent > 100:
-            raise ArgumentUsageError("usage error: (--max-instance-percent / --value-max-instance-percent-per-zone) must be an "
-                           "integer between 1 and 100.")
+            raise ArgumentUsageError("usage error: (--max-instance-percent / --value-max-instance-percent-per-zone) "
+                                     "must be an integer between 1 and 100.")
 
 
 def _validate_count(namespace):
