@@ -6446,10 +6446,6 @@ def restore_point_create(cmd,
     }
 
     if instant_access_duration_minutes is not None:
-        if instant_access_duration_minutes < 60 or instant_access_duration_minutes > 300:
-            raise ArgumentUsageError(
-                '--instant-access-duration/--instant-access-duration-minutes must be between 60 and 300 minutes.')
-
         parameters['instant_access_duration_minutes'] = instant_access_duration_minutes
 
     if exclude_disks is not None:
