@@ -4135,6 +4135,10 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
     is_confidential_vm = security_type and security_type.lower() == 'confidentialvm'
     if (is_trusted_launch or is_confidential_vm) and enable_integrity_monitoring:
         vmss = get_vmss_by_aaz(cmd, resource_group_name, vmss_name)
+        if not vmss.get('virtualMachineProfile'):
+            vmss['virtualMachineProfile'] = {}
+        if not vmss['virtualMachineProfile'].get('storageProfile'):
+            vmss['virtualMachineProfile']['storageProfile'] = {}
         vmss['virtualMachineProfile']['storageProfile']['imageReference'] = None
         os_type = vmss.get('virtualMachineProfile', {}).get('storageProfile', {}).get('osDisk', {}).get('osType')
         if os_type == 'Linux':
@@ -4149,16 +4153,18 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             'name': 'GuestAttestation',
             'autoUpgradeMinorVersion': True,
             'enableAutomaticUpgrade': not disable_integrity_monitoring_autoupgrade,
+            'protected_settings': None,
             'publisher': publisher,
+            'settings': None,
+            'provision_after_extensions': [],
             'typeHandlerVersion': version,
             'type': 'GuestAttestation'
         }
-        if not vmss.get('virtualMachineProfile', {}).get('extensionProfile'):
+        if not vmss['virtualMachineProfile'].get('extensionProfile'):
             vmss['virtualMachineProfile']['extensionProfile'] = {'extensions': []}
         vmss['virtualMachineProfile']['extensionProfile']['extensions'].append(ext)
         try:
-            from .operations.vmss import convert_show_result_to_snake_case
-            from .operations.vmss import VMSSCreate
+            from .operations.vmss import convert_show_result_to_snake_case, VMSSCreate
             vmss = convert_show_result_to_snake_case(vmss)
             vmss['resource_group'] = resource_group_name
             vmss['vm_scale_set_name'] = vmss_name
