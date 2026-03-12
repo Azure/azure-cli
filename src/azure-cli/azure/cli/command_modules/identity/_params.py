@@ -21,9 +21,7 @@ def load_arguments(self, _):
         c.argument('location', get_location_type(self.cli_ctx), required=False)
         c.argument('tags', tags_type)
         c.argument('isolation_scope', get_enum_type(['None', 'Regional']), required=False, help='Identity isolation scope, used to restrict identity assignment within an Azure region.')
-        c.argument('resource_restriction', help='Identity resource restriction, used to restrict the resources that can be assigned to the identity.')
 
     with self.argument_context('identity update') as c:
         c.argument('tags', tags_type)
         c.argument('isolation_scope', get_enum_type(['None', 'Regional']), required=False, help='Identity isolation scope, used to restrict identity assignment within an Azure region.')
-        c.argument('resource_restriction', help='Identity resource restriction, used to restrict the resources that can be assigned to the identity.')

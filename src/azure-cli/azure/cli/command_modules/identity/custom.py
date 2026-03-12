@@ -11,27 +11,23 @@ def list_user_assigned_identities(cmd, resource_group_name=None):
     return client.user_assigned_identities.list_by_subscription()
 
 
-def create_identity(client, resource_group_name, resource_name, location, tags=None, isolation_scope=None, resource_restriction=None):
+def create_identity(client, resource_group_name, resource_name, location, tags=None, isolation_scope=None):
     parameters = {}
     parameters['location'] = location
     if tags is not None:
         parameters['tags'] = tags
     if isolation_scope is not None:
         parameters['isolationScope'] = isolation_scope
-    if resource_restriction is not None:
-        parameters['resourceRestriction'] = resource_restriction
     return client.create_or_update(resource_group_name=resource_group_name,
                                    resource_name=resource_name,
                                    parameters=parameters)
 
 
-def update_identity(instance, tags=None, isolation_scope=None, resource_restriction=None):
+def update_identity(instance, tags=None, isolation_scope=None):
     parameters = {}
     if tags is not None:
         parameters['tags'] = tags
     parameters['isolationScope'] = isolation_scope or instance.isolation_scope
-    if resource_restriction is not None:
-        parameters['resourceRestriction'] = resource_restriction or instance.resource_restriction
     return parameters
 
 
