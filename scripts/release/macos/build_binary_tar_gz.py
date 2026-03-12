@@ -24,6 +24,7 @@ Archive Contents:
 ├── LICENSE
 ├── NOTICE.txt
 ├── README.md
+├── ThirdPartyNotices.txt
 ├── bin/
 │   └── az → ../libexec/bin/az
 ├── completions/
@@ -277,7 +278,7 @@ def _create_launcher_script(bin_dir: Path, python_version: str) -> None:
 
 
 def _copy_legal_files(install_dir: Path) -> None:
-    """Copy legal and documentation files from the project root into the install directory."""
+    """Copy legal and documentation files into the install directory."""
     print("\n=== Copying legal files ===")
 
     for filename in ("LICENSE", "NOTICE.txt", "README.md"):
@@ -288,6 +289,14 @@ def _copy_legal_files(install_dir: Path) -> None:
             print(f"Copied {filename}: {dst}")
         else:
             print(f"Warning: {filename} not found at {src}")
+
+    tpn_src = Path(__file__).resolve().parent / "resources" / "ThirdPartyNotices.txt"
+    if tpn_src.exists():
+        tpn_dst = install_dir / "ThirdPartyNotices.txt"
+        shutil.copy2(tpn_src, tpn_dst)
+        print(f"Copied ThirdPartyNotices.txt: {tpn_dst}")
+    else:
+        print(f"Warning: ThirdPartyNotices.txt not found at {tpn_src}")
 
 
 def _generate_shell_completions(venv_dir: Path, install_dir: Path) -> None:
