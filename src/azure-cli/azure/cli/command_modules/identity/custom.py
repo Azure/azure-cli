@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+
 def list_user_assigned_identities(cmd, resource_group_name=None):
     from azure.cli.command_modules.identity._client_factory import _msi_client_factory
     client = _msi_client_factory(cmd.cli_ctx)
@@ -27,6 +28,7 @@ def update_identity(instance, tags=None, isolation_scope=None):
     parameters = {}
     if tags is not None:
         parameters['tags'] = tags
+
     parameters['isolationScope'] = isolation_scope or instance.isolation_scope
     return parameters
 
