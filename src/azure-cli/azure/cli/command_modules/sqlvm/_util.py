@@ -256,15 +256,10 @@ def create_ama_and_dcra(cmd, curr_subscription, resource_group_name,
         dcra_url = f"{base_url}{dcra_name}{api_version}"
         if not does_name_exist(cmd, dcra_url):
             break
-    from azure.cli.command_modules.vm.custom import get_vm
+    from azure.cli.command_modules.vm.custom import get_vm_by_aaz
 
-    vm = get_vm(
-        cmd,
-        resource_group_name,
-        sql_virtual_machine_name,
-        'instanceView')
-    amainstall = build_ama_install_resource(
-        sql_virtual_machine_name, vm.location)
+    vm = get_vm_by_aaz(cmd, resource_group_name, sql_virtual_machine_name, 'instanceView')
+    amainstall = build_ama_install_resource(sql_virtual_machine_name, vm.get('location'))
 
     master_template.add_resource(amainstall)
 

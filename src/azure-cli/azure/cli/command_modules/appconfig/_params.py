@@ -189,6 +189,7 @@ def load_arguments(self, _):
         c.argument('no_replica', help='Proceed without replica creation for premium tier store.', arg_type=get_three_state_flag())
         c.argument('arm_auth_mode', arg_type=arm_auth_mode_arg_type)
         c.argument('enable_arm_private_network_access', arg_type=enable_arm_private_network_access_arg_type)
+        c.argument('appinsights_resource', help='Resource ID of the Application Insights resource to link with this App Configuration store.')
         c.argument('kv_revision_retention_period', arg_type=kv_revision_retention_period_arg_type)
         c.argument('azure_front_door_profile', help='Resource ID of an Azure Front Door profile to link to this App Configuration store.', is_preview=True)
 
@@ -201,6 +202,7 @@ def load_arguments(self, _):
         c.argument('enable_purge_protection', options_list=['--enable-purge-protection', '-p'], arg_type=get_three_state_flag(), help='Property specifying whether protection against purge is enabled for this App Configuration store. Setting this property to true activates protection against purge for this App Configuration store and its contents. Enabling this functionality is irreversible.')
         c.argument('arm_auth_mode', arg_type=arm_auth_mode_arg_type)
         c.argument('enable_arm_private_network_access', arg_type=enable_arm_private_network_access_arg_type)
+        c.argument('appinsights_resource', help='Resource ID of the Application Insights resource to link with this App Configuration store.')
         c.argument('kv_revision_retention_period', arg_type=kv_revision_retention_period_arg_type)
         c.argument('azure_front_door_profile', help='Resource ID of an Azure Front Door profile to link to this App Configuration store. Pass "" to unlink a Front Door profile.', is_preview=True)
 
@@ -376,6 +378,7 @@ def load_arguments(self, _):
         c.argument('key', validator=validate_feature_key, help='Key of the feature flag. Key must start with the ".appconfig.featureflag/" prefix. Key cannot contain the "%" character. Default key is the reserved prefix ".appconfig.featureflag/" + feature name.')
         c.argument('requirement_type', arg_type=get_enum_type([FeatureFlagConstants.REQUIREMENT_TYPE_ALL, FeatureFlagConstants.REQUIREMENT_TYPE_ANY]),
                    help='Requirement type determines if filters should use "Any" or "All" logic when evaluating the state of a feature.')
+        c.argument('telemetry_enabled', arg_type=get_three_state_flag(), help='Enable or disable telemetry for the feature flag.')
         c.argument('tags', arg_type=tags_type)
 
     with self.argument_context('appconfig feature delete') as c:

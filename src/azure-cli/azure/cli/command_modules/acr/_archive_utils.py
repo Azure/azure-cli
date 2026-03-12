@@ -63,8 +63,7 @@ def upload_source_code(cmd, client,
 def _pack_source_code(source_location, tar_file_path, docker_file_path, docker_file_in_tar):
     logger.warning("Packing source code into tar to upload...")
 
-    original_docker_file_name = os.path.basename(docker_file_path.replace("\\", os.sep))
-    ignore_list, ignore_list_size = _load_dockerignore_file(source_location, original_docker_file_name)
+    ignore_list, ignore_list_size = _load_dockerignore_file(source_location, docker_file_path)
     common_vcs_ignore_list = {'.git', '.gitignore', '.bzr', 'bzrignore', '.hg', '.hgignore', '.svn'}
     # Directories that should be completely excluded (no recursive descent) for performance reasons.
     # These typically contain large numbers of files that are not needed for container build context.
@@ -156,15 +155,15 @@ class IgnoreRule:  # pylint: disable=too-few-public-methods
 
 
 def _load_dockerignore_file(source_location, original_docker_file_name):
+    docker_file_name = original_docker_file_name.replace("\\", os.sep)
     # reference: https://docs.docker.com/engine/reference/builder/#dockerignore-file
     docker_ignore_file = os.path.join(source_location, ".dockerignore")
-    docker_ignore_file_override = None
-    if original_docker_file_name != "Dockerfile":
-        docker_ignore_file_override = os.path.join(
-            source_location, "{}.dockerignore".format(original_docker_file_name))
-        if os.path.exists(docker_ignore_file_override):
-            logger.warning("Overriding .dockerignore with %s", docker_ignore_file_override)
-            docker_ignore_file = docker_ignore_file_override
+    docker_ignore_file_override = os.path.join(
+        source_location, "{}.dockerignore".format(docker_file_name)
+    )
+    if os.path.exists(docker_ignore_file_override):
+        logger.warning("Overriding .dockerignore with %s", docker_ignore_file_override)
+        docker_ignore_file = docker_ignore_file_override
 
     if not os.path.exists(docker_ignore_file):
         return None, 0
