@@ -1520,7 +1520,7 @@ def load_arguments(self, _):
         c.argument('source_data_disk_resource', nargs='+', help='Resource Id of the source data disk')
         c.argument('data_disk_restore_point_encryption_set', nargs='+', help='Customer managed data disk encryption set resource id')
         c.argument('data_disk_restore_point_encryption_type', nargs='+', arg_type=get_enum_type(self.get_models('RestorePointEncryptionType')), help='The type of key used to encrypt the data of the data disk restore point.')
-        c.argument('instant_access_duration_minutes', options_list=['--instant-access-duration-minutes', '--instant-access-duration', '--ia-duration'],
+        c.argument('instant_access_duration_minutes', options_list=['--instant-access-duration-minutes', '--instant-access-duration', '--ia-duration'], type=int,
                    help='This property determines the time in minutes the snapshot is retained as instant access for '
                         'restoring Premium SSD v2 or Ultra disk with fast restore performance in this restore point.')
 
