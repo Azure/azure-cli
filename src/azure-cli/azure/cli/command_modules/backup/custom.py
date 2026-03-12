@@ -917,7 +917,6 @@ def enable_protection_for_vm(cmd, client, resource_group_name, vault_name, vm, p
     vm = VMShow(cli_ctx=cmd.cli_ctx)(command_args={
         'resource_group': vm_rg,
         'vm_name': vm_name,
-        'expand': 'instanceView'
     })
     vault = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name)
     policy = show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name, policy_name)
