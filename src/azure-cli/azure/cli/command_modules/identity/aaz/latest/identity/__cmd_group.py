@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "identity",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Manage Managed Identity
+    """Manage Identity
     """
     pass
 

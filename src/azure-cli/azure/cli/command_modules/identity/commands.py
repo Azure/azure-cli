@@ -19,10 +19,8 @@ def load_command_table(self, _):
         client_factory=_msi_operations_operations
     )
     with self.command_group('identity', identity_sdk, client_factory=_msi_user_identities_operations) as g:
-        # Note: 'create', 'update', and 'show' commands are defined
+        # Note: 'create', 'update', 'list', 'delete' and 'show' commands are defined
         # via AAZ generated code for the latest preview version.
-        g.command('delete', 'delete')
-        g.custom_command('list', 'list_user_assigned_identities')
         g.custom_command('list-resources', 'list_identity_resources', min_api='2021-09-30-preview')
 
     with self.command_group('identity', msi_operations_sdk, client_factory=_msi_operations_operations) as g:
