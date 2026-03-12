@@ -21,7 +21,7 @@ class PostgreSQLFlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
     def _test_flexible_server_upgrade_mgmt(self, resource_group):
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         current_version = '15'
-        new_version = '17'
+        new_version = '18'
         location = DEFAULT_LOCATION
 
         # create server

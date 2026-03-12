@@ -3,9 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import unittest
+import time
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
-LOCATION = "eastus"
-VNET_LOCATION = "eastus"
+LOCATION = "westus"
+VNET_LOCATION = "westus"
 
 # No tidy up of tests required. The resource group is automatically removed
 
@@ -233,7 +234,8 @@ class AzureNetAppFilesBackupPolicyServiceScenarioTest(ScenarioTest):
 
 
         backup_vault = self.cmd("az netappfiles account backup-vault create -g {rg} -a {account_name} -n {vault_name} -l {location} --tags {tags}").get_output_in_json()
-
+        if self.is_live or self.in_recording:
+            time.sleep(220)
         # volume update with backup policy
         self.cmd("az netappfiles volume update -g {rg} -a {account_name} -p %s -v %s --backup-policy-id %s --backup-vault-id %s" %
                      (pool_name, volume_name, backup_policy['id'], backup_vault['id']))

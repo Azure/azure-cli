@@ -619,6 +619,12 @@ def raise_unsupported_error_for_flex_vmss(vmss, error_message):
         raise ArgumentUsageError(error_message)
 
 
+def raise_unsupported_error_for_flex_vmss_by_aaz(vmss, error_message):
+    if vmss.get('orchestrationMode', '').lower() == 'flexible':
+        from azure.cli.core.azclierror import ArgumentUsageError
+        raise ArgumentUsageError(error_message)
+
+
 def is_trusted_launch_supported(supported_features):
     if not supported_features:
         return False
@@ -817,3 +823,12 @@ class UpgradeMode(Enum):
     AUTOMATIC = 'Automatic'
     MANUAL = 'Manual'
     ROLLING = 'Rolling'
+
+
+class OrchestrationServiceNames(Enum):
+    AUTOMATIC_REPAIRS = 'AutomaticRepairs'
+
+
+class OrchestrationServiceStateAction(Enum):
+    RESUME = 'Resume'
+    SUSPEND = 'Suspend'

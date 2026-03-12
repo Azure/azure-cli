@@ -2642,7 +2642,6 @@ class DeploymentStacksTest(ScenarioTest):
             'location': location,
             'template-file': os.path.join(curr_dir, 'simple_template.json').replace('\\', '\\\\'),
             'parameter-file': os.path.join(curr_dir, 'simple_template_params.json').replace('\\', '\\\\'),
-
         })
 
         self.cmd('stack sub create --name {name} --location {location} --template-file "{template-file}" --parameters "{parameter-file}" --deny-settings-mode "none" --action-on-unmanage detachAll --yes', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
@@ -2847,7 +2846,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.kwargs.update({'template-spec-id': template_spec_id})
 
         # create deployment stack with template file and parameter file
-        self.cmd('stack group create --name {name} --resource-group {resource-group}  --template-file "{template-file}" --deny-settings-mode "none" --parameters "{parameter-file}" --yes --description "stack deployment" --aou deleteAll --deny-settings-excluded-principals "principal1 principal2" --deny-settings-excluded-actions "action1 action2" --deny-settings-apply-to-child-scopes', checks=self.check('provisioningState', 'succeeded'))
+        self.cmd('stack group create --name {name} --resource-group {resource-group}  --template-file "{template-file}" --deny-settings-mode "none" --parameters "{parameter-file}" --yes --description "stack deployment" --aou deleteAll --deny-settings-excluded-principals "principal1 principal2" --deny-settings-excluded-actions "action1 action2" --deny-settings-apply-to-child-scopes --vl ProviderNoRbac', checks=self.check('provisioningState', 'succeeded'))
 
         # cleanup
         self.cmd('stack group delete --name {name} --resource-group {resource-group} --action-on-unmanage detachAll --yes')
@@ -3064,12 +3063,12 @@ class DeploymentStacksTest(ScenarioTest):
         })
 
         # create stack
-        self.cmd('stack group create --name {name} --resource-group {resource-group} --template-file "{template-file}" --deny-settings-mode "none" --parameters "{parameter-file}" --aou deleteAll --yes', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
+        self.cmd('stack group create --name {name} --resource-group {resource-group} --template-file "{template-file}" --deny-settings-mode "none" --parameters "{parameter-file}" --aou deleteAll --resources-without-delete-support detach --yes', checks=self.check('provisioningState', 'succeeded')).get_output_in_json()
 
         self.cmd('stack group show --name {name} --resource-group {resource-group}', checks=self.check('name', '{name}'))
 
         # delete stack
-        self.cmd('stack group delete --name {name} --resource-group {resource-group} --action-on-unmanage detachAll --yes')
+        self.cmd('stack group delete --name {name} --resource-group {resource-group} --action-on-unmanage detachAll --rwd detach --yes')
 
         # confirm stack is deleted
         self.cmd('stack group list --resource-group {resource-group}', checks=self.check("length([?name=='{name}'])", 0))
@@ -3083,7 +3082,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('stack group show --name {name} --resource-group {resource-group}', checks=self.check('name', '{name}'))
 
         # delete stack with stack id
-        self.cmd('stack group delete --id {id} --resource-group {resource-group} --action-on-unmanage detachAll --yes')
+        self.cmd('stack group delete --id {id} --resource-group {resource-group} --action-on-unmanage detachAll --rwd fail --yes')
 
         # confirm stack is deleted
         self.cmd('stack group list --resource-group {resource-group}', checks=self.check("length([?name=='{name}'])", 0))
@@ -3092,7 +3091,7 @@ class DeploymentStacksTest(ScenarioTest):
         self.cmd('group create --location {location} --name {resource-group-two}')
 
         # create stack with resource1 to check if resources are being detached on delete
-        self.cmd('stack group create --name {name} -g {resource-group-two} --template-file "{template-file-spec}" --deny-settings-mode "none" --action-on-unmanage detachAll --parameters "name={resource-one}" --yes', checks=self.check('provisioningState', 'succeeded'))
+        self.cmd('stack group create --name {name} -g {resource-group-two} --template-file "{template-file-spec}" --deny-settings-mode "none" --action-on-unmanage detachAll --rwd fail --parameters "name={resource-one}" --yes', checks=self.check('provisioningState', 'succeeded'))
 
         # delete stack set to (default) detach
         self.cmd('stack group delete -g {resource-group-two} --name {name} --action-on-unmanage detachAll --yes')
@@ -3489,7 +3488,7 @@ class DeploymentStacksTest(ScenarioTest):
 
         # validate deployment stack with template file and parameter file: success
         self.cmd(
-            'stack sub validate --name {name} --location {location} --template-file "{template-file}" --deny-settings-mode "none" --parameters "{parameter-file}" --description "stack deployment" --aou detachAll',
+            'stack sub validate --name {name} --location {location} --template-file "{template-file}" --deny-settings-mode "none" --parameters "{parameter-file}" --description "stack deployment" --aou detachAll --vl ProviderNoRbac',
             checks=self.check_pattern(
                 'properties.validatedResources[0].id', r'^/subscriptions/.*/resourceGroups/[^/]+$'))
 

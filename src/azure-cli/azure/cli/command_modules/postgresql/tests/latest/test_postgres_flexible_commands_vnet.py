@@ -34,6 +34,11 @@ class PostgreSQLFlexibleServerVnetMgmtScenarioTest(ScenarioTest):
     def test_postgres_flexible_server_vnet_mgmt_supplied_subnet_id_in_different_rg(self, resource_group_1, resource_group_2):
         self._test_flexible_server_vnet_mgmt_supplied_subnet_id_in_different_rg(resource_group_1, resource_group_2)
 
+    """ @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    def test_postgres_flexible_server_vnet_mgmt_migrate_network(self, resource_group):
+        self._test_postgres_flexible_server_vnet_mgmt_migrate_network(resource_group) """
+
     def _test_flexible_server_vnet_mgmt_existing_supplied_subnetid(self, resource_group):
 
         # flexible-server create
@@ -124,6 +129,14 @@ class PostgreSQLFlexibleServerVnetMgmtScenarioTest(ScenarioTest):
         self.assertEqual(show_result_2['network'][private_dns_zone_key],
                         '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/privateDnsZones/{}'.format(
                             self.get_subscription_id(), resource_group, private_dns_zone_2))
+        
+        # Case 3 : Migrate network of the server
+        self.cmd('postgres flexible-server migrate-network -g {} -n {}'.format(resource_group, servers[0]))
+        
+        show_result_3 = self.cmd('postgres flexible-server show -g {} -n {}'
+                                 .format(resource_group, servers[0])).get_output_in_json()
+
+        self.assertEqual(show_result_3['network']['delegatedSubnetResourceId'], None)
 
         # delete all servers
         self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, servers[0]),

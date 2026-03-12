@@ -358,6 +358,14 @@ example:
     text: az postgres flexible-server wait --exists --resource-group testGroup --name testserver
 """
 
+helps['postgres flexible-server migrate-network'] = """
+type: command
+short-summary: Migrate the network mode of a flexible server.
+examples:
+  - name: Migrate the network mode of a flexible server.
+    text: az postgres flexible-server migrate-network --resource-group testGroup --name testserver
+"""
+
 helps['postgres flexible-server delete'] = """
 type: command
 short-summary: Delete a flexible server.

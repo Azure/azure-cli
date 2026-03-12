@@ -29,7 +29,8 @@ from azure.cli.command_modules.vm._image_builder import ScriptType
 
 from azure.cli.command_modules.monitor.validators import validate_metric_dimension
 from azure.cli.command_modules.monitor.actions import get_period_type
-from ._vm_utils import RebootSetting, VMGuestPatchClassificationWindows, VMGuestPatchClassificationLinux
+from ._vm_utils import (RebootSetting, VMGuestPatchClassificationWindows, VMGuestPatchClassificationLinux,
+                        OrchestrationServiceNames, OrchestrationServiceStateAction)
 
 
 # pylint: disable=too-many-statements, too-many-branches, too-many-locals, too-many-lines
@@ -40,7 +41,6 @@ def load_arguments(self, _):
     UpgradeMode, CachingTypes, OperatingSystemTypes = self.get_models('UpgradeMode', 'CachingTypes', 'OperatingSystemTypes')
     HyperVGenerationTypes = self.get_models('HyperVGenerationTypes')
     DedicatedHostLicenseTypes = self.get_models('DedicatedHostLicenseTypes')
-    OrchestrationServiceNames, OrchestrationServiceStateAction = self.get_models('OrchestrationServiceNames', 'OrchestrationServiceStateAction', operation_group='virtual_machine_scale_sets')
     ReplicationMode = self.get_models('ReplicationMode', operation_group='gallery_image_versions')
     DiskControllerTypes = self.get_models('DiskControllerTypes', operation_group='virtual_machines')
 

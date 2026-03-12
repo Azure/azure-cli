@@ -4,14 +4,14 @@
 # --------------------------------------------------------------------------------------------
 
 
-# pylint: disable=too-many-locals, too-many-statements, line-too-long
+# pylint: disable=too-many-locals, too-many-statements, line-too-long, too-many-branches
 def load_arguments(self, _):
     from argcomplete.completers import FilesCompleter
     from argcomplete.completers import DirectoriesCompleter
 
     from azure.mgmt.resource.locks.models import LockLevel
     from azure.mgmt.resource.managedapplications.models import ApplicationLockLevel
-    from azure.mgmt.resource.deploymentstacks.models import DenySettingsMode
+    from azure.mgmt.resource.deploymentstacks.models import DenySettingsMode, ResourcesWithoutDeleteSupportAction, ValidationLevel as StacksValidationLevel
     from azure.cli.core.commands.validators import get_default_location_from_resource_group
 
     from azure.cli.core.api import get_subscription_id_list
@@ -25,7 +25,7 @@ def load_arguments(self, _):
     from azure.cli.command_modules.resource._completers import (
         get_resource_types_completion_list, get_providers_completion_list)
     from azure.cli.command_modules.resource._validators import (
-        validate_lock_parameters, validate_resource_lock, validate_group_lock, validate_subscription_lock, RollbackAction)
+        validate_lock_parameters, validate_resource_lock, validate_group_lock, validate_subscription_lock, RollbackAction, iso_8601_duration)
     from azure.cli.command_modules.resource.parameters import TagUpdateOperation, StacksActionOnUnmanage
 
     DeploymentMode, WhatIfResultFormat, ChangeType, ValidationLevel = self.get_models('DeploymentMode', 'WhatIfResultFormat', 'ChangeType', 'ValidationLevel')
@@ -104,6 +104,7 @@ def load_arguments(self, _):
     stacks_stack_deployment_resource_group = CLIArgumentType(options_list=['--deployment-resource-group', '--dr'], help='The scope at which the initial deployment should be created. If a scope is not specified, it will default to the scope of the deployment stack.')
     stacks_stack_deployment_subscription = CLIArgumentType(options_list=['--deployment-subscription', '--ds'], help='The scope at which the initial deployment should be created. If a scope is not specified, it will default to the scope of the deployment stack.')
     stacks_action_on_unmanage_type = CLIArgumentType(arg_type=get_enum_type(StacksActionOnUnmanage), options_list=['--action-on-unmanage', '--aou'], help='Defines what happens to resources that are no longer managed after the stack is updated or deleted.')
+    stacks_resources_without_delete_support_type = CLIArgumentType(arg_type=get_enum_type(ResourcesWithoutDeleteSupportAction), options_list=['--resources-without-delete-support', '--rwd'], help='Defines what happens to resources that do not support deletion when they are no longer managed by the stack.')
     stacks_deny_settings_mode = CLIArgumentType(arg_type=get_enum_type(DenySettingsMode), options_list=['--deny-settings-mode', '--dm'], help='Define which operations are denied on resources managed by the stack.')
     stacks_excluded_principals = CLIArgumentType(options_list=['--deny-settings-excluded-principals', '--ep'], help='List of AAD principal IDs excluded from the lock. Up to 5 principals are permitted.')
     stacks_excluded_actions = CLIArgumentType(options_list=['--deny-settings-excluded-actions', '--ea'], help="List of role-based management operations that are excluded from the denySettings. Up to 200 actions are permitted.")
@@ -111,6 +112,13 @@ def load_arguments(self, _):
     stacks_bypass_stack_out_of_sync_error_type = CLIArgumentType(
         arg_type=get_three_state_flag(), options_list=['--bypass-stack-out-of-sync-error', '--bse'],
         help='Flag to bypass service errors that indicate the stack resource list is not correctly synchronized.')
+    stacks_validation_level_type = CLIArgumentType(
+        arg_type=get_enum_type(StacksValidationLevel), options_list=['--validation-level', '--vl'], help="Validation level for the deployment stack. The default is 'Provider'.")
+
+    stacks_whatif_stack_id_type = CLIArgumentType(options_list=['--stack'], help='The fully-qualified ID of the deployment stack to perform a what-if operation on.')
+    stacks_whatif_retention_interval_type = CLIArgumentType(
+        options_list=['--retention-interval', '--ri'], type=iso_8601_duration,
+        help='The retention interval for What-If results. The value must be in ISO 8601 format and between 1 day and 30 days.')
 
     bicep_file_type = CLIArgumentType(options_list=['--file', '-f'], completer=FilesCompleter(), type=file_type)
     bicep_force_type = CLIArgumentType(options_list=['--force'], action='store_true')
@@ -613,89 +621,71 @@ def load_arguments(self, _):
     with self.argument_context('stack mg') as c:
         c.argument('management_group_id', arg_type=management_group_id_type, help='The management group id to create stack at.')
 
-    for scope in ['stack mg show', 'stack mg export']:
-        with self.argument_context(scope) as c:
-            c.argument('name', options_list=['--name', '-n'], arg_type=stacks_stack_name_type)
-            c.argument('id', arg_type=stacks_stack_type)
-            c.argument('subscription', arg_type=subscription_type)
+    # TODO(kylealbert): add "stack-whatif"
+    for resource_type in ['stack']:
+        for scope in ['group', 'sub', 'mg']:
+            for action in ['create', 'validate', 'delete', 'show', 'list', 'export']:
+                if resource_type == 'stack-whatif' and (action == 'validate' or action == 'export'):
+                    continue
 
-    with self.argument_context('stack mg delete') as c:
-        c.argument('name', options_list=['--name', '-n'], arg_type=stacks_stack_name_type)
-        c.argument('id', arg_type=stacks_stack_type)
-        c.argument('subscription', arg_type=subscription_type)
-        c.argument('action_on_unmanage', arg_type=stacks_action_on_unmanage_type)
-        c.argument('bypass_stack_out_of_sync_error', arg_type=stacks_bypass_stack_out_of_sync_error_type)
-        c.argument('yes', help='Do not prompt for confirmation')
+                with self.argument_context(f'{resource_type} {scope} {action}') as c:
+                    if action == 'create' or action == 'validate':
+                        c.argument('name', arg_type=stacks_name_type)
 
-    with self.argument_context('stack mg list') as c:
-        c.argument('subscription', arg_type=subscription_type)
+                        if scope == 'group':
+                            c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the deployment stack will be created.')
+                        elif scope == 'sub':
+                            c.argument('deployment_resource_group', arg_type=stacks_stack_deployment_resource_group)
+                        elif scope == 'mg':
+                            c.argument('deployment_subscription', arg_type=stacks_stack_deployment_subscription)
 
-    for scope in ['stack sub show', 'stack sub export']:
-        with self.argument_context(scope) as c:
-            c.argument('name', options_list=['--name', '-n'], arg_type=stacks_stack_name_type)
-            c.argument('id', arg_type=stacks_stack_type)
-            c.argument('subscription', arg_type=subscription_type)
+                        if scope != 'group':
+                            c.argument('location', arg_type=get_location_type(self.cli_ctx), help='The location to store deployment stack.')
 
-    with self.argument_context('stack sub delete') as c:
-        c.argument('name', options_list=['--name', '-n'], arg_type=stacks_stack_name_type)
-        c.argument('id', arg_type=stacks_stack_type)
-        c.argument('subscription', arg_type=subscription_type)
-        c.argument('action_on_unmanage', arg_type=stacks_action_on_unmanage_type)
-        c.argument('bypass_stack_out_of_sync_error', arg_type=stacks_bypass_stack_out_of_sync_error_type)
-        c.argument('yes', help='Do not prompt for confirmation')
-
-    for scope in ['group', 'sub', 'mg']:
-        for action in ['create', 'validate']:
-            with self.argument_context(f'stack {scope} {action}') as c:
-                c.argument('name', arg_type=stacks_name_type)
-
-                if scope == 'group':
-                    c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the deployment stack will be created.')
-                elif scope == 'sub':
-                    c.argument('deployment_resource_group', arg_type=stacks_stack_deployment_resource_group)
-                elif scope == 'mg':
-                    c.argument('deployment_subscription', arg_type=stacks_stack_deployment_subscription)
-
-                if scope != 'group':
-                    c.argument('location', arg_type=get_location_type(self.cli_ctx), help='The location to store deployment stack.')
-
-                c.argument('template_file', arg_type=deployment_template_file_type)
-                c.argument('template_spec', arg_type=deployment_template_spec_type)
-                c.argument('template_uri', arg_type=deployment_template_uri_type)
-                c.argument('query_string', arg_type=deployment_query_string_type)
-                c.argument('parameters', arg_type=deployment_parameters_type, help='Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.')
-                c.argument('description', arg_type=stacks_description_type)
-                c.argument('subscription', arg_type=subscription_type)
-                c.argument('action_on_unmanage', arg_type=stacks_action_on_unmanage_type)
-                c.argument('deny_settings_mode', arg_type=stacks_deny_settings_mode)
-                c.argument('deny_settings_excluded_principals', arg_type=stacks_excluded_principals)
-                c.argument('deny_settings_excluded_actions', arg_type=stacks_excluded_actions)
-                c.argument('deny_settings_apply_to_child_scopes', arg_type=stacks_apply_to_child_scopes)
-                c.argument('bypass_stack_out_of_sync_error', arg_type=stacks_bypass_stack_out_of_sync_error_type)
-                c.argument('tags', tags_type)
-
-                if action == 'create':
-                    c.argument('yes', help='Do not prompt for confirmation')
-
-    for scope in ['stack group show', 'stack group export']:
-        with self.argument_context(scope) as c:
-            c.argument('name', options_list=['--name', '-n'], arg_type=stacks_stack_name_type)
-            c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the deployment stack exists')
-            c.argument('id', arg_type=stacks_stack_type)
-            c.argument('subscription', arg_type=subscription_type)
-
-    with self.argument_context('stack group list') as c:
-        c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the deployment stack exists')
-        c.argument('subscription', arg_type=subscription_type)
-
-    with self.argument_context('stack group delete') as c:
-        c.argument('name', options_list=['--name', '-n'], arg_type=stacks_stack_name_type)
-        c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the deployment stack exists')
-        c.argument('id', arg_type=stacks_stack_type)
-        c.argument('subscription', arg_type=subscription_type)
-        c.argument('action_on_unmanage', arg_type=stacks_action_on_unmanage_type)
-        c.argument('bypass_stack_out_of_sync_error', arg_type=stacks_bypass_stack_out_of_sync_error_type)
-        c.argument('yes', help='Do not prompt for confirmation')
+                        c.argument('template_file', arg_type=deployment_template_file_type)
+                        c.argument('template_spec', arg_type=deployment_template_spec_type)
+                        c.argument('template_uri', arg_type=deployment_template_uri_type)
+                        c.argument('query_string', arg_type=deployment_query_string_type)
+                        c.argument('parameters', arg_type=deployment_parameters_type, help='Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.')
+                        c.argument('description', arg_type=stacks_description_type)
+                        c.argument('subscription', arg_type=subscription_type)
+                        c.argument('action_on_unmanage', arg_type=stacks_action_on_unmanage_type)
+                        c.argument('resources_without_delete_support', arg_type=stacks_resources_without_delete_support_type)
+                        c.argument('deny_settings_mode', arg_type=stacks_deny_settings_mode)
+                        c.argument('deny_settings_excluded_principals', arg_type=stacks_excluded_principals)
+                        c.argument('deny_settings_excluded_actions', arg_type=stacks_excluded_actions)
+                        c.argument('deny_settings_apply_to_child_scopes', arg_type=stacks_apply_to_child_scopes)
+                        c.argument('validation_level', arg_type=stacks_validation_level_type)
+                        c.argument('tags', tags_type)
+                        if resource_type == 'stack':
+                            c.argument('bypass_stack_out_of_sync_error', arg_type=stacks_bypass_stack_out_of_sync_error_type)
+                        elif resource_type == 'stack-whatif':
+                            c.argument('stack_id', arg_type=stacks_whatif_stack_id_type)
+                            c.argument('retention_interval', arg_type=stacks_whatif_retention_interval_type)
+                        if action == 'create' and resource_type == 'stack':
+                            c.argument('yes', help='Do not prompt for confirmation')
+                    elif action == 'delete':
+                        c.argument('name', options_list=['--name', '-n'], arg_type=stacks_stack_name_type)
+                        c.argument('id', arg_type=stacks_stack_type)
+                        c.argument('subscription', arg_type=subscription_type)
+                        c.argument('action_on_unmanage', arg_type=stacks_action_on_unmanage_type)
+                        c.argument('resources_without_delete_support', arg_type=stacks_resources_without_delete_support_type)
+                        c.argument('bypass_stack_out_of_sync_error', arg_type=stacks_bypass_stack_out_of_sync_error_type)
+                        c.argument('yes', help='Do not prompt for confirmation')
+                        if scope == 'group':
+                            c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the deployment stack exists')
+                    elif action == 'show' or action == 'export':
+                        c.argument('name', options_list=['--name', '-n'], arg_type=stacks_stack_name_type)
+                        c.argument('id', arg_type=stacks_stack_type)
+                        c.argument('subscription', arg_type=subscription_type)
+                        if scope == 'group':
+                            c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the deployment stack exists')
+                    elif action == 'list':
+                        if scope == 'sub':
+                            continue  # only uses global arguments
+                        c.argument('subscription', arg_type=subscription_type)
+                        if scope == 'group':
+                            c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the deployment stack exists')
 
     with self.argument_context('bicep build') as c:
         c.argument('file', arg_type=bicep_file_type, help="The path to the Bicep file to build in the file system.")

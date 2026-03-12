@@ -273,6 +273,11 @@ def _create_database_account(client,
         locations = []
         locations.append(Location(location_name=arm_location, failover_priority=0, is_zone_redundant=False))
 
+    for loc in locations:
+        if loc.failover_priority == 0:
+            arm_location = loc.location_name
+            break
+
     managed_service_identity = None
     SYSTEM_ID = '[system]'
     enable_system = False
@@ -409,8 +414,22 @@ def _create_database_account(client,
     )
 
     async_docdb_create = client.begin_create_or_update(resource_group_name, account_name, params)
-    docdb_account = async_docdb_create.result()
-    docdb_account = client.get(resource_group_name, account_name)  # Workaround
+    try:
+        docdb_account = async_docdb_create.result()
+    except HttpResponseError as ex:
+        message = str(ex)
+        if (is_restore_request and
+                ex.status_code == 403 and
+                "does not exist" in message and
+                ("Database Account" in message or "Forbidden" in message)):
+            logger.warning(
+                "Encountered known service issue (403 'does not exist') while restoring Cosmos DB account '%s' "
+                "in resource group '%s'. Using client.get() as a workaround. Raw error: %s",
+                account_name, resource_group_name, ex
+            )
+            docdb_account = client.get(resource_group_name, account_name)
+        else:
+            raise ex
     return docdb_account
 
 
@@ -460,10 +479,10 @@ def cli_cosmosdb_update(client,
         update_consistency_policy = True
 
     if network_acl_bypass_resource_ids is not None:
-        from azure.mgmt.core.tools import is_valid_resource_id
         from azure.cli.core.azclierror import InvalidArgumentValueError
+        from azure.cli.command_modules.cosmosdb._validators import is_valid_network_acl_bypass_resource_id
         for resource_id in network_acl_bypass_resource_ids:
-            if not is_valid_resource_id(resource_id):
+            if not is_valid_network_acl_bypass_resource_id(resource_id):
                 raise InvalidArgumentValueError(
                     f'{resource_id} is not a valid resource ID for --network-acl-bypass-resource-ids')
 
@@ -3517,6 +3536,24 @@ def cli_offline_region(client,
                        account_name,
                        resource_group_name,
                        region):
+
+    # Function to normalize region name
+    def _normalize_region(region_name):
+        return region_name.replace(' ', '').lower()
+
+    # Get the account to check for the region name
+    account = client.get(resource_group_name, account_name)
+    input_region_normalized = _normalize_region(region)
+    matched_region = None
+
+    # Check matches in both read and write locations
+    for loc in account.locations:
+        if _normalize_region(loc.location_name) == input_region_normalized:
+            matched_region = loc.location_name
+            break
+
+    if matched_region:
+        region = matched_region
 
     region_parameter_for_offline = RegionForOnlineOffline(region=region)
     return client.begin_offline_region(

@@ -518,7 +518,7 @@ class AzCliCommandInvoker(CommandInvoker):
         command_preserve_casing = roughly_parse_command_with_casing(args)
         args = _pre_command_table_create(self.cli_ctx, args)
 
-        if self._should_use_command_index() and self._is_top_level_help_request(args):
+        if self._should_show_cached_help(args):
             result = self._try_show_cached_help(command_preserve_casing, args)
             if result:
                 return result
@@ -734,6 +734,11 @@ class AzCliCommandInvoker(CommandInvoker):
     def _should_use_command_index(self):
         """Check if command index optimization is enabled."""
         return self.cli_ctx.config.getboolean('core', 'use_command_index', fallback=True)
+
+    def _should_show_cached_help(self, args):
+        return (self._should_use_command_index() and
+                self._is_top_level_help_request(args) and
+                not self.cli_ctx.data.get('completer_active'))
 
     def _try_show_cached_help(self, command_preserve_casing, args):
         """Try to show cached help for top-level help request.

@@ -20,13 +20,13 @@ class CheckFilePathAvailability(AAZCommand):
     Check if a file path is available
 
     :example: CheckFilePathAvailability
-        az netappfiles check-file-path-availability --location eastus --name my-exact-filepth --subnet-id /subscriptions/9760acf5-4638-11e7-9bdb-020073ca7778/resourceGroups/myRP/providers/Microsoft.Network/virtualNetworks/testvnet3/subnets/testsubnet3
+        az netappfiles check-file-path-availability --location eastus --name my-exact-filepth --subnet-id /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myRP/providers/Microsoft.Network/virtualNetworks/testvnet3/subnets/testsubnet3
     """
 
     _aaz_info = {
-        "version": "2025-09-01",
+        "version": "2025-12-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.netapp/locations/{}/checkfilepathavailability", "2025-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.netapp/locations/{}/checkfilepathavailability", "2025-12-01"],
         ]
     }
 
@@ -135,7 +135,7 @@ class CheckFilePathAvailability(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-09-01",
+                    "api-version", "2025-12-01",
                     required=True,
                 ),
             }
