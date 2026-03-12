@@ -5,7 +5,7 @@
 
 from azure.cli.command_modules.vm._client_factory import (cf_vm,
                                                           cf_vm_ext, cf_vm_ext_image,
-                                                          cf_vm_image, cf_vm_image_term, cf_usage,
+                                                          cf_vm_image_term, cf_usage,
                                                           cf_vmss, cf_images,
                                                           cf_galleries, cf_gallery_images, cf_gallery_image_versions,
                                                           cf_proximity_placement_groups,
@@ -80,11 +80,6 @@ def load_command_table(self, _):
     compute_vm_extension_image_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations#VirtualMachineExtensionImagesOperations.{}',
         client_factory=cf_vm_ext_image
-    )
-
-    compute_vm_image_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#VirtualMachineImagesOperations.{}',
-        client_factory=cf_vm_image
     )
 
     compute_vm_image_term_sdk = CliCommandType(
@@ -336,7 +331,7 @@ def load_command_table(self, _):
     with self.command_group('vm extension image', compute_vm_extension_image_sdk) as g:
         g.custom_command('list', 'list_vm_extension_images')
 
-    with self.command_group('vm image', compute_vm_image_sdk) as g:
+    with self.command_group('vm image') as g:
         g.custom_command('list-offers', 'list_offers')
         g.custom_command('list-publishers', 'list_publishers')
         g.custom_command('list-skus', 'list_sku')
@@ -402,6 +397,9 @@ def load_command_table(self, _):
         g.custom_command('list-instances', 'get_instances_list')
         g.custom_command('reimage', 'reimage_vmss', supports_no_wait=True)
         g.custom_command('restart', 'restart_vmss', supports_no_wait=True)
+        g.custom_command('scale', 'scale_vmss', supports_no_wait=True)
+        g.custom_command('set-orchestration-service-state', 'set_orchestration_service_state', supports_no_wait=True)
+        g.custom_command('stop', 'stop_vmss', supports_no_wait=True, validator=process_vm_vmss_stop)
 
     with self.command_group('vmss application', operation_group='virtual_machine_scale_sets') as g:
         g.custom_command('set', 'set_vmss_applications', validator=process_set_applications_namespace)
@@ -410,13 +408,10 @@ def load_command_table(self, _):
     with self.command_group('vmss', compute_vmss_sdk, operation_group='virtual_machine_scale_sets') as g:
         g.custom_command('create', 'create_vmss', transform=DeploymentOutputLongRunningOperation(self.cli_ctx, 'Starting vmss create'), supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_vmss_create_namespace, exception_handler=handle_template_based_exception)
         g.custom_command('get-instance-view', 'get_vmss_instance_view', table_transformer='{ProvisioningState:statuses[0].displayStatus, PowerState:statuses[1].displayStatus}')
-        g.custom_command('scale', 'scale_vmss', supports_no_wait=True)
         g.custom_show_command('show', 'get_vmss', table_transformer=get_vmss_table_output_transformer(self, False))
-        g.custom_command('stop', 'stop_vmss', supports_no_wait=True, validator=process_vm_vmss_stop)
         g.generic_update_command('update', getter_name='get_vmss_modified_by_aaz', setter_name='update_vmss', supports_no_wait=True, command_type=compute_custom, validator=validate_vmss_update_namespace)
         g.custom_command('update-instances', 'update_vmss_instances', supports_no_wait=True)
         g.wait_command('wait', getter_name='get_vmss', getter_type=compute_custom)
-        g.custom_command('set-orchestration-service-state', 'set_orchestration_service_state', supports_no_wait=True)
 
         from .aaz.latest.vmss import List as VMSSList
         self.command_table['vmss list'] = VMSSList(loader=self,

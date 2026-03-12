@@ -133,7 +133,7 @@ class AAZMgmtErrorFormat(AAZODataV4Format):
         # ARM specific annotations
         self.additional_info = [
             TypedErrorInfo(additional_info["type"], additional_info["info"])
-            for additional_info in self.get_object_prop(json_object, self.ADDITIONALINFO_LABEL, [])
+            for additional_info in self.get_object_prop(json_object, self.ADDITIONALINFO_LABEL, []) or []
         ]
 
     def __str__(self):

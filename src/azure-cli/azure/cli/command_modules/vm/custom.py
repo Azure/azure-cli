@@ -41,7 +41,7 @@ from ._vm_utils import read_content_if_is_file, import_aaz_by_profile, IdentityT
 from ._vm_diagnostics_templates import get_default_diag_config
 
 from ._actions import (load_images_from_aliases_doc, load_extension_images_thru_services,
-                       load_images_thru_services, _get_latest_image_version, _get_latest_image_version_by_aaz)
+                       load_images_thru_services, _get_latest_image_version_by_aaz)
 from ._client_factory import (_compute_client_factory, cf_vm_image_term)
 
 from .aaz.latest.vm.disk import AttachDetachDataDisk
@@ -2802,7 +2802,7 @@ def show_vm_image(cmd, urn=None, publisher=None, offer=None, sku=None, version=N
         elif len(items) == 4:
             publisher, offer, sku, version = urn.split(":")
         if version.lower() == 'latest':
-            version = _get_latest_image_version(cmd.cli_ctx, location, publisher, offer, sku)
+            version = _get_latest_image_version_by_aaz(cmd.cli_ctx, location, publisher, offer, sku)
     elif not publisher or not offer or not sku or not version:
         raise RequiredArgumentMissingError(error_msg)
     if edge_zone is not None:
@@ -4562,33 +4562,48 @@ def restart_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None,
 
 # pylint: disable=inconsistent-return-statements
 def scale_vmss(cmd, resource_group_name, vm_scale_set_name, new_capacity, no_wait=False):
-    VirtualMachineScaleSet = cmd.get_models('VirtualMachineScaleSet')
-    client = _compute_client_factory(cmd.cli_ctx)
-    vmss = client.virtual_machine_scale_sets.get(resource_group_name, vm_scale_set_name)
-    # pylint: disable=no-member
-    if vmss.sku.capacity == new_capacity:
+    from .operations.vmss import VMSSCreate, VMSSShow
+    vmss = VMSSShow(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'vm_scale_set_name': vm_scale_set_name
+    })
+    if vmss.get('sku', {}).get('capacity') == new_capacity:
         return
 
-    vmss.sku.capacity = new_capacity
-    vmss_new = VirtualMachineScaleSet(location=vmss.location, sku=vmss.sku)
-    if vmss.extended_location is not None:
-        vmss_new.extended_location = vmss.extended_location
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update,
-                       resource_group_name, vm_scale_set_name, vmss_new)
+    vmss_new = {
+        'resource_group': resource_group_name,
+        'vm_scale_set_name': vm_scale_set_name,
+        'no_wait': no_wait
+    }
+
+    if vmss.get('extended_location'):
+        vmss_new['extended_location'] = vmss['extendedLocation']
+
+    if vmss.get('location'):
+        vmss_new['location'] = vmss['location']
+
+    if vmss.get('sku'):
+        vmss_new['sku'] = vmss['sku']
+    else:
+        vmss_new['sku'] = {}
+
+    vmss_new['sku']['capacity'] = new_capacity
+
+    return VMSSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss_new)
 
 
 def stop_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False, skip_shutdown=False):
-    client = _compute_client_factory(cmd.cli_ctx)
-    VirtualMachineScaleSetVMInstanceRequiredIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceRequiredIDs')
+    from .aaz.latest.vmss import Stop as VmssStop
     if instance_ids is None:
         instance_ids = ['*']
-    instance_ids = VirtualMachineScaleSetVMInstanceRequiredIDs(instance_ids=instance_ids)
-    if cmd.supported_api_version(min_api='2020-06-01', operation_group='virtual_machine_scale_sets'):
-        return sdk_no_wait(
-            no_wait, client.virtual_machine_scale_sets.begin_power_off, resource_group_name, vm_scale_set_name,
-            vm_instance_i_ds=instance_ids, skip_shutdown=skip_shutdown)
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_power_off, resource_group_name,
-                       vm_scale_set_name, vm_instance_i_ds=instance_ids)
+    command_args = {
+        'resource_group': resource_group_name,
+        'vm_scale_set_name': vm_scale_set_name,
+        'skip_shutdown': skip_shutdown,
+        'instance_ids': instance_ids,
+        'no_wait': no_wait
+    }
+    return VmssStop(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
 def update_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_ids, no_wait=False):
@@ -5300,11 +5315,15 @@ def set_orchestration_service_state(cmd, resource_group_name, vm_scale_set_name,
     # currently service_name has only one available value "AutomaticRepairs". And SDK does not accept service_name,
     # instead SDK assign it to "AutomaticRepairs" in its own logic. As there may be more service name to be supported,
     # we define service_name as a required parameter here to avoid introducing a breaking change in the future.
-    client = _compute_client_factory(cmd.cli_ctx)
-    OrchestrationServiceStateInput = cmd.get_models('OrchestrationServiceStateInput')
-    state_input = OrchestrationServiceStateInput(service_name=service_name, action=action)
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_set_orchestration_service_state,
-                       resource_group_name, vm_scale_set_name, state_input)
+    from .aaz.latest.vmss import SetOrchestrationServiceState as VmssSetOrchestrationServiceState
+    command_args = {
+        'resource_group': resource_group_name,
+        'vm_scale_set_name': vm_scale_set_name,
+        'action': action,
+        'service_name': service_name,
+        'no_wait': no_wait
+    }
+    return VmssSetOrchestrationServiceState(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
 def upgrade_vmss_extension(cmd, resource_group_name, vm_scale_set_name, no_wait=False):
