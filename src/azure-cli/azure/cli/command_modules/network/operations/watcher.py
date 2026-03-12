@@ -76,7 +76,7 @@ def get_network_watcher_from_vm(cmd):
     args = cmd.ctx.args
     vm_name = parse_resource_id(args.vm.to_serialized_data())["name"]
     vm = get_vm(cmd.cli_ctx, args.resource_group_name, vm_name)
-    args.location = vm.location
+    args.location = vm.get('location')
     get_network_watcher_from_location(cmd)
 
 
@@ -92,7 +92,7 @@ def get_network_watcher_from_vmss(cmd):
     args = cmd.ctx.args
     vmss_name = parse_resource_id(args.target.to_serialized_data())["name"]
     vmss = get_vmss(cmd.cli_ctx, args.resource_group_name, vmss_name)
-    args.location = vmss.location
+    args.location = vmss.get('location')
     get_network_watcher_from_location(cmd)
 
 
