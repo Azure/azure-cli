@@ -29,12 +29,12 @@ INSTALL_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 AZURE_CLI_SITE_PACKAGES="$INSTALL_DIR/libexec/lib/python${PY_VER}/site-packages"
 
 if [[ "$SCRIPT_PATH" == /opt/homebrew/Caskroom/* ]] || [[ "$SCRIPT_PATH" == /usr/local/Caskroom/* ]]; then
-    INSTALLER="HOMEBREW"
+    INSTALLER="HOMEBREW_CASK"
 else
     INSTALLER="TARBALL"
 fi
 
-if [[ "$INSTALLER" == "HOMEBREW" ]]; then
+if [[ "$INSTALLER" == "HOMEBREW_CASK" ]]; then
     if [[ -x "/opt/homebrew/opt/python@${PY_VER}/libexec/bin/${PY_BIN}" ]]; then
         PYTHON="/opt/homebrew/opt/python@${PY_VER}/libexec/bin/${PY_BIN}"
     elif [[ -x "/usr/local/opt/python@${PY_VER}/libexec/bin/${PY_BIN}" ]]; then
