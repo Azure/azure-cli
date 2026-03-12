@@ -2652,60 +2652,54 @@ def _validate_vmss_create_auto_zone_placement(namespace):
 
     # "zones", zonePlacementPolicy cannot be enabled if "zones" list exists on the scale set
     if zpp and zones:
-        raise CLIError(
+        raise ArgumentUsageError(
             "usage error: --zone-placement-policy cannot be used with --zones. "
             "Specify either fixed zones (--zones) or automatic zone placement (--zone-placement-policy)."
         )
 
-    # zonePlacementPolicy allowed values
-    if zpp and str(zpp).lower() != 'auto':
-        raise CLIError(
-            "usage error: unsupported value for --zone-placement-policy. Only 'Auto' is supported."
-        )
-
     # max-zone-count must be positive
     if max_zone_count is not None and max_zone_count <= 0:
-        raise CLIError(
+        raise ArgumentUsageError(
             "usage error: --max-zone-count must be a positive integer."
         )
 
     # zoneBalance=true requires maxZoneCount
     if zone_balance is True and max_zone_count is None:
-        raise CLIError(
+        raise ArgumentUsageError(
             "usage error: --zone-balance requires --max-zone-count to be specified."
         )
 
     # Zones=Auto does not support overprovisioning
     if zpp and orchestration_mode and orchestration_mode.lower() == 'uniform':
         if not disable_overprovision:
-            raise CLIError(
+            raise ArgumentUsageError(
                 "usage error: zone placement policy does not support overprovisioning. "
                 "Set --disable-overprovision when using --zone-placement-policy Auto."
             )
 
     # zones=Auto does not support Proximity Placement Group
     if zpp and ppg:
-        raise CLIError(
+        raise ArgumentUsageError(
             "usage error: zone placement policy does not support proximity placement groups."
         )
 
     # zones=Auto does not support Capacity Reservation Group
     if zpp and crg:
-        raise CLIError(
+        raise ArgumentUsageError(
             "usage error: zone placement policy does not support capacity reservation groups."
         )
 
     if instance_percent_policy is not None:
         # enable=true requires value
         if instance_percent_policy is True and max_instance_percent is None:
-            raise CLIError(
+            raise ArgumentUsageError(
                 "usage error: --instance-percent-policy true requires "
                 "(--max-instance-percent / --value-max-instance-percent-per-zone)."
             )
 
         # enable=false should not be combined with value
         if instance_percent_policy is False and max_instance_percent is not None:
-            raise CLIError(
+            raise ArgumentUsageError(
                 "usage error: (--max-instance-percent / --value-max-instance-percent-per-zone) cannot be used when "
                 "--instance-percent-policy is false."
             )
@@ -2713,13 +2707,13 @@ def _validate_vmss_create_auto_zone_placement(namespace):
     # value range
     if max_instance_percent is not None:
         if instance_percent_policy is None:
-            raise CLIError(
+            raise ArgumentUsageError(
                 "usage error: (--max-instance-percent / --value-max-instance-percent-per-zone) cannot be used when "
                 "--instance-percent-policy is not set."
             )
 
         if max_instance_percent < 1 or max_instance_percent > 100:
-            raise CLIError("usage error: (--max-instance-percent / --value-max-instance-percent-per-zone) must be an "
+            raise ArgumentUsageError("usage error: (--max-instance-percent / --value-max-instance-percent-per-zone) must be an "
                            "integer between 1 and 100.")
 
 
