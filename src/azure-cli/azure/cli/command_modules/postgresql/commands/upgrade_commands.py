@@ -10,7 +10,7 @@ from knack.util import CLIError
 from .._client_factory import cf_postgres_flexible_replica
 from ..utils._flexible_server_location_capabilities_util import get_postgres_server_capability_info
 from ..utils._flexible_server_util import resolve_poller
-from ..utils.validators import pg_version_validator, validate_citus_cluster, validate_resource_group 
+from ..utils.validators import pg_version_validator, validate_citus_cluster, validate_resource_group
 
 logger = get_logger(__name__)
 # pylint: disable=raise-missing-from
@@ -35,8 +35,8 @@ def flexible_server_version_upgrade(cmd, client, resource_group_name, server_nam
     list_server_capability_info = get_postgres_server_capability_info(cmd, resource_group_name, server_name)
     eligible_versions = list_server_capability_info['supported_server_versions'][str(current_version)]
 
-    pg_version_validator(version, eligible_versions, current_version=current_version)
-    
+    pg_version_validator(version, eligible_versions)
+
     if version not in eligible_versions:
         # version not supported
         error_message = ""
