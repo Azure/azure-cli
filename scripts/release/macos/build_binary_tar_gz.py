@@ -80,7 +80,7 @@ CLI_EXECUTABLE_NAME = "az"
 TARBALL_NAME_TEMPLATE_DEFAULT = "{APP_NAME}-{VERSION}-{PLATFORM_TAG}-nopython.tar.gz"
 
 # Python version we're building for (must match Homebrew python@X.Y)
-# Can be overridden via --python-version CLI arg or PYTHON_MAJOR_MINOR env var
+# Can be overridden via PYTHON_MAJOR_MINOR env var
 PYTHON_MAJOR_MINOR = os.environ.get("PYTHON_MAJOR_MINOR", "3.13")
 PYTHON_BIN = "python3"
 TEMPLATE_DIR = Path(__file__).resolve().parent / "templates"
@@ -225,7 +225,7 @@ def install_azure_cli(venv_python: Path) -> None:
     subprocess.run([str(venv_python), "-m", "azure.cli", "--version"], check=True)
 
 
-def create_install_structure(venv_dir: Path, install_dir: Path, version: str, platform_tag: str) -> None:
+def create_install_structure(venv_dir: Path, install_dir: Path) -> None:
     """Create the final installation directory structure."""
     print("\n=== Creating installation structure ===")
 
@@ -475,8 +475,6 @@ def main() -> int:
             create_install_structure(
                 venv_dir=venv_dir,
                 install_dir=install_dir,
-                version=version,
-                platform_tag=args.platform_tag,
             )
 
             tarball_path = create_tarball(
