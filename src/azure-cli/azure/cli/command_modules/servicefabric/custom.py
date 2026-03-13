@@ -28,30 +28,12 @@ from azure.mgmt.servicefabric.models import (ClusterUpdateParameters,
                                              SettingsParameterDescription,
                                              NodeTypeDescription,
                                              EndpointRangeDescription)
-from azure.mgmt.compute.models import (VaultCertificate,
-                                       Sku as ComputeSku,
-                                       UpgradePolicy,
-                                       ImageReference,
-                                       ApiEntityReference,
-                                       VaultSecretGroup,
-                                       VirtualMachineScaleSetOSDisk,
-                                       VirtualMachineScaleSetVMProfile,
-                                       VirtualMachineScaleSetExtensionProfile,
-                                       VirtualMachineScaleSetOSProfile,
-                                       VirtualMachineScaleSetStorageProfile,
-                                       VirtualMachineScaleSet,
-                                       VirtualMachineScaleSetNetworkConfiguration,
-                                       VirtualMachineScaleSetIPConfiguration,
-                                       VirtualMachineScaleSetNetworkProfile,
-                                       SubResource,
-                                       UpgradeMode)
 from azure.mgmt.storage.models import StorageAccountCreateParameters
 
 from knack.log import get_logger
 
 from ._client_factory import (resource_client_factory,
                               keyvault_client_factory,
-                              compute_client_factory,
                               storage_client_factory)
 logger = get_logger(__name__)
 
@@ -476,7 +458,7 @@ def add_cluster_node(cmd, client, resource_group_name, cluster_name, node_type, 
 
     vmss['sku']['capacity'] = vmss['sku']['capacity'] + number_of_nodes_to_add
     vmss['resource_group'] = resource_group_name
-    vmss['vm_scale_set_name'] = vmss.name
+    vmss['vm_scale_set_name'] = vmss['name']
 
     # update vmss
     vmss_poll = VMSSCreate(cli_ctx=cli_ctx)(command_args=vmss)
@@ -512,7 +494,7 @@ def remove_cluster_node(cmd, client, resource_group_name, cluster_name, node_typ
 
     # update vmss
     vmss['resource_group'] = resource_group_name
-    vmss['vm_scale_set_name'] = vmss.name
+    vmss['vm_scale_set_name'] = vmss['name']
     vmss_poll = VMSSCreate(cli_ctx=cli_ctx)(command_args=vmss)
     LongRunningOperation(cli_ctx)(vmss_poll)
 
@@ -564,7 +546,7 @@ def update_cluster_durability(cmd, client, resource_group_name, cluster_name, no
         fabric_ext_ref['settings']['durabilityLevel'] = durability_level
         fabric_ext_ref['settings']['enableParallelJobs'] = True
         vmss['resource_group'] = resource_group_name
-        vmss['vm_scale_set_name'] = vmss.name
+        vmss['vm_scale_set_name'] = vmss['name']
         vmss_poll = VMSSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss)
         LongRunningOperation(cli_ctx)(vmss_poll)
 
@@ -691,18 +673,18 @@ def update_cluster_reliability_level(cmd,
     if instance_target == instance_now:
         return cluster
     if instance_target > instance_now:
-        if vmss.get('sku', {}).get('capacity') and vmss.get('sku', {}).get('capacity') < instance_target:
+        if vmss.get('sku', {}).get('capacity') is not None and vmss.get('sku', {}).get('capacity') < instance_target:
             if auto_add_node is not True:
                 raise CLIError('Please use --auto_add_node to automatically increase the nodes,{} requires {} nodes, but currenty there are {}'.
-                               format(reliability_level, instance_target, vmss.sku.capacity))
+                               format(reliability_level, instance_target, vmss['sku']['capacity']))
             vmss['sku']['capacity'] = instance_target
             from ..vm.operations.vmss import VMSSCreate
             vmss['resource_group'] = resource_group_name
-            vmss['vm_scale_set_name'] = vmss.name
+            vmss['vm_scale_set_name'] = vmss['name']
             vmss_poll = VMSSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss)
             LongRunningOperation(cli_ctx)(vmss_poll)
 
-    if vmss.get('sku', {}).get('capacity'):
+    if vmss.get('sku', {}).get('capacity') is not None:
         node_type.vm_instance_count = vmss['sku']['capacity']
     patch_request = ClusterUpdateParameters(
         node_types=cluster.node_types, reliability_level=reliability_level)
@@ -991,13 +973,11 @@ def _create_vmss(cmd, resource_group_name, cluster_name, cluster, node_type_name
         storage_client = storage_client_factory(cli_ctx)
         list_results = storage_client.storage_accounts.list_keys(
             resource_group_name, diagnostics_account)
-        import json
-        json_data = json.loads(
-            '{"storageAccountName": "", "storageAccountKey": "", "storageAccountEndPoint": ""}')
-        json_data['storageAccountName'] = diagnostics_account
-        json_data['storageAccountKey'] = list_results.keys[0].value
-        json_data['storageAccountEndPoint'] = "https://core.windows.net/"
-        diagnostics_ext['protectedSettings'] = json_data
+        diagnostics_ext['protected_settings'] = {
+            'storageAccountName': diagnostics_account,
+            'storageAccountKey': list_results.keys[0].value,
+            'storageAccountEndPoint': 'https://core.windows.net/'
+        }
 
     fabric_exts = [
         e for e in vmss_reference.get('virtual_machine_profile', {}).get('extension_profile', {}).get('extensions', [])
@@ -1231,21 +1211,24 @@ def _add_cert_to_vmss(cli_ctx, vmss, resource_group_name, vault_id, secret_url):
             'vault_certificates': new_vault_certificates
         })
     else:
-        if secrets[0].vault_certificates is not None:
-            certs = [
-                c for c in secrets[0].vault_certificates if c.certificate_url == secret_url]
+        if secrets[0].get('vault_certificates') is not None:
+            certs = [c for c in secrets[0]['vault_certificates'] if c.get('certificate_url') == secret_url]
             if certs is None or certs == []:
-                secrets[0].vault_certificates.append(
-                    VaultCertificate(certificate_url=secret_url, certificate_store='my'))
+                secrets[0]['vault_certificates'].append({
+                    'certificate_store': 'my',
+                    'certificate_url': secret_url
+                })
             else:
                 return
         else:
-            secrets[0].vault_certificates = []
-            secrets[0].vault_certificates.append(
-                VaultCertificate(secret_url, 'my'))
+            secrets[0]['vault_certificates'] = []
+            secrets[0]['vault_certificates'].append({
+                    'certificate_store': 'my',
+                    'certificate_url': secret_url
+                })
 
     vmss['resource_group'] = resource_group_name
-    vmss['vm_scale_set_name'] = vmss.name
+    vmss['vm_scale_set_name'] = vmss['name']
     poller = VMSSCreate(cli_ctx=cli_ctx)(command_args=vmss)
     return LongRunningOperation(cli_ctx)(poller)
 
@@ -1256,7 +1239,7 @@ def _get_sf_vm_extension(vmss):
         extension_type = None
         if ext.get('type1'):
             extension_type = ext['type1'].lower()
-        if ext.get('type'):
+        elif ext.get('type'):
             extension_type = ext['type'].lower()
 
         if extension_type is not None and extension_type in (SERVICE_FABRIC_WINDOWS_NODE_EXT_NAME, SERVICE_FABRIC_LINUX_NODE_EXT_NAME):

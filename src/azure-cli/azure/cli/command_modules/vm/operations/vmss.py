@@ -159,6 +159,7 @@ class VMSSList(_VMSSList):
 
             return self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
 
+
 def convert_show_result_to_snake_case(result):
     new_result = {}
     if "extendedLocation" in result:
