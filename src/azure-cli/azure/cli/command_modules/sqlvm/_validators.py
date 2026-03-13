@@ -243,8 +243,6 @@ def _validate_msi_valid_on_vm(cli_ctx, namespace):
     """
     logger.debug("Validate Azure AD authentication regarding the validity of the managed identity.")
 
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.cli.core.profiles import ResourceType
     from ..vm.operations.vm import VMShow
 
     # Retrieve the vm instance. This is a rest call to the server and deserialization afterwards
