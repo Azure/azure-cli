@@ -1223,9 +1223,9 @@ def _add_cert_to_vmss(cli_ctx, vmss, resource_group_name, vault_id, secret_url):
         else:
             secrets[0]['vault_certificates'] = []
             secrets[0]['vault_certificates'].append({
-                    'certificate_store': 'my',
-                    'certificate_url': secret_url
-                })
+                'certificate_store': 'my',
+                'certificate_url': secret_url
+            })
 
     vmss['resource_group'] = resource_group_name
     vmss['vm_scale_set_name'] = vmss['name']
