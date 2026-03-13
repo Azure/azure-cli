@@ -230,7 +230,7 @@ def load_arguments(self, _):
         c.argument('bandwidth_copy_speed', min_api='2023-10-02',
                    help='If this field is set on a snapshot and createOption is CopyStart, the snapshot will be copied at a quicker speed.',
                    arg_type=get_enum_type(["None", "Enhanced"]))
-        c.argument('instant_access_duration_minutes', options_list=['--instant-access-duration-minutes', '--ia-duration'], type=int, help='For snapshots created from Premium SSD v2 or Ultra disk, this property determines the time in minutes the snapshot is retained for instant access to enable faster restore. The disk sku should be UltraSSD_LRS or PremiumV2_LRS.')
+        c.argument('instant_access_duration_minutes', options_list=['--instant-access-duration-minutes', '--instant-access-duration', '--ia-duration'], type=int, help='For snapshots created from Premium SSD v2 or Ultra disk, this property determines the time in minutes the snapshot is retained for instant access to enable faster restore. The disk sku should be UltraSSD_LRS or PremiumV2_LRS.')
     # endregion
 
     # region Images
