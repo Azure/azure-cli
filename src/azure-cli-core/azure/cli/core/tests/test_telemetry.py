@@ -8,6 +8,10 @@ from unittest import mock
 
 
 class TestCoreTelemetry(unittest.TestCase):
+    def setUp(self):
+        from azure.cli.core import telemetry
+        telemetry._session.__init__()  # pylint: disable=unnecessary-dunder-call
+
     def test_suppress_all_exceptions(self):
         self._impl(Exception, 'fallback')
         self._impl(Exception, None)
@@ -116,5 +120,23 @@ class TestCoreTelemetry(unittest.TestCase):
                 azure_cli_props = session._get_azure_cli_properties()
 
                 self.assertIn('Context.Default.AzureCLI.CommandPreserveCasing', azure_cli_props)
-                self.assertEqual(azure_cli_props['Context.Default.AzureCLI.CommandPreserveCasing'], 
+                self.assertEqual(azure_cli_props['Context.Default.AzureCLI.CommandPreserveCasing'],
                                  expected_casing)
+
+    def test_thread_timeout_telemetry_property(self):
+        from azure.cli.core import telemetry
+
+        original_value = telemetry._session.thread_timeout
+        try:
+            telemetry._session.thread_timeout = None
+            props = telemetry._session._get_azure_cli_properties()
+            self.assertNotIn('Context.Default.AzureCLI.ThreadTimeout', props)
+
+            telemetry.set_thread_timeout(60)
+            props = telemetry._session._get_azure_cli_properties()
+            self.assertEqual(
+                props['Context.Default.AzureCLI.ThreadTimeout'],
+                'module loading failed with timeout seconds: 60'
+            )
+        finally:
+            telemetry._session.thread_timeout = original_value

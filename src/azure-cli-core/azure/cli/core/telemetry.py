@@ -80,6 +80,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         self.enable_broker_on_windows = None
         self.msal_telemetry = None
         self.login_experience_v2 = None
+        self.thread_timeout = None
 
     def add_event(self, name, properties):
         for key in self.instrumentation_key:
@@ -239,6 +240,11 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'EnableBrokerOnWindows', str(self.enable_broker_on_windows))
         set_custom_properties(result, 'MsalTelemetry', self.msal_telemetry)
         set_custom_properties(result, 'LoginExperienceV2', str(self.login_experience_v2))
+        set_custom_properties(
+            result,
+            'ThreadTimeout',
+            self.thread_timeout
+        )
 
         return result
 
@@ -444,6 +450,11 @@ def set_extension_management_detail(ext_name, ext_version):
 @decorators.suppress_all_exceptions()
 def set_command_index_rebuild_triggered(is_cmd_idx_rebuild_triggered=False):
     _session.is_cmd_idx_rebuild_triggered = is_cmd_idx_rebuild_triggered
+
+
+@decorators.suppress_all_exceptions()
+def set_thread_timeout(timeout_seconds):
+    _session.thread_timeout = 'module loading failed with timeout seconds: {}'.format(timeout_seconds)
 
 
 @decorators.suppress_all_exceptions()

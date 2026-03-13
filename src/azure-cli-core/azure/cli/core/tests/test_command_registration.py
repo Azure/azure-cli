@@ -9,7 +9,7 @@ from unittest import mock
 import unittest
 from collections import namedtuple
 
-from azure.cli.core import AzCommandsLoader, MainCommandsLoader
+from azure.cli.core import AzCommandsLoader, MainCommandsLoader, ModuleLoadResult, ModuleLoadTimeoutError
 from azure.cli.core.commands import ExtensionCommandSource
 from azure.cli.core.extension import EXTENSIONS_MOD_PREFIX
 from azure.cli.core.mock import DummyCli
@@ -274,22 +274,31 @@ class TestCommandRegistration(unittest.TestCase):
 
         # Load all commands (triggers parallel module loading)
         cmd_tbl = loader.load_command_table(None)
-        
+
         # Verify EVERY command in command_table has an entry in cmd_to_loader_map
         # This is exactly what azdev does before it hits KeyError
         for cmd_name in cmd_tbl:
             # This should NOT raise KeyError
-            self.assertIn(cmd_name, loader.cmd_to_loader_map, 
-                         f"Command '{cmd_name}' missing from cmd_to_loader_map - "
-                         f"would cause KeyError in azdev command-change meta-export")
-            
+            self.assertIn(
+                cmd_name,
+                loader.cmd_to_loader_map,
+                f"Command '{cmd_name}' missing from cmd_to_loader_map - "
+                f"would cause KeyError in azdev command-change meta-export"
+            )
+
             # Verify the entry is a list with at least one loader
             loaders = loader.cmd_to_loader_map[cmd_name]
-            self.assertIsInstance(loaders, list, 
-                                 f"cmd_to_loader_map['{cmd_name}'] should be a list")
-            self.assertGreater(len(loaders), 0, 
-                              f"cmd_to_loader_map['{cmd_name}'] should have at least one loader")
-        
+            self.assertIsInstance(
+                loaders,
+                list,
+                f"cmd_to_loader_map['{cmd_name}'] should be a list"
+            )
+            self.assertGreater(
+                len(loaders),
+                0,
+                f"cmd_to_loader_map['{cmd_name}'] should have at least one loader"
+            )
+
         # Verify all expected commands are present
         expected_commands = {'hello mod-only', 'hello overridden', 'extra final', 'hello ext-only'}
         actual_commands = set(cmd_tbl.keys())
@@ -429,6 +438,28 @@ class TestCommandRegistration(unittest.TestCase):
     @mock.patch('azure.cli.core.commands._load_command_loader', _mock_load_command_loader)
     @mock.patch('azure.cli.core.extension.get_extension_modname', _mock_get_extension_modname)
     @mock.patch('azure.cli.core.extension.get_extensions', _mock_get_extensions)
+    def test_command_index_not_updated_on_module_load_timeout(self):
+        from azure.cli.core._session import INDEX
+        from azure.cli.core import CommandIndex, __version__
+
+        cli = DummyCli()
+        loader = cli.commands_loader
+
+        sentinel_index = {'sentinel': ['azure.cli.command_modules.sentinel']}
+        INDEX[CommandIndex._COMMAND_INDEX_VERSION] = __version__
+        INDEX[CommandIndex._COMMAND_INDEX_CLOUD_PROFILE] = cli.cloud.profile
+        INDEX[CommandIndex._COMMAND_INDEX] = sentinel_index.copy()
+
+        with mock.patch.object(loader, '_load_modules', return_value=([], True)):
+            loader.load_command_table(None)
+
+        self.assertDictEqual(INDEX[CommandIndex._COMMAND_INDEX], sentinel_index)
+
+    @mock.patch('importlib.import_module', _mock_import_lib)
+    @mock.patch('pkgutil.iter_modules', _mock_iter_modules)
+    @mock.patch('azure.cli.core.commands._load_command_loader', _mock_load_command_loader)
+    @mock.patch('azure.cli.core.extension.get_extension_modname', _mock_get_extension_modname)
+    @mock.patch('azure.cli.core.extension.get_extensions', _mock_get_extensions)
     def test_command_index_always_loaded_extensions(self):
         import azure
         from azure.cli.core import CommandIndex
@@ -439,14 +470,14 @@ class TestCommandRegistration(unittest.TestCase):
         index.invalidate()
 
         # Test azext_always_loaded is loaded when command index is rebuilt
-        with mock.patch.object(azure.cli.core,'ALWAYS_LOADED_EXTENSIONS', ['azext_always_loaded']):
+        with mock.patch.object(azure.cli.core, 'ALWAYS_LOADED_EXTENSIONS', ['azext_always_loaded']):
             loader.load_command_table(["hello", "mod-only"])
             self.assertEqual(TestCommandRegistration.test_hook, "FAKE_HANDLER")
 
         TestCommandRegistration.test_hook = []
 
         # Test azext_always_loaded is loaded when command index is used
-        with mock.patch.object(azure.cli.core,'ALWAYS_LOADED_EXTENSIONS', ['azext_always_loaded']):
+        with mock.patch.object(azure.cli.core, 'ALWAYS_LOADED_EXTENSIONS', ['azext_always_loaded']):
             loader.load_command_table(["hello", "mod-only"])
             self.assertEqual(TestCommandRegistration.test_hook, "FAKE_HANDLER")
 
@@ -478,6 +509,20 @@ class TestCommandRegistration(unittest.TestCase):
         cmd_tbl = loader.load_command_table(["extra", "final", "positional_argument2"])
         self.assertDictEqual(INDEX[CommandIndex._COMMAND_INDEX], self.expected_command_index)
         self.assertEqual(list(cmd_tbl), ['extra final'])
+
+    @mock.patch('azure.cli.core.telemetry.set_exception')
+    def test_timeout_module_load_error_does_not_emit_fault_telemetry(self, mock_set_exception):
+        cli = DummyCli()
+        loader = cli.commands_loader
+
+        timeout_result = ModuleLoadResult('timeout_mod', {}, {}, 0,
+                          ModuleLoadTimeoutError('timeout_mod', 1))
+        loader._handle_module_load_error(timeout_result)
+        mock_set_exception.assert_not_called()
+
+        regular_error_result = ModuleLoadResult('bad_mod', {}, {}, 0, Exception('import failed'))
+        loader._handle_module_load_error(regular_error_result)
+        mock_set_exception.assert_called_once()
 
     def test_argument_with_overrides(self):
 

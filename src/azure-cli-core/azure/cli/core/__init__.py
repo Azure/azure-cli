@@ -36,8 +36,9 @@ TOP_LEVEL_COMPLETION_MARKER = '__top_level_completion__'
 ALWAYS_LOADED_MODULES = []
 # Extensions that will always be loaded if installed. They don't expose commands but hook into CLI core.
 ALWAYS_LOADED_EXTENSIONS = ['azext_ai_examples', 'azext_next']
-# Timeout (in seconds) for loading a single module. Acts as a safety valve to prevent indefinite hangs
-MODULE_LOAD_TIMEOUT_SECONDS = 60
+# Timeout (in seconds) for loading command modules.
+# Set via core.module_load_timeout. Use 0 or a negative value to disable timeout.
+DEFAULT_MODULE_LOAD_TIMEOUT_SECONDS = 120
 # Maximum number of worker threads for parallel module loading.
 MAX_WORKER_THREAD_COUNT = 4
 
@@ -203,8 +204,16 @@ class AzCli(CLI):
         format_styled_text.theme = theme
 
 
+class ModuleLoadTimeoutError(TimeoutError):
+    """Raised when a command module does not finish loading within timeout."""
+
+    def __init__(self, module_name, timeout_seconds):
+        super().__init__("Module '{}' load timeout after {} seconds".format(module_name, timeout_seconds))
+
+
 class ModuleLoadResult:  # pylint: disable=too-few-public-methods
-    def __init__(self, module_name, command_table, group_table, elapsed_time, error=None, traceback_str=None, command_loader=None):
+    def __init__(self, module_name, command_table, group_table, elapsed_time,
+                 error=None, traceback_str=None, command_loader=None):
         self.module_name = module_name
         self.command_table = command_table
         self.group_table = group_table
@@ -264,6 +273,8 @@ class MainCommandsLoader(CLICommandsLoader):
         from azure.cli.core.breaking_change import (
             import_core_breaking_changes, import_extension_breaking_changes)
 
+        module_load_timed_out = False
+
         def _update_command_table_from_modules(args, command_modules=None):
             """Loads command tables from modules and merge into the main command table.
 
@@ -290,9 +301,12 @@ class MainCommandsLoader(CLICommandsLoader):
                 except ImportError as e:
                     logger.warning(e)
 
+            nonlocal module_load_timed_out
+
             start_time = timeit.default_timer()
             logger.debug("Loading command modules...")
-            results = self._load_modules(args, command_modules)
+            results, timed_out = self._load_modules(args, command_modules)
+            module_load_timed_out = module_load_timed_out or timed_out
 
             count, cumulative_group_count, cumulative_command_count = \
                 self._process_results_with_timing(results)
@@ -524,9 +538,11 @@ class MainCommandsLoader(CLICommandsLoader):
         _update_command_table_from_extensions(ext_suppressions)
         logger.debug("Loaded %d groups, %d commands.", len(self.command_group_table), len(self.command_table))
 
-        if use_command_index:
+        if use_command_index and not module_load_timed_out:
             command_index.update(self.command_table)
             self._cache_help_index(command_index)
+        elif use_command_index and module_load_timed_out:
+            logger.warning("Skip command index update because module loading timed out.")
 
         return self.command_table
 
@@ -622,16 +638,21 @@ class MainCommandsLoader(CLICommandsLoader):
                 loader._update_command_definitions()  # pylint: disable=protected-access
 
     def _load_modules(self, args, command_modules):
-        """Load command modules using ThreadPoolExecutor with timeout protection."""
+        """Load command modules using ThreadPoolExecutor."""
         from azure.cli.core.commands import BLOCKED_MODS
+        from azure.cli.core import telemetry
 
+        timeout_seconds = self._get_module_load_timeout_seconds()
         results = []
+        timed_out = False
+        processed_futures = set()
         with ThreadPoolExecutor(max_workers=MAX_WORKER_THREAD_COUNT) as executor:
             future_to_module = {executor.submit(self._load_single_module, mod, args): mod
                                 for mod in command_modules if mod not in BLOCKED_MODS}
 
             try:
-                for future in concurrent.futures.as_completed(future_to_module, timeout=MODULE_LOAD_TIMEOUT_SECONDS):
+                for future in concurrent.futures.as_completed(future_to_module, timeout=timeout_seconds):
+                    processed_futures.add(future)
                     try:
                         result = future.result()
                         results.append(result)
@@ -644,7 +665,11 @@ class MainCommandsLoader(CLICommandsLoader):
                         logger.warning("Module '%s' load failed with unexpected exception: %s", mod, ex)
                         results.append(ModuleLoadResult(mod, {}, {}, 0, ex))
             except concurrent.futures.TimeoutError:
+                timed_out = True
+                telemetry.set_thread_timeout(timeout_seconds)
                 for future, mod in future_to_module.items():
+                    if future in processed_futures:
+                        continue
                     if future.done():
                         try:
                             result = future.result()
@@ -653,11 +678,33 @@ class MainCommandsLoader(CLICommandsLoader):
                             logger.warning("Module '%s' load failed: %s", mod, ex)
                             results.append(ModuleLoadResult(mod, {}, {}, 0, ex))
                     else:
-                        logger.warning("Module '%s' load timeout after %s seconds", mod, MODULE_LOAD_TIMEOUT_SECONDS)
-                        results.append(ModuleLoadResult(mod, {}, {}, 0,
-                                                        Exception(f"Module '{mod}' load timeout")))
+                        logger.warning("Module '%s' load timeout after %s seconds", mod, timeout_seconds)
+                        results.append(ModuleLoadResult(
+                            mod,
+                            {},
+                            {},
+                            0,
+                            ModuleLoadTimeoutError(mod, timeout_seconds)
+                        ))
 
-        return results
+        return results, timed_out
+
+    def _get_module_load_timeout_seconds(self):
+        raw_timeout = self.cli_ctx.config.get('core', 'module_load_timeout', str(DEFAULT_MODULE_LOAD_TIMEOUT_SECONDS))
+        try:
+            timeout_seconds = int(raw_timeout)
+        except (TypeError, ValueError):
+            logger.warning("Invalid core.module_load_timeout value '%s'. Using default %s seconds.",
+                           raw_timeout, DEFAULT_MODULE_LOAD_TIMEOUT_SECONDS)
+            timeout_seconds = DEFAULT_MODULE_LOAD_TIMEOUT_SECONDS
+
+        if timeout_seconds <= 0:
+            logger.debug("Module load timeout disabled by core.module_load_timeout=%s", timeout_seconds)
+            return None
+
+        logger.debug("Module load timeout set to %s seconds (core.module_load_timeout=%s).",
+                     timeout_seconds, raw_timeout)
+        return timeout_seconds
 
     def _load_single_module(self, mod, args):
         from azure.cli.core.breaking_change import import_module_breaking_changes
@@ -676,6 +723,10 @@ class MainCommandsLoader(CLICommandsLoader):
     def _handle_module_load_error(self, result):
         """Handle errors that occurred during module loading."""
         from azure.cli.core import telemetry
+
+        if isinstance(result.error, ModuleLoadTimeoutError):
+            logger.warning("Skip per-module timeout fault telemetry for '%s'.", result.module_name)
+            return
 
         logger.error("Error loading command module '%s': %s", result.module_name, result.error)
         telemetry.set_exception(exception=result.error,
