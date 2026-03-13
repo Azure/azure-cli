@@ -8,7 +8,6 @@ import unittest
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer)
 
-
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
@@ -38,25 +37,26 @@ class ApimScenarioTest(ScenarioTest):
             'enable_managed_identity': True,
             'tag': "foo=boo",
             'public_network_access': True,
-            'disable_gateway' : False
+            'disable_gateway': False
         })
 
         self.cmd('apim check-name -n {service_name} -o json',
                  checks=[self.check('nameAvailable', True)])
 
-        self.cmd('apim create --name {service_name} -g {rg} -l {rg_loc} --sku-name {sku_name} --publisher-email {publisher_email} --publisher-name {publisher_name} --enable-client-certificate {enable_cert} --enable-managed-identity {enable_managed_identity} --public-network-access {public_network_access} --disable-gateway {disable_gateway}',
-                 checks=[self.check('name', '{service_name}'),
-                         self.check('location', '{rg_loc_displayName}'),
-                         self.check('sku.name', '{sku_name}'),
-                         self.check('provisioningState', 'Succeeded'),
-                         # expect None for Developer sku, even though requested value was True - only works with Consumption sku
-                         self.check('enableClientCertificate', None),
-                         self.check('identity.type', 'SystemAssigned'),
-                         self.check('publisherName', '{publisher_name}'),
-                         self.check('publisherEmail', '{publisher_email}'),
-                         self.check('publicNetworkAccess', 'Enabled'),
-                         self.check('disableGateway', '{disable_gateway}')
-        ])
+        self.cmd(
+            'apim create --name {service_name} -g {rg} -l {rg_loc} --sku-name {sku_name} --publisher-email {publisher_email} --publisher-name {publisher_name} --enable-client-certificate {enable_cert} --enable-managed-identity {enable_managed_identity} --public-network-access {public_network_access} --disable-gateway {disable_gateway}',
+            checks=[self.check('name', '{service_name}'),
+                    self.check('location', '{rg_loc_displayName}'),
+                    self.check('sku.name', '{sku_name}'),
+                    self.check('provisioningState', 'Succeeded'),
+                    # expect None for Developer sku, even though requested value was True - only works with Consumption sku
+                    self.check('enableClientCertificate', None),
+                    self.check('identity.type', 'SystemAssigned'),
+                    self.check('publisherName', '{publisher_name}'),
+                    self.check('publisherEmail', '{publisher_email}'),
+                    self.check('publicNetworkAccess', 'Enabled'),
+                    self.check('disableGateway', '{disable_gateway}')
+                    ])
 
         # wait
         self.cmd('apim wait -g {rg} -n {service_name} --created', checks=[self.is_empty()])
@@ -74,7 +74,7 @@ class ApimScenarioTest(ScenarioTest):
             'apim update -n {service_name} -g {rg} --publisher-name {publisher_name} --set publisherEmail={publisher_email}',
             checks=[self.check('publisherName', '{publisher_name}'),
                     self.check('publisherEmail', '{publisher_email}')
-            ])
+                    ])
 
         self.cmd('apim show -g {rg} -n {service_name}', checks=[
             # recheck properties from create
@@ -93,7 +93,8 @@ class ApimScenarioTest(ScenarioTest):
             storage_account_for_backup, resource_group)).output[: -1]
 
         self.cmd('az storage container create -n {} --account-name {} --account-key {}'.format(account_container,
-                 storage_account_for_backup, account_key))
+                                                                                               storage_account_for_backup,
+                                                                                               account_key))
 
         self.kwargs.update({
             'backup_name': service_name + '_test_backup',
@@ -387,7 +388,7 @@ class ApimScenarioTest(ScenarioTest):
         api_file = open(schemapath, 'r')
         content_value = api_file.read()
         value = content_value
-        
+
         pythonfile = 'policy.xml'
         policypath = os.path.join(TEST_DIR, pythonfile)
 
@@ -418,10 +419,11 @@ class ApimScenarioTest(ScenarioTest):
             'apim api import -g "{rg}" --service-name "{service_name}" --path "{path3}" --api-id "{graphql_im_api_id}" --specification-url "{graphql_service_url}" --specification-format "{graphql}" --display-name "{graphql_im_api_id}"',
             checks=[self.check('displayName', '{graphql_im_api_id}'),
                     self.check('path', '{path3}'),
-                    self.check('apiType','{graphql_api_type}')])
+                    self.check('apiType', '{graphql_api_type}')])
 
         # api delete command
-        self.cmd('apim api delete -g {rg} --service-name {service_name} --api-id {graphql_im_api_id} --delete-revisions true -y')
+        self.cmd(
+            'apim api delete -g {rg} --service-name {service_name} --api-id {graphql_im_api_id} --delete-revisions true -y')
 
         self.cmd(
             'apim api create -g "{rg}" --service-name "{service_name}" --display-name "{graphql_display_name}" --path "{graphql_path}" --api-id "{graphql_api_id}" --protocols "{graphql_protocol}" --service-url "{graphql_service_url}" --api-type "{graphql_api_type}"',
@@ -429,73 +431,72 @@ class ApimScenarioTest(ScenarioTest):
                     self.check('path', '{graphql_path}'),
                     self.check('serviceUrl', '{graphql_service_url}'),
                     self.check('protocols[0]', '{graphql_protocol}')])
- 
-        #create schema
+
+        # create schema
         self.cmd(
             'apim api schema create -g "{rg}" --service-name "{service_name}" --api-id "{graphql_api_id}" --schema-id "{graphql_sch_id}" --schema-type "{graphql_schema_type}" --schema-path "{graphql_schema_path}"',
             checks=[self.check('contentType', '{graphql_schema_type}'),
                     self.check('name', '{graphql_sch_id}'),
                     self.check('value', '{schema_file_value}')])
-        
-        #create resolver
+
+        # create resolver
         self.cmd(
             'apim graphql resolver create -g "{rg}" --service-name "{service_name}" --api-id "{graphql_api_id}" --resolver-id "{resolver_id}" --display-name "{resolver_display_name}" --path "{resolver_path}" --description "{resolver_decription}"',
             checks=[self.check('name', '{resolver_id}'),
                     self.check('path', '{resolver_path}')])
-        
-        #get resolver
+
+        # get resolver
         self.cmd(
             'apim graphql resolver show -g "{rg}" --service-name "{service_name}" --api-id "{graphql_api_id}" --resolver-id "{resolver_id}"',
             checks=[self.check('name', '{resolver_id}'),
                     self.check('path', '{resolver_path}')])
-        
-        #list resolvers
-        resolver_count = len(self.cmd('apim graphql resolver list -g "{rg}" -n "{service_name}" --api-id "{graphql_api_id}"').get_output_in_json())
+
+        # list resolvers
+        resolver_count = len(self.cmd(
+            'apim graphql resolver list -g "{rg}" -n "{service_name}" --api-id "{graphql_api_id}"').get_output_in_json())
         self.assertEqual(resolver_count, 1)
 
-        #create resolver policy
+        # create resolver policy
         self.cmd(
             'apim graphql resolver policy create -g "{rg}" --service-name "{service_name}" --api-id "{graphql_api_id}" --resolver-id "{resolver_id}" --policy-format "xml" --value-path "{value_path}"',
             checks=[self.check('format', 'xml')])
-        
-        #get resolver policy
+
+        # get resolver policy
         self.cmd(
             'apim graphql resolver policy show -g "{rg}" --service-name "{service_name}" --api-id "{graphql_api_id}" --resolver-id "{resolver_id}"',
             checks=[self.check('format', 'xml')])
-        
-        #delete resolver policy
+
+        # delete resolver policy
         self.cmd(
             'apim graphql resolver policy delete -g "{rg}" --service-name "{service_name}" --api-id "{graphql_api_id}" --resolver-id "{resolver_id}" --yes')
-        
-        #delete resolver
+
+        # delete resolver
         self.cmd(
             'apim graphql resolver delete -g "{rg}" --service-name "{service_name}" --api-id "{graphql_api_id}" --resolver-id "{resolver_id}" --yes')
-        
-        
 
-        #get schema
+        # get schema
         self.cmd(
             'apim api schema show -g "{rg}" --service-name "{service_name}" --api-id "{graphql_api_id}" --schema-id "{graphql_sch_id}"',
             checks=[self.check('contentType', '{graphql_schema_type}'),
                     self.check('name', '{graphql_sch_id}'),
                     self.check('value', '{schema_file_value}')])
-        
-        
-        #list api schemas
-        schema_count = len(self.cmd('apim api schema list -g "{rg}" -n "{service_name}" --api-id "{graphql_api_id}"').get_output_in_json())
+
+        # list api schemas
+        schema_count = len(self.cmd(
+            'apim api schema list -g "{rg}" -n "{service_name}" --api-id "{graphql_api_id}"').get_output_in_json())
         self.assertEqual(schema_count, 1)
-        
-        
-        #entity
+
+        # entity
         entity = self.cmd(
             'apim api schema get-etag -g "{rg}" --service-name "{service_name}" --api-id "{graphql_api_id}" --schema-id "{graphql_sch_id}"')
         self.assertTrue(entity)
-        
-        #delete schema
+
+        # delete schema
         self.cmd(
             'apim api schema delete -g "{rg}" --service-name "{service_name}" --api-id "{graphql_api_id}" --schema-id "{graphql_sch_id}" --yes')
-        
-        schema_count = len(self.cmd('apim api schema list -g "{rg}" -n "{service_name}" --api-id "{graphql_api_id}"').get_output_in_json())
+
+        schema_count = len(self.cmd(
+            'apim api schema list -g "{rg}" -n "{service_name}" --api-id "{graphql_api_id}"').get_output_in_json())
         self.assertEqual(schema_count, 0)
 
         # websocket api
@@ -514,9 +515,9 @@ class ApimScenarioTest(ScenarioTest):
             checks=[self.check('displayName', '{ws_display_name}'),
                     self.check('path', '{ws_path}'),
                     self.check('serviceUrl', '{ws_service_url}'),
-                    self.check('apiType','{ws_api_type}'),
+                    self.check('apiType', '{ws_api_type}'),
                     self.check('protocols[0]', '{ws_protocol}')])
-        
+
         # named value operations
         self.kwargs.update({
             'display_name': self.create_random_name('nv-name', 14),
@@ -572,7 +573,6 @@ class ApimScenarioTest(ScenarioTest):
         final_count = len(self.cmd('apim list -g {rg}').get_output_in_json())
         self.assertEqual(final_count, service_count - 1)
 
-
     @ResourceGroupPreparer(name_prefix='cli_test_apim-', parameter_name_for_location='resource_group_location')
     @StorageAccountPreparer(parameter_name='storage_account_for_backup')
     @AllowLargeResponse()
@@ -614,14 +614,15 @@ class ApimScenarioTest(ScenarioTest):
         self.cmd('apim check-name -n {service_name} -o json',
                  checks=[self.check('nameAvailable', True)])
 
-        self.cmd('apim create --name {service_name} -g {rg} -l {rg_loc} --sku-name {sku_name} --publisher-email {publisher_email} --publisher-name {publisher_name} --enable-managed-identity {enable_managed_identity}',
-                 checks=[self.check('name', '{service_name}'),
-                         self.check('location', '{rg_loc_displayName}'),
-                         self.check('sku.name', '{sku_name}'),
-                         self.check('provisioningState', 'Succeeded'),
-                         self.check('identity.type', 'SystemAssigned'),
-                         self.check('publisherName', '{publisher_name}'),
-                         self.check('publisherEmail', '{publisher_email}')])
+        self.cmd(
+            'apim create --name {service_name} -g {rg} -l {rg_loc} --sku-name {sku_name} --publisher-email {publisher_email} --publisher-name {publisher_name} --enable-managed-identity {enable_managed_identity}',
+            checks=[self.check('name', '{service_name}'),
+                    self.check('location', '{rg_loc_displayName}'),
+                    self.check('sku.name', '{sku_name}'),
+                    self.check('provisioningState', 'Succeeded'),
+                    self.check('identity.type', 'SystemAssigned'),
+                    self.check('publisherName', '{publisher_name}'),
+                    self.check('publisherEmail', '{publisher_email}')])
 
         # import api
         self.cmd(
@@ -634,11 +635,29 @@ class ApimScenarioTest(ScenarioTest):
             'apim api export -g "{rg}" --service-name "{service_name}" --api-id "{api_id}" --export-format "OpenApiJsonUrl"',
             checks=[self.check('name', "{api_id}")])
 
+        # Test export with custom filename
+        # Validates that file_name parameter is properly incorporated into full_path
+        custom_filename = 'custom_export.json'
+        self.kwargs.update({
+            'file_path': TEST_DIR,
+            'file_name': custom_filename
+        })
+
+        self.cmd(
+            'apim api export -g "{rg}" --service-name "{service_name}" --api-id "{api_id}" --export-format "OpenApiJsonFile" --file-path "{file_path}" --file-name "{file_name}"'
+        )
+
+        # verify an exported file exists and then clean up
+        exported_full_path = os.path.join(TEST_DIR, custom_filename)
+        self.assertTrue(os.path.exists(exported_full_path))
+        os.remove(exported_full_path)
+
+
         # service delete command
         self.cmd('apim delete -g {rg} -n {service_name} -y')
 
-
-    @ResourceGroupPreparer(name_prefix='cli_test_apim_deletedservice-', parameter_name_for_location='resource_group_location')
+    @ResourceGroupPreparer(name_prefix='cli_test_apim_deletedservice-',
+                           parameter_name_for_location='resource_group_location')
     @StorageAccountPreparer(parameter_name='storage_account_for_backup')
     @AllowLargeResponse()
     def test_apim_deletedservice(self, resource_group, resource_group_location, storage_account_for_backup):
@@ -669,14 +688,15 @@ class ApimScenarioTest(ScenarioTest):
         self.cmd('apim check-name -n {service_name} -o json',
                  checks=[self.check('nameAvailable', True)])
 
-        self.cmd('apim create --name {service_name} -g {rg} -l {rg_loc} --sku-name {sku_name} --publisher-email {publisher_email} --publisher-name {publisher_name} --enable-managed-identity {enable_managed_identity}',
-                 checks=[self.check('name', '{service_name}'),
-                         self.check('location', '{rg_loc_displayName}'),
-                         self.check('sku.name', '{sku_name}'),
-                         self.check('provisioningState', 'Succeeded'),
-                         self.check('identity.type', 'SystemAssigned'),
-                         self.check('publisherName', '{publisher_name}'),
-                         self.check('publisherEmail', '{publisher_email}')])
+        self.cmd(
+            'apim create --name {service_name} -g {rg} -l {rg_loc} --sku-name {sku_name} --publisher-email {publisher_email} --publisher-name {publisher_name} --enable-managed-identity {enable_managed_identity}',
+            checks=[self.check('name', '{service_name}'),
+                    self.check('location', '{rg_loc_displayName}'),
+                    self.check('sku.name', '{sku_name}'),
+                    self.check('provisioningState', 'Succeeded'),
+                    self.check('identity.type', 'SystemAssigned'),
+                    self.check('publisherName', '{publisher_name}'),
+                    self.check('publisherEmail', '{publisher_email}')])
 
         # wait for creation
         self.cmd('apim wait -g {rg} -n {service_name} --created', checks=[self.is_empty()])
@@ -690,15 +710,16 @@ class ApimScenarioTest(ScenarioTest):
 
         # show deleted service
         self.cmd('apim deletedservice show -l {rg_loc} -n {service_name}',
-                    checks=[self.check('name', '{service_name}'),
-                        self.check('location', '{rg_loc_displayName}'),
-                        self.check('type', 'Microsoft.ApiManagement/deletedservices')])
+                 checks=[self.check('name', '{service_name}'),
+                         self.check('location', '{rg_loc_displayName}'),
+                         self.check('type', 'Microsoft.ApiManagement/deletedservices')])
 
         # purge deleted service
         self.cmd('apim deletedservice purge -l {rg_loc} -n {service_name}', checks=[self.is_empty()])
 
         # deletedservices = self.cmd('apim deletedservice list').get_output_in_json()
         # self.assertFalse(any(service['name'] == service_name for service in deletedservices))
+
 
 KNOWN_LOCS = {'eastasia': 'East Asia',
               'southeastasia': 'Southeast Asia',
