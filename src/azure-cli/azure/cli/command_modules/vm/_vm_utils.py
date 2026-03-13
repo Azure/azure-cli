@@ -60,6 +60,8 @@ def _resolve_api_version(cli_ctx, provider_namespace, resource_type, parent_path
     if not rt:
         raise CLIError('Resource type {} not found.'.format(resource_type_str))
     if len(rt) == 1 and rt[0].api_versions:
+        if rt[0].default_api_version:
+            return rt[0].default_api_version
         npv = [v for v in rt[0].api_versions if 'preview' not in v.lower()]
         return npv[0] if npv else rt[0].api_versions[0]
     raise CLIError(
