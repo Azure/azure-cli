@@ -1,0 +1,92 @@
+{
+  "title": "PipelineRunCreate_Import",
+  "operationId": "PipelineRuns_Create",
+  "parameters": {
+    "api-version": "2026-01-01-preview",
+    "subscriptionId": "00000000-0000-0000-0000-000000000000",
+    "resourceGroupName": "myResourceGroup",
+    "registryName": "myRegistry",
+    "pipelineRunName": "myPipelineRun",
+    "pipelineRunCreateParameters": {
+      "properties": {
+        "request": {
+          "pipelineResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.ContainerRegistry/registries/myRegistry/importPipelines/myImportPipeline",
+          "source": {
+            "type": "AzureStorageBlob",
+            "name": "myblob.tar.gz"
+          },
+          "catalogDigest": "sha256@"
+        },
+        "forceUpdateTag": "2020-03-04T17:23:21.9261521+00:00"
+      }
+    }
+  },
+  "responses": {
+    "200": {
+      "body": {
+        "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.ContainerRegistry/registries/myRegistry/pipelineRuns/myPipelineRun",
+        "name": "myPipelineRun",
+        "type": "Microsoft.ContainerRegistry/registries/pipelineRuns",
+        "properties": {
+          "request": {
+            "pipelineResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.ContainerRegistry/registries/myRegistry/importPipelines/myImportPipeline"
+          },
+          "response": {
+            "status": "Succeeded",
+            "progress": {
+              "percentage": "100"
+            },
+            "startTime": "2020-03-04T17:23:21.9261521+00:00",
+            "importedArtifacts": [
+              "sourceRepository/hello-world",
+              "sourceRepository2@sha256:00000000000000000000000000000000000"
+            ],
+            "source": {
+              "type": "AzureStorageBlob",
+              "uri": "https://accountname.blob.core.windows.net/containername/myblob.tar.gz",
+              "keyVaultUri": "https://myvault.vault.azure.net/secrets/acrimportsas",
+              "storageAccessMode": "SasToken"
+            },
+            "catalogDigest": "sha256@"
+          },
+          "provisioningState": "Succeeded"
+        }
+      }
+    },
+    "201": {
+      "headers": {
+        "Azure-AsyncOperation": "https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.ContainerRegistry/registries/myRegistry/pipelineRuns/myPipelineRun/operationStatuses/pipelineruns-00000000-0000-0000-0000-000000000000?api-version=2026-01-01-preview"
+      },
+      "body": {
+        "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.ContainerRegistry/registries/myRegistry/pipelineRuns/myPipelineRun",
+        "name": "myPipelineRun",
+        "type": "Microsoft.ContainerRegistry/registries/pipelineRuns",
+        "properties": {
+          "request": {
+            "pipelineResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.ContainerRegistry/registries/myRegistry/importPipelines/myImportPipeline"
+          },
+          "response": {
+            "status": "Succeeded",
+            "progress": {
+              "percentage": "100"
+            },
+            "startTime": "2020-03-04T17:23:21.9261521+00:00",
+            "finishTime": "2020-03-04T17:25:21.9261521+00:00",
+            "importedArtifacts": [
+              "sourceRepository/hello-world",
+              "sourceRepository2@sha256:00000000000000000000000000000000000"
+            ],
+            "source": {
+              "type": "AzureStorageBlob",
+              "uri": "https://accountname.blob.core.windows.net/containername/myblob.tar.gz",
+              "keyVaultUri": "https://myvault.vault.azure.net/secrets/acrimportsas",
+              "storageAccessMode": "SasToken"
+            },
+            "catalogDigest": "sha256@"
+          },
+          "provisioningState": "Succeeded"
+        }
+      }
+    }
+  }
+}

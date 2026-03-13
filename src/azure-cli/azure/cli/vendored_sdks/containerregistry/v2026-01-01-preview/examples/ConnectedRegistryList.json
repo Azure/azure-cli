@@ -1,0 +1,59 @@
+{
+  "title": "ConnectedRegistryList",
+  "operationId": "ConnectedRegistries_List",
+  "parameters": {
+    "api-version": "2026-01-01-preview",
+    "subscriptionId": "00000000-0000-0000-0000-000000000000",
+    "resourceGroupName": "myResourceGroup",
+    "registryName": "myRegistry"
+  },
+  "responses": {
+    "200": {
+      "body": {
+        "value": [
+          {
+            "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.ContainerRegistry/registries/myRegistry/connectedRegistries/myConnectedRegistry",
+            "name": "myConnectedRegistry",
+            "type": "Microsoft.ContainerRegistry/registries/connectedRegistries",
+            "properties": {
+              "mode": "ReadWrite",
+              "activation": {
+                "status": "Inactive"
+              },
+              "parent": {
+                "syncProperties": {
+                  "tokenId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.ContainerRegistry/registries/myRegistry/tokens/syncToken",
+                  "schedule": "0 9 * * *",
+                  "messageTtl": "P2D",
+                  "syncWindow": "PT3H"
+                }
+              },
+              "clientTokenIds": [
+                "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.ContainerRegistry/registries/myRegistry/tokens/client1Token"
+              ],
+              "logging": {
+                "logLevel": "Information",
+                "auditLogStatus": "Disabled"
+              },
+              "notificationsList": [
+                "hello-world:*:*",
+                "sample/repo/*:1.0:*"
+              ],
+              "garbageCollection": {
+                "enabled": true,
+                "schedule": "0 5 * * *"
+              },
+              "registrySyncResult": {
+                "syncTrigger": "InitialSync",
+                "syncState": "Succeeded",
+                "lastSyncStartTime": "2026-01-01T00:00:00.0000000-01:00",
+                "lastSyncEndTime": "2026-01-01T00:01:00.0000000-01:00",
+                "lastSuccessfulSyncEndTime": "2026-01-01T00:01:00.0000000-01:00"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

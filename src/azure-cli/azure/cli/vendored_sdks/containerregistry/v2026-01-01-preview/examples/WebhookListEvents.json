@@ -1,0 +1,65 @@
+{
+  "title": "WebhookListEvents",
+  "operationId": "Webhooks_ListEvents",
+  "parameters": {
+    "api-version": "2026-01-01-preview",
+    "subscriptionId": "00000000-0000-0000-0000-000000000000",
+    "resourceGroupName": "myResourceGroup",
+    "registryName": "myRegistry",
+    "webhookName": "myWebhook"
+  },
+  "responses": {
+    "200": {
+      "body": {
+        "value": [
+          {
+            "id": "00000000-0000-0000-0000-000000000000",
+            "eventRequestMessage": {
+              "content": {
+                "id": "00000000-0000-0000-0000-000000000000",
+                "timestamp": "2017-03-01T23:14:37.0707808Z",
+                "action": "push",
+                "target": {
+                  "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+                  "size": 708,
+                  "digest": "sha256:fea8895f450959fa676bcc1df0611ea93823a735a01205fd8622846041d0c7cf",
+                  "length": 708,
+                  "repository": "hello-world",
+                  "url": "http://192.168.100.227:5000/v2/hello-world/manifests/sha256:fea8895f450959fa676bcc1df0611ea93823a735a01205fd8622846041d0c7cf",
+                  "tag": "latest"
+                },
+                "request": {
+                  "id": "00000000-0000-0000-0000-000000000000",
+                  "addr": "192.168.64.11:42961",
+                  "host": "192.168.100.227:5000",
+                  "method": "GET",
+                  "useragent": "curl/7.38.0"
+                },
+                "actor": {},
+                "source": {
+                  "addr": "xtal.local:5000",
+                  "instanceID": "00000000-0000-0000-0000-000000000000"
+                }
+              },
+              "headers": {
+                "Content-Type": "application/json",
+                "Content-Length": "719",
+                "Authorization": "******"
+              },
+              "method": "POST",
+              "requestUri": "http://myservice.com",
+              "version": "1.1"
+            },
+            "eventResponseMessage": {
+              "headers": {
+                "Content-Length": "0"
+              },
+              "statusCode": "200",
+              "version": "1.1"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

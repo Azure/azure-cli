@@ -1,0 +1,70 @@
+{
+  "title": "WebhookUpdate",
+  "operationId": "Webhooks_Update",
+  "parameters": {
+    "api-version": "2026-01-01-preview",
+    "subscriptionId": "00000000-0000-0000-0000-000000000000",
+    "resourceGroupName": "myResourceGroup",
+    "registryName": "myRegistry",
+    "webhookName": "myWebhook",
+    "webhookUpdateParameters": {
+      "tags": {
+        "key": "value"
+      },
+      "properties": {
+        "serviceUri": "http://myservice.com",
+        "customHeaders": {
+          "Authorization": "******"
+        },
+        "status": "enabled",
+        "scope": "myRepository",
+        "actions": [
+          "push"
+        ]
+      }
+    }
+  },
+  "responses": {
+    "200": {
+      "body": {
+        "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.ContainerRegistry/registries/myRegistry/webhooks/myWebhook",
+        "name": "myWebhook",
+        "type": "Microsoft.ContainerRegistry/registries/webhooks",
+        "location": "westus",
+        "tags": {
+          "key": "value"
+        },
+        "properties": {
+          "status": "enabled",
+          "scope": "myRepository",
+          "actions": [
+            "push"
+          ],
+          "provisioningState": "Succeeded"
+        }
+      }
+    },
+    "201": {
+      "headers": {
+        "Azure-AsyncOperation": "https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.ContainerRegistry/registries/myRegistry/webhooks/myWebhook/operationStatuses/webhooks-00000000-0000-0000-0000-000000000000?api-version=2026-01-01-preview"
+      },
+      "body": {
+        "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.ContainerRegistry/registries/myRegistry/webhooks/myWebhook",
+        "name": "myWebhook",
+        "type": "Microsoft.ContainerRegistry/registries/webhooks",
+        "location": "westus",
+        "tags": {
+          "key": "value"
+        },
+        "properties": {
+          "status": "enabled",
+          "scope": "myRepository",
+          "actions": [
+            "push"
+          ],
+          "provisioningState": "Updating"
+        }
+      }
+    }
+  }
+}

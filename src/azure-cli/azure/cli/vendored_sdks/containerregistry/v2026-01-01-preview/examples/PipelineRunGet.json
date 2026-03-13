@@ -1,0 +1,44 @@
+{
+  "title": "PipelineRunGet",
+  "operationId": "PipelineRuns_Get",
+  "parameters": {
+    "api-version": "2026-01-01-preview",
+    "subscriptionId": "00000000-0000-0000-0000-000000000000",
+    "resourceGroupName": "myResourceGroup",
+    "registryName": "myRegistry",
+    "pipelineRunName": "myPipelineRun"
+  },
+  "responses": {
+    "200": {
+      "body": {
+        "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.ContainerRegistry/registries/myRegistry/pipelineRuns/myPipelineRun",
+        "name": "myPipelineRun",
+        "type": "Microsoft.ContainerRegistry/registries/pipelineRuns",
+        "properties": {
+          "request": {
+            "pipelineResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.ContainerRegistry/registries/myRegistry/exportPipelines/myExportPipeline",
+            "artifacts": [
+              "sourceRepository/hello-world",
+              "sourceRepository2@sha256:00000000000000000000000000000000000"
+            ]
+          },
+          "response": {
+            "status": "Running",
+            "catalogDigest": "sha256@",
+            "progress": {
+              "percentage": "20"
+            },
+            "startTime": "2020-03-04T17:23:21.9261521+00:00",
+            "target": {
+              "type": "AzureStorageBlob",
+              "uri": "https://accountname.blob.core.windows.net/containername/myblob.tar.gz",
+              "keyVaultUri": "https://myvault.vault.azure.net/secrets/acrexportsas",
+              "storageAccessMode": "SasToken"
+            }
+          },
+          "provisioningState": "Succeeded"
+        }
+      }
+    }
+  }
+}

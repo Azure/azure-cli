@@ -1,0 +1,30 @@
+{
+  "title": "RegistryGetPrivateLinkResource",
+  "operationId": "Registries_GetPrivateLinkResource",
+  "parameters": {
+    "api-version": "2026-01-01-preview",
+    "subscriptionId": "00000000-0000-0000-0000-000000000000",
+    "resourceGroupName": "myResourceGroup",
+    "registryName": "myRegistry",
+    "groupName": "registry"
+  },
+  "responses": {
+    "200": {
+      "body": {
+        "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.ContainerRegistry/registries/myRegistry/privateLinkResources/registry",
+        "name": "registry",
+        "type": "Microsoft.ContainerRegistry/registries/privateLinkResources",
+        "properties": {
+          "groupId": "registry",
+          "requiredMembers": [
+            "registry",
+            "registry_data_myregion"
+          ],
+          "requiredZoneNames": [
+            "privatelink.azurecr.io"
+          ]
+        }
+      }
+    }
+  }
+}

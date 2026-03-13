@@ -1,0 +1,61 @@
+{
+  "title": "ArchiveCreate",
+  "operationId": "Archives_Create",
+  "parameters": {
+    "api-version": "2026-01-01-preview",
+    "subscriptionId": "00000000-0000-0000-0000-000000000000",
+    "resourceGroupName": "myResourceGroup",
+    "registryName": "myRegistry",
+    "packageType": "rpm",
+    "archiveName": "myArchiveName",
+    "archiveCreateParameters": {
+      "properties": {
+        "packageSource": {
+          "type": "remote",
+          "url": "string"
+        },
+        "publishedVersion": "string",
+        "repositoryEndpointPrefix": "string"
+      }
+    }
+  },
+  "responses": {
+    "200": {
+      "body": {
+        "type": "Microsoft.ContainerRegistry/registries/archives",
+        "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.ContainerRegistry/registries/myRegistry/packages/rpm/archives/myArchiveName",
+        "name": "myArchiveName",
+        "properties": {
+          "packageSource": {
+            "type": "remote",
+            "url": "string"
+          },
+          "publishedVersion": "string",
+          "repositoryEndpointPrefix": "string",
+          "repositoryEndpoint": "string",
+          "provisioningState": "Succeeded"
+        }
+      }
+    },
+    "201": {
+      "headers": {
+        "Azure-AsyncOperation": "https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.ContainerRegistry/registries/myRegistry/packages/rpm/archives/myArchiveName/operationStatuses/archive-00000000-0000-0000-0000-000000000000?api-version=2023-01-01-preview"
+      },
+      "body": {
+        "type": "Microsoft.ContainerRegistry/registries/archives",
+        "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.ContainerRegistry/registries/myRegistry/archives/myArchiveName",
+        "name": "myArchiveName",
+        "properties": {
+          "packageSource": {
+            "type": "remote",
+            "url": "string"
+          },
+          "publishedVersion": "string",
+          "repositoryEndpointPrefix": "string",
+          "repositoryEndpoint": "string",
+          "provisioningState": "Succeeded"
+        }
+      }
+    }
+  }
+}

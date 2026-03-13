@@ -1,0 +1,30 @@
+{
+  "title": "CacheRuleList",
+  "operationId": "CacheRules_List",
+  "parameters": {
+    "api-version": "2026-01-01-preview",
+    "subscriptionId": "00000000-0000-0000-0000-000000000000",
+    "resourceGroupName": "myResourceGroup",
+    "registryName": "myRegistry"
+  },
+  "responses": {
+    "200": {
+      "body": {
+        "value": [
+          {
+            "type": "Microsoft.ContainerRegistry/registries/cacheRules",
+            "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.ContainerRegistry/registries/myRegistry/cacheRules/myCacheRule",
+            "name": "myCacheRule",
+            "properties": {
+              "credentialSetResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.ContainerRegistry/registries/myRegistry/credentialSets/myCredentialSet",
+              "sourceRepository": "docker.io/library/hello-world",
+              "targetRepository": "cached-docker-hub/hello-world",
+              "creationDate": "2022-11-07T18:20:33.8374968+00:00",
+              "provisioningState": "Succeeded"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

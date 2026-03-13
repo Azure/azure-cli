@@ -1,0 +1,35 @@
+{
+  "title": "WebhookList",
+  "operationId": "Webhooks_List",
+  "parameters": {
+    "api-version": "2026-01-01-preview",
+    "subscriptionId": "00000000-0000-0000-0000-000000000000",
+    "resourceGroupName": "myResourceGroup",
+    "registryName": "myRegistry"
+  },
+  "responses": {
+    "200": {
+      "body": {
+        "value": [
+          {
+            "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.ContainerRegistry/registries/myRegistry/webhooks/myWebhook",
+            "name": "myWebhook",
+            "type": "Microsoft.ContainerRegistry/registries/webhooks",
+            "location": "westus",
+            "tags": {
+              "key": "value"
+            },
+            "properties": {
+              "status": "enabled",
+              "scope": "myRepository",
+              "actions": [
+                "push"
+              ],
+              "provisioningState": "Succeeded"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

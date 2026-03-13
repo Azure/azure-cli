@@ -1,0 +1,52 @@
+{
+  "title": "ImportPipelineList",
+  "operationId": "ImportPipelines_List",
+  "parameters": {
+    "api-version": "2026-01-01-preview",
+    "subscriptionId": "00000000-0000-0000-0000-000000000000",
+    "resourceGroupName": "myResourceGroup",
+    "registryName": "myRegistry"
+  },
+  "responses": {
+    "200": {
+      "body": {
+        "value": [
+          {
+            "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.ContainerRegistry/registries/myRegistry/importPipelines/myImportPipeline",
+            "name": "myImportPipeline",
+            "type": "Microsoft.ContainerRegistry/registries/importPipelines",
+            "properties": {
+              "source": {
+                "type": "AzureStorageBlobContainer",
+                "uri": "https://accountname.blob.core.windows.net/containername",
+                "keyVaultUri": "https://myvault.vault.azure.net/secrets/acrimportsas",
+                "storageAccessMode": "SasToken"
+              },
+              "trigger": {
+                "sourceTrigger": {
+                  "status": "Enabled"
+                }
+              },
+              "options": [
+                "OverwriteTags",
+                "DeleteSourceBlobOnSuccess",
+                "ContinueOnErrors"
+              ],
+              "provisioningState": "Succeeded"
+            },
+            "location": "westus",
+            "identity": {
+              "type": "UserAssigned",
+              "userAssignedIdentities": {
+                "/subscriptions/f9d7ebed-adbd-4cb4-b973-aaf82c136138/resourcegroups/myResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/identity2": {
+                  "clientId": "d3ce1bc2-f7d7-4a5b-9979-950f4e57680e",
+                  "principalId": "b6p9f58b-6fbf-4efd-a7e0-fvd46911a466"
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

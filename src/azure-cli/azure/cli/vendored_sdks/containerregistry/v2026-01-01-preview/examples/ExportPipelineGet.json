@@ -1,0 +1,38 @@
+{
+  "title": "ExportPipelineGet",
+  "operationId": "ExportPipelines_Get",
+  "parameters": {
+    "api-version": "2026-01-01-preview",
+    "subscriptionId": "00000000-0000-0000-0000-000000000000",
+    "resourceGroupName": "myResourceGroup",
+    "registryName": "myRegistry",
+    "exportPipelineName": "myExportPipeline"
+  },
+  "responses": {
+    "200": {
+      "body": {
+        "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.ContainerRegistry/registries/myRegistry/exportPipelines/myExportPipeline",
+        "name": "myExportPipeline",
+        "type": "Microsoft.ContainerRegistry/registries/exportPipelines",
+        "properties": {
+          "target": {
+            "type": "AzureStorageBlobContainer",
+            "uri": "https://accountname.blob.core.windows.net/containername",
+            "keyVaultUri": "https://myvault.vault.azure.net/secrets/acrexportsas",
+            "storageAccessMode": "SasToken"
+          },
+          "options": [
+            "OverwriteBlobs"
+          ],
+          "provisioningState": "Succeeded"
+        },
+        "location": "westus",
+        "identity": {
+          "principalId": "fa153151-b9fd-46f4-9088-5e6600f2689v",
+          "tenantId": "f686d426-8d16-42db-81b7-abu4gm510ccd",
+          "type": "SystemAssigned"
+        }
+      }
+    }
+  }
+}

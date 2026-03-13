@@ -1,0 +1,31 @@
+{
+  "title": "ImportImageByManifestDigest",
+  "operationId": "Registries_ImportImage",
+  "parameters": {
+    "api-version": "2026-01-01-preview",
+    "subscriptionId": "00000000-0000-0000-0000-000000000000",
+    "resourceGroupName": "myResourceGroup",
+    "registryName": "myRegistry",
+    "parameters": {
+      "source": {
+        "resourceId": "/subscriptions/10000000-0000-0000-0000-000000000000/resourceGroups/sourceResourceGroup/providers/Microsoft.ContainerRegistry/registries/sourceRegistry",
+        "sourceImage": "sourceRepository@sha256:0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "targetTags": [
+        "targetRepository:targetTag"
+      ],
+      "untaggedTargetRepositories": [
+        "targetRepository1"
+      ],
+      "mode": "Force"
+    }
+  },
+  "responses": {
+    "200": {},
+    "202": {
+      "headers": {
+        "Location": "https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.ContainerRegistry/locations/location/operationResults/operationStatuses/registries-00000000-0000-0000-0000-000000000000?api-version=2026-01-01-preview"
+      }
+    }
+  }
+}
