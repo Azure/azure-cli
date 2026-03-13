@@ -694,7 +694,7 @@ def _validate_vm_create_storage_account(cmd, namespace):
         storage_id = parse_resource_id(namespace.storage_account)
         rg = storage_id.get('resource_group', namespace.resource_group_name)
         if check_existence(cmd.cli_ctx, storage_id['name'], rg, 'Microsoft.Storage',
-                           'storageAccounts', static_version='2015-06-15'):
+                           'storageAccounts', static_version='2025-06-01'):
             # 1 - existing storage account specified
             namespace.storage_account_type = 'existing'
             logger.debug("using specified existing storage account '%s'", storage_id['name'])
