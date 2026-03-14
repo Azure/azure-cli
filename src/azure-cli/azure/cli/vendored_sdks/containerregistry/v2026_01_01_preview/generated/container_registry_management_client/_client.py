@@ -93,8 +93,8 @@ class ContainerRegistryManagementClient:  # pylint: disable=too-many-instance-at
 
     def __init__(
         self,
-        subscription_id: str,
         credential: "TokenCredential",
+        subscription_id: str,
         *,
         endpoint: str = "https://management.azure.com",
         **kwargs: Any
@@ -120,7 +120,7 @@ class ContainerRegistryManagementClient:  # pylint: disable=too-many-instance-at
                 policies.SensitiveHeaderCleanupPolicy(**kwargs) if self._config.redirect_policy else None,
                 self._config.http_logging_policy,
             ]
-        self._client: PipelineClient = PipelineClient(base_url=endpoint, policies=_policies, **kwargs)
+        self._client: PipelineClient = PipelineClient(policies=_policies, **kwargs)
 
         client_models = {k: v for k, v in _models._models.__dict__.items() if isinstance(v, type)}
         client_models |= {k: v for k, v in _models.__dict__.items() if isinstance(v, type)}

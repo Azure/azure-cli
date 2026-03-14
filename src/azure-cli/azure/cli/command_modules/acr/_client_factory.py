@@ -14,6 +14,7 @@ VERSION_2023_01_01_PREVIEW = "2023-01-01-preview"
 VERSION_2024_11_01_PREVIEW = "2024-11-01-preview"
 VERSION_2025_03_01_PREVIEW = "2025-03-01-preview"
 VERSION_2025_04_01 = "2025-04-01"
+VERSION_2026_01_01_PREVIEW = "2026-01-01-preview"
 
 
 def get_acr_service_client(cli_ctx, api_version=None):
@@ -28,7 +29,12 @@ def cf_acr_registries(cli_ctx, *_):
 
 
 def cf_acr_cache(cli_ctx, *_):
-    return get_acr_service_client(cli_ctx, api_version=VERSION_2023_01_01_PREVIEW).cache_rules
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    # Use 2026-01-01-preview vendored SDK directly
+    from azure.cli.vendored_sdks.containerregistry.v2026_01_01_preview.generated.container_registry_management_client import (
+        ContainerRegistryManagementClient
+    )
+    return get_mgmt_service_client(cli_ctx, ContainerRegistryManagementClient, api_version=VERSION_2026_01_01_PREVIEW).cache_rules
 
 
 def cf_acr_cred_sets(cli_ctx, *_):
