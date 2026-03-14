@@ -7028,7 +7028,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         load_balancer_profile_1 = self.models.load_balancer_models.ManagedClusterLoadBalancerProfile(
             managed_outbound_i_ps=self.models.load_balancer_models.ManagedClusterLoadBalancerProfileManagedOutboundIPs(
                 count=3,
-                count_ipv6=3,
+                count_i_pv6=3,
             ),
             allocated_outbound_ports=5,
         )

@@ -107,7 +107,7 @@ def configure_load_balancer_profile(managed_outbound_ip_count, managed_outbound_
             if managed_outbound_ip_count is not None:
                 profile.managed_outbound_i_ps.count = managed_outbound_ip_count
             if managed_outbound_ipv6_count is not None:
-                profile.managed_outbound_i_ps.count_ipv6 = managed_outbound_ipv6_count
+                profile.managed_outbound_i_ps.count_i_pv6 = managed_outbound_ipv6_count
         elif profile.managed_outbound_i_ps is not None:
             profile.managed_outbound_i_ps = None
     if outbound_ports is not None:
