@@ -6,7 +6,7 @@
 # pylint: disable=unused-argument, line-too-long, import-outside-toplevel, raise-missing-from
 from azure.cli.core.azclierror import InvalidArgumentValueError
 from azure.core.paging import ItemPaged
-from ._client_factory import cf_postgres_flexible_location_capabilities, cf_postgres_flexible_server_capabilities
+from .._client_factory import cf_postgres_flexible_location_capabilities, cf_postgres_flexible_server_capabilities
 from collections import defaultdict
 
 
