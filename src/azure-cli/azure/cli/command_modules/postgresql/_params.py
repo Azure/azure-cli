@@ -7,22 +7,20 @@
 # pylint: disable=too-many-statements
 
 from knack.arguments import CLIArgumentType
-
+from argcomplete.completers import FilesCompleter
 from azure.cli.core.commands.parameters import (
     tags_type, get_location_type,
     get_enum_type, file_type,
     resource_group_name_type,
     get_three_state_flag)
-from azure.cli.command_modules.postgresql.validators import public_access_validator, maintenance_window_validator, ip_address_validator, \
+from azure.cli.command_modules.postgresql.utils._flexible_server_util import get_current_time
+from azure.cli.command_modules.postgresql.utils._util import get_autonomous_tuning_settings_map
+from azure.cli.command_modules.postgresql.utils.validators import public_access_validator, maintenance_window_validator, ip_address_validator, \
     retention_validator, validate_identity, validate_byok_identity, validate_identities, \
     virtual_endpoint_name_validator, node_count_validator, postgres_firewall_rule_name_validator, \
     db_renaming_cluster_validator
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction
-
 from .randomname.generate import generate_username
-from ._flexible_server_util import get_current_time
-from argcomplete.completers import FilesCompleter
-from ._util import get_autonomous_tuning_settings_map
 
 
 def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-locals
