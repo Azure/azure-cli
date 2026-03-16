@@ -2549,7 +2549,7 @@ class AKSAgentPoolAddDecoratorCommonTestCase(unittest.TestCase):
         if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
             ground_truth_agentpool_1.type = CONST_VIRTUAL_MACHINE_SCALE_SETS
         else:
-            ground_truth_agentpool_1.type = CONST_VIRTUAL_MACHINE_SCALE_SETS
+            ground_truth_agentpool_1.type_properties_type = CONST_VIRTUAL_MACHINE_SCALE_SETS
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 
     def common_set_up_custom_node_config(self):
@@ -2862,7 +2862,6 @@ class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCom
             count=3,
             node_taints=[],
             upgrade_settings=ground_truth_upgrade_settings_1,
-            type=CONST_VIRTUAL_MACHINE_SCALE_SETS,
             enable_encryption_at_host=False,
             enable_ultra_ssd=False,
             enable_fips=False,
@@ -2872,6 +2871,10 @@ class AKSAgentPoolAddDecoratorStandaloneModeTestCase(AKSAgentPoolAddDecoratorCom
             host_group_id=None,
             capacity_reservation_group_id=None,
         )
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            ground_truth_agentpool_1.type = CONST_VIRTUAL_MACHINE_SCALE_SETS
+        else:
+            ground_truth_agentpool_1.type_properties_type = CONST_VIRTUAL_MACHINE_SCALE_SETS
         self.assertEqual(dec_agentpool_1, ground_truth_agentpool_1)
 
         dec_1.context.raw_param.print_usage_statistics()

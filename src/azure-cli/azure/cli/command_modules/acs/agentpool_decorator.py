@@ -2056,7 +2056,10 @@ class AKSAgentPoolAddDecorator:
         """
         self._ensure_agentpool(agentpool)
 
-        agentpool.type = self.context.get_vm_set_type()
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            agentpool.type = self.context.get_vm_set_type()
+        else:
+            agentpool.type_properties_type = self.context.get_vm_set_type()
 
         agentpool.proximity_placement_group_id = self.context.get_ppg()
         agentpool.enable_encryption_at_host = self.context.get_enable_encryption_at_host()

@@ -14098,6 +14098,7 @@ spec:
             "--node-count 1",
             checks=[
                 self.check("provisioningState", "Succeeded"),
+                self.check("typePropertiesType", "VirtualMachines"),
                 self.check("vmSize", ""),
                 self.check("count", None),
                 self.check("virtualMachinesProfile.scale.manual[0].size", "Standard_D2s_v3", False),
@@ -14126,6 +14127,7 @@ spec:
             "--node-count 1",
             checks=[
                 self.check("provisioningState", "Succeeded"),
+                self.check("typePropertiesType", "VirtualMachines"),
                 self.check("vmSize", ""),
                 self.check("count", None),
                 self.check("virtualMachinesProfile.scale.manual[1].size", "Standard_DS2_v2", False),
@@ -14143,6 +14145,7 @@ spec:
             "--node-count 3",
             checks=[
                 self.check("provisioningState", "Succeeded"),
+                self.check("typePropertiesType", "VirtualMachines"),
                 self.check("vmSize", ""),
                 self.check("count", None),
                 self.check("virtualMachinesProfile.scale.manual[1].size", "Standard_D8s_v3", False),

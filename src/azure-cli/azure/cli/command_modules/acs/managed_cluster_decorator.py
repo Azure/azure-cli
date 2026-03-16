@@ -433,9 +433,9 @@ class AKSManagedClusterContext(BaseAKSContext):
                     )
                 )
             # verify keys
-            # pylint: disable=protected-access
+            from azure.core.serialization import attribute_list
             valid_keys = list(
-                k.replace("_", "-") for k in self.models.ManagedClusterPropertiesAutoScalerProfile()._attr_to_rest_field.keys()
+                k.replace("_", "-") for k in attribute_list(self.models.ManagedClusterPropertiesAutoScalerProfile())
             )
             for key in cluster_autoscaler_profile.keys():
                 if not key:
