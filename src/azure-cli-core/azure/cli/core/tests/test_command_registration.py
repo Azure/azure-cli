@@ -371,6 +371,11 @@ class TestCommandRegistration(unittest.TestCase):
         cmd_tbl = loader.load_command_table(["hello", "mod-only"])
         self.assertEqual(['hello mod-only', 'hello overridden', 'hello ext-only'], list(cmd_tbl.keys()))
 
+        # Test mixed-case top-level command still uses command index
+        _set_index(self.expected_command_index)
+        cmd_tbl = loader.load_command_table(["HELLO", "mod-only"])
+        self.assertEqual(['hello mod-only', 'hello overridden', 'hello ext-only'], list(cmd_tbl.keys()))
+
         # Full scenario test 1: Installing an extension 'azext_hello1' that extends 'hello' group
         outdated_command_index = {'hello': ['azure.cli.command_modules.hello'],
                                   'extra': ['azure.cli.command_modules.extra']}
