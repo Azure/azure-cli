@@ -18,7 +18,7 @@ class GetRoutesInformation(AAZCommand):
     """This operation retrieves the route set information for Vwan Express Route Gateway based on their resiliency
 
     :example: VwanExpressRouteGatewayGetRoutesInformation
-        az network express-route-gateway get-routes-information --resource-group rg1 --express-route-gateway-name ergw --attempt-refresh False
+        az network express-route-gateway get-routes-information --resource-group rg1 --name ergw --attempt-refresh False
     """
 
     _aaz_info = {
@@ -46,7 +46,7 @@ class GetRoutesInformation(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.express_route_gateway_name = AAZStrArg(
-            options=["--express-route-gateway-name"],
+            options=["--name"],
             help="The name of the vwan express route gateway.",
             required=True,
             id_part="name",

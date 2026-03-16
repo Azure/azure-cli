@@ -18,7 +18,7 @@ class GetFailoverAllTestsDetail(AAZCommand):
     """This operation retrieves the details of all the failover tests performed on the Virtual Wan ExpressRoute gateways for different peering locations
 
     :example: VwanExpressRouteGatewayFailoverAllTestsDetails
-        az network express-route-gateway get-failover-all-tests-detail --resource-group ExpressRouteVWan_ResiliencyValidation_Playwright_Tests --express-route-gateway-name b982dc4450f5406ba6d4344e15575138-eastus-er-gw --type SingleSiteFailover --fetch-latest True
+        az network express-route-gateway get-failover-all-tests-detail --resource-group rg1 --name ergw1 --type SingleSiteFailover --fetch-latest True
     """
 
     _aaz_info = {
@@ -46,7 +46,7 @@ class GetFailoverAllTestsDetail(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.express_route_gateway_name = AAZStrArg(
-            options=["--express-route-gateway-name"],
+            options=["--name"],
             help="The name of the vwan express route gateway.",
             required=True,
             id_part="name",

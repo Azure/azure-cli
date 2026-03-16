@@ -18,7 +18,7 @@ class GetFailoverSingleTestDetail(AAZCommand):
     """This operation retrieves the details of a particular failover test performed on the vwan expressRouteGateway based on the test Guid
 
     :example: VwanExpressRouteGatewayFailoverSingleTestDetails
-        az network express-route-gateway get-failover-single-test-detail --resource-group rg1 --express-route-gateway-name ergw --peering-location Vancouver --failover-test-id fe458ae8-d2ae-4520-a104-44bc233bde7e
+        az network express-route-gateway get-failover-single-test-detail --resource-group rg1 --name ergw --peering-location Vancouver --failover-test-id fe458ae8-d2ae-4520-a104-44bc233bde7e
     """
 
     _aaz_info = {
@@ -46,7 +46,7 @@ class GetFailoverSingleTestDetail(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.express_route_gateway_name = AAZStrArg(
-            options=["--express-route-gateway-name"],
+            options=["--name"],
             help="The name of the vwan express route gateway.",
             required=True,
             id_part="name",

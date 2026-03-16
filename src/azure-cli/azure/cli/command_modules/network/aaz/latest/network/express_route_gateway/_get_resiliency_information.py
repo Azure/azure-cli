@@ -18,7 +18,7 @@ class GetResiliencyInformation(AAZCommand):
     """This operation retrieves the resiliency information for VWAN ExpressRoute Gateway, including the gateway's current resiliency score and recommendations to further improve the score
 
     :example: VwanExpressRouteGatewayGetResiliencyInformation
-        az network express-route-gateway get-resiliency-information --resource-group rg1 --express-route-gateway-name ergw --attempt-refresh True
+        az network express-route-gateway get-resiliency-information --resource-group rg1 --name ergw --attempt-refresh True
     """
 
     _aaz_info = {
@@ -46,7 +46,7 @@ class GetResiliencyInformation(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.express_route_gateway_name = AAZStrArg(
-            options=["--express-route-gateway-name"],
+            options=["--name"],
             help="The name of the vwan express route gateway.",
             required=True,
             id_part="name",

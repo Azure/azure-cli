@@ -18,7 +18,7 @@ class StopSiteFailoverTest(AAZCommand):
     """This operation stops an ongoing failover simulation on the vwan expressRouteGateway for the specified peering location
 
     :example: VwanExpressRouteGatewayStopSiteFailoverSimulation
-        az network express-route-gateway stop-site-failover-test --resource-group rg1 --express-route-gateway-name ergw --peering-location Vancouver --was-simulation-successful True --details "[{failover-connection-name:conn1,failover-location:Denver,is-verified:False},{failover-connection-name:conn2,failover-location:Amsterdam,is-verified:True}]"
+        az network express-route-gateway stop-site-failover-test --resource-group rg1 --name ergw --peering-location Vancouver --simulation-successful True --details "[{failover-connection-name:conn1,failover-location:Denver,is-verified:False},{failover-connection-name:conn2,failover-location:Amsterdam,is-verified:True}]"
     """
 
     _aaz_info = {
@@ -46,7 +46,7 @@ class StopSiteFailoverTest(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.express_route_gateway_name = AAZStrArg(
-            options=["--express-route-gateway-name"],
+            options=["--name"],
             help="The name of the express route gateway.",
             required=True,
             id_part="name",

@@ -18,7 +18,7 @@ class StartSiteFailoverTest(AAZCommand):
     """This operation starts failover simulation on the vwan expressRouteGateway for the specified peering location
 
     :example: VwanExpressRouteGatewayStartSiteFailoverSimulation
-        az network express-route-gateway start-site-failover-test --resource-group rg1 --express-route-gateway-name ergw --peering-location Vancouver
+        az network express-route-gateway start-site-failover-test --resource-group rg1 --name ergw --peering-location Vancouver
     """
 
     _aaz_info = {
@@ -46,7 +46,7 @@ class StartSiteFailoverTest(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.express_route_gateway_name = AAZStrArg(
-            options=["--express-route-gateway-name"],
+            options=["--name"],
             help="The name of the express route gateway.",
             required=True,
             id_part="name",
