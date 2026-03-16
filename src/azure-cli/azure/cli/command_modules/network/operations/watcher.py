@@ -72,10 +72,13 @@ def get_network_watcher_from_location(cmd, watcher_name="watcher_name", rg_name=
 
 
 def get_network_watcher_from_vm(cmd):
-    from ..custom import get_vm
+    from ...vm.operations.vm import VMShow
     args = cmd.ctx.args
     vm_name = parse_resource_id(args.vm.to_serialized_data())["name"]
-    vm = get_vm(cmd.cli_ctx, args.resource_group_name, vm_name)
+    vm = VMShow(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': args.resource_group_name,
+        'vm_name': vm_name
+    })
     args.location = vm.get('location')
     get_network_watcher_from_location(cmd)
 
@@ -88,10 +91,13 @@ def get_network_watcher_from_resource(cmd):
 
 
 def get_network_watcher_from_vmss(cmd):
-    from ..custom import get_vmss
+    from ...vm.operations.vmss import VMSSShow
     args = cmd.ctx.args
     vmss_name = parse_resource_id(args.target.to_serialized_data())["name"]
-    vmss = get_vmss(cmd.cli_ctx, args.resource_group_name, vmss_name)
+    vmss = VMSSShow(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': args.resource_group_name,
+        'vm_scale_set_name': vmss_name
+    })
     args.location = vmss.get('location')
     get_network_watcher_from_location(cmd)
 
@@ -387,7 +393,7 @@ class TestConnectivity(_TestConnectivity):
         return args_schema
 
     def pre_operations(self):
-        from ..custom import get_vm
+        from ...vm.operations.vm import VMShow
         args = self.ctx.args
         id_parts = parse_resource_id(args.source_resource.to_serialized_data())
         vm_name = id_parts["name"]
@@ -395,7 +401,10 @@ class TestConnectivity(_TestConnectivity):
         if not rg:
             raise ValidationError("usage error: --source-resource ID | --source-resource NAME --resource-group NAME")
 
-        vm = get_vm(self.cli_ctx, rg, vm_name)
+        vm = VMShow(cli_ctx=self.cli_ctx)(command_args={
+            'resource_group': rg,
+            'vm_name': vm_name
+        })
         args.location = vm.get('location')
         get_network_watcher_from_location(self)
 
