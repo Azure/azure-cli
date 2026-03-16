@@ -74,7 +74,7 @@ class StopSiteFailoverTest(AAZCommand):
             required=True,
         )
         _args_schema.was_simulation_successful = AAZBoolArg(
-            options=["--was-simulation-successful"],
+            options=["--simulation-successful"],
             arg_group="StopParameters",
             help="Whether the failover simulation was successful or not",
             required=True,
