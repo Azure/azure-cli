@@ -12,7 +12,7 @@
 # limitations under the License.
 # ----------------------------------------------------------------------------------
 
-<#[
+<#
 .SYNOPSIS
     Sync ADO Wiki Squad Mapping to resourceManagement.yml by adding squad labels
     wherever a mapped label is added.
@@ -44,7 +44,11 @@ function InitializeRequiredPackages {
         $packageVersion = $_["PackageVersion"]
         $packageDll = $_["DllName"]
         Install-Package -Name $packageName -RequiredVersion $packageVersion -Source "https://www.nuget.org/api/v2" -Destination $packagesDirectory -SkipDependencies -ExcludeVersion -Force
-        Add-Type -LiteralPath (Join-Path -Path $packagesDirectory -ChildPath $packageName | Join-Path -ChildPath "lib" | Join-Path -ChildPath "net6.0" | Join-Path -ChildPath $packageDll) -ErrorAction SilentlyContinue
+        $packageDllPath = Join-Path -Path $packagesDirectory -ChildPath $packageName | Join-Path -ChildPath "lib" | Join-Path -ChildPath "net6.0" | Join-Path -ChildPath $packageDll
+        if (-not (Test-Path -LiteralPath $packageDllPath)) {
+            throw "Package DLL not found: $packageDllPath"
+        }
+        Add-Type -LiteralPath $packageDllPath -ErrorAction Stop
     }
 }
 
@@ -131,7 +135,21 @@ function UpdateNode {
         return
     }
 
-    if ($Node -is [System.Collections.IDictionary] -or $Node -is [PSCustomObject]) {
+    if ($Node -is [System.Collections.IDictionary]) {
+        foreach ($entry in $Node.GetEnumerator()) {
+            $name = $entry.Key
+            $value = $entry.Value
+
+            if ($name -in @('then', 'actions')) {
+                $Node[$name] = EnsureSquadLabelsInActions -ActionList $value -LabelToSquad $LabelToSquad
+            }
+
+            UpdateNode -Node $value -LabelToSquad $LabelToSquad
+        }
+        return
+    }
+
+    if ($Node -is [PSCustomObject]) {
         foreach ($property in $Node.PSObject.Properties) {
             $name = $property.Name
             $value = $property.Value

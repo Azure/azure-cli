@@ -65,6 +65,7 @@ jobs:
         Write-Host "##vso[task.setvariable variable=GithubToken;issecret=true]$GithubToken"
       azurePowerShellVersion: 'LatestVersion'
     displayName: Get Github PAT from Key Vault
+    condition: and(succeeded(), eq(variables['ChangesDetected'], 'true'))
 
   - pwsh: |
       git config --global user.email "AzPyCLI@microsoft.com"
