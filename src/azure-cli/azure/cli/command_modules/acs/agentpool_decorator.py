@@ -1249,8 +1249,8 @@ class AKSAgentPoolContext(BaseAKSContext):
             if self.agentpool and self.agentpool.type is not None:
                 vm_set_type = self.agentpool.type
         else:
-            if self.agentpool and self.agentpool.properties and self.agentpool.properties.type is not None:
-                vm_set_type = self.agentpool.properties.type
+            if self.agentpool and self.agentpool.properties and self.agentpool.properties.type_properties_type is not None:
+                vm_set_type = self.agentpool.properties.type_properties_type
 
         # normalize
         if vm_set_type.lower() == CONST_VIRTUAL_MACHINE_SCALE_SETS.lower():

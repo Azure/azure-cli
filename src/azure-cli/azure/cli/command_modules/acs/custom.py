@@ -3139,7 +3139,7 @@ def aks_agentpool_scale(cmd, client, resource_group_name, cluster_name,
     if new_node_count == instance.count:
         raise CLIError(
             "The new node count is the same as the current node count.")
-    if instance.properties.type == CONST_VIRTUAL_MACHINES:
+    if instance.properties.type_properties_type == CONST_VIRTUAL_MACHINES:
         if len(instance.virtual_machines_profile.scale.manual) == 1:
             instance.virtual_machines_profile.scale.manual[0].count = new_node_count
         else:
@@ -3323,7 +3323,7 @@ def aks_agentpool_manual_scale_add(cmd,
                                    node_count,
                                    no_wait=False):
     instance = client.get(resource_group_name, cluster_name, nodepool_name)
-    if instance.properties.type != CONST_VIRTUAL_MACHINES:
+    if instance.properties.type_properties_type != CONST_VIRTUAL_MACHINES:
         raise ClientRequestError("Cannot add manual to a non-virtualmachines node pool.")
 
     ManualScaleProfile = cmd.get_models(
@@ -3360,7 +3360,7 @@ def aks_agentpool_manual_scale_update(cmd,    # pylint: disable=unused-argument
         raise RequiredArgumentMissingError("specify --vm-sizes or --node-count or both.")
 
     instance = client.get(resource_group_name, cluster_name, nodepool_name)
-    if instance.properties.type != CONST_VIRTUAL_MACHINES:
+    if instance.properties.type_properties_type != CONST_VIRTUAL_MACHINES:
         raise ClientRequestError("Cannot update manual in a non-virtualmachines node pool.")
 
     _current_vm_sizes = [x.strip().lower() for x in current_vm_sizes.split(",")]
@@ -3401,7 +3401,7 @@ def aks_agentpool_manual_scale_delete(cmd,    # pylint: disable=unused-argument
                                       current_vm_sizes,
                                       no_wait=False):
     instance = client.get(resource_group_name, cluster_name, nodepool_name)
-    if instance.properties.type != CONST_VIRTUAL_MACHINES:
+    if instance.properties.type_properties_type != CONST_VIRTUAL_MACHINES:
         raise CLIError("Cannot delete manual in a non-virtualmachines node pool.")
 
     _current_vm_sizes = [x.strip().lower() for x in current_vm_sizes.split(",")]

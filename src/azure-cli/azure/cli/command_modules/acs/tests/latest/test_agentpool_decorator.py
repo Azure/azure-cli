@@ -1241,9 +1241,15 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
             self.agentpool_decorator_mode,
         )
         self.assertEqual(ctx_1.get_vm_set_type(), CONST_VIRTUAL_MACHINE_SCALE_SETS)
-        agentpool = self.create_initialized_agentpool_instance(
-            type=CONST_AVAILABILITY_SET,
-        )
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.MANAGED_CLUSTER:
+            agentpool = self.create_initialized_agentpool_instance(
+                type=CONST_AVAILABILITY_SET,
+            )
+        else:
+            agentpool = self.create_initialized_agentpool_instance()
+            if agentpool.properties is None:
+                agentpool.properties = {}
+            agentpool.properties.type_properties_type = CONST_AVAILABILITY_SET
         ctx_1.attach_agentpool(agentpool)
         self.assertEqual(ctx_1.get_vm_set_type(), CONST_AVAILABILITY_SET)
 
