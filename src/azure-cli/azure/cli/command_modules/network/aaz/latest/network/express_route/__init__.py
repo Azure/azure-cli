@@ -20,3 +20,7 @@ from ._list_service_providers import *
 from ._show import *
 from ._update import *
 from ._wait import *
+from ._get_circuit_link_failover_all_tests_detail import *
+from ._get_circuit_link_failover_single_test_detail import *
+from ._start_circuit_link_failover_test import *
+from ._stop_circuit_link_failover_test import *
