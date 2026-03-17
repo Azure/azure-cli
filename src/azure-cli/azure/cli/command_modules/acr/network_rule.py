@@ -33,6 +33,7 @@ def _set_virtual_network_rules(network_rule_set, vnet_rules):
             serialized.append(rule)
     network_rule_set.additional_properties['virtualNetworkRules'] = serialized
 
+
 # Used in commands.py for command group acr network-rule
 def _transform_network_rule_response(result):
     """Transform the registry response to use virtualNetworkResourceId instead of id.
