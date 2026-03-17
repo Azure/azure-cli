@@ -22,7 +22,6 @@ from ._arg import AAZArgumentsSchema, AAZBoolArg, \
 from ._base import AAZUndefined, AAZBaseValue
 from ._field_type import AAZObjectType
 from ._paging import AAZPaged
-from ._poller import AAZLROPoller
 from ._command_ctx import AAZCommandCtx
 from .exceptions import AAZUnknownFieldError, AAZUnregisteredArg
 from .utils import get_aaz_profile_module_name
@@ -235,6 +234,7 @@ class AAZCommand(CLICommand):
     def build_lro_poller(self, executor, extract_result):
         """ Build AAZLROPoller instance to support long running operation
         """
+        from ._poller import AAZLROPoller
         polling_generator = executor()
         if self.ctx.lro_no_wait:
             # run until yield the first polling
@@ -389,20 +389,20 @@ AAZ_PACKAGE_FULL_LOAD_ENV_NAME = 'AZURE_AAZ_FULL_LOAD'
 
 def load_aaz_command_table(loader, aaz_pkg_name, args):
     """ This function is used in AzCommandsLoader.load_command_table.
-    It will load commands in module's aaz package.
+    It will load commands in module's aaz package using file-path based navigation.
     """
     profile_pkg = _get_profile_pkg(aaz_pkg_name, loader.cli_ctx.cloud)
 
     command_table = {}
     command_group_table = {}
-    if args is None:
-        arg_str = ''
-        fully_load = True
+    if args is None or os.environ.get(AAZ_PACKAGE_FULL_LOAD_ENV_NAME, 'False').lower() == 'true':
+        effective_args = None  # fully load
     else:
-        arg_str = ' '.join(args).lower()  # Sometimes args may contain capital letters.
-        fully_load = os.environ.get(AAZ_PACKAGE_FULL_LOAD_ENV_NAME, 'False').lower() == 'true'  # disable cut logic
+        effective_args = list(args)
     if profile_pkg is not None:
-        _load_aaz_pkg(loader, profile_pkg, command_table, command_group_table, arg_str, fully_load)
+        base_path = os.path.dirname(profile_pkg.__file__)
+        _load_aaz_by_path(loader, base_path, profile_pkg.__name__, effective_args,
+                          command_table, command_group_table)
 
     for group_name, command_group in command_group_table.items():
         loader.command_group_table[group_name] = command_group
@@ -437,6 +437,92 @@ def link_helper(pkg, *links):
             setattr(cls, link[0], partial(func, cls))
         return cls
     return _wrapper
+
+
+def _try_import_module(relative_name, package):
+    """Try to import a module by relative name, return None on failure."""
+    try:
+        return importlib.import_module(relative_name, package)
+    except (ModuleNotFoundError, ImportError):
+        # Comment the debug log because it may cause confusion
+        # commands from different modules may patch each other.
+        # logger.debug('Failed to import module %s relative to %s.', relative_name, package)
+        return None
+
+
+def _register_from_module(loader, mod, command_table, command_group_table):
+    """Scan a module's namespace for AAZCommand/AAZCommandGroup classes and register them."""
+    for value in mod.__dict__.values():
+        if not isinstance(value, type):
+            continue
+        if issubclass(value, AAZCommandGroup) and value.AZ_NAME:
+            command_group_table[value.AZ_NAME] = value(cli_ctx=loader.cli_ctx)
+        elif issubclass(value, AAZCommand) and value.AZ_NAME:
+            command_table[value.AZ_NAME] = value(loader=loader)
+
+
+def _load_aaz_by_path(loader, base_path, base_module, args, command_table, command_group_table):
+    """Recursively navigate the AAZ package tree guided by CLI args.
+
+    - args is None or empty  → full recursive load of all commands under this directory.
+    - args has items → try to match first arg as a command file or sub-directory,
+                       recurse with remaining args on match.
+    - args exhausted / no match → load current level's commands and sub-group headers.
+
+    :param base_path: Filesystem path of the current package directory.
+    :param base_module: Dotted module name of the current package.
+    :param args: Remaining CLI args (list of str), or None for full load.
+    """
+    if not os.path.isdir(base_path):
+        return
+
+    if args is not None and args and not args[0].startswith('-'):
+        first_arg = args[0].lower().replace('-', '_')
+
+        # First arg matches a command file (e.g. "create" → "_create.py")
+        cmd_file = os.path.join(base_path, f"_{first_arg}.py")
+        if os.path.isfile(cmd_file):
+            mod = _try_import_module(f"._{first_arg}", base_module)
+            if mod:
+                _register_from_module(loader, mod, command_table, command_group_table)
+            return
+
+        # First arg matches a sub-directory (command group)
+        sub_dir = os.path.join(base_path, first_arg)
+        if os.path.isdir(sub_dir):
+            sub_module = f"{base_module}.{first_arg}"
+            mod = _try_import_module('.__cmd_group', sub_module)
+            if mod:
+                _register_from_module(loader, mod, command_table, command_group_table)
+            _load_aaz_by_path(loader, sub_dir, sub_module, args[1:], command_table, command_group_table)
+            return
+
+    # Load __cmd_group + all command files at this level
+    mod = _try_import_module('.__cmd_group', base_module)
+    if mod:
+        _register_from_module(loader, mod, command_table, command_group_table)
+
+    for entry in os.listdir(base_path):
+        entry_path = os.path.join(base_path, entry)
+
+        # Command files: _create.py, _list.py, etc.
+        if (entry.startswith('_') and not entry.startswith('__') and
+                entry.endswith('.py') and os.path.isfile(entry_path)):
+            mod = _try_import_module(f'.{entry[:-3]}', base_module)
+            if mod:
+                _register_from_module(loader, mod, command_table, command_group_table)
+
+        # Sub-directories
+        elif not entry.startswith('_') and os.path.isdir(entry_path):
+            sub_module = f"{base_module}.{entry}"
+            if not args:
+                # Full load → recurse into every sub-directory
+                _load_aaz_by_path(loader, entry_path, sub_module, None, command_table, command_group_table)
+            else:
+                # Args exhausted / not matched → only load sub-group headers for help listing
+                mod = _try_import_module('.__cmd_group', sub_module)
+                if mod:
+                    _register_from_module(loader, mod, command_table, command_group_table)
 
 
 def _load_aaz_pkg(loader, pkg, parent_command_table, command_group_table, arg_str, fully_load):

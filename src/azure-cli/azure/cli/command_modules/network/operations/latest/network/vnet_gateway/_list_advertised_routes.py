@@ -1,0 +1,16 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+
+# pylint: disable=line-too-long, protected-access, too-few-public-methods
+
+from azure.cli.command_modules.network.aaz.latest.network.vnet_gateway._list_advertised_routes import \
+    ListAdvertisedRoutes as _ListAdvertisedRoutes
+from azure.cli.command_modules.network._format import transform_vnet_gateway_routes_table
+
+
+class VNetGatewayListAdvertisedRoutes(_ListAdvertisedRoutes):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.table_transformer = transform_vnet_gateway_routes_table

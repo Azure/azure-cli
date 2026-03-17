@@ -7,7 +7,3 @@
 
 # pylint: skip-file
 # flake8: noqa
-
-from .__cmd_group import *
-from ._set import *
-from ._show import *

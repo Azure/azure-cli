@@ -7,10 +7,3 @@
 
 # pylint: skip-file
 # flake8: noqa
-
-from .__cmd_group import *
-from ._create import *
-from ._delete import *
-from ._show import *
-from ._show_geographic_hierarchy import *
-from ._update import *

@@ -8,136 +8,16 @@
 
 from collections import Counter, OrderedDict
 
-import socket
 from knack.log import get_logger
 from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id, resource_id
 
 from azure.cli.core.aaz import AAZClientConfiguration, has_value, register_client, AAZFileArgTextFormat
 from azure.cli.core.aaz._client import AAZMgmtClient
-from azure.cli.core.aaz.utils import assign_aaz_list_arg
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 
 from azure.cli.core.util import CLIError, sdk_no_wait
-from azure.cli.core.azclierror import InvalidArgumentValueError, ValidationError, \
-    UnrecognizedArgumentError, ResourceNotFoundError, ArgumentUsageError
+from azure.cli.core.azclierror import UnrecognizedArgumentError, ResourceNotFoundError
 from azure.cli.core.profiles import ResourceType
-
-from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
-from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
-
-from .aaz.latest.network import ListUsages as _UsagesList
-from .aaz.latest.network.application_gateway import Update as _ApplicationGatewayUpdate
-from .aaz.latest.network.application_gateway.address_pool import Create as _AddressPoolCreate, \
-    Update as _AddressPoolUpdate
-from .aaz.latest.network.application_gateway.auth_cert import Create as _AuthCertCreate, Update as _AuthCertUpdate
-from .aaz.latest.network.application_gateway.client_cert import Add as _ClientCertAdd, Update as _ClientCertUpdate
-from .aaz.latest.network.application_gateway.frontend_ip import Create as _FrontendIPCreate, Update as _FrontendIPUpdate
-from .aaz.latest.network.application_gateway.http_listener import Create as _HTTPListenerCreate, \
-    Update as _HTTPListenerUpdate
-from .aaz.latest.network.application_gateway.http_settings import Create as _HTTPSettingsCreate, \
-    Update as _HTTPSettingsUpdate
-from .aaz.latest.network.application_gateway.identity import Assign as _IdentityAssign
-from .aaz.latest.network.application_gateway.private_link import Add as _AGPrivateLinkAdd, \
-    Remove as _AGPrivateLinkRemove
-from .aaz.latest.network.application_gateway.private_link.ip_config import Add as _AGPrivateLinkIPConfigAdd
-from .aaz.latest.network.application_gateway.listener import Create as _ListenerCreate, Update as _ListenerUpdate
-from .aaz.latest.network.application_gateway.redirect_config import Create as _RedirectConfigCreate, \
-    Update as _RedirectConfigUpdate
-from .aaz.latest.network.application_gateway.rewrite_rule import Create as _AGRewriteRuleCreate, \
-    Update as _AGRewriteRuleUpdate
-from .aaz.latest.network.application_gateway.root_cert import Create as _RootCertCreate, Update as _RootCertUpdate
-from .aaz.latest.network.application_gateway.routing_rule import Create as _RoutingRuleCreate, \
-    Update as _RoutingRuleUpdate
-from .aaz.latest.network.application_gateway.rule import Create as _RuleCreate, Update as _RuleUpdate
-from .aaz.latest.network.application_gateway.settings import Create as _SettingsCreate, Update as _SettingsUpdate
-from .aaz.latest.network.application_gateway.ssl_cert import Create as _SSLCertCreate, Update as _SSLCertUpdate
-from .aaz.latest.network.application_gateway.ssl_policy import Set as _SSLPolicySet
-from .aaz.latest.network.application_gateway.ssl_profile import Add as _SSLProfileAdd, Update as _SSLProfileUpdate
-from .aaz.latest.network.application_gateway.url_path_map import Create as _URLPathMapCreate, \
-    Update as _URLPathMapUpdate
-from .aaz.latest.network.application_gateway.url_path_map.rule import Create as _URLPathMapRuleCreate
-from .aaz.latest.network.application_gateway.waf_policy import Create as _WAFCreate
-from .aaz.latest.network.application_gateway.waf_policy.custom_rule.match_condition import \
-    Add as _WAFCustomRuleMatchConditionAdd
-from .aaz.latest.network.application_gateway.waf_policy.policy_setting import Update as _WAFPolicySettingUpdate
-from .aaz.latest.network.custom_ip.prefix import Create as _CustomIpPrefixCreate, Update as _CustomIpPrefixUpdate
-from .aaz.latest.network.ddos_custom_policy import Update as _DdosCustomPolicyUpdate
-from .aaz.latest.network.dns.record_set import List as _DNSRecordSetListByZone
-from .aaz.latest.network.dns.zone import Create as _DNSZoneCreate
-from .aaz.latest.network.express_route import Create as _ExpressRouteCreate, Update as _ExpressRouteUpdate
-from .aaz.latest.network.express_route.gateway import Create as _ExpressRouteGatewayCreate, \
-    Update as _ExpressRouteGatewayUpdate
-from .aaz.latest.network.express_route.gateway.connection import Create as _ExpressRouteConnectionCreate, \
-    Update as _ExpressRouteConnectionUpdate
-from .aaz.latest.network.express_route.peering import Create as _ExpressRoutePeeringCreate, \
-    Update as _ExpressRoutePeeringUpdate
-from .aaz.latest.network.express_route.peering.connection import Create as _ExpressRoutePeeringConnectionCreate
-from .aaz.latest.network.express_route.port import Create as _ExpressRoutePortCreate
-from .aaz.latest.network.express_route.port.identity import Assign as _ExpressRoutePortIdentityAssign
-from .aaz.latest.network.express_route.port.link import Update as _ExpressRoutePortLinkUpdate
-from .aaz.latest.network.nic import Create as _NICCreate, Update as _NICUpdate
-from .aaz.latest.network.nic.ip_config import Create as _NICIPConfigCreate, Update as _NICIPConfigUpdate
-from .aaz.latest.network.nic.ip_config.inbound_nat_rule import Add as _NICIPConfigNATAdd, \
-    Remove as _NICIPConfigNATRemove
-from .aaz.latest.network.nsg import Create as _NSGCreate
-from .aaz.latest.network.nsg.rule import Create as _NSGRuleCreate, Update as _NSGRuleUpdate
-from .aaz.latest.network.public_ip import Create as _PublicIPCreate, Update as _PublicIPUpdate
-from .aaz.latest.network.private_endpoint import Create as _PrivateEndpointCreate, Update as _PrivateEndpointUpdate
-from .aaz.latest.network.private_endpoint.asg import Add as _PrivateEndpointAsgAdd
-from .aaz.latest.network.private_endpoint.dns_zone_group import Create as _PrivateEndpointPrivateDnsZoneGroupCreate, \
-    Add as _PrivateEndpointPrivateDnsZoneAdd
-from .aaz.latest.network.private_endpoint.ip_config import Add as _PrivateEndpointIpConfigAdd
-from .aaz.latest.network.private_link_service import Create as _PrivateLinkServiceCreate, \
-    Update as _PrivateLinkServiceUpdate
-from .aaz.latest.network.private_link_service.connection import Update as _PrivateEndpointConnectionUpdate
-from .aaz.latest.network.public_ip.prefix import Create as _PublicIpPrefixCreate
-from .aaz.latest.network.security_partner_provider import Create as _SecurityPartnerProviderCreate, \
-    Update as _SecurityPartnerProviderUpdate
-from .aaz.latest.network.virtual_appliance import Create as _VirtualApplianceCreate, Update as _VirtualApplianceUpdate
-from .aaz.latest.network.vnet import Create as _VNetCreate, Update as _VNetUpdate
-from .aaz.latest.network.vnet.peering import Create as _VNetPeeringCreate
-from .aaz.latest.network.vnet.subnet import Create as _VNetSubnetCreate, Update as _VNetSubnetUpdate
-from .aaz.latest.network.vnet_gateway import Create as _VnetGatewayCreate, Update as _VnetGatewayUpdate, \
-    DisconnectVpnConnections as _VnetGatewayVpnConnectionsDisconnect, Show as _VNetGatewayShow, List as _VNetGatewayList
-from .aaz.latest.network.vnet_gateway.aad import Assign as _VnetGatewayAadAssign
-from .aaz.latest.network.vnet_gateway.ipsec_policy import Add as _VnetGatewayIpsecPolicyAdd
-from .aaz.latest.network.vnet_gateway.nat_rule import Add as _VnetGatewayNatRuleAdd, List as _VnetGatewayNatRuleShow, \
-    Remove as _VnetGatewayNatRuleRemove
-from .aaz.latest.network.vnet_gateway.revoked_cert import Create as _VnetGatewayRevokedCertCreate
-from .aaz.latest.network.vnet_gateway.root_cert import Create as _VnetGatewayRootCertCreate
-from .aaz.latest.network.vnet_gateway.vpn_client import GenerateVpnProfile as _VpnProfileGenerate, \
-    Generate as _VpnClientPackageGenerate
-from .aaz.latest.network.vpn_connection import Update as _VpnConnectionUpdate, \
-    ShowDeviceConfigScript as _VpnConnectionDeviceConfigScriptShow
-from .aaz.latest.network.vpn_connection.ipsec_policy import Add as _VpnConnIpsecPolicyAdd
-from .aaz.latest.network.vpn_connection.packet_capture import Stop as _VpnConnPackageCaptureStop
-from .aaz.latest.network.vpn_connection.shared_key import Update as _VpnConnSharedKeyUpdate
-from .operations.dns import (RecordSetAShow as DNSRecordSetAShow, RecordSetAAAAShow as DNSRecordSetAAAAShow,  # pylint: disable=unused-import
-                             RecordSetDSShow as DNSRecordSetDSShow, RecordSetMXShow as DNSRecordSetMXShow,
-                             RecordSetNAPTRShow as DNSRecordSetNAPTRShow, RecordSetNSShow as DNSRecordSetNSShow,
-                             RecordSetPTRShow as DNSRecordSetPTRShow, RecordSetSRVShow as DNSRecordSetSRVShow,
-                             RecordSetTLSAShow as DNSRecordSetTLSAShow, RecordSetTXTShow as DNSRecordSetTXTShow,
-                             RecordSetCAAShow as DNSRecordSetCAAShow, RecordSetCNAMEShow as DNSRecordSetCNAMEShow,
-                             RecordSetSOAShow as DNSRecordSetSOAShow)
-from .operations.dns import (RecordSetACreate as DNSRecordSetACreate, RecordSetAAAACreate as DNSRecordSetAAAACreate,  # pylint: disable=unused-import
-                             RecordSetDSCreate as DNSRecordSetDSCreate, RecordSetMXCreate as DNSRecordSetMXCreate,
-                             RecordSetNAPTRCreate as DNSRecordSetNAPTRCreate, RecordSetNSCreate as DNSRecordSetNSCreate,
-                             RecordSetPTRCreate as DNSRecordSetPTRCreate, RecordSetSRVCreate as DNSRecordSetSRVCreate,
-                             RecordSetTLSACreate as DNSRecordSetTLSACreate, RecordSetTXTCreate as DNSRecordSetTXTCreate,
-                             RecordSetCAACreate as DNSRecordSetCAACreate, RecordSetCNAMECreate as DNSRecordSetCNAMECreate,
-                             RecordSetSOACreate as DNSRecordSetSOACreate)
-from .operations.dns import (RecordSetAUpdate as DNSRecordSetAUpdate, RecordSetAAAAUpdate as DNSRecordSetAAAAUpdate,  # pylint: disable=unused-import
-                             RecordSetDSUpdate as DNSRecordSetDSUpdate, RecordSetMXUpdate as DNSRecordSetMXUpdate,
-                             RecordSetNAPTRUpdate as DNSRecordSetNAPTRUpdate, RecordSetNSUpdate as DNSRecordSetNSUpdate,
-                             RecordSetPTRUpdate as DNSRecordSetPTRUpdate, RecordSetSRVUpdate as DNSRecordSetSRVUpdate,
-                             RecordSetTLSAUpdate as DNSRecordSetTLSAUpdate, RecordSetTXTUpdate as DNSRecordSetTXTUpdate,
-                             RecordSetCAAUpdate as DNSRecordSetCAAUpdate, RecordSetCNAMEUpdate as DNSRecordSetCNAMEUpdate)
-from .operations.dns import (RecordSetADelete as DNSRecordSetADelete, RecordSetAAAADelete as DNSRecordSetAAAADelete,  # pylint: disable=unused-import
-                             RecordSetDSDelete as DNSRecordSetDSDelete, RecordSetMXDelete as DNSRecordSetMXDelete,
-                             RecordSetNAPTRDelete as DNSRecordSetNAPTRDelete, RecordSetNSDelete as DNSRecordSetNSDelete,
-                             RecordSetPTRDelete as DNSRecordSetPTRDelete, RecordSetSRVDelete as DNSRecordSetSRVDelete,
-                             RecordSetTLSADelete as DNSRecordSetTLSADelete, RecordSetTXTDelete as DNSRecordSetTXTDelete,
-                             RecordSetCAADelete as DNSRecordSetCAADelete, RecordSetCNAMEDelete as DNSRecordSetCNAMEDelete)
 
 logger = get_logger(__name__)
 
@@ -339,404 +219,9 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, deployment_name, deployment)
 
 
-class ApplicationGatewayUpdate(_ApplicationGatewayUpdate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZDictArg, AAZStrArg, AAZArgEnum
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.custom_error_pages = AAZDictArg(
-            options=["--custom-error-pages"],
-            help="Space-separated list of custom error pages in `STATUS_CODE=URL` format.",
-            nullable=True,
-        )
-        args_schema.custom_error_pages.Element = AAZStrArg(
-            nullable=True,
-        )
-        args_schema.http2.enum = AAZArgEnum({"Enabled": True, "Disabled": False})
-        args_schema.custom_error_configurations._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        if has_value(args.custom_error_pages):
-            configurations = []
-            for code, url in args.custom_error_pages.items():
-                configurations.append({
-                    "status_code": code,
-                    "custom_error_page_url": url,
-                })
-            args.custom_error_configurations = configurations
-        if has_value(args.sku):
-            sku = str(args.sku)
-            args.sku.tier = sku.split("_", 1)[0] if not _is_v2_sku(sku) else sku
-
-
-class AuthCertCreate(_AuthCertCreate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZFileArg, AAZFileArgBase64EncodeFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.cert_file = AAZFileArg(
-            options=["--cert-file"],
-            help="Path to the certificate file.",
-            required=True,
-            fmt=AAZFileArgBase64EncodeFormat(),
-        )
-        args_schema.data._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        if has_value(args.cert_file):
-            args.data = args.cert_file
-
-
-class AuthCertUpdate(_AuthCertUpdate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZFileArg, AAZFileArgBase64EncodeFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.cert_file = AAZFileArg(
-            options=["--cert-file"],
-            help="Path to the certificate file.",
-            required=True,
-            fmt=AAZFileArgBase64EncodeFormat(),
-            nullable=True,
-        )
-        args_schema.data._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        if has_value(args.cert_file):
-            args.data = args.cert_file
-
-
-class AddressPoolCreate(_AddressPoolCreate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.servers = AAZListArg(
-            options=["--servers"],
-            help="Space-separated list of IP addresses or DNS names corresponding to backend servers."
-        )
-        args_schema.servers.Element = AAZStrArg()
-        args_schema.backend_addresses._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-
-        def server_trans(_, server):
-            try:
-                socket.inet_aton(str(server))  # pylint:disable=no-member
-                return {"ip_address": server}
-            except OSError:  # pylint:disable=no-member
-                return {"fqdn": server}
-
-        args.backend_addresses = assign_aaz_list_arg(
-            args.backend_addresses,
-            args.servers,
-            element_transformer=server_trans
-        )
-
-
-class AddressPoolUpdate(_AddressPoolUpdate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.servers = AAZListArg(
-            options=["--servers"],
-            help="Space-separated list of IP addresses or DNS names corresponding to backend servers.",
-            nullable=True,
-        )
-        args_schema.servers.Element = AAZStrArg(
-            nullable=True,
-        )
-        args_schema.backend_addresses._registered = False
-        return args_schema
-
-    class NonRetryableCreateOrUpdate(_AddressPoolUpdate.ApplicationGatewaysCreateOrUpdate):
-        CLIENT_TYPE = "NonRetryableClient"
-
-    def _execute_operations(self):
-        self.pre_operations()
-        self.ApplicationGatewaysGet(ctx=self.ctx)()
-        self.pre_instance_update(self.ctx.selectors.subresource.required())
-        self.InstanceUpdateByJson(ctx=self.ctx)()
-        self.InstanceUpdateByGeneric(ctx=self.ctx)()
-        self.post_instance_update(self.ctx.selectors.subresource.required())
-        yield self.NonRetryableCreateOrUpdate(ctx=self.ctx)()
-        self.post_operations()
-
-    def pre_operations(self):
-        args = self.ctx.args
-
-        def server_trans(_, server):
-            try:
-                socket.inet_aton(str(server))  # pylint:disable=no-member
-                return {"ip_address": server}
-            except OSError:  # pylint:disable=no-member
-                return {"fqdn": server}
-
-        args.backend_addresses = assign_aaz_list_arg(
-            args.backend_addresses,
-            args.servers,
-            element_transformer=server_trans
-        )
-
-
-class FrontedIPCreate(_FrontendIPCreate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.vnet_name = AAZStrArg(
-            options=["--vnet-name"],
-            help="Name of the virtual network corresponding to the subnet."
-        )
-        args_schema.public_ip_address._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/publicIpAddresses/{}",
-        )
-        args_schema.subnet._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/virtualNetworks/{vnet_name}/subnets/{}",
-        )
-        args_schema.private_ip_allocation_method._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        args.private_ip_allocation_method = "Static" if has_value(args.private_ip_address) else "Dynamic"
-
-
-class FrontedIPUpdate(_FrontendIPUpdate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.vnet_name = AAZStrArg(
-            options=["--vnet-name"],
-            help="Name of the virtual network corresponding to the subnet."
-        )
-        args_schema.subnet._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/virtualNetworks/{vnet_name}/subnets/{}",
-        )
-        args_schema.private_ip_allocation_method._registered = False
-        return args_schema
-
-    def post_instance_update(self, instance):
-        instance.properties.private_ip_allocation_method = "Static" if has_value(instance.properties.private_ip_address) else "Dynamic"
-
-
-class HTTPListenerCreate(_HTTPListenerCreate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.frontend_ip._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/frontendIPConfigurations/{}",
-        )
-        args_schema.frontend_port._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/frontendPorts/{}",
-        )
-        args_schema.ssl_cert._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/sslCertificates/{}",
-        )
-        args_schema.ssl_profile_id._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/sslProfiles/{}",
-        )
-        args_schema.waf_policy._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/ApplicationGatewayWebApplicationFirewallPolicies/{}",
-        )
-        args_schema.frontend_port._required = True
-        args_schema.protocol._registered = False
-        args_schema.require_server_name_indication._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        if has_value(args.ssl_cert):
-            args.protocol = "Https"
-            args.require_server_name_indication = True if has_value(args.host_name) else None
-        else:
-            args.protocol = "Http"
-
-    def pre_instance_create(self):
-        args = self.ctx.args
-        if not has_value(args.frontend_ip):
-            instance = self.ctx.vars.instance
-            frontend_ip_configurations = instance.properties.frontend_ip_configurations
-            if len(frontend_ip_configurations) == 1:
-                args.frontend_ip = instance.properties.frontend_ip_configurations[0].id
-            elif len(frontend_ip_configurations) > 1:
-                err_msg = "Multiple frontend IP configurations found. Specify --frontend-ip explicitly."
-                raise ArgumentUsageError(err_msg)
-
-
-class HTTPListenerUpdate(_HTTPListenerUpdate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.frontend_ip._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/frontendIPConfigurations/{}",
-        )
-        args_schema.frontend_port._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/frontendPorts/{}",
-        )
-        args_schema.ssl_cert._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/sslCertificates/{}",
-        )
-        args_schema.ssl_profile_id._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/sslProfiles/{}",
-        )
-        args_schema.waf_policy._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/ApplicationGatewayWebApplicationFirewallPolicies/{}",
-        )
-        args_schema.frontend_port._nullable = False
-        args_schema.protocol._registered = False
-        args_schema.require_server_name_indication._registered = False
-        return args_schema
-
-    def post_instance_update(self, instance):
-        instance.properties.protocol = "Https" if has_value(instance.properties.ssl_certificate) else "Http"
-        cond1 = instance.properties.host_name
-        cond2 = instance.properties.protocol.to_serialized_data().lower() == "https"
-        instance.properties.require_server_name_indication = cond1 and cond2
-        if not has_value(instance.properties.frontend_ip_configuration.id):
-            instance.properties.frontend_ip_configuration = None
-        if not has_value(instance.properties.ssl_certificate.id):
-            instance.properties.ssl_certificate = None
-        if not has_value(instance.properties.ssl_profile.id):
-            instance.properties.ssl_profile = None
-        if not has_value(instance.properties.firewall_policy.id):
-            instance.properties.firewall_policy = None
-
-
-class ListenerCreate(_ListenerCreate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.frontend_ip._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/frontendIPConfigurations/{}",
-        )
-        args_schema.frontend_port._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/frontendPorts/{}",
-        )
-        args_schema.ssl_cert._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/sslCertificates/{}",
-        )
-        args_schema.ssl_profile_id._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/sslProfiles/{}",
-        )
-        args_schema.frontend_port._required = True
-        args_schema.protocol._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        args.protocol = "Tls" if has_value(args.ssl_cert) else "Tcp"
-
-    def pre_instance_create(self):
-        args = self.ctx.args
-        if not has_value(args.frontend_ip):
-            instance = self.ctx.vars.instance
-            frontend_ip_configurations = instance.properties.frontend_ip_configurations
-            if len(frontend_ip_configurations) == 1:
-                args.frontend_ip = instance.properties.frontend_ip_configurations[0].id
-            elif len(frontend_ip_configurations) > 1:
-                err_msg = "Multiple frontend IP configurations found. Specify --frontend-ip explicitly."
-                raise ArgumentUsageError(err_msg)
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
-
-
-class ListenerUpdate(_ListenerUpdate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.frontend_ip._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/frontendIPConfigurations/{}",
-        )
-        args_schema.frontend_port._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/frontendPorts/{}",
-        )
-        args_schema.ssl_cert._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/sslCertificates/{}",
-        )
-        args_schema.ssl_profile_id._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/sslProfiles/{}",
-        )
-        args_schema.frontend_port._nullable = False
-        args_schema.protocol._registered = False
-        return args_schema
-
-    def post_instance_update(self, instance):
-        instance.properties.protocol = "Tls" if has_value(instance.properties.ssl_certificate) else "Tcp"
-        if not has_value(instance.properties.frontend_ip_configuration.id):
-            instance.properties.frontend_ip_configuration = None
-        if not has_value(instance.properties.ssl_certificate.id):
-            instance.properties.ssl_certificate = None
-        if not has_value(instance.properties.ssl_profile.id):
-            instance.properties.ssl_profile = None
-
-
-class IdentityAssign(_IdentityAssign):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArg, AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.identity = AAZResourceIdArg(
-            options=["--identity"],
-            help="Name or ID of the ManagedIdentity Resource.",
-            required=True,
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.ManagedIdentity"
-                         "/userAssignedIdentities/{}",
-            ),
-        )
-        args_schema.type._registered = False
-        args_schema.user_assigned_identities._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        args.type = "UserAssigned"
-        args.user_assigned_identities = {args.identity.to_serialized_data(): {}}
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
-
-
 def remove_ag_identity(cmd, resource_group_name, application_gateway_name, no_wait=False):
+    from .aaz.latest.network.application_gateway._update import Update as _ApplicationGatewayUpdate
+
     class IdentityRemove(_ApplicationGatewayUpdate):
         def pre_operations(self):
             args = self.ctx.args
@@ -751,201 +236,7 @@ def remove_ag_identity(cmd, resource_group_name, application_gateway_name, no_wa
     })
 
 
-class AGPrivateLinkAdd(_AGPrivateLinkAdd):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg, AAZBoolArg
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.frontend_ip = AAZStrArg(
-            options=["--frontend-ip"],
-            help="Frontend IP that the private link will associate to.",
-            required=True,
-        )
-        args_schema.subnet = AAZStrArg(
-            options=["--subnet"],
-            help="Name or ID of a subnet within the same vnet of an application gateway.",
-            arg_group="Properties",
-            required=True,
-        )
-        args_schema.subnet_prefix = AAZStrArg(
-            options=["--subnet-prefix"],
-            help="CIDR prefix to use when creating a new subnet.",
-            arg_group="Properties",
-        )
-        args_schema.ip_address = AAZStrArg(
-            options=["--ip-address"],
-            help="Static private IP address of a subnet for private link. If omitting, a dynamic one will be created.",
-            arg_group="Properties",
-        )
-        args_schema.primary = AAZBoolArg(
-            options=["--primary"],
-            help="Whether the IP configuration is primary or not.",
-            arg_group="Properties",
-        )
-        args_schema.ip_configurations._registered = False
-        return args_schema
-
-    def pre_instance_create(self):
-        args = self.ctx.args
-        instance = self.ctx.vars.instance
-        if not any(fic for fic in instance.properties.frontend_ip_configurations if fic.name == args.frontend_ip):
-            err_msg = "Frontend IP doesn't exist."
-            raise ValidationError(err_msg)
-
-        private_link_id = resource_id(
-            subscription=self.ctx.subscription_id,
-            resource_group=args.resource_group,
-            namespace="Microsoft.Network",
-            type="applicationGateways",
-            name=args.gateway_name,
-            child_type_1="privateLinkConfigurations",
-            child_name_1=args.name
-        )
-        for fic in instance.properties.frontend_ip_configurations:
-            if has_value(fic.properties.private_link_configuration) \
-                    and fic.properties.private_link_configuration.id == private_link_id:
-                err_msg = "Frontend IP already reference an existing private link."
-                raise ValidationError(err_msg)
-        # associate private link with frontend IP configuration
-        for fic in instance.properties.frontend_ip_configurations:
-            if fic.name == args.frontend_ip:
-                fic.properties.private_link_configuration = {"id": private_link_id}
-
-        if has_value(instance.properties.private_link_configurations):
-            for plc in instance.properties.private_link_configurations:
-                if plc.name == args.name:
-                    err_msg = "Private link name duplicates."
-                    raise ValidationError(err_msg)
-        # prepare subnet for new private link
-        rid = instance.properties.gateway_ip_configurations[0].properties.subnet.id.to_serialized_data()
-        metadata = parse_resource_id(rid)
-        if not is_valid_resource_id(args.subnet.to_serialized_data()):
-            args.subnet = resource_id(
-                subscription=metadata["subscription"],
-                resource_group=metadata["resource_group"],
-                namespace="Microsoft.Network",
-                type="virtualNetworks",
-                name=metadata["name"],
-                child_type_1="subnets",
-                child_name_1=args.subnet
-            )
-
-        from .aaz.latest.network.vnet import Show
-        vnet = Show(cli_ctx=self.cli_ctx)(command_args={
-            "name": metadata["name"],
-            "resource_group": metadata["resource_group"]
-        })
-        for subnet in vnet["subnets"]:
-            if subnet["id"] == args.subnet:
-                break
-        else:
-            subnet_name = parse_resource_id(args.subnet.to_serialized_data())["child_name_1"]
-
-            from azure.cli.core.commands import LongRunningOperation
-            poller = VNetSubnetCreate(cli_ctx=self.cli_ctx)(command_args={
-                "name": subnet_name,
-                "vnet_name": metadata["name"],
-                "resource_group": metadata["resource_group"],
-                "address_prefix": args.subnet_prefix,
-                "private_link_service_network_policies": "Disabled"
-            })
-            LongRunningOperation(self.cli_ctx)(poller)
-
-        args.ip_configurations = [{
-            "name": "PrivateLinkDefaultIPConfiguration",
-            "private_ip_address": args.ip_address,
-            "private_ip_allocation_method": "Static" if has_value(args.ip_address) else "Dynamic",
-            "subnet": {"id": args.subnet},
-            "primary": args.primary
-        }]
-
-
-class AGPrivateLinkRemove(_AGPrivateLinkRemove):
-    def pre_instance_delete(self):
-        args = self.ctx.args
-        instance = self.ctx.vars.instance
-        for plc in instance.properties.private_link_configurations:
-            if plc.name == args.name:
-                to_be_removed = plc
-                break
-        else:
-            err_msg = "Private link doesn't exist."
-            raise ValidationError(err_msg)
-
-        for fic in instance.properties.frontend_ip_configurations:
-            if has_value(fic.properties.private_link_configuration) \
-                    and fic.properties.private_link_configuration.id == to_be_removed.id:
-                fic.properties.private_link_configuration = None
-
-
-class AGPrivateLinkIPConfigAdd(_AGPrivateLinkIPConfigAdd):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.private_ip_allocation_method._registered = False
-        args_schema.subnet._registered = False
-        return args_schema
-
-    def pre_instance_create(self):
-        args = self.ctx.args
-        instance = self.ctx.vars.instance
-        for plc in instance.properties.private_link_configurations:
-            if plc.name == args.private_link:
-                target_private_link = plc
-                break
-        else:
-            err_msg = "Private link doesn't exist."
-            raise ValidationError(err_msg)
-
-        args.private_ip_allocation_method = "Static" if has_value(args.ip_address) else "Dynamic"
-        subnet_id = target_private_link.properties.ip_configurations[0].properties.subnet.id
-        args.subnet.id = subnet_id
-
-
 # region application-gateway trusted-client-certificates
-class ClientCertAdd(_ClientCertAdd):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZFileArg, AAZFileArgBase64EncodeFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.data = AAZFileArg(
-            options=["--data"],
-            help="Path to the certificate file.",
-            required=True,
-            fmt=AAZFileArgBase64EncodeFormat(),
-        )
-        args_schema.cert_data._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        if has_value(args.data):
-            args.cert_data = args.data
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
-
-
-class ClientCertUpdate(_ClientCertUpdate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZFileArg, AAZFileArgBase64EncodeFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.data = AAZFileArg(
-            options=["--data"],
-            help="Path to the certificate file.",
-            required=True,
-            fmt=AAZFileArgBase64EncodeFormat(),
-            nullable=True,
-        )
-        args_schema.cert_data._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        if has_value(args.data):
-            args.cert_data = args.data
 
 
 def show_ag_backend_health(cmd, resource_group_name, application_gateway_name, expand=None,
@@ -976,7 +267,7 @@ def show_ag_backend_health(cmd, resource_group_name, application_gateway_name, e
                 child_name_1=http_settings
             )
 
-        from .aaz.latest.network.application_gateway import HealthOnDemand
+        from .aaz.latest.network.application_gateway._health_on_demand import HealthOnDemand
         return LongRunningOperation(cmd.cli_ctx)(
             HealthOnDemand(cli_ctx=cmd.cli_ctx)(command_args={
                 "name": application_gateway_name,
@@ -994,7 +285,7 @@ def show_ag_backend_health(cmd, resource_group_name, application_gateway_name, e
             })
         )
 
-    from .aaz.latest.network.application_gateway import Health
+    from .aaz.latest.network.application_gateway._health import Health
     return LongRunningOperation(cmd.cli_ctx)(
         Health(cli_ctx=cmd.cli_ctx)(command_args={
             "name": application_gateway_name,
@@ -1006,841 +297,9 @@ def show_ag_backend_health(cmd, resource_group_name, application_gateway_name, e
 
 
 # region application-gateway ssl-profile
-class SSLProfileAdd(_SSLProfileAdd):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZBoolArg, AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.client_auth_config = AAZBoolArg(
-            options=["--client-auth-configuration", "--client-auth-config"],
-            help="Client authentication configuration of the application gateway resource.",
-        )
-        args_schema.trusted_client_certs = AAZListArg(
-            options=["--trusted-client-certificates", "--trusted-client-cert"],
-            help="Array of references to application gateway trusted client certificates.",
-        )
-        args_schema.trusted_client_certs.Element = AAZResourceIdArg(
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                         "/applicationGateways/{gateway_name}/trustedClientCertificates/{}",
-            ),
-        )
-        args_schema.auth_configuration._registered = False
-        args_schema.client_certificates._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        if has_value(args.client_auth_config):
-            args.auth_configuration.verify_client_cert_issuer_dn = args.client_auth_config
-        args.client_certificates = assign_aaz_list_arg(
-            args.client_certificates,
-            args.trusted_client_certs,
-            element_transformer=lambda _, cert_id: {"id": cert_id}
-        )
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
 
 
-class SSLProfileUpdate(_SSLProfileUpdate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZBoolArg, AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.client_auth_config = AAZBoolArg(
-            options=["--client-auth-configuration", "--client-auth-config"],
-            help="Client authentication configuration of the application gateway resource.",
-            nullable=True,
-        )
-        args_schema.trusted_client_certs = AAZListArg(
-            options=["--trusted-client-certificates", "--trusted-client-cert"],
-            help="Array of references to application gateway trusted client certificates.",
-            nullable=True,
-        )
-        args_schema.trusted_client_certs.Element = AAZResourceIdArg(
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                         "/applicationGateways/{gateway_name}/trustedClientCertificates/{}",
-            ),
-            nullable=True,
-        )
-        args_schema.auth_configuration._registered = False
-        args_schema.client_certificates._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        if has_value(args.client_auth_config):
-            args.auth_configuration.verify_client_cert_issuer_dn = args.client_auth_config
-        args.client_certificates = assign_aaz_list_arg(
-            args.client_certificates,
-            args.trusted_client_certs,
-            element_transformer=lambda _, cert_id: {"id": cert_id}
-        )
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
 # endregion
-
-
-class HTTPSettingsCreate(_HTTPSettingsCreate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZIntArg, AAZIntArgFormat, AAZResourceIdArg, AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.auth_certs = AAZListArg(
-            options=["--auth-certs"],
-            help="Space-separated list of authentication certificates (Names and IDs) to associate with the HTTP settings.",
-        )
-        args_schema.auth_certs.Element = AAZResourceIdArg(
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                         "/applicationGateways/{gateway_name}/authenticationCertificates/{}",
-            ),
-        )
-        args_schema.root_certs = AAZListArg(
-            options=["--root-certs"],
-            help="Space-separated list of trusted root certificates (Names and IDs) to associate with the HTTP settings. "
-                 "`--host-name` or `--host-name-from-backend-pool` is required when this field is set.",
-        )
-        args_schema.root_certs.Element = AAZResourceIdArg(
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                         "/applicationGateways/{gateway_name}/trustedRootCertificates/{}",
-            ),
-        )
-        args_schema.connection_draining_timeout = AAZIntArg(
-            options=["--connection-draining-timeout"],
-            help="Time in seconds after a backend server is removed during which on open connection remains active. "
-                 "Range from 0 (Disabled) to 3600.",
-            default=0,
-            fmt=AAZIntArgFormat(
-                maximum=3600,
-                minimum=0,
-            ),
-        )
-        args_schema.probe._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/probes/{}",
-        )
-        args_schema.cookie_based_affinity._blank = "Enabled"
-        args_schema.port._required = True
-        args_schema.authentication_certificates._registered = False
-        args_schema.trusted_root_certificates._registered = False
-        args_schema.connection_draining._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        args.authentication_certificates = assign_aaz_list_arg(
-            args.authentication_certificates,
-            args.auth_certs,
-            element_transformer=lambda _, auth_cert_id: {"id": auth_cert_id}
-        )
-        args.trusted_root_certificates = assign_aaz_list_arg(
-            args.trusted_root_certificates,
-            args.root_certs,
-            element_transformer=lambda _, root_cert_id: {"id": root_cert_id}
-        )
-        timeout = args.connection_draining_timeout.to_serialized_data()
-        args.connection_draining.enabled = bool(timeout)
-        args.connection_draining.drain_timeout_in_sec = timeout or 1
-
-
-class HTTPSettingsUpdate(_HTTPSettingsUpdate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZIntArg, AAZIntArgFormat, AAZResourceIdArg, AAZResourceIdArgFormat
-
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.auth_certs = AAZListArg(
-            options=["--auth-certs"],
-            help="Space-separated list of authentication certificates (Names and IDs) to associate with the HTTP settings.",
-            nullable=True,
-        )
-        args_schema.auth_certs.Element = AAZResourceIdArg(
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                         "/applicationGateways/{gateway_name}/authenticationCertificates/{}",
-            ),
-            nullable=True,
-        )
-        args_schema.root_certs = AAZListArg(
-            options=["--root-certs"],
-            help="Space-separated list of trusted root certificates (Names and IDs) to associate with the HTTP settings. "
-                 "`--host-name` or `--host-name-from-backend-pool` is required when this field is set.",
-            nullable=True,
-        )
-        args_schema.root_certs.Element = AAZResourceIdArg(
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                         "/applicationGateways/{gateway_name}/trustedRootCertificates/{}",
-            ),
-            nullable=True,
-        )
-        args_schema.connection_draining_timeout = AAZIntArg(
-            options=["--connection-draining-timeout"],
-            help="Time in seconds after a backend server is removed during which on open connection remains active. "
-                 "Range from 0 (Disabled) to 3600.",
-            fmt=AAZIntArgFormat(
-                maximum=3600,
-                minimum=0,
-            ),
-            nullable=True,
-        )
-        args_schema.probe._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/probes/{}",
-        )
-        args_schema.cookie_based_affinity._blank = "Enabled"
-        args_schema.authentication_certificates._registered = False
-        args_schema.trusted_root_certificates._registered = False
-        args_schema.connection_draining._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        args.authentication_certificates = assign_aaz_list_arg(
-            args.authentication_certificates,
-            args.auth_certs,
-            element_transformer=lambda _, auth_cert_id: {"id": auth_cert_id}
-        )
-        args.trusted_root_certificates = assign_aaz_list_arg(
-            args.trusted_root_certificates,
-            args.root_certs,
-            element_transformer=lambda _, root_cert_id: {"id": root_cert_id}
-        )
-        if has_value(args.connection_draining_timeout):
-            timeout = args.connection_draining_timeout.to_serialized_data()
-            args.connection_draining.enabled = bool(timeout)
-            args.connection_draining.drain_timeout_in_sec = timeout or 1
-
-    def post_instance_update(self, instance):
-        if not has_value(instance.properties.probe.id):
-            instance.properties.probe = None
-
-
-class SettingsCreate(_SettingsCreate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.root_certs = AAZListArg(
-            options=["--root-certs"],
-            help="Space-separated list of trusted root certificates (Names and IDs) to associate with the HTTP settings. "
-                 "`--host-name` or `--backend-pool-host-name` is required when this field is set.",
-        )
-        args_schema.root_certs.Element = AAZResourceIdArg(
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                         "/applicationGateways/{gateway_name}/trustedRootCertificates/{}",
-            ),
-        )
-        args_schema.probe._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/probes/{}",
-        )
-        args_schema.port._required = True
-        args_schema.trusted_root_certificates._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        args.trusted_root_certificates = assign_aaz_list_arg(
-            args.trusted_root_certificates,
-            args.root_certs,
-            element_transformer=lambda _, root_cert_id: {"id": root_cert_id}
-        )
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
-
-
-class SettingsUpdate(_SettingsUpdate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.root_certs = AAZListArg(
-            options=["--root-certs"],
-            help="Space-separated list of trusted root certificates (Names and IDs) to associate with the HTTP settings. "
-                 "`--host-name` or `--backend-pool-host-name` is required when this field is set.",
-            nullable=True,
-        )
-        args_schema.root_certs.Element = AAZResourceIdArg(
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                         "/applicationGateways/{gateway_name}/trustedRootCertificates/{}",
-            ),
-            nullable=True,
-        )
-        args_schema.probe._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/probes/{}",
-        )
-        args_schema.trusted_root_certificates._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        args.trusted_root_certificates = assign_aaz_list_arg(
-            args.trusted_root_certificates,
-            args.root_certs,
-            element_transformer=lambda _, root_cert_id: {"id": root_cert_id}
-        )
-
-    def post_instance_update(self, instance):
-        if not has_value(instance.properties.probe.id):
-            instance.properties.probe = None
-
-
-class RedirectConfigCreate(_RedirectConfigCreate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.target_listener._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/httpListeners/{}",
-        )
-        args_schema.type._required = True
-        return args_schema
-
-
-class RedirectConfigUpdate(_RedirectConfigUpdate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.target_listener._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/httpListeners/{}",
-        )
-        return args_schema
-
-    def post_instance_update(self, instance):
-        if not has_value(instance.properties.target_listener.id):
-            instance.properties.target_listener = None
-        if has_value(instance.properties.target_listener):
-            instance.properties.target_url = None
-        if has_value(instance.properties.target_url):
-            instance.properties.target_listener = None
-
-
-class AGRewriteRuleCreate(_AGRewriteRuleCreate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZDictArg, AAZStrArg
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.request_headers = AAZDictArg(
-            options=["--request-headers"],
-            help="Space-separated list of HEADER=VALUE pairs. "
-                 "Values from: `az network application-gateway rewrite-rule list-request-headers`.",
-        )
-        args_schema.request_headers.Element = AAZStrArg()
-        args_schema.response_headers = AAZDictArg(
-            options=["--response-headers"],
-            help="Space-separated list of HEADER=VALUE pairs. "
-                 "Values from: `az network application-gateway rewrite-rule list-response-headers`.",
-        )
-        args_schema.response_headers.Element = AAZStrArg()
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        if has_value(args.request_headers):
-            configurations = []
-            for k, v in args.request_headers.items():
-                configurations.append({"header_name": k, "header_value": v})
-            args.request_header_configurations = configurations
-        if has_value(args.response_headers):
-            configurations = []
-            for k, v in args.response_headers.items():
-                configurations.append({"header_name": k, "header_value": v})
-            args.response_header_configurations = configurations
-
-
-class AGRewriteRuleUpdate(_AGRewriteRuleUpdate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZDictArg, AAZStrArg
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.request_headers = AAZDictArg(
-            options=["--request-headers"],
-            help="Space-separated list of HEADER=VALUE pairs. "
-                 "Values from: `az network application-gateway rewrite-rule list-request-headers`.",
-            nullable=True,
-        )
-        args_schema.request_headers.Element = AAZStrArg(
-            nullable=True,
-        )
-        args_schema.response_headers = AAZDictArg(
-            options=["--response-headers"],
-            help="Space-separated list of HEADER=VALUE pairs. "
-                 "Values from: `az network application-gateway rewrite-rule list-response-headers`.",
-            nullable=True,
-        )
-        args_schema.response_headers.Element = AAZStrArg(
-            nullable=True,
-        )
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        if has_value(args.request_headers):
-            if args.request_headers.to_serialized_data() is None:
-                args.request_header_configurations = None
-            else:
-                configurations = []
-                for k, v in args.request_headers.items():
-                    configurations.append({"header_name": k, "header_value": v})
-                args.request_header_configurations = configurations
-        if has_value(args.response_headers):
-            if args.response_headers.to_serialized_data() is None:
-                args.response_header_configurations = None
-            else:
-                configurations = []
-                for k, v in args.response_headers.items():
-                    configurations.append({"header_name": k, "header_value": v})
-                args.response_header_configurations = configurations
-
-
-class RuleCreate(_RuleCreate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.address_pool._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/backendAddressPools/{}",
-        )
-        args_schema.http_listener._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/httpListeners/{}",
-        )
-        args_schema.http_settings._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/backendHttpSettingsCollection/{}",
-        )
-        args_schema.redirect_config._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/redirectConfigurations/{}",
-        )
-        args_schema.rewrite_rule_set._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/rewriteRuleSets/{}",
-        )
-        args_schema.url_path_map._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/urlPathMaps/{}",
-        )
-        return args_schema
-
-    def pre_instance_create(self):
-        args = self.ctx.args
-        instance = self.ctx.vars.instance
-        if not has_value(args.address_pool) and not has_value(args.redirect_config):
-            address_pools = instance.properties.backend_address_pools
-            if len(address_pools) == 1:
-                args.address_pool = instance.properties.backend_address_pools[0].id
-            elif len(address_pools) > 1:
-                err_msg = "Multiple backend address pools found. Specify --address-pool explicitly."
-                raise ArgumentUsageError(err_msg)
-        if not has_value(args.http_settings) and not has_value(args.redirect_config):
-            settings = instance.properties.backend_http_settings_collection
-            if len(settings) == 1:
-                args.http_settings = instance.properties.backend_http_settings_collection[0].id
-            elif len(settings) > 1:
-                err_msg = "Multiple backend settings found. Specify --http-settings explicitly."
-                raise ArgumentUsageError(err_msg)
-        if not has_value(args.http_listener):
-            listeners = instance.properties.http_listeners
-            if len(listeners) == 1:
-                args.http_listener = instance.properties.http_listeners[0].id
-            elif len(listeners) > 1:
-                err_msg = "Multiple HTTP listeners found. Specify --http-listener explicitly."
-                raise ArgumentUsageError(err_msg)
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
-
-
-class RuleUpdate(_RuleUpdate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.address_pool._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/backendAddressPools/{}",
-        )
-        args_schema.http_listener._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/httpListeners/{}",
-        )
-        args_schema.http_settings._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/backendHttpSettingsCollection/{}",
-        )
-        args_schema.redirect_config._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/redirectConfigurations/{}",
-        )
-        args_schema.rewrite_rule_set._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/rewriteRuleSets/{}",
-        )
-        args_schema.url_path_map._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/urlPathMaps/{}",
-        )
-        return args_schema
-
-    def post_instance_update(self, instance):
-        if not has_value(instance.properties.backend_address_pool.id):
-            instance.properties.backend_address_pool = None
-        if not has_value(instance.properties.backend_http_settings.id):
-            instance.properties.backend_http_settings = None
-        if not has_value(instance.properties.http_listener.id):
-            instance.properties.http_listener = None
-        if not has_value(instance.properties.redirect_configuration.id):
-            instance.properties.redirect_configuration = None
-        if not has_value(instance.properties.rewrite_rule_set.id):
-            instance.properties.rewrite_rule_set = None
-        if not has_value(instance.properties.url_path_map.id):
-            instance.properties.url_path_map = None
-
-
-class RoutingRuleCreate(_RoutingRuleCreate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.address_pool._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/backendAddressPools/{}",
-        )
-        args_schema.listener._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/listeners/{}",
-        )
-        args_schema.settings._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/backendSettingsCollection/{}",
-        )
-        return args_schema
-
-    def pre_instance_create(self):
-        args = self.ctx.args
-        instance = self.ctx.vars.instance
-        if not has_value(args.address_pool):
-            address_pools = instance.properties.backend_address_pools
-            if len(address_pools) == 1:
-                args.address_pool = instance.properties.backend_address_pools[0].id
-            elif len(address_pools) > 1:
-                err_msg = "Multiple backend address pools found. Specify --address-pool explicitly."
-                raise ArgumentUsageError(err_msg)
-        if not has_value(args.listener):
-            listeners = instance.properties.listeners
-            if len(listeners) == 1:
-                args.listener = instance.properties.listeners[0].id
-            elif len(listeners) > 1:
-                err_msg = "Multiple listeners found. Specify --listener explicitly."
-                raise ArgumentUsageError(err_msg)
-        if not has_value(args.settings):
-            settings = instance.properties.backend_settings_collection
-            if len(settings) == 1:
-                args.settings = instance.properties.backend_settings_collection[0].id
-            elif len(settings) > 1:
-                err_msg = "Multiple backend settings found. Specify --settings explicitly."
-                raise ArgumentUsageError(err_msg)
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
-
-
-class RoutingRuleUpdate(_RoutingRuleUpdate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.address_pool._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/backendAddressPools/{}",
-        )
-        args_schema.listener._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/listeners/{}",
-        )
-        args_schema.settings._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/backendSettingsCollection/{}",
-        )
-        return args_schema
-
-    def post_instance_update(self, instance):
-        if not has_value(instance.properties.backend_address_pool.id):
-            instance.properties.backend_address_pool = None
-        if not has_value(instance.properties.backend_settings.id):
-            instance.properties.backend_settings = None
-        if not has_value(instance.properties.listener.id):
-            instance.properties.listener = None
-
-
-class SSLCertCreate(_SSLCertCreate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZFileArg, AAZFileArgBase64EncodeFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.cert_file = AAZFileArg(
-            options=["--cert-file"],
-            help="Path to the pfx certificate file.",
-            fmt=AAZFileArgBase64EncodeFormat(),
-        )
-        args_schema.data._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        if has_value(args.cert_file):
-            args.data = args.cert_file
-
-
-class SSLCertUpdate(_SSLCertUpdate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZFileArg, AAZFileArgBase64EncodeFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.cert_file = AAZFileArg(
-            options=["--cert-file"],
-            help="Path to the pfx certificate file.",
-            fmt=AAZFileArgBase64EncodeFormat(),
-            nullable=True,
-        )
-        args_schema.data._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        if has_value(args.cert_file):
-            args.data = args.cert_file
-
-
-class SSLPolicySet(_SSLPolicySet):
-    def pre_operations(self):
-        args = self.ctx.args
-        if has_value(args.name):
-            args.policy_type = "Predefined"
-        elif not has_value(args.policy_type) \
-                and (has_value(args.cipher_suites) or has_value(args.min_protocol_version)):
-            args.policy_type = "Custom"
-
-
-class RootCertCreate(_RootCertCreate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZFileArg, AAZFileArgBase64EncodeFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.cert_file = AAZFileArg(
-            options=["--cert-file"],
-            help="Path to the certificate file.",
-            fmt=AAZFileArgBase64EncodeFormat(),
-        )
-        args_schema.data._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        if has_value(args.cert_file):
-            args.data = args.cert_file
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
-
-
-class RootCertUpdate(_RootCertUpdate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZFileArg, AAZFileArgBase64EncodeFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.cert_file = AAZFileArg(
-            options=["--cert-file"],
-            help="Path to the certificate file.",
-            fmt=AAZFileArgBase64EncodeFormat(),
-            nullable=True,
-        )
-        args_schema.data._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        if has_value(args.cert_file):
-            args.data = args.cert_file
-
-
-class URLPathMapCreate(_URLPathMapCreate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.rule_name = AAZStrArg(
-            options=["--rule-name"],
-            arg_group="First Rule",
-            help="Name of the rule for a URL path map.",
-            default="default",
-        )
-        args_schema.paths = AAZListArg(
-            options=["--paths"],
-            arg_group="First Rule",
-            help="Space-separated list of paths to associate with the rule. "
-                 "Valid paths start and end with \"/\", e.g, \"/bar/\".",
-            required=True,
-        )
-        args_schema.paths.Element = AAZStrArg()
-        args_schema.address_pool = AAZResourceIdArg(
-            options=["--address-pool"],
-            arg_group="First Rule",
-            help="Name or ID of the backend address pool to use with the created rule.",
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                         "/applicationGateways/{gateway_name}/backendAddressPools/{}",
-            ),
-        )
-        args_schema.http_settings = AAZResourceIdArg(
-            options=["--http-settings"],
-            arg_group="First Rule",
-            help="Name or ID of the HTTP settings to use with the created rule.",
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                         "/applicationGateways/{gateway_name}/backendHttpSettingsCollection/{}",
-            ),
-        )
-        args_schema.redirect_config = AAZResourceIdArg(
-            options=["--redirect-config"],
-            arg_group="First Rule",
-            help="Name or ID of the redirect configuration to use with the created rule.",
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                         "/applicationGateways/{gateway_name}/redirectConfigurations/{}",
-            ),
-        )
-        args_schema.rewrite_rule_set = AAZResourceIdArg(
-            options=["--rewrite-rule-set"],
-            arg_group="First Rule",
-            help="Name or ID of the rewrite rule set. If not specified, the default for the map will be used.",
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                         "/applicationGateways/{gateway_name}/rewriteRuleSets/{}",
-            ),
-        )
-        args_schema.waf_policy = AAZResourceIdArg(
-            options=["--waf-policy"],
-            arg_group="First Rule",
-            help="Name or ID of a web application firewall policy resource.",
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                         "/ApplicationGatewayWebApplicationFirewallPolicies/{}",
-            ),
-        )
-        # add templates for resource id
-        args_schema.default_address_pool._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/backendAddressPools/{}",
-        )
-        args_schema.default_http_settings._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/backendHttpSettingsCollection/{}",
-        )
-        args_schema.default_redirect_config._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/redirectConfigurations/{}",
-        )
-        args_schema.default_rewrite_rule_set._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/rewriteRuleSets/{}",
-        )
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        rules = [{
-            "name": args.rule_name,
-            "paths": args.paths,
-            "backend_address_pool": {"id": args.address_pool} if has_value(args.address_pool) else None,
-            "backend_http_settings": {"id": args.http_settings} if has_value(args.http_settings) else None,
-            "redirect_configuration": {"id": args.redirect_config} if has_value(args.redirect_config) else None,
-            "rewrite_rule_set": {"id": args.rewrite_rule_set} if has_value(args.rewrite_rule_set) else None,
-            "firewall_policy": {"id": args.waf_policy} if has_value(args.waf_policy) else None,
-        }]
-        args.rules = rules
-
-
-class URLPathMapUpdate(_URLPathMapUpdate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        # apply templates for resource id
-        args_schema.default_address_pool._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/backendAddressPools/{}",
-        )
-        args_schema.default_http_settings._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/backendHttpSettingsCollection/{}",
-        )
-        args_schema.default_redirect_config._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/redirectConfigurations/{}",
-        )
-        args_schema.default_rewrite_rule_set._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/rewriteRuleSets/{}",
-        )
-        return args_schema
-
-
-class URLPathMapRuleCreate(_URLPathMapRuleCreate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.paths._required = True
-        # add templates for resource id
-        args_schema.address_pool._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/backendAddressPools/{}",
-        )
-        args_schema.http_settings._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/backendHttpSettingsCollection/{}",
-        )
-        args_schema.redirect_config._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/redirectConfigurations/{}",
-        )
-        args_schema.rewrite_rule_set._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/applicationGateways/{gateway_name}/rewriteRuleSets/{}",
-        )
-        args_schema.waf_policy._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/ApplicationGatewayWebApplicationFirewallPolicies/{}",
-        )
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        if has_value(args.address_pool) and has_value(args.redirect_config):
-            err_msg = "Cannot reference a BackendAddressPool when Redirect Configuration is specified."
-            raise ArgumentUsageError(err_msg)
 
 
 def set_ag_waf_config(cmd, resource_group_name, application_gateway_name, enabled,
@@ -1853,6 +312,8 @@ def set_ag_waf_config(cmd, resource_group_name, application_gateway_name, enable
         "rule_set_type": rule_set_type,
         "rule_set_version": rule_set_version
     }
+
+    from .aaz.latest.network.application_gateway._update import Update as _ApplicationGatewayUpdate
 
     class WAFConfigSet(_ApplicationGatewayUpdate):
         def pre_operations(self):
@@ -1897,7 +358,7 @@ def set_ag_waf_config(cmd, resource_group_name, application_gateway_name, enable
 
 
 def show_ag_waf_config(cmd, resource_group_name, application_gateway_name):
-    from .aaz.latest.network.application_gateway import Show
+    from .aaz.latest.network.application_gateway._show import Show
     return Show(cli_ctx=cmd.cli_ctx)(command_args={
         "name": application_gateway_name,
         "resource_group": resource_group_name
@@ -1905,7 +366,7 @@ def show_ag_waf_config(cmd, resource_group_name, application_gateway_name):
 
 
 def list_ag_waf_rule_sets(cmd, _type=None, version=None, group=None):
-    from .aaz.latest.network.application_gateway.waf_config import ListRuleSets
+    from .aaz.latest.network.application_gateway.waf_config._list_rule_sets import ListRuleSets
     rule_sets = ListRuleSets(cli_ctx=cmd.cli_ctx)(command_args={})["value"]
 
     filtered_sets = []
@@ -1933,46 +394,12 @@ def list_ag_waf_rule_sets(cmd, _type=None, version=None, group=None):
 
 
 # region ApplicationGatewayWAFPolicy
-class WAFCreate(_WAFCreate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.rule_set_type = AAZStrArg(
-            options=["--type"],
-            help="Type of the web application firewall rule set.",
-            default="Microsoft_DefaultRuleSet",
-            enum={
-                "Microsoft_BotManagerRuleSet": "Microsoft_BotManagerRuleSet",
-                "Microsoft_DefaultRuleSet": "Microsoft_DefaultRuleSet",
-                "OWASP": "OWASP",
-                "Microsoft_HTTPDDoSRuleSet": "Microsoft_HTTPDDoSRuleSet"
-            },
-        )
-        args_schema.rule_set_version = AAZStrArg(
-            options=["--version"],
-            help="Version of the web application firewall rule set type. "
-                 "0.1, 1.0, and 1.1 are used for Microsoft_BotManagerRuleSet",
-            default="2.1"
-        )
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        managed_rule_set = {
-            "rule_set_type": args.rule_set_type,
-            "rule_set_version": args.rule_set_version
-        }
-        managed_rule_definition = {
-            "managed_rule_sets": [managed_rule_set]
-        }
-        args.managed_rules = managed_rule_definition
 # endregion
 
 
 # region ApplicationGatewayWAFPolicyRules PolicySettings
 def list_waf_policy_setting(cmd, resource_group_name, policy_name):
-    from .aaz.latest.network.application_gateway.waf_policy import Show
+    from .aaz.latest.network.application_gateway.waf_policy._show import Show
     return Show(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "name": policy_name}
@@ -1981,47 +408,8 @@ def list_waf_policy_setting(cmd, resource_group_name, policy_name):
 
 
 # region ApplicationGatewayWAFPolicyRuleMatchConditions
-class WAFCustomRuleMatchConditionAdd(_WAFCustomRuleMatchConditionAdd):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.match_variables = AAZListArg(
-            options=["--match-variables"],
-            help="Space-separated list of variables to use when matching. Variable values: RemoteAddr, RequestMethod, "
-                 "QueryString, PostArgs, RequestUri, RequestHeaders, RequestBody, RequestCookies.",
-            required=True,
-        )
-        args_schema.match_variables.Element = AAZStrArg()
-        # filter arguments
-        args_schema.variables._required = False
-        args_schema.variables._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        variables = []
-        for variable in args.match_variables:
-            try:
-                name, selector = str(variable).split(".", 1)
-            except ValueError:
-                name, selector = variable, None
-            variables.append({
-                "variable_name": name,
-                "selector": selector,
-            })
-        args.variables = variables
-        # validate
-        if str(args.operator).lower() == "any" and has_value(args.values):
-            raise ArgumentUsageError("\"Any\" operator does not require --values.")
-        if str(args.operator).lower() != "any" and not has_value(args.values):
-            raise ArgumentUsageError("Non-any operator requires --values.")
 
 
-class WAFPolicySettingUpdate(_WAFPolicySettingUpdate):
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
 # endregion
 
 
@@ -2060,7 +448,7 @@ def add_waf_managed_rule_set(cmd, resource_group_name, policy_name,
         "rule_group_overrides": rule_group_overrides
     }
 
-    from .aaz.latest.network.application_gateway.waf_policy import Update
+    from .aaz.latest.network.application_gateway.waf_policy._update import Update
 
     class WAFManagedRuleSetAdd(Update):
         def pre_instance_update(self, instance):
@@ -2109,7 +497,7 @@ def update_waf_managed_rule_set(cmd, resource_group_name, policy_name,
         "rule_group_overrides": rule_group_overrides
     }
 
-    from .aaz.latest.network.application_gateway.waf_policy import Update
+    from .aaz.latest.network.application_gateway.waf_policy._update import Update
 
     class WAFManagedRuleSetUpdate(Update):
         def pre_instance_update(self, instance):
@@ -2152,7 +540,7 @@ def remove_waf_managed_rule_set(cmd, resource_group_name, policy_name,
     """
     Remove a managed rule set by rule set group name if rule_group_name is specified. Otherwise, remove all rule set.
     """
-    from .aaz.latest.network.application_gateway.waf_policy import Update
+    from .aaz.latest.network.application_gateway.waf_policy._update import Update
 
     class WAFManagedRuleSetRemove(Update):
         def pre_instance_update(self, instance):
@@ -2193,7 +581,7 @@ def remove_waf_managed_rule_set(cmd, resource_group_name, policy_name,
 
 
 def list_waf_managed_rules(cmd, resource_group_name, policy_name):
-    from .aaz.latest.network.application_gateway.waf_policy import Show
+    from .aaz.latest.network.application_gateway.waf_policy._show import Show
     return Show(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "name": policy_name
@@ -2203,7 +591,7 @@ def list_waf_managed_rules(cmd, resource_group_name, policy_name):
 
 # region ApplicationGatewayWAFPolicy ManagedRule Exception
 def remove_waf_managed_rule_exception(cmd, resource_group_name, policy_name):
-    from .aaz.latest.network.application_gateway.waf_policy import Update
+    from .aaz.latest.network.application_gateway.waf_policy._update import Update
 
     class WAFExceptionRemove(Update):
         def pre_instance_update(self, instance):
@@ -2219,7 +607,7 @@ def remove_waf_managed_rule_exception(cmd, resource_group_name, policy_name):
 # region ApplicationGatewayWAFPolicy ManagedRule OwaspCrsExclusionEntry
 # pylint: disable=too-many-nested-blocks
 def remove_waf_managed_rule_exclusion(cmd, resource_group_name, policy_name):
-    from .aaz.latest.network.application_gateway.waf_policy import Update
+    from .aaz.latest.network.application_gateway.waf_policy._update import Update
 
     class WAFExclusionRemove(Update):
         def pre_instance_update(self, instance):
@@ -2257,7 +645,7 @@ def add_waf_exclusion_rule_set(cmd, resource_group_name, policy_name,
         "rule_groups": rule_groups,
     }
 
-    from .aaz.latest.network.application_gateway.waf_policy import Update
+    from .aaz.latest.network.application_gateway.waf_policy._update import Update
 
     class WAFExclusionRuleSetAdd(Update):
         def pre_instance_update(self, instance):
@@ -2304,7 +692,7 @@ def add_waf_exclusion_rule_set(cmd, resource_group_name, policy_name,
 def remove_waf_exclusion_rule_set(cmd, resource_group_name, policy_name,
                                   rule_set_type, rule_set_version, match_variable, selector_match_operator, selector,
                                   rule_group_name=None):
-    from .aaz.latest.network.application_gateway.waf_policy import Update
+    from .aaz.latest.network.application_gateway.waf_policy._update import Update
 
     class WAFExclusionRuleSetRemove(Update):
         def pre_instance_update(self, instance):
@@ -2372,7 +760,8 @@ def remove_waf_exclusion_rule_set(cmd, resource_group_name, policy_name,
 # region DdosProtectionPlans
 def create_ddos_plan(cmd, resource_group_name, ddos_plan_name, location=None, tags=None, vnets=None):
     from azure.cli.core.commands import LongRunningOperation
-    from azure.cli.command_modules.network.aaz.latest.network.ddos_protection import Create
+    from azure.cli.command_modules.network.aaz.latest.network.ddos_protection._create import Create
+    from azure.cli.command_modules.network.operations.latest.network.vnet._update import VNetUpdate
     Create_Ddos_Protection = Create(cli_ctx=cmd.cli_ctx)
     args = {
         "name": ddos_plan_name,
@@ -2403,13 +792,13 @@ def create_ddos_plan(cmd, resource_group_name, ddos_plan_name, location=None, ta
         "name": ddos_plan_name,
         "resource_group": resource_group_name,
     }
-    from azure.cli.command_modules.network.aaz.latest.network.ddos_protection import Show
+    from azure.cli.command_modules.network.aaz.latest.network.ddos_protection._show import Show
     Show_Ddos_Protection = Show(cli_ctx=cmd.cli_ctx)
     return Show_Ddos_Protection(show_args)
 
 
 def update_ddos_plan(cmd, resource_group_name, ddos_plan_name, tags=None, vnets=None):
-    from azure.cli.command_modules.network.aaz.latest.network.ddos_protection import Update
+    from azure.cli.command_modules.network.aaz.latest.network.ddos_protection._update import Update
     Update_Ddos_Protection = Update(cli_ctx=cmd.cli_ctx)
     args = {
         "name": ddos_plan_name,
@@ -2418,7 +807,8 @@ def update_ddos_plan(cmd, resource_group_name, ddos_plan_name, tags=None, vnets=
     if tags is not None:
         args['tags'] = tags
     if vnets is not None:
-        from azure.cli.command_modules.network.aaz.latest.network.ddos_protection import Show
+        from azure.cli.command_modules.network.aaz.latest.network.ddos_protection._show import Show
+        from azure.cli.command_modules.network.operations.latest.network.vnet._update import VNetUpdate
         show_args = {
             "name": ddos_plan_name,
             "resource_group": resource_group_name,
@@ -2513,6 +903,8 @@ def add_dns_delegation(cmd, child_zone, parent_zone, child_rg, child_zone_name):
 
 
 def create_dns_zone(cmd, resource_group_name, zone_name, parent_zone_name=None, tags=None, if_none_match=False):
+    from .aaz.latest.network.dns.zone._create import Create as _DNSZoneCreate
+
     created_zone = _DNSZoneCreate(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "zone_name": zone_name,
@@ -2528,6 +920,8 @@ def create_dns_zone(cmd, resource_group_name, zone_name, parent_zone_name=None, 
 
 
 def show_dns_soa_record_set(cmd, resource_group_name, zone_name, record_type):
+    from .operations.latest.network.dns.record_set.soa._show import RecordSetSOAShow as DNSRecordSetSOAShow
+
     return DNSRecordSetSOAShow(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "zone_name": zone_name
@@ -2539,6 +933,8 @@ def update_dns_soa_record(cmd, resource_group_name, zone_name, host=None, email=
                           minimum_ttl=3600, if_none_match=None):
     record_set_name = '@'
     record_type = 'soa'
+
+    from .operations.latest.network.dns.record_set.soa._show import RecordSetSOAShow as DNSRecordSetSOAShow
 
     record_set = DNSRecordSetSOAShow(cli_ctx=cmd.cli_ctx)(command_args={
         "zone_name": zone_name,
@@ -2583,6 +979,8 @@ def _type_to_property_name(key):
 
 def export_zone(cmd, resource_group_name, zone_name, file_name=None):  # pylint: disable=too-many-branches
     from time import localtime, strftime
+    from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
+    from .aaz.latest.network.dns.record_set._list import List as _DNSRecordSetListByZone
 
     record_sets = _DNSRecordSetListByZone(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
@@ -2744,6 +1142,9 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
     except OSError as e:
         raise UnclassifiedUserFault(e)
 
+    from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
+    from .operations.latest.network.dns.record_set.soa._show import RecordSetSOAShow as DNSRecordSetSOAShow
+
     zone_obj = parse_zone_file(file_text, zone_name)
 
     origin = zone_name
@@ -2808,6 +1209,8 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
 
     print('== BEGINNING ZONE IMPORT: {} ==\n'.format(zone_name), file=sys.stderr)
 
+    from .aaz.latest.network.dns.zone._create import Create as _DNSZoneCreate
+
     _DNSZoneCreate(cli_ctx=cmd.cli_ctx)(command_args={
         'resource_group': resource_group_name,
         'zone_name': zone_name,
@@ -2835,7 +1238,8 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
             rs["soa_record"]["host"] = root_soa["SOARecord"]["host"]
             rs_name = '@'
         elif rs_name == '@' and rs_type == 'ns':
-            root_ns = DNSRecordSetNSShow(cli_ctx=cmd.cli_ctx)(command_args={
+            _DNSRecordSetNSShow = _record_show_func('ns')
+            root_ns = _DNSRecordSetNSShow(cli_ctx=cmd.cli_ctx)(command_args={
                 'resource_group': resource_group_name,
                 'zone_name': zone_name,
                 'name': '@'
@@ -2845,13 +1249,25 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
         try:
             rs["target_resource"] = rs.get("target_resource").get("id") if rs.get("target_resource") else None
             rs["traffic_management_profile"] = rs.get("traffic_management_profile").get("id") if rs.get("traffic_management_profile") else None
-            _record_create = _record_create_func(rs_type)
-            _record_create(cli_ctx=cmd.cli_ctx)(command_args={
-                'resource_group': resource_group_name,
-                'zone_name': zone_name,
-                'name': rs_name,
-                **rs
-            })
+            if rs_type == 'soa':
+                # SOA records don't have a separate create command; use the base aaz create directly
+                from .aaz.latest.network.dns.record_set._create import Create as _RecordSetCreateBase
+                _RecordSetCreateBase(cli_ctx=cmd.cli_ctx)(command_args={
+                    'resource_group': resource_group_name,
+                    'zone_name': zone_name,
+                    'name': rs_name,
+                    'record_type': 'SOA',
+                    **rs
+                })
+            else:
+                _record_create = _record_create_func(rs_type)
+                _record_create(cli_ctx=cmd.cli_ctx)(command_args={
+                    'resource_group': resource_group_name,
+                    'zone_name': zone_name,
+                    'name': rs_name,
+                    'record_type': rs_type.upper(),
+                    **rs
+                })
 
             cum_records += record_count
             print("({}/{}) Imported {} records of type '{}' and name '{}'"
@@ -3162,20 +1578,31 @@ def _add_record(record_set, record, record_type, is_list=False):
         record_set[record_property] = record
 
 
+def _dns_record_set_import(record_type, operation):
+    """Dynamically import a DNS record set command class from the operations module."""
+    import importlib
+    rt = record_type.lower()
+    op = operation.lower()
+    module_path = f"azure.cli.command_modules.network.operations.latest.network.dns.record_set.{rt}._{op}"
+    class_name = f"RecordSet{record_type.upper()}{operation.capitalize()}"
+    mod = importlib.import_module(module_path)
+    return getattr(mod, class_name)
+
+
 def _record_show_func(record_type):
-    return globals()["DNSRecordSet{}Show".format(record_type.upper())]
+    return _dns_record_set_import(record_type, "show")
 
 
 def _record_create_func(record_type):
-    return globals()["DNSRecordSet{}Create".format(record_type.upper())]
+    return _dns_record_set_import(record_type, "create")
 
 
 def _record_delete_func(record_type):
-    return globals()["DNSRecordSet{}Delete".format(record_type.upper())]
+    return _dns_record_set_import(record_type, "delete")
 
 
 def _record_update_func(record_type):
-    return globals()["DNSRecordSet{}Update".format(record_type.upper())]
+    return _dns_record_set_import(record_type, "update")
 
 
 def _add_save_record(cmd, record, record_type, record_set_name, resource_group_name, zone_name,
@@ -3285,78 +1712,6 @@ def lists_match(l1, l2):
 
 
 # region ExpressRoutes
-class ExpressRouteCreate(_ExpressRouteCreate):
-
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.bandwidth = AAZListArg(
-            options=["--bandwidth"],
-            help="Bandwidth of the circuit. Usage: INT {Mbps,Gbps}. Defaults to Mbps."
-        )
-        args_schema.bandwidth.Element = AAZStrArg()
-        args_schema.bandwidth_in_mbps._registered = False
-        args_schema.bandwidth_in_gbps._registered = False
-        args_schema.sku_name._registered = False
-        args_schema.express_route_port._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/expressRoutePorts/{}",
-        )
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        if has_value(args.bandwidth):
-            converted_bandwidth = _validate_bandwidth(args.bandwidth)
-        args.sku_name = '{}_{}'.format(args.sku_tier, args.sku_family)
-
-        if has_value(args.express_route_port):
-            args.provider = None
-            args.peering_location = None
-            args.bandwidth_in_gbps = converted_bandwidth / 1000.0
-        else:
-            args.bandwidth_in_mbps = int(converted_bandwidth)
-
-
-class ExpressRouteUpdate(_ExpressRouteUpdate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.bandwidth = AAZListArg(
-            options=["--bandwidth"],
-            help="Bandwidth of the circuit. Usage: INT {Mbps,Gbps}. Defaults to Mbps.",
-            nullable=True
-        )
-        args_schema.bandwidth.Element = AAZStrArg(nullable=True)
-        args_schema.bandwidth_in_mbps._registered = False
-        args_schema.bandwidth_in_gbps._registered = False
-        args_schema.sku_name._registered = False
-        args_schema.express_route_port._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/expressRoutePorts/{}"
-        )
-
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        if has_value(args.sku_tier) and has_value(args.sku_family):
-            args.sku_name = f"{args.sku_tier}_{args.sku_family}"
-
-        if has_value(args.bandwidth):
-            converted_bandwidth = _validate_bandwidth(args.bandwidth)
-            args.bandwidth_in_gbps = converted_bandwidth / 1000
-            args.bandwidth_in_mbps = int(converted_bandwidth)
-
-    def post_instance_update(self, instance):
-        if not has_value(instance.properties.express_route_port.id):
-            instance.properties.express_route_port = None
-
-        if has_value(instance.properties.express_route_port):
-            instance.properties.service_provider_properties = None
-        else:
-            instance.properties.bandwidth_in_gbps = None
 
 
 def _validate_ipv6_address_prefixes(prefixes):
@@ -3378,284 +1733,18 @@ def _validate_ipv6_address_prefixes(prefixes):
     return version == IPv6Network
 
 
-class ExpressRoutePeeringCreate(_ExpressRoutePeeringCreate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArgFormat, AAZArgEnum
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.ip_version = AAZStrArg(
-            options=['--ip-version'],
-            arg_group="Microsoft Peering",
-            help="The IP version to update Microsoft Peering settings for. Allowed values: IPv4, IPv6. Default: IPv4.",
-            default='IPv4'
-        )
-        args_schema.route_filter._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/routeFilters/{}",
-        )
-        # taken from Xplat. No enums in SDK
-        args_schema.routing_registry_name.enum = AAZArgEnum({"ARIN": "ARIN", "APNIC": "APNIC", "AFRINIC": "AFRINIC", "LACNIC": "LACNIC", "RIPENCC": "RIPENCC", "RADB": "RADB", "ALTDB": "ALTDB", "LEVEL3": "LEVEL3"})
-        args_schema.ipv6_peering_config._registered = False
-        args_schema.peering_name._required = False
-        args_schema.peering_name._registered = False
-
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        args.peering_name = args.peering_type
-        if args.ip_version.to_serialized_data().lower() == 'ipv6':
-            if args.peering_type.to_serialized_data().lower() == 'microsoftpeering':
-                microsoft_config = {'advertised_public_prefixes': args.advertised_public_prefixes,
-                                    'customer_asn': args.customer_asn,
-                                    'routing_registry_name': args.routing_registry_name}
-            else:
-                microsoft_config = None
-            args.ipv6_peering_config = {
-                'primary_peer_address_prefix': args.primary_peer_subnet,
-                'secondary_peer_address_prefix': args.secondary_peer_subnet,
-                'microsoft_peering_config': microsoft_config,
-                'route_filter': args.route_filter
-            }
-            args.primary_peer_subnet = None
-            args.secondary_peer_subnet = None
-            args.route_filter = None
-            args.advertised_public_prefixes = None
-            args.customer_asn = None
-            args.routing_registry_name = None
-
-        else:
-            if has_value(args.peering_type) and args.peering_type.to_serialized_data().lower() != 'microsoftpeering':
-                args.advertised_public_prefixes = None
-                args.customer_asn = None
-                args.routing_registry_name = None
-                args.legacy_mode = None
-
-
-class ExpressRoutePeeringUpdate(_ExpressRoutePeeringUpdate):
-
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArgFormat, AAZArgEnum
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.ip_version = AAZStrArg(
-            options=['--ip-version'],
-            arg_group="Microsoft Peering",
-            help="The IP version to update Microsoft Peering settings for. Allowed values: IPv4, IPv6. Default: IPv4.",
-            default='IPv4'
-        )
-        args_schema.route_filter._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/routeFilters/{}",
-        )
-        # taken from Xplat. No enums in SDK
-        args_schema.routing_registry_name.enum = AAZArgEnum({"ARIN": "ARIN", "APNIC": "APNIC", "AFRINIC": "AFRINIC", "LACNIC": "LACNIC", "RIPENCC": "RIPENCC", "RADB": "RADB", "ALTDB": "ALTDB", "LEVEL3": "LEVEL3"})
-        args_schema.ipv6_peering_config._registered = False
-        args_schema.peering_type._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        if args.ip_version.to_serialized_data().lower() == 'ipv6':
-            microsoft_config = {}
-            args.ipv6_peering_config = {}
-            if has_value(args.primary_peer_subnet):
-                args.ipv6_peering_config['primary_peer_address_prefix'] = args.primary_peer_subnet
-                args.primary_peer_subnet = None
-            if has_value(args.secondary_peer_subnet):
-                args.ipv6_peering_config['secondary_peer_address_prefix'] = args.secondary_peer_subnet
-                args.secondary_peer_subnet = None
-            if has_value(args.advertised_public_prefixes):
-                microsoft_config['advertised_public_prefixes'] = args.advertised_public_prefixes
-                args.advertised_public_prefixes = None
-            if has_value(args.customer_asn):
-                microsoft_config['customer_asn'] = args.customer_asn
-                args.customer_asn = None
-            if has_value(args.routing_registry_name):
-                microsoft_config['routing_registry_name'] = args.routing_registry_name
-                args.routing_registry_name = None
-            if has_value(args.route_filter):
-                args.ipv6_peering_config['route_filter'] = args.route_filter
-                args.route_filter = None
-            if microsoft_config is not None:
-                args.ipv6_peering_config['microsoft_peering_config'] = microsoft_config
-
-
-class ExpressRoutePeeringConnectionCreate(_ExpressRoutePeeringConnectionCreate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.peer_circuit._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/expressRouteCircuits/{}/peerings/{peering_name}",
-        )
-        args_schema.source_circuit._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/expressRouteCircuits/{circuit_name}/peerings/{peering_name}",
-        )
-
-        return args_schema
 # endregion
 
 
 # region ExpressRoute Connection
 # pylint: disable=unused-argument
-class ExpressRouteGatewayCreate(_ExpressRouteGatewayCreate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.virtual_hub._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualHubs/{}",
-        )
-
-        return args_schema
-
-
-class ExpressRouteGatewayUpdate(_ExpressRouteGatewayUpdate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.virtual_hub._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualHubs/{}",
-        )
-
-        return args_schema
-
-
-class ExpressRouteConnectionCreate(_ExpressRouteConnectionCreate):
-
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.associated_route_table = AAZStrArg(
-            options=['--associated-route-table', '--associated'],
-            arg_group="Routing Configuration",
-            help="The resource id of route table associated with this routing configuration.",
-            is_preview=True)
-        args_schema.propagated_route_tables = AAZListArg(
-            options=['--propagated-route-tables', '--propagated'],
-            arg_group="Routing Configuration",
-            help="Space-separated list of resource id of propagated route tables.",
-            is_preview=True)
-        args_schema.propagated_route_tables.Element = AAZStrArg()
-        args_schema.circuit_name = AAZStrArg(
-            options=['--circuit-name'],
-            arg_group="Peering",
-            help="ExpressRoute circuit name."
-        )
-        args_schema.peering._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/expressRouteCircuits/{circuit_name}/peerings/{}"
-        )
-        args_schema.associated_id._registered = False
-        args_schema.propagated_ids._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-
-        if has_value(args.associated_route_table):
-            args.associated_id = {"id": args.associated_route_table}
-        if has_value(args.propagated_route_tables):
-            args.propagated_ids = [{"id": propagated_route_table} for propagated_route_table in args.propagated_route_tables]
 
 
 # pylint: disable=unused-argument
-class ExpressRouteConnectionUpdate(_ExpressRouteConnectionUpdate):
-
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.associated_route_table = AAZStrArg(
-            options=['--associated-route-table', '--associated'],
-            arg_group="Routing Configuration",
-            help="The resource id of route table associated with this routing configuration.",
-            is_preview=True,
-            nullable=True)
-        args_schema.propagated_route_tables = AAZListArg(
-            options=['--propagated-route-tables', '--propagated'],
-            arg_group="Routing Configuration",
-            help="Space-separated list of resource id of propagated route tables.",
-            is_preview=True,
-            nullable=True)
-        args_schema.propagated_route_tables.Element = AAZStrArg(nullable=True)
-        args_schema.circuit_name = AAZStrArg(
-            options=['--circuit-name'],
-            arg_group="Peering",
-            help="ExpressRoute circuit name.",
-            nullable=True
-        )
-        args_schema.peering._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/expressRouteCircuits/{circuit_name}/peerings/{}"
-        )
-        args_schema.associated_id._registered = False
-        args_schema.propagated_ids._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-
-        if has_value(args.associated_route_table):
-            args.associated_id = {"id": args.associated_route_table}
-
-        args.propagated_ids = assign_aaz_list_arg(
-            args.propagated_ids,
-            args.propagated_route_tables,
-            element_transformer=lambda _, propagated_route_table: {"id": propagated_route_table}
-        )
 # endregion
 
 
 # region ExpressRoute ports
-class ExpressRoutePortCreate(_ExpressRoutePortCreate):
-
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.bandwidth = AAZListArg(
-            options=["--bandwidth"],
-            help="Bandwidth of the circuit. Usage: INT {Mbps,Gbps}. Defaults to Mbps."
-        )
-        args_schema.bandwidth.Element = AAZStrArg()
-        args_schema.bandwidth_in_gbps._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        if has_value(args.bandwidth):
-            converted_bandwidth = _validate_bandwidth(args.bandwidth, mbps=False)
-            args.bandwidth_in_gbps = int(converted_bandwidth)
-
-
-def _validate_bandwidth(bandwidth, mbps=True):
-    unit = 'mbps' if mbps else 'gbps'
-    if bandwidth is None:
-        return
-    if len(bandwidth) == 1:
-        bandwidth_comps = bandwidth[0].to_serialized_data().split(' ')
-    else:
-        bandwidth_comps = bandwidth.to_serialized_data()
-
-    usage_error = InvalidArgumentValueError('--bandwidth INT {Mbps,Gbps}')
-    if len(bandwidth_comps) == 1:
-        bandwidth_comps.append(unit)
-    if len(bandwidth_comps) > 2:
-        raise usage_error
-    input_value = bandwidth_comps[0]
-    input_unit = bandwidth_comps[1].lower()
-    if float(input_value) and input_unit in ['mbps', 'gbps']:
-        if input_unit == unit:
-            converted_bandwidth = float(bandwidth_comps[0])
-        elif input_unit == 'gbps':
-            converted_bandwidth = float(bandwidth_comps[0]) * 1000
-        else:
-            converted_bandwidth = float(bandwidth_comps[0]) / 1000
-    else:
-        raise usage_error
-    return converted_bandwidth
-
-
 def update_express_route_port(cmd, instance, tags=None):
     with cmd.update_context(instance) as c:
         c.set_param('tags', tags, True)
@@ -3678,7 +1767,7 @@ def download_generated_loa_as_pdf(cmd,
         basename = basename + '.pdf'
 
     file_path = os.path.join(dirname, basename)
-    from .aaz.latest.network.express_route.port import GenerateLoa
+    from .aaz.latest.network.express_route.port._generate_loa import GenerateLoa
     response = GenerateLoa(cli_ctx=cmd.cli_ctx)(command_args={'resource_group': resource_group_name,
                                                               'name': express_route_port_name,
                                                               'customer_name': customer_name})
@@ -3695,308 +1784,18 @@ def download_generated_loa_as_pdf(cmd,
     logger.warning("The generated letter of authorization is saved at %s", file_path)
 
 
-class ExpressRoutePortIdentityAssign(_ExpressRoutePortIdentityAssign):
-
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArg, AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.identity = AAZResourceIdArg(
-            options=['--identity'],
-            arg_group="Identity",
-            help="Name or ID of the ManagedIdentity Resource.",
-            required=True,
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{}"
-            )
-        )
-
-        args_schema.user_assigned_identities._registered = False
-        args_schema.type._registered = False
-
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        identity = args.identity.to_serialized_data()
-        args.user_assigned_identities = {identity: {}}
-
-
-class ExpressRoutePortLinkUpdate(_ExpressRoutePortLinkUpdate):
-
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.admin_state._blank = "Enabled"
-
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        # TODO https://github.com/Azure/azure-rest-api-specs/issues/7569
-        # need to remove this conversion when the issue is fixed.
-        if has_value(args.macsec_cipher):
-            macsec_cipher = args.macsec_cipher.to_serialized_data()
-            macsec_ciphers_tmp = {'gcm-aes-128': 'GcmAes128', 'gcm-aes-256': 'GcmAes256'}
-            macsec_cipher = macsec_ciphers_tmp.get(macsec_cipher, macsec_cipher)
-            args.macsec_cipher = macsec_cipher
 # endregion
 
 
 # region PrivateEndpoint
-class PrivateEndpointCreate(_PrivateEndpointCreate):
-
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZBoolArg, AAZListArg, AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.private_connection_resource_id = AAZStrArg(
-            options=['--private-connection-resource-id'],
-            help="The resource id of the private endpoint to connect to.",
-            required=True)
-        args_schema.group_ids = AAZListArg(
-            options=["--group-ids", "--group-id"],
-            help="The ID of the group obtained from the remote resource that this private endpoint should connect to. You can use \"az network private-link-resource list\" to obtain the supported group ids. You must provide this except for PrivateLinkService.,"
-        )
-        args_schema.group_ids.Element = AAZStrArg()
-        args_schema.request_message = AAZStrArg(
-            options=['--request-message'],
-            help="A message passed to the owner of the remote resource with this connection request. Restricted to 140 chars.")
-        args_schema.connection_name = AAZStrArg(
-            options=['--connection-name'],
-            help="Name of the private link service connection.",
-            required=True)
-        args_schema.manual_request = AAZBoolArg(
-            options=['--manual-request'],
-            help="Use manual request to establish the connection. Configure it as 'true' when you don't have access to the subscription of private link service.")
-        args_schema.vnet_name = AAZStrArg(
-            options=['--vnet-name'],
-            help="The virtual network (VNet) associated with the subnet (Omit if supplying a subnet id).")
-        args_schema.subnet = AAZResourceIdArg(
-            options=['--subnet'],
-            help="Name or ID of an existing subnet. If name specified, also specify --vnet-name. "
-                 "If you want to use an existing subnet in other resource group or subscription, please provide the ID instead of the name of the subnet and do not specify the--vnet-name.",
-            required=True,
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{vnet_name}/subnets/{}"
-            )
-        )
-        args_schema.manual_private_link_service_connections._registered = False
-        args_schema.private_link_service_connections._registered = False
-        args_schema.edge_zone_type._registered = False
-        args_schema.subnet_id._registered = False
-
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        pls_connection = {'name': args.connection_name,
-                          'group_ids': args.group_ids,
-                          'request_message': args.request_message,
-                          'private_link_service_id': args.private_connection_resource_id}
-
-        if args.manual_request:
-            args.manual_private_link_service_connections = [pls_connection]
-        else:
-            args.private_link_service_connections = [pls_connection]
-
-        if has_value(args.subnet):
-            args.subnet_id = args.subnet
-
-        if has_value(args.edge_zone):
-            args.edge_zone_type = 'EdgeZone'
 
 
-class PrivateEndpointUpdate(_PrivateEndpointUpdate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.request_message = AAZStrArg(
-            options=['--request-message'],
-            help="A message passed to the owner of the remote resource with this connection request. Restricted to 140 chars.")
-
-        args_schema.manual_private_link_service_connections._registered = False
-        args_schema.private_link_service_connections._registered = False
-
-        return args_schema
-
-    def pre_instance_update(self, instance):
-        args = self.ctx.args
-        if has_value(args.request_message):
-            if has_value(instance.properties.private_link_service_connections):
-                instance.properties.private_link_service_connections[0].properties.request_message = args.request_message
-            elif has_value(instance.properties.manual_private_link_service_connections):
-                instance.properties.manual_private_link_service_connections[0].properties.request_message = args.request_message
-
-
-class PrivateEndpointPrivateDnsZoneGroupCreate(_PrivateEndpointPrivateDnsZoneGroupCreate):
-
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.private_dns_zone = AAZResourceIdArg(
-            options=['--private-dns-zone'],
-            help="Name or ID of the private dns zone.",
-            required=True,
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/privateDnsZones/{}"
-            )
-        )
-        args_schema.zone_name = AAZStrArg(options=['--zone-name'], help="Name of the private dns zone.", required=True)
-        args_schema.private_dns_zone_configs._registered = False
-
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        args.private_dns_zone_configs = [{'name': args.zone_name, 'private_dns_zone_id': args.private_dns_zone}]
-
-
-class PrivateEndpointPrivateDnsZoneAdd(_PrivateEndpointPrivateDnsZoneAdd):
-
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArg, AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.private_dns_zone = AAZResourceIdArg(
-            options=['--private-dns-zone'],
-            help="Name or ID of the private dns zone.",
-            required=True,
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/privateDnsZones/{}"
-            )
-        )
-        args_schema.private_dns_zone_id._registered = False
-
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        args.private_dns_zone_id = args.private_dns_zone
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
-
-
-class PrivateEndpointIpConfigAdd(_PrivateEndpointIpConfigAdd):
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
-
-
-class PrivateEndpointAsgAdd(_PrivateEndpointAsgAdd):
-
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.asg_id._required = False
-
-        return args_schema
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
 # endregion
 
 
 # region PrivateLinkService
-class PrivateLinkServiceCreate(_PrivateLinkServiceCreate):
-
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.vnet_name = AAZStrArg(options=['--vnet-name'], arg_group="IP Configuration", help="The virtual network (VNet) name.")
-        args_schema.subnet = AAZResourceIdArg(
-            options=['--subnet'],
-            arg_group="IP Configuration",
-            help="Name or ID of subnet to use. If name provided, also supply `--vnet-name`.",
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{vnet_name}/subnets/{}"
-            )
-        )
-        args_schema.private_ip_address = AAZStrArg(options=['--private-ip-address'], arg_group="IP Configuration", help="Static private IP address to use.")
-        args_schema.private_ip_address_version = AAZStrArg(options=['--private-ip-address-version'], arg_group="IP Configuration", help="IP version of the private IP address.",
-                                                           default="IPv4", enum={"IPv4": "IPv4", "IPv6": "IPv6"})
-        args_schema.private_ip_allocation_method = AAZStrArg(options=['--private-ip-allocation-method'], arg_group="IP Configuration", help="Private IP address allocation method.",
-                                                             enum={"Dynamic": "Dynamic", "Static": "Static"})
-        args_schema.lb_name = AAZStrArg(options=['--lb-name'], help="Name of the load balancer to retrieve frontend IP configs from. Ignored if a frontend IP configuration ID is supplied.")
-        args_schema.lb_frontend_ip_configs = AAZListArg(options=['--lb-frontend-ip-configs'], help="Space-separated list of names or IDs of load balancer frontend IP configurations to link to. If names are used, also supply `--lb-name`.")
-        args_schema.lb_frontend_ip_configs.Element = AAZResourceIdArg(
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIpConfigurations/{}"
-            )
-        )
-
-        args_schema.load_balancer_frontend_ip_configurations._registered = False
-        args_schema.edge_zone_type._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-
-        if not has_value(args.ip_configurations):
-            args.ip_configurations = [{
-                'name': '{}_ipconfig_0'.format(args.name.to_serialized_data()),
-                'private_ip_address': args.private_ip_address,
-                'private_ip_allocation_method': args.private_ip_allocation_method,
-                'private_ip_address_version': args.private_ip_address_version,
-                'subnet': {'id': args.subnet}
-            }]
-
-        args.load_balancer_frontend_ip_configurations = assign_aaz_list_arg(
-            args.load_balancer_frontend_ip_configurations,
-            args.lb_frontend_ip_configs,
-            element_transformer=lambda _, lb_frontend_ip_config: {"id": lb_frontend_ip_config}
-        )
-
-        if has_value(args.edge_zone):
-            args.edge_zone_type = 'EdgeZone'
-        if not has_value(args.lb_frontend_ip_configs) and not has_value(args.destination_ip_address):
-            raise CLIError("usage error: either --lb-frontend-ip-configs or --destination-ip-address is required")
 
 
-class PrivateLinkServiceUpdate(_PrivateLinkServiceUpdate):
-
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg, AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.lb_name = AAZStrArg(options=['--lb-name'], help="Name of the load balancer to retrieve frontend IP configs from. Ignored if a frontend IP configuration ID is supplied.")
-        args_schema.lb_frontend_ip_configs = AAZListArg(options=['--lb-frontend-ip-configs'], help="Space-separated list of names or IDs of load balancer frontend IP configurations to link to. If names are used, also supply `--lb-name`.", nullable=True)
-        args_schema.lb_frontend_ip_configs.Element = AAZResourceIdArg(
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/loadBalancers/{lb_name}/frontendIpConfigurations/{}"
-            ),
-            nullable=True
-        )
-        args_schema.load_balancer_frontend_ip_configurations._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-
-        if has_value(args.lb_frontend_ip_configs):
-            args.load_balancer_frontend_ip_configurations = assign_aaz_list_arg(
-                args.load_balancer_frontend_ip_configurations,
-                args.lb_frontend_ip_configs,
-                element_transformer=lambda _, lb_frontend_ip_config: {"id": lb_frontend_ip_config}
-            )
-
-
-class PrivateEndpointConnectionUpdate(_PrivateEndpointConnectionUpdate):
-
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZArgEnum
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.connection_status._required = True
-        args_schema.connection_status.enum = AAZArgEnum({"Approved": "Approved", "Rejected": "Rejected", "Removed": "Removed"})
-        return args_schema
 # endregion
 
 
@@ -4115,7 +1914,7 @@ def list_load_balancer_mapping(cmd, resource_group_name, load_balancer_name, bac
         args["ip_configuration"] = {'id': request['ip_configuration']}
     if 'ip_address' in request:
         args["ip_address"] = request['ip_address']
-    from .aaz.latest.network.lb import ListMapping
+    from .aaz.latest.network.lb._list_mapping import ListMapping
     return ListMapping(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 
@@ -4228,176 +2027,6 @@ def create_cross_region_load_balancer(cmd, load_balancer_name, resource_group_na
 
 
 # region NetworkInterfaces (NIC)
-class NICCreate(_NICCreate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.vnet_name = AAZStrArg(
-            options=["--vnet-name"],
-            arg_group="IP Configuration",
-            help="Name of the virtual network.",
-        )
-        args_schema.subnet = AAZResourceIdArg(
-            options=["--subnet"],
-            arg_group="IP Configuration",
-            help="Name or ID of an existing subnet. If name specified, please also specify `--vnet-name`; "
-                 "If you want to use an existing subnet in other resource group, "
-                 "please provide the ID instead of the name of the subnet.",
-            required=True,
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                         "/virtualNetworks/{vnet_name}/subnets/{}",
-            ),
-        )
-        args_schema.application_security_groups = AAZListArg(
-            options=["--application-security-groups", "--asgs"],
-            arg_group="IP Configuration",
-            help="Space-separated list of application security groups.",
-        )
-        args_schema.application_security_groups.Element = AAZResourceIdArg(
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                         "/applicationSecurityGroups/{}",
-            ),
-        )
-        args_schema.private_ip_address = AAZStrArg(
-            options=["--private-ip-address"],
-            arg_group="IP Configuration",
-            help="Static private IP address to use.",
-        )
-        args_schema.private_ip_address_version = AAZStrArg(
-            options=["--private-ip-address-version"],
-            arg_group="IP Configuration",
-            help="Version of private IP address to use.",
-            enum=["IPv4", "IPv6"],
-            default="IPv4",
-        )
-        args_schema.public_ip_address = AAZResourceIdArg(
-            options=["--public-ip-address"],
-            arg_group="IP Configuration",
-            help="Name or ID of an existing public IP address.",
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/"
-                         "publicIPAddresses/{}"
-            ),
-        )
-        args_schema.gateway_name = AAZStrArg(
-            options=["--gateway-name"],
-            arg_group="Application Gateway",
-            help="Name of the application gateway."
-        )
-        args_schema.app_gateway_address_pools = AAZListArg(
-            options=["--app-gateway-address-pools", "--ag-address-pools"],
-            arg_group="Application Gateway",
-            help="Space-separated list of names or IDs of application gateway backend address pools to "
-                 "associate with the NIC. If names are used, `--gateway-name` must be specified.",
-        )
-        args_schema.app_gateway_address_pools.Element = AAZResourceIdArg(
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                         "/applicationGateways/{gateway_name}/backendAddressPools/{}",
-            ),
-        )
-        args_schema.lb_name = AAZStrArg(
-            options=["--lb-name"],
-            arg_group="Load Balancer",
-            help="Name of the load balancer",
-        )
-        args_schema.lb_address_pools = AAZListArg(
-            options=["--lb-address-pools"],
-            arg_group="Load Balancer",
-            help="Space-separated list of names or IDs of load balancer address pools to associate with the NIC. "
-                 "If names are used, `--lb-name` must be specified.",
-        )
-        args_schema.lb_address_pools.Element = AAZResourceIdArg(
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                         "/loadBalancers/{lb_name}/backendAddressPools/{}",
-            ),
-        )
-        args_schema.lb_inbound_nat_rules = AAZListArg(
-            options=["--lb-inbound-nat-rules"],
-            arg_group="Load Balancer",
-            help="Space-separated list of names or IDs of load balancer inbound NAT rules to associate with the NIC. "
-                 "If names are used, `--lb-name` must be specified.",
-        )
-        args_schema.lb_inbound_nat_rules.Element = AAZResourceIdArg(
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                         "/loadBalancers/{lb_name}/inboundNatRules/{}",
-            ),
-        )
-        args_schema.edge_zone = AAZStrArg(
-            options=["--edge-zone"],
-            help="Name of edge zone."
-        )
-        args_schema.network_security_group = AAZResourceIdArg(
-            options=["--network-security-group"],
-            help="Name or ID of an existing network security group",
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                         "/networkSecurityGroups/{}",
-            ),
-        )
-        args_schema.extended_location._registered = False
-        args_schema.ip_configurations._registered = False
-        args_schema.nsg._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        if has_value(args.network_security_group):
-            args.nsg.id = args.network_security_group
-        if has_value(args.edge_zone):
-            args.extended_location.name = args.edge_zone
-            args.extended_location.type = "EdgeZone"
-        ip_configuration = {
-            "name": "ipconfig1",
-            "private_ip_address": args.private_ip_address,
-            "private_ip_address_version": args.private_ip_address_version,  # when address doesn't exist, version should be ipv4 (default)
-            "private_ip_allocation_method": "Static" if has_value(args.private_ip_address) else "Dynamic",
-            "subnet": {"id": args.subnet} if has_value(args.subnet) else None,
-            "public_ip_address": {"id": args.public_ip_address} if has_value(args.public_ip_address) else None,
-            "application_security_groups": [{"id": x} for x in args.application_security_groups] if has_value(args.application_security_groups) else None,
-            "application_gateway_backend_address_pools": [{"id": x} for x in args.app_gateway_address_pools] if has_value(args.app_gateway_address_pools) else None,
-            "load_balancer_backend_address_pools": [{"id": x} for x in args.lb_address_pools] if has_value(args.lb_address_pools) else None,
-            "load_balancer_inbound_nat_rules": [{"id": x} for x in args.lb_inbound_nat_rules] if has_value(args.lb_inbound_nat_rules) else None,
-        }
-        args.ip_configurations = [ip_configuration]
-
-    def _output(self, *args, **kwargs):
-        result = super()._output(*args, **kwargs)
-        return {"NewNIC": result}
-
-
-class NICUpdate(_NICUpdate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArg, AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.network_security_group = AAZResourceIdArg(
-            options=["--network-security-group"],
-            help="Name or ID of an existing network security group",
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                         "/networkSecurityGroups/{}",
-            ),
-            nullable=True,
-        )
-        args_schema.nsg._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        if has_value(args.network_security_group):
-            args.nsg.id = args.network_security_group
-        if has_value(args.internal_dns_name) and args.internal_dns_name == "":
-            args.internal_dns_name = None
-
-    def post_instance_update(self, instance):
-        if not has_value(instance.properties.network_security_group.id):
-            instance.properties.network_security_group = None
 
 
 def _get_nic_ip_config(nic, name):
@@ -4411,285 +2040,10 @@ def _get_nic_ip_config(nic, name):
     return ip_config
 
 
-class NICIPConfigCreate(_NICIPConfigCreate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.vnet_name = AAZStrArg(
-            options=["--vnet-name"],
-            arg_group="IP Configuration",
-            help="Name of the virtual network.",
-        )
-        args_schema.subnet._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/virtualNetworks/{vnet_name}/subnets/{}",
-        )
-        args_schema.public_ip_address._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/"
-                     "publicIPAddresses/{}"
-        )
-        args_schema.application_security_groups = AAZListArg(
-            options=["--application-security-groups", "--asgs"],
-            arg_group="IP Configuration",
-            help="Space-separated list of application security groups.",
-        )
-        args_schema.application_security_groups.Element = AAZResourceIdArg(
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                         "/applicationSecurityGroups/{}",
-            ),
-        )
-        args_schema.gateway_name = AAZStrArg(
-            options=["--gateway-name"],
-            arg_group="Application Gateway",
-            help="Name of the application gateway."
-        )
-        args_schema.app_gateway_address_pools = AAZListArg(
-            options=["--app-gateway-address-pools", "--ag-address-pools"],
-            arg_group="Application Gateway",
-            help="Space-separated list of names or IDs of application gateway backend address pools to "
-                 "associate with the NIC. If names are used, `--gateway-name` must be specified.",
-        )
-        args_schema.app_gateway_address_pools.Element = AAZResourceIdArg(
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                         "/applicationGateways/{gateway_name}/backendAddressPools/{}",
-            ),
-        )
-        args_schema.lb_name = AAZStrArg(
-            options=["--lb-name"],
-            arg_group="Load Balancer",
-            help="Name of the load balancer",
-        )
-        args_schema.lb_address_pools = AAZListArg(
-            options=["--lb-address-pools"],
-            arg_group="Load Balancer",
-            help="Space-separated list of names or IDs of load balancer address pools to associate with the NIC. "
-                 "If names are used, `--lb-name` must be specified.",
-        )
-        args_schema.lb_address_pools.Element = AAZResourceIdArg(
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                         "/loadBalancers/{lb_name}/backendAddressPools/{}",
-            ),
-        )
-        args_schema.lb_inbound_nat_rules = AAZListArg(
-            options=["--lb-inbound-nat-rules"],
-            arg_group="Load Balancer",
-            help="Space-separated list of names or IDs of load balancer inbound NAT rules to associate with the NIC. "
-                 "If names are used, `--lb-name` must be specified.",
-        )
-        args_schema.lb_inbound_nat_rules.Element = AAZResourceIdArg(
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                         "/loadBalancers/{lb_name}/inboundNatRules/{}",
-            ),
-        )
-        args_schema.application_gateway_backend_address_pools._registered = False
-        args_schema.load_balancer_backend_address_pools._registered = False
-        args_schema.load_balancer_inbound_nat_rules._registered = False
-        args_schema.private_ip_allocation_method._registered = False
-        args_schema.asgs_obj._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        args.private_ip_allocation_method = "Static" if has_value(args.private_ip_address) else "Dynamic"
-        if has_value(args.private_ip_address_prefix_length) and has_value(args.make_primary) and \
-                args.make_primary.to_serialized_data() is True:
-            raise ArgumentUsageError(
-                'usage error: When `--private-ip-address-prefix-length` is specified, `--make-primary` must be false')
-
-        args.asgs_obj = assign_aaz_list_arg(
-            args.asgs_obj,
-            args.application_security_groups,
-            element_transformer=lambda _, asg_id: {"id": asg_id}
-        )
-        args.application_gateway_backend_address_pools = assign_aaz_list_arg(
-            args.application_gateway_backend_address_pools,
-            args.app_gateway_address_pools,
-            element_transformer=lambda _, pool_id: {"id": pool_id}
-        )
-        args.load_balancer_backend_address_pools = assign_aaz_list_arg(
-            args.load_balancer_backend_address_pools,
-            args.lb_address_pools,
-            element_transformer=lambda _, pool_id: {"id": pool_id}
-        )
-        args.load_balancer_inbound_nat_rules = assign_aaz_list_arg(
-            args.load_balancer_inbound_nat_rules,
-            args.lb_inbound_nat_rules,
-            element_transformer=lambda _, rule_id: {"id": rule_id}
-        )
-
-    def pre_instance_create(self):
-        args = self.ctx.args
-        instance = self.ctx.vars.instance
-        if args.private_ip_address_version.to_serialized_data().lower() == "ipv4" and not has_value(args.subnet):
-            primary = next(x for x in instance.properties.ip_configurations if x.properties.primary)
-            args.subnet = primary.properties.subnet.id
-        if args.make_primary.to_serialized_data():
-            for config in instance.properties.ip_configurations:
-                config.properties.primary = False
-
-
-class NICIPConfigUpdate(_NICIPConfigUpdate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.vnet_name = AAZStrArg(
-            options=["--vnet-name"],
-            arg_group="IP Configuration",
-            help="Name of the virtual network.",
-            nullable=True,
-        )
-        args_schema.subnet._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/virtualNetworks/{vnet_name}/subnets/{}",
-        )
-        args_schema.public_ip_address._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/"
-                     "publicIPAddresses/{}"
-        )
-        args_schema.gateway_lb._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/"
-                     "loadBalancers/{}/frontendIPConfigurations/{}",
-        )
-        args_schema.application_security_groups = AAZListArg(
-            options=["--application-security-groups", "--asgs"],
-            arg_group="IP Configuration",
-            help="Space-separated list of application security groups.",
-            nullable=True,
-        )
-        args_schema.application_security_groups.Element = AAZResourceIdArg(
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                         "/applicationSecurityGroups/{}",
-            ),
-            nullable=True,
-        )
-        args_schema.gateway_name = AAZStrArg(
-            options=["--gateway-name"],
-            arg_group="Application Gateway",
-            help="Name of the application gateway.",
-            nullable=True,
-        )
-        args_schema.app_gateway_address_pools = AAZListArg(
-            options=["--app-gateway-address-pools", "--ag-address-pools"],
-            arg_group="Application Gateway",
-            help="Space-separated list of names or IDs of application gateway backend address pools to "
-                 "associate with the NIC. If names are used, `--gateway-name` must be specified.",
-            nullable=True,
-        )
-        args_schema.app_gateway_address_pools.Element = AAZResourceIdArg(
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                         "/applicationGateways/{gateway_name}/backendAddressPools/{}",
-            ),
-            nullable=True,
-        )
-        args_schema.lb_name = AAZStrArg(
-            options=["--lb-name"],
-            arg_group="Load Balancer",
-            help="Name of the load balancer",
-            nullable=True,
-        )
-        args_schema.lb_address_pools = AAZListArg(
-            options=["--lb-address-pools"],
-            arg_group="Load Balancer",
-            help="Space-separated list of names or IDs of load balancer address pools to associate with the NIC. "
-                 "If names are used, `--lb-name` must be specified.",
-            nullable=True,
-        )
-        args_schema.lb_address_pools.Element = AAZResourceIdArg(
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                         "/loadBalancers/{lb_name}/backendAddressPools/{}",
-            ),
-            nullable=True,
-        )
-        args_schema.lb_inbound_nat_rules = AAZListArg(
-            options=["--lb-inbound-nat-rules"],
-            arg_group="Load Balancer",
-            help="Space-separated list of names or IDs of load balancer inbound NAT rules to associate with the NIC. "
-                 "If names are used, `--lb-name` must be specified.",
-            nullable=True,
-        )
-        args_schema.lb_inbound_nat_rules.Element = AAZResourceIdArg(
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                         "/loadBalancers/{lb_name}/inboundNatRules/{}",
-            ),
-            nullable=True,
-        )
-        args_schema.application_gateway_backend_address_pools._registered = False
-        args_schema.load_balancer_backend_address_pools._registered = False
-        args_schema.load_balancer_inbound_nat_rules._registered = False
-        args_schema.private_ip_allocation_method._registered = False
-        args_schema.asgs_obj._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        if has_value(args.private_ip_address):
-            if args.private_ip_address is None or args.private_ip_address == "":
-                # switch private IP address allocation to dynamic if empty string is used
-                args.private_ip_address = None
-                args.private_ip_allocation_method = "Dynamic"
-                args.private_ip_address_version = "IPv4"
-            else:
-                # if specific address provided, allocation is static
-                args.private_ip_allocation_method = "Static"
-
-        if has_value(args.private_ip_address_prefix_length) and has_value(args.make_primary) and \
-                args.make_primary.to_serialized_data() is True:
-            raise ArgumentUsageError(
-                'usage error: When `--private-ip-address-prefix-length` is specified, `--make-primary` must be false')
-
-    def pre_instance_update(self, instance):
-        args = self.ctx.args
-        instance = self.ctx.vars.instance
-        args.asgs_obj = assign_aaz_list_arg(
-            args.asgs_obj,
-            args.application_security_groups,
-            element_transformer=lambda _, asg_id: {"id": asg_id}
-        )
-        args.application_gateway_backend_address_pools = assign_aaz_list_arg(
-            args.application_gateway_backend_address_pools,
-            args.app_gateway_address_pools,
-            element_transformer=lambda _, pool_id: {"id": pool_id}
-        )
-        args.load_balancer_backend_address_pools = assign_aaz_list_arg(
-            args.load_balancer_backend_address_pools,
-            args.lb_address_pools,
-            element_transformer=lambda _, pool_id: {"id": pool_id}
-        )
-        args.load_balancer_inbound_nat_rules = assign_aaz_list_arg(
-            args.load_balancer_inbound_nat_rules,
-            args.lb_inbound_nat_rules,
-            element_transformer=lambda _, rule_id: {"id": rule_id}
-        )
-        # all ip configurations must belong to the same asgs
-        is_primary = args.make_primary.to_serialized_data()
-        for config in instance.properties.ip_configurations:
-            if is_primary:
-                config.properties.primary = False
-            config.properties.application_security_groups = args.asgs_obj
-
-    def post_instance_update(self, instance):
-        if not has_value(instance.properties.subnet.id):
-            instance.properties.subnet = None
-        if not has_value(instance.properties.public_ip_address.id):
-            instance.properties.public_ip_address = None
-        if not has_value(instance.properties.gateway_load_balancer.id):
-            instance.properties.gateway_load_balancer = None
-
-
 def add_nic_ip_config_address_pool(cmd, resource_group_name, network_interface_name, ip_config_name,
                                    backend_address_pool, load_balancer_name=None, application_gateway_name=None):
-    from .aaz.latest.network.nic.ip_config.lb_pool import Add as _LBPoolAdd
-    from .aaz.latest.network.nic.ip_config.ag_pool import Add as _AGPoolAdd
+    from .aaz.latest.network.nic.ip_config.lb_pool._add import Add as _LBPoolAdd
+    from .aaz.latest.network.nic.ip_config.ag_pool._add import Add as _AGPoolAdd
 
     class LBPoolAdd(_LBPoolAdd):
         def _output(self, *args, **kwargs):
@@ -4715,8 +2069,8 @@ def add_nic_ip_config_address_pool(cmd, resource_group_name, network_interface_n
 
 def remove_nic_ip_config_address_pool(cmd, resource_group_name, network_interface_name, ip_config_name,
                                       backend_address_pool, load_balancer_name=None, application_gateway_name=None):
-    from .aaz.latest.network.nic.ip_config.lb_pool import Remove as LBPoolRemove
-    from .aaz.latest.network.nic.ip_config.ag_pool import Remove as AGPoolRemove
+    from .aaz.latest.network.nic.ip_config.lb_pool._remove import Remove as LBPoolRemove
+    from .aaz.latest.network.nic.ip_config.ag_pool._remove import Remove as AGPoolRemove
 
     arguments = {
         "ip_config_name": ip_config_name,
@@ -4730,41 +2084,6 @@ def remove_nic_ip_config_address_pool(cmd, resource_group_name, network_interfac
         return AGPoolRemove(cli_ctx=cmd.cli_ctx)(command_args=arguments)
 
 
-class NICIPConfigNATAdd(_NICIPConfigNATAdd):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.lb_name = AAZStrArg(
-            options=["--lb-name"],
-            help="Name of the load balancer",
-        )
-        args_schema.inbound_nat_rule._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/loadBalancers/{lb_name}/inboundNatRules/{}",
-        )
-        return args_schema
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result["ipConfigurations"][0]
-
-
-class NICIPConfigNATRemove(_NICIPConfigNATRemove):
-
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg, AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.lb_name = AAZStrArg(
-            options=["--lb-name"],
-            help="Name of the load balancer",
-        )
-        args_schema.inbound_nat_rule._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/loadBalancers/{lb_name}/inboundNatRules/{}",
-        )
-        return args_schema
 # endregion
 
 
@@ -4778,155 +2097,8 @@ def _handle_plural_or_singular(args, plural_name, singular_name):
     setattr(args, singular_name, values[0] if len(values) == 1 else None)
 
 
-class NSGCreate(_NSGCreate):
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return {"NewNSG": result}
-
-
-class NSGRuleCreate(_NSGRuleCreate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.priority._required = True
-        args_schema.destination_asgs = AAZListArg(
-            options=["--destination-asgs"],
-            arg_group="Destination",
-            help="Space-separated list of application security group names or IDs. Limited by backend server, "
-                 "temporarily this argument only supports one application security group name or ID.",
-        )
-        args_schema.destination_asgs.Element = AAZResourceIdArg(
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                         "/applicationSecurityGroups/{}",
-            ),
-        )
-        args_schema.source_asgs = AAZListArg(
-            options=["--source-asgs"],
-            arg_group="Source",
-            help="Space-separated list of application security group names or IDs. Limited by backend server, "
-                 "temporarily this argument only supports one application security group name or ID.",
-        )
-        args_schema.source_asgs.Element = AAZResourceIdArg(
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                         "/applicationSecurityGroups/{}",
-            ),
-        )
-        # filter arguments
-        args_schema.destination_address_prefix._registered = False
-        args_schema.destination_application_security_groups._registered = False
-        args_schema.destination_port_range._registered = False
-        args_schema.source_address_prefix._registered = False
-        args_schema.source_application_security_groups._registered = False
-        args_schema.source_port_range._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        _handle_plural_or_singular(args, "destination_address_prefixes", "destination_address_prefix")
-        _handle_plural_or_singular(args, "destination_port_ranges", "destination_port_range")
-        _handle_plural_or_singular(args, "source_address_prefixes", "source_address_prefix")
-        _handle_plural_or_singular(args, "source_port_ranges", "source_port_range")
-        # handle application security groups
-        if has_value(args.destination_asgs):
-            args.destination_application_security_groups = [{"id": asg_id} for asg_id in args.destination_asgs]
-            if has_value(args.destination_address_prefix):
-                args.destination_address_prefix = None
-        if has_value(args.source_asgs):
-            args.source_application_security_groups = [{"id": asg_id} for asg_id in args.source_asgs]
-            if has_value(args.source_address_prefix):
-                args.source_address_prefix = None
-
-
-class NSGRuleUpdate(_NSGRuleUpdate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZResourceIdArg, AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.destination_asgs = AAZListArg(
-            options=["--destination-asgs"],
-            arg_group="Destination",
-            help="Space-separated list of application security group names or IDs. Limited by backend server, "
-                 "temporarily this argument only supports one application security group name or ID.",
-            nullable=True,
-        )
-        args_schema.destination_asgs.Element = AAZResourceIdArg(
-            nullable=True,
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                         "/applicationSecurityGroups/{}",
-            ),
-        )
-        args_schema.source_asgs = AAZListArg(
-            options=["--source-asgs"],
-            arg_group="Source",
-            help="Space-separated list of application security group names or IDs. Limited by backend server, "
-                 "temporarily this argument only supports one application security group name or ID.",
-            nullable=True,
-        )
-        args_schema.source_asgs.Element = AAZResourceIdArg(
-            nullable=True,
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                         "/applicationSecurityGroups/{}",
-            ),
-        )
-        # filter arguments
-        args_schema.destination_address_prefix._registered = False
-        args_schema.destination_application_security_groups._registered = False
-        args_schema.destination_port_range._registered = False
-        args_schema.source_address_prefix._registered = False
-        args_schema.source_application_security_groups._registered = False
-        args_schema.source_port_range._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        # handle application security groups
-        args.destination_application_security_groups = assign_aaz_list_arg(
-            args.destination_application_security_groups,
-            args.destination_asgs,
-            element_transformer=lambda _, asg_id: {"id": asg_id}
-        )
-        args.source_application_security_groups = assign_aaz_list_arg(
-            args.source_application_security_groups,
-            args.source_asgs,
-            element_transformer=lambda _, asg_id: {"id": asg_id}
-        )
-
-    def pre_instance_update(self, instance):
-        if instance.properties.sourceAddressPrefix:
-            instance.properties.sourceAddressPrefixes = [instance.properties.sourceAddressPrefix]
-            instance.properties.sourceAddressPrefix = None
-        if instance.properties.destinationAddressPrefix:
-            instance.properties.destinationAddressPrefixes = [instance.properties.destinationAddressPrefix]
-            instance.properties.destinationAddressPrefix = None
-        if instance.properties.sourcePortRange:
-            instance.properties.sourcePortRanges = [instance.properties.sourcePortRange]
-            instance.properties.sourcePortRange = None
-        if instance.properties.destinationPortRange:
-            instance.properties.destinationPortRanges = [instance.properties.destinationPortRange]
-            instance.properties.destinationPortRange = None
-
-    def post_instance_update(self, instance):
-        if instance.properties.sourceAddressPrefixes and len(instance.properties.sourceAddressPrefixes) == 1:
-            instance.properties.sourceAddressPrefix = instance.properties.sourceAddressPrefixes[0]
-            instance.properties.sourceAddressPrefixes = None
-        if instance.properties.destinationAddressPrefixes and len(instance.properties.destinationAddressPrefixes) == 1:
-            instance.properties.destinationAddressPrefix = instance.properties.destinationAddressPrefixes[0]
-            instance.properties.destinationAddressPrefixes = None
-        if instance.properties.sourcePortRanges and len(instance.properties.sourcePortRanges) == 1:
-            instance.properties.sourcePortRange = instance.properties.sourcePortRanges[0]
-            instance.properties.sourcePortRanges = None
-        if instance.properties.destinationPortRanges and len(instance.properties.destinationPortRanges) == 1:
-            instance.properties.destinationPortRange = instance.properties.destinationPortRanges[0]
-            instance.properties.destinationPortRanges = None
-
-
 def list_nsg_rules(cmd, resource_group_name, network_security_group_name, include_default=False):
-    from .aaz.latest.network.nsg import Show
+    from .aaz.latest.network.nsg._show import Show
     nsg = Show(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "name": network_security_group_name
@@ -4942,7 +2114,7 @@ def _create_network_watchers(cmd, resource_group_name, locations, tags):
     if resource_group_name is None:
         raise CLIError("usage error: '--resource-group' required when enabling new regions")
 
-    from .aaz.latest.network.watcher import Create
+    from .aaz.latest.network.watcher._create import Create
     for location in locations:
         Create(cli_ctx=cmd.cli_ctx)(command_args={
             'name': 'NetworkWatcher_{}'.format(location),
@@ -4953,7 +2125,7 @@ def _create_network_watchers(cmd, resource_group_name, locations, tags):
 
 
 def _update_network_watchers(cmd, watchers, tags):
-    from .aaz.latest.network.watcher import Update
+    from .aaz.latest.network.watcher._update import Update
     for watcher in watchers:
         id_parts = parse_resource_id(watcher['id'])
         watcher_rg = id_parts['resource_group']
@@ -4968,7 +2140,7 @@ def _update_network_watchers(cmd, watchers, tags):
 
 
 def _delete_network_watchers(cmd, watchers):
-    from .aaz.latest.network.watcher import Delete
+    from .aaz.latest.network.watcher._delete import Delete
     for watcher in watchers:
         from azure.cli.core.commands import LongRunningOperation
         id_parts = parse_resource_id(watcher['id'])
@@ -4985,7 +2157,7 @@ def _delete_network_watchers(cmd, watchers):
 
 
 def configure_network_watcher(cmd, locations, resource_group_name=None, enabled=None, tags=None):
-    from .aaz.latest.network.watcher import List
+    from .aaz.latest.network.watcher._list import List
     watcher_list = List(cli_ctx=cmd.cli_ctx)(command_args={})
     locations_list = [location.lower() for location in locations]
     existing_watchers = [w for w in watcher_list if w["location"] in locations_list]
@@ -5183,13 +2355,13 @@ def show_nw_flow_logging(cmd, watcher_rg, watcher_name, location=None, resource_
                          flow_log_name=None):
     # deprecated approach to show flow log
     if nsg is not None:
-        from .aaz.latest.network.watcher.flow_log import ConfigureFlowLog
+        from .aaz.latest.network.watcher.flow_log._configure_flow_log import ConfigureFlowLog
         return ConfigureFlowLog(cli_ctx=cmd.cli_ctx)(command_args={"network_watcher_name": watcher_name,
                                                                    "resource_group": watcher_rg,
                                                                    "target_resource_id": nsg})
 
     # new approach to show flow log
-    from .aaz.latest.network.watcher.flow_log import Show
+    from .aaz.latest.network.watcher.flow_log._show import Show
     return Show(cli_ctx=cmd.cli_ctx)(command_args={"network_watcher_name": watcher_name,
                                                    "resource_group": watcher_rg,
                                                    "name": flow_log_name})
@@ -5228,7 +2400,7 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
         public_ip_args["public_ip_prefix"] = public_ip_prefix
 
         # reuse prefix information
-        from .aaz.latest.network.public_ip.prefix import Show
+        from .aaz.latest.network.public_ip.prefix._show import Show
         pip_obj = Show(cli_ctx=cmd.cli_ctx)(command_args={'resource_group': resource_group_name, 'name': public_ip_prefix_name})
         version = pip_obj['publicIPAddressVersion']
         sku = pip_obj['sku']['name']
@@ -5267,89 +2439,11 @@ def create_public_ip(cmd, resource_group_name, public_ip_address_name, location=
     if ddos_protection_plan:
         public_ip_args['ddos_protection_plan'] = ddos_protection_plan
 
+    from .operations.latest.network.public_ip._create import PublicIPCreate
+
     return PublicIPCreate(cli_ctx=cmd.cli_ctx)(command_args=public_ip_args)
 
 
-class PublicIPCreate(_PublicIPCreate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.public_ip_prefix._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/publicIPPrefixes/{}",
-        )
-        args_schema.ddos_protection_plan._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/ddosProtectionPlans/{}",
-        )
-        return args_schema
-
-
-class PublicIPUpdate(_PublicIPUpdate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg, AAZDictArg, AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.public_ip_prefix._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/publicIPPrefixes/{}",
-        )
-        args_schema.ddos_protection_plan._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/ddosProtectionPlans/{}",
-        )
-        args_schema.ip_tags = AAZDictArg(
-            options=["--ip-tags"],
-            help="Space-separated list of IP tags in `TYPE=VAL` format.",
-            nullable=True
-        )
-        args_schema.ip_tags.Element = AAZStrArg()
-        args_schema.ip_tags_list._registered = False
-
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        if has_value(args.ip_tags):
-            if (ip_tags := args.ip_tags.to_serialized_data()) is None:
-                args.ip_tags_list = []
-            else:
-                args.ip_tags_list = [{"ip_tag_type": k, "tag": v} for k, v in ip_tags.items()]
-
-    def post_instance_update(self, instance):
-        if not has_value(instance.properties.ddos_settings.ddos_protection_plan.id):
-            instance.properties.ddos_settings.ddos_protection_plan = None
-
-
-class PublicIpPrefixCreate(_PublicIpPrefixCreate):
-
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZDictArg, AAZStrArg, AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.custom_ip_prefix_name._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/customIPPrefixes/{}"
-        )
-        args_schema.ip_tags = AAZDictArg(
-            options=["--ip-tags"],
-            help="The list of tags associated with the public IP prefix in 'TYPE=VAL' format.",
-        )
-        args_schema.ip_tags.Element = AAZStrArg()
-        args_schema.type._registered = False
-        args_schema.ip_tags_list._registered = False
-
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        if has_value(args.edge_zone):
-            args.type = 'EdgeZone'
-        if has_value(args.ip_tags):
-            ip_tags = []
-            for k, v in args.ip_tags.to_serialized_data().items():
-                ip_tags.append({"ip_tag_type": k, "tag": v})
-            args.ip_tags_list = ip_tags
 # endregion
 
 
@@ -5360,7 +2454,7 @@ def create_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_g
                                    profile_status="Enabled",
                                    ttl=30, tags=None, interval=None, timeout=None, max_failures=None,
                                    monitor_custom_headers=None, status_code_ranges=None, max_return=None):
-    from .aaz.latest.network.traffic_manager.profile import Create
+    from .aaz.latest.network.traffic_manager.profile._create import Create
     if monitor_path is None and monitor_protocol == 'HTTP':
         monitor_path = '/'
     args = {
@@ -5391,7 +2485,7 @@ def update_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_g
                                    monitor_protocol=None, monitor_port=None, monitor_path=None,
                                    ttl=None, timeout=None, interval=None, max_failures=None,
                                    monitor_custom_headers=None, status_code_ranges=None, max_return=None):
-    from .aaz.latest.network.traffic_manager.profile import Update
+    from .aaz.latest.network.traffic_manager.profile._update import Update
     args = {
         "name": traffic_manager_profile_name,
         "resource_group": resource_group_name
@@ -5432,7 +2526,7 @@ def create_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
                                     endpoint_location=None, endpoint_monitor_status=None,
                                     min_child_endpoints=None, min_child_ipv4=None, min_child_ipv6=None,
                                     geo_mapping=None, monitor_custom_headers=None, subnets=None, always_serve=None):
-    from .aaz.latest.network.traffic_manager.endpoint import Create
+    from .aaz.latest.network.traffic_manager.endpoint._create import Create
     args = {
         "name": endpoint_name,
         "type": endpoint_type,
@@ -5464,7 +2558,7 @@ def update_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
                                     weight=None, min_child_endpoints=None, min_child_ipv4=None,
                                     min_child_ipv6=None, geo_mapping=None,
                                     subnets=None, monitor_custom_headers=None, always_serve=None):
-    from .aaz.latest.network.traffic_manager.endpoint import Update
+    from .aaz.latest.network.traffic_manager.endpoint._update import Update
     args = {
         "name": endpoint_name,
         "type": endpoint_type,
@@ -5504,7 +2598,7 @@ def update_traffic_manager_endpoint(cmd, resource_group_name, profile_name, endp
 
 
 def list_traffic_manager_endpoints(cmd, resource_group_name, profile_name, endpoint_type=None):
-    from .aaz.latest.network.traffic_manager.profile import Show
+    from .aaz.latest.network.traffic_manager.profile._show import Show
     profile = Show(cli_ctx=cmd.cli_ctx)(command_args={
         "profile_name": profile_name,
         "resource_group": resource_group_name,
@@ -5515,345 +2609,8 @@ def list_traffic_manager_endpoints(cmd, resource_group_name, profile_name, endpo
 
 
 # region VirtualNetworks
-class VNetCreate(_VNetCreate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.edge_zone = AAZStrArg(
-            options=["--edge-zone"],
-            help="The name of edge zone.",
-        )
-        # add subnet arguments
-        args_schema.subnet_name = AAZStrArg(
-            options=["--subnet-name"],
-            arg_group="Subnet",
-            help="Name of a new subnet to create within the VNet.",
-        )
-        args_schema.subnet_prefixes = AAZListArg(
-            options=["--subnet-prefixes"],
-            arg_group="Subnet",
-            help="Space-separated list of address prefixes in CIDR format for the new subnet. If omitted, "
-                 "automatically reserves a /24 (or as large as available) block within the VNet address space.",
-        )
-        args_schema.subnet_prefixes.Element = AAZStrArg()
-        args_schema.subnet_nsg = AAZResourceIdArg(
-            options=["--nsg", "--network-security-group"],
-            arg_group="Subnet",
-            help="Name or ID of a network security group (NSG).",
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                         "/networkSecurityGroups/{}",
-            ),
-        )
-        args_schema.ddos_protection_plan._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/ddosProtectionPlans/{}",
-        )
-        # filter arguments
-        args_schema.extended_location._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        if has_value(args.edge_zone):
-            args.extended_location.name = args.edge_zone
-            args.extended_location.type = "EdgeZone"
-
-        if has_value(args.subnet_name):
-            subnet = {"name": args.subnet_name}
-            if not has_value(args.subnet_prefixes):
-                # set default value
-                address, bit_mask = str(args.address_prefixes[0]).split("/")
-                subnet_mask = 24 if int(bit_mask) < 24 else bit_mask
-                subnet["address_prefix"] = f"{address}/{subnet_mask}"
-            elif len(args.subnet_prefixes) == 1:
-                subnet["address_prefix"] = args.subnet_prefixes[0]
-            else:
-                subnet["address_prefixes"] = args.subnet_prefixes
-            if has_value(args.subnet_nsg):
-                subnet["network_security_group"] = {"id": args.subnet_nsg}
-            args.subnets = [subnet]
-
-        if has_value(args.ipam_pool_prefix_allocations):
-            args.address_prefixes = []
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return {"newVNet": result}
-
-
-class VNetUpdate(_VNetUpdate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        # handle detach logic
-        args_schema.ddos_protection_plan._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/ddosProtectionPlans/{}",
-        )
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        if args.ipam_pool_prefix_allocations.to_serialized_data():
-            args.address_prefixes = []
-
-    def post_instance_update(self, instance):
-        if not has_value(instance.properties.ddos_protection_plan.id):
-            instance.properties.ddos_protection_plan = None
-
-
-class VNetSubnetCreate(_VNetSubnetCreate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.delegations = AAZListArg(
-            options=["--delegations"],
-            help="Space-separated list of services to whom the subnet should be delegated, e.g., Microsoft.Sql/servers."
-        )
-        args_schema.delegations.Element = AAZStrArg()
-        # add endpoint/policy arguments
-        args_schema.service_endpoints = AAZListArg(
-            options=["--service-endpoints"],
-            help="Space-separated list of services allowed private access to this subnet. "
-                 "Values from: az network vnet list-endpoint-services.",
-        )
-        args_schema.service_endpoints.Element = AAZStrArg()
-        args_schema.service_endpoint_policy = AAZListArg(
-            options=["--service-endpoint-policy"],
-            help="Space-separated list of names or IDs of service endpoint policies to apply.",
-        )
-        args_schema.service_endpoint_policy.Element = AAZResourceIdArg(
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                         "/serviceEndpointPolicies/{}",
-            ),
-        )
-        # add ple/pls arguments
-        args_schema.disable_private_endpoint_network_policies = AAZStrArg(
-            options=["--disable-private-endpoint-network-policies"],
-            help="Disable private endpoint network policies on the subnet. Please note that it will be replaced by `--private-endpoint-network-policies` soon.",
-            enum={
-                "true": "Disabled", "t": "Disabled", "yes": "Disabled", "y": "Disabled", "1": "Disabled",
-                "false": "Enabled", "f": "Enabled", "no": "Enabled", "n": "Enabled", "0": "Enabled",
-            },
-            blank="Disabled",
-        )
-        args_schema.disable_private_link_service_network_policies = AAZStrArg(
-            options=["--disable-private-link-service-network-policies"],
-            help="Disable private link service network policies on the subnet. Please note that it will be replaced by `--private-link-service-network-policies` soon.",
-            enum={
-                "true": "Disabled", "t": "Disabled", "yes": "Disabled", "y": "Disabled", "1": "Disabled",
-                "false": "Enabled", "f": "Enabled", "no": "Enabled", "n": "Enabled", "0": "Enabled",
-            },
-            blank="Disabled",
-        )
-        args_schema.nat_gateway._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/natGateways/{}",
-        )
-        args_schema.network_security_group._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/networkSecurityGroups/{}",
-        )
-        args_schema.route_table._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/routeTables/{}",
-        )
-        # filter arguments
-        args_schema.policies._registered = False
-        args_schema.delegated_services._registered = False
-        args_schema.address_prefix._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        _handle_plural_or_singular(args, "address_prefixes", "address_prefix")
-
-        def delegation_trans(index, service_name):
-            service_name = str(service_name)
-            # covert name to service name
-            if "/" not in service_name and len(service_name.split(".")) == 3:
-                _, service, resource_type = service_name.split(".")
-                service_name = f"Microsoft.{service}/{resource_type}"
-            return {
-                "name": str(index),
-                "service_name": service_name,
-            }
-
-        if has_value(args.endpoints) and has_value(args.service_endpoints):
-            raise ArgumentUsageError("usage error: `--endpoints` and `--service-endpoints` cannot be used together, we prefer to use `endpoints` instead")
-        args.delegated_services = assign_aaz_list_arg(
-            args.delegated_services,
-            args.delegations,
-            element_transformer=delegation_trans
-        )
-        args.endpoints = assign_aaz_list_arg(
-            args.endpoints,
-            args.service_endpoints,
-            element_transformer=lambda _, service_name: {"service": service_name}
-        )
-        args.policies = assign_aaz_list_arg(
-            args.policies,
-            args.service_endpoint_policy,
-            element_transformer=lambda _, policy_id: {"id": policy_id}
-        )
-        # use string instead of bool
-        if has_value(args.disable_private_endpoint_network_policies):
-            logger.warning(subnet_disable_ple_msg)
-            args.private_endpoint_network_policies = args.disable_private_endpoint_network_policies
-        if has_value(args.disable_private_link_service_network_policies):
-            logger.warning(subnet_disable_pls_msg)
-            args.private_link_service_network_policies = args.disable_private_link_service_network_policies
-
-        if has_value(args.ipam_pool_prefix_allocations):
-            args.address_prefixes = []
-
-
-class VNetSubnetUpdate(_VNetSubnetUpdate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZResourceIdArg, AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.delegations = AAZListArg(
-            options=["--delegations"],
-            help="Space-separated list of services to whom the subnet should be delegated, e.g., Microsoft.Sql/servers.",
-            nullable=True,
-        )
-        args_schema.delegations.Element = AAZStrArg(
-            nullable=True,
-        )
-        # add endpoint/policy arguments
-        args_schema.service_endpoints = AAZListArg(
-            options=["--service-endpoints"],
-            help="Space-separated list of services allowed private access to this subnet. "
-                 "Values from: az network vnet list-endpoint-services.",
-            nullable=True,
-        )
-        args_schema.service_endpoints.Element = AAZStrArg(
-            nullable=True,
-        )
-        args_schema.service_endpoint_policy = AAZListArg(
-            options=["--service-endpoint-policy"],
-            help="Space-separated list of names or IDs of service endpoint policies to apply.",
-            nullable=True,
-        )
-        args_schema.service_endpoint_policy.Element = AAZResourceIdArg(
-            nullable=True,
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                         "/serviceEndpointPolicies/{}",
-            ),
-        )
-        # add ple/pls arguments
-        args_schema.disable_private_endpoint_network_policies = AAZStrArg(
-            options=["--disable-private-endpoint-network-policies"],
-            help="Disable private endpoint network policies on the subnet. Please note that it will be replaced by `--private-endpoint-network-policies` soon.",
-            nullable=True,
-            enum={
-                "true": "Disabled", "t": "Disabled", "yes": "Disabled", "y": "Disabled", "1": "Disabled",
-                "false": "Enabled", "f": "Enabled", "no": "Enabled", "n": "Enabled", "0": "Enabled",
-            },
-            blank="Disabled",
-        )
-        args_schema.disable_private_link_service_network_policies = AAZStrArg(
-            options=["--disable-private-link-service-network-policies"],
-            help="Disable private link service network policies on the subnet. Please note that it will be replaced by `--private-link-service-network-policies` soon.",
-            nullable=True,
-            enum={
-                "true": "Disabled", "t": "Disabled", "yes": "Disabled", "y": "Disabled", "1": "Disabled",
-                "false": "Enabled", "f": "Enabled", "no": "Enabled", "n": "Enabled", "0": "Enabled",
-            },
-            blank="Disabled",
-        )
-        # filter arguments
-        args_schema.address_prefix._registered = False
-        args_schema.delegated_services._registered = False
-        args_schema.policies._registered = False
-        # handle detach logic
-        args_schema.nat_gateway._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/natGateways/{}",
-        )
-        args_schema.network_security_group._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/networkSecurityGroups/{}",
-        )
-        args_schema.route_table._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network"
-                     "/routeTables/{}",
-        )
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        _handle_plural_or_singular(args, "address_prefixes", "address_prefix")
-
-        def delegation_trans(index, service_name):
-            service_name = str(service_name)
-            # covert name to service name
-            if "/" not in service_name and len(service_name.split(".")) == 3:
-                _, service, resource_type = service_name.split(".")
-                service_name = f"Microsoft.{service}/{resource_type}"
-            return {
-                "name": str(index),
-                "service_name": service_name,
-            }
-
-        if has_value(args.endpoints) and has_value(args.service_endpoints):
-            raise ArgumentUsageError("usage error: `--endpoints` and `--service-endpoints` cannot be used together, we prefer to use `endpoints` instead")
-        args.delegated_services = assign_aaz_list_arg(
-            args.delegated_services,
-            args.delegations,
-            element_transformer=delegation_trans
-        )
-        args.endpoints = assign_aaz_list_arg(
-            args.endpoints,
-            args.service_endpoints,
-            element_transformer=lambda _, service_name: {"service": service_name}
-        )
-        args.policies = assign_aaz_list_arg(
-            args.policies,
-            args.service_endpoint_policy,
-            element_transformer=lambda _, policy_id: {"id": policy_id}
-        )
-        # use string instead of bool
-        if has_value(args.disable_private_endpoint_network_policies):
-            logger.warning(subnet_disable_ple_msg)
-            args.private_endpoint_network_policies = args.disable_private_endpoint_network_policies
-        if has_value(args.disable_private_link_service_network_policies):
-            logger.warning(subnet_disable_pls_msg)
-            args.private_link_service_network_policies = args.disable_private_link_service_network_policies
-
-        if args.ipam_pool_prefix_allocations.to_serialized_data():
-            args.address_prefixes = []
-
-    def post_instance_update(self, instance):
-        if not has_value(instance.properties.network_security_group.id):
-            instance.properties.network_security_group = None
-        if not has_value(instance.properties.route_table.id):
-            instance.properties.route_table = None
-        if not has_value(instance.properties.nat_gateway.id):
-            instance.properties.nat_gateway = None
-
-
-class VNetPeeringCreate(_VNetPeeringCreate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.sync_remote._registered = False
-        args_schema.remote_vnet._required = True
-        args_schema.remote_vnet._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{}",
-        )
-        return args_schema
-
-
 def list_available_ips(cmd, resource_group_name, virtual_network_name):
-    from .aaz.latest.network.vnet import Show
+    from .aaz.latest.network.vnet._show import Show
     vnet = Show(cli_ctx=cmd.cli_ctx)(command_args={
         "name": virtual_network_name,
         "resource_group": resource_group_name,
@@ -5861,7 +2618,7 @@ def list_available_ips(cmd, resource_group_name, virtual_network_name):
 
     start_ip = vnet["addressSpace"]["addressPrefixes"][0].split("/")[0]
 
-    from .aaz.latest.network.vnet import CheckIpAddress
+    from .aaz.latest.network.vnet._check_ip_address import CheckIpAddress
     return CheckIpAddress(cli_ctx=cmd.cli_ctx)(command_args={
         "name": virtual_network_name,
         "resource_group": resource_group_name,
@@ -5870,7 +2627,7 @@ def list_available_ips(cmd, resource_group_name, virtual_network_name):
 
 
 def subnet_list_available_ips(cmd, resource_group_name, virtual_network_name, subnet_name):
-    from .aaz.latest.network.vnet.subnet import Show
+    from .aaz.latest.network.vnet.subnet._show import Show
     subnet = Show(cli_ctx=cmd.cli_ctx)(command_args={
         "name": subnet_name,
         "resource_group": resource_group_name,
@@ -5883,7 +2640,7 @@ def subnet_list_available_ips(cmd, resource_group_name, virtual_network_name, su
         address_prefix = subnet["addressPrefix"]
     start_ip = address_prefix.split("/")[0]
 
-    from .aaz.latest.network.vnet import CheckIpAddress
+    from .aaz.latest.network.vnet._check_ip_address import CheckIpAddress
     return CheckIpAddress(cli_ctx=cmd.cli_ctx)(command_args={
         "name": virtual_network_name,
         "resource_group": resource_group_name,
@@ -5892,7 +2649,8 @@ def subnet_list_available_ips(cmd, resource_group_name, virtual_network_name, su
 
 
 def sync_vnet_peering(cmd, resource_group_name, virtual_network_name, virtual_network_peering_name):
-    from .aaz.latest.network.vnet.peering import Show
+    from .aaz.latest.network.vnet.peering._show import Show
+    from .operations.latest.network.vnet.peering._create import VNetPeeringCreate
     try:
         peering = Show(cli_ctx=cmd.cli_ctx)(command_args={
             "name": virtual_network_peering_name,
@@ -5918,40 +2676,6 @@ def sync_vnet_peering(cmd, resource_group_name, virtual_network_name, virtual_ne
 
 
 # region VirtualNetworkGateways
-class VnetGatewayRootCertCreate(_VnetGatewayRootCertCreate):
-
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZFileArg, AAZFileArgBase64EncodeFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.public_cert_data = AAZFileArg(options=['--public-cert-data'],
-                                                  help="Base64 contents of the root certificate file or file path.",
-                                                  required=True,
-                                                  fmt=AAZFileArgBase64EncodeFormat())
-        args_schema.root_cert_data._required = False
-        args_schema.root_cert_data._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        if has_value(args.public_cert_data):
-            import os
-            path = os.path.expanduser(args.public_cert_data.to_serialized_data())
-        else:
-            path = None
-        args.root_cert_data = path
-
-
-class VnetGatewayRevokedCertCreate(_VnetGatewayRevokedCertCreate):
-
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.thumbprint._required = True
-
-        return args_schema
-
-
 class RootCertFormat(AAZFileArgTextFormat):
     def read_file(self, file_path):
         with open(file_path, 'r', encoding=self._encoding) as cert_file:
@@ -5959,249 +2683,6 @@ class RootCertFormat(AAZFileArgTextFormat):
 
         cert_data = ''.join(line.strip() for line in lines if not line.startswith('-----'))
         return cert_data
-
-
-class VnetGatewayCreate(_VnetGatewayCreate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZFileArg, AAZResourceIdArg, AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.public_ip_addresses = AAZListArg(options=['--public-ip-addresses', '--public-ip-address'],
-                                                     help="Specify a single public IP (name or ID) for an active-standby gateway. Specify two space-separated public IPs for an active-active gateway.")
-        args_schema.public_ip_addresses.Element = AAZResourceIdArg(
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/publicIPAddresses/{}"
-            )
-        )
-        args_schema.vnet = AAZResourceIdArg(
-            options=['--vnet'],
-            help="Name or ID of an existing virtual network which has a subnet named 'GatewaySubnet'.",
-            required=True,
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{}"
-            )
-        )
-        args_schema.nat_rules.Element.external_mappings = AAZStrArg(
-            options=["external-mappings"],
-            help="Required.The private IP address external mapping for NAT.",
-        )
-        args_schema.nat_rules.Element.internal_mappings = AAZStrArg(
-            options=["internal-mappings"],
-            help="Required.The private IP address internal mapping for NAT.",
-        )
-        args_schema.root_cert_data = AAZFileArg(options=['--root-cert-data'], arg_group="Root Cert Authentication",
-                                                help="Base64 contents of the root certificate file or file path.",
-                                                fmt=RootCertFormat())
-        args_schema.root_cert_name = AAZStrArg(options=['--root-cert-name'], arg_group="Root Cert Authentication",
-                                               help="Root certificate name.")
-        args_schema.gateway_default_site._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/localNetworkGateways/{}"
-        )
-        args_schema.virtual_network_gateway_migration_status._registered = False
-        args_schema.ip_configurations._registered = False
-        args_schema.edge_zone_type._registered = False
-        args_schema.active._registered = False
-        args_schema.vpn_client_root_certificates._registered = False
-        args_schema.sku_tier._registered = False
-        args_schema.enable_bgp._registered = False
-        args_schema.nat_rules.Element.external_mappings_ip._registered = False
-        args_schema.nat_rules.Element.internal_mappings_ip._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        subnet = args.vnet.to_serialized_data() + '/subnets/GatewaySubnet'
-        args.sku_tier = args.sku
-        if has_value(args.gateway_type) and args.gateway_type != "LocalGateway":
-            args.active = len(args.public_ip_addresses) == 2
-        else:
-            args.active = False
-
-        args.ip_configurations = []
-        if args.gateway_type != "LocalGateway":
-            if has_value(args.public_ip_addresses):
-                public_ip_addresses = args.public_ip_addresses.to_serialized_data()
-                ip_configuration = {}
-                for i, public_ip in enumerate(public_ip_addresses):
-                    ip_configuration[i] = {'subnet': subnet, 'public_ip_address': public_ip,
-                                           'private_ip_allocation_method': 'Dynamic',
-                                           'name': 'vnetGatewayConfig{}'.format(i)}
-                    args.ip_configurations.append(ip_configuration[i])
-            else:
-                ip_configuration = {'subnet': subnet,
-                                    'private_ip_allocation_method': 'Dynamic',
-                                    'name': 'vnetGatewayConfig'}
-                args.ip_configurations.append(ip_configuration)
-
-        else:
-            args.vpn_type = None
-            args.sku = None
-            args.sku_tier = None
-
-        if has_value(args.asn) or has_value(args.bgp_peering_address) or has_value(args.peer_weight):
-            args.enable_bgp = True
-        else:
-            args.asn = None
-            args.bgp_peering_address = None
-            args.peer_weight = None
-
-        if has_value(args.nat_rules):
-            rules = args.nat_rules.to_serialized_data()
-            for rule in rules:
-                if 'internal_mappings' in rule:
-                    internal_mappings = rule['internal_mappings'].split(',')
-                    rule['internal_mappings_ip'] = [{"address_space": internal_mapping} for internal_mapping in
-                                                    internal_mappings]
-                if 'external_mappings' in rule:
-                    external_mappings = rule['external_mappings'].split(',')
-                    rule['external_mappings_ip'] = [{"address_space": external_mapping} for external_mapping in
-                                                    external_mappings]
-            args.nat_rules = rules
-
-        if has_value(args.address_prefixes) or has_value(args.client_protocol):
-            if has_value(args.root_cert_data):
-                data = args.root_cert_data.to_serialized_data()
-            else:
-                data = None
-            if has_value(args.root_cert_name):
-                args.vpn_client_root_certificates = [{'name': args.root_cert_name, 'public_cert_data': data}]
-            else:
-                args.vpn_client_root_certificates = []
-
-        if has_value(args.edge_zone):
-            args.edge_zone_type = 'EdgeZone'
-
-    def _output(self, *args, **kwargs):
-        from azure.cli.core.aaz import AAZUndefined
-        if has_value(self.ctx.vars.instance.properties.nat_rules):
-            nat_rules = self.ctx.vars.instance.properties.natRules.to_serialized_data()
-            for nat_rule in nat_rules:
-                if 'type' in nat_rule['properties']:
-                    # `properties.type` conflict with the `type` property when flatten `properties`
-                    nat_rule['properties']['type'] = AAZUndefined
-            self.ctx.vars.instance.properties.nat_rules = nat_rules
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return {'vnetGateway': result}
-
-
-class VnetGatewayUpdate(_VnetGatewayUpdate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZFileArg, AAZResourceIdArg, AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.public_ip_addresses = AAZListArg(options=['--public-ip-addresses', '--public-ip-address'],
-                                                     help="Specify a single public IP (name or ID) for an active-standby gateway. Specify two space-separated public IPs for an active-active gateway.",
-                                                     nullable=True)
-        args_schema.public_ip_addresses.Element = AAZResourceIdArg(
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/publicIPAddresses/{}"
-            ),
-            nullable=True,
-        )
-        args_schema.vnet = AAZResourceIdArg(
-            options=['--vnet'],
-            help="Name or ID of an existing virtual network which has a subnet named 'GatewaySubnet'.",
-            fmt=AAZResourceIdArgFormat(
-                template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{}"
-            ),
-        )
-        args_schema.root_cert_data = AAZFileArg(options=['--root-cert-data'], arg_group="Root Cert Authentication",
-                                                help="Base64 contents of the root certificate file or file path.",
-                                                fmt=RootCertFormat(), nullable=True)
-        args_schema.root_cert_name = AAZStrArg(options=['--root-cert-name'], arg_group="Root Cert Authentication",
-                                               help="Root certificate name.", nullable=True,)
-        args_schema.gateway_default_site._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/localNetworkGateways/{}"
-        )
-        args_schema.enable_high_bandwidth_vpn_gateway._registered = False
-        args_schema.virtual_network_gateway_migration_status._registered = False
-        args_schema.ip_configurations._registered = False
-        args_schema.active._registered = False
-        args_schema.vpn_client_root_certificates._registered = False
-        args_schema.sku_tier._registered = False
-        args_schema.vpn_client_ipsec_policies._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-
-        if has_value(args.sku):
-            args.sku_tier = args.sku
-
-    def pre_instance_update(self, instance):
-        args = self.ctx.args
-        if has_value(args.root_cert_data):
-            collection = instance.properties.vpn_client_configuration.vpn_client_root_certificates.to_serialized_data()
-            root_certificate = {'name': args.root_cert_name, 'public_cert_data': args.root_cert_data}
-            value = args.root_cert_name.to_serialized_data()
-            match = next((x for x in collection if getattr(x, 'name', None) == value), None)
-            if match:
-                collection.remove(match)
-            collection.append(root_certificate)
-            args.vpn_client_root_certificates = collection
-
-        subnet_id = '{}/subnets/GatewaySubnet'.format(args.vnet) if has_value(args.vnet) else \
-            instance.properties.ip_configurations[0].properties.subnet.id
-
-        if has_value(args.vnet):
-            if has_value(instance.properties.ip_configurations):
-                for config in instance.properties.ip_configurations:
-                    config.properties.subnet.id = subnet_id
-
-        if has_value(args.public_ip_addresses):
-            instance.properties.ip_configurations = []
-            public_ip_addresses = args.public_ip_addresses.to_serialized_data()
-            args.ip_configurations = []
-            ip_configuration = {}
-            for i, public_ip in enumerate(public_ip_addresses):
-                ip_configuration[i] = {'subnet': subnet_id, 'public_ip_address': {'id': public_ip},
-                                       'private_ip_allocation_method': 'Dynamic',
-                                       'name': 'vnetGatewayConfig{}'.format(i)}
-                args.ip_configurations.append(ip_configuration[i])
-
-            # Update active-active/active-standby status
-            active = len(args.public_ip_addresses) == 2
-            if instance.properties.active_active and not active:
-                logger.info('Placing gateway in active-standby mode.')
-            elif not instance.properties.active_active and active:
-                logger.info('Placing gateway in active-active mode.')
-            args.active = active
-
-
-class VNetGatewayShow(_VNetGatewayShow):
-    def _output(self, *args, **kwargs):
-        from azure.cli.core.aaz import AAZUndefined
-
-        # resolve flatten conflict
-        # when the type field conflicts, the type in inner layer is ignored and the outer layer is applied
-        props = self.ctx.vars.instance.properties
-        if has_value(props.nat_rules):
-            for rule in props.nat_rules:
-                if has_value(rule.properties) and has_value(rule.properties.type):
-                    rule.properties.type = AAZUndefined
-
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-
-        return result
-
-
-class VNetGatewayList(_VNetGatewayList):
-    def _output(self, *args, **kwargs):
-        from azure.cli.core.aaz import AAZUndefined
-
-        # resolve flatten conflict
-        # when the type field conflicts, the type in inner layer is ignored and the outer layer is applied
-        for item in self.ctx.vars.instance.value:
-            props = item.properties
-            if has_value(props.nat_rules):
-                for rule in props.nat_rules:
-                    if has_value(rule.properties) and has_value(rule.properties.type):
-                        rule.properties.type = AAZUndefined
-
-        result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
-        next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
-
-        return result, next_link
 
 
 def generate_vpn_client(cmd, resource_group_name, virtual_network_gateway_name, processor_architecture=None,
@@ -6214,21 +2695,13 @@ def generate_vpn_client(cmd, resource_group_name, virtual_network_gateway_name, 
         generate_args['authentication_method'] = authentication_method
         generate_args['radius_server_auth_certificate'] = radius_server_auth_certificate
         generate_args['client_root_certificates'] = client_root_certificates
+        from .aaz.latest.network.vnet_gateway.vpn_client._generate_vpn_profile import GenerateVpnProfile as _VpnProfileGenerate
+
         return _VpnProfileGenerate(cli_ctx=cmd.cli_ctx)(command_args=generate_args)
     # legacy implementation
+    from .aaz.latest.network.vnet_gateway.vpn_client._generate import Generate as _VpnClientPackageGenerate
+
     return _VpnClientPackageGenerate(cli_ctx=cmd.cli_ctx)(command_args=generate_args)
-
-
-class VnetGatewayVpnConnectionsDisconnect(_VnetGatewayVpnConnectionsDisconnect):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.vpn_connections.Element._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/connections/{}"
-        )
-
-        return args_schema
 # endregion
 
 
@@ -6294,57 +2767,19 @@ def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gatewa
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, deployment_name, deployment)
 
 
-class VpnConnectionUpdate(_VpnConnectionUpdate):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.ipsec_policies._registered = False
-
-        return args_schema
-
-
 def list_vpn_connections(cmd, resource_group_name, virtual_network_gateway_name=None):
-    from .aaz.latest.network.vpn_connection import List, ListConnection
+    from .aaz.latest.network.vpn_connection._list import List
+    from .aaz.latest.network.vpn_connection._list_connection import ListConnection
     if virtual_network_gateway_name:
         return ListConnection(cli_ctx=cmd.cli_ctx)(command_args={"resource_group": resource_group_name,
                                                                  "vnet_gateway": virtual_network_gateway_name})
     return List(cli_ctx=cmd.cli_ctx)(command_args={"resource_group": resource_group_name})
-
-
-class VpnConnPackageCaptureStop(_VpnConnPackageCaptureStop):
-
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.sas_url._required = True
-        return args_schema
-
-
-class VpnConnectionDeviceConfigScriptShow(_VpnConnectionDeviceConfigScriptShow):
-
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.device_family._required = True
-        args_schema.firmware_version._required = True
-        args_schema.vendor._required = True
-
-        return args_schema
 # endregion
 
 
 # region IPSec Policy Commands
-class VnetGatewayIpsecPolicyAdd(_VnetGatewayIpsecPolicyAdd):
-
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.vpn_client_ipsec_policy_index._registered = False
-
-        return args_schema
-
-
 def clear_vnet_gateway_ipsec_policies(cmd, resource_group_name, gateway_name, no_wait=False):
+    from .aaz.latest.network.vnet_gateway._update import Update as _VnetGatewayUpdate
 
     class VnetGatewayIpsecPoliciesClear(_VnetGatewayUpdate):
 
@@ -6367,15 +2802,9 @@ def clear_vnet_gateway_ipsec_policies(cmd, resource_group_name, gateway_name, no
     return VnetGatewayIpsecPoliciesClear(cli_ctx=cmd.cli_ctx)(command_args=ipsec_policies_args)
 
 
-class VpnConnIpsecPolicyAdd(_VpnConnIpsecPolicyAdd):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.ipsec_policy_index._registered = False
-        return args_schema
-
-
 def clear_vpn_conn_ipsec_policies(cmd, resource_group_name, connection_name, no_wait=False):
+    from .aaz.latest.network.vpn_connection._update import Update as _VpnConnectionUpdate
+
     class VpnConnIpsecPoliciesClear(_VpnConnectionUpdate):
 
         def _output(self, *args, **kwargs):
@@ -6395,19 +2824,9 @@ def clear_vpn_conn_ipsec_policies(cmd, resource_group_name, connection_name, no_
     return VpnConnIpsecPoliciesClear(cli_ctx=cmd.cli_ctx)(command_args=ipsec_policies_args)
 
 
-class VnetGatewayAadAssign(_VnetGatewayAadAssign):
-
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.audience._required = True
-        args_schema.issuer._required = True
-        args_schema.tenant._required = True
-
-        return args_schema
-
-
 def remove_vnet_gateway_aad(cmd, resource_group_name, gateway_name, no_wait=False):
+    from .aaz.latest.network.vnet_gateway._update import Update as _VnetGatewayUpdate
+
     class VnetGatewayAadRemove(_VnetGatewayUpdate):
         def pre_operations(self):
             args = self.ctx.args
@@ -6424,88 +2843,6 @@ def remove_vnet_gateway_aad(cmd, resource_group_name, gateway_name, no_wait=Fals
     return LongRunningOperation(cmd.cli_ctx)(poller)['vpnClientConfiguration']
 
 
-class VnetGatewayNatRuleAdd(_VnetGatewayNatRuleAdd):
-
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.external_mappings = AAZListArg(
-            options=["--external-mappings"],
-            help="The private IP address external mapping for NAT.",
-            required=True
-        )
-        args_schema.external_mappings.Element = AAZStrArg()
-        args_schema.internal_mappings = AAZListArg(
-            options=["--internal-mappings"],
-            help="The private IP address internal mapping for NAT.",
-            required=True
-        )
-        args_schema.internal_mappings.Element = AAZStrArg()
-
-        args_schema.external_mappings_ip._registered = False
-        args_schema.internal_mappings_ip._registered = False
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        if has_value(args.external_mappings):
-            args.external_mappings_ip = assign_aaz_list_arg(
-                args.external_mappings_ip,
-                args.external_mappings,
-                element_transformer=lambda _, external_mapping: {"address_space": external_mapping}
-            )
-
-        if has_value(args.internal_mappings):
-            args.internal_mappings_ip = assign_aaz_list_arg(
-                args.internal_mappings_ip,
-                args.internal_mappings,
-                element_transformer=lambda _, internal_mapping: {"address_space": internal_mapping}
-            )
-
-    def _output(self, *args, **kwargs):
-        from azure.cli.core.aaz import AAZUndefined
-        if has_value(self.ctx.vars.instance.properties.nat_rules):
-            nat_rules = self.ctx.vars.instance.properties.natRules.to_serialized_data()
-            for nat_rule in nat_rules:
-                if 'type' in nat_rule['properties']:
-                    nat_rule['properties']['type'] = AAZUndefined
-            self.ctx.vars.instance.properties.nat_rules = nat_rules
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
-
-
-class VnetGatewayNatRuleShow(_VnetGatewayNatRuleShow):
-
-    def _output(self, *args, **kwargs):
-        from azure.cli.core.aaz import AAZUndefined
-        if has_value(self.ctx.vars.instance.properties.nat_rules):
-            nat_rules = self.ctx.vars.instance.properties.natRules.to_serialized_data()
-            for nat_rule in nat_rules:
-                if 'type' in nat_rule['properties']:
-                    nat_rule['properties']['type'] = AAZUndefined
-            self.ctx.vars.instance.properties.nat_rules = nat_rules
-        result = self.deserialize_output(self.ctx.selectors.subresource.required(), client_flatten=True)
-        return result
-
-
-class VnetGatewayNatRuleRemove(_VnetGatewayNatRuleRemove):
-
-    def _handler(self, command_args):
-        lro_poller = super()._handler(command_args)
-        lro_poller._result_callback = self._output
-        return lro_poller
-
-    def _output(self, *args, **kwargs):
-        from azure.cli.core.aaz import AAZUndefined
-        if has_value(self.ctx.vars.instance.properties.nat_rules):
-            nat_rules = self.ctx.vars.instance.properties.natRules.to_serialized_data()
-            for nat_rule in nat_rules:
-                if 'type' in nat_rule['properties']:
-                    nat_rule['properties']['type'] = AAZUndefined
-            self.ctx.vars.instance.properties.nat_rules = nat_rules
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
 # endregion
 
 
@@ -6521,8 +2858,8 @@ def create_virtual_hub(cmd,
                        tags=None):
     from azure.core.exceptions import HttpResponseError
     from azure.cli.core.commands import LongRunningOperation
-    from .aaz.latest.network.routeserver import Show
-    from .aaz.latest.network.routeserver import List
+    from .aaz.latest.network.routeserver._show import Show
+    from .aaz.latest.network.routeserver._list import List
 
     list_result = List(cli_ctx=cmd.cli_ctx)(command_args={'resource_group': resource_group_name})
     for x in list_result:
@@ -6539,11 +2876,12 @@ def create_virtual_hub(cmd,
         "hub_routing_preference": hub_routing_preference,
         "auto_scale_config": auto_scale_config
     }
-    from .aaz.latest.network.routeserver import Create
+    from .aaz.latest.network.routeserver._create import Create
     vhub_poller = Create(cli_ctx=cmd.cli_ctx)(command_args=args)
     LongRunningOperation(cmd.cli_ctx)(vhub_poller)
 
-    from .aaz.latest.network.routeserver.ip_config import Create as IPConfigCreate, Delete as IPConfigDelete
+    from .aaz.latest.network.routeserver.ip_config._create import Create as IPConfigCreate
+    from .aaz.latest.network.routeserver.ip_config._delete import Delete as IPConfigDelete
     try:
         create_poller = IPConfigCreate(cli_ctx=cmd.cli_ctx)(command_args={
             'name': 'Default',
@@ -6564,7 +2902,7 @@ def create_virtual_hub(cmd,
             LongRunningOperation(cmd.cli_ctx)(delete_poller)
         except HttpResponseError:
             pass
-        from .aaz.latest.network.routeserver import Delete
+        from .aaz.latest.network.routeserver._delete import Delete
         Delete(cli_ctx=cmd.cli_ctx)(command_args={'resource_group': resource_group_name, 'name': virtual_hub_name})
         raise ex
 
@@ -6573,7 +2911,8 @@ def create_virtual_hub(cmd,
 
 def delete_virtual_hub(cmd, resource_group_name, virtual_hub_name):
     from azure.cli.core.commands import LongRunningOperation
-    from .aaz.latest.network.routeserver.ip_config import List as IPConfigList, Delete as IPConfigDelete
+    from .aaz.latest.network.routeserver.ip_config._list import List as IPConfigList
+    from .aaz.latest.network.routeserver.ip_config._delete import Delete as IPConfigDelete
     ip_configs = IPConfigList(cli_ctx=cmd.cli_ctx)(command_args={
         'vhub_name': virtual_hub_name,
         'resource_group': resource_group_name
@@ -6588,33 +2927,8 @@ def delete_virtual_hub(cmd, resource_group_name, virtual_hub_name):
         LongRunningOperation(cmd.cli_ctx)(poller)
     except StopIteration:
         pass
-    from .aaz.latest.network.routeserver import Delete
+    from .aaz.latest.network.routeserver._delete import Delete
     return Delete(cli_ctx=cmd.cli_ctx)(command_args={'resource_group': resource_group_name, 'name': virtual_hub_name})
-# endregion
-
-
-# region network gateway connection
-class VpnConnSharedKeyUpdate(_VpnConnSharedKeyUpdate):
-
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.value._required = True
-        return args_schema
-# endregion
-
-
-# region usages
-class UsagesList(_UsagesList):
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
-        next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
-        result = list(result)
-        for item in result:
-            item['currentValue'] = str(item['currentValue'])
-            item['limit'] = str(item['limit'])
-            item['localName'] = item['name']['localizedValue']
-        return result, next_link
 # endregion
 
 
@@ -6624,7 +2938,7 @@ def remove_nw_connection_monitor_output(cmd, connection_monitor_name, location):
         'connection_monitor_name': connection_monitor_name,
         'location': location
     }
-    from .operations.watcher import WatcherConnectionMonitorOutputRemove
+    from .operations.latest.network.watcher._helpers import WatcherConnectionMonitorOutputRemove
     return WatcherConnectionMonitorOutputRemove(cli_ctx=cmd.cli_ctx)(command_args=update_args)
 
 
@@ -6634,97 +2948,15 @@ def remove_nw_connection_monitor_test_group(cmd, connection_monitor_name, locati
         'location': location,
         'test_group_name': name
     }
-    from .operations.watcher import WatcherConnectionMonitorTestGroupRemove
+    from .operations.latest.network.watcher._helpers import WatcherConnectionMonitorTestGroupRemove
     return WatcherConnectionMonitorTestGroupRemove(cli_ctx=cmd.cli_ctx)(command_args=update_args)
-
-
-class SecurityPartnerProviderCreate(_SecurityPartnerProviderCreate):
-
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.vhub._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualHubs/{}",
-        )
-
-        return args_schema
-
-
-class SecurityPartnerProviderUpdate(_SecurityPartnerProviderUpdate):
-
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.vhub._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualHubs/{}",
-        )
-
-        return args_schema
-
-
-class VirtualApplianceCreate(_VirtualApplianceCreate):
-
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.vhub._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualHubs/{}",
-        )
-
-        return args_schema
-
-
-class VirtualApplianceUpdate(_VirtualApplianceUpdate):
-
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArgFormat
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.vhub._fmt = AAZResourceIdArgFormat(
-            template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualHubs/{}",
-        )
-
-        return args_schema
-
-
-class CustomIpPrefixCreate(_CustomIpPrefixCreate):
-
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZBoolArg
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.is_parent = AAZBoolArg(
-            options=["--is-parent"],
-            help="Denotes that resource is being created as a Parent CustomIpPrefix",
-        )
-        return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        if args.is_parent:
-            args.prefix_type = "Parent"
-        elif has_value(args.cip_prefix_parent):
-            args.prefix_type = "Child"
-
-
-class CustomIpPrefixUpdate(_CustomIpPrefixUpdate):
-
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZArgEnum
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.state.enum = AAZArgEnum({"commission": "Commissioning", "decommission": "Decommissioning", "deprovision": "Deprovisioning", "provision": "Provisioning"})
-
-        return args_schema
 
 
 def create_ddos_custom_policy(cmd, ddos_custom_policy_name, resource_group_name, location=None, tags=None,
                               detection_rule_name=None, detection_mode=None, traffic_type=None,
                               packets_per_second=None, no_wait=None):
-    from .aaz.latest.network.ddos_custom_policy import Create as DdosCustomPolicyCreate, Show as DdosCustomPolicyShow
+    from .aaz.latest.network.ddos_custom_policy._create import Create as DdosCustomPolicyCreate
+    from .aaz.latest.network.ddos_custom_policy._show import Show as DdosCustomPolicyShow
     from .operations.ddos_custom_policy import convert_ddos_custom_policy_to_snake_case, combine_old_and_new_custom_policy
     from ._template_builder import build_ddos_custom_policy
 
