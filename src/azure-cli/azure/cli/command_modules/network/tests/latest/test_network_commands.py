@@ -9066,5 +9066,144 @@ class DdosCustomPolicyScenarioTest(ScenarioTest):
 
         self.cmd('network ddos-custom-policy delete -g {rg} -n {policy_name} -y', checks=self.is_empty())
 
+
+class NetworkPrivateEndpointScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='test_network_private_endpoint_ip_version_type', location='eastus2euap')
+    @StorageAccountPreparer(name_prefix='saplr', kind='StorageV2')
+    def test_network_private_endpoint_ip_version_type(self, resource_group, storage_account):
+        self.kwargs.update({
+            'sa': storage_account,
+            'rg': resource_group,
+            'location': 'eastus2euap',
+
+            'vnet': 'vnetipvt',
+            'subnet_pls': 'subnetpls',
+            'subnet_pe': 'subnetpe',
+
+            'pe_conn': 'cn',
+            'pe_v4': 'peipv4',
+            'pe_v6': 'peipv6',
+            'pe_ds': 'peds',
+
+            'nic_v4': 'nicv4',
+            'nic_v6': 'nicv6',
+            'nic_ds': 'nicds',
+
+            # Dual-stack VNet/Subnet prefixes (ULA for IPv6 is fine for private addressing)
+            'vnet_ipv4': '10.0.0.0/16',
+            'vnet_ipv6': 'fd00:db8:0:0::/56',
+
+            'subnet_pls_ipv4': '10.0.0.0/24',
+            'subnet_pe_ipv4': '10.0.1.0/24',
+            'subnet_pe_ipv6': 'fd00:db8:0:1::/64',
+        })
+
+        # VNet (dual-stack) + PLS subnet
+        self.cmd(
+            'network vnet create -g {rg} -n {vnet} -l {location} '
+            '--address-prefixes {vnet_ipv4} {vnet_ipv6} '
+            '--subnet-name {subnet_pls} --subnet-prefixes {subnet_pls_ipv4}'
+        )
+
+        # Enable High Scale Private Endpoints (IPv6 / DualStack prerequisite)
+        self.cmd(
+            'network vnet update -g {rg} -n {vnet} '
+            '--private-endpoint-vnet-policies Basic'
+        )
+
+        self.cmd(
+            'network vnet subnet update -g {rg} -n {subnet_pls} --vnet-name {vnet} '
+            '--disable-private-link-service-network-policies'
+        )
+
+        # Private Endpoint subnet (dual-stack)
+        self.cmd(
+            'network vnet subnet create -g {rg} -n {subnet_pe} --vnet-name {vnet} '
+            '--address-prefixes {subnet_pe_ipv4} {subnet_pe_ipv6} '
+            '--default-outbound false'
+        )
+
+        self.cmd(
+            'network vnet subnet update -g {rg} -n {subnet_pe} --vnet-name {vnet} '
+            '--private-endpoint-network-policies RouteTableEnabled'
+        )
+
+        # ---- Storage PLR ----
+        pr = self.cmd(
+            'storage account private-link-resource list --account-name {sa} -g {rg}'
+        ).get_output_in_json()
+        self.kwargs['group_id'] = pr[0]['groupId']
+
+        storage = self.cmd(
+            'storage account show -n {sa} -g {rg}'
+        ).get_output_in_json()
+        self.kwargs['sa_id'] = storage['id']
+
+        # IPv4
+        self.cmd(
+            'network private-endpoint create -g {rg} -n {pe_v4} '
+            '--vnet-name {vnet} --subnet {subnet_pe} '
+            '--group-id {group_id} '
+            '--private-connection-resource-id {sa_id} '
+            '--connection-name {pe_conn} '
+            '-l {location} --nic-name {nic_v4} '
+            '--ip-version-type IPv4',
+            checks=[
+                self.check('ipVersionType', 'IPv4'),
+            ]
+        )
+
+        # IPv6
+        self.cmd(
+            'network private-endpoint create -g {rg} -n {pe_v6} '
+            '--vnet-name {vnet} --subnet {subnet_pe} '
+            '--group-id {group_id} '
+            '--private-connection-resource-id {sa_id} '
+            '--connection-name {pe_conn} '
+            '-l {location} --nic-name {nic_v6} '
+            '--ip-version-type IPv6',
+            checks=[
+                self.check('ipVersionType', 'IPv6'),
+            ]
+        )
+
+        # DualStack
+        self.cmd(
+            'network private-endpoint create -g {rg} -n {pe_ds} '
+            '--vnet-name {vnet} --subnet {subnet_pe} '
+            '--group-id {group_id} '
+            '--private-connection-resource-id {sa_id} '
+            '--connection-name {pe_conn} '
+            '-l {location} --nic-name {nic_ds} '
+            '--ip-version-type DualStack',
+            checks=[
+                self.check('ipVersionType', 'DualStack'),
+            ]
+        )
+
+        # Update PE: IPv4 -> DualStack
+        self.cmd(
+            'network private-endpoint update -g {rg} -n {pe_v4} '
+            '--ip-version-type DualStack',
+            checks=[
+                self.check('name', '{pe_v4}'),
+                self.check('ipVersionType', 'DualStack'),
+                self.check('provisioningState', 'Succeeded'),
+            ]
+        )
+
+        # Update PE: DualStack -> IPv6 (not allowed, expect failure)
+        self.cmd(
+            'network private-endpoint update -g {rg} -n {pe_v4} '
+            '--ip-version-type IPv6',
+            expect_failure=True
+        )
+
+        # Basic list checks
+        self.cmd('network private-endpoint list -g {rg}', checks=[
+            self.check('length(@)', 3)
+        ])
+
+
 if __name__ == '__main__':
     unittest.main()

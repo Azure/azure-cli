@@ -4,98 +4,61 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long, import-outside-toplevel
-from requests import get
-from knack.log import get_logger
-from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id, is_valid_resource_name, resource_id  # pylint: disable=import-error
+from azure.cli.core.azclierror import RequiredArgumentMissingError, ValidationError
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_subscription_id
-from azure.cli.core.util import CLIError, user_confirmation
-from azure.cli.core.azclierror import ValidationError
-from azure.mgmt.privatedns.models import PrivateZone
-from azure.mgmt.privatedns.models import SubResource
-from azure.mgmt.privatedns.models import VirtualNetworkLink
-from ._client_factory import resource_client_factory, private_dns_client_factory, private_dns_link_client_factory
-from ._config_reader import get_cloud_cluster
-from ._flexible_server_util import get_id_components, check_existence, _is_resource_name, parse_public_access_input, get_user_confirmation, _check_resource_group_existence
-from .validators import validate_private_dns_zone, validate_vnet_location
-
-from .aaz.latest.network.vnet import Create as VNetCreate, Show as VNetShow, Update as _VNetUpdate
-from .aaz.latest.network.vnet.subnet import Create as SubnetCreate, Show as SubnetShow, Update as SubnetUpdate
+from azure.cli.core.util import CLIError, sdk_no_wait, user_confirmation
+from azure.mgmt import postgresqlflexibleservers as postgresql_flexibleservers
+from azure.mgmt.core.tools import (  # pylint: disable=import-error
+    is_valid_resource_id,
+    is_valid_resource_name,
+    parse_resource_id,
+    resource_id,
+)
+from azure.mgmt.privatedns.models import PrivateZone, SubResource, VirtualNetworkLink
+from knack.log import get_logger
+from requests import get
+from .._client_factory import (
+    private_dns_client_factory,
+    private_dns_link_client_factory,
+    resource_client_factory,
+)
+from .._config_reader import get_cloud_cluster
+from ..aaz.latest.network.vnet import (
+    Create as VNetCreate,
+    Show as VNetShow,
+    Update as _VNetUpdate,
+)
+from ..aaz.latest.network.vnet.subnet import (
+    Create as SubnetCreate,
+    Show as SubnetShow,
+    Update as SubnetUpdate,
+)
+from ..utils._flexible_server_util import (
+    _check_resource_group_existence,
+    _is_resource_name,
+    check_existence,
+    get_id_components,
+    get_user_confirmation,
+    parse_public_access_input,
+)
+from ..utils.validators import (
+    validate_private_dns_zone,
+    validate_resource_group,
+    validate_vnet_location,
+)
 
 logger = get_logger(__name__)
+DELEGATION_SERVICE_NAME = "Microsoft.DBforPostgreSQL/flexibleServers"
 DEFAULT_VNET_ADDRESS_PREFIX = '10.0.0.0/16'
 DEFAULT_SUBNET_ADDRESS_PREFIX = '10.0.0.0/24'
 IP_ADDRESS_CHECKER = 'https://api.ipify.org'
 
 
-def prepare_mysql_exist_private_network(cmd, resource_group, server_name, vnet, subnet, location, delegation_service_name):
-    nw_subscription = get_subscription_id(cmd.cli_ctx)
-    resource_client = resource_client_factory(cmd.cli_ctx)
-    if subnet is not None and vnet is None:
-        if not is_valid_resource_id(subnet):
-            raise ValidationError("Incorrectly formed Subnet ID. If you are providing only --subnet (not --vnet), the Subnet parameter should be in resource ID format.")
-        if 'child_name_1' not in parse_resource_id(subnet):
-            raise ValidationError("Incorrectly formed Subnet ID. Check if the Subnet ID is in the right format.")
+def flexible_server_migrate_network(client, resource_group_name, server_name, no_wait=False):
+    validate_resource_group(resource_group_name)
 
-        id_subscription, id_resource_group, id_vnet, id_subnet = get_id_components(subnet)
-        nw_subscription, resource_client = _change_client_with_different_subscription(cmd, id_subscription, nw_subscription, resource_client)
-
-        if id_subnet is None:
-            id_subnet = 'Subnet' + server_name
-
-        subnet_result = _create_mysql_exist_vnet_subnet_delegation(cmd, nw_subscription, resource_client, delegation_service_name, id_resource_group, id_vnet, id_subnet, location)
-    elif subnet is None and vnet is not None:
-        raise ValidationError("Missing Subnet. If you want to use private access, --subnet is requried.")
-    elif subnet is not None and vnet is not None:
-        if _is_resource_name(vnet) and _is_resource_name(subnet):
-            subnet_result = _create_mysql_exist_vnet_subnet_delegation(cmd, nw_subscription, resource_client, delegation_service_name, resource_group, vnet, subnet, location)
-        else:
-            raise ValidationError("If you pass both --vnet and --subnet, consider passing names instead of IDs. If you want to use an existing subnet, please provide the subnet Id only (not vnet Id).")
-
-    return subnet_result["id"]
-
-
-def _create_mysql_exist_vnet_subnet_delegation(cmd, nw_subscription, resource_client, delegation_service_name, resource_group, vnet_name, subnet_name, location):
-    if not check_existence(resource_client, vnet_name, resource_group, 'Microsoft.Network', 'virtualNetworks'):
-        raise ValidationError("Invalid Vnet. The vnet id of the subnet id your provided was not found.")
-
-    if not check_existence(resource_client, subnet_name, resource_group, 'Microsoft.Network', 'subnets', parent_name=vnet_name, parent_type='virtualNetworks'):
-        raise ValidationError("Invalid Subnet. The subnet id your provided was not found.")
-
-    logger.warning('Using existing Vnet "%s" in resource group "%s"', vnet_name, resource_group)
-    vnet = VNetShow(cli_ctx=cmd.cli_ctx)(command_args={
-        "name": vnet_name,
-        "subscription": nw_subscription,
-        "resource_group": resource_group
-    })
-    validate_vnet_location(vnet, location)
-
-    delegation = {"name": delegation_service_name, "service_name": delegation_service_name}
-    logger.warning('Using existing Subnet "%s" in resource group "%s"', subnet_name, resource_group)
-    subnet = SubnetShow(cli_ctx=cmd.cli_ctx)(command_args={
-        "name": subnet_name,
-        "vnet_name": vnet_name,
-        "subscription": nw_subscription,
-        "resource_group": resource_group
-    })
-
-    # Add Delegation if not delegated already
-    if not subnet.get("delegations", None):
-        logger.warning('Adding "%s" delegation to the existing subnet %s.', delegation_service_name, subnet_name)
-        poller = SubnetUpdate(cli_ctx=cmd.cli_ctx)(command_args={
-            "name": subnet_name,
-            "vnet_name": vnet_name,
-            "subscription": nw_subscription,
-            "resource_group": resource_group,
-            "delegated_services": [delegation]
-        })
-        subnet = LongRunningOperation(cmd.cli_ctx)(poller)
-    else:
-        for delgtn in subnet["delegations"]:
-            if delgtn["serviceName"] != delegation_service_name:
-                raise CLIError("Can not use subnet with existing delegations other than {}".format(delegation_service_name))
-
-    return subnet
+    return sdk_no_wait(no_wait, client.begin_migrate_network_mode, resource_group_name, server_name)
 
 
 # pylint: disable=too-many-locals, too-many-statements, too-many-branches, import-outside-toplevel
@@ -274,72 +237,6 @@ def _create_subnet_delegation(cmd, nw_subscription, resource_client, delegation_
     return subnet
 
 
-def prepare_mysql_exist_private_dns_zone(cmd, resource_group, private_dns_zone, subnet_id):
-    # Get Vnet Components
-    vnet_subscription, vnet_rg, vnet_name, _ = get_id_components(subnet_id)
-    vnet_id = resource_id(subscription=vnet_subscription,
-                          resource_group=vnet_rg,
-                          namespace='Microsoft.Network',
-                          type='virtualNetworks',
-                          name=vnet_name)
-    vnet = VNetShow(cli_ctx=cmd.cli_ctx)(command_args={
-        "name": vnet_name,
-        "subscription": vnet_subscription,
-        "resource_group": vnet_rg
-    })
-
-    dns_rg = None
-    dns_subscription = vnet_subscription
-    if not _is_resource_name(private_dns_zone) and is_valid_resource_id(private_dns_zone):
-        dns_subscription, dns_rg, private_dns_zone, _ = get_id_components(private_dns_zone)
-
-    server_sub_resource_client = resource_client_factory(cmd.cli_ctx, subscription_id=get_subscription_id(cmd.cli_ctx))
-    vnet_sub_resource_client = resource_client_factory(cmd.cli_ctx, subscription_id=vnet_subscription)
-    dns_sub_resource_client = resource_client_factory(cmd.cli_ctx, subscription_id=dns_subscription)
-
-    zone_exist_flag = False
-    if dns_rg is not None and check_existence(dns_sub_resource_client, private_dns_zone, dns_rg, 'Microsoft.Network', 'privateDnsZones'):
-        zone_exist_flag = True
-    elif dns_rg is None and check_existence(server_sub_resource_client, private_dns_zone, resource_group, 'Microsoft.Network', 'privateDnsZones'):
-        zone_exist_flag = True
-        dns_rg = resource_group
-        dns_subscription = get_subscription_id(cmd.cli_ctx)
-    elif dns_rg is None and check_existence(vnet_sub_resource_client, private_dns_zone, vnet_rg, 'Microsoft.Network', 'privateDnsZones'):
-        zone_exist_flag = True
-        dns_subscription = vnet_subscription
-        dns_rg = vnet_rg
-    elif dns_rg is None:
-        zone_exist_flag = False
-        dns_subscription = vnet_subscription
-        dns_rg = vnet_rg
-
-    if not zone_exist_flag:
-        raise ValidationError("Invalid Private DNS Zone. --private-dns-zone your provided was not found.")
-
-    private_dns_client = private_dns_client_factory(cmd.cli_ctx, subscription_id=dns_subscription)
-    private_dns_link_client = private_dns_link_client_factory(cmd.cli_ctx, subscription_id=dns_subscription)
-    link = VirtualNetworkLink(location='global', virtual_network=SubResource(id=vnet["id"]))
-    link.registration_enabled = False
-
-    logger.warning('Using existing private dns zone %s in resource group "%s"', private_dns_zone, dns_rg)
-
-    private_zone = private_dns_client.get(resource_group_name=dns_rg, private_zone_name=private_dns_zone)
-    virtual_links = private_dns_link_client.list(resource_group_name=dns_rg, private_zone_name=private_dns_zone)
-
-    link_exist_flag = False
-    for virtual_link in virtual_links:
-        if virtual_link.virtual_network.id == vnet_id:
-            link_exist_flag = True
-            break
-
-    if not link_exist_flag:
-        private_dns_link_client.begin_create_or_update(resource_group_name=dns_rg,
-                                                       private_zone_name=private_dns_zone,
-                                                       virtual_network_link_name=vnet_name + '-link',
-                                                       parameters=link, if_none_match='*').result()
-    return private_zone.id
-
-
 def prepare_private_dns_zone(db_context, resource_group, server_name, private_dns_zone, subnet_id, location, yes):
     cmd = db_context.cmd
 
@@ -363,8 +260,6 @@ def prepare_private_dns_zone(db_context, resource_group, server_name, private_dn
     else:
         dns_suffix_client = db_context.cf_private_dns_zone_suffix(cmd.cli_ctx, '_')
         private_dns_zone_suffix = dns_suffix_client.get()
-        if db_context.command_group == 'mysql':
-            private_dns_zone_suffix = private_dns_zone_suffix.private_dns_zone_suffix
 
     # suffix should start with .
     if private_dns_zone_suffix[0] != '.':
@@ -482,3 +377,44 @@ def prepare_public_network(public_access, yes):
         start_ip, end_ip = parse_public_access_input(public_access)
 
     return start_ip, end_ip
+
+
+def flexible_server_provision_network_resource(cmd, resource_group_name, server_name,
+                                               location, db_context, private_dns_zone_arguments=None, public_access=None,
+                                               vnet=None, subnet=None, vnet_address_prefix=None, subnet_address_prefix=None, yes=False):
+    validate_resource_group(resource_group_name)
+
+    start_ip = -1
+    end_ip = -1
+    network = postgresql_flexibleservers.models.Network()
+
+    if subnet is not None or vnet is not None:
+        subnet_id = prepare_private_network(cmd,
+                                            resource_group_name,
+                                            server_name,
+                                            vnet=vnet,
+                                            subnet=subnet,
+                                            location=location,
+                                            delegation_service_name=DELEGATION_SERVICE_NAME,
+                                            vnet_address_pref=vnet_address_prefix,
+                                            subnet_address_pref=subnet_address_prefix,
+                                            yes=yes)
+        private_dns_zone_id = prepare_private_dns_zone(db_context,
+                                                       resource_group_name,
+                                                       server_name,
+                                                       private_dns_zone=private_dns_zone_arguments,
+                                                       subnet_id=subnet_id,
+                                                       location=location,
+                                                       yes=yes)
+        network.delegated_subnet_resource_id = subnet_id
+        network.private_dns_zone_arm_resource_id = private_dns_zone_id
+    elif subnet is None and vnet is None and private_dns_zone_arguments is not None:
+        raise RequiredArgumentMissingError("Private DNS zone can only be used with private access setting. Use vnet or/and subnet parameters.")
+    else:
+        start_ip, end_ip = prepare_public_network(public_access, yes=yes)
+        if public_access is not None and str(public_access).lower() in ['disabled', 'none']:
+            network.public_network_access = 'Disabled'
+        else:
+            network.public_network_access = 'Enabled'
+
+    return network, start_ip, end_ip

@@ -30,9 +30,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-09-01",
+        "version": "2025-12-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2025-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2025-12-01"],
         ]
     }
 
@@ -480,6 +480,16 @@ class Create(AAZCommand):
         protocol_types = cls._args_schema.protocol_types
         protocol_types.Element = AAZStrArg()
 
+        # define Arg Group "RansomwareProtection"
+
+        _args_schema = cls._args_schema
+        _args_schema.desired_ransomware_protection_state = AAZStrArg(
+            options=["--desired-arp-state", "--desired-ransomware-protection-state"],
+            arg_group="RansomwareProtection",
+            help="The desired value of the Advanced Ransomware Protection feature state available to the volume",
+            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
+        )
+
         # define Arg Group "RemotePath"
 
         _args_schema = cls._args_schema
@@ -627,7 +637,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-09-01",
+                    "api-version", "2025-12-01",
                     required=True,
                 ),
             }
@@ -702,6 +712,7 @@ class Create(AAZCommand):
             data_protection = _builder.get(".properties.dataProtection")
             if data_protection is not None:
                 data_protection.set_prop("backup", AAZObjectType)
+                data_protection.set_prop("ransomwareProtection", AAZObjectType)
                 data_protection.set_prop("replication", AAZObjectType)
                 data_protection.set_prop("snapshot", AAZObjectType)
                 data_protection.set_prop("volumeRelocation", AAZObjectType)
@@ -711,6 +722,10 @@ class Create(AAZCommand):
                 backup.set_prop("backupPolicyId", AAZStrType, ".backup_policy_id")
                 backup.set_prop("backupVaultId", AAZStrType, ".backup_vault_id")
                 backup.set_prop("policyEnforced", AAZBoolType, ".policy_enforced")
+
+            ransomware_protection = _builder.get(".properties.dataProtection.ransomwareProtection")
+            if ransomware_protection is not None:
+                ransomware_protection.set_prop("desiredRansomwareProtectionState", AAZStrType, ".desired_ransomware_protection_state")
 
             replication = _builder.get(".properties.dataProtection.replication")
             if replication is not None:
@@ -1033,6 +1048,9 @@ class Create(AAZCommand):
 
             data_protection = cls._schema_on_200_201.properties.data_protection
             data_protection.backup = AAZObjectType()
+            data_protection.ransomware_protection = AAZObjectType(
+                serialized_name="ransomwareProtection",
+            )
             data_protection.replication = AAZObjectType()
             data_protection.snapshot = AAZObjectType()
             data_protection.volume_relocation = AAZObjectType(
@@ -1048,6 +1066,15 @@ class Create(AAZCommand):
             )
             backup.policy_enforced = AAZBoolType(
                 serialized_name="policyEnforced",
+            )
+
+            ransomware_protection = cls._schema_on_200_201.properties.data_protection.ransomware_protection
+            ransomware_protection.actual_ransomware_protection_state = AAZStrType(
+                serialized_name="actualRansomwareProtectionState",
+                flags={"read_only": True},
+            )
+            ransomware_protection.desired_ransomware_protection_state = AAZStrType(
+                serialized_name="desiredRansomwareProtectionState",
             )
 
             replication = cls._schema_on_200_201.properties.data_protection.replication

@@ -3738,7 +3738,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 imds_mode=None, add_proxy_agent_extension=None, wire_server_access_control_profile_reference_id=None,
                 imds_access_control_profile_reference_id=None, enable_automatic_zone_balancing=None,
                 automatic_zone_balancing_strategy=None, automatic_zone_balancing_behavior=None,
-                enable_automatic_repairs=None):
+                enable_automatic_repairs=None, zone_placement_policy=None, include_zones=None,
+                exclude_zones=None, max_zone_count=None, instance_percent_policy=None, max_instance_percent=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -4062,7 +4063,9 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             enable_automatic_zone_balancing=enable_automatic_zone_balancing,
             automatic_zone_balancing_strategy=automatic_zone_balancing_strategy,
             automatic_zone_balancing_behavior=automatic_zone_balancing_behavior,
-            enable_automatic_repairs=enable_automatic_repairs)
+            enable_automatic_repairs=enable_automatic_repairs, zone_placement_policy=zone_placement_policy,
+            include_zones=include_zones, exclude_zones=exclude_zones, max_zone_count=max_zone_count,
+            instance_percent_policy=instance_percent_policy, max_instance_percent=max_instance_percent)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -4639,7 +4642,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 wire_server_mode=None, imds_mode=None, add_proxy_agent_extension=None,
                 wire_server_access_control_profile_reference_id=None,
                 imds_access_control_profile_reference_id=None, enable_automatic_zone_balancing=None,
-                automatic_zone_balancing_strategy=None, automatic_zone_balancing_behavior=None, **kwargs):
+                automatic_zone_balancing_strategy=None, automatic_zone_balancing_behavior=None, max_zone_count=None,
+                instance_percent_policy=None, max_instance_percent=None, **kwargs):
     from .operations.vmss_vms import convert_show_result_to_snake_case as vmss_vms_convert_show_result_to_snake_case
     from .operations.vmss import convert_show_result_to_snake_case as vmss_convert_show_result_to_snake_case
     vmss = kwargs['parameters']
@@ -5097,6 +5101,28 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
     vmss["vm_scale_set_name"] = name
     vmss["no_wait"] = no_wait
 
+    if max_zone_count is not None or instance_percent_policy is not None or max_instance_percent is not None:
+        if vmss.get("resiliency_policy", None) is None:
+            vmss["resiliency_policy"] = {}
+        if vmss["resiliency_policy"].get("zone_allocation_policy", None) is None:
+            vmss["resiliency_policy"]["zone_allocation_policy"] = {}
+
+        if max_zone_count is not None:
+            vmss["resiliency_policy"]["zone_allocation_policy"]["max_zone_count"] = max_zone_count
+
+        if instance_percent_policy is not None or max_instance_percent is not None:
+            if vmss["resiliency_policy"]["zone_allocation_policy"].get("max_instance_percent_per_zone_policy",
+                                                                       None) is None:
+                vmss["resiliency_policy"]["zone_allocation_policy"]["max_instance_percent_per_zone_policy"] = {}
+
+            if instance_percent_policy is not None:
+                vmss["resiliency_policy"]["zone_allocation_policy"]["max_instance_percent_per_zone_policy"][
+                    "enabled"] = instance_percent_policy
+
+            if max_instance_percent is not None:
+                vmss["resiliency_policy"]["zone_allocation_policy"]["max_instance_percent_per_zone_policy"][
+                    "value"] = max_instance_percent
+
     from .operations.vmss import VMSSCreate
     return VMSSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss)
 
@@ -5315,11 +5341,15 @@ def set_orchestration_service_state(cmd, resource_group_name, vm_scale_set_name,
     # currently service_name has only one available value "AutomaticRepairs". And SDK does not accept service_name,
     # instead SDK assign it to "AutomaticRepairs" in its own logic. As there may be more service name to be supported,
     # we define service_name as a required parameter here to avoid introducing a breaking change in the future.
-    client = _compute_client_factory(cmd.cli_ctx)
-    OrchestrationServiceStateInput = cmd.get_models('OrchestrationServiceStateInput')
-    state_input = OrchestrationServiceStateInput(service_name=service_name, action=action)
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_set_orchestration_service_state,
-                       resource_group_name, vm_scale_set_name, state_input)
+    from .aaz.latest.vmss import SetOrchestrationServiceState as VmssSetOrchestrationServiceState
+    command_args = {
+        'resource_group': resource_group_name,
+        'vm_scale_set_name': vm_scale_set_name,
+        'action': action,
+        'service_name': service_name,
+        'no_wait': no_wait
+    }
+    return VmssSetOrchestrationServiceState(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
 def upgrade_vmss_extension(cmd, resource_group_name, vm_scale_set_name, no_wait=False):
