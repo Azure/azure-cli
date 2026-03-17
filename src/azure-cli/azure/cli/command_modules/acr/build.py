@@ -97,11 +97,8 @@ def acr_build(cmd,  # pylint: disable=too-many-locals
 
     platform_os, platform_arch, platform_variant = get_validate_platform(cmd, platform)
 
-    DockerBuildRequest, PlatformProperties, RoleAssignmentMode = cmd.get_models(
-        'DockerBuildRequest',
-        'PlatformProperties',
-        'RoleAssignmentMode',
-        operation_group='runs')
+    from azure.mgmt.containerregistrytasks.models import DockerBuildRequest, PlatformProperties
+    RoleAssignmentMode = cmd.get_models('RoleAssignmentMode')
 
     registry_abac_enabled = registry.role_assignment_mode == RoleAssignmentMode.ABAC_REPOSITORY_PERMISSIONS
 

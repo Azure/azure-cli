@@ -32,7 +32,7 @@ def acr_agentpool_create(cmd,
     registry, resource_group_name = get_registry_by_name(
         cmd.cli_ctx, registry_name, resource_group_name)
 
-    AgentPool = cmd.get_models('AgentPool', operation_group='agent_pools')
+    from azure.mgmt.containerregistrytasks.models import AgentPool
 
     agentpool_create_parameters = AgentPool(
         location=registry.location,
@@ -61,7 +61,7 @@ def acr_agentpool_update(cmd,
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name)
 
-    AgentPoolUpdateParameters = cmd.get_models('AgentPoolUpdateParameters', operation_group='agent_pools')
+    from azure.mgmt.containerregistrytasks.models import AgentPoolUpdateParameters
 
     update_parameters = AgentPoolUpdateParameters(count=count)
 

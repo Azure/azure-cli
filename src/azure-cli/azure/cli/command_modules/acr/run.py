@@ -57,9 +57,9 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
 
     platform_os, platform_arch, platform_variant = get_validate_platform(cmd, platform)
 
-    EncodedTaskRunRequest, FileTaskRunRequest, PlatformProperties, RoleAssignmentMode = cmd.get_models(
-        'EncodedTaskRunRequest', 'FileTaskRunRequest', 'PlatformProperties', 'RoleAssignmentMode',
-        operation_group='runs')
+    from azure.mgmt.containerregistrytasks.models import (
+        EncodedTaskRunRequest, FileTaskRunRequest, PlatformProperties)
+    RoleAssignmentMode = cmd.get_models('RoleAssignmentMode')
 
     registry_abac_enabled = registry.role_assignment_mode == RoleAssignmentMode.ABAC_REPOSITORY_PERMISSIONS
     credentials = get_source_and_custom_registry_credentials(
