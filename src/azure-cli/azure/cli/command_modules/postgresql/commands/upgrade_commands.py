@@ -5,15 +5,11 @@
 
 # pylint: disable=unused-argument, line-too-long
 from azure.cli.core.util import user_confirmation
-from knack.log import get_logger
 from knack.util import CLIError
 from .._client_factory import cf_postgres_flexible_replica
 from ..utils._flexible_server_location_capabilities_util import get_postgres_server_capability_info
 from ..utils._flexible_server_util import resolve_poller
 from ..utils.validators import pg_version_validator, validate_citus_cluster, validate_resource_group
-
-logger = get_logger(__name__)
-# pylint: disable=raise-missing-from
 
 
 def flexible_server_version_upgrade(cmd, client, resource_group_name, server_name, version, yes=None):
