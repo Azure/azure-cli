@@ -349,7 +349,7 @@ def pg_version_validator(version, versions):
         if version in ('11', '12', '13'):
             logger.warning("The version selected is a retired community version of PostgreSQL. "
                            "To use this version, you will automatically be enrolled in our extended "
-                           "support plan for an additional charge. "
+                           "support plan for an additional charge starting August 1, 2026. "
                            "Upgrade to PostgreSQL 14 or later as soon as possible to "
                            "maintain security, performance, and supportability.")
 
