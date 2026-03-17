@@ -51,6 +51,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_NETWORK_PRIVATEDNS = ('azure.mgmt.privatedns', 'PrivateDnsManagementClient')
     MGMT_AUTHORIZATION = ('azure.mgmt.authorization', 'AuthorizationManagementClient')
     MGMT_CONTAINERREGISTRY = ('azure.mgmt.containerregistry', 'ContainerRegistryManagementClient')
+    MGMT_CONTAINERREGISTRYTASKS = ('azure.mgmt.containerregistrytasks', 'ContainerRegistryTasksMgmtClient')
     MGMT_RESOURCE_FEATURES = ('azure.mgmt.resource.features', 'FeatureClient')
     MGMT_RESOURCE_LINKS = ('azure.mgmt.resource.links', 'ManagementLinkClient')
     MGMT_RESOURCE_LOCKS = ('azure.mgmt.resource.locks', 'ManagementLockClient')
@@ -188,6 +189,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_KEYVAULT: None,
         ResourceType.MGMT_AUTHORIZATION: None,
         ResourceType.MGMT_CONTAINERREGISTRY: None,
+        ResourceType.MGMT_CONTAINERREGISTRYTASKS: None,
         # The order does make things different.
         # Please keep ResourceType.DATA_KEYVAULT_KEYS before ResourceType.DATA_KEYVAULT
         ResourceType.DATA_KEYVAULT_CERTIFICATES: None,
