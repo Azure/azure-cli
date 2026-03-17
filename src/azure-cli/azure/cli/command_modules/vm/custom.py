@@ -3053,7 +3053,7 @@ def _update_vm_nics(cmd, vm, nics, primary_nic):
 
 
 # region VirtualMachines RunCommand
-def run_command_invoke(cmd, resource_group_name, vm_vmss_name, command_id, scripts=None, parameters=None, instance_id=None):  # pylint: disable=line-too-long
+def run_command_invoke(cmd, resource_group_name, vm_vmss_name, command_id, scripts=None, parameters=None, instance_id=None, no_wait=False):  # pylint: disable=line-too-long
     parameters = parameters or []  # CLI user input arg "parameters"
     params = []  # AAZCommand arg for "parameters"
     auto_arg_name_num = 0
@@ -3078,7 +3078,8 @@ def run_command_invoke(cmd, resource_group_name, vm_vmss_name, command_id, scrip
             'instance_id': instance_id,
             'command_id': command_id,
             'script': scripts,
-            'parameters': params
+            'parameters': params,
+            'no_wait': no_wait,
         })
 
     # otherwise this is a regular vm instance
@@ -3088,12 +3089,13 @@ def run_command_invoke(cmd, resource_group_name, vm_vmss_name, command_id, scrip
         'vm_name': vm_vmss_name,
         'command_id': command_id,
         'script': scripts,
-        'parameters': params
+        'parameters': params,
+        'no_wait': no_wait
     })
 
 
-def vm_run_command_invoke(cmd, resource_group_name, vm_name, command_id, scripts=None, parameters=None):
-    return run_command_invoke(cmd, resource_group_name, vm_name, command_id, scripts, parameters)
+def vm_run_command_invoke(cmd, resource_group_name, vm_name, command_id, scripts=None, parameters=None, no_wait=False):
+    return run_command_invoke(cmd, resource_group_name, vm_name, command_id, scripts, parameters, no_wait=no_wait)
 
 
 def vm_run_command_create(cmd,
