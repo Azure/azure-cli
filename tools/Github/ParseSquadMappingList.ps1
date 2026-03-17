@@ -22,34 +22,30 @@ param(
     [string] $AccessToken
 )
 
-function InitializeRequiredPackages {
+function GetIndentLength {
     [CmdletBinding()]
-    param ()
-
-    $packagesDirectoryName = "JsonYamlPackages"
-    $packagesDirectory = Join-Path -Path . -ChildPath $packagesDirectoryName
-    if (Test-Path -LiteralPath $packagesDirectory) {
-        Remove-Item -LiteralPath $packagesDirectory -Recurse -Force
-    }
-
-    New-Item -Path . -Name $packagesDirectoryName -ItemType Directory -Force
-
-    $requiredPackages = @(
-        @{ PackageName = "Newtonsoft.Json"; PackageVersion = "13.0.2"; DllName = "Newtonsoft.Json.dll" },
-        @{ PackageName = "YamlDotNet"; PackageVersion = "13.2.0"; DllName = "YamlDotNet.dll" }
+    param(
+        [string] $Line
     )
 
-    $requiredPackages | ForEach-Object {
-        $packageName = $_["PackageName"]
-        $packageVersion = $_["PackageVersion"]
-        $packageDll = $_["DllName"]
-        Install-Package -Name $packageName -RequiredVersion $packageVersion -Source "https://www.nuget.org/api/v2" -Destination $packagesDirectory -SkipDependencies -ExcludeVersion -Force
-        $packageDllPath = Join-Path -Path $packagesDirectory -ChildPath $packageName | Join-Path -ChildPath "lib" | Join-Path -ChildPath "net6.0" | Join-Path -ChildPath $packageDll
-        if (-not (Test-Path -LiteralPath $packageDllPath)) {
-            throw "Package DLL not found: $packageDllPath"
+    return ([regex]::Match($Line, '^\s*').Value).Length
+}
+
+function TryParseLabelValue {
+    [CmdletBinding()]
+    param(
+        [string] $Line
+    )
+
+    if ($Line -match '^\s*label:\s*(.+)\s*$') {
+        $value = $Matches[1].Trim()
+        if (($value.StartsWith('"') -and $value.EndsWith('"')) -or ($value.StartsWith("'") -and $value.EndsWith("'"))) {
+            $value = $value.Substring(1, $value.Length - 2)
         }
-        Add-Type -LiteralPath $packageDllPath -ErrorAction Stop
+        return $value
     }
+
+    return $null
 }
 
 function GetSquadMappingFromWiki {
@@ -92,33 +88,60 @@ function EnsureSquadLabelsInActions {
         [hashtable] $LabelToSquad
     )
 
-    if ($null -eq $ActionList) {
+    if ($null -eq $ActionList -or $ActionList -is [string]) {
         return $ActionList
     }
 
+    $isSingleAction = $ActionList -is [System.Collections.IDictionary] -or $ActionList -is [PSCustomObject]
     $list = [System.Collections.Generic.List[object]]::new()
-    foreach ($action in $ActionList) {
-        $list.Add($action)
+    if ($isSingleAction) {
+        $list.Add($ActionList)
+    } else {
+        foreach ($action in $ActionList) {
+            $list.Add($action)
+        }
     }
 
     $labelsPresent = @{}
     foreach ($action in $list) {
-        if ($null -ne $action -and $action.PSObject.Properties.Name -contains "addLabel") {
-            $label = $action.addLabel.label
-            if (![string]::IsNullOrWhiteSpace($label)) {
-                $labelsPresent[$label] = $true
+        if ($null -eq $action) {
+            continue
+        }
+
+        $label = $null
+        if ($action -is [System.Collections.IDictionary]) {
+            if ($action.Contains("addLabel")) {
+                $labelNode = $action["addLabel"]
+                if ($labelNode -is [System.Collections.IDictionary]) {
+                    $label = $labelNode["label"]
+                } else {
+                    $label = $labelNode.label
+                }
             }
+        } elseif ($action.PSObject.Properties.Name -contains "addLabel") {
+            $label = $action.addLabel.label
+        }
+
+        if (![string]::IsNullOrWhiteSpace($label)) {
+            $labelsPresent[$label] = $true
         }
     }
 
-    foreach ($label in $labelsPresent.Keys) {
+    $labelsToCheck = @($labelsPresent.Keys)
+    $didAdd = $false
+    foreach ($label in $labelsToCheck) {
         if ($LabelToSquad.ContainsKey($label)) {
             $squadLabel = $LabelToSquad[$label]
             if (-not $labelsPresent.ContainsKey($squadLabel)) {
                 $list.Add([PSCustomObject]@{ addLabel = [PSCustomObject]@{ label = $squadLabel } })
                 $labelsPresent[$squadLabel] = $true
+                $didAdd = $true
             }
         }
+    }
+
+    if (-not $didAdd) {
+        return $ActionList
     }
 
     return $list.ToArray()
@@ -170,26 +193,123 @@ function UpdateNode {
     }
 }
 
+function AddSquadLabelsToYaml {
+    [CmdletBinding()]
+    param(
+        [string[]] $Lines,
+        [hashtable] $LabelToSquad
+    )
+
+    $insertions = [System.Collections.Generic.List[object]]::new()
+
+    for ($i = 0; $i -lt $Lines.Count; $i++) {
+        $line = $Lines[$i]
+        if ($line -match '^(\s*)(then|actions):\s*$') {
+            $baseIndentLength = $Matches[1].Length
+
+            $j = $i + 1
+            while ($j -lt $Lines.Count -and $Lines[$j].Trim().Length -eq 0) {
+                $j++
+            }
+            if ($j -ge $Lines.Count) {
+                continue
+            }
+
+            $listLine = $Lines[$j]
+            $listIndentLength = GetIndentLength -Line $listLine
+            if ($listIndentLength -lt $baseIndentLength -or -not ($listLine -match '^\s*-\s+')) {
+                continue
+            }
+
+            $k = $j
+            while ($k -lt $Lines.Count) {
+                $lineAtK = $Lines[$k]
+                if ($lineAtK.Trim().Length -ne 0 -and (GetIndentLength -Line $lineAtK) -lt $baseIndentLength) {
+                    break
+                }
+                # Also break if we hit a `description:` at the same level as `then:`
+                if ($lineAtK -match '^\s*description:' -and (GetIndentLength -Line $lineAtK) -eq $baseIndentLength) {
+                    break
+                }
+                $k++
+            }
+
+            $labelsPresent = @{}
+            $lastAddLabelEnd = -1
+            for ($b = $j; $b -lt $k; $b++) {
+                $lineAtB = $Lines[$b]
+                if ($lineAtB -match '^\s*-\s+addLabel:\s*$' -and (GetIndentLength -Line $lineAtB) -eq $listIndentLength) {
+                    $labelValue = $null
+                    for ($c = $b + 1; $c -lt $k; $c++) {
+                        $lineAtC = $Lines[$c]
+                        if ($lineAtC -match '^\s*-\s+' -and (GetIndentLength -Line $lineAtC) -eq $listIndentLength) {
+                            break
+                        }
+                        $labelValue = TryParseLabelValue -Line $lineAtC
+                        if ($null -ne $labelValue) {
+                            $lastAddLabelEnd = $c
+                            break
+                        }
+                    }
+                    if (![string]::IsNullOrWhiteSpace($labelValue)) {
+                        $labelsPresent[$labelValue] = $true
+                    }
+                }
+            }
+
+            if ($lastAddLabelEnd -ge 0) {
+                $labelsToAdd = [System.Collections.Generic.List[string]]::new()
+                foreach ($label in $labelsPresent.Keys) {
+                    if ($LabelToSquad.ContainsKey($label)) {
+                        $squadLabel = $LabelToSquad[$label]
+                        if (-not $labelsPresent.ContainsKey($squadLabel) -and -not $labelsToAdd.Contains($squadLabel)) {
+                            $labelsToAdd.Add($squadLabel)
+                        }
+                    }
+                }
+
+                if ($labelsToAdd.Count -gt 0) {
+                    $insertLines = [System.Collections.Generic.List[string]]::new()
+                    foreach ($squadLabel in $labelsToAdd) {
+                        $insertLines.Add((" " * $listIndentLength) + "- addLabel:")
+                        $insertLines.Add((" " * $listIndentLength) + "    label: $squadLabel")
+                    }
+                    $insertions.Add([PSCustomObject]@{ Index = $lastAddLabelEnd + 1; Lines = $insertLines })
+                }
+            }
+        }
+    }
+
+    if ($insertions.Count -eq 0) {
+        return $Lines
+    }
+
+    $sortedInsertions = $insertions | Sort-Object Index -Descending
+    $lineList = [System.Collections.Generic.List[string]]::new()
+    $lineList.AddRange($Lines)
+    foreach ($insertion in $sortedInsertions) {
+        $lineList.InsertRange($insertion.Index, $insertion.Lines)
+    }
+
+    return $lineList.ToArray()
+}
+
 $labelToSquad = GetSquadMappingFromWiki -AccessToken $AccessToken
 if ($labelToSquad.Count -eq 0) {
     throw "No squad mappings found in the wiki."
 }
 
-InitializeRequiredPackages
-
 $yamlConfigPath = $PSScriptRoot | Split-Path | Split-Path | Join-Path -ChildPath ".github" | Join-Path -ChildPath "policies" | Join-Path -ChildPath "resourceManagement.yml"
-$yamlContent = Get-Content -Path $yamlConfigPath -Raw
-$yamlDeserializer = [YamlDotNet.Serialization.DeserializerBuilder]::new().Build()
-$yamlObjectGraph = $yamlDeserializer.Deserialize($yamlContent)
-$jsonSerializer = [YamlDotNet.Serialization.SerializerBuilder]::new().JsonCompatible().Build()
-$jsonObjectGraph = $jsonSerializer.Serialize($yamlObjectGraph) | ConvertFrom-Json
-
-UpdateNode -Node $jsonObjectGraph -LabelToSquad $labelToSquad
-
-$updatedJsonContent = $jsonObjectGraph | ConvertTo-Json -Depth 64
-$updatedJsonObjectGraph = [Newtonsoft.Json.JsonConvert]::DeserializeObject[System.Dynamic.ExpandoObject]($updatedJsonContent)
-$yamlSerializer = [YamlDotNet.Serialization.SerializerBuilder]::new().Build()
-$updatedYamlContent = $yamlSerializer.Serialize($updatedJsonObjectGraph)
-$updatedYamlContent | Out-File -FilePath $yamlConfigPath -NoNewline -Force
-
-(Get-Content -Path $yamlConfigPath) | ForEach-Object { $_.TrimEnd() } | Set-Content -Path $yamlConfigPath
+$yamlContent = [System.IO.File]::ReadAllText($yamlConfigPath)
+$lineEnding = "`n"
+if ($yamlContent.Contains("`r`n")) {
+    $lineEnding = "`r`n"
+}
+$endsWithNewline = $yamlContent.EndsWith("`n")
+$yamlLines = [regex]::Split($yamlContent, "\r?\n", [System.Text.RegularExpressions.RegexOptions]::None)
+$updatedLines = AddSquadLabelsToYaml -Lines $yamlLines -LabelToSquad $labelToSquad
+$updatedContent = [string]::Join($lineEnding, $updatedLines)
+if (-not $endsWithNewline -and $updatedContent.EndsWith($lineEnding)) {
+    $updatedContent = $updatedContent.Substring(0, $updatedContent.Length - $lineEnding.Length)
+}
+[System.IO.File]::WriteAllText($yamlConfigPath, $updatedContent)
