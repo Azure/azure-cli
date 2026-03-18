@@ -81,21 +81,10 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
     registry, resource_group_name = get_registry_by_name(
         cmd.cli_ctx, registry_name, resource_group_name)
 
-    AgentProperties, AuthInfo, BaseImageTrigger, PlatformProperties, RoleAssignmentMode, \
-        SourceControlType, SourceProperties, SourceTrigger, Task, TriggerStatus, \
-        TriggerProperties = cmd.get_models(
-            'AgentProperties',
-            'AuthInfo',
-            'BaseImageTrigger',
-            'PlatformProperties',
-            'RoleAssignmentMode',
-            'SourceControlType',
-            'SourceProperties',
-            'SourceTrigger',
-            'Task',
-            'TriggerStatus',
-            'TriggerProperties',
-            operation_group='tasks')
+    from azure.mgmt.containerregistrytasks.models import (
+        AgentProperties, AuthInfo, BaseImageTrigger, PlatformProperties, SourceControlType,
+        SourceProperties, SourceTrigger, Task, TriggerStatus, TriggerProperties)
+    RoleAssignmentMode = cmd.get_models('RoleAssignmentMode')
 
     # If quicktask skip other parameters
     if is_system_task and task_name == ACR_TASK_QUICKTASK:
@@ -137,7 +126,6 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
 
     step = create_task_step(
         context_path=context_path,
-        cmd=cmd,
         file=file,
         image_names=image_names,
         values=values,
@@ -157,8 +145,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
         source_control_type = SourceControlType.github.value
 
     source_triggers = None
-    source_trigger_events = _get_trigger_event_list_put(cmd,
-                                                        commit_trigger_enabled,
+    source_trigger_events = _get_trigger_event_list_put(commit_trigger_enabled,
                                                         pull_request_trigger_enabled)
     # if source_trigger_events contains any event types we assume they are enabled
     if source_trigger_events:
@@ -200,10 +187,10 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
 
     identity = None
     if assign_identity is not None:
-        identity = _build_identities_info(cmd, assign_identity)
+        identity = _build_identities_info(assign_identity)
 
     if source_acr_auth_id and source_acr_auth_id.lower() != "none":
-        identity, _ = _update_identities_info(cmd, source_acr_auth_id, identity)
+        identity, _ = _update_identities_info(source_acr_auth_id, identity)
 
     registry_abac_enabled = registry.role_assignment_mode == RoleAssignmentMode.ABAC_REPOSITORY_PERMISSIONS
 
@@ -267,7 +254,6 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
 
 
 def create_task_step(context_path,
-                     cmd,
                      file,
                      image_names,
                      values,
@@ -281,11 +267,7 @@ def create_task_step(context_path,
                      target,
                      cmd_value,
                      timeout):
-    DockerBuildStep, EncodedTaskStep, FileTaskStep = cmd.get_models(
-        'DockerBuildStep',
-        'EncodedTaskStep',
-        'FileTaskStep',
-        operation_group='tasks')
+    from azure.mgmt.containerregistrytasks.models import DockerBuildStep, EncodedTaskStep, FileTaskStep
     if context_path:
         if file:
             if file.endswith(ALLOWED_TASK_FILE_TYPES):
@@ -395,22 +377,11 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
     registry, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
-    AgentProperties, AuthInfoUpdateParameters, BaseImageTriggerUpdateParameters, \
-        PlatformUpdateParameters, RoleAssignmentMode, SourceControlType, \
-        SourceUpdateParameters, SourceTriggerUpdateParameters, TaskUpdateParameters, \
-        TriggerStatus, TriggerUpdateParameters = cmd.get_models(
-            'AgentProperties',
-            'AuthInfoUpdateParameters',
-            'BaseImageTriggerUpdateParameters',
-            'PlatformUpdateParameters',
-            'RoleAssignmentMode',
-            'SourceControlType',
-            'SourceUpdateParameters',
-            'SourceTriggerUpdateParameters',
-            'TaskUpdateParameters',
-            'TriggerStatus',
-            'TriggerUpdateParameters',
-            operation_group='tasks')
+    from azure.mgmt.containerregistrytasks.models import (
+        AgentProperties, AuthInfoUpdateParameters, BaseImageTriggerUpdateParameters,
+        PlatformUpdateParameters, SourceControlType, SourceUpdateParameters,
+        SourceTriggerUpdateParameters, TaskUpdateParameters, TriggerStatus, TriggerUpdateParameters)
+    RoleAssignmentMode = cmd.get_models('RoleAssignmentMode')
 
     task = client.get_details(resource_group_name, registry_name, task_name)
 
@@ -457,7 +428,6 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
     step = update_task_step(
         step=step,  # Need exisiting step for update
         context_path=context_path,
-        cmd=cmd,
         encoded_task_content=encoded_task_content,
         file=file,
         image_names=image_names,
@@ -484,8 +454,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
 
         source_triggers = task.trigger.source_triggers
         if (commit_trigger_enabled or pull_request_trigger_enabled) or source_triggers:
-            source_trigger_events = _get_trigger_event_list_patch(cmd,
-                                                                  source_triggers,
+            source_trigger_events = _get_trigger_event_list_patch(source_triggers,
                                                                   commit_trigger_enabled,
                                                                   pull_request_trigger_enabled)
 
@@ -526,7 +495,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
 
     if source_acr_auth_id and source_acr_auth_id.lower() != "none":
         identity = client.get_details(resource_group_name, registry_name, task_name).identity
-        identity, update_identity = _update_identities_info(cmd, source_acr_auth_id, identity)
+        identity, update_identity = _update_identities_info(source_acr_auth_id, identity)
 
         if update_identity:
             taskUpdateParameters = TaskUpdateParameters(
@@ -569,7 +538,6 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
 
 def update_task_step(step,
                      context_path,
-                     cmd,
                      encoded_task_content,
                      file,
                      image_names,
@@ -582,12 +550,8 @@ def update_task_step(step,
                      arg,
                      secret_arg,
                      target):
-    DockerBuildStepUpdateParameters, EncodedTaskStepUpdateParameters, \
-        FileTaskStepUpdateParameters = cmd.get_models(
-            'DockerBuildStepUpdateParameters',
-            'EncodedTaskStepUpdateParameters',
-            'FileTaskStepUpdateParameters',
-            operation_group='tasks')
+    from azure.mgmt.containerregistrytasks.models import (
+        DockerBuildStepUpdateParameters, EncodedTaskStepUpdateParameters, FileTaskStepUpdateParameters)
     arguments = _get_all_override_arguments(arg, secret_arg)
     set_values = _get_all_override_arguments(set_value, set_secret)
     # If context_path is not None, check if file is provided
@@ -656,9 +620,9 @@ def acr_task_identity_assign(cmd,
                              resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
-    TaskUpdateParameters = cmd.get_models('TaskUpdateParameters', operation_group='tasks')
+    from azure.mgmt.containerregistrytasks.models import TaskUpdateParameters
 
-    identity = _build_identities_info(cmd, identities)
+    identity = _build_identities_info(identities)
 
     taskUpdateParameters = TaskUpdateParameters(
         identity=identity
@@ -675,7 +639,7 @@ def acr_task_identity_remove(cmd,
                              resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
-    TaskUpdateParameters = cmd.get_models('TaskUpdateParameters', operation_group='tasks')
+    from azure.mgmt.containerregistrytasks.models import TaskUpdateParameters
 
     if identities and IDENTITY_GLOBAL_REMOVE in identities:
         if len(identities) > 1:
@@ -691,9 +655,9 @@ def acr_task_identity_remove(cmd,
             resource_group_name, registry_name, task_name).identity
         identities = IDENTITY_GLOBAL_REMOVE if not existingIdentity else list(
             existingIdentity.user_assigned_identities.keys())
-        identity = _build_identities_info(cmd, identities)
+        identity = _build_identities_info(identities)
     else:
-        identity = _build_identities_info(cmd, identities, True)
+        identity = _build_identities_info(identities, True)
 
     taskUpdateParameters = TaskUpdateParameters(
         identity=identity
@@ -726,7 +690,7 @@ def acr_task_credential_add(cmd,
                             resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
-    TaskUpdateParameters = cmd.get_models('TaskUpdateParameters', operation_group='tasks')
+    from azure.mgmt.containerregistrytasks.models import TaskUpdateParameters
 
     existingCreds = client.get_details(resource_group_name, registry_name, task_name).credentials
     if not existingCreds or not existingCreds.custom_registries:
@@ -763,7 +727,7 @@ def acr_task_credential_update(cmd,
                                resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
-    TaskUpdateParameters = cmd.get_models('TaskUpdateParameters', operation_group='tasks')
+    from azure.mgmt.containerregistrytasks.models import TaskUpdateParameters
 
     existingCreds = client.get_details(resource_group_name, registry_name, task_name).credentials
     if not existingCreds or not existingCreds.custom_registries:
@@ -797,7 +761,7 @@ def acr_task_credential_remove(cmd,
                                resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
-    TaskUpdateParameters = cmd.get_models('TaskUpdateParameters', operation_group='tasks')
+    from azure.mgmt.containerregistrytasks.models import TaskUpdateParameters
 
     taskUpdateParameters = TaskUpdateParameters(
         credentials=get_source_and_custom_registry_credentials(
@@ -834,12 +798,8 @@ def acr_task_timer_add(cmd,
                        resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
-    TaskUpdateParameters, TriggerStatus, TriggerUpdateParameters, TimerTriggerUpdateParameters = cmd.get_models(
-        'TaskUpdateParameters',
-        'TriggerStatus',
-        'TriggerUpdateParameters',
-        'TimerTriggerUpdateParameters',
-        operation_group='tasks')
+    from azure.mgmt.containerregistrytasks.models import (
+        TaskUpdateParameters, TriggerStatus, TriggerUpdateParameters, TimerTriggerUpdateParameters)
 
     taskUpdateParameters = TaskUpdateParameters(
         trigger=TriggerUpdateParameters(
@@ -866,12 +826,8 @@ def acr_task_timer_update(cmd,
                           resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
-    TaskUpdateParameters, TriggerStatus, TriggerUpdateParameters, TimerTriggerUpdateParameters = cmd.get_models(
-        'TaskUpdateParameters',
-        'TriggerStatus',
-        'TriggerUpdateParameters',
-        'TimerTriggerUpdateParameters',
-        operation_group='tasks')
+    from azure.mgmt.containerregistrytasks.models import (
+        TaskUpdateParameters, TriggerStatus, TriggerUpdateParameters, TimerTriggerUpdateParameters)
 
     trigger_status = None
     if enabled is not None:
@@ -973,10 +929,7 @@ def acr_task_run(cmd,  # pylint: disable=too-many-locals
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
-    OverrideTaskStepProperties, TaskRunRequest = cmd.get_models(
-        'OverrideTaskStepProperties',
-        'TaskRunRequest',
-        operation_group='tasks')
+    from azure.mgmt.containerregistrytasks.models import OverrideTaskStepProperties, TaskRunRequest
 
     from ._client_factory import cf_acr_registries_tasks
     client_registries = cf_acr_registries_tasks(cmd.cli_ctx)
@@ -1143,7 +1096,7 @@ def _get_all_override_arguments(argument=None, secret_argument=None):
     return arguments
 
 
-def _update_identities_info(cmd, new_identity, identity):
+def _update_identities_info(new_identity, identity):
     """
     Add the new identity information to the existing IdentityProperties provided.
 
@@ -1159,12 +1112,9 @@ def _update_identities_info(cmd, new_identity, identity):
 
     if identity is None:
         update_identity = True
-        return _build_identities_info(cmd, [new_identity]), update_identity
+        return _build_identities_info([new_identity]), update_identity
 
-    ResourceIdentityType, UserIdentityProperties = cmd.get_models(
-        'ResourceIdentityType',
-        'UserIdentityProperties',
-        operation_group='tasks')
+    from azure.mgmt.containerregistrytasks.models import ResourceIdentityType, UserIdentityProperties
 
     assign_system_identity = IDENTITY_LOCAL_ID == new_identity
     if assign_system_identity:
@@ -1191,12 +1141,9 @@ def _update_identities_info(cmd, new_identity, identity):
     return identity, update_identity
 
 
-def _build_identities_info(cmd, identities, is_remove=False):
-    IdentityProperties, ResourceIdentityType, UserIdentityProperties = cmd.get_models(
-        'IdentityProperties',
-        'ResourceIdentityType',
-        'UserIdentityProperties',
-        operation_group='tasks')
+def _build_identities_info(identities, is_remove=False):
+    from azure.mgmt.containerregistrytasks.models import (
+        IdentityProperties, ResourceIdentityType, UserIdentityProperties)
     identities = identities or []
     identity_types = []
     if IDENTITY_GLOBAL_REMOVE in identities:
@@ -1216,10 +1163,9 @@ def _build_identities_info(cmd, identities, is_remove=False):
     return identity
 
 
-def _get_trigger_event_list_put(cmd,
-                                commit_trigger_enabled=None,
+def _get_trigger_event_list_put(commit_trigger_enabled=None,
                                 pull_request_trigger_enabled=None):
-    SourceTriggerEvent = cmd.get_models('SourceTriggerEvent', operation_group='tasks')
+    from azure.mgmt.containerregistrytasks.models import SourceTriggerEvent
     source_trigger_events = []
     if commit_trigger_enabled:
         source_trigger_events.append(SourceTriggerEvent.commit.value)
@@ -1228,14 +1174,10 @@ def _get_trigger_event_list_put(cmd,
     return source_trigger_events
 
 
-def _get_trigger_event_list_patch(cmd,
-                                  source_triggers,
+def _get_trigger_event_list_patch(source_triggers,
                                   commit_trigger_enabled=None,
                                   pull_request_trigger_enabled=None):
-    SourceTriggerEvent, TriggerStatus = cmd.get_models(
-        'SourceTriggerEvent',
-        'TriggerStatus',
-        operation_group='tasks')
+    from azure.mgmt.containerregistrytasks.models import SourceTriggerEvent, TriggerStatus
     source_trigger_events = set()
     # perform merge with server-side event list
     if source_triggers:
