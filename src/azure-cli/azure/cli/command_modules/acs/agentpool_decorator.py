@@ -32,7 +32,9 @@ from azure.cli.command_modules.acs._consts import (
     DecoratorEarlyExitException,
     DecoratorMode,
 )
-from azure.cli.command_modules.acs._helpers import get_snapshot_by_snapshot_id, safe_list_get, process_dns_overrides, build_etag_kwargs
+from azure.cli.command_modules.acs._helpers import (
+    get_snapshot_by_snapshot_id, safe_list_get, process_dns_overrides, build_etag_kwargs
+)
 from azure.cli.command_modules.acs._validators import extract_comma_separated_string
 from azure.cli.command_modules.acs.base_decorator import BaseAKSContext, BaseAKSModels, BaseAKSParamDict
 from azure.cli.core import AzCommandsLoader
@@ -1249,7 +1251,8 @@ class AKSAgentPoolContext(BaseAKSContext):
             if self.agentpool and self.agentpool.type is not None:
                 vm_set_type = self.agentpool.type
         else:
-            if self.agentpool and self.agentpool.properties and self.agentpool.properties.type_properties_type is not None:
+            if (self.agentpool and self.agentpool.properties and
+                    self.agentpool.properties.type_properties_type is not None):
                 vm_set_type = self.agentpool.properties.type_properties_type
 
         # normalize
