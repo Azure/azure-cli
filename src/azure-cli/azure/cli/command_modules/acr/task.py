@@ -171,7 +171,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
 
     timer_triggers = None
     if schedule:
-        timer_triggers = build_timers_info(cmd, schedule)
+        timer_triggers = build_timers_info(schedule)
 
     base_image_trigger = None
     if base_image_trigger_enabled:
@@ -183,7 +183,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
             update_trigger_payload_type=update_trigger_payload_type
         )
 
-    platform_os, platform_arch, platform_variant = get_validate_platform(cmd, platform)
+    platform_os, platform_arch, platform_variant = get_validate_platform(platform)
 
     identity = None
     if assign_identity is not None:
@@ -491,7 +491,7 @@ def acr_task_update(cmd,  # pylint: disable=too-many-locals, too-many-statements
 
     platform_os, platform_arch, platform_variant = None, None, None
     if platform:
-        platform_os, platform_arch, platform_variant = get_validate_platform(cmd, platform)
+        platform_os, platform_arch, platform_variant = get_validate_platform(platform)
 
     if source_acr_auth_id and source_acr_auth_id.lower() != "none":
         identity = client.get_details(resource_group_name, registry_name, task_name).identity

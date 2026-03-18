@@ -95,7 +95,7 @@ def acr_build(cmd,  # pylint: disable=too-many-locals
 
     is_push_enabled = _get_push_enabled_status(no_push, image_names)
 
-    platform_os, platform_arch, platform_variant = get_validate_platform(cmd, platform)
+    platform_os, platform_arch, platform_variant = get_validate_platform(platform)
 
     from azure.mgmt.containerregistrytasks.models import DockerBuildRequest, PlatformProperties
     RoleAssignmentMode = cmd.get_models('RoleAssignmentMode')

@@ -52,7 +52,7 @@ def acr_pack_build(cmd,  # pylint: disable=too-many-locals
     if not source_location:
         raise CLIError('Building with Buildpacks requires a valid source location.')
 
-    platform_os, platform_arch, platform_variant = get_validate_platform(cmd, platform)
+    platform_os, platform_arch, platform_variant = get_validate_platform(platform)
     from azure.mgmt.containerregistrytasks.models import OS
     if platform_os != OS.linux.value.lower():
         raise CLIError('Building with Buildpacks is only supported on Linux.')

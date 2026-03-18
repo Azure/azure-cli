@@ -200,7 +200,7 @@ def _invalid_sku_downgrade():
         "Managed registries could not be downgraded to Classic SKU.")
 
 
-def get_validate_platform(cmd, platform):
+def get_validate_platform(platform):
     """Gets and validates the Platform from both flags
     :param str platform: The name of Platform passed by user in --platform flag
     """
@@ -369,7 +369,7 @@ def get_source_and_custom_registry_credentials(cmd,
     )
 
 
-def build_timers_info(cmd, schedules):
+def build_timers_info(schedules):
     timer_triggers = []
     from azure.mgmt.containerregistrytasks.models import TriggerStatus, TimerTrigger
 
