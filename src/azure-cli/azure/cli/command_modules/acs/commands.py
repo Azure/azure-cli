@@ -60,8 +60,8 @@ def load_command_table(self, _):
     )
 
     maintenance_configuration_sdk = CliCommandType(
-        operations_tmpl='aazure.mgmt.containerservice.operations.'
-                        '_maintenance_configurations_operations#MaintenanceConfigurationsOperations.{}',
+        operations_tmpl='azure.mgmt.containerservice.operations.'
+                        '_operations#MaintenanceConfigurationsOperations.{}',
         operation_group='maintenance_configurations',
         resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         client_factory=cf_maintenance_configurations
@@ -69,7 +69,7 @@ def load_command_table(self, _):
 
     managed_namespaces_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.containerservice.operations.'
-                        '_managed_namespaces_operations#ManagedNamespacesOperations.{}',
+                        '_operations#ManagedNamespacesOperations.{}',
         operation_group='managed_namespaces',
         resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         client_factory=cf_managed_namespaces,
@@ -77,7 +77,7 @@ def load_command_table(self, _):
 
     snapshot_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.containerservice.operations.'
-                        '_snapshots_operations#SnapshotsOperations.{}',
+                        '_operations#SnapshotsOperations.{}',
         operation_group='snapshots',
         resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         client_factory=cf_snapshots
@@ -85,7 +85,7 @@ def load_command_table(self, _):
 
     trustedaccess_role_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.containerservice.operations.'
-                        '_trusted_access_roles_operations#TrustedAccessRolesOperations.{}',
+                        '_operations#TrustedAccessRolesOperations.{}',
         operation_group='trustedaccess_role',
         resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         client_factory=cf_trustedaccess_role
@@ -93,7 +93,7 @@ def load_command_table(self, _):
 
     trustedaccess_role_binding_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.containerservice.operations.'
-                        '_trusted_access_role_bindings_operations#TrustedAccessRoleBindingsOperations.{}',
+                        '_operations#TrustedAccessRoleBindingsOperations.{}',
         operation_group='trustedaccess_role_binding',
         resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         client_factory=cf_trustedaccess_role_binding
