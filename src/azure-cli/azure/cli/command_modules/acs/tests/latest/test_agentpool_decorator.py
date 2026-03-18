@@ -1248,7 +1248,7 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         else:
             agentpool = self.create_initialized_agentpool_instance()
             if agentpool.properties is None:
-                agentpool.properties = {}
+                agentpool.properties = self.models.AgentPoolManagedClusterAgentPoolProfileProperties()
             agentpool.properties.type_properties_type = CONST_AVAILABILITY_SET
         ctx_1.attach_agentpool(agentpool)
         self.assertEqual(ctx_1.get_vm_set_type(), CONST_AVAILABILITY_SET)

@@ -1501,9 +1501,10 @@ def _remove_nulls(managed_clusters):
                 for attr in ap_attrs:
                     if getattr(ap_profile, attr, None) is None:
                         ap_profile.pop(attr, None)
-        for attr in sp_attrs:
-            if getattr(managed_cluster.service_principal_profile, attr, None) is None:
-                managed_cluster.service_principal_profile.pop(attr, None)
+        if managed_cluster.service_principal_profile is not None:
+            for attr in sp_attrs:
+                if getattr(managed_cluster.service_principal_profile, attr, None) is None:
+                    managed_cluster.service_principal_profile.pop(attr, None)
     return managed_clusters
 
 
