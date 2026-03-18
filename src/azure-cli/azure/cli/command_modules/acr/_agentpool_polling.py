@@ -29,7 +29,6 @@ def delete_agentpool_with_polling(cmd,
             resource_group_name, registry_name, agent_pool_name, cls=lambda x, y, z: x),
         deserialization_callback=deserialize_agentpool,
         polling_method=RunPolling(
-            cmd=cmd,
             registry_name=registry_name,
             agent_pool_name=agent_pool_name
         ))
@@ -37,8 +36,7 @@ def delete_agentpool_with_polling(cmd,
 
 class RunPolling(PollingMethod):  # pylint: disable=too-many-instance-attributes
 
-    def __init__(self, cmd, registry_name, agent_pool_name, timeout=30):
-        self._cmd = cmd
+    def __init__(self, registry_name, agent_pool_name, timeout=30):
         self._registry_name = registry_name
         self._agent_pool_name = agent_pool_name
         self._timeout = timeout
@@ -83,7 +81,7 @@ class RunPolling(PollingMethod):  # pylint: disable=too-many-instance-attributes
         return self.operation_result
 
     def _set_operation_status(self, response):
-        AgentPoolStatus = self._cmd.get_models('ProvisioningState')
+        from azure.mgmt.containerregistrytasks.models import ProvisioningState as AgentPoolStatus
         if response.http_response.status_code == 200 or response.http_response.status_code == 404:
             self.operation_result = self._deserialize(response)
             self.operation_status = self.operation_result.provisioning_state or AgentPoolStatus.succeeded.value
