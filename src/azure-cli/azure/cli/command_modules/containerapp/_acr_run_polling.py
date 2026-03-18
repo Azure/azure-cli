@@ -19,7 +19,7 @@ def get_run_with_polling(cmd,
                          registry_name,
                          resource_group_name):
     deserializer = Deserializer(
-        {k: v for k, v in get_acr_task_models(cmd).__dict__.items() if isinstance(v, type)})
+        {k: v for k, v in get_acr_task_models().__dict__.items() if isinstance(v, type)})
 
     def deserialize_run(response):
         return deserializer('Run', response)
