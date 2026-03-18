@@ -842,6 +842,10 @@ def load_arguments(self, _):
                 'by that action.'
             )
         )
+    with self.argument_context('aks delete') as c:
+        c.argument("if_match")
+        c.argument("if_none_match")
+
     with self.argument_context('aks disable-addons', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('addons', options_list=['--addons', '-a'])
 

@@ -1453,6 +1453,11 @@ def aks_scale(cmd, client, resource_group_name, name, node_count, nodepool_name=
     raise CLIError('The nodepool "{}" was not found.'.format(nodepool_name))
 
 
+def aks_delete(cmd, client, resource_group_name, name, no_wait=False, if_match=None, if_none_match=None):
+    return sdk_no_wait(no_wait, client.begin_delete, resource_group_name, name,
+                       **build_etag_kwargs(if_match, if_none_match))
+
+
 def aks_show(cmd, client, resource_group_name, name):
     mc = client.get(resource_group_name, name)
     return _remove_nulls([mc])[0]
