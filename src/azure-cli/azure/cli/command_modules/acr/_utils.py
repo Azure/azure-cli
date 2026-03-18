@@ -204,7 +204,7 @@ def get_validate_platform(cmd, platform):
     """Gets and validates the Platform from both flags
     :param str platform: The name of Platform passed by user in --platform flag
     """
-    OS, Architecture = cmd.get_models('OS', 'Architecture', operation_group='runs')
+    from azure.mgmt.containerregistrytasks.models import OS, Architecture
 
     # Defaults
     platform_os = OS.linux.value
@@ -301,11 +301,8 @@ def get_source_and_custom_registry_credentials(cmd,
     :param bool registry_abac_enabled: whether the registry is ABAC-enabled
     :param bool deprecate_auth_mode: whether to print the auth mode deprecation warning
     """
-    Credentials, CustomRegistryCredentials, SourceRegistryCredentials, SecretObject, \
-        SecretObjectType = cmd.get_models(
-            'Credentials', 'CustomRegistryCredentials', 'SourceRegistryCredentials', 'SecretObject',
-            'SecretObjectType',
-            operation_group='tasks')
+    from azure.mgmt.containerregistrytasks.models import (
+        Credentials, CustomRegistryCredentials, SourceRegistryCredentials, SecretObject, SecretObjectType)
 
     if deprecate_auth_mode:
         check_auth_mode_for_abac(registry_abac_enabled, auth_mode)
@@ -374,7 +371,7 @@ def get_source_and_custom_registry_credentials(cmd,
 
 def build_timers_info(cmd, schedules):
     timer_triggers = []
-    TriggerStatus, TimerTrigger = cmd.get_models('TriggerStatus', 'TimerTrigger', operation_group='tasks')
+    from azure.mgmt.containerregistrytasks.models import TriggerStatus, TimerTrigger
 
     # Provide a default name for the timer if no name was provided.
     for index, schedule in enumerate(schedules, start=1):
