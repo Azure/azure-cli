@@ -220,9 +220,9 @@ def get_validate_platform(cmd, platform):
     platform_os = platform_os.lower()
     platform_arch = platform_arch.lower()
 
-    valid_os = get_valid_os(cmd)
-    valid_arch = get_valid_architecture(cmd)
-    valid_variant = get_valid_variant(cmd)
+    valid_os = get_valid_os()
+    valid_arch = get_valid_architecture()
+    valid_variant = get_valid_variant()
 
     if platform_os not in valid_os:
         raise CLIError(

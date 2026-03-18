@@ -18,7 +18,7 @@ def delete_agentpool_with_polling(cmd,
                                   registry_name,
                                   resource_group_name):
     deserializer = Deserializer(
-        {k: v for k, v in get_acr_task_models(cmd).__dict__.items() if isinstance(v, type)})
+        {k: v for k, v in get_acr_task_models().__dict__.items() if isinstance(v, type)})
 
     def deserialize_agentpool(response):
         return deserializer('AgentPool', response)
@@ -62,7 +62,7 @@ class RunPolling(PollingMethod):  # pylint: disable=too-many-instance-attributes
             time.sleep(self._timeout)
             self._update_status()
 
-        if self.operation_status not in get_succeeded_agentpool_status(self._cmd):
+        if self.operation_status not in get_succeeded_agentpool_status():
             from knack.util import CLIError
             raise CLIError("The agent pool deletion with name '{}' finished with unsuccessful status '{}'. "
                            "Show run details by 'az acr agentpool show -r {} -n {}'. ".format(
@@ -77,7 +77,7 @@ class RunPolling(PollingMethod):  # pylint: disable=too-many-instance-attributes
         return self.operation_status
 
     def finished(self):
-        return self.operation_status in get_finished_agentpool_status(self._cmd)
+        return self.operation_status in get_finished_agentpool_status()
 
     def resource(self):
         return self.operation_result
