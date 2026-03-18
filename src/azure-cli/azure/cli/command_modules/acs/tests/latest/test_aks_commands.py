@@ -1937,7 +1937,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # delete
         self.cmd(
-            'aks delete -g {resource_group} -n {name} --yes --no-wait --etag={if_match}', checks=[self.is_empty()])
+            'aks delete -g {resource_group} -n {name} --yes --no-wait --if-match={if_match}', checks=[self.is_empty()])
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
@@ -11494,7 +11494,7 @@ spec:
 
         # delete
         self.cmd(
-            'aks delete -g {resource_group} -n {name} --yes --no-wait --etag={if_match}', checks=[self.is_empty()])
+            'aks delete -g {resource_group} -n {name} --yes --no-wait --if-match={if_match}', checks=[self.is_empty()])
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
