@@ -29,7 +29,6 @@ def get_run_with_polling(cmd,
             resource_group_name, registry_name, run_id, cls=lambda x, y, z: x),
         deserialization_callback=deserialize_run,
         polling_method=RunPolling(
-            cmd=cmd,
             registry_name=registry_name,
             run_id=run_id
         ))
@@ -37,8 +36,7 @@ def get_run_with_polling(cmd,
 
 class RunPolling(PollingMethod):  # pylint: disable=too-many-instance-attributes
 
-    def __init__(self, cmd, registry_name, run_id, timeout=30):
-        self._cmd = cmd
+    def __init__(self, registry_name, run_id, timeout=30):
         self._registry_name = registry_name
         self._run_id = run_id
         self._timeout = timeout
@@ -85,7 +83,7 @@ class RunPolling(PollingMethod):  # pylint: disable=too-many-instance-attributes
         return self.operation_result
 
     def _set_operation_status(self, response):
-        RunStatus = self._cmd.get_models('RunStatus')
+        from azure.mgmt.containerregistrytasks.models import RunStatus
         if response.http_response.status_code == 200:
             self.operation_result = self._deserialize(response)
             self.operation_status = self.operation_result.status or RunStatus.queued.value
