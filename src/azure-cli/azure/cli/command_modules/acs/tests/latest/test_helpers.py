@@ -125,16 +125,18 @@ class DecoratorFunctionsTestCase(unittest.TestCase):
 
         mc_1 = self.models.ManagedCluster(
             location="test_location",
-            api_server_access_profile=self.models.ManagedClusterAPIServerAccessProfile(),
+            api_server_access_profile=self.models.ManagedClusterAPIServerAccessProfile(
+                enable_vnet_integration=True,
+            ),
         )
-        mc_1.api_server_access_profile.additional_properties={'enableVnetIntegration': True}
         self.assertEqual(check_is_apiserver_vnet_integration_cluster(mc_1), True)
 
         mc_2 = self.models.ManagedCluster(
             location="test_location",
-            api_server_access_profile=self.models.ManagedClusterAPIServerAccessProfile(),
+            api_server_access_profile=self.models.ManagedClusterAPIServerAccessProfile(
+                enable_vnet_integration=False,
+            ),
         )
-        mc_2.api_server_access_profile.additional_properties={'enableVnetIntegration': False}
         self.assertEqual(check_is_apiserver_vnet_integration_cluster(mc_2), False)
 
         mc_3 = self.models.ManagedCluster(
@@ -171,9 +173,9 @@ class DecoratorFunctionsTestCase(unittest.TestCase):
             location="test_location",
             api_server_access_profile=self.models.ManagedClusterAPIServerAccessProfile(
                 enable_private_cluster=True,
+                enable_vnet_integration=True,
             ),
         )
-        mc_3.api_server_access_profile.additional_properties={'enableVnetIntegration': True}
         self.assertEqual(check_is_private_link_cluster(mc_3), False)
 
         mc_4 = self.models.ManagedCluster(

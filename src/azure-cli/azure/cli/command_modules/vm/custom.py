@@ -3029,7 +3029,7 @@ def _update_vm_nics(cmd, vm, nics, primary_nic):
 
 
 # region VirtualMachines RunCommand
-def run_command_invoke(cmd, resource_group_name, vm_vmss_name, command_id, scripts=None, parameters=None, instance_id=None):  # pylint: disable=line-too-long
+def run_command_invoke(cmd, resource_group_name, vm_vmss_name, command_id, scripts=None, parameters=None, instance_id=None, no_wait=False):  # pylint: disable=line-too-long
     parameters = parameters or []  # CLI user input arg "parameters"
     params = []  # AAZCommand arg for "parameters"
     auto_arg_name_num = 0
@@ -3054,7 +3054,8 @@ def run_command_invoke(cmd, resource_group_name, vm_vmss_name, command_id, scrip
             'instance_id': instance_id,
             'command_id': command_id,
             'script': scripts,
-            'parameters': params
+            'parameters': params,
+            'no_wait': no_wait,
         })
 
     # otherwise this is a regular vm instance
@@ -3064,12 +3065,13 @@ def run_command_invoke(cmd, resource_group_name, vm_vmss_name, command_id, scrip
         'vm_name': vm_vmss_name,
         'command_id': command_id,
         'script': scripts,
-        'parameters': params
+        'parameters': params,
+        'no_wait': no_wait
     })
 
 
-def vm_run_command_invoke(cmd, resource_group_name, vm_name, command_id, scripts=None, parameters=None):
-    return run_command_invoke(cmd, resource_group_name, vm_name, command_id, scripts, parameters)
+def vm_run_command_invoke(cmd, resource_group_name, vm_name, command_id, scripts=None, parameters=None, no_wait=False):
+    return run_command_invoke(cmd, resource_group_name, vm_name, command_id, scripts, parameters, no_wait=no_wait)
 
 
 def vm_run_command_create(cmd,
@@ -3714,7 +3716,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 imds_mode=None, add_proxy_agent_extension=None, wire_server_access_control_profile_reference_id=None,
                 imds_access_control_profile_reference_id=None, enable_automatic_zone_balancing=None,
                 automatic_zone_balancing_strategy=None, automatic_zone_balancing_behavior=None,
-                enable_automatic_repairs=None):
+                enable_automatic_repairs=None, zone_placement_policy=None, include_zones=None,
+                exclude_zones=None, max_zone_count=None, instance_percent_policy=None, max_instance_percent=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -4038,7 +4041,9 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             enable_automatic_zone_balancing=enable_automatic_zone_balancing,
             automatic_zone_balancing_strategy=automatic_zone_balancing_strategy,
             automatic_zone_balancing_behavior=automatic_zone_balancing_behavior,
-            enable_automatic_repairs=enable_automatic_repairs)
+            enable_automatic_repairs=enable_automatic_repairs, zone_placement_policy=zone_placement_policy,
+            include_zones=include_zones, exclude_zones=exclude_zones, max_zone_count=max_zone_count,
+            instance_percent_policy=instance_percent_policy, max_instance_percent=max_instance_percent)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -4589,7 +4594,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 wire_server_mode=None, imds_mode=None, add_proxy_agent_extension=None,
                 wire_server_access_control_profile_reference_id=None,
                 imds_access_control_profile_reference_id=None, enable_automatic_zone_balancing=None,
-                automatic_zone_balancing_strategy=None, automatic_zone_balancing_behavior=None, **kwargs):
+                automatic_zone_balancing_strategy=None, automatic_zone_balancing_behavior=None, max_zone_count=None,
+                instance_percent_policy=None, max_instance_percent=None, **kwargs):
     from .operations.vmss_vms import convert_show_result_to_snake_case as vmss_vms_convert_show_result_to_snake_case
     from .operations.vmss import convert_show_result_to_snake_case as vmss_convert_show_result_to_snake_case
     vmss = kwargs['parameters']
@@ -5046,6 +5052,28 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
     vmss["resource_group"] = resource_group_name
     vmss["vm_scale_set_name"] = name
     vmss["no_wait"] = no_wait
+
+    if max_zone_count is not None or instance_percent_policy is not None or max_instance_percent is not None:
+        if vmss.get("resiliency_policy", None) is None:
+            vmss["resiliency_policy"] = {}
+        if vmss["resiliency_policy"].get("zone_allocation_policy", None) is None:
+            vmss["resiliency_policy"]["zone_allocation_policy"] = {}
+
+        if max_zone_count is not None:
+            vmss["resiliency_policy"]["zone_allocation_policy"]["max_zone_count"] = max_zone_count
+
+        if instance_percent_policy is not None or max_instance_percent is not None:
+            if vmss["resiliency_policy"]["zone_allocation_policy"].get("max_instance_percent_per_zone_policy",
+                                                                       None) is None:
+                vmss["resiliency_policy"]["zone_allocation_policy"]["max_instance_percent_per_zone_policy"] = {}
+
+            if instance_percent_policy is not None:
+                vmss["resiliency_policy"]["zone_allocation_policy"]["max_instance_percent_per_zone_policy"][
+                    "enabled"] = instance_percent_policy
+
+            if max_instance_percent is not None:
+                vmss["resiliency_policy"]["zone_allocation_policy"]["max_instance_percent_per_zone_policy"][
+                    "value"] = max_instance_percent
 
     from .operations.vmss import VMSSCreate
     return VMSSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss)
@@ -6386,6 +6414,7 @@ def restore_point_create(cmd,
                          source_data_disk_resource=None,
                          data_disk_restore_point_encryption_set=None,
                          data_disk_restore_point_encryption_type=None,
+                         instant_access_duration_minutes=None,
                          no_wait=False):
     parameters = {
         'restore_point_collection_name': restore_point_collection_name,
@@ -6393,6 +6422,10 @@ def restore_point_create(cmd,
         'resource_group': resource_group_name,
         'no_wait': no_wait
     }
+
+    if instant_access_duration_minutes is not None:
+        parameters['instant_access_duration_minutes'] = instant_access_duration_minutes
+
     if exclude_disks is not None:
         parameters['exclude_disks'] = []
         for disk in exclude_disks:
