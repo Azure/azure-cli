@@ -1976,10 +1976,16 @@ def load_kubernetes_configuration(filename):
             return yaml.safe_load(stream)
     except OSError as ex:
         if getattr(ex, 'errno', 0) == errno.ENOENT:
-            raise CLIError('{} does not exist'.format(filename))
+            raise CLIError('{} does not exist'.format(filename)) from ex
+        if getattr(ex, 'errno', 0) in (errno.EACCES, errno.EPERM):
+            raise FileOperationError(
+                'Permission denied when trying to read {}. '
+                'Please ensure you have read access to this file, or specify a different file path '
+                'using the --file/-f argument.'.format(filename)
+            ) from ex
         raise
     except (yaml.parser.ParserError, UnicodeDecodeError) as ex:
-        raise CLIError('Error parsing {} ({})'.format(filename, str(ex)))
+        raise CLIError('Error parsing {} ({})'.format(filename, str(ex))) from ex
 
 
 def merge_kubernetes_configurations(existing_file, addition_file, replace, context_name=None):
@@ -2025,8 +2031,17 @@ def merge_kubernetes_configurations(existing_file, addition_file, replace, conte
                 existing_file_perms,
             )
 
-    with open(existing_file, 'w+') as stream:
-        yaml.safe_dump(existing, stream, default_flow_style=False)
+    try:
+        with open(existing_file, 'w+') as stream:
+            yaml.safe_dump(existing, stream, default_flow_style=False)
+    except OSError as ex:
+        if getattr(ex, 'errno', 0) in (errno.EACCES, errno.EPERM, errno.EROFS):
+            raise FileOperationError(
+                'Permission denied when trying to write to {}. '
+                'Please ensure you have write access to this file, or specify a different file path '
+                'using the --file/-f argument.'.format(existing_file)
+            ) from ex
+        raise
 
     current_context = addition.get('current-context', 'UNKNOWN')
     msg = 'Merged "{}" as current context in {}'.format(
