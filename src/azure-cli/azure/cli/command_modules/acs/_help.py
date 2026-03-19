@@ -2873,6 +2873,31 @@ helps["aks mesh upgrade rollback"] = """
         text: az aks mesh upgrade rollback --resource-group MyResourceGroup --name MyManagedCluster
 """
 
+helps['aks mesh enable-istio-cni'] = """
+    type: command
+    short-summary: Enable Istio CNI chaining for Azure Service Mesh proxy redirection mechanism.
+    long-summary: >
+      This command enables Istio CNI chaining as the proxy redirection mechanism
+      for Azure Service Mesh. CNI chaining provides better security and performance
+      compared to init containers by using CNI plugins to set up traffic redirection.
+    examples:
+      - name: Enable Istio CNI chaining for Azure Service Mesh.
+        text: az aks mesh enable-istio-cni --resource-group MyResourceGroup --name MyManagedCluster
+"""
+
+helps['aks mesh disable-istio-cni'] = """
+    type: command
+    short-summary: Disable Istio CNI chaining for Azure Service Mesh proxy redirection mechanism.
+    long-summary: >
+      This command disables Istio CNI chaining and reverts to using init
+      containers as the proxy redirection mechanism for Azure Service Mesh. This
+      is the traditional method using privileged init containers to set up
+      iptables rules.
+    examples:
+      - name: Disable Istio CNI chaining for Azure Service Mesh.
+        text: az aks mesh disable-istio-cni --resource-group MyResourceGroup --name MyManagedCluster
+"""
+
 helps["aks approuting"] = """
     type: group
     short-summary: Commands to manage App Routing addon.

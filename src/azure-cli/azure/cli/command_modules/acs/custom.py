@@ -3856,6 +3856,38 @@ def aks_mesh_upgrade_rollback(
         mesh_upgrade_command=CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_ROLLBACK)
 
 
+def aks_mesh_enable_istio_cni(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+):
+    """Enable Istio CNI chaining for the Azure Service Mesh proxy redirection mechanism."""
+    return _aks_mesh_update(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        enable_istio_cni=True,
+    )
+
+
+def aks_mesh_disable_istio_cni(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+):
+    """Disable Istio CNI chaining for the Azure Service Mesh proxy redirection mechanism."""
+    return _aks_mesh_update(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        disable_istio_cni=True,
+    )
+
+
 def _aks_mesh_get_supported_revisions(
         cmd,
         client,
@@ -3889,6 +3921,8 @@ def _aks_mesh_update(
         revision=None,
         yes=False,
         mesh_upgrade_command=None,
+        enable_istio_cni=None,
+        disable_istio_cni=None,
 ):
     raw_parameters = locals()
 

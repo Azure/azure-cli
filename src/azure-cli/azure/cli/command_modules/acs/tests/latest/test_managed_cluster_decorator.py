@@ -6039,6 +6039,105 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             mode="Istio", istio=self.models.IstioServiceMesh(revisions=["asm-1-18"])
         ))
 
+    def test_handle_istio_cni_asm(self):
+        # Test enable Istio CNI on a cluster with ASM enabled
+        ctx_enable = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_istio_cni": True,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        old_profile = self.models.ServiceMeshProfile(
+            mode="Istio",
+            istio=self.models.IstioServiceMesh(
+                revisions=["asm-1-18"],
+                components=self.models.IstioComponents(),
+            ),
+        )
+        new_profile, updated = ctx_enable._handle_istio_cni_asm(old_profile)
+        self.assertEqual(updated, True)
+        self.assertEqual(
+            new_profile.istio.components.proxy_redirection_mechanism,
+            "CNIChaining",
+        )
+
+        # Test disable Istio CNI on a cluster with ASM enabled
+        ctx_disable = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "disable_istio_cni": True,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        old_profile = self.models.ServiceMeshProfile(
+            mode="Istio",
+            istio=self.models.IstioServiceMesh(
+                revisions=["asm-1-18"],
+                components=self.models.IstioComponents(
+                    proxy_redirection_mechanism="CNIChaining"
+                ),
+            ),
+        )
+        new_profile, updated = ctx_disable._handle_istio_cni_asm(old_profile)
+        self.assertEqual(updated, True)
+        self.assertEqual(
+            new_profile.istio.components.proxy_redirection_mechanism,
+            "InitContainers",
+        )
+
+        # Test error when ASM is not enabled
+        ctx_enable_no_asm = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_istio_cni": True,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        disabled_profile = self.models.ServiceMeshProfile(
+            mode="Disabled",
+        )
+        with self.assertRaises(ArgumentUsageError):
+            ctx_enable_no_asm._handle_istio_cni_asm(disabled_profile)
+
+        # Test error when both enable and disable are specified
+        ctx_both = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_istio_cni": True,
+                    "disable_istio_cni": True,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_both._handle_istio_cni_asm(old_profile)
+
+        # Test no-op when neither enable nor disable is specified
+        ctx_noop = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({}),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        old_profile = self.models.ServiceMeshProfile(
+            mode="Istio",
+            istio=self.models.IstioServiceMesh(revisions=["asm-1-18"]),
+        )
+        new_profile, updated = ctx_noop._handle_istio_cni_asm(old_profile)
+        self.assertEqual(updated, False)
+
     def test_handle_ingress_gateways_asm(self):
         ctx_0 = AKSManagedClusterContext(
             self.cmd,
