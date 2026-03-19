@@ -6464,6 +6464,7 @@ def restore_point_create(cmd,
                          source_data_disk_resource=None,
                          data_disk_restore_point_encryption_set=None,
                          data_disk_restore_point_encryption_type=None,
+                         instant_access_duration_minutes=None,
                          no_wait=False):
     parameters = {
         'restore_point_collection_name': restore_point_collection_name,
@@ -6471,6 +6472,10 @@ def restore_point_create(cmd,
         'resource_group': resource_group_name,
         'no_wait': no_wait
     }
+
+    if instant_access_duration_minutes is not None:
+        parameters['instant_access_duration_minutes'] = instant_access_duration_minutes
+
     if exclude_disks is not None:
         parameters['exclude_disks'] = []
         for disk in exclude_disks:
