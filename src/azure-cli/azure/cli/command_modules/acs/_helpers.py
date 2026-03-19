@@ -7,7 +7,7 @@ import os
 import random
 import re
 import semver
-from typing import Any, List, TypeVar
+from typing import Any, Dict, List, TypeVar
 
 from azure.cli.command_modules.acs._client_factory import get_snapshots_client, get_msi_client
 from azure.cli.core.azclierror import (
@@ -66,6 +66,22 @@ def safe_lower(obj: Any) -> Any:
     return obj
 
 
+def build_etag_kwargs(if_match=None, if_none_match=None) -> Dict[str, Any]:
+    """Convert if_match/if_none_match to etag/match_condition kwargs for SDK v41+."""
+    from azure.core import MatchConditions
+    kwargs: Dict[str, Any] = {}
+    if if_match is not None:
+        kwargs["etag"] = if_match
+        kwargs["match_condition"] = MatchConditions.IfNotModified
+    elif if_none_match is not None:
+        if if_none_match == "*":
+            kwargs["match_condition"] = MatchConditions.IfMissing
+        else:
+            kwargs["etag"] = if_none_match
+            kwargs["match_condition"] = MatchConditions.IfModified
+    return kwargs
+
+
 def get_property_from_dict_or_object(obj, property_name) -> Any:
     """Get the value corresponding to the property name from a dictionary or object.
 
@@ -103,15 +119,10 @@ def check_is_private_cluster(mc: ManagedCluster) -> bool:
 def check_is_apiserver_vnet_integration_cluster(mc: ManagedCluster) -> bool:
     """Check `mc` object to determine whether apiserver vnet integration is enabled.
 
-    Note: enableVnetIntegration is still in preview api so we use additional_properties here
-
     :return: bool
     """
     if mc and mc.api_server_access_profile:
-        additional_properties = mc.api_server_access_profile.additional_properties
-        if 'enableVnetIntegration' in additional_properties:
-            return additional_properties['enableVnetIntegration']
-        return False
+        return bool(mc.api_server_access_profile.enable_vnet_integration)
     return False
 
 
