@@ -6138,6 +6138,60 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         new_profile, updated = ctx_noop._handle_istio_cni_asm(old_profile)
         self.assertEqual(updated, False)
 
+        # Test idempotency: enable CNI when already CNIChaining → no-op
+        ctx_enable_idempotent = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_istio_cni": True,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        already_cni_profile = self.models.ServiceMeshProfile(
+            mode="Istio",
+            istio=self.models.IstioServiceMesh(
+                revisions=["asm-1-18"],
+                components=self.models.IstioComponents(
+                    proxy_redirection_mechanism="CNIChaining"
+                ),
+            ),
+        )
+        new_profile, updated = ctx_enable_idempotent._handle_istio_cni_asm(already_cni_profile)
+        self.assertEqual(updated, False)
+        self.assertEqual(
+            new_profile.istio.components.proxy_redirection_mechanism,
+            "CNIChaining",
+        )
+
+        # Test idempotency: disable CNI when already InitContainers → no-op
+        ctx_disable_idempotent = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "disable_istio_cni": True,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        already_init_profile = self.models.ServiceMeshProfile(
+            mode="Istio",
+            istio=self.models.IstioServiceMesh(
+                revisions=["asm-1-18"],
+                components=self.models.IstioComponents(
+                    proxy_redirection_mechanism="InitContainers"
+                ),
+            ),
+        )
+        new_profile, updated = ctx_disable_idempotent._handle_istio_cni_asm(already_init_profile)
+        self.assertEqual(updated, False)
+        self.assertEqual(
+            new_profile.istio.components.proxy_redirection_mechanism,
+            "InitContainers",
+        )
+
     def test_handle_ingress_gateways_asm(self):
         ctx_0 = AKSManagedClusterContext(
             self.cmd,

@@ -98,8 +98,6 @@ Release History
 
 **AKS**
 
-* `az aks mesh enable-istio-cni`: Add command to enable Istio CNI chaining for Azure Service Mesh proxy redirection mechanism
-* `az aks mesh disable-istio-cni`: Add command to disable Istio CNI chaining for Azure Service Mesh proxy redirection mechanism
 * `az aks create`: Add `--enable-container-network-logs` parameter to enable container network logs (#32700)
 * `az aks update`: Add `--enable-container-network-logs` and `--disable-container-network-logs` parameters to enable and disable container network logs (#32700)
 * `az aks enable-addons`: Add support for default workspace creation in Bleu and Delos clouds (#32753)

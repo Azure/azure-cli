@@ -5064,14 +5064,23 @@ class AKSManagedClusterContext(BaseAKSContext):
             if new_profile.istio.components is None:
                 new_profile.istio.components = self.models.IstioComponents()  # pylint: disable=no-member
 
+            # Only update when the proxy redirection mechanism actually changes
+            current_mechanism = getattr(
+                new_profile.istio.components,
+                "proxy_redirection_mechanism",
+                None,
+            )
+
             if enable_istio_cni:
-                new_profile.istio.components.proxy_redirection_mechanism = \
-                    CONST_AZURE_SERVICE_MESH_PROXY_REDIRECTION_CNI_CHAINING
-                updated = True
+                if current_mechanism != CONST_AZURE_SERVICE_MESH_PROXY_REDIRECTION_CNI_CHAINING:
+                    new_profile.istio.components.proxy_redirection_mechanism = \
+                        CONST_AZURE_SERVICE_MESH_PROXY_REDIRECTION_CNI_CHAINING
+                    updated = True
             elif disable_istio_cni:
-                new_profile.istio.components.proxy_redirection_mechanism = \
-                    CONST_AZURE_SERVICE_MESH_PROXY_REDIRECTION_INIT_CONTAINERS
-                updated = True
+                if current_mechanism != CONST_AZURE_SERVICE_MESH_PROXY_REDIRECTION_INIT_CONTAINERS:
+                    new_profile.istio.components.proxy_redirection_mechanism = \
+                        CONST_AZURE_SERVICE_MESH_PROXY_REDIRECTION_INIT_CONTAINERS
+                    updated = True
 
         return new_profile, updated
 
