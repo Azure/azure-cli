@@ -268,7 +268,7 @@ class DevExtension(Extension):
                 for item in os.listdir(path):
                     _collect(os.path.join(path, item), depth + 1, max_depth)
         for source in DEV_EXTENSION_SOURCES:
-            _collect(source)
+            _collect(source, max_depth=2)
         # https://docs.python.org/3/library/os.html#os.listdir, listdir is in arbitrary order.
         # Sort the extensions by name to support overwrite extension feature: https://github.com/Azure/azure-cli/issues/25782.
         exts.sort(key=lambda ext: ext.name)
