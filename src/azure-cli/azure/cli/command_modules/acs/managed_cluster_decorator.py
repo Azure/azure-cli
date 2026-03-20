@@ -55,6 +55,7 @@ from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
     CONST_ACSTOR_VERSION_V1,
 )
 from azure.cli.command_modules.acs._helpers import (
+    build_etag_kwargs,
     check_is_managed_aad_cluster,
     check_is_msi_cluster,
     check_is_apiserver_vnet_integration_cluster,
@@ -238,7 +239,6 @@ class AKSManagedClusterModels(AKSAgentPoolModels):
             maintenance_configuration_models = {}
             # getting maintenance configuration related models
             maintenance_configuration_models["MaintenanceConfiguration"] = self.MaintenanceConfiguration
-            maintenance_configuration_models["MaintenanceConfigurationListResult"] = self.MaintenanceConfigurationListResult
             maintenance_configuration_models["MaintenanceWindow"] = self.MaintenanceWindow
             maintenance_configuration_models["Schedule"] = self.Schedule
             maintenance_configuration_models["DailySchedule"] = self.DailySchedule
@@ -433,9 +433,9 @@ class AKSManagedClusterContext(BaseAKSContext):
                     )
                 )
             # verify keys
-            # pylint: disable=protected-access
+            from azure.core.serialization import attribute_list
             valid_keys = list(
-                k.replace("_", "-") for k in self.models.ManagedClusterPropertiesAutoScalerProfile._attribute_map.keys()
+                k.replace("_", "-") for k in attribute_list(self.models.ManagedClusterPropertiesAutoScalerProfile())
             )
             for key in cluster_autoscaler_profile.keys():
                 if not key:
@@ -1739,7 +1739,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         enable_managed_identity = self.raw_param.get("enable_managed_identity")
         # In create mode, try to read the property value corresponding to the parameter from the `mc` object
         if self.decorator_mode == DecoratorMode.CREATE:
-            if self.mc and self.mc.identity:
+            if self.mc and self.mc.identity is not None:
                 enable_managed_identity = check_is_msi_cluster(self.mc)
 
         # skip dynamic completion & validation if option read_only is specified
@@ -2288,7 +2288,7 @@ class AKSManagedClusterContext(BaseAKSContext):
                 self.mc.sku and
                 getattr(self.mc.sku, 'name', None) is not None
             ):
-                skuName = vars(self.mc.sku)['name'].lower()
+                skuName = self.mc.sku.name.lower()
             else:
                 skuName = CONST_MANAGED_CLUSTER_SKU_NAME_BASE
         return skuName
@@ -4028,9 +4028,9 @@ class AKSManagedClusterContext(BaseAKSContext):
             if (
                 self.mc and
                 self.mc.api_server_access_profile and
-                "enableVnetIntegration" in self.mc.api_server_access_profile.additional_properties
+                self.mc.api_server_access_profile.enable_vnet_integration is not None
             ):
-                enable_apiserver_vnet_integration = self.mc.api_server_access_profile.additional_properties['enableVnetIntegration']
+                enable_apiserver_vnet_integration = self.mc.api_server_access_profile.enable_vnet_integration
 
         # this parameter does not need dynamic completion
         # validation
@@ -4554,11 +4554,8 @@ class AKSManagedClusterContext(BaseAKSContext):
         if not read_only and self.decorator_mode == DecoratorMode.UPDATE:
             if cluster_autoscaler_profile and self.mc and self.mc.auto_scaler_profile:
                 # shallow copy should be enough for string-to-string dictionary
-                copy_of_raw_dict = self.mc.auto_scaler_profile.__dict__.copy()
-                new_options_dict = {
-                    key.replace("-", "_"): value
-                    for key, value in cluster_autoscaler_profile.items()
-                }
+                copy_of_raw_dict = dict(self.mc.auto_scaler_profile)
+                new_options_dict = dict(cluster_autoscaler_profile.items())
                 copy_of_raw_dict.update(new_options_dict)
                 cluster_autoscaler_profile = copy_of_raw_dict
 
@@ -5923,11 +5920,14 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         """
         self._ensure_mc(mc)
 
+        from azure.core.serialization import attribute_list
         defaults_in_mc = {}
-        for attr_name, attr_value in vars(mc).items():
-            if not attr_name.startswith("_") and attr_name != "location" and attr_value is not None:
-                defaults_in_mc[attr_name] = attr_value
-                setattr(mc, attr_name, None)
+        for attr_name in attribute_list(mc):
+            if attr_name != "location":
+                attr_value = getattr(mc, attr_name, None)
+                if attr_value is not None:
+                    defaults_in_mc[attr_name] = attr_value
+                    setattr(mc, attr_name, None)
         self.context.set_intermediate("defaults_in_mc", defaults_in_mc, overwrite_exists=True)
         return mc
 
@@ -6393,7 +6393,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         ):
             # Attention: RP would return UnexpectedLoadBalancerSkuForCurrentOutboundConfiguration internal server error
             # if load_balancer_sku is set to basic and load_balancer_profile is assigned.
-            # Attention: SDK provides default values for pod_cidr, service_cidr, dns_service_ip, docker_bridge_cidr
+            # Attention: SDK provides default values for pod_cidr, service_cidr, dns_service_ip
             # and outbound_type, and they might be overwritten to None.
             network_profile = self.models.ContainerServiceNetworkProfile(
                 network_plugin=network_plugin,
@@ -6404,7 +6404,6 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 service_cidrs=service_cidrs,
                 ip_families=ip_families,
                 dns_service_ip=dns_service_ip,
-                docker_bridge_cidr=docker_bridge_address,
                 network_policy=network_policy,
                 network_dataplane=network_dataplane,
                 load_balancer_sku=load_balancer_sku,
@@ -6852,15 +6851,11 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         if self.context.get_enable_apiserver_vnet_integration():
             if api_server_access_profile is None:
                 api_server_access_profile = self.models.ManagedClusterAPIServerAccessProfile()
-            # todo(levimm): remove the additional_properties after 2025-03-01 sdk is generated
-            api_server_access_profile.additional_properties['enableVnetIntegration'] = True
-            api_server_access_profile.enable_additional_properties_sending()
+            api_server_access_profile.enable_vnet_integration = True
         if self.context.get_apiserver_subnet_id():
             if api_server_access_profile is None:
-                # pylint: disable=no-member
                 api_server_access_profile = self.models.ManagedClusterAPIServerAccessProfile()
-            api_server_access_profile.additional_properties['subnetId'] = self.context.get_apiserver_subnet_id()
-            api_server_access_profile.enable_additional_properties_sending()
+            api_server_access_profile.subnet_id = self.context.get_apiserver_subnet_id()
         mc.api_server_access_profile = api_server_access_profile
 
         fqdn_subdomain = self.context.get_fqdn_subdomain()
@@ -7673,8 +7668,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 resource_name=self.context.get_name(),
                 parameters=mc,
                 headers=self.context.get_aks_custom_headers(),
-                if_match=self.context.get_if_match(),
-                if_none_match=self.context.get_if_none_match(),
+                **build_etag_kwargs(self.context.get_if_match(), self.context.get_if_none_match()),
             )
             self.immediate_processing_after_request(mc)
             # poll until the result is returned
@@ -7688,8 +7682,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 resource_name=self.context.get_name(),
                 parameters=mc,
                 headers=self.context.get_aks_custom_headers(),
-                if_match=self.context.get_if_match(),
-                if_none_match=self.context.get_if_none_match(),
+                **build_etag_kwargs(self.context.get_if_match(), self.context.get_if_none_match()),
             )
         return cluster
 
@@ -8110,19 +8103,13 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         if private_dns_zone is not None:
             profile_holder.private_dns_zone = private_dns_zone
         if self.context.get_enable_apiserver_vnet_integration():
-            profile_holder.additional_properties['enableVnetIntegration'] = True
-            profile_holder.enable_additional_properties_sending()
+            profile_holder.enable_vnet_integration = True
         if self.context.get_apiserver_subnet_id():
-            profile_holder.additional_properties['subnetId'] = self.context.get_apiserver_subnet_id()
-            profile_holder.enable_additional_properties_sending()
+            profile_holder.subnet_id = self.context.get_apiserver_subnet_id()
         if self.context.get_enable_private_cluster():
             profile_holder.enable_private_cluster = True
-            # send additional properties when enable private cluster since enableVnetIntegration is required
-            profile_holder.enable_additional_properties_sending()
         if self.context.get_disable_private_cluster():
             profile_holder.enable_private_cluster = False
-            # send additional properties when enable private cluster since enableVnetIntegration is required
-            profile_holder.enable_additional_properties_sending()
 
         # keep api_server_access_profile empty if none of its properties are updated
         if (
@@ -10030,8 +10017,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 resource_name=self.context.get_name(),
                 parameters=mc,
                 headers=self.context.get_aks_custom_headers(),
-                if_match=self.context.get_if_match(),
-                if_none_match=self.context.get_if_none_match(),
+                **build_etag_kwargs(self.context.get_if_match(), self.context.get_if_none_match()),
             )
             self.immediate_processing_after_request(mc)
             # poll until the result is returned
@@ -10045,8 +10031,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 resource_name=self.context.get_name(),
                 parameters=mc,
                 headers=self.context.get_aks_custom_headers(),
-                if_match=self.context.get_if_match(),
-                if_none_match=self.context.get_if_none_match(),
+                **build_etag_kwargs(self.context.get_if_match(), self.context.get_if_none_match()),
             )
         return cluster
 

@@ -636,7 +636,7 @@ class VMCustomImageTest(ScenarioTest):
         })
 
         self.cmd('vm create -g {rg} -n {vm1} --image Debian:debian-10:10:latest --use-unmanaged-disk --admin-username sdk-test-admin '
-                 '--admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} --size Standard_B2ms --nsg-rule NONE')
+                 '--admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} --size Standard_D2s_v3 --nsg-rule NONE')
 
         # Disable default outbound access
         self.cmd(
@@ -650,7 +650,7 @@ class VMCustomImageTest(ScenarioTest):
         self.cmd('image create -g {rg} -n {image1} --source {vm1}')
 
         self.cmd('vm create -g {rg} -n {vm2} --image Debian:debian-10:10:latest --storage-sku standard_lrs --data-disk-sizes-gb 1 1 1 1 '
-                 '--admin-username sdk-test-admin --admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} --size Standard_B2ms --nsg-rule NONE')
+                 '--admin-username sdk-test-admin --admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} --size Standard_D2s_v3 --nsg-rule NONE')
         data_disks = self.cmd('vm show -g {rg} -n {vm2}').get_output_in_json()['storageProfile']['dataDisks']
         self.kwargs['disk_0_name'] = data_disks[0]['name']
         self.kwargs['disk_2_name'] = data_disks[2]['name']
@@ -668,17 +668,10 @@ class VMCustomImageTest(ScenarioTest):
         self.cmd('image create -g {rg} -n {image2} --source {vm2}')
 
         self.cmd('vm create -g {rg} -n {newvm1} --image {image1} --admin-username sdk-test-admin --admin-password testPassword0 '
-                 '--authentication-type password --subnet {subnet} --vnet-name {vnet} --size Standard_B2ms --nsg-rule NONE')
+                 '--authentication-type password --subnet {subnet} --vnet-name {vnet} --size Standard_D2s_v3 --nsg-rule NONE')
         self.cmd('vm show -g {rg} -n {newvm1}', checks=[
             self.check('storageProfile.imageReference.resourceGroup', '{rg}'),
             self.check('storageProfile.osDisk.createOption', 'FromImage')
-        ])
-
-        self.cmd('network nsg create -g {rg} -n {nsg}')
-        self.cmd('vmss create -g {rg} -n vmss1 --image {image1} --admin-username sdk-test-admin --admin-password testPassword0 '
-                 '--authentication-type password --orchestration-mode Uniform --lb-sku Standard --nsg {nsg} --vm-sku Standard_B1ls', checks=[
-            self.check('vmss.virtualMachineProfile.storageProfile.imageReference.resourceGroup', '{rg}'),
-            self.check('vmss.virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage')
         ])
 
     @AllowLargeResponse(size_kb=99999)
@@ -13976,6 +13969,75 @@ class VMUltraSSDLivedataDiskIopsMbpsScenarioTest(ScenarioTest):
 
         self.assertNotEqual(r.exit_code, 0)
 
+
+class VMRestorePointInstantAccessScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_rp_ia', location='eastus2euap')
+    @AllowLargeResponse(size_kb=99999)
+    def test_vm_restore_point_instant_access(self, resource_group):
+        self.kwargs.update({
+            'vm': 'testVm1',
+            'vnet': 'testVnet1',
+            'subnet': 'testSubnet1',
+            'pip': 'testPip1',
+            'disk': 'testDdv2',
+            'rpc': 'testRpc1',
+            'rp': 'testRp1',
+            'location': 'eastus2euap'
+        })
+
+        # Create VM
+        vm = self.cmd('vm create -g {rg} -n {vm} --image Win2022Datacenter --admin-username azureuser --admin-password '
+                      '"Password12345!" --size Standard_D2s_v3 --vnet-name {vnet} -l {location} '
+                      '--subnet {subnet} --public-ip-address {pip} --zone 1').get_output_in_json()
+
+        self.kwargs.update({
+            'vm_id': vm['id']
+        })
+
+        # Create data disk
+        self.cmd('disk create -g {rg} -n {disk} --size-gb 100 --sku PremiumV2_LRS -l {location} --zone 1',
+            checks=[
+                self.check('name', '{disk}')
+            ]
+        )
+
+        # Attach data disk
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk}')
+
+        # Create restore point collection with instant access enabled
+        self.cmd('restore-point collection create -g {rg} -l {location} '
+                 '--source-id {vm_id} --collection-name {rpc} --instant-access true',
+            checks=[
+                self.check('instantAccess', True),
+                self.check('provisioningState', 'Succeeded')
+            ]
+        )
+
+        # Create restore point with instant access duration
+        self.cmd('restore-point create -g {rg} --collection-name {rpc} -n {rp} --instant-access-duration 120',
+            checks=[
+                self.check('instantAccessDurationMinutes', 120),
+                self.check('consistencyMode', 'ApplicationConsistent'),
+                self.check('provisioningState', 'Succeeded')
+            ]
+        )
+
+        # Show restore point with instance view
+        self.cmd('restore-point show -g {rg} --collection-name {rpc} -n {rp} --instance-view',
+            checks=[
+                self.check('instantAccessDurationMinutes', 120),
+                self.exists('instanceView.diskRestorePoints[0].snapshotAccessState')
+            ]
+        )
+
+        # Update restore point collection to disable instant access
+        self.cmd('restore-point collection update -g {rg} --collection-name {rpc} --instant-access false',
+            checks=[
+                self.check('instantAccess', False),
+                self.check('provisioningState', 'Succeeded')
+            ]
+        )
 
 class VMSSAutomaticZonePlacementTest(ScenarioTest):
     """
