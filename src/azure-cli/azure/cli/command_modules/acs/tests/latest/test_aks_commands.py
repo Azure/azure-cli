@@ -2316,31 +2316,44 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_azure_service_mesh_enable_disable_istio_cni(self, resource_group, resource_group_location):
         """ This test case exercises enabling and disabling Istio CNI for the service mesh profile.
-        It creates a cluster with azure service mesh profile enabled.
-        Then enables Istio CNI by running `aks mesh enable-istio-cni`
-        followed by disabling by running `aks mesh disable-istio-cni`.
+        It creates a cluster, enables azure service mesh, then enables Istio CNI
+        by running `aks mesh enable-istio-cni` followed by disabling by running
+        `aks mesh disable-istio-cni`.
         """
 
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
         # kwargs for string formatting
         aks_name = self.create_random_name('cliakstest', 16)
+
+        # Get the latest supported revision (compatible with current K8s versions)
+        mesh_revisions_cmd = f"aks mesh get-revisions -l {resource_group_location}"
+        mesh_revisions = self.cmd(mesh_revisions_cmd).get_output_in_json()
+        revisions = [r["revision"] for r in mesh_revisions["meshRevisions"]]
+        sorted_revisions = sort_asm_revisions(revisions)
+        latest_revision = sorted_revisions[-1]
+
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
             'location': resource_group_location,
             'ssh_key_value': self.generate_ssh_keys(),
-            'revision': self._get_asm_supported_revision(resource_group_location, False),
+            'revision': latest_revision,
         })
 
-        # create cluster with --enable-azure-service-mesh
+        # create cluster without --enable-azure-service-mesh
         create_cmd = (
             'aks create --resource-group={resource_group} --name={name} --location={location} '
             '--aks-custom-headers=AKSHTTPCustomFeatures=Microsoft.ContainerService/AzureServiceMeshPreview '
-            '--ssh-key-value={ssh_key_value} --enable-azure-service-mesh --revision={revision} --output=json'
+            '--ssh-key-value={ssh_key_value} --output=json'
         )
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # enable azure service mesh
+        enable_mesh_cmd = 'aks mesh enable --resource-group={resource_group} --name={name} --revision={revision}'
+        self.cmd(enable_mesh_cmd, checks=[
             self.check('serviceMeshProfile.mode', 'Istio'),
         ])
 
