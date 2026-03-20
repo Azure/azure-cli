@@ -5181,21 +5181,21 @@ def attach_managed_data_disk_to_vmss(cmd, resource_group_name, vmss_name, size_g
         if existing_disk is None:
             data_disk = {
                 'caching': caching,
-                'create_option': DiskCreateOptionTypes.EMPTY.value,
-                'disk_size_gb': size_gb,
+                'createOption': DiskCreateOptionTypes.EMPTY.value,
+                'diskSizeGB': size_gb,
                 'lun': lun,
-                'managed_disk': {
-                    'storage_account_type': sku
+                'managedDisk': {
+                    'storageAccountType': sku
                 }
             }
         else:
             data_disk = {
                 'caching': caching,
-                'create_option': DiskCreateOptionTypes.ATTACH.value,
+                'createOption': DiskCreateOptionTypes.ATTACH.value,
                 'lun': lun,
-                'managed_disk': {
+                'managedDisk': {
                     'id': existing_disk,
-                    'storage_account_type': sku
+                    'storageAccountType': sku
                 }
             }
 
