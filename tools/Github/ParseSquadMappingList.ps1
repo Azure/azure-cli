@@ -275,6 +275,39 @@ function AddSquadLabelsToYaml {
                         $insertLines.Add((" " * $listIndentLength) + "    label: $squadLabel")
                     }
                     $insertions.Add([PSCustomObject]@{ Index = $lastAddLabelEnd + 1; Lines = $insertLines })
+
+                    $isPR = $false
+                    for ($p = $i - 1; $p -ge 0; $p--) {
+                        if ($Lines[$p] -match '^\s*description:') { break }
+                        if ($Lines[$p] -match 'payloadType:\s*Pull_Request') { $isPR = $true; break }
+                    }
+                    if ($isPR) {
+                        $lastUserEnd = -1
+                        $usersIndent = $listIndentLength + 4
+                        $existingUsers = @{}
+                        for ($b = $j; $b -lt $k; $b++) {
+                            if ($Lines[$b] -match '^\s*-\s+assignTo:\s*$' -and (GetIndentLength -Line $Lines[$b]) -eq $listIndentLength) {
+                                for ($c = $b + 1; $c -lt $k; $c++) {
+                                    if ($Lines[$c] -match '^\s*-\s+' -and (GetIndentLength -Line $Lines[$c]) -eq $listIndentLength) { break }
+                                    if ($Lines[$c] -match '^\s*-\s+(\S+)\s*$' -and (GetIndentLength -Line $Lines[$c]) -eq $usersIndent) {
+                                        $existingUsers[$Matches[1]] = $true
+                                        $lastUserEnd = $c
+                                    }
+                                }
+                            }
+                        }
+                        if ($lastUserEnd -ge 0) {
+                            $userInsertLines = [System.Collections.Generic.List[string]]::new()
+                            foreach ($squadLabel in $labelsToAdd) {
+                                if (-not $existingUsers.ContainsKey($squadLabel)) {
+                                    $userInsertLines.Add((" " * $usersIndent) + "- $squadLabel")
+                                }
+                            }
+                            if ($userInsertLines.Count -gt 0) {
+                                $insertions.Add([PSCustomObject]@{ Index = $lastUserEnd + 1; Lines = $userInsertLines })
+                            }
+                        }
+                    }
                 }
             }
         }
