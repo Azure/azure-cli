@@ -124,6 +124,10 @@ def acr_cache_update_custom(cmd,
     if not has_cred_update and not has_identity_update:
         raise InvalidArgumentValueError("You must provide at least one parameter to update (credential set, identity, or removal flag).")
 
+    #initilize properties if not already set
+    if instance.properties is None:
+        instance.properties = CacheRuleProperties() 
+
     # Handle credential set updates
     if has_cred_update:
         if remove_cred_set:
