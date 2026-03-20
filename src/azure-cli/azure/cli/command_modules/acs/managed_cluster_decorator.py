@@ -48,6 +48,8 @@ from azure.cli.command_modules.acs._consts import (
     CONST_NONE_UPGRADE_CHANNEL,
     CONST_AVAILABILITY_SET,
     CONST_VIRTUAL_MACHINES,
+    CONST_ACNS_DATAPATH_ACCELERATION_MODE_BPFVETH, 
+    CONST_ACNS_DATAPATH_ACCELERATION_MODE_NONE    
 )
 from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
     CONST_ACSTOR_EXT_INSTALLATION_NAME,
@@ -2535,10 +2537,11 @@ class AKSManagedClusterContext(BaseAKSContext):
         Union[bool, None],
         Union[bool, None],
         Union[bool, None],
+        Union[bool, None]
     ]:
         """Get the enablement of acns
 
-        :return: Tuple of 3 elements which can be bool or None
+        :return: Tuple of 4 elements which can be bool or None
         """
         enable_acns = self.raw_param.get("enable_acns")
         disable_acns = self.raw_param.get("disable_acns")
@@ -2553,17 +2556,22 @@ class AKSManagedClusterContext(BaseAKSContext):
         disable_acns = bool(disable_acns) if disable_acns is not None else False
         acns = enable_acns or not disable_acns
         acns_observability = self.get_acns_observability()
+        acns_datapath_acceleration_mode = self.get_acns_datapath_acceleration_mode()
+        acns_perf_enabled = None
+        if acns_datapath_acceleration_mode is not None:
+            acns_perf_enabled = acns_datapath_acceleration_mode == CONST_ACNS_DATAPATH_ACCELERATION_MODE_BPFVETH
         acns_security = self.get_acns_security()
-        if acns and (acns_observability is False and acns_security is False):
+        if acns and (acns_observability is False and acns_security is False and acns_perf_enabled is not True):
             raise MutuallyExclusiveArgumentError(
-                "Cannot disable both observability and security when enabling ACNS. "
+                "Cannot disable observability, security, and performance acceleration when enabling ACNS. "
                 "Please enable at least one of them or disable ACNS with --disable-acns."
             )
-        if not acns and (acns_observability is not None or acns_security is not None):
+        if not acns and (acns_observability is not None or acns_security is not None
+           or acns_datapath_acceleration_mode is not None):
             raise MutuallyExclusiveArgumentError(
                 "--disable-acns does not use any additional acns arguments."
             )
-        return acns, acns_observability, acns_security
+        return acns, acns_observability, acns_security, acns_perf_enabled
 
     def get_acns_observability(self) -> Union[bool, None]:
         """Get the enablement of acns observability
@@ -2578,6 +2586,21 @@ class AKSManagedClusterContext(BaseAKSContext):
         :return: bool or None"""
         disable_acns_security = self.raw_param.get("disable_acns_security")
         return not bool(disable_acns_security) if disable_acns_security is not None else None
+    
+    def get_acns_datapath_acceleration_mode(self) -> Union[str, None]:
+        """Get the value of acns_datapath_acceleration_mode
+
+        :return: str or None
+        """
+        disable_acns = self.raw_param.get("disable_acns")
+        acns_datapath_acceleration_mode = self.raw_param.get("acns_datapath_acceleration_mode")
+        if (acns_datapath_acceleration_mode is not None
+           and acns_datapath_acceleration_mode != CONST_ACNS_DATAPATH_ACCELERATION_MODE_NONE):
+            if disable_acns:
+                raise MutuallyExclusiveArgumentError(
+                    "--disable-acns cannot be used with --acns-performance-acceleration-mode."
+                )
+        return acns_datapath_acceleration_mode
 
     def get_acns_advanced_networkpolicies(self) -> Union[str, None]:
         """Get the value of acns_advanced_networkpolicies
@@ -2816,7 +2839,8 @@ class AKSManagedClusterContext(BaseAKSContext):
             CONST_MONITORING_USING_AAD_MSI_AUTH,
             CONST_OPEN_SERVICE_MESH_ADDON_NAME, CONST_ROTATION_POLL_INTERVAL,
             CONST_SECRET_ROTATION_ENABLED, CONST_VIRTUAL_NODE_ADDON_NAME,
-            CONST_VIRTUAL_NODE_SUBNET_NAME)
+            CONST_VIRTUAL_NODE_SUBNET_NAME
+        )
 
         addon_consts = {}
         addon_consts["ADDONS"] = ADDONS
@@ -6354,8 +6378,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
 
         network_dataplane = self.context.get_network_dataplane()
 
-        (acns_enabled, acns_observability, acns_security) = self.context.get_acns_enablement()
         acns_advanced_networkpolicies = self.context.get_acns_advanced_networkpolicies()
+        (acns_enabled, acns_observability, acns_security, acns_perf_enabled) = self.context.get_acns_enablement()
         if acns_enabled is not None:
             acns = self.models.AdvancedNetworking(
                 enabled=acns_enabled,
@@ -6375,6 +6399,10 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                     )
                 else:
                     acns.security.advanced_network_policies = acns_advanced_networkpolicies
+            if acns_perf_enabled is not None:
+                if acns.performance is None:
+                    acns.performance = self.models.AdvancedNetworkingPerformance()
+                acns.performance.acceleration_mode = self.get_acns_datapath_acceleration_mode()
 
         if any(
             [
@@ -8279,8 +8307,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         :return: the ManagedCluster object
         """
         self._ensure_mc(mc)
-        (acns_enabled, acns_observability, acns_security) = self.context.get_acns_enablement()
         acns_advanced_networkpolicies = self.context.get_acns_advanced_networkpolicies()
+        (acns_enabled, acns_observability, acns_security, acns_perf_enabled) = self.context.get_acns_enablement()
         if acns_enabled is not None:
             acns = self.models.AdvancedNetworking(
                 enabled=acns_enabled,
@@ -8300,6 +8328,11 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                     )
                 else:
                     acns.security.advanced_network_policies = acns_advanced_networkpolicies
+            if acns_perf_enabled is not None:
+                acns.performance = self.models.AdvancedNetworkingPerformance(
+                    acceleration_mode = self.get_acns_datapath_acceleration_mode(),
+                )
+
         if acns_enabled is not None:
             mc.network_profile.advanced_networking = acns
         return mc
