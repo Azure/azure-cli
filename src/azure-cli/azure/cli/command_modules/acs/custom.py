@@ -1146,6 +1146,8 @@ def aks_update(
     disable_image_cleaner=False,
     image_cleaner_interval_hours=None,
     http_proxy_config=None,
+    disable_http_proxy=False,
+    enable_http_proxy=False,
     enable_keda=False,
     disable_keda=False,
     enable_vpa=False,

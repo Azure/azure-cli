@@ -12644,6 +12644,74 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         )
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
 
+        # custom value
+        dec_2 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "disable_http_proxy": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+
+        mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            http_proxy_config = self.models.ManagedClusterHTTPProxyConfig(
+                enabled=True,
+                httpProxy="http://cli-proxy-vm:3128/",
+                httpsProxy="https://cli-proxy-vm:3129/",
+            )
+        )
+        dec_2.context.attach_mc(mc_2)
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_2.update_http_proxy_enabled(None)
+        dec_mc_2 = dec_2.update_http_proxy_enabled(mc_2)
+
+        ground_truth_mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            http_proxy_config = self.models.ManagedClusterHTTPProxyConfig(
+                enabled=False,
+                httpProxy="http://cli-proxy-vm:3128/",
+                httpsProxy="https://cli-proxy-vm:3129/",
+            )
+        )
+        self.assertEqual(dec_mc_2, ground_truth_mc_2)
+
+        # custom value
+        dec_3 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_http_proxy": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+
+        mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            http_proxy_config = self.models.ManagedClusterHTTPProxyConfig(
+                enabled=False,
+                httpProxy="http://cli-proxy-vm:3128/",
+                httpsProxy="https://cli-proxy-vm:3129/",
+            )
+        )
+        dec_3.context.attach_mc(mc_3)
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_3.update_http_proxy_enabled(None)
+        dec_mc_3 = dec_3.update_http_proxy_enabled(mc_3)
+
+        ground_truth_mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            http_proxy_config = self.models.ManagedClusterHTTPProxyConfig(
+                enabled=True,
+                httpProxy="http://cli-proxy-vm:3128/",
+                httpsProxy="https://cli-proxy-vm:3129/",
+            )
+        )
+        self.assertEqual(dec_mc_3, ground_truth_mc_3)
+
     def test_update_service_mesh_profile(self):
         dec_1 = AKSManagedClusterUpdateDecorator(
             self.cmd,
