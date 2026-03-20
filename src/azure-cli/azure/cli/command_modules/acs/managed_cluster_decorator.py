@@ -8329,7 +8329,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                     acns.security.advanced_network_policies = acns_advanced_networkpolicies
             if acns_perf_enabled is not None:
                 acns.performance = self.models.AdvancedNetworkingPerformance(
-                    acceleration_mode = self.get_acns_datapath_acceleration_mode(),
+                    acceleration_mode=self.get_acns_datapath_acceleration_mode(),
                 )
 
         if acns_enabled is not None:
