@@ -613,7 +613,7 @@ def load_arguments(self, _):
         c.argument("acns_advanced_networkpolicies", arg_type=get_enum_type(advanced_networkpolicies))
         c.argument('enable_container_network_logs', action='store_true')
         c.argument(
-            "acns_datapath_acceleration_mode", 
+            "acns_datapath_acceleration_mode",
             arg_type=get_enum_type(acns_datapath_acceleration_modes),
             help="Set the datapath acceleration mode for Azure Container Networking Solution (ACNS). Valid values are 'BpfVeth' and 'None'."
         )
@@ -677,7 +677,7 @@ def load_arguments(self, _):
         c.argument('enable_container_network_logs', action='store_true')
         c.argument('disable_container_network_logs', action='store_true')
         c.argument(
-            "acns_datapath_acceleration_mode", 
+            "acns_datapath_acceleration_mode",
             arg_type=get_enum_type(acns_datapath_acceleration_modes),
             help="Set the datapath acceleration mode for Azure Container Networking Solution (ACNS). Valid values are 'BpfVeth' and 'None'."
         )
