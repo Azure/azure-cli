@@ -905,8 +905,13 @@ class VolumeGroupCreate(_VolumeGroupCreate):
         if has_value(args.database_throughput):
             database_throughput = args.database_throughput.to_serialized_data()
 
-        data_repl_skd = args.data_repl_skd.to_serialized_data()
-        data_src_id = args.data_src_id.to_serialized_data()
+        data_repl_skd = None
+        if has_value(args.data_repl_skd):
+            data_repl_skd = args.data_repl_skd.to_serialized_data()
+
+        data_src_id = None
+        if has_value(args.data_src_id):
+            data_src_id = args.data_src_id.to_serialized_data()
         if has_value(args.log_throughput):
             log_throughput = args.log_throughput.to_serialized_data()
         else:
@@ -929,8 +934,12 @@ class VolumeGroupCreate(_VolumeGroupCreate):
         else:
             shared_network_features = None
 
-        shared_repl_skd = args.shared_repl_skd.to_serialized_data()
-        shared_src_id = args.data_repl_skd.to_serialized_data()
+        shared_repl_skd = None
+        if has_value(args.shared_repl_skd):
+            shared_repl_skd = args.shared_repl_skd.to_serialized_data()
+        shared_src_id = None
+        if has_value(args.shared_src_id):
+            shared_src_id = args.shared_src_id.to_serialized_data()
         smb_access_based_enumeration = args.smb_access.to_serialized_data()
         smb_non_browsable = args.smb_browsable.to_serialized_data()
 
@@ -944,8 +953,13 @@ class VolumeGroupCreate(_VolumeGroupCreate):
             data_backup_throughput = None
 
         backup_nfsv3 = args.backup_nfsv3.to_serialized_data()
-        data_backup_repl_skd = args.data_backup_replication_schedule.to_serialized_data()
-        data_backup_src_id = args.data_backup_src_id.to_serialized_data()
+        data_backup_repl_skd = None
+        if has_value(args.data_backup_replication_schedule):
+            data_backup_repl_skd = args.data_backup_replication_schedule.to_serialized_data()
+
+        data_backup_src_id = None
+        if has_value(args.data_backup_src_id):
+            data_backup_src_id = args.data_backup_src_id.to_serialized_data()
 
         if has_value(args.data_backup_size):
             data_backup_size = args.data_backup_size.to_serialized_data()
@@ -956,8 +970,13 @@ class VolumeGroupCreate(_VolumeGroupCreate):
             log_backup_throughput = args.log_backup_throughput.to_serialized_data()
         else:
             log_backup_throughput = None
-        log_backup_repl_skd = args.log_backup_repl_skd.to_serialized_data()
-        log_backup_src_id = args.log_backup_src_id.to_serialized_data()
+
+        log_backup_repl_skd = None
+        if has_value(args.log_backup_repl_skd):
+            log_backup_repl_skd = args.log_backup_repl_skd.to_serialized_data()
+        log_backup_src_id = None
+        if has_value(args.log_backup_src_id):
+            log_backup_src_id = args.log_backup_src_id.to_serialized_data()
         if has_value(args.log_backup_size):
             log_backup_size = args.log_backup_size.to_serialized_data()
         else:
@@ -1113,7 +1132,8 @@ def create_data_volume_properties(subnet_id, application_identifier, application
     if data_repl_skd is not None and data_src_id is not None:
         replication = ({"replication_schedule": data_repl_skd,
                         "remote_volume_resource_id": data_src_id})
-        data_protection = {"replication": replication}
+        if replication is not None:
+            data_protection = {"replication": replication}
 
     data_volume = {
         "subnet_id": subnet_id,
@@ -1223,7 +1243,8 @@ def create_shared_volume_properties(subnet_id, application_identifier, applicati
     if shared_repl_skd is not None and shared_src_id is not None:
         replication = {"replication_schedule": shared_repl_skd,
                        "remote_volume_resource_id": shared_src_id}
-        data_protection = {"replication": replication}
+        if replication is not None:
+            data_protection = {"replication": replication}
 
     shared_volume = {
         "subnet_id": subnet_id,
@@ -1285,7 +1306,8 @@ def create_data_backup_volume_properties(subnet_id, application_identifier, appl
     if data_backup_repl_skd is not None and data_backup_src_id is not None:
         replication = {"replication_schedule": data_backup_repl_skd,
                        "remote_volume_resource_id": data_backup_src_id}
-        data_protection = {"replication": replication}
+        if replication is not None:
+            data_protection = {"replication": replication}
 
     data_backup_volume = {
         "subnet_id": subnet_id,
@@ -1344,7 +1366,8 @@ def create_log_backup_volume_properties(subnet_id, application_identifier, appli
     if log_backup_repl_skd is not None and log_backup_src_id is not None:
         replication = {"replication_schedule": log_backup_repl_skd,
                        "remote_volume_resource_id": log_backup_src_id}
-        data_protection = {"replication": replication}
+        if replication is not None:
+            data_protection = {"replication": replication}
 
     log_backup = {
         "subnet_id": subnet_id,

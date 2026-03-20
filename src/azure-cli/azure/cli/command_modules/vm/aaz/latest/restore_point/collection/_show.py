@@ -25,9 +25,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-11-01",
+        "version": "2025-04-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/restorepointcollections/{}", "2024-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/restorepointcollections/{}", "2025-04-01"],
         ]
     }
 
@@ -131,7 +131,7 @@ class Show(AAZCommand):
                     "$expand", self.ctx.args.expand,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2024-11-01",
+                    "api-version", "2025-04-01",
                     required=True,
                 ),
             }
@@ -187,6 +187,9 @@ class Show(AAZCommand):
             )
 
             properties = cls._schema_on_200.properties
+            properties.instant_access = AAZBoolType(
+                serialized_name="instantAccess",
+            )
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
@@ -234,6 +237,9 @@ class Show(AAZCommand):
                 serialized_name="instanceView",
                 flags={"read_only": True},
             )
+            properties.instant_access_duration_minutes = AAZIntType(
+                serialized_name="instantAccessDurationMinutes",
+            )
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
@@ -266,6 +272,9 @@ class Show(AAZCommand):
             _element.id = AAZStrType()
             _element.replication_status = AAZObjectType(
                 serialized_name="replicationStatus",
+            )
+            _element.snapshot_access_state = AAZStrType(
+                serialized_name="snapshotAccessState",
             )
 
             replication_status = cls._schema_on_200.properties.restore_points.Element.properties.instance_view.disk_restore_points.Element.replication_status
@@ -541,6 +550,9 @@ class Show(AAZCommand):
             )
 
             proxy_agent_settings = cls._schema_on_200.properties.restore_points.Element.properties.source_metadata.security_profile.proxy_agent_settings
+            proxy_agent_settings.add_proxy_agent_extension = AAZBoolType(
+                serialized_name="addProxyAgentExtension",
+            )
             proxy_agent_settings.enabled = AAZBoolType()
             proxy_agent_settings.imds = AAZObjectType()
             _ShowHelper._build_schema_host_endpoint_settings_read(proxy_agent_settings.imds)
@@ -586,9 +598,6 @@ class Show(AAZCommand):
             _ShowHelper._build_schema_disk_restore_point_attributes_read(_element.disk_restore_point)
             _element.disk_size_gb = AAZIntType(
                 serialized_name="diskSizeGB",
-                flags={"read_only": True},
-            )
-            _element.lun = AAZIntType(
                 flags={"read_only": True},
             )
             _element.managed_disk = AAZObjectType(
