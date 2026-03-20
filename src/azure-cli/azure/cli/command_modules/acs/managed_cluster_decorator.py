@@ -48,8 +48,8 @@ from azure.cli.command_modules.acs._consts import (
     CONST_NONE_UPGRADE_CHANNEL,
     CONST_AVAILABILITY_SET,
     CONST_VIRTUAL_MACHINES,
-    CONST_ACNS_DATAPATH_ACCELERATION_MODE_BPFVETH, 
-    CONST_ACNS_DATAPATH_ACCELERATION_MODE_NONE    
+    CONST_ACNS_DATAPATH_ACCELERATION_MODE_BPFVETH,
+    CONST_ACNS_DATAPATH_ACCELERATION_MODE_NONE
 )
 from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
     CONST_ACSTOR_EXT_INSTALLATION_NAME,
@@ -2546,7 +2546,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         enable_acns = self.raw_param.get("enable_acns")
         disable_acns = self.raw_param.get("disable_acns")
         if enable_acns is None and disable_acns is None:
-            return None, None, None
+            return None, None, None, None
         if enable_acns and disable_acns:
             raise MutuallyExclusiveArgumentError(
                 "Cannot specify --enable-acns and "
@@ -2566,8 +2566,8 @@ class AKSManagedClusterContext(BaseAKSContext):
                 "Cannot disable observability, security, and performance acceleration when enabling ACNS. "
                 "Please enable at least one of them or disable ACNS with --disable-acns."
             )
-        if not acns and (acns_observability is not None or acns_security is not None
-           or acns_datapath_acceleration_mode is not None):
+        if not acns and (acns_observability is not None or acns_security is not None or 
+                         acns_datapath_acceleration_mode is not None):
             raise MutuallyExclusiveArgumentError(
                 "--disable-acns does not use any additional acns arguments."
             )
@@ -2586,7 +2586,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         :return: bool or None"""
         disable_acns_security = self.raw_param.get("disable_acns_security")
         return not bool(disable_acns_security) if disable_acns_security is not None else None
-    
+
     def get_acns_datapath_acceleration_mode(self) -> Union[str, None]:
         """Get the value of acns_datapath_acceleration_mode
 
@@ -2594,8 +2594,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         disable_acns = self.raw_param.get("disable_acns")
         acns_datapath_acceleration_mode = self.raw_param.get("acns_datapath_acceleration_mode")
-        if (acns_datapath_acceleration_mode is not None
-           and acns_datapath_acceleration_mode != CONST_ACNS_DATAPATH_ACCELERATION_MODE_NONE):
+        if (acns_datapath_acceleration_mode is not None and acns_datapath_acceleration_mode != CONST_ACNS_DATAPATH_ACCELERATION_MODE_NONE):
             if disable_acns:
                 raise MutuallyExclusiveArgumentError(
                     "--disable-acns cannot be used with --acns-performance-acceleration-mode."
