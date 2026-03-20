@@ -2615,6 +2615,9 @@ examples:
   - name: Create a web app and deploy as a static HTML app.
     text: >
         az webapp up --html
+  - name: Create a web app with a specified domain name scope for unique hostname generation
+    text: >
+        az webapp up -n MyUniqueAppName --domain-name-scope TenantReuse
 """
 
 helps['webapp update'] = """
