@@ -5,17 +5,7 @@
 # pylint: disable=no-self-use, line-too-long, protected-access, too-few-public-methods, unused-argument
 from knack.log import get_logger
 
-from ..aaz.latest.vm.host import Show as _VMHostShow
-
 logger = get_logger(__name__)
-
-
-class VMHostShow(_VMHostShow):
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        if 'tags' not in result:
-            result['tags'] = {}
-        return result
 
 
 def convert_show_result_to_snake_case(result):

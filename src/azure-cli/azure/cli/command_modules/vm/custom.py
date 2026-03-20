@@ -5973,7 +5973,7 @@ def create_dedicated_host(cmd, host_group_name, host_name, resource_group_name, 
 
 
 def get_dedicated_host(cmd, host_group_name, host_name, resource_group_name, expand=None):
-    from .operations.vm_host import VMHostShow
+    from .aaz.latest.vm.host import Show as VMHostShow
     command_args = {
         'host_group_name': host_group_name,
         'host_name': host_name,
