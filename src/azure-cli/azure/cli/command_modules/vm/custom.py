@@ -5914,22 +5914,17 @@ def create_dedicated_host_group(cmd, host_group_name, resource_group_name, platf
         'host_group_name': host_group_name,
         'resource_group': resource_group_name,
         'location': location,
-        'platform_fault_domain_count': platform_fault_domain_count
+        'platform_fault_domain_count': platform_fault_domain_count,
+        'tags': tags,
+        'zones': zones,
+        'support_automatic_placement': automatic_placement,
+        'additional_capabilities': None
     }
-
-    if tags is not None:
-        command_args['tags'] = tags or {}
-
-    if zones is not None:
-        command_args['zones'] = zones or []
 
     if ultra_ssd_enabled is not None:
         command_args['additional_capabilities'] = {
             'ultra_ssd_enabled': ultra_ssd_enabled
         }
-
-    if automatic_placement is not None:
-        command_args['support_automatic_placement'] = automatic_placement
 
     return VmHostGroupCreate(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
@@ -5947,16 +5942,6 @@ def get_dedicated_host_group(cmd, host_group_name, resource_group_name, expand=N
     if expand:
         command_args['expand'] = expand
     return VMHostGroupShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
-
-
-def update_dedicated_host_group(cmd, host_group_name, resource_group_name, **kwargs):
-    from .aaz.latest.vm.host.group import Create as VmHostGroupCreate
-    from .operations.vm_host_group import convert_show_result_to_snake_case
-    vm_host_group = kwargs['dedicated_host_group']
-    vm_host_group = convert_show_result_to_snake_case(vm_host_group)
-    vm_host_group['host_group_name'] = host_group_name
-    vm_host_group['resource_group'] = resource_group_name
-    return VmHostGroupCreate(cli_ctx=cmd.cli_ctx)(command_args=vm_host_group)
 
 
 def create_dedicated_host(cmd, client, host_group_name, host_name, resource_group_name, sku, platform_fault_domain=None,
