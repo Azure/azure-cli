@@ -25,6 +25,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_NETWORK_PLUGIN_MODE_OVERLAY, CONST_NETWORK_PLUGIN_NONE,
     CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDUAL,
     CONST_NETWORK_POD_IP_ALLOCATION_MODE_STATIC_BLOCK,
+    CONST_ACNS_DATAPATH_ACCELERATION_MODE_BPFVETH, CONST_ACNS_DATAPATH_ACCELERATION_MODE_NONE,
     CONST_NODE_IMAGE_UPGRADE_CHANNEL, CONST_NONE_UPGRADE_CHANNEL,
     CONST_NODE_OS_CHANNEL_NODE_IMAGE,
     CONST_NODE_OS_CHANNEL_NONE,
@@ -363,6 +364,12 @@ workload_runtime_types = [
     CONST_WORKLOAD_RUNTIME_KATA_VM_ISOLATION,
 ]
 
+# consts for acns datapath acceleration mode
+acns_datapath_acceleration_modes = [
+    CONST_ACNS_DATAPATH_ACCELERATION_MODE_BPFVETH,
+    CONST_ACNS_DATAPATH_ACCELERATION_MODE_NONE
+]
+
 
 def load_arguments(self, _):
     acr_arg_type = CLIArgumentType(metavar='ACR_NAME_OR_RESOURCE_ID')
@@ -603,8 +610,16 @@ def load_arguments(self, _):
         c.argument('enable_acns', action='store_true')
         c.argument('disable_acns_observability', action='store_true')
         c.argument('disable_acns_security', action='store_true')
+<<<<<<< Updated upstream
         c.argument("acns_advanced_networkpolicies", arg_type=get_enum_type(advanced_networkpolicies))
         c.argument('enable_container_network_logs', action='store_true')
+=======
+        c.argument(
+            "acns_datapath_acceleration_mode", 
+            arg_type=get_enum_type(acns_datapath_acceleration_modes),
+            help="Set the datapath acceleration mode for Azure Container Networking Solution (ACNS). Valid values are 'BpfVeth' and 'None'."
+        )
+>>>>>>> Stashed changes
         c.argument("if_match")
         c.argument("if_none_match")
         # node provisioning
@@ -661,9 +676,17 @@ def load_arguments(self, _):
         c.argument('disable_acns', action='store_true')
         c.argument('disable_acns_observability', action='store_true')
         c.argument('disable_acns_security', action='store_true')
+<<<<<<< Updated upstream
         c.argument("acns_advanced_networkpolicies", arg_type=get_enum_type(advanced_networkpolicies))
         c.argument('enable_container_network_logs', action='store_true')
         c.argument('disable_container_network_logs', action='store_true')
+=======
+        c.argument(
+            "acns_datapath_acceleration_mode", 
+            arg_type=get_enum_type(acns_datapath_acceleration_modes),
+            help="Set the datapath acceleration mode for Azure Container Networking Solution (ACNS). Valid values are 'BpfVeth' and 'None'."
+        )
+>>>>>>> Stashed changes
         # private cluster parameters
         c.argument('enable_apiserver_vnet_integration', action='store_true')
         c.argument('apiserver_subnet_id', validator=validate_apiserver_subnet_id)

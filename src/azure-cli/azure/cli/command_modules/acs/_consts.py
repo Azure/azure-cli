@@ -144,6 +144,10 @@ CONST_ADVANCED_NETWORKPOLICIES_L7 = "L7"
 CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDUAL = "DynamicIndividual"
 CONST_NETWORK_POD_IP_ALLOCATION_MODE_STATIC_BLOCK = "StaticBlock"
 
+# advanced container networking services (ACNS) datapath acceleration mode
+CONST_ACNS_DATAPATH_ACCELERATION_MODE_BPFVETH = "BpfVeth"
+CONST_ACNS_DATAPATH_ACCELERATION_MODE_NONE = "None"
+
 # consts for addons
 # http application routing
 CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME = "httpApplicationRouting"
