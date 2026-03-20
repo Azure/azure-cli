@@ -2566,7 +2566,7 @@ class AKSManagedClusterContext(BaseAKSContext):
                 "Cannot disable observability, security, and performance acceleration when enabling ACNS. "
                 "Please enable at least one of them or disable ACNS with --disable-acns."
             )
-        if not acns and (acns_observability is not None or acns_security is not None or 
+        if not acns and (acns_observability is not None or acns_security is not None or
                          acns_datapath_acceleration_mode is not None):
             raise MutuallyExclusiveArgumentError(
                 "--disable-acns does not use any additional acns arguments."
