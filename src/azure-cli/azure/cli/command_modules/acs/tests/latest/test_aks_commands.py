@@ -13076,6 +13076,7 @@ spec:
             {
                 "resource_group": resource_group,
                 "name": aks_name,
+                "ssh_key_value": self.generate_ssh_keys(),
                 "location": resource_group_location,
             }
         )
@@ -13083,9 +13084,9 @@ spec:
         # create
         create_cmd = (
             "aks create --resource-group={resource_group} --name={name} --location={location} "
-            "--os-sku AzureLinux --network-plugin azure --network-dataplane=cilium --network-plugin-mode overlay "
-            "--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AdvancedNetworkingPerformancePreview" 
-            "--enable-acns --acns-datapath-acceleration-mode BpfVeth --disable-acns-security --disable-acns-observability"
+            "--ssh-key-value={ssh_key_value} --node-count=1 --tier standard "
+            "--network-plugin azure --network-plugin-mode overlay --enable-acns --acns-datapath-acceleration-mode BpfVeth"
+            "--disale-acns-security --disable-acns-observability"
         )
         self.cmd(
             create_cmd,
@@ -13100,7 +13101,9 @@ spec:
 
         # disable acns datapath acceleration
         disable_cmd = (
-            "aks update --resource-group={resource_group} --name={name} --location={location} --disable-acns"
+            "aks update --resource-group={resource_group} --name={name} --location={location} "
+            "--ssh-key-value={ssh_key_value} --node-count=1 --tier standard "
+            "--network-plugin azure --network-plugin-mode overlay --disable-acns"
         )
         self.cmd(
             disable_cmd,
@@ -13116,8 +13119,8 @@ spec:
         # enable acns datapath acceleration
         enable_cmd = (
             "aks update --resource-group={resource_group} --name={name} --location={location} "
-            "--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AdvancedNetworkingPerformancePreview"
-            "--enable-acns --acns-datapath-acceleration-mode BpfVeth --disable-acns-security --disable-acns-observability"
+            "--ssh-key-value={ssh_key_value} --node-count=1 --tier standard "
+            "--network-plugin azure --network-plugin-mode overlay --enable-acns --acns-datapath-acceleration-mode BpfVeth"
         )
         self.cmd(
             enable_cmd,
