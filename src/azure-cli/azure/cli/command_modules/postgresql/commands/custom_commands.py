@@ -692,7 +692,7 @@ def flexible_list_skus(cmd, client, location):
 def flexible_server_georestore(cmd, client, resource_group_name, server_name, source_server, location, zone=None,
                                vnet=None, vnet_address_prefix=None, subnet=None, subnet_address_prefix=None,
                                private_dns_zone_arguments=None, geo_redundant_backup=None, no_wait=False, yes=False,
-                               byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None, restore_point_in_time=None):
+                               byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None, restore_point_in_time=None, tags=None):
     validate_resource_group(resource_group_name)
 
     server_name = server_name.lower()
@@ -740,7 +740,8 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
         source_server_resource_id=source_server_id,
         create_mode="GeoRestore",
         availability_zone=zone,
-        storage=storage
+        storage=storage,
+        tags=tags
     )
 
     if source_server_object.network.public_network_access == 'Disabled':
