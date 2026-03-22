@@ -445,6 +445,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('subnet_address_prefix', arg_type=subnet_address_prefix_arg_type)
             c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
             c.argument('zone', arg_type=zone_arg_type)
+            c.argument('tags', tags_type)
             c.argument('yes', arg_type=yes_arg_type)
             c.argument('byok_key', arg_type=key_arg_type)
             c.argument('byok_identity', arg_type=identity_arg_type)
