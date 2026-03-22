@@ -1,0 +1,79 @@
+name: Verify PR Title
+
+on:
+  pull_request_target:
+    types: [opened, edited, synchronize, reopened]
+    branches:
+      - dev
+      - release
+
+jobs:
+  verify-pr-title:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate PR title format
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = context.payload.pull_request.title;
+            const errors = [];
+
+            // Rule 1: Title must start with [Component Name] or {Component Name}
+            const prefixMatch = title.match(/^(\[([^\]]*)\]|\{([^}]*)\})/);
+            if (!prefixMatch) {
+              errors.push(
+                "PR title must start with `[Component Name]` (customer-facing) or `{Component Name}` (non-customer-facing)."
+              );
+            } else {
+              const componentName = (prefixMatch[2] || prefixMatch[3] || "").trim();
+              if (!componentName) {
+                errors.push(
+                  "Component name inside the brackets must not be empty."
+                );
+              }
+            }
+
+            // Rule 2: If "Fix #" appears after the prefix, it must be followed by a number
+            if (prefixMatch) {
+              const rest = title.slice(prefixMatch[0].length).trim();
+              const fixMatch = rest.match(/^Fix\s+#/i);
+              if (fixMatch) {
+                const validFix = rest.match(/^Fix\s+#\d+/i);
+                if (!validFix) {
+                  errors.push(
+                    "`Fix #` must be followed by a valid issue number (e.g., `Fix #12345`)."
+                  );
+                }
+              }
+            }
+
+            if (errors.length > 0) {
+              const message = [
+                "## ❌ PR Title Validation Failed\n",
+                ...errors.map(e => `- ${e}`),
+                "",
+                "### Expected format",
+                "```",
+                "[Component Name] description of the change",
+                "{Component Name} description of a non-customer-facing change",
+                "[Component Name] BREAKING CHANGE: description",
+                "[Component Name] Fix #12345: description",
+                "```",
+                "",
+                "### Examples",
+                "```",
+                "[Storage] BREAKING CHANGE: `az storage remove`: Remove --auth-mode argument",
+                "[ARM] Fix #10246: `az resource tag`: Fix crash when --ids is a resource group ID",
+                "{Aladdin} Add help example for dns",
+                "[API Management] Add new operation support",
+                "```",
+              ].join("\n");
+
+              core.summary.addRaw(message);
+              await core.summary.write();
+              core.setFailed("PR title does not follow the required format.");
+            } else {
+              core.summary.addRaw("## ✅ PR Title Validation Passed");
+              await core.summary.write();
+              core.info("PR title format is valid.");
+            }
