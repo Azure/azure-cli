@@ -32,7 +32,9 @@ from azure.cli.command_modules.acs._consts import (
     DecoratorEarlyExitException,
     DecoratorMode,
 )
-from azure.cli.command_modules.acs._helpers import get_snapshot_by_snapshot_id, safe_list_get, process_dns_overrides
+from azure.cli.command_modules.acs._helpers import (
+    get_snapshot_by_snapshot_id, safe_list_get, process_dns_overrides, build_etag_kwargs
+)
 from azure.cli.command_modules.acs._validators import extract_comma_separated_string
 from azure.cli.command_modules.acs.base_decorator import BaseAKSContext, BaseAKSModels, BaseAKSParamDict
 from azure.cli.core import AzCommandsLoader
@@ -1249,8 +1251,9 @@ class AKSAgentPoolContext(BaseAKSContext):
             if self.agentpool and self.agentpool.type is not None:
                 vm_set_type = self.agentpool.type
         else:
-            if self.agentpool and self.agentpool.type_properties_type is not None:
-                vm_set_type = self.agentpool.type_properties_type
+            if (self.agentpool and self.agentpool.properties and
+                    self.agentpool.properties.type_properties_type is not None):
+                vm_set_type = self.agentpool.properties.type_properties_type
 
         # normalize
         if vm_set_type.lower() == CONST_VIRTUAL_MACHINE_SCALE_SETS.lower():
@@ -2350,8 +2353,7 @@ class AKSAgentPoolAddDecorator:
             # validated in "init_agentpool", skip to avoid duplicate api calls
             self.context._get_nodepool_name(enable_validation=False),
             agentpool,
-            if_match=self.context.get_if_match(),
-            if_none_match=self.context.get_if_none_match(),
+            **build_etag_kwargs(self.context.get_if_match(), self.context.get_if_none_match()),
             headers=self.context.get_aks_custom_headers(),
         )
 
@@ -2697,8 +2699,7 @@ class AKSAgentPoolUpdateDecorator:
             self.context.get_cluster_name(),
             self.context.get_nodepool_name(),
             agentpool,
-            if_match=self.context.get_if_match(),
-            if_none_match=self.context.get_if_none_match(),
+            **build_etag_kwargs(self.context.get_if_match(), self.context.get_if_none_match()),
             headers=self.context.get_aks_custom_headers(),
         )
 
