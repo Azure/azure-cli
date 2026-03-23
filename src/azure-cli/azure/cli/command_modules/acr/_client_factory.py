@@ -29,12 +29,7 @@ def cf_acr_registries(cli_ctx, *_):
 
 
 def cf_acr_cache(cli_ctx, *_):
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    # Use 2026-01-01-preview vendored SDK directly
-    from azure.cli.vendored_sdks.containerregistry.v2026_01_01_preview.generated.container_registry_management_client import (
-        ContainerRegistryManagementClient
-    )
-    return get_mgmt_service_client(cli_ctx, ContainerRegistryManagementClient, api_version=VERSION_2026_01_01_PREVIEW).cache_rules
+    return get_acr_service_client(cli_ctx, api_version=VERSION_2026_01_01_PREVIEW).cache_rules
 
 
 def cf_acr_cred_sets(cli_ctx, *_):

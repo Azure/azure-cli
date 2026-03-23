@@ -193,7 +193,7 @@ AZURE_API_PROFILES = {
             'task_runs': '2025-03-01-preview',
             'runs': '2025-03-01-preview',
             'network_rule': '2021-08-01-preview',
-            'cache_rules': '2023-01-01-preview',
+            'cache_rules': '2026-01-01-preview',
             'credential_sets': '2023-01-01-preview'
         }),
         # The order does make things different.
@@ -244,7 +244,8 @@ AD_HOC_API_VERSIONS = {
         'VERSION_2023_11_01_PREVIEW': "2023-11-01-preview",
         'VERSION_2024_11_01_PREVIEW': "2024-11-01-preview",
         'VERSION_2025_03_01_PREVIEW': "2025-03-01-preview",
-        'VERSION_2025_04_01': "2025-04-01"
+        'VERSION_2025_04_01': "2025-04-01",
+        'VERSION_2026_01_01_PREVIEW': "2026-01-01-preview"
     },
     ResourceType.MGMT_MSI: {
         'user_assigned_identities': '2022-01-31-preview',
@@ -281,6 +282,10 @@ class _ApiVersions:  # pylint: disable=too-few-public-methods
             self._resolve()
             return self._operations_groups_value[item]
         except KeyError:
+            # For new-style SDKs without property-based operation groups,
+            # return the default API version for any unlisted group.
+            if self._sdk_profile and self._sdk_profile.default_api_version:
+                return self._post_process(self._sdk_profile.default_api_version)
             raise AttributeError('Attribute {} does not exist.'.format(item))
 
 

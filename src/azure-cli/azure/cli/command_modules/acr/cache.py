@@ -8,10 +8,11 @@ from ._utils import get_resource_group_name_by_registry_name
 from azure.cli.core.azclierror import InvalidArgumentValueError
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.core.serialization import NULL as AzureCoreNull
-from azure.cli.vendored_sdks.containerregistry.v2026_01_01_preview.generated.container_registry_management_client.models import (
+from azure.mgmt.containerregistry.models import (
     CacheRule,
     CacheRuleProperties,
     CacheRuleUpdateParameters,
+    CacheRuleUpdateProperties,
     IdentityProperties,
     UserIdentityProperties
 )
@@ -126,12 +127,12 @@ def acr_cache_update_custom(cmd,
 
     #initilize properties if not already set
     if instance.properties is None:
-        instance.properties = CacheRuleProperties() 
+        instance.properties = CacheRuleUpdateProperties() 
 
     # Handle credential set updates
     if has_cred_update:
         if remove_cred_set:
-            cred_set_id = AzureCoreNull
+            instance.properties.credential_set_resource_id = AzureCoreNull
         else:
             sub_id = get_subscription_id(cmd.cli_ctx)
             rg = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
@@ -142,7 +143,7 @@ def acr_cache_update_custom(cmd,
                 reg_name=registry_name,
                 cred_set_name=cred_set
             )
-        instance.credential_set_resource_id = cred_set_id
+            instance.properties.credential_set_resource_id = cred_set_id
     
     # Handle identity updates
     if has_identity_update:

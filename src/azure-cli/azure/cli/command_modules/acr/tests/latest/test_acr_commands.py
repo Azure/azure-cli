@@ -283,7 +283,7 @@ class AcrCommandsTests(ScenarioTest):
             'rg_loc': resource_group_location,
             'sku': 'Standard',
             'cr_name': 'test-mi',
-            'source_repo': 'mcr.microsoft.com/mcr/hello-world',
+            'source_repo': 'upstreamregistry.azurecr.io/hello-world',
             'target_repo': 'hello-world-mi',
             'identity_name': self.create_random_name('cache-identity', 20),
             'identity_name2': self.create_random_name('cache-identity2', 20)
@@ -307,19 +307,19 @@ class AcrCommandsTests(ScenarioTest):
         self.cmd('acr cache create -n {cr_name} -r {registry_name} -s {source_repo} -t {target_repo} --identity {identity_id}',
                  checks=[self.check('name', '{cr_name}'),
                          self.check('provisioningState', 'Succeeded'),
-                         self.check('identity.type', 'UserAssigned')])
+                         self.check('identity.type', 'userAssigned')])
 
         # Test cache show includes identity
         self.cmd('acr cache show -n {cr_name} -r {registry_name} -g {rg}',
                  checks=[self.check('name', '{cr_name}'),
                          self.check('provisioningState', 'Succeeded'),
-                         self.check('identity.type', 'UserAssigned')])
+                         self.check('identity.type', 'userAssigned')])
 
         # Test cache update with different managed identity
         self.cmd('acr cache update -n {cr_name} -r {registry_name} --identity {identity_id2}',
                  checks=[self.check('name', '{cr_name}'),
                          self.check('provisioningState', 'Succeeded'),
-                         self.check('identity.type', 'UserAssigned')])
+                         self.check('identity.type', 'userAssigned')])
 
         # Clean up
         self.cmd('acr cache delete -n {cr_name} -r {registry_name} -y')
