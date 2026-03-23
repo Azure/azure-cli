@@ -12,8 +12,7 @@ from azure.core.exceptions import HttpResponseError
 from ._constants import get_finished_run_status, get_succeeded_run_status
 
 
-def get_run_with_polling(cmd,
-                         client,
+def get_run_with_polling(client,
                          run_id,
                          registry_name,
                          resource_group_name):

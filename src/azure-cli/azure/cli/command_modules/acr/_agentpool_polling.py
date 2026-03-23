@@ -12,8 +12,7 @@ from azure.core.polling import PollingMethod, LROPoller
 from ._constants import get_succeeded_agentpool_status, get_finished_agentpool_status
 
 
-def delete_agentpool_with_polling(cmd,
-                                  client,
+def delete_agentpool_with_polling(client,
                                   agent_pool_name,
                                   registry_name,
                                   resource_group_name):

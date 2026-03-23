@@ -101,7 +101,7 @@ def acr_agentpool_delete(cmd,
         # it marks the resource as deleted and stop routing further requests to the resource including the
         # async deletion status api. Hence arm will directly return 404. Consider this as successful delete.
         from ._agentpool_polling import delete_agentpool_with_polling
-        return delete_agentpool_with_polling(cmd, client, agent_pool_name, registry_name, resource_group_name)
+        return delete_agentpool_with_polling(client, agent_pool_name, registry_name, resource_group_name)
     except ValidationError as e:
         raise CLIError(e)
 
