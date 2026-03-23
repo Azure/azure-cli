@@ -276,7 +276,7 @@ def create_task_step(context_path,
                     values_file_path=values,
                     context_path=context_path,
                     context_access_token=git_access_token,
-                    values=(set_value if set_value else []) + (set_secret if set_secret else [])
+                    values_property=(set_value if set_value else []) + (set_secret if set_secret else [])
                 )
             else:
                 step = DockerBuildStep(
@@ -300,7 +300,7 @@ def create_task_step(context_path,
                 yaml_template.encode()).decode(),
             context_path=context_path,
             context_access_token=git_access_token,
-            values=(set_value if set_value else []) + (set_secret if set_secret else [])
+            values_property=(set_value if set_value else []) + (set_secret if set_secret else [])
         )
     return step
 
@@ -563,7 +563,7 @@ def update_task_step(step,
                     values_file_path=values,
                     context_path=context_path,
                     context_access_token=git_access_token,
-                    values=set_values
+                    values_property=set_values
                 )
             else:
                 step = DockerBuildStepUpdateParameters(
@@ -596,7 +596,7 @@ def update_task_step(step,
                     values_file_path=values,
                     context_path=context_path,
                     context_access_token=git_access_token,
-                    values=set_values
+                    values_property=set_values
                 )
     # If context_path is None, update the encoded task
     else:
@@ -607,7 +607,7 @@ def update_task_step(step,
             encoded_task_content=encoded_task_content,
             context_path=context_path,
             context_access_token=git_access_token,
-            values=set_values
+            values_property=set_values
         )
     return step
 
@@ -958,7 +958,7 @@ def acr_task_run(cmd,  # pylint: disable=too-many-locals
         file=file,
         arguments=(arg if arg else []) + (secret_arg if secret_arg else []),
         target=target,
-        values=(set_value if set_value else []) + (set_secret if set_secret else []),
+        values_property=(set_value if set_value else []) + (set_secret if set_secret else []),
         update_trigger_token=update_trigger_token
     )
     queued_run = client_registries.schedule_run(

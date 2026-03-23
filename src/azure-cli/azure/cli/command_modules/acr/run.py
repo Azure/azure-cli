@@ -74,7 +74,7 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
         request = FileTaskRunRequest(
             task_file_path=file if file else ACR_TASK_YAML_DEFAULT_NAME,
             values_file_path=values,
-            values=(set_value if set_value else []) + (set_secret if set_secret else []),
+            values_property=(set_value if set_value else []) + (set_secret if set_secret else []),
             source_location=source_location,
             timeout=timeout,
             platform=PlatformProperties(
@@ -91,7 +91,7 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
         import base64
         request = EncodedTaskRunRequest(
             encoded_task_content=base64.b64encode(yaml_template.encode()).decode(),
-            values=(set_value if set_value else []) + (set_secret if set_secret else []),
+            values_property=(set_value if set_value else []) + (set_secret if set_secret else []),
             source_location=source_location,
             timeout=timeout,
             platform=PlatformProperties(
