@@ -228,11 +228,6 @@ AD_HOC_API_VERSIONS = {
         # src/azure-cli/azure/cli/command_modules/appservice/_constants.py:68
         'app_service_certificate_orders': '2022-09-01'
     },
-    ResourceType.MGMT_CONTAINERREGISTRY: {
-        # src/azure-cli/azure/cli/command_modules/acr/_client_factory.py
-        'VERSION_2021_08_01_PREVIEW': "2021-08-01-preview",
-        'VERSION_2026_01_01_PREVIEW': "2026-01-01-preview"
-    },
     ResourceType.MGMT_MSI: {
         'user_assigned_identities': '2022-01-31-preview',
     }
