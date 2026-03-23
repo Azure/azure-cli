@@ -197,7 +197,7 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     _pg_sku_name_validator(sku_name, sku_info, tier, instance)
     _pg_high_availability_validator(high_availability, zonal_resiliency, allow_same_zone,
                                     standby_availability_zone, zone, tier, single_az, instance)
-    _pg_version_validator(version, list_location_capability_info['server_versions'])
+    pg_version_validator(version, list_location_capability_info['server_versions'])
     pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup, instance)
     is_microsoft_entra_auth = bool(microsoft_entra_auth is not None and microsoft_entra_auth.lower() == 'enabled')
     _pg_authentication_validator(password_auth, is_microsoft_entra_auth,
@@ -342,16 +342,14 @@ def _pg_storage_performance_tier_validator(performance_tier, sku_info, tier=None
                                ' Allowed values : {}'.format(storage_size, performance_tiers))
 
 
-def _pg_version_validator(version, versions):
+def pg_version_validator(version, versions):
     if version:
         if version not in versions:
             raise CLIError('Incorrect value for --version. Allowed values : {}'.format(sorted(versions)))
-        if version in ('11', '12'):
-            logger.warning("Support for PostgreSQL %s has officially ended. "
-                           "We recommend selecting PostgreSQL 14 or a later version for "
-                           "all future operations.", str(version))
-        if version == '13':
-            logger.warning("PostgreSQL version 13 will reach end-of-life (EOL) soon. "
+        if version in ('11', '12', '13'):
+            logger.warning("The version selected is a retired community version of PostgreSQL. "
+                           "To use this version, you will automatically be enrolled in our extended "
+                           "support plan for an additional charge starting August 1, 2026. "
                            "Upgrade to PostgreSQL 14 or later as soon as possible to "
                            "maintain security, performance, and supportability.")
 
