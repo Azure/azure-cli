@@ -133,7 +133,7 @@ DEPENDENCIES = [
     'azure-storage-file-share==12.24.0b1',
     'azure-storage-queue==12.15.0b1',
     'azure-synapse-accesscontrol~=0.5.0',
-    'azure-synapse-artifacts~=0.21.0',
+    'azure-synapse-artifacts~=0.22.0',
     'azure-synapse-managedprivateendpoints~=0.4.0',
     'azure-synapse-spark~=0.7.0',
     'chardet~=5.2.0',
