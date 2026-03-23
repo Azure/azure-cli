@@ -12658,8 +12658,8 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             location="test_location",
             http_proxy_config = self.models.ManagedClusterHTTPProxyConfig(
                 enabled=True,
-                httpProxy="http://cli-proxy-vm:3128/",
-                httpsProxy="https://cli-proxy-vm:3129/",
+                http_proxy="http://cli-proxy-vm:3128/",
+                https_proxy="https://cli-proxy-vm:3129/",
             )
         )
         dec_2.context.attach_mc(mc_2)
@@ -12672,8 +12672,8 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             location="test_location",
             http_proxy_config = self.models.ManagedClusterHTTPProxyConfig(
                 enabled=False,
-                httpProxy="http://cli-proxy-vm:3128/",
-                httpsProxy="https://cli-proxy-vm:3129/",
+                http_proxy="http://cli-proxy-vm:3128/",
+                https_proxy="https://cli-proxy-vm:3129/",
             )
         )
         self.assertEqual(dec_mc_2, ground_truth_mc_2)
@@ -12692,8 +12692,8 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             location="test_location",
             http_proxy_config = self.models.ManagedClusterHTTPProxyConfig(
                 enabled=False,
-                httpProxy="http://cli-proxy-vm:3128/",
-                httpsProxy="https://cli-proxy-vm:3129/",
+                http_proxy="http://cli-proxy-vm:3128/",
+                https_proxy="https://cli-proxy-vm:3129/",
             )
         )
         dec_3.context.attach_mc(mc_3)
@@ -12706,8 +12706,8 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             location="test_location",
             http_proxy_config = self.models.ManagedClusterHTTPProxyConfig(
                 enabled=True,
-                httpProxy="http://cli-proxy-vm:3128/",
-                httpsProxy="https://cli-proxy-vm:3129/",
+                http_proxy="http://cli-proxy-vm:3128/",
+                https_proxy="https://cli-proxy-vm:3129/",
             )
         )
         self.assertEqual(dec_mc_3, ground_truth_mc_3)
