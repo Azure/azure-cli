@@ -13109,14 +13109,30 @@ spec:
             ],
         )
 
-        # enable acns datapath acceleration
-        enable_cmd = (
-            "aks update --resource-group={resource_group} --name={name} "
+        # delete
+        self.cmd(
+            "aks delete -g {resource_group} -n {name} --yes --no-wait",
+            checks=[self.is_empty()],
+        )
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17,
+        name_prefix="clitest",
+        location="westcentralus",
+    )
+    def test_aks_update_with_perf(
+        self, resource_group, resource_group_location
+    ):
+        # create
+        create_cmd = (
+            "aks create --resource-group={resource_group} --name={name} --location={location} "
+            "--os-sku AzureLinux --network-plugin azure --network-dataplane=cilium --network-plugin-mode overlay "
             "--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AdvancedNetworkingPerformancePreview "
             "--enable-acns --acns-datapath-acceleration-mode BpfVeth --disable-acns-security --disable-acns-observability"
         )
         self.cmd(
-            enable_cmd,
+            create_cmd,
             checks=[
                 self.check("provisioningState", "Succeeded"),
                 self.check("networkProfile.advancedNetworking.enabled", True),
@@ -13133,7 +13149,7 @@ spec:
             "--network-plugin azure --network-plugin-mode overlay --enable-acns --enable-acns-security"
         )
         self.cmd(
-            enable_cmd,
+            update_cmd,
             checks=[
                 self.check("provisioningState", "Succeeded"),
                 self.check("networkProfile.advancedNetworking.enabled", True),
