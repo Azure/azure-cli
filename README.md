@@ -221,3 +221,6 @@ For more information see the [Code of Conduct FAQ](https://opensource.microsoft.
 
 If you would like to become an active contributor to this project please
 follow the instructions provided in [Microsoft Open Source Guidelines](https://opensource.microsoft.com/collaborate).
+
+## Credscanner false positive fix
+The readme has temporary changes to test the cred scanner code
