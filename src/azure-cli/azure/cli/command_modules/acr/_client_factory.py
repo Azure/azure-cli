@@ -5,7 +5,6 @@
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
-VERSION_2021_08_01_PREVIEW = "2021-08-01-preview"
 VERSION_2026_01_01_PREVIEW = "2026-01-01-preview"
 
 
@@ -32,10 +31,6 @@ def cf_acr_cache(cli_ctx, *_):
 
 def cf_acr_cred_sets(cli_ctx, *_):
     return get_acr_service_client(cli_ctx, api_version=VERSION_2026_01_01_PREVIEW).credential_sets
-
-
-def cf_acr_network_rules(cli_ctx, *_):
-    return get_acr_service_client(cli_ctx, api_version=VERSION_2021_08_01_PREVIEW).registries
 
 
 def cf_acr_registries_tasks(cli_ctx, *_):
