@@ -13262,7 +13262,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
-        self.assertEqual(ctx_1.get_acns_enablement(), (None, None, None))
+        self.assertEqual(ctx_1.get_acns_enablement(), (None, None, None, None))
 
         # Flag set to True.
         ctx_2 = AKSManagedClusterContext(
@@ -13275,7 +13275,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
-        self.assertEqual(ctx_2.get_acns_enablement(), (True, None, None))
+        self.assertEqual(ctx_2.get_acns_enablement(), (True, None, None, None))
 
         # Flag set to True.
         ctx_3 = AKSManagedClusterContext(
@@ -13288,7 +13288,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
-        self.assertEqual(ctx_3.get_acns_enablement(), (True, None, None))
+        self.assertEqual(ctx_3.get_acns_enablement(), (True, None, None, None))
 
         # Flag set to True and False.
         ctx_4 = AKSManagedClusterContext(
@@ -13317,7 +13317,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
-        self.assertEqual(ctx_5.get_acns_enablement(), (False, None, None))
+        self.assertEqual(ctx_5.get_acns_enablement(), (False, None, None, None))
 
         ctx_6 = AKSManagedClusterContext(
             self.cmd,
@@ -13330,7 +13330,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
-        self.assertEqual(ctx_6.get_acns_enablement(), (True, False, None))
+        self.assertEqual(ctx_6.get_acns_enablement(), (True, False, None, None))
 
         ctx_7 = AKSManagedClusterContext(
             self.cmd,
@@ -13343,16 +13343,30 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
-        self.assertEqual(ctx_7.get_acns_enablement(), (True, None, False))
+        self.assertEqual(ctx_7.get_acns_enablement(), (True, None, False, None))
+
+        ctx_8 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_acns": True,
+                    "acns_datapath_acceleration_mode": "BpfVeth",
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_8.get_acns_enablement(), (True, None, False, True))
 
         # Illegal flags
-        ctx_8 = AKSManagedClusterContext(
+        ctx_9 = AKSManagedClusterContext(
             self.cmd,
             AKSManagedClusterParamDict(
                 {
                     "enable_acns": True,
                     "disable_acns_security": True,
                     "disable_acns_observability": True,
+                    #acns performance is None by default
                 }
             ),
             self.models,
@@ -13360,10 +13374,10 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         )
         # fail on get_acns mutual exclusive error
         with self.assertRaises(MutuallyExclusiveArgumentError):
-            ctx_8.get_acns_enablement()
+            ctx_9.get_acns_enablement()
         
         # Illegal flags
-        ctx_9 = AKSManagedClusterContext(
+        ctx_10 = AKSManagedClusterContext(
             self.cmd,
             AKSManagedClusterParamDict(
                 {
@@ -13377,7 +13391,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         )
         # fail on get_acns mutual exclusive error
         with self.assertRaises(MutuallyExclusiveArgumentError):
-            ctx_9.get_acns_enablement()
+            ctx_10.get_acns_enablement()
 
     def test_mc_get_acns_transit_encryption_type(self):
         # Default, not set.
