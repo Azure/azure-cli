@@ -1410,7 +1410,7 @@ def _update_upgrade_settings(cmd, instance,
                     f"{upgrade_override_until} is not a valid datatime format."
                 )
         elif force_upgrade:
-            default_extended_until = datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=3)
+            default_extended_until = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=3)
             if existing_until is None or existing_until.timestamp() < default_extended_until.timestamp():
                 instance.upgrade_settings.override_settings.until = default_extended_until
     return instance
