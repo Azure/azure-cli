@@ -11,6 +11,12 @@ from ._utils import validate_premium_registry
 
 
 NETWORK_RULE_NOT_SUPPORTED = 'Network rules are only supported for managed registries in Premium SKU.'
+# TODO: The networkRuleSet property was unintentionally removed from preview APIs.
+# This was not previously exposed, because of multi-api support in the Python SDK.
+# The Python SDK no longer supports multi-api, highlighting this issue. 
+# Until the next preview API release is deployed, this code uses direct REST calls to get and update the registry's networkRuleSet
+# Once the next preview API is released, this code should be updated to use the SDK methods to get and update the networkRuleSet, 
+# and the api version should be updated to reflect the latest API version, rather than hard coded, as it currently is below.
 API_VERSION = "2021-08-01-preview"
 
 
@@ -67,18 +73,8 @@ def acr_network_rule_list(cmd, registry_name, resource_group_name=None):
         cmd, registry_name, resource_group_name, NETWORK_RULE_NOT_SUPPORTED)
 
     registry = _get_registry(cmd.cli_ctx, resource_group_name, registry_name)
-    network_rule_set = registry.get('properties', {}).get('networkRuleSet', {})
-
-    virtual_network_rules = [
-        {'virtualNetworkResourceId': rule.get('id'), 'action': rule.get('action', 'Allow')}
-        for rule in (network_rule_set.get('virtualNetworkRules') or [])
-    ]
-    ip_rules = [
-        {'ipAddressOrRange': rule.get('value') or rule.get('ipAddressOrRange'), 'action': rule.get('action', 'Allow')}
-        for rule in (network_rule_set.get('ipRules') or [])
-    ]
-
-    return {'virtualNetworkRules': virtual_network_rules, 'ipRules': ip_rules}
+    network_rule_set = _format_registry_response(registry)['networkRuleSet']
+    return {'virtualNetworkRules': network_rule_set['virtualNetworkRules'], 'ipRules': network_rule_set['ipRules']}
 
 
 def acr_network_rule_add(cmd,
