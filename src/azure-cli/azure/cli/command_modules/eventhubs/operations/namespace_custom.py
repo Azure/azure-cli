@@ -44,7 +44,7 @@ def create_eventhub_namespace(cmd, resource_group_name, namespace_name, location
                               is_kafka_enabled=None, is_auto_inflate_enabled=None, alternate_name=None,
                               public_network_access=None, cluster_arm_id=None, max_replication_lag_duration_in_seconds=None,
                               geo_data_replication_config=None):
-    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace import Create
+    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace._create import Create
 
     user_assigned_identity = {}
     command_args_dict = {}
@@ -117,8 +117,8 @@ def create_eventhub_namespace(cmd, resource_group_name, namespace_name, location
 
 def cli_add_encryption(cmd, resource_group_name, namespace_name, encryption_config,
                        require_infrastructure_encryption=None):
-    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace import Update
-    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace import Show
+    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace._update import Update
+    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace._show import Show
 
     eventhubsnm = Show(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
@@ -148,8 +148,8 @@ def cli_add_encryption(cmd, resource_group_name, namespace_name, encryption_conf
 
 
 def cli_remove_encryption(cmd, resource_group_name, namespace_name, encryption_config):
-    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace import Update
-    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace import Show
+    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace._update import Update
+    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace._show import Show
 
     eventhubsnm = Show(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
@@ -176,8 +176,8 @@ def cli_remove_encryption(cmd, resource_group_name, namespace_name, encryption_c
 
 
 def cli_add_identity(cmd, resource_group_name, namespace_name, system_assigned=None, user_assigned=None):
-    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace import Update
-    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace import Show
+    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace._update import Update
+    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace._show import Show
 
     eventhubsnm = Show(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
@@ -226,8 +226,8 @@ def cli_add_identity(cmd, resource_group_name, namespace_name, system_assigned=N
 
 
 def cli_remove_identity(cmd, resource_group_name, namespace_name, system_assigned=None, user_assigned=None):
-    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace import Update
-    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace import Show
+    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace._update import Update
+    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace._show import Show
 
     eventhubsnm = Show(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
@@ -272,8 +272,8 @@ def cli_remove_identity(cmd, resource_group_name, namespace_name, system_assigne
 def approve_private_endpoint_connection(cmd, resource_group_name, namespace_name,
                                         private_endpoint_connection_name, description=None):
 
-    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.private_endpoint_connection import Update
-    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.private_endpoint_connection import Show
+    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.private_endpoint_connection._update import Update
+    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.private_endpoint_connection._show import Show
 
     private_endpoint_connection = Show(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
@@ -299,7 +299,7 @@ def approve_private_endpoint_connection(cmd, resource_group_name, namespace_name
 
 def reject_private_endpoint_connection(cmd, resource_group_name, namespace_name, private_endpoint_connection_name,
                                        description=None):
-    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.private_endpoint_connection import Update
+    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.private_endpoint_connection._update import Update
     command_args_dict = {
         "resource_group": resource_group_name,
         "namespace_name": namespace_name,
@@ -312,7 +312,7 @@ def reject_private_endpoint_connection(cmd, resource_group_name, namespace_name,
 
 def delete_private_endpoint_connection(cmd, resource_group_name, namespace_name, private_endpoint_connection_name,
                                        description=None):
-    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.private_endpoint_connection import Delete
+    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.private_endpoint_connection._delete import Delete
     command_args_dict = {
         "resource_group": resource_group_name,
         "namespace_name": namespace_name,
@@ -324,7 +324,7 @@ def delete_private_endpoint_connection(cmd, resource_group_name, namespace_name,
 
 def set_georecovery_alias(cmd, resource_group_name, namespace_name, alias,
                           partner_namespace, alternate_name=None):
-    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.georecovery_alias import Create
+    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.georecovery_alias._create import Create
     command_arg_dict = {
         "resource_group": resource_group_name,
         "namespace_name": namespace_name,
@@ -336,8 +336,8 @@ def set_georecovery_alias(cmd, resource_group_name, namespace_name, alias,
 
 
 def cli_add_location(cmd, resource_group_name, namespace_name, geo_data_replication_config):
-    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace import Update
-    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace import Show
+    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace._update import Update
+    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace._show import Show
 
     eventhubsnm = Show(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
@@ -361,8 +361,8 @@ def cli_add_location(cmd, resource_group_name, namespace_name, geo_data_replicat
 
 
 def cli_remove_location(cmd, resource_group_name, namespace_name, geo_data_replication_config):
-    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace import Update
-    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace import Show
+    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace._update import Update
+    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace._show import Show
 
     eventhubsnm = Show(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,

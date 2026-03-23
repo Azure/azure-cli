@@ -9,7 +9,7 @@
 from azure.cli.command_modules.eventhubs.constants import SYSTEM
 from azure.cli.command_modules.eventhubs.constants import SYSTEMUSER
 from azure.cli.command_modules.eventhubs.constants import USER
-from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.eventhub import Update as _EventHubEntityUpdate
+from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.eventhub._update import Update as _EventHubEntityUpdate
 
 
 def cli_eventhub_create(cmd, resource_group_name, namespace_name, event_hub_name,
@@ -19,7 +19,7 @@ def cli_eventhub_create(cmd, resource_group_name, namespace_name, event_hub_name
                         mi_user_assigned=None, mi_system_assigned=False,
                         timestamp_type=None, user_metadata=None, min_compaction_lag_in_mins=None):
 
-    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.eventhub import Create
+    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.eventhub._create import Create
     command_arg_dict = {}
     if cleanup_policy:
         command_arg_dict.update({

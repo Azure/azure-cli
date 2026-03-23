@@ -15,8 +15,8 @@ from azure.cli.core.azclierror import CLIError
 
 
 def add_network_rule_set_ip_rule(cmd, resource_group_name, namespace_name, ip_rule=None):
-    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.network_rule_set import Update
-    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.network_rule_set import Show
+    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.network_rule_set._update import Update
+    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.network_rule_set._show import Show
 
     eventhubs_ip_rule = Show(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
@@ -47,8 +47,8 @@ def add_network_rule_set_ip_rule(cmd, resource_group_name, namespace_name, ip_ru
 
 
 def remove_network_rule_set_ip_rule(cmd, resource_group_name, namespace_name, ip_rule=None):
-    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.network_rule_set import Update
-    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.network_rule_set import Show
+    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.network_rule_set._update import Update
+    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.network_rule_set._show import Show
     eventhubs_ip_rule = Show(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "namespace_name": namespace_name
@@ -74,8 +74,8 @@ def remove_network_rule_set_ip_rule(cmd, resource_group_name, namespace_name, ip
 
 
 def add_virtual_network_rule(cmd, resource_group_name, namespace_name, subnet=None):
-    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.network_rule_set import Update
-    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.network_rule_set import Show
+    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.network_rule_set._update import Update
+    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.network_rule_set._show import Show
     eventhubs_nw_rule = Show(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "namespace_name": namespace_name
@@ -106,8 +106,8 @@ def add_virtual_network_rule(cmd, resource_group_name, namespace_name, subnet=No
 
 def remove_virtual_network_rule(cmd, resource_group_name, namespace_name, subnet=None):
 
-    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.network_rule_set import Update
-    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.network_rule_set import Show
+    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.network_rule_set._update import Update
+    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.network_rule_set._show import Show
     eventhubs_nw_rule = Show(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "namespace_name": namespace_name

@@ -24,7 +24,7 @@ def create_app_group_policy_object(col):
 
 def cli_appgroup_create(cmd, resource_group_name, namespace_name, application_group_name, client_app_group_identifier,
                         throttling_policy_config=None, is_enabled=None):
-    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.application_group import Create
+    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.application_group._create import Create
     command_args_dict = {}
 
     command_args_dict.update({
@@ -40,8 +40,8 @@ def cli_appgroup_create(cmd, resource_group_name, namespace_name, application_gr
 
 
 def cli_add_appgroup_policy(cmd, resource_group_name, namespace_name, application_group_name, throttling_policy_config):
-    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.application_group import Update
-    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.application_group import Show
+    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.application_group._update import Update
+    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.application_group._show import Show
 
     application_group = Show(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
@@ -65,8 +65,8 @@ def cli_add_appgroup_policy(cmd, resource_group_name, namespace_name, applicatio
 
 def cli_remove_appgroup_policy(cmd, resource_group_name, namespace_name, application_group_name, policy):
     from azure.cli.core.azclierror import ResourceNotFoundError
-    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.application_group import Update
-    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.application_group import Show
+    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.application_group._update import Update
+    from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.namespace.application_group._show import Show
     application_group = Show(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
         "namespace_name": namespace_name,
