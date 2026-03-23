@@ -14,6 +14,7 @@ VERSION_2023_01_01_PREVIEW = "2023-01-01-preview"
 VERSION_2024_11_01_PREVIEW = "2024-11-01-preview"
 VERSION_2025_03_01_PREVIEW = "2025-03-01-preview"
 VERSION_2025_04_01 = "2025-04-01"
+VERSION_2026_01_01_PREVIEW = "2026-01-01-preview"
 
 
 def get_acr_service_client(cli_ctx, api_version=None):
@@ -34,11 +35,11 @@ def cf_acr_registries(cli_ctx, *_):
 
 
 def cf_acr_cache(cli_ctx, *_):
-    return get_acr_service_client(cli_ctx, api_version=VERSION_2023_01_01_PREVIEW).cache_rules
+    return get_acr_service_client(cli_ctx, api_version=VERSION_2026_01_01_PREVIEW).cache_rules
 
 
 def cf_acr_cred_sets(cli_ctx, *_):
-    return get_acr_service_client(cli_ctx, api_version=VERSION_2023_01_01_PREVIEW).credential_sets
+    return get_acr_service_client(cli_ctx, api_version=VERSION_2026_01_01_PREVIEW).credential_sets
 
 
 def cf_acr_network_rules(cli_ctx, *_):
@@ -74,15 +75,15 @@ def cf_acr_runs(cli_ctx, *_):
 
 
 def cf_acr_scope_maps(cli_ctx, *_):
-    return get_acr_service_client(cli_ctx, VERSION_2024_11_01_PREVIEW).scope_maps
+    return get_acr_service_client(cli_ctx, VERSION_2026_01_01_PREVIEW).scope_maps
 
 
 def cf_acr_tokens(cli_ctx, *_):
-    return get_acr_service_client(cli_ctx, VERSION_2024_11_01_PREVIEW).tokens
+    return get_acr_service_client(cli_ctx, VERSION_2026_01_01_PREVIEW).tokens
 
 
 def cf_acr_token_credentials(cli_ctx, *_):
-    return get_acr_service_client(cli_ctx, VERSION_2024_11_01_PREVIEW).registries
+    return get_acr_service_client(cli_ctx, VERSION_2026_01_01_PREVIEW).registries
 
 
 def cf_acr_agentpool(cli_ctx, *_):
