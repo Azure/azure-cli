@@ -238,7 +238,8 @@ AD_HOC_API_VERSIONS = {
         'VERSION_2023_11_01_PREVIEW': "2023-11-01-preview",
         'VERSION_2024_11_01_PREVIEW': "2024-11-01-preview",
         'VERSION_2025_03_01_PREVIEW': "2025-03-01-preview",
-        'VERSION_2025_04_01': "2025-04-01"
+        'VERSION_2025_04_01': "2025-04-01",
+        'VERSION_2026_01_01_PREVIEW': "2026-01-01-preview"
     },
     ResourceType.MGMT_MSI: {
         'user_assigned_identities': '2022-01-31-preview',
