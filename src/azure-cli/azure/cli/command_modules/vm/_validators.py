@@ -90,7 +90,8 @@ def _validate_proximity_placement_group(cmd, namespace):
         parsed = parse_resource_id(namespace.proximity_placement_group)
         rg, name = parsed['resource_group'], parsed['name']
 
-        if not check_existence(cmd.cli_ctx, name, rg, 'Microsoft.Compute', 'proximityPlacementGroups'):
+        if not check_existence(cmd.cli_ctx, name, rg, 'Microsoft.Compute',
+                               'proximityPlacementGroups', static_version='2024-07-01'):
             raise CLIError("Proximity Placement Group '{}' does not exist.".format(name))
 
 
@@ -692,7 +693,8 @@ def _validate_vm_create_storage_account(cmd, namespace):
     if namespace.storage_account:
         storage_id = parse_resource_id(namespace.storage_account)
         rg = storage_id.get('resource_group', namespace.resource_group_name)
-        if check_existence(cmd.cli_ctx, storage_id['name'], rg, 'Microsoft.Storage', 'storageAccounts'):
+        if check_existence(cmd.cli_ctx, storage_id['name'], rg, 'Microsoft.Storage',
+                           'storageAccounts', static_version='2024-01-01'):
             # 1 - existing storage account specified
             namespace.storage_account_type = 'existing'
             logger.debug("using specified existing storage account '%s'", storage_id['name'])
@@ -735,7 +737,8 @@ def _validate_vm_create_availability_set(cmd, namespace):
         name = as_id['name']
         rg = as_id.get('resource_group', namespace.resource_group_name)
 
-        if not check_existence(cmd.cli_ctx, name, rg, 'Microsoft.Compute', 'availabilitySets'):
+        if not check_existence(cmd.cli_ctx, name, rg, 'Microsoft.Compute',
+                               'availabilitySets', static_version='2024-07-01'):
             raise CLIError("Availability set '{}' does not exist.".format(name))
 
         namespace.availability_set = resource_id(
@@ -755,7 +758,8 @@ def _validate_vm_create_vmss(cmd, namespace):
         name = as_id['name']
         rg = as_id.get('resource_group', namespace.resource_group_name)
 
-        if not check_existence(cmd.cli_ctx, name, rg, 'Microsoft.Compute', 'virtualMachineScaleSets'):
+        if not check_existence(cmd.cli_ctx, name, rg, 'Microsoft.Compute',
+                               'virtualMachineScaleSets', static_version='2025-04-01'):
             raise CLIError("virtual machine scale set '{}' does not exist.".format(name))
 
         namespace.vmss = resource_id(
@@ -1035,7 +1039,8 @@ def _validate_vm_create_nsg(cmd, namespace):
 
     if namespace.nsg:
         if check_existence(cmd.cli_ctx, namespace.nsg, namespace.resource_group_name,
-                           'Microsoft.Network', 'networkSecurityGroups'):
+                           'Microsoft.Network', 'networkSecurityGroups',
+                           static_version="2023-11-01"):
             namespace.nsg_type = 'existing'
             logger.debug("using specified NSG '%s'", namespace.nsg)
         else:
@@ -1058,7 +1063,8 @@ def _validate_vmss_create_nsg(cmd, namespace):
 def _validate_vm_vmss_create_public_ip(cmd, namespace):
     if namespace.public_ip_address:
         if check_existence(cmd.cli_ctx, namespace.public_ip_address, namespace.resource_group_name,
-                           'Microsoft.Network', 'publicIPAddresses'):
+                           'Microsoft.Network', 'publicIPAddresses',
+                           static_version='2022-05-01'):
             namespace.public_ip_address_type = 'existing'
             logger.debug("using existing specified public IP '%s'", namespace.public_ip_address)
         else:

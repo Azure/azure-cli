@@ -267,6 +267,10 @@ CONST_NODE_PROVISIONING_DEFAULT_POOLS_AUTO = "Auto"
 # consts for workloadruntime
 CONST_WORKLOAD_RUNTIME_KATA_VM_ISOLATION = "KataVmIsolation"
 
+# consts for acns transit encryption
+CONST_TRANSIT_ENCRYPTION_WIREGUARD = "WireGuard"
+CONST_TRANSIT_ENCRYPTION_NONE = "None"
+
 
 # consts for decorator pattern
 class DecoratorMode(Enum):
