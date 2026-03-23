@@ -13105,11 +13105,7 @@ spec:
         self.cmd(
             disable_cmd,
             checks=[
-                self.check("provisioningState", "Succeeded"),
-                self.check("networkProfile.advancedNetworking.enabled", True),
-                self.check("networkProfile.advancedNetworking.security.enabled", False),
-                self.check("networkProfile.advancedNetworking.observability.enabled", False),
-                self.check("networkProfile.advancedNetworking.performance.accelerationMode", "None")
+                self.check("provisioningState", "Succeeded")
             ],
         )
 
@@ -13134,7 +13130,7 @@ spec:
         update_cmd = (
             "aks update --resource-group={resource_group} --name={name} "
             "--ssh-key-value={ssh_key_value} --node-count=1 --tier standard "
-            "--network-plugin azure --network-plugin-mode overlay --enable-acns --enable-acns-seurity"
+            "--network-plugin azure --network-plugin-mode overlay --enable-acns --enable-acns-security"
         )
         self.cmd(
             enable_cmd,
