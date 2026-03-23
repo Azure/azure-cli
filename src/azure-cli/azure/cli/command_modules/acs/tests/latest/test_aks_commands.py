@@ -13158,8 +13158,7 @@ spec:
         # update other acns
         update_cmd = (
             "aks update --resource-group={resource_group} --name={name} "
-            "--ssh-key-value={ssh_key_value} --node-count=1 --tier standard "
-            "--network-plugin azure --network-plugin-mode overlay --enable-acns --enable-acns-security"
+            "--enable-acns --enable-acns-security"
         )
         self.cmd(
             update_cmd,
