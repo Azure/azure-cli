@@ -1,0 +1,186 @@
+# macOS Build Jobs Template
+#
+# Purpose: Build Azure CLI tar.gz for macOS (ARM64 + Intel)
+# Usage: Can be called from main pipeline or standalone wrapper
+#
+# Parameters:
+#   - PythonVersion: Homebrew Python version (default: 3.13)
+#   - MacosArm64Image: VM image for ARM64 builds
+#   - MacosIntelImage: VM image for Intel builds
+#   - condition: Job execution condition
+#   - dependsOn: Jobs this depends on
+#
+# Artifacts Published:
+#   - macos-cli-build-unsigned-arm64
+#   - macos-cli-build-unsigned-x86_64
+
+parameters:
+  - name: PythonVersion
+    type: string
+    default: '3.13'
+  - name: MacosArm64Image
+    type: string
+    default: 'macos-15-arm64'
+  - name: MacosIntelImage
+    type: string
+    default: 'macos-15'
+  - name: condition
+    type: string
+    default: 'succeeded()'
+  - name: dependsOn
+    type: object
+    default: []
+
+jobs:
+# ============================================================================
+# JOB: BUILD MACOS CLI (ARM64 + Intel via Matrix)
+# ============================================================================
+- job: BuildMacOSCli
+  displayName: 'macOS | Build CLI'
+  condition: ${{ parameters.condition }}
+  dependsOn: ${{ parameters.dependsOn }}
+  strategy:
+    matrix:
+      ARM64:
+        Architecture: 'arm64'
+        vmImageName: ${{ parameters.MacosArm64Image }}
+      Intel:
+        Architecture: 'x86_64'
+        vmImageName: ${{ parameters.MacosIntelImage }}
+  pool:
+    vmImage: $(vmImageName)
+  timeoutInMinutes: 60
+  
+  steps:
+  - checkout: self
+    fetchDepth: 1
+  
+  - bash: |
+      set -e
+      
+      echo "=== Installing Homebrew Python ${{ parameters.PythonVersion }} ==="
+      echo "Architecture: $(Architecture)"
+      brew install python@${{ parameters.PythonVersion }}
+      
+      PYTHON_PATH=$(brew --prefix python@${{ parameters.PythonVersion }})/libexec/bin/python3
+      echo "Python path: $PYTHON_PATH"
+      $PYTHON_PATH --version
+      
+      echo "##vso[task.setvariable variable=PythonPath]$PYTHON_PATH"
+    displayName: 'Install Homebrew Python'
+  
+  - bash: |
+      set -e
+      
+      PYTHON="$(PythonPath)"
+      ARCH="$(Architecture)"
+      
+      echo "=== Building Azure CLI with Homebrew Python ==="
+      echo "Python: $PYTHON"
+      echo "Architecture: $ARCH"
+      $PYTHON --version
+      
+      $PYTHON scripts/release/macos/build_binary_tar_gz.py \
+        --platform-tag macos-$ARCH \
+        --output-dir dist/binary_tar_gz
+      
+      echo ""
+      echo "=== Build Output ==="
+      ls -lh dist/binary_tar_gz/
+      
+      mkdir -p $(Build.ArtifactStagingDirectory)/cli-build
+      cp dist/binary_tar_gz/*.tar.gz $(Build.ArtifactStagingDirectory)/cli-build/
+      cp dist/binary_tar_gz/*.sha256 $(Build.ArtifactStagingDirectory)/cli-build/
+      
+    displayName: 'Build Azure CLI Tarball'
+    env:
+      PYTHON_MAJOR_MINOR: ${{ parameters.PythonVersion }}
+  
+  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+    displayName: 'Generate SBOM'
+    inputs:
+      BuildDropPath: $(Build.ArtifactStagingDirectory)/cli-build
+  
+  - publish: $(Build.ArtifactStagingDirectory)/cli-build
+    artifact: 'macos-cli-build-unsigned-$(Architecture)'
+    displayName: 'Publish Unsigned CLI Build ($(Architecture))'
+
+# ============================================================================
+# JOB: VERIFY MACOS CLI (ARM64 + Intel via Matrix)
+# ============================================================================
+- job: VerifyMacOSCli
+  displayName: 'macOS | Verify CLI'
+  dependsOn: BuildMacOSCli
+  condition: succeeded()
+  strategy:
+    matrix:
+      ARM64:
+        Architecture: 'arm64'
+        vmImageName: ${{ parameters.MacosArm64Image }}
+      Intel:
+        Architecture: 'x86_64'
+        vmImageName: ${{ parameters.MacosIntelImage }}
+  pool:
+    vmImage: $(vmImageName)
+  
+  steps:
+  - checkout: none
+  
+  - download: current
+    artifact: 'macos-cli-build-unsigned-$(Architecture)'
+    displayName: 'Download CLI Build ($(Architecture))'
+  
+  - bash: |
+      set -e
+      
+      ARCH="$(Architecture)"
+      TARBALL=$(find $(Pipeline.Workspace)/macos-cli-build-unsigned-$ARCH -name "azure-cli-*-macos-$ARCH-nopython.tar.gz" | head -1)
+      EXTRACT_DIR=$(mktemp -d)
+      
+      echo "=== Tarball Analysis ==="
+      echo "Architecture: $ARCH"
+      echo "Tarball: $(basename "$TARBALL")"
+      TARBALL_SIZE=$(du -h "$TARBALL" | cut -f1)
+      echo "Size: $TARBALL_SIZE"
+      
+      tar -xzf "$TARBALL" -C "$EXTRACT_DIR"
+      
+      echo ""
+      echo "=== Native Extensions (.so files) ==="
+      find "$EXTRACT_DIR" -name "*.so" -type f | wc -l
+      
+      echo ""
+      echo "=== Tarball Contents Summary ==="
+      echo "Extracted size: $(du -sh "$EXTRACT_DIR" | cut -f1)"
+      echo "File count: $(find "$EXTRACT_DIR" -type f | wc -l)"
+      
+      rm -rf "$EXTRACT_DIR"
+    displayName: 'Analyze Tarball ($(Architecture))'
+  
+  - bash: |
+      set -e
+      
+      ARCH="$(Architecture)"
+      TARBALL=$(find $(Pipeline.Workspace)/macos-cli-build-unsigned-$ARCH -name "azure-cli-*-macos-$ARCH-nopython.tar.gz" | head -1)
+      EXTRACT_DIR=$(mktemp -d)
+      
+      echo "=== Verifying Azure CLI on $ARCH ==="
+      tar -xzf "$TARBALL" -C "$EXTRACT_DIR"
+      
+      if ! brew list python@${{ parameters.PythonVersion }} &>/dev/null; then
+        brew install python@${{ parameters.PythonVersion }}
+      fi
+
+      AZ_PYTHON="$(brew --prefix python@${{ parameters.PythonVersion }})/libexec/bin/python3"
+      export AZ_PYTHON
+      
+      echo "System architecture: $(uname -m)"
+      
+      export AZ_DEBUG=1
+      "$EXTRACT_DIR/bin/az" version
+      
+      echo ""
+      echo "Azure CLI works correctly on $ARCH"
+      
+      rm -rf "$EXTRACT_DIR"
+    displayName: 'Verify CLI Works ($(Architecture))'
