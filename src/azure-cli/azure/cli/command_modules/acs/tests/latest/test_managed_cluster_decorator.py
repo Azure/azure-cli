@@ -13408,7 +13408,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
-        self.assertEqual(ctx_11.get_acns_enablement(), (True, None, None, True))
+        self.assertEqual(ctx_11.get_acns_enablement(), (True, False, False, True))
 
 
         # illegal flags with update
@@ -13443,7 +13443,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
-        self.assertEqual(ctx_13.get_acns_enablement(), (True, None, None, True))
+        self.assertEqual(ctx_13.get_acns_enablement(), (True, False, False, True))
 
     def test_mc_get_acns_transit_encryption_type(self):
         # Default, not set.
