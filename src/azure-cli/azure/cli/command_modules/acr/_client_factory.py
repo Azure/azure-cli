@@ -91,4 +91,4 @@ def cf_acr_agentpool(cli_ctx, *_):
 
 
 def cf_acr_connected_registries(cli_ctx, *_):
-    return get_acr_service_client(cli_ctx, VERSION_2025_04_01).connected_registries
+    return get_acr_service_client(cli_ctx, VERSION_2026_01_01_PREVIEW).connected_registries
