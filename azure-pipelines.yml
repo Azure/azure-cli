@@ -16,7 +16,8 @@ pr:
 
 variables:
 - template: ${{ variables.Pipeline.Workspace }}/.azure-pipelines/templates/variables.yml
-- group: 'AME ESRP Variable Group'
+- ${{ if eq(variables['System.TeamProject'], 'release') }}:
+  - group: 'AME ESRP Variable Group'
 - name: Codeql.Enabled
   value: false
 - name: ComponentDetection.ForceScan
@@ -718,6 +719,8 @@ jobs:
 
 # ============================================================================
 # HOMEBREW CASK JOBS (Pre-built, signed, notarized binaries)
+# Phase 1 runs in all projects; Phases 2-3 require the release project
+# because ESRP resources are not available elsewhere.
 # ============================================================================
 
 # Phase 1: Build unsigned tarballs (ARM64 + Intel)
@@ -730,25 +733,27 @@ jobs:
     dependsOn: ['ExtractMetadata']
 
 # Phase 2: Sign and notarize via ESRP
-- template: .azure-pipelines/templates/macos/macos-sign-notarize-jobs.yml
-  parameters:
-    MacosArm64Image: ${{ variables.macos_arm64_pool }}
-    MacosIntelImage: ${{ variables.macos_intel_pool }}
-    BundleId: 'com.microsoft.azure.cli'
-    PythonVersion: $(macos_cask_python_version)
-    ESRPServiceConnection: 'ame_esrp_connection'
-    UseCurrentPipelineArtifacts: true
-    dependsOn: ['VerifyMacOSCli']
+- ${{ if eq(variables['System.TeamProject'], 'release') }}:
+  - template: .azure-pipelines/templates/macos/macos-sign-notarize-jobs.yml
+    parameters:
+      MacosArm64Image: ${{ variables.macos_arm64_pool }}
+      MacosIntelImage: ${{ variables.macos_intel_pool }}
+      BundleId: 'com.microsoft.azure.cli'
+      PythonVersion: $(macos_cask_python_version)
+      ESRPServiceConnection: 'ame_esrp_connection'
+      UseCurrentPipelineArtifacts: true
+      dependsOn: ['VerifyMacOSCli']
 
 # Phase 3: Generate cask and test via temp tap
-- template: .azure-pipelines/templates/macos/macos-cask-generation-and-tests.yml
-  parameters:
-    MacosArm64Image: ${{ variables.macos_arm64_pool }}
-    MacosIntelImage: ${{ variables.macos_intel_pool }}
-    PythonVersion: $(macos_cask_python_version)
-    GitHubRepo: $(Build.Repository.Name)
-    Debug: false
-    dependsOn: ['CreateFinalTarball']
+- ${{ if eq(variables['System.TeamProject'], 'release') }}:
+  - template: .azure-pipelines/templates/macos/macos-cask-generation-and-tests.yml
+    parameters:
+      MacosArm64Image: ${{ variables.macos_arm64_pool }}
+      MacosIntelImage: ${{ variables.macos_intel_pool }}
+      PythonVersion: $(macos_cask_python_version)
+      GitHubRepo: $(Build.Repository.Name)
+      Debug: false
+      dependsOn: ['CreateFinalTarball']
 
 - job: BuildRpmPackagesAzureLinux
   displayName: Build Rpm Package

@@ -74,7 +74,8 @@ resources:
 
 variables:
   - template: templates/variables.yml
-  - group: 'AME ESRP Variable Group'
+  - ${{ if eq(variables['System.TeamProject'], 'release') }}:
+    - group: 'AME ESRP Variable Group'
   
   - name: GitHubRepo
     value: ${{ parameters.GitHubRepo }}
@@ -122,16 +123,17 @@ jobs:
 # ============================================================================
 # PHASE 2: SIGN & NOTARIZE (via ESRP)
 # ============================================================================
-- template: templates/macos/macos-sign-notarize-jobs.yml
-  parameters:
-    BundleId: ${{ parameters.BundleId }}
-    PythonVersion: ${{ parameters.PythonVersion }}
-    MacosArm64Image: ${{ variables.macos_arm64_pool }}
-    MacosIntelImage: ${{ variables.macos_intel_pool }}
-    ESRPServiceConnection: ${{ parameters.ESRPServiceConnection }}
-    UseCurrentPipelineArtifacts: true
-    dependsOn:
-    - VerifyMacOSCli
+- ${{ if eq(variables['System.TeamProject'], 'release') }}:
+  - template: templates/macos/macos-sign-notarize-jobs.yml
+    parameters:
+      BundleId: ${{ parameters.BundleId }}
+      PythonVersion: ${{ parameters.PythonVersion }}
+      MacosArm64Image: ${{ variables.macos_arm64_pool }}
+      MacosIntelImage: ${{ variables.macos_intel_pool }}
+      ESRPServiceConnection: ${{ parameters.ESRPServiceConnection }}
+      UseCurrentPipelineArtifacts: true
+      dependsOn:
+      - VerifyMacOSCli
 
 # Jobs included:
 # - DownloadAnalyze (matrix: ARM64 + Intel)
@@ -144,15 +146,16 @@ jobs:
 # ============================================================================
 # PHASE 3a: TEST (local file:// cask + offline install)
 # ============================================================================
-- template: templates/macos/macos-cask-generation-and-tests.yml
-  parameters:
-    MacosArm64Image: ${{ variables.macos_arm64_pool }}
-    MacosIntelImage: ${{ variables.macos_intel_pool }}
-    PythonVersion: ${{ parameters.PythonVersion }}
-    GitHubRepo: $(GitHubRepo)
-    Debug: ${{ parameters.Debug }}
-    dependsOn:
-    - CreateFinalTarball
+- ${{ if eq(variables['System.TeamProject'], 'release') }}:
+  - template: templates/macos/macos-cask-generation-and-tests.yml
+    parameters:
+      MacosArm64Image: ${{ variables.macos_arm64_pool }}
+      MacosIntelImage: ${{ variables.macos_intel_pool }}
+      PythonVersion: ${{ parameters.PythonVersion }}
+      GitHubRepo: $(GitHubRepo)
+      Debug: ${{ parameters.Debug }}
+      dependsOn:
+      - CreateFinalTarball
 
 # Jobs included:
 # - TestTempTapCask (matrix: ARM64 + Intel) - tests cask with local file:// URLs
@@ -161,18 +164,19 @@ jobs:
 # ============================================================================
 # PHASE 3b: PUBLISH (GitHub + Homebrew tap)
 # ============================================================================
-- template: templates/macos/macos-publish-jobs.yml
-  parameters:
-    PublishToGitHub: ${{ parameters.PublishToGitHub }}
-    UpdateHomebrew: ${{ parameters.UpdateHomebrew }}
-    TestAfterPublish: false
-    GitHubRepo: $(GitHubRepo)
-    GitHubServiceConnection: ${{ parameters.GitHubServiceConnection }}
-    HomebrewTapRepo: ${{ parameters.HomebrewTapRepo }}
-    MacosArm64Image: ${{ variables.macos_arm64_pool }}
-    MacosIntelImage: ${{ variables.macos_intel_pool }}
-    PythonVersion: ${{ parameters.PythonVersion }}
-    Debug: ${{ parameters.Debug }}
+- ${{ if eq(variables['System.TeamProject'], 'release') }}:
+  - template: templates/macos/macos-publish-jobs.yml
+    parameters:
+      PublishToGitHub: ${{ parameters.PublishToGitHub }}
+      UpdateHomebrew: ${{ parameters.UpdateHomebrew }}
+      TestAfterPublish: false
+      GitHubRepo: $(GitHubRepo)
+      GitHubServiceConnection: ${{ parameters.GitHubServiceConnection }}
+      HomebrewTapRepo: ${{ parameters.HomebrewTapRepo }}
+      MacosArm64Image: ${{ variables.macos_arm64_pool }}
+      MacosIntelImage: ${{ variables.macos_intel_pool }}
+      PythonVersion: ${{ parameters.PythonVersion }}
+      Debug: ${{ parameters.Debug }}
     dependsOn:
     - TestTempTapCask
     - TestOfflineInstall
