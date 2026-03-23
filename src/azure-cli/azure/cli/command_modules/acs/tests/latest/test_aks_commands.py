@@ -13100,7 +13100,7 @@ spec:
 
         # disable acns datapath acceleration
         disable_cmd = (
-            "aks update --resource-group={resource_group} --name={name} --location={location} --disable-acns"
+            "aks update --resource-group={resource_group} --name={name} --disable-acns"
         )
         self.cmd(
             disable_cmd,
@@ -13115,7 +13115,7 @@ spec:
 
         # enable acns datapath acceleration
         enable_cmd = (
-            "aks update --resource-group={resource_group} --name={name} --location={location} "
+            "aks update --resource-group={resource_group} --name={name} "
             "--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AdvancedNetworkingPerformancePreview"             
             "--enable-acns --acns-datapath-acceleration-mode BpfVeth --disable-acns-security --disable-acns-observability"
         )
@@ -13132,7 +13132,7 @@ spec:
 
         # update other acns
         update_cmd = (
-            "aks update --resource-group={resource_group} --name={name} --location={location} "
+            "aks update --resource-group={resource_group} --name={name} "
             "--ssh-key-value={ssh_key_value} --node-count=1 --tier standard "
             "--network-plugin azure --network-plugin-mode overlay --enable-acns --enable-acns-seurity"
         )
