@@ -3,13 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import json
 import time
 
 from azure.core.polling import PollingMethod, LROPoller
 from azure.core.exceptions import HttpResponseError
-from msrest import Deserializer
 
-from ._constants import get_acr_task_models, get_finished_run_status, get_succeeded_run_status
+from ._constants import get_finished_run_status, get_succeeded_run_status
 
 
 def get_run_with_polling(cmd,
@@ -17,11 +17,10 @@ def get_run_with_polling(cmd,
                          run_id,
                          registry_name,
                          resource_group_name):
-    deserializer = Deserializer(
-        {k: v for k, v in get_acr_task_models().__dict__.items() if isinstance(v, type)})
+    from azure.mgmt.containerregistrytasks.models import Run
 
     def deserialize_run(response):
-        return deserializer('Run', response)
+        return Run(json.loads(response.http_response.text()))
 
     return LROPoller(
         client=client,
@@ -43,7 +42,6 @@ class RunPolling(PollingMethod):  # pylint: disable=too-many-instance-attributes
         self._client = None
         self._response = None  # Will hold latest received response
         self._url = None  # The URL used to get the run
-        self._deserialize = None  # The deserializer for Run
         self.operation_status = ""
         self.operation_result = None
 
@@ -51,7 +49,6 @@ class RunPolling(PollingMethod):  # pylint: disable=too-many-instance-attributes
         self._client = client._client  # pylint: disable=protected-access
         self._response = initial_response
         self._url = initial_response.http_request.url
-        self._deserialize = deserialization_callback
 
         self._set_operation_status(initial_response)
 
@@ -83,9 +80,9 @@ class RunPolling(PollingMethod):  # pylint: disable=too-many-instance-attributes
         return self.operation_result
 
     def _set_operation_status(self, response):
-        from azure.mgmt.containerregistrytasks.models import RunStatus
+        from azure.mgmt.containerregistrytasks.models import Run, RunStatus
         if response.http_response.status_code == 200:
-            self.operation_result = self._deserialize(response)
+            self.operation_result = Run(json.loads(response.http_response.text()))
             self.operation_status = self.operation_result.status or RunStatus.queued.value
             return
         raise HttpResponseError(response)

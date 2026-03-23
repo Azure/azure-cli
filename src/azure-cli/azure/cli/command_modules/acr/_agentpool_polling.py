@@ -3,13 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import json
 import time
 
-from msrest import Deserializer
 from azure.core.exceptions import HttpResponseError
 from azure.core.polling import PollingMethod, LROPoller
 
-from ._constants import get_acr_task_models, get_succeeded_agentpool_status, get_finished_agentpool_status
+from ._constants import get_succeeded_agentpool_status, get_finished_agentpool_status
 
 
 def delete_agentpool_with_polling(cmd,
@@ -17,11 +17,10 @@ def delete_agentpool_with_polling(cmd,
                                   agent_pool_name,
                                   registry_name,
                                   resource_group_name):
-    deserializer = Deserializer(
-        {k: v for k, v in get_acr_task_models().__dict__.items() if isinstance(v, type)})
+    from azure.mgmt.containerregistrytasks.models import AgentPool
 
     def deserialize_agentpool(response):
-        return deserializer('AgentPool', response)
+        return AgentPool(json.loads(response.http_response.text()))
 
     return LROPoller(
         client=client,
@@ -43,7 +42,6 @@ class RunPolling(PollingMethod):  # pylint: disable=too-many-instance-attributes
         self._client = None
         self._response = None  # Will hold latest received response
         self._url = None  # The URL used to get the run
-        self._deserialize = None  # The deserializer for Run
         self.operation_status = ""
         self.operation_result = None
 
@@ -51,7 +49,6 @@ class RunPolling(PollingMethod):  # pylint: disable=too-many-instance-attributes
         self._client = client._client  # pylint: disable=protected-access
         self._response = initial_response
         self._url = initial_response.http_request.url
-        self._deserialize = deserialization_callback
 
         self._set_operation_status(initial_response)
 
@@ -81,9 +78,9 @@ class RunPolling(PollingMethod):  # pylint: disable=too-many-instance-attributes
         return self.operation_result
 
     def _set_operation_status(self, response):
-        from azure.mgmt.containerregistrytasks.models import ProvisioningState as AgentPoolStatus
+        from azure.mgmt.containerregistrytasks.models import AgentPool, ProvisioningState as AgentPoolStatus
         if response.http_response.status_code == 200 or response.http_response.status_code == 404:
-            self.operation_result = self._deserialize(response)
+            self.operation_result = AgentPool(json.loads(response.http_response.text()))
             self.operation_status = self.operation_result.provisioning_state or AgentPoolStatus.succeeded.value
             return
         raise HttpResponseError(response)
