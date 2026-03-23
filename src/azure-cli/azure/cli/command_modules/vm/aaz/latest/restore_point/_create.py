@@ -11,11 +11,14 @@
 from azure.cli.core.aaz import *
 
 
+@register_command(
+    "restore-point create",
+)
 class Create(AAZCommand):
     """Create the restore point. Updating properties of an existing restore point is not allowed.
 
     :example: Create a restore point
-        az restore-point create --exclude-disks "/subscriptions/{subscription-id}/resourceGroups/myResourceGroup/providers/Microsoft.Compute/disks/disk123" --resource-group "myResourceGroup" --collection-name "rpcName" --name "rpName"
+        az restore-point create --exclude-disks "/subscriptions/{subscription-id}/resourceGroups/myResour ceGroup/providers/Microsoft.Compute/disks/disk123" --resource-group "myResourceGroup" --collection-name "rpcName" --name "rpName" --instant-access-duration-minutes 120
 
     :example: Create a restore point with --consistency-mode CrashConsistent
         az vm create -n vm -g rg --image UbuntuLTS --tag EnableCrashConsistentRestorePoint=True
@@ -24,9 +27,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-11-01",
+        "version": "2025-04-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/restorepointcollections/{}/restorepoints/{}", "2024-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/restorepointcollections/{}/restorepoints/{}", "2025-04-01"],
         ]
     }
 
@@ -82,6 +85,11 @@ class Create(AAZCommand):
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
+        _args_schema.instant_access_duration_minutes = AAZIntArg(
+            options=["--instant-access-duration", "--instant-access-duration-minutes"],
+            arg_group="Properties",
+            help="This property determines the time in minutes the snapshot is retained as instant access for restoring Premium SSD v2 or Ultra disk with fast restore performance in this restore point. Range is between 60 and 300. Default is 300.",
+        )
         _args_schema.source_metadata = AAZObjectArg(
             options=["--source-metadata"],
             arg_group="Properties",
@@ -340,7 +348,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-11-01",
+                    "api-version", "2025-04-01",
                     required=True,
                 ),
             }
@@ -371,6 +379,7 @@ class Create(AAZCommand):
             if properties is not None:
                 properties.set_prop("consistencyMode", AAZStrType, ".consistency_mode")
                 properties.set_prop("excludeDisks", AAZListType, ".exclude_disks")
+                properties.set_prop("instantAccessDurationMinutes", AAZIntType, ".instant_access_duration_minutes")
                 properties.set_prop("sourceMetadata", AAZObjectType, ".source_metadata")
                 _CreateHelper._build_schema_api_entity_reference_create(properties.set_prop("sourceRestorePoint", AAZObjectType, ".source_restore_point"))
 
@@ -449,6 +458,9 @@ class Create(AAZCommand):
                 serialized_name="instanceView",
                 flags={"read_only": True},
             )
+            properties.instant_access_duration_minutes = AAZIntType(
+                serialized_name="instantAccessDurationMinutes",
+            )
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
@@ -481,6 +493,9 @@ class Create(AAZCommand):
             _element.id = AAZStrType()
             _element.replication_status = AAZObjectType(
                 serialized_name="replicationStatus",
+            )
+            _element.snapshot_access_state = AAZStrType(
+                serialized_name="snapshotAccessState",
             )
 
             replication_status = cls._schema_on_201.properties.instance_view.disk_restore_points.Element.replication_status
@@ -756,6 +771,9 @@ class Create(AAZCommand):
             )
 
             proxy_agent_settings = cls._schema_on_201.properties.source_metadata.security_profile.proxy_agent_settings
+            proxy_agent_settings.add_proxy_agent_extension = AAZBoolType(
+                serialized_name="addProxyAgentExtension",
+            )
             proxy_agent_settings.enabled = AAZBoolType()
             proxy_agent_settings.imds = AAZObjectType()
             _CreateHelper._build_schema_host_endpoint_settings_read(proxy_agent_settings.imds)
@@ -801,9 +819,6 @@ class Create(AAZCommand):
             _CreateHelper._build_schema_disk_restore_point_attributes_read(_element.disk_restore_point)
             _element.disk_size_gb = AAZIntType(
                 serialized_name="diskSizeGB",
-                flags={"read_only": True},
-            )
-            _element.lun = AAZIntType(
                 flags={"read_only": True},
             )
             _element.managed_disk = AAZObjectType(

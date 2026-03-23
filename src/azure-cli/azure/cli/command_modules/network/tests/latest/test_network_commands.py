@@ -7687,8 +7687,8 @@ class NetworkWatcherScenarioTest(ScenarioTest):
             'vnet': 'vnet1'
         })
 
-        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password --admin-username deploy '
-                 '--admin-password PassPass10!) --nsg {vm} --subnet {subnet} --vnet-name {vnet} --nsg-rule None')
+        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:16.04-LTS:latest --authentication-type password --admin-username deploy '
+                 '--admin-password PassPass10!) --nsg {vm} --subnet {subnet} --vnet-name {vnet} --nsg-rule None --size Standard_D2s_v3')
 
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
@@ -7717,7 +7717,7 @@ class NetworkWatcherScenarioTest(ScenarioTest):
             'capture1': 'captureVMSS1',
             'capture2': 'captureVMSS2'
         })
-        self.cmd('vmss create -g {rg} --name {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --location {loc} --admin-username azureuser --generate-ssh-keys --upgrade-policy-mode Automatic')
+        self.cmd('vmss create -g {rg} --name {vmss} --image Canonical:UbuntuServer:16.04-LTS:latest --location {loc} --admin-username azureuser --generate-ssh-keys --upgrade-policy-mode Automatic --vm-sku Standard_D2s_v3 --orchestration-mode Uniform')
         self.cmd('vmss extension set --name NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher --resource-group {rg} --vmss-name  {vmss}')
 
         self.cmd('network watcher packet-capture create -g {rg} --target {vmss} -n {capture} --target-type AzureVMSS --file-path capture/capture.cap', checks=[

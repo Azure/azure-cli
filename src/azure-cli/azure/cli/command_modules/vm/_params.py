@@ -24,7 +24,7 @@ from azure.cli.command_modules.vm._validators import (
     validate_asg_names_or_ids, validate_keyvault, _validate_proximity_placement_group,
     validate_vm_name_for_monitor_metrics)
 
-from azure.cli.command_modules.vm._vm_utils import MSI_LOCAL_ID
+from azure.cli.command_modules.vm._vm_utils import MSI_LOCAL_ID, UpgradeMode
 from azure.cli.command_modules.vm._image_builder import ScriptType
 
 from azure.cli.command_modules.monitor.validators import validate_metric_dimension
@@ -38,7 +38,7 @@ def load_arguments(self, _):
     # Model imports
     DiskStorageAccountTypes = self.get_models('DiskStorageAccountTypes', operation_group='disks')
     SnapshotStorageAccountTypes = self.get_models('SnapshotStorageAccountTypes', operation_group='snapshots')
-    UpgradeMode, CachingTypes, OperatingSystemTypes = self.get_models('UpgradeMode', 'CachingTypes', 'OperatingSystemTypes')
+    CachingTypes, OperatingSystemTypes = self.get_models('CachingTypes', 'OperatingSystemTypes')
     HyperVGenerationTypes = self.get_models('HyperVGenerationTypes')
     DedicatedHostLicenseTypes = self.get_models('DedicatedHostLicenseTypes')
     ReplicationMode = self.get_models('ReplicationMode', operation_group='gallery_image_versions')
@@ -230,7 +230,7 @@ def load_arguments(self, _):
         c.argument('bandwidth_copy_speed', min_api='2023-10-02',
                    help='If this field is set on a snapshot and createOption is CopyStart, the snapshot will be copied at a quicker speed.',
                    arg_type=get_enum_type(["None", "Enhanced"]))
-        c.argument('instant_access_duration_minutes', options_list=['--instant-access-duration-minutes', '--ia-duration'], type=int, help='For snapshots created from Premium SSD v2 or Ultra disk, this property determines the time in minutes the snapshot is retained for instant access to enable faster restore. The disk sku should be UltraSSD_LRS or PremiumV2_LRS')
+        c.argument('instant_access_duration_minutes', options_list=['--instant-access-duration-minutes', '--instant-access-duration', '--ia-duration'], type=int, help='For snapshots created from Premium SSD v2 or Ultra disk, this property determines the time in minutes the snapshot is retained for instant access to enable faster restore. The disk sku should be UltraSSD_LRS or PremiumV2_LRS.')
     # endregion
 
     # region Images
@@ -1584,6 +1584,9 @@ def load_arguments(self, _):
         c.argument('source_data_disk_resource', nargs='+', help='Resource Id of the source data disk')
         c.argument('data_disk_restore_point_encryption_set', nargs='+', help='Customer managed data disk encryption set resource id')
         c.argument('data_disk_restore_point_encryption_type', nargs='+', arg_type=get_enum_type(self.get_models('RestorePointEncryptionType')), help='The type of key used to encrypt the data of the data disk restore point.')
+        c.argument('instant_access_duration_minutes', options_list=['--instant-access-duration-minutes', '--instant-access-duration', '--ia-duration'], type=int,
+                   help='This property determines the time in minutes the snapshot is retained as instant access for '
+                        'restoring Premium SSD v2 or Ultra disk with fast restore performance in this restore point.')
 
     with self.argument_context('restore-point show') as c:
         c.argument('restore_point_name', options_list=['--name', '-n', '--restore-point-name'],

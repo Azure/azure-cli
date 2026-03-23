@@ -80,7 +80,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_VIRTUAL_MACHINES,
 )
 from azure.cli.command_modules.acs._polling import RunCommandLocationPolling
-from azure.cli.command_modules.acs._helpers import get_snapshot_by_snapshot_id, check_is_private_link_cluster
+from azure.cli.command_modules.acs._helpers import get_snapshot_by_snapshot_id, check_is_private_link_cluster, build_etag_kwargs
 from azure.cli.command_modules.acs._resourcegroup import get_rg_location
 from azure.cli.command_modules.acs.managednamespace import aks_managed_namespace_add, aks_managed_namespace_update
 from azure.cli.command_modules.acs._validators import extract_comma_separated_string
@@ -935,6 +935,7 @@ def aks_create(
     disable_acns_security=None,
     acns_advanced_networkpolicies=None,
     enable_container_network_logs=None,
+    acns_transit_encryption_type=None,
     # network isoalted cluster
     bootstrap_artifact_source=CONST_ARTIFACT_SOURCE_DIRECT,
     bootstrap_container_registry_resource_id=None,
@@ -1164,6 +1165,7 @@ def aks_update(
     acns_advanced_networkpolicies=None,
     enable_container_network_logs=None,
     disable_container_network_logs=None,
+    acns_transit_encryption_type=None,
     # network isoalted cluster
     bootstrap_artifact_source=None,
     bootstrap_container_registry_resource_id=None,
@@ -1357,7 +1359,7 @@ def aks_upgrade(cmd,
     if active_cloud.profile != "latest":
         return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
 
-    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance, if_match=if_match, if_none_match=if_none_match)
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance, **build_etag_kwargs(if_match, if_none_match))
 
 
 def _update_upgrade_settings(cmd, instance,
@@ -1453,6 +1455,11 @@ def aks_scale(cmd, client, resource_group_name, name, node_count, nodepool_name=
     raise CLIError('The nodepool "{}" was not found.'.format(nodepool_name))
 
 
+def aks_delete(cmd, client, resource_group_name, name, no_wait=False, if_match=None, if_none_match=None):
+    return sdk_no_wait(no_wait, client.begin_delete, resource_group_name, name,
+                       **build_etag_kwargs(if_match, if_none_match))
+
+
 def aks_show(cmd, client, resource_group_name, name):
     mc = client.get(resource_group_name, name)
     return _remove_nulls([mc])[0]
@@ -1490,15 +1497,16 @@ def _remove_nulls(managed_clusters):
     for managed_cluster in managed_clusters:
         for attr in attrs:
             if getattr(managed_cluster, attr, None) is None:
-                delattr(managed_cluster, attr)
+                managed_cluster.pop(attr, None)
         if managed_cluster.agent_pool_profiles is not None:
             for ap_profile in managed_cluster.agent_pool_profiles:
                 for attr in ap_attrs:
                     if getattr(ap_profile, attr, None) is None:
-                        delattr(ap_profile, attr)
-        for attr in sp_attrs:
-            if getattr(managed_cluster.service_principal_profile, attr, None) is None:
-                delattr(managed_cluster.service_principal_profile, attr)
+                        ap_profile.pop(attr, None)
+        if managed_cluster.service_principal_profile is not None:
+            for attr in sp_attrs:
+                if getattr(managed_cluster.service_principal_profile, attr, None) is None:
+                    managed_cluster.service_principal_profile.pop(attr, None)
     return managed_clusters
 
 
@@ -1835,14 +1843,14 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
     if admin:
         if cmd.cli_ctx.cloud.profile == "latest":
             credentialResults = client.list_cluster_admin_credentials(
-                resource_group_name, name, serverType)
+                resource_group_name, name, server_fqdn=serverType)
         else:
             credentialResults = client.list_cluster_admin_credentials(
                 resource_group_name, name)
     else:
         if cmd.cli_ctx.cloud.profile == "latest":
             credentialResults = client.list_cluster_user_credentials(
-                resource_group_name, name, serverType, credential_format)
+                resource_group_name, name, server_fqdn=serverType, format=credential_format)
         else:
             credentialResults = client.list_cluster_user_credentials(
                 resource_group_name, name)
@@ -1970,10 +1978,16 @@ def load_kubernetes_configuration(filename):
             return yaml.safe_load(stream)
     except OSError as ex:
         if getattr(ex, 'errno', 0) == errno.ENOENT:
-            raise CLIError('{} does not exist'.format(filename))
+            raise CLIError('{} does not exist'.format(filename)) from ex
+        if getattr(ex, 'errno', 0) in (errno.EACCES, errno.EPERM):
+            raise FileOperationError(
+                'Permission denied when trying to read {}. '
+                'Please ensure you have read access to this file, or specify a different file path '
+                'using the --file/-f argument.'.format(filename)
+            ) from ex
         raise
     except (yaml.parser.ParserError, UnicodeDecodeError) as ex:
-        raise CLIError('Error parsing {} ({})'.format(filename, str(ex)))
+        raise CLIError('Error parsing {} ({})'.format(filename, str(ex))) from ex
 
 
 def merge_kubernetes_configurations(existing_file, addition_file, replace, context_name=None):
@@ -2019,8 +2033,17 @@ def merge_kubernetes_configurations(existing_file, addition_file, replace, conte
                 existing_file_perms,
             )
 
-    with open(existing_file, 'w+') as stream:
-        yaml.safe_dump(existing, stream, default_flow_style=False)
+    try:
+        with open(existing_file, 'w+') as stream:
+            yaml.safe_dump(existing, stream, default_flow_style=False)
+    except OSError as ex:
+        if getattr(ex, 'errno', 0) in (errno.EACCES, errno.EPERM, errno.EROFS):
+            raise FileOperationError(
+                'Permission denied when trying to write to {}. '
+                'Please ensure you have write access to this file, or specify a different file path '
+                'using the --file/-f argument.'.format(existing_file)
+            ) from ex
+        raise
 
     current_context = addition.get('current-context', 'UNKNOWN')
     msg = 'Merged "{}" as current context in {}'.format(
@@ -3124,8 +3147,7 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
         nodepool_name,
         instance,
         headers=aks_custom_headers,
-        if_match=if_match,
-        if_none_match=if_none_match,
+        **build_etag_kwargs(if_match, if_none_match),
     )
 
 
@@ -3140,7 +3162,7 @@ def aks_agentpool_scale(cmd, client, resource_group_name, cluster_name,
     if new_node_count == instance.count:
         raise CLIError(
             "The new node count is the same as the current node count.")
-    if instance.type_properties_type == CONST_VIRTUAL_MACHINES:
+    if instance.properties.type_properties_type == CONST_VIRTUAL_MACHINES:
         if len(instance.virtual_machines_profile.scale.manual) == 1:
             instance.virtual_machines_profile.scale.manual[0].count = new_node_count
         else:
@@ -3222,7 +3244,7 @@ def aks_agentpool_delete(cmd, client, resource_group_name, cluster_name,
     if cmd.cli_ctx.cloud.profile != "latest":
         return sdk_no_wait(no_wait, client.begin_delete, resource_group_name, cluster_name, nodepool_name)
 
-    return sdk_no_wait(no_wait, client.begin_delete, resource_group_name, cluster_name, nodepool_name, if_match=if_match, ignore_pod_disruption_budget=ignore_pdb)
+    return sdk_no_wait(no_wait, client.begin_delete, resource_group_name, cluster_name, nodepool_name, **build_etag_kwargs(if_match), ignore_pod_disruption_budget=ignore_pdb)
 
 
 def aks_agentpool_operation_abort(cmd,
@@ -3324,7 +3346,7 @@ def aks_agentpool_manual_scale_add(cmd,
                                    node_count,
                                    no_wait=False):
     instance = client.get(resource_group_name, cluster_name, nodepool_name)
-    if instance.type_properties_type != CONST_VIRTUAL_MACHINES:
+    if instance.properties.type_properties_type != CONST_VIRTUAL_MACHINES:
         raise ClientRequestError("Cannot add manual to a non-virtualmachines node pool.")
 
     ManualScaleProfile = cmd.get_models(
@@ -3361,7 +3383,7 @@ def aks_agentpool_manual_scale_update(cmd,    # pylint: disable=unused-argument
         raise RequiredArgumentMissingError("specify --vm-sizes or --node-count or both.")
 
     instance = client.get(resource_group_name, cluster_name, nodepool_name)
-    if instance.type_properties_type != CONST_VIRTUAL_MACHINES:
+    if instance.properties.type_properties_type != CONST_VIRTUAL_MACHINES:
         raise ClientRequestError("Cannot update manual in a non-virtualmachines node pool.")
 
     _current_vm_sizes = [x.strip().lower() for x in current_vm_sizes.split(",")]
@@ -3402,7 +3424,7 @@ def aks_agentpool_manual_scale_delete(cmd,    # pylint: disable=unused-argument
                                       current_vm_sizes,
                                       no_wait=False):
     instance = client.get(resource_group_name, cluster_name, nodepool_name)
-    if instance.type_properties_type != CONST_VIRTUAL_MACHINES:
+    if instance.properties.type_properties_type != CONST_VIRTUAL_MACHINES:
         raise CLIError("Cannot delete manual in a non-virtualmachines node pool.")
 
     _current_vm_sizes = [x.strip().lower() for x in current_vm_sizes.split(",")]
