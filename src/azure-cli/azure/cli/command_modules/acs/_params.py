@@ -75,7 +75,9 @@ from azure.cli.command_modules.acs._consts import (
     CONST_NODE_PROVISIONING_MODE_AUTO,
     CONST_NODE_PROVISIONING_DEFAULT_POOLS_NONE,
     CONST_NODE_PROVISIONING_DEFAULT_POOLS_AUTO,
-    CONST_WORKLOAD_RUNTIME_KATA_VM_ISOLATION)
+    CONST_WORKLOAD_RUNTIME_KATA_VM_ISOLATION,
+    CONST_TRANSIT_ENCRYPTION_WIREGUARD,
+    CONST_TRANSIT_ENCRYPTION_NONE)
 from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
     CONST_ACSTOR_ALL,
     CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY,
@@ -226,6 +228,11 @@ node_provisioning_modes = [
 node_provisioning_default_pools = [
     CONST_NODE_PROVISIONING_DEFAULT_POOLS_NONE,
     CONST_NODE_PROVISIONING_DEFAULT_POOLS_AUTO,
+]
+
+transit_encryption_types = [
+    CONST_TRANSIT_ENCRYPTION_WIREGUARD,
+    CONST_TRANSIT_ENCRYPTION_NONE,
 ]
 
 dev_space_endpoint_types = ['Public', 'Private', 'None']
@@ -605,6 +612,7 @@ def load_arguments(self, _):
         c.argument('disable_acns_security', action='store_true')
         c.argument("acns_advanced_networkpolicies", arg_type=get_enum_type(advanced_networkpolicies))
         c.argument('enable_container_network_logs', action='store_true')
+        c.argument('acns_transit_encryption_type', arg_type=get_enum_type(transit_encryption_types))
         c.argument("if_match")
         c.argument("if_none_match")
         # node provisioning
@@ -664,6 +672,7 @@ def load_arguments(self, _):
         c.argument("acns_advanced_networkpolicies", arg_type=get_enum_type(advanced_networkpolicies))
         c.argument('enable_container_network_logs', action='store_true')
         c.argument('disable_container_network_logs', action='store_true')
+        c.argument('acns_transit_encryption_type', arg_type=get_enum_type(transit_encryption_types))
         # private cluster parameters
         c.argument('enable_apiserver_vnet_integration', action='store_true')
         c.argument('apiserver_subnet_id', validator=validate_apiserver_subnet_id)

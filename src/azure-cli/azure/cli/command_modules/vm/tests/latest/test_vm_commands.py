@@ -4608,7 +4608,7 @@ class VMSSCreateOptions(ScenarioTest):
             self.check('upgradePolicy.mode', self.kwargs['update'].title()),
             self.check('singlePlacementGroup', True),
             self.check('virtualMachineProfile.osProfile.computerNamePrefix', 'vmss1'),
-            self.check('virtualMachineProfile.storageProfile.osDisk.diskSizeGb', 40)
+            self.check('virtualMachineProfile.storageProfile.osDisk.diskSizeGB', 40)
         ])
         self.kwargs['id'] = self.cmd('vmss list-instances -g {rg} -n {vmss} --query "[].instanceId"').get_output_in_json()[0]
         self.cmd('vmss show -g {rg} -n {vmss} --instance-id {id}',
@@ -4617,16 +4617,16 @@ class VMSSCreateOptions(ScenarioTest):
         self.cmd('vmss disk attach -g {rg} --vmss-name {vmss} --size-gb 3')
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('length(virtualMachineProfile.storageProfile.dataDisks)', 2),
-            self.check('virtualMachineProfile.storageProfile.dataDisks[0].diskSizeGb', 1),
+            self.check('virtualMachineProfile.storageProfile.dataDisks[0].diskSizeGB', 1),
             self.check('virtualMachineProfile.storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Standard_LRS'),
-            self.check('virtualMachineProfile.storageProfile.dataDisks[1].diskSizeGb', 3),
+            self.check('virtualMachineProfile.storageProfile.dataDisks[1].diskSizeGB', 3),
             self.check('virtualMachineProfile.storageProfile.dataDisks[1].managedDisk.storageAccountType', 'Standard_LRS'),
         ])
         self.cmd('vmss disk detach -g {rg} --vmss-name {vmss} --lun 1')
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('length(virtualMachineProfile.storageProfile.dataDisks)', 1),
             self.check('virtualMachineProfile.storageProfile.dataDisks[0].lun', 0),
-            self.check('virtualMachineProfile.storageProfile.dataDisks[0].diskSizeGb', 1)
+            self.check('virtualMachineProfile.storageProfile.dataDisks[0].diskSizeGB', 1)
         ])
         result = self.cmd('vmss list -g {rg} -otable')
         table_output = set(result.output.splitlines()[2].split())
@@ -4665,13 +4665,13 @@ class VMSSCreateOptions(ScenarioTest):
         self.cmd('vmss create -g {rg} -n {vmss} --image {image} --vm-sku {sku} --admin-username vmtest --admin-password Test123456789# '
                  '--enable-resilient-creation --disable-overprovision --upgrade-policy-mode Manual --orchestration-mode Uniform --lb-sku Standard')
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
-            self.check('resiliencyPolicy.resilientVmCreationPolicy.enabled', True),
+            self.check('resiliencyPolicy.resilientVMCreationPolicy.enabled', True),
         ])
 
         self.cmd('vmss update -g {rg} -n {vmss} --enable-resilient-deletion --enable-resilient-creation false')
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
-            self.check('resiliencyPolicy.resilientVmCreationPolicy.enabled', False),
-            self.check('resiliencyPolicy.resilientVmDeletionPolicy.enabled', True),
+            self.check('resiliencyPolicy.resilientVMCreationPolicy.enabled', False),
+            self.check('resiliencyPolicy.resilientVMDeletionPolicy.enabled', True),
         ])
 
     @unittest.skip(
@@ -5411,17 +5411,15 @@ class VMSSUpdateTests(ScenarioTest):
     def test_vmss_update_ephemeral_os_disk_placement(self, resource_group, resource_group_location):
         self.kwargs.update({
             'vm1': 'cli-test-vm-local-vm1',
-            'vm2': 'cli-test-vm-local-vm2',
             'image': 'OpenLogic:CentOS:7.5:latest',
             'placement1': 'ResourceDisk',
             'placement2': 'CacheDisk',
             'size1': 'Standard_DS5_v2',
             'size2': 'Standard_DS4_v2',
-            'loc': resource_group_location,
         })
 
         # check create base1
-        self.cmd('vmss create -n {vm1} -g {rg} --image {image} --vm-sku Standard_B1ls --ephemeral-os-disk --admin-username vmtest')
+        self.cmd('vmss create -n {vm1} -g {rg} --image {image} --vm-sku Standard_B1ls --ephemeral-os-disk --admin-username vmtest --vm-sku Standard_B1ls')
         self.cmd('vmss show -g {rg} -n {vm1}', checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.option', 'Local'),
@@ -6995,7 +6993,7 @@ class VMSecurityProfileTestForDiskEncryption(ScenarioTest):
         self.assertIsNotNone(virtualMachine['identity'])
         self.assertTrue(encryptionIdentityId.lower() in (k.lower() for k in virtualMachine['identity']['userAssignedIdentities'].keys()))
         self.assertIsNotNone(virtualMachine['virtualMachineProfile']['securityProfile'])
-        self.assertIsNone(virtualMachine['virtualMachineProfile']['securityProfile']['encryptionIdentity']) 
+        self.assertIsNone(virtualMachine['virtualMachineProfile']['securityProfile'].get('encryptionIdentity'))
         
 @api_version_constraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30')
 class VMDiskEncryptionTest(ScenarioTest):

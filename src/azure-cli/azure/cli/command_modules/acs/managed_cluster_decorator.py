@@ -2676,6 +2676,32 @@ class AKSManagedClusterContext(BaseAKSContext):
         # If container network logs are not being enabled, return the original value
         return enable_high_log_scale_mode
 
+    def get_acns_transit_encryption_type(self) -> Union[str, None]:
+        """Get the transit encryption type for acns security.
+
+        :return: str or None
+        """
+        acns_transit_encryption = self.raw_param.get("acns_transit_encryption_type")
+        if acns_transit_encryption is not None:
+            enable_acns = self.raw_param.get("enable_acns")
+            disable_acns = self.raw_param.get("disable_acns")
+            disable_acns_security = self.raw_param.get("disable_acns_security")
+            if disable_acns_security:
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify --acns-transit-encryption-type and "
+                    "--disable-acns-security at the same time."
+                )
+            if disable_acns:
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify --acns-transit-encryption-type and "
+                    "--disable-acns at the same time."
+                )
+            if self.decorator_mode == DecoratorMode.CREATE and not enable_acns:
+                raise MutuallyExclusiveArgumentError(
+                    "--acns-transit-encryption-type requires --enable-acns."
+                )
+        return acns_transit_encryption
+
     def _get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(
         self, enable_validation: bool = False
     ) -> Tuple[
@@ -6356,6 +6382,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
 
         (acns_enabled, acns_observability, acns_security) = self.context.get_acns_enablement()
         acns_advanced_networkpolicies = self.context.get_acns_advanced_networkpolicies()
+        acns_transit_encryption = self.context.get_acns_transit_encryption_type()
         if acns_enabled is not None:
             acns = self.models.AdvancedNetworking(
                 enabled=acns_enabled,
@@ -6375,6 +6402,12 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                     )
                 else:
                     acns.security.advanced_network_policies = acns_advanced_networkpolicies
+            if acns_transit_encryption is not None:
+                if acns.security is None:
+                    acns.security = self.models.AdvancedNetworkingSecurity()
+                acns.security.transit_encryption = self.models.AdvancedNetworkingSecurityTransitEncryption(
+                    type=acns_transit_encryption,
+                )
 
         if any(
             [
@@ -8281,6 +8314,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         self._ensure_mc(mc)
         (acns_enabled, acns_observability, acns_security) = self.context.get_acns_enablement()
         acns_advanced_networkpolicies = self.context.get_acns_advanced_networkpolicies()
+        acns_transit_encryption = self.context.get_acns_transit_encryption_type()
         if acns_enabled is not None:
             acns = self.models.AdvancedNetworking(
                 enabled=acns_enabled,
@@ -8300,8 +8334,27 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                     )
                 else:
                     acns.security.advanced_network_policies = acns_advanced_networkpolicies
-        if acns_enabled is not None:
+            if acns_transit_encryption is not None:
+                if acns.security is None:
+                    acns.security = self.models.AdvancedNetworkingSecurity()
+                acns.security.transit_encryption = self.models.AdvancedNetworkingSecurityTransitEncryption(
+                    type=acns_transit_encryption,
+                )
             mc.network_profile.advanced_networking = acns
+        elif acns_transit_encryption is not None:
+            if (mc.network_profile.advanced_networking is None or
+                    not mc.network_profile.advanced_networking.enabled):
+                raise MutuallyExclusiveArgumentError(
+                    "--acns-transit-encryption-type requires ACNS to be enabled on the cluster. "
+                    "Use --enable-acns together with --acns-transit-encryption-type."
+                )
+            if mc.network_profile.advanced_networking.security is None:
+                mc.network_profile.advanced_networking.security = self.models.AdvancedNetworkingSecurity()
+            mc.network_profile.advanced_networking.security.transit_encryption = (
+                self.models.AdvancedNetworkingSecurityTransitEncryption(
+                    type=acns_transit_encryption,
+                )
+            )
         return mc
 
     def update_monitoring_profile_flow_logs(self, mc: ManagedCluster) -> ManagedCluster:

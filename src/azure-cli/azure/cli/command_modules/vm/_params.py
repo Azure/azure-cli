@@ -24,7 +24,7 @@ from azure.cli.command_modules.vm._validators import (
     validate_asg_names_or_ids, validate_keyvault, _validate_proximity_placement_group,
     validate_vm_name_for_monitor_metrics)
 
-from azure.cli.command_modules.vm._vm_utils import MSI_LOCAL_ID
+from azure.cli.command_modules.vm._vm_utils import MSI_LOCAL_ID, UpgradeMode
 from azure.cli.command_modules.vm._image_builder import ScriptType
 
 from azure.cli.command_modules.monitor.validators import validate_metric_dimension
@@ -38,7 +38,7 @@ def load_arguments(self, _):
     # Model imports
     DiskStorageAccountTypes = self.get_models('DiskStorageAccountTypes', operation_group='disks')
     SnapshotStorageAccountTypes = self.get_models('SnapshotStorageAccountTypes', operation_group='snapshots')
-    UpgradeMode, CachingTypes, OperatingSystemTypes = self.get_models('UpgradeMode', 'CachingTypes', 'OperatingSystemTypes')
+    CachingTypes, OperatingSystemTypes = self.get_models('CachingTypes', 'OperatingSystemTypes')
     HyperVGenerationTypes = self.get_models('HyperVGenerationTypes')
     DedicatedHostLicenseTypes = self.get_models('DedicatedHostLicenseTypes')
     ReplicationMode = self.get_models('ReplicationMode', operation_group='gallery_image_versions')

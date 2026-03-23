@@ -935,6 +935,7 @@ def aks_create(
     disable_acns_security=None,
     acns_advanced_networkpolicies=None,
     enable_container_network_logs=None,
+    acns_transit_encryption_type=None,
     # network isoalted cluster
     bootstrap_artifact_source=CONST_ARTIFACT_SOURCE_DIRECT,
     bootstrap_container_registry_resource_id=None,
@@ -1164,6 +1165,7 @@ def aks_update(
     acns_advanced_networkpolicies=None,
     enable_container_network_logs=None,
     disable_container_network_logs=None,
+    acns_transit_encryption_type=None,
     # network isoalted cluster
     bootstrap_artifact_source=None,
     bootstrap_container_registry_resource_id=None,
