@@ -6428,7 +6428,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             if acns_perf_enabled is not None:
                 if acns.performance is None:
                     acns.performance = self.models.AdvancedNetworkingPerformance()
-                acns.performance.acceleration_mode = self.get_acns_datapath_acceleration_mode()
+                acns.performance.acceleration_mode = self.context.get_acns_datapath_acceleration_mode()
             if acns_transit_encryption is not None:
                 if acns.security is None:
                     acns.security = self.models.AdvancedNetworkingSecurity()
@@ -8363,7 +8363,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                     acns.security.advanced_network_policies = acns_advanced_networkpolicies
             if acns_perf_enabled is not None:
                 acns.performance = self.models.AdvancedNetworkingPerformance(
-                    acceleration_mode=self.get_acns_datapath_acceleration_mode(),
+                    acceleration_mode=self.context.get_acns_datapath_acceleration_mode(),
                 )
 
         if acns_enabled is not None:
