@@ -77,7 +77,7 @@ DEPENDENCIES = [
     'azure-mgmt-cognitiveservices~=14.1.0',
     'azure-mgmt-compute~=34.1.0',
     'azure-mgmt-containerinstance==10.2.0b1',
-    'azure-mgmt-containerregistry==14.1.0b1',
+    'azure-mgmt-containerregistry==15.1.0b1',
     'azure-mgmt-containerservice~=40.2.0',
     'azure-mgmt-cosmosdb==9.9.0',
     'azure-mgmt-datalake-store~=1.1.0b1',
