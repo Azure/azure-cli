@@ -2533,7 +2533,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         return self.raw_param.get("network_dataplane")
 
-    def get_acns_enablement(self) -> Tuple[
+    def get_acns_enablement_with_perf(self) -> Tuple[
         Union[bool, None],
         Union[bool, None],
         Union[bool, None],
@@ -6412,7 +6412,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         network_dataplane = self.context.get_network_dataplane()
 
         acns_advanced_networkpolicies = self.context.get_acns_advanced_networkpolicies()
-        (acns_enabled, acns_observability, acns_security, acns_perf_enabled) = self.context.get_acns_enablement()
+        (acns_enabled, acns_observability, acns_security, acns_perf_enabled) = self.context.get_acns_enablement_with_perf()
         acns_transit_encryption = self.context.get_acns_transit_encryption_type()
         if acns_enabled is not None:
             acns = self.models.AdvancedNetworking(
@@ -8348,7 +8348,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         """
         self._ensure_mc(mc)
         acns_advanced_networkpolicies = self.context.get_acns_advanced_networkpolicies()
-        (acns_enabled, acns_observability, acns_security, acns_perf_enabled) = self.context.get_acns_enablement()
+        (acns_enabled, acns_observability, acns_security, acns_perf_enabled) = self.context.get_acns_enablement_with_perf()
         acns_transit_encryption = self.context.get_acns_transit_encryption_type()
         if acns_enabled is not None:
             acns = self.models.AdvancedNetworking(

@@ -13256,7 +13256,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         normalClusterCalculated = noopDecorator3.update_k8s_support_plan(normalCluster)
         self.assertEqual(normalClusterCalculated, normalCluster)
     
-    def test_mc_get_acns_enablement(self):
+    def test_mc_get_acns_enablement_with_perf(self):
         # Default, not set.
         ctx_1 = AKSManagedClusterContext(
             self.cmd,
@@ -13264,7 +13264,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
-        self.assertEqual(ctx_1.get_acns_enablement(), (None, None, None, None))
+        self.assertEqual(ctx_1.get_acns_enablement_with_perf(), (None, None, None, None))
 
         # Flag set to True.
         ctx_2 = AKSManagedClusterContext(
@@ -13277,7 +13277,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
-        self.assertEqual(ctx_2.get_acns_enablement(), (True, None, None, None))
+        self.assertEqual(ctx_2.get_acns_enablement_with_perf(), (True, None, None, None))
 
         # Flag set to True.
         ctx_3 = AKSManagedClusterContext(
@@ -13290,7 +13290,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
-        self.assertEqual(ctx_3.get_acns_enablement(), (True, None, None, None))
+        self.assertEqual(ctx_3.get_acns_enablement_with_perf(), (True, None, None, None))
 
         # Flag set to True and False.
         ctx_4 = AKSManagedClusterContext(
@@ -13306,7 +13306,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         )
         # fail on get_acns mutual exclusive error
         with self.assertRaises(MutuallyExclusiveArgumentError):
-            ctx_4.get_acns_enablement()
+            ctx_4.get_acns_enablement_with_perf()
 
         # Flag set to False.
         ctx_5 = AKSManagedClusterContext(
@@ -13319,7 +13319,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
-        self.assertEqual(ctx_5.get_acns_enablement(), (False, None, None, None))
+        self.assertEqual(ctx_5.get_acns_enablement_with_perf(), (False, None, None, None))
 
         ctx_6 = AKSManagedClusterContext(
             self.cmd,
@@ -13332,7 +13332,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
-        self.assertEqual(ctx_6.get_acns_enablement(), (True, False, None, None))
+        self.assertEqual(ctx_6.get_acns_enablement_with_perf(), (True, False, None, None))
 
         ctx_7 = AKSManagedClusterContext(
             self.cmd,
@@ -13345,7 +13345,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
-        self.assertEqual(ctx_7.get_acns_enablement(), (True, None, False, None))
+        self.assertEqual(ctx_7.get_acns_enablement_with_perf(), (True, None, False, None))
 
         ctx_8 = AKSManagedClusterContext(
             self.cmd,
@@ -13358,7 +13358,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
-        self.assertEqual(ctx_8.get_acns_enablement(), (True, None, None, True))
+        self.assertEqual(ctx_8.get_acns_enablement_with_perf(), (True, None, None, True))
 
         # Illegal flags
         ctx_9 = AKSManagedClusterContext(
@@ -13376,7 +13376,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         )
         # fail on get_acns mutual exclusive error
         with self.assertRaises(MutuallyExclusiveArgumentError):
-            ctx_9.get_acns_enablement()
+            ctx_9.get_acns_enablement_with_perf()
         
         # Illegal flags
         ctx_10 = AKSManagedClusterContext(
@@ -13393,7 +13393,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         )
         # fail on get_acns mutual exclusive error
         with self.assertRaises(MutuallyExclusiveArgumentError):
-            ctx_10.get_acns_enablement()
+            ctx_10.get_acns_enablement_with_perf()
 
 
         # only acns and perf flags
@@ -13410,7 +13410,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
-        self.assertEqual(ctx_11.get_acns_enablement(), (True, False, False, True))
+        self.assertEqual(ctx_11.get_acns_enablement_with_perf(), (True, False, False, True))
 
 
         # illegal flags with update
@@ -13429,7 +13429,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         )
         # fail on get_acns mutual exclusive error
         with self.assertRaises(MutuallyExclusiveArgumentError):
-            ctx_12.get_acns_enablement()
+            ctx_12.get_acns_enablement_with_perf()
 
         # only acns and perf flags
         ctx_13 = AKSManagedClusterContext(
@@ -13445,7 +13445,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
-        self.assertEqual(ctx_13.get_acns_enablement(), (True, False, False, True))
+        self.assertEqual(ctx_13.get_acns_enablement_with_perf(), (True, False, False, True))
 
     def test_mc_get_acns_datapath_acceleration_mode(self):
         # Default, not set.
