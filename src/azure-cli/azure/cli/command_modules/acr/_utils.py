@@ -571,10 +571,8 @@ def create_default_scope_map(cmd,
     except ResourceNotFoundError:
         pass
     logger.info('Creating a scope map "%s" for provided permissions.', scope_map_name)
-    scope_map_request = {
-        'actions': actions,
-        'scope_map_description': scope_map_description
-    }
+    ScopeMap = cmd.get_models('ScopeMap')
+    scope_map_request = ScopeMap(actions=actions, description=scope_map_description)
     poller = scope_map_client.begin_create(resource_group_name, registry_name, scope_map_name, scope_map_request)
     scope_map = LongRunningOperation(cmd.cli_ctx)(poller)
     return scope_map
