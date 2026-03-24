@@ -81,7 +81,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_VIRTUAL_MACHINES,
 )
 from azure.cli.command_modules.acs._polling import RunCommandLocationPolling
-from azure.cli.command_modules.acs._helpers import get_snapshot_by_snapshot_id, check_is_private_link_cluster, build_etag_kwargs
+from azure.cli.command_modules.acs._helpers import get_snapshot_by_snapshot_id, get_monitoring_addon_key, check_is_private_link_cluster, build_etag_kwargs
 from azure.cli.command_modules.acs._resourcegroup import get_rg_location
 from azure.cli.command_modules.acs.managednamespace import aks_managed_namespace_add, aks_managed_namespace_update
 from azure.cli.command_modules.acs._validators import extract_comma_separated_string
@@ -1515,22 +1515,13 @@ def _remove_nulls(managed_clusters):
     return managed_clusters
 
 
-def _get_monitoring_addon_key_custom(addon_profiles):
-    """Return the key present in addon_profiles for the monitoring addon (omsagent or omsAgent)."""
-    if addon_profiles is None:
-        return CONST_MONITORING_ADDON_NAME
-    if CONST_MONITORING_ADDON_NAME in addon_profiles:
-        return CONST_MONITORING_ADDON_NAME
-    if CONST_MONITORING_ADDON_NAME_CAMELCASE in addon_profiles:
-        return CONST_MONITORING_ADDON_NAME_CAMELCASE
-    return CONST_MONITORING_ADDON_NAME
-
-
 # pylint: disable=line-too-long
 def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=False):
     instance = client.get(resource_group_name, name)
     subscription_id = get_subscription_id(cmd.cli_ctx)
-    monitoring_addon_key = _get_monitoring_addon_key_custom(instance.addon_profiles)
+    monitoring_addon_key = get_monitoring_addon_key(
+        instance.addon_profiles, CONST_MONITORING_ADDON_NAME, CONST_MONITORING_ADDON_NAME_CAMELCASE
+    )
     try:
         if addons == "monitoring" and monitoring_addon_key in instance.addon_profiles and \
                 instance.addon_profiles[monitoring_addon_key].enabled and \
@@ -1629,7 +1620,9 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
 
     if need_pull_for_result:
         if enable_monitoring:
-            monitoring_addon_key = _get_monitoring_addon_key_custom(instance.addon_profiles)
+            monitoring_addon_key = get_monitoring_addon_key(
+                instance.addon_profiles, CONST_MONITORING_ADDON_NAME, CONST_MONITORING_ADDON_NAME_CAMELCASE
+            )
             if CONST_MONITORING_USING_AAD_MSI_AUTH in instance.addon_profiles[monitoring_addon_key].config and \
                str(instance.addon_profiles[monitoring_addon_key].config[CONST_MONITORING_USING_AAD_MSI_AUTH]).lower() == 'true':
                 if msi_auth:
@@ -4103,7 +4096,9 @@ def is_monitoring_addon_enabled(addons, instance):
                     break
 
         addon_profiles = instance.addon_profiles or {}
-        monitoring_addon_key = _get_monitoring_addon_key_custom(addon_profiles)
+        monitoring_addon_key = get_monitoring_addon_key(
+            addon_profiles, CONST_MONITORING_ADDON_NAME, CONST_MONITORING_ADDON_NAME_CAMELCASE
+        )
         monitoring_addon_enabled = is_monitoring_addon and monitoring_addon_key in addon_profiles and addon_profiles[
             monitoring_addon_key].enabled
     except Exception as ex:  # pylint: disable=broad-except

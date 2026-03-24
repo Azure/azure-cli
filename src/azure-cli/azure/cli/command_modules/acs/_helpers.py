@@ -28,6 +28,22 @@ from azure.core.exceptions import AzureError, HttpResponseError, ServiceRequestE
 ManagedCluster = TypeVar("ManagedCluster")
 
 
+def get_monitoring_addon_key(addon_profiles, monitoring_addon_name, monitoring_addon_name_camelcase=None):
+    """Return the key present in addon_profiles for the monitoring addon.
+
+    The API response may return the monitoring addon key as either "omsagent"
+    (lowercase) or "omsAgent" (camelCase). This helper checks both variants
+    and returns the one that exists, falling back to the lowercase constant.
+    """
+    if addon_profiles is None:
+        return monitoring_addon_name
+    if monitoring_addon_name in addon_profiles:
+        return monitoring_addon_name
+    if monitoring_addon_name_camelcase and monitoring_addon_name_camelcase in addon_profiles:
+        return monitoring_addon_name_camelcase
+    return monitoring_addon_name
+
+
 def format_parameter_name_to_option_name(parameter_name: str) -> str:
     """Convert a name in parameter format to option format.
 

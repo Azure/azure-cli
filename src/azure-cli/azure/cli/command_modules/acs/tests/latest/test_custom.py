@@ -45,6 +45,7 @@ from azure.cli.command_modules.acs.tests.latest.utils import (
 )
 from azure.cli.core.util import CLIError
 from azure.cli.core.profiles import ResourceType
+from azure.core.exceptions import HttpResponseError, ResourceExistsError
 from azure.mgmt.containerservice.models import (
     ManagedClusterAddonProfile,
 )
@@ -1170,6 +1171,166 @@ class TestAddonConfigurationAzureDelosCloud(unittest.TestCase):
         # Verify the workspace resource ID contains the default region code
         self.assertIn('DefaultResourceGroup-DELOSC', result)
         self.assertIn(f'DefaultWorkspace-{subscription_id}-DELOSC', result)
+
+
+class TestWorkspaceCreationRetry(unittest.TestCase):
+    """Tests for the retry logic in ensure_default_log_analytics_workspace_for_monitoring."""
+
+    def setUp(self):
+        self.cli = MockCLI()
+        self.cmd = MockCmd(self.cli)
+        self.cmd.cli_ctx.cloud.name = 'AzureCloud'
+
+    def _make_mocks(self):
+        """Create standard mocks for resource group and resources clients."""
+        mock_rg_client = mock.Mock()
+        mock_rg_client.check_existence.return_value = False
+        mock_rg_client.create_or_update = mock.Mock()
+
+        mock_poller = mock.Mock()
+        mock_result = mock.Mock()
+        mock_result.id = '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.OperationalInsights/workspaces/ws'
+        mock_poller.result.return_value = mock_result
+        mock_poller.done.return_value = True
+
+        mock_resources_client = mock.Mock()
+        mock_resources_client.begin_create_or_update_by_id.return_value = mock_poller
+
+        self.cmd.get_models = mock.Mock(return_value=mock.Mock)
+        return mock_rg_client, mock_resources_client
+
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.time.sleep')
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resources_client')
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resource_groups_client')
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_rg_location')
+    def test_retry_on_409_conflict(self, mock_get_rg_location, mock_get_rg_client, mock_get_resources_client, mock_sleep):
+        """409 Conflict should be retried with exponential backoff."""
+        mock_get_rg_location.return_value = 'eastus'
+        mock_rg_client, mock_resources_client = self._make_mocks()
+        mock_get_rg_client.return_value = mock_rg_client
+        mock_get_resources_client.return_value = mock_resources_client
+
+        # First call raises 409, second succeeds
+        conflict_error = HttpResponseError(response=mock.Mock(status_code=409))
+        conflict_error.status_code = 409
+        mock_poller_success = mock.Mock()
+        mock_result = mock.Mock()
+        mock_result.id = '/subscriptions/sub/rg/ws'
+        mock_poller_success.result.return_value = mock_result
+        mock_poller_success.done.return_value = True
+        mock_resources_client.begin_create_or_update_by_id.side_effect = [
+            conflict_error, mock_poller_success
+        ]
+
+        result = ensure_default_log_analytics_workspace_for_monitoring(
+            self.cmd, '00000000-0000-0000-0000-000000000000', 'test-rg'
+        )
+
+        self.assertEqual(result, '/subscriptions/sub/rg/ws')
+        self.assertEqual(mock_sleep.call_count, 1)
+        # Verify backoff: first retry sleep should be base (5) * 2^0 + jitter
+        sleep_arg = mock_sleep.call_args[0][0]
+        self.assertGreaterEqual(sleep_arg, 5.0)
+        self.assertLessEqual(sleep_arg, 7.0)  # 5 + up to 2s jitter
+
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.time.sleep')
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resources_client')
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resource_groups_client')
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_rg_location')
+    def test_non_409_http_error_not_retried(self, mock_get_rg_location, mock_get_rg_client, mock_get_resources_client, mock_sleep):
+        """Non-409 HttpResponseError should be raised immediately, not retried."""
+        mock_get_rg_location.return_value = 'eastus'
+        mock_rg_client, mock_resources_client = self._make_mocks()
+        mock_get_rg_client.return_value = mock_rg_client
+        mock_get_resources_client.return_value = mock_resources_client
+
+        bad_request_error = HttpResponseError(response=mock.Mock(status_code=400))
+        bad_request_error.status_code = 400
+        mock_resources_client.begin_create_or_update_by_id.side_effect = bad_request_error
+
+        with self.assertRaises(HttpResponseError):
+            ensure_default_log_analytics_workspace_for_monitoring(
+                self.cmd, '00000000-0000-0000-0000-000000000000', 'test-rg'
+            )
+
+        mock_sleep.assert_not_called()
+
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.time.sleep')
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resources_client')
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resource_groups_client')
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_rg_location')
+    def test_resource_exists_error_retried(self, mock_get_rg_location, mock_get_rg_client, mock_get_resources_client, mock_sleep):
+        """ResourceExistsError should be retried."""
+        mock_get_rg_location.return_value = 'eastus'
+        mock_rg_client, mock_resources_client = self._make_mocks()
+        mock_get_rg_client.return_value = mock_rg_client
+        mock_get_resources_client.return_value = mock_resources_client
+
+        exists_error = ResourceExistsError("already exists")
+        mock_poller_success = mock.Mock()
+        mock_result = mock.Mock()
+        mock_result.id = '/subscriptions/sub/rg/ws'
+        mock_poller_success.result.return_value = mock_result
+        mock_poller_success.done.return_value = True
+        mock_resources_client.begin_create_or_update_by_id.side_effect = [
+            exists_error, mock_poller_success
+        ]
+
+        result = ensure_default_log_analytics_workspace_for_monitoring(
+            self.cmd, '00000000-0000-0000-0000-000000000000', 'test-rg'
+        )
+
+        self.assertEqual(result, '/subscriptions/sub/rg/ws')
+        self.assertEqual(mock_sleep.call_count, 1)
+
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.time.sleep')
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resources_client')
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resource_groups_client')
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_rg_location')
+    def test_409_conflict_exhausts_retries(self, mock_get_rg_location, mock_get_rg_client, mock_get_resources_client, mock_sleep):
+        """409 Conflict that persists through all retries should raise."""
+        mock_get_rg_location.return_value = 'eastus'
+        mock_rg_client, mock_resources_client = self._make_mocks()
+        mock_get_rg_client.return_value = mock_rg_client
+        mock_get_resources_client.return_value = mock_resources_client
+
+        conflict_error = HttpResponseError(response=mock.Mock(status_code=409))
+        conflict_error.status_code = 409
+        mock_resources_client.begin_create_or_update_by_id.side_effect = conflict_error
+
+        with self.assertRaises(HttpResponseError):
+            ensure_default_log_analytics_workspace_for_monitoring(
+                self.cmd, '00000000-0000-0000-0000-000000000000', 'test-rg'
+            )
+
+        # Should have slept twice (retries 0 and 1), then raised on retry 2
+        self.assertEqual(mock_sleep.call_count, 2)
+
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.time.sleep')
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resources_client')
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resource_groups_client')
+    @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_rg_location')
+    def test_exponential_backoff_increasing_sleep(self, mock_get_rg_location, mock_get_rg_client, mock_get_resources_client, mock_sleep):
+        """Sleep durations should increase exponentially across retries."""
+        mock_get_rg_location.return_value = 'eastus'
+        mock_rg_client, mock_resources_client = self._make_mocks()
+        mock_get_rg_client.return_value = mock_rg_client
+        mock_get_resources_client.return_value = mock_resources_client
+
+        conflict_error = HttpResponseError(response=mock.Mock(status_code=409))
+        conflict_error.status_code = 409
+        mock_resources_client.begin_create_or_update_by_id.side_effect = conflict_error
+
+        with self.assertRaises(HttpResponseError):
+            ensure_default_log_analytics_workspace_for_monitoring(
+                self.cmd, '00000000-0000-0000-0000-000000000000', 'test-rg'
+            )
+
+        self.assertEqual(mock_sleep.call_count, 2)
+        first_sleep = mock_sleep.call_args_list[0][0][0]
+        second_sleep = mock_sleep.call_args_list[1][0][0]
+        # Second sleep should be larger (base doubles: 5->10, plus jitter)
+        self.assertGreater(second_sleep, first_sleep)
 
 
 if __name__ == "__main__":

@@ -63,6 +63,7 @@ from azure.cli.command_modules.acs._helpers import (
     check_is_apiserver_vnet_integration_cluster,
     check_is_private_cluster,
     format_parameter_name_to_option_name,
+    get_monitoring_addon_key,
     get_user_assigned_identity_by_resource_id,
     get_shared_control_plane_identity,
     map_azure_error_to_cli_error,
@@ -160,22 +161,14 @@ ManagedClusterIngressProfileWebAppRouting = TypeVar("ManagedClusterIngressProfil
 ManagedClusterIngressProfileNginx = TypeVar("ManagedClusterIngressProfileNginx")
 ServiceMeshProfile = TypeVar("ServiceMeshProfile")
 
-def _get_monitoring_addon_key(addon_profiles, addon_consts):
-    """Return the key present in addon_profiles for the monitoring addon.
 
-    The API response may return the monitoring addon key as either "omsagent"
-    (lowercase) or "omsAgent" (camelCase). This helper checks both variants
-    and returns the one that exists, falling back to the lowercase constant.
-    """
-    CONST_MONITORING_ADDON_NAME = addon_consts.get("CONST_MONITORING_ADDON_NAME")
-    CONST_MONITORING_ADDON_NAME_CAMELCASE = addon_consts.get("CONST_MONITORING_ADDON_NAME_CAMELCASE")
-    if addon_profiles is None:
-        return CONST_MONITORING_ADDON_NAME
-    if CONST_MONITORING_ADDON_NAME in addon_profiles:
-        return CONST_MONITORING_ADDON_NAME
-    if CONST_MONITORING_ADDON_NAME_CAMELCASE and CONST_MONITORING_ADDON_NAME_CAMELCASE in addon_profiles:
-        return CONST_MONITORING_ADDON_NAME_CAMELCASE
-    return CONST_MONITORING_ADDON_NAME
+def _get_monitoring_addon_key_from_consts(addon_profiles, addon_consts):
+    """Thin wrapper around get_monitoring_addon_key that unpacks addon_consts dict."""
+    return get_monitoring_addon_key(
+        addon_profiles,
+        addon_consts.get("CONST_MONITORING_ADDON_NAME"),
+        addon_consts.get("CONST_MONITORING_ADDON_NAME_CAMELCASE"),
+    )
 
 
 # TODO
@@ -2661,7 +2654,7 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         # Check if monitoring is already enabled on the cluster
         addon_consts = self.get_addon_consts()
-        monitoring_addon_key = _get_monitoring_addon_key(mc.addon_profiles, addon_consts)
+        monitoring_addon_key = _get_monitoring_addon_key_from_consts(mc.addon_profiles, addon_consts)
         monitoring_on_cluster = (
             mc.addon_profiles and
             mc.addon_profiles.get(monitoring_addon_key) and
@@ -3145,21 +3138,16 @@ class AKSManagedClusterContext(BaseAKSContext):
         enable_msi_auth_for_monitoring = self.raw_param.get("enable_msi_auth_for_monitoring")
 
         # Use helper to find the correct monitoring addon key (handles omsagent/omsAgent variants)
-        monitoring_addon_key = _get_monitoring_addon_key(
+        monitoring_addon_key = _get_monitoring_addon_key_from_consts(
             self.mc.addon_profiles if self.mc else None, addon_consts
         )
 
-        # For non-MSI clusters (service principal), MSI auth is not available.
-        # But if the cluster is MSI-based (client_id == "msi"), check the existing
-        # addon config — the addon may already have useAADAuth=true.
         if (
             self.mc and
             self.mc.service_principal_profile and
-            self.mc.service_principal_profile.client_id is not None and
-            self.mc.service_principal_profile.client_id != "msi"
+            self.mc.service_principal_profile.client_id is not None
         ):
             return False
-
         # try to read the property value corresponding to the parameter from the `mc` object
         if (
             self.mc and
@@ -3169,18 +3157,13 @@ class AKSManagedClusterContext(BaseAKSContext):
                 monitoring_addon_key
             ).config.get(CONST_MONITORING_USING_AAD_MSI_AUTH) is not None
         ):
-            existing_msi_auth = (
+            enable_msi_auth_for_monitoring = (
                 safe_lower(
                     self.mc.addon_profiles.get(monitoring_addon_key).config.get(
                         CONST_MONITORING_USING_AAD_MSI_AUTH
                     )
                 ) == "true"
             )
-            # If the existing addon already has useAADAuth=true, honor that
-            # even if enable_msi_auth_for_monitoring was not explicitly set
-            if existing_msi_auth:
-                return True
-            enable_msi_auth_for_monitoring = existing_msi_auth
 
         sku_name = self.get_sku_name()
         if sku_name == CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC:
@@ -7602,7 +7585,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             elif self.context.raw_param.get("enable_addons") is not None:
                 # Create the DCR Association here
                 addon_consts = self.context.get_addon_consts()
-                monitoring_addon_key = _get_monitoring_addon_key(cluster.addon_profiles, addon_consts)
+                monitoring_addon_key = _get_monitoring_addon_key_from_consts(cluster.addon_profiles, addon_consts)
                 self.context.external_functions.ensure_container_insights_for_monitoring(
                     self.cmd,
                     cluster.addon_profiles[monitoring_addon_key],
@@ -8453,7 +8436,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         addon_consts = self.context.get_addon_consts()
         CONST_MONITORING_USING_AAD_MSI_AUTH = addon_consts.get("CONST_MONITORING_USING_AAD_MSI_AUTH")
-        monitoring_addon_key = _get_monitoring_addon_key(mc.addon_profiles, addon_consts)
+        monitoring_addon_key = _get_monitoring_addon_key_from_consts(mc.addon_profiles, addon_consts)
 
         enable_high_log_scale_mode = self.context.get_enable_high_log_scale_mode()
         enable_cnl = self.context.raw_param.get("enable_container_network_logs")
@@ -8673,9 +8656,6 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         # determine the value of constants
         addon_consts = self.context.get_addon_consts()
-        CONST_MONITORING_ADDON_NAME = addon_consts.get(
-            "CONST_MONITORING_ADDON_NAME"
-        )
         CONST_INGRESS_APPGW_ADDON_NAME = addon_consts.get(
             "CONST_INGRESS_APPGW_ADDON_NAME"
         )
@@ -8688,7 +8668,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         azure_keyvault_secrets_provider_addon_profile = None
         if mc.addon_profiles is not None:
-            monitoring_addon_key = _get_monitoring_addon_key(mc.addon_profiles, addon_consts)
+            monitoring_addon_key = _get_monitoring_addon_key_from_consts(mc.addon_profiles, addon_consts)
             monitoring_addon_enabled = (
                 monitoring_addon_key in mc.addon_profiles and
                 mc.addon_profiles[monitoring_addon_key].enabled
@@ -9967,7 +9947,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             ):
                 # Create/update the DCR and DCRA here
                 addon_consts = self.context.get_addon_consts()
-                monitoring_addon_key = _get_monitoring_addon_key(cluster.addon_profiles, addon_consts)
+                monitoring_addon_key = _get_monitoring_addon_key_from_consts(cluster.addon_profiles, addon_consts)
                 # When CNL/HLSM flags changed, also update the DCR
                 needs_dcr_update = monitoring_addon_postprocessing_required
                 self.context.external_functions.ensure_container_insights_for_monitoring(

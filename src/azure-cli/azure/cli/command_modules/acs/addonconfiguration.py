@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 import json
 import os
+import random
 import re
 import time
 
@@ -326,9 +327,9 @@ def ensure_default_log_analytics_workspace_for_monitoring(
         location=workspace_region, properties={"sku": {"name": "standalone"}}
     )
 
-    # Retry with backoff for workspace provisioning conflicts (409 Conflict)
+    # Retry with exponential backoff + jitter for 409 Conflict during workspace provisioning
     _MAX_RETRY_TIMES = 3
-    _RETRY_SLEEP_SECONDS = 30
+    _BASE_SLEEP_SECONDS = 5
     for retry_count in range(_MAX_RETRY_TIMES):
         try:
             async_poller = resources.begin_create_or_update_by_id(
@@ -343,14 +344,26 @@ def ensure_default_log_analytics_workspace_for_monitoring(
                     break
 
             return ws_resource_id
-        except (HttpResponseError, ResourceExistsError) as ex:
+        except ResourceExistsError:
+            # ResourceExistsError is a subclass of HttpResponseError, so must be caught first
             if retry_count >= (_MAX_RETRY_TIMES - 1):
-                raise ex
+                raise
+            sleep_seconds = _BASE_SLEEP_SECONDS * (2 ** retry_count) + random.uniform(0, 2)
             logger.warning(
-                "Workspace creation conflict (attempt %d/%d), retrying in %ds...",
-                retry_count + 1, _MAX_RETRY_TIMES, _RETRY_SLEEP_SECONDS
+                "Workspace already exists (attempt %d/%d), retrying in %.1fs...",
+                retry_count + 1, _MAX_RETRY_TIMES, sleep_seconds
             )
-            time.sleep(_RETRY_SLEEP_SECONDS)
+            time.sleep(sleep_seconds)
+        except HttpResponseError as ex:
+            is_conflict = hasattr(ex, 'status_code') and ex.status_code == 409
+            if not is_conflict or retry_count >= (_MAX_RETRY_TIMES - 1):
+                raise
+            sleep_seconds = _BASE_SLEEP_SECONDS * (2 ** retry_count) + random.uniform(0, 2)
+            logger.warning(
+                "Workspace creation conflict (attempt %d/%d), retrying in %.1fs...",
+                retry_count + 1, _MAX_RETRY_TIMES, sleep_seconds
+            )
+            time.sleep(sleep_seconds)
 
     return default_workspace_resource_id
 

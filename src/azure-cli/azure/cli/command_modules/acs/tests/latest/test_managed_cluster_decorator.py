@@ -8635,6 +8635,58 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             assignee_principal_type=None,
         )
 
+        # Case 5: Create with enable_high_log_scale_mode=True + CNL
+        # Verifies HLSM is passed through to ensure_container_insights_for_monitoring
+        dec_5 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "resource_group_name": "test_rg_name",
+                "name": "test_name",
+                "enable_msi_auth_for_monitoring": True,
+                "enable_addons": "monitoring",
+                "enable_container_network_logs": True,
+                "enable_high_log_scale_mode": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        monitoring_addon_profile_5 = self.models.ManagedClusterAddonProfile(
+            enabled=True,
+            config={},
+        )
+        mc_5 = self.models.ManagedCluster(
+            location="test_location",
+            addon_profiles={
+                CONST_MONITORING_ADDON_NAME: monitoring_addon_profile_5,
+            },
+        )
+        dec_5.context.attach_mc(mc_5)
+        dec_5.context.set_intermediate("monitoring_addon_enabled", True)
+        mock_profile_5 = Mock(get_subscription_id=Mock(return_value="1234-5678-9012"))
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.Profile", return_value=mock_profile_5
+        ), patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.ensure_container_insights_for_monitoring"
+        ) as mock_ensure_5:
+            dec_5.postprocessing_after_mc_created(mc_5)
+        mock_ensure_5.assert_called_once_with(
+            self.cmd,
+            monitoring_addon_profile_5,
+            "1234-5678-9012",
+            "test_rg_name",
+            "test_name",
+            "test_location",
+            remove_monitoring=False,
+            aad_route=True,
+            create_dcr=False,
+            create_dcra=True,
+            enable_syslog=None,
+            data_collection_settings=None,
+            is_private_cluster=None,
+            ampls_resource_id=None,
+            enable_high_log_scale_mode=True,
+        )
+
     def test_put_mc(self):
         dec_1 = AKSManagedClusterCreateDecorator(
             self.cmd,
@@ -12583,6 +12635,57 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             assignee_principal_type=None,
         )
 
+        # Case 5: Update with HLSM=True via monitoring_addon_postprocessing_required
+        # Verifies enable_high_log_scale_mode=True is passed and create_dcr=True for DCR update
+        dec_5 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "resource_group_name": "test_rg_name",
+                "name": "test_name",
+                "enable_msi_auth_for_monitoring": True,
+                "enable_high_log_scale_mode": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        monitoring_addon_profile_5 = self.models.ManagedClusterAddonProfile(
+            enabled=True,
+            config={CONST_MONITORING_USING_AAD_MSI_AUTH: "true"},
+        )
+        mc_5 = self.models.ManagedCluster(
+            location="test_location",
+            addon_profiles={
+                CONST_MONITORING_ADDON_NAME: monitoring_addon_profile_5,
+            },
+        )
+        dec_5.context.attach_mc(mc_5)
+        dec_5.context.set_intermediate("monitoring_addon_enabled", True)
+        dec_5.context.set_intermediate("monitoring_addon_postprocessing_required", True)
+        mock_profile_5 = Mock(get_subscription_id=Mock(return_value="1234-5678-9012"))
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.Profile", return_value=mock_profile_5
+        ), patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.ensure_container_insights_for_monitoring"
+        ) as mock_ensure_5:
+            dec_5.postprocessing_after_mc_created(mc_5)
+        mock_ensure_5.assert_called_once_with(
+            self.cmd,
+            monitoring_addon_profile_5,
+            "1234-5678-9012",
+            "test_rg_name",
+            "test_name",
+            "test_location",
+            remove_monitoring=False,
+            aad_route=True,
+            create_dcr=True,
+            create_dcra=True,
+            enable_syslog=None,
+            data_collection_settings=None,
+            is_private_cluster=None,
+            ampls_resource_id=None,
+            enable_high_log_scale_mode=True,
+        )
+
     def test_put_mc(self):
         dec_1 = AKSManagedClusterUpdateDecorator(
             self.cmd,
@@ -14862,6 +14965,13 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         self.assertTrue(
             dec_9.context.get_intermediate("monitoring_addon_postprocessing_required")
         )
+        # Verify HLSM is resolved to True
+        self.assertEqual(dec_9.context.get_enable_high_log_scale_mode(), True)
+        # Verify CNL flag was NOT added to addon config (HLSM alone doesn't set it)
+        self.assertNotIn(
+            "enableRetinaNetworkFlags",
+            dec_mc_9.addon_profiles["omsagent"].config or {},
+        )
 
         # Case 10: UPDATE - disable HLSM while CNL is active -> should ERROR
         dec_10 = AKSManagedClusterUpdateDecorator(
@@ -14932,6 +15042,8 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         self.assertTrue(
             dec_11.context.get_intermediate("monitoring_addon_postprocessing_required")
         )
+        # Verify HLSM is resolved to True
+        self.assertEqual(dec_11.context.get_enable_high_log_scale_mode(), True)
 
         # Case 12: UPDATE - enable HLSM without monitoring addon -> should ERROR
         dec_12 = AKSManagedClusterUpdateDecorator(

@@ -13323,6 +13323,8 @@ spec:
             checks=[
                 self.check("provisioningState", "Succeeded"),
                 self.check("networkProfile.advancedNetworking.observability.enabled", True),
+                self.check("addonProfiles.omsagent.enabled", True),
+                self.check("addonProfiles.omsagent.config.enableRetinaNetworkFlags", "True"),
             ],
         )
 
@@ -13335,6 +13337,8 @@ spec:
             disable_cnl_cmd,
             checks=[
                 self.check("provisioningState", "Succeeded"),
+                self.check("addonProfiles.omsagent.enabled", True),
+                self.check("addonProfiles.omsagent.config.enableRetinaNetworkFlags", "False"),
             ],
         )
 
@@ -13347,6 +13351,7 @@ spec:
             enable_hlsm_cmd,
             checks=[
                 self.check("provisioningState", "Succeeded"),
+                self.check("addonProfiles.omsagent.enabled", True),
             ],
         )
 
@@ -13359,6 +13364,8 @@ spec:
             enable_cnl_cmd,
             checks=[
                 self.check("provisioningState", "Succeeded"),
+                self.check("addonProfiles.omsagent.enabled", True),
+                self.check("addonProfiles.omsagent.config.enableRetinaNetworkFlags", "True"),
             ],
         )
 

@@ -13,6 +13,7 @@ from azure.cli.command_modules.acs._helpers import (
     check_is_private_cluster,
     check_is_private_link_cluster,
     format_parameter_name_to_option_name,
+    get_monitoring_addon_key,
     get_property_from_dict_or_object,
     get_snapshot,
     get_snapshot_by_snapshot_id,
@@ -345,6 +346,44 @@ class GetUserAssignedIdentityTestCase(unittest.TestCase):
             return_value=mock_user_assigned_identity_operations_3,
         ), self.assertRaises(ServiceError):
             get_user_assigned_identity("mock_cli_ctx", "mock_sub_id", "mock_rg", "mock_identity_name")
+
+
+class TestGetMonitoringAddonKey(unittest.TestCase):
+    """Tests for the shared get_monitoring_addon_key helper."""
+
+    def test_returns_default_when_addon_profiles_is_none(self):
+        result = get_monitoring_addon_key(None, "omsagent", "omsAgent")
+        self.assertEqual(result, "omsagent")
+
+    def test_returns_lowercase_key_when_present(self):
+        addon_profiles = {"omsagent": object()}
+        result = get_monitoring_addon_key(addon_profiles, "omsagent", "omsAgent")
+        self.assertEqual(result, "omsagent")
+
+    def test_returns_camelcase_key_when_lowercase_absent(self):
+        addon_profiles = {"omsAgent": object()}
+        result = get_monitoring_addon_key(addon_profiles, "omsagent", "omsAgent")
+        self.assertEqual(result, "omsAgent")
+
+    def test_prefers_lowercase_when_both_present(self):
+        addon_profiles = {"omsagent": object(), "omsAgent": object()}
+        result = get_monitoring_addon_key(addon_profiles, "omsagent", "omsAgent")
+        self.assertEqual(result, "omsagent")
+
+    def test_returns_default_when_neither_key_present(self):
+        addon_profiles = {"someOtherAddon": object()}
+        result = get_monitoring_addon_key(addon_profiles, "omsagent", "omsAgent")
+        self.assertEqual(result, "omsagent")
+
+    def test_returns_default_when_camelcase_is_none(self):
+        addon_profiles = {"omsAgent": object()}
+        result = get_monitoring_addon_key(addon_profiles, "omsagent", None)
+        self.assertEqual(result, "omsagent")
+
+    def test_returns_default_when_camelcase_not_provided(self):
+        addon_profiles = {"omsAgent": object()}
+        result = get_monitoring_addon_key(addon_profiles, "omsagent")
+        self.assertEqual(result, "omsagent")
 
 
 if __name__ == "__main__":
