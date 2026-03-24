@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "vmss",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Mange azure compute vm config
+    """Manage groupings of virtual machines in an Azure Virtual Machine Scale Set (VMSS).
     """
     pass
 
