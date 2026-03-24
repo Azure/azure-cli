@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long, consider-using-f-string
 
-import json
 import time
 
 from azure.core.exceptions import HttpResponseError
@@ -20,7 +19,7 @@ def get_run_with_polling(cmd,
     from azure.mgmt.containerregistrytasks.models import Run
 
     def deserialize_run(response):
-        return Run(json.loads(response.http_response.text()))
+        return Run(response.http_response.json())
 
     return LROPoller(
         client=client,
@@ -84,7 +83,7 @@ class RunPolling(PollingMethod):  # pylint: disable=too-many-instance-attributes
     def _set_operation_status(self, response):
         from azure.mgmt.containerregistrytasks.models import Run
         if response.http_response.status_code == 200:
-            self.operation_result = Run(json.loads(response.http_response.text()))
+            self.operation_result = Run(response.http_response.json())
             self.operation_status = self.operation_result.status
             return
         raise HttpResponseError(response)
