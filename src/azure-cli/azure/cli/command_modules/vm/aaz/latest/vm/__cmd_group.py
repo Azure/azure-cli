@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "vm",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Manage Linux or Windows virtual machines.
+    """Mange azure compute vm config
     """
     pass
 
