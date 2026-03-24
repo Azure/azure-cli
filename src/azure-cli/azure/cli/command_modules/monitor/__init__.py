@@ -6,7 +6,14 @@
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.commands import AzArgumentContext, CliCommandType
 
-from azure.cli.command_modules.monitor._help import helps  # pylint: disable=unused-import
+from knack.log import get_logger
+
+from azure.cli.command_modules.monitor._help import helps as helps  # pylint: disable=unused-import
+
+logger = get_logger(__name__)
+
+_OPTIMIZED_LOADING_CONFIG_SECTION = 'monitor'
+_OPTIMIZED_LOADING_CONFIG_KEY = 'optimized_loading'
 
 
 # pylint: disable=line-too-long
@@ -42,17 +49,46 @@ class MonitorCommandsLoader(AzCommandsLoader):
 
     def load_command_table(self, args):
         from azure.cli.command_modules.monitor.commands import load_command_table
-        from azure.cli.core.aaz import load_aaz_command_table
+        from azure.cli.core.aaz import load_aaz_command_table_args_guided
+
+        use_optimized = self.cli_ctx.config.getboolean(
+            _OPTIMIZED_LOADING_CONFIG_SECTION, _OPTIMIZED_LOADING_CONFIG_KEY, fallback=True)
+
+        # When optimized loading is disabled, still use the optimized loader but
+        # pass args=None to force a full load (no trimming). The gutted __init__.py
+        # files are incompatible with the old load_aaz_command_table loader, so we
+        # cannot fall back to it.
+        effective_args = args if use_optimized else None
+
+        if use_optimized and args and args[0:1] == ['monitor']:
+            logger.warning(
+                "The monitor module is using optimized command loading for improved performance. "
+                "If you encounter any issues, you can disable this by running: "
+                "az config set %s.%s=false",
+                _OPTIMIZED_LOADING_CONFIG_SECTION, _OPTIMIZED_LOADING_CONFIG_KEY)
+
         try:
             from . import aaz
         except ImportError:
             aaz = None
         if aaz:
-            load_aaz_command_table(
+            load_aaz_command_table_args_guided(
                 loader=self,
                 aaz_pkg_name=aaz.__name__,
-                args=args
+                args=effective_args
             )
+
+        try:
+            from . import operations
+        except ImportError:
+            operations = None
+        if operations:
+            load_aaz_command_table_args_guided(
+                loader=self,
+                aaz_pkg_name=operations.__name__,
+                args=effective_args
+            )
+
         load_command_table(self, args)
         return self.command_table
 

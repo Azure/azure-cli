@@ -3,26 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.command_modules.monitor.aaz.latest.monitor.log_analytics.workspace.linked_storage import \
-    Create as _WorkspaceLinkedStorageAccountCreate, Update as _WorkspaceLinkedStorageAccountUpdate
-
-
-class WorkspaceLinkedStorageAccountCreate(_WorkspaceLinkedStorageAccountCreate):
-
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZResourceIdArg, AAZResourceIdArgFormat
-        cls._args_schema = super()._build_arguments_schema(*args, **kwargs)
-
-        storage_accounts = cls._args_schema.storage_accounts
-        storage_accounts._element = AAZResourceIdArg(fmt=AAZResourceIdArgFormat(  # pylint: disable=protected-access
-            template='/subscriptions/{subscription}/resourceGroups/{resource_group}/'
-                     'providers/Microsoft.Storage/storageAccounts/{}'))
-        return cls._args_schema
-
 
 def add_log_analytics_workspace_linked_storage_accounts(cmd, resource_group_name, workspace_name,
                                                         data_source_type, storage_account_ids):
+    from azure.cli.command_modules.monitor.aaz.latest.monitor.log_analytics.workspace.linked_storage._update \
+        import Update as _WorkspaceLinkedStorageAccountUpdate
     class Add(_WorkspaceLinkedStorageAccountUpdate):
 
         def pre_instance_update(self, instance):
@@ -37,6 +22,9 @@ def add_log_analytics_workspace_linked_storage_accounts(cmd, resource_group_name
 
 def remove_log_analytics_workspace_linked_storage_accounts(cmd, resource_group_name, workspace_name,
                                                            data_source_type, storage_account_ids):
+    from azure.cli.command_modules.monitor.aaz.latest.monitor.log_analytics.workspace.linked_storage._update \
+        import Update as _WorkspaceLinkedStorageAccountUpdate
+
     class Remove(_WorkspaceLinkedStorageAccountUpdate):
 
         def pre_instance_update(self, instance):
