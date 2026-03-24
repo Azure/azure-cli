@@ -4,9 +4,7 @@
 # --------------------------------------------------------------------------------------------
 import json
 import os
-import random
 import re
-import time
 
 from azure.cli.command_modules.acs._client_factory import get_resource_groups_client, get_resources_client
 from azure.cli.core.util import get_file_json
@@ -24,7 +22,7 @@ from azure.cli.command_modules.acs._roleassignments import add_role_assignment
 from azure.cli.core.azclierror import AzCLIError, CLIError, InvalidArgumentValueError, ArgumentUsageError
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import send_raw_request
-from azure.core.exceptions import HttpResponseError, ResourceExistsError
+from azure.core.exceptions import HttpResponseError
 from azure.mgmt.core.tools import parse_resource_id, resource_id
 from knack.log import get_logger
 
@@ -327,45 +325,18 @@ def ensure_default_log_analytics_workspace_for_monitoring(
         location=workspace_region, properties={"sku": {"name": "standalone"}}
     )
 
-    # Retry with exponential backoff + jitter for 409 Conflict during workspace provisioning
-    _MAX_RETRY_TIMES = 3
-    _BASE_SLEEP_SECONDS = 5
-    for retry_count in range(_MAX_RETRY_TIMES):
-        try:
-            async_poller = resources.begin_create_or_update_by_id(
-                default_workspace_resource_id, "2015-11-01-preview", generic_resource
-            )
+    async_poller = resources.begin_create_or_update_by_id(
+        default_workspace_resource_id, "2015-11-01-preview", generic_resource
+    )
 
-            ws_resource_id = ""
-            while True:
-                result = async_poller.result(15)
-                if async_poller.done():
-                    ws_resource_id = result.id
-                    break
+    ws_resource_id = ""
+    while True:
+        result = async_poller.result(15)
+        if async_poller.done():
+            ws_resource_id = result.id
+            break
 
-            return ws_resource_id
-        except ResourceExistsError:
-            # ResourceExistsError is a subclass of HttpResponseError, so must be caught first
-            if retry_count >= (_MAX_RETRY_TIMES - 1):
-                raise
-            sleep_seconds = _BASE_SLEEP_SECONDS * (2 ** retry_count) + random.uniform(0, 2)
-            logger.warning(
-                "Workspace already exists (attempt %d/%d), retrying in %.1fs...",
-                retry_count + 1, _MAX_RETRY_TIMES, sleep_seconds
-            )
-            time.sleep(sleep_seconds)
-        except HttpResponseError as ex:
-            is_conflict = hasattr(ex, 'status_code') and ex.status_code == 409
-            if not is_conflict or retry_count >= (_MAX_RETRY_TIMES - 1):
-                raise
-            sleep_seconds = _BASE_SLEEP_SECONDS * (2 ** retry_count) + random.uniform(0, 2)
-            logger.warning(
-                "Workspace creation conflict (attempt %d/%d), retrying in %.1fs...",
-                retry_count + 1, _MAX_RETRY_TIMES, sleep_seconds
-            )
-            time.sleep(sleep_seconds)
-
-    return default_workspace_resource_id
+    return ws_resource_id
 
 
 def sanitize_loganalytics_ws_resource_id(workspace_resource_id):
