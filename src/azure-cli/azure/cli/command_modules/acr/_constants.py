@@ -91,11 +91,6 @@ def get_succeeded_run_status():
     return [RunStatus.succeeded.value]
 
 
-def get_acr_task_models():
-    from azure.mgmt.containerregistrytasks import models
-    return models
-
-
 def get_succeeded_agentpool_status():
     from azure.mgmt.containerregistrytasks.models import ProvisioningState
     return [ProvisioningState.succeeded.value]
