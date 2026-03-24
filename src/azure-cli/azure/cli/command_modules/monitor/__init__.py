@@ -12,8 +12,8 @@ from azure.cli.command_modules.monitor._help import helps as helps  # pylint: di
 
 logger = get_logger(__name__)
 
-_OPTIMIZED_LOADING_CONFIG_SECTION = 'monitor'
-_OPTIMIZED_LOADING_CONFIG_KEY = 'optimized_loading'
+_FULL_LOADING_CONFIG_SECTION = 'monitor'
+_FULL_LOADING_CONFIG_KEY = 'full_loading'
 
 
 # pylint: disable=line-too-long
@@ -51,21 +51,20 @@ class MonitorCommandsLoader(AzCommandsLoader):
         from azure.cli.command_modules.monitor.commands import load_command_table
         from azure.cli.core.aaz import load_aaz_command_table_args_guided
 
-        use_optimized = self.cli_ctx.config.getboolean(
-            _OPTIMIZED_LOADING_CONFIG_SECTION, _OPTIMIZED_LOADING_CONFIG_KEY, fallback=True)
+        use_full_loading = self.cli_ctx.config.getboolean(
+            _FULL_LOADING_CONFIG_SECTION, _FULL_LOADING_CONFIG_KEY, fallback=False)
 
-        # When optimized loading is disabled, still use the optimized loader but
-        # pass args=None to force a full load (no trimming). The gutted __init__.py
-        # files are incompatible with the old load_aaz_command_table loader, so we
-        # cannot fall back to it.
-        effective_args = args if use_optimized else None
+        # When full loading is enabled, pass args=None to force a full load
+        # (no trimming). The gutted __init__.py files are incompatible with
+        # the old load_aaz_command_table loader, so we cannot fall back to it.
+        effective_args = None if use_full_loading else args
 
-        if use_optimized and args and args[0:1] == ['monitor']:
+        if not use_full_loading and args and args[0:1] == ['monitor']:
             logger.warning(
                 "The monitor module is using optimized command loading for improved performance. "
-                "If you encounter any issues, you can disable this by running: "
-                "az config set %s.%s=false",
-                _OPTIMIZED_LOADING_CONFIG_SECTION, _OPTIMIZED_LOADING_CONFIG_KEY)
+                "If you encounter any issues, you can switch to full loading by running: "
+                "az config set %s.%s=true",
+                _FULL_LOADING_CONFIG_SECTION, _FULL_LOADING_CONFIG_KEY)
 
         try:
             from . import aaz

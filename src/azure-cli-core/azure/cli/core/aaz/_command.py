@@ -421,8 +421,16 @@ def _try_import_module(relative_name, package):
     """Try to import a module by relative name, return None on failure."""
     try:
         return importlib.import_module(relative_name, package)
-    except (ModuleNotFoundError, ImportError):
-        return None
+    except ModuleNotFoundError as ex:
+        # Only treat "module not found" for the requested module as a benign miss.
+        target_mod_name = f"{package}.{relative_name.lstrip('.')}"
+        if ex.name == target_mod_name:
+            return None
+        # Different module is missing; propagate so the real error surfaces.
+        raise
+    except ImportError:
+        logger.error("Error importing module %r from package %r", relative_name, package)
+        raise
 
 
 def _register_from_module(loader, mod, command_table, command_group_table):
@@ -464,10 +472,11 @@ def _get_pkg_children(pkg):
 def _load_aaz_by_pkg(loader, pkg, args, command_table, command_group_table):
     """Recursively navigate the AAZ package tree guided by CLI args.
 
-    - args is None or empty  -> full recursive load of all commands under this package.
-    - args has items -> try to match first arg as a command module or sub-package,
-                        recurse with remaining args on match.
-    - args exhausted / no match -> load current level's commands and sub-group headers.
+    - args is None           -> full recursive load of all commands under this package.
+    - args is empty list     -> args exhausted; load current level's commands and sub-group headers.
+    - args has items         -> try to match first arg as a command module or sub-package,
+                                recurse with remaining args on match.
+    - no match on first arg  -> load current level's commands and sub-group headers.
     """
     base_module = pkg.__name__
     file_stems, subdir_names = _get_pkg_children(pkg)
@@ -506,7 +515,7 @@ def _load_aaz_by_pkg(loader, pkg, args, command_table, command_group_table):
 
     for subdir in subdir_names:
         sub_module = f"{base_module}.{subdir}"
-        if not args:
+        if args is None:
             # Full load -> recurse into every sub-package
             sub_pkg = _try_import_module(f'.{subdir}', base_module)
             if sub_pkg:
