@@ -50,7 +50,20 @@ class MetricsAlertUpdate(_MetricsAlertUpdate):
             options=["--add-conditions"],
             singular_options=["--add-condition"],
             arg_group="Condition",
-            help="Add a condition which triggers the rule."
+            help="Add a condition which triggers the rule.\n\n"
+                 "Usage: --add-condition {avg,min,max,total,count} [NAMESPACE.]METRIC\n"
+                 "[{=,!=,>,>=,<,<=} THRESHOLD]\n"
+                 "[{>,><,<} dynamic SENSITIVITY VIOLATIONS of EVALUATIONS [since DATETIME]]\n"
+                 "[where DIMENSION {includes,excludes} VALUE [or VALUE ...]\n"
+                 "[and   DIMENSION {includes,excludes} VALUE [or VALUE ...] ...]]\n\n"
+                 "Sensitivity can be 'low', 'medium', 'high'.\n\n"
+                 "Violations can be the number of violations to trigger an alert. It should be smaller or equal to evaluation.\n\n"
+                 "Evaluations can be the number of evaluation periods for dynamic threshold.\n\n"
+                 "Datetime can be the date from which to start learning the metric historical data and calculate the dynamic thresholds (in ISO8601 format).\n\n"
+                 "Dimensions can be queried by adding the 'where' keyword and multiple dimensions can be queried by combining them with the 'and' keyword.\n\n"
+                 "Values for METRIC, DIMENSION and appropriate THRESHOLD values can be obtained from `az monitor metrics list-definitions` command.\n\n"
+                 "Due to server limitation, when an alert rule contains multiple criterias, the use of dimensions is limited to one value per dimension within each criterion.\n\n"
+                 "Multiple conditions can be specified by using more than one `--add-condition` argument."
         )
         args_schema.add_conditions.Element = AAZCustomListArg()
         args_schema.add_conditions.Element.Element = AAZStrArg()
