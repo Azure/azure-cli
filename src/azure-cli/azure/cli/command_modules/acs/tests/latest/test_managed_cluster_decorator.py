@@ -12761,6 +12761,124 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             enable_high_log_scale_mode=True,
         )
 
+        # Case 7: Update with CNL enabled on an MSI cluster where monitoring was already enabled.
+        # In the update flow, update_addon_profiles sets monitoring_addon_enabled=True
+        # (because the addon is already present and enabled on the cluster).
+        # get_enable_msi_auth_for_monitoring() returns False for MSI clusters where
+        # service_principal_profile.client_id="msi", so the code enters the
+        # "if not enable_msi_auth_for_monitoring:" branch. The fix ensures that when
+        # monitoring_addon_postprocessing_required=True, the DCR is still updated
+        # with aad_route=True inside that branch.
+        dec_7 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "resource_group_name": "test_rg_name",
+                "name": "test_name",
+                "enable_msi_auth_for_monitoring": False,
+                "enable_container_network_logs": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        monitoring_addon_profile_7 = self.models.ManagedClusterAddonProfile(
+            enabled=True,
+            config={
+                CONST_MONITORING_USING_AAD_MSI_AUTH: "true",
+                "enableRetinaNetworkFlags": "True",
+            },
+        )
+        mc_7 = self.models.ManagedCluster(
+            location="test_location",
+            addon_profiles={
+                CONST_MONITORING_ADDON_NAME: monitoring_addon_profile_7,
+            },
+            service_principal_profile=self.models.ManagedClusterServicePrincipalProfile(
+                client_id="msi"
+            ),
+        )
+        dec_7.context.attach_mc(mc_7)
+        # monitoring_addon_enabled is True — set by update_addon_profiles because addon already exists
+        dec_7.context.set_intermediate("monitoring_addon_enabled", True)
+        dec_7.context.set_intermediate("monitoring_addon_postprocessing_required", True)
+        mock_profile_7 = Mock(get_subscription_id=Mock(return_value="1234-5678-9012"))
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.Profile", return_value=mock_profile_7
+        ), patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.ensure_container_insights_for_monitoring"
+        ) as mock_ensure_7:
+            dec_7.postprocessing_after_mc_created(mc_7)
+        mock_ensure_7.assert_called_once_with(
+            self.cmd,
+            monitoring_addon_profile_7,
+            "1234-5678-9012",
+            "test_rg_name",
+            "test_name",
+            "test_location",
+            remove_monitoring=False,
+            aad_route=True,
+            create_dcr=True,
+            create_dcra=False,
+            enable_syslog=None,
+            data_collection_settings=None,
+            is_private_cluster=None,
+            ampls_resource_id=None,
+            enable_high_log_scale_mode=True,
+        )
+
+        # Case 8: Update with HLSM-only on an MSI cluster where monitoring was already enabled
+        dec_8 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "resource_group_name": "test_rg_name",
+                "name": "test_name",
+                "enable_msi_auth_for_monitoring": False,
+                "enable_high_log_scale_mode": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        monitoring_addon_profile_8 = self.models.ManagedClusterAddonProfile(
+            enabled=True,
+            config={CONST_MONITORING_USING_AAD_MSI_AUTH: "true"},
+        )
+        mc_8 = self.models.ManagedCluster(
+            location="test_location",
+            addon_profiles={
+                CONST_MONITORING_ADDON_NAME: monitoring_addon_profile_8,
+            },
+            service_principal_profile=self.models.ManagedClusterServicePrincipalProfile(
+                client_id="msi"
+            ),
+        )
+        dec_8.context.attach_mc(mc_8)
+        # monitoring_addon_enabled is True — set by update_addon_profiles because addon already exists
+        dec_8.context.set_intermediate("monitoring_addon_enabled", True)
+        dec_8.context.set_intermediate("monitoring_addon_postprocessing_required", True)
+        mock_profile_8 = Mock(get_subscription_id=Mock(return_value="1234-5678-9012"))
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.Profile", return_value=mock_profile_8
+        ), patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.ensure_container_insights_for_monitoring"
+        ) as mock_ensure_8:
+            dec_8.postprocessing_after_mc_created(mc_8)
+        mock_ensure_8.assert_called_once_with(
+            self.cmd,
+            monitoring_addon_profile_8,
+            "1234-5678-9012",
+            "test_rg_name",
+            "test_name",
+            "test_location",
+            remove_monitoring=False,
+            aad_route=True,
+            create_dcr=True,
+            create_dcra=False,
+            enable_syslog=None,
+            data_collection_settings=None,
+            is_private_cluster=None,
+            ampls_resource_id=None,
+            enable_high_log_scale_mode=True,
+        )
+
     def test_put_mc(self):
         dec_1 = AKSManagedClusterUpdateDecorator(
             self.cmd,

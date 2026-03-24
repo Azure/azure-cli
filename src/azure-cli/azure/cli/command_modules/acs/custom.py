@@ -1836,7 +1836,19 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, name, ad
                 else:
                     raise CLIError(
                         "The addon {} is not installed.".format(addon))
-            addon_profiles[addon].config = None
+            # When disabling the monitoring addon, preserve enableRetinaNetworkFlags (CNL)
+            # so that re-enabling the addon later restores the CNL setting.
+            monitoring_addon_key = get_monitoring_addon_key(
+                addon_profiles, CONST_MONITORING_ADDON_NAME, CONST_MONITORING_ADDON_NAME_CAMELCASE
+            )
+            if addon == monitoring_addon_key and addon_profiles[addon].config:
+                existing_cnl = addon_profiles[addon].config.get("enableRetinaNetworkFlags")
+                if existing_cnl is not None:
+                    addon_profiles[addon].config = {"enableRetinaNetworkFlags": existing_cnl}
+                else:
+                    addon_profiles[addon].config = None
+            else:
+                addon_profiles[addon].config = None
         addon_profiles[addon].enabled = enable
 
     instance.addon_profiles = addon_profiles

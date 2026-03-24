@@ -654,6 +654,90 @@ class AcsCustomCommandTest(unittest.TestCase):
         self.assertTrue(monitoring_profile.enabled)
         self.assertEqual(monitoring_profile.config.get('enableRetinaNetworkFlags'), 'True')
 
+        # monitoring disable preserves enableRetinaNetworkFlags (CNL) in config
+        instance = mock.MagicMock()
+        instance.addon_profiles = {
+            CONST_MONITORING_ADDON_NAME: ManagedClusterAddonProfile(
+                enabled=True,
+                config={
+                    'logAnalyticsWorkspaceResourceID': '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.OperationalInsights/workspaces/ws',
+                    CONST_MONITORING_USING_AAD_MSI_AUTH: 'true',
+                    'enableRetinaNetworkFlags': 'True',
+                },
+            ),
+        }
+        instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'clitest000001', 'monitoring', enable=False)
+        monitoring_profile = instance.addon_profiles[CONST_MONITORING_ADDON_NAME]
+        self.assertFalse(monitoring_profile.enabled)
+        self.assertIsNotNone(monitoring_profile.config)
+        self.assertEqual(monitoring_profile.config.get('enableRetinaNetworkFlags'), 'True')
+        # Workspace and auth keys should NOT be preserved (only CNL flag)
+        self.assertIsNone(monitoring_profile.config.get('logAnalyticsWorkspaceResourceID'))
+
+        # monitoring disable → enable cycle preserves CNL (Test 6b scenario)
+        instance = mock.MagicMock()
+        instance.addon_profiles = {
+            CONST_MONITORING_ADDON_NAME: ManagedClusterAddonProfile(
+                enabled=True,
+                config={
+                    'logAnalyticsWorkspaceResourceID': '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.OperationalInsights/workspaces/old-ws',
+                    CONST_MONITORING_USING_AAD_MSI_AUTH: 'true',
+                    'enableRetinaNetworkFlags': 'True',
+                },
+            ),
+        }
+        # Step 1: disable monitoring
+        instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'clitest000001', 'monitoring', enable=False)
+        self.assertFalse(instance.addon_profiles[CONST_MONITORING_ADDON_NAME].enabled)
+        self.assertEqual(instance.addon_profiles[CONST_MONITORING_ADDON_NAME].config.get('enableRetinaNetworkFlags'), 'True')
+        # Step 2: re-enable monitoring with new workspace
+        instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'clitest000001', 'monitoring', enable=True,
+                                  workspace_resource_id='/subscriptions/sub/resourceGroups/rg/providers/Microsoft.OperationalInsights/workspaces/new-ws')
+        monitoring_profile = instance.addon_profiles[CONST_MONITORING_ADDON_NAME]
+        self.assertTrue(monitoring_profile.enabled)
+        self.assertEqual(monitoring_profile.config.get('enableRetinaNetworkFlags'), 'True')
+        self.assertIn('new-ws', monitoring_profile.config.get('logAnalyticsWorkspaceResourceID'))
+
+        # monitoring disable without CNL sets config to None
+        instance = mock.MagicMock()
+        instance.addon_profiles = {
+            CONST_MONITORING_ADDON_NAME: ManagedClusterAddonProfile(
+                enabled=True,
+                config={
+                    'logAnalyticsWorkspaceResourceID': '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.OperationalInsights/workspaces/ws',
+                    CONST_MONITORING_USING_AAD_MSI_AUTH: 'true',
+                },
+            ),
+        }
+        instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'clitest000001', 'monitoring', enable=False)
+        monitoring_profile = instance.addon_profiles[CONST_MONITORING_ADDON_NAME]
+        self.assertFalse(monitoring_profile.enabled)
+        self.assertIsNone(monitoring_profile.config)
+
+        # monitoring disable preserves CNL with camelCase key (omsAgent)
+        instance = mock.MagicMock()
+        instance.addon_profiles = {
+            CONST_MONITORING_ADDON_NAME_CAMELCASE: ManagedClusterAddonProfile(
+                enabled=True,
+                config={
+                    'logAnalyticsWorkspaceResourceID': '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.OperationalInsights/workspaces/ws',
+                    CONST_MONITORING_USING_AAD_MSI_AUTH: 'true',
+                    'enableRetinaNetworkFlags': 'True',
+                },
+            ),
+        }
+        # The addon key normalization in _update_addons remaps camelCase to lowercase
+        instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'clitest000001', 'monitoring', enable=False)
+        monitoring_profile = instance.addon_profiles[CONST_MONITORING_ADDON_NAME]
+        self.assertFalse(monitoring_profile.enabled)
+        self.assertIsNotNone(monitoring_profile.config)
+        self.assertEqual(monitoring_profile.config.get('enableRetinaNetworkFlags'), 'True')
+
     @mock.patch('azure.cli.command_modules.acs.custom._urlretrieve')
     @mock.patch('azure.cli.command_modules.acs.custom.logger')
     def test_k8s_install_kubectl_emit_warnings(self, logger_mock, mock_url_retrieve):

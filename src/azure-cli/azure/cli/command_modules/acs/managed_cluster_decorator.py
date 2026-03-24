@@ -9941,6 +9941,31 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                     self.context.external_functions.add_monitoring_role_assignment(
                         cluster, cluster_resource_id, self.cmd
                     )
+                # If CNL/HLSM flags changed, also update the DCR even though MSI auth
+                # was not detected via get_enable_msi_auth_for_monitoring (which returns
+                # False for existing MSI clusters where client_id=="msi").
+                if monitoring_addon_postprocessing_required:
+                    addon_consts = self.context.get_addon_consts()
+                    monitoring_addon_key = _get_monitoring_addon_key_from_consts(
+                        cluster.addon_profiles, addon_consts
+                    )
+                    self.context.external_functions.ensure_container_insights_for_monitoring(
+                        self.cmd,
+                        cluster.addon_profiles[monitoring_addon_key],
+                        self.context.get_subscription_id(),
+                        self.context.get_resource_group_name(),
+                        self.context.get_name(),
+                        self.context.get_location(),
+                        remove_monitoring=False,
+                        aad_route=True,
+                        create_dcr=True,
+                        create_dcra=False,
+                        enable_syslog=self.context.get_enable_syslog(),
+                        data_collection_settings=self.context.get_data_collection_settings(),
+                        is_private_cluster=self.context.get_enable_private_cluster(),
+                        ampls_resource_id=self.context.get_ampls_resource_id(),
+                        enable_high_log_scale_mode=self.context.get_enable_high_log_scale_mode(),
+                    )
             elif (
                 self.context.raw_param.get("enable_addons") is not None or
                 monitoring_addon_postprocessing_required
