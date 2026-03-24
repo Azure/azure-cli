@@ -308,6 +308,7 @@ def get_source_and_custom_registry_credentials(cmd,
         check_auth_mode_for_abac(registry_abac_enabled, auth_mode)
 
     source_registry_identity = None
+    clear_source_identity = False
     if source_acr_auth_id:
         # "Default" and "None" are the allowed values for source registry auth mode.
         # For a non-ABAC-enabled registry, "--source-acr-auth-id" will not take effect, and authentication
@@ -319,7 +320,7 @@ def get_source_and_custom_registry_credentials(cmd,
                            'resolve this conflict.')
 
         if source_acr_auth_id.lower() == "none":
-            source_registry_identity = None
+            clear_source_identity = True  # explicitly send null to clear the identity field in PATCH
         elif source_acr_auth_id.startswith('/subscriptions/'):  # user-assigned MI resource ID
             source_registry_identity = resolve_identity_client_id(cmd.cli_ctx, source_acr_auth_id)
         elif source_acr_auth_id == CALLER_IDENTITY_ALIAS or source_acr_auth_id == SYSTEM_ASSIGNED_IDENTITY_ALIAS:
@@ -328,9 +329,10 @@ def get_source_and_custom_registry_credentials(cmd,
             raise CLIError('Error: Invalid value for --source-acr-auth-id.')
 
     source_registry_credentials = None
-    if auth_mode or source_registry_identity:
+    if auth_mode or source_registry_identity or clear_source_identity:
+        from azure.core.serialization import NULL
         source_registry_credentials = SourceRegistryCredentials(
-            login_mode=auth_mode, identity=source_registry_identity)
+            login_mode=auth_mode, identity=NULL if clear_source_identity else source_registry_identity)
 
     custom_registries = None
     if login_server:
