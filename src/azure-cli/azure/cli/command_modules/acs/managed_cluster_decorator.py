@@ -2013,20 +2013,58 @@ class AKSManagedClusterContext(BaseAKSContext):
     def get_disable_http_proxy(self) -> bool:
         """Obtain the value of disable_http_proxy.
 
+        This function will verify the parameter by default. If both enable_http_proxy and disable_http_proxy are
+        specified, raise a MutuallyExclusiveArgumentError.
+
+        :return: bool
+        """
+        return self._get_disable_http_proxy(enable_validation=True)
+
+    def _get_disable_http_proxy(self, enable_validation: bool = False) -> bool:
+        """Internal function to obtain the value of disable_http_proxy.
+
+        This function supports the option of enable_validation. When enabled, if both enable_http_proxy and
+        disable_http_proxy are specified, raise a MutuallyExclusiveArgumentError.
+
         :return: bool
         """
         # read the original value passed by the command
         disable_http_proxy = self.raw_param.get("disable_http_proxy")
+
+        if enable_validation:
+            if disable_http_proxy and self._get_enable_http_proxy(enable_validation=False):
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify --enable-http-proxy and --disable-http-proxy at the same time."
+                )
 
         return disable_http_proxy
 
     def get_enable_http_proxy(self) -> bool:
         """Obtain the value of enable_http_proxy.
 
+        This function will verify the parameter by default. If both enable_http_proxy and disable_http_proxy are
+        specified, raise a MutuallyExclusiveArgumentError.
+
+        :return: bool
+        """
+        return self._get_enable_http_proxy(enable_validation=True)
+
+    def _get_enable_http_proxy(self, enable_validation: bool = False) -> bool:
+        """Internal function to obtain the value of enable_http_proxy.
+
+        This function supports the option of enable_validation. When enabled, if both enable_http_proxy and
+        disable_http_proxy are specified, raise a MutuallyExclusiveArgumentError.
+
         :return: bool
         """
         # read the original value passed by the command
         enable_http_proxy = self.raw_param.get("enable_http_proxy")
+
+        if enable_validation:
+            if enable_http_proxy and self._get_disable_http_proxy(enable_validation=False):
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify --enable-http-proxy and --disable-http-proxy at the same time."
+                )
 
         return enable_http_proxy
 
@@ -8352,11 +8390,15 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
     def update_http_proxy_config(self, mc: ManagedCluster) -> ManagedCluster:
         """Set up http proxy config for the ManagedCluster object.
 
+        Only updates if --http-proxy-config was explicitly provided, to avoid wiping existing config.
+
         :return: the ManagedCluster object
         """
         self._ensure_mc(mc)
 
-        mc.http_proxy_config = self.context.get_http_proxy_config()
+        http_proxy_config = self.context.get_http_proxy_config()
+        if http_proxy_config is not None:
+            mc.http_proxy_config = http_proxy_config
         return mc
 
     def update_http_proxy_enabled(self, mc: ManagedCluster) -> ManagedCluster:
@@ -8371,14 +8413,20 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 mc.http_proxy_config = (
                     self.models.ManagedClusterHTTPProxyConfig()  # pylint: disable=no-member
                 )
-            mc.http_proxy_config.enabled = False
+            if isinstance(mc.http_proxy_config, dict):
+                mc.http_proxy_config["enabled"] = False
+            else:
+                mc.http_proxy_config.enabled = False
 
         if self.context.get_enable_http_proxy():
             if mc.http_proxy_config is None:
                 mc.http_proxy_config = (
                     self.models.ManagedClusterHTTPProxyConfig()  # pylint: disable=no-member
                 )
-            mc.http_proxy_config.enabled = True
+            if isinstance(mc.http_proxy_config, dict):
+                mc.http_proxy_config["enabled"] = True
+            else:
+                mc.http_proxy_config.enabled = True
 
         return mc
 

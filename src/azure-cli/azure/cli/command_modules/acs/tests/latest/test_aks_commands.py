@@ -712,6 +712,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             disable_cmd,
             checks=[
                 self.check("httpProxyConfig.enabled", False),
+                self.check("httpProxyConfig.httpProxy", "http://cli-proxy-vm:3128/"),
+                self.check("httpProxyConfig.httpsProxy", "https://cli-proxy-vm:3129/"),
             ],
         )
 
@@ -728,6 +730,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             reenable_cmd,
             checks=[
                 self.check("httpProxyConfig.enabled", True),
+                self.check("httpProxyConfig.httpProxy", "http://cli-proxy-vm:3128/"),
+                self.check("httpProxyConfig.httpsProxy", "https://cli-proxy-vm:3129/"),
             ],
         )
 
