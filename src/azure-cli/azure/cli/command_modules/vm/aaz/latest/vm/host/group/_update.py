@@ -18,7 +18,7 @@ class Update(AAZCommand):
     """Update a dedicated host group.
 
     :example: Update a dedicated host group with Ultra SSD support.
-        az vm host group update --resource-group myResourceGroup --name myDedicatedHostGroup --tags "{department:finance}" --zones "[1]" --platform-fault-domain-count 3 --support-automatic-placement True --additional-capabilities "{ultra-ssd-enabled:True}"
+        az vm host group update --resource-group myResourceGroup --name myDedicatedHostGroup --set tags.foo="bar"
     """
 
     _aaz_info = {
