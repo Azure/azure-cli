@@ -8413,20 +8413,14 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 mc.http_proxy_config = (
                     self.models.ManagedClusterHTTPProxyConfig()  # pylint: disable=no-member
                 )
-            if isinstance(mc.http_proxy_config, dict):
-                mc.http_proxy_config["enabled"] = False
-            else:
-                mc.http_proxy_config.enabled = False
+            mc.http_proxy_config.enabled = False
 
         if self.context.get_enable_http_proxy():
             if mc.http_proxy_config is None:
                 mc.http_proxy_config = (
                     self.models.ManagedClusterHTTPProxyConfig()  # pylint: disable=no-member
                 )
-            if isinstance(mc.http_proxy_config, dict):
-                mc.http_proxy_config["enabled"] = True
-            else:
-                mc.http_proxy_config.enabled = True
+            mc.http_proxy_config.enabled = True
 
         return mc
 
