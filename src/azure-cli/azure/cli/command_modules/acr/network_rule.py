@@ -13,10 +13,11 @@ from ._utils import validate_premium_registry
 NETWORK_RULE_NOT_SUPPORTED = 'Network rules are only supported for managed registries in Premium SKU.'
 # TODO: The networkRuleSet property was unintentionally removed from preview APIs.
 # This was not previously exposed, because of multi-api support in the Python SDK.
-# The Python SDK no longer supports multi-api, highlighting this issue. 
-# Until the next preview API release is deployed, this code uses direct REST calls to get and update the registry's networkRuleSet
-# Once the next preview API is released, this code should be updated to use the SDK methods to get and update the networkRuleSet, 
-# and the api version should be updated to reflect the latest API version, rather than hard coded, as it currently is below.
+# The Python SDK no longer supports multi-api, highlighting this issue.
+# Until the next preview API release is deployed, this code uses direct REST calls to get and update
+# the registry's networkRuleSet. Once the next preview API is released, this code should be updated
+# to use the SDK methods to get and update the networkRuleSet, and the api version should be updated
+# to reflect the latest API version, rather than hard coded, as it currently is below.
 API_VERSION = "2021-08-01-preview"
 
 
