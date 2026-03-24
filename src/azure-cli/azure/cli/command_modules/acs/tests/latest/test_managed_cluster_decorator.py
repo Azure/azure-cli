@@ -13366,7 +13366,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
                     "enable_acns": True,
                     "disable_acns_security": True,
                     "disable_acns_observability": True,
-                    #acns performance is None by default
+                    # acns performance is None by default
                 }
             ),
             self.models,

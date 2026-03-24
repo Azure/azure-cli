@@ -2597,7 +2597,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         if (acns_datapath_acceleration_mode is not None and acns_datapath_acceleration_mode != CONST_ACNS_DATAPATH_ACCELERATION_MODE_NONE):
             if disable_acns:
                 raise MutuallyExclusiveArgumentError(
-                    "--disable-acns cannot be used with --acns-performance-acceleration-mode."
+                    "--disable-acns cannot be used with --acns-datapath-acceleration-mode."
                 )
         return acns_datapath_acceleration_mode
 
