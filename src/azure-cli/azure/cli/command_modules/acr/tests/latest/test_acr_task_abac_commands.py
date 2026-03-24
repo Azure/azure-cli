@@ -56,6 +56,9 @@ class AcrTaskAbacCommandsTests(ScenarioTest):
         })
 
         # Assign "Container Registry Repository Contributor" role to the user-assigned managed identity for the registry.
+        # Wait for the UAMI's service principal to propagate in Entra before assigning roles.
+        if os.environ.get(ENV_LIVE_TEST, False):
+            time.sleep(30)
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             self.cmd('role assignment create --role "Container Registry Repository Contributor" --assignee {uami_client_id} --scope {registry_resource_id}',
                      checks=[self.check('scope', '{registry_resource_id}')])
@@ -91,6 +94,9 @@ class AcrTaskAbacCommandsTests(ScenarioTest):
                  expect_failure=True)
 
         # Assign "Container Registry Repository Contributor" role to the system-assigned identity for the registry.
+        # Wait for the system-assigned identity's service principal to propagate in Entra before assigning roles.
+        if os.environ.get(ENV_LIVE_TEST, False):
+            time.sleep(30)
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             self.cmd('role assignment create --role "Container Registry Repository Contributor" --assignee {principal_id} --scope {registry_resource_id}',
                      checks=[self.check('principalId', '{principal_id}')])
@@ -238,6 +244,9 @@ class AcrTaskAbacCommandsTests(ScenarioTest):
         self.cmd('acr task run -n {task_name} -r {registry_name} --no-logs', expect_failure=True)
 
         # Assign Data Plane permissions
+        # Wait for the system-assigned identity's service principal to propagate in Entra before assigning roles.
+        if os.environ.get(ENV_LIVE_TEST, False):
+            time.sleep(30)
         with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
             self.cmd('role assignment create --role "Container Registry Repository Contributor" --assignee {principal_id} --scope {registry_resource_id}',
                      checks=[self.check('principalId', '{principal_id}')])
