@@ -17,6 +17,8 @@ from azure.cli.command_modules.acs._consts import (
     CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME,
     CONST_KUBE_DASHBOARD_ADDON_NAME,
     CONST_MONITORING_ADDON_NAME,
+    CONST_MONITORING_ADDON_NAME_CAMELCASE,
+    CONST_MONITORING_USING_AAD_MSI_AUTH,
 )
 from azure.cli.command_modules.acs.addonconfiguration import (
     ensure_default_log_analytics_workspace_for_monitoring,
@@ -25,6 +27,7 @@ from azure.cli.command_modules.acs.custom import (
     _get_command_context,
     _update_addons,
     aks_stop,
+    is_monitoring_addon_enabled,
     k8s_install_kubectl,
     k8s_install_kubelogin,
     merge_kubernetes_configurations,
@@ -612,6 +615,44 @@ class AcsCustomCommandTest(unittest.TestCase):
                                   'clitest000001', 'clitest000001', 'ingress-appgw', enable=False)
         addon_profile = instance.addon_profiles['ingressApplicationGateway']
         self.assertFalse(addon_profile.enabled)
+
+        # monitoring enable preserves enableRetinaNetworkFlags (CNL) from camelCase addon key
+        # Scenario: cluster has monitoring under "omsAgent" (camelCase) key with CNL enabled;
+        # CLI enables monitoring (uses "omsagent" key), CNL should be preserved from old key
+        instance = mock.MagicMock()
+        instance.addon_profiles = {
+            CONST_MONITORING_ADDON_NAME_CAMELCASE: ManagedClusterAddonProfile(
+                enabled=False,
+                config={
+                    'logAnalyticsWorkspaceResourceID': '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.OperationalInsights/workspaces/ws',
+                    CONST_MONITORING_USING_AAD_MSI_AUTH: 'true',
+                    'enableRetinaNetworkFlags': 'True',
+                },
+            ),
+        }
+        instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'clitest000001', 'monitoring', enable=True)
+        monitoring_profile = instance.addon_profiles[CONST_MONITORING_ADDON_NAME]
+        self.assertTrue(monitoring_profile.enabled)
+        self.assertEqual(monitoring_profile.config.get('enableRetinaNetworkFlags'), 'True')
+
+        # monitoring enable preserves enableRetinaNetworkFlags from lowercase addon key
+        instance = mock.MagicMock()
+        instance.addon_profiles = {
+            CONST_MONITORING_ADDON_NAME: ManagedClusterAddonProfile(
+                enabled=False,
+                config={
+                    'logAnalyticsWorkspaceResourceID': '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.OperationalInsights/workspaces/ws',
+                    CONST_MONITORING_USING_AAD_MSI_AUTH: 'true',
+                    'enableRetinaNetworkFlags': 'True',
+                },
+            ),
+        }
+        instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'clitest000001', 'monitoring', enable=True)
+        monitoring_profile = instance.addon_profiles[CONST_MONITORING_ADDON_NAME]
+        self.assertTrue(monitoring_profile.enabled)
+        self.assertEqual(monitoring_profile.config.get('enableRetinaNetworkFlags'), 'True')
 
     @mock.patch('azure.cli.command_modules.acs.custom._urlretrieve')
     @mock.patch('azure.cli.command_modules.acs.custom.logger')
@@ -1331,6 +1372,43 @@ class TestWorkspaceCreationRetry(unittest.TestCase):
         second_sleep = mock_sleep.call_args_list[1][0][0]
         # Second sleep should be larger (base doubles: 5->10, plus jitter)
         self.assertGreater(second_sleep, first_sleep)
+
+
+class TestIsMonitoringAddonEnabled(unittest.TestCase):
+    """Tests for the is_monitoring_addon_enabled helper in custom.py."""
+
+    def test_monitoring_enabled_with_lowercase_key(self):
+        instance = mock.Mock()
+        instance.addon_profiles = {
+            CONST_MONITORING_ADDON_NAME: ManagedClusterAddonProfile(enabled=True, config={}),
+        }
+        self.assertTrue(is_monitoring_addon_enabled("monitoring", instance))
+
+    def test_monitoring_enabled_with_camelcase_key(self):
+        instance = mock.Mock()
+        instance.addon_profiles = {
+            CONST_MONITORING_ADDON_NAME_CAMELCASE: ManagedClusterAddonProfile(enabled=True, config={}),
+        }
+        self.assertTrue(is_monitoring_addon_enabled("monitoring", instance))
+
+    def test_monitoring_disabled_with_camelcase_key(self):
+        instance = mock.Mock()
+        instance.addon_profiles = {
+            CONST_MONITORING_ADDON_NAME_CAMELCASE: ManagedClusterAddonProfile(enabled=False, config={}),
+        }
+        self.assertFalse(is_monitoring_addon_enabled("monitoring", instance))
+
+    def test_no_monitoring_addon_at_all(self):
+        instance = mock.Mock()
+        instance.addon_profiles = {}
+        self.assertFalse(is_monitoring_addon_enabled("monitoring", instance))
+
+    def test_non_monitoring_addon(self):
+        instance = mock.Mock()
+        instance.addon_profiles = {
+            CONST_MONITORING_ADDON_NAME: ManagedClusterAddonProfile(enabled=True, config={}),
+        }
+        self.assertFalse(is_monitoring_addon_enabled("http_application_routing", instance))
 
 
 if __name__ == "__main__":

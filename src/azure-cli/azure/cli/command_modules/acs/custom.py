@@ -1749,16 +1749,17 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, name, ad
                             "--enable_msi_auth_for_monitoring is not supported in %s cloud and continuing monitoring enablement without this flag.", cloud_name)
                         enable_msi_auth_for_monitoring = False
 
+                # Capture existing CNL flag before overwriting config
+                existing_cnl = None
+                existing_addon = addon_profiles.get(addon) or addon_profiles.get(CONST_MONITORING_ADDON_NAME_CAMELCASE)
+                if existing_addon and existing_addon.config:
+                    existing_cnl = existing_addon.config.get("enableRetinaNetworkFlags")
+
                 addon_profile.config = {
                     CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: workspace_resource_id}
                 addon_profile.config[CONST_MONITORING_USING_AAD_MSI_AUTH] = "true" if enable_msi_auth_for_monitoring else "false"
 
                 # Preserve enableRetinaNetworkFlags (CNL) if it was set on the existing addon
-                # or if container network logs are being enabled simultaneously
-                existing_cnl = None
-                existing_addon = addon_profiles.get(addon) or addon_profiles.get(CONST_MONITORING_ADDON_NAME_CAMELCASE)
-                if existing_addon and existing_addon.config:
-                    existing_cnl = existing_addon.config.get("enableRetinaNetworkFlags")
                 if existing_cnl is not None:
                     addon_profile.config["enableRetinaNetworkFlags"] = existing_cnl
             elif addon == (CONST_VIRTUAL_NODE_ADDON_NAME + os_type):

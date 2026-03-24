@@ -2829,6 +2829,27 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         ctx_1.attach_mc(mc)
         self.assertEqual(ctx_1.get_enable_msi_auth_for_monitoring(), True)
 
+        # camelCase key (omsAgent) should also be resolved
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_msi_auth_for_monitoring": False,
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        addon_profiles_2 = {
+            CONST_MONITORING_ADDON_NAME_CAMELCASE: self.models.ManagedClusterAddonProfile(
+                enabled=True,
+                config={CONST_MONITORING_USING_AAD_MSI_AUTH: "true"},
+            )
+        }
+        mc_2 = self.models.ManagedCluster(location="test_location", addon_profiles=addon_profiles_2)
+        ctx_2.attach_mc(mc_2)
+        self.assertEqual(ctx_2.get_enable_msi_auth_for_monitoring(), True)
+
     def test_get_virtual_node_addon_os_type(self):
         # default
         ctx_1 = AKSManagedClusterContext(self.cmd, AKSManagedClusterParamDict({}), self.models, DecoratorMode.CREATE)
@@ -12497,6 +12518,10 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         self.assertEqual(dec_1.check_is_postprocessing_required(mc_1), True)
 
         dec_1.context.remove_intermediate("monitoring_addon_enabled")
+        dec_1.context.set_intermediate("monitoring_addon_postprocessing_required", True)
+        self.assertEqual(dec_1.check_is_postprocessing_required(mc_1), True)
+
+        dec_1.context.remove_intermediate("monitoring_addon_postprocessing_required")
         dec_1.context.set_intermediate("ingress_appgw_addon_enabled", True)
         self.assertEqual(dec_1.check_is_postprocessing_required(mc_1), True)
 
@@ -12671,6 +12696,56 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         mock_ensure_5.assert_called_once_with(
             self.cmd,
             monitoring_addon_profile_5,
+            "1234-5678-9012",
+            "test_rg_name",
+            "test_name",
+            "test_location",
+            remove_monitoring=False,
+            aad_route=True,
+            create_dcr=True,
+            create_dcra=True,
+            enable_syslog=None,
+            data_collection_settings=None,
+            is_private_cluster=None,
+            ampls_resource_id=None,
+            enable_high_log_scale_mode=True,
+        )
+
+        # Case 6: Update postprocessing with camelCase addon key (omsAgent)
+        dec_6 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "resource_group_name": "test_rg_name",
+                "name": "test_name",
+                "enable_msi_auth_for_monitoring": True,
+                "enable_high_log_scale_mode": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        monitoring_addon_profile_6 = self.models.ManagedClusterAddonProfile(
+            enabled=True,
+            config={CONST_MONITORING_USING_AAD_MSI_AUTH: "true"},
+        )
+        mc_6 = self.models.ManagedCluster(
+            location="test_location",
+            addon_profiles={
+                CONST_MONITORING_ADDON_NAME_CAMELCASE: monitoring_addon_profile_6,
+            },
+        )
+        dec_6.context.attach_mc(mc_6)
+        dec_6.context.set_intermediate("monitoring_addon_enabled", True)
+        dec_6.context.set_intermediate("monitoring_addon_postprocessing_required", True)
+        mock_profile_6 = Mock(get_subscription_id=Mock(return_value="1234-5678-9012"))
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.Profile", return_value=mock_profile_6
+        ), patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.ensure_container_insights_for_monitoring"
+        ) as mock_ensure_6:
+            dec_6.postprocessing_after_mc_created(mc_6)
+        mock_ensure_6.assert_called_once_with(
+            self.cmd,
+            monitoring_addon_profile_6,
             "1234-5678-9012",
             "test_rg_name",
             "test_name",
@@ -15129,6 +15204,108 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         dec_14.context.attach_mc(mc_14)
         with self.assertRaises(MutuallyExclusiveArgumentError):
             dec_14.update_monitoring_profile_flow_logs(mc_14)
+
+        # Case 15: UPDATE - enable HLSM with camelCase key (omsAgent)
+        dec_15 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_high_log_scale_mode": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_15 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="azure",
+                network_plugin_mode="overlay",
+                network_dataplane="cilium",
+                advanced_networking=self.models.AdvancedNetworking(
+                    enabled=True,
+                ),
+            ),
+            addon_profiles={
+                CONST_MONITORING_ADDON_NAME_CAMELCASE: self.models.ManagedClusterAddonProfile(
+                    enabled=True,
+                    config={CONST_MONITORING_USING_AAD_MSI_AUTH: "true"},
+                )
+            },
+        )
+        dec_15.context.attach_mc(mc_15)
+        dec_mc_15 = dec_15.update_monitoring_profile_flow_logs(mc_15)
+        self.assertTrue(
+            dec_15.context.get_intermediate("monitoring_addon_postprocessing_required")
+        )
+        self.assertEqual(dec_15.context.get_enable_high_log_scale_mode(), True)
+
+        # Case 16: UPDATE - enable CNL with camelCase key (omsAgent)
+        dec_16 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_container_network_logs": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_16 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="azure",
+                network_plugin_mode="overlay",
+                network_dataplane="cilium",
+                advanced_networking=self.models.AdvancedNetworking(
+                    enabled=True,
+                ),
+            ),
+            addon_profiles={
+                CONST_MONITORING_ADDON_NAME_CAMELCASE: self.models.ManagedClusterAddonProfile(
+                    enabled=True,
+                    config={CONST_MONITORING_USING_AAD_MSI_AUTH: "true"},
+                )
+            },
+        )
+        dec_16.context.attach_mc(mc_16)
+        dec_mc_16 = dec_16.update_monitoring_profile_flow_logs(mc_16)
+        self.assertEqual(
+            dec_mc_16.addon_profiles[CONST_MONITORING_ADDON_NAME_CAMELCASE].config["enableRetinaNetworkFlags"],
+            "True",
+        )
+        self.assertTrue(
+            dec_16.context.get_intermediate("monitoring_addon_postprocessing_required")
+        )
+
+        # Case 17: UPDATE - disable HLSM with camelCase key, CNL active -> should ERROR
+        dec_17 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_high_log_scale_mode": False,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_17 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="azure",
+                network_plugin_mode="overlay",
+                network_dataplane="cilium",
+                advanced_networking=self.models.AdvancedNetworking(
+                    enabled=True,
+                ),
+            ),
+            addon_profiles={
+                CONST_MONITORING_ADDON_NAME_CAMELCASE: self.models.ManagedClusterAddonProfile(
+                    enabled=True,
+                    config={
+                        CONST_MONITORING_USING_AAD_MSI_AUTH: "true",
+                        "enableRetinaNetworkFlags": "True",
+                    },
+                )
+            },
+        )
+        dec_17.context.attach_mc(mc_17)
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            dec_17.update_monitoring_profile_flow_logs(mc_17)
 
 
 if __name__ == "__main__":
