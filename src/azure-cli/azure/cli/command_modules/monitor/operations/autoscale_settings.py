@@ -114,7 +114,7 @@ def autoscale_create(cmd, resource, count, autoscale_name=None, resource_group_n
 
     if not (min_count == count and max_count == count):
         logger.warning('Follow up with `az monitor autoscale rule create` to add scaling rules.')
-    from azure.cli.command_modules.monitor.aaz.latest.monitor.autoscale._create import Create as AutoScaleCreate
+    from azure.cli.command_modules.monitor.operations.latest.monitor.autoscale._create import AutoScaleCreate
     return AutoScaleCreate(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 

@@ -6,6 +6,7 @@
 from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.commands.transform import _parse_id
+from azure.cli.command_modules.monitor.util import gen_guid
 
 logger = get_logger(__name__)
 CLONED_NAME = "cloned-{}-{}"
@@ -45,7 +46,6 @@ def _add_into_existing_scopes(cmd, source_resource, alert_rule, target_resource)
 
 def _clone_and_replace_action_group(cmd, source_resource, alert_rule, action_group_mapping, target_resource):
     from azure.mgmt.core.tools import parse_resource_id
-    from azure.cli.command_modules.monitor.util import gen_guid
 
     source_subscription_id = parse_resource_id(source_resource)['subscription']
     target_subscription_id = parse_resource_id(target_resource)['subscription']
@@ -97,7 +97,6 @@ def format_metrics_alert_req(alert_rule):
 
 def _clone_alert_rule(cmd, alert_rule, target_resource):
     from azure.mgmt.core.tools import parse_resource_id
-    from azure.cli.command_modules.monitor.util import gen_guid
 
     alert_rule['scopes'] = [target_resource]
     resource_group_name, name = _parse_id(target_resource).values()  # pylint: disable=unbalanced-dict-unpacking

@@ -103,8 +103,8 @@ def create_log_analytics_workspace_table(cmd, resource_group_name, workspace_nam
                                          retention_in_days=None, total_retention_in_days=None, plan=None,
                                          description=None, no_wait=False):
     from azure.cli.core.azclierror import InvalidArgumentValueError, ArgumentUsageError, RequiredArgumentMissingError
-    from azure.cli.command_modules.monitor.aaz.latest.monitor.log_analytics.workspace.table._create \
-        import Create as WorkspaceTableCreate
+    from azure.cli.command_modules.monitor.operations.latest.monitor.log_analytics.workspace.table._create \
+        import WorkspaceTableCreate
 
     if retention_in_days and total_retention_in_days:
         if total_retention_in_days < retention_in_days:
@@ -143,8 +143,8 @@ def create_log_analytics_workspace_table_search_job(cmd, resource_group_name, wo
                                                     search_query, start_search_time, end_search_time,
                                                     retention_in_days=None, total_retention_in_days=None, limit=None,
                                                     no_wait=False):
-    from azure.cli.command_modules.monitor.aaz.latest.monitor.log_analytics.workspace.table._create \
-        import Create as WorkspaceTableCreate
+    from azure.cli.command_modules.monitor.operations.latest.monitor.log_analytics.workspace.table._create \
+        import WorkspaceTableCreate
 
     return WorkspaceTableCreate(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
@@ -165,8 +165,8 @@ def create_log_analytics_workspace_table_search_job(cmd, resource_group_name, wo
 def create_log_analytics_workspace_table_restore(cmd, resource_group_name, workspace_name, table_name,
                                                  start_restore_time, end_restore_time, restore_source_table,
                                                  no_wait=False):
-    from azure.cli.command_modules.monitor.aaz.latest.monitor.log_analytics.workspace.table._create \
-        import Create as WorkspaceTableCreate
+    from azure.cli.command_modules.monitor.operations.latest.monitor.log_analytics.workspace.table._create \
+        import WorkspaceTableCreate
 
     return WorkspaceTableCreate(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_group": resource_group_name,
@@ -185,8 +185,8 @@ def update_log_analytics_workspace_table(cmd, resource_group_name, workspace_nam
                                          retention_in_days=None, total_retention_in_days=None, plan=None,
                                          description=None, no_wait=False):
     from azure.cli.core.azclierror import ArgumentUsageError
-    from azure.cli.command_modules.monitor.aaz.latest.monitor.log_analytics.workspace.table._update \
-        import Update as WorkspaceTableUpdate
+    from azure.cli.command_modules.monitor.operations.latest.monitor.log_analytics.workspace.table._update \
+        import WorkspaceTableUpdate
 
     columns_list = None
     if columns:

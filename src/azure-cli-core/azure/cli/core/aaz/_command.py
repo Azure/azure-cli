@@ -438,6 +438,8 @@ def _register_from_module(loader, mod, command_table, command_group_table):
     for value in mod.__dict__.values():
         if not isinstance(value, type):
             continue
+        if value.__module__ != mod.__name__:  # skip imported classes
+            continue
         if issubclass(value, AAZCommandGroup) and value.AZ_NAME:
             command_group_table[value.AZ_NAME] = value(cli_ctx=loader.cli_ctx)
         elif issubclass(value, AAZCommand) and value.AZ_NAME:
