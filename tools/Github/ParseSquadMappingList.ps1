@@ -286,7 +286,8 @@ function AddSquadLabelsToYaml {
             }
 
             $labelsToAdd = [System.Collections.Generic.List[string]]::new()
-            foreach ($label in $labelsPresent.Keys) {
+            $sortedLabels = $labelsPresent.Keys | Sort-Object -CaseSensitive
+            foreach ($label in $sortedLabels) {
                 if ($LabelToSquad.ContainsKey($label)) {
                     $squadLabel = $LabelToSquad[$label]
                     if (-not $labelsPresent.ContainsKey($squadLabel) -and -not $labelsToAdd.Contains($squadLabel)) {
@@ -305,7 +306,7 @@ function AddSquadLabelsToYaml {
                     $insertions.Add([PSCustomObject]@{ Index = $lastAddLabelEnd + 1; Lines = $insertLines })
                 }
 
-                    $isPR = $false
+                $isPR = $false
                     for ($p = $i - 1; $p -ge 0; $p--) {
                         if ($Lines[$p] -match '^\s*description:') { break }
                         if ($Lines[$p] -match 'payloadType:\s*Pull_Request') { $isPR = $true; break }
@@ -342,38 +343,39 @@ function AddSquadLabelsToYaml {
                         }
                     }
 
-                    $mentionUsersIndex = -1
-                    $mentioneesIndent = -1
-                    $mentionItemIndent = -1
-                    $existingMentions = @{}
-                    $lastMentionEnd = -1
-                    for ($b = $j; $b -lt $k; $b++) {
-                        $lineAtB = $Lines[$b]
-                        $indentAtB = GetIndentLength -Line $lineAtB
-                        if ($lineAtB -match '^\s*-\s+mentionUsers:\s*$' -and $indentAtB -eq $listIndentLength) {
-                            $mentionUsersIndex = $b; continue
-                        }
-                        if ($mentionUsersIndex -ge 0) {
-                            if ($lineAtB.Trim().Length -ne 0 -and $indentAtB -le $listIndentLength -and $lineAtB -match '^\s*-\s+') { break }
-                            if ($lineAtB -match '^\s*mentionees:\s*$') { $mentioneesIndent = $indentAtB; continue }
-                            if ($lineAtB -match '^\s*-\s+(\S+)\s*$') {
-                                if ($mentionItemIndent -lt 0) { $mentionItemIndent = $indentAtB }
-                                $existingMentions[$Matches[1]] = $true
-                                $lastMentionEnd = $b
-                            }
+                $mentionUsersIndex = -1
+                $mentioneesIndent = -1
+                $mentionItemIndent = -1
+                $existingMentions = @{}
+                $lastMentionEnd = -1
+                for ($b = $j; $b -lt $k; $b++) {
+                    $lineAtB = $Lines[$b]
+                    $indentAtB = GetIndentLength -Line $lineAtB
+                    if ($lineAtB -match '^\s*-\s+mentionUsers:\s*$' -and $indentAtB -eq $listIndentLength) {
+                        $mentionUsersIndex = $b
+                        continue
+                    }
+                    if ($mentionUsersIndex -ge 0) {
+                        if ($lineAtB.Trim().Length -ne 0 -and $indentAtB -le $listIndentLength -and $lineAtB -match '^\s*-\s+') { break }
+                        if ($lineAtB -match '^\s*mentionees:\s*$') { $mentioneesIndent = $indentAtB; continue }
+                        if ($lineAtB -match '^\s*-\s+(\S+)\s*$') {
+                            if ($mentionItemIndent -lt 0) { $mentionItemIndent = $indentAtB }
+                            $existingMentions[$Matches[1]] = $true
+                            $lastMentionEnd = $b
                         }
                     }
-                    if ($mentionUsersIndex -ge 0 -and $lastMentionEnd -ge 0) {
-                        if ($mentionItemIndent -lt 0) { $mentionItemIndent = ($mentioneesIndent -gt 0) ? $mentioneesIndent : ($listIndentLength + 4) }
-                        $mentionInsertLines = [System.Collections.Generic.List[string]]::new()
-                        foreach ($squadLabel in $labelsToAdd) {
-                            if (-not $existingMentions.ContainsKey($squadLabel)) {
-                                $mentionInsertLines.Add((" " * $mentionItemIndent) + "- $squadLabel")
-                            }
+                }
+
+                if ($mentionUsersIndex -ge 0 -and $lastMentionEnd -ge 0) {
+                    if ($mentionItemIndent -lt 0) { $mentionItemIndent = ($mentioneesIndent -gt 0) ? $mentioneesIndent : ($listIndentLength + 4) }
+                    $mentionInsertLines = [System.Collections.Generic.List[string]]::new()
+                    foreach ($squadLabel in $labelsToAdd) {
+                        if (-not $existingMentions.ContainsKey($squadLabel)) {
+                            $mentionInsertLines.Add((" " * $mentionItemIndent) + "- $squadLabel")
                         }
-                        if ($mentionInsertLines.Count -gt 0) {
-                            $insertions.Add([PSCustomObject]@{ Index = $lastMentionEnd + 1; Lines = $mentionInsertLines })
-                        }
+                    }
+                    if ($mentionInsertLines.Count -gt 0) {
+                        $insertions.Add([PSCustomObject]@{ Index = $lastMentionEnd + 1; Lines = $mentionInsertLines })
                     }
                 }
             }
@@ -392,6 +394,7 @@ function AddSquadLabelsToYaml {
     }
 
     return $lineList.ToArray()
+}
 
 $labelToSquad = GetSquadMappingFromWiki -AccessToken $AccessToken
 if ($labelToSquad.Count -eq 0) {
