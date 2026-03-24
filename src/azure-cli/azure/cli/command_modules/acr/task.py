@@ -899,8 +899,9 @@ def acr_task_update_run(cmd,
     _, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, TASK_NOT_SUPPORTED)
 
+    from azure.mgmt.containerregistrytasks.models import RunUpdateParameters
     is_archive_enabled = not no_archive if no_archive is not None else None
-    run_update_parameters = {'is_archive_enabled': is_archive_enabled}
+    run_update_parameters = RunUpdateParameters(is_archive_enabled=is_archive_enabled)
 
     return client.update(resource_group_name=resource_group_name,
                          registry_name=registry_name,
