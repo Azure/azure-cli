@@ -90,7 +90,8 @@ def _validate_proximity_placement_group(cmd, namespace):
         parsed = parse_resource_id(namespace.proximity_placement_group)
         rg, name = parsed['resource_group'], parsed['name']
 
-        if not check_existence(cmd.cli_ctx, name, rg, 'Microsoft.Compute', 'proximityPlacementGroups'):
+        if not check_existence(cmd.cli_ctx, name, rg, 'Microsoft.Compute',
+                               'proximityPlacementGroups', static_version='2024-07-01'):
             raise CLIError("Proximity Placement Group '{}' does not exist.".format(name))
 
 
@@ -692,7 +693,8 @@ def _validate_vm_create_storage_account(cmd, namespace):
     if namespace.storage_account:
         storage_id = parse_resource_id(namespace.storage_account)
         rg = storage_id.get('resource_group', namespace.resource_group_name)
-        if check_existence(cmd.cli_ctx, storage_id['name'], rg, 'Microsoft.Storage', 'storageAccounts'):
+        if check_existence(cmd.cli_ctx, storage_id['name'], rg, 'Microsoft.Storage',
+                           'storageAccounts', static_version='2024-01-01'):
             # 1 - existing storage account specified
             namespace.storage_account_type = 'existing'
             logger.debug("using specified existing storage account '%s'", storage_id['name'])
@@ -735,7 +737,8 @@ def _validate_vm_create_availability_set(cmd, namespace):
         name = as_id['name']
         rg = as_id.get('resource_group', namespace.resource_group_name)
 
-        if not check_existence(cmd.cli_ctx, name, rg, 'Microsoft.Compute', 'availabilitySets'):
+        if not check_existence(cmd.cli_ctx, name, rg, 'Microsoft.Compute',
+                               'availabilitySets', static_version='2024-07-01'):
             raise CLIError("Availability set '{}' does not exist.".format(name))
 
         namespace.availability_set = resource_id(
@@ -755,7 +758,8 @@ def _validate_vm_create_vmss(cmd, namespace):
         name = as_id['name']
         rg = as_id.get('resource_group', namespace.resource_group_name)
 
-        if not check_existence(cmd.cli_ctx, name, rg, 'Microsoft.Compute', 'virtualMachineScaleSets'):
+        if not check_existence(cmd.cli_ctx, name, rg, 'Microsoft.Compute',
+                               'virtualMachineScaleSets', static_version='2025-04-01'):
             raise CLIError("virtual machine scale set '{}' does not exist.".format(name))
 
         namespace.vmss = resource_id(
@@ -1035,7 +1039,8 @@ def _validate_vm_create_nsg(cmd, namespace):
 
     if namespace.nsg:
         if check_existence(cmd.cli_ctx, namespace.nsg, namespace.resource_group_name,
-                           'Microsoft.Network', 'networkSecurityGroups'):
+                           'Microsoft.Network', 'networkSecurityGroups',
+                           static_version="2023-11-01"):
             namespace.nsg_type = 'existing'
             logger.debug("using specified NSG '%s'", namespace.nsg)
         else:
@@ -1058,7 +1063,8 @@ def _validate_vmss_create_nsg(cmd, namespace):
 def _validate_vm_vmss_create_public_ip(cmd, namespace):
     if namespace.public_ip_address:
         if check_existence(cmd.cli_ctx, namespace.public_ip_address, namespace.resource_group_name,
-                           'Microsoft.Network', 'publicIPAddresses'):
+                           'Microsoft.Network', 'publicIPAddresses',
+                           static_version='2022-05-01'):
             namespace.public_ip_address_type = 'existing'
             logger.debug("using existing specified public IP '%s'", namespace.public_ip_address)
         else:
@@ -1824,6 +1830,7 @@ def process_vmss_create_namespace(cmd, namespace):
             raise ArgumentUsageError('usage error: please specify the --image when you want to specify the VM SKU')
 
         _validate_trusted_launch(namespace)
+        _validate_vmss_create_auto_zone_placement(namespace)
         if namespace.image:
 
             if namespace.vm_sku is None:
@@ -1920,6 +1927,7 @@ def process_vmss_create_namespace(cmd, namespace):
     _validate_vmss_terminate_notification(cmd, namespace)
     _validate_vmss_create_automatic_repairs(cmd, namespace)
     _validate_vmss_create_host_group(cmd, namespace)
+    _validate_vmss_create_auto_zone_placement(namespace)
 
     if namespace.secrets:
         _validate_secrets(namespace.secrets, namespace.os_type)
@@ -2686,6 +2694,85 @@ def _validate_vmss_create_host_group(cmd, namespace):
                 subscription=get_subscription_id(cmd.cli_ctx), resource_group=namespace.resource_group_name,
                 namespace='Microsoft.Compute', type='hostGroups', name=namespace.host_group
             )
+
+
+def _validate_vmss_create_auto_zone_placement(namespace):
+    zpp = getattr(namespace, 'zone_placement_policy', None)
+    zones = getattr(namespace, 'zones', None)
+    zone_balance = getattr(namespace, 'zone_balance', None)
+    max_zone_count = getattr(namespace, 'max_zone_count', None)
+    disable_overprovision = getattr(namespace, 'disable_overprovision', None)
+    ppg = getattr(namespace, 'ppg', None)
+    crg = getattr(namespace, 'capacity_reservation_group', None)
+    orchestration_mode = getattr(namespace, 'orchestration_mode', None)
+    instance_percent_policy = getattr(namespace, 'instance_percent_policy', None)
+    max_instance_percent = getattr(namespace, 'max_instance_percent', None)
+
+    # "zones", zonePlacementPolicy cannot be enabled if "zones" list exists on the scale set
+    if zpp and zones:
+        raise ArgumentUsageError(
+            "usage error: --zone-placement-policy cannot be used with --zones. "
+            "Specify either fixed zones (--zones) or automatic zone placement (--zone-placement-policy)."
+        )
+
+    # max-zone-count must be positive
+    if max_zone_count is not None and max_zone_count <= 0:
+        raise ArgumentUsageError(
+            "usage error: --max-zone-count must be a positive integer."
+        )
+
+    # zoneBalance=true requires maxZoneCount
+    if zone_balance is True and max_zone_count is None:
+        raise ArgumentUsageError(
+            "usage error: --zone-balance requires --max-zone-count to be specified."
+        )
+
+    # Zones=Auto does not support overprovisioning
+    if zpp and orchestration_mode and orchestration_mode.lower() == 'uniform':
+        if not disable_overprovision:
+            raise ArgumentUsageError(
+                "usage error: zone placement policy does not support overprovisioning. "
+                "Set --disable-overprovision when using --zone-placement-policy Auto."
+            )
+
+    # zones=Auto does not support Proximity Placement Group
+    if zpp and ppg:
+        raise ArgumentUsageError(
+            "usage error: zone placement policy does not support proximity placement groups."
+        )
+
+    # zones=Auto does not support Capacity Reservation Group
+    if zpp and crg:
+        raise ArgumentUsageError(
+            "usage error: zone placement policy does not support capacity reservation groups."
+        )
+
+    if instance_percent_policy is not None:
+        # enable=true requires value
+        if instance_percent_policy is True and max_instance_percent is None:
+            raise ArgumentUsageError(
+                "usage error: --instance-percent-policy true requires "
+                "(--max-instance-percent / --value-max-instance-percent-per-zone)."
+            )
+
+        # enable=false should not be combined with value
+        if instance_percent_policy is False and max_instance_percent is not None:
+            raise ArgumentUsageError(
+                "usage error: (--max-instance-percent / --value-max-instance-percent-per-zone) cannot be used when "
+                "--instance-percent-policy is false."
+            )
+
+    # value range
+    if max_instance_percent is not None:
+        if instance_percent_policy is None:
+            raise ArgumentUsageError(
+                "usage error: (--max-instance-percent / --value-max-instance-percent-per-zone) cannot be used when "
+                "--instance-percent-policy is not set."
+            )
+
+        if max_instance_percent < 1 or max_instance_percent > 100:
+            raise ArgumentUsageError("usage error: (--max-instance-percent / --value-max-instance-percent-per-zone) "
+                                     "must be an integer between 1 and 100.")
 
 
 def _validate_count(namespace):

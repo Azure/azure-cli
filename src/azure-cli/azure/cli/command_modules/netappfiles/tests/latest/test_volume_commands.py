@@ -731,3 +731,45 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         #     self.cmd("az netappfiles volume splitclonefromparent -g {rg} -a %s -p %s -v %s --username %s" % (account_name, pool_name, volume_name))
         # self.assertIn('GroupIdListForLDAPUserNotSupportedVolumes', str(
         #     cm.exception))
+
+
+    @serial_test()
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_', additional_tags={'owner': 'cli_test'})
+    def test_volume_ransomware_enabled(self):
+        # tests that adding export policy works with non-default service level/usage threshold
+        account_name = self.create_random_name(prefix='cli-acc-', length=24)
+        pool_name = self.create_random_name(prefix='cli-pool-', length=24)
+        volume_name = self.create_random_name(prefix='cli-vol-', length=24)
+        pool_payload = "--service-level 'Premium' --size 4"
+        volume_payload = "--service-level 'Premium' --usage-threshold 100 --desired-arp-state 'Enabled'"
+        ransom_location = "uksouth"
+
+        volume = self.create_volume(account_name, pool_name, volume_name, '{rg}', pool_payload=pool_payload, volume_payload=volume_payload)
+        assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
+        # check the specified volume properties
+        # assert volume['usageThreshold'] == 8192 * GIB_SCALE
+        assert volume['dataProtection']['ransomwareProtection']['desiredRansomwareProtectionState'] == "Enabled"
+
+        # list ransomware reports for the volume
+        ransomware_reports = self.cmd("az netappfiles volume ransomware-report list -g {rg} -a %s -p %s -v %s" % (account_name, pool_name, volume_name)).get_output_in_json()
+        assert isinstance(ransomware_reports, list)
+
+        # show the current ransomware report - no active event expected on a fresh volume
+        with self.assertRaises(HttpResponseError):
+            self.cmd("az netappfiles volume ransomware-report show -g {rg} -a %s -p %s -v %s --ransomware-report-name current" % (account_name, pool_name, volume_name))
+
+    @serial_test()
+    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_volume_', additional_tags={'owner': 'cli_test'})
+    def test_list_quota_report(self):
+        account_name = self.create_random_name(prefix='cli-acc-', length=24)
+        pool_name = self.create_random_name(prefix='cli-pool-', length=24)
+        volume_name = self.create_random_name(prefix='cli-vol-', length=24)
+
+        volume = self.create_volume(account_name, pool_name, volume_name, '{rg}')
+        assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
+
+        # call listQuotaReport - a fresh volume with no data or quotas should return an empty list
+        quota_report = self.cmd("az netappfiles volume list-quota-report -g {rg} -a %s -p %s -v %s" % (account_name, pool_name, volume_name)).get_output_in_json()
+        assert 'quotaReportRecords' in quota_report["properties"]
+        assert isinstance(quota_report["properties"]['quotaReportRecords'], list)
+        assert len(quota_report["properties"]['quotaReportRecords']) == 0

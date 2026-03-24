@@ -512,14 +512,11 @@ class AzCliCommandInvoker(CommandInvoker):
                                   EVENT_INVOKER_FILTER_RESULT)
         from azure.cli.core.commands.events import (
             EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE, EVENT_INVOKER_PRE_LOAD_ARGUMENTS, EVENT_INVOKER_POST_LOAD_ARGUMENTS)
-        from azure.cli.core.util import roughly_parse_command_with_casing
 
-        # TODO: Can't simply be invoked as an event because args are transformed
-        command_preserve_casing = roughly_parse_command_with_casing(args)
         args = _pre_command_table_create(self.cli_ctx, args)
 
         if self._should_show_cached_help(args):
-            result = self._try_show_cached_help(command_preserve_casing, args)
+            result = self._try_show_cached_help(args)
             if result:
                 return result
 
@@ -593,7 +590,7 @@ class AzCliCommandInvoker(CommandInvoker):
                     logger.debug("Failed to cache help data: %s", ex)
 
             # TODO: No event in base with which to target
-            telemetry.set_command_details('az', command_preserve_casing=command_preserve_casing)
+            telemetry.set_command_details('az')
             telemetry.set_success(summary='welcome')
             return CommandResultItem(None, exit_code=0)
 
@@ -648,8 +645,7 @@ class AzCliCommandInvoker(CommandInvoker):
             pass
         telemetry.set_command_details(self.cli_ctx.data['command'], self.data['output'],
                                       self.cli_ctx.data['safe_params'],
-                                      extension_name=extension_name, extension_version=extension_version,
-                                      command_preserve_casing=command_preserve_casing)
+                                      extension_name=extension_name, extension_version=extension_version)
         if extension_name:
             self.data['command_extension_name'] = extension_name
             self.cli_ctx.logging.log_cmd_metadata_extension_info(extension_name, extension_version)
@@ -740,7 +736,7 @@ class AzCliCommandInvoker(CommandInvoker):
                 self._is_top_level_help_request(args) and
                 not self.cli_ctx.data.get('completer_active'))
 
-    def _try_show_cached_help(self, command_preserve_casing, args):
+    def _try_show_cached_help(self, args):
         """Try to show cached help for top-level help request.
 
         Returns CommandResultItem if cached help was shown, None otherwise.
@@ -752,7 +748,7 @@ class AzCliCommandInvoker(CommandInvoker):
         if help_index:
             # Display cached help using the help system
             self.help.show_cached_help(help_index, args)
-            telemetry.set_command_details('az', command_preserve_casing=command_preserve_casing, parameters=['--help'])
+            telemetry.set_command_details('az', parameters=['--help'])
             telemetry.set_success(summary='show help')
             return CommandResultItem(None, exit_code=0)
 

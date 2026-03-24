@@ -360,9 +360,9 @@ example:
 
 helps['postgres flexible-server migrate-network'] = """
 type: command
-short-summary: Migrate the network mode of a flexible server.
+short-summary: Migrate an Azure Database for PostgreSQL server from VNet integration to a Private Link network model.
 examples:
-  - name: Migrate the network mode of a flexible server.
+  - name: Migrate an Azure Database for PostgreSQL server from VNet integration to a Private Link network model.
     text: az postgres flexible-server migrate-network --resource-group testGroup --name testserver
 """
 

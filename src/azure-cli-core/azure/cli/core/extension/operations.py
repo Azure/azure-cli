@@ -194,7 +194,7 @@ def _install_deps_for_psycopg2():  # pylint: disable=too-many-statements
     system = platform.system()
     if system == 'Darwin':
         subprocess.call(['xcode-select', '--install'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        if installer != 'HOMEBREW':
+        if installer not in ('HOMEBREW', 'HOMEBREW_CASK'):
             from shutil import which
             if which('brew') is None:
                 logger.warning('You may need to install postgresql with homebrew first before you install this extension.')
