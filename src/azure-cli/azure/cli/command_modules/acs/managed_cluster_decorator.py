@@ -2593,11 +2593,19 @@ class AKSManagedClusterContext(BaseAKSContext):
         :return: str or None
         """
         disable_acns = self.raw_param.get("disable_acns")
+        enable_acns = self.raw_param.get("enable_acns")
         acns_datapath_acceleration_mode = self.raw_param.get("acns_datapath_acceleration_mode")
-        if (acns_datapath_acceleration_mode is not None and acns_datapath_acceleration_mode != CONST_ACNS_DATAPATH_ACCELERATION_MODE_NONE):
+        if acns_datapath_acceleration_mode is not None and \
+                acns_datapath_acceleration_mode != CONST_ACNS_DATAPATH_ACCELERATION_MODE_NONE:
             if disable_acns:
                 raise MutuallyExclusiveArgumentError(
-                    "--disable-acns cannot be used with --acns-datapath-acceleration-mode."
+                    "--disable-acns cannot be used with --acns-performance-acceleration-mode."
+                )
+            # Require explicit ACNS enablement when specifying a datapath acceleration mode on create
+            if self.decorator_mode == DecoratorMode.CREATE and not enable_acns:
+                raise ArgumentUsageError(
+                    "--acns-datapath-acceleration-mode can only be used when ACNS is enabled. "
+                    "Please specify --enable-acns."
                 )
         return acns_datapath_acceleration_mode
 
