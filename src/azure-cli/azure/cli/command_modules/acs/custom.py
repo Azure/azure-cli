@@ -1169,6 +1169,8 @@ def aks_update(
     disable_container_network_logs=None,
     acns_datapath_acceleration_mode=None,
     acns_transit_encryption_type=None,
+    # monitoring addons
+    enable_high_log_scale_mode=None,
     # network isoalted cluster
     bootstrap_artifact_source=None,
     bootstrap_container_registry_resource_id=None,

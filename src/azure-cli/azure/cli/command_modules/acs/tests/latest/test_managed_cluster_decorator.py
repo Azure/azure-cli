@@ -14829,6 +14829,195 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             ):
                 dec_8.set_up_addon_profiles(mc_8)
 
+        # Case 9: UPDATE - enable HLSM only (no CNL), monitoring with MSI auth enabled
+        dec_9 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_high_log_scale_mode": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_9 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="azure",
+                network_plugin_mode="overlay",
+                network_dataplane="cilium",
+                advanced_networking=self.models.AdvancedNetworking(
+                    enabled=True,
+                ),
+            ),
+            addon_profiles={
+                "omsagent": self.models.ManagedClusterAddonProfile(
+                    enabled=True,
+                    config={CONST_MONITORING_USING_AAD_MSI_AUTH: "true"},
+                )
+            },
+        )
+        dec_9.context.attach_mc(mc_9)
+        dec_mc_9 = dec_9.update_monitoring_profile_flow_logs(mc_9)
+        # HLSM should be enabled but CNL remains unset — no enableRetinaNetworkFlags change
+        # The monitoring_addon_postprocessing_required intermediate should be set
+        self.assertTrue(
+            dec_9.context.get_intermediate("monitoring_addon_postprocessing_required")
+        )
+
+        # Case 10: UPDATE - disable HLSM while CNL is active -> should ERROR
+        dec_10 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_high_log_scale_mode": False,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_10 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="azure",
+                network_plugin_mode="overlay",
+                network_dataplane="cilium",
+                advanced_networking=self.models.AdvancedNetworking(
+                    enabled=True,
+                ),
+            ),
+            addon_profiles={
+                "omsagent": self.models.ManagedClusterAddonProfile(
+                    enabled=True,
+                    config={
+                        CONST_MONITORING_USING_AAD_MSI_AUTH: "true",
+                        "enableRetinaNetworkFlags": "True",
+                    },
+                )
+            },
+        )
+        dec_10.context.attach_mc(mc_10)
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            dec_10.update_monitoring_profile_flow_logs(mc_10)
+
+        # Case 11: UPDATE - enable CNL + HLSM=true together
+        dec_11 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_container_network_logs": True,
+                "enable_high_log_scale_mode": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_11 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="azure",
+                network_plugin_mode="overlay",
+                network_dataplane="cilium",
+                advanced_networking=self.models.AdvancedNetworking(
+                    enabled=True,
+                ),
+            ),
+            addon_profiles={
+                "omsagent": self.models.ManagedClusterAddonProfile(
+                    enabled=True,
+                    config={CONST_MONITORING_USING_AAD_MSI_AUTH: "true"},
+                )
+            },
+        )
+        dec_11.context.attach_mc(mc_11)
+        dec_mc_11 = dec_11.update_monitoring_profile_flow_logs(mc_11)
+        self.assertEqual(
+            dec_mc_11.addon_profiles["omsagent"].config["enableRetinaNetworkFlags"],
+            "True",
+        )
+        self.assertTrue(
+            dec_11.context.get_intermediate("monitoring_addon_postprocessing_required")
+        )
+
+        # Case 12: UPDATE - enable HLSM without monitoring addon -> should ERROR
+        dec_12 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_high_log_scale_mode": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_12 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="azure",
+                network_plugin_mode="overlay",
+                network_dataplane="cilium",
+                advanced_networking=self.models.AdvancedNetworking(
+                    enabled=True,
+                ),
+            ),
+        )
+        dec_12.context.attach_mc(mc_12)
+        with self.assertRaises(RequiredArgumentMissingError):
+            dec_12.update_monitoring_profile_flow_logs(mc_12)
+
+        # Case 13: UPDATE - enable HLSM without MSI auth -> should ERROR
+        dec_13 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_high_log_scale_mode": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_13 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="azure",
+                network_plugin_mode="overlay",
+                network_dataplane="cilium",
+                advanced_networking=self.models.AdvancedNetworking(
+                    enabled=True,
+                ),
+            ),
+            addon_profiles={
+                "omsagent": self.models.ManagedClusterAddonProfile(
+                    enabled=True,
+                    config={CONST_MONITORING_USING_AAD_MSI_AUTH: "false"},
+                )
+            },
+        )
+        dec_13.context.attach_mc(mc_13)
+        with self.assertRaises(RequiredArgumentMissingError):
+            dec_13.update_monitoring_profile_flow_logs(mc_13)
+
+        # Case 14: UPDATE - enable CNL + HLSM=false -> should ERROR
+        dec_14 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_container_network_logs": True,
+                "enable_high_log_scale_mode": False,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_14 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="azure",
+                network_plugin_mode="overlay",
+                network_dataplane="cilium",
+                advanced_networking=self.models.AdvancedNetworking(
+                    enabled=True,
+                ),
+            ),
+            addon_profiles={
+                "omsagent": self.models.ManagedClusterAddonProfile(
+                    enabled=True,
+                    config={CONST_MONITORING_USING_AAD_MSI_AUTH: "true"},
+                )
+            },
+        )
+        dec_14.context.attach_mc(mc_14)
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            dec_14.update_monitoring_profile_flow_logs(mc_14)
+
 
 if __name__ == "__main__":
     unittest.main()

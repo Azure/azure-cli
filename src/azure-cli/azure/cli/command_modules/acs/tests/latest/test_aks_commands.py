@@ -13326,6 +13326,42 @@ spec:
             ],
         )
 
+        # update: disable container network logs
+        disable_cnl_cmd = (
+            "aks update --resource-group={resource_group} --name={name} "
+            "--disable-container-network-logs "
+        )
+        self.cmd(
+            disable_cnl_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+            ],
+        )
+
+        # update: enable high log scale mode independently via aks update
+        enable_hlsm_cmd = (
+            "aks update --resource-group={resource_group} --name={name} "
+            "--enable-high-log-scale-mode "
+        )
+        self.cmd(
+            enable_hlsm_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+            ],
+        )
+
+        # update: re-enable container network logs (should auto-enable HLSM)
+        enable_cnl_cmd = (
+            "aks update --resource-group={resource_group} --name={name} "
+            "--enable-container-network-logs "
+        )
+        self.cmd(
+            enable_cnl_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+            ],
+        )
+
         # delete
         self.cmd(
             "aks delete -g {resource_group} -n {name} --yes --no-wait",
