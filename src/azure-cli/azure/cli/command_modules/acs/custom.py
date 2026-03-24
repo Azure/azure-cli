@@ -59,6 +59,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_INGRESS_APPGW_WATCH_NAMESPACE,
     CONST_KUBE_DASHBOARD_ADDON_NAME,
     CONST_MONITORING_ADDON_NAME,
+    CONST_MONITORING_ADDON_NAME_CAMELCASE,
     CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
     CONST_MONITORING_USING_AAD_MSI_AUTH,
     CONST_NODEPOOL_MODE_USER,
@@ -1512,19 +1513,31 @@ def _remove_nulls(managed_clusters):
     return managed_clusters
 
 
+def _get_monitoring_addon_key_custom(addon_profiles):
+    """Return the key present in addon_profiles for the monitoring addon (omsagent or omsAgent)."""
+    if addon_profiles is None:
+        return CONST_MONITORING_ADDON_NAME
+    if CONST_MONITORING_ADDON_NAME in addon_profiles:
+        return CONST_MONITORING_ADDON_NAME
+    if CONST_MONITORING_ADDON_NAME_CAMELCASE in addon_profiles:
+        return CONST_MONITORING_ADDON_NAME_CAMELCASE
+    return CONST_MONITORING_ADDON_NAME
+
+
 # pylint: disable=line-too-long
 def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=False):
     instance = client.get(resource_group_name, name)
     subscription_id = get_subscription_id(cmd.cli_ctx)
+    monitoring_addon_key = _get_monitoring_addon_key_custom(instance.addon_profiles)
     try:
-        if addons == "monitoring" and CONST_MONITORING_ADDON_NAME in instance.addon_profiles and \
-                instance.addon_profiles[CONST_MONITORING_ADDON_NAME].enabled and \
-                CONST_MONITORING_USING_AAD_MSI_AUTH in instance.addon_profiles[CONST_MONITORING_ADDON_NAME].config and \
-                str(instance.addon_profiles[CONST_MONITORING_ADDON_NAME].config[CONST_MONITORING_USING_AAD_MSI_AUTH]).lower() == 'true':
+        if addons == "monitoring" and monitoring_addon_key in instance.addon_profiles and \
+                instance.addon_profiles[monitoring_addon_key].enabled and \
+                CONST_MONITORING_USING_AAD_MSI_AUTH in instance.addon_profiles[monitoring_addon_key].config and \
+                str(instance.addon_profiles[monitoring_addon_key].config[CONST_MONITORING_USING_AAD_MSI_AUTH]).lower() == 'true':
             # remove the DCR association because otherwise the DCR can't be deleted
             ensure_container_insights_for_monitoring(
                 cmd,
-                instance.addon_profiles[CONST_MONITORING_ADDON_NAME],
+                instance.addon_profiles[monitoring_addon_key],
                 subscription_id,
                 resource_group_name,
                 name,
@@ -1614,12 +1627,13 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
 
     if need_pull_for_result:
         if enable_monitoring:
-            if CONST_MONITORING_USING_AAD_MSI_AUTH in instance.addon_profiles[CONST_MONITORING_ADDON_NAME].config and \
-               str(instance.addon_profiles[CONST_MONITORING_ADDON_NAME].config[CONST_MONITORING_USING_AAD_MSI_AUTH]).lower() == 'true':
+            monitoring_addon_key = _get_monitoring_addon_key_custom(instance.addon_profiles)
+            if CONST_MONITORING_USING_AAD_MSI_AUTH in instance.addon_profiles[monitoring_addon_key].config and \
+               str(instance.addon_profiles[monitoring_addon_key].config[CONST_MONITORING_USING_AAD_MSI_AUTH]).lower() == 'true':
                 if msi_auth:
                     # create a Data Collection Rule (DCR) and associate it with the cluster
                     ensure_container_insights_for_monitoring(
-                        cmd, instance.addon_profiles[CONST_MONITORING_ADDON_NAME],
+                        cmd, instance.addon_profiles[monitoring_addon_key],
                         subscription_id,
                         resource_group_name,
                         name,
@@ -1650,7 +1664,7 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                     raise ArgumentUsageError(
                         "--ampls-resource-id supported only in MSI auth mode.")
                 ensure_container_insights_for_monitoring(
-                    cmd, instance.addon_profiles[CONST_MONITORING_ADDON_NAME], subscription_id, resource_group_name, name, instance.location, aad_route=False)
+                    cmd, instance.addon_profiles[monitoring_addon_key], subscription_id, resource_group_name, name, instance.location, aad_route=False)
 
         # adding a wait here since we rely on the result for role assignment
         result = LongRunningOperation(cmd.cli_ctx)(
@@ -1743,6 +1757,15 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, name, ad
                 addon_profile.config = {
                     CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: workspace_resource_id}
                 addon_profile.config[CONST_MONITORING_USING_AAD_MSI_AUTH] = "true" if enable_msi_auth_for_monitoring else "false"
+
+                # Preserve enableRetinaNetworkFlags (CNL) if it was set on the existing addon
+                # or if container network logs are being enabled simultaneously
+                existing_cnl = None
+                existing_addon = addon_profiles.get(addon) or addon_profiles.get(CONST_MONITORING_ADDON_NAME_CAMELCASE)
+                if existing_addon and existing_addon.config:
+                    existing_cnl = existing_addon.config.get("enableRetinaNetworkFlags")
+                if existing_cnl is not None:
+                    addon_profile.config["enableRetinaNetworkFlags"] = existing_cnl
             elif addon == (CONST_VIRTUAL_NODE_ADDON_NAME + os_type):
                 if addon_profile.enabled:
                     raise CLIError('The virtual-node addon is already enabled for this managed cluster.\n'
@@ -4078,8 +4101,9 @@ def is_monitoring_addon_enabled(addons, instance):
                     break
 
         addon_profiles = instance.addon_profiles or {}
-        monitoring_addon_enabled = is_monitoring_addon and CONST_MONITORING_ADDON_NAME in addon_profiles and addon_profiles[
-            CONST_MONITORING_ADDON_NAME].enabled
+        monitoring_addon_key = _get_monitoring_addon_key_custom(addon_profiles)
+        monitoring_addon_enabled = is_monitoring_addon and monitoring_addon_key in addon_profiles and addon_profiles[
+            monitoring_addon_key].enabled
     except Exception as ex:  # pylint: disable=broad-except
         logger.debug("failed to check monitoring addon enabled: %s", ex)
     return monitoring_addon_enabled
