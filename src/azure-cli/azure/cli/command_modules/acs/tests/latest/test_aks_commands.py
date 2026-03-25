@@ -13351,12 +13351,9 @@ spec:
         )
 
         # update: enable high log scale mode independently via aks update
-        enable_hlsm_cmd = (
-            "aks update --resource-group={resource_group} --name={name} "
-            "--enable-high-log-scale-mode "
-        )
         self.cmd(
-            enable_hlsm_cmd,
+            "aks update --resource-group={resource_group} --name={name} "
+            "--enable-high-log-scale-mode ",
             checks=[
                 self.check("provisioningState", "Succeeded"),
                 self.check("addonProfiles.omsagent.enabled", True),
