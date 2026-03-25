@@ -5954,20 +5954,12 @@ def create_dedicated_host(cmd, host_group_name, host_name, resource_group_name, 
         'location': location,
         'sku': {
             'name': sku
-        }
+        },
+        'platform_fault_domain': platform_fault_domain,
+        'license_type': license_type,
+        'auto_replace_on_failure': auto_replace_on_failure,
+        'tags': tags or {}
     }
-
-    if tags is not None:
-        command_args['tags'] = tags or {}
-
-    if auto_replace_on_failure is not None:
-        command_args['auto_replace_on_failure'] = auto_replace_on_failure
-
-    if license_type:
-        command_args['license_type'] = license_type
-
-    if platform_fault_domain:
-        command_args['platform_fault_domain'] = platform_fault_domain
 
     return VmHostCreate(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
