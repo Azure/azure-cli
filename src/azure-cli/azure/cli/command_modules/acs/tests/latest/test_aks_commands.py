@@ -13158,7 +13158,7 @@ spec:
         # update other acns
         update_cmd = (
             "aks update --resource-group={resource_group} --name={name} "
-            "--enable-acns --disable-acns-observability --acns-datapath-acceleration-mode BpfVeth "
+            "--enable-acns --disable-acns-observability "
         )
         self.cmd(
             update_cmd,
