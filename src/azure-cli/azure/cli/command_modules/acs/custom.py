@@ -1626,11 +1626,10 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                str(instance.addon_profiles[monitoring_addon_key].config[CONST_MONITORING_USING_AAD_MSI_AUTH]).lower() == 'true':
                 if msi_auth:
                     # Auto-enable HLSM when CNL is active and HLSM not explicitly set
-                    if enable_high_log_scale_mode is None:
-                        addon_config = instance.addon_profiles[monitoring_addon_key].config or {}
-                        cnl_flag = addon_config.get("enableRetinaNetworkFlags", "").lower()
-                        if cnl_flag == "true":
-                            enable_high_log_scale_mode = True
+                    if enable_high_log_scale_mode is None and \
+                       (instance.addon_profiles[monitoring_addon_key].config or {}).get(
+                           "enableRetinaNetworkFlags", "").lower() == "true":
+                        enable_high_log_scale_mode = True
                     # create a Data Collection Rule (DCR) and associate it with the cluster
                     ensure_container_insights_for_monitoring(
                         cmd, instance.addon_profiles[monitoring_addon_key],
