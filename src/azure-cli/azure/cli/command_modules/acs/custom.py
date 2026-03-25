@@ -59,7 +59,6 @@ from azure.cli.command_modules.acs._consts import (
     CONST_INGRESS_APPGW_WATCH_NAMESPACE,
     CONST_KUBE_DASHBOARD_ADDON_NAME,
     CONST_MONITORING_ADDON_NAME,
-    CONST_MONITORING_ADDON_NAME_CAMELCASE,
     CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
     CONST_MONITORING_USING_AAD_MSI_AUTH,
     CONST_NODEPOOL_MODE_USER,
@@ -1520,7 +1519,7 @@ def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=F
     instance = client.get(resource_group_name, name)
     subscription_id = get_subscription_id(cmd.cli_ctx)
     monitoring_addon_key = get_monitoring_addon_key(
-        instance.addon_profiles, CONST_MONITORING_ADDON_NAME, CONST_MONITORING_ADDON_NAME_CAMELCASE
+        instance.addon_profiles, CONST_MONITORING_ADDON_NAME
     )
     try:
         if addons == "monitoring" and monitoring_addon_key in instance.addon_profiles and \
@@ -1621,16 +1620,17 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
     if need_pull_for_result:
         if enable_monitoring:
             monitoring_addon_key = get_monitoring_addon_key(
-                instance.addon_profiles, CONST_MONITORING_ADDON_NAME, CONST_MONITORING_ADDON_NAME_CAMELCASE
+                instance.addon_profiles, CONST_MONITORING_ADDON_NAME
             )
-            # Auto-enable HLSM if CNL is active and HLSM was not explicitly set
-            if enable_high_log_scale_mode is None:
-                cnl_flag = instance.addon_profiles[monitoring_addon_key].config.get("enableRetinaNetworkFlags")
-                if cnl_flag is not None and str(cnl_flag).lower() == "true":
-                    enable_high_log_scale_mode = True
             if CONST_MONITORING_USING_AAD_MSI_AUTH in instance.addon_profiles[monitoring_addon_key].config and \
                str(instance.addon_profiles[monitoring_addon_key].config[CONST_MONITORING_USING_AAD_MSI_AUTH]).lower() == 'true':
                 if msi_auth:
+                    # Auto-enable HLSM when CNL is active and HLSM not explicitly set
+                    if enable_high_log_scale_mode is None:
+                        addon_config = instance.addon_profiles[monitoring_addon_key].config or {}
+                        cnl_flag = addon_config.get("enableRetinaNetworkFlags", "").lower()
+                        if cnl_flag == "true":
+                            enable_high_log_scale_mode = True
                     # create a Data Collection Rule (DCR) and associate it with the cluster
                     ensure_container_insights_for_monitoring(
                         cmd, instance.addon_profiles[monitoring_addon_key],
@@ -1754,19 +1754,9 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, name, ad
                             "--enable_msi_auth_for_monitoring is not supported in %s cloud and continuing monitoring enablement without this flag.", cloud_name)
                         enable_msi_auth_for_monitoring = False
 
-                # Capture existing CNL flag before overwriting config
-                existing_cnl = None
-                existing_addon = addon_profiles.get(addon) or addon_profiles.get(CONST_MONITORING_ADDON_NAME_CAMELCASE)
-                if existing_addon and existing_addon.config:
-                    existing_cnl = existing_addon.config.get("enableRetinaNetworkFlags")
-
                 addon_profile.config = {
                     CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID: workspace_resource_id}
                 addon_profile.config[CONST_MONITORING_USING_AAD_MSI_AUTH] = "true" if enable_msi_auth_for_monitoring else "false"
-
-                # Preserve enableRetinaNetworkFlags (CNL) if it was set on the existing addon
-                if existing_cnl is not None:
-                    addon_profile.config["enableRetinaNetworkFlags"] = existing_cnl
             elif addon == (CONST_VIRTUAL_NODE_ADDON_NAME + os_type):
                 if addon_profile.enabled:
                     raise CLIError('The virtual-node addon is already enabled for this managed cluster.\n'
@@ -1841,19 +1831,7 @@ def _update_addons(cmd, instance, subscription_id, resource_group_name, name, ad
                 else:
                     raise CLIError(
                         "The addon {} is not installed.".format(addon))
-            # When disabling the monitoring addon, preserve enableRetinaNetworkFlags (CNL)
-            # so that re-enabling the addon later restores the CNL setting.
-            monitoring_addon_key = get_monitoring_addon_key(
-                addon_profiles, CONST_MONITORING_ADDON_NAME, CONST_MONITORING_ADDON_NAME_CAMELCASE
-            )
-            if addon == monitoring_addon_key and addon_profiles[addon].config:
-                existing_cnl = addon_profiles[addon].config.get("enableRetinaNetworkFlags")
-                if existing_cnl is not None:
-                    addon_profiles[addon].config = {"enableRetinaNetworkFlags": existing_cnl}
-                else:
-                    addon_profiles[addon].config = None
-            else:
-                addon_profiles[addon].config = None
+            addon_profiles[addon].config = None
         addon_profiles[addon].enabled = enable
 
     instance.addon_profiles = addon_profiles
@@ -4115,7 +4093,7 @@ def is_monitoring_addon_enabled(addons, instance):
 
         addon_profiles = instance.addon_profiles or {}
         monitoring_addon_key = get_monitoring_addon_key(
-            addon_profiles, CONST_MONITORING_ADDON_NAME, CONST_MONITORING_ADDON_NAME_CAMELCASE
+            addon_profiles, CONST_MONITORING_ADDON_NAME
         )
         monitoring_addon_enabled = is_monitoring_addon and monitoring_addon_key in addon_profiles and addon_profiles[
             monitoring_addon_key].enabled

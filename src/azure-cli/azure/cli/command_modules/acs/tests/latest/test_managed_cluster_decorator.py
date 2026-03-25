@@ -23,7 +23,6 @@ from azure.cli.command_modules.acs._consts import (
     CONST_INGRESS_APPGW_WATCH_NAMESPACE,
     CONST_KUBE_DASHBOARD_ADDON_NAME,
     CONST_MONITORING_ADDON_NAME,
-    CONST_MONITORING_ADDON_NAME_CAMELCASE,
     CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
     CONST_OPEN_SERVICE_MESH_ADDON_NAME,
     CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
@@ -2532,7 +2531,6 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             "CONST_INGRESS_APPGW_WATCH_NAMESPACE": CONST_INGRESS_APPGW_WATCH_NAMESPACE,
             "CONST_KUBE_DASHBOARD_ADDON_NAME": CONST_KUBE_DASHBOARD_ADDON_NAME,
             "CONST_MONITORING_ADDON_NAME": CONST_MONITORING_ADDON_NAME,
-            "CONST_MONITORING_ADDON_NAME_CAMELCASE": CONST_MONITORING_ADDON_NAME_CAMELCASE,
             "CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID": CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
             "CONST_OPEN_SERVICE_MESH_ADDON_NAME": CONST_OPEN_SERVICE_MESH_ADDON_NAME,
             "CONST_VIRTUAL_NODE_ADDON_NAME": CONST_VIRTUAL_NODE_ADDON_NAME,
@@ -2841,7 +2839,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             DecoratorMode.CREATE,
         )
         addon_profiles_2 = {
-            CONST_MONITORING_ADDON_NAME_CAMELCASE: self.models.ManagedClusterAddonProfile(
+            "omsAgent": self.models.ManagedClusterAddonProfile(
                 enabled=True,
                 config={CONST_MONITORING_USING_AAD_MSI_AUTH: "true"},
             )
@@ -12730,7 +12728,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         mc_6 = self.models.ManagedCluster(
             location="test_location",
             addon_profiles={
-                CONST_MONITORING_ADDON_NAME_CAMELCASE: monitoring_addon_profile_6,
+                "omsAgent": monitoring_addon_profile_6,
             },
         )
         dec_6.context.attach_mc(mc_6)
@@ -15343,7 +15341,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
                 ),
             ),
             addon_profiles={
-                CONST_MONITORING_ADDON_NAME_CAMELCASE: self.models.ManagedClusterAddonProfile(
+                "omsAgent": self.models.ManagedClusterAddonProfile(
                     enabled=True,
                     config={CONST_MONITORING_USING_AAD_MSI_AUTH: "true"},
                 )
@@ -15376,7 +15374,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
                 ),
             ),
             addon_profiles={
-                CONST_MONITORING_ADDON_NAME_CAMELCASE: self.models.ManagedClusterAddonProfile(
+                "omsAgent": self.models.ManagedClusterAddonProfile(
                     enabled=True,
                     config={CONST_MONITORING_USING_AAD_MSI_AUTH: "true"},
                 )
@@ -15385,7 +15383,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         dec_16.context.attach_mc(mc_16)
         dec_mc_16 = dec_16.update_monitoring_profile_flow_logs(mc_16)
         self.assertEqual(
-            dec_mc_16.addon_profiles[CONST_MONITORING_ADDON_NAME_CAMELCASE].config["enableRetinaNetworkFlags"],
+            dec_mc_16.addon_profiles[CONST_MONITORING_ADDON_NAME].config["enableRetinaNetworkFlags"],
             "True",
         )
         self.assertTrue(
@@ -15412,7 +15410,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
                 ),
             ),
             addon_profiles={
-                CONST_MONITORING_ADDON_NAME_CAMELCASE: self.models.ManagedClusterAddonProfile(
+                "omsAgent": self.models.ManagedClusterAddonProfile(
                     enabled=True,
                     config={
                         CONST_MONITORING_USING_AAD_MSI_AUTH: "true",

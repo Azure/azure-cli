@@ -28,7 +28,7 @@ from azure.core.exceptions import AzureError, HttpResponseError, ServiceRequestE
 ManagedCluster = TypeVar("ManagedCluster")
 
 
-def get_monitoring_addon_key(addon_profiles, monitoring_addon_name, monitoring_addon_name_camelcase=None):
+def get_monitoring_addon_key(addon_profiles, monitoring_addon_name):
     """Return the canonical key for the monitoring addon, normalizing non-standard casing.
 
     The API response may return the monitoring addon key in any casing (e.g.
@@ -42,10 +42,7 @@ def get_monitoring_addon_key(addon_profiles, monitoring_addon_name, monitoring_a
     # Exact match on the canonical lowercase name – preferred form.
     if monitoring_addon_name in addon_profiles:
         return monitoring_addon_name
-    # Exact match on the known camelCase variant.
-    if monitoring_addon_name_camelcase and monitoring_addon_name_camelcase in addon_profiles:
-        return monitoring_addon_name_camelcase
-    # Case-insensitive fallback: catch any other casing the server may return.
+    # Case-insensitive fallback: catch any casing the server may return.
     target_lower = monitoring_addon_name.lower()
     for key in list(addon_profiles):
         if key.lower() == target_lower:

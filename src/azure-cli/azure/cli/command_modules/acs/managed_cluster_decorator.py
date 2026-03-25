@@ -167,9 +167,7 @@ def _get_monitoring_addon_key_from_consts(addon_profiles, addon_consts):
     return get_monitoring_addon_key(
         addon_profiles,
         addon_consts.get("CONST_MONITORING_ADDON_NAME"),
-        addon_consts.get("CONST_MONITORING_ADDON_NAME_CAMELCASE"),
     )
-
 
 # TODO
 # 1. remove enable_rbac related implementation
@@ -2881,7 +2879,6 @@ class AKSManagedClusterContext(BaseAKSContext):
             CONST_INGRESS_APPGW_SUBNET_CIDR, CONST_INGRESS_APPGW_SUBNET_ID,
             CONST_INGRESS_APPGW_WATCH_NAMESPACE,
             CONST_KUBE_DASHBOARD_ADDON_NAME, CONST_MONITORING_ADDON_NAME,
-            CONST_MONITORING_ADDON_NAME_CAMELCASE,
             CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
             CONST_MONITORING_USING_AAD_MSI_AUTH,
             CONST_OPEN_SERVICE_MESH_ADDON_NAME, CONST_ROTATION_POLL_INTERVAL,
@@ -2925,9 +2922,6 @@ class AKSManagedClusterContext(BaseAKSContext):
         addon_consts[
             "CONST_MONITORING_ADDON_NAME"
         ] = CONST_MONITORING_ADDON_NAME
-        addon_consts[
-            "CONST_MONITORING_ADDON_NAME_CAMELCASE"
-        ] = CONST_MONITORING_ADDON_NAME_CAMELCASE
         addon_consts[
             "CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID"
         ] = CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID

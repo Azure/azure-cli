@@ -657,16 +657,20 @@ def ensure_container_insights_for_monitoring(
             )
 
             resources = get_resources_client(cmd.cli_ctx, cluster_subscription)
-            dcr_creation_body = json.loads(
-                dcr_creation_body_with_syslog if enable_syslog else dcr_creation_body_without_syslog
-            )
             for _ in range(3):
                 try:
-                    resources.begin_create_or_update_by_id(
-                        dcr_resource_id,
-                        "2022-06-01",
-                        dcr_creation_body
-                    )
+                    if enable_syslog:
+                        resources.begin_create_or_update_by_id(
+                            dcr_resource_id,
+                            "2022-06-01",
+                            json.loads(dcr_creation_body_with_syslog)
+                        )
+                    else:
+                        resources.begin_create_or_update_by_id(
+                            dcr_resource_id,
+                            "2022-06-01",
+                            json.loads(dcr_creation_body_without_syslog)
+                        )
                     error = None
                     break
                 except CLIError as e:
