@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import json
 import time
 
 from azure.core.exceptions import HttpResponseError
@@ -18,7 +19,7 @@ def delete_agentpool_with_polling(client,
     from azure.mgmt.containerregistrytasks.models import AgentPool
 
     def deserialize_agentpool(response):
-        return AgentPool(response.http_response.json())
+        return AgentPool(json.loads(response.http_response.text()))
 
     return LROPoller(
         client=client,
@@ -78,7 +79,7 @@ class RunPolling(PollingMethod):  # pylint: disable=too-many-instance-attributes
     def _set_operation_status(self, response):
         from azure.mgmt.containerregistrytasks.models import AgentPool, ProvisioningState as AgentPoolStatus
         if response.http_response.status_code == 200 or response.http_response.status_code == 404:
-            self.operation_result = AgentPool(response.http_response.json())
+            self.operation_result = AgentPool(json.loads(response.http_response.text()))
             self.operation_status = self.operation_result.provisioning_state or AgentPoolStatus.succeeded.value
             return
         raise HttpResponseError(response)

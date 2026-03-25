@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import json
 import time
 
 from azure.core.polling import PollingMethod, LROPoller
@@ -18,7 +19,7 @@ def get_run_with_polling(client,
     from azure.mgmt.containerregistrytasks.models import Run
 
     def deserialize_run(response):
-        return Run(response.http_response.json())
+        return Run(json.loads(response.http_response.text()))
 
     return LROPoller(
         client=client,
@@ -80,7 +81,7 @@ class RunPolling(PollingMethod):  # pylint: disable=too-many-instance-attributes
     def _set_operation_status(self, response):
         from azure.mgmt.containerregistrytasks.models import Run, RunStatus
         if response.http_response.status_code == 200:
-            self.operation_result = Run(response.http_response.json())
+            self.operation_result = Run(json.loads(response.http_response.text()))
             self.operation_status = self.operation_result.status or RunStatus.queued.value
             return
         raise HttpResponseError(response)
