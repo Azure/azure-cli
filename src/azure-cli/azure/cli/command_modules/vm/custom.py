@@ -6249,20 +6249,16 @@ def create_capacity_reservation_group(cmd, resource_group_name, capacity_reserva
     command_args = {
         'capacity_reservation_group_name': capacity_reservation_group_name,
         'resource_group': resource_group_name,
+        'location': location,
+        'tags': tags,
+        'zones': zones
     }
-
-    if location:
-        command_args['location'] = location
-
-    if tags is not None:
-        command_args['tags'] = tags or {}
-
-    if zones is not None:
-        command_args['zones'] = zones or []
 
     if sharing_profile is not None:
         subscription_ids = [{'id': sub_id} for sub_id in sharing_profile]
         command_args['sharing_profile'] = {'subscription_ids': subscription_ids}
+    else:
+        command_args['sharing_profile'] = sharing_profile
 
     return CapacityReservationGroupCreate(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
@@ -6273,14 +6269,14 @@ def update_capacity_reservation_group(cmd, resource_group_name, capacity_reserva
     command_args = {
         'capacity_reservation_group_name': capacity_reservation_group_name,
         'resource_group': resource_group_name,
+        'tags': tags
     }
-
-    if tags:
-        command_args['tags'] = tags
 
     if sharing_profile is not None:
         subscription_ids = [{'id': sub_id} for sub_id in sharing_profile]
         command_args['sharing_profile'] = {'subscription_ids': subscription_ids}
+    else:
+        command_args['sharing_profile'] = sharing_profile
 
     return CapacityReservationGroupUpdate(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
