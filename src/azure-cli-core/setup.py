@@ -84,5 +84,5 @@ setup(
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests", "azure", "azure.cli"]),
     install_requires=DEPENDENCIES,
     python_requires='>=3.10.0',
-    package_data={'azure.cli.core': ['auth/landing_pages/*.html']}
+    package_data={'azure.cli.core': ['auth/landing_pages/*.html', 'commandIndex.latest.json', 'helpIndex.latest.json']}
 )
