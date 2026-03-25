@@ -8,8 +8,8 @@ def add_log_analytics_workspace_linked_storage_accounts(cmd, resource_group_name
                                                         data_source_type, storage_account_ids):
     from azure.cli.command_modules.monitor.aaz.latest.monitor.log_analytics.workspace.linked_storage._update \
         import Update as _WorkspaceLinkedStorageAccountUpdate
-    class Add(_WorkspaceLinkedStorageAccountUpdate):
 
+    class Add(_WorkspaceLinkedStorageAccountUpdate):
         def pre_instance_update(self, instance):
             instance.properties.storage_account_ids.extend(storage_account_ids)
 
@@ -26,7 +26,6 @@ def remove_log_analytics_workspace_linked_storage_accounts(cmd, resource_group_n
         import Update as _WorkspaceLinkedStorageAccountUpdate
 
     class Remove(_WorkspaceLinkedStorageAccountUpdate):
-
         def pre_instance_update(self, instance):
             storage_account_ids_set = set(str.lower(storage_account_id) for storage_account_id in storage_account_ids)
             new_storage_account_ids = []

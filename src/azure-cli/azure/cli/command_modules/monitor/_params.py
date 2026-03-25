@@ -15,7 +15,7 @@ from azure.cli.command_modules.monitor.actions import (
 from azure.cli.command_modules.monitor.validators import (
     validate_loganalytics_workspace_search_table_name, validate_loganalytics_workspace_restore_table_name,
     validate_autoscale_recurrence, validate_autoscale_timegrain, get_action_group_validator,
-    get_action_group_id_validator, validate_metric_dimension, validate_storage_accounts_name_or_id)
+    validate_metric_dimension, validate_storage_accounts_name_or_id)
 from azure.cli.command_modules.monitor.actions import get_date_midnight_type
 
 from knack.arguments import CLIArgumentType

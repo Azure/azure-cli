@@ -3,12 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core import AzCommandsLoader
-from azure.cli.core.commands import AzArgumentContext, CliCommandType
-
 from knack.log import get_logger
 
-from azure.cli.command_modules.monitor._help import helps as helps  # pylint: disable=unused-import
+from azure.cli.core import AzCommandsLoader
+from azure.cli.core.commands import AzArgumentContext, CliCommandType
+from azure.cli.command_modules.monitor._help import helps   # pylint: disable=unused-import
 
 logger = get_logger(__name__)
 

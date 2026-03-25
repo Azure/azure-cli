@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=protected-access, line-too-long, too-many-statements
+# pylint: disable=protected-access, line-too-long, too-many-statements, too-many-locals, too-many-nested-blocks
 
 from knack.log import get_logger
 

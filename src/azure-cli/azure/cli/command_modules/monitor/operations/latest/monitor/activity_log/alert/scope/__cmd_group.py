@@ -9,10 +9,9 @@ from azure.cli.core.aaz import AAZCommandGroup, register_command_group
 @register_command_group(
     "monitor activity-log alert scope",
 )
-class __CMDGroup(AAZCommandGroup):
+class __CMDGroup(AAZCommandGroup):  # pylint: disable=too-few-public-methods
     """Manage scopes for activity log alert rules.
     """
-    pass
 
 
 __all__ = ["__CMDGroup"]
