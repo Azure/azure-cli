@@ -5914,8 +5914,7 @@ def create_dedicated_host_group(cmd, host_group_name, resource_group_name, platf
         'platform_fault_domain_count': platform_fault_domain_count,
         'tags': tags,
         'zones': zones,
-        'support_automatic_placement': automatic_placement,
-        'additional_capabilities': None
+        'support_automatic_placement': automatic_placement
     }
 
     if ultra_ssd_enabled is not None:
