@@ -1,4 +1,5 @@
 ---
+# Pre-existing parameter exclusions
 monitor activity-log alert update:
     parameters:
         enabled:
@@ -51,9 +52,6 @@ monitor action-group enable-receiver:
 monitor diagnostic-settings subscription update:
     rule_exclusions:
     - missing_command_example
-monitor autoscale rule copy:
-    rule_exclusions:
-    - missing_command_example
 monitor activity-log list:
     rule_exclusions:
     - missing_command_test_coverage
@@ -81,6 +79,7 @@ monitor autoscale profile show:
 monitor autoscale rule copy:
     rule_exclusions:
     - missing_command_test_coverage
+    - missing_command_example
 monitor autoscale rule create:
     rule_exclusions:
     - missing_command_test_coverage
@@ -120,29 +119,6 @@ monitor log-analytics workspace table search-job create:
 monitor metrics list:
     rule_exclusions:
     - missing_command_test_coverage
-monitor metrics list-definitions:
-    rule_exclusions:
-    - missing_command_test_coverage
-monitor metrics list-namespaces:
-    rule_exclusions:
-    - missing_command_test_coverage
-monitor metrics "create":
-    rule_exclusions:
-    - missing_command_test_coverage
-monitor:
-    parameters:
-        location:
-            rule_exclusions:
-            - missing_parameter_test_coverage
-        tags:
-            rule_exclusions:
-            - missing_parameter_test_coverage
-monitor metrics:
-    parameters:
-        namespace:
-            rule_exclusions:
-            - missing_parameter_test_coverage
-monitor metrics list:
     parameters:
         metadata:
             rule_exclusions:
@@ -174,12 +150,33 @@ monitor metrics list:
         interval:
             rule_exclusions:
             - missing_parameter_test_coverage
+monitor metrics list-definitions:
+    rule_exclusions:
+    - missing_command_test_coverage
 monitor metrics list-namespaces:
+    rule_exclusions:
+    - missing_command_test_coverage
     parameters:
         resource_uri:
             rule_exclusions:
             - missing_parameter_test_coverage
         start_time:
+            rule_exclusions:
+            - missing_parameter_test_coverage
+monitor metrics "create":
+    rule_exclusions:
+    - missing_command_test_coverage
+monitor:
+    parameters:
+        location:
+            rule_exclusions:
+            - missing_parameter_test_coverage
+        tags:
+            rule_exclusions:
+            - missing_parameter_test_coverage
+monitor metrics:
+    parameters:
+        namespace:
             rule_exclusions:
             - missing_parameter_test_coverage
 monitor metrics alert:
@@ -199,4 +196,3 @@ monitor metrics alert:
         auto_mitigate:
             rule_exclusions:
             - missing_parameter_test_coverage
-...
