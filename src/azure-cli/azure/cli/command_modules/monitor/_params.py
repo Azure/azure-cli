@@ -88,14 +88,6 @@ def load_arguments(self, _):
     with self.argument_context('monitor metrics alert create', arg_group=None) as c:
         c.argument('actions', options_list=['--action', '-a'], action=MetricAlertAddAction, nargs='+', validator=get_action_group_validator('actions'))
 
-    with self.argument_context('monitor metrics alert update', arg_group='Action') as c:
-        c.argument('add_actions', options_list='--add-action', action=MetricAlertAddAction, nargs='+', validator=get_action_group_validator('add_actions'))
-        c.argument('remove_actions', nargs='+', validator=get_action_group_id_validator('remove_actions'))
-
-    with self.argument_context('monitor metrics alert update', arg_group='Condition') as c:
-        c.argument('add_conditions', options_list='--add-condition', action=MetricAlertConditionAction, nargs='+')
-        c.argument('remove_conditions', nargs='+')
-
     with self.argument_context('monitor metrics alert dimension create', arg_group=None) as c:
         c.argument('dimension_name', options_list=['--name', '-n'],
                    help='Name of the dimension.')
