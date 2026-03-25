@@ -9095,11 +9095,19 @@ spec:
                 ])
 
         # wait for any in-progress cluster operation to finish before disabling
-        self.cmd(f'aks wait -g {resource_group} -n {aks_name} --updated')
-        time.sleep(30)
+        self.cmd(f'aks wait -g {resource_group} -n {aks_name} --updated --interval 30 --timeout 600')
+        time.sleep(60)
 
-        # make sure monitoring can be smoothly disabled
-        self.cmd(f'aks disable-addons -a monitoring -g={resource_group} -n={aks_name}')
+        # make sure monitoring can be smoothly disabled, retry on 409 (in-progress addon operation)
+        for attempt in range(6):
+            try:
+                self.cmd(f'aks disable-addons -a monitoring -g={resource_group} -n={aks_name}')
+                break
+            except Exception:
+                if attempt < 5:
+                    time.sleep(60)
+                else:
+                    raise
 
         # delete
         self.cmd(f'aks delete -g {resource_group} -n {aks_name} --yes --no-wait', checks=[self.is_empty()])
@@ -9191,11 +9199,19 @@ spec:
         ])
 
         # wait for any in-progress cluster operation to finish before disabling
-        self.cmd(f'aks wait -g {resource_group} -n {aks_name} --updated')
-        time.sleep(30)
+        self.cmd(f'aks wait -g {resource_group} -n {aks_name} --updated --interval 30 --timeout 600')
+        time.sleep(60)
 
-        # make sure monitoring can be smoothly disabled
-        self.cmd(f'aks disable-addons -a monitoring -g={resource_group} -n={aks_name}')
+        # make sure monitoring can be smoothly disabled, retry on 409 (in-progress addon operation)
+        for attempt in range(6):
+            try:
+                self.cmd(f'aks disable-addons -a monitoring -g={resource_group} -n={aks_name}')
+                break
+            except Exception:
+                if attempt < 5:
+                    time.sleep(60)
+                else:
+                    raise
 
         # delete
         self.cmd(f'aks delete -g {resource_group} -n {aks_name} --yes --no-wait', checks=[self.is_empty()])
@@ -9247,11 +9263,19 @@ spec:
             pass  # this is expected
 
         # wait for any in-progress cluster operation to finish before disabling
-        self.cmd(f'aks wait -g {resource_group} -n {aks_name} --updated')
-        time.sleep(30)
+        self.cmd(f'aks wait -g {resource_group} -n {aks_name} --updated --interval 30 --timeout 600')
+        time.sleep(60)
 
-        # make sure monitoring can be smoothly disabled
-        self.cmd(f'aks disable-addons -a monitoring -g={resource_group} -n={aks_name}')
+        # make sure monitoring can be smoothly disabled, retry on 409 (in-progress addon operation)
+        for attempt in range(6):
+            try:
+                self.cmd(f'aks disable-addons -a monitoring -g={resource_group} -n={aks_name}')
+                break
+            except Exception:
+                if attempt < 5:
+                    time.sleep(60)
+                else:
+                    raise
 
         # delete
         self.cmd(f'aks delete -g {resource_group} -n {aks_name} --yes --no-wait', checks=[self.is_empty()])
