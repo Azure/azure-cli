@@ -9094,6 +9094,9 @@ spec:
                 self.check('properties.provisioningState', f'Succeeded')
                 ])
 
+        # wait for any in-progress cluster operation to finish before disabling
+        self.cmd(f'aks wait -g {resource_group} -n {aks_name} --updated')
+
         # make sure monitoring can be smoothly disabled
         self.cmd(f'aks disable-addons -a monitoring -g={resource_group} -n={aks_name}')
 
@@ -9241,6 +9244,8 @@ spec:
         except Exception as err:
             pass  # this is expected
 
+        # wait for any in-progress cluster operation to finish before disabling
+        self.cmd(f'aks wait -g {resource_group} -n {aks_name} --updated')
 
         # make sure monitoring can be smoothly disabled
         self.cmd(f'aks disable-addons -a monitoring -g={resource_group} -n={aks_name}')

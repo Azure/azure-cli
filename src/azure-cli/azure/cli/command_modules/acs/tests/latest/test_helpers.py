@@ -375,6 +375,17 @@ class TestGetMonitoringAddonKey(unittest.TestCase):
         result = get_monitoring_addon_key(addon_profiles, "omsagent", "omsAgent")
         self.assertEqual(result, "omsagent")
 
+    def test_normalizes_nonstandard_casing(self):
+        """A key like 'oMSaGent' should be re-keyed to the canonical form."""
+        profile = object()
+        addon_profiles = {"oMSaGent": profile}
+        result = get_monitoring_addon_key(addon_profiles, "omsagent", "omsAgent")
+        self.assertEqual(result, "omsagent")
+        # The dict should now contain the canonical key, not the old one.
+        self.assertIn("omsagent", addon_profiles)
+        self.assertNotIn("oMSaGent", addon_profiles)
+        self.assertIs(addon_profiles["omsagent"], profile)
+
     def test_returns_default_when_camelcase_is_none(self):
         addon_profiles = {"omsAgent": object()}
         result = get_monitoring_addon_key(addon_profiles, "omsagent", None)
