@@ -53,3 +53,5 @@ When legacy mode is no longer needed:
    ```
 
 4. **Revert linter config** — remove `_legacy` from `pylintrc` `ignore` and `*/_legacy` from `.flake8` `exclude`.
+
+5. **Remove linter exclusions** — delete the refactor-related entries in `linter_exclusions.yml` (the block under the comment `# Commands below are not new — they were re-registered via AAZ operations/latest/`). These exclusions suppress `missing_command_test_coverage` and `missing_parameter_test_coverage` for commands that the linter diff mistakenly flags as "new" due to the registration change.
