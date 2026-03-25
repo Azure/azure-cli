@@ -1080,6 +1080,23 @@ jobs:
         docker pull ${DISTRO_BASE_IMAGE}
         docker run --rm -e DISTRO=${DISTRO} -e CLI_VERSION=$CLI_VERSION -v $SYSTEM_ARTIFACTSDIRECTORY/debian:/mnt/artifacts -v $(pwd):/azure-cli ${DISTRO_BASE_IMAGE} /bin/bash "/azure-cli/scripts/release/debian/test_deb_in_docker.sh"
 
+- job: VerifyLatestIndices
+  displayName: "Verify latest index assets"
+  timeoutInMinutes: 20
+  pool:
+    name: ${{ variables.ubuntu_pool }}
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.13'
+    inputs:
+      versionSpec: 3.13
+  - template: .azure-pipelines/templates/azdev_setup.yml
+  - bash: |
+      set -ev
+      . env/bin/activate
+      python scripts/generate_latest_indices.py verify
+    displayName: 'Verify generated latest indices'
+
 - job: CheckStyle
   displayName: "Check CLI Style"
   timeoutInMinutes: 120
