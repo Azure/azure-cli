@@ -1623,6 +1623,11 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
             monitoring_addon_key = get_monitoring_addon_key(
                 instance.addon_profiles, CONST_MONITORING_ADDON_NAME, CONST_MONITORING_ADDON_NAME_CAMELCASE
             )
+            # Auto-enable HLSM if CNL is active and HLSM was not explicitly set
+            if enable_high_log_scale_mode is None:
+                cnl_flag = instance.addon_profiles[monitoring_addon_key].config.get("enableRetinaNetworkFlags")
+                if cnl_flag is not None and str(cnl_flag).lower() == "true":
+                    enable_high_log_scale_mode = True
             if CONST_MONITORING_USING_AAD_MSI_AUTH in instance.addon_profiles[monitoring_addon_key].config and \
                str(instance.addon_profiles[monitoring_addon_key].config[CONST_MONITORING_USING_AAD_MSI_AUTH]).lower() == 'true':
                 if msi_auth:
