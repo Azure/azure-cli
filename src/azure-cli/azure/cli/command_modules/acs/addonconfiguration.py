@@ -4,7 +4,9 @@
 # --------------------------------------------------------------------------------------------
 import json
 import os
+import random
 import re
+import time
 
 from azure.cli.command_modules.acs._client_factory import get_resource_groups_client, get_resources_client
 from azure.cli.core.util import get_file_json
@@ -657,24 +659,31 @@ def ensure_container_insights_for_monitoring(
             )
 
             resources = get_resources_client(cmd.cli_ctx, cluster_subscription)
-            for _ in range(3):
+            dcr_creation_body = json.loads(
+                dcr_creation_body_with_syslog if enable_syslog else dcr_creation_body_without_syslog
+            )
+            max_retries = 3
+            max_total_delay = 30
+            total_delay = 0
+            for attempt in range(max_retries):
                 try:
-                    if enable_syslog:
-                        resources.begin_create_or_update_by_id(
-                            dcr_resource_id,
-                            "2022-06-01",
-                            json.loads(dcr_creation_body_with_syslog)
-                        )
-                    else:
-                        resources.begin_create_or_update_by_id(
-                            dcr_resource_id,
-                            "2022-06-01",
-                            json.loads(dcr_creation_body_without_syslog)
-                        )
+                    resources.begin_create_or_update_by_id(
+                        dcr_resource_id,
+                        "2022-06-01",
+                        dcr_creation_body
+                    )
                     error = None
                     break
-                except CLIError as e:
+                except (CLIError, HttpResponseError) as e:
                     error = e
+                    if attempt < max_retries - 1 and total_delay < max_total_delay:
+                        delay = min(2 ** attempt + random.uniform(0, 1), max_total_delay - total_delay)
+                        logger.warning(
+                            "DCR creation attempt %d/%d failed, retrying in %.1f seconds: %s",
+                            attempt + 1, max_retries, delay, e
+                        )
+                        time.sleep(delay)
+                        total_delay += delay
             else:
                 raise error
 
