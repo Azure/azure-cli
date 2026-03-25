@@ -4,17 +4,18 @@
 # --------------------------------------------------------------------------------------------
 
 import time
-from azure.cli.testsdk.scenario_tests import AllowLargeResponse
+
 from azure.cli.testsdk import (
     JMESPathCheck,
     NoneCheck,
     ResourceGroupPreparer,
     ScenarioTest,
     StringContainCheck)
-from ..._client_factory import cf_postgres_flexible_private_dns_zone_suffix_operations
-from ...flexible_server_virtual_network import prepare_private_dns_zone
-from ...flexible_server_custom_postgres import DbContext as PostgresDbContext
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from .constants import DEFAULT_LOCATION, SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH
+from ..._client_factory import cf_postgres_flexible_private_dns_zone_suffix_operations
+from ..._db_context import DbContext as PostgresDbContext
+from ...commands.network_commands import prepare_private_dns_zone
 
 
 class PostgreSQLFlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):

@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.breaking_change import (
+    register_argument_deprecate,
     register_command_group_deprecate,
     register_logic_breaking_change
 )
@@ -41,3 +42,8 @@ register_logic_breaking_change('acr config content-trust update', 'Remove conten
                                detail='The `--status enabled` parameter will no longer be accepted and will result in '
                                       'an error due to Docker Content Trust deprecation.',
                                doc_link='https://aka.ms/acr/dctdeprecation')
+
+register_argument_deprecate('acr replication create', '--region-endpoint-enabled',
+                            redirect='--global-endpoint-routing')
+register_argument_deprecate('acr replication update', '--region-endpoint-enabled',
+                            redirect='--global-endpoint-routing')
