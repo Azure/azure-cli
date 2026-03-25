@@ -1,0 +1,188 @@
+# Azure CLI - macOS Release Pipeline (Build → Sign → Test → Publish)
+#
+# Purpose: Complete end-to-end macOS release pipeline
+# Architecture: Chains 4 job templates in sequence
+#
+# Pipeline Flow:
+#   1. macos-build-jobs.yml        → Build unsigned tarballs (ARM64 + Intel)
+#   2. macos-sign-notarize-jobs.yml → Sign and notarize via ESRP
+#   3. macos-test-jobs.yml         → Test cask (local file://) + offline install
+#   4. macos-publish-jobs.yml      → GitHub release + Homebrew cask update
+#
+# Output Artifacts:
+#   - cli-build-unsigned-arm64, cli-build-unsigned-x86_64 (intermediate)
+#   - cli-signed-notarized-arm64, cli-signed-notarized-x86_64 (final)
+
+trigger: none
+
+parameters:
+  # Build parameters
+  - name: PythonVersion
+    displayName: 'Python Version (Homebrew)'
+    type: string
+    default: '3.13'
+  
+  # Sign/notarize parameters
+  - name: BundleId
+    displayName: 'Bundle ID for notarization'
+    type: string
+    default: 'com.microsoft.azure.cli'
+  
+  # Publish parameters
+  - name: PublishToGitHub
+    displayName: 'Publish to GitHub Release'
+    type: boolean
+    default: true
+  
+  - name: GitHubRepo
+    displayName: 'GitHub Repository (owner/repo)'
+    type: string
+    default: 'Azure/homebrew-azure-cli'
+  
+  - name: UpdateHomebrew
+    displayName: 'Update Homebrew cask after release'
+    type: boolean
+    default: true
+  
+  - name: HomebrewTapRepo
+    displayName: 'Homebrew Tap Repository'
+    type: string
+    default: 'Azure/homebrew-azure-cli'
+  
+  - name: GitHubServiceConnection
+    displayName: 'GitHub Service Connection'
+    type: string
+    default: 'Azure'
+  
+  - name: ESRPServiceConnection
+    displayName: 'ESRP Service Connection'
+    type: string
+    default: 'ame_esrp_connection'
+  
+  - name: Debug
+    displayName: 'Enable debug diagnostics'
+    type: boolean
+    default: false
+
+resources:
+  repositories:
+  - repository: homebrewtap
+    type: github
+    endpoint: 'Azure'
+    name: Azure/homebrew-azure-cli
+    ref: main
+
+variables:
+  - template: templates/variables.yml
+  - ${{ if eq(variables['System.TeamProject'], 'release') }}:
+    - group: 'AME ESRP Variable Group'
+  
+  - name: GitHubRepo
+    value: ${{ parameters.GitHubRepo }}
+  - name: HomebrewTapRepo
+    value: ${{ parameters.HomebrewTapRepo }}
+  
+  # Disable auto-injection tasks
+  - name: Codeql.Enabled
+    value: false
+  - name: Codeql.SkipTaskAutoInjection
+    value: true
+  - name: CodeQL.enabled
+    value: false
+  - name: runCodesignValidationInjection
+    value: false
+  - name: DOTNET_CLI_TELEMETRY_OPTOUT
+    value: 1
+  - name: DOTNET_NOLOGO
+    value: 1
+  - name: NugetSecurityAnalysisWarningLevel
+    value: none
+  - name: skipNugetSecurityAnalysis
+    value: true
+
+name: macos-release-$(Build.BuildId)
+
+# ============================================================================
+# JOBS: End-to-end macOS release flow
+# ============================================================================
+jobs:
+# ============================================================================
+# PHASE 1: BUILD (unsigned tarballs)
+# ============================================================================
+- template: templates/macos/macos-build-jobs.yml
+  parameters:
+    PythonVersion: ${{ parameters.PythonVersion }}
+    MacosArm64Image: ${{ variables.macos_arm64_pool }}
+    MacosIntelImage: ${{ variables.macos_intel_pool }}
+
+# Jobs included:
+# - BuildMacOSCli (matrix: ARM64 + Intel)
+# - VerifyMacOSCli (matrix: ARM64 + Intel)
+# Artifacts: cli-build-unsigned-arm64, cli-build-unsigned-x86_64
+
+# ============================================================================
+# PHASE 2: SIGN & NOTARIZE (via ESRP)
+# ============================================================================
+- ${{ if eq(variables['System.TeamProject'], 'release') }}:
+  - template: templates/macos/macos-sign-notarize-jobs.yml
+    parameters:
+      BundleId: ${{ parameters.BundleId }}
+      PythonVersion: ${{ parameters.PythonVersion }}
+      MacosArm64Image: ${{ variables.macos_arm64_pool }}
+      MacosIntelImage: ${{ variables.macos_intel_pool }}
+      ESRPServiceConnection: ${{ parameters.ESRPServiceConnection }}
+      UseCurrentPipelineArtifacts: true
+      dependsOn:
+      - VerifyMacOSCli
+
+# Jobs included:
+# - DownloadAnalyze (matrix: ARM64 + Intel)
+# - SignBinaries (matrix: ARM64 + Intel)
+# - CreateNotarizeBundle (matrix: ARM64 + Intel)
+# - Notarize (matrix: ARM64 + Intel)
+# - CreateFinalTarball (matrix: ARM64 + Intel)
+# Artifacts: cli-signed-notarized-arm64, cli-signed-notarized-x86_64
+
+# ============================================================================
+# PHASE 3a: TEST (local file:// cask + offline install)
+# ============================================================================
+- ${{ if eq(variables['System.TeamProject'], 'release') }}:
+  - template: templates/macos/macos-cask-generation-and-tests.yml
+    parameters:
+      MacosArm64Image: ${{ variables.macos_arm64_pool }}
+      MacosIntelImage: ${{ variables.macos_intel_pool }}
+      PythonVersion: ${{ parameters.PythonVersion }}
+      GitHubRepo: $(GitHubRepo)
+      Debug: ${{ parameters.Debug }}
+      dependsOn:
+      - CreateFinalTarball
+
+# Jobs included:
+# - TestTempTapCask (matrix: ARM64 + Intel) - tests cask with local file:// URLs
+# - TestOfflineInstall (matrix: ARM64 + Intel) - tests direct tarball install
+
+# ============================================================================
+# PHASE 3b: PUBLISH (GitHub + Homebrew tap)
+# ============================================================================
+- ${{ if eq(variables['System.TeamProject'], 'release') }}:
+  - template: templates/macos/macos-publish-jobs.yml
+    parameters:
+      PublishToGitHub: ${{ parameters.PublishToGitHub }}
+      UpdateHomebrew: ${{ parameters.UpdateHomebrew }}
+      TestAfterPublish: false
+      GitHubRepo: $(GitHubRepo)
+      GitHubServiceConnection: ${{ parameters.GitHubServiceConnection }}
+      HomebrewTapRepo: ${{ parameters.HomebrewTapRepo }}
+      MacosArm64Image: ${{ variables.macos_arm64_pool }}
+      MacosIntelImage: ${{ variables.macos_intel_pool }}
+      PythonVersion: ${{ parameters.PythonVersion }}
+      Debug: ${{ parameters.Debug }}
+    dependsOn:
+    - TestTempTapCask
+    - TestOfflineInstall
+
+# Jobs included:
+# - CreateGitHubRelease (conditional)
+# - UpdateHomebrewCask (conditional)
+# - PrintSummary
+

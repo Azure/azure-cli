@@ -2,29 +2,37 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+import math
+import re
+
 from dateutil import parser
 from functools import cmp_to_key
-import re
-from knack.prompting import prompt_pass, NoTTYException
-from knack.util import CLIError
 from knack.log import get_logger
-import math
-from azure.mgmt.core.tools import parse_resource_id, resource_id, is_valid_resource_id, is_valid_resource_name
-from azure.cli.core.azclierror import ValidationError, ArgumentUsageError
+from knack.prompting import NoTTYException, prompt_pass
+from knack.util import CLIError
+from azure.cli.core.azclierror import ArgumentUsageError, ValidationError
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_tags)
-from azure.cli.core.util import parse_proxy_resource_id
 from azure.cli.core.profiles import ResourceType
+from azure.cli.core.util import parse_proxy_resource_id
 from azure.core.exceptions import HttpResponseError
-from ._client_factory import (cf_postgres_flexible_servers,
-                              cf_postgres_check_resource_availability)
-from ._flexible_server_util import (get_postgres_skus, get_postgres_storage_sizes, get_postgres_tiers,
-                                    _is_resource_name)
-from ._flexible_server_location_capabilities_util import (get_postgres_location_capability_info,
-                                                          get_postgres_server_capability_info,
-                                                          get_performance_tiers,
-                                                          get_performance_tiers_for_storage)
+from azure.mgmt.core.tools import (
+    is_valid_resource_id,
+    is_valid_resource_name,
+    parse_resource_id,
+    resource_id)
+from .._client_factory import cf_postgres_check_resource_availability, cf_postgres_flexible_servers
+from ._flexible_server_location_capabilities_util import (
+    get_performance_tiers,
+    get_performance_tiers_for_storage,
+    get_postgres_location_capability_info,
+    get_postgres_server_capability_info)
+from ._flexible_server_util import (
+    _is_resource_name,
+    get_postgres_skus,
+    get_postgres_storage_sizes,
+    get_postgres_tiers)
 
 logger = get_logger(__name__)
 
@@ -189,7 +197,7 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     _pg_sku_name_validator(sku_name, sku_info, tier, instance)
     _pg_high_availability_validator(high_availability, zonal_resiliency, allow_same_zone,
                                     standby_availability_zone, zone, tier, single_az, instance)
-    _pg_version_validator(version, list_location_capability_info['server_versions'])
+    pg_version_validator(version, list_location_capability_info['server_versions'])
     pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup, instance)
     is_microsoft_entra_auth = bool(microsoft_entra_auth is not None and microsoft_entra_auth.lower() == 'enabled')
     _pg_authentication_validator(password_auth, is_microsoft_entra_auth,
@@ -334,16 +342,14 @@ def _pg_storage_performance_tier_validator(performance_tier, sku_info, tier=None
                                ' Allowed values : {}'.format(storage_size, performance_tiers))
 
 
-def _pg_version_validator(version, versions):
+def pg_version_validator(version, versions):
     if version:
         if version not in versions:
             raise CLIError('Incorrect value for --version. Allowed values : {}'.format(sorted(versions)))
-        if version in ('11', '12'):
-            logger.warning("Support for PostgreSQL %s has officially ended. "
-                           "We recommend selecting PostgreSQL 14 or a later version for "
-                           "all future operations.", str(version))
-        if version == '13':
-            logger.warning("PostgreSQL version 13 will reach end-of-life (EOL) soon. "
+        if version in ('11', '12', '13'):
+            logger.warning("The version selected is a retired community version of PostgreSQL. "
+                           "To use this version, you will automatically be enrolled in our extended "
+                           "support plan for an additional charge starting August 1, 2026. "
                            "Upgrade to PostgreSQL 14 or later as soon as possible to "
                            "maintain security, performance, and supportability.")
 

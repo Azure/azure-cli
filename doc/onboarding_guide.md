@@ -1,9 +1,7 @@
 Onboarding Best Practices
 =========================
 
-As a prerequisite, please contact Carl Shipley first for the [PLR](http://aka.ms/plrcriteria) (Product Launch Readiness) process.
-
-Then reach out to `azpycli@microsoft.com` to get the CLI onboarding process started. You'll be assigned a dev contact on the CLI team. Early and frequent communication with this contact is essential to ensuring a smooth onboarding.
+Contact `azpycli@microsoft.com` to get the CLI onboarding process started. You'll be assigned a dev contact on the CLI team. Early and frequent communication with this contact is essential to ensuring a smooth onboarding.
 
 ## Extension vs. Module
 
