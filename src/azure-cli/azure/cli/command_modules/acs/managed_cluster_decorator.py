@@ -8316,31 +8316,40 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         acns_advanced_networkpolicies = self.context.get_acns_advanced_networkpolicies()
         acns_transit_encryption = self.context.get_acns_transit_encryption_type()
         if acns_enabled is not None:
-            acns = self.models.AdvancedNetworking(
-                enabled=acns_enabled,
-            )
+            # Preserve existing advanced_networking settings, only overwrite fields the user specified
+            if mc.network_profile.advanced_networking is None:
+                mc.network_profile.advanced_networking = self.models.AdvancedNetworking()
+            mc.network_profile.advanced_networking.enabled = acns_enabled
             if acns_observability is not None:
-                acns.observability = self.models.AdvancedNetworkingObservability(
-                    enabled=acns_observability,
-                )
-            if acns_security is not None:
-                acns.security = self.models.AdvancedNetworkingSecurity(
-                    enabled=acns_security,
-                )
-            if acns_advanced_networkpolicies is not None:
-                if acns.security is None:
-                    acns.security = self.models.AdvancedNetworkingSecurity(
-                        advanced_network_policies=acns_advanced_networkpolicies
+                if mc.network_profile.advanced_networking.observability is None:
+                    mc.network_profile.advanced_networking.observability = (
+                        self.models.AdvancedNetworkingObservability()
                     )
-                else:
-                    acns.security.advanced_network_policies = acns_advanced_networkpolicies
-            if acns_transit_encryption is not None:
-                if acns.security is None:
-                    acns.security = self.models.AdvancedNetworkingSecurity()
-                acns.security.transit_encryption = self.models.AdvancedNetworkingSecurityTransitEncryption(
-                    type=acns_transit_encryption,
+                mc.network_profile.advanced_networking.observability.enabled = acns_observability
+            if acns_security is not None:
+                if mc.network_profile.advanced_networking.security is None:
+                    mc.network_profile.advanced_networking.security = (
+                        self.models.AdvancedNetworkingSecurity()
+                    )
+                mc.network_profile.advanced_networking.security.enabled = acns_security
+            if acns_advanced_networkpolicies is not None:
+                if mc.network_profile.advanced_networking.security is None:
+                    mc.network_profile.advanced_networking.security = (
+                        self.models.AdvancedNetworkingSecurity()
+                    )
+                mc.network_profile.advanced_networking.security.advanced_network_policies = (
+                    acns_advanced_networkpolicies
                 )
-            mc.network_profile.advanced_networking = acns
+            if acns_transit_encryption is not None:
+                if mc.network_profile.advanced_networking.security is None:
+                    mc.network_profile.advanced_networking.security = (
+                        self.models.AdvancedNetworkingSecurity()
+                    )
+                mc.network_profile.advanced_networking.security.transit_encryption = (
+                    self.models.AdvancedNetworkingSecurityTransitEncryption(
+                        type=acns_transit_encryption,
+                    )
+                )
         elif acns_transit_encryption is not None:
             if (mc.network_profile.advanced_networking is None or
                     not mc.network_profile.advanced_networking.enabled):
