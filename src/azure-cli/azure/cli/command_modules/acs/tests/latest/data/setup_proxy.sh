@@ -7,22 +7,12 @@ echo "setting up ${WORKDIR}"
 
 pushd "$WORKDIR"
 
-apt update -y && apt install -y apt-transport-https curl gnupg make gcc < /dev/null
-
-# add diladele apt key
-wget -qO - https://packages.diladele.com/diladele_pub.asc | apt-key add -
-
-# add new repo
-tee /etc/apt/sources.list.d/squid413-ubuntu20.diladele.com.list <<EOF
-deb https://squid413-ubuntu20.diladele.com/ubuntu/ focal main
-EOF
-
-# and install
-apt-get update && apt-get install -y squid-common squid-openssl squidclient libecap3 libecap3-dev < /dev/null
+apt-get update -y && apt-get install -y curl squid < /dev/null
 
 mkdir -p /var/lib/squid
 
-/usr/lib/squid/security_file_certgen -c -s /var/lib/squid/ssl_db -M 4MB || true
+/usr/lib/squid/security_file_certgen -c -s /var/lib/squid/ssl_db -M 4MB 2>/dev/null || \
+  /usr/libexec/squid/security_file_certgen -c -s /var/lib/squid/ssl_db -M 4MB 2>/dev/null || true
 
 chown -R proxy:proxy /var/lib/squid
 

@@ -646,7 +646,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         create_vm_cmd = 'vm create \
             --resource-group={resource_group} \
             --name=cli-proxy-vm \
-            --image Canonical:0001-com-ubuntu-server-focal:20_04-lts:latest \
+            --image Canonical:0001-com-ubuntu-server-jammy:22_04-lts:latest \
             --ssh-key-values @{ssh_key_value} \
             --public-ip-address "" \
             --custom-data {custom_data_path} \
