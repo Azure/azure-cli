@@ -3469,11 +3469,80 @@ def _is_auth_v2_app(auth_settings_v2):
     return False
 
 
+# Mapping from v2 redirect_to_provider values to v1 defaultProvider enum names.
+_V2_PROVIDER_TO_V1_DEFAULT = {
+    'azureactivedirectory': 'AzureActiveDirectory',
+    'facebook': 'Facebook',
+    'google': 'Google',
+    'microsoftaccount': 'MicrosoftAccount',
+    'twitter': 'Twitter',
+}
+
+
+def _add_v1_compat_fields(v2_model, secret_overrides=None):
+    """Add backward-compatible flat v1 fields to a v2 auth settings response.
+
+    Converts the v2 model to a dict and adds top-level aliases for the v1
+    field names so that callers relying on the flat v1 structure (e.g.
+    ``az webapp auth show --query enabled``) continue to work.
+    """
+    from azure.cli.core.util import todict
+
+    result = todict(v2_model)
+    if secret_overrides is None:
+        secret_overrides = {}
+
+    # platform → flat fields
+    platform = result.get('platform') or {}
+    result['enabled'] = platform.get('enabled', False)
+    result['runtimeVersion'] = platform.get('runtimeVersion')
+
+    # globalValidation → flat fields
+    gv = result.get('globalValidation') or {}
+    result['unauthenticatedClientAction'] = gv.get('unauthenticatedClientAction')
+    redirect_provider = gv.get('redirectToProvider')
+    result['defaultProvider'] = (
+        _V2_PROVIDER_TO_V1_DEFAULT.get(redirect_provider, redirect_provider)
+        if redirect_provider else None)
+
+    # login / tokenStore → flat fields
+    login = result.get('login') or {}
+    ts = login.get('tokenStore') or {}
+    result['tokenStoreEnabled'] = ts.get('enabled')
+    result['tokenRefreshExtensionHours'] = ts.get('tokenRefreshExtensionHours')
+    result['allowedExternalRedirectUrls'] = login.get('allowedExternalRedirectUrls')
+
+    # identityProviders → flat fields
+    ip = result.get('identityProviders') or {}
+
+    # Azure Active Directory
+    aad = ip.get('azureActiveDirectory') or {}
+    aad_reg = aad.get('registration') or {}
+    aad_val = aad.get('validation') or {}
+    result['clientId'] = aad_reg.get('clientId')
+    result['clientSecretCertificateThumbprint'] = aad_reg.get('clientSecretCertificateThumbprint')
+    result['issuer'] = aad_reg.get('openIdIssuer')
+    result['allowedAudiences'] = aad_val.get('allowedAudiences')
+    result['clientSecret'] = (
+        secret_overrides.get('clientSecret') or aad_reg.get('clientSecretSettingName'))
+
+    # Facebook
+    fb = ip.get('facebook') or {}
+    fb_reg = fb.get('registration') or {}
+    fb_login = fb.get('login') or {}
+    result['facebookAppId'] = fb_reg.get('appId')
+    result['facebookAppSecret'] = (
+        secret_overrides.get('facebookAppSecret') or fb_reg.get('appSecretSettingName'))
+    result['facebookOauthScopes'] = fb_login.get('scopes')
+
+    return result
+
+
 def get_auth_settings(cmd, resource_group_name, name, slot=None):
     try:
         auth_settings_v2 = _get_auth_settings_v2(cmd, resource_group_name, name, slot)
         if _is_auth_v2_app(auth_settings_v2):
-            return auth_settings_v2
+            return _add_v1_compat_fields(auth_settings_v2)
     except HttpResponseError as ex:
         status_code = getattr(ex, 'status_code', None)
         if status_code not in (404, None):
@@ -3735,7 +3804,7 @@ def update_auth_settings(cmd, resource_group_name, name, enabled=None, action=No
         if auth_settings_v2 is None:
             from azure.mgmt.web.models import SiteAuthSettingsV2
             auth_settings_v2 = SiteAuthSettingsV2()
-        return _update_auth_settings_v2(
+        v2_result = _update_auth_settings_v2(
             cmd, resource_group_name, name, auth_settings_v2,
             enabled=enabled, action=action, client_id=client_id,
             token_store_enabled=token_store_enabled, runtime_version=runtime_version,
@@ -3754,6 +3823,14 @@ def update_auth_settings(cmd, resource_group_name, name, enabled=None, action=No
             microsoft_account_client_secret=microsoft_account_client_secret,
             microsoft_account_oauth_scopes=microsoft_account_oauth_scopes,
             require_https=require_https, slot=slot)
+        # Pass through original secret values for backward-compatible fields,
+        # since v2 stores setting names rather than raw secret values.
+        secret_overrides = {}
+        if client_secret is not None:
+            secret_overrides['clientSecret'] = client_secret
+        if facebook_app_secret is not None:
+            secret_overrides['facebookAppSecret'] = facebook_app_secret
+        return _add_v1_compat_fields(v2_result, secret_overrides=secret_overrides)
 
     # v1 path
     auth_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_auth_settings', slot)

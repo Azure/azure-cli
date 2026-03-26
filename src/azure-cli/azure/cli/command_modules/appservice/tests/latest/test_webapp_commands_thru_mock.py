@@ -41,6 +41,7 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          _is_auth_v2_app,
                                                          _get_auth_settings_v2,
                                                          _update_auth_settings_v2,
+                                                         _add_v1_compat_fields,
                                                          config_source_control)
 
 # pylint: disable=line-too-long
@@ -705,6 +706,96 @@ class TestWebappAuthV2Mocked(unittest.TestCase):
                 azure_active_directory=AzureActiveDirectory(enabled=True)))
         self.assertTrue(_is_auth_v2_app(settings))
 
+    def test_add_v1_compat_fields_empty_v2(self):
+        """v1 compat fields default to None/False for an unconfigured v2 app."""
+        from azure.mgmt.web.models import SiteAuthSettingsV2, AuthPlatform
+        v2 = SiteAuthSettingsV2(platform=AuthPlatform(enabled=False))
+        result = _add_v1_compat_fields(v2)
+        self.assertIsInstance(result, dict)
+        self.assertFalse(result['enabled'])
+        self.assertIsNone(result['defaultProvider'])
+        self.assertIsNone(result['unauthenticatedClientAction'])
+        self.assertIsNone(result['tokenStoreEnabled'])
+        self.assertIsNone(result['clientId'])
+        self.assertIsNone(result['clientSecret'])
+        self.assertIsNone(result['facebookAppId'])
+        self.assertIsNone(result['facebookAppSecret'])
+        self.assertIsNone(result['facebookOauthScopes'])
+
+    def test_add_v1_compat_fields_populated_v2(self):
+        """v1 compat fields are populated from the full v2 structure."""
+        from azure.mgmt.web.models import (
+            SiteAuthSettingsV2, AuthPlatform, GlobalValidation,
+            IdentityProviders, AzureActiveDirectory,
+            AzureActiveDirectoryRegistration, AzureActiveDirectoryValidation,
+            Facebook, AppRegistration, LoginScopes,
+            Login, TokenStore)
+        v2 = SiteAuthSettingsV2(
+            platform=AuthPlatform(enabled=True, runtime_version='1.2.8'),
+            global_validation=GlobalValidation(
+                unauthenticated_client_action='RedirectToLoginPage',
+                redirect_to_provider='facebook'),
+            login=Login(
+                token_store=TokenStore(enabled=False, token_refresh_extension_hours=7.2)),
+            identity_providers=IdentityProviders(
+                azure_active_directory=AzureActiveDirectory(
+                    enabled=True,
+                    registration=AzureActiveDirectoryRegistration(
+                        client_id='aad_client_id',
+                        client_secret_setting_name='SECRET_SETTING',
+                        client_secret_certificate_thumbprint='aad_thumbprint',
+                        open_id_issuer='https://issuer_url'),
+                    validation=AzureActiveDirectoryValidation(
+                        allowed_audiences=['https://audience1'])),
+                facebook=Facebook(
+                    enabled=True,
+                    registration=AppRegistration(
+                        app_id='facebook_id',
+                        app_secret_setting_name='FB_SECRET_SETTING'),
+                    login=LoginScopes(scopes=['public_profile', 'email']))))
+        result = _add_v1_compat_fields(v2)
+        self.assertTrue(result['enabled'])
+        self.assertEqual(result['runtimeVersion'], '1.2.8')
+        self.assertEqual(result['unauthenticatedClientAction'], 'RedirectToLoginPage')
+        self.assertEqual(result['defaultProvider'], 'Facebook')
+        self.assertFalse(result['tokenStoreEnabled'])
+        self.assertEqual(result['tokenRefreshExtensionHours'], 7.2)
+        self.assertEqual(result['clientId'], 'aad_client_id')
+        self.assertEqual(result['clientSecret'], 'SECRET_SETTING')
+        self.assertEqual(result['clientSecretCertificateThumbprint'], 'aad_thumbprint')
+        self.assertEqual(result['issuer'], 'https://issuer_url')
+        self.assertEqual(result['allowedAudiences'], ['https://audience1'])
+        self.assertEqual(result['facebookAppId'], 'facebook_id')
+        self.assertEqual(result['facebookAppSecret'], 'FB_SECRET_SETTING')
+        self.assertEqual(result['facebookOauthScopes'], ['public_profile', 'email'])
+
+    def test_add_v1_compat_fields_secret_overrides(self):
+        """Secret overrides replace setting names with actual secret values."""
+        from azure.mgmt.web.models import (
+            SiteAuthSettingsV2, AuthPlatform, IdentityProviders,
+            AzureActiveDirectory, AzureActiveDirectoryRegistration,
+            Facebook, AppRegistration)
+        v2 = SiteAuthSettingsV2(
+            platform=AuthPlatform(enabled=True),
+            identity_providers=IdentityProviders(
+                azure_active_directory=AzureActiveDirectory(
+                    enabled=True,
+                    registration=AzureActiveDirectoryRegistration(
+                        client_id='cid',
+                        client_secret_setting_name='SETTING_NAME')),
+                facebook=Facebook(
+                    enabled=True,
+                    registration=AppRegistration(
+                        app_id='fbid',
+                        app_secret_setting_name='FB_SETTING_NAME'))))
+        overrides = {
+            'clientSecret': 'actual_aad_secret',
+            'facebookAppSecret': 'actual_fb_secret',
+        }
+        result = _add_v1_compat_fields(v2, secret_overrides=overrides)
+        self.assertEqual(result['clientSecret'], 'actual_aad_secret')
+        self.assertEqual(result['facebookAppSecret'], 'actual_fb_secret')
+
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
     def test_get_auth_settings_returns_v2_when_configured(self, mock_site_op):
         from azure.mgmt.web.models import SiteAuthSettingsV2, AuthPlatform
@@ -714,7 +805,11 @@ class TestWebappAuthV2Mocked(unittest.TestCase):
         cmd = _get_test_cmd()
         result = get_auth_settings(cmd, 'rg', 'myapp')
 
-        self.assertIsInstance(result, SiteAuthSettingsV2)
+        # Result is now a dict with v2 structure and v1 compat fields
+        self.assertIsInstance(result, dict)
+        self.assertTrue(result['platform']['enabled'])
+        # v1 compat field
+        self.assertTrue(result['enabled'])
         mock_site_op.assert_called_once_with(cmd.cli_ctx, 'rg', 'myapp',
                                               'get_auth_settings_v2', None)
 
@@ -774,7 +869,9 @@ class TestWebappAuthV2Mocked(unittest.TestCase):
         result = update_auth_settings(cmd, 'rg', 'myapp', enabled='true',
                                        client_id='test-client-id')
 
-        self.assertEqual(result, updated_v2)
+        # Result is now a dict with v2 structure and v1 compat fields
+        self.assertIsInstance(result, dict)
+        self.assertTrue(result['enabled'])
         # Verify update_auth_settings_v2 was called
         calls = [c for c in mock_site_op.call_args_list if c[0][3] == 'update_auth_settings_v2']
         self.assertEqual(len(calls), 1)
@@ -809,8 +906,8 @@ class TestWebappAuthV2Mocked(unittest.TestCase):
         result = update_auth_settings(cmd, 'rg', 'myapp', require_https='true')
 
         # Should have used v2 path due to --require-https
-        self.assertIsNotNone(result.http_settings)
-        self.assertTrue(result.http_settings.require_https)
+        self.assertIsNotNone(result['httpSettings'])
+        self.assertTrue(result['httpSettings']['requireHttps'])
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
     def test_update_auth_settings_v1_fallback(self, mock_site_op):
@@ -867,17 +964,21 @@ class TestWebappAuthV2Mocked(unittest.TestCase):
             issuer='https://sts.windows.net/tenant-id/',
             token_store_enabled='true')
 
-        # Verify AAD settings in v2 structure
-        aad = result.identity_providers.azure_active_directory
-        self.assertTrue(aad.enabled)
-        self.assertEqual(aad.registration.client_id, 'my-client-id')
-        # client_secret_setting_name should reference the app setting name, not the secret value
-        self.assertEqual(aad.registration.client_secret_setting_name,
+        # Verify AAD settings in v2 structure (dict with camelCase keys)
+        aad = result['identityProviders']['azureActiveDirectory']
+        self.assertTrue(aad['enabled'])
+        self.assertEqual(aad['registration']['clientId'], 'my-client-id')
+        # clientSecretSettingName should reference the app setting name, not the secret value
+        self.assertEqual(aad['registration']['clientSecretSettingName'],
                          'MICROSOFT_PROVIDER_AUTHENTICATION_SECRET')
-        self.assertEqual(aad.registration.open_id_issuer, 'https://sts.windows.net/tenant-id/')
-        self.assertEqual(aad.validation.allowed_audiences, ['https://myapp.azurewebsites.net'])
+        self.assertEqual(aad['registration']['openIdIssuer'], 'https://sts.windows.net/tenant-id/')
+        self.assertEqual(aad['validation']['allowedAudiences'], ['https://myapp.azurewebsites.net'])
         # Verify token store
-        self.assertTrue(result.login.token_store.enabled)
+        self.assertTrue(result['login']['tokenStore']['enabled'])
+        # Verify v1 compat fields carry the actual secret value
+        self.assertEqual(result['clientSecret'], 'my-secret')
+        self.assertEqual(result['clientId'], 'my-client-id')
+        self.assertTrue(result['tokenStoreEnabled'])
         # Verify the secret was stored in app settings
         self.assertEqual(mock_app_settings.properties['MICROSOFT_PROVIDER_AUTHENTICATION_SECRET'],
                          'my-secret')
@@ -909,13 +1010,17 @@ class TestWebappAuthV2Mocked(unittest.TestCase):
             facebook_app_secret='fb-secret',
             facebook_oauth_scopes=['public_profile', 'email'])
 
-        fb = result.identity_providers.facebook
-        self.assertTrue(fb.enabled)
-        self.assertEqual(fb.registration.app_id, 'fb-app-id')
-        # app_secret_setting_name should reference the app setting name, not the secret value
-        self.assertEqual(fb.registration.app_secret_setting_name,
+        fb = result['identityProviders']['facebook']
+        self.assertTrue(fb['enabled'])
+        self.assertEqual(fb['registration']['appId'], 'fb-app-id')
+        # appSecretSettingName should reference the app setting name, not the secret value
+        self.assertEqual(fb['registration']['appSecretSettingName'],
                          'FACEBOOK_PROVIDER_AUTHENTICATION_SECRET')
-        self.assertEqual(fb.login.scopes, ['public_profile', 'email'])
+        self.assertEqual(fb['login']['scopes'], ['public_profile', 'email'])
+        # Verify v1 compat fields carry the actual secret value
+        self.assertEqual(result['facebookAppId'], 'fb-app-id')
+        self.assertEqual(result['facebookAppSecret'], 'fb-secret')
+        self.assertEqual(result['facebookOauthScopes'], ['public_profile', 'email'])
         # Verify the secret was stored in app settings
         self.assertEqual(mock_app_settings.properties['FACEBOOK_PROVIDER_AUTHENTICATION_SECRET'],
                          'fb-secret')
@@ -937,7 +1042,9 @@ class TestWebappAuthV2Mocked(unittest.TestCase):
         cmd = _get_test_cmd()
         result = update_auth_settings(cmd, 'rg', 'myapp', action='AllowAnonymous')
 
-        self.assertEqual(result.global_validation.unauthenticated_client_action, 'AllowAnonymous')
+        self.assertEqual(result['globalValidation']['unauthenticatedClientAction'], 'AllowAnonymous')
+        # v1 compat field
+        self.assertEqual(result['unauthenticatedClientAction'], 'AllowAnonymous')
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
     def test_update_auth_v2_action_login_with_aad(self, mock_site_op):
@@ -957,8 +1064,10 @@ class TestWebappAuthV2Mocked(unittest.TestCase):
         result = update_auth_settings(cmd, 'rg', 'myapp',
                                        action='LoginWithAzureActiveDirectory')
 
-        self.assertEqual(result.global_validation.unauthenticated_client_action, 'RedirectToLoginPage')
-        self.assertEqual(result.global_validation.redirect_to_provider, 'azureactivedirectory')
+        self.assertEqual(result['globalValidation']['unauthenticatedClientAction'], 'RedirectToLoginPage')
+        self.assertEqual(result['globalValidation']['redirectToProvider'], 'azureactivedirectory')
+        # v1 compat field
+        self.assertEqual(result['defaultProvider'], 'AzureActiveDirectory')
 
 class TestServicePrincipalDeploymentSource(unittest.TestCase):
     """Tests for Service Principal authentication detection in deployment source config"""
