@@ -226,7 +226,8 @@ def _format_resource_changes(builder, resource_changes, definite_changes=True):
     for _, resource_changes_in_scope in resource_changes_by_scope:
         resource_changes_in_scope_list = list(resource_changes_in_scope)
         scope = _get_scope(resource_changes_in_scope_list[0])
-        _format_resource_changes_in_scope(builder, scope, resource_changes_in_scope_list)
+        if scope != "Unknown":
+            _format_resource_changes_in_scope(builder, scope, resource_changes_in_scope_list)
 
 
 def _format_resource_changes_in_scope(builder, scope, resource_changes_in_scope):
@@ -248,6 +249,9 @@ def _format_resource_changes_in_scope(builder, scope, resource_changes_in_scope)
 def _format_resource_change(builder, resource_change, is_last):
     change_type = resource_change.change_type
     relative_resource_id = _get_relative_resource_id(resource_change)
+    if relative_resource_id is None:
+        return
+
     api_version = _get_api_version(resource_change)
 
     builder.append_line()
@@ -447,7 +451,7 @@ def _get_api_version(resource_change):
 
 def _get_scope(resource_change):
     scope, _ = split_resource_id(resource_change.resource_id)
-    return scope
+    return scope or "Unknown"  # TODO: extensible resource support
 
 
 def _get_scope_uppercase(resource_change):
