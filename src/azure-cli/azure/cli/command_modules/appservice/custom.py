@@ -6705,7 +6705,7 @@ def import_ssl_cert(cmd, resource_group_name, key_vault, key_vault_certificate_n
                                                 certificate_envelope=kv_cert_def)
 
 
-def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None, certificate_name=None):
+def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None, certificate_name=None, wait=False):
     Certificate = cmd.get_models('Certificate')
     hostname = hostname.lower()
     client = web_client_factory(cmd.cli_ctx)
@@ -6742,7 +6742,8 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None,
         poll_url = ex.response.headers['Location'] if 'Location' in ex.response.headers else None
         if ex.response.status_code == 202 and poll_url:
             r = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
-            poll_timeout = time.time() + 60 * 2  # 2 minute timeout
+            poll_timeout_minutes = 10 if wait else 2
+            poll_timeout = time.time() + 60 * poll_timeout_minutes
 
             while r.status_code != 200 and time.time() < poll_timeout:
                 time.sleep(5)
@@ -6753,6 +6754,11 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None,
                     return r.json()
                 except ValueError:
                     return r.text
+            if wait:
+                raise CLIError("Managed Certificate creation for '{}' timed out after {} minutes. "
+                               "Check status with 'az webapp config ssl show -g {} "
+                               "--certificate-name {}'.".format(hostname, poll_timeout_minutes,
+                                                                resource_group_name, certificate_name))
             logger.warning("Managed Certificate creation in progress. Please use the command "
                            "'az webapp config ssl show -g %s --certificate-name %s' "
                            " to view your certificate once it is created", resource_group_name, certificate_name)

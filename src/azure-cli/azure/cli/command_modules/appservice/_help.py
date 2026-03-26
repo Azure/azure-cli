@@ -1782,6 +1782,8 @@ short-summary: Create a Managed Certificate for a hostname in a webapp app.
 examples:
   - name: Create a Managed Certificate for cname.mycustomdomain.com.
     text: az webapp config ssl create --resource-group MyResourceGroup --name MyWebapp --hostname cname.mycustomdomain.com
+  - name: Create a Managed Certificate and wait for it to complete (up to 10 minutes).
+    text: az webapp config ssl create --resource-group MyResourceGroup --name MyWebapp --hostname cname.mycustomdomain.com --wait
 """
 
 helps['webapp config storage-account'] = """
