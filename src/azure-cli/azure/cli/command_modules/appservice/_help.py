@@ -1591,16 +1591,16 @@ long-summary: >
 
     App Service exposes each connection string as an environment variable with a type-based
     prefix:
-      SQLServer    → SQLCONNSTR_<name>
-      SQLAzure     → SQLAZURECONNSTR_<name>
-      MySQL        → MYSQLCONNSTR_<name>
-      PostgreSQL   → POSTGRESQLCONNSTR_<name>
-      Custom       → CUSTOMCONNSTR_<name>
+      SQLServer    → `SQLCONNSTR_<name>`
+      SQLAzure     → `SQLAZURECONNSTR_<name>`
+      MySQL        → `MYSQLCONNSTR_<name>`
+      PostgreSQL   → `POSTGRESQLCONNSTR_<name>`
+      Custom       → `CUSTOMCONNSTR_<name>`
 
 
     .NET's Configuration.GetConnectionString() auto-maps only the SQLServer, SQLAzure, and
     Custom prefixes. For MySQL and PostgreSQL connection strings, access the value directly
-    via Configuration["MYSQLCONNSTR_<name>"] or Configuration["POSTGRESQLCONNSTR_<name>"]
+    via `Configuration["MYSQLCONNSTR_<name>"]` or `Configuration["POSTGRESQLCONNSTR_<name>"]`
     instead.
 examples:
   - name: Add a mysql connection string.
