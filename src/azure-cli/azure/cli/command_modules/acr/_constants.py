@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long
 
-from azure.cli.core.profiles import ResourceType
 from enum import Enum
 
 ACR_RESOURCE_PROVIDER = 'Microsoft.ContainerRegistry'
@@ -63,23 +62,23 @@ def get_premium_sku(cmd):
     return [SkuName.premium.value]
 
 
-def get_valid_os(cmd):
-    OS = cmd.get_models('OS', operation_group='task_runs')
+def get_valid_os():
+    from azure.mgmt.containerregistrytasks.models import OS
     return [item.value.lower() for item in OS]
 
 
-def get_valid_architecture(cmd):
-    Architecture = cmd.get_models('Architecture', operation_group='task_runs')
+def get_valid_architecture():
+    from azure.mgmt.containerregistrytasks.models import Architecture
     return [item.value.lower() for item in Architecture]
 
 
-def get_valid_variant(cmd):
-    Variant = cmd.get_models('Variant', operation_group='task_runs')
+def get_valid_variant():
+    from azure.mgmt.containerregistrytasks.models import Variant
     return [item.value.lower() for item in Variant]
 
 
-def get_finished_run_status(cmd):
-    RunStatus = cmd.get_models('RunStatus', operation_group='task_runs')
+def get_finished_run_status():
+    from azure.mgmt.containerregistrytasks.models import RunStatus
     return [RunStatus.succeeded.value,
             RunStatus.failed.value,
             RunStatus.canceled.value,
@@ -87,23 +86,18 @@ def get_finished_run_status(cmd):
             RunStatus.timeout.value]
 
 
-def get_succeeded_run_status(cmd):
-    RunStatus = cmd.get_models('RunStatus', operation_group='task_runs')
+def get_succeeded_run_status():
+    from azure.mgmt.containerregistrytasks.models import RunStatus
     return [RunStatus.succeeded.value]
 
 
-def get_acr_task_models(cmd):
-    from azure.cli.core.profiles import get_sdk
-    return get_sdk(cmd.cli_ctx, ResourceType.MGMT_CONTAINERREGISTRY, 'models', operation_group='tasks')
+def get_succeeded_agentpool_status():
+    from azure.mgmt.containerregistrytasks.models import ProvisioningState
+    return [ProvisioningState.succeeded.value]
 
 
-def get_succeeded_agentpool_status(cmd):
-    AgentPoolStatus = cmd.get_models('ProvisioningState', operation_group='agent_pools')
-    return [AgentPoolStatus.succeeded.value]
-
-
-def get_finished_agentpool_status(cmd):
-    AgentPoolStatus = cmd.get_models('ProvisioningState', operation_group='agent_pools')
-    return [AgentPoolStatus.succeeded.value,
-            AgentPoolStatus.failed.value,
-            AgentPoolStatus.canceled.value]
+def get_finished_agentpool_status():
+    from azure.mgmt.containerregistrytasks.models import ProvisioningState
+    return [ProvisioningState.succeeded.value,
+            ProvisioningState.failed.value,
+            ProvisioningState.canceled.value]

@@ -794,9 +794,9 @@ def _build_image_remotely(cmd, source_dir, image_name,  # pylint: disable=too-ma
         prepare_source_location,
         get_resource_group_name_by_registry_name,
     )
-    from azure.mgmt.containerregistry.models import (
+    from azure.mgmt.containerregistry.models import RoleAssignmentMode
+    from azure.mgmt.containerregistrytasks.models import (
         Credentials as AcrCredentials,
-        RoleAssignmentMode,
         SourceRegistryCredentials,
     )
 
@@ -857,7 +857,7 @@ def _build_image_remotely(cmd, source_dir, image_name,  # pylint: disable=too-ma
             logger.warning("Dockerfile found - using Docker build")
             logger.warning("Queueing build task...")
 
-            from azure.mgmt.containerregistry.models import (
+            from azure.mgmt.containerregistrytasks.models import (
                 DockerBuildRequest, PlatformProperties
             )
 
@@ -881,7 +881,7 @@ def _build_image_remotely(cmd, source_dir, image_name,  # pylint: disable=too-ma
             logger.warning("Buildpacks will detect Python, Node.js, .NET, etc.")
             logger.warning("Queueing build task...")
 
-            from azure.mgmt.containerregistry.models import (
+            from azure.mgmt.containerregistrytasks.models import (
                 EncodedTaskRunRequest, PlatformProperties
             )
 
