@@ -4341,9 +4341,11 @@ def update_container_settings(cmd, resource_group_name, name, container_registry
                                                     'list_application_settings', slot)
     existing_properties = existing_app_settings.properties or {}
 
-    if (not container_registry_user and not container_registry_password and
-            not acr_use_identity and
-            container_registry_url and '.azurecr.io' in container_registry_url):
+    # Skip credential lookup entirely when managed identity ACR pull is enabled
+    if acr_use_identity:
+        logger.info('Managed identity ACR pull is enabled; skipping automatic credential lookup.')
+    elif (not container_registry_user and not container_registry_password and
+          container_registry_url and '.azurecr.io' in container_registry_url):
         existing_user_val = existing_properties.get('DOCKER_REGISTRY_SERVER_USERNAME', '')
         existing_pass_val = existing_properties.get('DOCKER_REGISTRY_SERVER_PASSWORD', '')
         if _is_key_vault_reference(existing_user_val) or _is_key_vault_reference(existing_pass_val):
@@ -4388,22 +4390,30 @@ def update_container_settings(cmd, resource_group_name, name, container_registry
     if container_image_name is not None:
         _add_fx_version(cmd, resource_group_name, name, container_image_name, slot)
 
+    # Accumulate site-config changes and issue a single update_site_configs call
+    site_config_kwargs = {}
     if multicontainer_config_file and multicontainer_config_type:
         encoded_config_file = _get_linux_multicontainer_encoded_config_from_file(multicontainer_config_file)
-        linux_fx_version = _format_fx_version(encoded_config_file, multicontainer_config_type)
-        update_site_configs(cmd, resource_group_name, name, linux_fx_version=linux_fx_version, slot=slot)
+        site_config_kwargs['linux_fx_version'] = _format_fx_version(encoded_config_file,
+                                                                    multicontainer_config_type)
     elif multicontainer_config_file or multicontainer_config_type:
         logger.warning('Must change both settings --multicontainer-config-file FILE --multicontainer-config-type TYPE')
 
-    if min_replicas is not None or max_replicas is not None:
-        update_site_configs(cmd, resource_group_name, name, min_replicas=min_replicas, max_replicas=max_replicas)
+    if min_replicas is not None:
+        site_config_kwargs['min_replicas'] = min_replicas
+    if max_replicas is not None:
+        site_config_kwargs['max_replicas'] = max_replicas
+
+    if acr_use_identity is not None:
+        site_config_kwargs['acr_use_identity'] = acr_use_identity
+    if acr_identity is not None:
+        site_config_kwargs['acr_identity'] = acr_identity
+
+    if site_config_kwargs:
+        update_site_configs(cmd, resource_group_name, name, slot=slot, **site_config_kwargs)
 
     if assign_identities is not None:
         assign_identity(cmd, resource_group_name, name, assign_identities, role, slot, scope)
-
-    if acr_use_identity is not None or acr_identity is not None:
-        update_site_configs(cmd, resource_group_name, name, slot=slot,
-                            acr_use_identity=acr_use_identity, acr_identity=acr_identity)
 
     return _mask_creds_related_appsettings(_filter_for_container_settings(cmd, resource_group_name, name, settings,
                                                                           slot=slot))

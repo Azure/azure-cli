@@ -681,6 +681,7 @@ class TestUpdateContainerSettingsIdentity(unittest.TestCase):
         mock_app_settings.properties = properties or {}
         return mock_app_settings
 
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_acr_cred')
     @mock.patch('azure.cli.command_modules.appservice.custom._mask_creds_related_appsettings')
     @mock.patch('azure.cli.command_modules.appservice.custom._filter_for_container_settings')
     @mock.patch('azure.cli.command_modules.appservice.custom.get_app_settings', return_value=[])
@@ -694,7 +695,8 @@ class TestUpdateContainerSettingsIdentity(unittest.TestCase):
     def test_container_set_with_system_identity_and_acr(
             self, mock_update_site_configs, mock_assign_identity,
             mock_add_fx, mock_site_op, mock_client_factory, mock_centauri,
-            mock_settings_op, mock_get_app, mock_filter, mock_mask):
+            mock_settings_op, mock_get_app, mock_filter, mock_mask,
+            mock_get_acr_cred):
         mock_mask.return_value = {}
         mock_site_op.return_value = self._make_mock_app_settings()
         cmd = _get_test_cmd()
@@ -705,12 +707,14 @@ class TestUpdateContainerSettingsIdentity(unittest.TestCase):
             assign_identities=['[system]'],
             acr_use_identity='true',
             acr_identity='[system]')
+        mock_get_acr_cred.assert_not_called()
         mock_assign_identity.assert_called_once_with(
             cmd, 'rg', 'web1', ['[system]'], 'AcrPull', None, None)
         mock_update_site_configs.assert_called_once_with(
             cmd, 'rg', 'web1', slot=None,
             acr_use_identity='true', acr_identity='[system]')
 
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_acr_cred')
     @mock.patch('azure.cli.command_modules.appservice.custom._mask_creds_related_appsettings')
     @mock.patch('azure.cli.command_modules.appservice.custom._filter_for_container_settings')
     @mock.patch('azure.cli.command_modules.appservice.custom.get_app_settings', return_value=[])
@@ -724,7 +728,8 @@ class TestUpdateContainerSettingsIdentity(unittest.TestCase):
     def test_container_set_with_user_identity(
             self, mock_update_site_configs, mock_assign_identity,
             mock_add_fx, mock_site_op, mock_client_factory, mock_centauri,
-            mock_settings_op, mock_get_app, mock_filter, mock_mask):
+            mock_settings_op, mock_get_app, mock_filter, mock_mask,
+            mock_get_acr_cred):
         mock_mask.return_value = {}
         mock_site_op.return_value = self._make_mock_app_settings()
         cmd = _get_test_cmd()
@@ -736,6 +741,7 @@ class TestUpdateContainerSettingsIdentity(unittest.TestCase):
             assign_identities=[user_identity],
             acr_use_identity='true',
             acr_identity=user_identity)
+        mock_get_acr_cred.assert_not_called()
         mock_assign_identity.assert_called_once_with(
             cmd, 'rg', 'web1', [user_identity], 'AcrPull', None, None)
         mock_update_site_configs.assert_called_once_with(
@@ -768,6 +774,7 @@ class TestUpdateContainerSettingsIdentity(unittest.TestCase):
         mock_assign_identity.assert_not_called()
         mock_update_site_configs.assert_not_called()
 
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_acr_cred')
     @mock.patch('azure.cli.command_modules.appservice.custom._mask_creds_related_appsettings')
     @mock.patch('azure.cli.command_modules.appservice.custom._filter_for_container_settings')
     @mock.patch('azure.cli.command_modules.appservice.custom.get_app_settings', return_value=[])
@@ -781,7 +788,8 @@ class TestUpdateContainerSettingsIdentity(unittest.TestCase):
     def test_container_set_with_custom_role(
             self, mock_update_site_configs, mock_assign_identity,
             mock_add_fx, mock_site_op, mock_client_factory, mock_centauri,
-            mock_settings_op, mock_get_app, mock_filter, mock_mask):
+            mock_settings_op, mock_get_app, mock_filter, mock_mask,
+            mock_get_acr_cred):
         mock_mask.return_value = {}
         mock_site_op.return_value = self._make_mock_app_settings()
         cmd = _get_test_cmd()
@@ -793,9 +801,14 @@ class TestUpdateContainerSettingsIdentity(unittest.TestCase):
             role='Reader',
             acr_use_identity='true',
             acr_identity='[system]')
+        mock_get_acr_cred.assert_not_called()
         mock_assign_identity.assert_called_once_with(
             cmd, 'rg', 'web1', ['[system]'], 'Reader', None, None)
+        mock_update_site_configs.assert_called_once_with(
+            cmd, 'rg', 'web1', slot=None,
+            acr_use_identity='true', acr_identity='[system]')
 
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_acr_cred')
     @mock.patch('azure.cli.command_modules.appservice.custom._mask_creds_related_appsettings')
     @mock.patch('azure.cli.command_modules.appservice.custom._filter_for_container_settings')
     @mock.patch('azure.cli.command_modules.appservice.custom.get_app_settings', return_value=[])
@@ -809,7 +822,8 @@ class TestUpdateContainerSettingsIdentity(unittest.TestCase):
     def test_container_set_disable_acr_identity(
             self, mock_update_site_configs, mock_assign_identity,
             mock_add_fx, mock_site_op, mock_client_factory, mock_centauri,
-            mock_settings_op, mock_get_app, mock_filter, mock_mask):
+            mock_settings_op, mock_get_app, mock_filter, mock_mask,
+            mock_get_acr_cred):
         mock_mask.return_value = {}
         mock_site_op.return_value = self._make_mock_app_settings()
         cmd = _get_test_cmd()
@@ -820,7 +834,7 @@ class TestUpdateContainerSettingsIdentity(unittest.TestCase):
         mock_assign_identity.assert_not_called()
         mock_update_site_configs.assert_called_once_with(
             cmd, 'rg', 'web1', slot=None,
-            acr_use_identity='false', acr_identity=None)
+            acr_use_identity='false')
 
     @mock.patch('azure.cli.command_modules.appservice.custom._get_acr_cred')
     @mock.patch('azure.cli.command_modules.appservice.custom._mask_creds_related_appsettings')
