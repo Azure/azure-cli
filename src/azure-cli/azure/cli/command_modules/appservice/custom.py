@@ -10164,6 +10164,8 @@ def get_tunnel(cmd, resource_group_name, name, port=None, slot=None, instance=No
 def create_tunnel(cmd, resource_group_name, name, port=None, slot=None, timeout=None, instance=None):
     tunnel_server = get_tunnel(cmd, resource_group_name, name, port, slot, instance)
 
+    _register_tunnel_cleanup(tunnel_server)
+
     t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
     t.daemon = True
     t.start()
@@ -10182,15 +10184,22 @@ def create_tunnel(cmd, resource_group_name, name, port=None, slot=None, timeout=
 
     logger.warning('Ctrl + C to close')
 
-    if timeout:
-        time.sleep(int(timeout))
-    else:
-        while t.is_alive():
-            time.sleep(5)
+    try:
+        if timeout:
+            time.sleep(int(timeout))
+        else:
+            while t.is_alive():
+                time.sleep(5)
+    except KeyboardInterrupt:
+        logger.warning('Shutting down tunnel...')
+    finally:
+        tunnel_server.close()
 
 
 def create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=None, timeout=None, instance=None):
     tunnel_server = get_tunnel(cmd, resource_group_name, name, port, slot, instance)
+
+    _register_tunnel_cleanup(tunnel_server)
 
     t = threading.Thread(target=_start_tunnel, args=(tunnel_server,))
     t.daemon = True
@@ -10204,11 +10213,16 @@ def create_tunnel_and_session(cmd, resource_group_name, name, port=None, slot=No
     s.daemon = True
     s.start()
 
-    if timeout:
-        time.sleep(int(timeout))
-    else:
-        while s.is_alive() and t.is_alive():
-            time.sleep(5)
+    try:
+        if timeout:
+            time.sleep(int(timeout))
+        else:
+            while s.is_alive() and t.is_alive():
+                time.sleep(5)
+    except KeyboardInterrupt:
+        logger.warning('Shutting down tunnel...')
+    finally:
+        tunnel_server.close()
 
 
 def perform_onedeploy_functionapp(cmd,
@@ -10724,6 +10738,25 @@ def _wait_for_webapp(tunnel_server):
 
 def _start_tunnel(tunnel_server):
     tunnel_server.start_server()
+
+
+def _register_tunnel_cleanup(tunnel_server):
+    """Register signal handlers and atexit to ensure the tunnel is cleaned up."""
+    import atexit
+    import signal
+
+    def _cleanup():
+        tunnel_server.close()
+
+    atexit.register(_cleanup)
+
+    def _signal_handler(signum, frame):  # pylint: disable=unused-argument
+        logger.warning('Received signal %s, shutting down tunnel...', signum)
+        tunnel_server.close()
+        sys.exit(0)
+
+    signal.signal(signal.SIGINT, _signal_handler)
+    signal.signal(signal.SIGTERM, _signal_handler)
 
 
 def _start_ssh_session(hostname, port, username, password):

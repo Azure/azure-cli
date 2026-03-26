@@ -998,14 +998,22 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('webapp ssh') as c:
         c.argument('port', options_list=['--port', '-p'],
                    help='Port for the remote connection. Default: Random available port', type=int)
-        c.argument('timeout', options_list=['--timeout', '-t'], help='timeout in seconds. Defaults to none', type=int)
-        c.argument('instance', options_list=['--instance', '-i'], help='Webapp instance to connect to. Defaults to none.')
+        c.argument('timeout', options_list=['--timeout', '-t'],
+                   help='Timeout in seconds. The tunnel will automatically close after this duration. '
+                        'Defaults to none (keep open until manually closed).', type=int)
+        c.argument('instance', options_list=['--instance', '-i'],
+                   help='Webapp instance to connect to. Use `az webapp list-instances` to get available instances. '
+                        'If not specified, connects to an arbitrary instance.')
 
     with self.argument_context('webapp create-remote-connection') as c:
         c.argument('port', options_list=['--port', '-p'],
                    help='Port for the remote connection. Default: Random available port', type=int)
-        c.argument('timeout', options_list=['--timeout', '-t'], help='timeout in seconds. Defaults to none', type=int)
-        c.argument('instance', options_list=['--instance', '-i'], help='Webapp instance to connect to. Defaults to none.')
+        c.argument('timeout', options_list=['--timeout', '-t'],
+                   help='Timeout in seconds. The tunnel will automatically close after this duration. '
+                        'Defaults to none (keep open until manually closed).', type=int)
+        c.argument('instance', options_list=['--instance', '-i'],
+                   help='Webapp instance to connect to. Use `az webapp list-instances` to get available instances. '
+                        'If not specified, connects to an arbitrary instance.')
 
     with self.argument_context('webapp vnet-integration') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)

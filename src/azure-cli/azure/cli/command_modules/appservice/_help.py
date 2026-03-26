@@ -1941,6 +1941,8 @@ short-summary: Creates a remote connection using a tcp tunnel to your web app
 examples:
   - name: Create a remote connection using a tcp tunnel to your web app
     text: az webapp create-remote-connection --name MyWebApp --resource-group MyResourceGroup
+  - name: Create a remote connection to a specific instance
+    text: az webapp create-remote-connection --name MyWebApp --resource-group MyResourceGroup --instance 89c07485c4742abcde3f0e19ea4402a06e3b48145ed81e6468066f10a78074b1
 """
 
 helps['webapp delete'] = """
@@ -2424,6 +2426,9 @@ examples:
   - name: ssh into a web app
     text: >
         az webapp ssh -n MyUniqueAppName -g MyResourceGroup
+  - name: ssh into a specific instance of a web app
+    text: >
+        az webapp ssh -n MyUniqueAppName -g MyResourceGroup --instance 89c07485c4742abcde3f0e19ea4402a06e3b48145ed81e6468066f10a78074b1
 """
 
 helps['webapp start'] = """
