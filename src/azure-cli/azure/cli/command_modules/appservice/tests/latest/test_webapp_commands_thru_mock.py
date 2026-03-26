@@ -706,50 +706,72 @@ class TestCreateAppServicePlanDefaults(unittest.TestCase):
         self.assertIn('P0V3', str(call_kwargs))
 
 
+class _FakePagedIterator:
+    """Simulates an Azure SDK paged iterator that yields items across multiple pages."""
+
+    def __init__(self, pages):
+        self._pages = pages
+        self._page_fetch_count = 0
+
+    def __iter__(self):
+        for page in self._pages:
+            self._page_fetch_count += 1
+            yield from page
+
+    @property
+    def pages_fetched(self):
+        return self._page_fetch_count
+
+
+def _make_cert(name, thumbprint=''):
+    cert = mock.MagicMock()
+    cert.name = name
+    cert.thumbprint = thumbprint
+    return cert
+
+
 class TestSSLCertPagination(unittest.TestCase):
     """Tests for SSL certificate pagination fix (#29403, #28722, #27950)."""
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     def test_list_ssl_certs_returns_all_pages(self, client_factory_mock):
-        """Ensure list_ssl_certs fully consumes the pager and returns a list."""
+        """Ensure list_ssl_certs fully consumes the pager and returns a concrete list."""
         cmd_mock = _get_test_cmd()
 
-        cert1 = mock.MagicMock()
-        cert1.name = 'cert1'
-        cert2 = mock.MagicMock()
-        cert2.name = 'cert2'
-        cert3 = mock.MagicMock()
-        cert3.name = 'cert3'
+        page1 = [_make_cert('cert1'), _make_cert('cert2')]
+        page2 = [_make_cert('cert3')]
+        pager = _FakePagedIterator([page1, page2])
 
         client = mock.MagicMock()
         client_factory_mock.return_value = client
-        client.certificates.list_by_resource_group.return_value = iter([cert1, cert2, cert3])
+        client.certificates.list_by_resource_group.return_value = pager
 
         result = list_ssl_certs(cmd_mock, 'myRG')
 
+        # Must be a concrete list (not a lazy iterator) so the CLI framework
+        # can serialize all results, and must contain items from every page.
         self.assertIsInstance(result, list)
         self.assertEqual(len(result), 3)
+        self.assertEqual(pager.pages_fetched, 2)
         client.certificates.list_by_resource_group.assert_called_once_with('myRG')
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     def test_delete_ssl_cert_finds_cert_beyond_first_page(self, client_factory_mock):
-        """Ensure delete_ssl_cert can find a cert that would be on a later page."""
+        """Ensure delete_ssl_cert can find a cert on a later page."""
         cmd_mock = _get_test_cmd()
 
-        certs = []
-        for i in range(100):
-            c = mock.MagicMock()
-            c.thumbprint = f'THUMB{i:04d}'
-            c.name = f'cert{i}'
-            certs.append(c)
+        # Target cert is on page 2 — would be missed without full pagination
+        page1 = [_make_cert(f'cert{i}', f'THUMB{i:04d}') for i in range(50)]
+        page2 = [_make_cert(f'cert{i}', f'THUMB{i:04d}') for i in range(50, 100)]
+        pager = _FakePagedIterator([page1, page2])
 
         client = mock.MagicMock()
         client_factory_mock.return_value = client
-        client.certificates.list_by_resource_group.return_value = iter(certs)
+        client.certificates.list_by_resource_group.return_value = pager
 
-        target_thumbprint = 'THUMB0099'
-        delete_ssl_cert(cmd_mock, 'myRG', target_thumbprint)
+        delete_ssl_cert(cmd_mock, 'myRG', 'THUMB0099')
 
+        self.assertEqual(pager.pages_fetched, 2)
         client.certificates.delete.assert_called_once_with('myRG', 'cert99')
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
@@ -757,13 +779,11 @@ class TestSSLCertPagination(unittest.TestCase):
         """Ensure delete_ssl_cert raises ResourceNotFoundError for missing thumbprint."""
         cmd_mock = _get_test_cmd()
 
-        cert = mock.MagicMock()
-        cert.thumbprint = 'AAAA'
-        cert.name = 'cert1'
+        pager = _FakePagedIterator([[_make_cert('cert1', 'AAAA')]])
 
         client = mock.MagicMock()
         client_factory_mock.return_value = client
-        client.certificates.list_by_resource_group.return_value = iter([cert])
+        client.certificates.list_by_resource_group.return_value = pager
 
         with self.assertRaises(ResourceNotFoundError):
             delete_ssl_cert(cmd_mock, 'myRG', 'NONEXISTENT')

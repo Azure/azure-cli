@@ -6811,12 +6811,14 @@ def _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint, 
     for webapp_cert in webapp_certs:
         if webapp_cert.thumbprint == certificate_thumbprint:
             found_cert = webapp_cert
+            break
     # search for a cert that matches in the webapp's RG
     if not found_cert:
         webapp_certs = list(client.certificates.list_by_resource_group(resource_group_name))
         for webapp_cert in webapp_certs:
             if webapp_cert.thumbprint == certificate_thumbprint:
                 found_cert = webapp_cert
+                break
     # search for a cert that matches in the subscription, filtering on the serverfarm
     if not found_cert:
         sub_certs = client.certificates.list(filter=f"ServerFarmId eq '{webapp.server_farm_id}'")
