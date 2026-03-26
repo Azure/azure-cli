@@ -98,12 +98,7 @@ class YamlLoaderMixin:  # pylint:disable=too-few-public-methods
     # get the list of yaml help file names for the command or group
     @staticmethod
     def _get_yaml_help_files_list(nouns, cmd_loader_map_ref):
-        """Get list of YAML help file paths for the command or group.
-
-        Uses importlib.resources for zip-compatible package file discovery,
-        with a fallback to filesystem-based os.listdir for older layouts.
-        """
-        import importlib.resources
+        import inspect
 
         command_nouns = " ".join(nouns)
         # if command in map, get the loader. Path of loader is path of helpfile.
@@ -124,13 +119,13 @@ class YamlLoaderMixin:  # pylint:disable=too-few-public-methods
         results = []
         if loaders:
             for loader in loaders:
-                # Use importlib.resources for zip-compatible package file discovery
-                loader_module = loader.__class__.__module__
-                pkg_files = importlib.resources.files(loader_module)
-                for item in pkg_files.iterdir():
-                    name = item.name
-                    if name.endswith("help.yaml") or name.endswith("help.yml"):
-                        results.append(str(item))
+                loader_file_path = inspect.getfile(loader.__class__)
+                dir_name = os.path.dirname(loader_file_path)
+                files = os.listdir(dir_name)
+                for file in files:
+                    if file.endswith("help.yaml") or file.endswith("help.yml"):
+                        help_file_path = os.path.join(dir_name, file)
+                        results.append(help_file_path)
         return results
 
     @staticmethod
