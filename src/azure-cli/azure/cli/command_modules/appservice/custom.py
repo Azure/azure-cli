@@ -4220,6 +4220,18 @@ def _redact_appsettings(settings):
     return settings
 
 
+def _is_json_settings(settings):
+    """Check if settings input is in JSON format (e.g. from @file.json)."""
+    if not settings:
+        return False
+    try:
+        settings_str = ''.join([i.rstrip() for i in settings])
+        json.loads(settings_str)
+        return True
+    except (json.decoder.JSONDecodeError, ValueError):
+        return False
+
+
 def _build_app_settings_input(settings, connection_string_type):
     if not settings:
         return []
@@ -4253,12 +4265,17 @@ def update_connection_strings(cmd, resource_group_name, name, connection_string_
     from azure.mgmt.web.models import ConnStringValueTypePair
     if not settings and not slot_settings:
         raise ArgumentUsageError('Usage Error: --settings |--slot-settings')
+    # Detect JSON input before parsing — JSON means replace-all semantics
+    replace_all = _is_json_settings(settings)
     settings = _build_app_settings_input(settings, connection_string_type)
     sticky_slot_settings = _build_app_settings_input(slot_settings, connection_string_type)
     rm_sticky_slot_settings = set()
 
     conn_strings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
                                            'list_connection_strings', slot)
+
+    if replace_all:
+        conn_strings.properties = {}
 
     for name_value_type in settings + sticky_slot_settings:
         # split at the first '=', connection string should not have '=' in the name
@@ -6605,7 +6622,7 @@ def _get_cert(certificate_password, certificate_file):
 
 def list_ssl_certs(cmd, resource_group_name):
     client = web_client_factory(cmd.cli_ctx)
-    return client.certificates.list_by_resource_group(resource_group_name)
+    return list(client.certificates.list_by_resource_group(resource_group_name))
 
 
 def show_ssl_cert(cmd, resource_group_name, certificate_name):

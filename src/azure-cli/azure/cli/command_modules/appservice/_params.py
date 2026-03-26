@@ -90,7 +90,7 @@ def load_arguments(self, _):
         c.ignore('app_instance')
         c.argument('resource_group_name', arg_type=resource_group_name_type)
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
-        c.argument('slot', options_list=['--slot', '-s'],
+        c.argument('slot', options_list=['--slot', '-s'], id_part='child_name_1',
                    help="the name of the slot. Default to the productions slot if not specified")
         c.argument('name', arg_type=webapp_name_arg_type)
 
