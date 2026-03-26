@@ -274,7 +274,7 @@ class TestUpdateManagedNamespace(unittest.TestCase):
         with self.assertRaises(InvalidArgumentValueError) as cm:
             ns.aks_managed_namespace_update(cmd, None, raw_parameters, None, None, False)
         self.assertIn(err, str(cm.exception))
-    
+
     def test_update_managed_namespace_sets_location_from_existing_namespace(self, mock_get_client):
         cli_ctx = MockCLI()
         cmd = MockCmd(cli_ctx)
