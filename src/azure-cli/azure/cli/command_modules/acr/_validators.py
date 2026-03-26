@@ -202,20 +202,26 @@ def validate_cache_credentials(namespace):
 
     if has_remove_cred_set and (has_identity or has_cred_set):
         raise InvalidArgumentValueError(
-            "Cannot specify --remove-cred-set with other credential options. Use --remove-cred-set alone to remove credentials."
+            "Cannot specify --remove-cred-set with other credential options. "
+            "Use --remove-cred-set alone to remove credentials."
         )
-    
+
     # Validate identity format if provided
     if has_identity:
-        identity_pattern = r'^/subscriptions/[^/]+/resource[Gg]roups/[^/]+/providers/Microsoft\.ManagedIdentity/userAssignedIdentities/[^/]+$'
-        
-        if not re.match(identity_pattern, namespace.identity):
+        identity_pattern = (
+            r'^/subscriptions/[^/]+/resource[Gg]roups/[^/]+'
+            r'/providers/Microsoft\.ManagedIdentity'
+            r'/userAssignedIdentities/[^/]+$'
+        )
+
+        if not re.match(identity_pattern, namespace.identity, re.IGNORECASE):
             example_format = USER_ASSIGNED_IDENTITY_RESOURCE_ID_TEMPLATE.format(
                 sub_id='{subscriptionId}',
                 rg='{resourceGroupName}',
                 identity_name='{identityName}'
             )
             raise InvalidArgumentValueError(
-                f"The --identity parameter must be a valid ARM resource ID for a user-assigned managed identity. "
+                f"The --identity parameter must be a valid ARM resource ID "
+                f"for a user-assigned managed identity. "
                 f"Format: {example_format}"
             )

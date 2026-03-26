@@ -66,7 +66,7 @@ def acr_cache_create(cmd,
                      identity=None):
 
     rg = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
-    
+
     # Handle credential set
     if cred_set:
         sub_id = get_subscription_id(cmd.cli_ctx)
@@ -79,7 +79,7 @@ def acr_cache_create(cmd,
         )
     else:
         cred_set_id = AzureCoreNull
-    
+
     # Handle identity
     identity_properties = None
     if identity:
@@ -121,13 +121,16 @@ def acr_cache_update_custom(cmd,
     # Check if any update parameters are provided
     has_cred_update = cred_set is not None or remove_cred_set
     has_identity_update = identity is not None
-    
+
     if not has_cred_update and not has_identity_update:
-        raise InvalidArgumentValueError("You must provide at least one parameter to update (credential set, identity, or removal flag).")
+        raise InvalidArgumentValueError(
+            "You must provide at least one parameter to update "
+            "(credential set, identity, or removal flag)."
+        )
 
     # initialize properties if not already set
     if instance.properties is None:
-        instance.properties = CacheRuleUpdateProperties() 
+        instance.properties = CacheRuleUpdateProperties()
 
     # Handle credential set updates
     if has_cred_update:
@@ -144,7 +147,7 @@ def acr_cache_update_custom(cmd,
                 cred_set_name=cred_set
             )
             instance.properties.credential_set_resource_id = cred_set_id
-    
+
     # Handle identity updates
     if has_identity_update and identity:
         # Create IdentityProperties with UserAssigned type
@@ -159,7 +162,7 @@ def acr_cache_update_custom(cmd,
     return instance
 
 
-def acr_cache_update_get(cmd):
+def acr_cache_update_get(cmd):  # pylint: disable=unused-argument
     """Returns an empty CacheRuleUpdateParameters object.
     """
 
