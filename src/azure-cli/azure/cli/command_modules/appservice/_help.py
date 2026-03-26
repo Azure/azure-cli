@@ -2597,12 +2597,16 @@ examples:
 
 helps['webapp sitecontainers convert'] = """
 type: command
-short-summary: Convert a webapp from sitecontainers to a classic custom container and vice versa.
+short-summary: Convert a webapp from sitecontainers to a classic custom container and vice versa. Supports both single-container (DOCKER|) and multi-container (COMPOSE|) apps.
 examples:
   - name: Convert a webapp to classic custom container (docker) from sitecontainers
     text: az webapp sitecontainers convert --mode docker --name MyWebApp --resource-group MyResourceGroup
-  - name: Convert a webapp to sitecontainers from classic custom container (docker)
+  - name: Convert a single-container webapp (DOCKER|) to sitecontainers
     text: az webapp sitecontainers convert --mode sitecontainers --name MyWebApp --resource-group MyResourceGroup
+  - name: Convert a multi-container webapp (COMPOSE|) to sitecontainers
+    text: az webapp sitecontainers convert --mode sitecontainers --name MyWebApp --resource-group MyResourceGroup
+  - name: Convert a COMPOSE app to sitecontainers specifying which service is the main container
+    text: az webapp sitecontainers convert --mode sitecontainers --name MyWebApp --resource-group MyResourceGroup --main-container-name web
 """
 
 

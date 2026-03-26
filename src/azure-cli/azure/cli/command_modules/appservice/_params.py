@@ -383,6 +383,10 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context("webapp sitecontainers convert") as c:
         c.argument('mode', options_list=['--mode'], help='Mode for conversion.',
                    arg_type=get_enum_type(['docker', 'sitecontainers']))
+        c.argument('main_container_name', options_list=['--main-container-name'],
+                   help='For COMPOSE to sitecontainers conversion, specifies which '
+                        'compose service should be the main container. If not provided, '
+                        'the service with a port mapping is auto-detected.')
 
     with self.argument_context('webapp show') as c:
         c.argument('name', arg_type=webapp_name_arg_type)
