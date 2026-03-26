@@ -83,8 +83,8 @@ register_argument_deprecate('postgres flexible-server replica create', '--replic
 
 # Server create command will stop creating new or altering existing network resources required for the server to function, such as virtual networks, subnets, IP ranges, etc. It will instead require users to provide the necessary network resources precreated using the corresponding commands from the `az network` module. That change will take effect in next breaking change release(2.86.0) scheduled for May 2026.
 register_other_breaking_change('postgres flexible-server create',
-                               message='This command will stop creating new or altering existing '
-                               'network resources required for the server to function, such as virtual networks, '
+                               message='This command will stop creating new network resources or altering '
+                               'existing ones which are required for the server to function, such as virtual networks, '
                                'subnets, IP ranges, etc. It will instead require users to provide the necessary '
                                'network resources precreated using the corresponding commands from the '
                                '`az network` module. This change will take effect in next breaking change '
@@ -92,8 +92,8 @@ register_other_breaking_change('postgres flexible-server create',
 
 # Replica create command will stop creating new or altering existing network resources required for the server to function, such as virtual networks, subnets, IP ranges, etc. It will instead require users to provide the necessary network resources precreated using the corresponding commands from the `az network` module. That change will take effect in next breaking change release(2.86.0) scheduled for May 2026.
 register_other_breaking_change('postgres flexible-server replica create',
-                               message='This command will stop creating new or altering existing '
-                               'network resources required for the server to function, such as virtual networks, '
+                               message='This command will stop creating new network resources or altering '
+                               'existing ones which are required for the server to function, such as virtual networks, '
                                'subnets, IP ranges, etc. It will instead require users to provide the necessary '
                                'network resources precreated using the corresponding commands from the '
                                '`az network` module. This change will take effect in next breaking change '
@@ -101,8 +101,8 @@ register_other_breaking_change('postgres flexible-server replica create',
 
 # Server restore command will stop creating new or altering existing network resources required for the server to function, such as virtual networks, subnets, IP ranges, etc. It will instead require users to provide the necessary network resources precreated using the corresponding commands from the `az network` module. That change will take effect in next breaking change release(2.86.0) scheduled for May 2026.
 register_other_breaking_change('postgres flexible-server restore',
-                               message='This command will stop creating new or altering existing '
-                               'network resources required for the server to function, such as virtual networks, '
+                               message='This command will stop creating new network resources or altering '
+                               'existing ones which are required for the server to function, such as virtual networks, '
                                'subnets, IP ranges, etc. It will instead require users to provide the necessary '
                                'network resources precreated using the corresponding commands from the '
                                '`az network` module. This change will take effect in next breaking change '
@@ -110,8 +110,8 @@ register_other_breaking_change('postgres flexible-server restore',
 
 # Server geo-restore command will stop creating new or altering existing network resources required for the server to function, such as virtual networks, subnets, IP ranges, etc. It will instead require users to provide the necessary network resources precreated using the corresponding commands from the `az network` module. That change will take effect in next breaking change release(2.86.0) scheduled for May 2026.
 register_other_breaking_change('postgres flexible-server geo-restore',
-                               message='This command will stop creating new or altering existing '
-                               'network resources required for the server to function, such as virtual networks, '
+                               message='This command will stop creating new network resources or altering '
+                               'existing ones which are required for the server to function, such as virtual networks, '
                                'subnets, IP ranges, etc. It will instead require users to provide the necessary '
                                'network resources precreated using the corresponding commands from the '
                                '`az network` module. This change will take effect in next breaking change '
@@ -120,8 +120,8 @@ register_other_breaking_change('postgres flexible-server geo-restore',
 
 # Revive dropped server command will stop creating new or altering existing network resources required for the server to function, such as virtual networks, subnets, IP ranges, etc. It will instead require users to provide the necessary network resources precreated using the corresponding commands from the `az network` module. That change will take effect in next breaking change release(2.86.0) scheduled for May 2026.
 register_other_breaking_change('postgres flexible-server revive-dropped',
-                               message='This command will stop creating new or altering existing '
-                               'network resources required for the server to function, such as virtual networks, '
+                               message='This command will stop creating new network resources or altering '
+                               'existing ones which are required for the server to function, such as virtual networks, '
                                'subnets, IP ranges, etc. It will instead require users to provide the necessary '
                                'network resources precreated using the corresponding commands from the '
                                '`az network` module. This change will take effect in next breaking change '
