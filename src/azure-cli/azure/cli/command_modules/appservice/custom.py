@@ -6605,7 +6605,7 @@ def _get_cert(certificate_password, certificate_file):
 
 def list_ssl_certs(cmd, resource_group_name):
     client = web_client_factory(cmd.cli_ctx)
-    return client.certificates.list_by_resource_group(resource_group_name)
+    return list(client.certificates.list_by_resource_group(resource_group_name))
 
 
 def show_ssl_cert(cmd, resource_group_name, certificate_name):
@@ -6615,7 +6615,7 @@ def show_ssl_cert(cmd, resource_group_name, certificate_name):
 
 def delete_ssl_cert(cmd, resource_group_name, certificate_thumbprint):
     client = web_client_factory(cmd.cli_ctx)
-    webapp_certs = client.certificates.list_by_resource_group(resource_group_name)
+    webapp_certs = list(client.certificates.list_by_resource_group(resource_group_name))
     for webapp_cert in webapp_certs:
         if webapp_cert.thumbprint == certificate_thumbprint:
             return client.certificates.delete(resource_group_name, webapp_cert.name)
@@ -6804,7 +6804,7 @@ def _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint, 
         raise ResourceNotFoundError("'{}' app doesn't exist".format(name))
 
     cert_resource_group_name = parse_resource_id(webapp.server_farm_id)['resource_group']
-    webapp_certs = client.certificates.list_by_resource_group(cert_resource_group_name)
+    webapp_certs = list(client.certificates.list_by_resource_group(cert_resource_group_name))
 
     found_cert = None
     # search for a cert that matches in the app service plan's RG
@@ -6813,7 +6813,7 @@ def _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint, 
             found_cert = webapp_cert
     # search for a cert that matches in the webapp's RG
     if not found_cert:
-        webapp_certs = client.certificates.list_by_resource_group(resource_group_name)
+        webapp_certs = list(client.certificates.list_by_resource_group(resource_group_name))
         for webapp_cert in webapp_certs:
             if webapp_cert.thumbprint == certificate_thumbprint:
                 found_cert = webapp_cert

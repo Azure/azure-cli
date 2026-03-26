@@ -13,7 +13,8 @@ from knack.util import CLIError
 from azure.cli.core.azclierror import (InvalidArgumentValueError,
                                        MutuallyExclusiveArgumentError,
                                        AzureResponseError,
-                                       ArgumentUsageError)
+                                       ArgumentUsageError,
+                                       ResourceNotFoundError)
 from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          update_git_token, add_hostname,
                                                          update_site_configs,
@@ -31,6 +32,8 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          list_snapshots,
                                                          restore_snapshot,
                                                          create_managed_ssl_cert,
+                                                         list_ssl_certs,
+                                                         delete_ssl_cert,
                                                          add_github_actions,
                                                          update_app_settings,
                                                          update_application_settings_polling,
@@ -701,6 +704,69 @@ class TestCreateAppServicePlanDefaults(unittest.TestCase):
         call_kwargs = sku_description_cls.call_args
         # The sku name should be normalized P0V3
         self.assertIn('P0V3', str(call_kwargs))
+
+
+class TestSSLCertPagination(unittest.TestCase):
+    """Tests for SSL certificate pagination fix (#29403, #28722, #27950)."""
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    def test_list_ssl_certs_returns_all_pages(self, client_factory_mock):
+        """Ensure list_ssl_certs fully consumes the pager and returns a list."""
+        cmd_mock = _get_test_cmd()
+
+        cert1 = mock.MagicMock()
+        cert1.name = 'cert1'
+        cert2 = mock.MagicMock()
+        cert2.name = 'cert2'
+        cert3 = mock.MagicMock()
+        cert3.name = 'cert3'
+
+        client = mock.MagicMock()
+        client_factory_mock.return_value = client
+        client.certificates.list_by_resource_group.return_value = iter([cert1, cert2, cert3])
+
+        result = list_ssl_certs(cmd_mock, 'myRG')
+
+        self.assertIsInstance(result, list)
+        self.assertEqual(len(result), 3)
+        client.certificates.list_by_resource_group.assert_called_once_with('myRG')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    def test_delete_ssl_cert_finds_cert_beyond_first_page(self, client_factory_mock):
+        """Ensure delete_ssl_cert can find a cert that would be on a later page."""
+        cmd_mock = _get_test_cmd()
+
+        certs = []
+        for i in range(100):
+            c = mock.MagicMock()
+            c.thumbprint = f'THUMB{i:04d}'
+            c.name = f'cert{i}'
+            certs.append(c)
+
+        client = mock.MagicMock()
+        client_factory_mock.return_value = client
+        client.certificates.list_by_resource_group.return_value = iter(certs)
+
+        target_thumbprint = 'THUMB0099'
+        delete_ssl_cert(cmd_mock, 'myRG', target_thumbprint)
+
+        client.certificates.delete.assert_called_once_with('myRG', 'cert99')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    def test_delete_ssl_cert_not_found_raises_error(self, client_factory_mock):
+        """Ensure delete_ssl_cert raises ResourceNotFoundError for missing thumbprint."""
+        cmd_mock = _get_test_cmd()
+
+        cert = mock.MagicMock()
+        cert.thumbprint = 'AAAA'
+        cert.name = 'cert1'
+
+        client = mock.MagicMock()
+        client_factory_mock.return_value = client
+        client.certificates.list_by_resource_group.return_value = iter([cert])
+
+        with self.assertRaises(ResourceNotFoundError):
+            delete_ssl_cert(cmd_mock, 'myRG', 'NONEXISTENT')
 
 
 if __name__ == '__main__':
