@@ -3340,6 +3340,9 @@ helps['webapp deploy'] = """
     long-summary: |
         Deploys a zip, war, jar, ear, static file, startup script, or library to an existing Azure Web App.
         The web app must already exist — use 'az webapp create' to create one first.
+        Supports deploying from local files (--src-path) or remote URLs (--src-url).
+        When --track-status is enabled (the default for Linux web apps), the command monitors
+        application startup after deployment by polling health endpoints.
 
         IMPORTANT: Zip deployment does NOT automatically run build automation (dependency installation,
         compilation, etc.). If your package is not pre-built, you must set the
@@ -3359,4 +3362,14 @@ helps['webapp deploy'] = """
       text: az webapp deploy --resource-group ResourceGroup --name AppName --src-path SourcePath --type static --target-path staticfiles/test.txt
     - name: Deploy a zip file with enriched error diagnostics on failure.
       text: az webapp deploy -g ResourceGroup -n AppName --src-path app.zip --enriched-errors true
+    - name: Deploy a zip file from a remote URL.
+      text: az webapp deploy --resource-group ResourceGroup --name AppName --src-url https://example.com/app.zip
+    - name: Deploy without cleaning the target directory.
+      text: az webapp deploy --resource-group ResourceGroup --name AppName --src-path app.zip --clean false
+    - name: Deploy with runtime status tracking for Linux web app.
+      text: az webapp deploy --resource-group ResourceGroup --name AppName --src-path app.zip --track-status true --async false
+    - name: Deploy to a specific slot.
+      text: az webapp deploy --resource-group ResourceGroup --name AppName --src-path app.jar --type jar --slot staging
+    - name: Deploy a static text file to a custom path.
+      text: az webapp deploy --resource-group ResourceGroup --name AppName --src-path file.txt --type static --target-path staticfiles/file.txt
 """
