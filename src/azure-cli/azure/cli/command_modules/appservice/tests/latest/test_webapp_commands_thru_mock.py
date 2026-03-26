@@ -33,7 +33,8 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          add_github_actions,
                                                          update_app_settings,
                                                          update_application_settings_polling,
-                                                         update_webapp)
+                                                         update_webapp,
+                                                         config_source_control)
 
 # pylint: disable=line-too-long
 from azure.cli.core.profiles import ResourceType
@@ -637,6 +638,114 @@ class TestUpdateWebapp(unittest.TestCase):
         result = update_webapp(cmd_mock, instance, platform_release_channel='Latest')
 
         self.assertEqual(result.additional_properties["properties"]["platformReleaseChannel"], "Latest")
+
+
+class TestServicePrincipalDeploymentSource(unittest.TestCase):
+    """Tests for Service Principal authentication detection in deployment source config"""
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._is_service_principal_auth')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_location_from_webapp')
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
+    def test_config_source_control_with_sp_and_github_action_raises_error(
+        self, web_client_factory_mock, get_location_mock, is_sp_auth_mock
+    ):
+        """Test that SP auth + --github-action raises ValidationError"""
+        from azure.cli.core.azclierror import ValidationError
+        
+        # Setup mocks
+        is_sp_auth_mock.return_value = True
+        get_location_mock.return_value = 'eastus'
+        
+        cmd = _get_test_cmd()
+        
+        # Execute and assert
+        with self.assertRaises(ValidationError) as context:
+            config_source_control(
+                cmd,
+                resource_group_name='test-rg',
+                name='test-app',
+                repo_url='https://github.com/test/repo',
+                github_action=True
+            )
+        
+        self.assertIn('Service Principal authentication', str(context.exception))
+        self.assertIn('az webapp deployment github-actions add', str(context.exception))
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._is_service_principal_auth')
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_location_from_webapp')
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
+    def test_config_source_control_with_user_and_github_action_succeeds(
+        self, web_client_factory_mock, get_location_mock, generic_site_op_mock, is_sp_auth_mock
+    ):
+        """Test that user auth + --github-action passes through (no error raised)"""
+        
+        # Setup mocks
+        is_sp_auth_mock.return_value = False  # User authentication
+        get_location_mock.return_value = 'eastus'
+        
+        # Mock the site operation to return a mock response
+        mock_poller = mock.Mock()
+        mock_poller.done.return_value = True
+        mock_response = mock.Mock()
+        mock_response.git_hub_action_configuration = None
+        mock_poller.result.return_value = mock_response
+        generic_site_op_mock.return_value = mock_poller
+        
+        cmd = _get_test_cmd()
+        
+        # Execute - should not raise an error
+        config_source_control(
+            cmd,
+            resource_group_name='test-rg',
+            name='test-app',
+            repo_url='https://github.com/test/repo',
+            github_action=True
+        )
+
+        # Assert _generic_site_operation was called with correct SiteSourceControl
+        generic_site_op_mock.assert_called_once()
+        call_args = generic_site_op_mock.call_args
+        source_control_arg = call_args[0][5]
+        self.assertTrue(source_control_arg.is_git_hub_action)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._is_service_principal_auth')
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_location_from_webapp')
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
+    def test_config_source_control_with_sp_without_github_action_succeeds(
+        self, web_client_factory_mock, get_location_mock, generic_site_op_mock, is_sp_auth_mock
+    ):
+        """Test that SP auth without --github-action passes through (no error raised)"""
+        
+        # Setup mocks
+        is_sp_auth_mock.return_value = True  # Service Principal authentication
+        get_location_mock.return_value = 'eastus'
+        
+        # Mock the site operation to return a mock response
+        mock_poller = mock.Mock()
+        mock_poller.done.return_value = True
+        mock_response = mock.Mock()
+        mock_response.git_hub_action_configuration = None
+        mock_poller.result.return_value = mock_response
+        generic_site_op_mock.return_value = mock_poller
+        
+        cmd = _get_test_cmd()
+        
+        # Execute - should not raise an error when github_action is None/False
+        config_source_control(
+            cmd,
+            resource_group_name='test-rg',
+            name='test-app',
+            repo_url='https://github.com/test/repo',
+            github_action=None  # Not using GitHub Actions
+        )
+
+        # Assert _generic_site_operation was called with correct SiteSourceControl
+        generic_site_op_mock.assert_called_once()
+        call_args = generic_site_op_mock.call_args
+        source_control_arg = call_args[0][5]
+        self.assertFalse(source_control_arg.is_git_hub_action)
 
 
 class FakedResponse:  # pylint: disable=too-few-public-methods

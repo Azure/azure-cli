@@ -117,6 +117,17 @@ logger = get_logger(__name__)
 # Please maintain compatibility in both interfaces and functionalities"
 
 
+def _is_service_principal_auth(cli_ctx):
+    """Check if current authentication is via Service Principal."""
+    from azure.cli.core._profile import Profile
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    profile = Profile(cli_ctx=cli_ctx)
+    subscription_id = get_subscription_id(cli_ctx)
+    account = profile.get_subscription(subscription=subscription_id)
+    # Service principals have user.type == 'servicePrincipal'
+    return account.get('user', {}).get('type') == 'servicePrincipal'
+
+
 def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_file=None,  # pylint: disable=too-many-statements,too-many-branches
                   deployment_container_image_name=None, deployment_source_url=None, deployment_source_branch='master',
                   deployment_local_git=None, sitecontainers_app=None,
@@ -3996,6 +4007,13 @@ def config_source_control(cmd, resource_group_name, name, repo_url, repository_t
                           manual_integration=None, git_token=None, slot=None, github_action=None):
     client = web_client_factory(cmd.cli_ctx)
     location = _get_location_from_webapp(client, resource_group_name, name)
+
+    # Check for Service Principal + GitHub Actions incompatibility
+    if github_action and _is_service_principal_auth(cmd.cli_ctx):
+        raise ValidationError(
+            "GitHub Actions deployment cannot be configured with Service Principal authentication. "
+            "Use 'az webapp deployment github-actions add' instead, which supports Service Principal workflows."
+        )
 
     from azure.mgmt.web.models import SiteSourceControl, SourceControl
     if git_token:
