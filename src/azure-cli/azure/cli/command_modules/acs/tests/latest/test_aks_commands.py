@@ -7884,6 +7884,11 @@ spec:
             self.check('azureMonitorProfile.metrics.enabled', True),
         ])
 
+        # wait for cluster to fully settle before issuing next update
+        self.cmd('aks wait --resource-group={resource_group} --name={name} --updated --interval 30 --timeout 600')
+        if self.is_live or self.in_recording:
+            time.sleep(60)
+
         # update: disable-azure-monitor-metrics
         update_cmd = 'aks update --resource-group={resource_group} --name={name} --yes --output=json ' \
                      '--disable-azure-monitor-metrics'
