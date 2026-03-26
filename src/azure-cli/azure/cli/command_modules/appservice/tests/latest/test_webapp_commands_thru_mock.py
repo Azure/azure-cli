@@ -762,7 +762,7 @@ class TestTunnelServer(unittest.TestCase):
         # Fail twice, succeed on third
         mock_create_conn.side_effect = [ConnectionError("fail1"), ConnectionError("fail2"), mock_ws]
 
-        with mock.patch('azure.cli.command_modules.appservice.tunnel.time.sleep'):
+        with mock.patch.object(server._closing, 'wait'):
             result = server._create_websocket_connection(
                 'wss://test/Tunnel.ashx', ['Authorization: Basic dGVzdDp0ZXN0'], 0)
 
@@ -789,7 +789,7 @@ class TestTunnelServer(unittest.TestCase):
 
         mock_create_conn.side_effect = ConnectionError("always fail")
 
-        with mock.patch('azure.cli.command_modules.appservice.tunnel.time.sleep'):
+        with mock.patch.object(server._closing, 'wait'):
             with self.assertRaises(CLIError) as ctx:
                 server._create_websocket_connection(
                     'wss://test/Tunnel.ashx', ['Authorization: Basic dGVzdDp0ZXN0'], 0)

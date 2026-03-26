@@ -8,7 +8,6 @@ import sys
 import ssl
 import json
 import socket
-import time
 import traceback
 import logging as logs
 from contextlib import closing
@@ -148,7 +147,7 @@ class TunnelServer:
                         'Failed to establish WebSocket tunnel connection after {} attempts. '
                         'Last error: {}'.format(_MAX_RECONNECT_ATTEMPTS, ex))
                 logger.warning('Retrying WebSocket connection in %s seconds...', delay)
-                time.sleep(delay)
+                self._closing.wait(delay)
                 delay = min(delay * 2, _MAX_RECONNECT_DELAY)
         return None  # pragma: no cover
 

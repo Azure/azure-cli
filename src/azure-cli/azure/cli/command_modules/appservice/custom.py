@@ -10753,7 +10753,6 @@ def _register_tunnel_cleanup(tunnel_server):
     def _signal_handler(signum, frame):  # pylint: disable=unused-argument
         logger.warning('Received signal %s, shutting down tunnel...', signum)
         tunnel_server.close()
-        sys.exit(0)
 
     signal.signal(signal.SIGINT, _signal_handler)
     signal.signal(signal.SIGTERM, _signal_handler)
