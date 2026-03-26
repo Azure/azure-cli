@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=protected-access
+# pylint: disable=protected-access, line-too-long
 
 from azure.cli.core.aaz import register_command
 from azure.cli.command_modules.monitor.aaz.latest.monitor.private_link_scope.private_endpoint_connection._update \
