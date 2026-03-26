@@ -616,6 +616,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
+            'location': resource_group_location,
             'http_proxy_path': get_test_data_file_path('httpproxyconfig.json').replace('\\', '\\\\'),
             'custom_data_path': get_test_data_file_path('setup_proxy.sh').replace('\\', '\\\\'),
             'ssh_key_value': self.generate_ssh_keys()
@@ -633,7 +634,25 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             --vnet-name={name} \
             --name proxy-subnet \
             --address-prefix 10.42.3.0/24'
-            # --default-outbound false  # disable outbound connection would fail cluster creation
+
+        # NAT gateway gives the proxy VM outbound internet access (no public IP on the VM)
+        create_nat_pip_cmd = 'network public-ip create \
+            --resource-group={resource_group} \
+            --name=nat-pip \
+            --sku Standard \
+            --location={location}'
+
+        create_nat_gw_cmd = 'network nat gateway create \
+            --resource-group={resource_group} \
+            --name=nat-gw \
+            --public-ip-addresses nat-pip \
+            --location={location}'
+
+        attach_nat_proxy_cmd = 'network vnet subnet update \
+            --resource-group={resource_group} \
+            --vnet-name={name} \
+            --name proxy-subnet \
+            --nat-gateway nat-gw'
 
         show_subnet_cmd = 'network vnet subnet show \
             --resource-group={resource_group} \
@@ -660,6 +679,10 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(create_subnet_cmd, checks=[
             self.check('provisioningState', 'Succeeded')
         ])
+
+        self.cmd(create_nat_pip_cmd)
+        self.cmd(create_nat_gw_cmd)
+        self.cmd(attach_nat_proxy_cmd)
 
         subnet_output = self.cmd(show_subnet_cmd).get_output_in_json()
         subnet_id = subnet_output["id"]
