@@ -20,6 +20,7 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          view_in_browser,
                                                          sync_site_repo,
                                                          _match_host_names_from_cert,
+                                                         _update_host_name_ssl_state,
                                                          bind_ssl_cert,
                                                          list_publish_profiles,
                                                          show_app,
@@ -637,6 +638,59 @@ class TestUpdateWebapp(unittest.TestCase):
         result = update_webapp(cmd_mock, instance, platform_release_channel='Latest')
 
         self.assertEqual(result.additional_properties["properties"]["platformReleaseChannel"], "Latest")
+
+
+class TestUpdateHostNameSslState(unittest.TestCase):
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
+    def test_update_host_name_ssl_state_passes_full_site(self, generic_site_op_mock):
+        """Test that _update_host_name_ssl_state passes the full Site object (not a partial one)
+        to begin_create_or_update, preserving policy-sensitive fields like https_only."""
+        cmd_mock = _get_test_cmd()
+        Site, HostNameSslState, SslState = cmd_mock.get_models('Site', 'HostNameSslState', 'SslState')
+
+        webapp = Site(name='mySite', location='eastus', tags={'env': 'prod'})
+        webapp.https_only = True
+        webapp.host_name_ssl_states = [
+            HostNameSslState(name='existing.contoso.com',
+                             ssl_state=SslState.sni_enabled,
+                             thumbprint='EXISTINGTHUMB')
+        ]
+
+        _update_host_name_ssl_state(cmd_mock, 'myRg', 'mySite', webapp,
+                                    'www.contoso.com', SslState.sni_enabled, 'NEWTHUMB')
+
+        generic_site_op_mock.assert_called_once()
+        call_args = generic_site_op_mock.call_args
+        passed_site = call_args[0][5]  # (cli_ctx, rg, name, op, slot, site)
+
+        # The passed object should be the original webapp, preserving all fields
+        self.assertTrue(passed_site.https_only,
+                        "https_only must be preserved to avoid Azure Policy denial")
+        self.assertEqual(passed_site.location, 'eastus')
+        self.assertEqual(passed_site.tags, {'env': 'prod'})
+
+        # host_name_ssl_states should contain only the binding being updated
+        self.assertEqual(len(passed_site.host_name_ssl_states), 1)
+        ssl_state = passed_site.host_name_ssl_states[0]
+        self.assertEqual(ssl_state.name, 'www.contoso.com')
+        self.assertEqual(ssl_state.thumbprint, 'NEWTHUMB')
+        self.assertTrue(ssl_state.to_update)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
+    def test_update_host_name_ssl_state_with_slot(self, generic_site_op_mock):
+        """Test that slot parameter is correctly forwarded."""
+        cmd_mock = _get_test_cmd()
+        Site, SslState = cmd_mock.get_models('Site', 'SslState')
+        webapp = Site(name='mySite', location='westus')
+
+        _update_host_name_ssl_state(cmd_mock, 'myRg', 'mySite', webapp,
+                                    'www.contoso.com', SslState.sni_enabled, 'THUMB', slot='staging')
+
+        call_args = generic_site_op_mock.call_args
+        # slot is the 5th positional arg (index 4) after cli_ctx, rg, name, operation_name
+        self.assertEqual(call_args[0][4], 'staging')
+        # site is the 6th positional arg (index 5)
+        self.assertIs(call_args[0][5], webapp)
 
 
 class FakedResponse:  # pylint: disable=too-few-public-methods
