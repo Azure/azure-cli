@@ -33,6 +33,8 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          add_github_actions,
                                                          update_app_settings,
                                                          update_application_settings_polling,
+                                                         update_container_settings,
+                                                         _is_key_vault_reference,
                                                          update_webapp)
 
 # pylint: disable=line-too-long
@@ -637,6 +639,91 @@ class TestUpdateWebapp(unittest.TestCase):
         result = update_webapp(cmd_mock, instance, platform_release_channel='Latest')
 
         self.assertEqual(result.additional_properties["properties"]["platformReleaseChannel"], "Latest")
+
+
+class TestUpdateContainerSettingsPreservesKeyVaultRefs(unittest.TestCase):
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_fx_version', return_value='DOCKER|myimage:latest')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_app_settings')
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_settings_operation')
+    @mock.patch('azure.cli.command_modules.appservice.custom.is_centauri_functionapp', return_value=False)
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
+    def test_container_set_preserves_kv_ref_settings(self, mock_site_op, mock_client_factory,
+                                                     mock_centauri, mock_settings_op,
+                                                     mock_get_app_settings, mock_get_fx):
+        """Key Vault reference app settings must survive az webapp config container set."""
+        cmd_mock = _get_test_cmd()
+
+        kv_ref = '@Microsoft.KeyVault(SecretUri=https://myvault.vault.azure.net/secrets/mysecret)'
+        existing_properties = {
+            'MY_KV_SECRET': kv_ref,
+            'NORMAL_SETTING': 'normal_value',
+            'DOCKER_REGISTRY_SERVER_URL': 'https://old.azurecr.io',
+        }
+        mock_app_settings = mock.MagicMock()
+        mock_app_settings.properties = dict(existing_properties)
+        mock_site_op.return_value = mock_app_settings
+
+        mock_get_app_settings.return_value = [
+            {'name': 'MY_KV_SECRET', 'value': kv_ref, 'slotSetting': False},
+            {'name': 'NORMAL_SETTING', 'value': 'normal_value', 'slotSetting': False},
+            {'name': 'DOCKER_REGISTRY_SERVER_URL', 'value': 'https://new.example.io', 'slotSetting': False},
+        ]
+
+        update_container_settings(cmd_mock, 'test-rg', 'test-app',
+                                  container_registry_url='https://new.example.io')
+
+        # The settings written back must still contain the KV ref and normal setting
+        written_props = mock_app_settings.properties
+        self.assertEqual(written_props['MY_KV_SECRET'], kv_ref)
+        self.assertEqual(written_props['NORMAL_SETTING'], 'normal_value')
+        self.assertEqual(written_props['DOCKER_REGISTRY_SERVER_URL'], 'https://new.example.io')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_fx_version', return_value='DOCKER|myimage:latest')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_app_settings')
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_settings_operation')
+    @mock.patch('azure.cli.command_modules.appservice.custom.is_centauri_functionapp', return_value=False)
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
+    def test_container_set_skips_acr_auto_detect_when_kv_refs(self, mock_site_op, mock_client_factory,
+                                                              mock_centauri, mock_settings_op,
+                                                              mock_get_app_settings, mock_get_fx):
+        """ACR credential auto-detection must be skipped when existing creds are KV references."""
+        cmd_mock = _get_test_cmd()
+
+        kv_user = '@Microsoft.KeyVault(SecretUri=https://vault.vault.azure.net/secrets/user)'
+        kv_pass = '@Microsoft.KeyVault(SecretUri=https://vault.vault.azure.net/secrets/pass)'
+        existing_properties = {
+            'DOCKER_REGISTRY_SERVER_URL': 'https://old.azurecr.io',
+            'DOCKER_REGISTRY_SERVER_USERNAME': kv_user,
+            'DOCKER_REGISTRY_SERVER_PASSWORD': kv_pass,
+        }
+        mock_app_settings = mock.MagicMock()
+        mock_app_settings.properties = dict(existing_properties)
+        mock_site_op.return_value = mock_app_settings
+
+        mock_get_app_settings.return_value = [
+            {'name': 'DOCKER_REGISTRY_SERVER_URL', 'value': 'https://myregistry.azurecr.io', 'slotSetting': False},
+        ]
+
+        with mock.patch('azure.cli.command_modules.appservice.custom._get_acr_cred') as mock_acr_cred:
+            update_container_settings(cmd_mock, 'test-rg', 'test-app',
+                                      container_registry_url='https://myregistry.azurecr.io')
+            # _get_acr_cred should NOT have been called because existing creds are KV refs
+            mock_acr_cred.assert_not_called()
+
+        # Existing KV references for username/password must be preserved
+        written_props = mock_app_settings.properties
+        self.assertEqual(written_props['DOCKER_REGISTRY_SERVER_USERNAME'], kv_user)
+        self.assertEqual(written_props['DOCKER_REGISTRY_SERVER_PASSWORD'], kv_pass)
+
+    def test_is_key_vault_reference_detects_kv_refs(self):
+        self.assertTrue(_is_key_vault_reference('@Microsoft.KeyVault(SecretUri=https://v.vault.azure.net/secrets/s)'))
+        self.assertTrue(_is_key_vault_reference('  @Microsoft.KeyVault(VaultName=v;SecretName=s)'))
+        self.assertFalse(_is_key_vault_reference('plain_value'))
+        self.assertFalse(_is_key_vault_reference(''))
+        self.assertFalse(_is_key_vault_reference(None))
 
 
 class FakedResponse:  # pylint: disable=too-few-public-methods
