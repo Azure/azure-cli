@@ -13,7 +13,9 @@ from knack.util import CLIError
 from azure.cli.core.azclierror import (InvalidArgumentValueError,
                                        MutuallyExclusiveArgumentError,
                                        AzureResponseError,
-                                       ArgumentUsageError)
+                                       ArgumentUsageError,
+                                       ResourceNotFoundError,
+                                       ValidationError)
 from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          update_git_token, add_hostname,
                                                          update_site_configs,
@@ -35,7 +37,8 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          update_app_settings,
                                                          update_application_settings_polling,
                                                          update_webapp,
-                                                         create_webapp)
+                                                         create_webapp,
+                                                         _send_deploy_request)
 
 # pylint: disable=line-too-long
 from azure.cli.core.profiles import ResourceType
@@ -669,6 +672,118 @@ class TestUpdateWebapp(unittest.TestCase):
         result = update_webapp(cmd_mock, instance, platform_release_channel='Latest')
 
         self.assertEqual(result.additional_properties["properties"]["platformReleaseChannel"], "Latest")
+
+
+class TestSendDeployRequest(unittest.TestCase):
+    """Tests for _send_deploy_request wrapper that provides actionable error messages."""
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    def test_success_passes_through(self, send_raw_request_mock):
+        """Successful responses (200/202) should pass through unchanged."""
+        cli_ctx = _get_test_cmd().cli_ctx
+        response = mock.MagicMock()
+        response.status_code = 202
+        send_raw_request_mock.return_value = response
+
+        result = _send_deploy_request(cli_ctx, 'https://management.azure.com/deploy', '{"properties":{}}')
+
+        self.assertEqual(result, response)
+        send_raw_request_mock.assert_called_once_with(
+            cli_ctx, "PUT", 'https://management.azure.com/deploy', body='{"properties":{}}'
+        )
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    def test_400_with_empty_body_gives_actionable_error(self, send_raw_request_mock):
+        """HTTP 400 with empty body should produce a helpful error message instead of bare 'Bad Request'."""
+        from azure.cli.core.azclierror import HTTPError
+        cli_ctx = _get_test_cmd().cli_ctx
+
+        response = mock.MagicMock()
+        response.status_code = 400
+        response.reason = "Bad Request"
+        response.text = ""
+        send_raw_request_mock.side_effect = HTTPError("Bad Request", response)
+
+        with self.assertRaises(CLIError) as ctx:
+            _send_deploy_request(cli_ctx, 'https://management.azure.com/deploy', '{"properties":{}}')
+
+        error_msg = str(ctx.exception)
+        self.assertIn("Deployment from URL failed with status 400 (Bad Request)", error_msg)
+        self.assertIn("source URL is not publicly accessible", error_msg)
+        self.assertIn("SAS token has expired", error_msg)
+        self.assertIn("artifact type does not match", error_msg)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    def test_400_with_response_body_includes_details(self, send_raw_request_mock):
+        """HTTP 400 with a response body should include the details in the error."""
+        from azure.cli.core.azclierror import HTTPError
+        cli_ctx = _get_test_cmd().cli_ctx
+
+        response = mock.MagicMock()
+        response.status_code = 400
+        response.reason = "Bad Request"
+        response.text = "Invalid package URI"
+        send_raw_request_mock.side_effect = HTTPError("Bad Request(Invalid package URI)", response)
+
+        with self.assertRaises(CLIError) as ctx:
+            _send_deploy_request(cli_ctx, 'https://management.azure.com/deploy', '{"properties":{}}')
+
+        error_msg = str(ctx.exception)
+        self.assertIn("Deployment from URL failed with status 400", error_msg)
+        self.assertIn("Invalid package URI", error_msg)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    def test_404_gives_not_found_error(self, send_raw_request_mock):
+        """HTTP 404 should raise ResourceNotFoundError with guidance."""
+        from azure.cli.core.azclierror import HTTPError
+        cli_ctx = _get_test_cmd().cli_ctx
+
+        response = mock.MagicMock()
+        response.status_code = 404
+        response.reason = "Not Found"
+        response.text = ""
+        send_raw_request_mock.side_effect = HTTPError("Not Found", response)
+
+        with self.assertRaises(ResourceNotFoundError) as ctx:
+            _send_deploy_request(cli_ctx, 'https://management.azure.com/deploy', '{"properties":{}}')
+
+        error_msg = str(ctx.exception)
+        self.assertIn("Deployment from URL failed with status 404", error_msg)
+        self.assertIn("app or OneDeploy endpoint could not be found", error_msg)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    def test_409_gives_conflict_error(self, send_raw_request_mock):
+        """HTTP 409 should raise ValidationError about in-progress deployment."""
+        from azure.cli.core.azclierror import HTTPError
+        cli_ctx = _get_test_cmd().cli_ctx
+
+        response = mock.MagicMock()
+        response.status_code = 409
+        response.reason = "Conflict"
+        response.text = ""
+        send_raw_request_mock.side_effect = HTTPError("Conflict", response)
+
+        with self.assertRaises(ValidationError) as ctx:
+            _send_deploy_request(cli_ctx, 'https://management.azure.com/deploy', '{"properties":{}}')
+
+        error_msg = str(ctx.exception)
+        self.assertIn("Deployment from URL failed with status 409", error_msg)
+        self.assertIn("Another deployment is currently in progress", error_msg)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    def test_unhandled_error_reraises(self, send_raw_request_mock):
+        """Unhandled HTTP errors (e.g., 500) should re-raise without modification."""
+        from azure.cli.core.azclierror import HTTPError
+        cli_ctx = _get_test_cmd().cli_ctx
+
+        response = mock.MagicMock()
+        response.status_code = 500
+        response.reason = "Internal Server Error"
+        response.text = "Internal Server Error"
+        send_raw_request_mock.side_effect = HTTPError("Internal Server Error", response)
+
+        with self.assertRaises(HTTPError):
+            _send_deploy_request(cli_ctx, 'https://management.azure.com/deploy', '{"properties":{}}')
 
 
 class FakedResponse:  # pylint: disable=too-few-public-methods

@@ -10550,6 +10550,43 @@ def _warmup_kudu_and_get_cookie_internal(params):
     return None
 
 
+def _send_deploy_request(cli_ctx, deploy_url, body):
+    """Wrapper around send_raw_request for --src-url deployments that provides
+    actionable error messages instead of bare HTTP status codes."""
+    from azure.cli.core.azclierror import HTTPError
+    try:
+        return send_raw_request(cli_ctx, "PUT", deploy_url, body=body)
+    except HTTPError as ex:
+        resp = ex.response
+        status_code = resp.status_code if resp is not None else None
+        response_text = resp.text if resp is not None else ""
+        reason = getattr(resp, 'reason', None) or "Unknown"
+        error_detail = f" Details: {response_text}" if response_text else ""
+        if status_code == 400:
+            raise CLIError(
+                f"Deployment from URL failed with status 400 ({reason}).{error_detail}\n"
+                "Possible causes:\n"
+                "  - The source URL is not publicly accessible or the SAS token has expired\n"
+                "  - The URL does not point to a valid deployment artifact\n"
+                "  - The artifact type does not match the file content (e.g., --type zip for a non-zip file)\n"
+                "Please verify the URL is accessible and the artifact type is correct."
+            ) from ex
+        if status_code == 404:
+            raise ResourceNotFoundError(
+                f"Deployment from URL failed with status 404 ({reason}).{error_detail}\n"
+                "The target app or OneDeploy endpoint could not be found. "
+                "Verify that the resource group, app name, and slot (if any) are correct, "
+                "and that the app still exists."
+            ) from ex
+        if status_code == 409:
+            raise ValidationError(
+                f"Deployment from URL failed with status 409 ({reason}).{error_detail}\n"
+                "Another deployment is currently in progress. Please wait for the existing "
+                "deployment to complete before starting a new one."
+            ) from ex
+        raise
+
+
 def _make_onedeploy_request(params):
     import requests
     from azure.cli.core.util import should_disable_connection_verify
@@ -10597,16 +10634,16 @@ def _make_onedeploy_request(params):
                 if cookies is None:
                     logger.info("Failed to fetch affinity cookie for Kudu. "
                                 "Deployment will proceed without pre-warming a Kudu instance.")
-                    response = send_raw_request(params.cmd.cli_ctx, "PUT", deploy_url, body=body)
+                    response = _send_deploy_request(params.cmd.cli_ctx, deploy_url, body)
                 else:
                     deploy_arm_url = _build_onedeploy_url(params, cookies.get("ARRAffinity"))
-                    response = send_raw_request(params.cmd.cli_ctx, "PUT", deploy_arm_url, body=body)
+                    response = _send_deploy_request(params.cmd.cli_ctx, deploy_arm_url, body)
             except Exception as ex:  # pylint: disable=broad-except
                 logger.info("Failed to deploy using instances endpoint. "
                             "Deployment will proceed without pre-warming a Kudu instance. Ex: %s", ex)
-                response = send_raw_request(params.cmd.cli_ctx, "PUT", deploy_url, body=body)
+                response = _send_deploy_request(params.cmd.cli_ctx, deploy_url, body)
         else:
-            response = send_raw_request(params.cmd.cli_ctx, "PUT", deploy_url, body=body)
+            response = _send_deploy_request(params.cmd.cli_ctx, deploy_url, body)
         poll_async_deployment_for_debugging = False
 
     # check the status of deployment
