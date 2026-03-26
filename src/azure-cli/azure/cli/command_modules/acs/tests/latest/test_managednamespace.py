@@ -312,7 +312,7 @@ class TestUpdateManagedNamespace(unittest.TestCase):
 
         ns.aks_managed_namespace_update(cmd, mock_client, raw_parameters, None, existing_ns, False)
 
-        # The namespace that passed to begin_create_or_update should carry the existing location
+        # The namespace passed to begin_create_or_update should carry the existing location
         call_args = mock_client.begin_create_or_update.call_args
         namespace_config = call_args[0][3]  # 4th positional arg
         self.assertEqual(namespace_config.location, "westus2")
