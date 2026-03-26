@@ -117,7 +117,7 @@ cp squidc.pem /usr/local/share/ca-certificates/squidc.crt
 update-ca-certificates 
 
 sed -i 's~http_access deny all~http_access allow all~' /etc/squid/squid.conf
-sed -i "s~http_port 3128~http_port $HOST:3128\nhttps_port $HOST:3129 tls-cert=/etc/squid/squidc.pem tls-key=/etc/squid/squidk.pem~" /etc/squid/squid.conf
+sed -i "s~http_port 3128~http_port $HOST:3128~" /etc/squid/squid.conf
 
 systemctl restart squid
 systemctl status squid
@@ -125,5 +125,3 @@ systemctl status squid
 # validation, fails VM creation if commands fail
 curl -fsSl -o /dev/null -w '%{http_code}\n' -x http://${HOST}:3128/ -I http://www.google.com
 curl -fsSl -o /dev/null -w '%{http_code}\n' -x http://${HOST}:3128/ -I https://www.google.com
-curl -fsSl -o /dev/null -w '%{http_code}\n' -x https://${HOST}:3129/ -I http://www.google.com
-curl -fsSl -o /dev/null -w '%{http_code}\n' -x https://${HOST}:3129/ -I https://www.google.com
