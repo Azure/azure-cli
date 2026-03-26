@@ -14,7 +14,7 @@ from azure.cli.core.util import get_file_json
 from azure.mgmt.web.models import SkuDescription
 
 from ._constants import (NETCORE_RUNTIME_NAME, NODE_RUNTIME_NAME, ASPDOTNET_RUNTIME_NAME, STATIC_RUNTIME_NAME,
-                         PYTHON_RUNTIME_NAME, LINUX_SKU_DEFAULT, OS_DEFAULT, DOTNET_RUNTIME_NAME,
+                         PYTHON_RUNTIME_NAME, JAVA_RUNTIME_NAME, LINUX_SKU_DEFAULT, OS_DEFAULT, DOTNET_RUNTIME_NAME,
                          DOTNET_TARGET_FRAMEWORK_REGEX, GENERATE_RANDOM_APP_NAMES, DOTNET_REFERENCES_DIR_IN_ZIP)
 from .utils import get_resource_if_exists
 
@@ -190,6 +190,10 @@ def get_lang_from_content(src_path, html=False, is_linux=False):
     elif os.path.isfile(package_json_file) or os.path.isfile('server.js') or os.path.isfile('index.js'):
         runtime_details_dict['language'] = NODE_RUNTIME_NAME
         runtime_details_dict['file_loc'] = package_json_file if os.path.isfile(package_json_file) else ''
+        runtime_details_dict['default_sku'] = LINUX_SKU_DEFAULT
+    elif os.path.isfile(os.path.join(src_path, 'pom.xml')):
+        runtime_details_dict['language'] = JAVA_RUNTIME_NAME
+        runtime_details_dict['file_loc'] = os.path.join(src_path, 'pom.xml')
         runtime_details_dict['default_sku'] = LINUX_SKU_DEFAULT
     elif package_netcore_file:
         runtime_lang = detect_dotnet_lang(package_netcore_file, is_linux=is_linux)

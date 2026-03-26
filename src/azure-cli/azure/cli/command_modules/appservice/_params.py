@@ -156,10 +156,11 @@ subscription than the app service environment, please use the resource ID for --
                    help="Storage mount configurations. Provide key-value pairs for `name=<name> source=<source> type=<type> destination-path=<path> credentials-secret-uri=<uri>`.")
 
     with self.argument_context('appservice plan update') as c:
-        c.argument('sku', arg_type=sku_arg_type)
+        c.argument('sku', arg_type=sku_arg_type,
+                   help='SKU of the app service plan. Use this to scale up (change machine size), e.g. --sku P1v3.')
         c.argument('elastic_scale', arg_type=get_three_state_flag(), help='Enable or disable automatic scaling. Set to "true" to enable elastic scale for this plan, or "false" to disable elastic scale for this plan. The SKU must be a Premium V2 SKU (P1V2, P2V2, P3V2) or a Premium V3 SKU (P1V3, P2V3, P3V3)')
         c.argument('max_elastic_worker_count', options_list=['--max-elastic-worker-count', '-m'], type=int, help='Maximum number of instances that the plan can scale out to. The plan must be an elastic scale plan.')
-        c.argument('number_of_workers', type=int, help='Number of workers to be allocated.')
+        c.argument('number_of_workers', type=int, help='Number of workers to be allocated. Use this to scale out (add instances), e.g. --number-of-workers 3.')
         c.ignore('allow_pending_state')
         c.argument('async_scaling_enabled', arg_type=get_three_state_flag(), help='Enables async scaling for the app service plan. Set to "true" to create an async operation if there are insufficient workers to scale synchronously. The SKU must be Dedicated.')
         c.argument('default_identity', is_preview=True,
@@ -305,7 +306,12 @@ subscription than the app service environment, please use the resource ID for --
                    validator=validate_site_create,
                    local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.SET],
                                                                  scopes=['webapp', 'cupertino']))
-        c.argument('startup_file', help="Linux only. The web's startup file")
+        c.argument('startup_file', help="Linux only. The web's startup file. "
+                                        "Required for FastAPI and other ASGI "
+                                        "frameworks (auto-detection is not supported). "
+                                        "Example for Flask: \"gunicorn --bind=0.0.0.0 --timeout 600 "
+                                        "app:app\". Example for FastAPI: \"gunicorn -k "
+                                        "uvicorn.workers.UvicornWorker app:app\".")
         c.argument('sitecontainers_app', help="If true, a webapp which supports sitecontainers will be created", arg_type=get_three_state_flag())
         c.argument('deployment_container_image_name', options_list=['--deployment-container-image-name', '-i'], help='Container image name from container registry, e.g. publisher/image-name:tag', deprecate_info=c.deprecate(target='--deployment-container-image-name'))
         c.argument('container_registry_url', options_list=['--container-registry-url'], help='The container registry server url')
@@ -951,11 +957,15 @@ subscription than the app service environment, please use the resource ID for --
                                                                  scopes=['webapp', 'cupertino']))
         c.argument('plan', options_list=['--plan', '-p'],
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
-                   help="name of the app service plan associated with the webapp",
+                   help="name of the app service plan associated with the webapp. If not specified, a name is auto-generated.",
                    configured_default='appserviceplan')
         c.argument('sku', arg_type=sku_arg_type)
-        c.argument('os_type', options_list=['--os-type'], arg_type=get_enum_type(OS_TYPES), help="Set the OS type for the app to be created.")
-        c.argument('runtime', options_list=['--runtime', '-r'], help="canonicalized web runtime in the format of Framework:Version, e.g. \"PHP:7.2\"."
+        c.argument('os_type', options_list=['--os-type'], arg_type=get_enum_type(OS_TYPES),
+                   help="Set the OS type for the app to be created. Defaults to Linux for Python "
+                        "and Node.js runtimes, and to Windows for .NET and ASP.NET runtimes. "
+                        "Use 'linux' explicitly for .NET Linux deployments.")
+        c.argument('runtime', options_list=['--runtime', '-r'], help="canonicalized web runtime in the format of Framework:Version, e.g. \"PHP:7.2\". "
+                                                                     "Recommended: always specify explicitly for reliable results. Auto-detection from source files may pick the wrong version. "
                                                                      "Use `az webapp list-runtimes` for available list.")
         c.argument('dryrun', help="show summary of the create and deploy operation instead of executing it",
                    default=False, action='store_true')
