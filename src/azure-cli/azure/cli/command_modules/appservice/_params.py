@@ -659,6 +659,23 @@ subscription than the app service environment, please use the resource ID for --
         c.ignore('min_replicas')
         c.ignore('max_replicas')
 
+    with self.argument_context('webapp config container set') as c:
+        c.argument('assign_identities', nargs='*', options_list=['--assign-identity'],
+                   help="Accept system or user assigned identities separated by spaces. "
+                        "Use '[system]' to refer to system assigned identity, "
+                        "or a resource id to refer to user assigned identity. "
+                        "Check out help for more examples")
+        c.argument('scope', options_list=['--scope'],
+                   help="Scope that the system assigned identity can access")
+        c.argument('role', options_list=['--role'],
+                   help="Role name or id the system assigned identity will have")
+        c.argument('acr_use_identity', arg_type=get_three_state_flag(return_label=True),
+                   help="Enable or disable pulling images from ACR using a managed identity")
+        c.argument('acr_identity',
+                   help="Accept system or user assigned identity which will be used for ACR image pull. "
+                        "Use '[system]' to refer to system assigned identity, "
+                        "or a resource id to refer to user assigned identity.")
+
     with self.argument_context('functionapp config container') as c:
         c.argument('registry_server', options_list=['--registry-server', '-r', c.deprecate(target='--docker-registry-server-url', redirect='--registry-server')],
                    help='the container registry server url')

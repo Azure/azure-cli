@@ -4328,7 +4328,9 @@ def update_container_settings(cmd, resource_group_name, name, container_registry
                               container_image_name=None, container_registry_user=None,
                               websites_enable_app_service_storage=None, container_registry_password=None,
                               multicontainer_config_type=None, multicontainer_config_file=None,
-                              slot=None, min_replicas=None, max_replicas=None):
+                              slot=None, min_replicas=None, max_replicas=None,
+                              assign_identities=None, role='AcrPull', scope=None,
+                              acr_use_identity=None, acr_identity=None):
     settings = []
     if container_registry_url is not None:
         settings.append('DOCKER_REGISTRY_SERVER_URL=' + container_registry_url)
@@ -4365,6 +4367,13 @@ def update_container_settings(cmd, resource_group_name, name, container_registry
 
     if min_replicas is not None or max_replicas is not None:
         update_site_configs(cmd, resource_group_name, name, min_replicas=min_replicas, max_replicas=max_replicas)
+
+    if assign_identities is not None:
+        assign_identity(cmd, resource_group_name, name, assign_identities, role, slot, scope)
+
+    if acr_use_identity is not None or acr_identity is not None:
+        update_site_configs(cmd, resource_group_name, name, slot=slot,
+                            acr_use_identity=acr_use_identity, acr_identity=acr_identity)
 
     return _mask_creds_related_appsettings(_filter_for_container_settings(cmd, resource_group_name, name, settings,
                                                                           slot=slot))

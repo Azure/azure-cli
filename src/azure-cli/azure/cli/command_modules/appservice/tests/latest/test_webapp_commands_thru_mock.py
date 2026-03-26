@@ -35,7 +35,8 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          update_app_settings,
                                                          update_application_settings_polling,
                                                          update_webapp,
-                                                         create_webapp)
+                                                         create_webapp,
+                                                         update_container_settings)
 
 # pylint: disable=line-too-long
 from azure.cli.core.profiles import ResourceType
@@ -669,6 +670,126 @@ class TestUpdateWebapp(unittest.TestCase):
         result = update_webapp(cmd_mock, instance, platform_release_channel='Latest')
 
         self.assertEqual(result.additional_properties["properties"]["platformReleaseChannel"], "Latest")
+
+
+class TestUpdateContainerSettingsIdentity(unittest.TestCase):
+    """Tests for managed identity support in update_container_settings."""
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._mask_creds_related_appsettings')
+    @mock.patch('azure.cli.command_modules.appservice.custom._filter_for_container_settings')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_app_settings', return_value=[])
+    @mock.patch('azure.cli.command_modules.appservice.custom.update_app_settings')
+    @mock.patch('azure.cli.command_modules.appservice.custom._add_fx_version')
+    @mock.patch('azure.cli.command_modules.appservice.custom.assign_identity')
+    @mock.patch('azure.cli.command_modules.appservice.custom.update_site_configs')
+    def test_container_set_with_system_identity_and_acr(
+            self, mock_update_site_configs, mock_assign_identity,
+            mock_add_fx, mock_update_app, mock_get_app, mock_filter, mock_mask):
+        mock_mask.return_value = {}
+        cmd = _get_test_cmd()
+        update_container_settings(
+            cmd, 'rg', 'web1',
+            container_registry_url='https://myregistry.azurecr.io',
+            container_image_name='myregistry.azurecr.io/myimage:latest',
+            assign_identities=['[system]'],
+            acr_use_identity='true',
+            acr_identity='[system]')
+        mock_assign_identity.assert_called_once_with(
+            cmd, 'rg', 'web1', ['[system]'], 'AcrPull', None, None)
+        mock_update_site_configs.assert_called_once_with(
+            cmd, 'rg', 'web1', slot=None,
+            acr_use_identity='true', acr_identity='[system]')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._mask_creds_related_appsettings')
+    @mock.patch('azure.cli.command_modules.appservice.custom._filter_for_container_settings')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_app_settings', return_value=[])
+    @mock.patch('azure.cli.command_modules.appservice.custom.update_app_settings')
+    @mock.patch('azure.cli.command_modules.appservice.custom._add_fx_version')
+    @mock.patch('azure.cli.command_modules.appservice.custom.assign_identity')
+    @mock.patch('azure.cli.command_modules.appservice.custom.update_site_configs')
+    def test_container_set_with_user_identity(
+            self, mock_update_site_configs, mock_assign_identity,
+            mock_add_fx, mock_update_app, mock_get_app, mock_filter, mock_mask):
+        mock_mask.return_value = {}
+        cmd = _get_test_cmd()
+        user_identity = '/subscriptions/sub1/resourcegroups/rg1/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id1'
+        update_container_settings(
+            cmd, 'rg', 'web1',
+            container_registry_url='https://myregistry.azurecr.io',
+            container_image_name='myregistry.azurecr.io/myimage:latest',
+            assign_identities=[user_identity],
+            acr_use_identity='true',
+            acr_identity=user_identity)
+        mock_assign_identity.assert_called_once_with(
+            cmd, 'rg', 'web1', [user_identity], 'AcrPull', None, None)
+        mock_update_site_configs.assert_called_once_with(
+            cmd, 'rg', 'web1', slot=None,
+            acr_use_identity='true', acr_identity=user_identity)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._mask_creds_related_appsettings')
+    @mock.patch('azure.cli.command_modules.appservice.custom._filter_for_container_settings')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_app_settings', return_value=[])
+    @mock.patch('azure.cli.command_modules.appservice.custom.update_app_settings')
+    @mock.patch('azure.cli.command_modules.appservice.custom._add_fx_version')
+    @mock.patch('azure.cli.command_modules.appservice.custom.assign_identity')
+    @mock.patch('azure.cli.command_modules.appservice.custom.update_site_configs')
+    def test_container_set_without_identity_does_not_call_identity_apis(
+            self, mock_update_site_configs, mock_assign_identity,
+            mock_add_fx, mock_update_app, mock_get_app, mock_filter, mock_mask):
+        mock_mask.return_value = {}
+        cmd = _get_test_cmd()
+        update_container_settings(
+            cmd, 'rg', 'web1',
+            container_registry_url='https://myregistry.azurecr.io',
+            container_image_name='myregistry.azurecr.io/myimage:latest',
+            container_registry_user='user',
+            container_registry_password='pass')
+        mock_assign_identity.assert_not_called()
+        mock_update_site_configs.assert_not_called()
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._mask_creds_related_appsettings')
+    @mock.patch('azure.cli.command_modules.appservice.custom._filter_for_container_settings')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_app_settings', return_value=[])
+    @mock.patch('azure.cli.command_modules.appservice.custom.update_app_settings')
+    @mock.patch('azure.cli.command_modules.appservice.custom._add_fx_version')
+    @mock.patch('azure.cli.command_modules.appservice.custom.assign_identity')
+    @mock.patch('azure.cli.command_modules.appservice.custom.update_site_configs')
+    def test_container_set_with_custom_role(
+            self, mock_update_site_configs, mock_assign_identity,
+            mock_add_fx, mock_update_app, mock_get_app, mock_filter, mock_mask):
+        mock_mask.return_value = {}
+        cmd = _get_test_cmd()
+        update_container_settings(
+            cmd, 'rg', 'web1',
+            container_registry_url='https://myregistry.azurecr.io',
+            container_image_name='myregistry.azurecr.io/myimage:latest',
+            assign_identities=['[system]'],
+            role='Reader',
+            acr_use_identity='true',
+            acr_identity='[system]')
+        mock_assign_identity.assert_called_once_with(
+            cmd, 'rg', 'web1', ['[system]'], 'Reader', None, None)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._mask_creds_related_appsettings')
+    @mock.patch('azure.cli.command_modules.appservice.custom._filter_for_container_settings')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_app_settings', return_value=[])
+    @mock.patch('azure.cli.command_modules.appservice.custom.update_app_settings')
+    @mock.patch('azure.cli.command_modules.appservice.custom._add_fx_version')
+    @mock.patch('azure.cli.command_modules.appservice.custom.assign_identity')
+    @mock.patch('azure.cli.command_modules.appservice.custom.update_site_configs')
+    def test_container_set_disable_acr_identity(
+            self, mock_update_site_configs, mock_assign_identity,
+            mock_add_fx, mock_update_app, mock_get_app, mock_filter, mock_mask):
+        mock_mask.return_value = {}
+        cmd = _get_test_cmd()
+        update_container_settings(
+            cmd, 'rg', 'web1',
+            container_registry_url='https://myregistry.azurecr.io',
+            acr_use_identity='false')
+        mock_assign_identity.assert_not_called()
+        mock_update_site_configs.assert_called_once_with(
+            cmd, 'rg', 'web1', slot=None,
+            acr_use_identity='false', acr_identity=None)
 
 
 class FakedResponse:  # pylint: disable=too-few-public-methods
