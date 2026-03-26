@@ -4336,6 +4336,7 @@ def update_container_settings(cmd, resource_group_name, name, container_registry
         settings.append('DOCKER_REGISTRY_SERVER_URL=' + container_registry_url)
 
     if (not container_registry_user and not container_registry_password and
+            not acr_use_identity and
             container_registry_url and '.azurecr.io' in container_registry_url):
         logger.warning('No credential was provided to access Azure Container Registry. Trying to look up...')
         parsed = urlparse(container_registry_url)

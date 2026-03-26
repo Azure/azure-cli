@@ -791,6 +791,30 @@ class TestUpdateContainerSettingsIdentity(unittest.TestCase):
             cmd, 'rg', 'web1', slot=None,
             acr_use_identity='false', acr_identity=None)
 
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_acr_cred')
+    @mock.patch('azure.cli.command_modules.appservice.custom._mask_creds_related_appsettings')
+    @mock.patch('azure.cli.command_modules.appservice.custom._filter_for_container_settings')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_app_settings', return_value=[])
+    @mock.patch('azure.cli.command_modules.appservice.custom.update_app_settings')
+    @mock.patch('azure.cli.command_modules.appservice.custom._add_fx_version')
+    @mock.patch('azure.cli.command_modules.appservice.custom.assign_identity')
+    @mock.patch('azure.cli.command_modules.appservice.custom.update_site_configs')
+    def test_acr_use_identity_skips_credential_lookup(
+            self, mock_update_site_configs, mock_assign_identity,
+            mock_add_fx, mock_update_app, mock_get_app, mock_filter, mock_mask,
+            mock_get_acr_cred):
+        """When acr_use_identity is set, _get_acr_cred should NOT be called."""
+        mock_mask.return_value = {}
+        cmd = _get_test_cmd()
+        update_container_settings(
+            cmd, 'rg', 'web1',
+            container_registry_url='https://myregistry.azurecr.io',
+            container_image_name='myregistry.azurecr.io/myimage:latest',
+            assign_identities=['[system]'],
+            acr_use_identity='true',
+            acr_identity='[system]')
+        mock_get_acr_cred.assert_not_called()
+
 
 class FakedResponse:  # pylint: disable=too-few-public-methods
     def __init__(self, status_code):
