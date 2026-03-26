@@ -13,6 +13,7 @@ class AutoScaleShow(_AutoScaleShow):
 
     def _output(self, *args, **kwargs):
         from azure.cli.core.aaz import AAZUndefined
+        # When the name field conflicts, the name in inner layer is ignored and the outer layer is applied
         if has_value(self.ctx.vars.instance.properties.name):
             self.ctx.vars.instance.properties.name = AAZUndefined
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)

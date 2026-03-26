@@ -23,7 +23,10 @@ class DiagnosticSettingsCreate(_DiagnosticSettingsCreate):
         from azure.cli.core.aaz import AAZBoolArg
         arg_schema.export_to_resource_specific = AAZBoolArg(
             options=['--export-to-resource-specific'],
-            help="Indicate that the export to LA must be done to a resource specific table."
+            help="Indicate that the export to LA must be done to a resource specific table, a.k.a. "
+                 "dedicated or fixed schema table, as opposed to the default dynamic schema table called "
+                 "AzureDiagnostics. This argument is effective only when the argument --workspace is also given. "
+                 "Allowed values: false, true."
         )
         arg_schema.log_analytics_destination_type._registered = False
         arg_schema.service_bus_rule_id._registered = False
@@ -69,6 +72,7 @@ class DiagnosticSettingsCreate(_DiagnosticSettingsCreate):
             if not is_valid_resource_id(event_hub_rule):
                 if not has_value(event_hub):
                     raise CLIError('usage error: --event-hub-rule ID | --event-hub-rule NAME --event-hub NAME')
+                # use value from --event-hub if the rule is a name
                 event_hub_rule = resource_id(
                     subscription=ctx.subscription_id,
                     resource_group=rg,
@@ -78,7 +82,9 @@ class DiagnosticSettingsCreate(_DiagnosticSettingsCreate):
                     child_type_1='AuthorizationRules',
                     child_name_1=event_hub_rule)
                 args.event_hub_rule = event_hub_rule
+
             elif not has_value(event_hub):
+                # extract the event hub name from `--event-hub-rule` if provided as an ID
                 event_hub = parse_resource_id(event_hub_rule)['name']
                 args.event_hub = event_hub
         if not (has_value(storage_account) or has_value(workspace) or has_value(event_hub)):

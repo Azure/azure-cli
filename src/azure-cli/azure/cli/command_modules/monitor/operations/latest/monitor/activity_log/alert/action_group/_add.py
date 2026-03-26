@@ -16,6 +16,27 @@ from azure.cli.command_modules.monitor.operations.activity_log_alerts import pro
 @register_command("monitor activity-log alert action-group add")
 class ActivityLogAlertActionGroupAdd(_ActivityLogAlertUpdate):
     """Add action groups to this activity log alert rule. It can also be used to overwrite existing webhook properties of particular action groups.
+
+    :example: Add an action group and specify webhook properties.
+        az monitor activity-log alert action-group add -n AlertName -g ResourceGroup \\
+          --action /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/microsoft.insight
+        s/actionGroups/{ActionGroup} \\
+          --webhook-properties usage=test owner=jane
+
+    :example: Overwite an existing action group's webhook properties.
+        az monitor activity-log alert action-group add -n AlertName -g ResourceGroup \\
+          -a /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/microsoft.insights/acti
+        onGroups/{ActionGroup} \\
+          --webhook-properties usage=test owner=john
+
+    :example: Remove webhook properties from an existing action group.
+        az monitor activity-log alert action-group add -n AlertName -g ResourceGroup \\
+          -a /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/microsoft.insights/acti
+        onGroups/{ActionGroup}
+
+    :example: Add new action groups but prevent the command from accidently overwrite existing webhook properties
+        az monitor activity-log alert action-group add -n AlertName -g ResourceGroup --strict \\
+          --action-group ResourceIDList
     """
 
     @classmethod
@@ -42,7 +63,11 @@ class ActivityLogAlertActionGroupAdd(_ActivityLogAlertUpdate):
         args_schema.webhook_properties_list = AAZCustomListArg(
             options=['--webhook-properties', '-w'],
             help="Space-separated webhook properties in 'key[=value]' format. "
-                 "These properties are associated with the action groups added in this command."
+                 "These properties are associated with the action groups added in this command." + '''
+          For any webhook receiver in these action group, these data are appended to the webhook
+          payload. To attach different webhook properties to different action groups, add the
+          action groups in separate update-action commands.
+          '''
         )
         args_schema.webhook_properties_list.Element = AAZStrArg()
 

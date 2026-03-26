@@ -44,10 +44,13 @@ class AutoScaleUpdate(_AutoScaleUpdate):
         args_schema.add_actions = AAZCustomListArg(
             options=["--add-actions"],
             singular_options=['--add-action', '-a'],
-            help="Add an action to fire when a scaling event occurs."
-                 " Usage: --add-action TYPE KEY [ARG ...]"
-                 " Email: --add-action email bob@contoso.com ann@contoso.com"
-                 " Webhook: --add-action webhook https://www.contoso.com/alert apiKey=value",
+            help="Add an action to fire when a scaling event occurs." + '''
+        Usage:   --add-action TYPE KEY [ARG ...]
+        Email:   --add-action email bob@contoso.com ann@contoso.com
+        Webhook: --add-action webhook https://www.contoso.com/alert apiKey=value
+        Webhook: --add-action webhook https://www.contoso.com/alert?apiKey=value
+        Multiple actions can be specified by using more than one `--add-action` argument.
+        ''',
             arg_group="Notification",
         )
         args_schema.add_actions.Element = AAZCustomListArg()
@@ -56,10 +59,11 @@ class AutoScaleUpdate(_AutoScaleUpdate):
         args_schema.remove_actions = AAZCustomListArg(
             options=["--remove-actions"],
             singular_options=['--remove-action', '-r'],
-            help="Remove one or more actions."
-                 " Usage: --remove-action TYPE KEY [KEY ...]"
-                 " Email: --remove-action email bob@contoso.com ann@contoso.com"
-                 " Webhook: --remove-action webhook https://contoso.com/alert https://alerts.contoso.com.",
+            help="Remove one or more actions." + '''
+        Usage:   --remove-action TYPE KEY [KEY ...]
+        Email:   --remove-action email bob@contoso.com ann@contoso.com
+        Webhook: --remove-action webhook https://contoso.com/alert https://alerts.contoso.com.
+        ''',
             arg_group="Notification",
         )
         args_schema.remove_actions.Element = AAZCustomListArg()
@@ -89,6 +93,8 @@ class AutoScaleUpdate(_AutoScaleUpdate):
             curr_max = default_profile["capacity"]["maximum"]
             is_fixed_count = curr_count == curr_min and curr_count == curr_max
 
+            # check for special case where count is used to indicate fixed value and only
+            # count is updated
             if has_value(args.count) and is_fixed_count and not has_value(args.min_count) and not has_value(args.max_count):
                 args.min_count = args.count.to_serialized_data()
                 args.max_count = args.count.to_serialized_data()
@@ -97,11 +103,14 @@ class AutoScaleUpdate(_AutoScaleUpdate):
             min_count = curr_min if not has_value(args.min_count) else args.min_count.to_serialized_data()
             max_count = curr_max if not has_value(args.max_count) else args.max_count.to_serialized_data()
 
+            # There may be multiple "default" profiles. All need to updated.
             for profile in instance.properties.profiles:
                 if has_value(profile.fixed_date):
                     continue
                 if has_value(profile.recurrence):
                     try:
+                        # portal denotes the "default" pairs by using a JSON string for their name
+                        # so if it can be decoded, we know this is a default profile
                         json.loads(profile.name.to_serialized_data())
                     except ValueError:
                         continue
@@ -130,6 +139,7 @@ class AutoScaleUpdate(_AutoScaleUpdate):
                 "webhooks": []
             }
 
+        # process removals
         if len(remove_actions) > 0:
             removed_emails, removed_webhooks = _parse_action_removals(remove_actions)
             updated_notification['email']['customEmails'] = \
@@ -137,6 +147,7 @@ class AutoScaleUpdate(_AutoScaleUpdate):
             updated_notification['webhooks'] = \
                 [x for x in updated_notification['webhooks'] if x['serviceUri'] not in removed_webhooks]
 
+        # process additions
         for action in add_actions:
             if action["key"] == "email":
                 for email in action["value"]["customEmails"]:
@@ -156,6 +167,7 @@ class AutoScaleUpdate(_AutoScaleUpdate):
 
     def _output(self, *args, **kwargs):
         from azure.cli.core.aaz import AAZUndefined
+        # When the name field conflicts, the name in inner layer is ignored and the outer layer is applied
         if has_value(self.ctx.vars.instance.properties.name):
             self.ctx.vars.instance.properties.name = AAZUndefined
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)

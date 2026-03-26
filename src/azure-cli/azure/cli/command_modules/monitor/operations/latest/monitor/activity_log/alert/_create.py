@@ -29,9 +29,10 @@ class ActivityLogAlertCreate(_ActivityLogAlertCreate):
         args_schema.scopes._registered = False
         args_schema.scope_ui = AAZListArg(
             options=["--scope", "-s"],
-            help="A list of strings that will be used as prefixes."
-                 " The alert rule will only apply to activity logs with resourceIDs that fall under one of"
-                 " these prefixes. If not provided, the subscriptionId will be used.",
+            help="A list of strings that will be used as prefixes." + '''
+        The alert rule will only apply to activity logs with resourceIDs that fall under one of
+        these prefixes. If not provided, the subscriptionId will be used.
+        ''',
         )
         args_schema.scope_ui.Element = AAZStrArg()
 
@@ -43,10 +44,11 @@ class ActivityLogAlertCreate(_ActivityLogAlertCreate):
         args_schema.condition = AAZCustomListArg(
             options=["--condition", "-c"],
             help="The condition that will cause the alert rule to activate. "
-                 "The format is FIELD=VALUE[ and FIELD=VALUE...]"
-                 " The possible values for the field are 'resourceId', 'category', 'caller',"
-                 " 'level', 'operationName', 'resourceGroup', 'resourceProvider', 'status',"
-                 " 'subStatus', 'resourceType', or anything beginning with 'properties'."
+                 "The format is FIELD=VALUE[ and FIELD=VALUE...]" + '''
+        The possible values for the field are 'resourceId', 'category', 'caller',
+        'level', 'operationName', 'resourceGroup', 'resourceProvider', 'status',
+        'subStatus', 'resourceType', or anything beginning with 'properties'.
+        '''
         )
         args_schema.condition.Element = AAZStrArg()
 
@@ -64,10 +66,11 @@ class ActivityLogAlertCreate(_ActivityLogAlertCreate):
         args_schema.webhook_properties_list = AAZCustomListArg(
             options=['--webhook-properties', '-w'],
             help="Space-separated webhook properties in 'key[=value]' format. "
-                 "These properties are associated with the action groups added in this command."
-                 " For any webhook receiver in these action group, this data is appended to the webhook"
-                 " payload. To attach different webhook properties to different action groups, add the"
-                 " action groups in separate update-action commands."
+                 "These properties are associated with the action groups added in this command." + '''
+        For any webhook receiver in these action group, this data is appended to the webhook
+        payload. To attach different webhook properties to different action groups, add the
+        action groups in separate update-action commands.
+        '''
         )
         args_schema.webhook_properties_list.Element = AAZStrArg()
 
@@ -81,6 +84,9 @@ class ActivityLogAlertCreate(_ActivityLogAlertCreate):
         if not has_value(args.scope_ui):
             from azure.mgmt.core.tools import resource_id
             from azure.cli.core.commands.client_factory import get_subscription_id
+            # args.scopes = [resource_id(subscription=get_subscription_id(self.cli_ctx),
+            #                            resource_group=args.resource_group)]
+            # service check
             args.scopes = [resource_id(subscription=get_subscription_id(self.cli_ctx))]
         else:
             args.scopes = args.scope_ui.to_serialized_data()
@@ -106,6 +112,7 @@ class ActivityLogAlertCreate(_ActivityLogAlertCreate):
                     "field": "category",
                     "equals": "ServiceHealth",
                 })
+        # Add action groups
         action_group_rids = set()
         if has_value(args.action_group_ids):
             action_group_rids = set(args.action_group_ids.to_serialized_data())

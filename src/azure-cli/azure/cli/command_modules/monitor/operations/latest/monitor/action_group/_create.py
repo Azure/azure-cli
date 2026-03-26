@@ -77,8 +77,10 @@ class ActionGroupCreate(_ActionGroupCreate):
         validate_tags(args)
         action_group_name = args.action_group_name.to_serialized_data()
         if not has_value(args.location):
+            # both inputed or 'global' location are available for action group
             args.location = "Global"
         if not has_value(args.group_short_name):
+            # '12' is the short name length limitation
             args.group_short_name = action_group_name[:12]
         if not has_value(args.receiver_actions):
             return

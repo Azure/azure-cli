@@ -88,7 +88,7 @@ def process_webhook_properties(args):
     return result
 
 
-def _normalize_names(cli_ctx, resource_names, resource_group, namespace, resource_type):
+def normalize_names(cli_ctx, resource_names, resource_group, namespace, resource_type):
     """Normalize a group of resource names. Returns a set of resource ids. Throws if any of the name can't be correctly
     converted to a resource id."""
     from azure.mgmt.core.tools import is_valid_resource_id, resource_id

@@ -13,6 +13,13 @@ from azure.cli.command_modules.monitor.aaz.latest.monitor.activity_log.alert._up
 @register_command("monitor activity-log alert scope add")
 class ActivityLogAlertScopeAdd(_ActivityLogAlertUpdate):
     """Add scopes to this activity log alert rule.
+
+    :example: Add scopes to this activity log alert rule.
+        az monitor activity-log alert scope add --name MyActivityLogAlerts --resource-group
+        MyResourceGroup --scope /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+        /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/resourceGroups/myRG
+        /subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-
+        xxxxxxxxxxxx/resourceGroups/myRG/Microsoft.KeyVault/vaults/mykey
     """
 
     @classmethod
@@ -30,6 +37,7 @@ class ActivityLogAlertScopeAdd(_ActivityLogAlertUpdate):
             help="List of scopes to add. Each scope could be a resource ID or a subscription ID.",
         )
         args_schema.scope_ui.Element = AAZStrArg()
+
         args_schema.reset = AAZBoolArg(
             options=["--reset"],
             help="Remove all the existing action groups before add new conditions.",
@@ -42,4 +50,5 @@ class ActivityLogAlertScopeAdd(_ActivityLogAlertUpdate):
         new_scopes = set() if args.reset else set(instance.properties.scopes.to_serialized_data())
         for scope in args.scope_ui.to_serialized_data():
             new_scopes.add(scope)
+
         args.scopes = list(new_scopes)

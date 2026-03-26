@@ -13,6 +13,7 @@ class AutoScaleList(_AutoScaleList):
 
     def _output(self, *args, **kwargs):
         from azure.cli.core.aaz import AAZUndefined
+        # When the name field conflicts, the name in inner layer is ignored and the outer layer is applied
         for value in self.ctx.vars.instance.value:
             if has_value(value.properties):
                 value.properties.name = AAZUndefined

@@ -8,7 +8,7 @@
 from azure.cli.core.aaz import AAZStrArg, AAZListArg, register_command
 from azure.cli.command_modules.monitor.aaz.latest.monitor.activity_log.alert._update \
     import Update as _ActivityLogAlertUpdate
-from azure.cli.command_modules.monitor.operations.activity_log_alerts import _normalize_names
+from azure.cli.command_modules.monitor.operations.activity_log_alerts import normalize_names
 
 
 @register_command("monitor activity-log alert action-group remove")
@@ -39,14 +39,15 @@ class ActivityLogAlertActionGroupRemove(_ActivityLogAlertUpdate):
         if len(action_group_ids) == 1 and action_group_ids[0] == '*':
             instance.properties.actions.actionGroups = []
         else:
-            rids = _normalize_names(self.cli_ctx, args.action_group_ids.to_serialized_data(), args.resource_group,
+            # normalize the action group ids
+            rids = normalize_names(self.cli_ctx, args.action_group_ids.to_serialized_data(), args.resource_group,
                                     'microsoft.insights', 'actionGroups')
             action_groups = []
             for item in instance.properties.actions.actionGroups:
                 ac_id = item.actionGroupId.to_serialized_data()
                 found = False
                 for rid in rids:
-                    if ac_id.lower() == rid.lower():
+                    if ac_id.lower() == rid.lower():  # service returned action group id can be uppercase
                         found = True
                         break
                 if not found:

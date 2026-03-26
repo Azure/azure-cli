@@ -24,10 +24,11 @@ class ActivityLogAlertUpdate(_ActivityLogAlertUpdate):
         args_schema.condition = AAZCustomListArg(
             options=["--condition", "-c"],
             help="The condition that will cause the alert rule to activate. "
-                 "The format is FIELD=VALUE[ and FIELD=VALUE...]"
-                 " The possible values for the field are 'resourceId', 'category', 'caller',"
-                 " 'level', 'operationName', 'resourceGroup', 'resourceProvider', 'status',"
-                 " 'subStatus', 'resourceType', or anything beginning with 'properties'."
+                 "The format is FIELD=VALUE[ and FIELD=VALUE...]" + '''
+        The possible values for the field are 'resourceId', 'category', 'caller',
+        'level', 'operationName', 'resourceGroup', 'resourceProvider', 'status',
+        'subStatus', 'resourceType', or anything beginning with 'properties'.
+        '''
         )
         args_schema.condition.Element = AAZStrArg()
         return args_schema
