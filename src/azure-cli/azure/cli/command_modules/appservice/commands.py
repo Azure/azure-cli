@@ -313,6 +313,8 @@ def load_command_table(self, _):
                          exception_handler=ex_handler_factory(creating_plan=True), validator=validate_asp_create)
         g.command('delete', 'delete', confirmation=True)
         g.custom_command('list', 'list_app_service_plans')
+        g.custom_command('list-skus', 'list_plan_skus', is_preview=True)
+        g.custom_command('list-slots', 'list_plan_slots', is_preview=True)
         g.custom_show_command('show', 'show_plan')
         g.generic_update_command('update', setter_name='update_app_service_plan_with_progress', custom_func_name='update_app_service_plan',
                                  setter_arg_name='app_service_plan', setter_type=appservice_custom, supports_no_wait=True,

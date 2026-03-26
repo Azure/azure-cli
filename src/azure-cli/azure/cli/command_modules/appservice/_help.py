@@ -109,6 +109,26 @@ examples:
     crafted: true
 """
 
+helps['appservice plan list-skus'] = """
+type: command
+short-summary: List the available SKUs for an app service plan.
+long-summary: Shows which SKU tiers and sizes are available for an existing app service plan, including worker sizes and capacities.
+examples:
+  - name: List available SKUs for an app service plan.
+    text: >
+        az appservice plan list-skus -g MyResourceGroup -n MyPlan
+"""
+
+helps['appservice plan list-slots'] = """
+type: command
+short-summary: List all deployment slots across all apps in an app service plan.
+long-summary: Enumerates every web app under the plan, then lists the deployment slots for each app.
+examples:
+  - name: List all deployment slots for all apps in a plan.
+    text: >
+        az appservice plan list-slots -g MyResourceGroup -n MyPlan
+"""
+
 helps['appservice plan managed-instance'] = """
 type: group
 short-summary: Manage configurations for managed instance App Service plans.
@@ -2295,6 +2315,13 @@ examples:
 helps['webapp list-instances'] = """
 type: command
 short-summary: List all scaled out instances of a web app or web app slot.
+examples:
+  - name: List instances for a web app.
+    text: >
+        az webapp list-instances -g MyResourceGroup -n MyWebApp
+  - name: List instances for a specific deployment slot.
+    text: >
+        az webapp list-instances -g MyResourceGroup -n MyWebApp --slot staging
 """
 
 helps['webapp list-runtimes'] = """

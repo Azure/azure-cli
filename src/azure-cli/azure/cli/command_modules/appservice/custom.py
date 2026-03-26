@@ -4818,6 +4818,30 @@ def list_app_service_plans(cmd, resource_group_name=None):
     return plans
 
 
+def list_plan_skus(cmd, resource_group_name, name):
+    client = web_client_factory(cmd.cli_ctx)
+    return client.app_service_plans.get_server_farm_skus(resource_group_name, name)
+
+
+def list_plan_slots(cmd, resource_group_name, name):
+    client = web_client_factory(cmd.cli_ctx)
+    apps = list(client.app_service_plans.list_web_apps(resource_group_name, name))
+    results = []
+    for app in apps:
+        app_name = app.name
+        slots = list(client.web_apps.list_slots(resource_group_name, app_name))
+        for slot in slots:
+            slot.name = slot.name.split('/')[-1]
+            results.append({
+                'appName': app_name,
+                'slotName': slot.name,
+                'resourceGroup': resource_group_name,
+                'status': slot.state,
+                'defaultHostName': slot.default_host_name,
+            })
+    return results
+
+
 # TODO use zone_redundant field on ASP model when we switch to SDK version 5.0.0
 def _enable_zone_redundant(plan_def, sku_def, number_of_workers):
     plan_def.enable_additional_properties_sending()

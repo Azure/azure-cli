@@ -703,5 +703,61 @@ class TestCreateAppServicePlanDefaults(unittest.TestCase):
         self.assertIn('P0V3', str(call_kwargs))
 
 
+class TestAppServicePlanFeatures(unittest.TestCase):
+    def setUp(self):
+        self.client = WebSiteManagementClient(mock.MagicMock(), '123455678')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    def test_list_plan_skus(self, client_factory_mock):
+        from azure.cli.command_modules.appservice.custom import list_plan_skus
+        mock_client = mock.MagicMock()
+        client_factory_mock.return_value = mock_client
+        expected = {'resourceType': 'serverfarms', 'skus': [{'name': 'S1'}]}
+        mock_client.app_service_plans.get_server_farm_skus.return_value = expected
+
+        cmd = _get_test_cmd()
+        result = list_plan_skus(cmd, 'rg', 'plan1')
+        self.assertEqual(result, expected)
+        mock_client.app_service_plans.get_server_farm_skus.assert_called_once_with('rg', 'plan1')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    def test_list_plan_slots(self, client_factory_mock):
+        from azure.cli.command_modules.appservice.custom import list_plan_slots
+        mock_client = mock.MagicMock()
+        client_factory_mock.return_value = mock_client
+
+        mock_app = mock.MagicMock()
+        mock_app.name = 'app1'
+        mock_client.app_service_plans.list_web_apps.return_value = [mock_app]
+
+        mock_slot = mock.MagicMock()
+        mock_slot.name = 'app1/staging'
+        mock_slot.state = 'Running'
+        mock_slot.default_host_name = 'app1-staging.azurewebsites.net'
+        mock_client.web_apps.list_slots.return_value = [mock_slot]
+
+        cmd = _get_test_cmd()
+        result = list_plan_slots(cmd, 'rg', 'plan1')
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]['appName'], 'app1')
+        self.assertEqual(result[0]['slotName'], 'staging')
+        self.assertEqual(result[0]['status'], 'Running')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    def test_list_plan_slots_no_slots(self, client_factory_mock):
+        from azure.cli.command_modules.appservice.custom import list_plan_slots
+        mock_client = mock.MagicMock()
+        client_factory_mock.return_value = mock_client
+
+        mock_app = mock.MagicMock()
+        mock_app.name = 'app1'
+        mock_client.app_service_plans.list_web_apps.return_value = [mock_app]
+        mock_client.web_apps.list_slots.return_value = []
+
+        cmd = _get_test_cmd()
+        result = list_plan_slots(cmd, 'rg', 'plan1')
+        self.assertEqual(result, [])
+
+
 if __name__ == '__main__':
     unittest.main()
