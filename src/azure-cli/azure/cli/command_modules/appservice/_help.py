@@ -1692,6 +1692,15 @@ examples:
   - name: set configuration through a JSON file called params.json
     text: >
         az webapp config set -g MyResourceGroup -n MyUniqueApp --generic-configurations "@.\\params.json"
+  - name: Set the linux runtime stack to Python 3.11 (format is RUNTIME|VERSION).
+    text: >
+        az webapp config set -g MyResourceGroup -n MyUniqueApp --linux-fx-version "PYTHON|3.11"
+  - name: Set the linux runtime stack to Node.js 18 LTS.
+    text: >
+        az webapp config set -g MyResourceGroup -n MyUniqueApp --linux-fx-version "NODE|18-lts"
+  - name: Set the linux runtime stack to .NET 8.0.
+    text: >
+        az webapp config set -g MyResourceGroup -n MyUniqueApp --linux-fx-version "DOTNETCORE|8.0"
 
 """
 
@@ -1954,6 +1963,9 @@ examples:
   - name: Create a Linux Python web app with a startup script.
     text: >
         az webapp create -g MyResourceGroup -p MyLinuxPlan -n MyUniqueAppName --runtime "PYTHON:3.14" --startup-file "startup.sh"
+  - name: Create a web app with a system-assigned managed identity and grant it access to a storage account.
+    text: >
+        az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --assign-identity [system] --scope /subscriptions/{subscription}/resourceGroups/{resourceGroup}/providers/Microsoft.Storage/storageAccounts/{storageAccount} --role Contributor
 """
 
 helps['webapp create-remote-connection'] = """
