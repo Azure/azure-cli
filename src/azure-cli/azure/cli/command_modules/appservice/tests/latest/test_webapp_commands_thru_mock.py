@@ -8,7 +8,6 @@ import os
 
 from azure.core.exceptions import HttpResponseError
 
-from azure.mgmt.web import WebSiteManagementClient
 from knack.util import CLIError
 from azure.cli.core.azclierror import (InvalidArgumentValueError,
                                        MutuallyExclusiveArgumentError,
@@ -58,8 +57,6 @@ def _get_test_cmd():
 
 
 class TestWebappMocked(unittest.TestCase):
-    def setUp(self):
-        self.client = WebSiteManagementClient(mock.MagicMock(), '123455678')
 
     @mock.patch('azure.cli.command_modules.appservice.custom._update_site_source_control_properties_for_gh_action')
     @mock.patch('azure.cli.command_modules.appservice.custom._add_publish_profile_to_github')
@@ -770,8 +767,6 @@ class TestCreateAppServicePlanDefaults(unittest.TestCase):
 
 
 class TestAppServicePlanFeatures(unittest.TestCase):
-    def setUp(self):
-        self.client = WebSiteManagementClient(mock.MagicMock(), '123455678')
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     def test_list_plan_skus(self, client_factory_mock):
@@ -797,6 +792,7 @@ class TestAppServicePlanFeatures(unittest.TestCase):
         mock_client.app_service_plans.list_web_apps.return_value = [mock_app]
 
         mock_slot = mock.MagicMock()
+        mock_slot.id = '/subscriptions/sub1/resourceGroups/rg/providers/Microsoft.Web/sites/app1/slots/staging'
         mock_slot.name = 'app1/staging'
         mock_slot.state = 'Running'
         mock_slot.default_host_name = 'app1-staging.azurewebsites.net'

@@ -4840,10 +4840,10 @@ def list_plan_slots(cmd, resource_group_name, name):
         app_name = app.name
         slots = list(client.web_apps.list_slots(resource_group_name, app_name))
         for slot in slots:
-            slot.name = slot.name.split('/')[-1]
+            slot_name = slot.id.split('/slots/')[-1] if slot.id and '/slots/' in slot.id else slot.name.split('/')[-1]
             results.append({
                 'appName': app_name,
-                'slotName': slot.name,
+                'slotName': slot_name,
                 'resourceGroup': resource_group_name,
                 'status': slot.state,
                 'defaultHostName': slot.default_host_name,

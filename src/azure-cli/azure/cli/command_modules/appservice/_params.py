@@ -182,14 +182,10 @@ subscription than the app service environment, please use the resource ID for --
                    configured_default='appserviceplan', id_part='name', local_context_attribute=None)
 
     with self.argument_context('appservice plan list-skus') as c:
-        c.argument('name', arg_type=name_arg_type, help='The name of the app service plan',
-                   completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
-                   configured_default='appserviceplan', id_part='name')
+        c.argument('name', id_part=None)
 
     with self.argument_context('appservice plan list-slots') as c:
-        c.argument('name', arg_type=name_arg_type, help='The name of the app service plan',
-                   completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
-                   configured_default='appserviceplan', id_part='name')
+        c.argument('name', id_part=None)
 
     with self.argument_context('appservice plan managed-instance install-script') as c:
         c.argument('name', arg_type=name_arg_type, help='The name of the app service plan',
