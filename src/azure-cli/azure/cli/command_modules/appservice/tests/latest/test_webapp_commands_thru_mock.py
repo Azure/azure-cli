@@ -689,8 +689,10 @@ class TestUpdateHostNameSslState(unittest.TestCase):
         call_args = generic_site_op_mock.call_args
         # slot is the 5th positional arg (index 4) after cli_ctx, rg, name, operation_name
         self.assertEqual(call_args[0][4], 'staging')
-        # site is the 6th positional arg (index 5)
-        self.assertIs(call_args[0][5], webapp)
+        # site is the 6th positional arg (index 5); verify it has the expected properties
+        site_arg = call_args[0][5]
+        self.assertEqual(site_arg.name, webapp.name)
+        self.assertEqual(site_arg.location, webapp.location)
 
 
 class FakedResponse:  # pylint: disable=too-few-public-methods

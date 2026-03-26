@@ -6053,7 +6053,10 @@ def _update_host_name_ssl_state(cmd, resource_group_name, webapp_name, webapp,
 
 def _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint, ssl_type, hostname, slot=None):
     client = web_client_factory(cmd.cli_ctx)
-    webapp = client.web_apps.get(resource_group_name, name)
+    if slot:
+        webapp = client.web_apps.get_slot(resource_group_name, name, slot)
+    else:
+        webapp = client.web_apps.get(resource_group_name, name)
     if not webapp:
         raise ResourceNotFoundError("'{}' app doesn't exist".format(name))
 
