@@ -6787,14 +6787,13 @@ def _check_service_principal_permissions(cmd, resource_group_name, key_vault_nam
 
 def _update_host_name_ssl_state(cmd, resource_group_name, webapp_name, webapp,
                                 host_name, ssl_state, thumbprint, slot=None):
-    Site, HostNameSslState = cmd.get_models('Site', 'HostNameSslState')
-    updated_webapp = Site(host_name_ssl_states=[HostNameSslState(name=host_name,
-                                                                 ssl_state=ssl_state,
-                                                                 thumbprint=thumbprint,
-                                                                 to_update=True)],
-                          location=webapp.location, tags=webapp.tags)
+    HostNameSslState = cmd.get_models('HostNameSslState')
+    webapp.host_name_ssl_states = [HostNameSslState(name=host_name,
+                                                    ssl_state=ssl_state,
+                                                    thumbprint=thumbprint,
+                                                    to_update=True)]
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp_name, 'begin_create_or_update',
-                                   slot, updated_webapp)
+                                   slot, webapp)
 
 
 def _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint, ssl_type, hostname, slot=None):
