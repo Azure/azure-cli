@@ -131,6 +131,8 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         return _remove_symbols(payload)
 
     def _get_base_properties(self):
+        uname = platform.uname()
+
         return {
             'Reserved.ChannelUsed': 'AI',
             'Reserved.EventId': self.event_id,
@@ -151,9 +153,10 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
                 self.product_version, self.module_version),
             'Context.Default.VS.Core.MacAddressHash': _get_hash_mac_address(),
             'Context.Default.VS.Core.Machine.Id': _get_hash_machine_id(),
-            'Context.Default.VS.Core.OS.Type': platform.system().lower(),  # eg. darwin, windows
-            'Context.Default.VS.Core.OS.Version': platform.version().lower(),  # eg. 10.0.14942
-            'Context.Default.VS.Core.OS.Platform': platform.platform().lower(),  # eg. windows-10-10.0.19041-sp0
+            'Context.Default.VS.Core.OS.Type': uname.system.lower(),  # eg. darwin, windows
+            'Context.Default.VS.Core.OS.Version': uname.version.lower(),  # eg. 10.0.14942
+            'Context.Default.VS.Core.OS.Platform': '{}-{}-{}-{}'.format(
+                uname.system, uname.release, uname.version, uname.machine).lower(),  # eg. windows-10-10.0.19041-sp0
             # the distro info is complement of platform info for linux
             'Context.Default.VS.Core.Distro.Name': _get_distro_name(),  # eg. 'CentOS Linux 8'
             'Context.Default.VS.Core.Distro.Id': _get_distro_id(),  # eg. 'centos'

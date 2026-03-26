@@ -22,7 +22,6 @@ from ._arg import AAZArgumentsSchema, AAZBoolArg, \
 from ._base import AAZUndefined, AAZBaseValue
 from ._field_type import AAZObjectType
 from ._paging import AAZPaged
-from ._poller import AAZLROPoller
 from ._command_ctx import AAZCommandCtx
 from .exceptions import AAZUnknownFieldError, AAZUnregisteredArg
 from .utils import get_aaz_profile_module_name
@@ -235,6 +234,7 @@ class AAZCommand(CLICommand):
     def build_lro_poller(self, executor, extract_result):
         """ Build AAZLROPoller instance to support long running operation
         """
+        from ._poller import AAZLROPoller
         polling_generator = executor()
         if self.ctx.lro_no_wait:
             # run until yield the first polling

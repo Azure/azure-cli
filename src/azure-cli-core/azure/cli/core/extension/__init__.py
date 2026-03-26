@@ -10,7 +10,6 @@ import json
 import re
 from sysconfig import get_path
 
-import pkginfo
 from knack.config import CLIConfig
 from knack.log import get_logger
 from azure.cli.core._config import GLOBAL_CONFIG_DIR, ENV_VAR_PREFIX
@@ -134,6 +133,7 @@ class WheelExtension(Extension):
 
     def get_metadata(self):
         from glob import glob
+        import pkginfo
 
         metadata = {}
         ext_dir = self.path or get_extension_path(self.name)
@@ -213,6 +213,8 @@ class DevExtension(Extension):
         return self.metadata.get('version')
 
     def get_metadata(self):
+        import pkginfo
+
         metadata = {}
         ext_dir = self.path
         if not ext_dir or not os.path.isdir(ext_dir):

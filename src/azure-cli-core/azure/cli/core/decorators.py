@@ -10,7 +10,6 @@ This module will be executed in separate process after az process is terminated 
 that it doesn't import modules other than those in the Python Standard Library
 """
 
-import hashlib
 from functools import wraps
 
 from knack.log import get_logger
@@ -43,6 +42,7 @@ def call_once(factory_func):
     def _wrapped(*args, **kwargs):
         if not factory_func.executed:
             factory_func.cached_result = factory_func(*args, **kwargs)
+            factory_func.executed = True
 
         return factory_func.cached_result
 
@@ -57,6 +57,7 @@ def hash256_result(func):
 
     @wraps(func)
     def _decorator(*args, **kwargs):
+        import hashlib
         val = func(*args, **kwargs)
         if val is None:
             raise ValueError('Return value is None')
