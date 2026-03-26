@@ -9096,7 +9096,8 @@ spec:
 
         # wait for any in-progress cluster operation to finish before disabling
         self.cmd(f'aks wait -g {resource_group} -n {aks_name} --updated --interval 30 --timeout 600')
-        time.sleep(60)
+        if self.is_live or self.in_recording:
+            time.sleep(60)
 
         # make sure monitoring can be smoothly disabled, retry on 409 (in-progress addon operation)
         for attempt in range(6):
@@ -9105,7 +9106,8 @@ spec:
                 break
             except Exception:
                 if attempt < 5:
-                    time.sleep(60)
+                    if self.is_live or self.in_recording:
+                        time.sleep(60)
                 else:
                     raise
 
@@ -9200,7 +9202,8 @@ spec:
 
         # wait for any in-progress cluster operation to finish before disabling
         self.cmd(f'aks wait -g {resource_group} -n {aks_name} --updated --interval 30 --timeout 600')
-        time.sleep(60)
+        if self.is_live or self.in_recording:
+            time.sleep(60)
 
         # make sure monitoring can be smoothly disabled, retry on 409 (in-progress addon operation)
         for attempt in range(6):
@@ -9209,7 +9212,8 @@ spec:
                 break
             except Exception:
                 if attempt < 5:
-                    time.sleep(60)
+                    if self.is_live or self.in_recording:
+                        time.sleep(60)
                 else:
                     raise
 
@@ -9264,7 +9268,8 @@ spec:
 
         # wait for any in-progress cluster operation to finish before disabling
         self.cmd(f'aks wait -g {resource_group} -n {aks_name} --updated --interval 30 --timeout 600')
-        time.sleep(60)
+        if self.is_live or self.in_recording:
+            time.sleep(60)
 
         # make sure monitoring can be smoothly disabled, retry on 409 (in-progress addon operation)
         for attempt in range(6):
@@ -9273,7 +9278,8 @@ spec:
                 break
             except Exception:
                 if attempt < 5:
-                    time.sleep(60)
+                    if self.is_live or self.in_recording:
+                        time.sleep(60)
                 else:
                     raise
 
