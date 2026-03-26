@@ -521,7 +521,7 @@ subscription than the app service environment, please use the resource ID for --
             c.argument('hostname', help='The custom domain name')
             c.argument('name', options_list=['--name', '-n'], help='Name of the web app.')
             c.argument('resource-group', options_list=['--resource-group', '-g'], help='Name of resource group.')
-            c.argument('domain_validation_method', options_list=['--domain-validation-method'],
+            c.argument('domain_validation_method', options_list=['--domain-validation-method', '--validation-method'],
                        help='Method used for domain validation. Use this when the certificate needs to validate a '
                             'child DNS zone, e.g. "TXT" for TXT record validation.')
         with self.argument_context(scope + ' config hostname') as c:
