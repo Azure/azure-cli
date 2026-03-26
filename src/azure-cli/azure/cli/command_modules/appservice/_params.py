@@ -325,7 +325,7 @@ subscription than the app service environment, please use the resource ID for --
                                         "Example script file: \"startup.sh\".")
         c.argument('sitecontainers_app', help="If true, a webapp which supports sitecontainers will be created", arg_type=get_three_state_flag())
         c.argument('deployment_container_image_name', options_list=['--deployment-container-image-name', '-i'], help='Container image name from container registry, e.g. publisher/image-name:tag', deprecate_info=c.deprecate(target='--deployment-container-image-name'))
-        c.argument('container_registry_url', options_list=['--container-registry-url'], help='The container registry server url')
+        c.argument('container_registry_url', options_list=['--container-registry-url', c.deprecate(target='--docker-registry-server-url', redirect='--container-registry-url')], help='The container registry server url')
         c.argument('container_image_name', options_list=['--container-image-name', '-c'],
                    help='The container custom image name and optionally the tag name (e.g., `<registry-name>/<image-name>:<tag>`). Note: if --container-registry-url is also provided, use `<image-name>:<tag>` without the registry name.')
         c.argument('container_registry_user', options_list=['--container-registry-user', '-s', c.deprecate(target='--docker-registry-server-user', redirect='--container-registry-user')], help='The container registry server username')
@@ -544,6 +544,21 @@ subscription than the app service environment, please use the resource ID for --
             c.argument('hostname', help='The custom domain name')
             c.argument('name', options_list=['--name', '-n'], help='Name of the web app.')
             c.argument('resource-group', options_list=['--resource-group', '-g'], help='Name of resource group.')
+        with self.argument_context(scope + ' config public-cert') as c:
+            c.argument('public_certificate_name', options_list=['--public-certificate-name'],
+                       help='The name of the public certificate.')
+            c.argument('slot', options_list=['--slot', '-s'],
+                       help='The name of the slot. Default to the productions slot if not specified')
+        with self.argument_context(scope + ' config public-cert upload') as c:
+            c.argument('certificate_file', type=file_type,
+                       help='The filepath for the .cer or .crt public certificate file')
+            c.argument('public_certificate_location', options_list=['--certificate-location'],
+                       help='Location (certificate store) for the public certificate',
+                       arg_type=get_enum_type(['CurrentUserMy', 'LocalMachineMy', 'Unknown']),
+                       default='CurrentUserMy')
+        with self.argument_context(scope + ' config public-cert list') as c:
+            c.argument('name', arg_type=(webapp_name_arg_type if scope == 'webapp' else functionapp_name_arg_type),
+                       id_part=None)
         with self.argument_context(scope + ' config hostname') as c:
             c.argument('hostname', completer=get_hostname_completion_list,
                        help="hostname assigned to the site, such as custom domains", id_part='child_name_1')
@@ -705,7 +720,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('settings', nargs='+', help="space-separated configuration for the number of pre-allocated instances in the format `<name>=<value>`")
 
     with self.argument_context('webapp config connection-string list') as c:
-        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+        c.argument('name', arg_type=webapp_name_arg_type)
 
     with self.argument_context('webapp config storage-account list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
@@ -777,7 +792,12 @@ subscription than the app service environment, please use the resource ID for --
                    arg_type=get_enum_type(['error', 'warning', 'information', 'verbose']))
         c.argument('web_server_logging', help='configure Web server logging',
                    arg_type=get_enum_type(['off', 'filesystem', 'azureblobstorage']))
-        c.argument('docker_container_logging', help='configure gathering STDOUT and STDERR output from container',
+        c.argument('docker_container_logging',
+                   help="Configure gathering STDOUT and STDERR output from container. "
+                        "'filesystem' enables collection and storage on the web app's file system "
+                        "(accessible via log stream and log download). "
+                        "'off' disables container output collection. "
+                        "Applies to Linux web apps and Windows container web apps.",
                    arg_type=get_enum_type(['off', 'filesystem']))
         c.argument('web_server_log_sas_url', options_list=['--web-server-log-sas-url'],
                    help='SAS URL to an Azure Blob Storage container for web server log storage. Required when --web-server-logging is set to azureblobstorage.')
@@ -825,14 +845,6 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('webapp config connection-string') as c:
         c.argument('connection_string_type', options_list=['--connection-string-type', '-t'],
                    help='connection string type', arg_type=get_enum_type(ConnectionStringType))
-        c.argument('ids', options_list=['--ids'],
-                   help="One or more resource IDs (space delimited). If provided no other 'Resource Id' arguments should be specified.",
-                   required=True)
-        c.argument('resource_group', options_list=['--resource-group', '-g'],
-                   help='Name of resource group. You can configure the default group using `az configure --default-group=<name>`. If `--ids` is provided this should NOT be specified.')
-        c.argument('name', options_list=['--name', '-n'],
-                   help='Name of the web app. You can configure the default using `az configure --defaults web=<name>`. If `--ids` is provided this should NOT be specified.',
-                   local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.GET]))
 
     with self.argument_context('webapp config storage-account') as c:
         c.argument('custom_id', options_list=['--custom-id', '-i'], help='name of the share configured within the web app')
