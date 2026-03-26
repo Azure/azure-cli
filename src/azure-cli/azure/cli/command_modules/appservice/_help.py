@@ -2620,9 +2620,11 @@ helps['webapp up'] = """
 type: command
 short-summary: >
     Create a webapp and deploy code from a local workspace to the app. The command is required to run from the folder
-    where the code is present. Current support includes Node, Python, .NET Core and ASP.NET. Node,
-    Python apps are created as Linux apps. .Net Core, ASP.NET, and static HTML apps are created as Windows apps.
-    Append the html flag to deploy as a static HTML app.
+    where the code is present. Current support includes Node, Python, .NET Core and ASP.NET. Node, Python, and .NET Core
+    apps are created as Linux apps. ASP.NET apps are created as Windows apps.
+    Static HTML sites are auto-detected and deployed as Linux apps; use the --html flag to force HTML detection.
+    The runtime and OS are auto-detected from source files but can be overridden with --runtime and --os-type.
+    The runtime version is read from project files (runtime.txt, .python-version, package.json engines, *.csproj).
     Each time the command is successfully run, default argument values for resource group, sku, location, plan, and name are saved for the current directory.
     These defaults are then used for any arguments not provided on subsequent runs of the command in the same directory.  Use 'az configure' to manage defaults.
     Run this command with the --debug parameter to see the API calls and parameters values being used.
@@ -2650,15 +2652,24 @@ examples:
   - name: Create a web app with a specified name and a Java 11 runtime
     text: >
         az webapp up -n MyUniqueAppName --runtime "java:11:Java SE:11"
+  - name: Deploy a Python app (auto-detected from requirements.txt) to a Linux app
+    text: >
+        az webapp up -n MyPythonApp
+  - name: Deploy a Node.js app with a specific runtime version
+    text: >
+        az webapp up -n MyNodeApp --runtime "node|18-lts"
   - name: Create a web app in a specific region, by running the command from the folder where the code to be deployed exists.
     text: >
         az webapp up -l locationName
   - name: Create a web app and enable log streaming after the deployment operation is complete. This will enable the default configuration required to enable log streaming.
     text: >
         az webapp up --logs
-  - name: Create a web app and deploy as a static HTML app.
+  - name: Deploy a static HTML site (auto-detected or forced with --html)
     text: >
         az webapp up --html
+  - name: Deploy a .NET app and explicitly set the OS type
+    text: >
+        az webapp up -n MyDotnetApp --os-type Linux --runtime "dotnetcore|8.0"
   - name: Create a web app with a specified domain name scope for unique hostname generation
     text: >
         az webapp up -n MyUniqueAppName --domain-name-scope TenantReuse

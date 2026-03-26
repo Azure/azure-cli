@@ -85,7 +85,7 @@ from ._create_util import (zip_contents_from_dir, get_runtime_version_details, c
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
                            detect_os_from_src, get_current_stack_from_runtime, generate_default_app_name,
                            get_or_create_default_workspace, get_or_create_default_resource_group,
-                           get_workspace)
+                           get_workspace, validate_runtime_os_combo)
 from ._constants import (FUNCTIONS_STACKS_API_KEYS, FUNCTIONS_LINUX_RUNTIME_VERSION_REGEX,
                          FUNCTIONS_WINDOWS_RUNTIME_VERSION_REGEX, PUBLIC_CLOUD,
                          LINUX_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH, WINDOWS_GITHUB_ACTIONS_WORKFLOW_TEMPLATE_PATH,
@@ -9872,6 +9872,10 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
                                "Use 'az webapp list-runtimes' for available options.", language.upper())
             else:
                 logger.warning("No --runtime specified. Using %s version: %s.", language, version_used_create)
+
+    # Pre-validate runtime+OS combo before creating any resources (#25597)
+    if _create_new_app:
+        validate_runtime_os_combo(language, version_used_create, os_name, helper, _is_linux)
 
     runtime_version = "{}|{}".format(language, version_used_create) if \
         version_used_create != "-" else version_used_create
