@@ -4324,6 +4324,11 @@ CONTAINER_APPSETTING_NAMES = ['DOCKER_REGISTRY_SERVER_URL', 'DOCKER_REGISTRY_SER
 APPSETTINGS_TO_MASK = ['DOCKER_REGISTRY_SERVER_PASSWORD']
 
 
+def _is_key_vault_reference(value):
+    """Check if a setting value is a Key Vault reference."""
+    return isinstance(value, str) and value.strip().startswith('@Microsoft.KeyVault(')
+
+
 def update_container_settings(cmd, resource_group_name, name, container_registry_url=None,
                               container_image_name=None, container_registry_user=None,
                               websites_enable_app_service_storage=None, container_registry_password=None,
@@ -4331,30 +4336,54 @@ def update_container_settings(cmd, resource_group_name, name, container_registry
                               slot=None, min_replicas=None, max_replicas=None,
                               assign_identities=None, role='AcrPull', scope=None,
                               acr_use_identity=None, acr_identity=None):
-    settings = []
-    if container_registry_url is not None:
-        settings.append('DOCKER_REGISTRY_SERVER_URL=' + container_registry_url)
+    # Read existing app settings so we can preserve non-container settings and Key Vault references
+    existing_app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
+                                                    'list_application_settings', slot)
+    existing_properties = existing_app_settings.properties or {}
 
     if (not container_registry_user and not container_registry_password and
             not acr_use_identity and
             container_registry_url and '.azurecr.io' in container_registry_url):
-        logger.warning('No credential was provided to access Azure Container Registry. Trying to look up...')
-        parsed = urlparse(container_registry_url)
-        registry_name = (parsed.netloc if parsed.scheme else parsed.path).split('.')[0]
-        try:
-            container_registry_user, container_registry_password = _get_acr_cred(cmd.cli_ctx, registry_name)
-        except Exception as ex:  # pylint: disable=broad-except
-            logger.warning("Retrieving credentials failed with an exception:'%s'", ex)  # consider throw if needed
+        existing_user_val = existing_properties.get('DOCKER_REGISTRY_SERVER_USERNAME', '')
+        existing_pass_val = existing_properties.get('DOCKER_REGISTRY_SERVER_PASSWORD', '')
+        if _is_key_vault_reference(existing_user_val) or _is_key_vault_reference(existing_pass_val):
+            logger.warning('Existing registry credentials use Key Vault references. '
+                           'Skipping automatic credential lookup.')
+        else:
+            logger.warning('No credential was provided to access Azure Container Registry. '
+                           'Trying to look up...')
+            parsed = urlparse(container_registry_url)
+            registry_name = (parsed.netloc if parsed.scheme else parsed.path).split('.')[0]
+            try:
+                container_registry_user, container_registry_password = _get_acr_cred(cmd.cli_ctx,
+                                                                                    registry_name)
+            except Exception as ex:  # pylint: disable=broad-except
+                logger.warning("Retrieving credentials failed with an exception:'%s'", ex)
 
+    # Build dict of only the container-specific settings that were explicitly provided
+    container_updates = {}
+    if container_registry_url is not None:
+        container_updates['DOCKER_REGISTRY_SERVER_URL'] = container_registry_url
     if container_registry_user is not None:
-        settings.append('DOCKER_REGISTRY_SERVER_USERNAME=' + container_registry_user)
+        container_updates['DOCKER_REGISTRY_SERVER_USERNAME'] = container_registry_user
     if container_registry_password is not None:
-        settings.append('DOCKER_REGISTRY_SERVER_PASSWORD=' + container_registry_password)
+        container_updates['DOCKER_REGISTRY_SERVER_PASSWORD'] = container_registry_password
     if websites_enable_app_service_storage:
-        settings.append('WEBSITES_ENABLE_APP_SERVICE_STORAGE=' + websites_enable_app_service_storage)
+        container_updates['WEBSITES_ENABLE_APP_SERVICE_STORAGE'] = websites_enable_app_service_storage
 
-    if container_registry_user or container_registry_password or container_registry_url or websites_enable_app_service_storage:  # pylint: disable=line-too-long
-        update_app_settings(cmd, resource_group_name, name, settings, slot)
+    if container_updates:
+        # Merge only container-specific keys into the existing settings,
+        # preserving all other app settings (including Key Vault references) as-is
+        for key, value in container_updates.items():
+            existing_app_settings.properties[key] = value
+        client = web_client_factory(cmd.cli_ctx)
+        if is_centauri_functionapp(cmd, resource_group_name, name):
+            update_application_settings_polling(cmd, resource_group_name, name,
+                                                existing_app_settings, slot, client)
+        else:
+            _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
+                                        'update_application_settings',
+                                        existing_app_settings, slot, client)
     settings = get_app_settings(cmd, resource_group_name, name, slot)
     if container_image_name is not None:
         _add_fx_version(cmd, resource_group_name, name, container_image_name, slot)

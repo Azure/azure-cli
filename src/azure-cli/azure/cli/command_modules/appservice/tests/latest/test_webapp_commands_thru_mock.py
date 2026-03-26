@@ -36,7 +36,8 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          update_application_settings_polling,
                                                          update_webapp,
                                                          create_webapp,
-                                                         update_container_settings)
+                                                         update_container_settings,
+                                                         _is_key_vault_reference)
 
 # pylint: disable=line-too-long
 from azure.cli.core.profiles import ResourceType
@@ -675,17 +676,27 @@ class TestUpdateWebapp(unittest.TestCase):
 class TestUpdateContainerSettingsIdentity(unittest.TestCase):
     """Tests for managed identity support in update_container_settings."""
 
+    def _make_mock_app_settings(self, properties=None):
+        mock_app_settings = mock.MagicMock()
+        mock_app_settings.properties = properties or {}
+        return mock_app_settings
+
     @mock.patch('azure.cli.command_modules.appservice.custom._mask_creds_related_appsettings')
     @mock.patch('azure.cli.command_modules.appservice.custom._filter_for_container_settings')
     @mock.patch('azure.cli.command_modules.appservice.custom.get_app_settings', return_value=[])
-    @mock.patch('azure.cli.command_modules.appservice.custom.update_app_settings')
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_settings_operation')
+    @mock.patch('azure.cli.command_modules.appservice.custom.is_centauri_functionapp', return_value=False)
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
     @mock.patch('azure.cli.command_modules.appservice.custom._add_fx_version')
     @mock.patch('azure.cli.command_modules.appservice.custom.assign_identity')
     @mock.patch('azure.cli.command_modules.appservice.custom.update_site_configs')
     def test_container_set_with_system_identity_and_acr(
             self, mock_update_site_configs, mock_assign_identity,
-            mock_add_fx, mock_update_app, mock_get_app, mock_filter, mock_mask):
+            mock_add_fx, mock_site_op, mock_client_factory, mock_centauri,
+            mock_settings_op, mock_get_app, mock_filter, mock_mask):
         mock_mask.return_value = {}
+        mock_site_op.return_value = self._make_mock_app_settings()
         cmd = _get_test_cmd()
         update_container_settings(
             cmd, 'rg', 'web1',
@@ -703,14 +714,19 @@ class TestUpdateContainerSettingsIdentity(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.appservice.custom._mask_creds_related_appsettings')
     @mock.patch('azure.cli.command_modules.appservice.custom._filter_for_container_settings')
     @mock.patch('azure.cli.command_modules.appservice.custom.get_app_settings', return_value=[])
-    @mock.patch('azure.cli.command_modules.appservice.custom.update_app_settings')
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_settings_operation')
+    @mock.patch('azure.cli.command_modules.appservice.custom.is_centauri_functionapp', return_value=False)
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
     @mock.patch('azure.cli.command_modules.appservice.custom._add_fx_version')
     @mock.patch('azure.cli.command_modules.appservice.custom.assign_identity')
     @mock.patch('azure.cli.command_modules.appservice.custom.update_site_configs')
     def test_container_set_with_user_identity(
             self, mock_update_site_configs, mock_assign_identity,
-            mock_add_fx, mock_update_app, mock_get_app, mock_filter, mock_mask):
+            mock_add_fx, mock_site_op, mock_client_factory, mock_centauri,
+            mock_settings_op, mock_get_app, mock_filter, mock_mask):
         mock_mask.return_value = {}
+        mock_site_op.return_value = self._make_mock_app_settings()
         cmd = _get_test_cmd()
         user_identity = '/subscriptions/sub1/resourcegroups/rg1/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id1'
         update_container_settings(
@@ -729,14 +745,19 @@ class TestUpdateContainerSettingsIdentity(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.appservice.custom._mask_creds_related_appsettings')
     @mock.patch('azure.cli.command_modules.appservice.custom._filter_for_container_settings')
     @mock.patch('azure.cli.command_modules.appservice.custom.get_app_settings', return_value=[])
-    @mock.patch('azure.cli.command_modules.appservice.custom.update_app_settings')
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_settings_operation')
+    @mock.patch('azure.cli.command_modules.appservice.custom.is_centauri_functionapp', return_value=False)
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
     @mock.patch('azure.cli.command_modules.appservice.custom._add_fx_version')
     @mock.patch('azure.cli.command_modules.appservice.custom.assign_identity')
     @mock.patch('azure.cli.command_modules.appservice.custom.update_site_configs')
     def test_container_set_without_identity_does_not_call_identity_apis(
             self, mock_update_site_configs, mock_assign_identity,
-            mock_add_fx, mock_update_app, mock_get_app, mock_filter, mock_mask):
+            mock_add_fx, mock_site_op, mock_client_factory, mock_centauri,
+            mock_settings_op, mock_get_app, mock_filter, mock_mask):
         mock_mask.return_value = {}
+        mock_site_op.return_value = self._make_mock_app_settings()
         cmd = _get_test_cmd()
         update_container_settings(
             cmd, 'rg', 'web1',
@@ -750,14 +771,19 @@ class TestUpdateContainerSettingsIdentity(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.appservice.custom._mask_creds_related_appsettings')
     @mock.patch('azure.cli.command_modules.appservice.custom._filter_for_container_settings')
     @mock.patch('azure.cli.command_modules.appservice.custom.get_app_settings', return_value=[])
-    @mock.patch('azure.cli.command_modules.appservice.custom.update_app_settings')
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_settings_operation')
+    @mock.patch('azure.cli.command_modules.appservice.custom.is_centauri_functionapp', return_value=False)
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
     @mock.patch('azure.cli.command_modules.appservice.custom._add_fx_version')
     @mock.patch('azure.cli.command_modules.appservice.custom.assign_identity')
     @mock.patch('azure.cli.command_modules.appservice.custom.update_site_configs')
     def test_container_set_with_custom_role(
             self, mock_update_site_configs, mock_assign_identity,
-            mock_add_fx, mock_update_app, mock_get_app, mock_filter, mock_mask):
+            mock_add_fx, mock_site_op, mock_client_factory, mock_centauri,
+            mock_settings_op, mock_get_app, mock_filter, mock_mask):
         mock_mask.return_value = {}
+        mock_site_op.return_value = self._make_mock_app_settings()
         cmd = _get_test_cmd()
         update_container_settings(
             cmd, 'rg', 'web1',
@@ -773,14 +799,19 @@ class TestUpdateContainerSettingsIdentity(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.appservice.custom._mask_creds_related_appsettings')
     @mock.patch('azure.cli.command_modules.appservice.custom._filter_for_container_settings')
     @mock.patch('azure.cli.command_modules.appservice.custom.get_app_settings', return_value=[])
-    @mock.patch('azure.cli.command_modules.appservice.custom.update_app_settings')
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_settings_operation')
+    @mock.patch('azure.cli.command_modules.appservice.custom.is_centauri_functionapp', return_value=False)
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
     @mock.patch('azure.cli.command_modules.appservice.custom._add_fx_version')
     @mock.patch('azure.cli.command_modules.appservice.custom.assign_identity')
     @mock.patch('azure.cli.command_modules.appservice.custom.update_site_configs')
     def test_container_set_disable_acr_identity(
             self, mock_update_site_configs, mock_assign_identity,
-            mock_add_fx, mock_update_app, mock_get_app, mock_filter, mock_mask):
+            mock_add_fx, mock_site_op, mock_client_factory, mock_centauri,
+            mock_settings_op, mock_get_app, mock_filter, mock_mask):
         mock_mask.return_value = {}
+        mock_site_op.return_value = self._make_mock_app_settings()
         cmd = _get_test_cmd()
         update_container_settings(
             cmd, 'rg', 'web1',
@@ -795,16 +826,21 @@ class TestUpdateContainerSettingsIdentity(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.appservice.custom._mask_creds_related_appsettings')
     @mock.patch('azure.cli.command_modules.appservice.custom._filter_for_container_settings')
     @mock.patch('azure.cli.command_modules.appservice.custom.get_app_settings', return_value=[])
-    @mock.patch('azure.cli.command_modules.appservice.custom.update_app_settings')
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_settings_operation')
+    @mock.patch('azure.cli.command_modules.appservice.custom.is_centauri_functionapp', return_value=False)
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
     @mock.patch('azure.cli.command_modules.appservice.custom._add_fx_version')
     @mock.patch('azure.cli.command_modules.appservice.custom.assign_identity')
     @mock.patch('azure.cli.command_modules.appservice.custom.update_site_configs')
     def test_acr_use_identity_skips_credential_lookup(
             self, mock_update_site_configs, mock_assign_identity,
-            mock_add_fx, mock_update_app, mock_get_app, mock_filter, mock_mask,
+            mock_add_fx, mock_site_op, mock_client_factory, mock_centauri,
+            mock_settings_op, mock_get_app, mock_filter, mock_mask,
             mock_get_acr_cred):
         """When acr_use_identity is set, _get_acr_cred should NOT be called."""
         mock_mask.return_value = {}
+        mock_site_op.return_value = self._make_mock_app_settings()
         cmd = _get_test_cmd()
         update_container_settings(
             cmd, 'rg', 'web1',
@@ -814,6 +850,91 @@ class TestUpdateContainerSettingsIdentity(unittest.TestCase):
             acr_use_identity='true',
             acr_identity='[system]')
         mock_get_acr_cred.assert_not_called()
+
+
+class TestUpdateContainerSettingsPreservesKeyVaultRefs(unittest.TestCase):
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_fx_version', return_value='DOCKER|myimage:latest')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_app_settings')
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_settings_operation')
+    @mock.patch('azure.cli.command_modules.appservice.custom.is_centauri_functionapp', return_value=False)
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
+    def test_container_set_preserves_kv_ref_settings(self, mock_site_op, mock_client_factory,
+                                                     mock_centauri, mock_settings_op,
+                                                     mock_get_app_settings, mock_get_fx):
+        """Key Vault reference app settings must survive az webapp config container set."""
+        cmd_mock = _get_test_cmd()
+
+        kv_ref = '@Microsoft.KeyVault(SecretUri=https://myvault.vault.azure.net/secrets/mysecret)'
+        existing_properties = {
+            'MY_KV_SECRET': kv_ref,
+            'NORMAL_SETTING': 'normal_value',
+            'DOCKER_REGISTRY_SERVER_URL': 'https://old.azurecr.io',
+        }
+        mock_app_settings = mock.MagicMock()
+        mock_app_settings.properties = dict(existing_properties)
+        mock_site_op.return_value = mock_app_settings
+
+        mock_get_app_settings.return_value = [
+            {'name': 'MY_KV_SECRET', 'value': kv_ref, 'slotSetting': False},
+            {'name': 'NORMAL_SETTING', 'value': 'normal_value', 'slotSetting': False},
+            {'name': 'DOCKER_REGISTRY_SERVER_URL', 'value': 'https://new.example.io', 'slotSetting': False},
+        ]
+
+        update_container_settings(cmd_mock, 'test-rg', 'test-app',
+                                  container_registry_url='https://new.example.io')
+
+        # The settings written back must still contain the KV ref and normal setting
+        written_props = mock_app_settings.properties
+        self.assertEqual(written_props['MY_KV_SECRET'], kv_ref)
+        self.assertEqual(written_props['NORMAL_SETTING'], 'normal_value')
+        self.assertEqual(written_props['DOCKER_REGISTRY_SERVER_URL'], 'https://new.example.io')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_fx_version', return_value='DOCKER|myimage:latest')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_app_settings')
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_settings_operation')
+    @mock.patch('azure.cli.command_modules.appservice.custom.is_centauri_functionapp', return_value=False)
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
+    def test_container_set_skips_acr_auto_detect_when_kv_refs(self, mock_site_op, mock_client_factory,
+                                                              mock_centauri, mock_settings_op,
+                                                              mock_get_app_settings, mock_get_fx):
+        """ACR credential auto-detection must be skipped when existing creds are KV references."""
+        cmd_mock = _get_test_cmd()
+
+        kv_user = '@Microsoft.KeyVault(SecretUri=https://vault.vault.azure.net/secrets/user)'
+        kv_pass = '@Microsoft.KeyVault(SecretUri=https://vault.vault.azure.net/secrets/pass)'
+        existing_properties = {
+            'DOCKER_REGISTRY_SERVER_URL': 'https://old.azurecr.io',
+            'DOCKER_REGISTRY_SERVER_USERNAME': kv_user,
+            'DOCKER_REGISTRY_SERVER_PASSWORD': kv_pass,
+        }
+        mock_app_settings = mock.MagicMock()
+        mock_app_settings.properties = dict(existing_properties)
+        mock_site_op.return_value = mock_app_settings
+
+        mock_get_app_settings.return_value = [
+            {'name': 'DOCKER_REGISTRY_SERVER_URL', 'value': 'https://myregistry.azurecr.io', 'slotSetting': False},
+        ]
+
+        with mock.patch('azure.cli.command_modules.appservice.custom._get_acr_cred') as mock_acr_cred:
+            update_container_settings(cmd_mock, 'test-rg', 'test-app',
+                                      container_registry_url='https://myregistry.azurecr.io')
+            # _get_acr_cred should NOT have been called because existing creds are KV refs
+            mock_acr_cred.assert_not_called()
+
+        # Existing KV references for username/password must be preserved
+        written_props = mock_app_settings.properties
+        self.assertEqual(written_props['DOCKER_REGISTRY_SERVER_USERNAME'], kv_user)
+        self.assertEqual(written_props['DOCKER_REGISTRY_SERVER_PASSWORD'], kv_pass)
+
+    def test_is_key_vault_reference_detects_kv_refs(self):
+        self.assertTrue(_is_key_vault_reference('@Microsoft.KeyVault(SecretUri=https://v.vault.azure.net/secrets/s)'))
+        self.assertTrue(_is_key_vault_reference('  @Microsoft.KeyVault(VaultName=v;SecretName=s)'))
+        self.assertFalse(_is_key_vault_reference('plain_value'))
+        self.assertFalse(_is_key_vault_reference(''))
+        self.assertFalse(_is_key_vault_reference(None))
 
 
 class FakedResponse:  # pylint: disable=too-few-public-methods
