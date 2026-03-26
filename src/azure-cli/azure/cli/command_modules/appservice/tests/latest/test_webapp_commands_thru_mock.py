@@ -778,11 +778,17 @@ class TestWebappAuthV2Mocked(unittest.TestCase):
         # Verify update_auth_settings_v2 was called
         calls = [c for c in mock_site_op.call_args_list if c[0][3] == 'update_auth_settings_v2']
         self.assertEqual(len(calls), 1)
-        # Verify the v2 settings were modified
-        sent_settings = calls[0][1].get('extra_parameter') or calls[0][0][4] if len(calls[0][0]) > 4 else None
-        # The auth settings object should have been passed as extra_parameter
-        update_call_args = calls[0]
-        self.assertIn('update_auth_settings_v2', update_call_args[0])
+        # Verify the v2 settings object passed as extra_parameter has expected changes
+        sent_settings = calls[0][1].get('extra_parameter') or (calls[0][0][5] if len(calls[0][0]) > 5 else None)
+        self.assertIsInstance(sent_settings, SiteAuthSettingsV2)
+        # Platform.enabled should reflect enabled='true'
+        self.assertIsNotNone(sent_settings.platform)
+        self.assertTrue(sent_settings.platform.enabled)
+        # AAD registration should reflect client_id
+        aad_provider = sent_settings.identity_providers.azure_active_directory
+        self.assertIsNotNone(aad_provider)
+        self.assertIsNotNone(aad_provider.registration)
+        self.assertEqual('test-client-id', aad_provider.registration.client_id)
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
     def test_update_auth_settings_require_https_forces_v2(self, mock_site_op):
@@ -836,11 +842,17 @@ class TestWebappAuthV2Mocked(unittest.TestCase):
     def test_update_auth_v2_aad_settings(self, mock_site_op):
         from azure.mgmt.web.models import SiteAuthSettingsV2, AuthPlatform
         v2_settings = SiteAuthSettingsV2(platform=AuthPlatform(enabled=True))
+        mock_app_settings = mock.MagicMock()
+        mock_app_settings.properties = {}
 
         def side_effect(cli_ctx, rg, name, op, slot=None, extra_parameter=None):
             if op == 'get_auth_settings_v2':
                 return v2_settings
             if op == 'update_auth_settings_v2':
+                return extra_parameter
+            if op == 'list_application_settings':
+                return mock_app_settings
+            if op == 'update_application_settings':
                 return extra_parameter
             return mock.MagicMock()
 
@@ -859,21 +871,32 @@ class TestWebappAuthV2Mocked(unittest.TestCase):
         aad = result.identity_providers.azure_active_directory
         self.assertTrue(aad.enabled)
         self.assertEqual(aad.registration.client_id, 'my-client-id')
-        self.assertEqual(aad.registration.client_secret_setting_name, 'my-secret')
+        # client_secret_setting_name should reference the app setting name, not the secret value
+        self.assertEqual(aad.registration.client_secret_setting_name,
+                         'MICROSOFT_PROVIDER_AUTHENTICATION_SECRET')
         self.assertEqual(aad.registration.open_id_issuer, 'https://sts.windows.net/tenant-id/')
         self.assertEqual(aad.validation.allowed_audiences, ['https://myapp.azurewebsites.net'])
         # Verify token store
         self.assertTrue(result.login.token_store.enabled)
+        # Verify the secret was stored in app settings
+        self.assertEqual(mock_app_settings.properties['MICROSOFT_PROVIDER_AUTHENTICATION_SECRET'],
+                         'my-secret')
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
     def test_update_auth_v2_facebook_settings(self, mock_site_op):
         from azure.mgmt.web.models import SiteAuthSettingsV2, AuthPlatform
         v2_settings = SiteAuthSettingsV2(platform=AuthPlatform(enabled=True))
+        mock_app_settings = mock.MagicMock()
+        mock_app_settings.properties = {}
 
         def side_effect(cli_ctx, rg, name, op, slot=None, extra_parameter=None):
             if op == 'get_auth_settings_v2':
                 return v2_settings
             if op == 'update_auth_settings_v2':
+                return extra_parameter
+            if op == 'list_application_settings':
+                return mock_app_settings
+            if op == 'update_application_settings':
                 return extra_parameter
             return mock.MagicMock()
 
@@ -889,8 +912,13 @@ class TestWebappAuthV2Mocked(unittest.TestCase):
         fb = result.identity_providers.facebook
         self.assertTrue(fb.enabled)
         self.assertEqual(fb.registration.app_id, 'fb-app-id')
-        self.assertEqual(fb.registration.app_secret_setting_name, 'fb-secret')
+        # app_secret_setting_name should reference the app setting name, not the secret value
+        self.assertEqual(fb.registration.app_secret_setting_name,
+                         'FACEBOOK_PROVIDER_AUTHENTICATION_SECRET')
         self.assertEqual(fb.login.scopes, ['public_profile', 'email'])
+        # Verify the secret was stored in app settings
+        self.assertEqual(mock_app_settings.properties['FACEBOOK_PROVIDER_AUTHENTICATION_SECRET'],
+                         'fb-secret')
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
     def test_update_auth_v2_action_allow_anonymous(self, mock_site_op):

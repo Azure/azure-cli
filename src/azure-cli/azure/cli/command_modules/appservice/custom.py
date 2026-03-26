@@ -121,12 +121,25 @@ logger = get_logger(__name__)
 
 
 def _is_service_principal_auth(cli_ctx):
-    """Check if current authentication is via Service Principal."""
+    """Check if current authentication is via Service Principal.
+
+    This helper performs profile/subscription lookups which can fail in cases such as
+    no subscription being selected or token/cache issues. In those situations, we
+    conservatively return False instead of raising, to avoid blocking unrelated
+    command flows (e.g. deployment source configuration) with profile errors.
+    """
     from azure.cli.core._profile import Profile
     from azure.cli.core.commands.client_factory import get_subscription_id
-    profile = Profile(cli_ctx=cli_ctx)
-    subscription_id = get_subscription_id(cli_ctx)
-    account = profile.get_subscription(subscription=subscription_id)
+    try:
+        profile = Profile(cli_ctx=cli_ctx)
+        subscription_id = get_subscription_id(cli_ctx)
+        if not subscription_id:
+            logger.debug("Unable to determine authentication type: no active subscription ID.")
+            return False
+        account = profile.get_subscription(subscription=subscription_id)
+    except Exception as ex:  # pylint: disable=broad-exception-caught
+        logger.debug("Failed to determine authentication type from profile: %s", ex)
+        return False
     # Service principals have user.type == 'servicePrincipal'
     return account.get('user', {}).get('type') == 'servicePrincipal'
 
@@ -3429,11 +3442,29 @@ def _is_auth_v2_app(auth_settings_v2):
     """Check if the app has v2 auth configured by inspecting the v2 settings object."""
     if auth_settings_v2 is None:
         return False
+    # If the platform block is present and explicitly configured, this is a v2 app.
     platform = getattr(auth_settings_v2, 'platform', None)
     if platform and getattr(platform, 'enabled', None) is not None:
         return True
+    # Check for any configured identity provider, not just Azure Active Directory.
     identity_providers = getattr(auth_settings_v2, 'identity_providers', None)
-    if identity_providers and getattr(identity_providers, 'azure_active_directory', None):
+    if identity_providers:
+        if getattr(identity_providers, 'azure_active_directory', None):
+            return True
+        if getattr(identity_providers, 'facebook', None):
+            return True
+        if getattr(identity_providers, 'google', None):
+            return True
+        if getattr(identity_providers, 'twitter', None):
+            return True
+        if getattr(identity_providers, 'microsoft', None):
+            return True
+    # Presence of other v2-specific configuration sections also indicates v2 auth.
+    if getattr(auth_settings_v2, 'http_settings', None) is not None:
+        return True
+    if getattr(auth_settings_v2, 'login', None) is not None:
+        return True
+    if getattr(auth_settings_v2, 'global_validation', None) is not None:
         return True
     return False
 
@@ -3443,8 +3474,11 @@ def get_auth_settings(cmd, resource_group_name, name, slot=None):
         auth_settings_v2 = _get_auth_settings_v2(cmd, resource_group_name, name, slot)
         if _is_auth_v2_app(auth_settings_v2):
             return auth_settings_v2
-    except Exception:  # pylint: disable=broad-except
-        pass
+    except HttpResponseError as ex:
+        status_code = getattr(ex, 'status_code', None)
+        if status_code not in (404, None):
+            logger.debug("Failed to get auth settings v2 for '%s': %s", name, ex, exc_info=True)
+            raise
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_auth_settings', slot)
 
 
@@ -3485,13 +3519,14 @@ def _update_auth_settings_v2(cmd, resource_group_name, name, auth_settings_v2,
                              microsoft_account_oauth_scopes=None,
                              require_https=None, slot=None):
     """Apply parameter updates to a SiteAuthSettingsV2 object and persist it."""
-    from azure.mgmt.web.models import (AuthPlatform, GlobalValidation, IdentityProviders,
-                                        Login, HttpSettings, TokenStore,
-                                        AzureActiveDirectory, AzureActiveDirectoryRegistration,
-                                        AzureActiveDirectoryValidation,
-                                        Facebook, AppRegistration, LoginScopes,
-                                        Google, ClientRegistration,
-                                        Twitter, TwitterRegistration)
+    from azure.mgmt.web.models import (
+        AuthPlatform, GlobalValidation, IdentityProviders,
+        Login, HttpSettings, TokenStore,
+        AzureActiveDirectory, AzureActiveDirectoryRegistration,
+        AzureActiveDirectoryValidation,
+        Facebook, AppRegistration, LoginScopes,
+        Google, ClientRegistration,
+        Twitter, TwitterRegistration)
 
     # -- platform --
     if auth_settings_v2.platform is None:
@@ -3542,9 +3577,14 @@ def _update_auth_settings_v2(cmd, resource_group_name, name, auth_settings_v2,
         auth_settings_v2.identity_providers = IdentityProviders()
     ip = auth_settings_v2.identity_providers
 
+    # Collect secrets that need to be stored as app settings.
+    # The v2 auth model *_secret_setting_name fields expect the name of an app setting,
+    # not the secret value itself.
+    secrets_to_store = {}
+
     # AAD
     if any(v is not None for v in [client_id, client_secret, client_secret_certificate_thumbprint,
-                                    allowed_audiences, issuer]):
+                                   allowed_audiences, issuer]):
         if ip.azure_active_directory is None:
             ip.azure_active_directory = AzureActiveDirectory(enabled=True)
         else:
@@ -3555,7 +3595,9 @@ def _update_auth_settings_v2(cmd, resource_group_name, name, auth_settings_v2,
         if client_id is not None:
             aad.registration.client_id = client_id
         if client_secret is not None:
-            aad.registration.client_secret_setting_name = client_secret
+            setting_name = 'MICROSOFT_PROVIDER_AUTHENTICATION_SECRET'
+            secrets_to_store[setting_name] = client_secret
+            aad.registration.client_secret_setting_name = setting_name
         if client_secret_certificate_thumbprint is not None:
             aad.registration.client_secret_certificate_thumbprint = client_secret_certificate_thumbprint
         if issuer is not None:
@@ -3577,7 +3619,9 @@ def _update_auth_settings_v2(cmd, resource_group_name, name, auth_settings_v2,
             if facebook_app_id is not None:
                 ip.facebook.registration.app_id = facebook_app_id
             if facebook_app_secret is not None:
-                ip.facebook.registration.app_secret_setting_name = facebook_app_secret
+                setting_name = 'FACEBOOK_PROVIDER_AUTHENTICATION_SECRET'
+                secrets_to_store[setting_name] = facebook_app_secret
+                ip.facebook.registration.app_secret_setting_name = setting_name
         if facebook_oauth_scopes is not None:
             if ip.facebook.login is None:
                 ip.facebook.login = LoginScopes()
@@ -3595,7 +3639,9 @@ def _update_auth_settings_v2(cmd, resource_group_name, name, auth_settings_v2,
             if google_client_id is not None:
                 ip.google.registration.client_id = google_client_id
             if google_client_secret is not None:
-                ip.google.registration.client_secret_setting_name = google_client_secret
+                setting_name = 'GOOGLE_PROVIDER_AUTHENTICATION_SECRET'
+                secrets_to_store[setting_name] = google_client_secret
+                ip.google.registration.client_secret_setting_name = setting_name
         if google_oauth_scopes is not None:
             if ip.google.login is None:
                 ip.google.login = LoginScopes()
@@ -3612,11 +3658,13 @@ def _update_auth_settings_v2(cmd, resource_group_name, name, auth_settings_v2,
         if twitter_consumer_key is not None:
             ip.twitter.registration.consumer_key = twitter_consumer_key
         if twitter_consumer_secret is not None:
-            ip.twitter.registration.consumer_secret_setting_name = twitter_consumer_secret
+            setting_name = 'TWITTER_PROVIDER_AUTHENTICATION_SECRET'
+            secrets_to_store[setting_name] = twitter_consumer_secret
+            ip.twitter.registration.consumer_secret_setting_name = setting_name
 
     # Microsoft Account (legacy)
     if any(v is not None for v in [microsoft_account_client_id, microsoft_account_client_secret,
-                                    microsoft_account_oauth_scopes]):
+                                   microsoft_account_oauth_scopes]):
         if ip.legacy_microsoft_account is None:
             from azure.mgmt.web.models import LegacyMicrosoftAccount
             ip.legacy_microsoft_account = LegacyMicrosoftAccount(enabled=True)
@@ -3628,12 +3676,22 @@ def _update_auth_settings_v2(cmd, resource_group_name, name, auth_settings_v2,
             if microsoft_account_client_id is not None:
                 ip.legacy_microsoft_account.registration.client_id = microsoft_account_client_id
             if microsoft_account_client_secret is not None:
-                ip.legacy_microsoft_account.registration.client_secret_setting_name = \
-                    microsoft_account_client_secret
+                setting_name = 'MICROSOFTACCOUNT_PROVIDER_AUTHENTICATION_SECRET'
+                secrets_to_store[setting_name] = microsoft_account_client_secret
+                ip.legacy_microsoft_account.registration.client_secret_setting_name = setting_name
         if microsoft_account_oauth_scopes is not None:
             if ip.legacy_microsoft_account.login is None:
                 ip.legacy_microsoft_account.login = LoginScopes()
             ip.legacy_microsoft_account.login.scopes = microsoft_account_oauth_scopes
+
+    # Store all collected secrets into app settings in a single API call.
+    if secrets_to_store:
+        app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
+                                               'list_application_settings', slot)
+        for setting_key, secret_value in secrets_to_store.items():
+            app_settings.properties[setting_key] = secret_value
+        _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
+                                'update_application_settings', slot, app_settings)
 
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
                                    'update_auth_settings_v2', slot, auth_settings_v2)
@@ -3663,8 +3721,11 @@ def update_auth_settings(cmd, resource_group_name, name, enabled=None, action=No
         auth_settings_v2 = _get_auth_settings_v2(cmd, resource_group_name, name, slot)
         if _is_auth_v2_app(auth_settings_v2):
             use_v2 = True
-    except Exception:  # pylint: disable=broad-except
-        pass
+    except HttpResponseError as ex:
+        # Only treat 404 as "v2 not available"; propagate other HTTP errors
+        status_code = getattr(getattr(ex, 'response', None), 'status_code', None)
+        if status_code != 404:
+            raise
 
     # v2-only params force v2 path for new auth setups
     if require_https is not None:
