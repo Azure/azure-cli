@@ -12,8 +12,8 @@ from knack.log import get_logger
 
 from ._clients import ContainerAppClient, ManagedEnvironmentClient
 from ._ssh_utils import ping_container_app
-from ._utils import safe_get, is_registry_msi_system
-from ._constants import ACR_IMAGE_SUFFIX, LOG_TYPE_SYSTEM, MANAGED_ENVIRONMENT_RESOURCE_TYPE
+from ._utils import safe_get, is_registry_msi_system, is_acr_url
+from ._constants import LOG_TYPE_SYSTEM, MANAGED_ENVIRONMENT_RESOURCE_TYPE
 
 logger = get_logger(__name__)
 
@@ -26,8 +26,8 @@ def validate_create(registry_identity, registry_pass, registry_user, registry_se
         raise MutuallyExclusiveArgumentError("--no-wait is not supported with system registry identity")
     if registry_identity and not is_valid_resource_id(registry_identity) and not is_registry_msi_system(registry_identity):
         raise InvalidArgumentValueError("--registry-identity must be an identity resource ID or 'system'")
-    if registry_identity and ACR_IMAGE_SUFFIX not in (registry_server or ""):
-        raise InvalidArgumentValueError("--registry-identity: expected an ACR registry (*.azurecr.io) for --registry-server")
+    if registry_identity and not is_acr_url(registry_server or ""):
+        raise InvalidArgumentValueError("--registry-identity: expected an ACR registry (*.azurecr.io / *.azurecr.cn / *.azurecr.us) for --registry-server")
 
 
 def _is_number(s):
@@ -106,21 +106,21 @@ def validate_registry_server(namespace):
     if "create" in namespace.command.lower():
         if namespace.registry_server:
             if not namespace.registry_user or not namespace.registry_pass:
-                if ACR_IMAGE_SUFFIX not in namespace.registry_server:
+                if not is_acr_url(namespace.registry_server):
                     raise ValidationError("Usage error: --registry-server, --registry-password and --registry-username are required together if not using Azure Container Registry")
 
 
 def validate_registry_user(namespace):
     if "create" in namespace.command.lower():
         if namespace.registry_user:
-            if not namespace.registry_server or (not namespace.registry_pass and ACR_IMAGE_SUFFIX not in namespace.registry_server):
+            if not namespace.registry_server or (not namespace.registry_pass and not is_acr_url(namespace.registry_server)):
                 raise ValidationError("Usage error: --registry-server, --registry-password and --registry-username are required together if not using Azure Container Registry")
 
 
 def validate_registry_pass(namespace):
     if "create" in namespace.command.lower():
         if namespace.registry_pass:
-            if not namespace.registry_server or (not namespace.registry_user and ACR_IMAGE_SUFFIX not in namespace.registry_server):
+            if not namespace.registry_server or (not namespace.registry_user and not is_acr_url(namespace.registry_server)):
                 raise ValidationError("Usage error: --registry-server, --registry-password and --registry-username are required together if not using Azure Container Registry")
 
 
