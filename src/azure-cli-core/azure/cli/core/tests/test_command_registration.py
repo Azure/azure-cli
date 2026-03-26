@@ -165,6 +165,9 @@ class TestCommandRegistration(unittest.TestCase):
                 MockExtension(name=__name__ + '.Ext2CommandsLoader', preview=False, experimental=False, path=None, get_metadata=lambda: {}),
                 MockExtension(name=__name__ + '.ExtAlwaysLoadedCommandsLoader', preview=False, experimental=False, path=None, get_metadata=lambda: {})]
 
+    def _mock_no_extensions():
+        return []
+
     def _mock_load_command_loader(loader, args, name, prefix):
 
         class TestCommandsLoader(AzCommandsLoader):
@@ -184,6 +187,13 @@ class TestCommandRegistration(unittest.TestCase):
                     # https://docs.python.org/3/library/typing.html#typing.final
                     g.command('final', 'sample_vm_get')
                 self.__module__ = "azure.cli.command_modules.extra"
+                return self.command_table
+
+        class UtilCommandsLoader(AzCommandsLoader):
+            def load_command_table(self, args):
+                with self.command_group('version', operations_tmpl='{}#TestCommandRegistration.{{}}'.format(__name__)) as g:
+                    g.command('', 'sample_vm_get')
+                self.__module__ = "azure.cli.command_modules.util"
                 return self.command_table
 
         # Extend existing group by adding a new command
@@ -214,7 +224,7 @@ class TestCommandRegistration(unittest.TestCase):
                 return self.command_table
 
         if prefix == 'azure.cli.command_modules.':
-            command_loaders = {'hello': TestCommandsLoader, 'extra': Test2CommandsLoader}
+            command_loaders = {'hello': TestCommandsLoader, 'extra': Test2CommandsLoader, 'util': UtilCommandsLoader}
         else:
             command_loaders = {'azext_hello1': ExtCommandsLoader,
                                'azext_hello2': Ext2CommandsLoader,
@@ -305,6 +315,8 @@ class TestCommandRegistration(unittest.TestCase):
         from azure.cli.core import CommandIndex, __version__
 
         cli = DummyCli()
+        # This test validates legacy local index rebuild behavior, not latest packaged-index shortcuts.
+        cli.cloud.profile = "2019-03-01-hybrid"
         loader = cli.commands_loader
         command_index = CommandIndex(cli)
 
@@ -432,6 +444,267 @@ class TestCommandRegistration(unittest.TestCase):
     @mock.patch('importlib.import_module', _mock_import_lib)
     @mock.patch('pkgutil.iter_modules', _mock_iter_modules)
     @mock.patch('azure.cli.core.commands._load_command_loader', _mock_load_command_loader)
+    @mock.patch('azure.cli.core.extension.get_extensions', _mock_no_extensions)
+    def test_command_index_uses_packaged_latest_without_seeding(self):
+        from azure.cli.core._session import INDEX
+        from azure.cli.core import CommandIndex, __version__
+
+        cli = DummyCli()
+        loader = cli.commands_loader
+
+        # Simulate no local index metadata. This is the no-seeding path.
+        INDEX[CommandIndex._COMMAND_INDEX_VERSION] = ""
+        INDEX[CommandIndex._COMMAND_INDEX_CLOUD_PROFILE] = ""
+        INDEX[CommandIndex._COMMAND_INDEX] = {}
+
+        packaged_index = {
+            CommandIndex._COMMAND_INDEX_VERSION: __version__,
+            CommandIndex._COMMAND_INDEX_CLOUD_PROFILE: cli.cloud.profile,
+            CommandIndex._COMMAND_INDEX: {
+                'hello': ['azure.cli.command_modules.hello'],
+                'extra': ['azure.cli.command_modules.extra']
+            }
+        }
+
+        with mock.patch.object(CommandIndex, '_load_packaged_command_index', return_value=packaged_index):
+            cmd_tbl = loader.load_command_table(["hello", "mod-only"])
+
+        # Uses packaged index directly and doesn't require local index seeding.
+        self.assertEqual(list(cmd_tbl), ['hello mod-only', 'hello overridden'])
+        self.assertEqual(INDEX[CommandIndex._COMMAND_INDEX], {})
+
+    @mock.patch('importlib.import_module', _mock_import_lib)
+    @mock.patch('pkgutil.iter_modules', _mock_iter_modules)
+    @mock.patch('azure.cli.core.commands._load_command_loader', _mock_load_command_loader)
+    @mock.patch('azure.cli.core.extension.get_extension_modname', _mock_get_extension_modname)
+    @mock.patch('azure.cli.core.extension.get_extensions', _mock_get_extensions)
+    def test_command_index_loads_all_extensions_when_overlay_missing(self):
+        from azure.cli.core._session import INDEX, EXTENSION_INDEX
+        from azure.cli.core import CommandIndex, __version__
+
+        cli = DummyCli()
+        loader = cli.commands_loader
+        cli.invocation = cli.invocation_cls(cli_ctx=cli,
+                            commands_loader_cls=cli.commands_loader_cls,
+                            parser_cls=cli.parser_cls,
+                            help_cls=cli.help_cls)
+
+        INDEX[CommandIndex._COMMAND_INDEX_VERSION] = ""
+        INDEX[CommandIndex._COMMAND_INDEX_CLOUD_PROFILE] = ""
+        INDEX[CommandIndex._COMMAND_INDEX] = {}
+
+        packaged_index = {
+            CommandIndex._COMMAND_INDEX_VERSION: __version__,
+            CommandIndex._COMMAND_INDEX_CLOUD_PROFILE: cli.cloud.profile,
+            CommandIndex._COMMAND_INDEX: {
+                'hello': ['azure.cli.command_modules.hello'],
+                'extra': ['azure.cli.command_modules.extra']
+            }
+        }
+
+        with mock.patch.object(CommandIndex, '_load_packaged_command_index', return_value=packaged_index):
+            cmd_tbl = loader.load_command_table(["hello", "mod-only"])
+
+        # Missing overlay triggers loading all extensions, but avoids full module rebuild.
+        self.assertEqual(list(cmd_tbl), ['hello mod-only', 'hello overridden', 'hello ext-only'])
+        self.assertEqual(INDEX[CommandIndex._COMMAND_INDEX], {})
+        self.assertEqual(EXTENSION_INDEX[CommandIndex._COMMAND_INDEX_VERSION], __version__)
+        self.assertEqual(EXTENSION_INDEX[CommandIndex._COMMAND_INDEX_CLOUD_PROFILE], cli.cloud.profile)
+        self.assertIn('hello', EXTENSION_INDEX[CommandIndex._COMMAND_INDEX])
+        self.assertIn('azext_hello1', EXTENSION_INDEX[CommandIndex._COMMAND_INDEX]['hello'])
+        self.assertIn('azext_hello2', EXTENSION_INDEX[CommandIndex._COMMAND_INDEX]['hello'])
+
+    @mock.patch('importlib.import_module', _mock_import_lib)
+    @mock.patch('pkgutil.iter_modules', _mock_iter_modules)
+    @mock.patch('azure.cli.core.commands._load_command_loader', _mock_load_command_loader)
+    @mock.patch('azure.cli.core.extension.get_extension_modname', _mock_get_extension_modname)
+    @mock.patch('azure.cli.core.extension.get_extensions', _mock_get_extensions)
+    def test_command_index_latest_uppercase_help_triggers_full_core_reload(self):
+        from azure.cli.core._session import INDEX, EXTENSION_INDEX
+        from azure.cli.core import CommandIndex, __version__
+
+        cli = DummyCli()
+        loader = cli.commands_loader
+
+        INDEX[CommandIndex._COMMAND_INDEX_VERSION] = ""
+        INDEX[CommandIndex._COMMAND_INDEX_CLOUD_PROFILE] = ""
+        INDEX[CommandIndex._COMMAND_INDEX] = {}
+        EXTENSION_INDEX[CommandIndex._COMMAND_INDEX_VERSION] = ""
+        EXTENSION_INDEX[CommandIndex._COMMAND_INDEX_CLOUD_PROFILE] = ""
+        EXTENSION_INDEX[CommandIndex._COMMAND_INDEX] = {}
+
+        packaged_index = {
+            CommandIndex._COMMAND_INDEX_VERSION: __version__,
+            CommandIndex._COMMAND_INDEX_CLOUD_PROFILE: cli.cloud.profile,
+            CommandIndex._COMMAND_INDEX: {
+                'hello': ['azure.cli.command_modules.hello'],
+                'extra': ['azure.cli.command_modules.extra']
+            }
+        }
+
+        with mock.patch.object(CommandIndex, '_load_packaged_command_index', return_value=packaged_index):
+            cmd_tbl = loader.load_command_table(["HELP"])
+
+        # HELP should be treated the same as help and must not short-circuit core module reload.
+        self.assertIn('hello mod-only', cmd_tbl)
+        self.assertIn('extra final', cmd_tbl)
+        self.assertIn('hello', INDEX[CommandIndex._COMMAND_INDEX])
+        self.assertIn('extra', INDEX[CommandIndex._COMMAND_INDEX])
+
+    @mock.patch('importlib.import_module', _mock_import_lib)
+    @mock.patch('pkgutil.iter_modules', _mock_iter_modules)
+    @mock.patch('azure.cli.core.commands._load_command_loader', _mock_load_command_loader)
+    @mock.patch('azure.cli.core.extension.get_extension_modname', _mock_get_extension_modname)
+    @mock.patch('azure.cli.core.extension.get_extensions', _mock_get_extensions)
+    def test_command_index_latest_unknown_non_core_skips_full_core_reload(self):
+        from azure.cli.core._session import INDEX, EXTENSION_INDEX
+        from azure.cli.core import CommandIndex, __version__
+
+        cli = DummyCli()
+        loader = cli.commands_loader
+
+        INDEX[CommandIndex._COMMAND_INDEX_VERSION] = ""
+        INDEX[CommandIndex._COMMAND_INDEX_CLOUD_PROFILE] = ""
+        INDEX[CommandIndex._COMMAND_INDEX] = {}
+        EXTENSION_INDEX[CommandIndex._COMMAND_INDEX_VERSION] = ""
+        EXTENSION_INDEX[CommandIndex._COMMAND_INDEX_CLOUD_PROFILE] = ""
+        EXTENSION_INDEX[CommandIndex._COMMAND_INDEX] = {}
+
+        packaged_index = {
+            CommandIndex._COMMAND_INDEX_VERSION: __version__,
+            CommandIndex._COMMAND_INDEX_CLOUD_PROFILE: cli.cloud.profile,
+            CommandIndex._COMMAND_INDEX: {
+                'hello': ['azure.cli.command_modules.hello'],
+                'extra': ['azure.cli.command_modules.extra']
+            }
+        }
+
+        with mock.patch.object(CommandIndex, '_load_packaged_command_index', return_value=packaged_index):
+            cmd_tbl = loader.load_command_table(["foobar", "list"])
+
+        # Unknown non-core top-level command should try extensions without rebuilding all core modules.
+        self.assertNotIn('hello mod-only', cmd_tbl)
+        self.assertNotIn('extra final', cmd_tbl)
+        self.assertEqual(INDEX[CommandIndex._COMMAND_INDEX], {})
+        self.assertEqual(EXTENSION_INDEX[CommandIndex._COMMAND_INDEX_VERSION], __version__)
+        self.assertEqual(EXTENSION_INDEX[CommandIndex._COMMAND_INDEX_CLOUD_PROFILE], cli.cloud.profile)
+        self.assertIn('hello', EXTENSION_INDEX[CommandIndex._COMMAND_INDEX])
+
+    @mock.patch('importlib.import_module', _mock_import_lib)
+    @mock.patch('pkgutil.iter_modules', _mock_iter_modules)
+    @mock.patch('azure.cli.core.commands._load_command_loader', _mock_load_command_loader)
+    @mock.patch('azure.cli.core.extension.get_extension_modname', _mock_get_extension_modname)
+    @mock.patch('azure.cli.core.extension.get_extensions', _mock_get_extensions)
+    def test_command_index_blends_packaged_with_extension_overlay(self):
+        from azure.cli.core._session import INDEX, EXTENSION_INDEX
+        from azure.cli.core import CommandIndex, __version__
+
+        cli = DummyCli()
+        loader = cli.commands_loader
+
+        # Local command index is empty; packaged core index + extensionIndex overlay should be blended.
+        INDEX[CommandIndex._COMMAND_INDEX_VERSION] = ""
+        INDEX[CommandIndex._COMMAND_INDEX_CLOUD_PROFILE] = ""
+        INDEX[CommandIndex._COMMAND_INDEX] = {}
+
+        EXTENSION_INDEX[CommandIndex._COMMAND_INDEX_VERSION] = __version__
+        EXTENSION_INDEX[CommandIndex._COMMAND_INDEX_CLOUD_PROFILE] = cli.cloud.profile
+        EXTENSION_INDEX[CommandIndex._COMMAND_INDEX] = {
+            'hello': ['azext_hello1', 'azext_hello2']
+        }
+
+        packaged_index = {
+            CommandIndex._COMMAND_INDEX_VERSION: __version__,
+            CommandIndex._COMMAND_INDEX_CLOUD_PROFILE: cli.cloud.profile,
+            CommandIndex._COMMAND_INDEX: {
+                'hello': ['azure.cli.command_modules.hello'],
+                'extra': ['azure.cli.command_modules.extra']
+            }
+        }
+
+        with mock.patch.object(CommandIndex, '_load_packaged_command_index', return_value=packaged_index):
+            cmd_tbl = loader.load_command_table(["hello", "mod-only"])
+
+        # Extension commands are loaded through the overlay without rebuilding all modules.
+        self.assertEqual(list(cmd_tbl), ['hello mod-only', 'hello overridden', 'hello ext-only'])
+        self.assertEqual(INDEX[CommandIndex._COMMAND_INDEX], {})
+
+        EXTENSION_INDEX[CommandIndex._COMMAND_INDEX_VERSION] = ""
+        EXTENSION_INDEX[CommandIndex._COMMAND_INDEX_CLOUD_PROFILE] = ""
+        EXTENSION_INDEX[CommandIndex._COMMAND_INDEX] = {}
+
+    def test_packaged_command_index_file_schema(self):
+        from azure.cli.core import CommandIndex, __version__
+
+        cli = DummyCli()
+        command_index = CommandIndex(cli)
+        packaged_index = command_index._load_packaged_command_index()  # pylint: disable=protected-access
+
+        self.assertIsNotNone(packaged_index)
+        self.assertEqual(packaged_index.get(CommandIndex._COMMAND_INDEX_VERSION), __version__)
+        self.assertEqual(packaged_index.get(CommandIndex._COMMAND_INDEX_CLOUD_PROFILE), 'latest')
+        self.assertTrue(packaged_index.get(CommandIndex._COMMAND_INDEX))
+
+    @mock.patch('importlib.import_module', _mock_import_lib)
+    @mock.patch('pkgutil.iter_modules', _mock_iter_modules)
+    @mock.patch('azure.cli.core.commands._load_command_loader', _mock_load_command_loader)
+    @mock.patch('azure.cli.core.extension.get_extension_modname', _mock_get_extension_modname)
+    @mock.patch('azure.cli.core.extension.get_extensions', _mock_get_extensions)
+    def test_command_index_uses_packaged_for_version_with_extensions(self):
+        from azure.cli.core._session import INDEX
+        from azure.cli.core import CommandIndex, __version__
+
+        cli = DummyCli()
+        loader = cli.commands_loader
+
+        INDEX[CommandIndex._COMMAND_INDEX_VERSION] = ""
+        INDEX[CommandIndex._COMMAND_INDEX_CLOUD_PROFILE] = ""
+        INDEX[CommandIndex._COMMAND_INDEX] = {}
+
+        packaged_index = {
+            CommandIndex._COMMAND_INDEX_VERSION: __version__,
+            CommandIndex._COMMAND_INDEX_CLOUD_PROFILE: cli.cloud.profile,
+            CommandIndex._COMMAND_INDEX: {
+                'version': ['azure.cli.command_modules.util']
+            }
+        }
+
+        with mock.patch.object(CommandIndex, '_load_packaged_command_index', return_value=packaged_index):
+            cmd_tbl = loader.load_command_table(["version"])
+
+        self.assertIn('version', cmd_tbl)
+        # No full rebuild should happen for this fast path.
+        self.assertEqual(INDEX[CommandIndex._COMMAND_INDEX], {})
+
+    @mock.patch('importlib.import_module', _mock_import_lib)
+    @mock.patch('pkgutil.iter_modules', _mock_iter_modules)
+    @mock.patch('azure.cli.core.commands._load_command_loader', _mock_load_command_loader)
+    @mock.patch('azure.cli.core.extension.get_extension_modname', _mock_get_extension_modname)
+    @mock.patch('azure.cli.core.extension.get_extensions', _mock_get_extensions)
+    def test_command_index_non_latest_uses_local_mechanism(self):
+        from azure.cli.core._session import INDEX
+        from azure.cli.core import CommandIndex, __version__
+
+        cli = DummyCli()
+        loader = cli.commands_loader
+
+        with mock.patch.object(cli.cloud, "profile", "2019-03-01-hybrid"):
+            # Valid local index for non-latest profile should be used directly.
+            INDEX[CommandIndex._COMMAND_INDEX_VERSION] = __version__
+            INDEX[CommandIndex._COMMAND_INDEX_CLOUD_PROFILE] = "2019-03-01-hybrid"
+            INDEX[CommandIndex._COMMAND_INDEX] = {
+                'hello': ['azure.cli.command_modules.hello']
+            }
+
+            with mock.patch.object(CommandIndex, '_load_packaged_command_index',
+                                   side_effect=AssertionError('Packaged index should not be used for non-latest')):
+                cmd_tbl = loader.load_command_table(["hello", "mod-only"])
+
+        self.assertEqual(list(cmd_tbl), ['hello mod-only', 'hello overridden'])
+
+    @mock.patch('importlib.import_module', _mock_import_lib)
+    @mock.patch('pkgutil.iter_modules', _mock_iter_modules)
+    @mock.patch('azure.cli.core.commands._load_command_loader', _mock_load_command_loader)
     @mock.patch('azure.cli.core.extension.get_extension_modname', _mock_get_extension_modname)
     @mock.patch('azure.cli.core.extension.get_extensions', _mock_get_extensions)
     def test_command_index_always_loaded_extensions(self):
@@ -465,6 +738,8 @@ class TestCommandRegistration(unittest.TestCase):
         from azure.cli.core import CommandIndex
 
         cli = DummyCli()
+        # Use a non-latest profile so command index rebuild/usage follows local index semantics.
+        cli.cloud.profile = "2019-03-01-hybrid"
         loader = cli.commands_loader
         index = CommandIndex()
         index.invalidate()

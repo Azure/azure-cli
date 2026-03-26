@@ -193,6 +193,27 @@ function UpdateNode {
     }
 }
 
+function GetLabelsFromConditions {
+    [CmdletBinding()]
+    param([string[]] $Lines, [int] $ThenLineIndex, [int] $BaseIndentLength)
+    $labels = [System.Collections.Generic.List[string]]::new()
+    $ifLineIndex = -1
+    for ($p = $ThenLineIndex - 1; $p -ge 0; $p--) {
+        $lineAtP = $Lines[$p]
+        $indentAtP = GetIndentLength -Line $lineAtP
+        if ($lineAtP -match '^\s*-\s+if:\s*$' -and $indentAtP -le $BaseIndentLength) { $ifLineIndex = $p; break }
+        if ($indentAtP -lt $BaseIndentLength - 2) { break }
+    }
+    if ($ifLineIndex -lt 0) { return $labels }
+    for ($q = $ifLineIndex + 1; $q -lt $ThenLineIndex; $q++) {
+        $candidate = TryParseLabelValue -Line $Lines[$q]
+        if ($null -ne $candidate -and -not [string]::IsNullOrWhiteSpace($candidate)) {
+            if (-not $labels.Contains($candidate)) { $labels.Add($candidate) }
+        }
+    }
+    return $labels
+}
+
 function AddSquadLabelsToYaml {
     [CmdletBinding()]
     param(
@@ -257,56 +278,104 @@ function AddSquadLabelsToYaml {
                 }
             }
 
-            if ($lastAddLabelEnd -ge 0) {
-                $labelsToAdd = [System.Collections.Generic.List[string]]::new()
-                foreach ($label in $labelsPresent.Keys) {
-                    if ($LabelToSquad.ContainsKey($label)) {
-                        $squadLabel = $LabelToSquad[$label]
-                        if (-not $labelsPresent.ContainsKey($squadLabel) -and -not $labelsToAdd.Contains($squadLabel)) {
-                            $labelsToAdd.Add($squadLabel)
-                        }
+            $labelsFromConditions = GetLabelsFromConditions -Lines $Lines -ThenLineIndex $i -BaseIndentLength $baseIndentLength
+            foreach ($condLabel in $labelsFromConditions) {
+                if (-not [string]::IsNullOrWhiteSpace($condLabel)) {
+                    $labelsPresent[$condLabel] = $true
+                }
+            }
+
+            $labelsToAdd = [System.Collections.Generic.List[string]]::new()
+            $sortedLabels = $labelsPresent.Keys | Sort-Object -CaseSensitive
+            foreach ($label in $sortedLabels) {
+                if ($LabelToSquad.ContainsKey($label)) {
+                    $squadLabel = $LabelToSquad[$label]
+                    if (-not $labelsPresent.ContainsKey($squadLabel) -and -not $labelsToAdd.Contains($squadLabel)) {
+                        $labelsToAdd.Add($squadLabel)
                     }
                 }
+            }
 
-                if ($labelsToAdd.Count -gt 0) {
+            if ($labelsToAdd.Count -gt 0) {
+                if ($lastAddLabelEnd -ge 0) {
                     $insertLines = [System.Collections.Generic.List[string]]::new()
                     foreach ($squadLabel in $labelsToAdd) {
                         $insertLines.Add((" " * $listIndentLength) + "- addLabel:")
                         $insertLines.Add((" " * $listIndentLength) + "    label: $squadLabel")
                     }
                     $insertions.Add([PSCustomObject]@{ Index = $lastAddLabelEnd + 1; Lines = $insertLines })
+                }
 
-                    $isPR = $false
+                $isPR = $false
                     for ($p = $i - 1; $p -ge 0; $p--) {
                         if ($Lines[$p] -match '^\s*description:') { break }
                         if ($Lines[$p] -match 'payloadType:\s*Pull_Request') { $isPR = $true; break }
                     }
                     if ($isPR) {
-                        $lastUserEnd = -1
-                        $usersIndent = $listIndentLength + 4
-                        $existingUsers = @{}
+                        $lastReviewEnd = -1
+                        $reviewIndent = $listIndentLength + 4
+                        $existingReviewers = @{}
                         for ($b = $j; $b -lt $k; $b++) {
-                            if ($Lines[$b] -match '^\s*-\s+assignTo:\s*$' -and (GetIndentLength -Line $Lines[$b]) -eq $listIndentLength) {
+                            if ($Lines[$b] -match '^\s*-\s+requestReview:\s*$' -and (GetIndentLength -Line $Lines[$b]) -eq $listIndentLength) {
                                 for ($c = $b + 1; $c -lt $k; $c++) {
                                     if ($Lines[$c] -match '^\s*-\s+' -and (GetIndentLength -Line $Lines[$c]) -eq $listIndentLength) { break }
-                                    if ($Lines[$c] -match '^\s*-\s+(\S+)\s*$' -and (GetIndentLength -Line $Lines[$c]) -eq $usersIndent) {
-                                        $existingUsers[$Matches[1]] = $true
-                                        $lastUserEnd = $c
+                                    if ($Lines[$c] -match '^\s*reviewer:\s*(\S+)\s*$') {
+                                        $existingReviewers[$Matches[1]] = $true
+                                        $lastReviewEnd = $c
                                     }
                                 }
                             }
                         }
-                        if ($lastUserEnd -ge 0) {
-                            $userInsertLines = [System.Collections.Generic.List[string]]::new()
+                        if ($lastReviewEnd -lt 0) {
+                            $lastReviewEnd = $lastAddLabelEnd
+                        }
+                        if ($lastReviewEnd -ge 0) {
+                            $reviewInsertLines = [System.Collections.Generic.List[string]]::new()
                             foreach ($squadLabel in $labelsToAdd) {
-                                if (-not $existingUsers.ContainsKey($squadLabel)) {
-                                    $userInsertLines.Add((" " * $usersIndent) + "- $squadLabel")
+                                if (-not $existingReviewers.ContainsKey($squadLabel)) {
+                                    $reviewInsertLines.Add((" " * $listIndentLength) + "- requestReview:")
+                                    $reviewInsertLines.Add((" " * $reviewIndent) + "reviewer: $squadLabel")
                                 }
                             }
-                            if ($userInsertLines.Count -gt 0) {
-                                $insertions.Add([PSCustomObject]@{ Index = $lastUserEnd + 1; Lines = $userInsertLines })
+                            if ($reviewInsertLines.Count -gt 0) {
+                                $insertions.Add([PSCustomObject]@{ Index = $lastReviewEnd + 1; Lines = $reviewInsertLines })
                             }
                         }
+                    }
+
+                $mentionUsersIndex = -1
+                $mentioneesIndent = -1
+                $mentionItemIndent = -1
+                $existingMentions = @{}
+                $lastMentionEnd = -1
+                for ($b = $j; $b -lt $k; $b++) {
+                    $lineAtB = $Lines[$b]
+                    $indentAtB = GetIndentLength -Line $lineAtB
+                    if ($lineAtB -match '^\s*-\s+mentionUsers:\s*$' -and $indentAtB -eq $listIndentLength) {
+                        $mentionUsersIndex = $b
+                        continue
+                    }
+                    if ($mentionUsersIndex -ge 0) {
+                        if ($lineAtB.Trim().Length -ne 0 -and $indentAtB -le $listIndentLength -and $lineAtB -match '^\s*-\s+') { break }
+                        if ($lineAtB -match '^\s*mentionees:\s*$') { $mentioneesIndent = $indentAtB; continue }
+                        if ($lineAtB -match '^\s*-\s+(\S+)\s*$') {
+                            if ($mentionItemIndent -lt 0) { $mentionItemIndent = $indentAtB }
+                            $existingMentions[$Matches[1]] = $true
+                            $lastMentionEnd = $b
+                        }
+                    }
+                }
+
+                if ($mentionUsersIndex -ge 0 -and $lastMentionEnd -ge 0) {
+                    if ($mentionItemIndent -lt 0) { $mentionItemIndent = ($mentioneesIndent -gt 0) ? $mentioneesIndent : ($listIndentLength + 4) }
+                    $mentionInsertLines = [System.Collections.Generic.List[string]]::new()
+                    foreach ($squadLabel in $labelsToAdd) {
+                        if (-not $existingMentions.ContainsKey($squadLabel)) {
+                            $mentionInsertLines.Add((" " * $mentionItemIndent) + "- $squadLabel")
+                        }
+                    }
+                    if ($mentionInsertLines.Count -gt 0) {
+                        $insertions.Add([PSCustomObject]@{ Index = $lastMentionEnd + 1; Lines = $mentionInsertLines })
                     }
                 }
             }

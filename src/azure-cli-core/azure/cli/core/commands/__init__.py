@@ -741,9 +741,22 @@ class AzCliCommandInvoker(CommandInvoker):
 
         Returns CommandResultItem if cached help was shown, None otherwise.
         """
-        from azure.cli.core import CommandIndex
+        from azure.cli.core import CommandIndex, REFRESH_EXTENSION_HELP_OVERLAY_SENTINEL
         command_index = CommandIndex(self.cli_ctx)
         help_index = command_index.get_help_index()
+
+        if not help_index and command_index.needs_latest_extension_help_overlay_refresh():
+            logger.debug("Top-level cached help is unavailable on latest profile. "
+                         "Refreshing extension help overlay without full core module load.")
+            try:
+                if self.cli_ctx.invocation.data.get('command_string') is None:
+                    self.cli_ctx.invocation.data['command_string'] = ''
+                # Unknown top-level command forces extension-only load path on latest profile.
+                self.commands_loader.load_command_table([REFRESH_EXTENSION_HELP_OVERLAY_SENTINEL])
+                help_index = command_index.get_help_index()
+            except Exception as ex:  # pylint: disable=broad-except
+                # Keep cached-help refresh best-effort; normal invocation flow can still continue.
+                logger.debug("Failed to refresh latest extension help overlay: %s", ex)
 
         if help_index:
             # Display cached help using the help system

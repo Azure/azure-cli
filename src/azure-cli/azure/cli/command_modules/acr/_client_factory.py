@@ -5,21 +5,17 @@
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
-VERSION_2019_05_01_PREVIEW = "2019-05-01-preview"
-VERSION_2019_06_01_PREVIEW = "2019-06-01-preview"
-VERSION_2020_11_01_PREVIEW = "2020-11-01-preview"
-VERSION_2021_08_01_PREVIEW = "2021-08-01-preview"
-VERSION_2022_02_01_PREVIEW = "2022-02-01-preview"
-VERSION_2023_01_01_PREVIEW = "2023-01-01-preview"
-VERSION_2024_11_01_PREVIEW = "2024-11-01-preview"
-VERSION_2025_03_01_PREVIEW = "2025-03-01-preview"
-VERSION_2025_04_01 = "2025-04-01"
-
 
 def get_acr_service_client(cli_ctx, api_version=None):
     """Returns the client for managing container registries. """
     from azure.cli.core.profiles import ResourceType
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_CONTAINERREGISTRY, api_version=api_version)
+
+
+def get_acr_tasks_service_client(cli_ctx, api_version=None):
+    """Returns the client for managing container registry tasks."""
+    from azure.cli.core.profiles import ResourceType
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_CONTAINERREGISTRYTASKS, api_version=api_version)
 
 
 # The function is used in Azure and Edge and hybrid profile is used to support the different API versions.
@@ -28,19 +24,15 @@ def cf_acr_registries(cli_ctx, *_):
 
 
 def cf_acr_cache(cli_ctx, *_):
-    return get_acr_service_client(cli_ctx, api_version=VERSION_2023_01_01_PREVIEW).cache_rules
+    return get_acr_service_client(cli_ctx).cache_rules
 
 
 def cf_acr_cred_sets(cli_ctx, *_):
-    return get_acr_service_client(cli_ctx, api_version=VERSION_2023_01_01_PREVIEW).credential_sets
-
-
-def cf_acr_network_rules(cli_ctx, *_):
-    return get_acr_service_client(cli_ctx, api_version=VERSION_2021_08_01_PREVIEW).registries
+    return get_acr_service_client(cli_ctx).credential_sets
 
 
 def cf_acr_registries_tasks(cli_ctx, *_):
-    return get_acr_service_client(cli_ctx, api_version=VERSION_2025_03_01_PREVIEW).registries
+    return get_acr_tasks_service_client(cli_ctx).registries
 
 
 def cf_acr_replications(cli_ctx, *_):
@@ -56,32 +48,32 @@ def cf_acr_private_endpoint_connections(cli_ctx, *_):
 
 
 def cf_acr_tasks(cli_ctx, *_):
-    return get_acr_service_client(cli_ctx, VERSION_2025_03_01_PREVIEW).tasks
+    return get_acr_tasks_service_client(cli_ctx).tasks
 
 
 def cf_acr_taskruns(cli_ctx, *_):
-    return get_acr_service_client(cli_ctx, VERSION_2025_03_01_PREVIEW).task_runs
+    return get_acr_tasks_service_client(cli_ctx).task_runs
 
 
 def cf_acr_runs(cli_ctx, *_):
-    return get_acr_service_client(cli_ctx, VERSION_2025_03_01_PREVIEW).runs
+    return get_acr_tasks_service_client(cli_ctx).runs
 
 
 def cf_acr_scope_maps(cli_ctx, *_):
-    return get_acr_service_client(cli_ctx, VERSION_2024_11_01_PREVIEW).scope_maps
+    return get_acr_service_client(cli_ctx).scope_maps
 
 
 def cf_acr_tokens(cli_ctx, *_):
-    return get_acr_service_client(cli_ctx, VERSION_2024_11_01_PREVIEW).tokens
+    return get_acr_service_client(cli_ctx).tokens
 
 
 def cf_acr_token_credentials(cli_ctx, *_):
-    return get_acr_service_client(cli_ctx, VERSION_2024_11_01_PREVIEW).registries
+    return get_acr_service_client(cli_ctx).registries
 
 
 def cf_acr_agentpool(cli_ctx, *_):
-    return get_acr_service_client(cli_ctx, VERSION_2025_03_01_PREVIEW).agent_pools
+    return get_acr_tasks_service_client(cli_ctx).agent_pools
 
 
 def cf_acr_connected_registries(cli_ctx, *_):
-    return get_acr_service_client(cli_ctx, VERSION_2025_04_01).connected_registries
+    return get_acr_service_client(cli_ctx).connected_registries

@@ -591,6 +591,13 @@ parameters:
   - name: --enable-container-network-logs
     type: bool
     short-summary: Enable container network log collection functionalities on a cluster. Automatically enables --enable-high-log-scale-mode.
+  - name: --acns-datapath-acceleration-mode
+    type: string
+    short-summary: Set the datapath acceleration mode for Azure Container Networking Solution (ACNS) Performance. Valid values are 'BpfVeth' and 'None'.
+  - name: --acns-transit-encryption-type
+    type: string
+    short-summary: Set transit encryption type for ACNS security.
+    long-summary: Configures pod-to-pod encryption for Cilium-based clusters. Once enabled, all traffic between Cilium managed pods will be encrypted when it leaves the node boundary. Valid values are "WireGuard" and "None". On cluster creation, this must be used together with "--enable-acns".
   - name: --nrg-lockdown-restriction-level
     type: string
     short-summary: Restriction level on the managed node resource group.
@@ -1098,6 +1105,13 @@ parameters:
   - name: --disable-container-network-logs
     type: bool
     short-summary: Disable container network log collection functionalities on a cluster.
+  - name: --acns-datapath-acceleration-mode
+    type: string
+    short-summary: Set the datapath acceleration mode for Azure Container Networking Solution (ACNS) Performance. Valid values are 'BpfVeth' and 'None'.
+  - name: --acns-transit-encryption-type
+    type: string
+    short-summary: Set transit encryption type for ACNS security.
+    long-summary: Configures pod-to-pod encryption for Cilium-based clusters. Once enabled, all traffic between Cilium managed pods will be encrypted when it leaves the node boundary. Valid values are "WireGuard" and "None". When creating a cluster, this option must be used together with "--enable-acns"; when updating a cluster, it can be used on its own to modify the transit encryption type for an existing ACNS-enabled cluster.
   - name: --nrg-lockdown-restriction-level
     type: string
     short-summary: Restriction level on the managed node resource group.

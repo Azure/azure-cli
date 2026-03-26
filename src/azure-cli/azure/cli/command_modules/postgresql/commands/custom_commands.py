@@ -219,6 +219,7 @@ def flexible_server_create(cmd, client,
         firewall_id = create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip)
 
     user = server_result.administrator_login if is_password_auth_enabled else '<user>'
+    # [SuppressMessage("Microsoft.Security", "CS002:SecretInNextLine", Justification="Not a hardcoded secret - value is either a runtime-provided variable or the placeholder '<password>'")]
     password = administrator_login_password if is_password_auth_enabled else '<password>'
     server_id = server_result.id
     loc = server_result.location
