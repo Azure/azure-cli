@@ -38,7 +38,9 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          update_connection_strings,
                                                          update_application_settings_polling,
                                                          update_webapp,
-                                                         create_webapp)
+                                                         create_webapp,
+                                                         add_azure_storage_account,
+                                                         update_azure_storage_account)
 
 # pylint: disable=line-too-long
 from azure.cli.core.profiles import ResourceType
@@ -502,6 +504,90 @@ class TestWebappMocked(unittest.TestCase):
                                server_farm_id=farm_id, password='')
         client.certificates.create_or_update.assert_called_once_with(name=host_name, resource_group_name=rg_name,
                                                                      certificate_envelope=cert_def)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._verify_hostname_binding', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
+    def test_create_managed_ssl_cert_with_domain_validation_method(self, generic_site_op_mock, client_factory_mock, verify_binding_mock):
+        webapp_name = 'someWebAppName'
+        rg_name = 'someRgName'
+        farm_id = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg1/providers/Microsoft.Web/serverfarms/farm1'
+        host_name = 'child.mycustomdomain.com'
+
+        client = mock.MagicMock()
+        client_factory_mock.return_value = client
+        cmd_mock = _get_test_cmd()
+        cli_ctx_mock = mock.MagicMock()
+        cli_ctx_mock.data = {'subscription_id': 'sub1'}
+        cmd_mock.cli_ctx = cli_ctx_mock
+        Site, Certificate = cmd_mock.get_models('Site', 'Certificate')
+        site = Site(name=webapp_name, location='westeurope')
+        site.server_farm_id = farm_id
+        generic_site_op_mock.return_value = site
+
+        verify_binding_mock.return_value = True
+        create_managed_ssl_cert(cmd_mock, rg_name, webapp_name, host_name, None,
+                                domain_validation_method='TXT')
+
+        cert_def = Certificate(location='westeurope', canonical_name=host_name,
+                               server_farm_id=farm_id, password='', domain_validation_method='TXT')
+        client.certificates.create_or_update.assert_called_once_with(name=host_name, resource_group_name=rg_name,
+                                                                     certificate_envelope=cert_def)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_settings_operation', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
+    def test_add_azure_storage_account_with_protocol(self, generic_site_op_mock, client_factory_mock, settings_op_mock):
+        rg_name = 'someRgName'
+        webapp_name = 'someWebAppName'
+
+        cmd_mock = _get_test_cmd()
+        AzureStorageInfoValue = cmd_mock.get_models('AzureStorageInfoValue')
+
+        storage_accounts = mock.MagicMock()
+        storage_accounts.properties = {}
+        generic_site_op_mock.return_value = storage_accounts
+
+        result_mock = mock.MagicMock()
+        result_mock.properties = {}
+        settings_op_mock.return_value = result_mock
+
+        add_azure_storage_account(cmd_mock, rg_name, webapp_name, custom_id='myId',
+                                  storage_type='AzureFiles', account_name='myAccount',
+                                  share_name='myShare', access_key='myKey',
+                                  mount_path='/mnt/share', protocol='Nfs')
+
+        expected = AzureStorageInfoValue(type='AzureFiles', account_name='myAccount',
+                                         share_name='myShare', access_key='myKey',
+                                         mount_path='/mnt/share', protocol='Nfs')
+        self.assertEqual(storage_accounts.properties['myId'].protocol, expected.protocol)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_settings_operation', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
+    def test_update_azure_storage_account_with_protocol(self, generic_site_op_mock, client_factory_mock, settings_op_mock):
+        rg_name = 'someRgName'
+        webapp_name = 'someWebAppName'
+
+        cmd_mock = _get_test_cmd()
+        AzureStorageInfoValue = cmd_mock.get_models('AzureStorageInfoValue')
+
+        existing_config = AzureStorageInfoValue(type='AzureFiles', account_name='myAccount',
+                                                share_name='myShare', access_key='myKey',
+                                                mount_path='/mnt/share', protocol='Smb')
+        storage_accounts = mock.MagicMock()
+        storage_accounts.properties = {'myId': existing_config}
+        generic_site_op_mock.return_value = storage_accounts
+
+        result_mock = mock.MagicMock()
+        result_mock.properties = {}
+        settings_op_mock.return_value = result_mock
+
+        update_azure_storage_account(cmd_mock, rg_name, webapp_name, custom_id='myId',
+                                     protocol='Nfs')
+
+        new_config = storage_accounts.properties['myId']
+        self.assertEqual(new_config.protocol, 'Nfs')
 
 
     def test_update_app_settings_error_handling_no_parameters(self):
