@@ -6233,10 +6233,12 @@ def _get_url(cmd, resource_group_name, name, slot=None):
 def config_diagnostics(cmd, resource_group_name, name, level=None,
                        application_logging=None, web_server_logging=None,
                        docker_container_logging=None, detailed_error_messages=None,
-                       failed_request_tracing=None, slot=None):
+                       failed_request_tracing=None, slot=None,
+                       web_server_log_sas_url=None, web_server_log_retention=None):
     from azure.mgmt.web.models import (FileSystemApplicationLogsConfig, ApplicationLogsConfig,
                                        AzureBlobStorageApplicationLogsConfig, SiteLogsConfig,
                                        HttpLogsConfig, FileSystemHttpLogsConfig,
+                                       AzureBlobStorageHttpLogsConfig,
                                        EnabledConfig)
     client = web_client_factory(cmd.cli_ctx)
     # TODO: ensure we call get_site only once
@@ -6261,15 +6263,23 @@ def config_diagnostics(cmd, resource_group_name, name, level=None,
     http_logs = None
     server_logging_option = web_server_logging or docker_container_logging
     if server_logging_option:
-        # TODO: az blob storage log config currently not in use, will be impelemented later.
-        # Tracked as Issue: #4764 on Github
         filesystem_log_config = None
+        blob_log_config = None
         turned_on = server_logging_option != 'off'
         if server_logging_option in ['filesystem', 'off']:
             # 100 mb max log size, retention lasts 3 days. Yes we hard code it, portal does too
             filesystem_log_config = FileSystemHttpLogsConfig(retention_in_mb=100, retention_in_days=3,
                                                              enabled=turned_on)
-        http_logs = HttpLogsConfig(file_system=filesystem_log_config, azure_blob_storage=None)
+        if server_logging_option == 'azureblobstorage':
+            if not web_server_log_sas_url:
+                raise RequiredArgumentMissingError(
+                    '--web-server-log-sas-url is required when --web-server-logging is set to azureblobstorage.')
+            retention = web_server_log_retention if web_server_log_retention is not None else 3
+            blob_log_config = AzureBlobStorageHttpLogsConfig(
+                sas_url=web_server_log_sas_url,
+                retention_in_days=retention,
+                enabled=True)
+        http_logs = HttpLogsConfig(file_system=filesystem_log_config, azure_blob_storage=blob_log_config)
 
     detailed_error_messages_logs = (None if detailed_error_messages is None
                                     else EnabledConfig(enabled=detailed_error_messages))
@@ -6412,6 +6422,8 @@ def set_traffic_routing(cmd, resource_group_name, name, distribution):
     site = client.web_apps.get(resource_group_name, name)
     if not site:
         raise ResourceNotFoundError("'{}' app doesn't exist".format(name))
+    logger.warning('Traffic routing updates the site configuration, which may cause a brief restart. '
+                   'This is a known platform behavior.')
     configs = get_site_configs(cmd, resource_group_name, name)
     host_name_split = site.default_host_name.split('.', 1)
     host_name_suffix = '.' + host_name_split[1]

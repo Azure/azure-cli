@@ -776,9 +776,13 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('level', help='logging level',
                    arg_type=get_enum_type(['error', 'warning', 'information', 'verbose']))
         c.argument('web_server_logging', help='configure Web server logging',
-                   arg_type=get_enum_type(['off', 'filesystem']))
+                   arg_type=get_enum_type(['off', 'filesystem', 'azureblobstorage']))
         c.argument('docker_container_logging', help='configure gathering STDOUT and STDERR output from container',
                    arg_type=get_enum_type(['off', 'filesystem']))
+        c.argument('web_server_log_sas_url', options_list=['--web-server-log-sas-url'],
+                   help='SAS URL to an Azure Blob Storage container for web server log storage. Required when --web-server-logging is set to azureblobstorage.')
+        c.argument('web_server_log_retention', type=int, options_list=['--web-server-log-retention'],
+                   help='Number of days to retain web server logs when using Azure Blob Storage. Default: 3.')
 
     with self.argument_context('webapp log tail') as c:
         c.argument('provider',
