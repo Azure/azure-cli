@@ -15,8 +15,7 @@ from azure.mgmt.web.models import SkuDescription
 
 from ._constants import (NETCORE_RUNTIME_NAME, NODE_RUNTIME_NAME, ASPDOTNET_RUNTIME_NAME, STATIC_RUNTIME_NAME,
                          PYTHON_RUNTIME_NAME, LINUX_SKU_DEFAULT, OS_DEFAULT, DOTNET_RUNTIME_NAME,
-                         DOTNET_TARGET_FRAMEWORK_REGEX, GENERATE_RANDOM_APP_NAMES, DOTNET_REFERENCES_DIR_IN_ZIP,
-                         LINUX_OS_NAME)
+                         DOTNET_TARGET_FRAMEWORK_REGEX, GENERATE_RANDOM_APP_NAMES, DOTNET_REFERENCES_DIR_IN_ZIP)
 from .utils import get_resource_if_exists
 
 logger = get_logger(__name__)
@@ -176,7 +175,7 @@ def get_lang_from_content(src_path, html=False, is_linux=False):
             if fnmatch.fnmatch(file, "*.html") or fnmatch.fnmatch(file, "*.htm") or \
                     fnmatch.fnmatch(file, "*.shtml"):
                 if not static_html_file:
-                    static_html_file = os.path.join(src_path, file)
+                    static_html_file = os.path.join(_dirpath, file)
             if fnmatch.fnmatch(file, "*.csproj"):
                 package_netcore_file = os.path.join(src_path, file)
                 if not os.path.isfile(package_netcore_file):
@@ -298,7 +297,7 @@ def parse_node_version(file_path):
 
 
 def _detect_python_version(file_path):
-    """Detect Python version from runtime.txt, .python-version, or Dockerfile in the project directory."""
+    """Detect Python version from runtime.txt or .python-version in the project directory."""
     import re
     src_dir = os.path.dirname(file_path) if file_path else ''
     if not src_dir:
@@ -472,10 +471,10 @@ def validate_runtime_os_combo(language, version_used_create, os_name, stack_help
         match = stack_helper.resolve(runtime_version, is_linux)
         if not match:
             raise ValidationError(
-                "The runtime '{}' is not supported on {}. "
-                "Please check supported runtimes with: 'az webapp list-runtimes --os {}'.\n"
+                "The runtime '{}' is not supported on {os_name}. "
+                "Please check supported runtimes with: 'az webapp list-runtimes --os {os_name}'.\n"
                 "HINT: Try a different --os-type or --runtime value.".format(
-                    runtime_version, os_name, os_name))
+                    runtime_version, os_name=os_name))
 
 
 def get_plan_to_use(cmd, user, loc, sku, create_rg, resource_group_name, client, is_linux=False, plan=None):
