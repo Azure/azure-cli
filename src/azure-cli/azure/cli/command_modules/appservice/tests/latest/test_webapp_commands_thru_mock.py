@@ -811,6 +811,11 @@ class TestUpdateConnectionStringsReplace(unittest.TestCase):
         client_mock = mock.MagicMock()
         mock_client_factory.return_value = client_mock
 
+        # Simulate stale slot config names for connection strings that will be removed
+        slot_cfg_mock = mock.MagicMock()
+        slot_cfg_mock.connection_string_names = ['OldConn', 'KeepConn']
+        client_mock.web_apps.list_slot_configuration_names.return_value = slot_cfg_mock
+
         json_settings = ['[{"name":"NewConn","value":"new_val","type":"SQLAzure"}]']
         update_connection_strings(cmd_mock, 'rg', 'app', settings=json_settings)
 
@@ -818,6 +823,11 @@ class TestUpdateConnectionStringsReplace(unittest.TestCase):
         self.assertNotIn('OldConn', existing_conn_strings.properties)
         self.assertNotIn('KeepConn', existing_conn_strings.properties)
         self.assertIn('NewConn', existing_conn_strings.properties)
+
+        # Stale slot config names should be cleared in replace-all mode
+        client_mock.web_apps.update_slot_configuration_names.assert_called_once()
+        updated_cfg = client_mock.web_apps.update_slot_configuration_names.call_args[0][2]
+        self.assertEqual(updated_cfg.connection_string_names, [])
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_settings_operation')
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
@@ -851,7 +861,7 @@ class TestUpdateConnectionStringsReplace(unittest.TestCase):
 
 
 class TestListSslCertsPagination(unittest.TestCase):
-    """Tests for list_ssl_certs pagination fix (Issue #29495)."""
+    """Tests for list_ssl_certs pagination behavior."""
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
     def test_list_ssl_certs_returns_list(self, mock_client_factory):
@@ -907,9 +917,13 @@ class TestSlotIdParsing(unittest.TestCase):
         from azure.cli.command_modules.appservice import _params
 
         source = inspect.getsource(_params.load_arguments)
-        # The webapp context should have slot configured with id_part='child_name_1'
-        self.assertIn("id_part='child_name_1'", source,
-                       "slot argument must have id_part='child_name_1' for --ids slot parsing")
+        # Find the specific line that configures the slot argument with id_part
+        slot_lines = [line.strip() for line in source.splitlines()
+                      if "argument('slot'" in line and "id_part=" in line]
+        self.assertTrue(len(slot_lines) > 0,
+                        "Expected c.argument('slot', ..., id_part=...) in load_arguments")
+        self.assertTrue(any("child_name_1" in line for line in slot_lines),
+                        "slot argument must have id_part='child_name_1' for --ids slot parsing")
 
 
 class FakedResponse:  # pylint: disable=too-few-public-methods

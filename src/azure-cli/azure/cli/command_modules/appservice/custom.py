@@ -4295,7 +4295,13 @@ def update_connection_strings(cmd, resource_group_name, name, connection_string_
                                          'update_connection_strings',
                                          conn_strings, slot, client)
 
-    if sticky_slot_settings or rm_sticky_slot_settings:
+    if replace_all:
+        # Replace-all: slot config names must exactly match new slotSetting=true entries
+        new_slot_setting_names = set(n['name'] for n in sticky_slot_settings)
+        slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
+        slot_cfg_names.connection_string_names = list(new_slot_setting_names)
+        client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
+    elif sticky_slot_settings or rm_sticky_slot_settings:
         new_slot_setting_names = set(n['name'] for n in sticky_slot_settings)  # add setting name
         slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
         slot_cfg_names.connection_string_names = set(slot_cfg_names.connection_string_names or [])
@@ -6751,8 +6757,8 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None,
 
     server_farm_id = webapp.server_farm_id
     location = webapp.location
-    cert_kwargs = dict(location=location, canonical_name=hostname,
-                       server_farm_id=server_farm_id, password='')
+    cert_kwargs = {"location": location, "canonical_name": hostname,
+                   "server_farm_id": server_farm_id, "password": ''}
     if domain_validation_method:
         cert_kwargs['domain_validation_method'] = domain_validation_method
     easy_cert_def = Certificate(**cert_kwargs)
