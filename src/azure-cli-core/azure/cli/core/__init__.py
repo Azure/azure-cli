@@ -98,24 +98,14 @@ class AzCli(CLI):
 
         azure_folder = self.config.config_dir
         ensure_dir(azure_folder)
-
-        # Load session files in parallel — each open() costs ~20ms on Windows due to
-        # filesystem/antivirus overhead, and file I/O releases the GIL.
-        from concurrent.futures import ThreadPoolExecutor
-        load_tasks = [
-            (ACCOUNT, os.path.join(azure_folder, 'azureProfile.json'), 0),
-            (CONFIG, os.path.join(azure_folder, 'az.json'), 0),
-            (SESSION, os.path.join(azure_folder, 'az.sess'), 3600),
-            (INDEX, os.path.join(azure_folder, 'commandIndex.json'), 0),
-            (EXTENSION_INDEX, os.path.join(azure_folder, 'extensionIndex.json'), 0),
-            (HELP_INDEX, os.path.join(azure_folder, 'helpIndex.json'), 0),
-            (EXTENSION_HELP_INDEX, os.path.join(azure_folder, 'extensionHelpIndex.json'), 0),
-            (VERSIONS, os.path.join(azure_folder, 'versionCheck.json'), 0),
-        ]
-        with ThreadPoolExecutor(max_workers=len(load_tasks)) as pool:
-            futures = [pool.submit(s.load, path, max_age=age) for s, path, age in load_tasks]
-            for f in futures:
-                f.result()
+        ACCOUNT.load(os.path.join(azure_folder, 'azureProfile.json'))
+        CONFIG.load(os.path.join(azure_folder, 'az.json'))
+        SESSION.load(os.path.join(azure_folder, 'az.sess'), max_age=3600)
+        INDEX.load(os.path.join(azure_folder, 'commandIndex.json'))
+        EXTENSION_INDEX.load(os.path.join(azure_folder, 'extensionIndex.json'))
+        HELP_INDEX.load(os.path.join(azure_folder, 'helpIndex.json'))
+        EXTENSION_HELP_INDEX.load(os.path.join(azure_folder, 'extensionHelpIndex.json'))
+        VERSIONS.load(os.path.join(azure_folder, 'versionCheck.json'))
         handle_version_update()
 
         self.cloud = get_active_cloud(self)
