@@ -930,6 +930,10 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('microsoft_account_client_secret', arg_group='Microsoft', help='AAD V2 Application client secret')
         c.argument('microsoft_account_oauth_scopes', nargs='+',
                    help="One or more Microsoft authentification scopes (comma-delimited).", arg_group='Microsoft')
+        c.argument('require_https', options_list=['--require-https'],
+                   arg_type=get_three_state_flag(return_label=True), arg_group='Auth V2',
+                   help='Require HTTPS for authentication requests. When using v2 auth, '
+                        'configures the HTTP settings to require HTTPS.')
 
     with self.argument_context('webapp hybrid-connection') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)

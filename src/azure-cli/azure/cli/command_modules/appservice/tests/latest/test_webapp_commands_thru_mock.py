@@ -35,7 +35,12 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          update_app_settings,
                                                          update_application_settings_polling,
                                                          update_webapp,
-                                                         create_webapp)
+                                                         create_webapp,
+                                                         get_auth_settings,
+                                                         update_auth_settings,
+                                                         _is_auth_v2_app,
+                                                         _get_auth_settings_v2,
+                                                         _update_auth_settings_v2)
 
 # pylint: disable=line-too-long
 from azure.cli.core.profiles import ResourceType
@@ -669,6 +674,262 @@ class TestUpdateWebapp(unittest.TestCase):
         result = update_webapp(cmd_mock, instance, platform_release_channel='Latest')
 
         self.assertEqual(result.additional_properties["properties"]["platformReleaseChannel"], "Latest")
+
+
+class TestWebappAuthV2Mocked(unittest.TestCase):
+    """Tests for v1/v2 auth migration logic."""
+
+    def test_is_auth_v2_app_none(self):
+        self.assertFalse(_is_auth_v2_app(None))
+
+    def test_is_auth_v2_app_empty(self):
+        from azure.mgmt.web.models import SiteAuthSettingsV2
+        self.assertFalse(_is_auth_v2_app(SiteAuthSettingsV2()))
+
+    def test_is_auth_v2_app_with_platform_enabled(self):
+        from azure.mgmt.web.models import SiteAuthSettingsV2, AuthPlatform
+        settings = SiteAuthSettingsV2(platform=AuthPlatform(enabled=True))
+        self.assertTrue(_is_auth_v2_app(settings))
+
+    def test_is_auth_v2_app_with_platform_disabled(self):
+        from azure.mgmt.web.models import SiteAuthSettingsV2, AuthPlatform
+        settings = SiteAuthSettingsV2(platform=AuthPlatform(enabled=False))
+        self.assertTrue(_is_auth_v2_app(settings))
+
+    def test_is_auth_v2_app_with_identity_providers(self):
+        from azure.mgmt.web.models import (SiteAuthSettingsV2, IdentityProviders,
+                                            AzureActiveDirectory)
+        settings = SiteAuthSettingsV2(
+            identity_providers=IdentityProviders(
+                azure_active_directory=AzureActiveDirectory(enabled=True)))
+        self.assertTrue(_is_auth_v2_app(settings))
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
+    def test_get_auth_settings_returns_v2_when_configured(self, mock_site_op):
+        from azure.mgmt.web.models import SiteAuthSettingsV2, AuthPlatform
+        v2_settings = SiteAuthSettingsV2(platform=AuthPlatform(enabled=True))
+        mock_site_op.return_value = v2_settings
+
+        cmd = _get_test_cmd()
+        result = get_auth_settings(cmd, 'rg', 'myapp')
+
+        self.assertIsInstance(result, SiteAuthSettingsV2)
+        mock_site_op.assert_called_once_with(cmd.cli_ctx, 'rg', 'myapp',
+                                              'get_auth_settings_v2', None)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
+    def test_get_auth_settings_falls_back_to_v1(self, mock_site_op):
+        from azure.mgmt.web.models import SiteAuthSettingsV2
+
+        v2_settings = SiteAuthSettingsV2()  # empty = not v2
+        v1_settings = mock.MagicMock()
+        v1_settings.enabled = True
+
+        def side_effect(cli_ctx, rg, name, op, slot=None):
+            if op == 'get_auth_settings_v2':
+                return v2_settings
+            return v1_settings
+
+        mock_site_op.side_effect = side_effect
+
+        cmd = _get_test_cmd()
+        result = get_auth_settings(cmd, 'rg', 'myapp')
+
+        self.assertEqual(result, v1_settings)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
+    def test_get_auth_settings_v2_exception_falls_back_to_v1(self, mock_site_op):
+        v1_settings = mock.MagicMock()
+        v1_settings.enabled = False
+
+        def side_effect(cli_ctx, rg, name, op, slot=None):
+            if op == 'get_auth_settings_v2':
+                raise HttpResponseError(message="Not found")
+            return v1_settings
+
+        mock_site_op.side_effect = side_effect
+
+        cmd = _get_test_cmd()
+        result = get_auth_settings(cmd, 'rg', 'myapp')
+
+        self.assertEqual(result, v1_settings)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
+    def test_update_auth_settings_uses_v2_when_configured(self, mock_site_op):
+        from azure.mgmt.web.models import SiteAuthSettingsV2, AuthPlatform
+        v2_settings = SiteAuthSettingsV2(platform=AuthPlatform(enabled=True))
+        updated_v2 = SiteAuthSettingsV2(platform=AuthPlatform(enabled=True))
+
+        def side_effect(cli_ctx, rg, name, op, slot=None, extra_parameter=None):
+            if op == 'get_auth_settings_v2':
+                return v2_settings
+            if op == 'update_auth_settings_v2':
+                return updated_v2
+            return mock.MagicMock()
+
+        mock_site_op.side_effect = side_effect
+
+        cmd = _get_test_cmd()
+        result = update_auth_settings(cmd, 'rg', 'myapp', enabled='true',
+                                       client_id='test-client-id')
+
+        self.assertEqual(result, updated_v2)
+        # Verify update_auth_settings_v2 was called
+        calls = [c for c in mock_site_op.call_args_list if c[0][3] == 'update_auth_settings_v2']
+        self.assertEqual(len(calls), 1)
+        # Verify the v2 settings were modified
+        sent_settings = calls[0][1].get('extra_parameter') or calls[0][0][4] if len(calls[0][0]) > 4 else None
+        # The auth settings object should have been passed as extra_parameter
+        update_call_args = calls[0]
+        self.assertIn('update_auth_settings_v2', update_call_args[0])
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
+    def test_update_auth_settings_require_https_forces_v2(self, mock_site_op):
+        from azure.mgmt.web.models import SiteAuthSettingsV2
+        v2_settings = SiteAuthSettingsV2()  # empty = not v2 configured yet
+        updated_v2 = SiteAuthSettingsV2()
+
+        def side_effect(cli_ctx, rg, name, op, slot=None, extra_parameter=None):
+            if op == 'get_auth_settings_v2':
+                return v2_settings
+            if op == 'update_auth_settings_v2':
+                return extra_parameter  # return what was sent
+            return mock.MagicMock()
+
+        mock_site_op.side_effect = side_effect
+
+        cmd = _get_test_cmd()
+        result = update_auth_settings(cmd, 'rg', 'myapp', require_https='true')
+
+        # Should have used v2 path due to --require-https
+        self.assertIsNotNone(result.http_settings)
+        self.assertTrue(result.http_settings.require_https)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
+    def test_update_auth_settings_v1_fallback(self, mock_site_op):
+        from azure.mgmt.web.models import SiteAuthSettingsV2
+        v2_settings = SiteAuthSettingsV2()  # empty = not v2
+        v1_settings = mock.MagicMock()
+        v1_settings.enabled = False
+
+        def side_effect(cli_ctx, rg, name, op, slot=None, extra_parameter=None):
+            if op == 'get_auth_settings_v2':
+                return v2_settings
+            if op == 'get_auth_settings':
+                return v1_settings
+            if op == 'update_auth_settings':
+                return extra_parameter
+            return mock.MagicMock()
+
+        mock_site_op.side_effect = side_effect
+
+        cmd = _get_test_cmd()
+        result = update_auth_settings(cmd, 'rg', 'myapp', enabled='true',
+                                       facebook_app_id='fb-id')
+
+        # Should have used v1 path
+        self.assertTrue(result.enabled)
+        self.assertEqual(result.facebook_app_id, 'fb-id')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
+    def test_update_auth_v2_aad_settings(self, mock_site_op):
+        from azure.mgmt.web.models import SiteAuthSettingsV2, AuthPlatform
+        v2_settings = SiteAuthSettingsV2(platform=AuthPlatform(enabled=True))
+
+        def side_effect(cli_ctx, rg, name, op, slot=None, extra_parameter=None):
+            if op == 'get_auth_settings_v2':
+                return v2_settings
+            if op == 'update_auth_settings_v2':
+                return extra_parameter
+            return mock.MagicMock()
+
+        mock_site_op.side_effect = side_effect
+
+        cmd = _get_test_cmd()
+        result = update_auth_settings(
+            cmd, 'rg', 'myapp',
+            client_id='my-client-id',
+            client_secret='my-secret',
+            allowed_audiences=['https://myapp.azurewebsites.net'],
+            issuer='https://sts.windows.net/tenant-id/',
+            token_store_enabled='true')
+
+        # Verify AAD settings in v2 structure
+        aad = result.identity_providers.azure_active_directory
+        self.assertTrue(aad.enabled)
+        self.assertEqual(aad.registration.client_id, 'my-client-id')
+        self.assertEqual(aad.registration.client_secret_setting_name, 'my-secret')
+        self.assertEqual(aad.registration.open_id_issuer, 'https://sts.windows.net/tenant-id/')
+        self.assertEqual(aad.validation.allowed_audiences, ['https://myapp.azurewebsites.net'])
+        # Verify token store
+        self.assertTrue(result.login.token_store.enabled)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
+    def test_update_auth_v2_facebook_settings(self, mock_site_op):
+        from azure.mgmt.web.models import SiteAuthSettingsV2, AuthPlatform
+        v2_settings = SiteAuthSettingsV2(platform=AuthPlatform(enabled=True))
+
+        def side_effect(cli_ctx, rg, name, op, slot=None, extra_parameter=None):
+            if op == 'get_auth_settings_v2':
+                return v2_settings
+            if op == 'update_auth_settings_v2':
+                return extra_parameter
+            return mock.MagicMock()
+
+        mock_site_op.side_effect = side_effect
+
+        cmd = _get_test_cmd()
+        result = update_auth_settings(
+            cmd, 'rg', 'myapp',
+            facebook_app_id='fb-app-id',
+            facebook_app_secret='fb-secret',
+            facebook_oauth_scopes=['public_profile', 'email'])
+
+        fb = result.identity_providers.facebook
+        self.assertTrue(fb.enabled)
+        self.assertEqual(fb.registration.app_id, 'fb-app-id')
+        self.assertEqual(fb.registration.app_secret_setting_name, 'fb-secret')
+        self.assertEqual(fb.login.scopes, ['public_profile', 'email'])
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
+    def test_update_auth_v2_action_allow_anonymous(self, mock_site_op):
+        from azure.mgmt.web.models import SiteAuthSettingsV2, AuthPlatform
+        v2_settings = SiteAuthSettingsV2(platform=AuthPlatform(enabled=True))
+
+        def side_effect(cli_ctx, rg, name, op, slot=None, extra_parameter=None):
+            if op == 'get_auth_settings_v2':
+                return v2_settings
+            if op == 'update_auth_settings_v2':
+                return extra_parameter
+            return mock.MagicMock()
+
+        mock_site_op.side_effect = side_effect
+
+        cmd = _get_test_cmd()
+        result = update_auth_settings(cmd, 'rg', 'myapp', action='AllowAnonymous')
+
+        self.assertEqual(result.global_validation.unauthenticated_client_action, 'AllowAnonymous')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
+    def test_update_auth_v2_action_login_with_aad(self, mock_site_op):
+        from azure.mgmt.web.models import SiteAuthSettingsV2, AuthPlatform
+        v2_settings = SiteAuthSettingsV2(platform=AuthPlatform(enabled=True))
+
+        def side_effect(cli_ctx, rg, name, op, slot=None, extra_parameter=None):
+            if op == 'get_auth_settings_v2':
+                return v2_settings
+            if op == 'update_auth_settings_v2':
+                return extra_parameter
+            return mock.MagicMock()
+
+        mock_site_op.side_effect = side_effect
+
+        cmd = _get_test_cmd()
+        result = update_auth_settings(cmd, 'rg', 'myapp',
+                                       action='LoginWithAzureActiveDirectory')
+
+        self.assertEqual(result.global_validation.unauthenticated_client_action, 'RedirectToLoginPage')
+        self.assertEqual(result.global_validation.redirect_to_provider, 'azureactivedirectory')
 
 
 class FakedResponse:  # pylint: disable=too-few-public-methods
