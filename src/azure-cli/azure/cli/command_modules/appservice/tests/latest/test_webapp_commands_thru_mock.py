@@ -31,6 +31,7 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          list_snapshots,
                                                          restore_snapshot,
                                                          create_managed_ssl_cert,
+                                                         copy_slot,
                                                          add_github_actions,
                                                          update_app_settings,
                                                          update_application_settings_polling,
@@ -757,6 +758,77 @@ class TestAppServicePlanFeatures(unittest.TestCase):
         cmd = _get_test_cmd()
         result = list_plan_slots(cmd, 'rg', 'plan1')
         self.assertEqual(result, [])
+
+class TestCopySlot(unittest.TestCase):
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    def test_copy_slot_success(self, client_factory_mock, send_raw_request_mock):
+        """Test copy_slot sends correct REST call and returns on 200."""
+        client = mock.MagicMock()
+        client.DEFAULT_API_VERSION = '2024-04-01'
+        client_factory_mock.return_value = client
+        cmd_mock = _get_test_cmd()
+        cli_ctx_mock = mock.MagicMock()
+        cli_ctx_mock.data = {'subscription_id': 'sub1'}
+        cmd_mock.cli_ctx = cli_ctx_mock
+
+        response = mock.MagicMock()
+        response.status_code = 200
+        response.text = '{"status": "completed"}'
+        response.json.return_value = {"status": "completed"}
+        send_raw_request_mock.return_value = response
+
+        result = copy_slot(cmd_mock, 'rg1', 'myapp', 'staging', 'production')
+        self.assertEqual(result, {"status": "completed"})
+        send_raw_request_mock.assert_called_once()
+        call_args = send_raw_request_mock.call_args
+        self.assertIn('/slotcopy', call_args[1].get('url', '') or str(call_args))
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    def test_copy_slot_accepted(self, client_factory_mock, send_raw_request_mock):
+        """Test copy_slot returns None on 202 accepted."""
+        client = mock.MagicMock()
+        client.DEFAULT_API_VERSION = '2024-04-01'
+        client_factory_mock.return_value = client
+        cmd_mock = _get_test_cmd()
+        cli_ctx_mock = mock.MagicMock()
+        cli_ctx_mock.data = {'subscription_id': 'sub1'}
+        cmd_mock.cli_ctx = cli_ctx_mock
+
+        response = mock.MagicMock()
+        response.status_code = 202
+        response.text = ''
+        send_raw_request_mock.return_value = response
+
+        result = copy_slot(cmd_mock, 'rg1', 'myapp', 'staging')
+        self.assertIsNone(result)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    def test_copy_slot_default_target(self, client_factory_mock, send_raw_request_mock):
+        """Test copy_slot defaults target_slot to 'production'."""
+        client = mock.MagicMock()
+        client.DEFAULT_API_VERSION = '2024-04-01'
+        client_factory_mock.return_value = client
+        cmd_mock = _get_test_cmd()
+        cli_ctx_mock = mock.MagicMock()
+        cli_ctx_mock.data = {'subscription_id': 'sub1'}
+        cmd_mock.cli_ctx = cli_ctx_mock
+
+        response = mock.MagicMock()
+        response.status_code = 200
+        response.text = '{}'
+        response.json.return_value = {}
+        send_raw_request_mock.return_value = response
+
+        copy_slot(cmd_mock, 'rg1', 'myapp', 'staging')
+        call_args = send_raw_request_mock.call_args
+        body_arg = call_args[1].get('body', '')
+        import json
+        body = json.loads(body_arg)
+        self.assertEqual(body['targetSlot'], 'production')
 
 
 if __name__ == '__main__':

@@ -6379,6 +6379,27 @@ def swap_slot(cmd, resource_group_name, webapp, slot, target_slot=None, preserve
     return None
 
 
+def copy_slot(cmd, resource_group_name, webapp, slot, target_slot=None):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    client = web_client_factory(cmd.cli_ctx)
+    target_slot = target_slot or 'production'
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    url = ("/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}"
+           "/slots/{}/slotcopy?api-version={}").format(
+               subscription_id, resource_group_name, webapp, slot,
+               client.DEFAULT_API_VERSION)
+    body = json.dumps({"targetSlot": target_slot, "siteConfig": {}})
+    response = send_raw_request(cmd.cli_ctx, method='post', url=url, body=body)
+    if response.status_code == 200:
+        return response.json() if response.text else None
+    if response.status_code == 202:
+        logger.warning("Slot copy operation accepted and is in progress. "
+                       "Content from slot '%s' is being copied to '%s'.",
+                       slot, target_slot)
+        return None
+    return response.json() if response.text else None
+
+
 def delete_slot(cmd, resource_group_name, webapp, slot):
     client = web_client_factory(cmd.cli_ctx)
     # TODO: once swagger finalized, expose other parameters like: delete_all_slots, etc...

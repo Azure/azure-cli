@@ -256,6 +256,7 @@ def load_command_table(self, _):
         g.custom_command('auto-swap', 'config_slot_auto_swap')
         g.custom_command('swap', 'swap_slot', exception_handler=ex_handler_factory())
         g.custom_command('create', 'create_webapp_slot', exception_handler=ex_handler_factory())
+        g.custom_command('copy', 'copy_slot', exception_handler=ex_handler_factory(), is_preview=True)
 
     with self.command_group('webapp deployment') as g:
         g.custom_command('list-publishing-profiles', 'list_publish_profiles')

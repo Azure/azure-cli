@@ -743,6 +743,9 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('action',
                    help="swap types. use 'preview' to apply target slot's settings on the source slot first; use 'swap' to complete it; use 'reset' to reset the swap",
                    arg_type=get_enum_type(['swap', 'preview', 'reset']))
+    with self.argument_context('webapp deployment slot copy') as c:
+        c.argument('slot', help='the name of the source slot to copy from')
+        c.argument('target_slot', help="the name of the destination slot to copy to, default to 'production'")
 
     with self.argument_context('webapp deployment github-actions')as c:
         c.argument('name', arg_type=webapp_name_arg_type)

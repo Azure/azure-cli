@@ -2098,6 +2098,24 @@ examples:
             --target-slot production
 """
 
+helps['webapp deployment slot copy'] = """
+type: command
+short-summary: Copy the content and configuration of a deployment slot to another slot.
+long-summary: >
+    Copy site content from the source slot to the target slot. This is a one-way operation
+    that overwrites the target slot's content. Unlike swap, this does not exchange the slots.
+    The source slot is specified with --slot, and the destination is --target-slot (defaults to production).
+examples:
+  - name: Copy a staging slot's content to production.
+    text: >
+        az webapp deployment slot copy -g MyResourceGroup -n MyUniqueApp --slot staging \\
+            --target-slot production
+  - name: Copy production content to a staging slot.
+    text: >
+        az webapp deployment slot copy -g MyResourceGroup -n MyUniqueApp --slot production \\
+            --target-slot staging
+"""
+
 helps['webapp deployment source'] = """
 type: group
 short-summary: Manage web app deployment via source control.
