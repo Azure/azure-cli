@@ -521,6 +521,9 @@ subscription than the app service environment, please use the resource ID for --
             c.argument('hostname', help='The custom domain name')
             c.argument('name', options_list=['--name', '-n'], help='Name of the web app.')
             c.argument('resource-group', options_list=['--resource-group', '-g'], help='Name of resource group.')
+            c.argument('domain_validation_method', options_list=['--domain-validation-method'],
+                       help='Method used for domain validation. Use this when the certificate needs to validate a '
+                            'child DNS zone, e.g. "TXT" for TXT record validation.')
         with self.argument_context(scope + ' config hostname') as c:
             c.argument('hostname', completer=get_hostname_completion_list,
                        help="hostname assigned to the site, such as custom domains", id_part='child_name_1')
@@ -816,6 +819,9 @@ subscription than the app service environment, please use the resource ID for --
                    help='the path which the web app uses to read-write data ex: /share1 or /share2')
         c.argument('slot', options_list=['--slot', '-s'],
                    help="the name of the slot. Default to the productions slot if not specified")
+        c.argument('protocol', options_list=['--protocol'],
+                   arg_type=get_enum_type(['Smb', 'Nfs']),
+                   help='the protocol used to mount the storage account, e.g. Smb or Nfs')
     with self.argument_context('webapp config storage-account add') as c:
         c.argument('slot_setting', options_list=['--slot-setting'], help="With slot setting you can decide to make BYOS configuration sticky to a slot, meaning that when that slot is swapped, the storage account stays with that slot.")
     with self.argument_context('webapp config storage-account update') as c:

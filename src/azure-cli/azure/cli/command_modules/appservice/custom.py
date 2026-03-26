@@ -653,7 +653,8 @@ def update_application_settings_polling(cmd, resource_group_name, name, app_sett
 
 
 def add_azure_storage_account(cmd, resource_group_name, name, custom_id, storage_type, account_name,
-                              share_name, access_key, mount_path=None, slot=None, slot_setting=False):
+                              share_name, access_key, mount_path=None, slot=None, slot_setting=False,
+                              protocol=None):
     AzureStorageInfoValue = cmd.get_models('AzureStorageInfoValue')
     azure_storage_accounts = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
                                                      'list_azure_storage_accounts', slot)
@@ -665,7 +666,7 @@ def add_azure_storage_account(cmd, resource_group_name, name, custom_id, storage
 
     azure_storage_accounts.properties[custom_id] = AzureStorageInfoValue(type=storage_type, account_name=account_name,
                                                                          share_name=share_name, access_key=access_key,
-                                                                         mount_path=mount_path)
+                                                                         mount_path=mount_path, protocol=protocol)
     client = web_client_factory(cmd.cli_ctx)
 
     result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
@@ -684,7 +685,8 @@ def add_azure_storage_account(cmd, resource_group_name, name, custom_id, storage
 
 
 def update_azure_storage_account(cmd, resource_group_name, name, custom_id, storage_type=None, account_name=None,
-                                 share_name=None, access_key=None, mount_path=None, slot=None, slot_setting=False):
+                                 share_name=None, access_key=None, mount_path=None, slot=None, slot_setting=False,
+                                 protocol=None):
     AzureStorageInfoValue = cmd.get_models('AzureStorageInfoValue')
 
     azure_storage_accounts = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
@@ -702,7 +704,8 @@ def update_azure_storage_account(cmd, resource_group_name, name, custom_id, stor
         account_name=account_name or existing_account_config.account_name,
         share_name=share_name or existing_account_config.share_name,
         access_key=access_key or existing_account_config.access_key,
-        mount_path=mount_path or existing_account_config.mount_path
+        mount_path=mount_path or existing_account_config.mount_path,
+        protocol=protocol or existing_account_config.protocol
     )
 
     azure_storage_accounts.properties[custom_id] = new_account_config
@@ -5960,7 +5963,8 @@ def import_ssl_cert(cmd, resource_group_name, key_vault, key_vault_certificate_n
                                                 certificate_envelope=kv_cert_def)
 
 
-def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None, certificate_name=None):
+def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None, certificate_name=None,
+                            domain_validation_method=None):
     Certificate = cmd.get_models('Certificate')
     hostname = hostname.lower()
     client = web_client_factory(cmd.cli_ctx)
@@ -5985,8 +5989,11 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None,
 
     server_farm_id = webapp.server_farm_id
     location = webapp.location
-    easy_cert_def = Certificate(location=location, canonical_name=hostname,
-                                server_farm_id=server_farm_id, password='')
+    cert_kwargs = dict(location=location, canonical_name=hostname,
+                       server_farm_id=server_farm_id, password='')
+    if domain_validation_method:
+        cert_kwargs['domain_validation_method'] = domain_validation_method
+    easy_cert_def = Certificate(**cert_kwargs)
 
     # TODO: Update manual polling to use LongRunningOperation once backend API & new SDK supports polling
     try:
