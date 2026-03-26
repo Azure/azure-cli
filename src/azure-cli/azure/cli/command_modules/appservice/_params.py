@@ -807,7 +807,11 @@ subscription than the app service environment, please use the resource ID for --
 
     with self.argument_context('webapp config connection-string') as c:
         c.argument('connection_string_type', options_list=['--connection-string-type', '-t'],
-                   help='connection string type', arg_type=get_enum_type(ConnectionStringType))
+                   help='Connection string type. App Service sets an env var prefix per type '
+                        '(e.g., SQLAZURECONNSTR_, POSTGRESQLCONNSTR_). .NET GetConnectionString() '
+                        'auto-maps SQLServer, SQLAzure, and Custom only; for MySQL/PostgreSQL, '
+                        'read the env var directly.',
+                   arg_type=get_enum_type(ConnectionStringType))
         c.argument('ids', options_list=['--ids'],
                    help="One or more resource IDs (space delimited). If provided no other 'Resource Id' arguments should be specified.",
                    required=True)

@@ -1584,12 +1584,33 @@ examples:
 helps['webapp config connection-string set'] = """
 type: command
 short-summary: Update a web app's connection strings.
-long-summary: Note that connection string values are now redacted in the result. Please use the `az webapp config connection-string list` command to view the values.
+long-summary: >
+    Note that connection string values are now redacted in the result. Please use the
+    `az webapp config connection-string list` command to view the values.
+
+
+    App Service exposes each connection string as an environment variable with a type-based
+    prefix:
+      SQLServer    → SQLCONNSTR_<name>
+      SQLAzure     → SQLAZURECONNSTR_<name>
+      MySQL        → MYSQLCONNSTR_<name>
+      PostgreSQL   → POSTGRESQLCONNSTR_<name>
+      Custom       → CUSTOMCONNSTR_<name>
+
+
+    .NET's Configuration.GetConnectionString() auto-maps only the SQLServer, SQLAzure, and
+    Custom prefixes. For MySQL and PostgreSQL connection strings, access the value directly
+    via Configuration["MYSQLCONNSTR_<name>"] or Configuration["POSTGRESQLCONNSTR_<name>"]
+    instead.
 examples:
   - name: Add a mysql connection string.
     text: >
         az webapp config connection-string set -g MyResourceGroup -n MyUniqueApp -t mysql \\
             --settings mysql1='Server=myServer;Database=myDB;Uid=myUser;Pwd=myPwd;'
+  - name: Add a PostgreSQL connection string (access in .NET via Configuration["POSTGRESQLCONNSTR_pg1"]).
+    text: >
+        az webapp config connection-string set -g MyResourceGroup -n MyUniqueApp -t postgresql \\
+            --settings pg1='Host=myHost;Database=myDB;Username=myUser;Password=myPwd;'
 """
 
 helps['webapp config container'] = """
