@@ -6615,8 +6615,7 @@ def show_ssl_cert(cmd, resource_group_name, certificate_name):
 
 def delete_ssl_cert(cmd, resource_group_name, certificate_thumbprint):
     client = web_client_factory(cmd.cli_ctx)
-    webapp_certs = list(client.certificates.list_by_resource_group(resource_group_name))
-    for webapp_cert in webapp_certs:
+    for webapp_cert in client.certificates.list_by_resource_group(resource_group_name):
         if webapp_cert.thumbprint == certificate_thumbprint:
             return client.certificates.delete(resource_group_name, webapp_cert.name)
     raise ResourceNotFoundError("Certificate for thumbprint '{}' not found".format(certificate_thumbprint))
@@ -6812,25 +6811,24 @@ def _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint, 
         raise ResourceNotFoundError("'{}' app doesn't exist".format(name))
 
     cert_resource_group_name = parse_resource_id(webapp.server_farm_id)['resource_group']
-    webapp_certs = list(client.certificates.list_by_resource_group(cert_resource_group_name))
 
     found_cert = None
     # search for a cert that matches in the app service plan's RG
-    for webapp_cert in webapp_certs:
+    for webapp_cert in client.certificates.list_by_resource_group(cert_resource_group_name):
         if webapp_cert.thumbprint == certificate_thumbprint:
             found_cert = webapp_cert
             break
     # search for a cert that matches in the webapp's RG
     if not found_cert:
-        webapp_certs = list(client.certificates.list_by_resource_group(resource_group_name))
-        for webapp_cert in webapp_certs:
+        for webapp_cert in client.certificates.list_by_resource_group(resource_group_name):
             if webapp_cert.thumbprint == certificate_thumbprint:
                 found_cert = webapp_cert
                 break
     # search for a cert that matches in the subscription, filtering on the serverfarm
     if not found_cert:
-        sub_certs = client.certificates.list(filter=f"ServerFarmId eq '{webapp.server_farm_id}'")
-        found_cert = next(iter([c for c in sub_certs if c.thumbprint == certificate_thumbprint]), None)
+        found_cert = next((c for c in client.certificates.list(
+            filter=f"ServerFarmId eq '{webapp.server_farm_id}'")
+            if c.thumbprint == certificate_thumbprint), None)
     if found_cert:
         if not hostname:
             if len(found_cert.host_names) == 1 and not found_cert.host_names[0].startswith('*'):

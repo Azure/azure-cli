@@ -851,7 +851,13 @@ class TestCreateAppServicePlanDefaults(unittest.TestCase):
 
 
 class _FakePagedIterator:
-    """Simulates an Azure SDK paged iterator that yields items across multiple pages."""
+    """Simulates an Azure SDK paged iterator that yields items across multiple pages.
+
+    Unlike a plain list or iter(), this class mimics the SDK behavior where
+    items are fetched page-by-page via continuation tokens. The pages_fetched
+    property tracks how many pages have been consumed, allowing tests to verify
+    both full-consumption (list_ssl_certs) and early-break (delete, bind) behavior.
+    """
 
     def __init__(self, pages):
         self._pages = pages
@@ -917,6 +923,25 @@ class TestSSLCertPagination(unittest.TestCase):
 
         self.assertEqual(pager.pages_fetched, 2)
         client.certificates.delete.assert_called_once_with('myRG', 'cert99')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    def test_delete_ssl_cert_early_break_skips_remaining_pages(self, client_factory_mock):
+        """Ensure delete_ssl_cert stops iterating once the cert is found (lazy)."""
+        cmd_mock = _get_test_cmd()
+
+        page1 = [_make_cert('cert0', 'TARGET')]
+        page2 = [_make_cert('cert1', 'OTHER')]
+        pager = _FakePagedIterator([page1, page2])
+
+        client = mock.MagicMock()
+        client_factory_mock.return_value = client
+        client.certificates.list_by_resource_group.return_value = pager
+
+        delete_ssl_cert(cmd_mock, 'myRG', 'TARGET')
+
+        # Only page 1 should be fetched — early break avoids page 2
+        self.assertEqual(pager.pages_fetched, 1)
+        client.certificates.delete.assert_called_once_with('myRG', 'cert0')
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     def test_delete_ssl_cert_not_found_raises_error(self, client_factory_mock):
