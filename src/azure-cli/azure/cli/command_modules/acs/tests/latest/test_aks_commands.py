@@ -697,6 +697,14 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         self.cmd(create_vm_cmd)
 
+        # Wait for cloud-init to finish so Squid is installed and running
+        # before AKS nodes try to route traffic through the proxy
+        self.cmd('vm run-command invoke \
+            --resource-group={resource_group} \
+            --name=cli-proxy-vm \
+            --command-id RunShellScript \
+            --scripts "cloud-init status --wait"')
+
         self.kwargs.update({
             'vnet_subnet_id': subnet_id,
         })
