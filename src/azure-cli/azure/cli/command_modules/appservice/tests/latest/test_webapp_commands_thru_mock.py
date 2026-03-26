@@ -469,6 +469,94 @@ class TestWebappMocked(unittest.TestCase):
                                                                      certificate_envelope=cert_def)
 
 
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._verify_hostname_binding', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
+    def test_create_managed_ssl_cert_wait_timeout_raises_error(self, generic_site_op_mock, client_factory_mock,
+                                                                verify_binding_mock, send_raw_request_mock):
+        """Test that --wait raises CLIError on timeout instead of returning None."""
+        webapp_name = 'someWebAppName'
+        rg_name = 'someRgName'
+        farm_id = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg1/providers/Microsoft.Web/serverfarms/farm1'
+        host_name = 'www.contoso.com'
+
+        client = mock.MagicMock()
+        client_factory_mock.return_value = client
+        cmd_mock = _get_test_cmd()
+        cli_ctx_mock = mock.MagicMock()
+        cli_ctx_mock.data = {'subscription_id': 'sub1'}
+        cmd_mock.cli_ctx = cli_ctx_mock
+        Site, Certificate = cmd_mock.get_models('Site', 'Certificate')
+        site = Site(name=webapp_name, location='westeurope')
+        site.server_farm_id = farm_id
+        generic_site_op_mock.return_value = site
+        verify_binding_mock.return_value = True
+
+        # Simulate 202 with Location header
+        ex_response = mock.MagicMock()
+        ex_response.status_code = 202
+        ex_response.headers = {'Location': 'https://polling-url'}
+        api_exception = Exception('accepted')
+        api_exception.response = ex_response
+        client.certificates.create_or_update.side_effect = api_exception
+
+        # Polling always returns 202 (never completes)
+        poll_response = mock.MagicMock()
+        poll_response.status_code = 202
+        send_raw_request_mock.return_value = poll_response
+
+        # With wait=True and mocked time to simulate immediate timeout
+        with mock.patch('azure.cli.command_modules.appservice.custom.time') as time_mock:
+            time_mock.time.side_effect = [0, 999999]  # Start, then past timeout
+            time_mock.sleep = mock.MagicMock()
+            with self.assertRaises(CLIError):
+                create_managed_ssl_cert(cmd_mock, rg_name, webapp_name, host_name, None, wait=True)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._verify_hostname_binding', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
+    def test_create_managed_ssl_cert_no_wait_returns_none(self, generic_site_op_mock, client_factory_mock,
+                                                           verify_binding_mock, send_raw_request_mock):
+        """Test that without --wait, timeout returns None with a warning (default behavior)."""
+        webapp_name = 'someWebAppName'
+        rg_name = 'someRgName'
+        farm_id = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg1/providers/Microsoft.Web/serverfarms/farm1'
+        host_name = 'www.contoso.com'
+
+        client = mock.MagicMock()
+        client_factory_mock.return_value = client
+        cmd_mock = _get_test_cmd()
+        cli_ctx_mock = mock.MagicMock()
+        cli_ctx_mock.data = {'subscription_id': 'sub1'}
+        cmd_mock.cli_ctx = cli_ctx_mock
+        Site, Certificate = cmd_mock.get_models('Site', 'Certificate')
+        site = Site(name=webapp_name, location='westeurope')
+        site.server_farm_id = farm_id
+        generic_site_op_mock.return_value = site
+        verify_binding_mock.return_value = True
+
+        # Simulate 202 with Location header
+        ex_response = mock.MagicMock()
+        ex_response.status_code = 202
+        ex_response.headers = {'Location': 'https://polling-url'}
+        api_exception = Exception('accepted')
+        api_exception.response = ex_response
+        client.certificates.create_or_update.side_effect = api_exception
+
+        # Polling always returns 202
+        poll_response = mock.MagicMock()
+        poll_response.status_code = 202
+        send_raw_request_mock.return_value = poll_response
+
+        # Without wait (default), should return None, not raise
+        with mock.patch('azure.cli.command_modules.appservice.custom.time') as time_mock:
+            time_mock.time.side_effect = [0, 999999]
+            time_mock.sleep = mock.MagicMock()
+            result = create_managed_ssl_cert(cmd_mock, rg_name, webapp_name, host_name, None, wait=False)
+            self.assertIsNone(result)
+
     def test_update_app_settings_error_handling_no_parameters(self):
         """Test that MutuallyExclusiveArgumentError is raised when neither settings nor slot_settings are provided."""
         cmd_mock = _get_test_cmd()
