@@ -284,6 +284,15 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
             if name_validation.name_available:
                 site_config.app_settings.append(NameValuePair(name="WEBSITES_ENABLE_APP_SERVICE_STORAGE",
                                                               value="false"))
+                if container_registry_url:
+                    site_config.app_settings.append(NameValuePair(name="DOCKER_REGISTRY_SERVER_URL",
+                                                                  value=container_registry_url))
+                if container_registry_user:
+                    site_config.app_settings.append(NameValuePair(name="DOCKER_REGISTRY_SERVER_USERNAME",
+                                                                  value=container_registry_user))
+                if container_registry_password:
+                    site_config.app_settings.append(NameValuePair(name="DOCKER_REGISTRY_SERVER_PASSWORD",
+                                                                  value=container_registry_password))
         elif multicontainer_config_type and multicontainer_config_file:
             encoded_config_file = _get_linux_multicontainer_encoded_config_from_file(multicontainer_config_file)
             site_config.linux_fx_version = _format_fx_version(encoded_config_file, multicontainer_config_type)
@@ -5875,6 +5884,51 @@ def delete_ssl_cert(cmd, resource_group_name, certificate_thumbprint):
         if webapp_cert.thumbprint == certificate_thumbprint:
             return client.certificates.delete(resource_group_name, webapp_cert.name)
     raise ResourceNotFoundError("Certificate for thumbprint '{}' not found".format(certificate_thumbprint))
+
+
+def upload_public_cert(cmd, resource_group_name, name, public_certificate_name,
+                       certificate_file, slot=None,
+                       public_certificate_location='CurrentUserMy'):
+    PublicCertificate = cmd.get_models('PublicCertificate')
+    client = web_client_factory(cmd.cli_ctx)
+    with open(certificate_file, 'rb') as f:
+        cert_contents = f.read()
+    import base64
+    cert_blob = base64.b64encode(cert_contents)
+    public_cert = PublicCertificate(
+        blob=cert_blob,
+        public_certificate_location=public_certificate_location
+    )
+    if slot:
+        return client.web_apps.create_or_update_public_certificate_slot(
+            resource_group_name, name, public_certificate_name, public_cert, slot)
+    return client.web_apps.create_or_update_public_certificate(
+        resource_group_name, name, public_certificate_name, public_cert)
+
+
+def list_public_certs(cmd, resource_group_name, name, slot=None):
+    client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        return client.web_apps.list_public_certificates_slot(resource_group_name, name, slot)
+    return client.web_apps.list_public_certificates(resource_group_name, name)
+
+
+def delete_public_cert(cmd, resource_group_name, name, public_certificate_name, slot=None):
+    client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        return client.web_apps.delete_public_certificate_slot(
+            resource_group_name, name, public_certificate_name, slot)
+    return client.web_apps.delete_public_certificate(
+        resource_group_name, name, public_certificate_name)
+
+
+def show_public_cert(cmd, resource_group_name, name, public_certificate_name, slot=None):
+    client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        return client.web_apps.get_public_certificate_slot(
+            resource_group_name, name, public_certificate_name, slot)
+    return client.web_apps.get_public_certificate(
+        resource_group_name, name, public_certificate_name)
 
 
 def import_ssl_cert(cmd, resource_group_name, key_vault, key_vault_certificate_name, name=None, certificate_name=None):

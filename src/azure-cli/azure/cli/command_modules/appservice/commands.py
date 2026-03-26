@@ -203,6 +203,12 @@ def load_command_table(self, _):
         g.custom_command('import', 'import_ssl_cert', exception_handler=ex_handler_factory())
         g.custom_command('create', 'create_managed_ssl_cert', exception_handler=ex_handler_factory(), is_preview=True)
 
+    with self.command_group('webapp config public-cert') as g:
+        g.custom_command('upload', 'upload_public_cert')
+        g.custom_command('list', 'list_public_certs')
+        g.custom_show_command('show', 'show_public_cert')
+        g.custom_command('delete', 'delete_public_cert', confirmation=True)
+
     with self.command_group('webapp config backup') as g:
         g.custom_command('list', 'list_backups')
         g.custom_show_command('show', 'show_backup_configuration')
