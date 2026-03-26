@@ -654,6 +654,12 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             --name proxy-subnet \
             --nat-gateway nat-gw'
 
+        attach_nat_aks_cmd = 'network vnet subnet update \
+            --resource-group={resource_group} \
+            --vnet-name={name} \
+            --name aks-subnet \
+            --nat-gateway nat-gw'
+
         show_subnet_cmd = 'network vnet subnet show \
             --resource-group={resource_group} \
             --vnet-name={name} \
@@ -683,6 +689,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(create_nat_pip_cmd)
         self.cmd(create_nat_gw_cmd)
         self.cmd(attach_nat_proxy_cmd)
+        self.cmd(attach_nat_aks_cmd)
 
         subnet_output = self.cmd(show_subnet_cmd).get_output_in_json()
         subnet_id = subnet_output["id"]
