@@ -10665,12 +10665,60 @@ def _make_onedeploy_request(params):
                     deployment_status_url, params.slot, params.timeout)
             logger.info('Server response: %s', response_body)
         else:
+            # For --src-url deployments using ARM endpoint
             if 'application/json' in response.headers.get('content-type', ""):
-                state = response.json().get("properties", {}).get("provisioningState")
-                if state:
-                    logger.warning("Deployment status is: \"%s\"", state)
-                response_body = response.json().get("properties", {})
-        logger.warning("Deployment has completed successfully")
+                # Check if we should poll for completion (default is sync to match --src-path)
+                if params.is_async_deployment is not True:
+                    # Try to extract deployment ID from ARM response
+                    deployment_id = None
+                    try:
+                        response_json = response.json()
+                        # Check for deployment ID in response
+                        if 'id' in response_json:
+                            deployment_id = response_json['id'].split('/')[-1]
+                        elif 'properties' in response_json and 'deploymentId' in response_json['properties']:
+                            deployment_id = response_json['properties']['deploymentId']
+                    except Exception as ex:  # pylint: disable=broad-except
+                        logger.info("Failed to parse ARM response for deployment ID: %s", ex)
+
+                    # If we have a deployment ID, poll for completion
+                    if deployment_id:
+                        logger.info("Tracking deployment ID: %s", deployment_id)
+                        try:
+                            deploymentstatusapi_url = _build_deploymentstatus_url(
+                                params.cmd, params.resource_group_name, params.webapp_name,
+                                params.slot, deployment_id
+                            )
+                            # Poll deployment status using the ARM deployment status API
+                            logger.warning('Polling the status of sync deployment. Start Time: %s UTC',
+                                           datetime.datetime.now(datetime.timezone.utc))
+                            response_body = _poll_deployment_runtime_status(
+                                params.cmd, params.resource_group_name, params.webapp_name,
+                                params.slot, deploymentstatusapi_url, deployment_id, params.timeout
+                            )
+                        except Exception as ex:  # pylint: disable=broad-except
+                            logger.warning("Failed to track deployment status: %s. "
+                                           "Deployment may still be in progress.", ex)
+                            # Fallback to immediate response
+                            state = response.json().get("properties", {}).get("provisioningState")
+                            if state:
+                                logger.warning("Deployment status is: \"%s\"", state)
+                            response_body = response.json().get("properties", {})
+                    else:
+                        # No deployment ID found, return immediate response
+                        logger.info("Could not extract deployment ID from ARM response, returning immediate status")
+                        state = response.json().get("properties", {}).get("provisioningState")
+                        if state:
+                            logger.warning("Deployment status is: \"%s\"", state)
+                        response_body = response.json().get("properties", {})
+                else:
+                    # Async mode: return immediately with current state
+                    state = response.json().get("properties", {}).get("provisioningState")
+                    if state:
+                        logger.warning("Deployment status is: \"%s\"", state)
+                    response_body = response.json().get("properties", {})
+        if params.is_async_deployment is not True:
+            logger.warning("Deployment has completed successfully")
         logger.warning("You can visit your app at: %s", _get_url(params.cmd, params.resource_group_name,
                                                                  params.webapp_name, params.slot))
         return response_body

@@ -818,5 +818,263 @@ class TestCreateAppServicePlanDefaults(unittest.TestCase):
         self.assertIn('P0V3', str(call_kwargs))
 
 
+class TestWebappDeployWithSrcUrl(unittest.TestCase):
+    """Tests for webapp deploy with --src-url sync/async behavior"""
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._poll_deployment_runtime_status')
+    @mock.patch('azure.cli.command_modules.appservice.custom._build_deploymentstatus_url')
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_url')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_onedeploy_request_body')
+    @mock.patch('azure.cli.command_modules.appservice.custom._build_onedeploy_url')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_onedeploy_status_url')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_ondeploy_headers')
+    def test_src_url_sync_deployment_default(self, headers_mock, status_url_mock, build_url_mock_onedeploy,
+                                             body_mock, get_url_mock, send_raw_mock, build_url_mock, poll_mock):
+        """Test that --src-url defaults to sync deployment (polls for completion)"""
+        from azure.cli.command_modules.appservice.custom import _make_onedeploy_request
+
+        body_mock.return_value = ('{"type": "zip"}', None)
+        build_url_mock_onedeploy.return_value = 'https://management.azure.com/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/sites/myapp/extensions/onedeploy'
+        status_url_mock.return_value = 'https://myapp.scm.azurewebsites.net/api/deployments/latest'
+        headers_mock.return_value = {'Content-Type': 'application/json'}
+
+        class MockResponse:
+            status_code = 200
+            headers = {'content-type': 'application/json'}
+            text = '{"id": "/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/sites/myapp/extensions/onedeploy/123456"}'
+
+            def json(self):
+                return {
+                    'id': '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/sites/myapp/extensions/onedeploy/123456',
+                    'properties': {'provisioningState': 'InProgress'}
+                }
+
+        send_raw_mock.return_value = MockResponse()
+        build_url_mock.return_value = 'https://management.azure.com/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/sites/myapp/deploymentStatus/123456'
+        poll_mock.return_value = {'status': 'RuntimeSuccessful'}
+        get_url_mock.return_value = 'https://myapp.azurewebsites.net'
+
+        class Params:
+            src_url = 'https://example.com/myapp.zip'
+            src_path = None
+            is_async_deployment = None
+            cmd = _get_test_cmd()
+            resource_group_name = 'test-rg'
+            webapp_name = 'test-app'
+            slot = None
+            timeout = None
+            is_linux_webapp = False
+            is_functionapp = False
+            enable_kudu_warmup = False
+
+        params = Params()
+        _make_onedeploy_request(params)
+
+        poll_mock.assert_called_once()
+        build_url_mock.assert_called_with(params.cmd, 'test-rg', 'test-app', None, '123456')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._poll_deployment_runtime_status')
+    @mock.patch('azure.cli.command_modules.appservice.custom._build_deploymentstatus_url')
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_url')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_onedeploy_request_body')
+    @mock.patch('azure.cli.command_modules.appservice.custom._build_onedeploy_url')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_onedeploy_status_url')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_ondeploy_headers')
+    def test_src_url_sync_deployment_explicit_false(self, headers_mock, status_url_mock, build_url_mock_onedeploy,
+                                                     body_mock, get_url_mock, send_raw_mock, build_url_mock, poll_mock):
+        """Test that --src-url with --async false triggers polling"""
+        from azure.cli.command_modules.appservice.custom import _make_onedeploy_request
+
+        body_mock.return_value = ('{"type": "zip"}', None)
+        build_url_mock_onedeploy.return_value = 'https://management.azure.com/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/sites/myapp/extensions/onedeploy'
+        status_url_mock.return_value = 'https://myapp.scm.azurewebsites.net/api/deployments/latest'
+        headers_mock.return_value = {'Content-Type': 'application/json'}
+
+        class MockResponse:
+            status_code = 200
+            headers = {'content-type': 'application/json'}
+            text = '{"properties": {"deploymentId": "dep-789"}}'
+
+            def json(self):
+                return {
+                    'properties': {'deploymentId': 'dep-789', 'provisioningState': 'InProgress'}
+                }
+
+        send_raw_mock.return_value = MockResponse()
+        build_url_mock.return_value = 'https://management.azure.com/.../deploymentStatus/dep-789'
+        poll_mock.return_value = {'status': 'RuntimeSuccessful'}
+        get_url_mock.return_value = 'https://myapp.azurewebsites.net'
+
+        class Params:
+            src_url = 'https://example.com/myapp.zip'
+            src_path = None
+            is_async_deployment = False
+            cmd = _get_test_cmd()
+            resource_group_name = 'test-rg'
+            webapp_name = 'test-app'
+            slot = None
+            timeout = None
+            is_linux_webapp = False
+            is_functionapp = False
+            enable_kudu_warmup = False
+
+        params = Params()
+        _make_onedeploy_request(params)
+
+        poll_mock.assert_called_once()
+        build_url_mock.assert_called_with(params.cmd, 'test-rg', 'test-app', None, 'dep-789')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_url')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_onedeploy_request_body')
+    @mock.patch('azure.cli.command_modules.appservice.custom._build_onedeploy_url')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_onedeploy_status_url')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_ondeploy_headers')
+    def test_src_url_async_deployment(self, headers_mock, status_url_mock, build_url_mock_onedeploy,
+                                      body_mock, get_url_mock, send_raw_mock):
+        """Test that --src-url with --async true returns immediately without polling"""
+        from azure.cli.command_modules.appservice.custom import _make_onedeploy_request
+
+        body_mock.return_value = ('{"type": "zip"}', None)
+        build_url_mock_onedeploy.return_value = 'https://management.azure.com/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/sites/myapp/extensions/onedeploy'
+        status_url_mock.return_value = 'https://myapp.scm.azurewebsites.net/api/deployments/latest'
+        headers_mock.return_value = {'Content-Type': 'application/json'}
+
+        class MockResponse:
+            status_code = 200
+            headers = {'content-type': 'application/json'}
+            text = '{"id": "/subscriptions/sub/.../123456"}'
+
+            def json(self):
+                return {
+                    'id': '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/sites/myapp/extensions/onedeploy/123456',
+                    'properties': {'provisioningState': 'InProgress'}
+                }
+
+        send_raw_mock.return_value = MockResponse()
+        get_url_mock.return_value = 'https://myapp.azurewebsites.net'
+
+        class Params:
+            src_url = 'https://example.com/myapp.zip'
+            src_path = None
+            is_async_deployment = True
+            cmd = _get_test_cmd()
+            resource_group_name = 'test-rg'
+            webapp_name = 'test-app'
+            slot = None
+            timeout = None
+            is_linux_webapp = False
+            is_functionapp = False
+            enable_kudu_warmup = False
+
+        params = Params()
+        result = _make_onedeploy_request(params)
+
+        self.assertEqual(result.get('provisioningState'), 'InProgress')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_url')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_onedeploy_request_body')
+    @mock.patch('azure.cli.command_modules.appservice.custom._build_onedeploy_url')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_onedeploy_status_url')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_ondeploy_headers')
+    def test_src_url_no_deployment_id(self, headers_mock, status_url_mock, build_url_mock_onedeploy,
+                                      body_mock, get_url_mock, send_raw_mock):
+        """Test that --src-url falls back gracefully when no deployment ID is found"""
+        from azure.cli.command_modules.appservice.custom import _make_onedeploy_request
+
+        body_mock.return_value = ('{"type": "zip"}', None)
+        build_url_mock_onedeploy.return_value = 'https://management.azure.com/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/sites/myapp/extensions/onedeploy'
+        status_url_mock.return_value = 'https://myapp.scm.azurewebsites.net/api/deployments/latest'
+        headers_mock.return_value = {'Content-Type': 'application/json'}
+
+        class MockResponse:
+            status_code = 200
+            headers = {'content-type': 'application/json'}
+            text = '{}'
+
+            def json(self):
+                return {
+                    'properties': {'provisioningState': 'Succeeded'}
+                }
+
+        send_raw_mock.return_value = MockResponse()
+        get_url_mock.return_value = 'https://myapp.azurewebsites.net'
+
+        class Params:
+            src_url = 'https://example.com/myapp.zip'
+            src_path = None
+            is_async_deployment = None
+            cmd = _get_test_cmd()
+            resource_group_name = 'test-rg'
+            webapp_name = 'test-app'
+            slot = None
+            timeout = None
+            is_linux_webapp = False
+            is_functionapp = False
+            enable_kudu_warmup = False
+
+        params = Params()
+        result = _make_onedeploy_request(params)
+
+        self.assertEqual(result.get('provisioningState'), 'Succeeded')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._poll_deployment_runtime_status',
+                side_effect=RuntimeError("Simulated polling failure"))
+    @mock.patch('azure.cli.command_modules.appservice.custom._build_deploymentstatus_url',
+                return_value='https://management.azure.com/.../deploymentStatus/abc123')
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_url',
+                return_value='https://test-app.azurewebsites.net')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_onedeploy_request_body',
+                return_value=('{"type": "zip"}', None))
+    @mock.patch('azure.cli.command_modules.appservice.custom._build_onedeploy_url',
+                return_value='https://management.azure.com/.../onedeploy')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_onedeploy_status_url',
+                return_value='https://myapp.scm.azurewebsites.net/api/deployments/latest')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_ondeploy_headers',
+                return_value={'Content-Type': 'application/json'})
+    def test_src_url_fallback_on_poll_exception(self, headers_mock, status_url_mock,
+                                                build_url_mock_onedeploy, body_mock,
+                                                get_url_mock, send_raw_mock,
+                                                build_status_url_mock, poll_mock):
+        """Test that when _poll_deployment_runtime_status raises, the fallback returns the ARM response."""
+        from azure.cli.command_modules.appservice.custom import _make_onedeploy_request
+
+        class MockResponse:
+            status_code = 200
+            headers = {'content-type': 'application/json'}
+            text = '{"id": "/subs/sub/rg/rg/providers/Microsoft.Web/sites/app/extensions/onedeploy/abc123"}'
+
+            def json(self):
+                return {
+                    'id': '/subs/sub/rg/rg/providers/Microsoft.Web/sites/app/extensions/onedeploy/abc123',
+                    'properties': {'provisioningState': 'InProgress', 'deployer': 'ZipDeploy'}
+                }
+
+        send_raw_mock.return_value = MockResponse()
+
+        class Params:
+            src_url = 'https://example.com/myapp.zip'
+            src_path = None
+            is_async_deployment = None
+            cmd = _get_test_cmd()
+            resource_group_name = 'test-rg'
+            webapp_name = 'test-app'
+            slot = None
+            timeout = None
+            is_linux_webapp = False
+            is_functionapp = False
+            enable_kudu_warmup = False
+
+        params = Params()
+        result = _make_onedeploy_request(params)
+
+        poll_mock.assert_called_once()
+        self.assertIsNotNone(result)
+        self.assertEqual(result.get('provisioningState'), 'InProgress')
+        self.assertEqual(result.get('deployer'), 'ZipDeploy')
 if __name__ == '__main__':
     unittest.main()
