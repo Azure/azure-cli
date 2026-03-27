@@ -78,6 +78,11 @@ class Update(AAZCommand):
             help="Custom error configurations of the application gateway resource.",
             nullable=True,
         )
+        _args_schema.enable_fips = AAZBoolArg(
+            options=["--enable-fips"],
+            help="Whether FIPS is enabled on the application gateway resource.",
+            nullable=True,
+        )
         _args_schema.http2 = AAZBoolArg(
             options=["--http2"],
             help="Use HTTP2 for the application gateway",
@@ -621,6 +626,7 @@ class Update(AAZCommand):
             if properties is not None:
                 properties.set_prop("autoscaleConfiguration", AAZObjectType)
                 properties.set_prop("customErrorConfigurations", AAZListType, ".custom_error_configurations")
+                properties.set_prop("enableFips", AAZBoolType, ".enable_fips")
                 properties.set_prop("enableHttp2", AAZBoolType, ".http2")
                 properties.set_prop("sku", AAZObjectType)
                 properties.set_prop("sslProfiles", AAZListType, ".ssl_profiles")

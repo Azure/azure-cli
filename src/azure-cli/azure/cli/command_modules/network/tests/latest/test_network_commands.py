@@ -1113,11 +1113,12 @@ class NetworkAppGatewayZoneScenario(ScenarioTest):
 
 
 class NetworkAppGatewayAuthCertScenario(ScenarioTest):
-
+    @unittest.skip('not registered for feature Microsoft.Network/AllowBringYourOwnPublicIpAddress required to carry out the requested operation')
     @ResourceGroupPreparer(name_prefix='cli_test_ag_auth_cert')
     def test_network_ag_auth_cert(self, resource_group):
         self.kwargs.update({
             'gateway': 'ag1',
+            'ip1': 'ip1',
             'cert1': 'cert1',
             'cert1_file': os.path.join(TEST_DIR, 'AuthCert.pfx'),
             'cert2': 'cert2',
@@ -1126,7 +1127,8 @@ class NetworkAppGatewayAuthCertScenario(ScenarioTest):
             'cert3_file': os.path.join(TEST_DIR, 'AuthCert3.pfx'),
             'settings': 'https_settings'
         })
-        self.cmd('network application-gateway create -g {rg} -n {gateway} --priority 1001 --no-wait')
+        self.cmd('network public-ip create -g {rg} -n {ip1} --sku Standard --ip-tags FirstPartyUsage=/NonProd')
+        self.cmd('network application-gateway create -g {rg} -n {gateway} --priority 1001 --public-ip-address {ip1} --sku Standard_v2')
         self.cmd('network application-gateway wait -g {rg} -n {gateway} --exists')
         self.cmd('network application-gateway auth-cert create -g {rg} --gateway-name {gateway} -n {cert1} --cert-file "{cert1_file}" --no-wait')
         self.cmd('network application-gateway auth-cert create -g {rg} --gateway-name {gateway} -n {cert2} --cert-file "{cert2_file}" --no-wait')
@@ -1155,7 +1157,7 @@ class NetworkAppGatewayAuthCertScenario(ScenarioTest):
 
 
 class NetworkAppGatewayTrustedRootCertScenario(ScenarioTest):
-
+    @unittest.skip('not registered for feature Microsoft.Network/AllowBringYourOwnPublicIpAddress required to carry out the requested operation')
     @ResourceGroupPreparer(name_prefix='cli_test_ag_root_cert')
     def test_network_ag_root_cert(self, resource_group):
         self.kwargs.update({
