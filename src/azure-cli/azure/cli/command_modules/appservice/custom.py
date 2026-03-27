@@ -9141,7 +9141,12 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
         version_used_create = _data.get('to_create')
         detected_version = _data.get('detected')
         if language:
-            logger.warning("No --runtime specified. Auto-detected: %s:%s.", language, detected_version)
+            if not version_used_create or version_used_create == '-':
+                logger.warning("No --runtime specified. Could not auto-detect a valid %s version. "
+                               "Please specify --runtime explicitly. "
+                               "Use 'az webapp list-runtimes' for available options.", language.upper())
+            else:
+                logger.warning("No --runtime specified. Using %s version: %s.", language, version_used_create)
 
     runtime_version = "{}|{}".format(language, version_used_create) if \
         version_used_create != "-" else version_used_create
