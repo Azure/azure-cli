@@ -3324,7 +3324,7 @@ helps['webapp deploy'] = """
         The web app must already exist — use 'az webapp create' to create one first.
 
         IMPORTANT: For apps that require dependency installation during deployment (Python, Node.js,
-        Ruby, PHP), zip deployment does NOT automatically install dependencies. You must set the
+        PHP), zip deployment does NOT automatically install dependencies. You must set the
         app setting SCM_DO_BUILD_DURING_DEPLOYMENT=true before deploying:
 
             az webapp config appsettings set -g ResourceGroup -n AppName --settings SCM_DO_BUILD_DURING_DEPLOYMENT=true
