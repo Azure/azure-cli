@@ -12,7 +12,7 @@ NETWORK_RESOURCE_BREAKING_CHANGE_MESSAGE = (
     'for the server to function, such as virtual networks, subnets, IP ranges, etc. It will instead '
     'require users to provide the necessary network resources created beforehand using the corresponding '
     'commands from the `az network` module. This change will take effect in next breaking change '
-    'release(2.86.0) scheduled for May 2026.'
+    'release scheduled for May 2026.'
 )
 
 
