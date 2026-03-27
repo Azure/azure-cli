@@ -6,10 +6,6 @@ Release History
 2.84.0
 ++++++
 
-**ACR**
-
-* `az acr cache create/update`: Add `--identity` parameter to support using user-assigned managed identity for cache rules
-
 **AKS**
 
 * `az aks create`: Add `--enable-container-network-logs` parameter to enable container network logs (#32700)
