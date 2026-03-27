@@ -4329,6 +4329,21 @@ def _is_key_vault_reference(value):
     return isinstance(value, str) and value.strip().startswith('@Microsoft.KeyVault(')
 
 
+def _build_container_updates(container_registry_url, container_registry_user,
+                             container_registry_password, websites_enable_app_service_storage):
+    """Build dict of container-specific app settings that were explicitly provided."""
+    updates = {}
+    if container_registry_url is not None:
+        updates['DOCKER_REGISTRY_SERVER_URL'] = container_registry_url
+    if container_registry_user is not None:
+        updates['DOCKER_REGISTRY_SERVER_USERNAME'] = container_registry_user
+    if container_registry_password is not None:
+        updates['DOCKER_REGISTRY_SERVER_PASSWORD'] = container_registry_password
+    if websites_enable_app_service_storage:
+        updates['WEBSITES_ENABLE_APP_SERVICE_STORAGE'] = websites_enable_app_service_storage
+    return updates
+
+
 def update_container_settings(cmd, resource_group_name, name, container_registry_url=None,
                               container_image_name=None, container_registry_user=None,
                               websites_enable_app_service_storage=None, container_registry_password=None,
@@ -4358,20 +4373,14 @@ def update_container_settings(cmd, resource_group_name, name, container_registry
             registry_name = (parsed.netloc if parsed.scheme else parsed.path).split('.')[0]
             try:
                 container_registry_user, container_registry_password = _get_acr_cred(cmd.cli_ctx,
-                                                                                    registry_name)
+                                                                                     registry_name)
             except Exception as ex:  # pylint: disable=broad-except
                 logger.warning("Retrieving credentials failed with an exception:'%s'", ex)
 
     # Build dict of only the container-specific settings that were explicitly provided
-    container_updates = {}
-    if container_registry_url is not None:
-        container_updates['DOCKER_REGISTRY_SERVER_URL'] = container_registry_url
-    if container_registry_user is not None:
-        container_updates['DOCKER_REGISTRY_SERVER_USERNAME'] = container_registry_user
-    if container_registry_password is not None:
-        container_updates['DOCKER_REGISTRY_SERVER_PASSWORD'] = container_registry_password
-    if websites_enable_app_service_storage:
-        container_updates['WEBSITES_ENABLE_APP_SERVICE_STORAGE'] = websites_enable_app_service_storage
+    container_updates = _build_container_updates(container_registry_url, container_registry_user,
+                                                 container_registry_password,
+                                                 websites_enable_app_service_storage)
 
     if container_updates:
         # Merge only container-specific keys into the existing settings,
