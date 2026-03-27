@@ -9205,5 +9205,59 @@ class NetworkPrivateEndpointScenarioTest(ScenarioTest):
         ])
 
 
+class NetworkApplicationGatewayHttpSettingsScenario(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='test_ag', location='eastus')
+    def test_network_application_gateway_http_settings_validate_flags(self, resource_group):
+        self.kwargs.update({
+            'vnet': 'vnet1',
+            'subnet': 'subnet1',
+            'vnet_prefix': '10.0.0.0/16',
+            'subnet_prefix': '10.0.0.0/24',
+            'pip': 'pip1',
+            'ag': 'ag1',
+            'httpsettingname': 'mysettings1',
+            'addresspool': 'myaddresspool1',
+            'listener': 'mylistener1',
+            'rule': 'myrule1',
+        })
+
+        # Create vnet, pip, application-gateway
+        self.cmd('network vnet create -g {rg} -n {vnet} --address-prefix {vnet_prefix} --subnet-name {subnet} --subnet-prefix {subnet_prefix}')
+        self.cmd('network public-ip create -g {rg} -n {pip} --sku Standard --allocation-method Static')
+        self.cmd('network application-gateway create -g {rg} -n {ag} --vnet-name {vnet} --subnet {subnet} --public-ip-address {pip} --priority 1001 --sku Standard_v2')
+
+        # Create http settings
+        self.cmd('network application-gateway http-settings create -g {rg} --gateway-name {ag} -n {httpsettingname} '
+                 '--port 443 --protocol Https --cookie-based-affinity disabled '
+                 '--validate-cert-chain-and-expiry false --validate-sni true', checks=[
+            self.check('name', '{httpsettingname}'),
+            self.check('port', 443),
+            self.check('protocol', 'Https'),
+            self.check('cookieBasedAffinity', 'Disabled'),
+            self.check('validateCertChainAndExpiry', False),
+            self.check('validateSNI', True),
+        ])
+
+        # validate flags under backendHttpSettingsCollection for the created http setting
+        self.cmd('network application-gateway show -g {rg} -n {ag}', checks=[
+            self.check("backendHttpSettingsCollection[?name=='mysettings1'] | [0].validateCertChainAndExpiry", False),
+            self.check("backendHttpSettingsCollection[?name=='mysettings1'] | [0].validateSNI", True),
+        ])
+
+        # Create address-pool and http-listener
+        self.cmd('network application-gateway address-pool create -g {rg} --gateway-name {ag} -n {addresspool}')
+        self.cmd('network application-gateway http-listener create -g {rg} --gateway-name {ag} -n {listener} --no-wait '
+                 '--frontend-port appGatewayFrontendPort --host-name www.test.com')
+
+        # Create rule, then show app-gateway again and check validate flags are still the same
+        self.cmd('network application-gateway rule create -g {rg} --gateway-name {ag} -n {rule} --rule-type Basic '
+                 '--http-listener {listener} --address-pool {addresspool} --http-settings {httpsettingname} --priority 1004')
+
+        self.cmd('network application-gateway show -g {rg} -n {ag}', checks=[
+            self.check("backendHttpSettingsCollection[?name=='mysettings1'] | [0].validateCertChainAndExpiry", False),
+            self.check("backendHttpSettingsCollection[?name=='mysettings1'] | [0].validateSNI", True),
+        ])
+
+
 if __name__ == '__main__':
     unittest.main()
