@@ -513,7 +513,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     for scope in ['acr token create', 'acr token credential generate']:
         with self.argument_context(scope) as c:
             c.argument('expiration', validator=validate_expiration_time,
-                       help='UTC time for which the credentials will be valid. In the format of %Y-%m-%dT%H:%M:%SZ, e.g. 2025-12-31T12:59:59Z')
+                       help='UTC time for which the credentials will be valid. In the format of %%Y-%%m-%%dT%%H:%%M:%%SZ, e.g. 2025-12-31T12:59:59Z')
 
     with self.argument_context('acr token credential delete') as c:
         c.argument('password1', options_list=['--password1'], help='Flag indicating if first password should be deleted', action='store_true', required=False)

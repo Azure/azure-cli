@@ -572,7 +572,7 @@ class Create(AAZCommand):
         )
         rolling_upgrade_policy.max_batch_instance_percent = AAZIntArg(
             options=["max-batch-instance-percent"],
-            help="The maximum percent of total virtual machine instances that will be upgraded simultaneously by the rolling upgrade in one batch. As this is a maximum, unhealthy instances in previous or future batches can cause the percentage of instances in a batch to decrease to ensure higher reliability. The default value for this parameter is 20%.",
+            help="The maximum percent of total virtual machine instances that will be upgraded simultaneously by the rolling upgrade in one batch. As this is a maximum, unhealthy instances in previous or future batches can cause the percentage of instances in a batch to decrease to ensure higher reliability. The default value for this parameter is 20%%.",
             fmt=AAZIntArgFormat(
                 maximum=100,
                 minimum=5,
@@ -584,7 +584,7 @@ class Create(AAZCommand):
         )
         rolling_upgrade_policy.max_unhealthy_instance_percent = AAZIntArg(
             options=["max-unhealthy-instance-percent"],
-            help="The maximum percentage of the total virtual machine instances in the scale set that can be simultaneously unhealthy, either as a result of being upgraded, or by being found in an unhealthy state by the virtual machine health checks before the rolling upgrade aborts. This constraint will be checked prior to starting any batch. The default value for this parameter is 20%.",
+            help="The maximum percentage of the total virtual machine instances in the scale set that can be simultaneously unhealthy, either as a result of being upgraded, or by being found in an unhealthy state by the virtual machine health checks before the rolling upgrade aborts. This constraint will be checked prior to starting any batch. The default value for this parameter is 20%%.",
             fmt=AAZIntArgFormat(
                 maximum=100,
                 minimum=5,
@@ -592,7 +592,7 @@ class Create(AAZCommand):
         )
         rolling_upgrade_policy.max_unhealthy_upgraded_instance_percent = AAZIntArg(
             options=["max-unhealthy-upgraded-instance-percent"],
-            help="The maximum percentage of upgraded virtual machine instances that can be found to be in an unhealthy state. This check will happen after each batch is upgraded. If this percentage is ever exceeded, the rolling update aborts. The default value for this parameter is 20%.",
+            help="The maximum percentage of upgraded virtual machine instances that can be found to be in an unhealthy state. This check will happen after each batch is upgraded. If this percentage is ever exceeded, the rolling update aborts. The default value for this parameter is 20%%.",
             fmt=AAZIntArgFormat(
                 maximum=100,
             ),

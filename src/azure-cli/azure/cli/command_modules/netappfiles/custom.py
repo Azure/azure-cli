@@ -630,7 +630,7 @@ class VolumeGroupCreate(_VolumeGroupCreate):
         args_schema.add_snapshot_capacity = AAZIntArg(
             options=["--add-snapshot-capacity"],
             arg_group="Volumes",
-            help="Additional memory to store snapshots, must be specified as % of RAM (range 0-200). This is used to auto compute storage size.  Default: 50.",
+            help="Additional memory to store snapshots, must be specified as %% of RAM (range 0-200). This is used to auto compute storage size.  Default: 50.",
             required=False,
             default=50
         )

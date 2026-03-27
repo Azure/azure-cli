@@ -62,7 +62,7 @@ class ShowPredictiveMetric(AAZCommand):
         )
         _args_schema.metric_name = AAZStrArg(
             options=["--metric-name"],
-            help="The names of the metrics (comma separated) to retrieve. Special case: If a metricname itself has a comma in it then use %2 to indicate it. Eg: 'Metric,Name1' should be **'Metric%2Name1'**",
+            help="The names of the metrics (comma separated) to retrieve. Special case: If a metricname itself has a comma in it then use %%2 to indicate it. Eg: 'Metric,Name1' should be **'Metric%%2Name1'**",
             required=True,
         )
         _args_schema.metric_namespace = AAZStrArg(

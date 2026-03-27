@@ -435,7 +435,7 @@ def load_arguments(self, _):
         c.argument('disk_mbps_read_write', options_list=['--data-disk-mbps'], type=int, help='Specify the bandwidth in MB per second for the managed disk when storage account type is UltraSSD_LRS.')
         c.argument('availability_set', help='Name or ID of an existing availability set to add the VM to. None by default.')
         c.argument('vmss', help='Name or ID of an existing virtual machine scale set that the virtual machine should be assigned to. None by default.')
-        c.argument('nsg', help='The name to use when creating a new Network Security Group (default) or referencing an existing one. Can also reference an existing NSG by ID or specify "" for none (\'""\' in Azure CLI using PowerShell or --% operator).', arg_group='Network')
+        c.argument('nsg', help='The name to use when creating a new Network Security Group (default) or referencing an existing one. Can also reference an existing NSG by ID or specify "" for none (\'""\' in Azure CLI using PowerShell or --%% operator).', arg_group='Network')
         c.argument('nsg_rule', help='NSG rule to create when creating a new NSG. Defaults to open ports for allowing RDP on Windows and allowing SSH on Linux. NONE represents no NSG rule', arg_group='Network', arg_type=get_enum_type(['RDP', 'SSH', 'NONE']))
         c.argument('application_security_groups', resource_type=ResourceType.MGMT_NETWORK, min_api='2017-09-01', nargs='+', options_list=['--asgs'], help='Space-separated list of existing application security groups to associate with the VM.', arg_group='Network', validator=validate_asg_names_or_ids)
         c.argument('boot_diagnostics_storage',
@@ -904,11 +904,11 @@ def load_arguments(self, _):
             c.argument('terminate_notification_time', min_api='2019-03-01',
                        help='Length of time (in minutes, between 5 and 15) a notification to be sent to the VM on the instance metadata server till the VM gets deleted')
             c.argument('max_batch_instance_percent', type=int, min_api='2020-12-01',
-                       help='The maximum percent of total virtual machine instances that will be upgraded simultaneously by the rolling upgrade in one batch. Default: 20%')
+                       help='The maximum percent of total virtual machine instances that will be upgraded simultaneously by the rolling upgrade in one batch. Default: 20%%')
             c.argument('max_unhealthy_instance_percent', type=int, min_api='2020-12-01',
-                       help='The maximum percentage of the total virtual machine instances in the scale set that can be simultaneously unhealthy. Default: 20%')
+                       help='The maximum percentage of the total virtual machine instances in the scale set that can be simultaneously unhealthy. Default: 20%%')
             c.argument('max_unhealthy_upgraded_instance_percent', type=int, min_api='2020-12-01',
-                       help='The maximum percentage of upgraded virtual machine instances that can be found to be in an unhealthy state. Default: 20%')
+                       help='The maximum percentage of upgraded virtual machine instances that can be found to be in an unhealthy state. Default: 20%%')
             c.argument('pause_time_between_batches', min_api='2020-12-01',
                        help='The wait time between completing the update for all virtual machines in one batch and starting the next batch. Default: 0 seconds')
             c.argument('enable_cross_zone_upgrade', arg_type=get_three_state_flag(), min_api='2020-12-01',
