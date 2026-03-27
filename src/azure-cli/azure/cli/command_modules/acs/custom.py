@@ -935,6 +935,7 @@ def aks_create(
     disable_acns_security=None,
     acns_advanced_networkpolicies=None,
     enable_container_network_logs=None,
+    acns_datapath_acceleration_mode=None,
     acns_transit_encryption_type=None,
     # network isoalted cluster
     bootstrap_artifact_source=CONST_ARTIFACT_SOURCE_DIRECT,
@@ -1165,6 +1166,7 @@ def aks_update(
     acns_advanced_networkpolicies=None,
     enable_container_network_logs=None,
     disable_container_network_logs=None,
+    acns_datapath_acceleration_mode=None,
     acns_transit_encryption_type=None,
     # network isoalted cluster
     bootstrap_artifact_source=None,
@@ -1408,7 +1410,7 @@ def _update_upgrade_settings(cmd, instance,
                     f"{upgrade_override_until} is not a valid datatime format."
                 )
         elif force_upgrade:
-            default_extended_until = datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=3)
+            default_extended_until = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(days=3)
             if existing_until is None or existing_until.timestamp() < default_extended_until.timestamp():
                 instance.upgrade_settings.override_settings.until = default_extended_until
     return instance
