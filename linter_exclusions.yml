@@ -720,6 +720,20 @@ appservice plan update:
     number_of_workers:
       rule_exclusions:
       - no_parameter_defaults_for_update_commands
+appservice plan list-skus:
+  rule_exclusions:
+  - missing_command_test_coverage
+  parameters:
+    name:
+      rule_exclusions:
+      - missing_parameter_test_coverage
+appservice plan list-slots:
+  rule_exclusions:
+  - missing_command_test_coverage
+  parameters:
+    name:
+      rule_exclusions:
+      - missing_parameter_test_coverage
 aro create:
   parameters:
     cluster_resource_group:
@@ -3887,6 +3901,52 @@ webapp config container show:
     show_multicontainer_config:
       rule_exclusions:
       - option_length_too_long
+webapp config public-cert delete:
+  rule_exclusions:
+  - missing_command_test_coverage
+  parameters:
+    public_certificate_name:
+      rule_exclusions:
+      - missing_parameter_test_coverage
+    slot:
+      rule_exclusions:
+      - missing_parameter_test_coverage
+webapp config public-cert list:
+  rule_exclusions:
+  - missing_command_test_coverage
+  parameters:
+    name:
+      rule_exclusions:
+      - missing_parameter_test_coverage
+    slot:
+      rule_exclusions:
+      - missing_parameter_test_coverage
+webapp config public-cert show:
+  rule_exclusions:
+  - missing_command_test_coverage
+  parameters:
+    public_certificate_name:
+      rule_exclusions:
+      - missing_parameter_test_coverage
+    slot:
+      rule_exclusions:
+      - missing_parameter_test_coverage
+webapp config public-cert upload:
+  rule_exclusions:
+  - missing_command_test_coverage
+  parameters:
+    public_certificate_name:
+      rule_exclusions:
+      - missing_parameter_test_coverage
+    certificate_file:
+      rule_exclusions:
+      - missing_parameter_test_coverage
+    public_certificate_location:
+      rule_exclusions:
+      - missing_parameter_test_coverage
+    slot:
+      rule_exclusions:
+      - missing_parameter_test_coverage
 webapp config set:
   parameters:
     generic_configurations:
@@ -3945,6 +4005,16 @@ webapp delete:
     keep_dns_registration:
       rule_exclusions:
       - option_length_too_long
+webapp deployment slot copy:
+  rule_exclusions:
+  - missing_command_test_coverage
+  parameters:
+    slot:
+      rule_exclusions:
+      - missing_parameter_test_coverage
+    target_slot:
+      rule_exclusions:
+      - missing_parameter_test_coverage
 webapp deployment source config:
   parameters:
     private_repo_password:
@@ -3961,6 +4031,7 @@ webapp log config:
     docker_container_logging:
       rule_exclusions:
       - option_length_too_long
+      - missing_parameter_test_coverage
     failed_request_tracing:
       rule_exclusions:
       - option_length_too_long

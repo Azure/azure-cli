@@ -540,21 +540,6 @@ subscription than the app service environment, please use the resource ID for --
             c.argument('hostname', help='The custom domain name')
             c.argument('name', options_list=['--name', '-n'], help='Name of the web app.')
             c.argument('resource-group', options_list=['--resource-group', '-g'], help='Name of resource group.')
-        with self.argument_context(scope + ' config public-cert') as c:
-            c.argument('public_certificate_name', options_list=['--public-certificate-name'],
-                       help='The name of the public certificate.')
-            c.argument('slot', options_list=['--slot', '-s'],
-                       help='The name of the slot. Default to the productions slot if not specified')
-        with self.argument_context(scope + ' config public-cert upload') as c:
-            c.argument('certificate_file', type=file_type,
-                       help='The filepath for the .cer or .crt public certificate file')
-            c.argument('public_certificate_location', options_list=['--certificate-location'],
-                       help='Location (certificate store) for the public certificate',
-                       arg_type=get_enum_type(['CurrentUserMy', 'LocalMachineMy', 'Unknown']),
-                       default='CurrentUserMy')
-        with self.argument_context(scope + ' config public-cert list') as c:
-            c.argument('name', arg_type=(webapp_name_arg_type if scope == 'webapp' else functionapp_name_arg_type),
-                       id_part=None)
         with self.argument_context(scope + ' config hostname') as c:
             c.argument('hostname', completer=get_hostname_completion_list,
                        help="hostname assigned to the site, such as custom domains", id_part='child_name_1')
@@ -663,6 +648,21 @@ subscription than the app service environment, please use the resource ID for --
         with self.argument_context(scope + ' deployment container config') as c:
             c.argument('enable', options_list=['--enable-cd', '-e'], help='enable/disable continuous deployment',
                        arg_type=get_three_state_flag(return_label=True))
+
+    with self.argument_context('webapp config public-cert') as c:
+        c.argument('public_certificate_name', options_list=['--public-certificate-name', '--cert-name'],
+                   help='The name of the public certificate.')
+        c.argument('slot', options_list=['--slot', '-s'],
+                   help='The name of the slot. Default to the productions slot if not specified')
+    with self.argument_context('webapp config public-cert upload') as c:
+        c.argument('certificate_file', type=file_type,
+                   help='The filepath for the .cer or .crt public certificate file')
+        c.argument('public_certificate_location', options_list=['--certificate-location'],
+                   help='Location (certificate store) for the public certificate',
+                   arg_type=get_enum_type(['CurrentUserMy', 'LocalMachineMy', 'Unknown']),
+                   default='CurrentUserMy')
+    with self.argument_context('webapp config public-cert list') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
 
     with self.argument_context('webapp config container') as c:
         c.argument('container_registry_url',
@@ -797,7 +797,7 @@ subscription than the app service environment, please use the resource ID for --
                    arg_type=get_enum_type(['off', 'filesystem']))
         c.argument('web_server_log_sas_url', options_list=['--web-server-log-sas-url'],
                    help='SAS URL to an Azure Blob Storage container for web server log storage. Required when --web-server-logging is set to azureblobstorage.')
-        c.argument('web_server_log_retention', type=int, options_list=['--web-server-log-retention'],
+        c.argument('web_server_log_retention', type=int, options_list=['--web-server-log-retention', '--retention'],
                    help='Number of days to retain web server logs when using Azure Blob Storage. Default: 3.')
 
     with self.argument_context('webapp log tail') as c:
