@@ -8,6 +8,7 @@ from azure.cli.core.breaking_change import (register_argument_deprecate, registe
 
 
 NETWORK_RESOURCE_BREAKING_CHANGE_MESSAGE = (
+    'The --address-prefixes and --subnet-prefixes arguments have been deprecated and will be removed. '
     'This command will stop creating new network resources or altering existing ones which are required '
     'for the server to function, such as virtual networks, subnets, IP ranges, etc. It will instead '
     'require users to provide the necessary network resources created beforehand using the corresponding '
@@ -15,9 +16,19 @@ NETWORK_RESOURCE_BREAKING_CHANGE_MESSAGE = (
     'release(2.86.0) scheduled for May 2026.'
 )
 
-
 def _register_network_resource_breaking_change(command):
     register_other_breaking_change(command, message=NETWORK_RESOURCE_BREAKING_CHANGE_MESSAGE)
+
+# These commands will stop creating or altering required network resources and will instead require
+# users to provide those resources up front using the corresponding `az network` commands.
+# Parameters --address-prefixes and --subnet-prefixes will also be deprecated for these commands as part of this change.
+for command in (
+        'postgres flexible-server create',
+        'postgres flexible-server replica create',
+        'postgres flexible-server restore',
+        'postgres flexible-server geo-restore',
+        'postgres flexible-server revive-dropped'):
+    _register_network_resource_breaking_change(command)
 
 # High availability command argument changes
 register_argument_deprecate('postgres flexible-server create', '--high-availability', redirect='--zonal-resiliency')
@@ -94,13 +105,3 @@ register_other_breaking_change('postgres flexible-server migration',
 
 # Replica command argument changes
 register_argument_deprecate('postgres flexible-server replica create', '--replica-name', redirect='--name')
-
-# These commands will stop creating or altering required network resources and will instead require
-# users to provide those resources up front using the corresponding `az network` commands.
-for command in (
-        'postgres flexible-server create',
-        'postgres flexible-server replica create',
-        'postgres flexible-server restore',
-        'postgres flexible-server geo-restore',
-        'postgres flexible-server revive-dropped'):
-    _register_network_resource_breaking_change(command)
