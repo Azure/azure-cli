@@ -54,6 +54,8 @@ from azure.cli.command_modules.acs._consts import (
     CONST_AVAILABILITY_SET,
     CONST_SCALE_SET_PRIORITY_REGULAR,
     CONST_VIRTUAL_MACHINES,
+    CONST_ACNS_DATAPATH_ACCELERATION_MODE_BPFVETH,
+    CONST_ACNS_DATAPATH_ACCELERATION_MODE_NONE,
 )
 from azure.cli.command_modules.acs.agentpool_decorator import AKSAgentPoolContext, AKSAgentPoolParamDict
 from azure.cli.command_modules.acs.managed_cluster_decorator import (
@@ -2824,6 +2826,27 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         mc = self.models.ManagedCluster(location="test_location", addon_profiles=addon_profiles_1)
         ctx_1.attach_mc(mc)
         self.assertEqual(ctx_1.get_enable_msi_auth_for_monitoring(), True)
+
+        # camelCase key (omsAgent) should also be resolved
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_msi_auth_for_monitoring": False,
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        addon_profiles_2 = {
+            "omsAgent": self.models.ManagedClusterAddonProfile(
+                enabled=True,
+                config={CONST_MONITORING_USING_AAD_MSI_AUTH: "true"},
+            )
+        }
+        mc_2 = self.models.ManagedCluster(location="test_location", addon_profiles=addon_profiles_2)
+        ctx_2.attach_mc(mc_2)
+        self.assertEqual(ctx_2.get_enable_msi_auth_for_monitoring(), True)
 
     def test_get_virtual_node_addon_os_type(self):
         # default
@@ -8631,6 +8654,58 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             assignee_principal_type=None,
         )
 
+        # Case 5: Create with enable_high_log_scale_mode=True + CNL
+        # Verifies HLSM is passed through to ensure_container_insights_for_monitoring
+        dec_5 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "resource_group_name": "test_rg_name",
+                "name": "test_name",
+                "enable_msi_auth_for_monitoring": True,
+                "enable_addons": "monitoring",
+                "enable_container_network_logs": True,
+                "enable_high_log_scale_mode": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        monitoring_addon_profile_5 = self.models.ManagedClusterAddonProfile(
+            enabled=True,
+            config={},
+        )
+        mc_5 = self.models.ManagedCluster(
+            location="test_location",
+            addon_profiles={
+                CONST_MONITORING_ADDON_NAME: monitoring_addon_profile_5,
+            },
+        )
+        dec_5.context.attach_mc(mc_5)
+        dec_5.context.set_intermediate("monitoring_addon_enabled", True)
+        mock_profile_5 = Mock(get_subscription_id=Mock(return_value="1234-5678-9012"))
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.Profile", return_value=mock_profile_5
+        ), patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.ensure_container_insights_for_monitoring"
+        ) as mock_ensure_5:
+            dec_5.postprocessing_after_mc_created(mc_5)
+        mock_ensure_5.assert_called_once_with(
+            self.cmd,
+            monitoring_addon_profile_5,
+            "1234-5678-9012",
+            "test_rg_name",
+            "test_name",
+            "test_location",
+            remove_monitoring=False,
+            aad_route=True,
+            create_dcr=False,
+            create_dcra=True,
+            enable_syslog=None,
+            data_collection_settings=None,
+            is_private_cluster=None,
+            ampls_resource_id=None,
+            enable_high_log_scale_mode=True,
+        )
+
     def test_put_mc(self):
         dec_1 = AKSManagedClusterCreateDecorator(
             self.cmd,
@@ -12441,6 +12516,10 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         self.assertEqual(dec_1.check_is_postprocessing_required(mc_1), True)
 
         dec_1.context.remove_intermediate("monitoring_addon_enabled")
+        dec_1.context.set_intermediate("monitoring_addon_postprocessing_required", True)
+        self.assertEqual(dec_1.check_is_postprocessing_required(mc_1), True)
+
+        dec_1.context.remove_intermediate("monitoring_addon_postprocessing_required")
         dec_1.context.set_intermediate("ingress_appgw_addon_enabled", True)
         self.assertEqual(dec_1.check_is_postprocessing_required(mc_1), True)
 
@@ -12577,6 +12656,225 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             subscription_id="1234-5678-9012",
             is_service_principal=False,
             assignee_principal_type=None,
+        )
+
+        # Case 5: Update with HLSM=True via monitoring_addon_postprocessing_required
+        # Verifies enable_high_log_scale_mode=True is passed and create_dcr=True for DCR update
+        dec_5 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "resource_group_name": "test_rg_name",
+                "name": "test_name",
+                "enable_msi_auth_for_monitoring": True,
+                "enable_high_log_scale_mode": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        monitoring_addon_profile_5 = self.models.ManagedClusterAddonProfile(
+            enabled=True,
+            config={CONST_MONITORING_USING_AAD_MSI_AUTH: "true"},
+        )
+        mc_5 = self.models.ManagedCluster(
+            location="test_location",
+            addon_profiles={
+                CONST_MONITORING_ADDON_NAME: monitoring_addon_profile_5,
+            },
+        )
+        dec_5.context.attach_mc(mc_5)
+        dec_5.context.set_intermediate("monitoring_addon_enabled", True)
+        dec_5.context.set_intermediate("monitoring_addon_postprocessing_required", True)
+        mock_profile_5 = Mock(get_subscription_id=Mock(return_value="1234-5678-9012"))
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.Profile", return_value=mock_profile_5
+        ), patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.ensure_container_insights_for_monitoring"
+        ) as mock_ensure_5:
+            dec_5.postprocessing_after_mc_created(mc_5)
+        mock_ensure_5.assert_called_once_with(
+            self.cmd,
+            monitoring_addon_profile_5,
+            "1234-5678-9012",
+            "test_rg_name",
+            "test_name",
+            "test_location",
+            remove_monitoring=False,
+            aad_route=True,
+            create_dcr=True,
+            create_dcra=True,
+            enable_syslog=None,
+            data_collection_settings=None,
+            is_private_cluster=None,
+            ampls_resource_id=None,
+            enable_high_log_scale_mode=True,
+        )
+
+        # Case 6: Update postprocessing with camelCase addon key (omsAgent)
+        dec_6 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "resource_group_name": "test_rg_name",
+                "name": "test_name",
+                "enable_msi_auth_for_monitoring": True,
+                "enable_high_log_scale_mode": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        monitoring_addon_profile_6 = self.models.ManagedClusterAddonProfile(
+            enabled=True,
+            config={CONST_MONITORING_USING_AAD_MSI_AUTH: "true"},
+        )
+        mc_6 = self.models.ManagedCluster(
+            location="test_location",
+            addon_profiles={
+                "omsAgent": monitoring_addon_profile_6,
+            },
+        )
+        dec_6.context.attach_mc(mc_6)
+        dec_6.context.set_intermediate("monitoring_addon_enabled", True)
+        dec_6.context.set_intermediate("monitoring_addon_postprocessing_required", True)
+        mock_profile_6 = Mock(get_subscription_id=Mock(return_value="1234-5678-9012"))
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.Profile", return_value=mock_profile_6
+        ), patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.ensure_container_insights_for_monitoring"
+        ) as mock_ensure_6:
+            dec_6.postprocessing_after_mc_created(mc_6)
+        mock_ensure_6.assert_called_once_with(
+            self.cmd,
+            monitoring_addon_profile_6,
+            "1234-5678-9012",
+            "test_rg_name",
+            "test_name",
+            "test_location",
+            remove_monitoring=False,
+            aad_route=True,
+            create_dcr=True,
+            create_dcra=True,
+            enable_syslog=None,
+            data_collection_settings=None,
+            is_private_cluster=None,
+            ampls_resource_id=None,
+            enable_high_log_scale_mode=True,
+        )
+
+        # Case 7: Update with CNL enabled on an MSI cluster where monitoring was already enabled.
+        # In the update flow, update_addon_profiles sets monitoring_addon_enabled=True
+        # (because the addon is already present and enabled on the cluster).
+        # get_enable_msi_auth_for_monitoring() returns False for MSI clusters where
+        # service_principal_profile.client_id="msi", so the code enters the
+        # "if not enable_msi_auth_for_monitoring:" branch. The fix ensures that when
+        # monitoring_addon_postprocessing_required=True, the DCR is still updated
+        # with aad_route=True inside that branch.
+        dec_7 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "resource_group_name": "test_rg_name",
+                "name": "test_name",
+                "enable_msi_auth_for_monitoring": False,
+                "enable_container_network_logs": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        monitoring_addon_profile_7 = self.models.ManagedClusterAddonProfile(
+            enabled=True,
+            config={
+                CONST_MONITORING_USING_AAD_MSI_AUTH: "true",
+                "enableRetinaNetworkFlags": "True",
+            },
+        )
+        mc_7 = self.models.ManagedCluster(
+            location="test_location",
+            addon_profiles={
+                CONST_MONITORING_ADDON_NAME: monitoring_addon_profile_7,
+            },
+            service_principal_profile=self.models.ManagedClusterServicePrincipalProfile(
+                client_id="msi"
+            ),
+        )
+        dec_7.context.attach_mc(mc_7)
+        # monitoring_addon_enabled is True — set by update_addon_profiles because addon already exists
+        dec_7.context.set_intermediate("monitoring_addon_enabled", True)
+        dec_7.context.set_intermediate("monitoring_addon_postprocessing_required", True)
+        mock_profile_7 = Mock(get_subscription_id=Mock(return_value="1234-5678-9012"))
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.Profile", return_value=mock_profile_7
+        ), patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.ensure_container_insights_for_monitoring"
+        ) as mock_ensure_7:
+            dec_7.postprocessing_after_mc_created(mc_7)
+        mock_ensure_7.assert_called_once_with(
+            self.cmd,
+            monitoring_addon_profile_7,
+            "1234-5678-9012",
+            "test_rg_name",
+            "test_name",
+            "test_location",
+            remove_monitoring=False,
+            aad_route=True,
+            create_dcr=True,
+            create_dcra=False,
+            enable_syslog=None,
+            data_collection_settings=None,
+            is_private_cluster=None,
+            ampls_resource_id=None,
+            enable_high_log_scale_mode=True,
+        )
+
+        # Case 8: Update with HLSM-only on an MSI cluster where monitoring was already enabled
+        dec_8 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "resource_group_name": "test_rg_name",
+                "name": "test_name",
+                "enable_msi_auth_for_monitoring": False,
+                "enable_high_log_scale_mode": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        monitoring_addon_profile_8 = self.models.ManagedClusterAddonProfile(
+            enabled=True,
+            config={CONST_MONITORING_USING_AAD_MSI_AUTH: "true"},
+        )
+        mc_8 = self.models.ManagedCluster(
+            location="test_location",
+            addon_profiles={
+                CONST_MONITORING_ADDON_NAME: monitoring_addon_profile_8,
+            },
+            service_principal_profile=self.models.ManagedClusterServicePrincipalProfile(
+                client_id="msi"
+            ),
+        )
+        dec_8.context.attach_mc(mc_8)
+        # monitoring_addon_enabled is True — set by update_addon_profiles because addon already exists
+        dec_8.context.set_intermediate("monitoring_addon_enabled", True)
+        dec_8.context.set_intermediate("monitoring_addon_postprocessing_required", True)
+        mock_profile_8 = Mock(get_subscription_id=Mock(return_value="1234-5678-9012"))
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.Profile", return_value=mock_profile_8
+        ), patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.ensure_container_insights_for_monitoring"
+        ) as mock_ensure_8:
+            dec_8.postprocessing_after_mc_created(mc_8)
+        mock_ensure_8.assert_called_once_with(
+            self.cmd,
+            monitoring_addon_profile_8,
+            "1234-5678-9012",
+            "test_rg_name",
+            "test_name",
+            "test_location",
+            remove_monitoring=False,
+            aad_route=True,
+            create_dcr=True,
+            create_dcra=False,
+            enable_syslog=None,
+            data_collection_settings=None,
+            is_private_cluster=None,
+            ampls_resource_id=None,
+            enable_high_log_scale_mode=True,
         )
 
     def test_put_mc(self):
@@ -13254,7 +13552,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         normalClusterCalculated = noopDecorator3.update_k8s_support_plan(normalCluster)
         self.assertEqual(normalClusterCalculated, normalCluster)
     
-    def test_mc_get_acns_enablement(self):
+    def test_mc_get_acns_enablement_with_perf(self):
         # Default, not set.
         ctx_1 = AKSManagedClusterContext(
             self.cmd,
@@ -13262,7 +13560,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
-        self.assertEqual(ctx_1.get_acns_enablement(), (None, None, None))
+        self.assertEqual(ctx_1.get_acns_enablement_with_perf(), (None, None, None, None))
 
         # Flag set to True.
         ctx_2 = AKSManagedClusterContext(
@@ -13275,7 +13573,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
-        self.assertEqual(ctx_2.get_acns_enablement(), (True, None, None))
+        self.assertEqual(ctx_2.get_acns_enablement_with_perf(), (True, None, None, None))
 
         # Flag set to True.
         ctx_3 = AKSManagedClusterContext(
@@ -13288,7 +13586,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
-        self.assertEqual(ctx_3.get_acns_enablement(), (True, None, None))
+        self.assertEqual(ctx_3.get_acns_enablement_with_perf(), (True, None, None, None))
 
         # Flag set to True and False.
         ctx_4 = AKSManagedClusterContext(
@@ -13304,7 +13602,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         )
         # fail on get_acns mutual exclusive error
         with self.assertRaises(MutuallyExclusiveArgumentError):
-            ctx_4.get_acns_enablement()
+            ctx_4.get_acns_enablement_with_perf()
 
         # Flag set to False.
         ctx_5 = AKSManagedClusterContext(
@@ -13317,7 +13615,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
-        self.assertEqual(ctx_5.get_acns_enablement(), (False, None, None))
+        self.assertEqual(ctx_5.get_acns_enablement_with_perf(), (False, None, None, None))
 
         ctx_6 = AKSManagedClusterContext(
             self.cmd,
@@ -13330,7 +13628,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
-        self.assertEqual(ctx_6.get_acns_enablement(), (True, False, None))
+        self.assertEqual(ctx_6.get_acns_enablement_with_perf(), (True, False, None, None))
 
         ctx_7 = AKSManagedClusterContext(
             self.cmd,
@@ -13343,16 +13641,30 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.UPDATE,
         )
-        self.assertEqual(ctx_7.get_acns_enablement(), (True, None, False))
+        self.assertEqual(ctx_7.get_acns_enablement_with_perf(), (True, None, False, None))
+
+        ctx_8 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_acns": True,
+                    "acns_datapath_acceleration_mode": "BpfVeth",
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_8.get_acns_enablement_with_perf(), (True, None, None, True))
 
         # Illegal flags
-        ctx_8 = AKSManagedClusterContext(
+        ctx_9 = AKSManagedClusterContext(
             self.cmd,
             AKSManagedClusterParamDict(
                 {
                     "enable_acns": True,
                     "disable_acns_security": True,
                     "disable_acns_observability": True,
+                    # acns performance is None by default
                 }
             ),
             self.models,
@@ -13360,10 +13672,10 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         )
         # fail on get_acns mutual exclusive error
         with self.assertRaises(MutuallyExclusiveArgumentError):
-            ctx_8.get_acns_enablement()
+            ctx_9.get_acns_enablement_with_perf()
         
         # Illegal flags
-        ctx_9 = AKSManagedClusterContext(
+        ctx_10 = AKSManagedClusterContext(
             self.cmd,
             AKSManagedClusterParamDict(
                 {
@@ -13377,7 +13689,110 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         )
         # fail on get_acns mutual exclusive error
         with self.assertRaises(MutuallyExclusiveArgumentError):
-            ctx_9.get_acns_enablement()
+            ctx_10.get_acns_enablement_with_perf()
+
+
+        # only acns and perf flags
+        ctx_11 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_acns": True,
+                    "disable_acns_security": True,
+                    "disable_acns_observability": True,
+                    "acns_datapath_acceleration_mode": "BpfVeth",
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_11.get_acns_enablement_with_perf(), (True, False, False, True))
+
+
+        # illegal flags with update
+        ctx_12 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_acns": True,
+                    "disable_acns_security": True,
+                    "disable_acns_observability": True,
+                    "acns_datapath_acceleration_mode": "None",
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        # fail on get_acns mutual exclusive error
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_12.get_acns_enablement_with_perf()
+
+        # only acns and perf flags
+        ctx_13 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_acns": True,
+                    "disable_acns_security": True,
+                    "disable_acns_observability": True,
+                    "acns_datapath_acceleration_mode": "BpfVeth",
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_13.get_acns_enablement_with_perf(), (True, False, False, True))
+
+    def test_mc_get_acns_datapath_acceleration_mode(self):
+        # Default, not set.
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({}),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertIsNone(ctx_1.get_acns_datapath_acceleration_mode())
+
+        # BpfVeth with enable_acns.
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_acns": True,
+                    "acns_datapath_acceleration_mode": "BpfVeth",
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE
+        )
+        self.assertEqual(ctx_2.get_acns_datapath_acceleration_mode(), "BpfVeth")
+
+        # None value with enable_acns.
+        ctx_3 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_acns": True,
+                    "acns_datapath_acceleration_mode": "None"
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_3.get_acns_datapath_acceleration_mode(), "None")
+
+        # unspecified with acns enabled.
+        ctx_4 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_acns": True
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertIsNone(ctx_4.get_acns_datapath_acceleration_mode())
 
     def test_mc_get_acns_transit_encryption_type(self):
         # Default, not set.
@@ -13516,6 +13931,30 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             ),
         )
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+    def test_update_network_profile_advanced_networking_acns_no_performance(self):
+        # Update mode - ACNS enabled without performance being set
+        # Verify performance is None (not the string "None")
+        dec_1 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_acns": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="azure",
+            ),
+        )
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.update_network_profile_advanced_networking(mc_1)
+
+        self.assertIsNotNone(dec_mc_1.network_profile.advanced_networking)
+        self.assertEqual(dec_mc_1.network_profile.advanced_networking.enabled, True)
+        self.assertIsNone(dec_mc_1.network_profile.advanced_networking.performance)
 
     def test_get_acns_advanced_networkpolicies(self):
         # Default, not set.
@@ -13693,6 +14132,69 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             dec_mc_3.network_profile.advanced_networking.security.advanced_network_policies,
             "None"
         )
+
+    def test_set_up_network_profile_acns_performance(self):
+        # Create mode - ACNS enabled with BpfVeth datapath acceleration mode
+        dec_1 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_acns": True,
+                "acns_datapath_acceleration_mode": CONST_ACNS_DATAPATH_ACCELERATION_MODE_BPFVETH,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.set_up_network_profile(mc_1)
+
+        self.assertIsNotNone(dec_mc_1.network_profile.advanced_networking)
+        self.assertEqual(dec_mc_1.network_profile.advanced_networking.enabled, True)
+        self.assertIsNotNone(dec_mc_1.network_profile.advanced_networking.performance)
+        self.assertEqual(
+            dec_mc_1.network_profile.advanced_networking.performance.acceleration_mode,
+            CONST_ACNS_DATAPATH_ACCELERATION_MODE_BPFVETH,
+        )
+
+        # Create mode - ACNS enabled with "None" datapath acceleration mode
+        dec_2 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_acns": True,
+                "acns_datapath_acceleration_mode": CONST_ACNS_DATAPATH_ACCELERATION_MODE_NONE,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_2 = self.models.ManagedCluster(location="test_location")
+        dec_2.context.attach_mc(mc_2)
+        dec_mc_2 = dec_2.set_up_network_profile(mc_2)
+
+        self.assertIsNotNone(dec_mc_2.network_profile.advanced_networking)
+        self.assertEqual(dec_mc_2.network_profile.advanced_networking.enabled, True)
+        self.assertIsNotNone(dec_mc_2.network_profile.advanced_networking.performance)
+        self.assertEqual(
+            dec_mc_2.network_profile.advanced_networking.performance.acceleration_mode,
+            CONST_ACNS_DATAPATH_ACCELERATION_MODE_NONE,
+        )
+
+        # Create mode - ACNS enabled without performance being set
+        # Verify performance is None (not the string "None")
+        dec_3 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_acns": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_3 = self.models.ManagedCluster(location="test_location")
+        dec_3.context.attach_mc(mc_3)
+        dec_mc_3 = dec_3.set_up_network_profile(mc_3)
+
+        self.assertIsNotNone(dec_mc_3.network_profile.advanced_networking)
+        self.assertEqual(dec_mc_3.network_profile.advanced_networking.enabled, True)
+        self.assertIsNone(dec_mc_3.network_profile.advanced_networking.performance)
 
     def test_update_network_profile_advanced_networking_with_networkpolicies(self):
         # Update mode - add advanced network policies with new security object
@@ -14620,6 +15122,306 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
                 return_value=None,
             ):
                 dec_8.set_up_addon_profiles(mc_8)
+
+        # Case 9: UPDATE - enable HLSM only (no CNL), monitoring with MSI auth enabled
+        dec_9 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_high_log_scale_mode": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_9 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="azure",
+                network_plugin_mode="overlay",
+                network_dataplane="cilium",
+                advanced_networking=self.models.AdvancedNetworking(
+                    enabled=True,
+                ),
+            ),
+            addon_profiles={
+                "omsagent": self.models.ManagedClusterAddonProfile(
+                    enabled=True,
+                    config={CONST_MONITORING_USING_AAD_MSI_AUTH: "true"},
+                )
+            },
+        )
+        dec_9.context.attach_mc(mc_9)
+        dec_mc_9 = dec_9.update_monitoring_profile_flow_logs(mc_9)
+        # HLSM should be enabled but CNL remains unset — no enableRetinaNetworkFlags change
+        # The monitoring_addon_postprocessing_required intermediate should be set
+        self.assertTrue(
+            dec_9.context.get_intermediate("monitoring_addon_postprocessing_required")
+        )
+        # Verify HLSM is resolved to True
+        self.assertEqual(dec_9.context.get_enable_high_log_scale_mode(), True)
+        # Verify CNL flag was NOT added to addon config (HLSM alone doesn't set it)
+        self.assertNotIn(
+            "enableRetinaNetworkFlags",
+            dec_mc_9.addon_profiles["omsagent"].config or {},
+        )
+
+        # Case 10: UPDATE - disable HLSM while CNL is active -> should ERROR
+        dec_10 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_high_log_scale_mode": False,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_10 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="azure",
+                network_plugin_mode="overlay",
+                network_dataplane="cilium",
+                advanced_networking=self.models.AdvancedNetworking(
+                    enabled=True,
+                ),
+            ),
+            addon_profiles={
+                "omsagent": self.models.ManagedClusterAddonProfile(
+                    enabled=True,
+                    config={
+                        CONST_MONITORING_USING_AAD_MSI_AUTH: "true",
+                        "enableRetinaNetworkFlags": "True",
+                    },
+                )
+            },
+        )
+        dec_10.context.attach_mc(mc_10)
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            dec_10.update_monitoring_profile_flow_logs(mc_10)
+
+        # Case 11: UPDATE - enable CNL + HLSM=true together
+        dec_11 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_container_network_logs": True,
+                "enable_high_log_scale_mode": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_11 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="azure",
+                network_plugin_mode="overlay",
+                network_dataplane="cilium",
+                advanced_networking=self.models.AdvancedNetworking(
+                    enabled=True,
+                ),
+            ),
+            addon_profiles={
+                "omsagent": self.models.ManagedClusterAddonProfile(
+                    enabled=True,
+                    config={CONST_MONITORING_USING_AAD_MSI_AUTH: "true"},
+                )
+            },
+        )
+        dec_11.context.attach_mc(mc_11)
+        dec_mc_11 = dec_11.update_monitoring_profile_flow_logs(mc_11)
+        self.assertEqual(
+            dec_mc_11.addon_profiles["omsagent"].config["enableRetinaNetworkFlags"],
+            "True",
+        )
+        self.assertTrue(
+            dec_11.context.get_intermediate("monitoring_addon_postprocessing_required")
+        )
+        # Verify HLSM is resolved to True
+        self.assertEqual(dec_11.context.get_enable_high_log_scale_mode(), True)
+
+        # Case 12: UPDATE - enable HLSM without monitoring addon -> should ERROR
+        dec_12 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_high_log_scale_mode": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_12 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="azure",
+                network_plugin_mode="overlay",
+                network_dataplane="cilium",
+                advanced_networking=self.models.AdvancedNetworking(
+                    enabled=True,
+                ),
+            ),
+        )
+        dec_12.context.attach_mc(mc_12)
+        with self.assertRaises(RequiredArgumentMissingError):
+            dec_12.update_monitoring_profile_flow_logs(mc_12)
+
+        # Case 13: UPDATE - enable HLSM without MSI auth -> should ERROR
+        dec_13 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_high_log_scale_mode": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_13 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="azure",
+                network_plugin_mode="overlay",
+                network_dataplane="cilium",
+                advanced_networking=self.models.AdvancedNetworking(
+                    enabled=True,
+                ),
+            ),
+            addon_profiles={
+                "omsagent": self.models.ManagedClusterAddonProfile(
+                    enabled=True,
+                    config={CONST_MONITORING_USING_AAD_MSI_AUTH: "false"},
+                )
+            },
+        )
+        dec_13.context.attach_mc(mc_13)
+        with self.assertRaises(RequiredArgumentMissingError):
+            dec_13.update_monitoring_profile_flow_logs(mc_13)
+
+        # Case 14: UPDATE - enable CNL + HLSM=false -> should ERROR
+        dec_14 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_container_network_logs": True,
+                "enable_high_log_scale_mode": False,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_14 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="azure",
+                network_plugin_mode="overlay",
+                network_dataplane="cilium",
+                advanced_networking=self.models.AdvancedNetworking(
+                    enabled=True,
+                ),
+            ),
+            addon_profiles={
+                "omsagent": self.models.ManagedClusterAddonProfile(
+                    enabled=True,
+                    config={CONST_MONITORING_USING_AAD_MSI_AUTH: "true"},
+                )
+            },
+        )
+        dec_14.context.attach_mc(mc_14)
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            dec_14.update_monitoring_profile_flow_logs(mc_14)
+
+        # Case 15: UPDATE - enable HLSM with camelCase key (omsAgent)
+        dec_15 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_high_log_scale_mode": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_15 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="azure",
+                network_plugin_mode="overlay",
+                network_dataplane="cilium",
+                advanced_networking=self.models.AdvancedNetworking(
+                    enabled=True,
+                ),
+            ),
+            addon_profiles={
+                "omsAgent": self.models.ManagedClusterAddonProfile(
+                    enabled=True,
+                    config={CONST_MONITORING_USING_AAD_MSI_AUTH: "true"},
+                )
+            },
+        )
+        dec_15.context.attach_mc(mc_15)
+        dec_mc_15 = dec_15.update_monitoring_profile_flow_logs(mc_15)
+        self.assertTrue(
+            dec_15.context.get_intermediate("monitoring_addon_postprocessing_required")
+        )
+        self.assertEqual(dec_15.context.get_enable_high_log_scale_mode(), True)
+
+        # Case 16: UPDATE - enable CNL with camelCase key (omsAgent)
+        dec_16 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_container_network_logs": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_16 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="azure",
+                network_plugin_mode="overlay",
+                network_dataplane="cilium",
+                advanced_networking=self.models.AdvancedNetworking(
+                    enabled=True,
+                ),
+            ),
+            addon_profiles={
+                "omsAgent": self.models.ManagedClusterAddonProfile(
+                    enabled=True,
+                    config={CONST_MONITORING_USING_AAD_MSI_AUTH: "true"},
+                )
+            },
+        )
+        dec_16.context.attach_mc(mc_16)
+        dec_mc_16 = dec_16.update_monitoring_profile_flow_logs(mc_16)
+        self.assertEqual(
+            dec_mc_16.addon_profiles[CONST_MONITORING_ADDON_NAME].config["enableRetinaNetworkFlags"],
+            "True",
+        )
+        self.assertTrue(
+            dec_16.context.get_intermediate("monitoring_addon_postprocessing_required")
+        )
+
+        # Case 17: UPDATE - disable HLSM with camelCase key, CNL active -> should ERROR
+        dec_17 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_high_log_scale_mode": False,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_17 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="azure",
+                network_plugin_mode="overlay",
+                network_dataplane="cilium",
+                advanced_networking=self.models.AdvancedNetworking(
+                    enabled=True,
+                ),
+            ),
+            addon_profiles={
+                "omsAgent": self.models.ManagedClusterAddonProfile(
+                    enabled=True,
+                    config={
+                        CONST_MONITORING_USING_AAD_MSI_AUTH: "true",
+                        "enableRetinaNetworkFlags": "True",
+                    },
+                )
+            },
+        )
+        dec_17.context.attach_mc(mc_17)
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            dec_17.update_monitoring_profile_flow_logs(mc_17)
 
 
 if __name__ == "__main__":

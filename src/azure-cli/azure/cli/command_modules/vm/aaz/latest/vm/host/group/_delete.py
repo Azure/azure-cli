@@ -20,9 +20,9 @@ class Delete(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2019-03-01",
+        "version": "2024-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/hostgroups/{}", "2019-03-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/hostgroups/{}", "2024-11-01"],
         ]
     }
 
@@ -49,7 +49,6 @@ class Delete(AAZCommand):
             id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
-            help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
             required=True,
         )
         return cls._args_schema
@@ -117,7 +116,7 @@ class Delete(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2019-03-01",
+                    "api-version", "2024-11-01",
                     required=True,
                 ),
             }

@@ -7884,6 +7884,11 @@ spec:
             self.check('azureMonitorProfile.metrics.enabled', True),
         ])
 
+        # wait for cluster to fully settle before issuing next update
+        self.cmd('aks wait --resource-group={resource_group} --name={name} --updated --interval 30 --timeout 600')
+        if self.is_live or self.in_recording:
+            time.sleep(60)
+
         # update: disable-azure-monitor-metrics
         update_cmd = 'aks update --resource-group={resource_group} --name={name} --yes --output=json ' \
                      '--disable-azure-monitor-metrics'
@@ -9094,8 +9099,22 @@ spec:
                 self.check('properties.provisioningState', f'Succeeded')
                 ])
 
-        # make sure monitoring can be smoothly disabled
-        self.cmd(f'aks disable-addons -a monitoring -g={resource_group} -n={aks_name}')
+        # wait for any in-progress cluster operation to finish before disabling
+        self.cmd(f'aks wait -g {resource_group} -n {aks_name} --updated --interval 30 --timeout 600')
+        if self.is_live or self.in_recording:
+            time.sleep(60)
+
+        # make sure monitoring can be smoothly disabled, retry on 409 (in-progress addon operation)
+        for attempt in range(6):
+            try:
+                self.cmd(f'aks disable-addons -a monitoring -g={resource_group} -n={aks_name}')
+                break
+            except Exception:
+                if attempt < 5:
+                    if self.is_live or self.in_recording:
+                        time.sleep(60)
+                else:
+                    raise
 
         # delete
         self.cmd(f'aks delete -g {resource_group} -n {aks_name} --yes --no-wait', checks=[self.is_empty()])
@@ -9186,8 +9205,22 @@ spec:
             self.check('properties.dataCollectionRuleId', f'{dcr_resource_id}')
         ])
 
-        # make sure monitoring can be smoothly disabled
-        self.cmd(f'aks disable-addons -a monitoring -g={resource_group} -n={aks_name}')
+        # wait for any in-progress cluster operation to finish before disabling
+        self.cmd(f'aks wait -g {resource_group} -n {aks_name} --updated --interval 30 --timeout 600')
+        if self.is_live or self.in_recording:
+            time.sleep(60)
+
+        # make sure monitoring can be smoothly disabled, retry on 409 (in-progress addon operation)
+        for attempt in range(6):
+            try:
+                self.cmd(f'aks disable-addons -a monitoring -g={resource_group} -n={aks_name}')
+                break
+            except Exception:
+                if attempt < 5:
+                    if self.is_live or self.in_recording:
+                        time.sleep(60)
+                else:
+                    raise
 
         # delete
         self.cmd(f'aks delete -g {resource_group} -n {aks_name} --yes --no-wait', checks=[self.is_empty()])
@@ -9238,9 +9271,22 @@ spec:
         except Exception as err:
             pass  # this is expected
 
+        # wait for any in-progress cluster operation to finish before disabling
+        self.cmd(f'aks wait -g {resource_group} -n {aks_name} --updated --interval 30 --timeout 600')
+        if self.is_live or self.in_recording:
+            time.sleep(60)
 
-        # make sure monitoring can be smoothly disabled
-        self.cmd(f'aks disable-addons -a monitoring -g={resource_group} -n={aks_name}')
+        # make sure monitoring can be smoothly disabled, retry on 409 (in-progress addon operation)
+        for attempt in range(6):
+            try:
+                self.cmd(f'aks disable-addons -a monitoring -g={resource_group} -n={aks_name}')
+                break
+            except Exception:
+                if attempt < 5:
+                    if self.is_live or self.in_recording:
+                        time.sleep(60)
+                else:
+                    raise
 
         # delete
         self.cmd(f'aks delete -g {resource_group} -n {aks_name} --yes --no-wait', checks=[self.is_empty()])
@@ -13048,6 +13094,126 @@ spec:
                 self.check("networkProfile.advancedNetworking.enabled", True),
                 self.check("networkProfile.advancedNetworking.security.enabled", False),
                 self.check("networkProfile.advancedNetworking.observability.enabled", True),
+                self.check("networkProfile.advancedNetworking.performance.accelerationMode", "None")
+            ],
+        )
+
+        # delete
+        self.cmd(
+            "aks delete -g {resource_group} -n {name} --yes --no-wait",
+            checks=[self.is_empty()],
+        )
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17,
+        name_prefix="clitest",
+        location="westcentralus",
+    )
+    def test_aks_create_with_acns_perf(
+        self, resource_group, resource_group_location
+    ):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+
+        aks_name = self.create_random_name("cliakstest", 16)
+        self.kwargs.update(
+            {
+                "resource_group": resource_group,
+                "name": aks_name,
+                "location": resource_group_location,
+            }
+        )
+
+        # create
+        create_cmd = (
+            "aks create --resource-group={resource_group} --name={name} --location={location} "
+            "--os-sku AzureLinux --network-plugin azure --network-dataplane=cilium --network-plugin-mode overlay "
+            "--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AdvancedNetworkingPerformancePreview "
+            "--enable-acns --acns-datapath-acceleration-mode BpfVeth --disable-acns-security --disable-acns-observability"
+        )
+        self.cmd(
+            create_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("networkProfile.advancedNetworking.enabled", True),
+                self.check("networkProfile.advancedNetworking.security.enabled", False),
+                self.check("networkProfile.advancedNetworking.observability.enabled", False),
+                self.check("networkProfile.advancedNetworking.performance.accelerationMode", "BpfVeth")
+            ],
+        )
+
+        # disable acns datapath acceleration
+        disable_cmd = (
+            "aks update --resource-group={resource_group} --name={name} --disable-acns"
+        )
+        self.cmd(
+            disable_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded")
+            ],
+        )
+
+        # delete
+        self.cmd(
+            "aks delete -g {resource_group} -n {name} --yes --no-wait",
+            checks=[self.is_empty()],
+        )
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17,
+        name_prefix="clitest",
+        location="westcentralus",
+    )
+    def test_aks_update_with_perf(
+        self, resource_group, resource_group_location
+    ):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+
+        aks_name = self.create_random_name("cliakstest", 16)
+        self.kwargs.update(
+            {
+                "resource_group": resource_group,
+                "name": aks_name,
+                "location": resource_group_location,
+            }
+        )
+            
+        # create
+        create_cmd = (
+            "aks create --resource-group={resource_group} --name={name} --location={location} "
+            "--os-sku AzureLinux --network-plugin azure --network-dataplane=cilium --network-plugin-mode overlay "
+            "--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AdvancedNetworkingPerformancePreview "
+            "--enable-acns --acns-datapath-acceleration-mode BpfVeth --disable-acns-security --disable-acns-observability"
+        )
+        self.cmd(
+            create_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("networkProfile.advancedNetworking.enabled", True),
+                self.check("networkProfile.advancedNetworking.security.enabled", False),
+                self.check("networkProfile.advancedNetworking.observability.enabled", False),
+                self.check("networkProfile.advancedNetworking.performance.accelerationMode", "BpfVeth")
+            ],
+        )
+
+        # update other acns
+        update_cmd = (
+            "aks update --resource-group={resource_group} --name={name} "
+            "--enable-acns --disable-acns-observability "
+        )
+        self.cmd(
+            update_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("networkProfile.advancedNetworking.enabled", True),
+                self.check("networkProfile.advancedNetworking.security.enabled", True),
+                self.check("networkProfile.advancedNetworking.observability.enabled", False),
+                self.check("networkProfile.advancedNetworking.performance.accelerationMode", "BpfVeth")
             ],
         )
 
@@ -13203,6 +13369,46 @@ spec:
             checks=[
                 self.check("provisioningState", "Succeeded"),
                 self.check("networkProfile.advancedNetworking.observability.enabled", True),
+                self.check("addonProfiles.omsagent.enabled", True),
+                self.check("addonProfiles.omsagent.config.enableRetinaNetworkFlags", "True"),
+            ],
+        )
+
+        # update: disable container network logs
+        disable_cnl_cmd = (
+            "aks update --resource-group={resource_group} --name={name} "
+            "--disable-container-network-logs "
+        )
+        self.cmd(
+            disable_cnl_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("addonProfiles.omsagent.enabled", True),
+                self.check("addonProfiles.omsagent.config.enableRetinaNetworkFlags", "False"),
+            ],
+        )
+
+        # update: enable high log scale mode independently via aks update
+        self.cmd(
+            "aks update --resource-group={resource_group} --name={name} "
+            "--enable-high-log-scale-mode ",
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("addonProfiles.omsagent.enabled", True),
+            ],
+        )
+
+        # update: re-enable container network logs (should auto-enable HLSM)
+        enable_cnl_cmd = (
+            "aks update --resource-group={resource_group} --name={name} "
+            "--enable-container-network-logs "
+        )
+        self.cmd(
+            enable_cnl_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("addonProfiles.omsagent.enabled", True),
+                self.check("addonProfiles.omsagent.config.enableRetinaNetworkFlags", "True"),
             ],
         )
 

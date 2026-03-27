@@ -5,8 +5,6 @@
 
 import sys
 import os
-import subprocess
-import portalocker
 
 from azure.cli.telemetry.util import save_payload
 
@@ -16,6 +14,7 @@ DEFAULT_INSTRUMENTATION_KEY = 'c4395b75-49cc-422c-bc95-c7d51aef5d46'
 
 
 def _start(config_dir, cache_dir):
+    import subprocess
     from azure.cli.telemetry.components.telemetry_logging import get_logger
 
     logger = get_logger('process')
@@ -100,6 +99,7 @@ def main():
         logger.info('Attempt start. Configuration directory [%s]. Cache directory [%s].', sys.argv[1], sys.argv[2])
 
         try:
+            import portalocker
             collection = RecordsCollection(cache_dir)
             collection.snapshot_and_read()
 

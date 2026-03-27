@@ -29,7 +29,6 @@ from azure.cli.core.util import (
     get_command_type_kwarg, read_file_content, get_arg_list, poller_classes)
 from azure.cli.core.local_context import LocalContextAction
 from azure.cli.core import telemetry
-from azure.cli.core.commands.progress import IndeterminateProgressBar
 
 from knack.arguments import CLICommandArgument
 from knack.commands import CLICommand, CommandGroup, PREVIEW_EXPERIMENTAL_CONFLICT_ERROR
@@ -741,9 +740,22 @@ class AzCliCommandInvoker(CommandInvoker):
 
         Returns CommandResultItem if cached help was shown, None otherwise.
         """
-        from azure.cli.core import CommandIndex
+        from azure.cli.core import CommandIndex, REFRESH_EXTENSION_HELP_OVERLAY_SENTINEL
         command_index = CommandIndex(self.cli_ctx)
         help_index = command_index.get_help_index()
+
+        if not help_index and command_index.needs_latest_extension_help_overlay_refresh():
+            logger.debug("Top-level cached help is unavailable on latest profile. "
+                         "Refreshing extension help overlay without full core module load.")
+            try:
+                if self.cli_ctx.invocation.data.get('command_string') is None:
+                    self.cli_ctx.invocation.data['command_string'] = ''
+                # Unknown top-level command forces extension-only load path on latest profile.
+                self.commands_loader.load_command_table([REFRESH_EXTENSION_HELP_OVERLAY_SENTINEL])
+                help_index = command_index.get_help_index()
+            except Exception as ex:  # pylint: disable=broad-except
+                # Keep cached-help refresh best-effort; normal invocation flow can still continue.
+                logger.debug("Failed to refresh latest extension help overlay: %s", ex)
 
         if help_index:
             # Display cached help using the help system
@@ -1022,10 +1034,20 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
         self.deploy_dict = {}
         self.last_progress_report = datetime.datetime.now()
 
-        self.progress_bar = None
+        self._progress_bar = None
         disable_progress_bar = self.cli_ctx.config.getboolean('core', 'disable_progress_bar', False)
-        if not disable_progress_bar and not cli_ctx.only_show_errors:
-            self.progress_bar = progress_bar if progress_bar is not None else IndeterminateProgressBar(cli_ctx)
+        self.disable_progress_bar = disable_progress_bar or cli_ctx.only_show_errors
+        if not self.disable_progress_bar:
+            self._progress_bar = progress_bar
+
+    @property
+    def progress_bar(self):
+        if self.disable_progress_bar:
+            return None
+        if self._progress_bar is None:
+            from azure.cli.core.commands.progress import IndeterminateProgressBar
+            self._progress_bar = IndeterminateProgressBar(self.cli_ctx)
+        return self._progress_bar
 
     def _delay(self):
         time.sleep(self.poller_done_interval_ms / 1000.0)

@@ -28,6 +28,30 @@ from azure.core.exceptions import AzureError, HttpResponseError, ServiceRequestE
 ManagedCluster = TypeVar("ManagedCluster")
 
 
+def get_monitoring_addon_key(addon_profiles, monitoring_addon_name):
+    """Return the canonical key for the monitoring addon, normalizing non-standard casing.
+
+    The API response may return the monitoring addon key in any casing (e.g.
+    "omsagent", "omsAgent", "oMSaGent").  This helper performs a
+    case-insensitive lookup and, when a non-standard key is found, re-keys
+    addon_profiles in-place so that subsequent code always uses the canonical
+    ``monitoring_addon_name`` (lowercase) form.
+    """
+    if addon_profiles is None:
+        return monitoring_addon_name
+    # Exact match on the canonical lowercase name – preferred form.
+    if monitoring_addon_name in addon_profiles:
+        return monitoring_addon_name
+    # Case-insensitive fallback: catch any casing the server may return.
+    target_lower = monitoring_addon_name.lower()
+    for key in list(addon_profiles):
+        if key.lower() == target_lower:
+            # Normalize: move the profile to the canonical key.
+            addon_profiles[monitoring_addon_name] = addon_profiles.pop(key)
+            return monitoring_addon_name
+    return monitoring_addon_name
+
+
 def format_parameter_name_to_option_name(parameter_name: str) -> str:
     """Convert a name in parameter format to option format.
 
