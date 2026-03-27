@@ -738,7 +738,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # Wait for the update operation to fully reconcile before the next update
-        time.sleep(60)
+        time.sleep(180)
 
         self.kwargs.update(
             {
@@ -759,7 +759,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         )
 
         # Wait for the disable operation to fully reconcile before the next update
-        time.sleep(60)
+        time.sleep(180)
 
         self.kwargs.update(
             {
