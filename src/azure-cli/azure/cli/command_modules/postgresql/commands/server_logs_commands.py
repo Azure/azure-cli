@@ -19,6 +19,31 @@ from ..utils.validators import validate_citus_cluster, validate_resource_group
 logger = get_logger(__name__)
 
 
+def _sanitize_log_file(log_obj):
+    """Convert log object to dict and remove created_time for SDK compatibility."""
+    if hasattr(log_obj, 'as_dict'):
+        result = log_obj.as_dict()
+    elif isinstance(log_obj, dict):
+        result = dict(log_obj)
+    else:
+        result = vars(log_obj).copy()
+    
+    # Recursively remove created_time variants from all levels
+    def remove_created_time(obj):
+        if isinstance(obj, dict):
+            obj.pop('created_time', None)
+            obj.pop('createdTime', None)
+            obj.pop('created-time', None)
+            for value in obj.values():
+                remove_created_time(value)
+        elif isinstance(obj, list):
+            for item in obj:
+                remove_created_time(item)
+    
+    remove_created_time(result)
+    return result
+
+
 def flexible_server_download_log_files(client, resource_group_name, server_name, file_name):
     validate_resource_group(resource_group_name)
 
@@ -50,8 +75,7 @@ def flexible_server_list_log_files_with_filter(client, resource_group_name, serv
         if max_file_size is not None and f.size_in_kb > max_file_size:
             continue
 
-        del f.created_time
-        files.append(f)
+        files.append(_sanitize_log_file(f))
 
     return files
 
@@ -75,8 +99,7 @@ def flexible_server_log_list(client, resource_group_name, server_name, filename_
         if max_file_size is not None and f.size_in_kb > max_file_size:
             continue
 
-        del f.created_time
-        files.append(f)
+        files.append(_sanitize_log_file(f))
 
     return files
 
