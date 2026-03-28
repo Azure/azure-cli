@@ -37,7 +37,7 @@ def _sanitize_log_file(log_obj):
         elif isinstance(obj, list):
             for item in obj:
                 remove_created_time(item)
-    
+
     remove_created_time(result)
     return result
 
