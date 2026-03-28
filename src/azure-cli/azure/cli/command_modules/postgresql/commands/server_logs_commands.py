@@ -27,13 +27,11 @@ def _sanitize_log_file(log_obj):
         result = dict(log_obj)
     else:
         result = vars(log_obj).copy()
-    
+
     # Recursively remove created_time variants from all levels
     def remove_created_time(obj):
         if isinstance(obj, dict):
-            obj.pop('created_time', None)
             obj.pop('createdTime', None)
-            obj.pop('created-time', None)
             for value in obj.values():
                 remove_created_time(value)
         elif isinstance(obj, list):
