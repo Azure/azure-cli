@@ -149,12 +149,15 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     if container_image_name:
         if container_registry_url:
             registry_host = urlparse(container_registry_url).hostname
-            # Strip redundant registry host if the image name already includes it
+            # Warn if image name already includes the registry host
             if registry_host and container_image_name.lower().startswith(registry_host.lower() + "/"):
-                container_image_name = container_image_name[len(registry_host) + 1:]
-            if container_image_name.startswith('/'):
-                container_image_name = container_image_name[1:]
-            container_image_name = "{}/{}".format(registry_host, container_image_name)
+                logger.warning("Note: --container-image-name '%s' appears to include the registry host. "
+                               "The --container-registry-url host is prepended automatically. "
+                               "The resulting image will be: %s/%s",
+                               container_image_name, registry_host, container_image_name)
+            container_image_name = container_image_name if not container_registry_url else "{}/{}".format(
+                urlparse(container_registry_url).hostname,
+                container_image_name[1:] if container_image_name.startswith('/') else container_image_name)
     if deployment_container_image_name:
         container_image_name = deployment_container_image_name
 
@@ -3849,12 +3852,15 @@ def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_sou
     if container_image_name:
         if container_registry_url:
             registry_host = urlparse(container_registry_url).hostname
-            # Strip redundant registry host if the image name already includes it
+            # Warn if image name already includes the registry host
             if registry_host and container_image_name.lower().startswith(registry_host.lower() + "/"):
-                container_image_name = container_image_name[len(registry_host) + 1:]
-            if container_image_name.startswith('/'):
-                container_image_name = container_image_name[1:]
-            container_image_name = "{}/{}".format(registry_host, container_image_name)
+                logger.warning("Note: --container-image-name '%s' appears to include the registry host. "
+                               "The --container-registry-url host is prepended automatically. "
+                               "The resulting image will be: %s/%s",
+                               container_image_name, registry_host, container_image_name)
+            container_image_name = container_image_name if not container_registry_url else "{}/{}".format(
+                urlparse(container_registry_url).hostname,
+                container_image_name[1:] if container_image_name.startswith('/') else container_image_name)
     if deployment_container_image_name:
         container_image_name = deployment_container_image_name
 
@@ -4315,8 +4321,8 @@ has been deployed ".format(app_service_environment)
         "storage_mounts": storage_mounts,
     })
 
-    os_type = 'Linux' if is_linux else 'Windows'
-    logger.warning("App Service Plan '%s' created (%s).", name, os_type)
+    os_type = 'Linux' if is_linux else ('Hyper-V' if hyper_v else 'Windows')
+    logger.warning("Creating App Service Plan '%s' (%s).", name, os_type)
 
     if no_wait:
         return poller.result()
@@ -9140,7 +9146,7 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
         _data = get_runtime_version_details(_lang_details.get('file_loc'), language, helper, _is_linux)
         version_used_create = _data.get('to_create')
         detected_version = _data.get('detected')
-        if language:
+        if language and language.lower() != 'static':
             if not version_used_create or version_used_create == '-':
                 logger.warning("No --runtime specified. Could not auto-detect a valid %s version. "
                                "Please specify --runtime explicitly. "
@@ -9566,7 +9572,7 @@ def perform_onedeploy_webapp(cmd,
             if stack_prefix in ('PYTHON', 'NODE', 'PHP'):
                 logger.warning(
                     "Note: 'az webapp deploy' does not install dependencies (pip install, npm install, "
-                    "etc.) for Linux web apps. Ensure your zip includes all dependencies, or set the app "
+                    "etc.) by default for Linux web apps. Ensure your zip includes all dependencies, or set the app "
                     "setting SCM_DO_BUILD_DURING_DEPLOYMENT=true to enable builds during deployment."
                 )
         except Exception:  # pylint: disable=broad-except

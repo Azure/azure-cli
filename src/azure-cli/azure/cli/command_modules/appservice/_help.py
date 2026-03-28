@@ -1882,7 +1882,7 @@ long-summary: |
     Suggested next steps after creation:
     - Deploy your code:
         az webapp deploy -g MyResourceGroup -n MyAppName --src-path app.zip --type zip
-    - For apps loading large models or dependencies at startup, increase the container
+    - For Linux apps loading large models or dependencies at startup, increase the container
       start time limit (default 230s, max 1800s):
         az webapp config appsettings set -g MyResourceGroup -n MyAppName --settings WEBSITES_CONTAINER_START_TIME_LIMIT=1800
 examples:
@@ -1922,7 +1922,7 @@ examples:
         az webapp create -g MyResourceGroup -p MyPlan -n MyUniqueAppName --end-to-end-encryption-enabled true --min-tls-version 1.2
   - name: Create a Linux Python web app with a custom startup command.
     text: >
-        az webapp create -g MyResourceGroup -p MyLinuxPlan -n MyUniqueAppName --runtime "PYTHON:3.12" --startup-file "gunicorn --bind=0.0.0.0 app:app"
+        az webapp create -g MyResourceGroup -p MyLinuxPlan -n MyUniqueAppName --runtime "PYTHON:3.14" --startup-file "gunicorn --bind=0.0.0.0 app:app"
 """
 
 helps['webapp create-remote-connection'] = """
@@ -2628,10 +2628,10 @@ examples:
         az webapp up -n MyUniqueAppName
   - name: Deploy a Python app to Linux with explicit runtime and plan name.
     text: >
-        az webapp up -n MyApp --runtime "PYTHON:3.12" --plan MyPlan --sku P1v3
+        az webapp up -n MyApp --runtime "PYTHON:3.14" --plan MyPlan --sku P1v3
   - name: Deploy a .NET app to Linux (must specify --os-type linux).
     text: >
-        az webapp up -n MyDotnetApp --runtime "DOTNETCORE:8.0" --os-type linux --plan MyPlan
+        az webapp up -n MyDotnetApp --runtime "DOTNETCORE:10.0" --os-type linux --plan MyPlan
   - name: Create a web app with a specified name and a Java 11 runtime
     text: >
         az webapp up -n MyUniqueAppName --runtime "java:11:Java SE:11"
