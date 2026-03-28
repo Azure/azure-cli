@@ -9,6 +9,7 @@ from unittest import mock
 from azure.cli.command_modules.profile.custom import (
     list_subscriptions, get_access_token, login, logout, account_clear, _remove_adal_token_cache)
 
+from azure.cli.core._profile import _TENANT_LEVEL_ACCOUNT_NAME
 from azure.cli.core.mock import DummyCli
 from knack.util import CLIError
 
@@ -194,3 +195,74 @@ class ProfileCommandTest(unittest.TestCase):
             f.write("test_token_cache")
         assert _remove_adal_token_cache()
         assert not os.path.exists(adal_token_cache)
+
+
+class TestLoginSubscriptionFilter(unittest.TestCase):
+    """Tests for custom.login() with --skip-subscription-discovery and --subscription parameters."""
+
+    def test_skip_subscription_discovery_requires_tenant(self):
+        """--skip-subscription-discovery without --tenant raises CLIError."""
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = DummyCli()
+        with self.assertRaisesRegex(CLIError, "'--skip-subscription-discovery' requires '--tenant'"):
+            login(cmd, skip_subscription_discovery=True)
+
+    def test_skip_subscription_discovery_without_tenant_with_subscription(self):
+        """--skip-subscription-discovery --subscription S without --tenant raises CLIError."""
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = DummyCli()
+        with self.assertRaisesRegex(CLIError, "'--skip-subscription-discovery' requires '--tenant'"):
+            login(cmd, skip_subscription_discovery=True, default_subscription='sub-id')
+
+    @mock.patch('azure.cli.command_modules.profile._subscription_selector.SubscriptionSelector', autospec=True)
+    @mock.patch('azure.cli.command_modules.profile.custom.Profile', autospec=True)
+    def test_skip_subscription_discovery_bypasses_selector(self, profile_mock, selector_mock):
+        """--skip-subscription-discovery should bypass the interactive selector."""
+        tenant_id = 'test-tenant'
+        profile_instance = mock.MagicMock()
+        profile_instance.login.return_value = [
+            {'id': tenant_id, 'name': _TENANT_LEVEL_ACCOUNT_NAME, 'isDefault': True,
+             'environmentName': 'AzureCloud', 'tenantId': tenant_id}
+        ]
+        profile_mock.return_value = profile_instance
+
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = DummyCli()
+        cmd.cli_ctx.config = mock.MagicMock()
+        cmd.cli_ctx.config.getboolean.return_value = True  # login_experience_v2 = True
+
+        result = login(cmd, tenant=tenant_id, skip_subscription_discovery=True)
+
+        # Assert selector was never instantiated
+        selector_mock.assert_not_called()
+        self.assertIsNotNone(result)
+        assert result is not None
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]['name'], _TENANT_LEVEL_ACCOUNT_NAME)
+
+    @mock.patch('azure.cli.command_modules.profile._subscription_selector.SubscriptionSelector', autospec=True)
+    @mock.patch('azure.cli.command_modules.profile.custom.Profile', autospec=True)
+    def test_default_subscription_bypasses_selector(self, profile_mock, selector_mock):
+        """--subscription should bypass the interactive selector even without --skip-subscription-discovery."""
+        sub_id = 'target-sub-id'
+        profile_instance = mock.MagicMock()
+        profile_instance.login.return_value = [
+            {'id': sub_id, 'name': 'Target Sub', 'isDefault': True,
+             'environmentName': 'AzureCloud', 'tenantId': 'tenant1'},
+            {'id': 'other-sub', 'name': 'Other Sub', 'isDefault': False,
+             'environmentName': 'AzureCloud', 'tenantId': 'tenant1'}
+        ]
+        profile_mock.return_value = profile_instance
+
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = DummyCli()
+        cmd.cli_ctx.config = mock.MagicMock()
+        cmd.cli_ctx.config.getboolean.return_value = False
+
+        # Interactive login (no username) with --subscription
+        result = login(cmd, tenant='tenant1', default_subscription=sub_id)
+
+        # Assert selector was never instantiated
+        selector_mock.assert_not_called()
+        assert result is not None
+        self.assertEqual(len(result), 2)

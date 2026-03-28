@@ -152,7 +152,9 @@ class Profile:
               allow_no_subscriptions=False,
               use_cert_sn_issuer=None,
               show_progress=False,
-              claims_challenge=None):
+              claims_challenge=None,
+              skip_subscription_discovery=False,
+              default_subscription=None):
         """
         For service principal, `password` is a dict returned by ServicePrincipalAuth.build_credential
         """
@@ -198,15 +200,25 @@ class Profile:
         else:
             credential = identity.get_service_principal_credential(username)
 
-        if tenant:
+        is_bare_mode = skip_subscription_discovery and not default_subscription
+
+        if skip_subscription_discovery and default_subscription:
+            # Fast path: fetch only the specified subscription (1 API call)
+            subscriptions = subscription_finder.find_specific_subscriptions(
+                tenant, credential, [default_subscription])
+        elif is_bare_mode:
+            # Bare mode: no ARM subscription calls. Tenant-level account will be creatd below
+            subscriptions = []
+            subscription_finder.tenants.append(tenant)
+        elif tenant:
             subscriptions = subscription_finder.find_using_specific_tenant(tenant, credential)
         else:
             subscriptions = subscription_finder.find_using_common_tenant(username, credential)
 
-        if not subscriptions and not allow_no_subscriptions:
+        if not subscriptions and not allow_no_subscriptions and not is_bare_mode:
             raise CLIError("No subscriptions found for {}.".format(username))
 
-        if allow_no_subscriptions:
+        if allow_no_subscriptions or is_bare_mode:
             t_list = [s.tenant_id for s in subscriptions]
             bare_tenants = [t for t in subscription_finder.tenants if t not in t_list]
             tenant_accounts = self._build_tenant_level_accounts(bare_tenants)
@@ -218,6 +230,27 @@ class Profile:
                                                   is_service_principal, bool(use_cert_sn_issuer))
 
         self._set_subscriptions(consolidated)
+
+        # Validate default_subscription exists before calling set_active_subscription,
+        # so the caller can handle "not found" differently based on context.
+        if default_subscription:
+            match = next((s for s in consolidated
+                          if s[_SUBSCRIPTION_ID].lower() == default_subscription.lower() or
+                          s.get(_SUBSCRIPTION_NAME, '').lower() == default_subscription.lower()), None)
+            if match:
+                self.set_active_subscription(match[_SUBSCRIPTION_ID])
+                # Refresh consolidated from storage so the returned list reflects the new default
+                consolidated = self.load_cached_subscriptions()
+            elif skip_subscription_discovery:
+                # --skip-subscription-discovery + --subscription S, but S is inaccessible.
+                # without --allow-no-subscriptions → already errored above
+                # with --allow-no-subscriptions → tenant-level account only (we reach here)
+                logger.warning("Subscription '%s' not found. Profile has tenant-level account only.",
+                               default_subscription)
+            else:
+                raise CLIError("Subscription '{}' not found. Check the ID or name and try again."
+                               .format(default_subscription))
+
         return deepcopy(consolidated)
 
     def login_with_managed_identity(self, client_id=None, object_id=None, resource_id=None,
@@ -507,6 +540,7 @@ class Profile:
 
             set_cloud_subscription(self.cli_ctx, active_cloud.name, default_sub_id)
         self._storage[_SUBSCRIPTIONS] = subscriptions
+        return subscriptions
 
     @staticmethod
     def _pick_working_subscription(subscriptions):
