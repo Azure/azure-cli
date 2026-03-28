@@ -760,7 +760,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                 )
                 break
             except Exception as ex:
-                if attempt < 9 and 'OperationNotAllowed' in str(ex):
+                if attempt < 9 and 'ResourceExistsError' in type(ex).__name__:
                     time.sleep(60)
                     continue
                 raise
@@ -786,7 +786,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                 )
                 break
             except Exception as ex:
-                if attempt < 9 and 'OperationNotAllowed' in str(ex):
+                if attempt < 9 and 'ResourceExistsError' in type(ex).__name__:
                     time.sleep(60)
                     continue
                 raise
