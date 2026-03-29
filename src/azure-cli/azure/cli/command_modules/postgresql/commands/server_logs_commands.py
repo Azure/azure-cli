@@ -20,13 +20,8 @@ logger = get_logger(__name__)
 
 
 def _sanitize_log_file(log_obj):
-    """Convert log object to dict and remove created_time for SDK compatibility."""
-    if hasattr(log_obj, 'as_dict'):
-        result = log_obj.as_dict()
-    elif isinstance(log_obj, dict):
-        result = dict(log_obj)
-    else:
-        result = vars(log_obj).copy()
+    # Convert log object to dict
+    result = log_obj.as_dict()
 
     # Flatten properties from nested structure and reshape to legacy format
     if 'properties' in result and isinstance(result['properties'], dict):
