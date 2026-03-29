@@ -28,17 +28,21 @@ def _sanitize_log_file(log_obj):
     else:
         result = vars(log_obj).copy()
 
-    # Recursively remove created_time variants from all levels
-    def remove_created_time(obj):
-        if isinstance(obj, dict):
-            obj.pop('createdTime', None)
-            for value in obj.values():
-                remove_created_time(value)
-        elif isinstance(obj, list):
-            for item in obj:
-                remove_created_time(item)
+    # Flatten properties from nested structure and reshape to legacy format
+    if 'properties' in result and isinstance(result['properties'], dict):
+        properties = result.pop('properties')
+        # Extract type from properties and rename to typePropertiesType
+        if 'createdTime' in properties:
+            del properties['createdTime']  # Remove created_time as it's not in the original SDK model
+        if 'type' in properties:
+            result['typePropertiesType'] = properties.pop('type')
+        # Merge remaining properties into root level
+        result.update(properties)
 
-    remove_created_time(result)
+    # Add systemData if not present (for backward compatibility)
+    if 'systemData' not in result:
+        result['systemData'] = None
+
     return result
 
 
