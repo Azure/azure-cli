@@ -18,7 +18,7 @@ class GetFailoverAllTestsDetail(AAZCommand):
     """This operation retrieves the details of all the failover tests performed on the Virtual Wan ExpressRoute gateways for different peering locations
 
     :example: VwanExpressRouteGatewayFailoverAllTestsDetails
-        az network express-route-gateway get-failover-all-tests-detail --resource-group rg1 --name ergw1 --type SingleSiteFailover --fetch-latest True
+        az network express-route-gateway get-failover-all-tests-detail --resource-group "rg1" --name "ergw1" --type "SingleSiteFailover" --fetch-latest True
     """
 
     _aaz_info = {
@@ -45,13 +45,13 @@ class GetFailoverAllTestsDetail(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.express_route_gateway_name = AAZStrArg(
+        _args_schema.name = AAZStrArg(
             options=["--name"],
             help="The name of the vwan express route gateway.",
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
-                pattern="^[A-Za-z0-9_]+",
+                pattern="^[A-Za-z0-9_-]+",
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
@@ -133,7 +133,7 @@ class GetFailoverAllTestsDetail(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "expressRouteGatewayName", self.ctx.args.express_route_gateway_name,
+                    "expressRouteGatewayName", self.ctx.args.name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -189,12 +189,15 @@ class GetFailoverAllTestsDetail(AAZCommand):
             if cls._schema_on_200 is not None:
                 return cls._schema_on_200
 
-            cls._schema_on_200 = AAZListType()
+            cls._schema_on_200 = AAZObjectType()
 
             _schema_on_200 = cls._schema_on_200
-            _schema_on_200.Element = AAZObjectType()
+            _schema_on_200.value = AAZListType()
 
-            _element = cls._schema_on_200.Element
+            value = cls._schema_on_200.value
+            value.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element
             _element.circuits = AAZListType(
                 flags={"read_only": True},
             )
@@ -228,10 +231,10 @@ class GetFailoverAllTestsDetail(AAZCommand):
                 flags={"read_only": True},
             )
 
-            circuits = cls._schema_on_200.Element.circuits
+            circuits = cls._schema_on_200.value.Element.circuits
             circuits.Element = AAZObjectType()
 
-            _element = cls._schema_on_200.Element.circuits.Element
+            _element = cls._schema_on_200.value.Element.circuits.Element
             _element.connection_name = AAZStrType(
                 serialized_name="connectionName",
             )
@@ -240,10 +243,10 @@ class GetFailoverAllTestsDetail(AAZCommand):
                 serialized_name="nrpResourceUri",
             )
 
-            connections = cls._schema_on_200.Element.connections
+            connections = cls._schema_on_200.value.Element.connections
             connections.Element = AAZObjectType()
 
-            _element = cls._schema_on_200.Element.connections.Element
+            _element = cls._schema_on_200.value.Element.connections.Element
             _element.last_updated_time = AAZStrType(
                 serialized_name="lastUpdatedTime",
                 flags={"read_only": True},
@@ -254,7 +257,7 @@ class GetFailoverAllTestsDetail(AAZCommand):
             )
             _element.status = AAZStrType()
 
-            issues = cls._schema_on_200.Element.issues
+            issues = cls._schema_on_200.value.Element.issues
             issues.Element = AAZStrType()
 
             return cls._schema_on_200

@@ -18,7 +18,7 @@ class GetRoutesInformation(AAZCommand):
     """This operation retrieves the route set information for Vwan Express Route Gateway based on their resiliency
 
     :example: VwanExpressRouteGatewayGetRoutesInformation
-        az network express-route-gateway get-routes-information --resource-group rg1 --name ergw --attempt-refresh False
+        az network express-route-gateway get-routes-information --resource-group "rg1" --name "ergw" --attempt-refresh False
     """
 
     _aaz_info = {
@@ -45,13 +45,13 @@ class GetRoutesInformation(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.express_route_gateway_name = AAZStrArg(
+        _args_schema.name = AAZStrArg(
             options=["--name"],
             help="The name of the vwan express route gateway.",
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
-                pattern="^[A-Za-z0-9_]+",
+                pattern="^[A-Za-z0-9_-]+",
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
@@ -126,7 +126,7 @@ class GetRoutesInformation(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "expressRouteGatewayName", self.ctx.args.express_route_gateway_name,
+                    "expressRouteGatewayName", self.ctx.args.name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -225,8 +225,8 @@ class GetRoutesInformation(AAZCommand):
 
             _element = cls._schema_on_200.route_sets.Element.details.Element.Element
             _element.circuit = AAZStrType()
-            _element.pri = AAZStrType()
-            _element.sec = AAZStrType()
+            _element.pri = AAZIntType()
+            _element.sec = AAZIntType()
 
             locations = cls._schema_on_200.route_sets.Element.locations
             locations.Element = AAZStrType()

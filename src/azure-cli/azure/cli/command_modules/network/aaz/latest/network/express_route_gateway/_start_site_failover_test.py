@@ -18,7 +18,7 @@ class StartSiteFailoverTest(AAZCommand):
     """This operation starts failover simulation on the vwan expressRouteGateway for the specified peering location
 
     :example: VwanExpressRouteGatewayStartSiteFailoverSimulation
-        az network express-route-gateway start-site-failover-test --resource-group rg1 --name ergw --peering-location Vancouver
+        az network express-route-gateway start-site-failover-test --resource-group "rg1" --name "ergw" --peering-location "Vancouver"
     """
 
     _aaz_info = {
@@ -45,13 +45,13 @@ class StartSiteFailoverTest(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.express_route_gateway_name = AAZStrArg(
+        _args_schema.name = AAZStrArg(
             options=["--name"],
-            help="The name of the express route gateway.",
+            help="The name of the vwan express route gateway.",
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
-                pattern="^[A-Za-z0-9_]+",
+                pattern="^[A-Za-z0-9_-]+",
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
@@ -127,7 +127,7 @@ class StartSiteFailoverTest(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "expressRouteGatewayName", self.ctx.args.express_route_gateway_name,
+                    "expressRouteGatewayName", self.ctx.args.name,
                     required=True,
                 ),
                 **self.serialize_url_param(

@@ -18,7 +18,7 @@ class GetFailoverSingleTestDetail(AAZCommand):
     """This operation retrieves the details of a particular failover test performed on the vwan expressRouteGateway based on the test Guid
 
     :example: VwanExpressRouteGatewayFailoverSingleTestDetails
-        az network express-route-gateway get-failover-single-test-detail --resource-group rg1 --name ergw --peering-location Vancouver --failover-test-id fe458ae8-d2ae-4520-a104-44bc233bde7e
+        az network express-route-gateway get-failover-single-test-detail --resource-group "rg1" --name "ergw" --peering-location "Vancouver" --failover-test-id "fe458ae8-d2ae-4520-a104-44bc233bde7e"
     """
 
     _aaz_info = {
@@ -45,13 +45,13 @@ class GetFailoverSingleTestDetail(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.express_route_gateway_name = AAZStrArg(
+        _args_schema.name = AAZStrArg(
             options=["--name"],
             help="The name of the vwan express route gateway.",
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
-                pattern="^[A-Za-z0-9_]+",
+                pattern="^[A-Za-z0-9_-]+",
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
@@ -132,7 +132,7 @@ class GetFailoverSingleTestDetail(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "expressRouteGatewayName", self.ctx.args.express_route_gateway_name,
+                    "expressRouteGatewayName", self.ctx.args.name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -188,12 +188,15 @@ class GetFailoverSingleTestDetail(AAZCommand):
             if cls._schema_on_200 is not None:
                 return cls._schema_on_200
 
-            cls._schema_on_200 = AAZListType()
+            cls._schema_on_200 = AAZObjectType()
 
             _schema_on_200 = cls._schema_on_200
-            _schema_on_200.Element = AAZObjectType()
+            _schema_on_200.value = AAZListType()
 
-            _element = cls._schema_on_200.Element
+            value = cls._schema_on_200.value
+            value.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element
             _element.attestation = AAZBoolType(
                 flags={"read_only": True},
             )
@@ -229,10 +232,10 @@ class GetFailoverSingleTestDetail(AAZCommand):
                 flags={"read_only": True},
             )
 
-            failover_connection_details = cls._schema_on_200.Element.failover_connection_details
+            failover_connection_details = cls._schema_on_200.value.Element.failover_connection_details
             failover_connection_details.Element = AAZObjectType()
 
-            _element = cls._schema_on_200.Element.failover_connection_details.Element
+            _element = cls._schema_on_200.value.Element.failover_connection_details.Element
             _element.failover_connection_name = AAZStrType(
                 serialized_name="failoverConnectionName",
             )
@@ -243,22 +246,22 @@ class GetFailoverSingleTestDetail(AAZCommand):
                 serialized_name="isVerified",
             )
 
-            non_redundant_routes = cls._schema_on_200.Element.non_redundant_routes
+            non_redundant_routes = cls._schema_on_200.value.Element.non_redundant_routes
             non_redundant_routes.Element = AAZStrType()
 
-            redundant_routes = cls._schema_on_200.Element.redundant_routes
+            redundant_routes = cls._schema_on_200.value.Element.redundant_routes
             redundant_routes.Element = AAZObjectType()
 
-            _element = cls._schema_on_200.Element.redundant_routes.Element
+            _element = cls._schema_on_200.value.Element.redundant_routes.Element
             _element.peering_locations = AAZListType(
                 serialized_name="peeringLocations",
             )
             _element.routes = AAZListType()
 
-            peering_locations = cls._schema_on_200.Element.redundant_routes.Element.peering_locations
+            peering_locations = cls._schema_on_200.value.Element.redundant_routes.Element.peering_locations
             peering_locations.Element = AAZStrType()
 
-            routes = cls._schema_on_200.Element.redundant_routes.Element.routes
+            routes = cls._schema_on_200.value.Element.redundant_routes.Element.routes
             routes.Element = AAZStrType()
 
             return cls._schema_on_200

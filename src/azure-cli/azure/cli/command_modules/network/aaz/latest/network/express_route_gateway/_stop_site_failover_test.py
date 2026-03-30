@@ -18,7 +18,7 @@ class StopSiteFailoverTest(AAZCommand):
     """This operation stops an ongoing failover simulation on the vwan expressRouteGateway for the specified peering location
 
     :example: VwanExpressRouteGatewayStopSiteFailoverSimulation
-        az network express-route-gateway stop-site-failover-test --resource-group rg1 --name ergw --peering-location Vancouver --simulation-successful True --details "[{failover-connection-name:conn1,failover-location:Denver,is-verified:False},{failover-connection-name:conn2,failover-location:Amsterdam,is-verified:True}]"
+        az network express-route-gateway stop-site-failover-test --resource-group "rg1" --name "ergw" --peering-location "Vancouver" --simulation-successful True --details "[{failover-connection-name:'conn1',failover-location:'Denver',is-verified:False},{failover-connection-name:'conn2',failover-location:'Amsterdam',is-verified:True}]"
     """
 
     _aaz_info = {
@@ -45,13 +45,13 @@ class StopSiteFailoverTest(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.express_route_gateway_name = AAZStrArg(
+        _args_schema.name = AAZStrArg(
             options=["--name"],
-            help="The name of the express route gateway.",
+            help="The name of the vwan express route gateway.",
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
-                pattern="^[A-Za-z0-9_]+",
+                pattern="^[A-Za-z0-9_-]+",
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
@@ -73,7 +73,7 @@ class StopSiteFailoverTest(AAZCommand):
             help="Peering location of the test",
             required=True,
         )
-        _args_schema.was_simulation_successful = AAZBoolArg(
+        _args_schema.simulation_successful = AAZBoolArg(
             options=["--simulation-successful"],
             arg_group="StopParameters",
             help="Whether the failover simulation was successful or not",
@@ -161,7 +161,7 @@ class StopSiteFailoverTest(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "expressRouteGatewayName", self.ctx.args.express_route_gateway_name,
+                    "expressRouteGatewayName", self.ctx.args.name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -206,7 +206,7 @@ class StopSiteFailoverTest(AAZCommand):
             )
             _builder.set_prop("details", AAZListType, ".details", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("peeringLocation", AAZStrType, ".peering_location", typ_kwargs={"flags": {"required": True}})
-            _builder.set_prop("wasSimulationSuccessful", AAZBoolType, ".was_simulation_successful", typ_kwargs={"flags": {"required": True}})
+            _builder.set_prop("wasSimulationSuccessful", AAZBoolType, ".simulation_successful", typ_kwargs={"flags": {"required": True}})
 
             details = _builder.get(".details")
             if details is not None:
