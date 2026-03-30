@@ -796,6 +796,7 @@ class AcrCommandsTests(ScenarioTest):
                  checks=[self.check('anonymousPullEnabled', False)])
 
     @ResourceGroupPreparer()
+    @live_only()
     def test_acr_with_dual_stack_endpoints(self, resource_group, resource_group_location):
         self.kwargs.update({
             'registry_name': self.create_random_name('testreg', 20)
