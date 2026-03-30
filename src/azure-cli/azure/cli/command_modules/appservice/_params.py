@@ -317,7 +317,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('deployment_container_image_name', options_list=['--deployment-container-image-name', '-i'], help='Container image name from container registry, e.g. publisher/image-name:tag', deprecate_info=c.deprecate(target='--deployment-container-image-name'))
         c.argument('container_registry_url', options_list=['--container-registry-url'], help='The container registry server url')
         c.argument('container_image_name', options_list=['--container-image-name', '-c'],
-                   help='The container custom image name and optionally the tag name (e.g., <registry-name>/<image-name>:<tag>). Note: if --container-registry-url is also provided, use <image-name>:<tag> without the registry name.')
+                   help='The container custom image name and optionally the tag name (e.g., `<registry-name>/<image-name>:<tag>`). Note: if --container-registry-url is also provided, use `<image-name>:<tag>` without the registry name.')
         c.argument('container_registry_user', options_list=['--container-registry-user', '-s', c.deprecate(target='--docker-registry-server-user', redirect='--container-registry-user')], help='The container registry server username')
         c.argument('container_registry_password', options_list=['--container-registry-password', '-w', c.deprecate(target='--docker-registry-server-password', redirect='--container-registry-password')], help='The container registry server password. Required for private registries.')
         c.argument('multicontainer_config_type', options_list=['--multicontainer-config-type'], help="Linux only.", arg_type=get_enum_type(MULTI_CONTAINER_TYPES))
@@ -719,7 +719,7 @@ subscription than the app service environment, please use the resource ID for --
                    help='Container image name, e.g. publisher/image-name:tag', deprecate_info=c.deprecate(target='--deployment-container-image-name'))
         c.argument('container_registry_url', options_list=['--container-registry-url', '-r'], help='The container registry server url')
         c.argument('container_image_name', options_list=['--container-image-name', '-c'],
-                   help='The container custom image name and optionally the tag name (e.g., <registry-name>/<image-name>:<tag>). Note: if --container-registry-url is also provided, use <image-name>:<tag> without the registry name.')
+                   help='The container custom image name and optionally the tag name (e.g., `<registry-name>/<image-name>:<tag>`). Note: if --container-registry-url is also provided, use `<image-name>:<tag>` without the registry name.')
         c.argument('container_registry_user', options_list=['--container-registry-user', '-u', c.deprecate(target='--docker-registry-server-user', redirect='--container-registry-user')], help='The container registry server username')
         c.argument('container_registry_password', options_list=['--container-registry-password', '-w', c.deprecate(target='--docker-registry-server-password', redirect='--container-registry-password')],
                    help='The container registry server password')
