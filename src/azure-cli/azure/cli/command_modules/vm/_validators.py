@@ -2169,27 +2169,33 @@ def process_image_create_namespace(cmd, namespace):
                                   'virtualMachines', 'Microsoft.Compute')
         res = parse_resource_id(res_id)
         if res['type'] == 'virtualMachines':
-            compute_client = _compute_client_factory(cmd.cli_ctx, subscription_id=res['subscription'])
-            vm_info = compute_client.virtual_machines.get(res['resource_group'], res['name'])
+            from .operations.vm import VMShow
+            command_args = {
+                'subscription': res['subscription'],
+                'resource_group': res['resource_group'],
+                'vm_name': res['name']
+            }
+            vm_info = VMShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
             source_from_vm = True
     except ResourceNotFoundError:
         pass
 
     if source_from_vm:
         # pylint: disable=no-member
-        namespace.os_type = vm_info.storage_profile.os_disk.os_type
+        namespace.os_type = vm_info.get('storageProfile', {}).get('osDisk', {}).get('osType')
         namespace.source_virtual_machine = res_id
         if namespace.data_disk_sources:
             raise CLIError("'--data-disk-sources' is not allowed when capturing "
                            "images from virtual machines")
     else:
-        namespace.os_blob_uri, namespace.os_disk, namespace.os_snapshot, _, _ = _figure_out_storage_source(cmd.cli_ctx, namespace.resource_group_name, namespace.source)  # pylint: disable=line-too-long
+        namespace.os_blob_uri, namespace.os_disk, namespace.os_snapshot, _, _ = \
+            _figure_out_storage_source_by_aaz(cmd.cli_ctx, namespace.resource_group_name, namespace.source)
         namespace.data_blob_uris = []
         namespace.data_disks = []
         namespace.data_snapshots = []
         if namespace.data_disk_sources:
             for data_disk_source in namespace.data_disk_sources:
-                source_blob_uri, source_disk, source_snapshot, _, _ = _figure_out_storage_source(
+                source_blob_uri, source_disk, source_snapshot, _, _ = _figure_out_storage_source_by_aaz(
                     cmd.cli_ctx, namespace.resource_group_name, data_disk_source)
                 if source_blob_uri:
                     namespace.data_blob_uris.append(source_blob_uri)
@@ -2226,6 +2232,30 @@ def _figure_out_storage_source(cli_ctx, resource_group_name, source):
     return (source_blob_uri, source_disk, source_snapshot, source_restore_point, source_info)
 
 
+def _figure_out_storage_source_by_aaz(cli_ctx, resource_group_name, source):
+    source_blob_uri = None
+    source_disk = None
+    source_snapshot = None
+    source_info = None
+    source_restore_point = None
+    if urlparse(source).scheme:  # a uri?
+        source_blob_uri = source
+    elif '/disks/' in source.lower():
+        source_disk = source
+    elif '/snapshots/' in source.lower():
+        source_snapshot = source
+    elif '/restorepoints/' in source.lower():
+        source_restore_point = source
+    else:
+        source_info, is_snapshot = _get_disk_or_snapshot_info_by_aaz(cli_ctx, resource_group_name, source)
+        if is_snapshot:
+            source_snapshot = source_info.get('id')
+        else:
+            source_disk = source_info.get('id')
+
+    return (source_blob_uri, source_disk, source_snapshot, source_restore_point, source_info)
+
+
 def _get_disk_or_snapshot_info(cli_ctx, resource_group_name, source):
     compute_client = _compute_client_factory(cli_ctx)
     is_snapshot = True
@@ -2235,6 +2265,28 @@ def _get_disk_or_snapshot_info(cli_ctx, resource_group_name, source):
     except ResourceNotFoundError:
         is_snapshot = False
         info = compute_client.disks.get(resource_group_name, source)
+
+    return info, is_snapshot
+
+
+def _get_disk_or_snapshot_info_by_aaz(cli_ctx, resource_group_name, source):
+    from .aaz.latest.snapshot import Show as SnapshotShow
+    from .aaz.latest.disk import Show as DiskShow
+    is_snapshot = True
+
+    try:
+        command_args = {
+            'resource_group': resource_group_name,
+            'snapshot_name': source
+        }
+        info = SnapshotShow(cli_ctx=cli_ctx)(command_args=command_args)
+    except ResourceNotFoundError:
+        command_args = {
+            'resource_group': resource_group_name,
+            'disk_name': source
+        }
+        is_snapshot = False
+        info = DiskShow(cli_ctx=cli_ctx)(command_args=command_args)
 
     return info, is_snapshot
 

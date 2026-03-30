@@ -9492,7 +9492,7 @@ class DedicatedHostScenarioTest(ScenarioTest):
             'host-group': self.create_random_name('host', 10)
         })
         self.cmd('vm host group create -n {host-group} -g {rg} --ultra-ssd-enabled true -c 1 -l eastus2euap --zone 3', checks=[
-            self.check('additionalCapabilities.ultraSsdEnabled', True)
+            self.check('additionalCapabilities.ultraSSDEnabled', True)
         ])
 
     @AllowLargeResponse()

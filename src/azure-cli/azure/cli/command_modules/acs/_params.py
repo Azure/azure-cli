@@ -690,6 +690,8 @@ def load_arguments(self, _):
             help="Set the datapath acceleration mode for Azure Container Networking Solution (ACNS). Valid values are 'BpfVeth' and 'None'."
         )
         c.argument('acns_transit_encryption_type', arg_type=get_enum_type(transit_encryption_types))
+        # monitoring addons
+        c.argument('enable_high_log_scale_mode', arg_type=get_three_state_flag())
         # private cluster parameters
         c.argument('enable_apiserver_vnet_integration', action='store_true')
         c.argument('apiserver_subnet_id', validator=validate_apiserver_subnet_id)
