@@ -856,6 +856,23 @@ class SubscriptionFinder:
         self.tenants.append(tenant)
         return all_subscriptions
 
+    def find_specific_subscriptions(self, tenant, credential, subscription_ids):
+        """Fetch specific subscriptions by ID using GET /subscriptions/{id}
+        instead of listing all subscriptions.
+        https://learn.microsoft.com/en-us/rest/api/resources/subscriptions/get
+        """
+        client = self._create_subscription_client(credential)
+        all_subscriptions = []
+        for sub_id in subscription_ids:
+            try:
+                s = client.subscriptions.get(sub_id)
+                _attach_token_tenant(s, tenant)
+                all_subscriptions.append(s)
+            except Exception as ex:  # pylint: disable=broad-except
+                logger.warning("Failed to retrieve subscription %s: %s", sub_id, ex)
+        self.tenants.append(tenant)
+        return all_subscriptions
+
     def _create_subscription_client(self, credential):
         from azure.cli.core.profiles import ResourceType, get_api_version
         from azure.cli.core.profiles._shared import get_client_class
