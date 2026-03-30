@@ -691,6 +691,9 @@ appconfig create:
     enable_arm_private_network_access:
       rule_exclusions:
       - option_length_too_long
+appservice ase:
+  rule_exclusions:
+  - require_wait_command_if_no_wait
 appservice ase create:
   parameters:
     force_network_security_group:
@@ -715,6 +718,9 @@ appservice list-locations:
     linux_workers_enabled:
       rule_exclusions:
       - option_length_too_long
+appservice plan:
+  rule_exclusions:
+  - require_wait_command_if_no_wait
 appservice plan update:
   parameters:
     number_of_workers:
@@ -734,6 +740,11 @@ appservice plan list-slots:
     name:
       rule_exclusions:
       - missing_parameter_test_coverage
+appservice plan managed-instance instance connect:
+  parameters:
+    bastion_resource_group_name:
+      rule_exclusions:
+      - parameter_should_not_end_in_resource_group
 aro create:
   parameters:
     cluster_resource_group:
@@ -1984,6 +1995,11 @@ find:
     cli_term:
       rule_exclusions:
       - no_positional_parameters
+functionapp config access-restriction add:
+  parameters:
+    vnet_resource_group:
+      rule_exclusions:
+      - parameter_should_not_end_in_resource_group
 functionapp config access-restriction set:
   parameters:
     use_same_restrictions_for_scm_site:
@@ -2045,6 +2061,11 @@ functionapp deployment source config:
     private_repo_username:
       rule_exclusions:
       - option_length_too_long
+functionapp flex-migration start:
+  parameters:
+    source_resource_group:
+      rule_exclusions:
+      - parameter_should_not_end_in_resource_group
 group export:
   parameters:
     include_parameter_default_value:
@@ -3526,6 +3547,15 @@ sql vm update:
     workspace_sub:
       rule_exclusions:
       - missing_parameter_test_coverage
+staticwebapp:
+  rule_exclusions:
+  - require_wait_command_if_no_wait
+staticwebapp hostname:
+  rule_exclusions:
+  - require_wait_command_if_no_wait
+staticwebapp secrets:
+  rule_exclusions:
+  - require_wait_command_if_no_wait
 staticwebapp create:
   parameters:
     app_artifact_location:
@@ -3878,6 +3908,11 @@ webapp auth update:
     twitter_consumer_secret:
       rule_exclusions:
       - option_length_too_long
+webapp config access-restriction add:
+  parameters:
+    vnet_resource_group:
+      rule_exclusions:
+      - parameter_should_not_end_in_resource_group
 webapp config access-restriction set:
   parameters:
     use_same_restrictions_for_scm_site:
@@ -3901,6 +3936,14 @@ webapp config container show:
     show_multicontainer_config:
       rule_exclusions:
       - option_length_too_long
+webapp config public-cert:
+  parameters:
+    public_certificate_name:
+      rule_exclusions:
+      - missing_parameter_test_coverage
+    slot:
+      rule_exclusions:
+      - missing_parameter_test_coverage
 webapp config public-cert delete:
   rule_exclusions:
   - missing_command_test_coverage
@@ -3972,6 +4015,7 @@ webapp config snapshot restore:
     source_resource_group:
       rule_exclusions:
       - option_length_too_long
+      - parameter_should_not_end_in_resource_group
 webapp config ssl bind:
   parameters:
     certificate_thumbprint:
@@ -4035,6 +4079,12 @@ webapp log config:
     failed_request_tracing:
       rule_exclusions:
       - option_length_too_long
+    web_server_log_sas_url:
+      rule_exclusions:
+      - missing_parameter_test_coverage
+    web_server_log_retention:
+      rule_exclusions:
+      - missing_parameter_test_coverage
 webapp update:
   parameters:
     client_affinity_enabled:

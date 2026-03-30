@@ -716,7 +716,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('settings', nargs='+', help="space-separated configuration for the number of pre-allocated instances in the format `<name>=<value>`")
 
     with self.argument_context('webapp config connection-string list') as c:
-        c.argument('name', arg_type=webapp_name_arg_type)
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
 
     with self.argument_context('webapp config storage-account list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)

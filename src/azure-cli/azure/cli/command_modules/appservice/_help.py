@@ -2454,13 +2454,6 @@ long-summary: |
     Use 'filesystem' to enable (logs viewable via `az webapp log tail` or downloadable via
     `az webapp log download`) or 'off' to disable. Web server logs can be stored on the filesystem
     or in Azure Blob Storage. When using Azure Blob Storage, provide a SAS URL via --web-server-log-sas-url.
-parameters:
-  - name: --web-server-logging
-    short-summary: "Configure Web server logging. Use 'filesystem' for local storage, 'azureblobstorage' for Azure Blob Storage, or 'off' to disable."
-  - name: --web-server-log-sas-url
-    short-summary: SAS URL to an Azure Blob Storage container for web server log storage. Required when --web-server-logging is set to azureblobstorage.
-  - name: --web-server-log-retention
-    short-summary: Number of days to retain web server logs when using Azure Blob Storage (default 3).
 examples:
   - name: Disable web server logging.
     text: az webapp log config --name MyWebapp --resource-group MyResourceGroup --web-server-logging off
