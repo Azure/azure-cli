@@ -1638,8 +1638,6 @@ short-summary: Get a web app's connection strings.
 examples:
   - name: Get a web app's connection strings.
     text: az webapp config connection-string list --name MyWebapp --resource-group MyResourceGroup
-  - name: Get a web app's connection strings using a resource ID.
-    text: az webapp config connection-string list --ids /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Web/sites/{WebApp}
 """
 
 helps['webapp config connection-string set'] = """
