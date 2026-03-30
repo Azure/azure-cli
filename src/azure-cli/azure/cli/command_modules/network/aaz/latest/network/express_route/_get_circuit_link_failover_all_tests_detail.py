@@ -45,19 +45,19 @@ class GetCircuitLinkFailoverAllTestsDetail(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.express_route_circuit_name = AAZStrArg(
+        _args_schema.name = AAZStrArg(
             options=["--name"],
             help="The name of the express route circuit.",
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
-                pattern="^[A-Za-z0-9_]+",
+                pattern="^[A-Za-z0-9_-]+",
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-        _args_schema.failover_test_type = AAZStrArg(
+        _args_schema.type = AAZStrArg(
             options=["--type"],
             help="The type of failover test",
             required=True,
@@ -84,7 +84,7 @@ class GetCircuitLinkFailoverAllTestsDetail(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=False)
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
     class ExpressRouteCircuitsGetCircuitLinkFailoverAllTestsDetails(AAZHttpOperation):
@@ -133,7 +133,7 @@ class GetCircuitLinkFailoverAllTestsDetail(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "expressRouteCircuitName", self.ctx.args.express_route_circuit_name,
+                    "expressRouteCircuitName", self.ctx.args.name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -151,7 +151,7 @@ class GetCircuitLinkFailoverAllTestsDetail(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "failoverTestType", self.ctx.args.failover_test_type,
+                    "failoverTestType", self.ctx.args.type,
                     required=True,
                 ),
                 **self.serialize_query_param(
@@ -189,12 +189,15 @@ class GetCircuitLinkFailoverAllTestsDetail(AAZCommand):
             if cls._schema_on_200 is not None:
                 return cls._schema_on_200
 
-            cls._schema_on_200 = AAZListType()
+            cls._schema_on_200 = AAZObjectType()
 
             _schema_on_200 = cls._schema_on_200
-            _schema_on_200.Element = AAZObjectType()
+            _schema_on_200.value = AAZListType()
 
-            _element = cls._schema_on_200.Element
+            value = cls._schema_on_200.value
+            value.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element
             _element.bgp_status = AAZListType(
                 serialized_name="bgpStatus",
                 flags={"read_only": True},
@@ -234,10 +237,10 @@ class GetCircuitLinkFailoverAllTestsDetail(AAZCommand):
                 flags={"read_only": True},
             )
 
-            bgp_status = cls._schema_on_200.Element.bgp_status
+            bgp_status = cls._schema_on_200.value.Element.bgp_status
             bgp_status.Element = AAZObjectType()
 
-            _element = cls._schema_on_200.Element.bgp_status.Element
+            _element = cls._schema_on_200.value.Element.bgp_status.Element
             _element.bgp_status_type = AAZStrType(
                 serialized_name="bgpStatusType",
                 flags={"read_only": True},
@@ -251,7 +254,7 @@ class GetCircuitLinkFailoverAllTestsDetail(AAZCommand):
                 flags={"read_only": True},
             )
 
-            issues = cls._schema_on_200.Element.issues
+            issues = cls._schema_on_200.value.Element.issues
             issues.Element = AAZStrType()
 
             return cls._schema_on_200

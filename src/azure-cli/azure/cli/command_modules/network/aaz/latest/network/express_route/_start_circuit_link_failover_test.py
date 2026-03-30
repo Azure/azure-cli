@@ -45,21 +45,21 @@ class StartCircuitLinkFailoverTest(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.express_route_circuit_name = AAZStrArg(
+        _args_schema.name = AAZStrArg(
             options=["--name"],
             help="The name of the express route circuit.",
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
-                pattern="^[A-Za-z0-9_]+",
+                pattern="^[A-Za-z0-9_-]+",
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-        _args_schema.circuit_maintenance_category = AAZStrArg(
+        _args_schema.maintenance_category = AAZStrArg(
             options=["--maintenance-category"],
-            help="The type of maintenance that can occur during an ExpressRoute Circuit failover test",
+            help="The type of maintenance test category",
             required=True,
             enum={"ASPathPrepend": "ASPathPrepend", "BgpDisconnect": "BgpDisconnect"},
         )
@@ -134,7 +134,7 @@ class StartCircuitLinkFailoverTest(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "expressRouteCircuitName", self.ctx.args.express_route_circuit_name,
+                    "expressRouteCircuitName", self.ctx.args.name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -152,7 +152,7 @@ class StartCircuitLinkFailoverTest(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "circuitMaintenanceCategory", self.ctx.args.circuit_maintenance_category,
+                    "circuitMaintenanceCategory", self.ctx.args.maintenance_category,
                     required=True,
                 ),
                 **self.serialize_query_param(

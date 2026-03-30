@@ -45,13 +45,13 @@ class StopCircuitLinkFailoverTest(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.express_route_circuit_name = AAZStrArg(
+        _args_schema.name = AAZStrArg(
             options=["--name"],
             help="The name of the express route circuit.",
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
-                pattern="^[A-Za-z0-9_]+",
+                pattern="^[A-Za-z0-9_-]+",
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
@@ -81,7 +81,7 @@ class StopCircuitLinkFailoverTest(AAZCommand):
             required=True,
             enum={"Primary": "Primary", "Secondary": "Secondary"},
         )
-        _args_schema.was_simulation_successful = AAZBoolArg(
+        _args_schema.simulation_successful = AAZBoolArg(
             options=["--simulation-successful"],
             arg_group="StopParameters",
             help="Whether the failover simulation was successful or not",
@@ -152,7 +152,7 @@ class StopCircuitLinkFailoverTest(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "expressRouteCircuitName", self.ctx.args.express_route_circuit_name,
+                    "expressRouteCircuitName", self.ctx.args.name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -198,7 +198,7 @@ class StopCircuitLinkFailoverTest(AAZCommand):
             _builder.set_prop("circuitTestCategory", AAZStrType, ".circuit_test_category", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("isVerified", AAZBoolType, ".is_verified", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("linkType", AAZStrType, ".link_type", typ_kwargs={"flags": {"required": True}})
-            _builder.set_prop("wasSimulationSuccessful", AAZBoolType, ".was_simulation_successful", typ_kwargs={"flags": {"required": True}})
+            _builder.set_prop("wasSimulationSuccessful", AAZBoolType, ".simulation_successful", typ_kwargs={"flags": {"required": True}})
 
             return self.serialize_content(_content_value)
 
