@@ -9,9 +9,7 @@ __version__ = "2.84.0"
 import os
 import sys
 import json
-import timeit
-import concurrent.futures
-from concurrent.futures import ThreadPoolExecutor
+import time
 
 from knack.cli import CLI
 from knack.commands import CLICommandsLoader
@@ -322,14 +320,14 @@ class MainCommandsLoader(CLICommandsLoader):
                 except ImportError as e:
                     logger.warning(e)
 
-            start_time = timeit.default_timer()
+            start_time = time.perf_counter()
             logger.debug("Loading command modules...")
             results = self._load_modules(args, command_modules)
 
             count, cumulative_group_count, cumulative_command_count = \
                 self._process_results_with_timing(results)
 
-            total_elapsed_time = timeit.default_timer() - start_time
+            total_elapsed_time = time.perf_counter() - start_time
             # Summary line
             logger.debug(self.item_format_string,
                          "Total ({})".format(count), total_elapsed_time,
@@ -404,7 +402,7 @@ class MainCommandsLoader(CLICommandsLoader):
                     # Add to the map. This needs to happen before we load commands as registering a command
                     # from an extension requires this map to be up-to-date.
                     # self._mod_to_ext_map[ext_mod] = ext_name
-                    start_time = timeit.default_timer()
+                    start_time = time.perf_counter()
                     extension_command_table, extension_group_table, extension_command_loader = \
                         _load_extension_command_loader(self, args, ext_mod)
                     import_extension_breaking_changes(ext_mod)
@@ -427,7 +425,7 @@ class MainCommandsLoader(CLICommandsLoader):
                     self.command_table.update(extension_command_table)
                     self.command_group_table.update(extension_group_table)
 
-                    elapsed_time = timeit.default_timer() - start_time
+                    elapsed_time = time.perf_counter() - start_time
                     logger.debug(self.item_ext_format_string, ext_name, elapsed_time,
                                  len(extension_group_table), len(extension_command_table),
                                  ext_dir)
@@ -667,6 +665,8 @@ class MainCommandsLoader(CLICommandsLoader):
 
     def _load_modules(self, args, command_modules):
         """Load command modules using ThreadPoolExecutor with timeout protection."""
+        import concurrent.futures
+        from concurrent.futures import ThreadPoolExecutor
         from azure.cli.core.commands import BLOCKED_MODS
 
         results = []
@@ -708,10 +708,10 @@ class MainCommandsLoader(CLICommandsLoader):
         from azure.cli.core.commands import _load_module_command_loader
         import traceback
         try:
-            start_time = timeit.default_timer()
+            start_time = time.perf_counter()
             module_command_table, module_group_table, command_loader = _load_module_command_loader(self, args, mod)
             import_module_breaking_changes(mod)
-            elapsed_time = timeit.default_timer() - start_time
+            elapsed_time = time.perf_counter() - start_time
             return ModuleLoadResult(mod, module_command_table, module_group_table, elapsed_time, command_loader=command_loader)
         except Exception as ex:  # pylint: disable=broad-except
             tb_str = traceback.format_exc()
@@ -1227,7 +1227,7 @@ class CommandIndex:
 
         :param command_table: The command table built by azure.cli.core.MainCommandsLoader.load_command_table
         """
-        start_time = timeit.default_timer()
+        start_time = time.perf_counter()
         self.INDEX[self._COMMAND_INDEX_VERSION] = __version__
         self.INDEX[self._COMMAND_INDEX_CLOUD_PROFILE] = self.cloud_profile
         from collections import defaultdict
@@ -1242,7 +1242,7 @@ class CommandIndex:
             if module_name not in index[top_command]:
                 index[top_command].append(module_name)
 
-        elapsed_time = timeit.default_timer() - start_time
+        elapsed_time = time.perf_counter() - start_time
         self.INDEX[self._COMMAND_INDEX] = index
 
         self.update_extension_index(command_table)
