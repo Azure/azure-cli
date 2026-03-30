@@ -1,10 +1,9 @@
 The Scrum Master role of CLI is primarily release-focused, but also includes several ongoing responsibilities:
-- Host the weekly sync meeting every Thursday.
 - Attend office hours held on Tuesday and Friday.
   - Join this [channel](https://teams.microsoft.com/l/chat/19:e4bb31fd84ab4f2f9375ad848e8a80fa@thread.v2/conversations?context=%7B%22contextType%22%3A%22chat%22%7D). If there is any topic related to CLI requested, make sure to join the call. Request product manager to add you to the meeting series.
-- Monitor Batched CI on a regular basis:
+- Monitor [Batched CI](https://dev.azure.com/azclitools/public/_build?definitionId=32&_a=summary&repositoryFilter=12&branchFilter=487%2C487%2C487) on a regular basis:
 
-  ![](https://raw.githubusercontent.com/Azure/azure-cli/refs/heads/dev/doc/assets/batched-ci.png)
+  ![](https://raw.githubusercontent.com/Azure/azure-cli/refs/heads/dev/doc/assets/batched-ci-pipeline.png)
   - Ensure that Batched CI is in a normal state before the release. If there are any failures, coordinate with the corresponding engineer to resolve them.
 
 The Azure CLI release process is highly automated **with some manual intervention steps** and has evolved to use both Azure DevOps and GitHub Actions.
