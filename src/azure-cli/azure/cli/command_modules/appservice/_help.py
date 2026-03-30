@@ -1923,6 +1923,9 @@ examples:
   - name: Create a Linux Python web app with a custom startup command.
     text: >
         az webapp create -g MyResourceGroup -p MyLinuxPlan -n MyUniqueAppName --runtime "PYTHON:3.14" --startup-file "gunicorn --bind=0.0.0.0 app:app"
+  - name: Create a Linux Python web app with a startup script.
+    text: >
+        az webapp create -g MyResourceGroup -p MyLinuxPlan -n MyUniqueAppName --runtime "PYTHON:3.14" --startup-file "startup.sh"
 """
 
 helps['webapp create-remote-connection'] = """
