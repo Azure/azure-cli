@@ -387,8 +387,6 @@ class TestWebappMocked(unittest.TestCase):
         generic_site_op_mock.return_value = site
 
         client_factory_mock.return_value = client
-        
-
 
         SnapshotRecoverySource, SnapshotRestoreRequest = \
             cmd_mock.get_models('SnapshotRecoverySource', 'SnapshotRestoreRequest')
@@ -507,14 +505,13 @@ class TestWebappMocked(unittest.TestCase):
         client.certificates.create_or_update.assert_called_once_with(name=host_name, resource_group_name=rg_name,
                                                                      certificate_envelope=cert_def)
 
-
     def test_update_app_settings_error_handling_no_parameters(self):
         """Test that MutuallyExclusiveArgumentError is raised when neither settings nor slot_settings are provided."""
         cmd_mock = _get_test_cmd()
-        
+
         # Test missing both parameters - should fail early without calling any services
-        with self.assertRaisesRegex(MutuallyExclusiveArgumentError, 
-                                   "Please provide either --settings or --slot-settings parameter"):
+        with self.assertRaisesRegex(MutuallyExclusiveArgumentError,
+                                    "Please provide either --settings or --slot-settings parameter"):
             update_app_settings(cmd_mock, 'test-rg', 'test-app')
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
@@ -522,19 +519,19 @@ class TestWebappMocked(unittest.TestCase):
     def test_update_app_settings_error_handling_invalid_format(self, mock_json_parse, mock_site_op):
         """Test that InvalidArgumentValueError is raised for invalid setting formats."""
         cmd_mock = _get_test_cmd()
-        
+
         # Setup minimal mocks needed to reach the error handling code
         mock_app_settings = mock.MagicMock()
         mock_app_settings.properties = {}
         mock_site_op.return_value = mock_app_settings
-        
+
         # Mock shell_safe_json_parse to raise InvalidArgumentValueError (simulating invalid JSON)
         mock_json_parse.side_effect = InvalidArgumentValueError("Invalid JSON format")
-        
+
         # Test invalid format that can't be parsed as JSON or key=value
         invalid_setting = "invalid_format_no_equals_no_json"
         expected_message = r"Invalid setting format.*Expected 'key=value' format or valid JSON"
-        
+
         with self.assertRaisesRegex(InvalidArgumentValueError, expected_message):
             update_app_settings(cmd_mock, 'test-rg', 'test-app', settings=[invalid_setting])
 
@@ -543,19 +540,19 @@ class TestWebappMocked(unittest.TestCase):
     def test_update_app_settings_error_handling_invalid_format_no_equals(self, mock_json_parse, mock_site_op):
         """Test ValueError path when shell_safe_json_parse raises InvalidArgumentValueError and string contains no '='."""
         cmd_mock = _get_test_cmd()
-        
+
         # Setup minimal mocks needed to reach the error handling code
         mock_app_settings = mock.MagicMock()
         mock_app_settings.properties = {}
         mock_site_op.return_value = mock_app_settings
-        
+
         # Mock shell_safe_json_parse to raise InvalidArgumentValueError
         mock_json_parse.side_effect = InvalidArgumentValueError("Invalid JSON format")
-        
+
         # Test invalid format with no equals sign - this should trigger ValueError in split('=', 1)
         invalid_setting_no_equals = "invalidformatthatcontainsnoequalsign"
         expected_message = r"Invalid setting format.*Expected 'key=value' format or valid JSON"
-        
+
         with self.assertRaisesRegex(InvalidArgumentValueError, expected_message):
             update_app_settings(cmd_mock, 'test-rg', 'test-app', settings=[invalid_setting_no_equals])
 
@@ -564,26 +561,26 @@ class TestWebappMocked(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.appservice.custom.is_centauri_functionapp')
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_settings_operation')
     @mock.patch('azure.cli.command_modules.appservice.custom._build_app_settings_output')
-    def test_update_app_settings_success_key_value_format(self, mock_build, mock_settings_op, mock_centauri, 
-                                                         mock_client_factory, mock_site_op):
+    def test_update_app_settings_success_key_value_format(self, mock_build, mock_settings_op, mock_centauri,
+                                                          mock_client_factory, mock_site_op):
         """Test successful processing of key=value format settings."""
         cmd_mock = _get_test_cmd()
-        
+
         # Setup mocks
         mock_app_settings = mock.MagicMock()
         mock_app_settings.properties = {}
         mock_site_op.return_value = mock_app_settings
-        
+
         mock_client = mock.MagicMock()
         mock_client_factory.return_value = mock_client
         mock_centauri.return_value = False
         mock_settings_op.return_value = mock_app_settings
         mock_build.return_value = {"KEY1": "value1", "KEY2": "value2"}
-        
+
         # Test valid key=value format
-        result = update_app_settings(cmd_mock, 'test-rg', 'test-app', 
-                                   settings=['KEY1=value1', 'KEY2=value2'])
-        
+        result = update_app_settings(cmd_mock, 'test-rg', 'test-app',
+                                     settings=['KEY1=value1', 'KEY2=value2'])
+
         # Verify the function completed successfully
         self.assertEqual(result["KEY1"], "value1")
         self.assertEqual(result["KEY2"], "value2")
@@ -593,20 +590,20 @@ class TestWebappMocked(unittest.TestCase):
     def test_update_application_settings_polling_error_handling(self, mock_send_request):
         """Test that AzureResponseError is raised in polling function when appropriate."""
         cmd_mock = _get_test_cmd()
-        
+
         # Mock an exception that doesn't have the expected structure
         class MockException(Exception):
             def __init__(self):
                 self.response = mock.MagicMock()
                 self.response.status_code = 400  # Not 202
                 self.response.headers = {}
-        
+
         # Mock _generic_settings_operation to raise the exception
         with mock.patch('azure.cli.command_modules.appservice.custom._generic_settings_operation') as mock_settings_op, \
              self.assertRaisesRegex(AzureResponseError, "Failed to update application settings"):
             mock_settings_op.side_effect = MockException()
-            update_application_settings_polling(cmd_mock, 'test-rg', 'test-app', 
-                                               mock.MagicMock(), None, mock.MagicMock())
+            update_application_settings_polling(cmd_mock, 'test-rg', 'test-app',
+                                                mock.MagicMock(), None, mock.MagicMock())
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
@@ -614,15 +611,15 @@ class TestWebappMocked(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_settings_operation')
     @mock.patch('azure.cli.command_modules.appservice.custom._build_app_settings_output')
     def test_update_app_settings_success_with_slot_settings(self, mock_build, mock_settings_op, mock_centauri,
-                                                           mock_client_factory, mock_site_op):
+                                                            mock_client_factory, mock_site_op):
         """Test successful processing with slot settings."""
         cmd_mock = _get_test_cmd()
-        
+
         # Setup mocks
         mock_app_settings = mock.MagicMock()
         mock_app_settings.properties = {}
         mock_site_op.return_value = mock_app_settings
-        
+
         mock_client = mock.MagicMock()
         mock_slot_config = mock.MagicMock()
         mock_slot_config.app_setting_names = []
@@ -631,12 +628,12 @@ class TestWebappMocked(unittest.TestCase):
         mock_centauri.return_value = False
         mock_settings_op.return_value = mock_app_settings
         mock_build.return_value = {"SLOT_KEY": "slot_value"}
-        
+
         # Test with slot settings
-        result = update_app_settings(cmd_mock, 'test-rg', 'test-app', 
-                                   settings=['REGULAR_KEY=regular_value'],
-                                   slot_settings=['SLOT_KEY=slot_value'])
-        
+        update_app_settings(cmd_mock, 'test-rg', 'test-app',
+                            settings=['REGULAR_KEY=regular_value'],
+                            slot_settings=['SLOT_KEY=slot_value'])
+
         # Verify slot configuration was updated
         mock_client.web_apps.list_slot_configuration_names.assert_called_once()
         mock_client.web_apps.update_slot_configuration_names.assert_called_once()
@@ -700,7 +697,7 @@ class TestWebappAuthV2Mocked(unittest.TestCase):
 
     def test_is_auth_v2_app_with_identity_providers(self):
         from azure.mgmt.web.models import (SiteAuthSettingsV2, IdentityProviders,
-                                            AzureActiveDirectory)
+                                           AzureActiveDirectory)
         settings = SiteAuthSettingsV2(
             identity_providers=IdentityProviders(
                 azure_active_directory=AzureActiveDirectory(enabled=True)))
@@ -811,7 +808,7 @@ class TestWebappAuthV2Mocked(unittest.TestCase):
         # v1 compat field
         self.assertTrue(result['enabled'])
         mock_site_op.assert_called_once_with(cmd.cli_ctx, 'rg', 'myapp',
-                                              'get_auth_settings_v2', None)
+                                             'get_auth_settings_v2', None)
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
     def test_get_auth_settings_falls_back_to_v1(self, mock_site_op):
@@ -867,7 +864,7 @@ class TestWebappAuthV2Mocked(unittest.TestCase):
 
         cmd = _get_test_cmd()
         result = update_auth_settings(cmd, 'rg', 'myapp', enabled='true',
-                                       client_id='test-client-id')
+                                      client_id='test-client-id')
 
         # Result is now a dict with v2 structure and v1 compat fields
         self.assertIsInstance(result, dict)
@@ -891,7 +888,6 @@ class TestWebappAuthV2Mocked(unittest.TestCase):
     def test_update_auth_settings_require_https_forces_v2(self, mock_site_op):
         from azure.mgmt.web.models import SiteAuthSettingsV2
         v2_settings = SiteAuthSettingsV2()  # empty = not v2 configured yet
-        updated_v2 = SiteAuthSettingsV2()
 
         def side_effect(cli_ctx, rg, name, op, slot=None, extra_parameter=None):
             if op == 'get_auth_settings_v2':
@@ -929,7 +925,7 @@ class TestWebappAuthV2Mocked(unittest.TestCase):
 
         cmd = _get_test_cmd()
         result = update_auth_settings(cmd, 'rg', 'myapp', enabled='true',
-                                       facebook_app_id='fb-id')
+                                      facebook_app_id='fb-id')
 
         # Should have used v1 path
         self.assertTrue(result.enabled)
@@ -1062,12 +1058,13 @@ class TestWebappAuthV2Mocked(unittest.TestCase):
 
         cmd = _get_test_cmd()
         result = update_auth_settings(cmd, 'rg', 'myapp',
-                                       action='LoginWithAzureActiveDirectory')
+                                      action='LoginWithAzureActiveDirectory')
 
         self.assertEqual(result['globalValidation']['unauthenticatedClientAction'], 'RedirectToLoginPage')
         self.assertEqual(result['globalValidation']['redirectToProvider'], 'azureactivedirectory')
         # v1 compat field
         self.assertEqual(result['defaultProvider'], 'AzureActiveDirectory')
+
 
 class TestServicePrincipalDeploymentSource(unittest.TestCase):
     """Tests for Service Principal authentication detection in deployment source config"""
@@ -1080,13 +1077,13 @@ class TestServicePrincipalDeploymentSource(unittest.TestCase):
     ):
         """Test that SP auth + --github-action raises ValidationError"""
         from azure.cli.core.azclierror import ValidationError
-        
+
         # Setup mocks
         is_sp_auth_mock.return_value = True
         get_location_mock.return_value = 'eastus'
-        
+
         cmd = _get_test_cmd()
-        
+
         # Execute and assert
         with self.assertRaises(ValidationError) as context:
             config_source_control(
@@ -1096,7 +1093,7 @@ class TestServicePrincipalDeploymentSource(unittest.TestCase):
                 repo_url='https://github.com/test/repo',
                 github_action=True
             )
-        
+
         self.assertIn('Service Principal authentication', str(context.exception))
         self.assertIn('az webapp deployment github-actions add', str(context.exception))
 
@@ -1108,11 +1105,11 @@ class TestServicePrincipalDeploymentSource(unittest.TestCase):
         self, web_client_factory_mock, get_location_mock, generic_site_op_mock, is_sp_auth_mock
     ):
         """Test that user auth + --github-action passes through (no error raised)"""
-        
+
         # Setup mocks
         is_sp_auth_mock.return_value = False  # User authentication
         get_location_mock.return_value = 'eastus'
-        
+
         # Mock the site operation to return a mock response
         mock_poller = mock.Mock()
         mock_poller.done.return_value = True
@@ -1120,9 +1117,9 @@ class TestServicePrincipalDeploymentSource(unittest.TestCase):
         mock_response.git_hub_action_configuration = None
         mock_poller.result.return_value = mock_response
         generic_site_op_mock.return_value = mock_poller
-        
+
         cmd = _get_test_cmd()
-        
+
         # Execute - should not raise an error
         config_source_control(
             cmd,
@@ -1146,11 +1143,11 @@ class TestServicePrincipalDeploymentSource(unittest.TestCase):
         self, web_client_factory_mock, get_location_mock, generic_site_op_mock, is_sp_auth_mock
     ):
         """Test that SP auth without --github-action passes through (no error raised)"""
-        
+
         # Setup mocks
         is_sp_auth_mock.return_value = True  # Service Principal authentication
         get_location_mock.return_value = 'eastus'
-        
+
         # Mock the site operation to return a mock response
         mock_poller = mock.Mock()
         mock_poller.done.return_value = True
@@ -1158,9 +1155,9 @@ class TestServicePrincipalDeploymentSource(unittest.TestCase):
         mock_response.git_hub_action_configuration = None
         mock_poller.result.return_value = mock_response
         generic_site_op_mock.return_value = mock_poller
-        
+
         cmd = _get_test_cmd()
-        
+
         # Execute - should not raise an error when github_action is None/False
         config_source_control(
             cmd,

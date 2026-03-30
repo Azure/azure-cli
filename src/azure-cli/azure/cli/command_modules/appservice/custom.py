@@ -3592,7 +3592,7 @@ def _configure_auth_v2_global_validation(auth_settings_v2, action):
 
 
 def _configure_auth_v2_login(auth_settings_v2, token_store_enabled, token_refresh_extension_hours,
-                              allowed_external_redirect_urls):
+                             allowed_external_redirect_urls):
     """Configure the login / token_store block of a v2 auth settings object."""
     from azure.mgmt.web.models import Login, TokenStore
     if auth_settings_v2.login is None:
@@ -3619,7 +3619,7 @@ def _configure_auth_v2_http_settings(auth_settings_v2, require_https):
 
 
 def _configure_auth_v2_aad(ip, client_id, client_secret, client_secret_certificate_thumbprint,
-                            allowed_audiences, issuer):
+                           allowed_audiences, issuer):
     """Configure Azure Active Directory identity provider and return any secrets to store."""
     secrets = {}
     if not any(v is not None for v in [client_id, client_secret, client_secret_certificate_thumbprint,
@@ -3725,7 +3725,7 @@ def _configure_auth_v2_twitter(ip, twitter_consumer_key, twitter_consumer_secret
 
 
 def _configure_auth_v2_microsoft_account(ip, microsoft_account_client_id, microsoft_account_client_secret,
-                                          microsoft_account_oauth_scopes):
+                                         microsoft_account_oauth_scopes):
     """Configure Microsoft Account (legacy) identity provider and return any secrets to store."""
     secrets = {}
     if not any(v is not None for v in [microsoft_account_client_id, microsoft_account_client_secret,
@@ -3804,14 +3804,14 @@ def _update_auth_settings_v2(cmd, resource_group_name, name, auth_settings_v2,
     # Store all collected secrets into app settings in a single API call.
     if secrets_to_store:
         app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
-                                                'list_application_settings', slot)
+                                               'list_application_settings', slot)
         for setting_key, secret_value in secrets_to_store.items():
             app_settings.properties[setting_key] = secret_value
         _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
-                                 'update_application_settings', slot, app_settings)
+                                'update_application_settings', slot, app_settings)
 
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
-                                    'update_auth_settings_v2', slot, auth_settings_v2)
+                                   'update_auth_settings_v2', slot, auth_settings_v2)
 
 
 def update_auth_settings(cmd, resource_group_name, name, enabled=None, action=None,  # pylint: disable=unused-argument
