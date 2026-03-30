@@ -372,7 +372,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
 
     _enable_basic_auth(cmd, name, None, resource_group_name, basic_auth.lower())
     if not using_webapp_up:
-        logger.warning("Webapp '%s' created. Deploy your code with: az webapp deploy or az webapp up", name)
+        logger.warning("Webapp '%s' created. Deploy your code with: az webapp deploy", name)
     return webapp
 
 
@@ -9207,7 +9207,7 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
         loc = set_location(cmd, sku, location)
         rg_name = get_rg_to_use(user, resource_group_name)
         _create_new_rg = not check_resource_group_exists(cmd, rg_name)
-        _plan_was_provided = plan is not None
+        _plan_not_provided = plan is None
         plan = get_plan_to_use(cmd=cmd,
                                user=user,
                                loc=loc,
@@ -9217,7 +9217,7 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
                                plan=plan,
                                is_linux=_is_linux,
                                client=client)
-        if not _plan_was_provided:
+        if _plan_not_provided:
             logger.warning("No --plan specified. Auto-generated plan: '%s'.", plan)
     dry_run_str = r""" {
                 "name" : "%s",
@@ -9563,20 +9563,13 @@ def perform_onedeploy_webapp(cmd,
     app = client.web_apps.get(resource_group_name, name)
     params.is_linux_webapp = is_linux_webapp(app)
 
-    # Warn interpreted-language Linux apps that zip deploy won't auto-build
+    # Warn that zip deploy won't auto-build on Linux
     if params.is_linux_webapp and artifact_type in (None, 'zip'):
-        try:
-            site_config = get_site_configs(cmd, resource_group_name, name, slot)
-            linux_fx = getattr(site_config, 'linux_fx_version', '') or ''
-            stack_prefix = linux_fx.split('|')[0].upper() if '|' in linux_fx else ''
-            if stack_prefix in ('PYTHON', 'NODE', 'PHP'):
-                logger.warning(
-                    "Note: 'az webapp deploy' does not install dependencies (pip install, npm install, "
-                    "etc.) by default for Linux web apps. Ensure your zip includes all dependencies, or set the app "
-                    "setting SCM_DO_BUILD_DURING_DEPLOYMENT=true to enable builds during deployment."
-                )
-        except Exception:  # pylint: disable=broad-except
-            pass
+        logger.warning(
+            "Note: 'az webapp deploy' does not run build automation (dependency installation, "
+            "compilation, etc.) by default for Linux web apps. If your package is not pre-built, "
+            "set the app setting SCM_DO_BUILD_DURING_DEPLOYMENT=true to enable builds during deployment."
+        )
 
     params.is_functionapp = False
     return _perform_onedeploy_internal(params)
