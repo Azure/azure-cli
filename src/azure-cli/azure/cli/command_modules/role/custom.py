@@ -550,6 +550,110 @@ def _search_role_assignments(assignments_client, definitions_client,
     return assignments
 
 
+def list_deny_assignments(cmd, scope=None, filter_str=None):
+    """List deny assignments at a scope or for the entire subscription."""
+    authorization_client = _auth_client_factory(cmd.cli_ctx, scope)
+    deny_client = authorization_client.deny_assignments
+
+    if scope:
+        assignments = list(deny_client.list_for_scope(scope=scope, filter=filter_str))
+    else:
+        assignments = list(deny_client.list(filter=filter_str))
+
+    return todict(assignments) if assignments else []
+
+
+def show_deny_assignment(cmd, deny_assignment_id=None, deny_assignment_name=None, scope=None):
+    """Get a deny assignment by ID or name."""
+    authorization_client = _auth_client_factory(cmd.cli_ctx, scope)
+    deny_client = authorization_client.deny_assignments
+
+    if deny_assignment_id:
+        return deny_client.get_by_id(deny_assignment_id)
+    if deny_assignment_name and scope:
+        return deny_client.get(scope=scope, deny_assignment_id=deny_assignment_name)
+    raise CLIError('Please provide --id, or both --name and --scope.')
+
+
+def create_deny_assignment(cmd, scope, deny_assignment_name,
+                           actions=None, not_actions=None,
+                           description=None,
+                           exclude_principal_ids=None, exclude_principal_types=None,
+                           assignment_name=None):
+    """Create a user-assigned deny assignment (PP1).
+
+    Under PP1 constraints:
+    - Principals is always Everyone (SystemDefined, 00000000-0000-0000-0000-000000000000)
+    - ExcludePrincipals is required (at least one)
+    - DataActions and NotDataActions are not supported
+    - DoNotApplyToChildScopes is not supported
+    - Read actions (*/read) are not permitted
+    """
+    authorization_client = _auth_client_factory(cmd.cli_ctx, scope)
+    deny_client = authorization_client.deny_assignments
+
+    if not actions:
+        raise CLIError('At least one action is required via --actions.')
+
+    if not exclude_principal_ids:
+        raise CLIError('At least one excluded principal is required via --exclude-principal-ids. '
+                       'User-assigned deny assignments deny Everyone and require at least one exclusion.')
+
+    # Validate no read actions
+    for action in actions:
+        if action.lower().endswith('/read'):
+            raise CLIError(f"Read actions are not permitted for user-assigned deny assignments: '{action}'. "
+                           "Only write, delete, and action operations can be denied.")
+
+    if not assignment_name:
+        assignment_name = str(uuid.uuid4())
+
+    # Build exclude principals list
+    exclude_principals = []
+    if exclude_principal_types and len(exclude_principal_types) != len(exclude_principal_ids):
+        raise CLIError('--exclude-principal-types must have the same number of entries as --exclude-principal-ids.')
+
+    for i, pid in enumerate(exclude_principal_ids):
+        principal = {
+            'id': pid,
+            'type': exclude_principal_types[i] if exclude_principal_types else 'ServicePrincipal'
+        }
+        exclude_principals.append(principal)
+
+    # PP1: Principals must be Everyone (SystemDefined)
+    principals = [{'id': '00000000-0000-0000-0000-000000000000', 'type': 'SystemDefined'}]
+
+    deny_assignment_params = {
+        'deny_assignment_name': deny_assignment_name,
+        'description': description or '',
+        'permissions': [{
+            'actions': actions or [],
+            'not_actions': not_actions or [],
+            'data_actions': [],
+            'not_data_actions': []
+        }],
+        'scope': scope,
+        'principals': principals,
+        'exclude_principals': exclude_principals,
+        'is_system_protected': False
+    }
+
+    return deny_client.create(scope=scope, deny_assignment_id=assignment_name,
+                              parameters=deny_assignment_params)
+
+
+def delete_deny_assignment(cmd, scope=None, deny_assignment_id=None, deny_assignment_name=None):
+    """Delete a user-assigned deny assignment."""
+    authorization_client = _auth_client_factory(cmd.cli_ctx, scope)
+    deny_client = authorization_client.deny_assignments
+
+    if deny_assignment_id:
+        return deny_client.delete_by_id(deny_assignment_id)
+    if deny_assignment_name and scope:
+        return deny_client.delete(scope=scope, deny_assignment_id=deny_assignment_name)
+    raise CLIError('Please provide --id, or both --name and --scope.')
+
+
 def _build_role_scope(resource_group_name, scope, subscription_id):
     subscription_scope = '/subscriptions/' + subscription_id
     if scope:

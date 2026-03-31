@@ -390,6 +390,51 @@ def load_arguments(self, _):
     with self.argument_context('role assignment delete') as c:
         c.argument('yes', options_list=['--yes', '-y'], action='store_true', help='Currently no-op.')
 
+    with self.argument_context('role deny-assignment') as c:
+        c.argument('scope', help='Scope at which the deny assignment applies. '
+                        'For example, /subscriptions/00000000-0000-0000-0000-000000000000 or '
+                        '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myGroup')
+        c.argument('deny_assignment_name', options_list=['--name', '-n'],
+                   help='The display name of the deny assignment.')
+
+    with self.argument_context('role deny-assignment list') as c:
+        c.argument('filter_str', options_list=['--filter'],
+                   help='OData filter expression to apply. For example, '
+                        '"atScope()" to list at the current scope, or '
+                        '"gdprExportPrincipalId eq \'{objectId}\'" to list for a specific principal.')
+
+    with self.argument_context('role deny-assignment show') as c:
+        c.argument('deny_assignment_id', options_list=['--id'],
+                   help='The fully qualified ID of the deny assignment including scope, '
+                        'e.g. /subscriptions/{id}/providers/Microsoft.Authorization/denyAssignments/{denyAssignmentId}')
+        c.argument('deny_assignment_name', options_list=['--name', '-n'],
+                   help='The name (GUID) of the deny assignment.')
+
+    with self.argument_context('role deny-assignment create') as c:
+        c.argument('deny_assignment_name', options_list=['--name', '-n'],
+                   help='The display name of the deny assignment.')
+        c.argument('description', help='Description of the deny assignment.')
+        c.argument('actions', nargs='+',
+                   help='Space-separated list of actions to deny, e.g. '
+                        '"Microsoft.Authorization/roleAssignments/write". '
+                        'Note: read actions (*/read) are not permitted for user-assigned deny assignments.')
+        c.argument('not_actions', nargs='+',
+                   help='Space-separated list of actions to exclude from the deny.')
+        c.argument('exclude_principal_ids', nargs='+', options_list=['--exclude-principal-ids'],
+                   help='Space-separated list of principal object IDs to exclude from the deny. '
+                        'At least one is required for user-assigned deny assignments.')
+        c.argument('exclude_principal_types', nargs='+', options_list=['--exclude-principal-types'],
+                   help='Space-separated list of principal types corresponding to --exclude-principal-ids. '
+                        'Accepted values: User, Group, ServicePrincipal.')
+        c.argument('assignment_name', options_list=['--assignment-name'],
+                   help='A GUID for the deny assignment. If omitted, a new GUID is generated.')
+
+    with self.argument_context('role deny-assignment delete') as c:
+        c.argument('deny_assignment_id', options_list=['--id'],
+                   help='The fully qualified ID of the deny assignment to delete.')
+        c.argument('deny_assignment_name', options_list=['--name', '-n'],
+                   help='The name (GUID) of the deny assignment to delete.')
+
     with self.argument_context('role definition') as c:
         c.argument('custom_role_only', arg_type=get_three_state_flag(), help='custom roles only(vs. build-in ones)')
         c.argument('role_definition', help="json formatted content which defines the new role.")

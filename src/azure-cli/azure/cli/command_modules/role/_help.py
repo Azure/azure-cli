@@ -813,6 +813,86 @@ type: command
 short-summary: List changelogs for role assignments.
 """
 
+helps['role deny-assignment'] = """
+type: group
+short-summary: Manage deny assignments.
+long-summary: >-
+    Deny assignments block users from performing specific Azure resource actions even if a role assignment
+    grants them access. User-assigned deny assignments can be created to deny write, delete, and action
+    operations at a given scope while excluding specific principals.
+"""
+
+helps['role deny-assignment list'] = """
+type: command
+short-summary: List deny assignments.
+examples:
+  - name: List deny assignments at the subscription scope.
+    text: az role deny-assignment list --scope /subscriptions/00000000-0000-0000-0000-000000000000
+  - name: List all deny assignments in the current subscription.
+    text: az role deny-assignment list
+  - name: List deny assignments at a resource group scope.
+    text: az role deny-assignment list --scope /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myGroup
+"""
+
+helps['role deny-assignment show'] = """
+type: command
+short-summary: Get a deny assignment.
+examples:
+  - name: Show a deny assignment by its fully qualified ID.
+    text: >-
+        az role deny-assignment show
+        --id /subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/denyAssignments/00000000-0000-0000-0000-000000000001
+  - name: Show a deny assignment by name and scope.
+    text: >-
+        az role deny-assignment show
+        --name 00000000-0000-0000-0000-000000000001
+        --scope /subscriptions/00000000-0000-0000-0000-000000000000
+"""
+
+helps['role deny-assignment create'] = """
+type: command
+short-summary: Create a user-assigned deny assignment.
+long-summary: >-
+    Creates a deny assignment that blocks specific actions for all principals at the given scope,
+    excluding the specified principals. This is a PP1 (Private Preview 1) feature with the following constraints:
+    principals are always Everyone (SystemDefined), at least one excluded principal is required,
+    DataActions are not supported, DoNotApplyToChildScopes is not supported, and read actions (*/read)
+    are not permitted.
+examples:
+  - name: Create a deny assignment that blocks role assignment writes, excluding a specific service principal.
+    text: >-
+        az role deny-assignment create
+        --name "Block role assignment changes"
+        --scope /subscriptions/00000000-0000-0000-0000-000000000000
+        --actions "Microsoft.Authorization/roleAssignments/write" "Microsoft.Authorization/roleAssignments/delete"
+        --exclude-principal-ids 00000000-0000-0000-0000-000000000001
+        --exclude-principal-types ServicePrincipal
+  - name: Create a deny assignment with multiple excluded principals and a description.
+    text: >-
+        az role deny-assignment create
+        --name "Deny resource deletion"
+        --scope /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myGroup
+        --actions "*/delete"
+        --description "Prevent accidental resource deletion"
+        --exclude-principal-ids 00000000-0000-0000-0000-000000000001 00000000-0000-0000-0000-000000000002
+        --exclude-principal-types ServicePrincipal User
+"""
+
+helps['role deny-assignment delete'] = """
+type: command
+short-summary: Delete a user-assigned deny assignment.
+examples:
+  - name: Delete a deny assignment by its fully qualified ID.
+    text: >-
+        az role deny-assignment delete
+        --id /subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/denyAssignments/00000000-0000-0000-0000-000000000001
+  - name: Delete a deny assignment by name and scope.
+    text: >-
+        az role deny-assignment delete
+        --name 00000000-0000-0000-0000-000000000001
+        --scope /subscriptions/00000000-0000-0000-0000-000000000000
+"""
+
 helps['role definition'] = """
 type: group
 short-summary: Manage role definitions.
