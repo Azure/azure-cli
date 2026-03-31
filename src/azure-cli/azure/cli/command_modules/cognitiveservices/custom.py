@@ -2346,7 +2346,7 @@ def _build_outbound_rule(rule_type, category=None, destination=None, subresource
             destination=dest_obj
         )
     raise InvalidArgumentValueError(
-            f"Unknown rule type: {rule_type}. Must be one of: fqdn, privateendpoint, servicetag")
+        f"Unknown rule type: {rule_type}. Must be one of: fqdn, privateendpoint, servicetag")
 
 
 def outbound_rule_set(
@@ -2364,7 +2364,7 @@ def outbound_rule_set(
     Create or update a single outbound rule for the managed network.
     """
     rule = _build_outbound_rule(rule_type, category=category, destination=destination,
-                                 subresource_target=subresource_target)
+                                subresource_target=subresource_target)
     body = OutboundRuleBasicResource(properties=rule)
     return client.begin_create_or_update(
         resource_group_name, account_name, managed_network_name, rule_name, body)
