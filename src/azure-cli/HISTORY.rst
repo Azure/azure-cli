@@ -79,7 +79,7 @@ Release History
 
 **Packaging**
 
-* | Add new ways (preview) to install azure-cli on macOS (#32880)
+* Add new ways (preview) to install azure-cli on macOS (#32880)
 
 **PostgreSQL**
 
