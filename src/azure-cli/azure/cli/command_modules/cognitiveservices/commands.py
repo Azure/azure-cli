@@ -160,7 +160,7 @@ def load_command_table(self, _):
             client_factory=cf_managed_network_settings) as g:
         g.custom_command('create', 'managed_network_create')
         g.custom_command('update', 'managed_network_update')
-        g.show_command('show', 'get')
+        g.custom_show_command('show', 'managed_network_show')
         g.custom_command('provision-network', 'managed_network_provision',
                          client_factory=cf_managed_network_provisions)
 
@@ -169,10 +169,9 @@ def load_command_table(self, _):
             client_factory=cf_outbound_rule) as g:
         g.command('list', 'list')
         g.show_command('show', 'get')
-        g.command('remove', 'begin_delete', confirmation=True)
+        g.custom_command('remove', 'outbound_rule_remove', confirmation=True)
         g.custom_command('set', 'outbound_rule_set')
-        g.custom_command('bulk-set', 'outbound_rule_bulk_set',
-                         client_factory=cf_outbound_rules)
+        g.custom_command('bulk-set', 'outbound_rule_bulk_set')
 
     with self.command_group(
             'cognitiveservices account project', projects_type,

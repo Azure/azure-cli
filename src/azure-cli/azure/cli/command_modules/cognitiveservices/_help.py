@@ -854,6 +854,15 @@ helps['cognitiveservices account managed-network outbound-rule set'] = """
         --type servicetag
         --category UserDefined
         --destination '{"serviceTag": "Storage", "protocol": "TCP", "portRanges": "443"}'
+    - name: Create a PrivateEndpoint outbound rule.
+      text: >
+        az cognitiveservices account managed-network outbound-rule set
+        --name my-account
+        --resource-group my-resource-group
+        --rule my-pe-rule
+        --type privateendpoint
+        --destination /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/my-rg/providers/Microsoft.Storage/storageAccounts/mystorageaccount
+        --subresource-target blob
 """
 
 helps['cognitiveservices account managed-network outbound-rule bulk-set'] = """

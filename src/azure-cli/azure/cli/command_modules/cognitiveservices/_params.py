@@ -719,7 +719,8 @@ def load_arguments(self, _):
         c.argument('managed_network_name',
                    options_list=['--managed-network-name'],
                    help='Name of the managed network. Only "default" is supported.',
-                   default='default')
+                   default='default',
+                   required=False)
         c.argument('rule_name',
                    options_list=['--rule'],
                    help='Name of the outbound rule.')
@@ -738,7 +739,11 @@ def load_arguments(self, _):
                    options_list=['--destination'],
                    help='Destination for the outbound rule. '
                         'For FQDN rules, this is the FQDN string. '
-                        'For PrivateEndpoint and ServiceTag rules, provide a JSON string or @file path.')
+                        'For PrivateEndpoint rules, this is the service resource ID. '
+                        'For ServiceTag rules, provide a JSON string or @file path.')
+        c.argument('subresource_target',
+                   options_list=['--subresource-target'],
+                   help='Subresource target for PrivateEndpoint outbound rules (e.g. blob, table, queue, file, web, dfs).')
 
     with self.argument_context('cognitiveservices account managed-network outbound-rule bulk-set') as c:
         c.argument('file',
