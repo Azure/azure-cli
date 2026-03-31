@@ -26,8 +26,8 @@ from azure.mgmt.cognitiveservices.models import Account as CognitiveServicesAcco
     ConnectionPropertiesV2BasicResource, ConnectionUpdateContent, \
     Project, ProjectProperties, \
     ManagedNetworkSettingsPropertiesBasicResource, ManagedNetworkSettingsProperties, \
-    ManagedNetworkSettingsEx, ManagedNetworkSettingsBasicResource, ManagedNetworkSettings, \
-    OutboundRuleBasicResource, FqdnOutboundRule, OutboundRule, \
+    ManagedNetworkSettingsEx, \
+    OutboundRuleBasicResource, FqdnOutboundRule, \
     PrivateEndpointOutboundRule, PrivateEndpointOutboundRuleDestination, \
     ServiceTagOutboundRule, ServiceTagOutboundRuleDestination
 from azure.cli.command_modules.cognitiveservices._client_factory import cf_accounts, cf_resource_skus
@@ -2345,8 +2345,7 @@ def _build_outbound_rule(rule_type, category=None, destination=None, subresource
             category=category,
             destination=dest_obj
         )
-    else:
-        raise InvalidArgumentValueError(
+    raise InvalidArgumentValueError(
             f"Unknown rule type: {rule_type}. Must be one of: fqdn, privateendpoint, servicetag")
 
 
