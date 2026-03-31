@@ -706,6 +706,7 @@ def load_arguments(self, _):
                    help='Firewall SKU for the managed network.')
 
     with self.argument_context('cognitiveservices account managed-network update') as c:
+        c.argument('managed_network_name', default=None)
         c.argument('managed_network',
                    options_list=['--managed-network'],
                    arg_type=get_enum_type(['allow_internet_outbound', 'allow_only_approved_outbound']),
@@ -743,7 +744,8 @@ def load_arguments(self, _):
                         'For ServiceTag rules, provide a JSON string or @file path.')
         c.argument('subresource_target',
                    options_list=['--subresource-target'],
-                   help='Subresource target for PrivateEndpoint outbound rules (e.g. blob, table, queue, file, web, dfs).')
+                   help='Subresource target for PrivateEndpoint outbound rules '
+                        '(e.g. blob, table, queue, file, web, dfs).')
 
     with self.argument_context('cognitiveservices account managed-network outbound-rule bulk-set') as c:
         c.argument('file',

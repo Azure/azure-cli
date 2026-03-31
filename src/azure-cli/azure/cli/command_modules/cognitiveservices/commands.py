@@ -7,7 +7,7 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.cognitiveservices._client_factory import cf_accounts, cf_resource_skus, \
     cf_deleted_accounts, cf_deployments, cf_commitment_plans, cf_commitment_tiers, cf_models, cf_usages, \
     cf_ai_projects, cf_account_connections, cf_projects, cf_project_connections, \
-    cf_managed_network_settings, cf_managed_network_provisions, cf_outbound_rule, cf_outbound_rules
+    cf_managed_network_settings, cf_managed_network_provisions, cf_outbound_rule
 
 
 def load_command_table(self, _):
@@ -140,19 +140,9 @@ def load_command_table(self, _):
         client_factory=cf_managed_network_settings
     )
 
-    managed_network_provisions_type = CliCommandType(
-        operations_tmpl='azure.mgmt.cognitiveservices.operations#ManagedNetworkProvisionsOperations.{}',
-        client_factory=cf_managed_network_provisions
-    )
-
     outbound_rule_type = CliCommandType(
         operations_tmpl='azure.mgmt.cognitiveservices.operations#OutboundRuleOperations.{}',
         client_factory=cf_outbound_rule
-    )
-
-    outbound_rules_type = CliCommandType(
-        operations_tmpl='azure.mgmt.cognitiveservices.operations#OutboundRulesOperations.{}',
-        client_factory=cf_outbound_rules
     )
 
     with self.command_group(
