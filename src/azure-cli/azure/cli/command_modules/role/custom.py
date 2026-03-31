@@ -575,7 +575,7 @@ def show_deny_assignment(cmd, deny_assignment_id=None, deny_assignment_name=None
     raise CLIError('Please provide --id, or both --name and --scope.')
 
 
-def create_deny_assignment(cmd, scope, deny_assignment_name,
+def create_deny_assignment(cmd, scope=None, deny_assignment_name=None,
                            actions=None, not_actions=None,
                            description=None,
                            exclude_principal_ids=None, exclude_principal_types=None,
@@ -589,6 +589,12 @@ def create_deny_assignment(cmd, scope, deny_assignment_name,
     - DoNotApplyToChildScopes is not supported
     - Read actions (*/read) are not permitted
     """
+    if not scope:
+        raise CLIError('--scope is required for creating a deny assignment.')
+
+    if not deny_assignment_name:
+        raise CLIError('--name is required for creating a deny assignment.')
+
     authorization_client = _auth_client_factory(cmd.cli_ctx, scope)
     deny_client = authorization_client.deny_assignments
 

@@ -7,7 +7,6 @@
 # These tests require a subscription with the UserAssignedDenyAssignment feature flag enabled.
 
 import unittest
-from unittest import mock
 
 from azure.cli.testsdk import ScenarioTest, LiveScenarioTest
 
