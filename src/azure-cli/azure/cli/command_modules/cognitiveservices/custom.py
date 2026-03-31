@@ -2255,6 +2255,157 @@ def managed_network_provision(
     client,
     resource_group_name,
     account_name,
+):
+    """
+    Provision the managed network for an Azure Cognitive Services account.
+    """
+    return client.begin_provision_managed_network(resource_group_name, account_name)
+
+
+# --------------------------------------------------------------------------------------------
+# Outbound Rule commands
+# --------------------------------------------------------------------------------------------
+
+
+_RULE_TYPE_MAP = {
+    'fqdn': 'FQDN',
+    'privateendpoint': 'PrivateEndpoint',
+    'servicetag': 'ServiceTag',
+}
+
+
+def _build_outbound_rule(rule_type, category=None, destination=None):
+    """Build an OutboundRule or subclass based on rule_type."""
+    normalized_type = _RULE_TYPE_MAP.get(rule_type.lower(), rule_type)
+    if normalized_type == 'FQDN':
+        return FqdnOutboundRule(category=category, destination=destination)
+    # For PrivateEndpoint and ServiceTag, use the base OutboundRule
+    # and pass destination as additional kwargs if provided
+    rule = OutboundRule(category=category, type=normalized_type)
+    if destination:
+        # destination could be a JSON string for complex payloads
+        try:
+            dest = json.loads(destination)
+            rule.destination = dest
+        except (json.JSONDecodeError, TypeError):
+            rule.destination = destination
+    return rule
+
+
+def outbound_rule_set(
+    client,
+    resource_group_name,
+    account_name,
+    rule_name,
+    rule_type,
+    managed_network_name='default',
+    category=None,
+    destination=None,
+):
+    """
+    Create or update a single outbound rule for the managed network.
+    """
+    rule = _build_outbound_rule(rule_type, category=category, destination=destination)
+    body = OutboundRuleBasicResource(properties=rule)
+    return client.begin_create_or_update(
+        resource_group_name, account_name, managed_network_name, rule_name, body)
+
+
+def outbound_rule_bulk_set(
+    client,
+    resource_group_name,
+    account_name,
+    file,
+    managed_network_name='default',
+):
+    """
+    Bulk create or update outbound rules from a YAML/JSON file.
+    """
+    rules_dict = _load_source_as_dict(file)
+
+    # Build the outbound rules dictionary from file content
+    outbound_rules = {}
+    rules_data = rules_dict.get('rules', rules_dict)
+    if isinstance(rules_data, dict):
+        for name, rule_data in rules_data.items():
+            rt = rule_data.get('type', 'FQDN')
+            cat = rule_data.get('category', None)
+            dest = rule_data.get('destination', None)
+            outbound_rules[name] = _build_outbound_rule(rt, category=cat, destination=dest)
+    elif isinstance(rules_data, list):
+        for rule_data in rules_data:
+            name = rule_data.get('name')
+            if not name:
+                raise InvalidArgumentValueError(
+                    "Each rule in the list must have a 'name' field.")
+            rt = rule_data.get('type', 'FQDN')
+            cat = rule_data.get('category', None)
+            dest = rule_data.get('destination', None)
+            outbound_rules[name] = _build_outbound_rule(rt, category=cat, destination=dest)
+
+    managed_network_settings = ManagedNetworkSettings(outbound_rules=outbound_rules)
+    body = ManagedNetworkSettingsBasicResource(properties=managed_network_settings)
+    return client.begin_post(resource_group_name, account_name, managed_network_name, body)
+
+
+# --------------------------------------------------------------------------------------------
+# Managed Network commands
+# --------------------------------------------------------------------------------------------
+
+
+_ISOLATION_MODE_MAP = {
+    'allow_internet_outbound': 'AllowInternetOutbound',
+    'allow_only_approved_outbound': 'AllowOnlyApprovedOutbound',
+}
+
+
+def managed_network_create(
+    cmd,
+    client,
+    resource_group_name,
+    account_name,
+    managed_network,
+    managed_network_name='default',
+    firewall_sku=None,
+):
+    """
+    Create a managed network for an Azure Cognitive Services account.
+    """
+    isolation_mode = _ISOLATION_MODE_MAP.get(managed_network, managed_network)
+    managed_network_settings = ManagedNetworkSettingsEx(
+        isolation_mode=isolation_mode,
+        firewall_sku=firewall_sku,
+    )
+    properties = ManagedNetworkSettingsProperties(managed_network=managed_network_settings)
+    body = ManagedNetworkSettingsPropertiesBasicResource(properties=properties)
+    return client.begin_put(resource_group_name, account_name, managed_network_name, body)
+
+
+def managed_network_update(
+    client,
+    resource_group_name,
+    account_name,
+    managed_network_name='default',
+    managed_network=None,
+    firewall_sku=None,
+):
+    """
+    Update managed network settings for an Azure Cognitive Services account.
+    """
+    isolation_mode = _ISOLATION_MODE_MAP.get(managed_network, managed_network) if managed_network else None
+    managed_network_settings = ManagedNetworkSettingsEx(
+        isolation_mode=isolation_mode,
+        firewall_sku=firewall_sku,
+    )
+    properties = ManagedNetworkSettingsProperties(managed_network=managed_network_settings)
+    body = ManagedNetworkSettingsPropertiesBasicResource(properties=properties)
+    return client.begin_patch(resource_group_name, account_name, managed_network_name, body)
+
+
+def managed_network_provision(
+    client,
+    resource_group_name,
+    account_name,
     managed_network_name='default',
 ):
     """
