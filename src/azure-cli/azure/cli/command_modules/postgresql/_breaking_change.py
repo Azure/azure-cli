@@ -7,7 +7,7 @@ from azure.cli.core.breaking_change import (register_argument_deprecate, registe
                                             register_other_breaking_change)
 
 NETWORK_RESOURCE_BREAKING_CHANGE_MESSAGE = (
-    'The --address-prefixes, --subnet-prefixes, and --vnet arguments have been deprecated and will be removed. '
+    'The --address-prefixes and --subnet-prefixes arguments have been deprecated and will be removed. '
     'This command will stop creating new network resources or altering existing ones which are required '
     'for the server to function, such as virtual networks, subnets, IP ranges, etc. It will instead '
     'require users to provide the necessary network resources created beforehand using the corresponding '
