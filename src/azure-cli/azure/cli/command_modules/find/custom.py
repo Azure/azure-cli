@@ -39,7 +39,7 @@ def process_query(cli_term):
                 "The `az find` command has been retired. A new experience is being developed to replace it. \\"
                 "In the meantime, please use `az <command> --help` to explore commands and examples, \\"
                 "or visit https://aka.ms/cli_ref for reference documentation."
-                )
+            )
 
         else:
             if (platform.system() == 'Windows' and should_enable_styling()):
