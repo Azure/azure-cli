@@ -768,7 +768,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
     if exclude_zones is not None:
         placement['excludeZones'] = exclude_zones
     if placement:
-        vm['Placement'] = placement
+        vm['placement'] = placement
 
     return vm
 
@@ -1054,7 +1054,9 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         wire_server_access_control_profile_reference_id=None,
                         imds_access_control_profile_reference_id=None, enable_automatic_zone_balancing=None,
                         automatic_zone_balancing_strategy=None, automatic_zone_balancing_behavior=None,
-                        enable_automatic_repairs=None):
+                        enable_automatic_repairs=None, zone_placement_policy=None, include_zones=None,
+                        exclude_zones=None, max_zone_count=None, instance_percent_policy=None,
+                        max_instance_percent=None):
 
     # Build IP configuration
     ip_configuration = {}
@@ -1564,6 +1566,24 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
     if automatic_zone_rebalancing_policy:
         resiliency_policy['automaticZoneRebalancingPolicy'] = automatic_zone_rebalancing_policy
 
+    zone_allocation_policy = {}
+    if max_zone_count is not None:
+        zone_allocation_policy['maxZoneCount'] = max_zone_count
+
+    if instance_percent_policy is not None or max_instance_percent is not None:
+        policy = {}
+
+        if instance_percent_policy is not None:
+            policy['enabled'] = instance_percent_policy
+
+        if max_instance_percent is not None:
+            policy['value'] = max_instance_percent
+
+        zone_allocation_policy['maxInstancePercentPerZonePolicy'] = policy
+
+    if zone_allocation_policy:
+        resiliency_policy['zoneAllocationPolicy'] = zone_allocation_policy
+
     if resiliency_policy:
         vmss_properties['resiliencyPolicy'] = resiliency_policy
 
@@ -1687,7 +1707,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
         'name': name,
         'location': location,
         'tags': tags,
-        'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machine_scale_sets'),
+        'apiVersion': '2025-04-01',
         'dependsOn': [],
         'properties': vmss_properties
     }
@@ -1706,6 +1726,16 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
 
     if edge_zone:
         vmss['extendedLocation'] = edge_zone
+
+    placement = {}
+    if zone_placement_policy is not None:
+        placement['zonePlacementPolicy'] = zone_placement_policy
+    if include_zones is not None:
+        placement['includeZones'] = include_zones
+    if exclude_zones is not None:
+        placement['excludeZones'] = exclude_zones
+    if placement:
+        vmss['placement'] = placement
 
     return vmss
 

@@ -110,6 +110,174 @@ configuration:
           label: no-recent-activity
       description: '[Resolve Workflow] Issue Addressed Label Applied'
     - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Labeled
+      - hasLabel:
+          label: act-identity-squad
+      then:
+      - requestReview:
+          reviewer: act-identity-squad
+      - mentionUsers:
+          mentionees:
+          - act-identity-squad
+          replyTemplate: ":bell: Routing this PR to ${mentionees}."
+          assignMentionees: False
+      description: '[Squad Auto-Assign] Request review & mention when PR labeled act-identity-squad'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Labeled
+      - hasLabel:
+          label: act-observability-squad
+      then:
+      - requestReview:
+          reviewer: act-observability-squad
+      - mentionUsers:
+          mentionees:
+          - act-observability-squad
+          replyTemplate: ":bell: Routing this PR to ${mentionees}."
+          assignMentionees: False
+      description: '[Squad Auto-Assign] Request review & mention when PR labeled act-observability-squad'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Labeled
+      - hasLabel:
+          label: act-codegen-extensibility-squad
+      then:
+      - requestReview:
+          reviewer: act-codegen-extensibility-squad
+      - mentionUsers:
+          mentionees:
+          - act-codegen-extensibility-squad
+          replyTemplate: ":bell: Routing this PR to ${mentionees}."
+          assignMentionees: False
+      description: '[Squad Auto-Assign] Request review & mention when PR labeled act-codegen-extensibility-squad'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Labeled
+      - hasLabel:
+          label: act-quality-productivity-squad
+      then:
+      - requestReview:
+          reviewer: act-quality-productivity-squad
+      - mentionUsers:
+          mentionees:
+          - act-quality-productivity-squad
+          replyTemplate: ":bell: Routing this PR to ${mentionees}."
+          assignMentionees: False
+      description: '[Squad Auto-Assign] Request review & mention when PR labeled act-quality-productivity-squad'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Labeled
+      - hasLabel:
+          label: act-platform-engineering-squad
+      then:
+      - requestReview:
+          reviewer: act-platform-engineering-squad
+      - mentionUsers:
+          mentionees:
+          - act-platform-engineering-squad
+          replyTemplate: ":bell: Routing this PR to ${mentionees}."
+          assignMentionees: False
+      description: '[Squad Auto-Assign] Request review & mention when PR labeled act-platform-engineering-squad'
+    - if:
+      - payloadType: Pull_Request
+      - isAction:
+          action: Labeled
+      - hasLabel:
+          label: act-experience-enablement-squad
+      then:
+      - requestReview:
+          reviewer: act-experience-enablement-squad
+      - mentionUsers:
+          mentionees:
+          - act-experience-enablement-squad
+          replyTemplate: ":bell: Routing this PR to ${mentionees}."
+          assignMentionees: False
+      description: '[Squad Auto-Assign] Request review & mention when PR labeled act-experience-enablement-squad'
+    - if:
+      - payloadType: Issues
+      - isAction:
+          action: Labeled
+      - hasLabel:
+          label: act-identity-squad
+      then:
+      - mentionUsers:
+          mentionees:
+          - act-identity-squad
+          replyTemplate: ":bell: Routing this issue to ${mentionees}."
+          assignMentionees: False
+      description: '[Squad Auto-Assign] Mention when issue labeled act-identity-squad'
+    - if:
+      - payloadType: Issues
+      - isAction:
+          action: Labeled
+      - hasLabel:
+          label: act-observability-squad
+      then:
+      - mentionUsers:
+          mentionees:
+          - act-observability-squad
+          replyTemplate: ":bell: Routing this issue to ${mentionees}."
+          assignMentionees: False
+      description: '[Squad Auto-Assign] Mention when issue labeled act-observability-squad'
+    - if:
+      - payloadType: Issues
+      - isAction:
+          action: Labeled
+      - hasLabel:
+          label: act-codegen-extensibility-squad
+      then:
+      - mentionUsers:
+          mentionees:
+          - act-codegen-extensibility-squad
+          replyTemplate: ":bell: Routing this issue to ${mentionees}."
+          assignMentionees: False
+      description: '[Squad Auto-Assign] Mention when issue labeled act-codegen-extensibility-squad'
+    - if:
+      - payloadType: Issues
+      - isAction:
+          action: Labeled
+      - hasLabel:
+          label: act-quality-productivity-squad
+      then:
+      - mentionUsers:
+          mentionees:
+          - act-quality-productivity-squad
+          replyTemplate: ":bell: Routing this issue to ${mentionees}."
+          assignMentionees: False
+      description: '[Squad Auto-Assign] Mention when issue labeled act-quality-productivity-squad'
+    - if:
+      - payloadType: Issues
+      - isAction:
+          action: Labeled
+      - hasLabel:
+          label: act-platform-engineering-squad
+      then:
+      - mentionUsers:
+          mentionees:
+          - act-platform-engineering-squad
+          replyTemplate: ":bell: Routing this issue to ${mentionees}."
+          assignMentionees: False
+      description: '[Squad Auto-Assign] Mention when issue labeled act-platform-engineering-squad'
+    - if:
+      - payloadType: Issues
+      - isAction:
+          action: Labeled
+      - hasLabel:
+          label: act-experience-enablement-squad
+      then:
+      - mentionUsers:
+          mentionees:
+          - act-experience-enablement-squad
+          replyTemplate: ":bell: Routing this issue to ${mentionees}."
+          assignMentionees: False
+      description: '[Squad Auto-Assign] Mention when issue labeled act-experience-enablement-squad'
+    - if:
       - payloadType: Issue_Comment
       - hasLabel:
           label: issue-addressed
@@ -197,6 +365,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - adamedx
+            - act-identity-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -208,6 +377,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - acsdevx-msft
+            - act-observability-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -221,6 +391,7 @@ configuration:
             - mojayara
             - jportugal0
             - pkrishnanms
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -231,9 +402,10 @@ configuration:
         then:
         - mentionUsers:
             mentionees:
-            - danielsollondon
+            - mbifeld
             - FumingZhang
             - andyliuliming
+            - act-observability-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -283,6 +455,7 @@ configuration:
             - mikebudzynski
             - KedarJoshi
             - yingru97
+            - act-observability-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -295,6 +468,7 @@ configuration:
             mentionees:
             - shenmuxiaosen
             - avanigupta
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -307,6 +481,7 @@ configuration:
             mentionees:
             - antcp
             - AzureAppServiceCLI
+            - act-observability-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -329,6 +504,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - Juliehzl
+            - act-observability-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -354,6 +530,7 @@ configuration:
             mentionees:
             - alt-key
             - saisankargochhayat
+            - act-identity-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -366,6 +543,7 @@ configuration:
             mentionees:
             - josephkwchan
             - jennyhunter-msft
+            - act-identity-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -378,6 +556,7 @@ configuration:
             mentionees:
             - josephkwchan
             - jennyhunter-msft
+            - act-identity-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -389,6 +568,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - MSEvanhi
+            - act-identity-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -401,6 +581,7 @@ configuration:
             mentionees:
             - rthorn17
             - daxfohl
+            - act-identity-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -413,6 +594,7 @@ configuration:
             mentionees:
             - LizMS
             - cbrooksmsft
+            - act-identity-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -424,6 +606,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - MSEvanhi
+            - act-identity-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -435,6 +618,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - rthorn17
+            - act-identity-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -446,6 +630,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - Azure/deployments-owners
+            - act-identity-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -457,6 +642,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - Azure/deployments-owners
+            - act-identity-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -471,6 +657,7 @@ configuration:
             - jim-minter
             - julienstroheker
             - amanohar
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -507,6 +694,7 @@ configuration:
             mentionees:
             - darshanhs90
             - AshishGargMicrosoft
+            - act-identity-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -519,6 +707,7 @@ configuration:
             mentionees:
             - jaspkaur28
             - sanjkum
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -558,6 +747,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - Azure/deployments-owners
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -593,9 +783,8 @@ configuration:
         then:
         - mentionUsers:
             mentionees:
-            - lasuredd-msft
-            - fzkhan
-            - pkuma-msft
+            - ohnkoh-msft
+            - joschung
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -611,6 +800,7 @@ configuration:
             - cRui861
             - skapur12
             - wanghoppe
+            - act-observability-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -622,6 +812,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - pradeepgunda
+            - act-observability-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -634,6 +825,7 @@ configuration:
             mentionees:
             - muazmian
             - us6193
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -645,6 +837,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - greeshma-microsoft
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -679,6 +872,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - sgellock
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -690,6 +884,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - hirenshah1
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -701,6 +896,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - mbifeld
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -712,6 +908,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - bberera
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -736,6 +933,7 @@ configuration:
             mentionees:
             - yingqunpku
             - bowgong
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -748,6 +946,7 @@ configuration:
             mentionees:
             - jaggerbodas-ms
             - arwong
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -761,6 +960,7 @@ configuration:
             - ryogok
             - TFR258
             - tburns10
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -772,6 +972,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - swiftarrow11
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -784,6 +985,7 @@ configuration:
             mentionees:
             - areddish
             - tburns10
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -797,6 +999,7 @@ configuration:
             - JinyuID
             - dipidoo
             - SteveMSFT
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -810,6 +1013,7 @@ configuration:
             - ctstone
             - anrothMSFT
             - yungshinlintw
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -821,6 +1025,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - metanMSFT
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -832,6 +1037,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - olduroja
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -844,6 +1050,7 @@ configuration:
             mentionees:
             - cahann
             - kayousef
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -855,6 +1062,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - yangyuan
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -866,6 +1074,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - dwaijam
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -878,6 +1087,7 @@ configuration:
             mentionees:
             - bingisbestest
             - nerajput1607
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -890,6 +1100,7 @@ configuration:
             mentionees:
             - robch
             - oscholz
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -901,6 +1112,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - assafi
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -912,6 +1124,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - swmachan
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -926,6 +1139,7 @@ configuration:
             - yangyuan
             - tianxin-ms
             - xiaomin-ms
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -967,6 +1181,7 @@ configuration:
             - GabstaMSFT
             - ramankumarlive
             - ushnaarshadkhan
+            - act-observability-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -979,6 +1194,7 @@ configuration:
             mentionees:
             - TravisCragg-MSFT
             - GabstaMSFT
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1032,6 +1248,7 @@ configuration:
             - sandeepraichura
             - hilaryw29
             - GabstaMSFT
+            - act-observability-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1044,6 +1261,7 @@ configuration:
             mentionees:
             - TravisCragg-MSFT
             - sandeepraichura
+            - act-observability-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1099,6 +1317,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - nascarsayan
+            - act-observability-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1110,6 +1329,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - ms-premp
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1121,6 +1341,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - ccmbpxpcrew
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1132,6 +1353,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - ccmaxpcrew
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1143,6 +1365,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - ccmaxpcrew
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1154,6 +1377,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - ccmixpdevs
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1165,6 +1389,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - ccmshowbackdevs
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1176,6 +1401,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - TiagoCrewGitHubIssues
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1187,6 +1413,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - dkkapur
+            - act-observability-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1203,6 +1430,7 @@ configuration:
             - terencet-dev
             - shizhMSFT
             - JXavierMSFT
+            - act-observability-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1217,9 +1445,7 @@ configuration:
             - jwilder
             - thomas1206
             - seanmck
-            - danielsollondon
-            - FumingZhang
-            - andyliuliming
+            - act-observability-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1232,6 +1458,7 @@ configuration:
             mentionees:
             - howang-ms
             - Greedygre
+            - act-observability-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1245,6 +1472,7 @@ configuration:
             - pjohari-ms
             - kushagraThapar
             - simplynaveen20
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1268,6 +1496,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - ccmbpxpcrew
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1382,6 +1611,7 @@ configuration:
             - zhangyd2015
             - Frey-Wang
             - Jingshu923
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1393,6 +1623,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - sumantmehtams
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1404,6 +1635,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - MikeRys
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1415,6 +1647,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - sumantmehtams
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1426,6 +1659,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - sumantmehtams
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1437,6 +1671,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - sumantmehtams
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1448,6 +1683,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - amarjeetkr
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1500,6 +1736,7 @@ configuration:
             - a-t-mason
             - ganzee
             - manuaery
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1585,6 +1822,7 @@ configuration:
             mentionees:
             - v-anvashist
             - V-hmusukula
+            - act-platform-engineering-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1596,6 +1834,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - anishtrakru
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1643,6 +1882,7 @@ configuration:
             - Kishp01
             - veyaddan
             - santoshallumicrosoft
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1654,6 +1894,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - Saglodha
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1676,6 +1917,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - Ealianis
+            - act-observability-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1689,6 +1931,7 @@ configuration:
             - kamperiadis
             - amamounelsayed
             - khkh-ms
+            - act-observability-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1714,6 +1957,7 @@ configuration:
             mentionees:
             - mgreenegit
             - vivlingaiah
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1726,6 +1970,7 @@ configuration:
             mentionees:
             - aim-for-better
             - deshriva
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1773,6 +2018,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - Azure/azure-iot-cli-triage
+            - act-observability-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1785,6 +2031,7 @@ configuration:
             mentionees:
             - digimaun
             - Azure/azure-iot-cli-triage
+            - act-observability-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1796,6 +2043,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - Elsie4ever，MohinderAtwal
+            - act-observability-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1811,6 +2059,7 @@ configuration:
             - chen-karen
             - chandanrr
             - cheathamb36
+            - act-identity-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1823,6 +2072,7 @@ configuration:
             mentionees:
             - bavneetsingh16
             - ramyasreechakka
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1834,6 +2084,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - Tanmayeekamath
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1856,6 +2107,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - wsilveiranz
+            - act-observability-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1878,6 +2130,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - azureml-github
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1936,6 +2189,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - RamyaElangovanP
+            - act-identity-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1947,6 +2201,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - Lighthouse-Azure
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1985,6 +2240,7 @@ configuration:
             - akning-ms
             - junsu-msft
             - coffeemug
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2009,6 +2265,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - prbansa
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2020,6 +2277,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - akucer
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2075,6 +2333,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - kvijaykannan
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2196,6 +2455,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - yairgil
+            - act-observability-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2207,6 +2467,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - AzmonActionG
+            - act-observability-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2218,6 +2479,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - AzMonEssential
+            - act-observability-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2229,6 +2491,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - AzmonAlerts
+            - act-observability-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2240,6 +2503,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - azmonapplicationinsights
+            - act-observability-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2252,6 +2516,7 @@ configuration:
             mentionees:
             - AzMonEssential
             - LarryZhang19
+            - act-observability-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2263,6 +2528,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - AzMonEssential
+            - act-observability-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2278,6 +2544,7 @@ configuration:
             - rajkumar-rangaraj
             - TimothyMothra
             - vishweshbankwar
+            - act-observability-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2289,6 +2556,9 @@ configuration:
         - mentionUsers:
             mentionees:
             - AzmonLogA
+            - raronen
+            - MeirMen
+            - act-observability-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2300,6 +2570,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - AzMonEssential
+            - act-observability-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2313,6 +2584,7 @@ configuration:
             - azmonapplicationinsights
             - asafst
             - efratbp
+            - act-observability-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2328,6 +2600,7 @@ configuration:
             - akning-ms
             - junsu-msft
             - coffeemug
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2344,6 +2617,7 @@ configuration:
             - akning-ms
             - junsu-msft
             - coffeemug
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2366,6 +2640,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - audunn
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2377,6 +2652,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - aznetsuppgithub
+            - act-quality-productivity-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2388,6 +2664,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - appgwsuppgithub
+            - act-quality-productivity-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2400,6 +2677,7 @@ configuration:
             mentionees:
             - isamorris
             - bastionsuppgithub
+            - act-quality-productivity-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2410,9 +2688,10 @@ configuration:
         then:
         - mentionUsers:
             mentionees:
-            - t-bzhan
-            - gxue
-            - TracyYaoYao
+            - jingnanxu
+            - luxue
+            - arashz
+            - act-quality-productivity-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2424,6 +2703,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - ddossuppgithub
+            - act-quality-productivity-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2435,6 +2715,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - dnssuppgithub
+            - act-quality-productivity-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2446,6 +2727,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - exrsuppgithub
+            - act-quality-productivity-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2458,6 +2740,7 @@ configuration:
             mentionees:
             - gopimsft
             - Azure/azure-firewall
+            - act-quality-productivity-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2472,6 +2755,7 @@ configuration:
             - t-bzhan
             - gxue
             - TracyYaoYao
+            - act-quality-productivity-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2483,6 +2767,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - slbsupportgithub
+            - act-quality-productivity-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2494,6 +2779,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - nvasuppgithub
+            - act-quality-productivity-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2506,6 +2792,7 @@ configuration:
             mentionees:
             - shivamtripathi
             - kumaam
+            - act-quality-productivity-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2517,6 +2804,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - privlinksuppgithub
+            - act-quality-productivity-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2528,6 +2816,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - tmsuppgithub
+            - act-quality-productivity-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2539,6 +2828,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - vnetsuppgithub
+            - act-quality-productivity-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2550,6 +2840,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - vnetsuppgithub
+            - act-quality-productivity-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2561,6 +2852,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - vwansuppgithub
+            - act-quality-productivity-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2572,6 +2864,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - vpngwsuppgithub
+            - act-quality-productivity-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2646,6 +2939,7 @@ configuration:
             - shanhix1
             - calecarter
             - mentat9
+            - act-identity-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2659,6 +2953,7 @@ configuration:
             - gbowerman
             - jasomaning
             - nachoalonsoportillo
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2672,6 +2967,7 @@ configuration:
             - gbowerman
             - jasomaning
             - nachoalonsoportillo
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2695,6 +2991,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - ricardo-espinoza
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2719,6 +3016,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - Daya-Patil
+            - act-observability-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2745,6 +3043,7 @@ configuration:
             - nikitagarg_microsoft
             - sanar_microsoft
             - cawa_microsoft
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2757,6 +3056,7 @@ configuration:
             mentionees:
             - jfggdl
             - damodaravadhani
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2768,6 +3068,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - Rkapso
+            - act-observability-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2780,6 +3081,7 @@ configuration:
             mentionees:
             - kenieva
             - AshishGargMicrosoft
+            - act-identity-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2791,6 +3093,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - venu-l
+            - act-identity-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2802,6 +3105,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - stephbaron
+            - act-identity-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2813,6 +3117,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - yashjain4
+            - act-identity-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2847,6 +3152,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - hsurana06
+            - act-observability-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2861,6 +3167,7 @@ configuration:
             - efrainretana
             - mattgotteiner
             - Draconicida
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2872,6 +3179,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - keren-shani
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2884,6 +3192,7 @@ configuration:
             mentionees:
             - nazang
             - mooshc
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2917,6 +3226,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - Saglodha
+            - act-observability-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2929,6 +3239,7 @@ configuration:
             mentionees:
             - yungezz
             - houk-ms
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2943,6 +3254,7 @@ configuration:
             - a-santamaria
             - LukeSlev
             - Jkochhar
+            - act-observability-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2955,6 +3267,7 @@ configuration:
             mentionees:
             - sffamily
             - chenkennt
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2968,6 +3281,7 @@ configuration:
             - yucwan
             - yuwzho
             - ShichaoQiu
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2979,6 +3293,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - azureSQLGitHub
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2990,6 +3305,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - azureSQLGitHub
+            - act-observability-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -3001,6 +3317,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - azureSQLGitHub
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -3012,6 +3329,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - azureSQLGitHub
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -3023,6 +3341,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - azureSQLGitHub
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -3034,6 +3353,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - azureSQLGitHub
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -3045,6 +3365,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - azureSQLGitHub
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -3078,6 +3399,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - xgithubtriage
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -3092,6 +3414,7 @@ configuration:
             - sshankMSFT
             - golddove
             - S-J-M
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -3106,6 +3429,7 @@ configuration:
             - apurv2304
             - skallurk
             - vdziunms
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -3118,6 +3442,7 @@ configuration:
             mentionees:
             - ankushbindlish2
             - afedyashov
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -3156,6 +3481,7 @@ configuration:
             - anuragdalmia
             - shilpigautam
             - ramaganesan-rg
+            - act-identity-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -3182,6 +3508,7 @@ configuration:
             mentionees:
             - wanyang7
             - v-yanjungao
+            - act-codegen-extensibility-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -3239,6 +3566,7 @@ configuration:
             - AzureAppServiceCLI
             - antcp
             - yutanglin16
+            - act-observability-squad
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -3330,6 +3658,8 @@ configuration:
           label: Auto-Assign
       - addLabel:
           label: Service Attention
+      - addLabel:
+          label: act-quality-productivity-squad
       description: '[Network DNS] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -3372,6 +3702,8 @@ configuration:
           label: Azure CLI Team
       - addLabel:
           label: question
+      - addLabel:
+          label: act-quality-productivity-squad
       description: '[Network] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -3410,6 +3742,8 @@ configuration:
           label: Azure CLI Team
       - addLabel:
           label: question
+      - addLabel:
+          label: act-observability-squad
       description: '[Compute] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -3438,6 +3772,8 @@ configuration:
           label: Azure CLI Team
       - addLabel:
           label: question
+      - addLabel:
+          label: act-codegen-extensibility-squad
       description: '[Storage] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Pull_Request
@@ -3460,11 +3796,15 @@ configuration:
           reviewer: AllyW
       - requestReview:
           reviewer: necusjz
+      - requestReview:
+          reviewer: act-quality-productivity-squad
       - assignTo:
           users:
           - necusjz
       - addLabel:
           label: Network
+      - addLabel:
+          label: act-quality-productivity-squad
       description: '[Network Monitor Bastion] Auto assign labels and reviewers based on PR title/description.'
     - if:
       - payloadType: Pull_Request
@@ -3486,12 +3826,16 @@ configuration:
           label: Auto-Assign
       - requestReview:
           reviewer: yanzhudd
+      - requestReview:
+          reviewer: act-observability-squad
       - assignTo:
           users:
           - zhoxing-ms
           - yanzhudd
       - addLabel:
           label: Compute
+      - addLabel:
+          label: act-observability-squad
       description: '[Compute] Auto assign labels and reviewers based on PR title/description.'
     - if:
       - payloadType: Pull_Request
@@ -3513,11 +3857,15 @@ configuration:
           reviewer: calvinhzy
       - requestReview:
           reviewer: yonzhan
+      - requestReview:
+          reviewer: act-codegen-extensibility-squad
       - assignTo:
           users:
           - evelyn-ys
       - addLabel:
           label: Storage
+      - addLabel:
+          label: act-codegen-extensibility-squad
       description: '[Storage] Auto assign labels and reviewers based on PR title/description.'
     - if:
       - payloadType: Issues
@@ -3538,6 +3886,8 @@ configuration:
           label: Service Attention
       - addLabel:
           label: Auto-Assign
+      - addLabel:
+          label: act-observability-squad
       description: '[AKS] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -3561,6 +3911,8 @@ configuration:
           - ReaNAiveD
       - addLabel:
           label: Auto-Assign
+      - addLabel:
+          label: act-observability-squad
       description: '[logicapp] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -3581,6 +3933,8 @@ configuration:
           label: Service Attention
       - addLabel:
           label: Auto-Assign
+      - addLabel:
+          label: act-observability-squad
       description: '[webapp] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -3619,6 +3973,8 @@ configuration:
           label: Service Attention
       - addLabel:
           label: Auto-Assign
+      - addLabel:
+          label: act-codegen-extensibility-squad
       - assignTo:
           users:
           - yungezz
@@ -3645,6 +4001,8 @@ configuration:
           label: Auto-Assign
       - addLabel:
           label: IoT/CLI
+      - addLabel:
+          label: act-observability-squad
       description: '[iot] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -3690,6 +4048,8 @@ configuration:
           label: Azure CLI Team
       - addLabel:
           label: question
+      - addLabel:
+          label: act-identity-squad
       description: '[keyvault] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -3715,6 +4075,8 @@ configuration:
           label: Azure CLI Team
       - addLabel:
           label: question
+      - addLabel:
+          label: act-observability-squad
       description: '[monitor] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Pull_Request
@@ -3736,6 +4098,8 @@ configuration:
           reviewer: kairu-ms
       - requestReview:
           reviewer: necusjz
+      - requestReview:
+          reviewer: act-observability-squad
       - assignTo:
           users:
           - AllyW
@@ -3743,6 +4107,8 @@ configuration:
           label: Auto-Assign
       - addLabel:
           label: Monitor
+      - addLabel:
+          label: act-observability-squad
       description: '[Monitor] Auto assign labels and reviewers based on PR title/description.'
     - if:
       - payloadType: Issues
@@ -3768,6 +4134,8 @@ configuration:
           label: Azure CLI Team
       - addLabel:
           label: question
+      - addLabel:
+          label: act-identity-squad
       description: '[role] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -3799,6 +4167,8 @@ configuration:
           label: Azure CLI Team
       - addLabel:
           label: question
+      - addLabel:
+          label: act-identity-squad
       description: '[arm] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -3824,6 +4194,8 @@ configuration:
           label: Azure CLI Team
       - addLabel:
           label: question
+      - addLabel:
+          label: act-identity-squad
       description: '[arm] auto assign labels and users based on issue description. '
     - if:
       - payloadType: Issues
@@ -3844,6 +4216,8 @@ configuration:
           label: ARM
       - addLabel:
           label: Service Attention
+      - addLabel:
+          label: act-identity-squad
       description: '[arm-cxp] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -3864,6 +4238,8 @@ configuration:
           label: Service Attention
       - addLabel:
           label: SQL
+      - addLabel:
+          label: act-codegen-extensibility-squad
       description: '[sql] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -3884,6 +4260,8 @@ configuration:
           label: Service Attention
       - addLabel:
           label: Container Registry
+      - addLabel:
+          label: act-observability-squad
       description: '[acr] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -3909,6 +4287,8 @@ configuration:
           label: Azure CLI Team
       - addLabel:
           label: question
+      - addLabel:
+          label: act-identity-squad
       description: '[account] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -3929,6 +4309,8 @@ configuration:
           label: Container Instances
       - addLabel:
           label: Service Attention
+      - addLabel:
+          label: act-observability-squad
       description: '[container] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Pull_Request
@@ -3986,6 +4368,8 @@ configuration:
           label: Functions
       - addLabel:
           label: Service Attention
+      - addLabel:
+          label: act-observability-squad
       description: '[functionapp] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Pull_Request
@@ -4008,8 +4392,12 @@ configuration:
           - zhoxing-ms
       - addLabel:
           label: Functions
+      - addLabel:
+          label: act-observability-squad
       - requestReview:
           reviewer: zhoxing-ms
+      - requestReview:
+          reviewer: act-observability-squad
       description: '[functionapp] Auto assign labels and reviewers based on PR title/description.'
     - if:
       - payloadType: Issues
@@ -4030,6 +4418,8 @@ configuration:
           label: Service Attention
       - addLabel:
           label: API Management
+      - addLabel:
+          label: act-observability-squad
       description: '[apim] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -4050,6 +4440,8 @@ configuration:
           label: Service Attention
       - addLabel:
           label: DevOps
+      - addLabel:
+          label: act-platform-engineering-squad
       description: '[devops] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -4075,6 +4467,8 @@ configuration:
           label: Azure CLI Team
       - addLabel:
           label: question
+      - addLabel:
+          label: act-identity-squad
       description: '[graph] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -4100,6 +4494,8 @@ configuration:
           label: Azure CLI Team
       - addLabel:
           label: question
+      - addLabel:
+          label: act-codegen-extensibility-squad
       description: '[interactive] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -4125,6 +4521,8 @@ configuration:
           label: Azure CLI Team
       - addLabel:
           label: question
+      - addLabel:
+          label: act-platform-engineering-squad
       description: '[upgrade] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -4145,6 +4543,8 @@ configuration:
           label: Service Bus
       - addLabel:
           label: Service Attention
+      - addLabel:
+          label: act-observability-squad
       description: '[servicebus] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -4165,6 +4565,8 @@ configuration:
           label: Service Attention
       - addLabel:
           label: Machine Learning
+      - addLabel:
+          label: act-codegen-extensibility-squad
       description: '[machine learning] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -4185,6 +4587,8 @@ configuration:
           label: Service Attention
       - addLabel:
           label: Devtestlab
+      - addLabel:
+          label: act-codegen-extensibility-squad
       description: '[devtestlab] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -4210,6 +4614,8 @@ configuration:
           label: Azure CLI Team
       - addLabel:
           label: question
+      - addLabel:
+          label: act-codegen-extensibility-squad
       description: '[config] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -4251,6 +4657,8 @@ configuration:
           label: Service Attention
       - addLabel:
           label: NetAppFiles
+      - addLabel:
+          label: act-observability-squad
       description: '[netappfiles] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -4271,6 +4679,8 @@ configuration:
           label: Service Attention
       - addLabel:
           label: CosmosDB
+      - addLabel:
+          label: act-codegen-extensibility-squad
       description: '[cosmosdb] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -4301,6 +4711,8 @@ configuration:
           - mkarmark
       - addLabel:
           label: staticwebapp
+      - addLabel:
+          label: act-observability-squad
       description: '[staticwebapp] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Pull_Request
@@ -4320,11 +4732,15 @@ configuration:
           reviewer: zhoxing-ms
       - requestReview:
           reviewer: yonzhan
+      - requestReview:
+          reviewer: act-identity-squad
       - assignTo:
           users:
           - zhoxing-ms
       - addLabel:
           label: ARM
+      - addLabel:
+          label: act-identity-squad
       description: '[arm] Auto assign labels and reviewers based on PR title/description.'
     - if:
       - payloadType: Pull_Request
@@ -4344,11 +4760,15 @@ configuration:
           reviewer: jiasli
       - requestReview:
           reviewer: yonzhan
+      - requestReview:
+          reviewer: act-identity-squad
       - assignTo:
           users:
           - jiasli
       - addLabel:
           label: Account
+      - addLabel:
+          label: act-identity-squad
       description: '[account] Auto assign labels and reviewers based on PR title/description.'
     - if:
       - payloadType: Pull_Request
@@ -4365,11 +4785,15 @@ configuration:
           reviewer: evelyn-ys
       - requestReview:
           reviewer: yonzhan
+      - requestReview:
+          reviewer: act-identity-squad
       - assignTo:
           users:
           - evelyn-ys
       - addLabel:
           label: KeyVault
+      - addLabel:
+          label: act-identity-squad
       description: '[keyvault] Auto assign labels and reviewers based on PR title/description.'
     - if:
       - payloadType: Pull_Request
@@ -4397,8 +4821,12 @@ configuration:
           reviewer: yonzhan
       - requestReview:
           reviewer: FumingZhang
+      - requestReview:
+          reviewer: act-observability-squad
       - addLabel:
           label: AKS
+      - addLabel:
+          label: act-observability-squad
       description: '[aks] Auto assign labels and reviewers based on PR title/description.'
     - if:
       - payloadType: Pull_Request
@@ -4413,6 +4841,8 @@ configuration:
           reviewer: jiasli
       - requestReview:
           reviewer: yonzhan
+      - requestReview:
+          reviewer: act-identity-squad
       - addLabel:
           label: Auto-Assign
       - assignTo:
@@ -4420,6 +4850,8 @@ configuration:
           - jiasli
       - addLabel:
           label: RBAC
+      - addLabel:
+          label: act-identity-squad
       description: '[role] Auto assign labels and reviewers based on PR title/description.'
     - if:
       - payloadType: Pull_Request
@@ -4438,6 +4870,8 @@ configuration:
           reviewer: yonzhan
       - requestReview:
           reviewer: bebound
+      - requestReview:
+          reviewer: act-platform-engineering-squad
       - addLabel:
           label: Auto-Assign
       - assignTo:
@@ -4445,6 +4879,8 @@ configuration:
           - bebound
       - addLabel:
           label: Packaging
+      - addLabel:
+          label: act-platform-engineering-squad
       description: '[Packaging] Auto assign labels and reviewers based on PR title/description.'
     - if:
       - payloadType: Issues
@@ -4465,6 +4901,8 @@ configuration:
           label: Service Attention
       - addLabel:
           label: Event Grid
+      - addLabel:
+          label: act-codegen-extensibility-squad
       description: '[eventgrid] auto assign labels and users based on issue description. '
     - if:
       - payloadType: Pull_Request
@@ -4486,6 +4924,8 @@ configuration:
           reviewer: yanzhudd
       - requestReview:
           reviewer: yonzhan
+      - requestReview:
+          reviewer: act-observability-squad
       - assignTo:
           users:
           - zhoxing-ms
@@ -4493,6 +4933,8 @@ configuration:
           label: IoT
       - addLabel:
           label: IoT/CLI
+      - addLabel:
+          label: act-observability-squad
       description: '[iot] Auto assign labels and reviewers based on PR title/description.'
     - if:
       - payloadType: Issues
@@ -4513,6 +4955,8 @@ configuration:
           label: Service Attention
       - addLabel:
           label: Automation
+      - addLabel:
+          label: act-codegen-extensibility-squad
       description: '[automation] auto assign labels and users based on issue description. '
     - if:
       - payloadType: Pull_Request
@@ -4539,10 +4983,14 @@ configuration:
           reviewer: jsntcy
       - requestReview:
           reviewer: avanigupta
+      - requestReview:
+          reviewer: act-codegen-extensibility-squad
       - addLabel:
           label: App Configuration
       - addLabel:
           label: Auto-Assign
+      - addLabel:
+          label: act-codegen-extensibility-squad
       description: '[appconfig] Auto assign labels and reviewers based on PR title/description.'
     - if:
       - payloadType: Pull_Request
@@ -4570,6 +5018,8 @@ configuration:
           reviewer: zhoxing-ms
       - requestReview:
           reviewer: yonzhan
+      - requestReview:
+          reviewer: act-observability-squad
       - assignTo:
           users:
           - zhoxing-ms
@@ -4577,6 +5027,8 @@ configuration:
           label: Auto-Assign
       - addLabel:
           label: Container Registry
+      - addLabel:
+          label: act-observability-squad
       description: '[acr] Auto assign labels and reviewers based on PR title/description.'
     - if:
       - payloadType: Pull_Request
@@ -4590,12 +5042,16 @@ configuration:
           label: Auto-Assign
       - addLabel:
           label: Service Bus
+      - addLabel:
+          label: act-observability-squad
       - requestReview:
           reviewer: evelyn-ys
       - requestReview:
           reviewer: calvinhzy
       - requestReview:
           reviewer: yonzhan
+      - requestReview:
+          reviewer: act-observability-squad
       - assignTo:
           users:
           - evelyn-ys
@@ -4612,6 +5068,8 @@ configuration:
           label: Auto-Assign
       - addLabel:
           label: CI
+      - addLabel:
+          label: act-platform-engineering-squad
       - requestReview:
           reviewer: wangzelin007
       - requestReview:
@@ -4626,6 +5084,8 @@ configuration:
           reviewer: bebound
       - requestReview:
           reviewer: Pan-Qi
+      - requestReview:
+          reviewer: act-platform-engineering-squad
       - assignTo:
           users:
           - wangzelin007
@@ -4642,10 +5102,14 @@ configuration:
           label: Auto-Assign
       - addLabel:
           label: Core
+      - addLabel:
+          label: act-platform-engineering-squad
       - requestReview:
           reviewer: jiasli
       - requestReview:
           reviewer: yonzhan
+      - requestReview:
+          reviewer: act-platform-engineering-squad
       - assignTo:
           users:
           - jiasli
@@ -4691,12 +5155,16 @@ configuration:
           label: Auto-Assign
       - addLabel:
           label: SQL
+      - addLabel:
+          label: act-codegen-extensibility-squad
       - requestReview:
           reviewer: evelyn-ys
       - requestReview:
           reviewer: yonzhan
       - requestReview:
           reviewer: calvinhzy
+      - requestReview:
+          reviewer: act-codegen-extensibility-squad
       - assignTo:
           users:
           - evelyn-ys
@@ -4766,6 +5234,8 @@ configuration:
           label: Network - CDN
       - addLabel:
           label: Service Attention
+      - addLabel:
+          label: act-quality-productivity-squad
       description: '[cdn] auto assign labels and users based on issue description. '
     - if:
       - payloadType: Pull_Request
@@ -4783,12 +5253,16 @@ configuration:
           label: CosmosDB
       - addLabel:
           label: Auto-Assign
+      - addLabel:
+          label: act-codegen-extensibility-squad
       - requestReview:
           reviewer: evelyn-ys
       - requestReview:
           reviewer: calvinhzy
       - requestReview:
           reviewer: yonzhan
+      - requestReview:
+          reviewer: act-codegen-extensibility-squad
       - assignTo:
           users:
           - evelyn-ys
@@ -4812,6 +5286,8 @@ configuration:
           label: Service Attention
       - addLabel:
           label: Redis Cache
+      - addLabel:
+          label: act-codegen-extensibility-squad
       description: '[redis] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Pull_Request
@@ -4829,6 +5305,8 @@ configuration:
           label: Redis Cache
       - addLabel:
           label: Auto-Assign
+      - addLabel:
+          label: act-codegen-extensibility-squad
       - requestReview:
           reviewer: evelyn-ys
       - requestReview:
@@ -4842,6 +5320,8 @@ configuration:
           reviewer: zhoxing-ms
       - requestReview:
           reviewer: kairu-ms
+      - requestReview:
+          reviewer: act-codegen-extensibility-squad
       description: '[redis] Auto assign labels and reviewers based on PR title/description.'
     - if:
       - payloadType: Issues
@@ -4862,6 +5342,8 @@ configuration:
           label: Service Attention
       - addLabel:
           label: Service Fabric
+      - addLabel:
+          label: act-observability-squad
       description: '[Service Fabric] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Pull_Request
@@ -4879,12 +5361,16 @@ configuration:
           label: Service Fabric
       - addLabel:
           label: Auto-Assign
+      - addLabel:
+          label: act-observability-squad
       - requestReview:
           reviewer: zhoxing-ms
       - requestReview:
           reviewer: ' jsntcy'
       - requestReview:
           reviewer: yonzhan
+      - requestReview:
+          reviewer: act-observability-squad
       - assignTo:
           users:
           - zhoxing-ms
@@ -4910,6 +5396,8 @@ configuration:
           label: Service Attention
       - addLabel:
           label: SSH
+      - addLabel:
+          label: act-observability-squad
       description: '[ssh] auto assign labels and users based on issue description. '
     - if:
       - payloadType: Issues
@@ -4930,6 +5418,8 @@ configuration:
           label: Service Attention
       - addLabel:
           label: PostgreSQL
+      - addLabel:
+          label: act-codegen-extensibility-squad
       description: '[postgres] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -4950,6 +5440,8 @@ configuration:
           label: Service Attention
       - addLabel:
           label: Synapse
+      - addLabel:
+          label: act-codegen-extensibility-squad
       - assignTo:
           users:
           - evelyn-ys
@@ -4970,6 +5462,8 @@ configuration:
           label: Auto-Assign
       - addLabel:
           label: Event Hubs
+      - addLabel:
+          label: act-codegen-extensibility-squad
       - requestReview:
           reviewer: evelyn-ys
       - requestReview:
@@ -4979,6 +5473,8 @@ configuration:
           - evelyn-ys
       - requestReview:
           reviewer: yonzhan
+      - requestReview:
+          reviewer: act-codegen-extensibility-squad
       description: '[EventHub] Auto assign labels and reviewers based on PR title/description.'
     - if:
       - payloadType: Issues
@@ -5004,6 +5500,8 @@ configuration:
           label: Azure CLI Team
       - addLabel:
           label: question
+      - addLabel:
+          label: act-codegen-extensibility-squad
       description: '[portal] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Pull_Request
@@ -5025,11 +5523,15 @@ configuration:
           label: Auto-Assign
       - requestReview:
           reviewer: wangzelin007
+      - requestReview:
+          reviewer: act-codegen-extensibility-squad
       - assignTo:
           users:
           - ReaNAiveD
       - addLabel:
           label: Portal
+      - addLabel:
+          label: act-codegen-extensibility-squad
       description: '[portal] Auto assign labels and reviewers based on PR title/description.'
     - if:
       - payloadType: Pull_Request
@@ -5058,8 +5560,12 @@ configuration:
           reviewer: yonzhan
       - addLabel:
           label: Web Apps
+      - addLabel:
+          label: act-observability-squad
       - requestReview:
           reviewer: wangzelin007
+      - requestReview:
+          reviewer: act-observability-squad
       description: '[webapp] Auto assign labels and reviewers based on PR title/description.'
     - if:
       - payloadType: Pull_Request
@@ -5084,10 +5590,14 @@ configuration:
           - jiasli
       - addLabel:
           label: Graph
+      - addLabel:
+          label: act-identity-squad
       - requestReview:
           reviewer: evelyn-ys
       - requestReview:
           reviewer: calvinhzy
+      - requestReview:
+          reviewer: act-identity-squad
       description: '[graph] Auto assign labels and reviewers based on PR title/description.'
     - if:
       - payloadType: Pull_Request
@@ -5112,12 +5622,16 @@ configuration:
           - jiasli
       - addLabel:
           label: Installation
+      - addLabel:
+          label: act-platform-engineering-squad
       - requestReview:
           reviewer: jiasli
       - requestReview:
           reviewer: jsntcy
       - requestReview:
           reviewer: jiasli
+      - requestReview:
+          reviewer: act-platform-engineering-squad
       description: '[install] Auto assign labels and reviewers based on PR title/description.'
     - if:
       - payloadType: Issues
@@ -5140,6 +5654,8 @@ configuration:
           label: Pipelines
       - addLabel:
           label: DevOps
+      - addLabel:
+          label: act-platform-engineering-squad
       description: '[pipelines] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Pull_Request
@@ -5164,8 +5680,12 @@ configuration:
           - zhoxing-ms
       - addLabel:
           label: API Management
+      - addLabel:
+          label: act-observability-squad
       - requestReview:
           reviewer: zhoxing-ms
+      - requestReview:
+          reviewer: act-observability-squad
       description: '[apim] Auto assign labels and reviewers based on PR title/description.'
     - if:
       - payloadType: Issues
@@ -5191,6 +5711,8 @@ configuration:
           label: Azure CLI Team
       - addLabel:
           label: question
+      - addLabel:
+          label: act-identity-squad
       description: '[managed identity] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Pull_Request
@@ -5215,8 +5737,12 @@ configuration:
           - zhoxing-ms
       - addLabel:
           label: Managed Identity
+      - addLabel:
+          label: act-identity-squad
       - requestReview:
           reviewer: zhoxing-ms
+      - requestReview:
+          reviewer: act-identity-squad
       description: '[managed identity] Auto assign labels and reviewers based on PR title/description.'
     - if:
       - payloadType: Issues
@@ -5241,6 +5767,8 @@ configuration:
           label: Auto-Assign
       - addLabel:
           label: AAD
+      - addLabel:
+          label: act-identity-squad
       - assignTo:
           users:
           - jiasli
@@ -5274,8 +5802,12 @@ configuration:
           - jiasli
       - addLabel:
           label: AAD
+      - addLabel:
+          label: act-identity-squad
       - requestReview:
           reviewer: jiasli
+      - requestReview:
+          reviewer: act-identity-squad
       description: '[AAD] Auto assign labels and reviewers based on PR title/description.'
     - if:
       - payloadType: Issues
@@ -5296,6 +5828,8 @@ configuration:
           label: Service Attention
       - addLabel:
           label: Network - Bastion
+      - addLabel:
+          label: act-quality-productivity-squad
       description: '[network bastion] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Pull_Request
@@ -5318,10 +5852,14 @@ configuration:
           - evelyn-ys
       - addLabel:
           label: Event Grid
+      - addLabel:
+          label: act-codegen-extensibility-squad
       - requestReview:
           reviewer: calvinhzy
       - requestReview:
           reviewer: evelyn-ys
+      - requestReview:
+          reviewer: act-codegen-extensibility-squad
       description: '[eventgrid] Auto assign labels and reviewers based on PR title/description.'
     - if:
       - payloadType: Issues
@@ -5340,6 +5878,8 @@ configuration:
           label: Auto-Assign
       - addLabel:
           label: Desktop Virtualization
+      - addLabel:
+          label: act-codegen-extensibility-squad
       - assignTo:
           users:
           - wangzelin007
@@ -5367,10 +5907,14 @@ configuration:
           - wangzelin007
       - addLabel:
           label: Desktop Virtualization
+      - addLabel:
+          label: act-codegen-extensibility-squad
       - requestReview:
           reviewer: jsntcy
       - requestReview:
           reviewer: kairu-ms
+      - requestReview:
+          reviewer: act-codegen-extensibility-squad
       description: '[desktopvirtualization] Auto assign labels and reviewers based on PR title/description.'
     - if:
       - payloadType: Issues
@@ -5391,6 +5935,8 @@ configuration:
           label: Recovery Services Backup
       - addLabel:
           label: Service Attention
+      - addLabel:
+          label: act-observability-squad
       description: '[Backup] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Pull_Request
@@ -5415,10 +5961,14 @@ configuration:
           - zhoxing-ms
       - addLabel:
           label: Backup
+      - addLabel:
+          label: act-observability-squad
       - requestReview:
           reviewer: jsntcy
       - requestReview:
           reviewer: zhoxing-ms
+      - requestReview:
+          reviewer: act-observability-squad
       description: '[backup] Auto assign labels and reviewers based on PR title/description.'
     - if:
       - payloadType: Issues
@@ -5439,6 +5989,8 @@ configuration:
           label: ContainerApp
       - addLabel:
           label: Service Attention
+      - addLabel:
+          label: act-observability-squad
       description: '[container app] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Pull_Request
@@ -5465,6 +6017,8 @@ configuration:
           - zhoxing-ms
       - addLabel:
           label: ContainerApp
+      - addLabel:
+          label: act-observability-squad
       - requestReview:
           reviewer: zhoxing-ms
       - requestReview:
@@ -5495,6 +6049,8 @@ configuration:
           reviewer: jijohn14
       - requestReview:
           reviewer: Greedygre
+      - requestReview:
+          reviewer: act-observability-squad
       description: '[container app] Auto assign labels and reviewers based on PR title/description.'
     - if:
       - payloadType: Issues
@@ -5515,6 +6071,8 @@ configuration:
           label: Batch
       - addLabel:
           label: Service Attention
+      - addLabel:
+          label: act-observability-squad
       description: '[batch] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Pull_Request
@@ -5539,10 +6097,14 @@ configuration:
           - zhoxing-ms
       - addLabel:
           label: Batch
+      - addLabel:
+          label: act-observability-squad
       - requestReview:
           reviewer: jsntcy
       - requestReview:
           reviewer: zhoxing-ms
+      - requestReview:
+          reviewer: act-observability-squad
       description: '[batch] Auto assign labels and reviewers based on PR title/description.'
     - if:
       - payloadType: Pull_Request
@@ -5567,8 +6129,12 @@ configuration:
           - kairu-ms
       - addLabel:
           label: NetAppFiles
+      - addLabel:
+          label: act-observability-squad
       - requestReview:
           reviewer: jiasli
+      - requestReview:
+          reviewer: act-observability-squad
       - requestReview:
           reviewer: ' jsntcy'
       description: '[netappfiles] Auto assign labels and reviewers based on PR title/description.'
@@ -5591,6 +6157,8 @@ configuration:
           label: SQL - VM
       - addLabel:
           label: Service Attention
+      - addLabel:
+          label: act-codegen-extensibility-squad
       description: '[SqlVirtualMachine] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Pull_Request
@@ -5615,8 +6183,12 @@ configuration:
           - evelyn-ys
       - addLabel:
           label: SQL - VM
+      - addLabel:
+          label: act-codegen-extensibility-squad
       - requestReview:
           reviewer: calvinhzy
+      - requestReview:
+          reviewer: act-codegen-extensibility-squad
       description: '[SqlVirtualMachine] Auto assign labels and reviewers based on PR title/description.'
     - if:
       - payloadType: Issues
@@ -5637,6 +6209,8 @@ configuration:
           label: Network - Front Door
       - addLabel:
           label: Service Attention
+      - addLabel:
+          label: act-quality-productivity-squad
       description: '[Azure Front Door] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Pull_Request
@@ -5667,12 +6241,16 @@ configuration:
           - necusjz
       - addLabel:
           label: Network - Front Door
+      - addLabel:
+          label: act-quality-productivity-squad
       - requestReview:
           reviewer: wangzelin007
       - requestReview:
           reviewer: jsntcy
       - requestReview:
           reviewer: necusjz
+      - requestReview:
+          reviewer: act-quality-productivity-squad
       description: '[Azure Front Door] Auto assign labels and reviewers based on PR title/description.'
     - if:
       - payloadType: Pull_Request
@@ -5701,8 +6279,12 @@ configuration:
           reviewer: jsntcy
       - requestReview:
           reviewer: necusjz
+      - requestReview:
+          reviewer: act-quality-productivity-squad
       - addLabel:
           label: Network
+      - addLabel:
+          label: act-quality-productivity-squad
       description: '[cdn] Auto assign labels and reviewers based on PR title/description.'
     - if:
       - payloadType: Issues
@@ -5723,6 +6305,8 @@ configuration:
           label: Media Services
       - addLabel:
           label: Service Attention
+      - addLabel:
+          label: act-codegen-extensibility-squad
       description: '[ams] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Pull_Request
@@ -5747,10 +6331,14 @@ configuration:
           - kairu-ms
       - addLabel:
           label: Media Services
+      - addLabel:
+          label: act-codegen-extensibility-squad
       - requestReview:
           reviewer: jiasli
       - requestReview:
           reviewer: jsntcy
+      - requestReview:
+          reviewer: act-codegen-extensibility-squad
       description: '[ams] Auto assign labels and reviewers based on PR title/description.'
     - if:
       - payloadType: Issues
@@ -5771,6 +6359,8 @@ configuration:
           label: Event Hubs
       - addLabel:
           label: Service Attention
+      - addLabel:
+          label: act-codegen-extensibility-squad
       description: '[eventhub] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -5791,6 +6381,8 @@ configuration:
           label: Cognitive Services
       - addLabel:
           label: Service Attention
+      - addLabel:
+          label: act-codegen-extensibility-squad
       description: '[Cognitive Services] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Pull_Request
@@ -5818,12 +6410,16 @@ configuration:
           - kairu-ms
       - addLabel:
           label: Cognitive Services
+      - addLabel:
+          label: act-codegen-extensibility-squad
       - requestReview:
           reviewer: wangzelin007
       - requestReview:
           reviewer: jsntcy
       - requestReview:
           reviewer: jiasli
+      - requestReview:
+          reviewer: act-codegen-extensibility-squad
       description: '[Cognitive Services] Auto assign labels and reviewers based on PR title/description.'
     - if:
       - payloadType: Issues
@@ -5844,6 +6440,8 @@ configuration:
           label: App Configuration
       - addLabel:
           label: Service Attention
+      - addLabel:
+          label: act-codegen-extensibility-squad
       description: '[appconfig] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Pull_Request
@@ -5868,8 +6466,12 @@ configuration:
           - evelyn-ys
       - addLabel:
           label: Synapse
+      - addLabel:
+          label: act-codegen-extensibility-squad
       - requestReview:
           reviewer: evelyn-ys
+      - requestReview:
+          reviewer: act-codegen-extensibility-squad
       description: '[synapse] Auto assign labels and reviewers based on PR title/description.'
     - if:
       - payloadType: Issues
@@ -5890,6 +6492,8 @@ configuration:
           label: MySQL
       - addLabel:
           label: Service Attention
+      - addLabel:
+          label: act-codegen-extensibility-squad
       description: '[mysql] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -5910,6 +6514,8 @@ configuration:
           label: Logic App
       - addLabel:
           label: Service Attention
+      - addLabel:
+          label: act-observability-squad
       - assignTo:
           users:
           - ReaNAiveD
@@ -5943,8 +6549,12 @@ configuration:
           - zhoxing-ms
       - addLabel:
           label: Logic App
+      - addLabel:
+          label: act-observability-squad
       - requestReview:
           reviewer: wangzelin007
+      - requestReview:
+          reviewer: act-observability-squad
       description: '[logic app] Auto assign labels and reviewers based on PR title/description.'
     - if:
       - payloadType: Pull_Request
@@ -5987,6 +6597,8 @@ configuration:
           label: Auto-Assign
       - addLabel:
           label: Data Factory
+      - addLabel:
+          label: act-codegen-extensibility-squad
       - assignTo:
           users:
           - evelyn-ys
@@ -6014,8 +6626,12 @@ configuration:
           - evelyn-ys
       - addLabel:
           label: Data Factory
+      - addLabel:
+          label: act-codegen-extensibility-squad
       - requestReview:
           reviewer: calvinhzy
+      - requestReview:
+          reviewer: act-codegen-extensibility-squad
       description: '[Data Factory] Auto assign labels and reviewers based on PR title/description.'
     - if:
       - payloadType: Issues
@@ -6036,6 +6652,8 @@ configuration:
           label: arcdata
       - addLabel:
           label: Service Attention
+      - addLabel:
+          label: act-observability-squad
       description: '[acrdata] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Pull_Request
@@ -6055,11 +6673,15 @@ configuration:
           label: Auto-Assign
       - requestReview:
           reviewer: kairu-ms
+      - requestReview:
+          reviewer: act-observability-squad
       - assignTo:
           users:
           - kairu-ms
       - addLabel:
           label: Reservations
+      - addLabel:
+          label: act-observability-squad
       description: '[Reservations] Auto assign labels and reviewers based on PR title/description.'
     - if:
       - payloadType: Issues
@@ -6080,6 +6702,8 @@ configuration:
           label: Recovery Services Backup
       - addLabel:
           label: Service Attention
+      - addLabel:
+          label: act-observability-squad
       description: '[backup restore] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -6100,6 +6724,8 @@ configuration:
           label: Bot Services
       - addLabel:
           label: Service Attention
+      - addLabel:
+          label: act-codegen-extensibility-squad
       description: '[botservice] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -6120,6 +6746,8 @@ configuration:
           label: Advisor
       - addLabel:
           label: Service Attention
+      - addLabel:
+          label: act-codegen-extensibility-squad
       description: '[Advisor] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -6139,6 +6767,8 @@ configuration:
           label: Auto-Assign
       - addLabel:
           label: Service Attention
+      - addLabel:
+          label: act-observability-squad
       - assignTo:
           users:
           - madsd
@@ -6161,6 +6791,8 @@ configuration:
           label: Auto-Assign
       - addLabel:
           label: Service Attention
+      - addLabel:
+          label: act-observability-squad
       - assignTo:
           users:
           - Hamster-Huey
@@ -6183,6 +6815,8 @@ configuration:
           label: Auto-Assign
       - addLabel:
           label: Service Attention
+      - addLabel:
+          label: act-observability-squad
       - assignTo:
           users:
           - gsethdev
@@ -6205,6 +6839,8 @@ configuration:
           label: Auto-Assign
       - addLabel:
           label: Service Attention
+      - addLabel:
+          label: act-observability-squad
       - assignTo:
           users:
           - yutanglin16
@@ -6227,6 +6863,8 @@ configuration:
           label: Auto-Assign
       - addLabel:
           label: Service Attention
+      - addLabel:
+          label: act-observability-squad
       - assignTo:
           users:
           - btardif
@@ -6249,6 +6887,8 @@ configuration:
           label: Auto-Assign
       - addLabel:
           label: Service Attention
+      - addLabel:
+          label: act-observability-squad
       - assignTo:
           users:
           - seligj95
@@ -6271,6 +6911,8 @@ configuration:
           label: Auto-Assign
       - addLabel:
           label: Service Attention
+      - addLabel:
+          label: act-observability-squad
       - assignTo:
           users:
           - apwestgarth
@@ -6293,6 +6935,8 @@ configuration:
           label: Auto-Assign
       - addLabel:
           label: Service Attention
+      - addLabel:
+          label: act-observability-squad
       - assignTo:
           users:
           - yutanglin16
@@ -6315,6 +6959,8 @@ configuration:
           label: Auto-Assign
       - addLabel:
           label: Service Attention
+      - addLabel:
+          label: act-observability-squad
       - assignTo:
           users:
           - madsd
@@ -6337,6 +6983,8 @@ configuration:
           label: Auto-Assign
       - addLabel:
           label: Service Attention
+      - addLabel:
+          label: act-observability-squad
       - assignTo:
           users:
           - madsd
@@ -6360,6 +7008,8 @@ configuration:
           label: Artifacts
       - addLabel:
           label: Service Attention
+      - addLabel:
+          label: act-observability-squad
       description: '[Artifacts] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -6380,6 +7030,8 @@ configuration:
           label: Kubernetes Configuration
       - addLabel:
           label: Service Attention
+      - addLabel:
+          label: act-codegen-extensibility-squad
       description: '[Kubernetes Configuration] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Pull_Request
@@ -6399,11 +7051,15 @@ configuration:
           reviewer: evelyn-ys
       - requestReview:
           reviewer: yonzhan
+      - requestReview:
+          reviewer: act-codegen-extensibility-squad
       - assignTo:
           users:
           - evelyn-ys
       - addLabel:
           label: Event Hubs
+      - addLabel:
+          label: act-codegen-extensibility-squad
       description: '[EventHub] Auto assign labels and reviewers based on PR title/description.'
     - if:
       - payloadType: Issues
@@ -6424,6 +7080,8 @@ configuration:
           label: Reservations
       - addLabel:
           label: Service Attention
+      - addLabel:
+          label: act-observability-squad
       description: '[Reservations] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -6444,6 +7102,8 @@ configuration:
           label: Azure Deployments
       - addLabel:
           label: Service Attention
+      - addLabel:
+          label: act-codegen-extensibility-squad
       description: '[Azure Deployments] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Issues
@@ -6464,6 +7124,8 @@ configuration:
           label: ARO
       - addLabel:
           label: Service Attention
+      - addLabel:
+          label: act-codegen-extensibility-squad
       description: '[ARO] auto assign labels and users based on issue description.'
     - if:
       - payloadType: Pull_Request
@@ -6481,10 +7143,14 @@ configuration:
           label: Auto-Assign
       - addLabel:
           label: ARO
+      - addLabel:
+          label: act-codegen-extensibility-squad
       - requestReview:
           reviewer: kairu-ms
       - requestReview:
           reviewer: yonzhan
+      - requestReview:
+          reviewer: act-codegen-extensibility-squad
       - assignTo:
           users:
           - kairu-ms
@@ -6510,6 +7176,8 @@ configuration:
           label: Azure CLI Team
       - addLabel:
           label: question
+      - addLabel:
+          label: act-codegen-extensibility-squad
       - assignTo:
           users:
           - ReaNAiveD
@@ -6530,12 +7198,16 @@ configuration:
           label: Auto-Assign
       - addLabel:
           label: SecurityInsights
+      - addLabel:
+          label: act-codegen-extensibility-squad
       - requestReview:
           reviewer: yonzhan
       - requestReview:
           reviewer: ReaNAiveD
       - requestReview:
           reviewer: necusjz
+      - requestReview:
+          reviewer: act-codegen-extensibility-squad
       - assignTo:
           users:
           - ReaNAiveD
@@ -6559,6 +7231,8 @@ configuration:
           label: Quantum
       - addLabel:
           label: Service Attention
+      - addLabel:
+          label: act-codegen-extensibility-squad
       description: '[Quantum] auto assign labels and users based on issue description.'
 onFailure:
 onSuccess:

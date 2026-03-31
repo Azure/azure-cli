@@ -18,13 +18,13 @@ class Create(AAZCommand):
     """Create operation to create or update the restore point collection. Please refer to https://aka.ms/RestorePoints for more details. When updating a restore point collection, only tags may be modified.
 
     :example: Create or update a restore point collection.
-        az restore-point collection create --location "norwayeast" --source-id "/subscriptions/{subscription-id}/resourceGroups/myResourceGroup/providers/Microsoft.Compute/virtualMachines/myVM" --tags myTag1="tagValue1" --resource-group "myResourceGroup" --collection-name "myRpc"
+        az restore-point collection create --location "norwayeast" --source-id "/subscriptions/{subscription-id}/resourceGroups/myResourceGroup/providers/Microsoft.Compute/virtualMachines/myVM" --tags myTag1="tagValue1" --resource-group "myResourceGroup" --collection-name "myRpc" --instant-access true
     """
 
     _aaz_info = {
-        "version": "2024-11-01",
+        "version": "2025-04-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/restorepointcollections/{}", "2024-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/restorepointcollections/{}", "2025-04-01"],
         ]
     }
 
@@ -66,6 +66,15 @@ class Create(AAZCommand):
 
         tags = cls._args_schema.tags
         tags.Element = AAZStrArg()
+
+        # define Arg Group "Properties"
+
+        _args_schema = cls._args_schema
+        _args_schema.instant_access = AAZBoolArg(
+            options=["--instant-access"],
+            arg_group="Properties",
+            help="This property determines whether instant access snapshot is enabled for restore points created under this restore point collection for Premium SSD v2 or Ultra disk. Instant access snapshot for Premium SSD v2 or Ultra disk is instantaneously available for restoring disk with fast restore performance.",
+        )
 
         # define Arg Group "Source"
 
@@ -142,7 +151,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-11-01",
+                    "api-version", "2025-04-01",
                     required=True,
                 ),
             }
@@ -173,6 +182,7 @@ class Create(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
+                properties.set_prop("instantAccess", AAZBoolType, ".instant_access")
                 properties.set_prop("source", AAZObjectType)
 
             source = _builder.get(".properties.source")
@@ -226,6 +236,9 @@ class Create(AAZCommand):
             )
 
             properties = cls._schema_on_200_201.properties
+            properties.instant_access = AAZBoolType(
+                serialized_name="instantAccess",
+            )
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
@@ -273,6 +286,9 @@ class Create(AAZCommand):
                 serialized_name="instanceView",
                 flags={"read_only": True},
             )
+            properties.instant_access_duration_minutes = AAZIntType(
+                serialized_name="instantAccessDurationMinutes",
+            )
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
@@ -305,6 +321,9 @@ class Create(AAZCommand):
             _element.id = AAZStrType()
             _element.replication_status = AAZObjectType(
                 serialized_name="replicationStatus",
+            )
+            _element.snapshot_access_state = AAZStrType(
+                serialized_name="snapshotAccessState",
             )
 
             replication_status = cls._schema_on_200_201.properties.restore_points.Element.properties.instance_view.disk_restore_points.Element.replication_status
@@ -580,6 +599,9 @@ class Create(AAZCommand):
             )
 
             proxy_agent_settings = cls._schema_on_200_201.properties.restore_points.Element.properties.source_metadata.security_profile.proxy_agent_settings
+            proxy_agent_settings.add_proxy_agent_extension = AAZBoolType(
+                serialized_name="addProxyAgentExtension",
+            )
             proxy_agent_settings.enabled = AAZBoolType()
             proxy_agent_settings.imds = AAZObjectType()
             _CreateHelper._build_schema_host_endpoint_settings_read(proxy_agent_settings.imds)
@@ -625,9 +647,6 @@ class Create(AAZCommand):
             _CreateHelper._build_schema_disk_restore_point_attributes_read(_element.disk_restore_point)
             _element.disk_size_gb = AAZIntType(
                 serialized_name="diskSizeGB",
-                flags={"read_only": True},
-            )
-            _element.lun = AAZIntType(
                 flags={"read_only": True},
             )
             _element.managed_disk = AAZObjectType(

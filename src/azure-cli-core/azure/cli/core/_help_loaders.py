@@ -11,8 +11,6 @@ from azure.cli.core._help import (HelpExample, CliHelpFile)
 from knack.util import CLIError
 from knack.log import get_logger
 
-import yaml
-
 logger = get_logger(__name__)
 
 try:
@@ -132,6 +130,8 @@ class YamlLoaderMixin:  # pylint:disable=too-few-public-methods
 
     @staticmethod
     def _parse_yaml_from_string(text, help_file_path):
+        import yaml
+
         dir_name, base_name = os.path.split(help_file_path)
         pretty_file_path = os.path.join(os.path.basename(dir_name), base_name)
 

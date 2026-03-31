@@ -7,7 +7,7 @@ import os
 import random
 import re
 import semver
-from typing import Any, List, TypeVar
+from typing import Any, Dict, List, TypeVar
 
 from azure.cli.command_modules.acs._client_factory import get_snapshots_client, get_msi_client
 from azure.cli.core.azclierror import (
@@ -26,6 +26,30 @@ from azure.core.exceptions import AzureError, HttpResponseError, ServiceRequestE
 
 # type variables
 ManagedCluster = TypeVar("ManagedCluster")
+
+
+def get_monitoring_addon_key(addon_profiles, monitoring_addon_name):
+    """Return the canonical key for the monitoring addon, normalizing non-standard casing.
+
+    The API response may return the monitoring addon key in any casing (e.g.
+    "omsagent", "omsAgent", "oMSaGent").  This helper performs a
+    case-insensitive lookup and, when a non-standard key is found, re-keys
+    addon_profiles in-place so that subsequent code always uses the canonical
+    ``monitoring_addon_name`` (lowercase) form.
+    """
+    if addon_profiles is None:
+        return monitoring_addon_name
+    # Exact match on the canonical lowercase name – preferred form.
+    if monitoring_addon_name in addon_profiles:
+        return monitoring_addon_name
+    # Case-insensitive fallback: catch any casing the server may return.
+    target_lower = monitoring_addon_name.lower()
+    for key in list(addon_profiles):
+        if key.lower() == target_lower:
+            # Normalize: move the profile to the canonical key.
+            addon_profiles[monitoring_addon_name] = addon_profiles.pop(key)
+            return monitoring_addon_name
+    return monitoring_addon_name
 
 
 def format_parameter_name_to_option_name(parameter_name: str) -> str:
@@ -66,6 +90,22 @@ def safe_lower(obj: Any) -> Any:
     return obj
 
 
+def build_etag_kwargs(if_match=None, if_none_match=None) -> Dict[str, Any]:
+    """Convert if_match/if_none_match to etag/match_condition kwargs for SDK v41+."""
+    from azure.core import MatchConditions
+    kwargs: Dict[str, Any] = {}
+    if if_match is not None:
+        kwargs["etag"] = if_match
+        kwargs["match_condition"] = MatchConditions.IfNotModified
+    elif if_none_match is not None:
+        if if_none_match == "*":
+            kwargs["match_condition"] = MatchConditions.IfMissing
+        else:
+            kwargs["etag"] = if_none_match
+            kwargs["match_condition"] = MatchConditions.IfModified
+    return kwargs
+
+
 def get_property_from_dict_or_object(obj, property_name) -> Any:
     """Get the value corresponding to the property name from a dictionary or object.
 
@@ -103,15 +143,10 @@ def check_is_private_cluster(mc: ManagedCluster) -> bool:
 def check_is_apiserver_vnet_integration_cluster(mc: ManagedCluster) -> bool:
     """Check `mc` object to determine whether apiserver vnet integration is enabled.
 
-    Note: enableVnetIntegration is still in preview api so we use additional_properties here
-
     :return: bool
     """
     if mc and mc.api_server_access_profile:
-        additional_properties = mc.api_server_access_profile.additional_properties
-        if 'enableVnetIntegration' in additional_properties:
-            return additional_properties['enableVnetIntegration']
-        return False
+        return bool(mc.api_server_access_profile.enable_vnet_integration)
     return False
 
 
