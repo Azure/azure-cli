@@ -4,278 +4,398 @@
 # --------------------------------------------------------------------------------------------
 
 """
-Well-known deployment failure patterns for az webapp deploy / az functionapp deploy.
+Well-known Kudu deployment failure patterns for az webapp deploy / az functionapp deploy.
 
-Each pattern maps an errorCode to its deployment stage, common causes, and suggested fixes.
+Each pattern maps an errorCode to its deployment stage and suggested fixes.
+Error codes and messages are sourced from the KuduLite deployment engine.
 These patterns are used by the context-enriched error handler to produce actionable diagnostics
-instead of generic "Status Code: 504" messages.
+instead of generic HTTP status code messages.
 """
 
 DEPLOYMENT_FAILURE_PATTERNS = [
+    # -----------------------------------------------------------------------
+    # 400 Bad Request — OneDeploy / general request validation
+    # -----------------------------------------------------------------------
     {
-        "errorCode": "ZipDeployTimeout",
-        "stage": "ZipExtract",
-        "commonCauses": [
-            "Large node_modules or dependency folder",
-            "Slow network between client and App Service",
-            "B1 plan under-provisioned for artifact size"
-        ],
+        "errorCode": "DeploymentFailed",
+        "stage": "Deployment",
+        "httpStatus": 400,
         "suggestedFixes": [
-            "Scale up the App Service plan (e.g., B1 -> P1V2)",
-            "Set SCM_DO_BUILD_DURING_DEPLOYMENT=false to disable remote build",
-            "Reduce artifact size by excluding dev dependencies",
-            "Retry the deployment"
+            "Check the deployment request body and packageUri for correctness",
+            "Verify the artifact is a valid deployment package",
+            "Check deployment logs: 'az webapp log deployment show'"
         ]
     },
     {
-        "errorCode": "Exit137",
-        "stage": "ContainerStartup",
-        "commonCauses": [
-            "Out-of-memory (OOM) kill during startup",
-            "Startup memory spike exceeds plan limits"
-        ],
+        "errorCode": "InvalidArtifactType",
+        "stage": "Deployment",
+        "httpStatus": 400,
         "suggestedFixes": [
-            "Scale up the App Service plan to get more memory",
-            "Reduce startup memory footprint",
-            "Lazy-load heavy dependencies instead of importing at startup"
+            "Use a supported artifact type: zip, war, jar, ear, lib, startup, static, script",
+            "Check the 'type' query parameter in the deploy request"
         ]
     },
     {
-        "errorCode": "OryxBuildFailed",
-        "stage": "Build",
-        "commonCauses": [
-            "Missing requirements.txt or package.json",
-            "Oryx build system misconfigured",
-            "Incompatible dependency versions"
-        ],
+        "errorCode": "ArtifactStackMismatch",
+        "stage": "Deployment",
+        "httpStatus": 400,
         "suggestedFixes": [
+            "Ensure the artifact type matches the app's runtime stack (e.g., war requires Tomcat)",
+            "Check 'az webapp config show' for the current linuxFxVersion or windowsFxVersion",
+            "Update the runtime stack via 'az webapp config set --linux-fx-version'"
+        ]
+    },
+    {
+        "errorCode": "MissingDeployPath",
+        "stage": "Deployment",
+        "httpStatus": 400,
+        "suggestedFixes": [
+            "Provide the 'path' query parameter for type=lib, type=script, or type=static",
+            "Review the OneDeploy API documentation for required parameters"
+        ]
+    },
+    {
+        "errorCode": "InvalidDeployPath",
+        "stage": "Deployment",
+        "httpStatus": 400,
+        "suggestedFixes": [
+            "Remove trailing '/' from the deploy path",
+            "Use an absolute path; do not include '..' path segments",
+            "Review the deploy path for correct format"
+        ]
+    },
+    {
+        "errorCode": "InvalidPackageUri",
+        "stage": "Deployment",
+        "httpStatus": 400,
+        "suggestedFixes": [
+            "Verify the packageUri is a valid, accessible URL",
+            "Ensure the packageUri is not empty or null in the JSON request body",
+            "Test the package URL is reachable from your network"
+        ]
+    },
+    {
+        "errorCode": "CleanDeployForbidden",
+        "stage": "Deployment",
+        "httpStatus": 400,
+        "suggestedFixes": [
+            "Do not use clean=true when deploying to /home or /home/site",
+            "Change the deploy path to a subdirectory (e.g., /home/site/wwwroot)",
+            "Remove the 'clean=true' parameter from the deploy request"
+        ]
+    },
+    {
+        "errorCode": "InvalidDeploymentStatus",
+        "stage": "Deployment",
+        "httpStatus": 400,
+        "suggestedFixes": [
+            "Only mark deployments with 'Success' status as active",
+            "Verify the deployment completed successfully before setting it as active"
+        ]
+    },
+    {
+        "errorCode": "NoFileUploaded",
+        "stage": "Deployment",
+        "httpStatus": 400,
+        "suggestedFixes": [
+            "Ensure a file is included in the deployment request body",
+            "Check that the upload did not fail silently due to a network issue",
+            "Retry the deployment with the correct file"
+        ]
+    },
+    {
+        "errorCode": "UnsupportedFileType",
+        "stage": "Deployment",
+        "httpStatus": 400,
+        "suggestedFixes": [
+            "Only .zip files are supported for QuickDeploy",
+            "Package your application as a .zip file before deploying",
+            "Use OneDeploy for non-zip artifact types"
+        ]
+    },
+    {
+        "errorCode": "QuickDeployPrepareFailed",
+        "stage": "Deployment",
+        "httpStatus": 400,
+        "suggestedFixes": [
+            "Retry the deployment",
+            "Check available disk space on the App Service plan",
+            "Reduce the deployment artifact size"
+        ]
+    },
+    {
+        "errorCode": "QuickDeployInitFailed",
+        "stage": "Deployment",
+        "httpStatus": 400,
+        "suggestedFixes": [
+            "Retry the deployment",
+            "Restart the SCM site and try again",
+            "Check deployment logs for initialization errors"
+        ]
+    },
+    {
+        "errorCode": "InvalidDeploymentId",
+        "stage": "Deployment",
+        "httpStatus": 400,
+        "suggestedFixes": [
+            "Provide a valid GUID format for the deployment ID",
+            "Omit the deployment ID to let the system generate one"
+        ]
+    },
+    # -----------------------------------------------------------------------
+    # 400 Bad Request — ZipDeploy validation
+    # -----------------------------------------------------------------------
+    {
+        "errorCode": "ZipDeployMalformedUri",
+        "stage": "Deployment",
+        "httpStatus": 400,
+        "suggestedFixes": [
+            "Verify the package URI is well-formed (scheme, host, path)",
+            "Test the package URL independently before deploying"
+        ]
+    },
+    {
+        "errorCode": "ZipDeployUriInaccessible",
+        "stage": "Deployment",
+        "httpStatus": 400,
+        "suggestedFixes": [
+            "Verify the package URL is reachable from the App Service network",
+            "Check SAS token expiration if using Azure Storage",
+            "Ensure any firewall rules allow access from App Service"
+        ]
+    },
+    {
+        "errorCode": "ZipDeployInsufficientDisk",
+        "stage": "Deployment",
+        "httpStatus": 400,
+        "suggestedFixes": [
+            "Reduce the deployment package size",
+            "Scale up the App Service plan for more disk space",
+            "Clean up previous deployments or temp files on the app"
+        ]
+    },
+    {
+        "errorCode": "ZipDeployRuntimeMismatch",
+        "stage": "Deployment",
+        "httpStatus": 400,
+        "suggestedFixes": [
+            "Ensure the zip package language matches FUNCTIONS_WORKER_RUNTIME",
+            "Update FUNCTIONS_WORKER_RUNTIME app setting to match the deployed code",
+            "Check 'az functionapp config appsettings list' for FUNCTIONS_WORKER_RUNTIME"
+        ]
+    },
+    {
+        "errorCode": "ZipDeployRunFromPackageConflict",
+        "stage": "Deployment",
+        "httpStatus": 400,
+        "suggestedFixes": [
+            "Remove or update the WEBSITE_RUN_FROM_PACKAGE app setting pointing to a remote URL",
+            "Use 'az webapp config appsettings set' to clear WEBSITE_RUN_FROM_PACKAGE",
+            "Deploy directly instead of using run-from-package"
+        ]
+    },
+    {
+        "errorCode": "UnsupportedArtifactType",
+        "stage": "Deployment",
+        "httpStatus": 400,
+        "suggestedFixes": [
+            "Use a supported artifact type: zip, war, jar, ear, lib, startup, static, script",
+            "Check 'az webapp deploy --help' for valid type values"
+        ]
+    },
+    # -----------------------------------------------------------------------
+    # 403 Forbidden
+    # -----------------------------------------------------------------------
+    {
+        "errorCode": "ScmDisabled",
+        "stage": "Deployment",
+        "httpStatus": 403,
+        "suggestedFixes": [
+            "Enable SCM access in the app settings",
+            "Remove any app setting that disables the SCM site",
+            "Check 'az webapp config show' for scmType and related settings"
+        ]
+    },
+    # -----------------------------------------------------------------------
+    # 404 Not Found
+    # -----------------------------------------------------------------------
+    {
+        "errorCode": "RepositoryNotFound",
+        "stage": "Deployment",
+        "httpStatus": 404,
+        "suggestedFixes": [
+            "Perform an initial deployment before attempting redeployment",
+            "Verify the app has a git repository initialized on the SCM site"
+        ]
+    },
+    {
+        "errorCode": "DeploymentNotFound",
+        "stage": "Deployment",
+        "httpStatus": 404,
+        "suggestedFixes": [
+            "Verify the deployment ID is correct",
+            "List existing deployments: 'az webapp deployment list'",
+            "The deployment may have been cleaned up; redeploy instead"
+        ]
+    },
+    {
+        "errorCode": "LogNotFound",
+        "stage": "Deployment",
+        "httpStatus": 404,
+        "suggestedFixes": [
+            "Verify the deployment ID and log ID are correct",
+            "List deployment logs: 'az webapp log deployment show'"
+        ]
+    },
+    {
+        "errorCode": "NoDeploymentsExist",
+        "stage": "Deployment",
+        "httpStatus": 404,
+        "suggestedFixes": [
+            "Deploy the website first before requesting a deployment script",
+            "Use 'az webapp deploy' or 'az webapp deployment source config-zip' to deploy"
+        ]
+    },
+    {
+        "errorCode": "CustomDeployScriptInUse",
+        "stage": "Deployment",
+        "httpStatus": 404,
+        "suggestedFixes": [
+            "This operation is not supported when a custom deployment script is configured",
+            "Remove the custom deployment script (.deployment file) if not needed"
+        ]
+    },
+    {
+        "errorCode": "QuickDeployDisabled",
+        "stage": "Deployment",
+        "httpStatus": 404,
+        "suggestedFixes": [
+            "Enable the QuickDeploy feature flag on the app",
+            "Use standard ZipDeploy or OneDeploy instead"
+        ]
+    },
+    {
+        "errorCode": "RouteNotFound",
+        "stage": "Deployment",
+        "httpStatus": 404,
+        "suggestedFixes": [
+            "Verify the deployment API endpoint path is correct",
+            "Check the Kudu/SCM API documentation for valid routes"
+        ]
+    },
+    # -----------------------------------------------------------------------
+    # 409 Conflict
+    # -----------------------------------------------------------------------
+    {
+        "errorCode": "AutoSwapInProgress",
+        "stage": "Deployment",
+        "httpStatus": 409,
+        "suggestedFixes": [
+            "Wait for the auto swap operation to complete before deploying",
+            "Check slot swap status: 'az webapp deployment slot list'",
+            "Retry the deployment after the swap finishes"
+        ]
+    },
+    {
+        "errorCode": "DeploymentInProgress",
+        "stage": "Deployment",
+        "httpStatus": 409,
+        "suggestedFixes": [
+            "Wait for the current deployment to complete before starting a new one",
+            "Check deployment status: 'az webapp deployment show'",
+            "If stuck, restart the SCM site to release the deployment lock"
+        ]
+    },
+    {
+        "errorCode": "RunFromRemoteZipConfigured",
+        "stage": "Deployment",
+        "httpStatus": 409,
+        "suggestedFixes": [
+            "Remove WEBSITE_RUN_FROM_PACKAGE or WEBSITE_USE_ZIP app setting pointing to a remote URL",
+            "Use 'az webapp config appsettings delete --setting-names WEBSITE_RUN_FROM_PACKAGE'",
+            "Deploy to a staging slot instead"
+        ]
+    },
+    {
+        "errorCode": "DeploymentIdExists",
+        "stage": "Deployment",
+        "httpStatus": 409,
+        "suggestedFixes": [
+            "Use a unique deployment ID for each deployment",
+            "Omit the deployment ID to let the system generate one",
+            "Delete the existing deployment before reusing its ID"
+        ]
+    },
+    {
+        "errorCode": "DeploymentLockFailed",
+        "stage": "Deployment",
+        "httpStatus": 409,
+        "suggestedFixes": [
+            "Wait and retry — another deployment may be in progress",
+            "Restart the SCM site to release stale locks",
+            "Check if another CI/CD pipeline is deploying concurrently"
+        ]
+    },
+    # -----------------------------------------------------------------------
+    # 499 Client Closed Request
+    # -----------------------------------------------------------------------
+    {
+        "errorCode": "ClientDisconnected",
+        "stage": "Deployment",
+        "httpStatus": 499,
+        "suggestedFixes": [
+            "Retry the deployment with a stable network connection",
+            "Increase client timeout settings",
+            "Use async deployment (--async true) for long-running deploys"
+        ]
+    },
+    # -----------------------------------------------------------------------
+    # 500 Internal Server Error
+    # -----------------------------------------------------------------------
+    {
+        "errorCode": "InternalDeploymentError",
+        "stage": "Deployment",
+        "httpStatus": 500,
+        "suggestedFixes": [
+            "Retry the deployment",
+            "Check deployment logs: 'az webapp log deployment show'",
+            "Restart the SCM site and try again",
+            "If the problem persists, file an Azure support ticket"
+        ]
+    },
+    {
+        "errorCode": "EmptyBranch",
+        "stage": "Deployment",
+        "httpStatus": 500,
+        "suggestedFixes": [
+            "Push commits to the target deployment branch",
+            "Verify the branch name matches the configured deployment branch",
+            "Check 'az webapp deployment source show' for the configured branch"
+        ]
+    },
+    # -----------------------------------------------------------------------
+    # Kudu DeployStatus — Pending / Building / Deploying / Failed / Success
+    # -----------------------------------------------------------------------
+    {
+        "errorCode": "KuduBuildFailed",
+        "stage": "Building",
+        "httpStatus": None,
+        "suggestedFixes": [
+            "Check build logs: 'az webapp log deployment show'",
             "Ensure the correct build manifest file exists (requirements.txt / package.json)",
-            "Set SCM_DO_BUILD_DURING_DEPLOYMENT=false and pre-build artifacts locally",
-            "Check Oryx build logs for specific dependency errors"
+            "Set SCM_DO_BUILD_DURING_DEPLOYMENT=false and pre-build artifacts locally"
         ]
     },
     {
-        "errorCode": "StartupProbeFailed",
-        "stage": "ContainerStartup",
-        "commonCauses": [
-            "Application not listening on the expected port",
-            "Slow initialization exceeding probe timeout"
-        ],
+        "errorCode": "KuduDeployFailed",
+        "stage": "Deploying",
+        "httpStatus": None,
         "suggestedFixes": [
-            "Increase WEBSITES_CONTAINER_START_TIME_LIMIT (e.g., to 600)",
-            "Verify the PORT environment variable and that the app binds to it",
-            "Add a /health or /ready endpoint for the startup probe"
-        ]
-    },
-    {
-        "errorCode": "AuthFailed",
-        "stage": "Deployment",
-        "commonCauses": [
-            "RBAC role not assigned or misconfigured",
-            "Managed identity not enabled on the app"
-        ],
-        "suggestedFixes": [
-            "Ensure the deploying identity has Contributor or Website Contributor role",
-            "Enable system-assigned managed identity on the web app",
-            "Run 'az role assignment list' to verify permissions"
-        ]
-    },
-    {
-        "errorCode": "AppOfflineDetected",
-        "stage": "Deployment",
-        "commonCauses": [
-            "Deployment file lock preventing updates",
-            "app_offline.htm file left from a previous deployment"
-        ],
-        "suggestedFixes": [
-            "Remove the app_offline.htm file from wwwroot",
-            "Retry the deployment after a brief wait",
-            "Restart the app before redeploying"
-        ]
-    },
-    {
-        "errorCode": "DockerImagePullFailed",
-        "stage": "ContainerStartup",
-        "commonCauses": [
-            "Invalid image name or tag",
-            "Container registry authentication failure",
-            "Network connectivity issue to registry"
-        ],
-        "suggestedFixes": [
-            "Verify the image name and tag exist in the registry",
-            "Check container registry credentials and permissions",
-            "Ensure network connectivity between App Service and the registry"
-        ]
-    },
-    {
-        "errorCode": "SCMTimeout",
-        "stage": "ZipExtract",
-        "commonCauses": [
-            "Slow SCM (Kudu) operations under load",
-            "Very large deployment artifact"
-        ],
-        "suggestedFixes": [
-            "Split deployment into smaller artifacts",
-            "Set SCM_DO_BUILD_DURING_DEPLOYMENT=false to skip build during deploy",
+            "Check deployment logs: 'az webapp log deployment show'",
+            "Verify file permissions and disk space",
             "Retry the deployment"
         ]
     },
-    {
-        "errorCode": "ConfigConflict",
-        "stage": "ConfigUpdate",
-        "commonCauses": [
-            "Conflicting settings between portal and CLI/ARM",
-            "Stale configuration cached by the platform"
-        ],
-        "suggestedFixes": [
-            "Resolve conflicts manually in the Azure portal",
-            "Use an ARM template or Bicep to enforce consistent configuration",
-            "Run 'az webapp config show' to review current settings"
-        ]
-    },
-    {
-        "errorCode": "RuntimeMismatch",
-        "stage": "ContainerStartup",
-        "commonCauses": [
-            "Runtime version set in config does not match deployed code",
-            "Container base image uses a different runtime version"
-        ],
-        "suggestedFixes": [
-            "Update the runtime stack via 'az webapp config set --linux-fx-version'",
-            "Rebuild the container image with the correct runtime version",
-            "Check 'az webapp config show' for linuxFxVersion or windowsFxVersion"
-        ]
-    },
-    {
-        "errorCode": "SSLValidationFailed",
-        "stage": "Deployment",
-        "commonCauses": [
-            "Invalid or expired SSL certificate",
-            "Certificate-key mismatch"
-        ],
-        "suggestedFixes": [
-            "Upload a valid SSL certificate with matching private key",
-            "Check certificate expiration date",
-            "Verify the certificate password is correct"
-        ]
-    },
-    {
-        "errorCode": "InsufficientQuota",
-        "stage": "Deployment",
-        "commonCauses": [
-            "App Service plan instance or core limits reached",
-            "Subscription quota exhausted"
-        ],
-        "suggestedFixes": [
-            "Upgrade the App Service plan to a higher tier",
-            "Free up quota by deleting unused apps",
-            "Request a quota increase via Azure support"
-        ]
-    },
-    {
-        "errorCode": "PermissionDenied",
-        "stage": "Deployment",
-        "commonCauses": [
-            "Service principal or user lacks required RBAC role",
-            "Scope of role assignment is incorrect"
-        ],
-        "suggestedFixes": [
-            "Assign Contributor or Website Contributor role at the correct scope",
-            "Run 'az role assignment list --assignee <principal>' to verify",
-            "Check if a deny assignment or policy is blocking access"
-        ]
-    },
-    {
-        "errorCode": "FileLockError",
-        "stage": "ZipExtract",
-        "commonCauses": [
-            "File in use by a running process during deployment",
-            "Antivirus or file lock from another deployment"
-        ],
-        "suggestedFixes": [
-            "Stop the app before deploying: 'az webapp stop'",
-            "Retry the deployment after a short delay",
-            "Enable MSDEPLOY_RENAME_LOCKED_FILES=1 in app settings"
-        ]
-    },
-    {
-        "errorCode": "ColdStartTimeout",
-        "stage": "ContainerStartup",
-        "commonCauses": [
-            "Large dependency tree causing slow cold start",
-            "No pre-warmed instances available"
-        ],
-        "suggestedFixes": [
-            "Increase WEBSITES_CONTAINER_START_TIME_LIMIT",
-            "Scale up the plan for faster cold starts",
-            "Enable Always On to avoid cold starts"
-        ]
-    },
-    {
-        "errorCode": "DBConnectionFailed",
-        "stage": "ContainerStartup",
-        "commonCauses": [
-            "Database connection string missing from app settings",
-            "Database firewall blocking App Service IP"
-        ],
-        "suggestedFixes": [
-            "Set the connection string via 'az webapp config connection-string set'",
-            "Add App Service outbound IPs to the database firewall rules",
-            "Use a service connector: 'az webapp connection create'"
-        ]
-    },
-    {
-        "errorCode": "WebJobFailed",
-        "stage": "WebJobStartup",
-        "commonCauses": [
-            "Missing runtime for the WebJob",
-            "Package or dependency errors in the WebJob"
-        ],
-        "suggestedFixes": [
-            "Check WebJob runtime requirements and logs",
-            "Run 'az webapp webjob continuous list' to see WebJob status",
-            "Review logs at https://<app>.scm.azurewebsites.net/api/continuouswebjobs"
-        ]
-    },
-    {
-        "errorCode": "PortBindingError",
-        "stage": "ContainerStartup",
-        "commonCauses": [
-            "Container not exposing port 80 or 8080",
-            "WEBSITES_PORT not set to the correct port"
-        ],
-        "suggestedFixes": [
-            "Set WEBSITES_PORT app setting to match the container's listening port",
-            "Ensure the Dockerfile exposes the correct port",
-            "Check 'az webapp config appsettings list' for WEBSITES_PORT"
-        ]
-    },
-    {
-        "errorCode": "AppSettingsMisconfigured",
-        "stage": "ContainerStartup",
-        "commonCauses": [
-            "Missing required environment variables",
-            "Incorrect app setting names or values"
-        ],
-        "suggestedFixes": [
-            "Review app settings: 'az webapp config appsettings list'",
-            "Set required environment variables: 'az webapp config appsettings set'",
-            "Compare with working configuration or documentation"
-        ]
-    },
-    {
-        "errorCode": "StorageMountFailed",
-        "stage": "ContainerStartup",
-        "commonCauses": [
-            "SMB/NFS mount failure due to storage account issues",
-            "Incorrect storage credentials or share name"
-        ],
-        "suggestedFixes": [
-            "Verify the storage account name, key, and share exist",
-            "Check network connectivity (private endpoints, firewalls)",
-            "Run 'az webapp config storage-account list' to review mounts"
-        ]
-    }
 ]
 
 # Index for O(1) lookup by error code
@@ -289,10 +409,10 @@ def get_failure_pattern(error_code):
 
 def match_failure_pattern(status_code=None, error_message=None, deployment_status=None):
     """
-    Attempt to match an error to a well-known failure pattern based on heuristics.
+    Attempt to match an error to a well-known Kudu deployment failure pattern.
 
-    Examines status codes, error messages, and deployment status text to find the
-    most relevant failure pattern.
+    Examines HTTP status codes and error message text to find the most relevant
+    failure pattern from the KuduLite deployment engine.
 
     Returns the matched pattern dict or None.
     """
@@ -301,73 +421,120 @@ def match_failure_pattern(status_code=None, error_message=None, deployment_statu
 
     error_lower = error_message.lower()
 
-    # Status code based matching
-    if status_code in (504, 408):
-        if "scm" in error_lower or "kudu" in error_lower:
-            return get_failure_pattern("SCMTimeout")
-        return get_failure_pattern("ZipDeployTimeout")
+    # ----- 400 Bad Request: match on specific Kudu error messages -----
+    if status_code == 400:
+        # ZipDeploy validation errors (check first — most specific)
+        if "zipdeploy validation error" in error_lower:
+            if "malformed" in error_lower:
+                return get_failure_pattern("ZipDeployMalformedUri")
+            if "inaccessible" in error_lower:
+                return get_failure_pattern("ZipDeployUriInaccessible")
+            if "disk space" in error_lower or "package size" in error_lower:
+                return get_failure_pattern("ZipDeployInsufficientDisk")
+            if "cannot deploy" in error_lower and "functions" in error_lower:
+                return get_failure_pattern("ZipDeployRuntimeMismatch")
+            if "website_run_from_package" in error_lower:
+                return get_failure_pattern("ZipDeployRunFromPackageConflict")
 
-    if status_code == 401 or status_code == 403:
-        if "ssl" in error_lower or "cert" in error_lower:
-            return get_failure_pattern("SSLValidationFailed")
-        if "permission" in error_lower or "denied" in error_lower:
-            return get_failure_pattern("PermissionDenied")
-        return get_failure_pattern("AuthFailed")
+        # OneDeploy artifact / type errors
+        if "not recognized" in error_lower and "type=" in error_lower:
+            return get_failure_pattern("InvalidArtifactType")
+        if "cannot be deployed to stack" in error_lower:
+            return get_failure_pattern("ArtifactStackMismatch")
+        if "artifact type" in error_lower and "not supported" in error_lower:
+            return get_failure_pattern("UnsupportedArtifactType")
+        if "path must be defined" in error_lower:
+            return get_failure_pattern("MissingDeployPath")
+        if "path cannot end with" in error_lower or "path cannot contain" in error_lower:
+            return get_failure_pattern("InvalidDeployPath")
+        if "invalid packageu" in error_lower:
+            return get_failure_pattern("InvalidPackageUri")
+        if "clean deployments cannot be performed" in error_lower:
+            return get_failure_pattern("CleanDeployForbidden")
+        if "only successful status can be active" in error_lower:
+            return get_failure_pattern("InvalidDeploymentStatus")
+        if "no file uploaded" in error_lower:
+            return get_failure_pattern("NoFileUploaded")
+        if "only .zip files are supported" in error_lower:
+            return get_failure_pattern("UnsupportedFileType")
+        if "failed to prepare deployment file" in error_lower:
+            return get_failure_pattern("QuickDeployPrepareFailed")
+        if "failed to initialize deployment" in error_lower:
+            return get_failure_pattern("QuickDeployInitFailed")
+        if "invalid deployment id" in error_lower:
+            return get_failure_pattern("InvalidDeploymentId")
 
+        # Generic 400
+        return get_failure_pattern("DeploymentFailed")
+
+    # ----- 403 Forbidden -----
+    if status_code == 403:
+        return get_failure_pattern("ScmDisabled")
+
+    # ----- 404 Not Found -----
+    if status_code == 404:
+        if "repository could not be found" in error_lower:
+            return get_failure_pattern("RepositoryNotFound")
+        if "logid" in error_lower and "not found" in error_lower:
+            return get_failure_pattern("LogNotFound")
+        if "deployment" in error_lower and "not found" in error_lower:
+            return get_failure_pattern("DeploymentNotFound")
+        if "need to deploy website" in error_lower:
+            return get_failure_pattern("NoDeploymentsExist")
+        if "custom deployment script" in error_lower:
+            return get_failure_pattern("CustomDeployScriptInUse")
+        if "quickdeploy" in error_lower and "disabled" in error_lower:
+            return get_failure_pattern("QuickDeployDisabled")
+        if "no route registered" in error_lower:
+            return get_failure_pattern("RouteNotFound")
+        return get_failure_pattern("DeploymentNotFound")
+
+    # ----- 409 Conflict -----
     if status_code == 409:
-        if "lock" in error_lower or "locked" in error_lower:
-            return get_failure_pattern("FileLockError")
-        if "offline" in error_lower:
-            return get_failure_pattern("AppOfflineDetected")
+        if "auto swap" in error_lower:
+            return get_failure_pattern("AutoSwapInProgress")
+        if "run-from-zip" in error_lower or "website_run_from_package" in error_lower or "website_use_zip" in error_lower:
+            return get_failure_pattern("RunFromRemoteZipConfigured")
+        if "deployment with id" in error_lower and "exists" in error_lower:
+            return get_failure_pattern("DeploymentIdExists")
+        if "failed to acquire deployment lock" in error_lower:
+            return get_failure_pattern("DeploymentLockFailed")
+        # Generic 409 — deployment lock conflict
+        return get_failure_pattern("DeploymentInProgress")
 
-    if status_code == 429 or "quota" in error_lower or "insufficient" in error_lower:
-        return get_failure_pattern("InsufficientQuota")
+    # ----- 499 Client Closed Request -----
+    if status_code == 499:
+        return get_failure_pattern("ClientDisconnected")
 
-    # Deployment status based matching
-    if deployment_status == "BuildFailed":
-        if "oryx" in error_lower:
-            return get_failure_pattern("OryxBuildFailed")
-        return get_failure_pattern("OryxBuildFailed")  # default build failure
+    # ----- 500 Internal Server Error -----
+    if status_code == 500:
+        if "nothing has been pushed" in error_lower and "branch" in error_lower:
+            return get_failure_pattern("EmptyBranch")
+        return get_failure_pattern("InternalDeploymentError")
 
-    if deployment_status == "RuntimeFailed":
-        # Try to narrow down the runtime failure
-        if "137" in error_lower or "oom" in error_lower or "out of memory" in error_lower:
-            return get_failure_pattern("Exit137")
-        if "port" in error_lower or "bind" in error_lower:
-            return get_failure_pattern("PortBindingError")
-        if "probe" in error_lower or "health" in error_lower:
-            return get_failure_pattern("StartupProbeFailed")
-        if "image" in error_lower or "pull" in error_lower or "docker" in error_lower:
-            return get_failure_pattern("DockerImagePullFailed")
-        if "runtime" in error_lower and "mismatch" in error_lower:
-            return get_failure_pattern("RuntimeMismatch")
-        if "connection" in error_lower and ("db" in error_lower or "database" in error_lower or "sql" in error_lower):
-            return get_failure_pattern("DBConnectionFailed")
-        if "storage" in error_lower or "mount" in error_lower or "smb" in error_lower:
-            return get_failure_pattern("StorageMountFailed")
-        if "setting" in error_lower or "env" in error_lower or "environment" in error_lower:
-            return get_failure_pattern("AppSettingsMisconfigured")
-        if "cold" in error_lower or "startup" in error_lower or "timeout" in error_lower:
-            return get_failure_pattern("ColdStartTimeout")
-        # Generic runtime failure — use StartupProbeFailed as the closest match
-        return get_failure_pattern("StartupProbeFailed")
+    # ----- Kudu DeployStatus-based matching -----
+    if deployment_status == "Failed":
+        # Check error message for build vs deploy phase hints
+        if "build" in error_lower:
+            return get_failure_pattern("KuduBuildFailed")
+        return get_failure_pattern("KuduDeployFailed")
 
-    # Message-based matching (fallback heuristics)
-    if "artifact type" in error_lower and "cannot be deployed to stack" in error_lower:
-        return get_failure_pattern("RuntimeMismatch")
-    if "webjob" in error_lower:
-        return get_failure_pattern("WebJobFailed")
-    if "config" in error_lower and "conflict" in error_lower:
-        return get_failure_pattern("ConfigConflict")
-    if "offline" in error_lower:
-        return get_failure_pattern("AppOfflineDetected")
-    if "timeout" in error_lower:
-        return get_failure_pattern("ZipDeployTimeout")
-    if "permission" in error_lower or "denied" in error_lower or "unauthorized" in error_lower:
-        return get_failure_pattern("PermissionDenied")
-    if "quota" in error_lower or "exceeded" in error_lower:
-        return get_failure_pattern("InsufficientQuota")
-    if "lock" in error_lower:
-        return get_failure_pattern("FileLockError")
+    if deployment_status == "Building":
+        return get_failure_pattern("KuduBuildFailed")
+
+    # ----- Message-based fallback heuristics (no status code) -----
+    if not status_code:
+        if "request was aborted" in error_lower or "deployment was cancelled" in error_lower:
+            return get_failure_pattern("ClientDisconnected")
+        if "auto swap" in error_lower:
+            return get_failure_pattern("AutoSwapInProgress")
+        if "deployment currently in progress" in error_lower:
+            return get_failure_pattern("DeploymentInProgress")
+        if "run-from-zip" in error_lower:
+            return get_failure_pattern("RunFromRemoteZipConfigured")
+        if "cannot be deployed to stack" in error_lower:
+            return get_failure_pattern("ArtifactStackMismatch")
+        if "repository could not be found" in error_lower:
+            return get_failure_pattern("RepositoryNotFound")
 
     return None

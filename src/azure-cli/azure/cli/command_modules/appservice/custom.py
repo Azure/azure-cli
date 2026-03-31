@@ -58,7 +58,7 @@ from ._client_factory import (web_client_factory, ex_handler_factory, providers_
                               appcontainers_client_factory)
 from ._appservice_utils import _generic_site_operation, _generic_settings_operation
 from ._appservice_utils import MSI_LOCAL_ID
-from ._deployment_context_engine import raise_enriched_deployment_error
+from ._deployment_context_engine import raise_enriched_deployment_error, extract_status_code_from_message
 from .utils import (_normalize_sku,
                     get_sku_tier,
                     retryable_method,
@@ -926,13 +926,15 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
                                                              slot, timeout)
         except CLIError as deploy_err:
             if _should_enrich_errors:
+                _deploy_err_str = str(deploy_err)
                 raise_enriched_deployment_error(
                     cmd=cmd,
                     resource_group_name=resource_group_name,
                     webapp_name=name,
                     slot=slot,
                     artifact_type="zip",
-                    error_message=str(deploy_err),
+                    status_code=extract_status_code_from_message(_deploy_err_str),
+                    error_message=_deploy_err_str,
                     last_known_step="Zip deployment accepted (HTTP 202), tracking status"
                 )
             raise
@@ -9887,9 +9889,11 @@ def _make_onedeploy_request(params):
             except CLIError as deploy_err:
                 if not params.is_functionapp:
                     # Enrich the downstream deployment-tracking error with context
+                    _deploy_err_str = str(deploy_err)
                     raise_enriched_deployment_error(
                         params=params,
-                        error_message=str(deploy_err),
+                        status_code=extract_status_code_from_message(_deploy_err_str),
+                        error_message=_deploy_err_str,
                         last_known_step="Deployment accepted (HTTP 200/202), tracking status"
                     )
                 raise
@@ -9949,13 +9953,14 @@ def _perform_onedeploy_internal(params):
         raise
     except CLIError as ex:
         # Check if this is already an enriched error (from raise_enriched_deployment_error)
-        if "COPILOT CONTEXT" in str(ex):
+        if "DEPLOYMENT FAILED" in str(ex):
             raise
         if not params.is_functionapp:
-            # Raw CLIError from send_raw_request or other deployment calls — enrich it
+            _ex_str = str(ex)
             raise_enriched_deployment_error(
                 params=params,
-                error_message=str(ex),
+                status_code=extract_status_code_from_message(_ex_str),
+                error_message=_ex_str,
                 last_known_step="Deployment request"
             )
         raise

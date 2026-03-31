@@ -8,10 +8,11 @@ Context-enriched error builder for az webapp deploy / az functionapp deploy.
 
 Instead of raising a bare "Status Code: 504" error, this module builds a structured
 diagnostic context block that includes the error code, deployment stage, runtime info,
-common causes, suggested fixes, and a ready-to-use Copilot prompt.
+suggested fixes, and a ready-to-use Copilot prompt.
 """
 
-import yaml
+import re
+
 from knack.log import get_logger
 from knack.util import CLIError
 
@@ -19,13 +20,34 @@ from ._deployment_failure_patterns import match_failure_pattern
 
 logger = get_logger(__name__)
 
+# Patterns that reliably indicate an HTTP status code in CLI error messages.
+# Ordered from most specific to least specific; first match wins.
+_STATUS_CODE_PATTERNS = [
+    re.compile(r'Status\s*Code[:\s]+(\d{3})', re.IGNORECASE),   # "Status Code: 400"
+    re.compile(r'\((([45]\d{2}))\)'),                           # "Bad Request(400)"
+    re.compile(r'HTTP\s+(\d{3})', re.IGNORECASE),                # "HTTP 504"
+    re.compile(r'\b([45]\d{2})\s+(?:Bad|Unauthorized|Forbidden|Not\s+Found|Conflict|Too\s+Many|Internal|Gateway|Service)', re.IGNORECASE),  # "400 Bad Request"
+]
 
-def _safe_yaml_dump(data):
-    """Dump dict to YAML string, falling back to repr on error."""
-    try:
-        return yaml.dump(data, default_flow_style=False, sort_keys=False, allow_unicode=True).rstrip()
-    except Exception:  # pylint: disable=broad-except
-        return repr(data)
+
+def extract_status_code_from_message(message):
+    """Extract an HTTP status code (4xx/5xx) from a CLI error message string.
+
+    Uses targeted patterns ("Status Code: 400", "Bad Request(400)", "HTTP 504",
+    "400 Bad Request") rather than blindly matching any 3-digit number, to avoid
+    false positives from port numbers, exit codes, or counts.
+
+    Returns the integer status code, or None if no recognisable code is found.
+    """
+    if not message:
+        return None
+    for pattern in _STATUS_CODE_PATTERNS:
+        m = pattern.search(message)
+        if m:
+            code = int(m.group(1))
+            if 400 <= code <= 599:
+                return code
+    return None
 
 
 def _get_app_runtime(cmd, resource_group_name, webapp_name, slot=None):
@@ -180,12 +202,10 @@ def build_enriched_error_context(params=None, *, cmd=None, resource_group_name=N
         params, src_url=_src_url, artifact_type=_artifact
     )
 
-    # Causes and fixes
+    # Suggested fixes
     if pattern:
-        context["commonCauses"] = pattern["commonCauses"]
         context["suggestedFixes"] = pattern["suggestedFixes"]
     else:
-        context["commonCauses"] = ["Unrecognised failure — see error details below"]
         context["suggestedFixes"] = [
             "Check deployment logs: 'az webapp log deployment show -n {} -g {}'".format(
                 _name or '<app>', _rg or '<rg>'),
@@ -227,22 +247,15 @@ def format_enriched_error_message(context):
     """
     Format the structured context dict into a human-readable error message.
 
-    The output includes the YAML context block and a ready-to-use Copilot prompt.
+    The output is a single formatted block with diagnostics and a Copilot prompt.
     """
     lines = []
     lines.append("")
     lines.append("=" * 72)
-    lines.append("DEPLOYMENT FAILED — Context-Enriched Diagnostics")
+    lines.append("DEPLOYMENT FAILED: Context-Enriched Diagnostics")
     lines.append("=" * 72)
     lines.append("")
 
-    # YAML context block
-    lines.append("--- COPILOT CONTEXT ---")
-    lines.append(_safe_yaml_dump(context))
-    lines.append("--- END CONTEXT ---")
-    lines.append("")
-
-    # Human-readable summary
     lines.append(f"Error Code  : {context.get('errorCode', 'Unknown')}")
     lines.append(f"Stage       : {context.get('stage', 'Unknown')}")
     lines.append(f"Runtime     : {context.get('runtime', 'Unknown')}")
@@ -251,11 +264,8 @@ def format_enriched_error_message(context):
     lines.append(f"Plan SKU    : {context.get('planSku', 'Unknown')}")
     lines.append("")
 
-    causes = context.get("commonCauses", [])
-    if causes:
-        lines.append("Common Causes:")
-        for c in causes:
-            lines.append(f"  - {c}")
+    if context.get("rawError"):
+        lines.append(f"Raw Error   : {context['rawError']}")
         lines.append("")
 
     fixes = context.get("suggestedFixes", [])
@@ -265,17 +275,12 @@ def format_enriched_error_message(context):
             lines.append(f"  - {f}")
         lines.append("")
 
-    if context.get("rawError"):
-        lines.append(f"Raw Error   : {context['rawError']}")
-        lines.append("")
-
     # Copilot prompt
     lines.append("-" * 72)
     lines.append("Ask Copilot:")
-    lines.append('  Copy-paste the COPILOT CONTEXT block above into GitHub Copilot Chat,')
-    lines.append('  or run:')
-    lines.append('    gh copilot explain "Paste the COPILOT CONTEXT above and explain')
-    lines.append('    why this deployment failed and what I should do"')
+    lines.append("  Paste the error above into GitHub Copilot Chat, or run:")
+    lines.append('    gh copilot explain "why did my deployment fail with')
+    lines.append(f'    {context.get("errorCode", "this error")} and what should I do"')
     lines.append("-" * 72)
 
     return "\n".join(lines)
