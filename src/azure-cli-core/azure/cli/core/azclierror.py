@@ -81,7 +81,7 @@ class AzCLIError(CLIError):
                 print(recommendation, file=sys.stderr)
 
         if self.example_recommendations:
-            print()
+            print(file=sys.stderr)
             if len(self.example_recommendations) > 1:  # contains help examples
                 print("Examples from command's help:", file=sys.stderr)
 
