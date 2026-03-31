@@ -1015,6 +1015,12 @@ parameters:
   - name: --http-proxy-config
     type: string
     short-summary: HTTP Proxy configuration for this cluster.
+  - name: --disable-http-proxy
+    type: bool
+    short-summary: Disable HTTP Proxy Configuration on the cluster.
+  - name: --enable-http-proxy
+    type: bool
+    short-summary: Enable HTTP Proxy Configuration on the cluster.
   - name: --enable-oidc-issuer
     type: bool
     short-summary: Enable OIDC issuer.

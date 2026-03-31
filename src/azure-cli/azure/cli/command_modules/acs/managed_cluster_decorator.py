@@ -2021,6 +2021,64 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need validation
         return http_proxy_config
 
+    def get_disable_http_proxy(self) -> bool:
+        """Obtain the value of disable_http_proxy.
+
+        This function will verify the parameter by default. If both enable_http_proxy and disable_http_proxy are
+        specified, raise a MutuallyExclusiveArgumentError.
+
+        :return: bool
+        """
+        return self._get_disable_http_proxy(enable_validation=True)
+
+    def _get_disable_http_proxy(self, enable_validation: bool = False) -> bool:
+        """Internal function to obtain the value of disable_http_proxy.
+
+        This function supports the option of enable_validation. When enabled, if both enable_http_proxy and
+        disable_http_proxy are specified, raise a MutuallyExclusiveArgumentError.
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        disable_http_proxy = self.raw_param.get("disable_http_proxy")
+
+        if enable_validation:
+            if disable_http_proxy and self._get_enable_http_proxy(enable_validation=False):
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify --enable-http-proxy and --disable-http-proxy at the same time."
+                )
+
+        return disable_http_proxy
+
+    def get_enable_http_proxy(self) -> bool:
+        """Obtain the value of enable_http_proxy.
+
+        This function will verify the parameter by default. If both enable_http_proxy and disable_http_proxy are
+        specified, raise a MutuallyExclusiveArgumentError.
+
+        :return: bool
+        """
+        return self._get_enable_http_proxy(enable_validation=True)
+
+    def _get_enable_http_proxy(self, enable_validation: bool = False) -> bool:
+        """Internal function to obtain the value of enable_http_proxy.
+
+        This function supports the option of enable_validation. When enabled, if both enable_http_proxy and
+        disable_http_proxy are specified, raise a MutuallyExclusiveArgumentError.
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        enable_http_proxy = self.raw_param.get("enable_http_proxy")
+
+        if enable_validation:
+            if enable_http_proxy and self._get_disable_http_proxy(enable_validation=False):
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify --enable-http-proxy and --disable-http-proxy at the same time."
+                )
+
+        return enable_http_proxy
+
     def get_assignee_from_identity_or_sp_profile(self) -> Tuple[str, bool]:
         """Helper function to obtain the value of assignee from identity_profile or service_principal_profile.
 
@@ -8490,11 +8548,38 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
     def update_http_proxy_config(self, mc: ManagedCluster) -> ManagedCluster:
         """Set up http proxy config for the ManagedCluster object.
 
+        Only updates if --http-proxy-config was explicitly provided, to avoid wiping existing config.
+
         :return: the ManagedCluster object
         """
         self._ensure_mc(mc)
 
-        mc.http_proxy_config = self.context.get_http_proxy_config()
+        http_proxy_config = self.context.get_http_proxy_config()
+        if http_proxy_config is not None:
+            mc.http_proxy_config = http_proxy_config
+        return mc
+
+    def update_http_proxy_enabled(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update http proxy enabled/disabled state for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        if self.context.get_disable_http_proxy():
+            if mc.http_proxy_config is None:
+                mc.http_proxy_config = (
+                    self.models.ManagedClusterHTTPProxyConfig()  # pylint: disable=no-member
+                )
+            mc.http_proxy_config.enabled = False
+
+        if self.context.get_enable_http_proxy():
+            if mc.http_proxy_config is None:
+                mc.http_proxy_config = (
+                    self.models.ManagedClusterHTTPProxyConfig()  # pylint: disable=no-member
+                )
+            mc.http_proxy_config.enabled = True
+
         return mc
 
     def update_identity(self, mc: ManagedCluster) -> ManagedCluster:
@@ -9800,6 +9885,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_identity_profile(mc)
         # set up http proxy config
         mc = self.update_http_proxy_config(mc)
+        # update http proxy enabled/disabled state
+        mc = self.update_http_proxy_enabled(mc)
         # update workload autoscaler profile
         mc = self.update_workload_auto_scaler_profile(mc)
         # update kubernetes support plan

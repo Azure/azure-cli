@@ -743,6 +743,8 @@ def load_arguments(self, _):
         c.argument('disable_image_cleaner', action='store_true', validator=validate_image_cleaner_enable_disable_mutually_exclusive)
         c.argument('image_cleaner_interval_hours', type=int)
         c.argument('http_proxy_config')
+        c.argument('disable_http_proxy', action='store_true')
+        c.argument('enable_http_proxy', action='store_true')
         c.argument('custom_ca_trust_certificates', options_list=["--custom-ca-trust-certificates", "--ca-certs"], validator=validate_custom_ca_trust_certificates, help="path to file containing list of new line separated CAs")
         c.argument('enable_run_command', action='store_true')
         c.argument('disable_run_command', action='store_true')
