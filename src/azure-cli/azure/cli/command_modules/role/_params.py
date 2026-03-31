@@ -392,8 +392,8 @@ def load_arguments(self, _):
 
     with self.argument_context('role deny-assignment') as c:
         c.argument('scope', help='Scope at which the deny assignment applies. '
-                        'For example, /subscriptions/00000000-0000-0000-0000-000000000000 or '
-                        '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myGroup')
+                   'For example, /subscriptions/00000000-0000-0000-0000-000000000000 or '
+                   '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myGroup')
         c.argument('deny_assignment_name', options_list=['--name', '-n'],
                    help='The display name of the deny assignment.')
 
