@@ -13263,7 +13263,7 @@ spec:
             ],
         )
 
-        # update: enable security and observability
+        # update: --enable-acns defaults both observability and security to enabled
         update_cmd = (
             "aks update --resource-group={resource_group} --name={name} "
             "--enable-acns "
@@ -13293,7 +13293,7 @@ spec:
             ],
         )
 
-        # update: enable FQDN policy, disable observability
+        # update: disable observability (security defaults back to enabled)
         update_cmd3 = (
             "aks update --resource-group={resource_group} --name={name} "
             "--enable-acns --disable-acns-observability "
@@ -13559,6 +13559,86 @@ spec:
             checks=[self.is_empty()],
         )
 
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17,
+        name_prefix="clitest",
+        location="westcentralus",
+    )
+    def test_aks_update_acns_preserves_existing_settings(
+        self, resource_group, resource_group_location
+    ):
+        self.test_resources_count = 0
+        aks_name = self.create_random_name("cliakstest", 16)
+        self.kwargs.update(
+            {
+                "resource_group": resource_group,
+                "name": aks_name,
+                "ssh_key_value": self.generate_ssh_keys(),
+                "location": resource_group_location,
+            }
+        )
+
+        # Create cluster with ACNS enabled (gets observability + security by default)
+        create_cmd = (
+            "aks create --resource-group={resource_group} --name={name} --location={location} "
+            "--ssh-key-value={ssh_key_value} --node-count=1 --tier standard "
+            "--network-plugin azure --network-dataplane=cilium --network-plugin-mode overlay "
+            "--enable-acns "
+        )
+        self.cmd(
+            create_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("networkProfile.advancedNetworking.enabled", True),
+                self.check("networkProfile.advancedNetworking.observability.enabled", True),
+                self.check("networkProfile.advancedNetworking.security.enabled", True),
+            ],
+        )
+
+        # Update only network policies - existing observability and security.enabled should be preserved
+        update_cmd = (
+            "aks update --resource-group={resource_group} --name={name} "
+            "--enable-acns --acns-advanced-networkpolicies L7 "
+        )
+        self.cmd(
+            update_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("networkProfile.advancedNetworking.enabled", True),
+                self.check("networkProfile.advancedNetworking.observability.enabled", True),
+                self.check("networkProfile.advancedNetworking.security.enabled", True),
+                self.check("networkProfile.advancedNetworking.security.advancedNetworkPolicies", "L7"),
+            ],
+        )
+
+        # Wait for the first update to fully settle before issuing the next one
+        self.cmd('aks wait --resource-group={resource_group} --name={name} --updated --interval 30 --timeout 600')
+        if self.is_live or self.in_recording:
+            time.sleep(60)
+
+        # Update only transit encryption - existing observability, security, and network policies should be preserved
+        update_cmd_2 = (
+            "aks update --resource-group={resource_group} --name={name} "
+            "--acns-transit-encryption-type WireGuard "
+        )
+        self.cmd(
+            update_cmd_2,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("networkProfile.advancedNetworking.enabled", True),
+                self.check("networkProfile.advancedNetworking.observability.enabled", True),
+                self.check("networkProfile.advancedNetworking.security.enabled", True),
+                self.check("networkProfile.advancedNetworking.security.advancedNetworkPolicies", "L7"),
+                self.check("networkProfile.advancedNetworking.security.transitEncryption.type", "WireGuard"),
+            ],
+        )
+
+        # delete
+        self.cmd(
+            "aks delete -g {resource_group} -n {name} --yes --no-wait",
+            checks=[self.is_empty()],
+        )
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(
