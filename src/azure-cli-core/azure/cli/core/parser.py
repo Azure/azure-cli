@@ -169,7 +169,7 @@ class AzCliCommandParser(CLICommandParser):
             from azure.cli.core.util import QUERY_REFERENCE
             az_error.set_recommendation(QUERY_REFERENCE)
         elif recommendations:
-            az_error.set_aladdin_recommendation(recommendations)
+            az_error.set_example_recommendation(recommendations)
         az_error.print_error()
         az_error.send_telemetry()
         self.exit(2)
@@ -324,7 +324,7 @@ class AzCliCommandParser(CLICommandParser):
             recommender.set_help_examples(self.get_examples(command_name_inferred))
             recommendations = recommender.provide_recommendations()
             if recommendations:
-                az_error.set_aladdin_recommendation(recommendations)
+                az_error.set_example_recommendation(recommendations)
 
             # remind user to check extensions if we can not find a command to recommend
             if isinstance(az_error, CommandNotFoundError) \
