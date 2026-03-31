@@ -22,9 +22,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2018-03-01",
+        "version": "2024-03-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.insights/metricalerts/{}", "2018-03-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.insights/metricalerts/{}", "2024-03-01-preview"],
         ]
     }
 
@@ -96,7 +96,7 @@ class Show(AAZCommand):
 
         @property
         def error_format(self):
-            return "ODataV4Format"
+            return "MgmtErrorFormat"
 
         @property
         def url_parameters(self):
@@ -120,7 +120,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2018-03-01",
+                    "api-version", "2024-03-01-preview",
                     required=True,
                 ),
             }
@@ -156,6 +156,7 @@ class Show(AAZCommand):
             _schema_on_200.id = AAZStrType(
                 flags={"read_only": True},
             )
+            _schema_on_200.identity = AAZIdentityObjectType()
             _schema_on_200.location = AAZStrType(
                 flags={"required": True},
             )
@@ -170,13 +171,48 @@ class Show(AAZCommand):
                 flags={"read_only": True},
             )
 
+            identity = cls._schema_on_200.identity
+            identity.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
+            identity.tenant_id = AAZStrType(
+                serialized_name="tenantId",
+                flags={"read_only": True},
+            )
+            identity.type = AAZStrType(
+                flags={"required": True},
+            )
+            identity.user_assigned_identities = AAZDictType(
+                serialized_name="userAssignedIdentities",
+            )
+
+            user_assigned_identities = cls._schema_on_200.identity.user_assigned_identities
+            user_assigned_identities.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.identity.user_assigned_identities.Element
+            _element.client_id = AAZStrType(
+                serialized_name="clientId",
+                flags={"read_only": True},
+            )
+            _element.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
+
             properties = cls._schema_on_200.properties
+            properties.action_properties = AAZDictType(
+                serialized_name="actionProperties",
+            )
             properties.actions = AAZListType()
             properties.auto_mitigate = AAZBoolType(
                 serialized_name="autoMitigate",
             )
             properties.criteria = AAZObjectType(
                 flags={"required": True},
+            )
+            properties.custom_properties = AAZDictType(
+                serialized_name="customProperties",
             )
             properties.description = AAZStrType()
             properties.enabled = AAZBoolType(
@@ -194,6 +230,9 @@ class Show(AAZCommand):
                 serialized_name="lastUpdatedTime",
                 flags={"read_only": True},
             )
+            properties.resolve_configuration = AAZObjectType(
+                serialized_name="resolveConfiguration",
+            )
             properties.scopes = AAZListType(
                 flags={"required": True},
             )
@@ -208,8 +247,10 @@ class Show(AAZCommand):
             )
             properties.window_size = AAZStrType(
                 serialized_name="windowSize",
-                flags={"required": True},
             )
+
+            action_properties = cls._schema_on_200.properties.action_properties
+            action_properties.Element = AAZStrType()
 
             actions = cls._schema_on_200.properties.actions
             actions.Element = AAZObjectType()
@@ -300,6 +341,46 @@ class Show(AAZCommand):
                 flags={"required": True},
             )
 
+            disc_microsoft__azure__monitor__prom_ql_criteria = cls._schema_on_200.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.PromQLCriteria")
+            disc_microsoft__azure__monitor__prom_ql_criteria.all_of = AAZListType(
+                serialized_name="allOf",
+            )
+            disc_microsoft__azure__monitor__prom_ql_criteria.failing_periods = AAZObjectType(
+                serialized_name="failingPeriods",
+            )
+
+            all_of = cls._schema_on_200.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.PromQLCriteria").all_of
+            all_of.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.PromQLCriteria").all_of.Element
+            _element.criterion_type = AAZStrType(
+                serialized_name="criterionType",
+                flags={"required": True},
+            )
+            _element.name = AAZStrType(
+                flags={"required": True},
+            )
+            _element.query = AAZStrType(
+                flags={"required": True},
+            )
+
+            disc_dynamic_threshold_criterion = cls._schema_on_200.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.PromQLCriteria").all_of.Element.discriminate_by("criterion_type", "DynamicThresholdCriterion")
+            disc_dynamic_threshold_criterion.alert_sensitivity = AAZStrType(
+                serialized_name="alertSensitivity",
+                flags={"required": True},
+            )
+            disc_dynamic_threshold_criterion.ignore_data_before = AAZStrType(
+                serialized_name="ignoreDataBefore",
+            )
+            disc_dynamic_threshold_criterion.operator = AAZStrType(
+                flags={"required": True},
+            )
+
+            failing_periods = cls._schema_on_200.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.PromQLCriteria").failing_periods
+            failing_periods["for"] = AAZStrType(
+                flags={"required": True},
+            )
+
             disc_microsoft__azure__monitor__single_resource_multiple_metric_criteria = cls._schema_on_200.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria")
             disc_microsoft__azure__monitor__single_resource_multiple_metric_criteria.all_of = AAZListType(
                 serialized_name="allOf",
@@ -354,6 +435,18 @@ class Show(AAZCommand):
             disc_microsoft__azure__monitor__webtest_location_availability_criteria.web_test_id = AAZStrType(
                 serialized_name="webTestId",
                 flags={"required": True},
+            )
+
+            custom_properties = cls._schema_on_200.properties.custom_properties
+            custom_properties.Element = AAZStrType()
+
+            resolve_configuration = cls._schema_on_200.properties.resolve_configuration
+            resolve_configuration.auto_resolved = AAZBoolType(
+                serialized_name="autoResolved",
+                flags={"required": True},
+            )
+            resolve_configuration.time_to_resolve = AAZStrType(
+                serialized_name="timeToResolve",
             )
 
             scopes = cls._schema_on_200.properties.scopes

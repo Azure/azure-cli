@@ -63,7 +63,7 @@ class Create(AAZCommand):
         )
         _args_schema.logs = AAZListArg(
             options=["--logs"],
-            help="JSON encoded list of logs settings. Use '@{file}' to load from a file. For more information, visit: https://learn.microsoft.com/rest/api/monitor/diagnosticsettings/createorupdate#logsettings.",
+            help="JSON encoded list of logs settings. Use '@{file}' to load from a file.For more information, visit: https://learn.microsoft.com/rest/api/monitor/diagnosticsettings/createorupdate#logsettings.",
         )
         _args_schema.marketplace_partner_id = AAZStrArg(
             options=["--marketplace-partner-id"],
@@ -100,12 +100,12 @@ class Create(AAZCommand):
         )
         _element.enabled = AAZBoolArg(
             options=["enabled"],
-            help="A value indicating whether this log is enabled.",
+            help="a value indicating whether this log is enabled.",
             required=True,
         )
         _element.retention_policy = AAZObjectArg(
             options=["retention-policy"],
-            help="The retention policy for this log.",
+            help="the retention policy for this log.",
         )
         cls._build_args_retention_policy_create(_element.retention_policy)
 
@@ -119,17 +119,17 @@ class Create(AAZCommand):
         )
         _element.enabled = AAZBoolArg(
             options=["enabled"],
-            help="A value indicating whether this category is enabled.",
+            help="a value indicating whether this category is enabled.",
             required=True,
         )
         _element.retention_policy = AAZObjectArg(
             options=["retention-policy"],
-            help="The retention policy for this category.",
+            help="the retention policy for this category.",
         )
         cls._build_args_retention_policy_create(_element.retention_policy)
         _element.time_grain = AAZDurationArg(
             options=["time-grain"],
-            help="The timegrain of the metric in ISO8601 format.",
+            help="the timegrain of the metric in ISO8601 format.",
         )
 
         # define Arg Group "Target Resource"
@@ -157,7 +157,7 @@ class Create(AAZCommand):
         retention_policy_create = cls._args_retention_policy_create
         retention_policy_create.days = AAZIntArg(
             options=["days"],
-            help="The number of days for the retention. A value of 0 will retain the events indefinitely.",
+            help="the number of days for the retention in days. A value of 0 will retain the events indefinitely.",
             required=True,
             fmt=AAZIntArgFormat(
                 minimum=0,
@@ -165,7 +165,7 @@ class Create(AAZCommand):
         )
         retention_policy_create.enabled = AAZBoolArg(
             options=["enabled"],
-            help="A value indicating whether the retention policy is enabled.",
+            help="a value indicating whether the retention policy is enabled.",
             required=True,
         )
 
@@ -282,7 +282,7 @@ class Create(AAZCommand):
                 _elements.set_prop("category", AAZStrType, ".category")
                 _elements.set_prop("categoryGroup", AAZStrType, ".category_group")
                 _elements.set_prop("enabled", AAZBoolType, ".enabled", typ_kwargs={"flags": {"required": True}})
-                _build_schema_retention_policy_create(_elements.set_prop("retentionPolicy", AAZObjectType, ".retention_policy"))
+                _CreateHelper._build_schema_retention_policy_create(_elements.set_prop("retentionPolicy", AAZObjectType, ".retention_policy"))
 
             metrics = _builder.get(".properties.metrics")
             if metrics is not None:
@@ -292,7 +292,7 @@ class Create(AAZCommand):
             if _elements is not None:
                 _elements.set_prop("category", AAZStrType, ".category")
                 _elements.set_prop("enabled", AAZBoolType, ".enabled", typ_kwargs={"flags": {"required": True}})
-                _build_schema_retention_policy_create(_elements.set_prop("retentionPolicy", AAZObjectType, ".retention_policy"))
+                _CreateHelper._build_schema_retention_policy_create(_elements.set_prop("retentionPolicy", AAZObjectType, ".retention_policy"))
                 _elements.set_prop("timeGrain", AAZStrType, ".time_grain")
 
             return self.serialize_content(_content_value)
@@ -371,7 +371,7 @@ class Create(AAZCommand):
             _element.retention_policy = AAZObjectType(
                 serialized_name="retentionPolicy",
             )
-            _build_schema_retention_policy_read(_element.retention_policy)
+            _CreateHelper._build_schema_retention_policy_read(_element.retention_policy)
 
             metrics = cls._schema_on_200.properties.metrics
             metrics.Element = AAZObjectType()
@@ -384,7 +384,7 @@ class Create(AAZCommand):
             _element.retention_policy = AAZObjectType(
                 serialized_name="retentionPolicy",
             )
-            _build_schema_retention_policy_read(_element.retention_policy)
+            _CreateHelper._build_schema_retention_policy_read(_element.retention_policy)
             _element.time_grain = AAZStrType(
                 serialized_name="timeGrain",
             )
@@ -412,35 +412,37 @@ class Create(AAZCommand):
             return cls._schema_on_200
 
 
-def _build_schema_retention_policy_create(_builder):
-    if _builder is None:
-        return
-    _builder.set_prop("days", AAZIntType, ".days", typ_kwargs={"flags": {"required": True}})
-    _builder.set_prop("enabled", AAZBoolType, ".enabled", typ_kwargs={"flags": {"required": True}})
+class _CreateHelper:
+    """Helper class for Create"""
 
+    @classmethod
+    def _build_schema_retention_policy_create(cls, _builder):
+        if _builder is None:
+            return
+        _builder.set_prop("days", AAZIntType, ".days", typ_kwargs={"flags": {"required": True}})
+        _builder.set_prop("enabled", AAZBoolType, ".enabled", typ_kwargs={"flags": {"required": True}})
 
-_schema_retention_policy_read = None
+    _schema_retention_policy_read = None
 
+    @classmethod
+    def _build_schema_retention_policy_read(cls, _schema):
+        if cls._schema_retention_policy_read is not None:
+            _schema.days = cls._schema_retention_policy_read.days
+            _schema.enabled = cls._schema_retention_policy_read.enabled
+            return
 
-def _build_schema_retention_policy_read(_schema):
-    global _schema_retention_policy_read
-    if _schema_retention_policy_read is not None:
-        _schema.days = _schema_retention_policy_read.days
-        _schema.enabled = _schema_retention_policy_read.enabled
-        return
+        cls._schema_retention_policy_read = _schema_retention_policy_read = AAZObjectType()
 
-    _schema_retention_policy_read = AAZObjectType()
+        retention_policy_read = _schema_retention_policy_read
+        retention_policy_read.days = AAZIntType(
+            flags={"required": True},
+        )
+        retention_policy_read.enabled = AAZBoolType(
+            flags={"required": True},
+        )
 
-    retention_policy_read = _schema_retention_policy_read
-    retention_policy_read.days = AAZIntType(
-        flags={"required": True},
-    )
-    retention_policy_read.enabled = AAZBoolType(
-        flags={"required": True},
-    )
-
-    _schema.days = _schema_retention_policy_read.days
-    _schema.enabled = _schema_retention_policy_read.enabled
+        _schema.days = cls._schema_retention_policy_read.days
+        _schema.enabled = cls._schema_retention_policy_read.enabled
 
 
 __all__ = ["Create"]

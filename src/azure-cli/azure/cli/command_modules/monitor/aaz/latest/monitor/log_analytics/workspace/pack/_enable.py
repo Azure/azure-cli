@@ -69,11 +69,11 @@ class Enable(AAZCommand):
         self.IntelligencePacksEnable(ctx=self.ctx)()
         self.post_operations()
 
-    # @register_callback
+    @register_callback
     def pre_operations(self):
         pass
 
-    # @register_callback
+    @register_callback
     def post_operations(self):
         pass
 
@@ -137,6 +137,10 @@ class Enable(AAZCommand):
 
         def on_200(self, session):
             pass
+
+
+class _EnableHelper:
+    """Helper class for Enable"""
 
 
 __all__ = ["Enable"]

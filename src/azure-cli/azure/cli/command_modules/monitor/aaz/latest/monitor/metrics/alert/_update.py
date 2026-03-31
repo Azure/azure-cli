@@ -22,9 +22,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2018-03-01",
+        "version": "2024-03-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.insights/metricalerts/{}", "2018-03-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.insights/metricalerts/{}", "2024-03-01-preview"],
         ]
     }
 
@@ -84,6 +84,7 @@ class Update(AAZCommand):
         _args_schema.window_size = AAZDurationArg(
             options=["--window-size"],
             help="Time over which to aggregate metrics in `##h##m##s` format.",
+            nullable=True,
         )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
@@ -101,7 +102,50 @@ class Update(AAZCommand):
             nullable=True,
         )
 
+        # define Arg Group "Identity"
+
         # define Arg Group "Properties"
+
+        _args_schema = cls._args_schema
+        _args_schema.action_properties = AAZDictArg(
+            options=["--action-properties"],
+            arg_group="Properties",
+            help="The properties of an action properties.",
+            nullable=True,
+        )
+        _args_schema.custom_properties = AAZDictArg(
+            options=["--custom-properties"],
+            arg_group="Properties",
+            help="The properties of an alert payload.",
+            nullable=True,
+        )
+        _args_schema.resolve_configuration = AAZObjectArg(
+            options=["--resolve-configuration"],
+            arg_group="Properties",
+            help="The configuration for how the alert is resolved. Applicable for PromQLCriteria.",
+            nullable=True,
+        )
+
+        action_properties = cls._args_schema.action_properties
+        action_properties.Element = AAZStrArg(
+            nullable=True,
+        )
+
+        custom_properties = cls._args_schema.custom_properties
+        custom_properties.Element = AAZStrArg(
+            nullable=True,
+        )
+
+        resolve_configuration = cls._args_schema.resolve_configuration
+        resolve_configuration.auto_resolved = AAZBoolArg(
+            options=["auto-resolved"],
+            help="Indicates whether the alert should be auto resolved",
+        )
+        resolve_configuration.time_to_resolve = AAZDurationArg(
+            options=["time-to-resolve"],
+            help="The time (in ISO 8601 duration format) after which the alert should be auto resolved",
+            nullable=True,
+        )
         return cls._args_schema
 
     _args_metric_dimension_update = None
@@ -195,7 +239,7 @@ class Update(AAZCommand):
 
         @property
         def error_format(self):
-            return "ODataV4Format"
+            return "MgmtErrorFormat"
 
         @property
         def url_parameters(self):
@@ -219,7 +263,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2018-03-01",
+                    "api-version", "2024-03-01-preview",
                     required=True,
                 ),
             }
@@ -278,7 +322,7 @@ class Update(AAZCommand):
 
         @property
         def error_format(self):
-            return "ODataV4Format"
+            return "MgmtErrorFormat"
 
         @property
         def url_parameters(self):
@@ -302,7 +346,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2018-03-01",
+                    "api-version", "2024-03-01-preview",
                     required=True,
                 ),
             }
@@ -360,18 +404,35 @@ class Update(AAZCommand):
                 value=instance,
                 typ=AAZObjectType
             )
+            _builder.set_prop("identity", AAZIdentityObjectType)
             _builder.set_prop("properties", AAZObjectType, ".", typ_kwargs={"flags": {"required": True, "client_flatten": True}})
             _builder.set_prop("tags", AAZDictType, ".tags")
 
             properties = _builder.get(".properties")
             if properties is not None:
+                properties.set_prop("actionProperties", AAZDictType, ".action_properties")
                 properties.set_prop("autoMitigate", AAZBoolType, ".auto_mitigate")
+                properties.set_prop("customProperties", AAZDictType, ".custom_properties")
                 properties.set_prop("description", AAZStrType, ".description")
                 properties.set_prop("enabled", AAZBoolType, ".enabled", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("evaluationFrequency", AAZStrType, ".evaluation_frequency", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("resolveConfiguration", AAZObjectType, ".resolve_configuration")
                 properties.set_prop("scopes", AAZListType, ".scopes", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("severity", AAZIntType, ".severity", typ_kwargs={"flags": {"required": True}})
-                properties.set_prop("windowSize", AAZStrType, ".window_size", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("windowSize", AAZStrType, ".window_size")
+
+            action_properties = _builder.get(".properties.actionProperties")
+            if action_properties is not None:
+                action_properties.set_elements(AAZStrType, ".")
+
+            custom_properties = _builder.get(".properties.customProperties")
+            if custom_properties is not None:
+                custom_properties.set_elements(AAZStrType, ".")
+
+            resolve_configuration = _builder.get(".properties.resolveConfiguration")
+            if resolve_configuration is not None:
+                resolve_configuration.set_prop("autoResolved", AAZBoolType, ".auto_resolved", typ_kwargs={"flags": {"required": True}})
+                resolve_configuration.set_prop("timeToResolve", AAZStrType, ".time_to_resolve")
 
             scopes = _builder.get(".properties.scopes")
             if scopes is not None:
@@ -413,6 +474,7 @@ class _UpdateHelper:
     def _build_schema_metric_alert_resource_read(cls, _schema):
         if cls._schema_metric_alert_resource_read is not None:
             _schema.id = cls._schema_metric_alert_resource_read.id
+            _schema.identity = cls._schema_metric_alert_resource_read.identity
             _schema.location = cls._schema_metric_alert_resource_read.location
             _schema.name = cls._schema_metric_alert_resource_read.name
             _schema.properties = cls._schema_metric_alert_resource_read.properties
@@ -426,6 +488,7 @@ class _UpdateHelper:
         metric_alert_resource_read.id = AAZStrType(
             flags={"read_only": True},
         )
+        metric_alert_resource_read.identity = AAZIdentityObjectType()
         metric_alert_resource_read.location = AAZStrType(
             flags={"required": True},
         )
@@ -440,13 +503,48 @@ class _UpdateHelper:
             flags={"read_only": True},
         )
 
+        identity = _schema_metric_alert_resource_read.identity
+        identity.principal_id = AAZStrType(
+            serialized_name="principalId",
+            flags={"read_only": True},
+        )
+        identity.tenant_id = AAZStrType(
+            serialized_name="tenantId",
+            flags={"read_only": True},
+        )
+        identity.type = AAZStrType(
+            flags={"required": True},
+        )
+        identity.user_assigned_identities = AAZDictType(
+            serialized_name="userAssignedIdentities",
+        )
+
+        user_assigned_identities = _schema_metric_alert_resource_read.identity.user_assigned_identities
+        user_assigned_identities.Element = AAZObjectType()
+
+        _element = _schema_metric_alert_resource_read.identity.user_assigned_identities.Element
+        _element.client_id = AAZStrType(
+            serialized_name="clientId",
+            flags={"read_only": True},
+        )
+        _element.principal_id = AAZStrType(
+            serialized_name="principalId",
+            flags={"read_only": True},
+        )
+
         properties = _schema_metric_alert_resource_read.properties
+        properties.action_properties = AAZDictType(
+            serialized_name="actionProperties",
+        )
         properties.actions = AAZListType()
         properties.auto_mitigate = AAZBoolType(
             serialized_name="autoMitigate",
         )
         properties.criteria = AAZObjectType(
             flags={"required": True},
+        )
+        properties.custom_properties = AAZDictType(
+            serialized_name="customProperties",
         )
         properties.description = AAZStrType()
         properties.enabled = AAZBoolType(
@@ -464,6 +562,9 @@ class _UpdateHelper:
             serialized_name="lastUpdatedTime",
             flags={"read_only": True},
         )
+        properties.resolve_configuration = AAZObjectType(
+            serialized_name="resolveConfiguration",
+        )
         properties.scopes = AAZListType(
             flags={"required": True},
         )
@@ -478,8 +579,10 @@ class _UpdateHelper:
         )
         properties.window_size = AAZStrType(
             serialized_name="windowSize",
-            flags={"required": True},
         )
+
+        action_properties = _schema_metric_alert_resource_read.properties.action_properties
+        action_properties.Element = AAZStrType()
 
         actions = _schema_metric_alert_resource_read.properties.actions
         actions.Element = AAZObjectType()
@@ -570,6 +673,46 @@ class _UpdateHelper:
             flags={"required": True},
         )
 
+        disc_microsoft__azure__monitor__prom_ql_criteria = _schema_metric_alert_resource_read.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.PromQLCriteria")
+        disc_microsoft__azure__monitor__prom_ql_criteria.all_of = AAZListType(
+            serialized_name="allOf",
+        )
+        disc_microsoft__azure__monitor__prom_ql_criteria.failing_periods = AAZObjectType(
+            serialized_name="failingPeriods",
+        )
+
+        all_of = _schema_metric_alert_resource_read.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.PromQLCriteria").all_of
+        all_of.Element = AAZObjectType()
+
+        _element = _schema_metric_alert_resource_read.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.PromQLCriteria").all_of.Element
+        _element.criterion_type = AAZStrType(
+            serialized_name="criterionType",
+            flags={"required": True},
+        )
+        _element.name = AAZStrType(
+            flags={"required": True},
+        )
+        _element.query = AAZStrType(
+            flags={"required": True},
+        )
+
+        disc_dynamic_threshold_criterion = _schema_metric_alert_resource_read.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.PromQLCriteria").all_of.Element.discriminate_by("criterion_type", "DynamicThresholdCriterion")
+        disc_dynamic_threshold_criterion.alert_sensitivity = AAZStrType(
+            serialized_name="alertSensitivity",
+            flags={"required": True},
+        )
+        disc_dynamic_threshold_criterion.ignore_data_before = AAZStrType(
+            serialized_name="ignoreDataBefore",
+        )
+        disc_dynamic_threshold_criterion.operator = AAZStrType(
+            flags={"required": True},
+        )
+
+        failing_periods = _schema_metric_alert_resource_read.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.PromQLCriteria").failing_periods
+        failing_periods["for"] = AAZStrType(
+            flags={"required": True},
+        )
+
         disc_microsoft__azure__monitor__single_resource_multiple_metric_criteria = _schema_metric_alert_resource_read.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria")
         disc_microsoft__azure__monitor__single_resource_multiple_metric_criteria.all_of = AAZListType(
             serialized_name="allOf",
@@ -626,6 +769,18 @@ class _UpdateHelper:
             flags={"required": True},
         )
 
+        custom_properties = _schema_metric_alert_resource_read.properties.custom_properties
+        custom_properties.Element = AAZStrType()
+
+        resolve_configuration = _schema_metric_alert_resource_read.properties.resolve_configuration
+        resolve_configuration.auto_resolved = AAZBoolType(
+            serialized_name="autoResolved",
+            flags={"required": True},
+        )
+        resolve_configuration.time_to_resolve = AAZStrType(
+            serialized_name="timeToResolve",
+        )
+
         scopes = _schema_metric_alert_resource_read.properties.scopes
         scopes.Element = AAZStrType()
 
@@ -633,6 +788,7 @@ class _UpdateHelper:
         tags.Element = AAZStrType()
 
         _schema.id = cls._schema_metric_alert_resource_read.id
+        _schema.identity = cls._schema_metric_alert_resource_read.identity
         _schema.location = cls._schema_metric_alert_resource_read.location
         _schema.name = cls._schema_metric_alert_resource_read.name
         _schema.properties = cls._schema_metric_alert_resource_read.properties

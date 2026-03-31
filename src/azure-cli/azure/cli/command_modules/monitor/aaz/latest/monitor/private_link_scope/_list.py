@@ -16,10 +16,10 @@ from azure.cli.core.aaz import *
     is_preview=True,
 )
 class List(AAZCommand):
-    """List all monitor private link scope resources.
+    """List all monitor private link scope resource.
 
     :example: List all monitor private link scope resources.
-        az monitor private-link-scope list --name MyAzureMonitorPrivateLinkScope
+        az monitor private-link-scope list -g MyResourceGroup
     """
 
     _aaz_info = {

@@ -16,9 +16,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2018-03-01",
+        "version": "2024-03-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.insights/metricalerts/{}", "2018-03-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.insights/metricalerts/{}", "2024-03-01-preview"],
         ]
     }
 
@@ -47,6 +47,25 @@ class Create(AAZCommand):
             required=True,
         )
 
+        # define Arg Group "Identity"
+
+        _args_schema = cls._args_schema
+        _args_schema.mi_system_assigned = AAZStrArg(
+            options=["--system-assigned", "--mi-system-assigned"],
+            arg_group="Identity",
+            help="Set the system managed identity.",
+            blank="True",
+        )
+        _args_schema.mi_user_assigned = AAZListArg(
+            options=["--user-assigned", "--mi-user-assigned"],
+            arg_group="Identity",
+            help="Set the user managed identities.",
+            blank=[],
+        )
+
+        mi_user_assigned = cls._args_schema.mi_user_assigned
+        mi_user_assigned.Element = AAZStrArg()
+
         # define Arg Group "Parameters"
 
         _args_schema = cls._args_schema
@@ -70,6 +89,11 @@ class Create(AAZCommand):
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
+        _args_schema.action_properties = AAZDictArg(
+            options=["--action-properties"],
+            arg_group="Properties",
+            help="The properties of an action properties.",
+        )
         _args_schema.actions = AAZListArg(
             options=["--actions"],
             arg_group="Properties",
@@ -85,6 +109,11 @@ class Create(AAZCommand):
             arg_group="Properties",
             help="defines the specific alert criteria information.",
             required=True,
+        )
+        _args_schema.custom_properties = AAZDictArg(
+            options=["--custom-properties"],
+            arg_group="Properties",
+            help="The properties of an alert payload.",
         )
         _args_schema.description = AAZStrArg(
             options=["--description"],
@@ -102,6 +131,11 @@ class Create(AAZCommand):
             arg_group="Properties",
             help="how often the metric alert is evaluated represented in ISO 8601 duration format.",
             required=True,
+        )
+        _args_schema.resolve_configuration = AAZObjectArg(
+            options=["--resolve-configuration"],
+            arg_group="Properties",
+            help="The configuration for how the alert is resolved. Applicable for PromQLCriteria.",
         )
         _args_schema.scopes = AAZListArg(
             options=["--scopes"],
@@ -129,8 +163,10 @@ class Create(AAZCommand):
             options=["--window-size"],
             arg_group="Properties",
             help="the period of time (in ISO 8601 duration format) that is used to monitor alert activity based on the threshold.",
-            required=True,
         )
+
+        action_properties = cls._args_schema.action_properties
+        action_properties.Element = AAZStrArg()
 
         actions = cls._args_schema.actions
         actions.Element = AAZObjectArg()
@@ -151,6 +187,9 @@ class Create(AAZCommand):
         criteria = cls._args_schema.criteria
         criteria.microsoft_azure_monitor_multiple_resource_multiple_metric_criteria = AAZObjectArg(
             options=["microsoft-azure-monitor-multiple-resource-multiple-metric-criteria"],
+        )
+        criteria.microsoft_azure_monitor_prom_ql_criteria = AAZObjectArg(
+            options=["microsoft-azure-monitor-prom-ql-criteria"],
         )
         criteria.microsoft_azure_monitor_single_resource_multiple_metric_criteria = AAZObjectArg(
             options=["microsoft-azure-monitor-single-resource-multiple-metric-criteria"],
@@ -219,6 +258,9 @@ class Create(AAZCommand):
         dynamic_threshold_criterion.ignore_data_before = AAZDateTimeArg(
             options=["ignore-data-before"],
             help="Use this option to set the date from which to start learning the metric historical data and calculate the dynamic thresholds (in ISO8601 format)",
+            fmt=AAZDateTimeFormat(
+                protocol="iso",
+            ),
         )
         dynamic_threshold_criterion.operator = AAZStrArg(
             options=["operator"],
@@ -255,6 +297,66 @@ class Create(AAZCommand):
         dimensions = cls._args_schema.criteria.microsoft_azure_monitor_multiple_resource_multiple_metric_criteria.all_of.Element.dimensions
         dimensions.Element = AAZObjectArg()
         cls._build_args_metric_dimension_create(dimensions.Element)
+
+        microsoft_azure_monitor_prom_ql_criteria = cls._args_schema.criteria.microsoft_azure_monitor_prom_ql_criteria
+        microsoft_azure_monitor_prom_ql_criteria.all_of = AAZListArg(
+            options=["all-of"],
+            help="The list of promQL criteria. Alert will be raised when all conditions are met.",
+        )
+        microsoft_azure_monitor_prom_ql_criteria.failing_periods = AAZObjectArg(
+            options=["failing-periods"],
+            help="Configuration for failing periods in query-based alerts.",
+        )
+
+        all_of = cls._args_schema.criteria.microsoft_azure_monitor_prom_ql_criteria.all_of
+        all_of.Element = AAZObjectArg()
+
+        _element = cls._args_schema.criteria.microsoft_azure_monitor_prom_ql_criteria.all_of.Element
+        _element.dynamic_threshold_criterion = AAZObjectArg(
+            options=["dynamic-threshold-criterion"],
+        )
+        _element.static_threshold_criterion = AAZObjectArg(
+            options=["static-threshold-criterion"],
+            blank={},
+        )
+        _element.name = AAZStrArg(
+            options=["name"],
+            help="Name of the criteria.",
+            required=True,
+        )
+        _element.query = AAZStrArg(
+            options=["query"],
+            help="The query used to evaluate the alert rule",
+            required=True,
+        )
+
+        dynamic_threshold_criterion = cls._args_schema.criteria.microsoft_azure_monitor_prom_ql_criteria.all_of.Element.dynamic_threshold_criterion
+        dynamic_threshold_criterion.alert_sensitivity = AAZStrArg(
+            options=["alert-sensitivity"],
+            help="The extent of deviation required to trigger an alert. This will affect how tight the threshold is to the metric series pattern. Previously undocumented values might be returned",
+            required=True,
+            enum={"High": "High", "Low": "Low", "Medium": "Medium"},
+        )
+        dynamic_threshold_criterion.ignore_data_before = AAZDateTimeArg(
+            options=["ignore-data-before"],
+            help="Use this option to set the date from which to start learning the metric historical data and calculate the dynamic thresholds (in ISO8601 format)",
+            fmt=AAZDateTimeFormat(
+                protocol="iso",
+            ),
+        )
+        dynamic_threshold_criterion.operator = AAZStrArg(
+            options=["operator"],
+            help="The operator used to compare the metric value against the threshold. Previously undocumented values might be returned",
+            required=True,
+            enum={"GreaterOrLessThan": "GreaterOrLessThan", "GreaterThan": "GreaterThan", "LessThan": "LessThan"},
+        )
+
+        failing_periods = cls._args_schema.criteria.microsoft_azure_monitor_prom_ql_criteria.failing_periods
+        failing_periods.for_ = AAZDurationArg(
+            options=["for"],
+            help="The amount of time (in ISO 8601 duration format) alert must be active before firing.",
+            required=True,
+        )
 
         microsoft_azure_monitor_single_resource_multiple_metric_criteria = cls._args_schema.criteria.microsoft_azure_monitor_single_resource_multiple_metric_criteria
         microsoft_azure_monitor_single_resource_multiple_metric_criteria.all_of = AAZListArg(
@@ -325,6 +427,20 @@ class Create(AAZCommand):
             options=["web-test-id"],
             help="The Application Insights web test Id.",
             required=True,
+        )
+
+        custom_properties = cls._args_schema.custom_properties
+        custom_properties.Element = AAZStrArg()
+
+        resolve_configuration = cls._args_schema.resolve_configuration
+        resolve_configuration.auto_resolved = AAZBoolArg(
+            options=["auto-resolved"],
+            help="Indicates whether the alert should be auto resolved",
+            required=True,
+        )
+        resolve_configuration.time_to_resolve = AAZDurationArg(
+            options=["time-to-resolve"],
+            help="The time (in ISO 8601 duration format) after which the alert should be auto resolved",
         )
 
         scopes = cls._args_schema.scopes
@@ -408,7 +524,7 @@ class Create(AAZCommand):
 
         @property
         def error_format(self):
-            return "ODataV4Format"
+            return "MgmtErrorFormat"
 
         @property
         def url_parameters(self):
@@ -432,7 +548,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2018-03-01",
+                    "api-version", "2024-03-01-preview",
                     required=True,
                 ),
             }
@@ -457,23 +573,40 @@ class Create(AAZCommand):
                 typ=AAZObjectType,
                 typ_kwargs={"flags": {"required": True, "client_flatten": True}}
             )
+            _builder.set_prop("identity", AAZIdentityObjectType)
             _builder.set_prop("location", AAZStrType, ".location", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("properties", AAZObjectType, ".", typ_kwargs={"flags": {"required": True, "client_flatten": True}})
             _builder.set_prop("tags", AAZDictType, ".tags")
 
+            identity = _builder.get(".identity")
+            if identity is not None:
+                identity.set_prop("userAssigned", AAZListType, ".mi_user_assigned", typ_kwargs={"flags": {"action": "create"}})
+                identity.set_prop("systemAssigned", AAZStrType, ".mi_system_assigned", typ_kwargs={"flags": {"action": "create"}})
+
+            user_assigned = _builder.get(".identity.userAssigned")
+            if user_assigned is not None:
+                user_assigned.set_elements(AAZStrType, ".")
+
             properties = _builder.get(".properties")
             if properties is not None:
+                properties.set_prop("actionProperties", AAZDictType, ".action_properties")
                 properties.set_prop("actions", AAZListType, ".actions")
                 properties.set_prop("autoMitigate", AAZBoolType, ".auto_mitigate")
                 properties.set_prop("criteria", AAZObjectType, ".criteria", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("customProperties", AAZDictType, ".custom_properties")
                 properties.set_prop("description", AAZStrType, ".description")
                 properties.set_prop("enabled", AAZBoolType, ".enabled", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("evaluationFrequency", AAZStrType, ".evaluation_frequency", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("resolveConfiguration", AAZObjectType, ".resolve_configuration")
                 properties.set_prop("scopes", AAZListType, ".scopes", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("severity", AAZIntType, ".severity", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("targetResourceRegion", AAZStrType, ".target_resource_region")
                 properties.set_prop("targetResourceType", AAZStrType, ".target_resource_type")
-                properties.set_prop("windowSize", AAZStrType, ".window_size", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("windowSize", AAZStrType, ".window_size")
+
+            action_properties = _builder.get(".properties.actionProperties")
+            if action_properties is not None:
+                action_properties.set_elements(AAZStrType, ".")
 
             actions = _builder.get(".properties.actions")
             if actions is not None:
@@ -491,9 +624,11 @@ class Create(AAZCommand):
             criteria = _builder.get(".properties.criteria")
             if criteria is not None:
                 criteria.set_const("odata.type", "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria", AAZStrType, ".microsoft_azure_monitor_multiple_resource_multiple_metric_criteria", typ_kwargs={"flags": {"required": True}})
+                criteria.set_const("odata.type", "Microsoft.Azure.Monitor.PromQLCriteria", AAZStrType, ".microsoft_azure_monitor_prom_ql_criteria", typ_kwargs={"flags": {"required": True}})
                 criteria.set_const("odata.type", "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria", AAZStrType, ".microsoft_azure_monitor_single_resource_multiple_metric_criteria", typ_kwargs={"flags": {"required": True}})
                 criteria.set_const("odata.type", "Microsoft.Azure.Monitor.WebtestLocationAvailabilityCriteria", AAZStrType, ".microsoft_azure_monitor_webtest_location_availability_criteria", typ_kwargs={"flags": {"required": True}})
                 criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria")
+                criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.PromQLCriteria")
                 criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria")
                 criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.WebtestLocationAvailabilityCriteria")
 
@@ -539,6 +674,34 @@ class Create(AAZCommand):
                 disc_static_threshold_criterion.set_prop("operator", AAZStrType, ".static_threshold_criterion.operator", typ_kwargs={"flags": {"required": True}})
                 disc_static_threshold_criterion.set_prop("threshold", AAZFloatType, ".static_threshold_criterion.threshold", typ_kwargs={"flags": {"required": True}})
 
+            disc_microsoft__azure__monitor__prom_ql_criteria = _builder.get(".properties.criteria{odata.type:Microsoft.Azure.Monitor.PromQLCriteria}")
+            if disc_microsoft__azure__monitor__prom_ql_criteria is not None:
+                disc_microsoft__azure__monitor__prom_ql_criteria.set_prop("allOf", AAZListType, ".microsoft_azure_monitor_prom_ql_criteria.all_of")
+                disc_microsoft__azure__monitor__prom_ql_criteria.set_prop("failingPeriods", AAZObjectType, ".microsoft_azure_monitor_prom_ql_criteria.failing_periods")
+
+            all_of = _builder.get(".properties.criteria{odata.type:Microsoft.Azure.Monitor.PromQLCriteria}.allOf")
+            if all_of is not None:
+                all_of.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.criteria{odata.type:Microsoft.Azure.Monitor.PromQLCriteria}.allOf[]")
+            if _elements is not None:
+                _elements.set_const("criterionType", "DynamicThresholdCriterion", AAZStrType, ".dynamic_threshold_criterion", typ_kwargs={"flags": {"required": True}})
+                _elements.set_const("criterionType", "StaticThresholdCriterion", AAZStrType, ".static_threshold_criterion", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop("query", AAZStrType, ".query", typ_kwargs={"flags": {"required": True}})
+                _elements.discriminate_by("criterionType", "DynamicThresholdCriterion")
+                _elements.discriminate_by("criterionType", "StaticThresholdCriterion")
+
+            disc_dynamic_threshold_criterion = _builder.get(".properties.criteria{odata.type:Microsoft.Azure.Monitor.PromQLCriteria}.allOf[]{criterionType:DynamicThresholdCriterion}")
+            if disc_dynamic_threshold_criterion is not None:
+                disc_dynamic_threshold_criterion.set_prop("alertSensitivity", AAZStrType, ".dynamic_threshold_criterion.alert_sensitivity", typ_kwargs={"flags": {"required": True}})
+                disc_dynamic_threshold_criterion.set_prop("ignoreDataBefore", AAZStrType, ".dynamic_threshold_criterion.ignore_data_before")
+                disc_dynamic_threshold_criterion.set_prop("operator", AAZStrType, ".dynamic_threshold_criterion.operator", typ_kwargs={"flags": {"required": True}})
+
+            failing_periods = _builder.get(".properties.criteria{odata.type:Microsoft.Azure.Monitor.PromQLCriteria}.failingPeriods")
+            if failing_periods is not None:
+                failing_periods.set_prop("for", AAZStrType, ".for_", typ_kwargs={"flags": {"required": True}})
+
             disc_microsoft__azure__monitor__single_resource_multiple_metric_criteria = _builder.get(".properties.criteria{odata.type:Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria}")
             if disc_microsoft__azure__monitor__single_resource_multiple_metric_criteria is not None:
                 disc_microsoft__azure__monitor__single_resource_multiple_metric_criteria.set_prop("allOf", AAZListType, ".microsoft_azure_monitor_single_resource_multiple_metric_criteria.all_of")
@@ -568,6 +731,15 @@ class Create(AAZCommand):
                 disc_microsoft__azure__monitor__webtest_location_availability_criteria.set_prop("componentId", AAZStrType, ".microsoft_azure_monitor_webtest_location_availability_criteria.component_id", typ_kwargs={"flags": {"required": True}})
                 disc_microsoft__azure__monitor__webtest_location_availability_criteria.set_prop("failedLocationCount", AAZFloatType, ".microsoft_azure_monitor_webtest_location_availability_criteria.failed_location_count", typ_kwargs={"flags": {"required": True}})
                 disc_microsoft__azure__monitor__webtest_location_availability_criteria.set_prop("webTestId", AAZStrType, ".microsoft_azure_monitor_webtest_location_availability_criteria.web_test_id", typ_kwargs={"flags": {"required": True}})
+
+            custom_properties = _builder.get(".properties.customProperties")
+            if custom_properties is not None:
+                custom_properties.set_elements(AAZStrType, ".")
+
+            resolve_configuration = _builder.get(".properties.resolveConfiguration")
+            if resolve_configuration is not None:
+                resolve_configuration.set_prop("autoResolved", AAZBoolType, ".auto_resolved", typ_kwargs={"flags": {"required": True}})
+                resolve_configuration.set_prop("timeToResolve", AAZStrType, ".time_to_resolve")
 
             scopes = _builder.get(".properties.scopes")
             if scopes is not None:
@@ -600,6 +772,7 @@ class Create(AAZCommand):
             _schema_on_200.id = AAZStrType(
                 flags={"read_only": True},
             )
+            _schema_on_200.identity = AAZIdentityObjectType()
             _schema_on_200.location = AAZStrType(
                 flags={"required": True},
             )
@@ -614,13 +787,48 @@ class Create(AAZCommand):
                 flags={"read_only": True},
             )
 
+            identity = cls._schema_on_200.identity
+            identity.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
+            identity.tenant_id = AAZStrType(
+                serialized_name="tenantId",
+                flags={"read_only": True},
+            )
+            identity.type = AAZStrType(
+                flags={"required": True},
+            )
+            identity.user_assigned_identities = AAZDictType(
+                serialized_name="userAssignedIdentities",
+            )
+
+            user_assigned_identities = cls._schema_on_200.identity.user_assigned_identities
+            user_assigned_identities.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.identity.user_assigned_identities.Element
+            _element.client_id = AAZStrType(
+                serialized_name="clientId",
+                flags={"read_only": True},
+            )
+            _element.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
+
             properties = cls._schema_on_200.properties
+            properties.action_properties = AAZDictType(
+                serialized_name="actionProperties",
+            )
             properties.actions = AAZListType()
             properties.auto_mitigate = AAZBoolType(
                 serialized_name="autoMitigate",
             )
             properties.criteria = AAZObjectType(
                 flags={"required": True},
+            )
+            properties.custom_properties = AAZDictType(
+                serialized_name="customProperties",
             )
             properties.description = AAZStrType()
             properties.enabled = AAZBoolType(
@@ -638,6 +846,9 @@ class Create(AAZCommand):
                 serialized_name="lastUpdatedTime",
                 flags={"read_only": True},
             )
+            properties.resolve_configuration = AAZObjectType(
+                serialized_name="resolveConfiguration",
+            )
             properties.scopes = AAZListType(
                 flags={"required": True},
             )
@@ -652,8 +863,10 @@ class Create(AAZCommand):
             )
             properties.window_size = AAZStrType(
                 serialized_name="windowSize",
-                flags={"required": True},
             )
+
+            action_properties = cls._schema_on_200.properties.action_properties
+            action_properties.Element = AAZStrType()
 
             actions = cls._schema_on_200.properties.actions
             actions.Element = AAZObjectType()
@@ -744,6 +957,46 @@ class Create(AAZCommand):
                 flags={"required": True},
             )
 
+            disc_microsoft__azure__monitor__prom_ql_criteria = cls._schema_on_200.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.PromQLCriteria")
+            disc_microsoft__azure__monitor__prom_ql_criteria.all_of = AAZListType(
+                serialized_name="allOf",
+            )
+            disc_microsoft__azure__monitor__prom_ql_criteria.failing_periods = AAZObjectType(
+                serialized_name="failingPeriods",
+            )
+
+            all_of = cls._schema_on_200.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.PromQLCriteria").all_of
+            all_of.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.PromQLCriteria").all_of.Element
+            _element.criterion_type = AAZStrType(
+                serialized_name="criterionType",
+                flags={"required": True},
+            )
+            _element.name = AAZStrType(
+                flags={"required": True},
+            )
+            _element.query = AAZStrType(
+                flags={"required": True},
+            )
+
+            disc_dynamic_threshold_criterion = cls._schema_on_200.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.PromQLCriteria").all_of.Element.discriminate_by("criterion_type", "DynamicThresholdCriterion")
+            disc_dynamic_threshold_criterion.alert_sensitivity = AAZStrType(
+                serialized_name="alertSensitivity",
+                flags={"required": True},
+            )
+            disc_dynamic_threshold_criterion.ignore_data_before = AAZStrType(
+                serialized_name="ignoreDataBefore",
+            )
+            disc_dynamic_threshold_criterion.operator = AAZStrType(
+                flags={"required": True},
+            )
+
+            failing_periods = cls._schema_on_200.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.PromQLCriteria").failing_periods
+            failing_periods["for"] = AAZStrType(
+                flags={"required": True},
+            )
+
             disc_microsoft__azure__monitor__single_resource_multiple_metric_criteria = cls._schema_on_200.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria")
             disc_microsoft__azure__monitor__single_resource_multiple_metric_criteria.all_of = AAZListType(
                 serialized_name="allOf",
@@ -798,6 +1051,18 @@ class Create(AAZCommand):
             disc_microsoft__azure__monitor__webtest_location_availability_criteria.web_test_id = AAZStrType(
                 serialized_name="webTestId",
                 flags={"required": True},
+            )
+
+            custom_properties = cls._schema_on_200.properties.custom_properties
+            custom_properties.Element = AAZStrType()
+
+            resolve_configuration = cls._schema_on_200.properties.resolve_configuration
+            resolve_configuration.auto_resolved = AAZBoolType(
+                serialized_name="autoResolved",
+                flags={"required": True},
+            )
+            resolve_configuration.time_to_resolve = AAZStrType(
+                serialized_name="timeToResolve",
             )
 
             scopes = cls._schema_on_200.properties.scopes

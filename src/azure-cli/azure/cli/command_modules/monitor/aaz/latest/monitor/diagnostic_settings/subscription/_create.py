@@ -18,7 +18,7 @@ class Create(AAZCommand):
     """Create subscription diagnostic settings for the specified resource.
 
     :example: Create diagnostic settings for a subscription with EventHub.
-        az monitor diagnostic-settings subscription create -n {name} --location westus --event-hub-auth-rule {eventHubRuleID} --storage-account {storageAccount} --logs "[{category:Security,enabled:true},{category:Administrative,enabled:true},{category:ServiceHealth,enabled:true},{category:Alert,enabled:true},{category:Recommendation,enabled:true},{category:Policy,enabled:true},{category:Autoscale,enabled:true},{category:ResourceHealth,enabled:true}]"
+        az monitor diagnostic-settings subscription create -n {name} --location westus --event-hub- auth-rule {eventHubRuleID} --storage-account {storageAccount} \\ --logs "[{category:Security,enabled:true},{category:Administrative,enabled:true},{category:ServiceHealth,enabled:true},{category:Alert,enabled:true},{category:Recommendation,enabled:true},{category:Policy,enabled:true},{category:Autoscale,enabled:true},{category:ResourceHealth,enabled:true}]"
     """
 
     _aaz_info = {
@@ -48,7 +48,6 @@ class Create(AAZCommand):
             options=["-n", "--name"],
             help="The name of the diagnostic setting.",
             required=True,
-            id_part="name",
         )
         _args_schema.location = AAZResourceLocationArg(
             help="Location of the resource",
@@ -262,6 +261,10 @@ class Create(AAZCommand):
             )
 
             return cls._schema_on_200
+
+
+class _CreateHelper:
+    """Helper class for Create"""
 
 
 __all__ = ["Create"]

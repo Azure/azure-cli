@@ -51,7 +51,6 @@ class Create(AAZCommand):
             options=["--type", "--data-source-type"],
             help="Data source type for the linked storage account.",
             required=True,
-            id_part="child_name_1",
             enum={"Alerts": "Alerts", "AzureWatson": "AzureWatson", "CustomLogs": "CustomLogs", "Ingestion": "Ingestion", "Query": "Query"},
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
@@ -61,7 +60,6 @@ class Create(AAZCommand):
             options=["-n", "--workspace-name"],
             help="The name of the workspace.",
             required=True,
-            id_part="name",
             fmt=AAZStrArgFormat(
                 pattern="^[A-Za-z0-9][A-Za-z0-9-]+[A-Za-z0-9]$",
                 max_length=63,
@@ -88,11 +86,11 @@ class Create(AAZCommand):
         self.LinkedStorageAccountsCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
-    # @register_callback
+    @register_callback
     def pre_operations(self):
         pass
 
-    # @register_callback
+    @register_callback
     def post_operations(self):
         pass
 
@@ -234,6 +232,10 @@ class Create(AAZCommand):
             storage_account_ids.Element = AAZStrType()
 
             return cls._schema_on_200
+
+
+class _CreateHelper:
+    """Helper class for Create"""
 
 
 __all__ = ["Create"]
