@@ -25,13 +25,13 @@ from .._client_factory import (
     cf_postgres_check_resource_availability,
     cf_postgres_flexible_private_dns_zone_suffix_operations)
 from .._db_context import DbContext
-from .network_commands import flexible_server_provision_network_resource
+from .network_commands import flexible_server_validate_network
 
 
 # pylint: disable=too-many-locals
 def flexible_replica_create(cmd, client, resource_group_name, source_server, replica_name=None, name=None, zone=None,
-                            location=None, vnet=None, vnet_address_prefix=None, subnet=None,
-                            subnet_address_prefix=None, private_dns_zone_arguments=None, no_wait=False,
+                            location=None, subnet=None, vnet=None,
+                            private_dns_zone_arguments=None, no_wait=False,
                             byok_identity=None, byok_key=None,
                             sku_name=None, tier=None,
                             storage_gb=None, performance_tier=None, yes=False, tags=None):
@@ -40,7 +40,7 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
     if replica_name is None and name is None:
         raise RequiredArgumentMissingError('the following arguments are required: --name')
     if replica_name is not None and name is not None:
-        raise MutuallyExclusiveArgumentError('usage error: --name and --replica-name cannot be used together. Please use --name.')
+        raise MutuallyExclusiveArgumentError('usage error: --name and --replica-name cannot be used together. Use --name.')
     replica_name = replica_name.lower() if name is None else name.lower()
 
     if not is_valid_resource_id(source_server):
@@ -97,18 +97,16 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
         availability_zone=zone,
         create_mode="Replica")
 
-    if source_server_object.network.public_network_access == 'Disabled' and any((vnet, subnet)):
-        parameters.network, _, _ = flexible_server_provision_network_resource(cmd=cmd,
+    if source_server_object.network.public_network_access == 'Disabled' and subnet:
+        parameters.network, _, _ = flexible_server_validate_network(cmd=cmd,
                                                                               resource_group_name=resource_group_name,
                                                                               server_name=replica_name,
                                                                               location=location,
                                                                               db_context=db_context,
                                                                               private_dns_zone_arguments=private_dns_zone_arguments,
                                                                               public_access='Disabled',
-                                                                              vnet=vnet,
                                                                               subnet=subnet,
-                                                                              vnet_address_prefix=vnet_address_prefix,
-                                                                              subnet_address_prefix=subnet_address_prefix,
+                                                                              vnet=vnet,
                                                                               yes=yes)
     else:
         parameters.network = source_server_object.network
@@ -161,9 +159,9 @@ def flexible_replica_promote(cmd, client, resource_group_name, replica_name, pro
     if is_citus_cluster(cmd, resource_group_name, replica_name):
         # some settings validation
         if promote_mode.lower() == 'standalone':
-            raise ValidationError("Standalone replica promotion on elastic cluster isn't currently supported. Please use 'switchover' instead.")
+            raise ValidationError("Standalone replica promotion on elastic cluster isn't currently supported. Use 'switchover' instead.")
         if promote_option.lower() == 'planned':
-            raise ValidationError("Planned replica promotion on elastic cluster isn't currently supported. Please use 'forced' instead.")
+            raise ValidationError("Planned replica promotion on elastic cluster isn't currently supported. Use 'forced' instead.")
 
     try:
         server_object = client.get(resource_group_name, replica_name)

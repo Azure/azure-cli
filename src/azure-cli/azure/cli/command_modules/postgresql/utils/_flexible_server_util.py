@@ -309,7 +309,7 @@ def fill_action_template(cmd, database_engine, server, database_name, administra
                                         repository=repository)
         except HttpResponseError:
             raise AuthenticationError('You do not have authorization to create a service principal to run azure service in github actions. \n'
-                                      'Please create a service principal that has access to the database server and add "AZURE_CREDENTIALS" secret to your github repository. \n'
+                                      'Create a service principal that has access to the database server and add "AZURE_CREDENTIALS" secret to your github repository. \n'
                                       'Follow the instruction here "aka.ms/github-actions-azure-credentials".')
 
     connection_string_name = server.name.upper().replace("-", "_") + "_" + database_name.upper().replace("-", "_") + "_" + database_engine.upper() + "_CONNECTION_STRING"

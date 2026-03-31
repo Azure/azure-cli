@@ -201,28 +201,16 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             options_list=['--vnet'],
             help='Name or ID of a new or existing virtual network. '
                  'If you want to use a vnet from different resource group or subscription, '
-                 'please provide a resource ID. The name must be between 2 to 64 characters. '
+                 'provide a resource ID. The name must be between 2 to 64 characters. '
                  'The name must begin with a letter or number, end with a letter, number or underscore, '
                  'and may contain only letters, numbers, underscores, periods, or hyphens.'
         )
-
-        vnet_address_prefix_arg_type = CLIArgumentType(
-            options_list=['--address-prefixes'],
-            help='The IP address prefix to use when creating a new virtual network in CIDR format. '
-                 'Default value is 10.0.0.0/16.'
-        )
-
         subnet_arg_type = CLIArgumentType(
             options_list=['--subnet'],
             help='Name or resource ID of a new or existing subnet. '
-                 'If you want to use a subnet from different resource group or subscription, please provide resource ID instead of name. '
-                 'Please note that the subnet will be delegated to flexibleServers. '
+                 'If you want to use a subnet from different resource group or subscription, provide a resource ID instead of name. '
+                 'Note that the subnet will be delegated to flexibleServers. '
                  'After delegation, this subnet cannot be used for any other type of Azure resources.'
-        )
-
-        subnet_address_prefix_arg_type = CLIArgumentType(
-            options_list=['--subnet-prefixes'],
-            help='The subnet IP address prefix to use when creating a new subnet in CIDR format. Default value is 10.0.0.0/24.'
         )
 
         zone_arg_type = CLIArgumentType(
@@ -280,16 +268,16 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         private_dns_zone_arguments_arg_type = CLIArgumentType(
             options_list=['--private-dns-zone'],
             help='This parameter only applies for a server with private access. '
-                 'The name or id of new or existing private dns zone. '
-                 'You can use the private dns zone from same resource group, different resource group, or different subscription. '
-                 'If you want to use a zone from different resource group or subscription, please provide resource Id. '
-                 'CLI creates a new private dns zone within the same resource group as virtual network if not provided by users.'
+                 'The name or id of new or existing private DNS zone. '
+                 'You can use the private DNS zone from same resource group, different resource group, or different subscription. '
+                 'If you want to use a DNS zone from different resource group or subscription, provide its resource identifier. '
+                 'CLI creates a new private DNS zone within the same resource group as virtual network if not provided by users.'
         )
 
         restore_point_in_time_arg_type = CLIArgumentType(
             options_list=['--restore-time'],
             default=get_current_time(),
-            help='The point in time in UTC to restore from (ISO8601 format), e.g., 2017-04-26T02:10:00+00:00'
+            help='The point in time in UTC to restore from (ISO8601 format), e.g., 2026-03-22T18:20:22+00:00'
                  'The default value is set to current time.'
         )
 
@@ -420,9 +408,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('high_availability', arg_type=high_availability_arg_type, default="Disabled")
             c.argument('public_access', arg_type=public_access_create_arg_type)
             c.argument('vnet', arg_type=vnet_arg_type)
-            c.argument('vnet_address_prefix', arg_type=vnet_address_prefix_arg_type)
             c.argument('subnet', arg_type=subnet_arg_type)
-            c.argument('subnet_address_prefix', arg_type=subnet_address_prefix_arg_type)
             c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
             c.argument('zone', zone_arg_type)
             c.argument('tags', tags_type)
@@ -440,9 +426,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('restore_point_in_time', arg_type=restore_point_in_time_arg_type)
             c.argument('source_server', arg_type=source_server_arg_type)
             c.argument('vnet', arg_type=vnet_arg_type)
-            c.argument('vnet_address_prefix', arg_type=vnet_address_prefix_arg_type)
             c.argument('subnet', arg_type=subnet_arg_type)
-            c.argument('subnet_address_prefix', arg_type=subnet_address_prefix_arg_type)
             c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
             c.argument('zone', arg_type=zone_arg_type)
             c.argument('yes', arg_type=yes_arg_type)
@@ -458,9 +442,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('sku_name', arg_type=sku_name_arg_type)
             c.argument('source_server', arg_type=source_server_arg_type)
             c.argument('vnet', arg_type=vnet_arg_type)
-            c.argument('vnet_address_prefix', arg_type=vnet_address_prefix_arg_type)
             c.argument('subnet', arg_type=subnet_arg_type)
-            c.argument('subnet_address_prefix', arg_type=subnet_address_prefix_arg_type)
             c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
             c.argument('zone', arg_type=zone_arg_type)
             c.argument('yes', arg_type=yes_arg_type)
@@ -476,9 +458,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('sku_name', arg_type=sku_name_arg_type)
             c.argument('source_server', arg_type=source_server_arg_type)
             c.argument('vnet', arg_type=vnet_arg_type)
-            c.argument('vnet_address_prefix', arg_type=vnet_address_prefix_arg_type)
             c.argument('subnet', arg_type=subnet_arg_type)
-            c.argument('subnet_address_prefix', arg_type=subnet_address_prefix_arg_type)
             c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
             c.argument('zone', arg_type=zone_arg_type)
             c.argument('yes', arg_type=yes_arg_type)
@@ -619,8 +599,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('vnet', arg_type=vnet_arg_type)
             c.argument('subnet', arg_type=subnet_arg_type)
             c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
-            c.argument('vnet_address_prefix', arg_type=vnet_address_prefix_arg_type)
-            c.argument('subnet_address_prefix', arg_type=subnet_address_prefix_arg_type)
             c.argument('byok_key', arg_type=key_arg_type)
             c.argument('byok_identity', arg_type=identity_arg_type)
             c.argument('tier', arg_type=tier_arg_type)
