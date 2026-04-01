@@ -250,7 +250,8 @@ def create_action(action_name, cache_behavior=None, cache_duration=None, header_
                   custom_querystring=None, custom_fragment=None, source_pattern=None, destination=None,
                   preserve_unmatched_path=None, sub_id=None, resource_group=None, profile_name=None,
                   endpoint_name=None, origin_group=None, query_string_caching_behavior=None,
-                  enable_compression=None, enable_caching=None, forwarding_protocol=None):
+                  enable_compression=None, enable_caching=None, forwarding_protocol=None,
+                  edge_action_id=None, invocation_point=None):
     action = None
     if action_name == "CacheExpiration":
         action = {
@@ -398,6 +399,25 @@ def create_action(action_name, cache_behavior=None, cache_duration=None, header_
             }
         }
         return action
+    if action_name == "EdgeAction":
+        formatted_edge_action_id = None
+        if has_value(edge_action_id):
+            try:
+                formatted_edge_action_id = edge_action_id.to_serialized_data()
+            except AttributeError:
+                formatted_edge_action_id = edge_action_id
+        action = {
+            "edge_action": {
+                "parameters": {
+                    "type_name": "DeliveryRuleEdgeActionParameters",
+                    "edge_action_reference": {
+                        "id": formatted_edge_action_id
+                    },
+                    "invocation_point": invocation_point
+                }
+            }
+        }
+        return action
 
 
 def create_actions_from_existing(existing_actions):
@@ -489,6 +509,15 @@ def create_actions_from_existing(existing_actions):
                                                 RuleIsCompressionEnabled.ENABLED.value
                                                 else False,
                                                 enable_caching=enable_caching))
+        if name == 'EdgeAction':
+            parsed_actions.append(create_action(name,
+                                                edge_action_id=para['edgeActionReference']['id']
+                                                if 'edgeActionReference' in para and
+                                                'id' in para['edgeActionReference']
+                                                else None,
+                                                invocation_point=para['invocationPoint']
+                                                if 'invocationPoint' in para
+                                                else None))
     if len(parsed_actions) == 0:
         return []
     return parsed_actions
