@@ -322,7 +322,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('container_registry_password', options_list=['--container-registry-password', '-w', c.deprecate(target='--docker-registry-server-password', redirect='--container-registry-password')], help='The container registry server password. Required for private registries.')
         c.argument('multicontainer_config_type', options_list=['--multicontainer-config-type'], help="Linux only.", arg_type=get_enum_type(MULTI_CONTAINER_TYPES))
         c.argument('multicontainer_config_file', options_list=['--multicontainer-config-file'], help="Linux only. Config file for multicontainer apps. (local or remote)")
-        c.argument('runtime', options_list=['--runtime', '-r'], help="canonicalized web runtime in the format of Framework:Version, e.g. \"PHP:7.2\"."
+        c.argument('runtime', options_list=['--runtime', '-r'], help="canonicalized web runtime in the format of Framework:Version, e.g. \"PYTHON:3.14\"."
                                                                      "Use `az webapp list-runtimes` for available list")  # TODO ADD completer
         c.argument('plan', options_list=['--plan', '-p'], configured_default='appserviceplan',
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
@@ -966,7 +966,7 @@ subscription than the app service environment, please use the resource ID for --
                         "and Node.js runtimes, and to Windows for .NET and ASP.NET runtimes. "
                         "Use 'linux' explicitly for .NET Linux deployments. "
                         "Use 'az webapp list-runtimes' to see available runtimes.")
-        c.argument('runtime', options_list=['--runtime', '-r'], help="canonicalized web runtime in the format of Framework:Version, e.g. \"PHP:7.2\". "
+        c.argument('runtime', options_list=['--runtime', '-r'], help="canonicalized web runtime in the format of Framework:Version, e.g. \"PYTHON:3.14\". "
                                                                      "Recommended: always specify explicitly for reliable results. Auto-detection from source files may pick the wrong version. "
                                                                      "Use `az webapp list-runtimes` for available list.")
         c.argument('dryrun', help="show summary of the create and deploy operation instead of executing it",

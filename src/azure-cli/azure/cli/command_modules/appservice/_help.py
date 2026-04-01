@@ -1878,10 +1878,11 @@ long-summary: |
     The web app's name must be able to produce a unique FQDN as AppName.azurewebsites.net.
 
     This command creates the web app resource but does not deploy code.
+    Use 'az webapp list-runtimes' to see available runtimes.
 
     Suggested next steps after creation:
     - Deploy your code:
-        az webapp deploy -g MyResourceGroup -n MyAppName --src-path app.zip --type zip
+        az webapp deploy -g MyResourceGroup -n MyAppName --src-path app.zip
     - For Linux apps loading large models or dependencies at startup, increase the container
       start time limit (default 230s, max 1800s):
         az webapp config appsettings set -g MyResourceGroup -n MyAppName --settings WEBSITES_CONTAINER_START_TIME_LIMIT=1800
@@ -3338,7 +3339,7 @@ helps['webapp deploy'] = """
     - name: Enable remote build and deploy an app from a zip file.
       text: |
         az webapp config appsettings set -g ResourceGroup -n AppName --settings SCM_DO_BUILD_DURING_DEPLOYMENT=true
-        az webapp deploy -g ResourceGroup -n AppName --src-path app.zip --type zip
+        az webapp deploy -g ResourceGroup -n AppName --src-path app.zip
     - name: Deploy a war file asynchronously.
       text: az webapp deploy --resource-group ResourceGroup --name AppName --src-path SourcePath --type war --async true
     - name: Deploy a static text file to wwwroot/staticfiles/test.txt
