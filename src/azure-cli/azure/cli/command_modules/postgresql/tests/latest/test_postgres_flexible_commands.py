@@ -242,8 +242,13 @@ class PostgreSQLFlexibleServerValidatorScenarioTest(ScenarioTest):
                  resource_group, server_name, location),
                  expect_failure=True)
 
-        # Create server with invalid public access value (start-ip greater than end-ip)
+        # Create server with invalid public access value (end-ip is not a valid IPv4 address)
         self.cmd('postgres flexible-server create -g {} -n {} -l {} --public-access 12.0.0.0-10.0.0.0.0'.format(
+                 resource_group, server_name, location),
+                 expect_failure=True)
+
+        # Create server with invalid public access value (start-ip greater than end-ip)
+        self.cmd('postgres flexible-server create -g {} -n {} -l {} --public-access 12.0.0.0-10.0.0.0'.format(
                  resource_group, server_name, location),
                  expect_failure=True)
 

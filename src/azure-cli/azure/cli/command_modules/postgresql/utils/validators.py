@@ -724,7 +724,7 @@ def _pg_storage_type_validator(storage_type, auto_grow, performance_tier, tier,
 
     if is_create_ssdv2 or is_update_ssdv2:
         if auto_grow and auto_grow.lower() != 'disabled':
-            raise ValidationError('Invalid value for --storage-auto-grow. "Enabled"is not supported for servers with --storage-type set to "PremiumV2_LRS".')
+            raise ValidationError('Invalid value for --storage-auto-grow. "Enabled" is not supported for servers with --storage-type set to "PremiumV2_LRS".')
         if performance_tier:
             raise ValidationError('Invalid value for --performance-tier. Performance tier is not supported for servers with --storage-type set to "PremiumV2_LRS".')
         if tier and tier.lower() == 'burstable':

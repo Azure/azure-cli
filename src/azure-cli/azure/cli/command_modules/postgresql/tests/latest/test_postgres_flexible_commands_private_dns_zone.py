@@ -62,7 +62,7 @@ class PostgreSQLFlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
 
         # Create server with a private DNS zone name that matches the FQDN of the server (which is not supported)
         self.cmd('postgres flexible-server create -g {} -n {} -l {} --private-dns-zone {} --vnet {} --subnet {} --yes'.format(
-                 server_resource_group, server_resource_group, server_names[0], location, server_names[0] + '.postgres.database.azure.com', server_group_vnet_name, server_group_subnet_name),
+                 server_resource_group, server_names[0], location, server_names[0] + '.postgres.database.azure.com', server_group_vnet_name, server_group_subnet_name),
                  expect_failure=True)
 
         # Create server with a private DNS zone name that does not have the correct suffix
