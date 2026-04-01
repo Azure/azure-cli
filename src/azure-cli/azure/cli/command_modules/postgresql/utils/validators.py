@@ -206,7 +206,7 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
 
 
 def _cluster_validator(create_cluster, cluster_size, auto_grow, version, tier, instance):
-    if create_cluster and create_cluster.lower() == 'elasticcluster' or \
+    if (create_cluster and create_cluster.lower() == 'elasticcluster') or \
        (instance and instance.cluster and instance.cluster.cluster_size > 0):
         if instance is None and version != '17':
             raise ValidationError('Elastic cluster is only supported for PostgreSQL version 17.')
