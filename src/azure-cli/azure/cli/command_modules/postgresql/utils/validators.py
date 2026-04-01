@@ -733,8 +733,8 @@ def _pg_storage_type_validator(storage_type, auto_grow, performance_tier, tier,
             raise ValidationError('Invalid value for --performance-tier. Performance tier is not supported for '
                                   'servers with --storage-type set to "PremiumV2_LRS".')
         if tier and tier.lower() == 'burstable':
-            raise ValidationError('Invalid value for --tier. Burstable tier is not supported for '
-                                  'servers with --storage-type set to "PremiumV2_LRS".')
+            raise ValidationError('Invalid value for --storage-type. Servers with Burstable tier '
+                                  'don\'t support support --storage-type set to "PremiumV2_LRS".')
     else:
         if throughput is not None:
             raise CLIError('Invalid value for --throughput. Updating throughput is only supported for '

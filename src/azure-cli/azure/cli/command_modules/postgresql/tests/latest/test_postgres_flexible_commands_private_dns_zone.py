@@ -100,7 +100,7 @@ class PostgreSQLFlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
         self.cmd('network private-dns link vnet create -g {} -n MyLinkName -z {} -v {} -e False'.format(
                  vnet_resource_group, vnet_group_dns_zone, vnet_group_vnet['id']
         ))
- 
+
         # Create server with the private DNS zone that is linked to the vnet in a different resource group
         self.cmd('postgres flexible-server create -g {} -n {} -l {} --private-dns-zone {} --subnet {} --yes'.format(
                 server_resource_group, server_names[1], location, vnet_group_dns_zone, vnet_group_subnet["id"]))
