@@ -890,9 +890,6 @@ class AcrCommandsTests(ScenarioTest):
 
         self.kwargs["home_location"] = result["location"]
 
-        self.cmd('acr replication show --name {home_location} --registry {registry_2} --resource-group {rg}',
-                 checks=[self.check('zoneRedundancy', 'Enabled')])
-
         self.cmd('acr replication create --registry {registry_1}  -g {rg} --location {location_2} --zone-redundancy Enabled',
                  checks=[self.check('zoneRedundancy', 'Enabled')])
 
@@ -901,6 +898,9 @@ class AcrCommandsTests(ScenarioTest):
 
         self.cmd('acr replication create --registry {registry_2}  -g {rg} --location {location_3} --zone-redundancy Disabled',
                  checks=[self.check('zoneRedundancy', 'Disabled')])
+
+        self.cmd('acr replication show --name {home_location} --registry {registry_2} --resource-group {rg}',
+                 checks=[self.check('zoneRedundancy', 'Enabled')])
 
     def assertUserIdentitiesExpected(self, query_identities, result):
         result_identities = [identity.lower() for identity in result['userAssignedIdentities'].keys()]
