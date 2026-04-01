@@ -144,7 +144,8 @@ def validate_private_endpoint_connection_id(cmd, namespace):
         namespace.resource_group_name = _get_resource_group_from_server_name(cmd.cli_ctx, namespace.server_name)
 
     if not all([namespace.server_name, namespace.resource_group_name, namespace.private_endpoint_connection_name]):
-        raise CLIError('Specify either --id <private-endpoint-connection-identifier> or --name <private-endpoint-connection-name> --server-name <server-name>.')
+        raise CLIError('Specify either --id <private-endpoint-connection-identifier> '
+                       'or --name <private-endpoint-connection-name> --server-name <server-name>.')
 
     del namespace.connection_id
 
@@ -205,7 +206,8 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
 
 
 def _cluster_validator(create_cluster, cluster_size, auto_grow, version, tier, instance):
-    if create_cluster and create_cluster.lower() == 'elasticcluster' or (instance and instance.cluster and instance.cluster.cluster_size > 0):
+    if create_cluster and create_cluster.lower() == 'elasticcluster' or \
+       (instance and instance.cluster and instance.cluster.cluster_size > 0):
         if instance is None and version != '17':
             raise ValidationError('Elastic cluster is only supported for PostgreSQL version 17.')
 
@@ -654,6 +656,7 @@ def validate_and_format_restore_point_in_time(restore_time):
         raise ValidationError('The restore point in time value has incorrect date format. '
                               'Use ISO format e.g., 2026-03-22T18:20:22+00:00.')
 
+
 def is_citus_cluster(cmd, resource_group_name, server_name):
     server_operations_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
     server = server_operations_client.get(resource_group_name, server_name)
@@ -671,7 +674,8 @@ def validate_public_access_server(cmd, resource_group_name, server_name):
 
     server = server_operations_client.get(resource_group_name, server_name)
     if server.network.public_network_access == 'Disabled':
-        raise ValidationError('Firewall rule operations are not supported for a server without public access enabled.')
+        raise ValidationError('Firewall rule operations are not supported for a server '
+                              'without public access enabled.')
 
 
 def _validate_identity(cmd, namespace, identity):
@@ -710,8 +714,7 @@ def validate_identities(cmd, namespace):
 def _pg_storage_type_validator(storage_type, auto_grow, performance_tier, tier,
                                supported_storageV2_size, iops, throughput, instance):
     is_create_ssdv2 = storage_type and storage_type.lower() == 'premiumv2_lrs'
-    is_update_ssdv2 = instance and instance.storage.type and \
-                       instance.storage.type.lower() == 'premiumv2_lrs'
+    is_update_ssdv2 = (instance and instance.storage.type and instance.storage.type.lower() == 'premiumv2_lrs')
 
     if is_create_ssdv2:
         if supported_storageV2_size is None:
@@ -724,23 +727,30 @@ def _pg_storage_type_validator(storage_type, auto_grow, performance_tier, tier,
 
     if is_create_ssdv2 or is_update_ssdv2:
         if auto_grow and auto_grow.lower() != 'disabled':
-            raise ValidationError('Invalid value for --storage-auto-grow. "Enabled" is not supported for servers with --storage-type set to "PremiumV2_LRS".')
+            raise ValidationError('Invalid value for --storage-auto-grow. "Enabled" is not supported for '
+                                  'servers with --storage-type set to "PremiumV2_LRS".')
         if performance_tier:
-            raise ValidationError('Invalid value for --performance-tier. Performance tier is not supported for servers with --storage-type set to "PremiumV2_LRS".')
+            raise ValidationError('Invalid value for --performance-tier. Performance tier is not supported for '
+                                  'servers with --storage-type set to "PremiumV2_LRS".')
         if tier and tier.lower() == 'burstable':
-            raise ValidationError('Invalid value for --tier. Burstable tier is not supported for servers with --storage-type set to "PremiumV2_LRS".')
+            raise ValidationError('Invalid value for --tier. Burstable tier is not supported for '
+                                  'servers with --storage-type set to "PremiumV2_LRS".')
     else:
         if throughput is not None:
-            raise CLIError('Invalid value for --throughput. Updating throughput is only supported for servers created with --storage-type set to "PremiumV2_LRS".')
+            raise CLIError('Invalid value for --throughput. Updating throughput is only supported for '
+                           'servers created with --storage-type set to "PremiumV2_LRS".')
         if iops is not None:
-            raise CLIError('Invalid value for --iops. Updating storage iops is only supported for servers created with --storage-type set to "PremiumV2_LRS".')
+            raise CLIError('Invalid value for --iops. Updating storage iops is only supported for '
+                           'servers created with --storage-type set to "PremiumV2_LRS".')
 
 
 def pg_restore_validator(compute_tier, **args):
-    is_ssdv2_enabled = args.get('storage_type', None) is not None and args.get('storage_type').lower() == 'premiumv2_lrs'
+    is_ssdv2_enabled = args.get('storage_type', None) is not None \
+        and args.get('storage_type').lower() == 'premiumv2_lrs'
 
     if is_ssdv2_enabled and compute_tier.lower() == 'burstable':
-        raise ValidationError('Invalid value for --tier. Burstable tier is not supported for servers with --storage-type set to "PremiumV2_LRS".')
+        raise ValidationError('Invalid value for --tier. Burstable tier is not supported for servers with '
+                              '--storage-type set to "PremiumV2_LRS".')
 
 
 def _pg_authentication_validator(password_auth, is_microsoft_entra_auth_enabled,
