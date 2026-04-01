@@ -68,7 +68,7 @@ class Create(AAZCommand):
         _args_schema.auto_delete_on_idle = AAZDurationArg(
             options=["--auto-delete-on-idle"],
             arg_group="Properties",
-            help="ISO 8061 timeSpan idle interval after which the queue is automatically deleted. The minimum duration is 5 minutes.",
+            help="ISO 8601 timeSpan idle interval after which the queue is automatically deleted. The minimum duration is 5 minutes.",
         )
         _args_schema.enable_dead_lettering_on_message_expiration = AAZBoolArg(
             options=["--message-expiration", "--enable-dead-lettering-on-message-expiration"],
