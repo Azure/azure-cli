@@ -180,10 +180,16 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                  'Must set iops and throughput if using PremiumV2_LRS.'
         )
 
+        storage_type_replica_arg_type = CLIArgumentType(
+            arg_type=get_enum_type(['PremiumV2_LRS']),
+            options_list=['--storage-type'],
+            help='Storage type for the read replica. Allowed value is PremiumV2_LRS. Default is for the read replica to match storage type of the primary server.'
+        )
+
         storage_type_restore_arg_type = CLIArgumentType(
             arg_type=get_enum_type(['PremiumV2_LRS']),
             options_list=['--storage-type'],
-            help='Storage type for the new server. Allowed value is PremiumV2_LRS. Default value is none.'
+            help='Storage type for the new server. Allowed value is PremiumV2_LRS. Default is for the new server to match storage type of the source server.'
         )
 
         performance_tier_arg_type = CLIArgumentType(
@@ -629,6 +635,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('performance_tier', default=None, arg_type=performance_tier_arg_type)
             c.argument('yes', arg_type=yes_arg_type)
             c.argument('tags', arg_type=tags_type)
+            c.argument('storage_type', default=None, arg_type=storage_type_replica_arg_type)
 
         with self.argument_context('{} flexible-server replica promote'.format(command_group)) as c:
             c.argument('replica_name', arg_type=replica_name_arg_type)
