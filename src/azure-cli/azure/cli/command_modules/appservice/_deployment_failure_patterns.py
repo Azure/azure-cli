@@ -253,7 +253,7 @@ DEPLOYMENT_FAILURE_PATTERNS = [
         "httpStatus": 404,
         "suggestedFixes": [
             "Deploy the website first before requesting a deployment script",
-            "Use 'az webapp deploy' or 'az webapp deployment source config-zip' to deploy"
+            "Use 'az webapp deploy' to deploy"
         ]
     },
     {
