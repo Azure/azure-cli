@@ -211,9 +211,9 @@ DEPLOYMENT_FAILURE_PATTERNS = [
         "stage": "Deployment",
         "httpStatus": 403,
         "suggestedFixes": [
-            "Enable SCM access in the app settings",
-            "Remove any app setting that disables the SCM site",
-            "Check 'az webapp config show' for scmType and related settings"
+            "SCM (Kudu) site is disabled for this app",
+            "Check scmType in site config: 'az webapp config show --query scmType'",
+            "Enable SCM via the Azure portal under Configuration > General settings"
         ]
     },
     # -----------------------------------------------------------------------
@@ -234,7 +234,7 @@ DEPLOYMENT_FAILURE_PATTERNS = [
         "httpStatus": 404,
         "suggestedFixes": [
             "Verify the deployment ID is correct",
-            "List existing deployments: 'az webapp deployment list'",
+            "List deployment logs: 'az webapp log deployment show'",
             "The deployment may have been cleaned up; redeploy instead"
         ]
     },
@@ -447,7 +447,7 @@ def match_failure_pattern(status_code=None, error_message=None, deployment_statu
             return get_failure_pattern("MissingDeployPath")
         if "path cannot end with" in error_lower or "path cannot contain" in error_lower:
             return get_failure_pattern("InvalidDeployPath")
-        if "invalid packageu" in error_lower:
+        if "invalid packageurl" in error_lower:
             return get_failure_pattern("InvalidPackageUri")
         if "clean deployments cannot be performed" in error_lower:
             return get_failure_pattern("CleanDeployForbidden")

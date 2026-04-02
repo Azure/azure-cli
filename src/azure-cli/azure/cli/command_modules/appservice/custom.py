@@ -899,6 +899,8 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
 
     # Enriched errors are enabled via --enriched-errors flag on 'az webapp deploy' or 'az webapp up'.
     _should_enrich_errors = enriched_errors and not app_is_function_app
+    if enriched_errors and app_is_function_app:
+        logger.warning("--enriched-errors is not supported for function apps and will be ignored.")
 
     # Read file content
     with open(os.path.realpath(os.path.expanduser(src)), 'rb') as fs:
@@ -979,7 +981,7 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
                                     "to delete them.".format(deployment_status_url))
 
     # check if an error occured during deployment
-    if res.status_code:
+    if res.status_code and res.status_code >= 400:
         if _should_enrich_errors:
             raise_enriched_deployment_error(
                 cmd=cmd,
@@ -9990,7 +9992,7 @@ def _make_onedeploy_request(params):
                               .format(deployment_status_url))
 
     # check if an error occurred during deployment
-    if response.status_code:
+    if response.status_code and response.status_code >= 400:
         if params.enriched_errors:
             raise_enriched_deployment_error(
                 params=params,
@@ -10026,32 +10028,47 @@ def _perform_onedeploy_internal(params):
         raise
     except CLIError as ex:
         if params.enriched_errors:
-            _ex_str = str(ex)
-            raise_enriched_deployment_error(
-                params=params,
-                status_code=extract_status_code_from_message(_ex_str),
-                error_message=_ex_str,
-                last_known_step="Deployment request"
-            )
+            try:
+                _ex_str = str(ex)
+                raise_enriched_deployment_error(
+                    params=params,
+                    status_code=extract_status_code_from_message(_ex_str),
+                    error_message=_ex_str,
+                    last_known_step="Deployment request"
+                )
+            except EnrichedDeploymentError:
+                raise
+            except Exception:  # pylint: disable=broad-except
+                logger.debug("Failed to enrich deployment error, re-raising original.")
         raise
     except HttpResponseError as ex:
         if params.enriched_errors:
-            # Azure SDK errors (e.g. Bad Request from ARM)
-            raise_enriched_deployment_error(
-                params=params,
-                status_code=ex.status_code if hasattr(ex, 'status_code') else None,
-                error_message=str(ex),
-                last_known_step="ARM deployment request"
-            )
+            try:
+                # Azure SDK errors (e.g. Bad Request from ARM)
+                raise_enriched_deployment_error(
+                    params=params,
+                    status_code=ex.status_code if hasattr(ex, 'status_code') else None,
+                    error_message=str(ex),
+                    last_known_step="ARM deployment request"
+                )
+            except EnrichedDeploymentError:
+                raise
+            except Exception:  # pylint: disable=broad-except
+                logger.debug("Failed to enrich deployment error, re-raising original.")
         raise
     except Exception as ex:  # pylint: disable=broad-except
         if params.enriched_errors:
-            # Catch-all for unexpected errors (connection errors, timeouts, etc.)
-            raise_enriched_deployment_error(
-                params=params,
-                error_message=str(ex),
-                last_known_step="Deployment request"
-            )
+            try:
+                # Catch-all for unexpected errors (connection errors, timeouts, etc.)
+                raise_enriched_deployment_error(
+                    params=params,
+                    error_message=str(ex),
+                    last_known_step="Deployment request"
+                )
+            except EnrichedDeploymentError:
+                raise
+            except Exception:  # pylint: disable=broad-except
+                logger.debug("Failed to enrich deployment error, re-raising original.")
         raise
 
 
