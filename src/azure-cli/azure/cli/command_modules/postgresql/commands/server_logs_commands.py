@@ -28,7 +28,7 @@ def _sanitize_log_file(log_obj):
         properties = result.pop('properties')
         # Extract type from properties and rename to typePropertiesType
         if 'createdTime' in properties:
-            del properties['createdTime']  # Remove created_time as it's not in the original SDK model
+            del properties['createdTime']  # Remove createdTime as it's not in the original SDK model
         if 'type' in properties:
             result['typePropertiesType'] = properties.pop('type')
         # Merge remaining properties into root level
