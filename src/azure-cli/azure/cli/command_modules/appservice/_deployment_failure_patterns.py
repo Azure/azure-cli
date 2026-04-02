@@ -407,7 +407,7 @@ def get_failure_pattern(error_code):
     return _PATTERN_INDEX.get(error_code)
 
 
-def match_failure_pattern(status_code=None, error_message=None, deployment_status=None):
+def match_failure_pattern(status_code=None, error_message=None, deployment_status=None):  # pylint: disable=too-many-return-statements,too-many-branches
     """
     Attempt to match an error to a well-known Kudu deployment failure pattern.
 
@@ -493,7 +493,9 @@ def match_failure_pattern(status_code=None, error_message=None, deployment_statu
     if status_code == 409:
         if "auto swap" in error_lower:
             return get_failure_pattern("AutoSwapInProgress")
-        if "run-from-zip" in error_lower or "website_run_from_package" in error_lower or "website_use_zip" in error_lower:
+        if ("run-from-zip" in error_lower or
+                "website_run_from_package" in error_lower or
+                "website_use_zip" in error_lower):
             return get_failure_pattern("RunFromRemoteZipConfigured")
         if "deployment with id" in error_lower and "exists" in error_lower:
             return get_failure_pattern("DeploymentIdExists")

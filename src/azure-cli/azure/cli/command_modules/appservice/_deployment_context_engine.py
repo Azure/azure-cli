@@ -29,7 +29,6 @@ class EnrichedDeploymentError(CLIError):
     Used to reliably detect already-enriched errors without brittle
     string-matching on the error message text.
     """
-    pass
 
 
 # Patterns that reliably indicate an HTTP status code in CLI error messages.
@@ -38,7 +37,9 @@ _STATUS_CODE_PATTERNS = [
     re.compile(r'Status\s*Code[:\s]+(\d{3})', re.IGNORECASE),   # "Status Code: 400"
     re.compile(r'\((([45]\d{2}))\)'),                           # "Bad Request(400)"
     re.compile(r'HTTP\s+(\d{3})', re.IGNORECASE),                # "HTTP 504"
-    re.compile(r'\b([45]\d{2})\s+(?:Bad|Unauthorized|Forbidden|Not\s+Found|Conflict|Too\s+Many|Internal|Gateway|Service)', re.IGNORECASE),  # "400 Bad Request"
+    re.compile(
+        r'\b([45]\d{2})\s+(?:Bad|Unauthorized|Forbidden|Not\s+Found|Conflict'
+        r'|Too\s+Many|Internal|Gateway|Service)', re.IGNORECASE),  # "400 Bad Request"
 ]
 
 
@@ -142,26 +143,20 @@ def _determine_deployment_type(params=None, *, src_url=None, artifact_type=None)
     override the params-derived values when both are provided.
     """
     _src_url = src_url if src_url is not None else (getattr(params, 'src_url', None) if params else None)
-    _artifact = artifact_type if artifact_type is not None else (getattr(params, 'artifact_type', None) if params else None)
+    _artifact = artifact_type if artifact_type is not None else (
+        getattr(params, 'artifact_type', None) if params else None)
 
     if _src_url:
         return "OneDeploy (URL-based)"
-    if _artifact == 'zip':
-        return "ZipDeploy"
-    if _artifact == 'war':
-        return "WarDeploy"
-    if _artifact == 'jar':
-        return "JarDeploy"
-    if _artifact == 'ear':
-        return "EarDeploy"
-    if _artifact == 'startup':
-        return "StartupFile"
-    if _artifact == 'static':
-        return "StaticDeploy"
-    return "OneDeploy"
+
+    _ARTIFACT_TYPE_MAP = {
+        'zip': 'ZipDeploy', 'war': 'WarDeploy', 'jar': 'JarDeploy',
+        'ear': 'EarDeploy', 'startup': 'StartupFile', 'static': 'StaticDeploy'
+    }
+    return _ARTIFACT_TYPE_MAP.get(_artifact, "OneDeploy")
 
 
-def build_enriched_error_context(params=None, *, cmd=None, resource_group_name=None,
+def build_enriched_error_context(params=None, *, cmd=None, resource_group_name=None,  # pylint: disable=too-many-locals
                                  webapp_name=None, slot=None, src_url=None,
                                  artifact_type=None, status_code=None, error_message=None,
                                  deployment_status=None, deployment_properties=None,
@@ -202,9 +197,12 @@ def build_enriched_error_context(params=None, *, cmd=None, resource_group_name=N
     _cmd = cmd or (params.cmd if params else None)
     _rg = resource_group_name or (params.resource_group_name if params else None)
     _name = webapp_name or (params.webapp_name if params else None)
-    _slot = slot if slot is not None else (getattr(params, 'slot', None) if params else None)
-    _src_url = src_url if src_url is not None else (getattr(params, 'src_url', None) if params else None)
-    _artifact = artifact_type if artifact_type is not None else (getattr(params, 'artifact_type', None) if params else None)
+    _slot = slot if slot is not None else (
+        getattr(params, 'slot', None) if params else None)
+    _src_url = src_url if src_url is not None else (
+        getattr(params, 'src_url', None) if params else None)
+    _artifact = artifact_type if artifact_type is not None else (
+        getattr(params, 'artifact_type', None) if params else None)
 
     pattern = match_failure_pattern(
         status_code=status_code,
