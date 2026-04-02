@@ -2652,6 +2652,9 @@ examples:
   - name: Create a web app with a specified domain name scope for unique hostname generation
     text: >
         az webapp up -n MyUniqueAppName --domain-name-scope TenantReuse
+  - name: Deploy with enriched error diagnostics on failure.
+    text: >
+        az webapp up --enriched-errors true
 """
 
 helps['webapp update'] = """
@@ -3344,4 +3347,6 @@ helps['webapp deploy'] = """
       text: az webapp deploy --resource-group ResourceGroup --name AppName --src-path SourcePath --type war --async true
     - name: Deploy a static text file to wwwroot/staticfiles/test.txt
       text: az webapp deploy --resource-group ResourceGroup --name AppName --src-path SourcePath --type static --target-path staticfiles/test.txt
+    - name: Deploy a zip file with enriched error diagnostics on failure.
+      text: az webapp deploy -g ResourceGroup -n AppName --src-path app.zip --enriched-errors true
 """
