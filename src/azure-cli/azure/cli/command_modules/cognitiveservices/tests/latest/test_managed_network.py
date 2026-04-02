@@ -12,6 +12,7 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccoun
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
+@unittest.skip("Skipped: pending service fix")
 class CognitiveServicesManagedNetworkTests(ScenarioTest):
 
     INPUT_DATA_PATH: str = os.path.join(TEST_DIR, 'data')
