@@ -66,7 +66,7 @@ class ProfileCommandsLoader(AzCommandsLoader):
                        help='Skip the subscription discovery process during login. '
                             'Requires --tenant. Use with --subscription to '
                             'fetch a single subscription without listing all.')
-            c.argument('default_subscription', options_list=['--subscription', '-s'],
+            c.argument('subscription', options_list=['--subscription', '-s'],
                        help='Subscription ID or name to set as the default. '
                             'When combined with --skip-subscription-discovery, '
                             'only this subscription is retrieved via a direct API call '

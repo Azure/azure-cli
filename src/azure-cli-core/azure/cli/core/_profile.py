@@ -154,7 +154,7 @@ class Profile:
               show_progress=False,
               claims_challenge=None,
               skip_subscription_discovery=False,
-              default_subscription=None):
+              subscription=None):
         """
         For service principal, `password` is a dict returned by ServicePrincipalAuth.build_credential
         """
@@ -200,14 +200,14 @@ class Profile:
         else:
             credential = identity.get_service_principal_credential(username)
 
-        is_bare_mode = skip_subscription_discovery and not default_subscription
+        is_bare_mode = skip_subscription_discovery and not subscription
 
-        if skip_subscription_discovery and default_subscription:
+        if skip_subscription_discovery and subscription:
             # Fast path: fetch only the specified subscription (1 API call)
             subscriptions = subscription_finder.find_specific_subscriptions(
-                tenant, credential, [default_subscription])
+                tenant, credential, [subscription])
         elif is_bare_mode:
-            # Bare mode: no ARM subscription calls. Tenant-level account will be creatd below
+            # Bare mode: no ARM subscription calls. Tenant-level account will be created below
             subscriptions = []
             subscription_finder.tenants.append(tenant)
         elif tenant:
@@ -215,8 +215,14 @@ class Profile:
         else:
             subscriptions = subscription_finder.find_using_common_tenant(username, credential)
 
-        if not subscriptions and not allow_no_subscriptions and not is_bare_mode:
-            raise CLIError("No subscriptions found for {}.".format(username))
+        if not subscriptions and not allow_no_subscriptions:
+            if skip_subscription_discovery and subscription:
+                raise CLIError(
+                    "The subscription '{}' could not be retrieved for '{}'. "
+                    "Ensure the subscription exists and that you have access to it.".format(
+                        subscription, username))
+            if not is_bare_mode:
+                raise CLIError("No subscriptions found for {}.".format(username))
 
         if allow_no_subscriptions or is_bare_mode:
             t_list = [s.tenant_id for s in subscriptions]
@@ -228,28 +234,23 @@ class Profile:
 
         consolidated = self._normalize_properties(username, subscriptions,
                                                   is_service_principal, bool(use_cert_sn_issuer))
+        self._set_subscriptions(consolidated, preferred_subscription=subscription)
 
-        self._set_subscriptions(consolidated)
-
-        # Validate default_subscription exists before calling set_active_subscription,
-        # so the caller can handle "not found" differently based on context.
-        if default_subscription:
-            match = next((s for s in consolidated
-                          if s[_SUBSCRIPTION_ID].lower() == default_subscription.lower() or
-                          s.get(_SUBSCRIPTION_NAME, '').lower() == default_subscription.lower()), None)
-            if match:
-                self.set_active_subscription(match[_SUBSCRIPTION_ID])
-                # Refresh consolidated from storage so the returned list reflects the new default
-                consolidated = self.load_cached_subscriptions()
-            elif skip_subscription_discovery:
+        if subscription:
+            matches = [s for s in consolidated
+                       if s[_SUBSCRIPTION_ID].lower() == subscription.lower() or
+                       s.get(_SUBSCRIPTION_NAME, '').lower() == subscription.lower()]
+            if matches:
+                return deepcopy(matches)
+            if skip_subscription_discovery:
                 # --skip-subscription-discovery + --subscription S, but S is inaccessible.
                 # without --allow-no-subscriptions → already errored above
                 # with --allow-no-subscriptions → tenant-level account only (we reach here)
                 logger.warning("Subscription '%s' not found. Profile has tenant-level account only.",
-                               default_subscription)
+                               subscription)
             else:
                 raise CLIError("Subscription '{}' not found. Check the ID or name and try again."
-                               .format(default_subscription))
+                               .format(subscription))
 
         return deepcopy(consolidated)
 
@@ -496,7 +497,8 @@ class Profile:
         s.state = 'Enabled'
         return s
 
-    def _set_subscriptions(self, new_subscriptions, merge=True, secondary_key_name=None):
+    def _set_subscriptions(self, new_subscriptions, merge=True, secondary_key_name=None,
+                           preferred_subscription=None):
 
         def _get_key_name(account, secondary_key_name):
             return (account[_SUBSCRIPTION_ID] if secondary_key_name is None
@@ -522,17 +524,26 @@ class Profile:
         dic.update((_get_key_name(x, secondary_key_name), x) for x in new_subscriptions)
         subscriptions = list(dic.values())
         if subscriptions:
-            if active_one:
+            new_active_one = None
+
+            # If a preferred subscription is specified, try to use it as default
+            if preferred_subscription:
+                preferred_lower = preferred_subscription.lower()
+                new_active_one = next(
+                    (x for x in new_subscriptions
+                     if x[_SUBSCRIPTION_ID].lower() == preferred_lower or
+                     x.get(_SUBSCRIPTION_NAME, '').lower() == preferred_lower), None)
+
+            # Fall back to previously active subscription if still present
+            if not new_active_one and active_one:
                 new_active_one = next(
                     (x for x in new_subscriptions if _match_account(x, active_subscription_id, secondary_key_name,
                                                                     active_secondary_key_val)), None)
 
-                for s in subscriptions:
-                    s[_IS_DEFAULT_SUBSCRIPTION] = False
+            for s in subscriptions:
+                s[_IS_DEFAULT_SUBSCRIPTION] = False
 
-                if not new_active_one:
-                    new_active_one = Profile._pick_working_subscription(new_subscriptions)
-            else:
+            if not new_active_one:
                 new_active_one = Profile._pick_working_subscription(new_subscriptions)
 
             new_active_one[_IS_DEFAULT_SUBSCRIPTION] = True

@@ -120,6 +120,18 @@ def account_clear(cmd):
     profile.logout_all()
 
 
+def _select_and_set_active(profile, subscriptions):
+    """Launch interactive subscription selector and set the chosen subscription as active."""
+    from ._subscription_selector import SubscriptionSelector
+    from azure.cli.core._profile import _SUBSCRIPTION_ID
+
+    selected = SubscriptionSelector(subscriptions)()
+    profile.set_active_subscription(selected[_SUBSCRIPTION_ID])
+
+    print(LOGIN_ANNOUNCEMENT)
+    logger.warning(LOGIN_OUTPUT_WARNING)
+
+
 # pylint: disable=too-many-branches, too-many-locals
 def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_subscriptions=False,
           claims_challenge=None,
@@ -130,7 +142,7 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
           # Managed identity
           identity=False, client_id=None, object_id=None, resource_id=None,
           # Subscription discovery and default subscription selection control
-          skip_subscription_discovery=False, default_subscription=None):
+          skip_subscription_discovery=False, subscription=None):
     """Log in to access Azure subscriptions"""
 
     # quick argument usage check
@@ -191,10 +203,9 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
     from azure.cli.core.telemetry import set_login_experience_v2
     set_login_experience_v2(login_experience_v2)
 
-    # When --subscription or --skip-subscription-discovery is provided, bypass the interactive selector
-    select_subscription = (interactive and sys.stdin.isatty() and sys.stdout.isatty() and
-                           login_experience_v2 and not default_subscription and
-                           not skip_subscription_discovery)
+    can_show_selector = (interactive and sys.stdin.isatty() and sys.stdout.isatty() and
+                         login_experience_v2)
+    is_subscription_filter = bool(subscription or skip_subscription_discovery)
 
     subscriptions = profile.login(
         interactive,
@@ -206,22 +217,20 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
         use_device_code=use_device_code,
         allow_no_subscriptions=allow_no_subscriptions,
         use_cert_sn_issuer=use_cert_sn_issuer,
-        show_progress=select_subscription,
+        show_progress=can_show_selector and not skip_subscription_discovery,
         claims_challenge=claims_challenge,
         skip_subscription_discovery=skip_subscription_discovery,
-        default_subscription=default_subscription
+        subscription=subscription
     )
 
-    # Launch interactive account selection. No JSON output.
-    if select_subscription:
-        from ._subscription_selector import SubscriptionSelector
-        from azure.cli.core._profile import _SUBSCRIPTION_ID
+    # Filtered path (--subscription or --skip): show selector only when multiple matches
+    if can_show_selector and is_subscription_filter and len(subscriptions) > 1:
+        _select_and_set_active(profile, subscriptions)
+        return
 
-        selected = SubscriptionSelector(subscriptions)()
-        profile.set_active_subscription(selected[_SUBSCRIPTION_ID])
-
-        print(LOGIN_ANNOUNCEMENT)
-        logger.warning(LOGIN_OUTPUT_WARNING)
+    # Original no-filter path: always show selector (even 1 item) for backward compatibility
+    if can_show_selector and not is_subscription_filter:
+        _select_and_set_active(profile, subscriptions)
         return
 
     all_subscriptions = list(subscriptions)
