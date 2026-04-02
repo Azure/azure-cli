@@ -881,8 +881,9 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     app_is_linux_webapp = is_linux_webapp(app)
     app_is_function_app = is_functionapp(app)
 
-    # Should we enrich deployment errors with context? (webapp only, not functionapp)
-    _should_enrich_errors = not app_is_function_app
+    # Enriched errors are only enabled via --enriched-errors flag on 'az webapp deploy'.
+    # The legacy zip deploy path does not support the flag.
+    _should_enrich_errors = False
 
     # Read file content
     with open(os.path.realpath(os.path.expanduser(src)), 'rb') as fs:
@@ -9533,7 +9534,8 @@ def perform_onedeploy_webapp(cmd,
                              timeout=None,
                              slot=None,
                              track_status=True,
-                             enable_kudu_warmup=True):
+                             enable_kudu_warmup=True,
+                             enriched_errors=False):
     params = OneDeployParams()
 
     params.cmd = cmd
@@ -9551,6 +9553,7 @@ def perform_onedeploy_webapp(cmd,
     params.slot = slot
     params.track_status = track_status
     params.enable_kudu_warmup = enable_kudu_warmup
+    params.enriched_errors = enriched_errors
 
     client = web_client_factory(cmd.cli_ctx)
     app = client.web_apps.get(resource_group_name, name)
@@ -9580,6 +9583,7 @@ class OneDeployParams:
         self.enable_kudu_warmup = None
         self.is_linux_webapp = None
         self.is_functionapp = None
+        self.enriched_errors = False
 # pylint: enable=too-many-instance-attributes,too-few-public-methods
 
 
@@ -9889,7 +9893,7 @@ def _make_onedeploy_request(params):
                                                                  params.webapp_name,
                                                                  deployment_status_url, params.slot, params.timeout)
             except CLIError as deploy_err:
-                if not params.is_functionapp:
+                if params.enriched_errors:
                     # Enrich the downstream deployment-tracking error with context
                     _deploy_err_str = str(deploy_err)
                     raise_enriched_deployment_error(
@@ -9923,7 +9927,7 @@ def _make_onedeploy_request(params):
 
     # check if an error occurred during deployment
     if response.status_code:
-        if not params.is_functionapp:
+        if params.enriched_errors:
             raise_enriched_deployment_error(
                 params=params,
                 status_code=response.status_code,
@@ -9957,7 +9961,7 @@ def _perform_onedeploy_internal(params):
         # Check if this is already an enriched error (from raise_enriched_deployment_error)
         if "DEPLOYMENT FAILED" in str(ex):
             raise
-        if not params.is_functionapp:
+        if params.enriched_errors:
             _ex_str = str(ex)
             raise_enriched_deployment_error(
                 params=params,
@@ -9967,7 +9971,7 @@ def _perform_onedeploy_internal(params):
             )
         raise
     except HttpResponseError as ex:
-        if not params.is_functionapp:
+        if params.enriched_errors:
             # Azure SDK errors (e.g. Bad Request from ARM)
             raise_enriched_deployment_error(
                 params=params,
@@ -9977,7 +9981,7 @@ def _perform_onedeploy_internal(params):
             )
         raise
     except Exception as ex:  # pylint: disable=broad-except
-        if not params.is_functionapp:
+        if params.enriched_errors:
             # Catch-all for unexpected errors (connection errors, timeouts, etc.)
             raise_enriched_deployment_error(
                 params=params,
