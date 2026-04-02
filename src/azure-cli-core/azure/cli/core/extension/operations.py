@@ -13,7 +13,6 @@ import zipfile
 import traceback
 import hashlib
 from subprocess import check_output, STDOUT, CalledProcessError
-from urllib.parse import urlparse
 
 from packaging.version import parse
 
@@ -85,6 +84,7 @@ def _validate_whl_extension(ext_file):
 
 
 def _get_extension_info_from_source(source):
+    from urllib.parse import urlparse
     url_parse_result = urlparse(source)
     is_url = (url_parse_result.scheme == 'http' or url_parse_result.scheme == 'https')
     whl_filename = os.path.basename(url_parse_result.path) if is_url else os.path.basename(source)
@@ -96,6 +96,7 @@ def _get_extension_info_from_source(source):
 
 
 def _add_whl_ext(cli_ctx, source, ext_sha256=None, pip_extra_index_urls=None, pip_proxy=None, system=None):  # pylint: disable=too-many-statements
+    from urllib.parse import urlparse
     cli_ctx.get_progress_controller().add(message='Analyzing')
     if not source.endswith('.whl'):
         raise ValueError('Unknown extension type. Only Python wheels are supported.')

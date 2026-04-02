@@ -1015,6 +1015,12 @@ parameters:
   - name: --http-proxy-config
     type: string
     short-summary: HTTP Proxy configuration for this cluster.
+  - name: --disable-http-proxy
+    type: bool
+    short-summary: Disable HTTP Proxy Configuration on the cluster.
+  - name: --enable-http-proxy
+    type: bool
+    short-summary: Enable HTTP Proxy Configuration on the cluster.
   - name: --enable-oidc-issuer
     type: bool
     short-summary: Enable OIDC issuer.
@@ -1112,6 +1118,9 @@ parameters:
     type: string
     short-summary: Set transit encryption type for ACNS security.
     long-summary: Configures pod-to-pod encryption for Cilium-based clusters. Once enabled, all traffic between Cilium managed pods will be encrypted when it leaves the node boundary. Valid values are "WireGuard" and "None". When creating a cluster, this option must be used together with "--enable-acns"; when updating a cluster, it can be used on its own to modify the transit encryption type for an existing ACNS-enabled cluster.
+  - name: --enable-high-log-scale-mode
+    type: bool
+    short-summary: Enable High Log Scale Mode for Container Logs. Auto-enabled when --enable-container-network-logs is specified.
   - name: --nrg-lockdown-restriction-level
     type: string
     short-summary: Restriction level on the managed node resource group.

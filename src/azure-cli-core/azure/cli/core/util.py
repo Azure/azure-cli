@@ -4,18 +4,12 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=too-many-lines
 
-import base64
-import binascii
-import getpass
 import json
-import yaml
 import logging
 import os
 import platform
 import re
-import ssl
 import sys
-from urllib.request import urlopen
 
 from knack.log import get_logger
 from knack.util import CLIError, to_snake_case, to_camel_case
@@ -569,6 +563,7 @@ def get_file_json(file_path, throw_on_empty=True, preserve_order=False):
 
 
 def get_file_yaml(file_path, throw_on_empty=True):
+    import yaml  # Lazy-load: only needed when parsing YAML files
     content = read_file_content(file_path)
     if not content:
         if throw_on_empty:
@@ -593,6 +588,7 @@ def read_file_content(file_path, allow_binary=False):
 
     if allow_binary:
         try:
+            import base64
             with open(file_path, 'rb') as input_file:
                 logger.debug("attempting to read file %s as binary", file_path)
                 return base64.b64encode(input_file.read()).decode("utf-8")
@@ -643,6 +639,7 @@ def b64encode(s):
     :return: base64 encoded string
     :rtype: str
     """
+    import base64
     encoded = base64.b64encode(s.encode("latin-1"))
     return encoded.decode('latin-1')
 
@@ -654,6 +651,7 @@ def b64decode(s):
     :return: decoded string
     :rtype: str
     """
+    import base64
     encoded = base64.b64decode(s.encode("latin-1"))
     return encoded.decode('latin-1')
 
@@ -665,6 +663,8 @@ def b64_to_hex(s):
     :return: uppercase hex string
     :rtype: str
     """
+    import base64
+    import binascii
     decoded = base64.b64decode(s)
     hex_data = binascii.hexlify(decoded).upper()
     if isinstance(hex_data, bytes):
@@ -883,6 +883,7 @@ def reload_module(module):
 
 def get_default_admin_username():
     try:
+        import getpass
         username = getpass.getuser()
     except KeyError:
         username = None
@@ -1200,10 +1201,12 @@ ConfiguredDefaultSetter = ScopedConfig
 
 
 def _ssl_context():
+    import ssl
     return ssl.create_default_context()
 
 
 def urlretrieve(url):
+    from urllib.request import urlopen
     req = urlopen(url, context=_ssl_context())
     return req.read()
 
@@ -1332,17 +1335,19 @@ def handle_version_update():
     """
     try:
         from azure.cli.core._session import VERSIONS
-        from packaging.version import parse  # pylint: disable=import-error,no-name-in-module
         from azure.cli.core import __version__
         if not VERSIONS['versions']:
             get_cached_latest_versions()
-        elif parse(VERSIONS['versions']['core']['local']) != parse(__version__):
-            logger.debug("Azure CLI has been updated.")
-            logger.debug("Clean up versions and refresh cloud endpoints information in local files.")
-            VERSIONS['versions'] = {}
-            VERSIONS['update_time'] = ''
-            from azure.cli.core.cloud import refresh_known_clouds
-            refresh_known_clouds()
+        elif VERSIONS['versions']['core']['local'] != __version__:
+            # Lazy import packaging.version
+            from packaging.version import parse  # pylint: disable=import-error,no-name-in-module
+            if parse(VERSIONS['versions']['core']['local']) != parse(__version__):
+                logger.debug("Azure CLI has been updated.")
+                logger.debug("Clean up versions and refresh cloud endpoints information in local files.")
+                VERSIONS['versions'] = {}
+                VERSIONS['update_time'] = ''
+                from azure.cli.core.cloud import refresh_known_clouds
+                refresh_known_clouds()
     except Exception as ex:  # pylint: disable=broad-except
         logger.warning(ex)
 

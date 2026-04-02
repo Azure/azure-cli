@@ -812,6 +812,12 @@ class VMGuestPatchClassificationLinux(Enum):
     SECURITY = 'Security'
 
 
+class CachingTypes(Enum):
+    NONE = 'None'
+    READ_ONLY = 'ReadOnly'
+    READ_WRITE = 'ReadWrite'
+
+
 class DiskCreateOptionTypes(Enum):
     ATTACH = 'Attach'
     COPY = 'Copy'
