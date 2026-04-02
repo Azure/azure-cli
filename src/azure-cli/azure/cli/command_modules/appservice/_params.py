@@ -156,10 +156,11 @@ subscription than the app service environment, please use the resource ID for --
                    help="Storage mount configurations. Provide key-value pairs for `name=<name> source=<source> type=<type> destination-path=<path> credentials-secret-uri=<uri>`.")
 
     with self.argument_context('appservice plan update') as c:
-        c.argument('sku', arg_type=sku_arg_type)
+        c.argument('sku', arg_type=sku_arg_type,
+                   help='SKU of the app service plan. Use this to scale up/down (change machine size), e.g. --sku P1v3.')
         c.argument('elastic_scale', arg_type=get_three_state_flag(), help='Enable or disable automatic scaling. Set to "true" to enable elastic scale for this plan, or "false" to disable elastic scale for this plan. The SKU must be a Premium V2 SKU (P1V2, P2V2, P3V2) or a Premium V3 SKU (P1V3, P2V3, P3V3)')
         c.argument('max_elastic_worker_count', options_list=['--max-elastic-worker-count', '-m'], type=int, help='Maximum number of instances that the plan can scale out to. The plan must be an elastic scale plan.')
-        c.argument('number_of_workers', type=int, help='Number of workers to be allocated.')
+        c.argument('number_of_workers', type=int, help='Number of workers to be allocated. Use this to scale out/in (add or remove instances), e.g. --number-of-workers 3.')
         c.ignore('allow_pending_state')
         c.argument('async_scaling_enabled', arg_type=get_three_state_flag(), help='Enables async scaling for the app service plan. Set to "true" to create an async operation if there are insufficient workers to scale synchronously. The SKU must be Dedicated.')
         c.argument('default_identity', is_preview=True,
@@ -305,17 +306,23 @@ subscription than the app service environment, please use the resource ID for --
                    validator=validate_site_create,
                    local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.SET],
                                                                  scopes=['webapp', 'cupertino']))
-        c.argument('startup_file', help="Linux only. The web's startup file")
+        c.argument('startup_file', help="Linux only. The web's startup command or script file. "
+                                        "Required for FastAPI and other ASGI "
+                                        "frameworks (auto-detection is not supported). "
+                                        "Example command: \"gunicorn --bind=0.0.0.0 --timeout 600 "
+                                        "app:app\". Example for FastAPI: \"gunicorn -k "
+                                        "uvicorn.workers.UvicornWorker app:app\". "
+                                        "Example script file: \"startup.sh\".")
         c.argument('sitecontainers_app', help="If true, a webapp which supports sitecontainers will be created", arg_type=get_three_state_flag())
         c.argument('deployment_container_image_name', options_list=['--deployment-container-image-name', '-i'], help='Container image name from container registry, e.g. publisher/image-name:tag', deprecate_info=c.deprecate(target='--deployment-container-image-name'))
         c.argument('container_registry_url', options_list=['--container-registry-url'], help='The container registry server url')
         c.argument('container_image_name', options_list=['--container-image-name', '-c'],
-                   help='The container custom image name and optionally the tag name (e.g., `<registry-name>/<image-name>:<tag>`)')
+                   help='The container custom image name and optionally the tag name (e.g., `<registry-name>/<image-name>:<tag>`). Note: if --container-registry-url is also provided, use `<image-name>:<tag>` without the registry name.')
         c.argument('container_registry_user', options_list=['--container-registry-user', '-s', c.deprecate(target='--docker-registry-server-user', redirect='--container-registry-user')], help='The container registry server username')
         c.argument('container_registry_password', options_list=['--container-registry-password', '-w', c.deprecate(target='--docker-registry-server-password', redirect='--container-registry-password')], help='The container registry server password. Required for private registries.')
         c.argument('multicontainer_config_type', options_list=['--multicontainer-config-type'], help="Linux only.", arg_type=get_enum_type(MULTI_CONTAINER_TYPES))
         c.argument('multicontainer_config_file', options_list=['--multicontainer-config-file'], help="Linux only. Config file for multicontainer apps. (local or remote)")
-        c.argument('runtime', options_list=['--runtime', '-r'], help="canonicalized web runtime in the format of Framework:Version, e.g. \"PHP:7.2\"."
+        c.argument('runtime', options_list=['--runtime', '-r'], help="canonicalized web runtime in the format of Framework:Version, e.g. \"PYTHON:3.14\"."
                                                                      "Use `az webapp list-runtimes` for available list")  # TODO ADD completer
         c.argument('plan', options_list=['--plan', '-p'], configured_default='appserviceplan',
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
@@ -327,7 +334,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('acr_use_identity', action='store_true', help="Enable or disable pull image from acr use managed identity")
         c.argument('acr_identity', help='Accept system or user assigned identity which will be set for acr image pull. '
                                         'Use \'[system]\' to refer system assigned identity, or a resource id to refer user assigned identity.')
-        c.argument('basic_auth', help='Enable or disable basic auth for both SCM and FTP Basic Auth Publishing Credentials. Defaults to Enabled if not specified. See https://aka.ms/app-service-basic-auth to learn more.', arg_type=get_enum_type(BASIC_AUTH_TYPES))
+        c.argument('basic_auth', help='Enable or disable basic auth for both SCM and FTP Basic Auth Publishing Credentials. Disabled by default for new apps. See https://aka.ms/app-service-basic-auth to learn more.', arg_type=get_enum_type(BASIC_AUTH_TYPES))
         c.argument('auto_generated_domain_name_label_scope', options_list=['--domain-name-scope'], help="Specify the scope of uniqueness for the default hostname during resource creation.", arg_type=get_enum_type(AutoGeneratedDomainNameLabelScope))
         c.argument('end_to_end_encryption_enabled', options_list=['--end-to-end-encryption-enabled', '-e'],
                    help='Enable or disable end-to-end encryption between the Front End and the Workers.',
@@ -712,7 +719,7 @@ subscription than the app service environment, please use the resource ID for --
                    help='Container image name, e.g. publisher/image-name:tag', deprecate_info=c.deprecate(target='--deployment-container-image-name'))
         c.argument('container_registry_url', options_list=['--container-registry-url', '-r'], help='The container registry server url')
         c.argument('container_image_name', options_list=['--container-image-name', '-c'],
-                   help='The container custom image name and optionally the tag name (e.g., `<registry-name>/<image-name>:<tag>`)')
+                   help='The container custom image name and optionally the tag name (e.g., `<registry-name>/<image-name>:<tag>`). Note: if --container-registry-url is also provided, use `<image-name>:<tag>` without the registry name.')
         c.argument('container_registry_user', options_list=['--container-registry-user', '-u', c.deprecate(target='--docker-registry-server-user', redirect='--container-registry-user')], help='The container registry server username')
         c.argument('container_registry_password', options_list=['--container-registry-password', '-w', c.deprecate(target='--docker-registry-server-password', redirect='--container-registry-password')],
                    help='The container registry server password')
@@ -951,11 +958,16 @@ subscription than the app service environment, please use the resource ID for --
                                                                  scopes=['webapp', 'cupertino']))
         c.argument('plan', options_list=['--plan', '-p'],
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
-                   help="name of the app service plan associated with the webapp",
+                   help="name of the app service plan associated with the webapp. If not specified, a name is auto-generated.",
                    configured_default='appserviceplan')
         c.argument('sku', arg_type=sku_arg_type)
-        c.argument('os_type', options_list=['--os-type'], arg_type=get_enum_type(OS_TYPES), help="Set the OS type for the app to be created.")
-        c.argument('runtime', options_list=['--runtime', '-r'], help="canonicalized web runtime in the format of Framework:Version, e.g. \"PHP:7.2\"."
+        c.argument('os_type', options_list=['--os-type'], arg_type=get_enum_type(OS_TYPES),
+                   help="Set the OS type for the app to be created. Defaults to Linux for Python "
+                        "and Node.js runtimes, and to Windows for .NET and ASP.NET runtimes. "
+                        "Use 'linux' explicitly for .NET Linux deployments. "
+                        "Use 'az webapp list-runtimes' to see available runtimes.")
+        c.argument('runtime', options_list=['--runtime', '-r'], help="canonicalized web runtime in the format of Framework:Version, e.g. \"PYTHON:3.14\". "
+                                                                     "Recommended: always specify explicitly for reliable results. Auto-detection from source files may pick the wrong version. "
                                                                      "Use `az webapp list-runtimes` for available list.")
         c.argument('dryrun', help="show summary of the create and deploy operation instead of executing it",
                    default=False, action='store_true')

@@ -163,6 +163,27 @@ Style Checks
 azdev style <module> [--pylint] [--pep8]
 ```
 
+Latest Packaged Indices
+-----------------------
+
+Use azdev wrappers around Azure CLI's latest index generation script:
+
+```
+azdev latest-index generate
+azdev latest-index verify
+```
+
+You can pass an explicit Azure CLI checkout path when needed:
+
+```
+azdev latest-index generate --cli /path/to/azure-cli
+azdev latest-index verify --cli /path/to/azure-cli
+```
+
+`azdev latest-index verify` exits non-zero when generated output differs from
+the checked-in `commandIndex.latest.json` or `helpIndex.latest.json`, making it
+CI-friendly.
+
 Submitting Pull Requests
 ------------------------
 
