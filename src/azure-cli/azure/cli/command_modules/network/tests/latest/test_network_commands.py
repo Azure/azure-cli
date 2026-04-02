@@ -9261,5 +9261,69 @@ class NetworkApplicationGatewayHttpSettingsScenario(ScenarioTest):
         ])
 
 
+class ApplicationGatewayValidateFlagsScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_validate_flags', location='eastus')
+    def test_ag_rule_create_preserves_http_settings_validate_flags(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'rg': resource_group,
+            'loc': resource_group_location,
+            'vnet': self.create_random_name('vnet', 15),
+            'subnet': 'subnet1',
+            'pip': self.create_random_name('pip', 15),
+            'ag': self.create_random_name('ag', 15),
+            'settings': 'mysettings1',
+            'pool': 'myaddresspool1',
+            'listener': 'mylistener',
+            'rule': 'repro-rule'
+        })
+
+        self.cmd(
+            'az network vnet create -g {rg} -n {vnet} '
+            '--address-prefix 10.0.0.0/16 '
+            '--subnet-name {subnet} --subnet-prefix 10.0.0.0/24'
+        )
+        self.cmd('az network public-ip create -g {rg} -n {pip} --sku Standard --allocation-method Static')
+
+        self.cmd(
+            'az network application-gateway create -g {rg} -n {ag} '
+            '--vnet-name {vnet} --subnet {subnet} '
+            '--public-ip-address {pip} '
+            '--priority 1001 --sku Standard_v2'
+        )
+
+        self.cmd(
+            'az network application-gateway http-settings create -g {rg} --gateway-name {ag} '
+            '-n {settings} --port 443 --protocol Https '
+            '--cookie-based-affinity disabled '
+            '--validate-cert-chain-and-expiry false --validate-sni false',
+            checks=[
+                self.check('validateCertChainAndExpiry', False),
+                self.check('validateSNI', False)
+            ]
+        )
+
+        self.cmd('az network application-gateway address-pool create -g {rg} --gateway-name {ag} -n {pool}')
+        self.cmd(
+            'az network application-gateway http-listener create -g {rg} --gateway-name {ag} -n {listener} '
+            '--frontend-port appGatewayFrontendPort --host-name www.test.com'
+        )
+
+        self.cmd(
+            'az network application-gateway rule create -g {rg} --gateway-name {ag} -n {rule} '
+            '--rule-type Basic --http-listener {listener} '
+            '--address-pool {pool} --http-settings {settings} '
+            '--priority 1004'
+        )
+
+        self.cmd(
+            'az network application-gateway show -g {rg} -n {ag} '
+            '--query "backendHttpSettingsCollection[?name==\'{settings}\'] | [0]"',
+            checks=[
+                self.check('validateCertChainAndExpiry', False),
+                self.check('validateSNI', False)
+            ]
+        )
+
+
 if __name__ == '__main__':
     unittest.main()
