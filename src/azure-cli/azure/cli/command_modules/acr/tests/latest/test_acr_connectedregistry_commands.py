@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.testsdk import ScenarioTest, StorageAccountPreparer, ResourceGroupPreparer, record_only
-from azure.cli.testsdk.scenario_tests import live_only
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 
@@ -166,7 +165,6 @@ class AcrConnectedRegistryCommandsTests(ScenarioTest):
         # Delete registry
         self.cmd('acr delete -n {registry_name} -g {rg} -y')
 
-    @live_only()
     @ResourceGroupPreparer()
     @AllowLargeResponse(size_kb=99999)
     def test_acr_connectedregistry_dedicated_endpoint_not_enabled(self, resource_group, resource_group_location):

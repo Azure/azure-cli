@@ -95,7 +95,6 @@ class AcrCommandsTests(ScenarioTest):
             self.check_pattern('availableLoginServerName',r'{name}-[a-zA-Z0-9]+\.*')
         ])
     
-    @live_only()
     @ResourceGroupPreparer()
     def test_acr_login_expose_token(self, resource_group):
         registry_name = self.create_random_name('clireg', 20)
@@ -119,7 +118,6 @@ class AcrCommandsTests(ScenarioTest):
         self.assertEqual(tokens['accessToken'], tokens['refreshToken'])
 
     @ResourceGroupPreparer()
-    @live_only()
     def test_acr_create_with_managed_registry(self, resource_group, resource_group_location):
         registry_name = self.create_random_name('clireg', 20)
 
@@ -584,7 +582,6 @@ class AcrCommandsTests(ScenarioTest):
         ])
 
     @ResourceGroupPreparer()
-    @live_only()
     @KeyVaultPreparer(additional_params='--enable-purge-protection')
     def test_acr_encryption_with_cmk(self, key_vault, resource_group):
         user = self.cmd('ad signed-in-user show').get_output_in_json()
