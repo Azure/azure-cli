@@ -25,6 +25,7 @@ from azure.mgmt.cognitiveservices.models import Account as CognitiveServicesAcco
     CommitmentPlan, CommitmentPlanProperties, CommitmentPeriod, \
     ConnectionPropertiesV2BasicResource, ConnectionUpdateContent, \
     Project, ProjectProperties, \
+    RegenerateKeyParameters, \
     ManagedNetworkSettingsPropertiesBasicResource, ManagedNetworkSettingsProperties, \
     ManagedNetworkSettingsEx, \
     OutboundRuleBasicResource, FqdnOutboundRule, \
@@ -57,6 +58,14 @@ steps:
   - push: ["{image_name_full}"]
     timeout: 1800
 """
+
+
+def regenerate_key(client, resource_group_name, account_name, key_name):
+    """
+    Regenerate a key for an Azure Cognitive Services account.
+    """
+    parameters = RegenerateKeyParameters(key_name=key_name)
+    return client.regenerate_key(resource_group_name, account_name, parameters)
 
 
 def list_resources(client, resource_group_name=None):

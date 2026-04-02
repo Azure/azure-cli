@@ -77,7 +77,7 @@ def load_command_table(self, _):
         g.custom_command('list-kinds', 'list_kinds', client_factory=cf_resource_skus)
 
     with self.command_group('cognitiveservices account keys', accounts_type) as g:
-        g.command('regenerate', 'regenerate_key')
+        g.custom_command('regenerate', 'regenerate_key')
         g.command('list', 'list_keys')
 
     # deprecating this
