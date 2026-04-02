@@ -602,7 +602,8 @@ class AcrCommandsTests(ScenarioTest):
                  checks=[self.check('scope', '{scope}')])
         
         # Wait for the role assignment to propagate
-        time.sleep(15)
+        if self.is_live:
+            time.sleep(15)
 
         # create a new key
         result = self.cmd('keyvault key create --name {key_name} --vault-name {key_vault}')
@@ -615,11 +616,13 @@ class AcrCommandsTests(ScenarioTest):
         self.kwargs['identity_id'] = result.get_output_in_json()['id']
         self.kwargs['client_id'] = result.get_output_in_json()['clientId']
         
-        time.sleep(15) # wait for ARM cache to populate 
+        if self.is_live:
+            time.sleep(15) # wait for ARM cache to populate 
         
         self.cmd('role assignment create --role "Key Vault Crypto Service Encryption User" --assignee {principal_id} --scope /subscriptions/{subscription_id}/resourceGroups/{rg}/providers/Microsoft.KeyVault/vaults/{key_vault}')
 
-        time.sleep(15) # wait for Key Vault role assignment to propagate before ACR accesses the key
+        if self.is_live:
+            time.sleep(15) # wait for Key Vault role assignment to propagate before ACR accesses the key
 
         # create the registry with CMK encryption enabled using the user-assigned identity
         result = self.cmd('acr create --name {registry_name} --resource-group {rg} --sku premium --identity {identity_id} --key-encryption-key {key_id}', checks=[
@@ -670,18 +673,20 @@ class AcrCommandsTests(ScenarioTest):
         self.assertEqual(list(result['userAssignedIdentities'].keys())[0].lower(), self.kwargs['identity_id'].lower())
 
         # remove identities
-        import time
-        time.sleep(10)
+        if self.is_live:
+            time.sleep(10)
         self.cmd('acr identity remove --name {registry_name} --identities "{system_identity}" "{identity_id}"', self.check('identity', None))
 
         # try different combinations of adds and deletes
         # system
         self.cmd('acr identity assign --name {registry_name} --identities {system_identity}', self.check('identity.type', 'systemAssigned'))
-        time.sleep(10)
+        if self.is_live:
+            time.sleep(10)
         self.cmd('acr identity remove --name {registry_name} --identities {system_identity}', self.check('identity', None))
         # user
         self.cmd('acr identity assign --name {registry_name} --identities {identity_id}', self.check('identity.type', 'userAssigned'))
-        time.sleep(10)
+        if self.is_live:
+            time.sleep(10)
         self.cmd('acr identity remove --name {registry_name} --identities {identity_id}', self.check('identity', None))
 
         # add multiple identities
@@ -689,13 +694,15 @@ class AcrCommandsTests(ScenarioTest):
                           self.check('identity.type', 'systemAssigned, userAssigned')).get_output_in_json()
         self.assertUserIdentitiesExpected([self.kwargs['identity_id'].lower()], result['identity'])
         # add another user identity to existing
-        time.sleep(10)
+        if self.is_live:
+            time.sleep(10)
         result = self.cmd('acr identity assign --name {registry_name} --identities {second_identity_id}',
                           self.check('identity.type', 'systemAssigned, userAssigned')).get_output_in_json()
         self.assertUserIdentitiesExpected([self.kwargs['identity_id'].lower(), self.kwargs['second_identity_id'].lower()], result['identity'])
 
         # remove identities and validate result
-        time.sleep(10)
+        if self.is_live:
+            time.sleep(10)
         self.cmd('acr identity remove --name {registry_name} --identities {second_identity_id}', self.check('identity.type', 'systemAssigned, userAssigned'))
 
         self.cmd('acr identity remove --name {registry_name} --identities {identity_id}', self.check('identity.type', 'systemAssigned'))
