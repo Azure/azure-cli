@@ -782,9 +782,8 @@ def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_rem
 
 
 def enable_zip_deploy_webapp(cmd, resource_group_name, name, src, timeout=None, slot=None, track_status=True,
-                             enable_kudu_warmup=True, enriched_errors=False):
-    return enable_zip_deploy(cmd, resource_group_name, name, src, timeout, slot, track_status, enable_kudu_warmup,
-                             enriched_errors=enriched_errors)
+                             enable_kudu_warmup=True):
+    return enable_zip_deploy(cmd, resource_group_name, name, src, timeout, slot, track_status, enable_kudu_warmup)
 
 
 def check_flex_app_after_deployment(cmd, resource_group_name, name):

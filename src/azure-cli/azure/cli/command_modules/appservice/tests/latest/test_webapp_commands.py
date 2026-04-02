@@ -3561,5 +3561,70 @@ class WebappDNLTests(ScenarioTest):
         self.assertTrue(len(hash_part) == 16 and hash_part.islower(), "Hash is not 16 chars or not lowercase.")
         self.assertIn('-', region, "Region part does not have '-' separator.")
 
+
+class WebappEnrichedErrorsScenarioTest(ScenarioTest):
+    """Scenario tests for --enriched-errors flag on az webapp deploy and az webapp up."""
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_enriched_errors', location='westus2')
+    def test_webapp_deploy_enriched_errors_artifact_mismatch(self, resource_group):
+        """Deploy a .war to a Python app with --enriched-errors true — should get ArtifactStackMismatch."""
+        from azure.cli.command_modules.appservice._deployment_context_engine import EnrichedDeploymentError
+        webapp_name = self.create_random_name('webapp-enriched-test', 40)
+        plan_name = self.create_random_name('webapp-enriched-plan', 40)
+        war_file = os.path.join(TEST_DIR, 'data', 'sample.war')
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku F1 --is-linux'.format(resource_group, plan_name))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {} -r "PYTHON|3.11"'.format(resource_group, webapp_name, plan_name))
+        with self.assertRaises(EnrichedDeploymentError) as cm:
+            self.cmd('webapp deploy -g {} -n {} --src-path "{}" --type war --enriched-errors true'.format(
+                resource_group, webapp_name, war_file))
+        self.assertIn('ArtifactStackMismatch', str(cm.exception))
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_enriched_errors', location='westus2')
+    def test_webapp_deploy_without_enriched_errors(self, resource_group):
+        """Deploy a .war to a Python app without --enriched-errors — should get original CLIError."""
+        webapp_name = self.create_random_name('webapp-enriched-test', 40)
+        plan_name = self.create_random_name('webapp-enriched-plan', 40)
+        war_file = os.path.join(TEST_DIR, 'data', 'sample.war')
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku B1 --is-linux'.format(resource_group, plan_name))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {} -r "PYTHON|3.11"'.format(resource_group, webapp_name, plan_name))
+        with self.assertRaisesRegex(CLIError, "Status Code: 400"):
+            self.cmd('webapp deploy -g {} -n {} --src-path "{}" --type war'.format(
+                resource_group, webapp_name, war_file))
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_up_enriched', location='westus2')
+    def test_webapp_up_enriched_errors_flag_accepted(self, resource_group):
+        """Verify --enriched-errors flag is accepted by az webapp up with 409 conflict."""
+        from azure.cli.command_modules.appservice._deployment_context_engine import EnrichedDeploymentError
+        webapp_name = self.create_random_name('webapp-up-enr', 40)
+        plan_name = self.create_random_name('webapp-up-enr-plan', 40)
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku B1 --is-linux'.format(resource_group, plan_name))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {} -r "PYTHON|3.11"'.format(resource_group, webapp_name, plan_name))
+        self.cmd('webapp config appsettings set -g {} -n {} --settings '
+                 'WEBSITE_RUN_FROM_PACKAGE="https://fake.blob.core.windows.net/c/fake.zip"'.format(
+                     resource_group, webapp_name))
+        src_dir = tempfile.mkdtemp()
+        with open(os.path.join(src_dir, 'requirements.txt'), 'w') as f:
+            f.write('flask')
+        with open(os.path.join(src_dir, 'app.py'), 'w') as f:
+            f.write('print("hello")')
+        original_dir = os.getcwd()
+        try:
+            os.chdir(src_dir)
+            with self.assertRaises(EnrichedDeploymentError):
+                self.cmd('webapp up -n {} -g {} --enriched-errors true'.format(
+                    webapp_name, resource_group))
+        finally:
+            os.chdir(original_dir)
+
+
 if __name__ == '__main__':
     unittest.main()
