@@ -6,7 +6,8 @@
 from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.cognitiveservices._client_factory import cf_accounts, cf_resource_skus, \
     cf_deleted_accounts, cf_deployments, cf_commitment_plans, cf_commitment_tiers, cf_models, cf_usages, \
-    cf_ai_projects, cf_account_connections, cf_projects, cf_project_connections
+    cf_ai_projects, cf_account_connections, cf_projects, cf_project_connections, \
+    cf_managed_network_settings, cf_managed_network_provisions, cf_outbound_rule
 
 
 def load_command_table(self, _):
@@ -133,6 +134,34 @@ def load_command_table(self, _):
 
     with self.command_group('cognitiveservices agent logs', client_factory=cf_ai_projects, is_preview=True) as g:
         g.custom_show_command('show', 'agent_logs_show')
+
+    managed_network_settings_type = CliCommandType(
+        operations_tmpl='azure.mgmt.cognitiveservices.operations#ManagedNetworkSettingsOperations.{}',
+        client_factory=cf_managed_network_settings
+    )
+
+    outbound_rule_type = CliCommandType(
+        operations_tmpl='azure.mgmt.cognitiveservices.operations#OutboundRuleOperations.{}',
+        client_factory=cf_outbound_rule
+    )
+
+    with self.command_group(
+            'cognitiveservices account managed-network', managed_network_settings_type,
+            client_factory=cf_managed_network_settings, is_preview=True) as g:
+        g.custom_command('create', 'managed_network_create')
+        g.custom_command('update', 'managed_network_update')
+        g.custom_show_command('show', 'managed_network_show')
+        g.custom_command('provision-network', 'managed_network_provision',
+                         client_factory=cf_managed_network_provisions)
+
+    with self.command_group(
+            'cognitiveservices account managed-network outbound-rule', outbound_rule_type,
+            client_factory=cf_outbound_rule, is_preview=True) as g:
+        g.command('list', 'list')
+        g.show_command('show', 'get')
+        g.custom_command('remove', 'outbound_rule_remove', confirmation=True)
+        g.custom_command('set', 'outbound_rule_set')
+        g.custom_command('bulk-set', 'outbound_rule_bulk_set')
 
     with self.command_group(
             'cognitiveservices account project', projects_type,
