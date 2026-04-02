@@ -22,6 +22,7 @@ from azure.cli.command_modules.appservice._deployment_context_engine import (
     format_enriched_error_message,
     raise_enriched_deployment_error,
     extract_status_code_from_message,
+    EnrichedDeploymentError,
     _determine_deployment_type,
 )
 
@@ -289,20 +290,14 @@ class TestDeploymentContextEngine(unittest.TestCase):
             "azure.cli.command_modules.appservice._deployment_context_engine._get_app_runtime",
             return_value="PYTHON|3.11"
         )
-        patcher_region = patch(
-            "azure.cli.command_modules.appservice._deployment_context_engine._get_app_region",
-            return_value="Central India"
-        )
-        patcher_sku = patch(
-            "azure.cli.command_modules.appservice._deployment_context_engine._get_app_plan_sku",
-            return_value="B1"
+        patcher_region_sku = patch(
+            "azure.cli.command_modules.appservice._deployment_context_engine._get_app_region_and_plan_sku",
+            return_value=("Central India", "B1")
         )
         self.mock_runtime = patcher_runtime.start()
-        self.mock_region = patcher_region.start()
-        self.mock_sku = patcher_sku.start()
+        self.mock_region_sku = patcher_region_sku.start()
         self.addCleanup(patcher_runtime.stop)
-        self.addCleanup(patcher_region.stop)
-        self.addCleanup(patcher_sku.stop)
+        self.addCleanup(patcher_region_sku.stop)
 
     def test_determine_deployment_type_zip(self):
         params = _make_mock_params(artifact_type="zip", src_url=None)
@@ -421,8 +416,7 @@ class TestDeploymentContextEngine(unittest.TestCase):
     def test_raise_enriched_deployment_error(self):
         self._patch_app_metadata()
         params = _make_mock_params()
-        from knack.util import CLIError
-        with self.assertRaises(CLIError) as cm:
+        with self.assertRaises(EnrichedDeploymentError) as cm:
             raise_enriched_deployment_error(
                 params, status_code=409,
                 error_message="There is a deployment currently in progress."
@@ -435,8 +429,7 @@ class TestDeploymentContextEngine(unittest.TestCase):
         self._patch_app_metadata()
         mock_cmd = MagicMock()
         mock_cmd.cli_ctx = MagicMock()
-        from knack.util import CLIError
-        with self.assertRaises(CLIError) as cm:
+        with self.assertRaises(EnrichedDeploymentError) as cm:
             raise_enriched_deployment_error(
                 cmd=mock_cmd,
                 resource_group_name="test-rg",
@@ -477,27 +470,20 @@ class TestDeploymentErrorFlow(unittest.TestCase):
             "azure.cli.command_modules.appservice._deployment_context_engine._get_app_runtime",
             return_value="NODE|18"
         )
-        patcher_region = patch(
-            "azure.cli.command_modules.appservice._deployment_context_engine._get_app_region",
-            return_value="East US"
-        )
-        patcher_sku = patch(
-            "azure.cli.command_modules.appservice._deployment_context_engine._get_app_plan_sku",
-            return_value="P1V2"
+        patcher_region_sku = patch(
+            "azure.cli.command_modules.appservice._deployment_context_engine._get_app_region_and_plan_sku",
+            return_value=("East US", "P1V2")
         )
         self.mock_runtime = patcher_runtime.start()
-        self.mock_region = patcher_region.start()
-        self.mock_sku = patcher_sku.start()
+        self.mock_region_sku = patcher_region_sku.start()
         self.addCleanup(patcher_runtime.stop)
-        self.addCleanup(patcher_region.stop)
-        self.addCleanup(patcher_sku.stop)
+        self.addCleanup(patcher_region_sku.stop)
 
     def test_conflict_deployment_in_progress(self):
         """Simulate a 409 Conflict — deployment lock held."""
         self._patch_app_metadata()
         params = _make_mock_params(artifact_type="zip")
-        from knack.util import CLIError
-        with self.assertRaises(CLIError) as cm:
+        with self.assertRaises(EnrichedDeploymentError) as cm:
             raise_enriched_deployment_error(
                 params, status_code=409,
                 error_message="There is a deployment currently in progress. Please try again when it completes.",
@@ -518,8 +504,7 @@ class TestDeploymentErrorFlow(unittest.TestCase):
                          "message": "build failed: missing requirements.txt"}],
             "failedInstancesLogs": []
         }
-        from knack.util import CLIError
-        with self.assertRaises(CLIError) as cm:
+        with self.assertRaises(EnrichedDeploymentError) as cm:
             raise_enriched_deployment_error(
                 params, deployment_status="Failed",
                 error_message="build failed: missing requirements.txt",
@@ -533,8 +518,7 @@ class TestDeploymentErrorFlow(unittest.TestCase):
         """Simulate a ZipDeploy validation failure — insufficient disk space."""
         self._patch_app_metadata()
         params = _make_mock_params()
-        from knack.util import CLIError
-        with self.assertRaises(CLIError) as cm:
+        with self.assertRaises(EnrichedDeploymentError) as cm:
             raise_enriched_deployment_error(
                 params, status_code=400,
                 error_message="ZipDeploy Validation ERROR: Package size = 500 MB. Free disk space = 100 MB. The package will not fit."
@@ -547,8 +531,7 @@ class TestDeploymentErrorFlow(unittest.TestCase):
         """Simulate a 409 auto swap in progress."""
         self._patch_app_metadata()
         params = _make_mock_params()
-        from knack.util import CLIError
-        with self.assertRaises(CLIError) as cm:
+        with self.assertRaises(EnrichedDeploymentError) as cm:
             raise_enriched_deployment_error(
                 params, status_code=409,
                 error_message="There is an auto swap deployment currently ongoing please try again when it completes."

@@ -4,11 +4,13 @@
 # --------------------------------------------------------------------------------------------
 
 """
-Context-enriched error builder for az webapp deploy / az functionapp deploy.
+Context-enriched error builder for az webapp deploy.
 
 Instead of raising a bare "Status Code: 504" error, this module builds a structured
 diagnostic context block that includes the error code, deployment stage, runtime info,
 suggested fixes, and a ready-to-use Copilot prompt.
+
+Enabled via the --enriched-errors flag on az webapp deploy.
 """
 
 import re
@@ -19,6 +21,16 @@ from knack.util import CLIError
 from ._deployment_failure_patterns import match_failure_pattern
 
 logger = get_logger(__name__)
+
+
+class EnrichedDeploymentError(CLIError):
+    """A CLIError subclass for context-enriched deployment failures.
+
+    Used to reliably detect already-enriched errors without brittle
+    string-matching on the error message text.
+    """
+    pass
+
 
 # Patterns that reliably indicate an HTTP status code in CLI error messages.
 # Ordered from most specific to least specific; first match wins.
@@ -82,6 +94,28 @@ def _get_app_region(cmd, resource_group_name, webapp_name):
         return app.location if app else "Unknown"
     except Exception:  # pylint: disable=broad-except
         return "Unknown"
+
+
+def _get_app_region_and_plan_sku(cmd, resource_group_name, webapp_name):
+    """Fetch the Azure region and App Service plan SKU in a single API call.
+
+    Returns (region, sku) tuple.  Falls back to ("Unknown", "Unknown").
+    """
+    try:
+        from ._client_factory import web_client_factory
+        from azure.mgmt.core.tools import parse_resource_id
+        client = web_client_factory(cmd.cli_ctx)
+        app = client.web_apps.get(resource_group_name, webapp_name)
+        region = app.location if app else "Unknown"
+        sku = "Unknown"
+        if app and app.server_farm_id:
+            plan_parts = parse_resource_id(app.server_farm_id)
+            plan = client.app_service_plans.get(plan_parts['resource_group'], plan_parts['name'])
+            if plan and plan.sku:
+                sku = plan.sku.name
+        return region, sku
+    except Exception:  # pylint: disable=broad-except
+        return "Unknown", "Unknown"
 
 
 def _get_app_plan_sku(cmd, resource_group_name, webapp_name):
@@ -191,8 +225,9 @@ def build_enriched_error_context(params=None, *, cmd=None, resource_group_name=N
     # App metadata (best-effort)
     if _cmd and _rg and _name:
         context["runtime"] = _get_app_runtime(_cmd, _rg, _name, _slot)
-        context["region"] = _get_app_region(_cmd, _rg, _name)
-        context["planSku"] = _get_app_plan_sku(_cmd, _rg, _name)
+        region, plan_sku = _get_app_region_and_plan_sku(_cmd, _rg, _name)
+        context["region"] = region
+        context["planSku"] = plan_sku
     else:
         context["runtime"] = "Unknown"
         context["region"] = "Unknown"
@@ -225,7 +260,11 @@ def build_enriched_error_context(params=None, *, cmd=None, resource_group_name=N
                     'numberOfInstancesFailed'):
             val = deployment_properties.get(key)
             if val is not None:
-                context.setdefault("instanceStatus", {})[key] = int(val)
+                try:
+                    context.setdefault("instanceStatus", {})[key] = int(val)
+                except (TypeError, ValueError):
+                    # Ignore non-numeric values to avoid masking the original error
+                    continue
         errors = deployment_properties.get('errors')
         if errors:
             context["deploymentErrors"] = [
@@ -238,7 +277,10 @@ def build_enriched_error_context(params=None, *, cmd=None, resource_group_name=N
 
     # Raw details
     if error_message:
-        context["rawError"] = error_message[:500]  # truncate long bodies
+        if len(error_message) > 500:
+            context["rawError"] = error_message[:500] + "... [truncated]"
+        else:
+            context["rawError"] = error_message
 
     return context
 
@@ -313,7 +355,7 @@ def raise_enriched_deployment_error(params=None, *, cmd=None, resource_group_nam
         kudu_status=kudu_status
     )
 
-    logger.info("Deployment failure context: %s", context)
+    logger.debug("Deployment failure context: %s", context)
 
     message = format_enriched_error_message(context)
-    raise CLIError(message)
+    raise EnrichedDeploymentError(message)

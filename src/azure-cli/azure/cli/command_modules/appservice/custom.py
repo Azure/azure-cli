@@ -58,7 +58,9 @@ from ._client_factory import (web_client_factory, ex_handler_factory, providers_
                               appcontainers_client_factory)
 from ._appservice_utils import _generic_site_operation, _generic_settings_operation
 from ._appservice_utils import MSI_LOCAL_ID
-from ._deployment_context_engine import raise_enriched_deployment_error, extract_status_code_from_message
+from ._deployment_context_engine import (
+    raise_enriched_deployment_error, extract_status_code_from_message, EnrichedDeploymentError
+)
 from .utils import (_normalize_sku,
                     get_sku_tier,
                     retryable_method,
@@ -767,8 +769,9 @@ def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_rem
 
 
 def enable_zip_deploy_webapp(cmd, resource_group_name, name, src, timeout=None, slot=None, track_status=True,
-                             enable_kudu_warmup=True):
-    return enable_zip_deploy(cmd, resource_group_name, name, src, timeout, slot, track_status, enable_kudu_warmup)
+                             enable_kudu_warmup=True, enriched_errors=False):
+    return enable_zip_deploy(cmd, resource_group_name, name, src, timeout, slot, track_status, enable_kudu_warmup,
+                             enriched_errors=enriched_errors)
 
 
 def check_flex_app_after_deployment(cmd, resource_group_name, name):
@@ -856,7 +859,7 @@ def enable_zip_deploy_flex(cmd, resource_group_name, name, src, timeout=None, sl
 
 # This funtion performs deployment using /zipdeploy for both function app and web app
 def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=None,
-                      track_status=False, enable_kudu_warmup=True):
+                      track_status=False, enable_kudu_warmup=True, enriched_errors=False):
     logger.warning("Getting scm site credentials for zip deployment")
 
     try:
@@ -881,9 +884,8 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     app_is_linux_webapp = is_linux_webapp(app)
     app_is_function_app = is_functionapp(app)
 
-    # Enriched errors are only enabled via --enriched-errors flag on 'az webapp deploy'.
-    # The legacy zip deploy path does not support the flag.
-    _should_enrich_errors = False
+    # Enriched errors are enabled via --enriched-errors flag on 'az webapp deploy' or 'az webapp up'.
+    _should_enrich_errors = enriched_errors and not app_is_function_app
 
     # Read file content
     with open(os.path.realpath(os.path.expanduser(src)), 'rb') as fs:
@@ -943,6 +945,18 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
 
     # check if there's an ongoing process
     if res.status_code == 409:
+        if _should_enrich_errors:
+            raise_enriched_deployment_error(
+                cmd=cmd,
+                resource_group_name=resource_group_name,
+                webapp_name=name,
+                slot=slot,
+                artifact_type="zip",
+                status_code=409,
+                error_message=res.text if res.text else "Deployment conflict (HTTP 409)",
+                last_known_step="Zip deployment HTTP request",
+                kudu_status="409"
+            )
         raise UnclassifiedUserFault("There may be an ongoing deployment or your app setting has "
                                     "WEBSITE_RUN_FROM_PACKAGE. Please track your deployment in {} and ensure the "
                                     "WEBSITE_RUN_FROM_PACKAGE app setting is removed. Use 'az webapp config "
@@ -9115,7 +9129,7 @@ def get_history_triggered_webjob(cmd, resource_group_name, name, webjob_name, sl
 def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None, sku=None,  # pylint: disable=too-many-statements,too-many-branches
               os_type=None, runtime=None, dryrun=False, logs=False, launch_browser=False, html=False,
               app_service_environment=None, track_status=True, enable_kudu_warmup=True, basic_auth="",
-              auto_generated_domain_name_label_scope=None):
+              auto_generated_domain_name_label_scope=None, enriched_errors=False):
     if not name:
         name = generate_default_app_name(cmd)
 
@@ -9294,7 +9308,7 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
     # zip contents & deploy
     zip_file_path = zip_contents_from_dir(src_dir, language)
     enable_zip_deploy(cmd, rg_name, name, zip_file_path, track_status=track_status,
-                      enable_kudu_warmup=enable_kudu_warmup)
+                      enable_kudu_warmup=enable_kudu_warmup, enriched_errors=enriched_errors)
 
     if launch_browser:
         logger.warning("Launching app using default browser")
@@ -9957,10 +9971,10 @@ def _perform_onedeploy_internal(params):
     except (ValidationError, ResourceNotFoundError):
         # Known CLI validation errors (e.g. 409 conflict, 404 API not available) — re-raise as-is
         raise
+    except EnrichedDeploymentError:
+        # Already enriched by _make_onedeploy_request — re-raise as-is
+        raise
     except CLIError as ex:
-        # Check if this is already an enriched error (from raise_enriched_deployment_error)
-        if "DEPLOYMENT FAILED" in str(ex):
-            raise
         if params.enriched_errors:
             _ex_str = str(ex)
             raise_enriched_deployment_error(
