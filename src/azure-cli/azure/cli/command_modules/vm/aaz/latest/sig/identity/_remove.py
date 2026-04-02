@@ -13,12 +13,6 @@ from azure.cli.core.aaz import *
 
 class Remove(AAZCommand):
     """Remove the user or system managed identities.
-
-    :example: Remove the system assigned identity.
-        az sig identity remove --resource-group myResourceGroup --gallery-name myGalleryName
-
-    :example: Remove a user assigned identity.
-        az sig identity remove --resource-group myResourceGroup --gallery-name myGalleryName --identities readerId
     """
 
     _aaz_info = {
@@ -51,7 +45,7 @@ class Remove(AAZCommand):
             help="The name of the Shared Image Gallery to be deleted.",
             required=True,
             fmt=AAZStrArgFormat(
-                pattern="^[^\\W_][\\w._-]{0,79}(?<![-.])$",
+                pattern="^[^_\\W][\\w._-]{0,79}(?<![-.])$",
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
