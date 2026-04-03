@@ -645,32 +645,34 @@ class TestMainContainerDetection(unittest.TestCase):
         self.assertFalse(redis["is_main"])
 
     def test_multiple_ports_first_is_main(self):
+        # yaml.dump sorts keys alphabetically, so 'api' < 'web' means 'api' is first
         compose = {
             "version": "3",
             "services": {
-                "frontend": {"image": "nginx:alpine", "ports": ["80:80"]},
-                "backend": {"image": "node:20", "ports": ["8080:8080"]},
+                "api": {"image": "nginx:alpine", "ports": ["80:80"]},
+                "web": {"image": "node:20", "ports": ["8080:8080"]},
             }
         }
         created = self._run_conversion(compose)
-        frontend = next(c for c in created if c["container_name"] == "frontend")
-        backend = next(c for c in created if c["container_name"] == "backend")
-        self.assertTrue(frontend["is_main"])
-        self.assertFalse(backend["is_main"])
+        api = next(c for c in created if c["container_name"] == "api")
+        web = next(c for c in created if c["container_name"] == "web")
+        self.assertTrue(api["is_main"])
+        self.assertFalse(web["is_main"])
 
     def test_no_ports_first_service_is_main(self):
+        # yaml.dump sorts keys alphabetically, so 'alpha' < 'beta' means 'alpha' is first
         compose = {
             "version": "3",
             "services": {
-                "processor": {"image": "busybox:latest"},
-                "notifier": {"image": "busybox:latest"},
+                "alpha": {"image": "busybox:latest"},
+                "beta": {"image": "busybox:latest"},
             }
         }
         created = self._run_conversion(compose)
-        processor = next(c for c in created if c["container_name"] == "processor")
-        notifier = next(c for c in created if c["container_name"] == "notifier")
-        self.assertTrue(processor["is_main"])
-        self.assertFalse(notifier["is_main"])
+        alpha = next(c for c in created if c["container_name"] == "alpha")
+        beta = next(c for c in created if c["container_name"] == "beta")
+        self.assertTrue(alpha["is_main"])
+        self.assertFalse(beta["is_main"])
 
     def test_explicit_main_container_name_by_service(self):
         compose = {
@@ -952,11 +954,12 @@ class TestRollbackOnFailure(unittest.TestCase):
                 _convert_compose_to_sitecontainers(
                     cmd, "testapp", "testrg", None, site_config, linux_fx
                 )
-            # The first container ("web") should have been rolled back
+            # 'sidecar' < 'web' alphabetically, so sidecar is created first (succeeds),
+            # then web fails. Rollback deletes the already-created 'sidecar'.
             mock_delete.assert_called_once()
             delete_args = mock_delete.call_args
             self.assertEqual(delete_args[0][1], "testapp")
-            self.assertEqual(delete_args[0][3], "web")
+            self.assertEqual(delete_args[0][3], "sidecar")
 
     def test_linuxfxversion_not_set_on_failure(self):
         """If container creation fails, linuxFxVersion should NOT be changed."""
