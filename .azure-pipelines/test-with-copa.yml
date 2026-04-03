@@ -1,0 +1,523 @@
+variables:
+- template: ${{ variables.Pipeline.Workspace }}/.azure-pipelines/templates/variables.yml
+
+parameters:
+- name: architectures
+  type: object
+  default:
+  - name: AMD64
+    value: amd64
+    pool: pool-ubuntu-latest-multi-core
+  - name: ARM64
+    value: arm64
+    pool: pool-ubuntu-latest-arm64
+- name: ShouldTest
+  displayName: Test?
+  type: boolean
+  default: true
+- name: PatchLevel
+  displayName: copa-library-patch-level?
+  default: "patch"
+  values:
+  - patch
+  - minor
+  - major
+
+stages:
+- stage: PrepareInfo
+  displayName: Prepare
+  jobs:
+  - job: PrepareAzCliVersion
+    displayName: Prepare Build Info
+    pool:
+      name: ${{ variables.ubuntu_pool }}
+    steps:
+    - checkout: none
+    - task: Bash@3
+      name: PrepareAzCliVersionTask
+      displayName: Get Azure CLI Version
+      inputs:
+        targetType: 'inline'
+        script: |
+          curl -o __main__.py https://raw.githubusercontent.com/$BUILD_REPOSITORY_NAME/$BUILD_SOURCEBRANCH/src/azure-cli/azure/cli/__main__.py
+          AzCLI_VERSION=`cat __main__.py | grep __version__ | sed s/' '//g | sed s/'__version__='// |  sed s/\"//g`
+          
+          AzCLI_IMAGE_NAME="clibuild_$BUILD_BUILDNUMBER"
+          AzCLI_IMAGE_TAG="latest"
+          AzCLI_IMAGE_PATCHED_TAG="latest-patched"
+        
+          echo "Azure CLI version: $AzCLI_VERSION"
+          echo "Azure CLI Image Name: $AzCLI_IMAGE_NAME"
+          echo "Azure CLI Image Tag: $AzCLI_IMAGE_TAG"
+          echo "Azure CLI Image Copa Patched Tag: $AzCLI_IMAGE_PATCHED_TAG"
+
+          echo "##vso[task.setvariable variable=AzCliVersion]$AzCLI_VERSION"
+
+          echo "##vso[task.setvariable variable=AzCliVersion;isOutput=true]$AzCLI_VERSION"
+          echo "##vso[task.setvariable variable=AzCliImageName;isOutput=true]$AzCLI_IMAGE_NAME"
+          echo "##vso[task.setvariable variable=AzCliImageTag;isOutput=true]$AzCLI_IMAGE_TAG"
+          echo "##vso[task.setvariable variable=AzCliImagePatchedTag;isOutput=true]$AzCLI_IMAGE_PATCHED_TAG"
+
+    - task: PowerShell@2
+      displayName: Set Build name
+      inputs:
+        targetType: inline
+        pwsh: true
+        script: |
+          # build name has 2 limitations
+          # - The maximum length of a build name is 255 characters.
+          # - Characters which are not allowed include '"', '/', ':', '<', '>', '\', '|', '?', '@', and '*'.
+          
+          $originalBuildName = "$(Build.BuildNumber)"
+          $newBuildName = "$originalBuildName - Azure CLI Docker Build $(AzCliVersion)"
+
+          if("${{parameters.ShouldTest}}" -eq "true") {
+            $newBuildName = "$newBuildName with Test"
+          } else {
+            $newBuildName = "$newBuildName without Test"
+          }
+
+          $notAllowedChars = @('"', '/', ':', '<', '>', '\', '|', '?', '@', '*')
+          $notAllowedChars | ForEach-Object {$newBuildName = $newBuildName.Replace($_, '_')}
+          if ( $newBuildName.Length -gt 200 ) {
+            $newBuildName = $newBuildName.Substring(0, 200)
+          }
+          Write-Host "##vso[build.updatebuildnumber]$newBuildName"
+
+    - task: AzureCLI@2
+      name: PrepareServiceConnectionInfoTask
+      displayName: Get Test Azure Service Connection Info
+      inputs:
+        azureSubscription: '$(TestAzureSubscription)'
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          # Get user, subscription and tenant info
+          AzUserId=$(az account show --query user.name -o tsv)
+          AzSubscription=$(az account show --query id -o tsv)
+          AzTenant=$(az account show --query tenantId -o tsv)
+          
+          echo "Azure User ID: $AzUserId"
+          echo "Azure Subscription: $AzSubscription"
+          echo "Azure Tenant: $AzTenant"
+          echo "Azure Service Connection Id: $AZURESUBSCRIPTION_SERVICE_CONNECTION_ID"
+          
+          # Set pipeline variables as secrets
+          echo "##vso[task.setvariable variable=AzUserId;issecret=true;isOutput=true]$AzUserId"
+          echo "##vso[task.setvariable variable=AzSubscription;issecret=true;isOutput=true]$AzSubscription"
+          echo "##vso[task.setvariable variable=AzTenant;issecret=true;isOutput=true]$AzTenant"
+          echo "##vso[task.setvariable variable=ServiceConnectionId;isOutput=true]$AZURESUBSCRIPTION_SERVICE_CONNECTION_ID"
+
+- stage: Build
+  displayName: Build
+  dependsOn: 
+  - PrepareInfo
+  variables:
+    AzCliVersion: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersionTask.AzCliVersion'] ]
+    AzCliImageName: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersionTask.AzCliImageName'] ]
+    AzCliImageTag: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersionTask.AzCliImageTag'] ]
+  jobs:
+  - job: BuildRpmPackagesAzureLinux
+    displayName: Build Rpm
+    strategy:
+      matrix:
+        ${{ each arch in parameters.architectures }}:
+          ${{ arch.name }}:
+            image: $(BaseImage)
+            uploadArtifact: $(AzCliVersion)-rpm-${{ arch.value }}
+            pool: ${{ arch.pool }}
+    pool:
+      name: $(pool)
+    steps:
+    - bash: ./scripts/ci/install_docker.sh
+      displayName: Install Docker
+
+    # - task: PipAuthenticate@1
+    #   displayName: 'Pip Authenticate'
+    #   inputs:
+    #     artifactFeeds: $(AZURE_ARTIFACTS_FEEDS)
+
+    - task: Bash@3
+      displayName: 'Build Rpm Package: Azure Linux'
+      inputs:
+        targetType: 'filePath'
+        filePath: scripts/release/rpm/pipeline_azurelinux.sh
+
+    - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+      displayName: 'Generate SBOM'
+      inputs:
+        BuildDropPath: $(Build.ArtifactStagingDirectory)
+
+    - task: PublishPipelineArtifact@0
+      displayName: 'Publish RPM Artifact'
+      inputs:
+        TargetPath: $(Build.ArtifactStagingDirectory)
+        ArtifactName: $(uploadArtifact)
+
+  - job: BuildDockerImageAzureLinux
+    displayName: Build Docker
+    dependsOn: 
+    - BuildRpmPackagesAzureLinux
+    strategy:
+      matrix:
+        ${{ each arch in parameters.architectures }}:
+          ${{ arch.name }}:
+            pool: ${{ arch.pool }}
+            downloadArtifactName: $(AzCliVersion)-rpm-${{ arch.value }}
+            uploadArtifactName: $(AzCliVersion)-docker-${{ arch.value }}
+            dockerfile: azure-linux.dockerfile
+            image: $(BaseImage)
+    pool:
+      name: $(pool)
+    steps:
+    - bash: ./scripts/ci/install_docker.sh
+      displayName: Install Docker
+
+    - task: DownloadPipelineArtifact@1
+      displayName: 'Download RPM Package'
+      inputs:
+        TargetPath: '$(Build.ArtifactStagingDirectory)/rpm'
+        artifactName: $(downloadArtifactName)
+
+    - bash: |
+        set -ex
+        mkdir docker-temp
+        mv $(Build.ArtifactStagingDirectory)/rpm/*.rpm ./docker-temp/azure-cli.rpm
+        
+        docker build --no-cache \
+          --build-arg IMAGE=$IMAGE \
+          --tag $(AzCliImageName):$(AzCliImageTag) \
+          --file $DOCKERFILE \
+          $BUILD_SOURCESDIRECTORY
+
+        mkdir $(Build.ArtifactStagingDirectory)/docker
+        docker save -o "$(Build.ArtifactStagingDirectory)/docker/docker-azure-cli-$(AzCliVersion).tar" $(AzCliImageName):$(AzCliImageTag)
+      displayName: 'Build Docker Image'
+
+    - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+      displayName: 'Generate SBOM'
+      inputs:
+        BuildDropPath: $(Build.ArtifactStagingDirectory)/docker
+        DockerImagesToScan: $(AzCliDockerImageTag)
+
+    - task: PublishPipelineArtifact@0
+      displayName: Publish docker Artifact
+      inputs:
+        TargetPath: $(Build.ArtifactStagingDirectory)/docker
+        ArtifactName: $(uploadArtifactName)
+
+- stage: Test1
+  displayName: 1st Test - Original Image
+  dependsOn: 
+  - PrepareInfo
+  - Build 
+  variables:
+    AzCliVersion: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersionTask.AzCliVersion'] ]
+    AzCliImageName: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersionTask.AzCliImageName'] ]
+    AzCliImageTag: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersionTask.AzCliImageTag'] ]
+    TestAzUserId: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareServiceConnectionInfoTask.AzUserId'] ]
+    TestAzSubscription: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareServiceConnectionInfoTask.AzSubscription'] ]
+    TestAzTenant: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareServiceConnectionInfoTask.AzTenant'] ]
+    TestServiceConnectionId: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareServiceConnectionInfoTask.ServiceConnectionId'] ]
+  jobs:
+  - job: TestRpmPackagesAzureLinux
+    displayName: Test - Rpm
+    timeoutInMinutes: 180
+    condition: and(succeeded(), eq(${{parameters.ShouldTest}}, true))
+    pool:
+      name: $(pool)
+    strategy:
+      matrix:
+        ${{ each arch in parameters.architectures }}:
+          ${{ arch.name }}:
+            image: $(BaseImage)
+            downloadArtifactName: $(AzCliVersion)-rpm-${{ arch.value }}
+            pool: ${{ arch.pool }}
+    steps:
+    - task: DownloadPipelineArtifact@1
+      displayName: 'Download RPM Artifacts'
+      inputs:
+        TargetPath: '$(Build.ArtifactStagingDirectory)/rpm'
+        artifactName: $(downloadArtifactName)
+
+    - bash: ./scripts/ci/install_docker.sh
+      displayName: Install Docker
+
+    - bash: |
+        set -ex
+        RPM_NAME=$(find $SYSTEM_ARTIFACTSDIRECTORY/rpm/ -type f -name "azure-cli-$(AzCliVersion)-1.*.rpm" -printf '%f\n')
+
+        echo "== Test rpm package on ${IMAGE} =="
+        docker pull $IMAGE
+        docker run --rm -e RPM_NAME=$RPM_NAME -v $SYSTEM_ARTIFACTSDIRECTORY/rpm:/mnt/rpm -v $(pwd):/azure-cli $IMAGE /bin/bash /azure-cli/scripts/release/rpm/test_azurelinux_in_docker.sh
+      displayName: 'Test Rpm Package'
+
+  - template: templates/test-docker-image-smoke.yml
+    parameters:
+      architectures: ${{ parameters.architectures }}
+      ShouldTest: ${{ parameters.ShouldTest }}
+      timeoutInMinutes: 100
+      AzCliVersion: $(AzCliVersion)
+      AzCliImageName: $(AzCliImageName)
+      AzCliImageTag: $(AzCliImageTag)
+      TestAzUserId: $(TestAzUserId)
+      TestAzSubscription: $(TestAzSubscription)
+      TestAzTenant: $(TestAzTenant)
+      TestServiceConnectionId: $(TestServiceConnectionId)
+
+  - template: templates/test-docker-image-unit.yml
+    parameters:
+      architectures: ${{ parameters.architectures }}
+      ShouldTest: ${{ parameters.ShouldTest }}
+      timeoutInMinutes: 180
+      AzCliVersion: $(AzCliVersion)
+      AzCliImageName: $(AzCliImageName)
+      AzCliImageTag: $(AzCliImageTag)
+
+- stage: PatchWithCopa
+  displayName: Patch with Copa
+  dependsOn: 
+  - PrepareInfo
+  - Build
+  variables:
+    AzCliVersion: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersionTask.AzCliVersion'] ]
+    AzCliImageName: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersionTask.AzCliImageName'] ]
+    AzCliImageTag: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersionTask.AzCliImageTag'] ]
+    AzCliImagePatchedTag: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersionTask.AzCliImagePatchedTag'] ]
+  jobs:
+  - job: BuildCopaPatchedDockerImage
+    displayName: Patch with Copa
+    timeoutInMinutes: 180
+    strategy:
+      matrix:
+        ${{ each arch in parameters.architectures }}:
+          ${{ arch.name }}:
+            pool: ${{ arch.pool }}
+            downloadArtifactName: $(AzCliVersion)-docker-${{ arch.value }}
+            uploadArtifactName: $(AzCliVersion)-docker-${{ arch.value }}-patched
+            architecture: ${{ arch.value }}
+    pool:
+      name: $(pool)
+
+    steps:
+    - task: DownloadPipelineArtifact@1
+      displayName: 'Download Docker Image'
+      inputs:
+        TargetPath: '$(Build.ArtifactStagingDirectory)/docker'
+        artifactName: $(downloadArtifactName)
+
+    - bash: ./scripts/ci/install_docker.sh
+      displayName: Install Docker
+      
+    - task: Bash@3
+      displayName: Configure Docker Daemon
+      inputs:
+        targetType: 'inline'
+        script: |
+          if [ -f /etc/docker/daemon.json ]; then
+            echo "Docker daemon.json exists, printing content:"
+            cat /etc/docker/daemon.json
+          else
+            echo "Docker daemon.json does not exist, creating it..."
+            sudo mkdir -p /etc/docker
+            echo '{"features": { "containerd-snapshotter": true }}' | sudo tee /etc/docker/daemon.json
+            echo "Created /etc/docker/daemon.json with containerd-snapshotter enabled"
+          fi
+          sudo systemctl restart docker
+
+    - task: Bash@3
+      displayName: Install Trivy
+      inputs:
+        targetType: 'inline'
+        script: |
+          set -eux
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/bin
+          echo "----------------------------------"
+          trivy --version
+
+    - task: Bash@3
+      displayName: Install Copa
+      inputs:
+        targetType: 'inline'
+        script: |
+          CopaDownloadUrl="https://github.com/project-copacetic/copacetic/releases/download/v$(CopaVersion)/copa_$(CopaVersion)_linux_amd64.tar.gz"
+          if [ "$(architecture)" = "arm64" ]; then
+            CopaDownloadUrl="https://github.com/project-copacetic/copacetic/releases/download/v$(CopaVersion)/copa_$(CopaVersion)_linux_arm64.tar.gz"
+          fi
+          echo "Download copa from: $CopaDownloadUrl"
+          curl -L -o /tmp/copa.tar.gz $CopaDownloadUrl
+          sudo mkdir -p /opt/copacetic
+          sudo tar zxf /tmp/copa.tar.gz -C /opt/copacetic
+          sudo chmod +x /opt/copacetic/copa
+          sudo ln -s /opt/copacetic/copa /usr/bin/copa
+          
+          echo "---------------- copa --version ------------------"
+          copa --version
+          echo "---------------- copa --help ------------------"
+          copa --help
+          echo "---------------- copa patch --help ------------------"
+          copa patch --help
+          echo "-----------------------------------------------------"
+
+    - task: Bash@3
+      displayName: Check Docker Image
+      inputs:
+        targetType: 'inline'
+        script: |
+          TAR_FILE="$SYSTEM_ARTIFACTSDIRECTORY/docker/docker-azure-cli-$(AzCliVersion).tar"
+          docker load < $TAR_FILE
+          
+          echo "== Check Docker Images =="
+          docker images
+          
+          echo "== docker container =="
+          docker ps
+          
+          echo "== Run az self-test  =="
+          docker run $(AzCliImageName):$(AzCliImageTag) /bin/bash -c "time az self-test && time az --version && tdnf list --installed"
+
+    - task: Bash@3
+      displayName: Scan with Trivy
+      inputs:
+        targetType: 'inline'
+        script: |
+          set -eux
+          mkdir output
+          export IMAGE=$(AzCliImageName):$(AzCliImageTag)
+          OutputFile="trivy-scan-before.json"
+          trivy image --pkg-types os,library --ignore-unfixed -f json -o $OutputFile $IMAGE
+          cp $OutputFile ./output/
+
+    - task: Bash@3
+      displayName: Patch with Copa
+      name: PatchWithCopaTask
+      inputs:
+        targetType: 'inline'
+        script: |
+          export COPA_EXPERIMENTAL=1
+          export IMAGE=$(AzCliImageName):$(AzCliImageTag)
+          copa patch -i $IMAGE -r trivy-scan-before.json --pkg-types os,library --library-patch-level ${{parameters.PatchLevel}} --tag $(AzCliImagePatchedTag) 2>&1 | tee copa-patch.log
+
+          echo "------------- copa patched result: -------------"
+          cat copa-patch.log
+          echo "------------------------------------------------"
+          
+          PatchableVulnerabilitiesFound=true
+          if grep -q "Error" copa-patch.log; then
+            if grep -q "Error: no patchable vulnerabilities found" copa-patch.log; then
+              echo "no patchable vulnerabilities found"
+              PatchableVulnerabilitiesFound=false
+            else
+              echo "Found error in copa-patch.log:"
+              grep "Error" copa-patch.log
+              exit 1
+            fi
+          else
+            PATCHED_IMAGE="$(AzCliImageName):$(AzCliImagePatchedTag)"
+            if ! docker image ls --format "table {{.Repository}}:{{.Tag}}" | grep -q "^$PATCHED_IMAGE$"; then
+              echo "Error: Patched image $PATCHED_IMAGE does not exist"
+              exit 1
+            fi
+          fi
+          echo "##vso[task.setvariable variable=PatchableVulnerabilitiesFound]$PatchableVulnerabilitiesFound"
+          echo "##vso[task.setvariable variable=PatchableVulnerabilitiesFound;isOutput=true]$PatchableVulnerabilitiesFound"
+
+          echo "== Check Docker Images =="
+          docker images
+
+    - task: Bash@3
+      displayName: Check Patched Docker Image
+      condition: and(succeeded(), eq(variables['PatchableVulnerabilitiesFound'], 'true'))
+      inputs:
+        targetType: 'inline'
+        script: |
+          echo "== Check Docker Images =="
+          docker images
+          
+          echo "== Run az self-test  =="
+          docker run $(AzCliImageName):$(AzCliImagePatchedTag) /bin/bash -c "time az self-test && time az --version && tdnf list --installed"
+
+    - task: Bash@3
+      displayName: Save Patched Docker Image
+      condition: and(succeeded(), eq(variables['PatchableVulnerabilitiesFound'], 'true'))
+      inputs:
+        targetType: 'inline'
+        script: |
+          echo "== Check Docker Images =="
+          docker images
+          
+          echo "== Save Docker Image to tar file  =="
+          mkdir "$BUILD_STAGINGDIRECTORY/copa"
+          docker save -o "$BUILD_STAGINGDIRECTORY/copa/docker-azure-cli-$(AzCliVersion).tar" $(AzCliImageName):$(AzCliImagePatchedTag)
+
+    - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+      displayName: 'SBOM'
+      condition: and(succeeded(), eq(variables['PatchableVulnerabilitiesFound'], 'true'))
+      inputs:
+        BuildDropPath: $(Build.ArtifactStagingDirectory)/copa
+        DockerImagesToScan: $(AzCliImagePatchedTag)
+
+    - task: PublishPipelineArtifact@0
+      displayName: Publish docker Artifact
+      condition: and(succeeded(), eq(variables['PatchableVulnerabilitiesFound'], 'true'))
+      inputs:
+        TargetPath: $(Build.ArtifactStagingDirectory)/copa
+        ArtifactName: $(uploadArtifactName)
+
+    - task: Bash@3
+      displayName: Scan with Trivy again
+      condition: and(succeeded(), eq(variables['PatchableVulnerabilitiesFound'], 'true'))
+      continueOnError: true
+      inputs:
+        targetType: 'inline'
+        script: |
+          set -eux
+          export IMAGE=$(AzCliImageName):$(AzCliImagePatchedTag)
+          OutputFile="trivy-scan-after.json"
+          trivy image --pkg-types os,library --ignore-unfixed -f json -o $OutputFile $IMAGE
+          cp $OutputFile ./output/
+
+    - publish: $(System.DefaultWorkingDirectory)/output
+      artifact: $(AzCliVersion)-$(architecture)-trivy
+      displayName: Publish Trivy Artifact
+
+- stage: Test2
+  displayName: 2nd Test - Copa Patched Image
+  dependsOn: 
+  - PrepareInfo
+  - Build
+  - PatchWithCopa
+  condition: and(succeeded(), eq(dependencies.PatchWithCopa.outputs['BuildCopaPatchedDockerImage.PatchWithCopaTask.PatchableVulnerabilitiesFound'], 'true'))
+  variables:
+    AzCliVersion: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersionTask.AzCliVersion'] ]
+    AzCliImageName: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersionTask.AzCliImageName'] ]
+    AzCliImageTag: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersionTask.AzCliImageTag'] ]
+    AzCliImagePatchedTag: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersionTask.AzCliImagePatchedTag'] ]
+    TestAzUserId: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareServiceConnectionInfoTask.AzUserId'] ]
+    TestAzSubscription: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareServiceConnectionInfoTask.AzSubscription'] ]
+    TestAzTenant: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareServiceConnectionInfoTask.AzTenant'] ]
+    TestServiceConnectionId: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareServiceConnectionInfoTask.ServiceConnectionId'] ]
+  jobs:
+  - template: templates/test-docker-image-smoke.yml
+    parameters:
+      architectures: ${{ parameters.architectures }}
+      ShouldTest: ${{ parameters.ShouldTest }}
+      downloadArtifactNameSuffix: '-patched'
+      timeoutInMinutes: 100
+      AzCliVersion: $(AzCliVersion)
+      AzCliImageName: $(AzCliImageName)
+      AzCliImageTag: $(AzCliImagePatchedTag)
+      TestAzUserId: $(TestAzUserId)
+      TestAzSubscription: $(TestAzSubscription)
+      TestAzTenant: $(TestAzTenant)
+      TestServiceConnectionId: $(TestServiceConnectionId)
+
+  - template: templates/test-docker-image-unit.yml
+    parameters:
+      architectures: ${{ parameters.architectures }}
+      ShouldTest: ${{ parameters.ShouldTest }}
+      downloadArtifactNameSuffix: '-patched'
+      timeoutInMinutes: 180
+      AzCliVersion: $(AzCliVersion)
+      AzCliImageName: $(AzCliImageName)
+      AzCliImageTag: $(AzCliImagePatchedTag)

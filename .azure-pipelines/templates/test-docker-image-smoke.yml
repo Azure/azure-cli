@@ -1,0 +1,96 @@
+parameters:
+- name: architectures
+  type: object
+- name: downloadArtifactNameSuffix
+  type: string
+  default: ''
+- name: ShouldTest
+  type: boolean
+  default: false
+- name: timeoutInMinutes
+  type: number
+  default: 100
+- name: AzCliVersion
+  type: string
+  default: ''
+- name: AzCliImageName
+  type: string
+  default: ''
+- name: AzCliImageTag
+  type: string
+  default: ''
+- name: TestAzUserId
+  type: string
+  default: ''
+- name: TestAzSubscription
+  type: string
+  default: ''
+- name: TestAzTenant
+  type: string
+  default: ''
+- name: TestServiceConnectionId
+  type: string
+  default: ''
+
+jobs:
+- job: TestDockerImageSmokeTest
+  displayName: Smoke Test - Docker
+  condition: and(succeeded(), eq(${{parameters.ShouldTest}}, true))
+  timeoutInMinutes: ${{ parameters.timeoutInMinutes }}
+  strategy:
+    matrix:
+      ${{ each arch in parameters.architectures }}:
+        ${{ arch.name }}:
+          pool: ${{ arch.pool }}
+          downloadArtifactName: ${{ parameters.AzCliVersion }}-docker-${{ arch.value }}${{ parameters.downloadArtifactNameSuffix }}
+          uploadArtifactName:  ${{ parameters.AzCliVersion }}-docker-${{ arch.value }}-smoke-test${{ parameters.downloadArtifactNameSuffix }}
+          architecture: ${{ arch.value }}
+  pool:
+    name: $(pool)
+  steps:
+    - task: DownloadPipelineArtifact@1
+      displayName: 'Download Docker Image'
+      inputs:
+        TargetPath: '$(Build.ArtifactStagingDirectory)/docker'
+        artifactName: $(downloadArtifactName)
+
+    - bash: ./scripts/ci/install_docker.sh
+      displayName: Install Docker
+
+    - task: Bash@3
+      displayName: 🚀 Self Test
+      inputs:
+        targetType: 'inline'
+        script: |
+          echo "== Load docker image =="
+          TAR_FILE="$SYSTEM_ARTIFACTSDIRECTORY/docker/docker-azure-cli-${{ parameters.AzCliVersion }}.tar"
+          docker load < $TAR_FILE
+
+          echo "== Docker Images =="
+          docker images
+          
+          echo "== Run az self-test  =="
+          docker run ${{ parameters.AzCliImageName }}:${{ parameters.AzCliImageTag }} /bin/bash -c "time az self-test && time az --version && tdnf list --installed"
+
+    - task: Bash@3
+      displayName: 🚀🚀 Smoke Test
+      inputs:
+        targetType: 'inline'
+        script: |
+          scUrl="${SYSTEM_OIDCREQUESTURI}?api-version=7.1&serviceConnectionId=${{parameters.TestServiceConnectionId}}"
+          response=$(curl -s -X POST "$scUrl" -H "Authorization: Bearer $(System.AccessToken)" -H "Content-Type: application/json" -d '')
+          OidcToken=$(echo "$response" | jq -r '.oidcToken')
+
+          chmod +x ./scripts/release/docker/test_az_cli_in_pipeline.sh
+          docker run -v $(System.DefaultWorkingDirectory)/scripts/release/docker:/test ${{ parameters.AzCliImageName }}:${{ parameters.AzCliImageTag }} /bin/bash -c "az login --service-principal --username ${{parameters.TestAzUserId}} --tenant ${{parameters.TestAzTenant}} --federated-token $OidcToken && az account set --subscription ${{parameters.TestAzSubscription}} && /test/test_az_cli_in_pipeline.sh"
+
+          echo "--------------------------------------------"
+
+          mkdir output
+          mv $(System.DefaultWorkingDirectory)/scripts/release/docker/azure_cli_test_output.log $(System.DefaultWorkingDirectory)/output/azure_cli_test_output.log
+          mv $(System.DefaultWorkingDirectory)/scripts/release/docker/azure_cli_test_result.csv $(System.DefaultWorkingDirectory)/output/azure_cli_test_result.csv
+          ls $(System.DefaultWorkingDirectory)/output
+
+    - publish: $(System.DefaultWorkingDirectory)/output
+      artifact: $(uploadArtifactName)
+      displayName: Publish Test Artifact

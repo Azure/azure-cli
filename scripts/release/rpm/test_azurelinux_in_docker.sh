@@ -3,9 +3,29 @@
 # This script should be run in a Azure Linux docker container.
 set -exv
 
+# Parse command line arguments
+InstallRPM=true  # Default value
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --InstallRPM)
+            InstallRPM="$2"
+            shift 2
+            ;;
+        *)
+            echo "Unknown option: $1"
+            exit 1
+            ;;
+    esac
+done
+
+unset AZ_INSTALLER
+
 export USERNAME=azureuser
 
-tdnf --nogpgcheck install /mnt/rpm/$RPM_NAME -y
+# Install RPM package only if InstallRPM is true
+if [[ "$InstallRPM" == "true" ]]; then
+    tdnf --nogpgcheck install /mnt/rpm/$RPM_NAME -y
+fi
 
 tdnf install git gcc python3-devel python3-pip findutils ca-certificates -y
 
