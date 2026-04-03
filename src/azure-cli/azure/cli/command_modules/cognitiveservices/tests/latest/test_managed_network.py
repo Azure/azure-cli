@@ -12,10 +12,10 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccoun
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
-# @unittest.skip("Skipped: pending service fix")
+@unittest.skip("Skipped: pending service fix")
 class CognitiveServicesManagedNetworkTests(ScenarioTest):
 
-    INPUT_DATA_PATH: str = os.path.join(TEST_DIR, 'data')
+    INPUT_DATA_PATH: str = os.path.join(TEST_DIR, 'data', 'managed_network')
 
     @ResourceGroupPreparer()
     def test_managed_network_crud(self, resource_group):
@@ -188,7 +188,7 @@ class CognitiveServicesManagedNetworkTests(ScenarioTest):
         self.assertEqual(ret.exit_code, 0)
 
     # @unittest.skip("ServiceTag rule LRO polling returns 404 - service-side issue")
-    @ResourceGroupPreparer(random_name_length=20, parameter_name_for_location='location', key='rg_loc')
+    @ResourceGroupPreparer(random_name_length=20, parameter_name_for_location='location')
     def test_outbound_rule_service_tag(self, resource_group):
         """Test Service Tag outbound rule operations."""
         

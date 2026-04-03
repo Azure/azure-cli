@@ -174,8 +174,8 @@ def create(
 
     properties = CognitiveServicesAccountProperties()
     if api_properties is not None:
-        api_properties = CognitiveServicesAccountApiProperties.deserialize(
-            api_properties
+        api_properties = CognitiveServicesAccountApiProperties._deserialize(  # pylint: disable=protected-access
+            api_properties, []
         )
         properties.api_properties = api_properties
     if custom_domain:
@@ -221,8 +221,8 @@ def update(
 
     properties = CognitiveServicesAccountProperties()
     if api_properties is not None:
-        api_properties = CognitiveServicesAccountApiProperties.deserialize(
-            api_properties
+        api_properties = CognitiveServicesAccountApiProperties._deserialize(  # pylint: disable=protected-access
+            api_properties, []
         )
         properties.api_properties = api_properties
     if custom_domain:
