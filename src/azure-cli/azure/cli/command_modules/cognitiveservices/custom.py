@@ -2330,14 +2330,23 @@ def _build_outbound_rule(rule_type, category=None, destination=None, subresource
         )
     if normalized_type == 'ServiceTag':
         # ServiceTag requires a structured destination object with serviceTag field
+        # Map camelCase keys (from JSON examples) to snake_case (SDK model kwargs)
+        _service_tag_key_map = {
+            'serviceTag': 'service_tag',
+            'portRanges': 'port_ranges',
+        }
+
+        def _normalize_service_tag_keys(d):
+            return {_service_tag_key_map.get(k, k): v for k, v in d.items()}
+
         if isinstance(destination, ServiceTagOutboundRuleDestination):
             dest_obj = destination
         elif isinstance(destination, dict):
-            dest_obj = ServiceTagOutboundRuleDestination(**destination)
+            dest_obj = ServiceTagOutboundRuleDestination(**_normalize_service_tag_keys(destination))
         elif isinstance(destination, str):
             try:
                 dest_dict = json.loads(destination)
-                dest_obj = ServiceTagOutboundRuleDestination(**dest_dict)
+                dest_obj = ServiceTagOutboundRuleDestination(**_normalize_service_tag_keys(dest_dict))
             except (json.JSONDecodeError, TypeError):
                 dest_obj = ServiceTagOutboundRuleDestination(
                     service_tag=destination,

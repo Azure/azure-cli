@@ -105,10 +105,6 @@ def cf_outbound_rule(cli_ctx, *_):
     return get_cognitiveservices_management_client(cli_ctx).outbound_rule
 
 
-def cf_outbound_rules(cli_ctx, *_):
-    return get_cognitiveservices_management_client(cli_ctx).outbound_rules
-
-
 def cf_account_capability_hosts(cli_ctx, *_):
     return get_cognitiveservices_management_client(cli_ctx).account_capability_hosts
 

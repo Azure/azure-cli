@@ -194,20 +194,7 @@ class CognitiveServicesManagedNetworkTests(ScenarioTest):
         
         sname = self.create_random_name(prefix='cog', length=12)
         rule_name = 'test-st-rule'
-        
-        # Print resource details so we can share with service team
-        import sys
-        from datetime import datetime, timezone
-        print(f'\n=== SERVICE TAG TEST RESOURCES ===', file=sys.stderr)
-        print(f'Subscription:  {self.get_subscription_id()}', file=sys.stderr)
-        print(f'Resource Group: {resource_group}', file=sys.stderr)
-        print(f'Account Name:  {sname}', file=sys.stderr)
-        print(f'Rule Name:     {rule_name}', file=sys.stderr)
-        print(f'Region:        eastus', file=sys.stderr)
-        print(f'API Version:   2025-10-01-preview', file=sys.stderr)
-        print(f'Timestamp:     {datetime.now(timezone.utc).isoformat()}', file=sys.stderr)
-        print(f'=================================\n', file=sys.stderr)
-        
+
         self.kwargs.update({
             'sname': sname,
             'kind': 'AIServices',

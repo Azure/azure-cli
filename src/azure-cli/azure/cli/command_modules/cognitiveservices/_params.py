@@ -706,7 +706,6 @@ def load_arguments(self, _):
                    help='Firewall SKU for the managed network.')
 
     with self.argument_context('cognitiveservices account managed-network update') as c:
-        c.argument('managed_network_name', default=None)
         c.argument('managed_network',
                    options_list=['--managed-network'],
                    arg_type=get_enum_type(['allow_internet_outbound', 'allow_only_approved_outbound']),
@@ -741,7 +740,7 @@ def load_arguments(self, _):
                    help='Destination for the outbound rule. '
                         'For FQDN rules, this is the FQDN string. '
                         'For PrivateEndpoint rules, this is the service resource ID. '
-                        'For ServiceTag rules, provide a JSON string or @file path.')
+                        'For ServiceTag rules, provide a JSON string.')
         c.argument('subresource_target',
                    options_list=['--subresource-target'],
                    help='Subresource target for PrivateEndpoint outbound rules '
