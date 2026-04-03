@@ -6415,7 +6415,7 @@ class MSIScenarioTest(ScenarioTest):
         self.kwargs.update({
             'scope': '/subscriptions/{}/resourceGroups/{}'.format(subscription_id, resource_group),
             'sig1': 'sig1',
-            'sig1_id': '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Compute/virtualMachines/vm1'.format(subscription_id, resource_group),
+            'sig1_id': '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Compute/galleries/sig1'.format(subscription_id, resource_group),
             'sig2': 'sig2',
             'sig3': 'sig3',
             'sig4': 'sig4',
@@ -6449,23 +6449,24 @@ class MSIScenarioTest(ScenarioTest):
             self.assertIsNone(sig3_result.get('identity'))
 
             with self.assertRaisesRegex(ArgumentUsageError, "please specify both --role and --scope when assigning a role to the managed identity"):
-                self.cmd('sig identity assign -g {rg} -n {sig3} --scope {sig1_id}')
+                self.cmd('sig identity assign -g {rg} -r {sig3} --scope {sig1_id}')
 
-            result = self.cmd('sig identity assign -g {rg} -n {sig3} '
+            result = self.cmd('sig identity assign -g {rg} -r {sig3} '
                               '--scope {sig1_id} --role reader', checks=[
                 self.check('role', 'reader'),
                 self.check('scope', '{sig1_id}')
             ]).get_output_in_json()
             uuid.UUID(result['systemAssignedIdentity'])
 
-            self.cmd('sig identity remove -g {rg} -n {sig3}')
-            self.cmd('sig identity show -g {rg} -n {sig3}', checks=self.is_empty())
+            self.cmd('sig identity remove -g {rg} -r {sig3}')
+            self.cmd('sig identity show -g {rg} -r {sig3}', checks=self.is_empty())
 
         # create a vm w/o identity
         self.cmd('sig create -g {rg} --gallery-name {sig4}')
         # assign identity but w/o a role assignment
-        self.cmd('sig identity assign -g {rg} -n {sig4}', checks=[
-            self.check('scope', None)
+        self.cmd('sig identity assign -g {rg} -r {sig4}', checks=[
+            self.check('scope', None),
+            self.check('role', None),
         ])
 
     @AllowLargeResponse(size_kb=99999)
@@ -6493,41 +6494,42 @@ class MSIScenarioTest(ScenarioTest):
         self.assertFalse(result['identity']['systemAssignedIdentity'])
 
         # create a sig with system + user assigned identities
-        result = self.cmd('sig create -g {rg} -n {sig} --assign-identity {emsi} [system] '
+        result = self.cmd('sig create -g {rg} -r {sig} --assign-identity {emsi} [system] '
                           '--role reader --scope {scope}').get_output_in_json()
         emsis = [x.lower() for x in result['identity']['userAssignedIdentities'].keys()]
         self.assertEqual(emsis, [emsi_result['id'].lower()])
-        result = self.cmd('sig identity show -g {rg} -n {sig}', checks=[
+        result = self.cmd('sig identity show -g {rg} -r {sig}', checks=[
             self.check('type', 'SystemAssigned, UserAssigned')
         ]).get_output_in_json()
         emsis = [x.lower() for x in result['userAssignedIdentities'].keys()]
         self.assertEqual(emsis, [emsi_result['id'].lower()])
 
         # assign a new managed identity
-        self.cmd('sig identity assign -g {rg} -n {sig} --identities {emsi2}')
-        result = self.cmd('sig identity show -g {rg} -n {sig}').get_output_in_json()
+        self.cmd('sig identity assign -g {rg} -r {sig} --identities {emsi2}')
+        result = self.cmd('sig identity show -g {rg} -r {sig}').get_output_in_json()
         emsis = [x.lower() for x in result['userAssignedIdentities'].keys()]
         self.assertEqual(set(emsis), set([emsi_result['id'].lower(), emsi2_result['id'].lower()]))
 
         # remove the 1st user assigned identity
-        self.cmd('sig identity remove -g {rg} -n {sig} --identities {emsi}')
-        result = self.cmd('sig identity show -g {rg} -n {sig}', checks=[
+        self.cmd('sig identity remove -g {rg} -r {sig} --identities {emsi}')
+        result = self.cmd('sig identity show -g {rg} -r {sig}', checks=[
             self.check('type', 'SystemAssigned, UserAssigned')
         ]).get_output_in_json()
         emsis = [x.lower() for x in result['userAssignedIdentities'].keys()]
         self.assertEqual(emsis, [emsi2_result['id'].lower()])
 
         # remove the 2nd
-        self.cmd('sig identity remove -g {rg} -n {sig} --identities {emsi2}')
+        self.cmd('sig identity remove -g {rg} -r {sig} --identities {emsi2}')
         # verify the VM still has the system assigned identity
-        self.cmd('vm identity show -g {rg} -n {vm}', checks=[
+        self.cmd('sig identity show -g {rg} -r {vm}', checks=[
             self.check('type', 'SystemAssigned'),
             self.check('userAssignedIdentities', None),
         ])
 
         # remove the last assigned identity and check that remove does not fail if there are no assigned identities.
-        self.cmd('sig identity remove -g {rg} -n {sig}', checks=self.is_empty())
-        self.cmd('sig identity remove -g {rg} -n {sig}', checks=self.is_empty())
+        self.cmd('sig identity remove -g {rg} -r {sig}', checks=self.is_empty())
+        self.cmd('sig identity remove -g {rg} -r {sig}', checks=self.is_empty())
+
 
 class VMLiveScenarioTest(LiveScenarioTest):
 
