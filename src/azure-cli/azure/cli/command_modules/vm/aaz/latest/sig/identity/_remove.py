@@ -11,6 +11,9 @@
 from azure.cli.core.aaz import *
 
 
+@register_command(
+    "sig identity remove",
+)
 class Remove(AAZCommand):
     """Remove the user or system managed identities.
     """
