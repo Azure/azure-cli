@@ -12,31 +12,22 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "sig identity remove",
+    "sig identity wait",
 )
-class Remove(AAZCommand):
-    """Remove the user or system managed identities.
-
-    :example: Remove the system assigned identity.
-        az sig identity remove --resource-group myResourceGroup --gallery-name myGalleryName
-
-    :example: Remove a user assigned identity.
-        az sig identity remove --resource-group myResourceGroup --gallery-name myGalleryName --identities readerId
+class Wait(AAZWaitCommand):
+    """Place the CLI in a waiting state until a condition is met.
     """
 
     _aaz_info = {
-        "version": "2025-03-03",
         "resources": [
             ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/galleries/{}", "2025-03-03", "identity"],
         ]
     }
 
-    AZ_SUPPORT_NO_WAIT = True
-
     def _handler(self, command_args):
         super()._handler(command_args)
-        self.SubresourceSelector(ctx=self.ctx, name="subresource")
-        return self.build_lro_poller(self._execute_operations, self._output)
+        self._execute_operations()
+        return self._output()
 
     _args_schema = None
 
@@ -53,6 +44,7 @@ class Remove(AAZCommand):
             options=["-r", "--gallery-name"],
             help="The name of the Shared Image Gallery to be deleted.",
             required=True,
+            id_part="name",
             fmt=AAZStrArgFormat(
                 pattern="^[^_\\W][\\w._-]{0,79}(?<![-.])$",
             ),
@@ -60,34 +52,11 @@ class Remove(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-
-        # define Arg Group "Gallery.identity"
-
-        _args_schema = cls._args_schema
-        _args_schema.mi_system_assigned = AAZStrArg(
-            options=["--system-assigned", "--mi-system-assigned"],
-            arg_group="Gallery.identity",
-            help="Set the system managed identity.",
-            blank="True",
-        )
-        _args_schema.mi_user_assigned = AAZListArg(
-            options=["--user-assigned", "--mi-user-assigned"],
-            arg_group="Gallery.identity",
-            help="Set the user managed identities.",
-            blank=[],
-        )
-
-        mi_user_assigned = cls._args_schema.mi_user_assigned
-        mi_user_assigned.Element = AAZStrArg()
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
         self.GalleriesGet(ctx=self.ctx)()
-        self.pre_instance_update(self.ctx.selectors.subresource.get())
-        self.InstanceUpdateByJson(ctx=self.ctx)()
-        self.post_instance_update(self.ctx.selectors.subresource.get())
-        yield self.GalleriesCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -98,28 +67,9 @@ class Remove(AAZCommand):
     def post_operations(self):
         pass
 
-    @register_callback
-    def pre_instance_update(self, instance):
-        pass
-
-    @register_callback
-    def post_instance_update(self, instance):
-        pass
-
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.selectors.subresource.get(), client_flatten=True)
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=False)
         return result
-
-    class SubresourceSelector(AAZJsonSelector):
-
-        def _get(self):
-            result = self.ctx.vars.instance
-            return result.identity
-
-        def _set(self, value):
-            result = self.ctx.vars.instance
-            result.identity = value
-            return
 
     class GalleriesGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
@@ -200,144 +150,13 @@ class Remove(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _RemoveHelper._build_schema_gallery_read(cls._schema_on_200)
+            _WaitHelper._build_schema_gallery_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
-    class GalleriesCreateOrUpdate(AAZHttpOperation):
-        CLIENT_TYPE = "MgmtClient"
 
-        def __call__(self, *args, **kwargs):
-            request = self.make_request()
-            session = self.client.send_request(request=request, stream=False, **kwargs)
-            if session.http_response.status_code in [202]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_200_201,
-                    self.on_error,
-                    lro_options={"final-state-via": "location"},
-                    path_format_arguments=self.url_parameters,
-                )
-            if session.http_response.status_code in [200, 201]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_200_201,
-                    self.on_error,
-                    lro_options={"final-state-via": "location"},
-                    path_format_arguments=self.url_parameters,
-                )
-
-            return self.on_error(session.http_response)
-
-        @property
-        def url(self):
-            return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/galleries/{galleryName}",
-                **self.url_parameters
-            )
-
-        @property
-        def method(self):
-            return "PUT"
-
-        @property
-        def error_format(self):
-            return "ODataV4Format"
-
-        @property
-        def url_parameters(self):
-            parameters = {
-                **self.serialize_url_param(
-                    "galleryName", self.ctx.args.gallery_name,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.resource_group,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "subscriptionId", self.ctx.subscription_id,
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def query_parameters(self):
-            parameters = {
-                **self.serialize_query_param(
-                    "api-version", "2025-03-03",
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def header_parameters(self):
-            parameters = {
-                **self.serialize_header_param(
-                    "Content-Type", "application/json",
-                ),
-                **self.serialize_header_param(
-                    "Accept", "application/json",
-                ),
-            }
-            return parameters
-
-        @property
-        def content(self):
-            _content_value, _builder = self.new_content_builder(
-                self.ctx.args,
-                value=self.ctx.vars.instance,
-            )
-
-            return self.serialize_content(_content_value)
-
-        def on_200_201(self, session):
-            data = self.deserialize_http_content(session)
-            self.ctx.set_var(
-                "instance",
-                data,
-                schema_builder=self._build_schema_on_200_201
-            )
-
-        _schema_on_200_201 = None
-
-        @classmethod
-        def _build_schema_on_200_201(cls):
-            if cls._schema_on_200_201 is not None:
-                return cls._schema_on_200_201
-
-            cls._schema_on_200_201 = AAZObjectType()
-            _RemoveHelper._build_schema_gallery_read(cls._schema_on_200_201)
-
-            return cls._schema_on_200_201
-
-    class InstanceUpdateByJson(AAZJsonInstanceUpdateOperation):
-
-        def __call__(self, *args, **kwargs):
-            self._update_instance(self.ctx.selectors.subresource.get())
-
-        def _update_instance(self, instance):
-            _instance_value, _builder = self.new_content_builder(
-                self.ctx.args,
-                value=instance,
-                typ=AAZIdentityObjectType
-            )
-            _builder.set_prop("userAssigned", AAZListType, ".mi_user_assigned", typ_kwargs={"flags": {"action": "remove"}})
-            _builder.set_prop("systemAssigned", AAZStrType, ".mi_system_assigned", typ_kwargs={"flags": {"action": "remove"}})
-
-            user_assigned = _builder.get(".userAssigned")
-            if user_assigned is not None:
-                user_assigned.set_elements(AAZStrType, ".")
-
-            return _instance_value
-
-
-class _RemoveHelper:
-    """Helper class for Remove"""
+class _WaitHelper:
+    """Helper class for Wait"""
 
     _schema_gallery_read = None
 
@@ -527,4 +346,4 @@ class _RemoveHelper:
         _schema.type = cls._schema_gallery_read.type
 
 
-__all__ = ["Remove"]
+__all__ = ["Wait"]
