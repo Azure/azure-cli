@@ -5,6 +5,7 @@
 
 import json
 import os
+import random
 import subprocess
 import tempfile
 import time
@@ -49,6 +50,92 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         super(AzureKubernetesServiceScenarioTest, self).__init__(
             method_name, recording_processors=[KeyReplacer()]
         )
+
+    def cmd(self, command, checks=None, expect_failure=False):
+        if (checks and self.is_live and
+            os.environ.get('AZURE_CLI_TEST_RETRY_PROVISIONING_CHECK') == 'true'):
+            return self._cmd_with_retry(command, checks, expect_failure)
+        return super().cmd(command, checks=checks, expect_failure=expect_failure)
+
+    def _is_provisioning_state_check(self, check):
+        from azure.cli.testsdk.checkers import JMESPathCheck
+        if not isinstance(check, JMESPathCheck):
+            return False
+        return check._query == 'provisioningState' and check._expected_result == 'Succeeded'
+
+    def _should_retry_for_provisioning_state(self, result):
+        if not hasattr(result, 'get_output_in_json'):
+            return False, None
+        data = result.get_output_in_json()
+        if not isinstance(data, dict) or 'id' not in data:
+            return False, None
+        provisioning_state = data.get('provisioningState')
+        if not provisioning_state:
+            return False, None
+        terminal_states = {'Succeeded', 'Failed', 'Canceled'}
+        if provisioning_state in terminal_states:
+            return False, None
+        return True, data['id']
+
+    def _cmd_with_retry(self, command, checks, expect_failure):
+        from azure.cli.testsdk.base import execute
+        import logging
+
+        # Apply kwargs substitution (e.g. {resource_group}) before executing,
+        # matching what ScenarioTest.cmd() does internally.
+        command = self._apply_kwargs(command)
+        result = execute(self.cli_ctx, command, expect_failure=expect_failure)
+
+        # Split checks into provisioning vs everything else
+        provisioning_checks = [c for c in (checks or []) if self._is_provisioning_state_check(c)]
+        other_checks = [c for c in (checks or []) if not self._is_provisioning_state_check(c)]
+
+        if provisioning_checks:
+            should_retry, resource_id = self._should_retry_for_provisioning_state(result)
+            if should_retry:
+                initial_data = result.get_output_in_json()
+                initial_etag = initial_data.get('etag')
+                last_seen_etag = initial_etag
+                max_retries = int(os.environ.get('AZURE_CLI_TEST_PROVISIONING_MAX_RETRIES', '10'))
+                base_delay = float(os.environ.get('AZURE_CLI_TEST_PROVISIONING_BASE_DELAY', '2.0'))
+
+                # Poll with exponential backoff + jitter until terminal state
+                for attempt in range(max_retries):
+                    delay = base_delay * (2 ** attempt) + random.uniform(0, 1)
+                    time.sleep(delay)
+                    poll_result = execute(self.cli_ctx, f'resource show --ids {resource_id}', expect_failure=False)
+                    poll_data = poll_result.get_output_in_json()
+                    current_provisioning_state = poll_data.get('provisioningState')
+                    current_etag = poll_data.get('etag')
+
+                    # Track etag changes to detect external modifications during polling
+                    if current_etag and last_seen_etag and current_etag != last_seen_etag:
+                        logging.warning(f"ETag changed during polling (external modification detected)")
+                    last_seen_etag = current_etag
+
+                    if current_provisioning_state == 'Succeeded':
+                        break
+                    elif current_provisioning_state in {'Failed', 'Canceled'}:
+                        raise AssertionError(
+                            f"provisioningState reached terminal failure: {current_provisioning_state}"
+                        )
+                else:
+                    # for/else: ran all retries without breaking
+                    final_etag_msg = ""
+                    if initial_etag and last_seen_etag:
+                        final_etag_msg = f" (initial etag: {initial_etag}, final: {last_seen_etag})"
+                    raise TimeoutError(
+                        f"provisioningState did not reach 'Succeeded' after {max_retries} retries. "
+                        f"Final state: {current_provisioning_state}{final_etag_msg}"
+                    )
+
+            # Provisioning checks already verified via polling, skip re-checking stale result
+
+        # Run all non-provisioning checks against the original result
+        for check in other_checks:
+            check(result)
+
+        return result
 
     @classmethod
     def generate_ssh_keys(cls):
