@@ -78,7 +78,9 @@ def acr_connected_registry_create(cmd,  # pylint: disable=too-many-locals, too-m
                               registry_name), yes)
         acr_update_custom(cmd, registry, data_endpoint_enabled=True)
         registry_client = cf_acr_registries(cmd.cli_ctx)
-        acr_update_set(cmd, registry_client, registry_name, resource_group_name, registry)
+        LongRunningOperation(cmd.cli_ctx)(
+            acr_update_set(cmd, registry_client, registry_name, resource_group_name, registry)
+        )
 
     from azure.core.exceptions import HttpResponseError as ErrorResponseException
     parent = None

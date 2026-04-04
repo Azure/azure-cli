@@ -38,7 +38,8 @@ from azure.mgmt.apimanagement.models import (ApiManagementServiceResource, ApiMa
                                              OpenIdAuthenticationSettingsContract, ProductContract, ProductState,
                                              NamedValueCreateContract, VersioningScheme, ApiVersionSetContract,
                                              OperationContract, ApiManagementServiceCheckNameAvailabilityParameters,
-                                             ApiReleaseContract, SchemaContract, ResolverContract, PolicyContract)
+                                             ApiReleaseContract, SchemaContract, ResolverContract, PolicyContract,
+                                             BackendContract)
 
 logger = get_logger(__name__)
 
@@ -1165,3 +1166,62 @@ def apim_graphql_resolver_policy_delete(
                        resolver_id=resolver_id,
                        policy_id="policy",
                        if_match="*" if if_match is None else if_match)
+
+
+def apim_backend_create(
+        client, resource_group_name, service_name, backend_id, url, protocol, description=None,
+        no_wait=False, if_match=None):
+
+    parameters = BackendContract(
+        url=url,
+        protocol=protocol,
+        description=description
+    )
+
+    return sdk_no_wait(no_wait, client.backend.create_or_update,
+                       resource_group_name=resource_group_name,
+                       service_name=service_name,
+                       backend_id=backend_id,
+                       parameters=parameters,
+                       if_match="*" if if_match is None else if_match)
+
+
+def apim_backend_delete(
+        client, resource_group_name, service_name, backend_id, if_match=None, no_wait=False):
+
+    return sdk_no_wait(no_wait,
+                       client.backend.delete,
+                       resource_group_name=resource_group_name,
+                       service_name=service_name,
+                       backend_id=backend_id,
+                       if_match="*" if if_match is None else if_match)
+
+
+def apim_backend_show(client, resource_group_name, service_name, backend_id):
+
+    return client.backend.get(
+        resource_group_name=resource_group_name,
+        service_name=service_name,
+        backend_id=backend_id)
+
+
+def apim_backend_list(client, resource_group_name, service_name):
+
+    return client.backend.list_by_service(
+        resource_group_name=resource_group_name,
+        service_name=service_name)
+
+
+def apim_backend_update(
+        instance, url=None, protocol=None, description=None):
+
+    if url is not None:
+        instance.url = url
+
+    if protocol is not None:
+        instance.protocol = protocol
+
+    if description is not None:
+        instance.description = description
+
+    return instance

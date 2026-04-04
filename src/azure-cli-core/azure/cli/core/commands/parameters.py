@@ -5,7 +5,7 @@
 
 
 import argparse
-import platform
+import sys
 
 from azure.cli.core import EXCLUDED_PARAMS
 from azure.cli.core.commands.constants import CLI_PARAM_KWARGS, CLI_POSITIONAL_PARAM_KWARGS
@@ -274,7 +274,7 @@ deployment_name_type = CLIArgumentType(
     validator=generate_deployment_name
 )
 
-quotes = '""' if platform.system() == 'Windows' else "''"
+quotes = '""' if sys.platform == 'win32' else "''"
 quote_text = 'Use {} to clear existing tags.'.format(quotes)
 
 tags_type = CLIArgumentType(

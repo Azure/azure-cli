@@ -88,6 +88,11 @@ type: group
 short-summary: Manage soft-deleted Azure API Management services.
 """
 
+helps['apim backend'] = """
+type: group
+short-summary: Manage Azure API Management Backends.
+"""
+
 helps['apim backup'] = """
 type: command
 short-summary: Creates a backup of the API Management service to the given Azure Storage Account. This is long running operation and could take several minutes to complete.
@@ -748,4 +753,67 @@ examples:
   - name: Get list of policy configuration.
     text: |
         az apim graphql resolver policy list --service-name MyApim -g MyResourceGroup --api-id MyApi --resolver-id MyResolverId
+"""
+
+helps['apim backend list'] = """
+type: command
+short-summary: List API Management Backends.
+examples:
+  - name: List all Backends in an APIM instance.
+    text: |-
+        az apim backend list --resource-group MyResourceGroup --service-name MyServiceName
+"""
+
+helps['apim backend show'] = """
+type: command
+short-summary: Show details of an API Management Backend.
+examples:
+  - name: Show details of a Backend in an APIM instance.
+    text: |-
+        az apim backend show --resource-group MyResourceGroup --service-name MyServiceName --backend-id MyBackendId
+"""
+
+helps['apim backend delete'] = """
+type: command
+short-summary: Delete an API Management Backend.
+examples:
+  - name: Delete a Backend in an APIM instance.
+    text: |-
+        az apim backend delete --resource-group MyResourceGroup --service-name MyServiceName --backend-id MyBackendId
+"""
+
+helps['apim backend create'] = """
+type: command
+short-summary: Create or Update an API Management Backend.
+parameters:
+  - name: --backend-id
+    type: string
+    short-summary: unique name for the Backend to be created or updated
+    long-summary: |
+        Must be unique in the current API Management service instance.
+  - name: --url
+    type: string
+    short-summary: The URL of the backend service.
+  - name: --protocol
+    type: string
+    short-summary: The protocol used to communicate with the backend service.
+examples:
+  - name: Create a Backend.
+    text: |-
+        az apim backend create --service-name MyApim -g MyResourceGroup --backend-id MyBackendId --url https://mybackend.com --protocol http
+"""
+
+helps['apim backend update'] = """
+type: command
+short-summary: Update an API Management Backend.
+parameters:
+  - name: --backend-id
+    type: string
+    short-summary: unique name of the Backend to be updated
+    long-summary: |
+        Must be unique in the current API Management service instance.
+examples:
+  - name: Update a Backend.
+    text: |-
+        az apim backend update --service-name MyApim -g MyResourceGroup --backend-id MyBackendId --url https://mynewbackend.com
 """
