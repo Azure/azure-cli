@@ -7,7 +7,6 @@ from azure.cli.core.breaking_change import (register_argument_deprecate, registe
                                             register_other_breaking_change)
 
 NETWORK_RESOURCE_BREAKING_CHANGE_MESSAGE = (
-    'The --address-prefixes and --subnet-prefixes arguments have been deprecated and will be removed. '
     'This command will stop creating new network resources or altering existing ones which are required '
     'for the server to function, such as virtual networks, subnets, IP ranges, etc. It will instead '
     'require users to provide the necessary network resources created beforehand using the corresponding '
@@ -18,6 +17,8 @@ NETWORK_RESOURCE_BREAKING_CHANGE_MESSAGE = (
 
 def _register_network_resource_breaking_change(command_name):
     register_other_breaking_change(command_name, message=NETWORK_RESOURCE_BREAKING_CHANGE_MESSAGE)
+    register_argument_deprecate(command_name, '--address-prefixes')
+    register_argument_deprecate(command_name, '--subnet-prefixes')
 
 
 # These commands will stop creating or altering required network resources and will instead require
