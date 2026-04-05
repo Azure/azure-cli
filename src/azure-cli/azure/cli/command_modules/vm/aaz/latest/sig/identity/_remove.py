@@ -51,7 +51,7 @@ class Remove(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.gallery_name = AAZStrArg(
             options=["-r", "--gallery-name"],
-            help="The name of the Shared Image Gallery to be deleted.",
+            help="The name of the Shared Image Gallery.",
             required=True,
             fmt=AAZStrArgFormat(
                 pattern="^[^_\\W][\\w._-]{0,79}(?<![-.])$",
@@ -87,7 +87,7 @@ class Remove(AAZCommand):
         self.pre_instance_update(self.ctx.selectors.subresource.get())
         self.InstanceUpdateByJson(ctx=self.ctx)()
         self.post_instance_update(self.ctx.selectors.subresource.get())
-        yield self.GalleriesCreateOrUpdate(ctx=self.ctx)()
+        yield self.GalleriesUpdate(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -204,7 +204,7 @@ class Remove(AAZCommand):
 
             return cls._schema_on_200
 
-    class GalleriesCreateOrUpdate(AAZHttpOperation):
+    class GalleriesUpdate(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -214,16 +214,16 @@ class Remove(AAZCommand):
                 return self.client.build_lro_polling(
                     self.ctx.args.no_wait,
                     session,
-                    self.on_200_201,
+                    self.on_200,
                     self.on_error,
                     lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
-            if session.http_response.status_code in [200, 201]:
+            if session.http_response.status_code in [200]:
                 return self.client.build_lro_polling(
                     self.ctx.args.no_wait,
                     session,
-                    self.on_200_201,
+                    self.on_200,
                     self.on_error,
                     lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
@@ -240,7 +240,7 @@ class Remove(AAZCommand):
 
         @property
         def method(self):
-            return "PUT"
+            return "PATCH"
 
         @property
         def error_format(self):
@@ -288,32 +288,28 @@ class Remove(AAZCommand):
 
         @property
         def content(self):
-            _content_value, _builder = self.new_content_builder(
-                self.ctx.args,
-                value=self.ctx.vars.instance,
-            )
+            identity = self.serialize_content(self.ctx.selectors.subresource.required())
+            return {"identity": identity}
 
-            return self.serialize_content(_content_value)
-
-        def on_200_201(self, session):
+        def on_200(self, session):
             data = self.deserialize_http_content(session)
             self.ctx.set_var(
                 "instance",
                 data,
-                schema_builder=self._build_schema_on_200_201
+                schema_builder=self._build_schema_on_200
             )
 
-        _schema_on_200_201 = None
+        _schema_on_200 = None
 
         @classmethod
-        def _build_schema_on_200_201(cls):
-            if cls._schema_on_200_201 is not None:
-                return cls._schema_on_200_201
+        def _build_schema_on_200(cls):
+            if cls._schema_on_200 is not None:
+                return cls._schema_on_200
 
-            cls._schema_on_200_201 = AAZObjectType()
-            _RemoveHelper._build_schema_gallery_read(cls._schema_on_200_201)
+            cls._schema_on_200 = AAZObjectType()
+            _RemoveHelper._build_schema_gallery_read(cls._schema_on_200)
 
-            return cls._schema_on_200_201
+            return cls._schema_on_200
 
     class InstanceUpdateByJson(AAZJsonInstanceUpdateOperation):
 
