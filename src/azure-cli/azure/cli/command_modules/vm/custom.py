@@ -6677,13 +6677,15 @@ def _transform_community_gallery_list_output(result):
 
 def create_sig(cmd, resource_group_name, gallery_name, location=None, eula=None, public_name_prefix=None,
                publisher_contact=None, publisher_uri=None, tags=None, description=None, permissions=None,
-               soft_delete=None, assign_identity=None, identity_scope=None, identity_role=None, identity_role_id=None):
+               soft_delete=None, assign_identity=None, identity_scope=None, identity_role=None, identity_role_id=None,
+               no_wait=False):
     from .operations.sig import SigCreate
 
     command_args = {
         'gallery_name': gallery_name,
         'resource_group': resource_group_name,
-        'location': location
+        'location': location,
+        'no_wait': no_wait
     }
 
     if eula is not None:
