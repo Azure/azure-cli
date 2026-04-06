@@ -586,11 +586,31 @@ examples:
   - name: Create a shared image gallery.
     text: |
         az sig create --resource-group MyResourceGroup --gallery-name MyGallery123
+  - name: Create a shared image gallery with a system assigned identity.
+    text: |
+        az sig create --resource-group MyResourceGroup --gallery-name MyGallery123 --assign-identity
+  - name: Create a shared image gallery with a system assigned identity with the 'Reader' role.
+    text: |
+        az sig create --resource-group MyResourceGroup --gallery-name MyGallery123 --assign-identity 
+        --role Reader --scope /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup
+  - name: Create a shared image gallery with a user assigned identity.
+    text: |
+        az sig create --resource-group MyResourceGroup --gallery-name MyGallery123 --assign-identity id1
+  - name: Create a shared image gallery with both system and user assigned identity.
+    text: |
+        az sig create --resource-group MyResourceGroup --gallery-name MyGallery123 --assign-identity [system] id1
 """
 
 helps['sig identity assign'] = """
 type: command
 short-summary: Assign the user or system managed identities.
+examples:
+  - name: Enable the system assigned identity with the 'Reader' role.
+    text: |
+        az sig identity assign -g MyResourceGroup -r MyGalleryName --role Reader --scope /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup
+  - name: Enable the system assigned identity and a user assigned identity with the 'Reader' role.
+    text: |
+        az sig identity assign -g MyResourceGroup -r MyGalleryName --role Reader --identities [system] myAssignedId --scope /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup
 """
 
 helps['sig identity remove'] = """
