@@ -3778,7 +3778,7 @@ class NetworkExpressRouteCircuitLinkFailoverBasicScenarioTest(ScenarioTest):
 
         # Run the command
         result = self.cmd(
-            'network express-route start-circuit-link-failover-test '
+            'network express-route start-link-failover-test '
             '-g {rg} --name {circuit} '
             '--link-type {link_type} '
             '--maintenance-category {maintenance_category}'
@@ -3813,7 +3813,7 @@ class NetworkExpressRouteCircuitLinkFailoverBasicScenarioTest(ScenarioTest):
 
         # Run the command
         result = self.cmd(
-            'network express-route stop-circuit-link-failover-test '
+            'network express-route stop-link-failover-test '
             '-g {rg} --name {circuit} '
             '--circuit-test-category {maintenance_category} '
             '--link-type {link_type} '
@@ -3826,7 +3826,7 @@ class NetworkExpressRouteCircuitLinkFailoverBasicScenarioTest(ScenarioTest):
 
         # Run all tests detail command to validate the stop operation
         tests_link_latest = self.cmd(
-            'network express-route get-circuit-link-failover-all-tests-detail '
+            'network express-route get-link-failover-all-tests-detail '
             '-g {rg} --name {circuit} '
             '--fetch-latest True --type LinkFailover'
         ).get_output_in_json()
@@ -3835,7 +3835,7 @@ class NetworkExpressRouteCircuitLinkFailoverBasicScenarioTest(ScenarioTest):
 
         #
         single_test_result = self.cmd(
-                'network express-route get-circuit-link-failover-single-test-detail '
+                'network express-route get-link-failover-single-test-detail '
                 '-g {rg} --name {circuit} '
                 '--failover-test-id {test_guid} '
                 '--link-type {link_type} '
