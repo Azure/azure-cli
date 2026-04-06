@@ -1363,7 +1363,7 @@ def load_arguments(self, _):
         c.argument('permissions', arg_group='SharingProfile', arg_type=get_enum_type(['Community', 'Groups', 'Private']),
                    help='This property allows you to specify the permission of sharing gallery.')
         c.argument('soft_delete', arg_group='SoftDeletePolicy', arg_type=get_three_state_flag(), help='Enable soft-deletion for resources in this gallery, allowing them to be recovered within retention time.')
-        c.argument('assign_identity', nargs='*', arg_group=arg_group, help="accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity, or a resource id to refer user assigned identity. Check out help for more examples")
+        c.argument('assign_identity', nargs='*', arg_group='Managed Service Identity', help="accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity, or a resource id to refer user assigned identity. Check out help for more examples")
 
     with self.argument_context('sig identity remove') as c:
         c.argument('identities', nargs='*', help="Space-separated identities to assign. Use '{0}' to refer to the system assigned identity. Default: '{0}'".format(MSI_LOCAL_ID))
