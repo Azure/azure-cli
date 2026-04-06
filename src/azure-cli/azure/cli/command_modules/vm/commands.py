@@ -26,7 +26,8 @@ from azure.cli.command_modules.vm._validators import (
     process_remove_identity_namespace, process_vm_secret_format, process_vm_vmss_stop, validate_vmss_update_namespace,
     process_vm_update_namespace, process_set_applications_namespace, process_vm_disk_attach_namespace,
     process_image_version_create_namespace, process_image_version_update_namespace,
-    process_image_version_undelete_namespace, process_vm_disk_detach_namespace)
+    process_image_version_undelete_namespace, process_vm_disk_detach_namespace, process_sig_create_namespace,
+    process_sig_assign_identity_namespace, process_sig_remove_identity_namespace)
 
 from azure.cli.command_modules.vm._image_builder import (
     process_image_template_create_namespace, process_img_tmpl_output_add_namespace,
@@ -449,14 +450,20 @@ def load_command_table(self, _):
         g.custom_command('create', 'vmss_run_command_create', supports_no_wait=True)
         g.custom_command('update', 'vmss_run_command_update', supports_no_wait=True)
 
-    with self.command_group('sig', compute_galleries_sdk, operation_group='galleries') as g:
-        from .operations.sig import SigCreate, SigUpdate, SigShow
-        self.command_table['sig create'] = SigCreate(loader=self)
+    with self.command_group('sig', operation_group='galleries') as g:
+        g.custom_command('create', 'create_sig', supports_no_wait=True, validator=process_sig_create_namespace)
+        from .operations.sig import SigUpdate, SigShow
         self.command_table['sig update'] = SigUpdate(loader=self)
         self.command_table['sig show'] = SigShow(loader=self)
 
     with self.command_group('sig', community_gallery_sdk, client_factory=cf_community_gallery, operation_group='shared_galleries', min_api='2022-01-03') as g:
         g.custom_command('list-community', 'sig_community_gallery_list')
+
+    with self.command_group('sig identity') as g:
+        g.custom_command('assign', 'assign_sig_identity', validator=process_sig_assign_identity_namespace)
+        g.custom_command('remove', 'remove_sig_identity', validator=process_sig_remove_identity_namespace)
+        from .operations.sig import SigIdentityShow
+        self.command_table['sig identity show'] = SigIdentityShow(loader=self)
 
     with self.command_group('sig image-definition', compute_gallery_images_sdk, operation_group='gallery_images', min_api='2018-06-01') as g:
         g.custom_command('create', 'create_gallery_image')

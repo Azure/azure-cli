@@ -579,6 +579,32 @@ examples:
         az image builder show -n mytemplate -g my-group
 """
 
+helps['sig create'] = """
+type: command
+short-summary: Create a shared image gallery.
+examples:
+  - name: Create a shared image gallery.
+    text: |
+        az sig create --resource-group MyResourceGroup --gallery-name MyGallery123
+"""
+
+helps['sig identity assign'] = """
+type: command
+short-summary: Assign the user or system managed identities.
+"""
+
+helps['sig identity remove'] = """
+type: command
+short-summary: Remove the user or system managed identities.
+examples:
+  - name: Remove the system assigned identity.
+    text: |
+        az sig identity remove --resource-group myResourceGroup --gallery-name myGalleryName
+  - name: Remove a user assigned identity.
+    text: |
+        az sig identity remove --resource-group myResourceGroup --gallery-name myGalleryName --identities readerId
+"""
+
 helps['sig image-definition create'] = """
 type: command
 short-summary: create a gallery image definition
