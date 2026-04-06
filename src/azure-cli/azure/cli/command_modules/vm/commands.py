@@ -6,10 +6,10 @@
 from azure.cli.command_modules.vm._client_factory import (cf_vm,
                                                           cf_vm_ext, cf_vm_ext_image,
                                                           cf_vm_image_term, cf_usage,
-                                                          cf_vmss, cf_images,
+                                                          cf_vmss,
                                                           cf_galleries, cf_gallery_images, cf_gallery_image_versions,
                                                           cf_proximity_placement_groups,
-                                                          cf_dedicated_hosts, cf_dedicated_host_groups,
+                                                          cf_dedicated_hosts,
                                                           cf_log_analytics_data_plane, cf_capacity_reservations,
                                                           cf_community_gallery)
 from azure.cli.command_modules.vm._format import (
@@ -59,11 +59,6 @@ def load_command_table(self, _):
     compute_availset_profile = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations#AvailabilitySetsOperations.{}',
         operation_group='availability_sets'
-    )
-
-    compute_image_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#ImagesOperations.{}',
-        client_factory=cf_images
     )
 
     compute_vm_sdk = CliCommandType(
@@ -137,11 +132,6 @@ def load_command_table(self, _):
         client_factory=cf_dedicated_hosts,
     )
 
-    compute_dedicated_host_groups_sdk = CliCommandType(
-        operations_tmpl="azure.mgmt.compute.operations#DedicatedHostGroupsOperations.{}",
-        client_factory=cf_dedicated_host_groups,
-    )
-
     image_builder_image_templates_sdk = CliCommandType(
         operations_tmpl="azure.mgmt.imagebuilder.operations#VirtualMachineImageTemplatesOperations.{}",
         client_factory=cf_img_bldr_image_templates,
@@ -210,7 +200,7 @@ def load_command_table(self, _):
         self.command_table['disk-encryption-set identity remove'] = DiskEncryptionSetIdentityRemove(loader=self)
         g.custom_show_command('show', 'show_disk_encryption_set_identity')
 
-    with self.command_group('image', compute_image_sdk) as g:
+    with self.command_group('image') as g:
         g.custom_command('create', 'create_image', validator=process_image_create_namespace)
 
     with self.command_group('image builder', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
@@ -381,11 +371,12 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_dedicated_host')
         g.generic_update_command('update', setter_name='begin_create_or_update')
 
-    with self.command_group('vm host group', compute_dedicated_host_groups_sdk, client_factory=cf_dedicated_host_groups,
-                            min_api='2019-03-01') as g:
-        g.custom_command('get-instance-view', 'get_dedicated_host_group_instance_view', min_api='2020-06-01')
+    with self.command_group('vm host group') as g:
+        g.custom_command('get-instance-view', 'get_dedicated_host_group_instance_view')
         g.custom_command('create', 'create_dedicated_host_group')
-        g.generic_update_command('update')
+
+        from .operations.vm_host_group import VMHostGroupShow
+        self.command_table['vm host group show'] = VMHostGroupShow(loader=self)
 
     with self.command_group('vmss') as g:
         g.custom_command('create', 'create_vmss',

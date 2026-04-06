@@ -11,7 +11,7 @@ from azure.cli.command_modules.apim._format import (service_output_format)
 from azure.cli.command_modules.apim._client_factory import (cf_service, cf_api, cf_product, cf_nv, cf_apiops,
                                                             cf_apirelease, cf_apirevision, cf_apiversionset,
                                                             cf_apischema, cf_ds, cf_graphqlapiresolver,
-                                                            cf_graphqlapiresolverpolicy)
+                                                            cf_graphqlapiresolverpolicy, cf_backend)
 
 
 def load_command_table(self, _):
@@ -73,6 +73,11 @@ def load_command_table(self, _):
     graphql_api_resolver_policy = CliCommandType(
         operations_tmpl='azure.mgmt.apimanagement.operations#GraphQLApiResolverPolicyOperations.{}',
         client_factory=cf_graphqlapiresolverpolicy
+    )
+
+    backend_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.apimanagement.operations#BackendOperations.{}',
+        client_factory=cf_backend
     )
 
     # pylint: disable=line-too-long
@@ -178,3 +183,10 @@ def load_command_table(self, _):
         g.custom_command('delete', 'apim_graphql_resolver_policy_delete', confirmation=True)
         g.custom_show_command('show', 'apim_graphql_resolver_policy_show')
         g.custom_command('list', 'apim_graphql_resolver_policy_list')
+
+    with self.command_group('apim backend', backend_sdk) as g:
+        g.custom_command('create', 'apim_backend_create')
+        g.custom_show_command('show', 'apim_backend_show')
+        g.custom_command('list', 'apim_backend_list')
+        g.custom_command('delete', 'apim_backend_delete', confirmation=True)
+        g.generic_update_command('update', custom_func_name='apim_backend_update')
