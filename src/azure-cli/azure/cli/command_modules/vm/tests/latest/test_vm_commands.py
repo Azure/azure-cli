@@ -6484,58 +6484,59 @@ class MSIScenarioTest(ScenarioTest):
         emsi_result = self.cmd('identity create -g {rg} -n {emsi}').get_output_in_json()
         emsi2_result = self.cmd('identity create -g {rg} -n {emsi2}').get_output_in_json()
 
-        # create a sig with only user assigned identity
-        result = self.cmd('sig create -g {rg} --gallery-name {sig} --assign-identity {emsi}', checks=[
-            self.check('identity.role', None),
-            self.check('identity.scope', None)
-        ]).get_output_in_json()
-        emsis = [x.lower() for x in result['identity']['userAssignedIdentities'].keys()]
-        self.assertEqual(emsis, [emsi_result['id'].lower()])
-        self.assertFalse(result['identity']['systemAssignedIdentity'])
+        with mock.patch('azure.cli.core.commands.arm._gen_guid', side_effect=self.create_guid):
+            # create a sig with only user assigned identity
+            result = self.cmd('sig create -g {rg} --gallery-name {sig} --assign-identity {emsi}', checks=[
+                self.check('identity.role', None),
+                self.check('identity.scope', None)
+            ]).get_output_in_json()
+            emsis = [x.lower() for x in result['identity']['userAssignedIdentities'].keys()]
+            self.assertEqual(emsis, [emsi_result['id'].lower()])
+            self.assertFalse(result['identity']['systemAssignedIdentity'])
 
-        # create a sig with system + user assigned identities
-        result = self.cmd('sig create -g {rg} -r {sig} --assign-identity {emsi} [system] '
-                          '--role reader --scope {scope}').get_output_in_json()
-        emsis = [x.lower() for x in result['identity']['userAssignedIdentities'].keys()]
-        self.assertEqual(emsis, [emsi_result['id'].lower()])
-        result = self.cmd('sig identity show -g {rg} -r {sig}', checks=[
-            self.check('type', 'SystemAssigned, UserAssigned')
-        ]).get_output_in_json()
-        emsis = [x.lower() for x in result['userAssignedIdentities'].keys()]
-        self.assertEqual(emsis, [emsi_result['id'].lower()])
+            # create a sig with system + user assigned identities
+            result = self.cmd('sig create -g {rg} -r {sig} --assign-identity {emsi} [system] '
+                              '--role reader --scope {scope}').get_output_in_json()
+            emsis = [x.lower() for x in result['identity']['userAssignedIdentities'].keys()]
+            self.assertEqual(emsis, [emsi_result['id'].lower()])
+            result = self.cmd('sig identity show -g {rg} -r {sig}', checks=[
+                self.check('type', 'SystemAssigned, UserAssigned')
+            ]).get_output_in_json()
+            emsis = [x.lower() for x in result['userAssignedIdentities'].keys()]
+            self.assertEqual(emsis, [emsi_result['id'].lower()])
 
-        # Validate sig show command
-        result = self.cmd('sig show -g {rg} -r {sig}', checks=[
-            self.check('identity.type', 'SystemAssigned, UserAssigned')
-        ]).get_output_in_json()
-        emsis = [x.lower() for x in result['identity']['userAssignedIdentities'].keys()]
-        self.assertEqual(emsis, [emsi_result['id'].lower()])
+            # Validate sig show command
+            result = self.cmd('sig show -g {rg} -r {sig}', checks=[
+                self.check('identity.type', 'SystemAssigned, UserAssigned')
+            ]).get_output_in_json()
+            emsis = [x.lower() for x in result['identity']['userAssignedIdentities'].keys()]
+            self.assertEqual(emsis, [emsi_result['id'].lower()])
 
-        # assign a new managed identity
-        self.cmd('sig identity assign -g {rg} -r {sig} --identities {emsi2}')
-        result = self.cmd('sig identity show -g {rg} -r {sig}').get_output_in_json()
-        emsis = [x.lower() for x in result['userAssignedIdentities'].keys()]
-        self.assertEqual(set(emsis), set([emsi_result['id'].lower(), emsi2_result['id'].lower()]))
+            # assign a new managed identity
+            self.cmd('sig identity assign -g {rg} -r {sig} --identities {emsi2}')
+            result = self.cmd('sig identity show -g {rg} -r {sig}').get_output_in_json()
+            emsis = [x.lower() for x in result['userAssignedIdentities'].keys()]
+            self.assertEqual(set(emsis), set([emsi_result['id'].lower(), emsi2_result['id'].lower()]))
 
-        # remove the 1st user assigned identity
-        self.cmd('sig identity remove -g {rg} -r {sig} --identities {emsi}')
-        result = self.cmd('sig identity show -g {rg} -r {sig}', checks=[
-            self.check('type', 'SystemAssigned, UserAssigned')
-        ]).get_output_in_json()
-        emsis = [x.lower() for x in result['userAssignedIdentities'].keys()]
-        self.assertEqual(emsis, [emsi2_result['id'].lower()])
+            # remove the 1st user assigned identity
+            self.cmd('sig identity remove -g {rg} -r {sig} --identities {emsi}')
+            result = self.cmd('sig identity show -g {rg} -r {sig}', checks=[
+                self.check('type', 'SystemAssigned, UserAssigned')
+            ]).get_output_in_json()
+            emsis = [x.lower() for x in result['userAssignedIdentities'].keys()]
+            self.assertEqual(emsis, [emsi2_result['id'].lower()])
 
-        # remove the 2nd
-        self.cmd('sig identity remove -g {rg} -r {sig} --identities {emsi2}')
-        # verify the VM still has the system assigned identity
-        self.cmd('sig identity show -g {rg} -r {sig}', checks=[
-            self.check('type', 'SystemAssigned'),
-            self.check('userAssignedIdentities', None),
-        ])
+            # remove the 2nd
+            self.cmd('sig identity remove -g {rg} -r {sig} --identities {emsi2}')
+            # verify the VM still has the system assigned identity
+            self.cmd('sig identity show -g {rg} -r {sig}', checks=[
+                self.check('type', 'SystemAssigned'),
+                self.check('userAssignedIdentities', None),
+            ])
 
-        # remove the last assigned identity and check that remove does not fail if there are no assigned identities.
-        self.cmd('sig identity remove -g {rg} -r {sig}', checks=self.is_empty())
-        self.cmd('sig identity remove -g {rg} -r {sig}', checks=self.is_empty())
+            # remove the last assigned identity and check that remove does not fail if there are no assigned identities.
+            self.cmd('sig identity remove -g {rg} -r {sig}', checks=self.is_empty())
+            self.cmd('sig identity remove -g {rg} -r {sig}', checks=self.is_empty())
 
 
 class VMLiveScenarioTest(LiveScenarioTest):
@@ -8884,8 +8885,8 @@ class VMGalleryImage(ScenarioTest):
                  '--os-type linux --os-state Specialized -p publisher1 -f offer1 -s sku1 --hyper-v-generation v1')
 
         vm_id = self.cmd(
-            'vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --data-disk-sizes-gb 10 '
-            '--admin-username clitest1 --generate-ssh-key --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE').get_output_in_json()['id']
+            'vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:16.04-LTS:latest --data-disk-sizes-gb 10 '
+            '--admin-username clitest1 --generate-ssh-key --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --size Standard_D2s_v3').get_output_in_json()['id']
         self.kwargs.update({"vm_id": vm_id})
 
         # Disable default outbound access
