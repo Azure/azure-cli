@@ -6713,9 +6713,7 @@ def create_sig(cmd, resource_group_name, gallery_name, location=None, eula=None,
         command_args['soft_delete'] = soft_delete
 
     if assign_identity is None:
-        create_sig = SigCreate(cli_ctx=cmd.cli_ctx)(command_args=command_args)
-        LongRunningOperation(cmd.cli_ctx)(create_sig)
-        return create_sig.result()
+        return SigCreate(cli_ctx=cmd.cli_ctx)(command_args=command_args)
     else:
         from ._vm_utils import assign_identity as assign_identity_helper
         from .operations.sig import SigShow
