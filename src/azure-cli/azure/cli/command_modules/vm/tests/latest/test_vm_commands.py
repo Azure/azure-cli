@@ -6521,7 +6521,7 @@ class MSIScenarioTest(ScenarioTest):
         # remove the 2nd
         self.cmd('sig identity remove -g {rg} -r {sig} --identities {emsi2}')
         # verify the VM still has the system assigned identity
-        self.cmd('sig identity show -g {rg} -r {vm}', checks=[
+        self.cmd('sig identity show -g {rg} -r {sig}', checks=[
             self.check('type', 'SystemAssigned'),
             self.check('userAssignedIdentities', None),
         ])
