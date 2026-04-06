@@ -8947,10 +8947,12 @@ class NetworkVnetGatewayRoutesAndResiliencyInfoScenarioTest(ScenarioTest):
 
 class NetworkExpressRouteGatewayFailoverSimulationScenarioTest(ScenarioTest):
     @live_only()
-    def test_start_site_failover_test(self): # live_only as the express route is extremely expensive, contact service team for an available ER
+    def test_network_express_route_gateway_failover(self): # live_only as the express route is extremely expensive, contact service team for an available ER
         resource_group = "bhavana-vwan-failover"  
         er_gateway_name = "422dcfc236aa44f6838f556330b628e1-centraluseuap-er-gw"
         peering_location = "DataPathLocation1"
+        test_guid = "fb5c66a6-6852-49d9-bf56-fc3e8d2f2a3b"
+        was_simulation_successful = True
 
         self.kwargs.update({
             'rg': resource_group,
@@ -8966,17 +8968,9 @@ class NetworkExpressRouteGatewayFailoverSimulationScenarioTest(ScenarioTest):
 
         # Validate that result is a string (per _schema_on_200 = AAZStrType())
         self.assertIsInstance(result, dict)
-
-    @live_only()
-    def test_stop_site_failover_test(self): # live_only as the express route is extremely expensive, contact service team for an available ER
+        
         import time
-
-        time.sleep(2 * 60)  # 120 seconds To wait for sometime before stopping the test failover
-        resource_group = "bhavana-vwan-failover"  
-        er_gateway_name = "422dcfc236aa44f6838f556330b628e1-centraluseuap-er-gw"
-        peering_location = "DataPathLocation1"
-        test_guid = "e009d347-7d2c-4499-8ccd-6e5a03fa0f0d"
-        was_simulation_successful = True
+        time.sleep(2 * 60)  # 120 seconds To wait for sometime before stopping the test failover 
 
         # Construct failover test connection details
         failover_details = [
@@ -9036,6 +9030,7 @@ class NetworkExpressRouteGatewayFailoverSimulationScenarioTest(ScenarioTest):
 
         # Validate response structure
         self.assertIsInstance(single_test_result, dict)
+
 
 class NetworkExpressRouteGatewayRoutesResiliencyScenarioTest(ScenarioTest):
 
