@@ -6740,7 +6740,7 @@ def create_sig(cmd, resource_group_name, gallery_name, location=None, eula=None,
         return sig
 
 
-def _assign_identity(resource, identity, external_identities=[], enable_local_identity=None, command_args={}):
+def _assign_identity(resource, identity, external_identities=None, enable_local_identity=None, command_args={}):
     if resource.get('identity', {}).get('type', None) == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value:
         identity_types = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value
     elif resource.get('identity', {}).get('type', None) == IdentityType.SYSTEM_ASSIGNED.value and external_identities:

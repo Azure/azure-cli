@@ -137,7 +137,7 @@ class SigIdentityRemove(_SigIdentityRemove):
 
         if existing_identity['type'] == IdentityType.NONE.value \
                 or existing_identity['type'] == IdentityType.SYSTEM_ASSIGNED.value:
-            existing_identity.pop('userAssignedIdentities')
+            existing_identity.pop('userAssignedIdentities', None)
 
         self.ctx.vars.instance.identity = existing_identity
 
