@@ -62,8 +62,8 @@ class ApimScenarioTest(ScenarioTest):
         self.cmd('apim wait -g {rg} -n {service_name} --created', checks=[self.is_empty()])
 
         self.cmd('apim check-name -n {service_name}',
-                 checks=[self.check('nameAvailable', True),
-                         self.check('reason', 'Valid')])
+                 checks=[self.check('nameAvailable', False),
+                         self.check('reason', 'AlreadyExists')])
 
         self.kwargs.update({
             'publisher_email': 'publisher@contoso2.com',
@@ -121,7 +121,7 @@ class ApimScenarioTest(ScenarioTest):
             'subscription_key_query_param_name': 'query',
             'api_id2': '48242ec7f53745de9cbb800757a4204a',
             'subscription_required': True,
-            'specification_url': 'https://raw.githubusercontent.com/OAI/OpenAPI-Specification/master/examples/v3.0/petstore.json',
+            'specification_url': 'https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/_archive_/schemas/v3.0/pass/petstore.yaml',
             'specification_format': 'OpenApi',
             'product_id1': 'standard',
             'product_id2': 'premium',
@@ -566,6 +566,41 @@ class ApimScenarioTest(ScenarioTest):
         final_vs_count = len(self.cmd('apim api versionset list -g "{rg}" -n "{service_name}"').get_output_in_json())
         self.assertEqual(final_vs_count, initial_vs_count)
 
+        # Backends operations
+
+        self.kwargs.update({
+            'backend_id': self.create_random_name('backend-id-', 30)
+        })
+
+        # backend create command
+        self.cmd(
+            'apim backend create -g "{rg}" --service-name "{service_name}" --backend-id "{backend_id}" --url "https://mybackend.com/api" --protocol "http" --description "My backend description"',
+            checks=[self.check('name', '{backend_id}'),
+                    self.check('url', 'https://mybackend.com/api'),
+                    self.check('protocol', 'http'),
+                    self.check('description', "My backend description")])
+
+        # backend show command
+        self.cmd(
+            'apim backend show -g "{rg}" --service-name "{service_name}" --backend-id "{backend_id}"',
+            checks=[self.check('name', '{backend_id}'),
+                    self.check('url', 'https://mybackend.com/api')])
+
+        # backend update command
+        self.cmd(
+            'apim backend update -g "{rg}" --service-name "{service_name}" --backend-id "{backend_id}" --description "Updated backend description"',
+            checks=[self.check('description', 'Updated backend description')])
+
+        # backend list command
+        backend_count = len(self.cmd('apim backend list -g "{rg}" --service-name "{service_name}"').get_output_in_json())
+        self.assertEqual(backend_count, 1)
+
+        # backend delete command
+        self.cmd(
+            'apim backend delete -g "{rg}" --service-name "{service_name}" --backend-id "{backend_id}" -y')
+        backend_count = len(self.cmd('apim backend list -g "{rg}" --service-name "{service_name}"').get_output_in_json())
+        self.assertEqual(backend_count, 0)
+
         # service delete command
         self.cmd('apim delete -g {rg} -n {service_name} -y')
 
@@ -573,12 +608,10 @@ class ApimScenarioTest(ScenarioTest):
         self.assertEqual(final_count, service_count - 1)
 
 
-    @ResourceGroupPreparer(name_prefix='cli_test_apim-', parameter_name_for_location='resource_group_location')
+    @ResourceGroupPreparer(name_prefix='cli_test_apim_service-', parameter_name_for_location='resource_group_location')
     @StorageAccountPreparer(parameter_name='storage_account_for_backup')
     @AllowLargeResponse()
     def test_apim_export_api(self, resource_group, resource_group_location):
-        service_name = self.create_random_name('cli-test-apim-export-api-', 50)
-
         service_name = self.create_random_name('cli-test-apim-service-', 35)
         resource_group = self.create_random_name('cli-test-apim-service-rg', 35)
 
@@ -602,7 +635,7 @@ class ApimScenarioTest(ScenarioTest):
             'path': 'test',
             'api_id': '48242ec7f53745de9cbb800757a4204a',
             'api_version': 'v1',
-            'specification_url': 'https://raw.githubusercontent.com/OAI/OpenAPI-Specification/master/examples/v3.0/petstore.json',
+            'specification_url': 'https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/_archive_/schemas/v3.0/pass/petstore.yaml',
             'specification_format': 'OpenApi',
             'vs_id': 'MyVSId',
             'subscription_key_header_name': 'header',
