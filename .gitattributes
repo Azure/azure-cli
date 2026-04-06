@@ -16,6 +16,10 @@ build_scripts/windows/scripts/az eol=lf
 # sh scripts should be LF
 *.sh eol=lf
 
+# Git hook scripts (no extension) should be LF to work on macOS/Linux
+.githooks/pre-commit eol=lf
+.githooks/pre-push eol=lf
+
 # Generated latest index assets should always use LF to avoid cross-platform churn
 src/azure-cli-core/azure/cli/core/commandIndex.latest.json text eol=lf
 src/azure-cli-core/azure/cli/core/helpIndex.latest.json text eol=lf

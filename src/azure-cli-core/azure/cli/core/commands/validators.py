@@ -5,7 +5,6 @@
 
 import argparse
 import time
-import random
 
 from azure.cli.core.profiles import ResourceType
 
@@ -67,6 +66,7 @@ def validate_key_value_pairs(string):
 
 def generate_deployment_name(namespace):
     if not namespace.deployment_name:
+        import random
         namespace.deployment_name = \
             'azurecli{}{}'.format(str(time.time()), str(random.randint(1, 100000)))
 

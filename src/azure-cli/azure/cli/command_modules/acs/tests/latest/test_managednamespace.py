@@ -275,6 +275,51 @@ class TestUpdateManagedNamespace(unittest.TestCase):
             ns.aks_managed_namespace_update(cmd, None, raw_parameters, None, None, False)
         self.assertIn(err, str(cm.exception))
 
+    def test_update_managed_namespace_sets_location_from_existing_namespace(self, mock_get_client):
+        cli_ctx = MockCLI()
+        cmd = MockCmd(cli_ctx)
+
+        mock_client = Mock()
+
+        existing_ns = Mock()
+        existing_ns.name = "test_managed_namespace"
+        existing_ns.location = "westus2"
+        existing_ns.properties.default_resource_quota.cpu_request = "300m"
+        existing_ns.properties.default_resource_quota.cpu_limit = "500m"
+        existing_ns.properties.default_resource_quota.memory_request = "1Gi"
+        existing_ns.properties.default_resource_quota.memory_limit = "2Gi"
+        existing_ns.properties.default_network_policy.ingress = "DenyAll"
+        existing_ns.properties.default_network_policy.egress = "AllowAll"
+        existing_ns.properties.adoption_policy = "Never"
+        existing_ns.properties.delete_policy = "Keep"
+
+        raw_parameters = {
+            "resource_group_name": "test_rg",
+            "cluster_name": "test_cluster",
+            "name": "test_managed_namespace",
+            "tags": {},
+            "labels": None,
+            "annotations": ["a=c"],
+            "cpu_request": None,
+            "cpu_limit": None,
+            "memory_request": None,
+            "memory_limit": None,
+            "ingress_policy": None,
+            "egress_policy": None,
+            "adoption_policy": None,
+            "delete_policy": None,
+        }
+
+        ns.aks_managed_namespace_update(cmd, mock_client, raw_parameters, None, existing_ns, False)
+
+        # The namespace that passed to begin_create_or_update should carry the existing location
+        call_args = mock_client.begin_create_or_update.call_args
+        namespace_config = call_args[0][3]  # 4th positional arg
+        self.assertEqual(namespace_config.location, "westus2")
+
+        # No managed cluster GET should be needed for the update path
+        mock_get_client.assert_not_called()
+
 
 if __name__ == "__main__":
     unittest.main()
