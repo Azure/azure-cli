@@ -8948,9 +8948,9 @@ class NetworkVnetGatewayRoutesAndResiliencyInfoScenarioTest(ScenarioTest):
 class NetworkExpressRouteGatewayFailoverSimulationScenarioTest(ScenarioTest):
     @live_only()
     def test_start_site_failover_test(self): # live_only as the express route is extremely expensive, contact service team for an available ER
-        resource_group = "tamil-vwan-test"  
-        er_gateway_name = "afcf242ff531409897c9a28b4c69096a-centraluseuap-er-gw"
-        peering_location = "Washington DC"
+        resource_group = "bhavana-vwan-failover"  
+        er_gateway_name = "422dcfc236aa44f6838f556330b628e1-centraluseuap-er-gw"
+        peering_location = "DataPathLocation1"
 
         self.kwargs.update({
             'rg': resource_group,
@@ -8960,7 +8960,7 @@ class NetworkExpressRouteGatewayFailoverSimulationScenarioTest(ScenarioTest):
 
         # Run the command
         result = self.cmd(
-            'network express-route-gateway start-site-failover-test '
+            'network express-route gateway start-site-failover-test '
             '--resource-group {rg} --name {er_gw} --peering-location {peering_loc}'
         ).get_output_in_json()
 
@@ -8972,16 +8972,17 @@ class NetworkExpressRouteGatewayFailoverSimulationScenarioTest(ScenarioTest):
         import time
 
         time.sleep(2 * 60)  # 120 seconds To wait for sometime before stopping the test failover
-        resource_group = "tamil-vwan-test"  
-        er_gateway_name = "afcf242ff531409897c9a28b4c69096a-centraluseuap-er-gw"
-        peering_location = "Washington DC"
+        resource_group = "bhavana-vwan-failover"  
+        er_gateway_name = "422dcfc236aa44f6838f556330b628e1-centraluseuap-er-gw"
+        peering_location = "DataPathLocation1"
+        test_guid = "e009d347-7d2c-4499-8ccd-6e5a03fa0f0d"
         was_simulation_successful = True
 
         # Construct failover test connection details
         failover_details = [
             {
-                "failover-connection-name": "ExRConnection-centraluseuap-1750696126887",
-                "failover-location": "Washington DC",
+                "failover-connection-name": "ExRConnection-centraluseuap-1772183583607",
+                "failover-location": "DataPathLocation1",
                 "is-verified": True
             }
         ]
@@ -9000,20 +9001,41 @@ class NetworkExpressRouteGatewayFailoverSimulationScenarioTest(ScenarioTest):
             'er_gw': er_gateway_name,
             'peering_loc': peering_location,
             'was_successful': was_simulation_successful,
-            'details_arg': details_arg
+            'details_arg': details_arg,
+            'test_guid': test_guid
         })
 
         # Run the command
         result = self.cmd(
-            'network express-route-gateway stop-site-failover-test '
+            'network express-route gateway stop-site-failover-test '
             '--resource-group {rg} --name {er_gw} '
             '--peering-location {peering_loc} '
-            '--was-simulation-successful {was_successful} '
+            '--simulation-successful {was_successful} '
             '--details \'{details_arg}\''
         ).get_output_in_json()
 
         # Validate
         self.assertTrue(isinstance(result, (str, dict)))
+
+        # Run all tests detail command to validate the stop operation
+        tests_link_latest = self.cmd(
+            'network express-route gateway get-failover-all-tests-detail '
+            '--resource-group {rg} --name {er_gw} '
+            '--fetch-latest True --type SingleSiteFailover'
+        ).get_output_in_json()
+
+        self.assertIsInstance(tests_link_latest, dict)
+
+        #
+        single_test_result = self.cmd(
+                'network express-route gateway get-failover-single-test-detail '
+                '--resource-group {rg} --name {er_gw} '
+                '--failover-test-id {test_guid} '
+                '--peering-location {peering_loc} '
+            ).get_output_in_json()
+
+        # Validate response structure
+        self.assertIsInstance(single_test_result, dict)
 
 class NetworkExpressRouteGatewayRoutesResiliencyScenarioTest(ScenarioTest):
 
@@ -9028,44 +9050,20 @@ class NetworkExpressRouteGatewayRoutesResiliencyScenarioTest(ScenarioTest):
         """
         from time import sleep
 
+        resource_group = "bhavana-vwan-failover"  
+        er_gateway_name = "422dcfc236aa44f6838f556330b628e1-centraluseuap-er-gw"
+        attempt_refresh = True
+
         self.kwargs.update({
             'rg': resource_group,
-            'ergw': 'test-ergw-routes',
-            'vwan': 'test-vwan-routes',
-            'vhub': 'test-vhub-routes',
-            'attempt_refresh': True,
+            'er_gw': er_gateway_name,
+            'attempt_refresh': attempt_refresh
         })
-
-        # Create Virtual WAN
-        self.cmd('network vwan create -n {vwan} -g {rg} --type Standard', checks=[
-            self.check('name', '{vwan}')
-        ])
-
-        # Create Virtual Hub
-        self.cmd('network vhub create -g {rg} -n {vhub} --vwan {vwan} --address-prefix 10.6.0.0/16 --sku Standard', checks=[
-            self.check('name', '{vhub}')
-        ])
-
-        # Wait for hub to be provisioned
-        routing_state = self.cmd('network vhub show -g {rg} -n {vhub}').get_output_in_json()['routingState']
-        retry_count = 0
-        while routing_state != 'Provisioned':
-            if retry_count == 20:
-                raise Exception(f"Virtual Hub provisioning failed. Last known state: {routing_state}")
-            retry_count += 1
-            sleep(60)
-            routing_state = self.cmd('network vhub show -g {rg} -n {vhub}').get_output_in_json()['routingState']
-
-        # Create Express Route Gateway
-        self.cmd('network express-route gateway create -g {rg} -n {ergw} --virtual-hub {vhub} --min-val 2', checks=[
-            self.check('name', '{ergw}'),
-            self.check('provisioningState', 'Succeeded')
-        ])
 
         # Test 1: Get Routes Information
         routes_result = self.cmd(
-            'network express-route-gateway get-routes-information '
-            '-g {rg} --name {ergw} --attempt-refresh {attempt_refresh}'
+            'network express-route gateway get-routes-information '
+            '--resource-group {rg} --name {er_gw} --attempt-refresh {attempt_refresh}'
         ).get_output_in_json()
 
         # Validate routes information response structure
@@ -9080,8 +9078,8 @@ class NetworkExpressRouteGatewayRoutesResiliencyScenarioTest(ScenarioTest):
 
         # Test 2: Get Resiliency Information
         resiliency_result = self.cmd(
-            'network express-route-gateway get-resiliency-information '
-            '-g {rg} --name {ergw} --attempt-refresh {attempt_refresh}'
+            'network express-route gateway get-resiliency-information '
+            '--resource-group {rg} --name {er_gw} --attempt-refresh {attempt_refresh}'
         ).get_output_in_json()
 
         # Validate resiliency information response structure

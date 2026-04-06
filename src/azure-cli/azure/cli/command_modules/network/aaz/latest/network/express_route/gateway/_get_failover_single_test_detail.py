@@ -12,19 +12,19 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network express-route-gateway start-site-failover-test",
+    "network express-route gateway get-failover-single-test-detail",
 )
-class StartSiteFailoverTest(AAZCommand):
-    """This operation starts failover simulation on the vwan expressRouteGateway for the specified peering location
+class GetFailoverSingleTestDetail(AAZCommand):
+    """This operation retrieves the details of a particular failover test performed on the vwan expressRouteGateway based on the test Guid
 
-    :example: VwanExpressRouteGatewayStartSiteFailoverSimulation
-        az network express-route-gateway start-site-failover-test --resource-group "rg1" --name "ergw" --peering-location "Vancouver"
+    :example: VwanExpressRouteGatewayFailoverSingleTestDetails
+        az network express-route gateway get-failover-single-test-detail --resource-group "rg1" --name "ergw" --peering-location "Vancouver" --failover-test-id "fe458ae8-d2ae-4520-a104-44bc233bde7e"
     """
 
     _aaz_info = {
         "version": "2025-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressroutegateways/{}/startsitefailovertest", "2025-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressroutegateways/{}/getfailoversingletestdetails", "2025-07-01"],
         ]
     }
 
@@ -57,6 +57,11 @@ class StartSiteFailoverTest(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
+        _args_schema.failover_test_id = AAZStrArg(
+            options=["--failover-test-id"],
+            help="The unique Guid value which identifies the test",
+            required=True,
+        )
         _args_schema.peering_location = AAZStrArg(
             options=["--peering-location"],
             help="Peering location of the test",
@@ -66,7 +71,7 @@ class StartSiteFailoverTest(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.ExpressRouteGatewaysStartSiteFailoverTest(ctx=self.ctx)()
+        yield self.ExpressRouteGatewaysGetFailoverSingleTestDetails(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -78,10 +83,10 @@ class StartSiteFailoverTest(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=False)
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class ExpressRouteGatewaysStartSiteFailoverTest(AAZHttpOperation):
+    class ExpressRouteGatewaysGetFailoverSingleTestDetails(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -111,7 +116,7 @@ class StartSiteFailoverTest(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/expressRouteGateways/{expressRouteGatewayName}/startSiteFailoverTest",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/expressRouteGateways/{expressRouteGatewayName}/getFailoverSingleTestDetails",
                 **self.url_parameters
             )
 
@@ -144,6 +149,10 @@ class StartSiteFailoverTest(AAZCommand):
         @property
         def query_parameters(self):
             parameters = {
+                **self.serialize_query_param(
+                    "failoverTestId", self.ctx.args.failover_test_id,
+                    required=True,
+                ),
                 **self.serialize_query_param(
                     "peeringLocation", self.ctx.args.peering_location,
                     required=True,
@@ -179,13 +188,87 @@ class StartSiteFailoverTest(AAZCommand):
             if cls._schema_on_200 is not None:
                 return cls._schema_on_200
 
-            cls._schema_on_200 = AAZStrType()
+            cls._schema_on_200 = AAZObjectType()
+
+            _schema_on_200 = cls._schema_on_200
+            _schema_on_200.value = AAZListType()
+
+            value = cls._schema_on_200.value
+            value.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element
+            _element.attestation = AAZBoolType(
+                flags={"read_only": True},
+            )
+            _element.end_time = AAZStrType(
+                serialized_name="endTime",
+                flags={"read_only": True},
+            )
+            _element.failover_connection_details = AAZListType(
+                serialized_name="failoverConnectionDetails",
+                flags={"read_only": True},
+            )
+            _element.non_redundant_routes = AAZListType(
+                serialized_name="nonRedundantRoutes",
+                flags={"read_only": True},
+            )
+            _element.peering_location = AAZStrType(
+                serialized_name="peeringLocation",
+                flags={"read_only": True},
+            )
+            _element.redundant_routes = AAZListType(
+                serialized_name="redundantRoutes",
+                flags={"read_only": True},
+            )
+            _element.start_time = AAZStrType(
+                serialized_name="startTime",
+                flags={"read_only": True},
+            )
+            _element.status = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.was_simulation_successful = AAZBoolType(
+                serialized_name="wasSimulationSuccessful",
+                flags={"read_only": True},
+            )
+
+            failover_connection_details = cls._schema_on_200.value.Element.failover_connection_details
+            failover_connection_details.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.failover_connection_details.Element
+            _element.failover_connection_name = AAZStrType(
+                serialized_name="failoverConnectionName",
+            )
+            _element.failover_location = AAZStrType(
+                serialized_name="failoverLocation",
+            )
+            _element.is_verified = AAZBoolType(
+                serialized_name="isVerified",
+            )
+
+            non_redundant_routes = cls._schema_on_200.value.Element.non_redundant_routes
+            non_redundant_routes.Element = AAZStrType()
+
+            redundant_routes = cls._schema_on_200.value.Element.redundant_routes
+            redundant_routes.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.redundant_routes.Element
+            _element.peering_locations = AAZListType(
+                serialized_name="peeringLocations",
+            )
+            _element.routes = AAZListType()
+
+            peering_locations = cls._schema_on_200.value.Element.redundant_routes.Element.peering_locations
+            peering_locations.Element = AAZStrType()
+
+            routes = cls._schema_on_200.value.Element.redundant_routes.Element.routes
+            routes.Element = AAZStrType()
 
             return cls._schema_on_200
 
 
-class _StartSiteFailoverTestHelper:
-    """Helper class for StartSiteFailoverTest"""
+class _GetFailoverSingleTestDetailHelper:
+    """Helper class for GetFailoverSingleTestDetail"""
 
 
-__all__ = ["StartSiteFailoverTest"]
+__all__ = ["GetFailoverSingleTestDetail"]

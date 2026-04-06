@@ -12,19 +12,19 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network express-route-gateway stop-site-failover-test",
+    "network express-route gateway start-site-failover-test",
 )
-class StopSiteFailoverTest(AAZCommand):
-    """This operation stops an ongoing failover simulation on the vwan expressRouteGateway for the specified peering location
+class StartSiteFailoverTest(AAZCommand):
+    """This operation starts failover simulation on the vwan expressRouteGateway for the specified peering location
 
-    :example: VwanExpressRouteGatewayStopSiteFailoverSimulation
-        az network express-route-gateway stop-site-failover-test --resource-group "rg1" --name "ergw" --peering-location "Vancouver" --simulation-successful True --details "[{failover-connection-name:'conn1',failover-location:'Denver',is-verified:False},{failover-connection-name:'conn2',failover-location:'Amsterdam',is-verified:True}]"
+    :example: VwanExpressRouteGatewayStartSiteFailoverSimulation
+        az network express-route gateway start-site-failover-test --resource-group "rg1" --name "ergw" --peering-location "Vancouver"
     """
 
     _aaz_info = {
         "version": "2025-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressroutegateways/{}/stopsitefailovertest", "2025-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressroutegateways/{}/startsitefailovertest", "2025-07-01"],
         ]
     }
 
@@ -57,50 +57,16 @@ class StopSiteFailoverTest(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-
-        # define Arg Group "StopParameters"
-
-        _args_schema = cls._args_schema
-        _args_schema.details = AAZListArg(
-            options=["--details"],
-            arg_group="StopParameters",
-            help="List of all the failover connections for this peering location",
-            required=True,
-        )
         _args_schema.peering_location = AAZStrArg(
             options=["--peering-location"],
-            arg_group="StopParameters",
             help="Peering location of the test",
             required=True,
-        )
-        _args_schema.simulation_successful = AAZBoolArg(
-            options=["--simulation-successful"],
-            arg_group="StopParameters",
-            help="Whether the failover simulation was successful or not",
-            required=True,
-        )
-
-        details = cls._args_schema.details
-        details.Element = AAZObjectArg()
-
-        _element = cls._args_schema.details.Element
-        _element.failover_connection_name = AAZStrArg(
-            options=["failover-connection-name"],
-            help="Name of the failover connection",
-        )
-        _element.failover_location = AAZStrArg(
-            options=["failover-location"],
-            help="Location of the failover connection",
-        )
-        _element.is_verified = AAZBoolArg(
-            options=["is-verified"],
-            help="Whether the customer was able to establish connectivity through this failover connection or not",
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.ExpressRouteGatewaysStopSiteFailoverTest(ctx=self.ctx)()
+        yield self.ExpressRouteGatewaysStartSiteFailoverTest(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -115,7 +81,7 @@ class StopSiteFailoverTest(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=False)
         return result
 
-    class ExpressRouteGatewaysStopSiteFailoverTest(AAZHttpOperation):
+    class ExpressRouteGatewaysStartSiteFailoverTest(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -145,7 +111,7 @@ class StopSiteFailoverTest(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/expressRouteGateways/{expressRouteGatewayName}/stopSiteFailoverTest",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/expressRouteGateways/{expressRouteGatewayName}/startSiteFailoverTest",
                 **self.url_parameters
             )
 
@@ -179,6 +145,10 @@ class StopSiteFailoverTest(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
+                    "peeringLocation", self.ctx.args.peering_location,
+                    required=True,
+                ),
+                **self.serialize_query_param(
                     "api-version", "2025-07-01",
                     required=True,
                 ),
@@ -189,36 +159,10 @@ class StopSiteFailoverTest(AAZCommand):
         def header_parameters(self):
             parameters = {
                 **self.serialize_header_param(
-                    "Content-Type", "application/json",
-                ),
-                **self.serialize_header_param(
                     "Accept", "application/json",
                 ),
             }
             return parameters
-
-        @property
-        def content(self):
-            _content_value, _builder = self.new_content_builder(
-                self.ctx.args,
-                typ=AAZObjectType,
-                typ_kwargs={"flags": {"required": True, "client_flatten": True}}
-            )
-            _builder.set_prop("details", AAZListType, ".details", typ_kwargs={"flags": {"required": True}})
-            _builder.set_prop("peeringLocation", AAZStrType, ".peering_location", typ_kwargs={"flags": {"required": True}})
-            _builder.set_prop("wasSimulationSuccessful", AAZBoolType, ".simulation_successful", typ_kwargs={"flags": {"required": True}})
-
-            details = _builder.get(".details")
-            if details is not None:
-                details.set_elements(AAZObjectType, ".")
-
-            _elements = _builder.get(".details[]")
-            if _elements is not None:
-                _elements.set_prop("failoverConnectionName", AAZStrType, ".failover_connection_name")
-                _elements.set_prop("failoverLocation", AAZStrType, ".failover_location")
-                _elements.set_prop("isVerified", AAZBoolType, ".is_verified")
-
-            return self.serialize_content(_content_value)
 
         def on_200(self, session):
             data = self.deserialize_http_content(session)
@@ -240,8 +184,8 @@ class StopSiteFailoverTest(AAZCommand):
             return cls._schema_on_200
 
 
-class _StopSiteFailoverTestHelper:
-    """Helper class for StopSiteFailoverTest"""
+class _StartSiteFailoverTestHelper:
+    """Helper class for StartSiteFailoverTest"""
 
 
-__all__ = ["StopSiteFailoverTest"]
+__all__ = ["StartSiteFailoverTest"]

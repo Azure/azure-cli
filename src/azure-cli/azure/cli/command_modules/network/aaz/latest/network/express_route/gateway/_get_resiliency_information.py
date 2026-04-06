@@ -12,19 +12,19 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network express-route-gateway get-routes-information",
+    "network express-route gateway get-resiliency-information",
 )
-class GetRoutesInformation(AAZCommand):
-    """This operation retrieves the route set information for Vwan Express Route Gateway based on their resiliency
+class GetResiliencyInformation(AAZCommand):
+    """This operation retrieves the resiliency information for VWAN ExpressRoute Gateway, including the gateway's current resiliency score and recommendations to further improve the score
 
-    :example: VwanExpressRouteGatewayGetRoutesInformation
-        az network express-route-gateway get-routes-information --resource-group "rg1" --name "ergw" --attempt-refresh False
+    :example: VwanExpressRouteGatewayGetResiliencyInformation
+        az network express-route gateway get-resiliency-information --resource-group "rg1" --name "ergw" --attempt-refresh True
     """
 
     _aaz_info = {
         "version": "2025-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressroutegateways/{}/getroutesinformation", "2025-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressroutegateways/{}/getresiliencyinformation", "2025-07-01"],
         ]
     }
 
@@ -59,13 +59,13 @@ class GetRoutesInformation(AAZCommand):
         )
         _args_schema.attempt_refresh = AAZBoolArg(
             options=["--attempt-refresh"],
-            help="Attempt to recalculate the Route Sets Information for the gateway",
+            help="Attempt to recalculate the Resiliency Information for the gateway",
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.ExpressRouteGatewaysGetRoutesInformation(ctx=self.ctx)()
+        yield self.ExpressRouteGatewaysGetResiliencyInformation(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -80,7 +80,7 @@ class GetRoutesInformation(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class ExpressRouteGatewaysGetRoutesInformation(AAZHttpOperation):
+    class ExpressRouteGatewaysGetResiliencyInformation(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -110,7 +110,7 @@ class GetRoutesInformation(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/expressRouteGateways/{expressRouteGatewayName}/getRoutesInformation",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/expressRouteGateways/{expressRouteGatewayName}/getResiliencyInformation",
                 **self.url_parameters
             )
 
@@ -180,62 +180,74 @@ class GetRoutesInformation(AAZCommand):
             cls._schema_on_200 = AAZObjectType()
 
             _schema_on_200 = cls._schema_on_200
-            _schema_on_200.circuits_metadata_map = AAZDictType(
-                serialized_name="circuitsMetadataMap",
+            _schema_on_200.components = AAZListType(
                 flags={"read_only": True},
             )
             _schema_on_200.last_computed_time = AAZStrType(
                 serialized_name="lastComputedTime",
                 flags={"read_only": True},
             )
+            _schema_on_200.max_score_from_recommendations = AAZStrType(
+                serialized_name="maxScoreFromRecommendations",
+                flags={"read_only": True},
+            )
+            _schema_on_200.min_score_from_recommendations = AAZStrType(
+                serialized_name="minScoreFromRecommendations",
+                flags={"read_only": True},
+            )
             _schema_on_200.next_eligible_compute_time = AAZStrType(
                 serialized_name="nextEligibleComputeTime",
                 flags={"read_only": True},
             )
-            _schema_on_200.route_set_version = AAZStrType(
-                serialized_name="routeSetVersion",
+            _schema_on_200.overall_score = AAZStrType(
+                serialized_name="overallScore",
                 flags={"read_only": True},
             )
-            _schema_on_200.route_sets = AAZListType(
-                serialized_name="routeSets",
+            _schema_on_200.score_change = AAZStrType(
+                serialized_name="scoreChange",
                 flags={"read_only": True},
             )
 
-            circuits_metadata_map = cls._schema_on_200.circuits_metadata_map
-            circuits_metadata_map.Element = AAZObjectType()
+            components = cls._schema_on_200.components
+            components.Element = AAZObjectType()
 
-            _element = cls._schema_on_200.circuits_metadata_map.Element
-            _element.link = AAZStrType()
-            _element.location = AAZStrType()
+            _element = cls._schema_on_200.components.Element
+            _element.current_score = AAZStrType(
+                serialized_name="currentScore",
+            )
+            _element.max_score = AAZStrType(
+                serialized_name="maxScore",
+            )
             _element.name = AAZStrType()
+            _element.recommendations = AAZListType()
 
-            route_sets = cls._schema_on_200.route_sets
-            route_sets.Element = AAZObjectType()
+            recommendations = cls._schema_on_200.components.Element.recommendations
+            recommendations.Element = AAZObjectType()
 
-            _element = cls._schema_on_200.route_sets.Element
-            _element.details = AAZDictType()
-            _element.locations = AAZListType()
-            _element.name = AAZStrType()
-
-            details = cls._schema_on_200.route_sets.Element.details
-            details.Element = AAZListType()
-
-            _element = cls._schema_on_200.route_sets.Element.details.Element
-            _element.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.route_sets.Element.details.Element.Element
-            _element.circuit = AAZStrType()
-            _element.pri = AAZIntType()
-            _element.sec = AAZIntType()
-
-            locations = cls._schema_on_200.route_sets.Element.locations
-            locations.Element = AAZStrType()
+            _element = cls._schema_on_200.components.Element.recommendations.Element
+            _element.call_to_action_link = AAZStrType(
+                serialized_name="callToActionLink",
+            )
+            _element.call_to_action_text = AAZStrType(
+                serialized_name="callToActionText",
+            )
+            _element.details = AAZStrType()
+            _element.recommendation_id = AAZStrType(
+                serialized_name="recommendationId",
+            )
+            _element.recommendation_text = AAZStrType(
+                serialized_name="recommendationText",
+            )
+            _element.recommendation_title = AAZStrType(
+                serialized_name="recommendationTitle",
+            )
+            _element.severity = AAZStrType()
 
             return cls._schema_on_200
 
 
-class _GetRoutesInformationHelper:
-    """Helper class for GetRoutesInformation"""
+class _GetResiliencyInformationHelper:
+    """Helper class for GetResiliencyInformation"""
 
 
-__all__ = ["GetRoutesInformation"]
+__all__ = ["GetResiliencyInformation"]

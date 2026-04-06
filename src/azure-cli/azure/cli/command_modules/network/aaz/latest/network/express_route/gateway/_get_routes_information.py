@@ -12,19 +12,19 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network express-route-gateway get-failover-single-test-detail",
+    "network express-route gateway get-routes-information",
 )
-class GetFailoverSingleTestDetail(AAZCommand):
-    """This operation retrieves the details of a particular failover test performed on the vwan expressRouteGateway based on the test Guid
+class GetRoutesInformation(AAZCommand):
+    """This operation retrieves the route set information for Vwan Express Route Gateway based on their resiliency
 
-    :example: VwanExpressRouteGatewayFailoverSingleTestDetails
-        az network express-route-gateway get-failover-single-test-detail --resource-group "rg1" --name "ergw" --peering-location "Vancouver" --failover-test-id "fe458ae8-d2ae-4520-a104-44bc233bde7e"
+    :example: VwanExpressRouteGatewayGetRoutesInformation
+        az network express-route gateway get-routes-information --resource-group "rg1" --name "ergw" --attempt-refresh False
     """
 
     _aaz_info = {
         "version": "2025-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressroutegateways/{}/getfailoversingletestdetails", "2025-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressroutegateways/{}/getroutesinformation", "2025-07-01"],
         ]
     }
 
@@ -57,21 +57,15 @@ class GetFailoverSingleTestDetail(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-        _args_schema.failover_test_id = AAZStrArg(
-            options=["--failover-test-id"],
-            help="The unique Guid value which identifies the test",
-            required=True,
-        )
-        _args_schema.peering_location = AAZStrArg(
-            options=["--peering-location"],
-            help="Peering location of the test",
-            required=True,
+        _args_schema.attempt_refresh = AAZBoolArg(
+            options=["--attempt-refresh"],
+            help="Attempt to recalculate the Route Sets Information for the gateway",
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.ExpressRouteGatewaysGetFailoverSingleTestDetails(ctx=self.ctx)()
+        yield self.ExpressRouteGatewaysGetRoutesInformation(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -86,7 +80,7 @@ class GetFailoverSingleTestDetail(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class ExpressRouteGatewaysGetFailoverSingleTestDetails(AAZHttpOperation):
+    class ExpressRouteGatewaysGetRoutesInformation(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -116,7 +110,7 @@ class GetFailoverSingleTestDetail(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/expressRouteGateways/{expressRouteGatewayName}/getFailoverSingleTestDetails",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/expressRouteGateways/{expressRouteGatewayName}/getRoutesInformation",
                 **self.url_parameters
             )
 
@@ -150,12 +144,7 @@ class GetFailoverSingleTestDetail(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "failoverTestId", self.ctx.args.failover_test_id,
-                    required=True,
-                ),
-                **self.serialize_query_param(
-                    "peeringLocation", self.ctx.args.peering_location,
-                    required=True,
+                    "attemptRefresh", self.ctx.args.attempt_refresh,
                 ),
                 **self.serialize_query_param(
                     "api-version", "2025-07-01",
@@ -191,84 +180,62 @@ class GetFailoverSingleTestDetail(AAZCommand):
             cls._schema_on_200 = AAZObjectType()
 
             _schema_on_200 = cls._schema_on_200
-            _schema_on_200.value = AAZListType()
-
-            value = cls._schema_on_200.value
-            value.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element
-            _element.attestation = AAZBoolType(
+            _schema_on_200.circuits_metadata_map = AAZDictType(
+                serialized_name="circuitsMetadataMap",
                 flags={"read_only": True},
             )
-            _element.end_time = AAZStrType(
-                serialized_name="endTime",
+            _schema_on_200.last_computed_time = AAZStrType(
+                serialized_name="lastComputedTime",
                 flags={"read_only": True},
             )
-            _element.failover_connection_details = AAZListType(
-                serialized_name="failoverConnectionDetails",
+            _schema_on_200.next_eligible_compute_time = AAZStrType(
+                serialized_name="nextEligibleComputeTime",
                 flags={"read_only": True},
             )
-            _element.non_redundant_routes = AAZListType(
-                serialized_name="nonRedundantRoutes",
+            _schema_on_200.route_set_version = AAZStrType(
+                serialized_name="routeSetVersion",
                 flags={"read_only": True},
             )
-            _element.peering_location = AAZStrType(
-                serialized_name="peeringLocation",
-                flags={"read_only": True},
-            )
-            _element.redundant_routes = AAZListType(
-                serialized_name="redundantRoutes",
-                flags={"read_only": True},
-            )
-            _element.start_time = AAZStrType(
-                serialized_name="startTime",
-                flags={"read_only": True},
-            )
-            _element.status = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.was_simulation_successful = AAZBoolType(
-                serialized_name="wasSimulationSuccessful",
+            _schema_on_200.route_sets = AAZListType(
+                serialized_name="routeSets",
                 flags={"read_only": True},
             )
 
-            failover_connection_details = cls._schema_on_200.value.Element.failover_connection_details
-            failover_connection_details.Element = AAZObjectType()
+            circuits_metadata_map = cls._schema_on_200.circuits_metadata_map
+            circuits_metadata_map.Element = AAZObjectType()
 
-            _element = cls._schema_on_200.value.Element.failover_connection_details.Element
-            _element.failover_connection_name = AAZStrType(
-                serialized_name="failoverConnectionName",
-            )
-            _element.failover_location = AAZStrType(
-                serialized_name="failoverLocation",
-            )
-            _element.is_verified = AAZBoolType(
-                serialized_name="isVerified",
-            )
+            _element = cls._schema_on_200.circuits_metadata_map.Element
+            _element.link = AAZStrType()
+            _element.location = AAZStrType()
+            _element.name = AAZStrType()
 
-            non_redundant_routes = cls._schema_on_200.value.Element.non_redundant_routes
-            non_redundant_routes.Element = AAZStrType()
+            route_sets = cls._schema_on_200.route_sets
+            route_sets.Element = AAZObjectType()
 
-            redundant_routes = cls._schema_on_200.value.Element.redundant_routes
-            redundant_routes.Element = AAZObjectType()
+            _element = cls._schema_on_200.route_sets.Element
+            _element.details = AAZDictType()
+            _element.locations = AAZListType()
+            _element.name = AAZStrType()
 
-            _element = cls._schema_on_200.value.Element.redundant_routes.Element
-            _element.peering_locations = AAZListType(
-                serialized_name="peeringLocations",
-            )
-            _element.routes = AAZListType()
+            details = cls._schema_on_200.route_sets.Element.details
+            details.Element = AAZListType()
 
-            peering_locations = cls._schema_on_200.value.Element.redundant_routes.Element.peering_locations
-            peering_locations.Element = AAZStrType()
+            _element = cls._schema_on_200.route_sets.Element.details.Element
+            _element.Element = AAZObjectType()
 
-            routes = cls._schema_on_200.value.Element.redundant_routes.Element.routes
-            routes.Element = AAZStrType()
+            _element = cls._schema_on_200.route_sets.Element.details.Element.Element
+            _element.circuit = AAZStrType()
+            _element.pri = AAZIntType()
+            _element.sec = AAZIntType()
+
+            locations = cls._schema_on_200.route_sets.Element.locations
+            locations.Element = AAZStrType()
 
             return cls._schema_on_200
 
 
-class _GetFailoverSingleTestDetailHelper:
-    """Helper class for GetFailoverSingleTestDetail"""
+class _GetRoutesInformationHelper:
+    """Helper class for GetRoutesInformation"""
 
 
-__all__ = ["GetFailoverSingleTestDetail"]
+__all__ = ["GetRoutesInformation"]

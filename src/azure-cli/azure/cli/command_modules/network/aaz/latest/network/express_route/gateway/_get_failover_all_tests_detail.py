@@ -12,13 +12,13 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network express-route-gateway get-failover-all-tests-detail",
+    "network express-route gateway get-failover-all-tests-detail",
 )
 class GetFailoverAllTestsDetail(AAZCommand):
     """This operation retrieves the details of all the failover tests performed on the Virtual Wan ExpressRoute gateways for different peering locations
 
     :example: VwanExpressRouteGatewayFailoverAllTestsDetails
-        az network express-route-gateway get-failover-all-tests-detail --resource-group "rg1" --name "ergw1" --type "SingleSiteFailover" --fetch-latest True
+        az network express-route gateway get-failover-all-tests-detail --resource-group "rg1" --name "ergw1" --type "SingleSiteFailover" --fetch-latest True
     """
 
     _aaz_info = {

@@ -12,19 +12,19 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network express-route-gateway get-resiliency-information",
+    "network express-route gateway stop-site-failover-test",
 )
-class GetResiliencyInformation(AAZCommand):
-    """This operation retrieves the resiliency information for VWAN ExpressRoute Gateway, including the gateway's current resiliency score and recommendations to further improve the score
+class StopSiteFailoverTest(AAZCommand):
+    """This operation stops an ongoing failover simulation on the vwan expressRouteGateway for the specified peering location
 
-    :example: VwanExpressRouteGatewayGetResiliencyInformation
-        az network express-route-gateway get-resiliency-information --resource-group "rg1" --name "ergw" --attempt-refresh True
+    :example: VwanExpressRouteGatewayStopSiteFailoverSimulation
+        az network express-route gateway stop-site-failover-test --resource-group "rg1" --name "ergw" --peering-location "Vancouver" --simulation-successful True --details "[{failover-connection-name:'conn1',failover-location:'Denver',is-verified:False},{failover-connection-name:'conn2',failover-location:'Amsterdam',is-verified:True}]"
     """
 
     _aaz_info = {
         "version": "2025-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressroutegateways/{}/getresiliencyinformation", "2025-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressroutegateways/{}/stopsitefailovertest", "2025-07-01"],
         ]
     }
 
@@ -57,15 +57,50 @@ class GetResiliencyInformation(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-        _args_schema.attempt_refresh = AAZBoolArg(
-            options=["--attempt-refresh"],
-            help="Attempt to recalculate the Resiliency Information for the gateway",
+
+        # define Arg Group "StopParameters"
+
+        _args_schema = cls._args_schema
+        _args_schema.details = AAZListArg(
+            options=["--details"],
+            arg_group="StopParameters",
+            help="List of all the failover connections for this peering location",
+            required=True,
+        )
+        _args_schema.peering_location = AAZStrArg(
+            options=["--peering-location"],
+            arg_group="StopParameters",
+            help="Peering location of the test",
+            required=True,
+        )
+        _args_schema.simulation_successful = AAZBoolArg(
+            options=["--simulation-successful"],
+            arg_group="StopParameters",
+            help="Whether the failover simulation was successful or not",
+            required=True,
+        )
+
+        details = cls._args_schema.details
+        details.Element = AAZObjectArg()
+
+        _element = cls._args_schema.details.Element
+        _element.failover_connection_name = AAZStrArg(
+            options=["failover-connection-name"],
+            help="Name of the failover connection",
+        )
+        _element.failover_location = AAZStrArg(
+            options=["failover-location"],
+            help="Location of the failover connection",
+        )
+        _element.is_verified = AAZBoolArg(
+            options=["is-verified"],
+            help="Whether the customer was able to establish connectivity through this failover connection or not",
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.ExpressRouteGatewaysGetResiliencyInformation(ctx=self.ctx)()
+        yield self.ExpressRouteGatewaysStopSiteFailoverTest(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -77,10 +112,10 @@ class GetResiliencyInformation(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=False)
         return result
 
-    class ExpressRouteGatewaysGetResiliencyInformation(AAZHttpOperation):
+    class ExpressRouteGatewaysStopSiteFailoverTest(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -110,7 +145,7 @@ class GetResiliencyInformation(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/expressRouteGateways/{expressRouteGatewayName}/getResiliencyInformation",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/expressRouteGateways/{expressRouteGatewayName}/stopSiteFailoverTest",
                 **self.url_parameters
             )
 
@@ -144,9 +179,6 @@ class GetResiliencyInformation(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "attemptRefresh", self.ctx.args.attempt_refresh,
-                ),
-                **self.serialize_query_param(
                     "api-version", "2025-07-01",
                     required=True,
                 ),
@@ -157,10 +189,36 @@ class GetResiliencyInformation(AAZCommand):
         def header_parameters(self):
             parameters = {
                 **self.serialize_header_param(
+                    "Content-Type", "application/json",
+                ),
+                **self.serialize_header_param(
                     "Accept", "application/json",
                 ),
             }
             return parameters
+
+        @property
+        def content(self):
+            _content_value, _builder = self.new_content_builder(
+                self.ctx.args,
+                typ=AAZObjectType,
+                typ_kwargs={"flags": {"required": True, "client_flatten": True}}
+            )
+            _builder.set_prop("details", AAZListType, ".details", typ_kwargs={"flags": {"required": True}})
+            _builder.set_prop("peeringLocation", AAZStrType, ".peering_location", typ_kwargs={"flags": {"required": True}})
+            _builder.set_prop("wasSimulationSuccessful", AAZBoolType, ".simulation_successful", typ_kwargs={"flags": {"required": True}})
+
+            details = _builder.get(".details")
+            if details is not None:
+                details.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".details[]")
+            if _elements is not None:
+                _elements.set_prop("failoverConnectionName", AAZStrType, ".failover_connection_name")
+                _elements.set_prop("failoverLocation", AAZStrType, ".failover_location")
+                _elements.set_prop("isVerified", AAZBoolType, ".is_verified")
+
+            return self.serialize_content(_content_value)
 
         def on_200(self, session):
             data = self.deserialize_http_content(session)
@@ -177,77 +235,13 @@ class GetResiliencyInformation(AAZCommand):
             if cls._schema_on_200 is not None:
                 return cls._schema_on_200
 
-            cls._schema_on_200 = AAZObjectType()
-
-            _schema_on_200 = cls._schema_on_200
-            _schema_on_200.components = AAZListType(
-                flags={"read_only": True},
-            )
-            _schema_on_200.last_computed_time = AAZStrType(
-                serialized_name="lastComputedTime",
-                flags={"read_only": True},
-            )
-            _schema_on_200.max_score_from_recommendations = AAZStrType(
-                serialized_name="maxScoreFromRecommendations",
-                flags={"read_only": True},
-            )
-            _schema_on_200.min_score_from_recommendations = AAZStrType(
-                serialized_name="minScoreFromRecommendations",
-                flags={"read_only": True},
-            )
-            _schema_on_200.next_eligible_compute_time = AAZStrType(
-                serialized_name="nextEligibleComputeTime",
-                flags={"read_only": True},
-            )
-            _schema_on_200.overall_score = AAZStrType(
-                serialized_name="overallScore",
-                flags={"read_only": True},
-            )
-            _schema_on_200.score_change = AAZStrType(
-                serialized_name="scoreChange",
-                flags={"read_only": True},
-            )
-
-            components = cls._schema_on_200.components
-            components.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.components.Element
-            _element.current_score = AAZStrType(
-                serialized_name="currentScore",
-            )
-            _element.max_score = AAZStrType(
-                serialized_name="maxScore",
-            )
-            _element.name = AAZStrType()
-            _element.recommendations = AAZListType()
-
-            recommendations = cls._schema_on_200.components.Element.recommendations
-            recommendations.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.components.Element.recommendations.Element
-            _element.call_to_action_link = AAZStrType(
-                serialized_name="callToActionLink",
-            )
-            _element.call_to_action_text = AAZStrType(
-                serialized_name="callToActionText",
-            )
-            _element.details = AAZStrType()
-            _element.recommendation_id = AAZStrType(
-                serialized_name="recommendationId",
-            )
-            _element.recommendation_text = AAZStrType(
-                serialized_name="recommendationText",
-            )
-            _element.recommendation_title = AAZStrType(
-                serialized_name="recommendationTitle",
-            )
-            _element.severity = AAZStrType()
+            cls._schema_on_200 = AAZStrType()
 
             return cls._schema_on_200
 
 
-class _GetResiliencyInformationHelper:
-    """Helper class for GetResiliencyInformation"""
+class _StopSiteFailoverTestHelper:
+    """Helper class for StopSiteFailoverTest"""
 
 
-__all__ = ["GetResiliencyInformation"]
+__all__ = ["StopSiteFailoverTest"]
