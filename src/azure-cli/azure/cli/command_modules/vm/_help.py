@@ -591,7 +591,7 @@ examples:
         az sig create --resource-group MyResourceGroup --gallery-name MyGallery123 --assign-identity
   - name: Create a shared image gallery with a system assigned identity with the 'Reader' role.
     text: |
-        az sig create --resource-group MyResourceGroup --gallery-name MyGallery123 --assign-identity 
+        az sig create --resource-group MyResourceGroup --gallery-name MyGallery123 --assign-identity
         --role Reader --scope /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup
   - name: Create a shared image gallery with a user assigned identity.
     text: |

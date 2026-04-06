@@ -6716,7 +6716,6 @@ def create_sig(cmd, resource_group_name, gallery_name, location=None, eula=None,
         return SigCreate(cli_ctx=cmd.cli_ctx)(command_args=command_args)
     else:
         from ._vm_utils import assign_identity as assign_identity_helper
-        from .operations.sig import SigShow
 
         identity, _, external_identities, enable_local_identity = _build_identities_info(assign_identity)
 
@@ -6726,21 +6725,22 @@ def create_sig(cmd, resource_group_name, gallery_name, location=None, eula=None,
         def setter(sig, external_identities=external_identities):
             new_command_args = _assign_identity(sig, identity, external_identities, enable_local_identity, command_args)
 
-            create_sig = SigCreate(cli_ctx=cmd.cli_ctx)(command_args=new_command_args)
-            LongRunningOperation(cmd.cli_ctx)(create_sig)
-            return create_sig.result()
+            sig_create = SigCreate(cli_ctx=cmd.cli_ctx)(command_args=new_command_args)
+            LongRunningOperation(cmd.cli_ctx)(sig_create)
+            return sig_create.result()
 
         sig = assign_identity_helper(cmd.cli_ctx, getter, setter, identity_role=identity_role_id, identity_scope=identity_scope)
 
         if enable_local_identity and not identity_scope:
             _show_missing_access_warning(resource_group_name, gallery_name, 'sig')
         sig['identity'] = _construct_identity_info(identity_scope, identity_role,
-                                                  sig.get('identity', {}).get('principalId', None),
-                                                  sig.get('identity', {}).get('userAssignedIdentities', None))
+                                                   sig.get('identity', {}).get('principalId', None),
+                                                   sig.get('identity', {}).get('userAssignedIdentities', None))
         return sig
 
 
-def _assign_identity(resource, identity, external_identities=None, enable_local_identity=None, command_args={}):
+def _assign_identity(resource, identity, external_identities=None, enable_local_identity=None, command_args=None):
+    command_args = command_args or {}
     if resource.get('identity', {}).get('type', None) == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value:
         identity_types = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value
     elif resource.get('identity', {}).get('type', None) == IdentityType.SYSTEM_ASSIGNED.value and external_identities:
@@ -6774,7 +6774,7 @@ def _assign_identity(resource, identity, external_identities=None, enable_local_
 
 
 def assign_sig_identity(cmd, resource_group_name, gallery_name, assign_identity=None, identity_role=None,
-                       identity_role_id=None, identity_scope=None):
+                        identity_role_id=None, identity_scope=None):
     identity, _, external_identities, enable_local_identity = _build_identities_info(assign_identity)
 
     command_args = {'resource_group': resource_group_name, 'gallery_name': gallery_name}

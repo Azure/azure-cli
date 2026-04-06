@@ -777,10 +777,11 @@ def assign_identity(cli_ctx, getter, setter, identity_role=None, identity_scope=
 
     # create role assignment:
     if identity_scope:
-        principal_id = resource.get('identity', {}).get('principalId') \
-                       or resource.get('identity', {}).get('principal_id') \
-                       or resource.get('principal_id') \
-                       or resource.get('principalId')
+        principal_id = \
+            resource.get('identity', {}).get('principalId') \
+            or resource.get('identity', {}).get('principal_id') \
+            or resource.get('principal_id') \
+            or resource.get('principalId')
         create_role_assignment(cli_ctx, principal_id, identity_role, identity_scope)
     return resource
 

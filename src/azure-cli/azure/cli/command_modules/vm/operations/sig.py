@@ -157,7 +157,6 @@ class SigIdentityRemove(_SigIdentityRemove):
                 }
                 return json.dumps(content)
 
-
             identities = content.get('identity', {}).get('userAssignedIdentities')
             if identities:
                 if 'UserAssigned' in identities.keys():
