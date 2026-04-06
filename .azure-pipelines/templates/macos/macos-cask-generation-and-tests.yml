@@ -1,0 +1,318 @@
+# macOS Cask Generation and Test Jobs Template
+#
+# Purpose: Generate cask definition, test installation (using local file:// URLs), 
+#          and test offline tarball install
+# Usage: Called after sign/notarize template completes, before publishing
+#
+# Parameters:
+#   - MacosArm64Image: VM image for ARM64 tests
+#   - MacosIntelImage: VM image for Intel tests
+#   - PythonVersion: Homebrew Python version for testing
+#   - GitHubRepo: GitHub repository (for cask generation)
+#   - Debug: Enable debug diagnostics
+#   - dependsOn: Jobs this depends on (typically CreateFinalTarball)
+#
+# Requires:
+#   - Artifacts: macos-cli-signed-notarized-arm64, macos-cli-signed-notarized-x86_64
+#
+# Produces:
+#   - Artifact: macos-cask-definition (contains azure-cli.rb with GitHub URLs)
+
+parameters:
+  - name: MacosArm64Image
+    type: string
+    default: 'macos-15-arm64'
+  - name: MacosIntelImage
+    type: string
+    default: 'macos-15'
+  - name: PythonVersion
+    type: string
+    default: '3.13'
+  - name: GitHubRepo
+    type: string
+    default: 'placeholder/repo'
+  - name: Debug
+    type: boolean
+    default: false
+  - name: condition
+    type: string
+    default: 'succeeded()'
+  - name: dependsOn
+    type: object
+    default: ['CreateFinalTarball']
+
+jobs:
+# ============================================================================
+# JOB: GENERATE CASK AND TEST VIA TEMP HOMEBREW TAP (Both Architectures)
+# ============================================================================
+- job: TestTempTapCask
+  displayName: 'macOS | Generate Cask and Test'
+  dependsOn: ${{ parameters.dependsOn }}
+  condition: ${{ parameters.condition }}
+  strategy:
+    matrix:
+      ARM64:
+        Architecture: 'arm64'
+        vmImageName: ${{ parameters.MacosArm64Image }}
+      Intel:
+        Architecture: 'x86_64'
+        vmImageName: ${{ parameters.MacosIntelImage }}
+  pool:
+    vmImage: $(vmImageName)
+
+  steps:
+  - checkout: self
+    fetchDepth: 1
+
+  - download: current
+    artifact: 'macos-cli-signed-notarized-arm64'
+    displayName: 'Download signed tarball (ARM64)'
+
+  - download: current
+    artifact: 'macos-cli-signed-notarized-x86_64'
+    displayName: 'Download signed tarball (Intel)'
+
+  - bash: |
+      echo "=== Environment Info ($(Architecture)) ==="
+      echo "HOMEBREW_CASK_OPTS: $HOMEBREW_CASK_OPTS"
+      echo "macOS version: $(sw_vers -productVersion)"
+      echo "Homebrew version: $(brew --version | head -1)"
+      echo "Homebrew prefix: $(brew --prefix)"
+      echo "Homebrew repository: $(brew --repository)"
+    displayName: 'Show environment info'
+
+  - bash: |
+      echo "Cleanup: Remove pre-installed Azure CLI ($(Architecture))"
+      
+      if command -v az &> /dev/null; then
+        echo "Pre-installed Azure CLI detected: $(which az)"
+        brew uninstall azure-cli 2>/dev/null || true
+        brew uninstall --cask azure-cli 2>/dev/null || true
+        sudo rm -f /usr/local/bin/az
+        sudo rm -f /opt/homebrew/bin/az
+        hash -r
+      fi
+      
+    displayName: 'Cleanup pre-installed Azure CLI'
+
+  - bash: |
+      set -ev
+      
+      # Get tarballs
+      ARM64_TARBALL=$(find $(Pipeline.Workspace)/macos-cli-signed-notarized-arm64 -name "azure-cli-*-macos-arm64.tar.gz" | head -1)
+      X86_64_TARBALL=$(find $(Pipeline.Workspace)/macos-cli-signed-notarized-x86_64 -name "azure-cli-*-macos-x86_64.tar.gz" | head -1)
+      
+      VERSION=$(basename "$ARM64_TARBALL" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+([a-z0-9]+)?' | head -1)
+      
+      ARM64_SHA256=$(cat ${ARM64_TARBALL}.sha256 | cut -d' ' -f1)
+      X86_64_SHA256=$(cat ${X86_64_TARBALL}.sha256 | cut -d' ' -f1)
+      
+      echo "=== Generating Cask using template ==="
+      echo "Version: $VERSION"
+      echo "ARM64 tarball: $ARM64_TARBALL"
+      echo "ARM64 SHA256: $ARM64_SHA256"
+      echo "x86_64 tarball: $X86_64_TARBALL"
+      echo "x86_64 SHA256: $X86_64_SHA256"
+      
+      # Resolve repo root
+      REPO_NAME="$(Build.Repository.Name)"
+      REPO_DIR="${REPO_NAME##*/}"
+      REPO_ROOT=""
+      for candidate in \
+        "$(Build.SourcesDirectory)/$REPO_DIR" \
+        "$(Build.SourcesDirectory)/$REPO_NAME" \
+        "$(Build.SourcesDirectory)"; do
+        if [ -d "$candidate" ]; then
+          REPO_ROOT="$candidate"
+          break
+        fi
+      done
+      
+      if [ -z "$REPO_ROOT" ]; then
+        echo "ERROR: Unable to resolve repo root"
+        exit 1
+      fi
+      
+      # Generate cask using template with GitHub URLs (for publishing)
+      mkdir -p $(Pipeline.Workspace)/macos-cask-definition
+      python3 "$REPO_ROOT/scripts/release/macos/cask_generate.py" \
+        --version "$VERSION" \
+        --arm64-sha "$ARM64_SHA256" \
+        --x86-64-sha "$X86_64_SHA256" \
+        --github-repo "${{ parameters.GitHubRepo }}" \
+        --python-version "${{ parameters.PythonVersion }}" \
+        --template "$REPO_ROOT/scripts/release/macos/templates/azure-cli.rb.in" \
+        --output "$(Pipeline.Workspace)/macos-cask-definition/azure-cli.rb"
+      
+      echo "=== Generated Cask (GitHub URLs - for publishing) ==="
+      cat $(Pipeline.Workspace)/macos-cask-definition/azure-cli.rb
+      
+      # Copy to staging and modify for local file:// testing
+      mkdir -p $(Pipeline.Workspace)/cask-staging
+      cp $(Pipeline.Workspace)/macos-cask-definition/azure-cli.rb $(Pipeline.Workspace)/cask-staging/azure-cli.rb
+      
+      # Replace GitHub URL with file:// URL for local testing
+      WORKSPACE_PATH="$(Pipeline.Workspace)"
+      sed -i.bak "s|url \"https://github.com/[^\"]*\"|url \"file://${WORKSPACE_PATH}/macos-cli-signed-notarized-#{arch}/azure-cli-#{version}-macos-#{arch}.tar.gz\"|" \
+        $(Pipeline.Workspace)/cask-staging/azure-cli.rb
+      
+      # Remove the livecheck block since we're testing locally
+      sed -i.bak '/livecheck do/,/^  end$/d' $(Pipeline.Workspace)/cask-staging/azure-cli.rb
+      
+      echo "=== Generated Cask (file:// URLs - for local testing) ==="
+      cat $(Pipeline.Workspace)/cask-staging/azure-cli.rb
+      
+    displayName: 'Generate cask definition'
+
+  - bash: |
+      set -ev
+      
+      echo "=== Creating Temporary Homebrew Tap ($(Architecture)) ==="
+      
+      # Configure git (required for tap creation)
+      git config --global user.email "test@pipeline.local"
+      git config --global user.name "Test Pipeline"
+      
+      # Create a temporary tap (named distinctly to avoid conflict with real Azure/homebrew-azure-cli)
+      brew tap-new test/azure-cli-pipeline-test
+      
+      # Get tap path
+      TAP_PATH="$(brew --repository)/Library/Taps/test/homebrew-azure-cli-pipeline-test"
+      echo "Tap path: $TAP_PATH"
+      
+      # Create Casks directory and copy cask
+      mkdir -p "$TAP_PATH/Casks"
+      cp $(Pipeline.Workspace)/cask-staging/azure-cli.rb "$TAP_PATH/Casks/"
+      
+      echo "=== Cask copied to tap ==="
+      ls -la "$TAP_PATH/Casks/"
+      cat "$TAP_PATH/Casks/azure-cli.rb"
+      
+      # Commit the cask (required for installation)
+      cd "$TAP_PATH"
+      git add Casks/azure-cli.rb
+      git commit -m "Add azure-cli cask for testing"
+      
+      echo "=== Tap Structure ==="
+      ls -la "$TAP_PATH"
+      
+    displayName: 'Create temporary tap'
+
+  - bash: |
+      set -ev
+      
+      echo "=== Installing Cask from Temporary Tap ($(Architecture)) ==="
+      
+      # Ensure Python is available
+      if ! brew list python@${{ parameters.PythonVersion }} &>/dev/null; then
+        echo "Installing Python ${{ parameters.PythonVersion }}..."
+        brew install python@${{ parameters.PythonVersion }}
+      fi
+      
+      # Install the cask from our temporary tap
+      brew install --cask test/azure-cli-pipeline-test/azure-cli
+      
+      # Verify installation
+      echo "=== Verifying Installation ==="
+      which az
+      az --version
+      
+      INSTALLED_VERSION=$(az version -o tsv --query '"azure-cli"' 2>/dev/null || echo "unknown")
+      echo ""
+      echo "Installed version: $INSTALLED_VERSION"
+      echo "=== Temporary Tap Cask Test PASSED ($(Architecture)) ==="
+      
+    displayName: 'Install and test cask'
+
+  - bash: |
+      echo "=== Cleanup ($(Architecture)) ==="
+      
+      # Uninstall the cask
+      brew uninstall --cask azure-cli 2>/dev/null || true
+      
+      # Remove temporary tap
+      brew untap test/azure-cli-pipeline-test 2>/dev/null || true
+      
+      echo "Cleanup complete"
+    displayName: 'Cleanup'
+    condition: always()
+
+  # Publish cask artifact (only from ARM64 job - cask.rb is identical for both archs)
+  - task: PublishPipelineArtifact@1
+    displayName: 'Publish cask definition artifact'
+    condition: and(succeeded(), eq(variables['Architecture'], 'arm64'))
+    inputs:
+      targetPath: '$(Pipeline.Workspace)/macos-cask-definition'
+      artifactName: 'macos-cask-definition'
+
+# ============================================================================
+# JOB: TEST OFFLINE/TARBALL INSTALLATION (Both Architectures)
+# ============================================================================
+- job: TestOfflineInstall
+  displayName: 'macOS | Test Offline Installation'
+  dependsOn: ${{ parameters.dependsOn }}
+  condition: ${{ parameters.condition }}
+  strategy:
+    matrix:
+      ARM64:
+        Architecture: 'arm64'
+        vmImageName: ${{ parameters.MacosArm64Image }}
+      Intel:
+        Architecture: 'x86_64'
+        vmImageName: ${{ parameters.MacosIntelImage }}
+  pool:
+    vmImage: $(vmImageName)
+
+  steps:
+  - checkout: none
+
+  - bash: |
+      echo "=== Cleanup: Remove pre-installed Azure CLI ($(Architecture)) ==="
+      
+      if command -v az &> /dev/null; then
+        echo "Pre-installed Azure CLI detected: $(which az)"
+        
+        brew uninstall azure-cli 2>/dev/null || true
+        brew uninstall --cask azure-cli 2>/dev/null || true
+        
+        sudo rm -f /usr/local/bin/az
+        sudo rm -f /opt/homebrew/bin/az
+        
+        hash -r
+      fi
+      echo "Cleanup complete"
+    displayName: 'Remove pre-installed Azure CLI'
+
+  - download: current
+    artifact: 'macos-cli-signed-notarized-$(Architecture)'
+    displayName: 'Download signed tarball'
+
+  - bash: |
+      set -e
+      
+      echo "=== Testing Offline/Direct Tarball Installation ($(Architecture)) ==="
+      
+      TARBALL=$(find $(Pipeline.Workspace)/macos-cli-signed-notarized-$(Architecture) -name "azure-cli-*-macos-$(Architecture).tar.gz" | head -1)
+      TEST_DIR="$HOME/azure-cli-test"
+      
+      mkdir -p "$TEST_DIR"
+      tar -xzf "$TARBALL" -C "$TEST_DIR"
+      
+      if ! brew list python@${{ parameters.PythonVersion }} &>/dev/null; then
+        brew install python@${{ parameters.PythonVersion }}
+      fi
+      
+      AZ_PYTHON="$(brew --prefix python@${{ parameters.PythonVersion }})/libexec/bin/python3"
+      export AZ_PYTHON
+      
+      export AZ_DEBUG=1
+      "$TEST_DIR/bin/az" version
+      
+      INSTALLED_VERSION=$("$TEST_DIR/bin/az" version -o tsv --query '"azure-cli"' 2>/dev/null || echo "unknown")
+      
+      echo ""
+      echo "Installed version: $INSTALLED_VERSION"
+      echo "Offline installation successful ($(Architecture))"
+      
+      rm -rf "$TEST_DIR"
+    displayName: 'Test offline install'

@@ -25,6 +25,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_NETWORK_PLUGIN_MODE_OVERLAY, CONST_NETWORK_PLUGIN_NONE,
     CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDUAL,
     CONST_NETWORK_POD_IP_ALLOCATION_MODE_STATIC_BLOCK,
+    CONST_ACNS_DATAPATH_ACCELERATION_MODE_BPFVETH, CONST_ACNS_DATAPATH_ACCELERATION_MODE_NONE,
     CONST_NODE_IMAGE_UPGRADE_CHANNEL, CONST_NONE_UPGRADE_CHANNEL,
     CONST_NODE_OS_CHANNEL_NODE_IMAGE,
     CONST_NODE_OS_CHANNEL_NONE,
@@ -75,7 +76,9 @@ from azure.cli.command_modules.acs._consts import (
     CONST_NODE_PROVISIONING_MODE_AUTO,
     CONST_NODE_PROVISIONING_DEFAULT_POOLS_NONE,
     CONST_NODE_PROVISIONING_DEFAULT_POOLS_AUTO,
-    CONST_WORKLOAD_RUNTIME_KATA_VM_ISOLATION)
+    CONST_WORKLOAD_RUNTIME_KATA_VM_ISOLATION,
+    CONST_TRANSIT_ENCRYPTION_WIREGUARD,
+    CONST_TRANSIT_ENCRYPTION_NONE)
 from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
     CONST_ACSTOR_ALL,
     CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY,
@@ -228,6 +231,11 @@ node_provisioning_default_pools = [
     CONST_NODE_PROVISIONING_DEFAULT_POOLS_AUTO,
 ]
 
+transit_encryption_types = [
+    CONST_TRANSIT_ENCRYPTION_WIREGUARD,
+    CONST_TRANSIT_ENCRYPTION_NONE,
+]
+
 dev_space_endpoint_types = ['Public', 'Private', 'None']
 
 keyvault_network_access_types = [CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PUBLIC, CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE]
@@ -361,6 +369,12 @@ app_routing_nginx_configs = [
 
 workload_runtime_types = [
     CONST_WORKLOAD_RUNTIME_KATA_VM_ISOLATION,
+]
+
+# consts for acns datapath acceleration mode
+acns_datapath_acceleration_modes = [
+    CONST_ACNS_DATAPATH_ACCELERATION_MODE_BPFVETH,
+    CONST_ACNS_DATAPATH_ACCELERATION_MODE_NONE
 ]
 
 
@@ -605,6 +619,12 @@ def load_arguments(self, _):
         c.argument('disable_acns_security', action='store_true')
         c.argument("acns_advanced_networkpolicies", arg_type=get_enum_type(advanced_networkpolicies))
         c.argument('enable_container_network_logs', action='store_true')
+        c.argument(
+            "acns_datapath_acceleration_mode",
+            arg_type=get_enum_type(acns_datapath_acceleration_modes),
+            help="Set the datapath acceleration mode for Azure Container Networking Solution (ACNS). Valid values are 'BpfVeth' and 'None'."
+        )
+        c.argument('acns_transit_encryption_type', arg_type=get_enum_type(transit_encryption_types))
         c.argument("if_match")
         c.argument("if_none_match")
         # node provisioning
@@ -664,6 +684,14 @@ def load_arguments(self, _):
         c.argument("acns_advanced_networkpolicies", arg_type=get_enum_type(advanced_networkpolicies))
         c.argument('enable_container_network_logs', action='store_true')
         c.argument('disable_container_network_logs', action='store_true')
+        c.argument(
+            "acns_datapath_acceleration_mode",
+            arg_type=get_enum_type(acns_datapath_acceleration_modes),
+            help="Set the datapath acceleration mode for Azure Container Networking Solution (ACNS). Valid values are 'BpfVeth' and 'None'."
+        )
+        c.argument('acns_transit_encryption_type', arg_type=get_enum_type(transit_encryption_types))
+        # monitoring addons
+        c.argument('enable_high_log_scale_mode', arg_type=get_three_state_flag())
         # private cluster parameters
         c.argument('enable_apiserver_vnet_integration', action='store_true')
         c.argument('apiserver_subnet_id', validator=validate_apiserver_subnet_id)
@@ -715,6 +743,8 @@ def load_arguments(self, _):
         c.argument('disable_image_cleaner', action='store_true', validator=validate_image_cleaner_enable_disable_mutually_exclusive)
         c.argument('image_cleaner_interval_hours', type=int)
         c.argument('http_proxy_config')
+        c.argument('disable_http_proxy', action='store_true')
+        c.argument('enable_http_proxy', action='store_true')
         c.argument('custom_ca_trust_certificates', options_list=["--custom-ca-trust-certificates", "--ca-certs"], validator=validate_custom_ca_trust_certificates, help="path to file containing list of new line separated CAs")
         c.argument('enable_run_command', action='store_true')
         c.argument('disable_run_command', action='store_true')
@@ -842,6 +872,10 @@ def load_arguments(self, _):
                 'by that action.'
             )
         )
+    with self.argument_context('aks delete') as c:
+        c.argument("if_match")
+        c.argument("if_none_match")
+
     with self.argument_context('aks disable-addons', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('addons', options_list=['--addons', '-a'])
 
