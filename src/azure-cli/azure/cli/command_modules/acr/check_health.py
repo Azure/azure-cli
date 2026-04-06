@@ -354,7 +354,7 @@ def _check_registry_health(cmd, registry_name, repository, ignore_errors):
         valid_identity = False
         if registry.identity:
             valid_identity = ((client_id == 'system') and
-                                bool(registry.identity.principal_id))  # use system identity?
+                              bool(registry.identity.principal_id))  # use system identity?
             if not valid_identity and registry.identity.user_assigned_identities:
                 for k, v in registry.identity.user_assigned_identities.items():
                     if v.client_id == client_id:
