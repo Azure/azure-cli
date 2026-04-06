@@ -6504,6 +6504,13 @@ class MSIScenarioTest(ScenarioTest):
         emsis = [x.lower() for x in result['userAssignedIdentities'].keys()]
         self.assertEqual(emsis, [emsi_result['id'].lower()])
 
+        # Validate sig show command
+        result = self.cmd('sig show -g {rg} -r {sig}', checks=[
+            self.check('identity.type', 'SystemAssigned, UserAssigned')
+        ]).get_output_in_json()
+        emsis = [x.lower() for x in result['identity']['userAssignedIdentities'].keys()]
+        self.assertEqual(emsis, [emsi_result['id'].lower()])
+
         # assign a new managed identity
         self.cmd('sig identity assign -g {rg} -r {sig} --identities {emsi2}')
         result = self.cmd('sig identity show -g {rg} -r {sig}').get_output_in_json()
