@@ -12,19 +12,19 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network express-route stop-circuit-link-failover-test",
+    "network express-route get-link-failover-all-tests-detail",
 )
-class StopCircuitLinkFailoverTest(AAZCommand):
-    """This operation stops an ongoing failover simulation on the circuit for the specified link type
+class GetLinkFailoverAllTestsDetail(AAZCommand):
+    """This operation retrieves the details of all the failover tests performed on the ExpressRoute circuit for different peering locations
 
-    :example: ExpressRouteCircuitStopLinkFailoverSimulation
-        az network express-route stop-circuit-link-failover-test --resource-group rg1 --name erckt --circuit-test-category BgpDisconnect --link-type Primary --simulation-successful True --is-verified True
+    :example: ExpressRouteCircuitLinkFailoverAllTestsDetails
+        az network express-route get-link-failover-all-tests-detail --resource-group rg1 --name erckt --type LinkFailover --fetch-latest true
     """
 
     _aaz_info = {
         "version": "2025-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressroutecircuits/{}/stopcircuitlinkfailovertest", "2025-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressroutecircuits/{}/getlinkfailoveralltestsdetails", "2025-07-01"],
         ]
     }
 
@@ -57,41 +57,22 @@ class StopCircuitLinkFailoverTest(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-
-        # define Arg Group "StopParameters"
-
-        _args_schema = cls._args_schema
-        _args_schema.circuit_test_category = AAZStrArg(
-            options=["--circuit-test-category"],
-            arg_group="StopParameters",
-            help="The type of maintenance test category",
+        _args_schema.type = AAZStrArg(
+            options=["--type"],
+            help="The type of failover test",
             required=True,
-            enum={"ASPathPrepend": "ASPathPrepend", "BgpDisconnect": "BgpDisconnect"},
+            enum={"All": "All", "LinkFailover": "LinkFailover", "MultiSiteFailover": "MultiSiteFailover", "SingleSiteFailover": "SingleSiteFailover"},
         )
-        _args_schema.is_verified = AAZBoolArg(
-            options=["--is-verified"],
-            arg_group="StopParameters",
-            help="Whether the customer was able to establish connectivity through this failover link or not",
-            required=True,
-        )
-        _args_schema.link_type = AAZStrArg(
-            options=["--link-type"],
-            arg_group="StopParameters",
-            help="The type of link on which failover test was performed",
-            required=True,
-            enum={"Primary": "Primary", "Secondary": "Secondary"},
-        )
-        _args_schema.simulation_successful = AAZBoolArg(
-            options=["--simulation-successful"],
-            arg_group="StopParameters",
-            help="Whether the failover simulation was successful or not",
+        _args_schema.fetch_latest = AAZBoolArg(
+            options=["--fetch-latest"],
+            help="Fetch only the latest tests for each peering location",
             required=True,
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.ExpressRouteCircuitsStopCircuitLinkFailoverTest(ctx=self.ctx)()
+        yield self.ExpressRouteCircuitsGetLinkFailoverAllTestsDetails(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -103,10 +84,10 @@ class StopCircuitLinkFailoverTest(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=False)
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class ExpressRouteCircuitsStopCircuitLinkFailoverTest(AAZHttpOperation):
+    class ExpressRouteCircuitsGetLinkFailoverAllTestsDetails(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -136,7 +117,7 @@ class StopCircuitLinkFailoverTest(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/expressRouteCircuits/{expressRouteCircuitName}/stopCircuitLinkFailoverTest",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/expressRouteCircuits/{expressRouteCircuitName}/getCircuitLinkFailoverAllTestsDetails",
                 **self.url_parameters
             )
 
@@ -170,6 +151,14 @@ class StopCircuitLinkFailoverTest(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
+                    "failoverTestType", self.ctx.args.type,
+                    required=True,
+                ),
+                **self.serialize_query_param(
+                    "fetchLatest", self.ctx.args.fetch_latest,
+                    required=True,
+                ),
+                **self.serialize_query_param(
                     "api-version", "2025-07-01",
                     required=True,
                 ),
@@ -180,27 +169,10 @@ class StopCircuitLinkFailoverTest(AAZCommand):
         def header_parameters(self):
             parameters = {
                 **self.serialize_header_param(
-                    "Content-Type", "application/json",
-                ),
-                **self.serialize_header_param(
                     "Accept", "application/json",
                 ),
             }
             return parameters
-
-        @property
-        def content(self):
-            _content_value, _builder = self.new_content_builder(
-                self.ctx.args,
-                typ=AAZObjectType,
-                typ_kwargs={"flags": {"required": True, "client_flatten": True}}
-            )
-            _builder.set_prop("circuitTestCategory", AAZStrType, ".circuit_test_category", typ_kwargs={"flags": {"required": True}})
-            _builder.set_prop("isVerified", AAZBoolType, ".is_verified", typ_kwargs={"flags": {"required": True}})
-            _builder.set_prop("linkType", AAZStrType, ".link_type", typ_kwargs={"flags": {"required": True}})
-            _builder.set_prop("wasSimulationSuccessful", AAZBoolType, ".simulation_successful", typ_kwargs={"flags": {"required": True}})
-
-            return self.serialize_content(_content_value)
 
         def on_200(self, session):
             data = self.deserialize_http_content(session)
@@ -217,13 +189,79 @@ class StopCircuitLinkFailoverTest(AAZCommand):
             if cls._schema_on_200 is not None:
                 return cls._schema_on_200
 
-            cls._schema_on_200 = AAZStrType()
+            cls._schema_on_200 = AAZObjectType()
+
+            _schema_on_200 = cls._schema_on_200
+            _schema_on_200.value = AAZListType()
+
+            value = cls._schema_on_200.value
+            value.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element
+            _element.bgp_status = AAZListType(
+                serialized_name="bgpStatus",
+                flags={"read_only": True},
+            )
+            _element.circuit_test_category = AAZStrType(
+                serialized_name="circuitTestCategory",
+                flags={"read_only": True},
+            )
+            _element.end_time = AAZStrType(
+                serialized_name="endTime",
+                flags={"read_only": True},
+            )
+            _element.issues = AAZListType(
+                flags={"read_only": True},
+            )
+            _element.link_type = AAZStrType(
+                serialized_name="linkType",
+                flags={"read_only": True},
+            )
+            _element.start_time = AAZStrType(
+                serialized_name="startTime",
+                flags={"read_only": True},
+            )
+            _element.status = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.test_guid = AAZStrType(
+                serialized_name="testGuid",
+                flags={"read_only": True},
+            )
+            _element.test_type = AAZStrType(
+                serialized_name="testType",
+                flags={"read_only": True},
+            )
+            _element.was_simulation_successful = AAZBoolType(
+                serialized_name="wasSimulationSuccessful",
+                flags={"read_only": True},
+            )
+
+            bgp_status = cls._schema_on_200.value.Element.bgp_status
+            bgp_status.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.bgp_status.Element
+            _element.bgp_status_type = AAZStrType(
+                serialized_name="bgpStatusType",
+                flags={"read_only": True},
+            )
+            _element.check_time = AAZStrType(
+                serialized_name="checkTime",
+                flags={"read_only": True},
+            )
+            _element.link = AAZStrType()
+            _element.status = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            issues = cls._schema_on_200.value.Element.issues
+            issues.Element = AAZStrType()
 
             return cls._schema_on_200
 
 
-class _StopCircuitLinkFailoverTestHelper:
-    """Helper class for StopCircuitLinkFailoverTest"""
+class _GetLinkFailoverAllTestsDetailHelper:
+    """Helper class for GetLinkFailoverAllTestsDetail"""
 
 
-__all__ = ["StopCircuitLinkFailoverTest"]
+__all__ = ["GetLinkFailoverAllTestsDetail"]

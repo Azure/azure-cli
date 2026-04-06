@@ -12,19 +12,19 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network express-route get-circuit-link-failover-all-tests-detail",
+    "network express-route get-link-failover-single-test-detail",
 )
-class GetCircuitLinkFailoverAllTestsDetail(AAZCommand):
-    """This operation retrieves the details of all the failover tests performed on the ExpressRoute circuit for different peering locations
+class GetLinkFailoverSingleTestDetail(AAZCommand):
+    """This operation retrieves the details of a particular failover test performed on the circuit based on the test Guid
 
-    :example: ExpressRouteCircuitLinkFailoverAllTestsDetails
-        az network express-route get-circuit-link-failover-all-tests-detail --resource-group rg1 --name erckt --type LinkFailover --fetch-latest true
+    :example: ExpressRouteCircuitLinkFailoverSingleTestDetails
+        az network express-route get-link-failover-single-test-detail --resource-group rg1 --name erckt --failover-test-id fe458ae8-d2ae-4520-a104-44bc233bde7e --link-type Primary --maintenance-category BgpDisconnect
     """
 
     _aaz_info = {
         "version": "2025-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressroutecircuits/{}/getcircuitlinkfailoveralltestsdetails", "2025-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressroutecircuits/{}/getCircuitLinkFailoverSingleTestDetails", "2025-07-01"],
         ]
     }
 
@@ -57,22 +57,28 @@ class GetCircuitLinkFailoverAllTestsDetail(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-        _args_schema.type = AAZStrArg(
-            options=["--type"],
-            help="The type of failover test",
+        _args_schema.maintenance_category = AAZStrArg(
+            options=["--maintenance-category"],
+            help="The type of maintenance test category",
             required=True,
-            enum={"All": "All", "LinkFailover": "LinkFailover", "MultiSiteFailover": "MultiSiteFailover", "SingleSiteFailover": "SingleSiteFailover"},
+            enum={"ASPathPrepend": "ASPathPrepend", "BgpDisconnect": "BgpDisconnect"},
         )
-        _args_schema.fetch_latest = AAZBoolArg(
-            options=["--fetch-latest"],
-            help="Fetch only the latest tests for each peering location",
+        _args_schema.failover_test_id = AAZStrArg(
+            options=["--failover-test-id"],
+            help="The unique Guid value which identifies the test",
             required=True,
+        )
+        _args_schema.link_type = AAZStrArg(
+            options=["--link-type"],
+            help="The type of link on which failover test was performed",
+            required=True,
+            enum={"Primary": "Primary", "Secondary": "Secondary"},
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.ExpressRouteCircuitsGetCircuitLinkFailoverAllTestsDetails(ctx=self.ctx)()
+        yield self.ExpressRouteCircuitsGetLinkFailoverSingleTestDetails(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -87,7 +93,7 @@ class GetCircuitLinkFailoverAllTestsDetail(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class ExpressRouteCircuitsGetCircuitLinkFailoverAllTestsDetails(AAZHttpOperation):
+    class ExpressRouteCircuitsGetLinkFailoverSingleTestDetails(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -117,7 +123,7 @@ class GetCircuitLinkFailoverAllTestsDetail(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/expressRouteCircuits/{expressRouteCircuitName}/getCircuitLinkFailoverAllTestsDetails",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/expressRouteCircuits/{expressRouteCircuitName}/getCircuitLinkFailoverSingleTestDetails",
                 **self.url_parameters
             )
 
@@ -151,11 +157,15 @@ class GetCircuitLinkFailoverAllTestsDetail(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "failoverTestType", self.ctx.args.type,
+                    "circuitMaintenanceCategory", self.ctx.args.maintenance_category,
                     required=True,
                 ),
                 **self.serialize_query_param(
-                    "fetchLatest", self.ctx.args.fetch_latest,
+                    "failoverTestId", self.ctx.args.failover_test_id,
+                    required=True,
+                ),
+                **self.serialize_query_param(
+                    "linkType", self.ctx.args.link_type,
                     required=True,
                 ),
                 **self.serialize_query_param(
@@ -210,26 +220,29 @@ class GetCircuitLinkFailoverAllTestsDetail(AAZCommand):
                 serialized_name="endTime",
                 flags={"read_only": True},
             )
-            _element.issues = AAZListType(
+            _element.is_simulation_verified = AAZBoolType(
+                serialized_name="isSimulationVerified",
                 flags={"read_only": True},
             )
             _element.link_type = AAZStrType(
                 serialized_name="linkType",
                 flags={"read_only": True},
             )
+            _element.non_redundant_routes = AAZObjectType(
+                serialized_name="nonRedundantRoutes",
+                flags={"read_only": True},
+            )
+            _GetLinkFailoverSingleTestDetailHelper._build_schema_express_route_link_failover_route_list_read(_element.non_redundant_routes)
+            _element.redundant_routes = AAZObjectType(
+                serialized_name="redundantRoutes",
+                flags={"read_only": True},
+            )
+            _GetLinkFailoverSingleTestDetailHelper._build_schema_express_route_link_failover_route_list_read(_element.redundant_routes)
             _element.start_time = AAZStrType(
                 serialized_name="startTime",
                 flags={"read_only": True},
             )
             _element.status = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.test_guid = AAZStrType(
-                serialized_name="testGuid",
-                flags={"read_only": True},
-            )
-            _element.test_type = AAZStrType(
-                serialized_name="testType",
                 flags={"read_only": True},
             )
             _element.was_simulation_successful = AAZBoolType(
@@ -254,14 +267,73 @@ class GetCircuitLinkFailoverAllTestsDetail(AAZCommand):
                 flags={"read_only": True},
             )
 
-            issues = cls._schema_on_200.value.Element.issues
-            issues.Element = AAZStrType()
-
             return cls._schema_on_200
 
 
-class _GetCircuitLinkFailoverAllTestsDetailHelper:
-    """Helper class for GetCircuitLinkFailoverAllTestsDetail"""
+class _GetLinkFailoverSingleTestDetailHelper:
+    """Helper class for GetLinkFailoverSingleTestDetail"""
+
+    _schema_express_route_link_failover_route_list_read = None
+
+    @classmethod
+    def _build_schema_express_route_link_failover_route_list_read(cls, _schema):
+        if cls._schema_express_route_link_failover_route_list_read is not None:
+            _schema.before_simulation = cls._schema_express_route_link_failover_route_list_read.before_simulation
+            _schema.during_simulation = cls._schema_express_route_link_failover_route_list_read.during_simulation
+            return
+
+        cls._schema_express_route_link_failover_route_list_read = _schema_express_route_link_failover_route_list_read = AAZObjectType(
+            flags={"read_only": True}
+        )
+
+        express_route_link_failover_route_list_read = _schema_express_route_link_failover_route_list_read
+        express_route_link_failover_route_list_read.before_simulation = AAZListType(
+            serialized_name="beforeSimulation",
+        )
+        express_route_link_failover_route_list_read.during_simulation = AAZListType(
+            serialized_name="duringSimulation",
+        )
+
+        before_simulation = _schema_express_route_link_failover_route_list_read.before_simulation
+        before_simulation.Element = AAZObjectType()
+        cls._build_schema_express_route_link_failover_route_read(before_simulation.Element)
+
+        during_simulation = _schema_express_route_link_failover_route_list_read.during_simulation
+        during_simulation.Element = AAZObjectType()
+        cls._build_schema_express_route_link_failover_route_read(during_simulation.Element)
+
+        _schema.before_simulation = cls._schema_express_route_link_failover_route_list_read.before_simulation
+        _schema.during_simulation = cls._schema_express_route_link_failover_route_list_read.during_simulation
+
+    _schema_express_route_link_failover_route_read = None
+
+    @classmethod
+    def _build_schema_express_route_link_failover_route_read(cls, _schema):
+        if cls._schema_express_route_link_failover_route_read is not None:
+            _schema.next_hop = cls._schema_express_route_link_failover_route_read.next_hop
+            _schema.primary_as_path = cls._schema_express_route_link_failover_route_read.primary_as_path
+            _schema.route = cls._schema_express_route_link_failover_route_read.route
+            _schema.secondary_as_path = cls._schema_express_route_link_failover_route_read.secondary_as_path
+            return
+
+        cls._schema_express_route_link_failover_route_read = _schema_express_route_link_failover_route_read = AAZObjectType()
+
+        express_route_link_failover_route_read = _schema_express_route_link_failover_route_read
+        express_route_link_failover_route_read.next_hop = AAZStrType(
+            serialized_name="nextHop",
+        )
+        express_route_link_failover_route_read.primary_as_path = AAZStrType(
+            serialized_name="primaryASPath",
+        )
+        express_route_link_failover_route_read.route = AAZStrType()
+        express_route_link_failover_route_read.secondary_as_path = AAZStrType(
+            serialized_name="secondaryASPath",
+        )
+
+        _schema.next_hop = cls._schema_express_route_link_failover_route_read.next_hop
+        _schema.primary_as_path = cls._schema_express_route_link_failover_route_read.primary_as_path
+        _schema.route = cls._schema_express_route_link_failover_route_read.route
+        _schema.secondary_as_path = cls._schema_express_route_link_failover_route_read.secondary_as_path
 
 
-__all__ = ["GetCircuitLinkFailoverAllTestsDetail"]
+__all__ = ["GetLinkFailoverSingleTestDetail"]
