@@ -122,9 +122,11 @@ def _regional_endpoint_uri_to_login_server(uri, login_server_suffix):
     if not uri or not login_server_suffix:
         return uri
 
-    parts = uri.split('.')
+    uri_lower = uri.strip().lower()
+    suffix_lower = login_server_suffix.lower()
+    parts = uri_lower.split('.')
 
-    if len(parts) == 5 and parts[2] == 'geo' and uri.endswith(login_server_suffix):
+    if len(parts) == 5 and parts[2] == 'geo' and uri_lower.endswith(suffix_lower):
         return f"{parts[0]}{login_server_suffix}"
 
     # If not a regional endpoint format, return as-is

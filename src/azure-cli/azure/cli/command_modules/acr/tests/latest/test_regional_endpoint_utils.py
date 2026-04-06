@@ -21,6 +21,9 @@ class TestRegionalEndpointUriConversion(unittest.TestCase):
             ('myregistry.westus.geo.azurecr.io', 'myregistry.azurecr.io'),
             ('registry123.eastus2.geo.azurecr.io', 'registry123.azurecr.io'),
             ('prod-registry.centralus.geo.azurecr.io', 'prod-registry.azurecr.io'),
+            # Mixed-case: hostnames are case-insensitive, output is normalized to lowercase
+            ('MyRegistry.EastUS.Geo.azurecr.io', 'myregistry.azurecr.io'),
+            ('MYREGISTRY.WESTUS.GEO.AZURECR.IO', 'myregistry.azurecr.io'),
         ]
 
         for regional_uri, expected in test_cases:
