@@ -321,7 +321,6 @@ def _get_endpoint_and_token_status(cmd, login_server, registry_abac_enabled, rep
 
 
 def _check_registry_health(cmd, registry_name, repository, ignore_errors):
-    from azure.cli.core.profiles import ResourceType
     if registry_name is None:
         logger.warning("Registry name must be provided to check connectivity.")
         return
