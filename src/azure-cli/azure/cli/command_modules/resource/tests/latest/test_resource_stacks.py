@@ -27,7 +27,7 @@ class DeploymentStacksWhatIfTest(ScenarioTest):
         })
 
         self.cmd(
-            'stack-whatif group create --name {name} --resource-group {resource-group} --template-file "{template-file}" --deny-settings-mode denYdeletE --parameters "{parameter-file}" --description "stack deployment" --aou deleteAll --deny-settings-excluded-principals "01010000-0000-0000-0000-000000001111" --deny-settings-excluded-actions "action1 action2" --deny-settings-apply-to-child-scopes --vl ProviderNoRbac --ri P1D --stack "{stack-id}" --no-pretty-print',
+            'stack-whatif group create --name {name} --resource-group {resource-group} --template-file "{template-file}" --deny-settings-mode denYdeletE --parameters "{parameter-file}" --description "stack deployment" --aou deleteAll --deny-settings-excluded-principals "01010000-0000-0000-0000-000000001111" --deny-settings-excluded-actions "action1 action2" --deny-settings-apply-to-child-scopes --vl ProviderNoRbac --ri P1D --stack-id "{stack-id}" --no-pretty-print',
             checks=self.check('properties.provisioningState', 'succeeded'))
 
         self.cmd(
@@ -52,7 +52,7 @@ class DeploymentStacksWhatIfTest(ScenarioTest):
         })
 
         self.cmd(
-            'stack-whatif sub create --name {name} --location {location} --template-file "{template-file}" --dm denyDelete --parameters "{parameter-file}" --description "stack deployment" --aou deleteAll --deny-settings-excluded-actions "action1 action2" --deny-settings-apply-to-child-scopes --vl ProviderNoRbac --ri P1D --stack "{stack-id}" --no-pretty-print',
+            'stack-whatif sub create --name {name} --location {location} --template-file "{template-file}" --dm denyDelete --parameters "{parameter-file}" --description "stack deployment" --aou deleteAll --deny-settings-excluded-actions "action1 action2" --deny-settings-apply-to-child-scopes --vl ProviderNoRbac --ri P1D --stack-id "{stack-id}" --no-pretty-print',
             checks=self.check('properties.provisioningState', 'succeeded'))
 
         self.cmd('stack-whatif sub show --name {name}')
@@ -76,7 +76,7 @@ class DeploymentStacksWhatIfTest(ScenarioTest):
             'stack-id': f'/providers/Microsoft.Management/managementGroups/{DeploymentStacksWhatIfTest.MGMT_GROUP_NAME}/providers/Microsoft.Resources/deploymentStacks/{stack_name}',
         })
 
-        self.cmd('stack-whatif mg create --name {name} --location {location} --management-group-id {management-group} --template-file "{template-file}" --dm denyDelete --parameters "{parameter-file}" --description "stack deployment" --aou deleteAll --deny-settings-excluded-actions "action1 action2" --deny-settings-apply-to-child-scopes --vl ProviderNoRbac --ri P1D --stack "{stack-id}" --no-color')
+        self.cmd('stack-whatif mg create --name {name} --location {location} --management-group-id {management-group} --template-file "{template-file}" --dm denyDelete --parameters "{parameter-file}" --description "stack deployment" --aou deleteAll --deny-settings-excluded-actions "action1 action2" --deny-settings-apply-to-child-scopes --vl ProviderNoRbac --ri P1D --stack-id "{stack-id}" --no-color')
 
         self.cmd(
             'stack-whatif mg show --name {name} --management-group-id {management-group} --no-pretty-print',

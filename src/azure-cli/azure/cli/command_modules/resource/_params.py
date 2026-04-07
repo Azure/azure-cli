@@ -117,7 +117,7 @@ def load_arguments(self, _):
     stacks_validation_level_type = CLIArgumentType(
         arg_type=get_enum_type(StacksValidationLevel), options_list=['--validation-level', '--vl'], help="Validation level for the deployment stack. The default is 'Provider'.")
 
-    stacks_whatif_stack_id_type = CLIArgumentType(options_list=['--stack'], help='The fully-qualified ID of the deployment stack to perform a what-if operation on.')
+    stacks_whatif_stack_id_type = CLIArgumentType(options_list=['--stack-id'], help='The fully-qualified ID of the deployment stack to perform a what-if operation on.')
     stacks_whatif_retention_interval_type = CLIArgumentType(
         options_list=['--retention-interval', '--ri'], type=iso_8601_duration,
         help='The retention interval for What-If results. The value must be in ISO 8601 format and between 1 day and 30 days.')
