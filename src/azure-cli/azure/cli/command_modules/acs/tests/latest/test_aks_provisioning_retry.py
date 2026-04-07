@@ -16,9 +16,22 @@ class MockExecutionResult:
         self._json = output_json
         self.output = json.dumps(output_json)
         self.json_value = None
+        self.skip_assert = False
 
     def get_output_in_json(self):
         return self._json
+
+    def assert_with_checks(self, *args):
+        checks = []
+        for each in args:
+            if isinstance(each, list):
+                checks.extend(each)
+            elif callable(each):
+                checks.append(each)
+        if not self.skip_assert:
+            for c in checks:
+                c(self)
+        return self
 
 
 class TestShouldRetryForProvisioningState(unittest.TestCase):
@@ -44,6 +57,18 @@ class TestShouldRetryForProvisioningState(unittest.TestCase):
         result = MockExecutionResult({'id': '/subscriptions/xxx/rg/mc', 'provisioningState': 'Succeeded'})
         should_retry, _ = inst._should_retry_for_provisioning_state(result)
         self.assertFalse(should_retry)
+
+    def test_failed_raises_assertion(self):
+        inst = self._make_instance()
+        result = MockExecutionResult({'id': '/subscriptions/xxx/rg/mc', 'provisioningState': 'Failed'})
+        with self.assertRaises(AssertionError):
+            inst._should_retry_for_provisioning_state(result)
+
+    def test_canceled_raises_assertion(self):
+        inst = self._make_instance()
+        result = MockExecutionResult({'id': '/subscriptions/xxx/rg/mc', 'provisioningState': 'Canceled'})
+        with self.assertRaises(AssertionError):
+            inst._should_retry_for_provisioning_state(result)
 
     def test_no_id_returns_false(self):
         inst = self._make_instance()
@@ -74,15 +99,19 @@ class TestCmdWithRetry(unittest.TestCase):
         return MockExecutionResult(data)
 
     @patch.dict(os.environ, {'AZURE_CLI_TEST_PROVISIONING_MAX_RETRIES': '3', 'AZURE_CLI_TEST_PROVISIONING_BASE_DELAY': '0.01'})
+    @patch('time.sleep', return_value=None)
+    @patch('random.uniform', return_value=0)
     @patch('azure.cli.testsdk.base.execute')
-    def test_no_retry_when_already_succeeded(self, mock_execute):
+    def test_no_retry_when_already_succeeded(self, mock_execute, _mock_random, _mock_sleep):
         mock_execute.return_value = self._result({'id': '/rg/mc', 'provisioningState': 'Succeeded'})
         self._make_instance()._cmd_with_retry('aks show', [JMESPathCheck('provisioningState', 'Succeeded')], False)
         mock_execute.assert_called_once()
 
     @patch.dict(os.environ, {'AZURE_CLI_TEST_PROVISIONING_MAX_RETRIES': '3', 'AZURE_CLI_TEST_PROVISIONING_BASE_DELAY': '0.01'})
+    @patch('time.sleep', return_value=None)
+    @patch('random.uniform', return_value=0)
     @patch('azure.cli.testsdk.base.execute')
-    def test_retries_until_succeeded(self, mock_execute):
+    def test_retries_until_succeeded(self, mock_execute, _mock_random, _mock_sleep):
         resource_id = '/subscriptions/xxx/resourceGroups/rg/providers/Microsoft.ContainerService/managedClusters/mc'
         mock_execute.side_effect = [
             self._result({'id': resource_id, 'provisioningState': 'Updating'}),
@@ -93,8 +122,10 @@ class TestCmdWithRetry(unittest.TestCase):
         self.assertEqual(mock_execute.call_count, 3)
 
     @patch.dict(os.environ, {'AZURE_CLI_TEST_PROVISIONING_MAX_RETRIES': '2', 'AZURE_CLI_TEST_PROVISIONING_BASE_DELAY': '0.01'})
+    @patch('time.sleep', return_value=None)
+    @patch('random.uniform', return_value=0)
     @patch('azure.cli.testsdk.base.execute')
-    def test_raises_on_failed_state(self, mock_execute):
+    def test_raises_on_failed_state(self, mock_execute, _mock_random, _mock_sleep):
         mock_execute.side_effect = [
             self._result({'id': '/rg/mc', 'provisioningState': 'Updating'}),
             self._result({'provisioningState': 'Failed'}),
@@ -103,16 +134,30 @@ class TestCmdWithRetry(unittest.TestCase):
             self._make_instance()._cmd_with_retry('aks show', [JMESPathCheck('provisioningState', 'Succeeded')], False)
 
     @patch.dict(os.environ, {'AZURE_CLI_TEST_PROVISIONING_MAX_RETRIES': '2', 'AZURE_CLI_TEST_PROVISIONING_BASE_DELAY': '0.01'})
+    @patch('time.sleep', return_value=None)
+    @patch('random.uniform', return_value=0)
     @patch('azure.cli.testsdk.base.execute')
-    def test_raises_timeout_after_max_retries(self, mock_execute):
+    def test_raises_immediately_on_initial_failed_state(self, mock_execute, _mock_random, _mock_sleep):
+        mock_execute.return_value = self._result({'id': '/rg/mc', 'provisioningState': 'Failed'})
+        with self.assertRaises(AssertionError):
+            self._make_instance()._cmd_with_retry('aks show', [JMESPathCheck('provisioningState', 'Succeeded')], False)
+        mock_execute.assert_called_once()
+
+    @patch.dict(os.environ, {'AZURE_CLI_TEST_PROVISIONING_MAX_RETRIES': '2', 'AZURE_CLI_TEST_PROVISIONING_BASE_DELAY': '0.01'})
+    @patch('time.sleep', return_value=None)
+    @patch('random.uniform', return_value=0)
+    @patch('azure.cli.testsdk.base.execute')
+    def test_raises_timeout_after_max_retries(self, mock_execute, _mock_random, _mock_sleep):
         poll = self._result({'provisioningState': 'Updating'})
         mock_execute.side_effect = [self._result({'id': '/rg/mc', 'provisioningState': 'Updating'}), poll, poll]
         with self.assertRaises(TimeoutError):
             self._make_instance()._cmd_with_retry('aks show', [JMESPathCheck('provisioningState', 'Succeeded')], False)
 
     @patch.dict(os.environ, {'AZURE_CLI_TEST_PROVISIONING_MAX_RETRIES': '3', 'AZURE_CLI_TEST_PROVISIONING_BASE_DELAY': '0.01'})
+    @patch('time.sleep', return_value=None)
+    @patch('random.uniform', return_value=0)
     @patch('azure.cli.testsdk.base.execute')
-    def test_non_provisioning_checks_still_run(self, mock_execute):
+    def test_non_provisioning_checks_still_run(self, mock_execute, _mock_random, _mock_sleep):
         mock_execute.return_value = self._result({'id': '/rg/mc', 'name': 'mc', 'provisioningState': 'Succeeded'})
         name_check = MagicMock()
         self._make_instance()._cmd_with_retry('aks show', [JMESPathCheck('provisioningState', 'Succeeded'), name_check], False)

@@ -54,7 +54,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
     def cmd(self, command, checks=None, expect_failure=False):
         if (checks and self.is_live and
             os.environ.get('AZURE_CLI_TEST_RETRY_PROVISIONING_CHECK') == 'true'):
-            return self._cmd_with_retry(command, checks, expect_failure)
+            normalized_checks = checks if isinstance(checks, (list, tuple)) else [checks]
+            return self._cmd_with_retry(command, normalized_checks, expect_failure)
         return super().cmd(command, checks=checks, expect_failure=expect_failure)
 
     def _is_provisioning_state_check(self, check):
@@ -72,8 +73,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         provisioning_state = data.get('provisioningState')
         if not provisioning_state:
             return False, None
-        terminal_states = {'Succeeded', 'Failed', 'Canceled'}
-        if provisioning_state in terminal_states:
+        if provisioning_state in {'Failed', 'Canceled'}:
+            raise AssertionError(f"provisioningState is {provisioning_state}")
+        if provisioning_state == 'Succeeded':
             return False, None
         return True, data['id']
 
@@ -96,7 +98,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                 initial_data = result.get_output_in_json()
                 initial_etag = initial_data.get('etag')
                 last_seen_etag = initial_etag
-                max_retries = int(os.environ.get('AZURE_CLI_TEST_PROVISIONING_MAX_RETRIES', '10'))
+                max_retries = max(1, int(os.environ.get('AZURE_CLI_TEST_PROVISIONING_MAX_RETRIES', '10')))
                 base_delay = float(os.environ.get('AZURE_CLI_TEST_PROVISIONING_BASE_DELAY', '2.0'))
 
                 # Poll with exponential backoff + jitter until terminal state
@@ -132,8 +134,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             # Provisioning checks already verified via polling, skip re-checking stale result
 
         # Run all non-provisioning checks against the original result
-        for check in other_checks:
-            check(result)
+        if other_checks:
+            result.assert_with_checks(other_checks)
 
         return result
 
