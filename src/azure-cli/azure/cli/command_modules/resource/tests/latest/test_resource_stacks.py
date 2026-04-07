@@ -76,7 +76,7 @@ class DeploymentStacksWhatIfTest(ScenarioTest):
             'stack-id': f'/providers/Microsoft.Management/managementGroups/{DeploymentStacksWhatIfTest.MGMT_GROUP_NAME}/providers/Microsoft.Resources/deploymentStacks/{stack_name}',
         })
 
-        self.cmd('stack-whatif mg create --name {name} --location {location} --management-group-id {management-group} --template-file "{template-file}" --dm denyDelete --parameters "{parameter-file}" --description "stack deployment" --aou deleteAll --deny-settings-excluded-actions "action1 action2" --deny-settings-apply-to-child-scopes --vl ProviderNoRbac --ri P1D --stack-id "{stack-id}" --no-color')
+        self.cmd('stack-whatif mg create --name {name} --location {location} --management-group-id {management-group} --template-file "{template-file}" --dm none --parameters "{parameter-file}" --description "stack deployment" --aou deleteAll --deny-settings-excluded-actions "action1 action2" --deny-settings-apply-to-child-scopes --vl ProviderNoRbac --ri P1D --stack-id "{stack-id}" --no-color')
 
         self.cmd(
             'stack-whatif mg show --name {name} --management-group-id {management-group} --no-pretty-print',
