@@ -129,7 +129,6 @@ class CLIPrintMixin(CLIHelp):
     def _print_detailed_help(self, cli_name, help_file):
         CLIPrintMixin._print_extensions_msg(help_file)
         super()._print_detailed_help(cli_name, help_file)
-        self._print_az_find_message(help_file.command)
 
     @staticmethod
     def _get_choices_defaults_sources_str(p):
@@ -153,12 +152,6 @@ class CLIPrintMixin(CLIHelp):
                 _print_indent('{0}'.format(e.long_summary), indent)
             _print_indent('{0}'.format(e.command), indent)
             print('')
-
-    @staticmethod
-    def _print_az_find_message(command):
-        indent = 0
-        message = 'To search AI knowledge base for examples, use: az find "az {}"'.format(command)
-        _print_indent(message + '\n', indent)
 
     @staticmethod
     def _process_value_sources(p):
@@ -401,10 +394,7 @@ class AzCliHelp(CLIPrintMixin, CLIHelp):
 
         self._print_cached_help_section(groups_items, "Subgroups:", max_line_len)
         self._print_cached_help_section(commands_items, "Commands:", max_line_len)
-
-        # Use same az find message as non-cached path
-        print()  # Blank line before the message
-        self._print_az_find_message('')
+        print()
 
         from azure.cli.core.util import show_updates_available
         show_updates_available(new_line_after=True)
