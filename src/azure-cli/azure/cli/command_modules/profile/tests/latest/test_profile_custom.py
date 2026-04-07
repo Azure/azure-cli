@@ -214,6 +214,13 @@ class TestLoginSubscriptionFilter(unittest.TestCase):
         with self.assertRaisesRegex(CLIError, "'--skip-subscription-discovery' requires '--tenant'"):
             login(cmd, skip_subscription_discovery=True, subscription='sub-id')
 
+    def test_skip_subscription_discovery_with_name_rejects_non_guid(self):
+        """--skip-subscription-discovery --subscription 'My Sub' (a name, not GUID) raises CLIError."""
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = DummyCli()
+        with self.assertRaisesRegex(CLIError, "must be a subscription ID"):
+            login(cmd, tenant='tenant1', skip_subscription_discovery=True, subscription='My Subscription')
+
     @mock.patch('azure.cli.command_modules.profile.custom.sys')
     @mock.patch('azure.cli.command_modules.profile._subscription_selector.SubscriptionSelector', autospec=True)
     @mock.patch('azure.cli.command_modules.profile.custom.Profile', autospec=True)

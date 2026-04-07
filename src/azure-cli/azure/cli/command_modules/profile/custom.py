@@ -159,6 +159,11 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
         raise CLIError('usage error: --service-principal --username NAME --password SECRET --tenant TENANT')
     if skip_subscription_discovery and not tenant:
         raise CLIError("usage error: '--skip-subscription-discovery' requires '--tenant'")
+    if skip_subscription_discovery and subscription:
+        from azure.cli.core.util import is_guid
+        if not is_guid(subscription):
+            raise CLIError("usage error: '--subscription' must be a subscription ID (GUID), not a name, "
+                           "when combined with '--skip-subscription-discovery'.")
     if username and not service_principal and not identity:
         if cmd.cli_ctx.cloud.endpoints.active_directory.startswith('https://login.microsoftonline.com'):
             logger.warning(USERNAME_PASSWORD_DEPRECATION_WARNING_AZURE_CLOUD)
