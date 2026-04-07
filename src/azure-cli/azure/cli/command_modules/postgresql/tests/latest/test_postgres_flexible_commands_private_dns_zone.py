@@ -3,8 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import time
-
+import os
+from time import sleep
+from azure.cli.testsdk.scenario_tests.const import ENV_LIVE_TEST
 from azure.cli.testsdk import (
     JMESPathCheck,
     NoneCheck,
@@ -125,7 +126,7 @@ class PostgreSQLFlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
         self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(server_resource_group, server_names[1]),
                  checks=NoneCheck())
 
-        time.sleep(15 * 60)
+        os.environ.get(ENV_LIVE_TEST, False) and sleep(1800)
 
     def _test_flexible_server_new_private_dns_zone(self, server_resource_group, vnet_resource_group, dns_resource_group):
         server_names = ['clitest-private-dns-zone-test-3', 'clitest-private-dns-zone-test-4',
@@ -202,4 +203,4 @@ class PostgreSQLFlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
         self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(server_resource_group, server_names[4]),
                  checks=NoneCheck())
 
-        time.sleep(15 * 60)
+        os.environ.get(ENV_LIVE_TEST, False) and sleep(1800)

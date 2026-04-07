@@ -42,7 +42,7 @@ class FlexibleServerLogsMgmtScenarioTest(ScenarioTest):
             return
 
         # Wait for around 30 min to allow log files to be generated
-        sleep(30*60)
+        os.environ.get(ENV_LIVE_TEST, False) and sleep(1800)
 
         # List server log files
         server_log_files = self.cmd('postgres flexible-server server-logs list -g {} --server-name {} '
