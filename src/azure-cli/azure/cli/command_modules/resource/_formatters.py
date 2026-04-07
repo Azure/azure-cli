@@ -3,13 +3,19 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import typing as t
+import json
 from itertools import groupby
 
-from azure.mgmt.resource.deployments.models import ChangeType, PropertyChangeType, Level
+import azure.mgmt.resource.deployments.models as DeploymentModels
 
 from ._symbol import Symbol
 from ._color import Color, ColoredStringBuilder
 from ._utils import split_resource_id
+
+ChangeType = DeploymentModels.ChangeType
+PropertyChangeType = DeploymentModels.PropertyChangeType
+Level = DeploymentModels.Level
 
 _change_type_to_color = {
     ChangeType.create: Color.GREEN,
@@ -75,7 +81,7 @@ _property_change_type_to_weight = {
 }
 
 
-def format_what_if_operation_result(what_if_operation_result, enable_color=True):
+def format_what_if_operation_result(what_if_operation_result: DeploymentModels.WhatIfOperationResult, enable_color=True):
     builder = ColoredStringBuilder(enable_color)
     _format_noise_notice(builder)
     _format_change_type_legend(builder, what_if_operation_result.changes)
@@ -106,7 +112,7 @@ You can help us improve the accuracy of the result by opening an issue here: htt
     builder.append_line()
 
 
-def _format_change_type_legend(builder, resource_changes):
+def _format_change_type_legend(builder, resource_changes: t.Optional[list[DeploymentModels.WhatIfChange]]):
     if not resource_changes:
         return
 
@@ -140,7 +146,7 @@ def _format_change_type_legend(builder, resource_changes):
         builder.append_line(change_type.title())
 
 
-def _format_resource_changes_stats(builder, resource_changes, definite_changes=True):
+def _format_resource_changes_stats(builder, resource_changes: t.Optional[list[DeploymentModels.WhatIfChange]], definite_changes=True):
     if definite_changes:
         builder.append_line().append("Resource changes: ")
 
@@ -208,7 +214,7 @@ def _format_diagnostics(builder, resource_changes, potential_changes, diagnostic
                 builder.append_line()
 
 
-def _format_resource_changes(builder, resource_changes, definite_changes=True):
+def _format_resource_changes(builder, resource_changes: t.Optional[list[DeploymentModels.WhatIfChange]], definite_changes=True):
     if not resource_changes:
         return
 
@@ -226,8 +232,7 @@ def _format_resource_changes(builder, resource_changes, definite_changes=True):
     for _, resource_changes_in_scope in resource_changes_by_scope:
         resource_changes_in_scope_list = list(resource_changes_in_scope)
         scope = _get_scope(resource_changes_in_scope_list[0])
-        if scope != "Unknown":
-            _format_resource_changes_in_scope(builder, scope, resource_changes_in_scope_list)
+        _format_resource_changes_in_scope(builder, scope, resource_changes_in_scope_list)
 
 
 def _format_resource_changes_in_scope(builder, scope, resource_changes_in_scope):
@@ -246,12 +251,12 @@ def _format_resource_changes_in_scope(builder, scope, resource_changes_in_scope)
                 _format_resource_change(builder, resource_change, is_last)
 
 
-def _format_resource_change(builder, resource_change, is_last):
-    change_type = resource_change.change_type
+def _format_resource_change(builder, resource_change: DeploymentModels.WhatIfChange, is_last):
     relative_resource_id = _get_relative_resource_id(resource_change)
     if relative_resource_id is None:
         return
 
+    change_type = resource_change.change_type
     api_version = _get_api_version(resource_change)
 
     builder.append_line()
@@ -441,7 +446,7 @@ def _format_property_array_change(builder, parent_property_change, property_chan
     builder.append(Symbol.RIGHT_SQUARE_BRACKET)
 
 
-def _get_api_version(resource_change):
+def _get_api_version(resource_change: DeploymentModels.WhatIfChange):
     if resource_change.before:
         return resource_change.before.get("apiVersion")
     if resource_change.after:
@@ -449,18 +454,25 @@ def _get_api_version(resource_change):
     return None
 
 
-def _get_scope(resource_change):
-    scope, _ = split_resource_id(resource_change.resource_id)
-    return scope or "Unknown"  # TODO: extensible resource support
+def _get_scope(resource_change: DeploymentModels.WhatIfChange):
+    if resource_change.resource_id:
+        return split_resource_id(resource_change.resource_id)[0]
+    elif resource_change.extension:
+        # TODO: eventually this should include the extension config with key=value pairs
+        return f"{resource_change.extension.name}@{resource_change.extension.version}"
+    return "Unknown"
 
 
-def _get_scope_uppercase(resource_change):
+def _get_scope_uppercase(resource_change: DeploymentModels.WhatIfChange):
     return _get_scope(resource_change).upper()
 
 
-def _get_relative_resource_id(resource_change):
-    _, relative_resource_id = split_resource_id(resource_change.resource_id)
-    return relative_resource_id
+def _get_relative_resource_id(resource_change: DeploymentModels.WhatIfChange):
+    if resource_change.resource_id:
+        return split_resource_id(resource_change.resource_id)[1]
+    elif resource_change.identifiers:
+        return _format_ext_resource_identifiers(resource_change.identifiers)
+    return None
 
 
 def _get_max_path_length_from_property_changes(property_changes):
@@ -643,3 +655,12 @@ def _is_non_empty_array(value):
 
 def _is_non_empty_object(value):
     return isinstance(value, dict) and value
+
+
+def _format_ext_resource_identifiers(identifiers: t.Optional[dict[str, t.Any]]) -> str:
+    if not identifiers:
+        return ""
+
+    sorted_items = sorted(identifiers.items(), key=lambda x: x[0])
+
+    return ", ".join(f"{key}={json.dumps(value)}" for key, value in sorted_items)

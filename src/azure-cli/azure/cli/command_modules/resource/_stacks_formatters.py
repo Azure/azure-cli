@@ -11,6 +11,7 @@ from requests.structures import CaseInsensitiveDict
 import azure.mgmt.resource.deploymentstacks.models as StackModels
 # from itertools import groupby
 
+from ._formatters import _format_ext_resource_identifiers
 from ._color import Color, ColoredStringBuilder
 from ._utils import str_lower_eq
 
@@ -160,7 +161,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
                     x.change_certainty, 1) if not x.id else 0,  # Extension resources: then by certainty
                 x.type if x.extension else "",  # Extension resources: then by type
                 # Extension resources: then by identifiers
-                self._format_ext_resource_identifiers(x.identifiers) if x.identifiers else ""
+                _format_ext_resource_identifiers(x.identifiers) if x.identifiers else ""
             ))
 
         if self._format_resource_changes(resource_changes_sorted):
@@ -278,7 +279,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
 
         api_version_suffix = f" [{resource_change.api_version}]" if resource_change.api_version else ""
         resource_id = resource_change.id if resource_change.id else\
-            f"{resource_change.type} {self._format_ext_resource_identifiers(resource_change.identifiers)}"
+            f"{resource_change.type} {_format_ext_resource_identifiers(resource_change.identifiers)}"
         self.builder.append_line(f"{resource_id}{api_version_suffix}", color)
 
     def _format_resource_property_changes(
@@ -543,9 +544,3 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
                     result += f" {', '.join(config_parts)}"
 
         return result
-
-    @staticmethod
-    def _format_ext_resource_identifiers(identifiers: dict[str, t.Any]) -> str:
-        sorted_items = sorted(identifiers.items(), key=lambda x: x[0])
-
-        return ", ".join(f"{key}={json.dumps(value)}" for key, value in sorted_items)
