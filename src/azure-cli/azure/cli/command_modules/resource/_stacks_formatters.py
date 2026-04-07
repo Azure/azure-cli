@@ -90,7 +90,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         self._format_diagnostics()
 
         result = self.builder.build()
-        self.what_if_result = self.what_if_props = None
+        self.what_if_result = self.what_if_props = self.what_if_changes = None
 
         return result
 

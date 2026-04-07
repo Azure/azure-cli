@@ -93,7 +93,9 @@ class ColoredStringBuilder:
             self._contents.append("\n" * remaining_newlines)
 
     def clear(self):
-        self._contents = []
+        self._contents.clear()
+        self._colors.clear()
+        self._indents.clear()
 
     def _push_color(self, color):
         if not self._enable_color:

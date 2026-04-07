@@ -38,7 +38,7 @@ class TestStacksWhatIfResultFormatter(unittest.TestCase):
     @staticmethod
     def _get_stacks_what_if_test_file_path(file_name: str):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
-        return os.path.join(os.path.join(curr_dir, 'data\\stacks-what-if'), file_name).replace('\\', '\\\\')
+        return os.path.join(curr_dir, 'data', 'stacks-what-if', file_name)
 
     EXPECTED_STACKS_WHAT_IF_1 = f"""Resource and property changes are indicated with these symbols:
   {Color.GREEN}+{Color.RESET} Create              ! Unsupported
