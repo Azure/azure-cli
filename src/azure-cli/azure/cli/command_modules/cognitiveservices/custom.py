@@ -2500,6 +2500,17 @@ def project_update(
     return client.begin_update(resource_group_name, account_name, project_name, project)
 
 
+def project_delete(client, resource_group_name, account_name, project_name):
+    """Delete a project. Works around SDK rejecting 200 OK (only accepts 202/204)."""
+    from azure.core.exceptions import HttpResponseError
+    try:
+        return client.begin_delete(resource_group_name, account_name, project_name)
+    except HttpResponseError as ex:
+        if ex.response and ex.response.status_code == 200:
+            return None
+        raise
+
+
 def account_connection_create(
     client,
     resource_group_name,

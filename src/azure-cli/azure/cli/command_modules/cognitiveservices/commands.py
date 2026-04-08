@@ -167,7 +167,7 @@ def load_command_table(self, _):
             'cognitiveservices account project', projects_type,
             client_factory=cf_projects) as g:
         g.custom_command('create', 'project_create')
-        g.command('delete', 'begin_delete')
+        g.custom_command('delete', 'project_delete')
         g.show_command('show', 'get')
         g.command('list', 'list')
         g.custom_command('update', 'project_update')
