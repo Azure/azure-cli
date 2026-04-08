@@ -2268,7 +2268,9 @@ def managed_network_provision(
     """
     Provision the managed network for an Azure Cognitive Services account.
     """
-    return client.begin_provision_managed_network(resource_group_name, account_name, managed_network_name, body={})
+    # Pass body as pre-serialized bytes to work around an issue where empty dict {}
+    # is falsy in Python, causing content_type to be set to None while body is still serialized.
+    return client.begin_provision_managed_network(resource_group_name, account_name, managed_network_name, body=b'{}')
 
 
 def managed_network_show(
