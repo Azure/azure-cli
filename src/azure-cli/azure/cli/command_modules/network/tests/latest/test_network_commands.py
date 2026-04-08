@@ -3759,6 +3759,92 @@ class NetworkExpressRoutePortScenarioTest(ScenarioTest):
 
         self.cmd('network express-route port generate-loa --customer-name MyCustomer -g {rg} --name {name} -f loa1')
 
+class NetworkExpressRouteCircuitLinkFailoverBasicScenarioTest(ScenarioTest):
+    @live_only()
+    def test_start_circuit_link_failover_test(self): # live_only as the express route is extremely expensive, contact service team for an available ER
+        resource_group = "CircuitFailoverTestsBothLinks04"  
+        circuit_name = "ErCircuit01"
+        peering_location = "Noida2"
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'circuit': circuit_name,
+            'peering_loc': peering_location,
+            'link_type': 'Secondary',
+            'maintenance_category': 'BgpDisconnect',
+            'fetch_latest': True,
+            'test_type': 'LinkFailover',
+        })
+
+        # Run the command
+        result = self.cmd(
+            'network express-route start-link-failover-test '
+            '-g {rg} --name {circuit} '
+            '--link-type {link_type} '
+            '--maintenance-category {maintenance_category}'
+        ).get_output_in_json()
+
+        # Validate that result is a string (per _schema_on_200 = AAZStrType())
+        self.assertIsInstance(result, dict)
+
+    @live_only()
+    def test_stop_circuit_link_failover_test(self): # live_only as the express route is extremely expensive, contact service team for an available ER
+        import time
+
+        time.sleep(2 * 60)  # 120 seconds To wait for sometime before stopping the test failover
+        resource_group = "CircuitFailoverTestsBothLinks04"  
+        circuit_name = "ErCircuit01"
+        peering_location = "Noida2"
+        simulation_successful = True
+        test_guid = "c84fe369-b52c-4b66-87c7-ec873235c9c1"
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'circuit': circuit_name,
+            'peering_loc': peering_location,
+            'link_type': 'Secondary',
+            'maintenance_category': 'BgpDisconnect',
+            'fetch_latest': True,
+            'test_type': 'LinkFailover',
+            'simulation_successful': simulation_successful,
+            'is_verified': True,
+            'test_guid': test_guid,
+        })
+
+        # Run the command
+        result = self.cmd(
+            'network express-route stop-link-failover-test '
+            '-g {rg} --name {circuit} '
+            '--circuit-test-category {maintenance_category} '
+            '--link-type {link_type} '
+            '--simulation-successful {simulation_successful} '
+            '--is-verified {is_verified}'
+        ).get_output_in_json()
+
+        # Validate
+        self.assertTrue(isinstance(result, (str, dict)))
+
+        # Run all tests detail command to validate the stop operation
+        tests_link_latest = self.cmd(
+            'network express-route get-link-failover-all-tests-detail '
+            '-g {rg} --name {circuit} '
+            '--fetch-latest True --type LinkFailover'
+        ).get_output_in_json()
+
+        self.assertIsInstance(tests_link_latest, dict)
+
+        #
+        single_test_result = self.cmd(
+                'network express-route get-link-failover-single-test-detail '
+                '-g {rg} --name {circuit} '
+                '--failover-test-id {test_guid} '
+                '--link-type {link_type} '
+                '--maintenance-category {maintenance_category}'
+            ).get_output_in_json()
+
+        # Validate response structure
+        self.assertIsInstance(single_test_result, dict)
+
 
 class NetworkExpressRouteIPv6PeeringScenarioTest(ScenarioTest):
 

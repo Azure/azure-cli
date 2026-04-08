@@ -13995,6 +13995,8 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
                 service_cidr="192.168.0.0/16",
                 advanced_networking=self.models.AdvancedNetworking(
                     enabled=True,
+                    observability=self.models.AdvancedNetworkingObservability(enabled=True),
+                    security=self.models.AdvancedNetworkingSecurity(enabled=True),
                 ),
             ),
         )
@@ -14022,6 +14024,8 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
 
         self.assertIsNotNone(dec_mc_1.network_profile.advanced_networking)
         self.assertEqual(dec_mc_1.network_profile.advanced_networking.enabled, True)
+        self.assertEqual(dec_mc_1.network_profile.advanced_networking.observability.enabled, True)
+        self.assertEqual(dec_mc_1.network_profile.advanced_networking.security.enabled, True)
         self.assertIsNone(dec_mc_1.network_profile.advanced_networking.performance)
 
     def test_get_acns_advanced_networkpolicies(self):
@@ -14353,6 +14357,133 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             dec_mc_3.network_profile.advanced_networking.security.advanced_network_policies,
             "None"
         )
+        # Verify existing security.enabled is preserved
+        self.assertEqual(dec_mc_3.network_profile.advanced_networking.security.enabled, True)
+
+    def test_update_network_profile_advanced_networking_preserves_existing_state(self):
+        # Test that updating only network policies preserves existing observability and security settings
+        dec_1 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_acns": True,
+                "acns_advanced_networkpolicies": "L7",
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="azure",
+                advanced_networking=self.models.AdvancedNetworking(
+                    enabled=True,
+                    observability=self.models.AdvancedNetworkingObservability(
+                        enabled=True,
+                    ),
+                    security=self.models.AdvancedNetworkingSecurity(
+                        enabled=True,
+                        advanced_network_policies="FQDN",
+                        transit_encryption=self.models.AdvancedNetworkingSecurityTransitEncryption(
+                            type="WireGuard",
+                        ),
+                    ),
+                ),
+            ),
+        )
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.update_network_profile_advanced_networking(mc_1)
+
+        # Verify the updated field changed
+        self.assertEqual(
+            dec_mc_1.network_profile.advanced_networking.security.advanced_network_policies,
+            "L7"
+        )
+        # Verify existing observability is preserved
+        self.assertIsNotNone(dec_mc_1.network_profile.advanced_networking.observability)
+        self.assertEqual(dec_mc_1.network_profile.advanced_networking.observability.enabled, True)
+        # Verify existing security.enabled is preserved
+        self.assertEqual(dec_mc_1.network_profile.advanced_networking.security.enabled, True)
+        # Verify existing transit encryption is preserved
+        self.assertIsNotNone(dec_mc_1.network_profile.advanced_networking.security.transit_encryption)
+        self.assertEqual(
+            dec_mc_1.network_profile.advanced_networking.security.transit_encryption.type,
+            "WireGuard"
+        )
+
+        # Test that updating only observability preserves existing security settings
+        dec_2 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_acns": True,
+                "disable_acns_observability": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="azure",
+                advanced_networking=self.models.AdvancedNetworking(
+                    enabled=True,
+                    observability=self.models.AdvancedNetworkingObservability(
+                        enabled=True,
+                    ),
+                    security=self.models.AdvancedNetworkingSecurity(
+                        enabled=True,
+                        advanced_network_policies="FQDN",
+                    ),
+                ),
+            ),
+        )
+        dec_2.context.attach_mc(mc_2)
+        dec_mc_2 = dec_2.update_network_profile_advanced_networking(mc_2)
+
+        # Verify observability was updated
+        self.assertEqual(dec_mc_2.network_profile.advanced_networking.observability.enabled, False)
+        # Verify existing security is fully preserved
+        self.assertIsNotNone(dec_mc_2.network_profile.advanced_networking.security)
+        self.assertEqual(dec_mc_2.network_profile.advanced_networking.security.enabled, True)
+        self.assertEqual(
+            dec_mc_2.network_profile.advanced_networking.security.advanced_network_policies,
+            "FQDN"
+        )
+
+        # Test that disabling ACNS preserves existing sub-objects (server may need them for state tracking)
+        dec_3 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "disable_acns": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="azure",
+                advanced_networking=self.models.AdvancedNetworking(
+                    enabled=True,
+                    observability=self.models.AdvancedNetworkingObservability(
+                        enabled=True,
+                    ),
+                    security=self.models.AdvancedNetworkingSecurity(
+                        enabled=True,
+                        advanced_network_policies="FQDN",
+                    ),
+                ),
+            ),
+        )
+        dec_3.context.attach_mc(mc_3)
+        dec_mc_3 = dec_3.update_network_profile_advanced_networking(mc_3)
+
+        # Verify ACNS disabled
+        self.assertEqual(dec_mc_3.network_profile.advanced_networking.enabled, False)
+        # Verify sub-objects are preserved but explicitly disabled
+        self.assertIsNotNone(dec_mc_3.network_profile.advanced_networking.observability)
+        self.assertEqual(dec_mc_3.network_profile.advanced_networking.observability.enabled, False)
+        self.assertIsNotNone(dec_mc_3.network_profile.advanced_networking.security)
+        self.assertEqual(dec_mc_3.network_profile.advanced_networking.security.enabled, False)
 
     def test_update_network_profile_advanced_networking_with_transit_encryption(self):
         # test update with transit encryption
@@ -14389,7 +14520,9 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
                 service_cidr="192.168.0.0/16",
                 advanced_networking=self.models.AdvancedNetworking(
                     enabled=True,
+                    observability=self.models.AdvancedNetworkingObservability(enabled=True),
                     security=self.models.AdvancedNetworkingSecurity(
+                        enabled=True,
                         transit_encryption=self.models.AdvancedNetworkingSecurityTransitEncryption(
                             type="WireGuard",
                         ),
@@ -14434,6 +14567,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
                 service_cidr="192.168.0.0/16",
                 advanced_networking=self.models.AdvancedNetworking(
                     enabled=True,
+                    observability=self.models.AdvancedNetworkingObservability(enabled=True),
                     security=self.models.AdvancedNetworkingSecurity(
                         enabled=True,
                         transit_encryption=self.models.AdvancedNetworkingSecurityTransitEncryption(
