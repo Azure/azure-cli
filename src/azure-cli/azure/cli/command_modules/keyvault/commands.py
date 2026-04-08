@@ -9,7 +9,7 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.core.profiles import ResourceType
 
 from azure.cli.command_modules.keyvault._client_factory import (
-    get_client, get_client_factory, Clients)
+    get_client, get_client_factory, Clients, data_plane_azure_keyvault_ekm_client)
 
 from azure.cli.command_modules.keyvault._transformers import (
     filter_out_managed_resources,
@@ -26,7 +26,8 @@ from azure.cli.command_modules.keyvault._format import transform_secret_list_tab
 
 from azure.cli.command_modules.keyvault._validators import (
     process_secret_set_namespace, validate_key_create,
-    validate_private_endpoint_connection_id, validate_role_assignment_args)
+    validate_private_endpoint_connection_id, validate_role_assignment_args,
+    validate_ekm_connection_base, validate_ekm_connection_create, validate_ekm_connection_update)
 
 
 def transform_assignment_list(result):
@@ -64,6 +65,11 @@ def load_command_table(self, _):
     kv_hsms_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.keyvault.custom#{}',
         client_factory=get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)
+    )
+
+    data_ekm_custom = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.keyvault.custom#{}',
+        client_factory=data_plane_azure_keyvault_ekm_client
     )
     # endregion
 
@@ -136,6 +142,16 @@ def load_command_table(self, _):
         g.keyvault_custom('upload', 'security_domain_upload', supports_no_wait=True)
         g.keyvault_custom('download', 'security_domain_download', supports_no_wait=True)
         g.keyvault_custom('wait', '_wait_security_domain_operation')
+
+    with self.command_group('keyvault ekm-connection', command_type=data_ekm_custom) as g:
+        g.keyvault_custom('create', 'create_ekm_connection', validator=validate_ekm_connection_create)
+        g.keyvault_custom('update', 'update_ekm_connection', validator=validate_ekm_connection_update)
+        g.keyvault_custom('show', 'get_ekm_connection', validator=validate_ekm_connection_base)
+        g.keyvault_custom('check', 'check_ekm_connection', validator=validate_ekm_connection_base)
+        g.keyvault_custom('delete', 'delete_ekm_connection', validator=validate_ekm_connection_base)
+
+    with self.command_group('keyvault ekm-connection certificate', command_type=data_ekm_custom) as g:
+        g.keyvault_custom('show', 'get_ekm_certificate', validator=validate_ekm_connection_base)
 
     with self.command_group('keyvault key', data_key_entity.command_type) as g:
         g.keyvault_custom('create', 'create_key', transform=transform_key_output, validator=validate_key_create)

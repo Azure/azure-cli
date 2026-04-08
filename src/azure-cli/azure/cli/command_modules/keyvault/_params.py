@@ -360,6 +360,8 @@ def load_arguments(self, _):
                    help='The type of key to create. For valid values, see: https://learn.microsoft.com/rest/api/keyvault/keys/create-key/create-key#jsonwebkeytype')
         c.argument('curve', arg_type=get_enum_type(KeyCurveName),
                    help='Elliptic curve name. For valid values, see: https://learn.microsoft.com/rest/api/keyvault/keys/create-key/create-key#jsonwebkeycurvename')
+        c.extra('external_key_id', options_list=['--external-key-id'], arg_group='External Key',
+            help='Create an external Managed HSM key backed by an External Key Manager (EKM) key id.')
 
     with self.argument_context('keyvault key import') as c:
         c.argument('kty', arg_type=get_enum_type(CLIKeyTypeForBYOKImport), validator=validate_key_import_type,
@@ -614,6 +616,45 @@ def load_arguments(self, _):
     with self.argument_context('keyvault security-domain wait') as c:
         c.argument('target_operation', arg_type=get_enum_type(CLISecurityDomainOperation),
                    help='Target operation that needs waiting.')
+    # endregion
+
+    # region keyvault ekm-connection
+    for scope in ['create', 'update', 'show', 'check', 'delete']:
+        with self.argument_context('keyvault ekm-connection {}'.format(scope), arg_group='HSM Id') as c:
+            c.extra('hsm_name', hsm_url_type, required=False,
+                    help='Name of the HSM. Can be omitted if --id is specified.')
+            c.extra('identifier', options_list=['--id'], validator=validate_vault_or_hsm,
+                    help='Full URI of the HSM.')
+            c.ignore('vault_base_url')
+
+    with self.argument_context('keyvault ekm-connection create', arg_group='EKM Connection') as c:
+        c.argument('host', options_list=['--host'], required=True,
+                   help='EKM proxy host (FQDN or FQDN:port). If port is omitted, 443 is assumed.')
+        c.extra('path_prefix', options_list=['--path-prefix'],
+                help='Optional path prefix to append to EKM proxy requests. Must start with "/".')
+        c.extra('server_ca_certificates', options_list=['--server-ca-certificate'], nargs='+', type=file_type,
+                completer=FilesCompleter(),
+                help='Path(s) to server CA certificate(s) in PEM or DER format.')
+        c.extra('server_subject_common_name', options_list=['--server-subject-common-name'],
+                help='Optional expected Common Name (CN) for the EKM proxy server certificate.')
+
+    with self.argument_context('keyvault ekm-connection update', arg_group='EKM Connection') as c:
+        c.argument('host', options_list=['--host'], required=False,
+                   help='EKM proxy host (FQDN or FQDN:port). If port is omitted, 443 is assumed.')
+        c.extra('path_prefix', options_list=['--path-prefix'],
+                help='Optional path prefix to append to EKM proxy requests. Must start with "/".')
+        c.extra('server_ca_certificates', options_list=['--server-ca-certificate'], nargs='+', type=file_type,
+                completer=FilesCompleter(),
+                help='Path(s) to server CA certificate(s) in PEM or DER format.')
+        c.extra('server_subject_common_name', options_list=['--server-subject-common-name'],
+                help='Optional expected Common Name (CN) for the EKM proxy server certificate.')
+
+    with self.argument_context('keyvault ekm-connection certificate show', arg_group='HSM Id') as c:
+        c.extra('hsm_name', hsm_url_type, required=False,
+                help='Name of the HSM. Can be omitted if --id is specified.')
+        c.extra('identifier', options_list=['--id'], validator=validate_vault_or_hsm,
+                help='Full URI of the HSM.')
+        c.ignore('vault_base_url')
     # endregion
 
     # region keyvault backup/restore
