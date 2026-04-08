@@ -41,7 +41,7 @@ class ActivityLogAlertActionGroupRemove(_ActivityLogAlertUpdate):
         else:
             # normalize the action group ids
             rids = normalize_names(self.cli_ctx, args.action_group_ids.to_serialized_data(), args.resource_group,
-                                    'microsoft.insights', 'actionGroups')
+                                   'microsoft.insights', 'actionGroups')
             action_groups = []
             for item in instance.properties.actions.actionGroups:
                 ac_id = item.actionGroupId.to_serialized_data()
