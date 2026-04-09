@@ -2161,8 +2161,8 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr, node_name=None):
         # Get kubectl minor version
         kubectl_minor_version = -1
         try:
-            cmd = ["kubectl", "version", "-o", "json", "--kubeconfig", browse_path]
-            output = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+            kubectl_cmd = ["kubectl", "version", "-o", "json", "--kubeconfig", browse_path]
+            output = subprocess.Popen(kubectl_cmd, stdout=subprocess.PIPE)
             jsonS, _ = output.communicate()
             kubectl_version = json.loads(jsonS)
             # Remove any non-numeric characters like + from minor version
