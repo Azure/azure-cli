@@ -15,3 +15,9 @@ from ._list import *
 from ._show import *
 from ._update import *
 from ._wait import *
+from ._get_failover_all_tests_detail import *
+from ._get_failover_single_test_detail import *
+from ._get_resiliency_information import *
+from ._get_routes_information import *
+from ._start_site_failover_test import *
+from ._stop_site_failover_test import *

@@ -38,9 +38,6 @@ class FlexibleServerLogsMgmtScenarioTest(ScenarioTest):
                     checks=[JMESPathCheck('value', "1"),
                             JMESPathCheck('name', "logfiles.retention_days")]).get_output_in_json()
 
-        if os.environ.get(ENV_LIVE_TEST, True):
-            return
-
         # Wait for around 30 min to allow log files to be generated
         os.environ.get(ENV_LIVE_TEST, False) and sleep(1800)
 

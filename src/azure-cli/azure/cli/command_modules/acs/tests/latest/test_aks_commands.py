@@ -3869,6 +3869,103 @@ spec:
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
+    # live only because AzureContainerLinux RP changes have not rolled out yet,
+    # so recordings cannot be created and playback would fail.
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus2euap')
+    def test_aks_nodepool_add_with_ossku_azurecontainerlinux(self, resource_group, resource_group_location):
+        resource_group_location = 'eastus2euap'
+        aks_name = self.create_random_name('cliakstest', 16)
+        node_pool_name = self.create_random_name('c', 6)
+        node_pool_name_second = self.create_random_name('c', 6)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'node_pool_name': node_pool_name,
+            'node_pool_name_second': node_pool_name_second,
+            'ssh_key_value': self.generate_ssh_keys()
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--nodepool-name {node_pool_name} -c 1 ' \
+                     '--ssh-key-value={ssh_key_value}'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # nodepool add with AzureContainerLinux os-sku
+        self.cmd('aks nodepool add '
+                 '--resource-group={resource_group} '
+                 '--cluster-name={name} '
+                 '--name={node_pool_name_second} '
+                 '--node-vm-size Standard_D2s_v5 '
+                 '--os-sku AzureContainerLinux '
+                 '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AzureContainerLinuxPreview',
+                 checks=[
+                     self.check('provisioningState', 'Succeeded'),
+                     self.check('osSku', 'AzureContainerLinux'),
+                 ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    # live only because AzureContainerLinux RP changes have not rolled out yet,
+    # so recordings cannot be created and playback would fail.
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus2euap')
+    def test_aks_nodepool_update_with_ossku_azurecontainerlinux(self, resource_group, resource_group_location):
+        resource_group_location = 'eastus2euap'
+        aks_name = self.create_random_name('cliakstest', 16)
+        node_pool_name = self.create_random_name('c', 6)
+        node_pool_name_second = self.create_random_name('c', 6)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'node_pool_name': node_pool_name,
+            'node_pool_name_second': node_pool_name_second,
+            'ssh_key_value': self.generate_ssh_keys()
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--nodepool-name {node_pool_name} -c 1 ' \
+                     '--ssh-key-value={ssh_key_value}'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # add a second nodepool
+        self.cmd('aks nodepool add '
+                 '--resource-group={resource_group} '
+                 '--cluster-name={name} '
+                 '--name={node_pool_name_second} '
+                 '--node-vm-size Standard_D2s_v5 '
+                 '--os-sku AzureLinux',
+                 checks=[
+                     self.check('provisioningState', 'Succeeded'),
+                     self.check('osSku', 'AzureLinux'),
+                 ])
+
+        # nodepool update to AzureContainerLinux os-sku
+        self.cmd('aks nodepool update '
+                 '--resource-group={resource_group} '
+                 '--cluster-name={name} '
+                 '--name={node_pool_name_second} '
+                 '--os-sku AzureContainerLinux '
+                 '--enable-secure-boot '
+                 '--enable-vtpm '
+                 '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AzureContainerLinuxPreview',
+                 checks=[
+                     self.check('provisioningState', 'Succeeded'),
+                     self.check('osSku', 'AzureContainerLinux'),
+                 ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_nodepool_add_with_ossku_windows2022(self, resource_group, resource_group_location):
@@ -13361,7 +13458,7 @@ spec:
             ],
         )
 
-        # update: enable security and observability
+        # update: --enable-acns defaults both observability and security to enabled
         update_cmd = (
             "aks update --resource-group={resource_group} --name={name} "
             "--enable-acns "
@@ -13391,7 +13488,7 @@ spec:
             ],
         )
 
-        # update: enable FQDN policy, disable observability
+        # update: disable observability (security defaults back to enabled)
         update_cmd3 = (
             "aks update --resource-group={resource_group} --name={name} "
             "--enable-acns --disable-acns-observability "
@@ -13657,6 +13754,86 @@ spec:
             checks=[self.is_empty()],
         )
 
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17,
+        name_prefix="clitest",
+        location="westcentralus",
+    )
+    def test_aks_update_acns_preserves_existing_settings(
+        self, resource_group, resource_group_location
+    ):
+        self.test_resources_count = 0
+        aks_name = self.create_random_name("cliakstest", 16)
+        self.kwargs.update(
+            {
+                "resource_group": resource_group,
+                "name": aks_name,
+                "ssh_key_value": self.generate_ssh_keys(),
+                "location": resource_group_location,
+            }
+        )
+
+        # Create cluster with ACNS enabled (gets observability + security by default)
+        create_cmd = (
+            "aks create --resource-group={resource_group} --name={name} --location={location} "
+            "--ssh-key-value={ssh_key_value} --node-count=1 --tier standard "
+            "--network-plugin azure --network-dataplane=cilium --network-plugin-mode overlay "
+            "--enable-acns "
+        )
+        self.cmd(
+            create_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("networkProfile.advancedNetworking.enabled", True),
+                self.check("networkProfile.advancedNetworking.observability.enabled", True),
+                self.check("networkProfile.advancedNetworking.security.enabled", True),
+            ],
+        )
+
+        # Update only network policies - existing observability and security.enabled should be preserved
+        update_cmd = (
+            "aks update --resource-group={resource_group} --name={name} "
+            "--enable-acns --acns-advanced-networkpolicies L7 "
+        )
+        self.cmd(
+            update_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("networkProfile.advancedNetworking.enabled", True),
+                self.check("networkProfile.advancedNetworking.observability.enabled", True),
+                self.check("networkProfile.advancedNetworking.security.enabled", True),
+                self.check("networkProfile.advancedNetworking.security.advancedNetworkPolicies", "L7"),
+            ],
+        )
+
+        # Wait for the first update to fully settle before issuing the next one
+        self.cmd('aks wait --resource-group={resource_group} --name={name} --updated --interval 30 --timeout 600')
+        if self.is_live or self.in_recording:
+            time.sleep(60)
+
+        # Update only transit encryption - existing observability, security, and network policies should be preserved
+        update_cmd_2 = (
+            "aks update --resource-group={resource_group} --name={name} "
+            "--acns-transit-encryption-type WireGuard "
+        )
+        self.cmd(
+            update_cmd_2,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("networkProfile.advancedNetworking.enabled", True),
+                self.check("networkProfile.advancedNetworking.observability.enabled", True),
+                self.check("networkProfile.advancedNetworking.security.enabled", True),
+                self.check("networkProfile.advancedNetworking.security.advancedNetworkPolicies", "L7"),
+                self.check("networkProfile.advancedNetworking.security.transitEncryption.type", "WireGuard"),
+            ],
+        )
+
+        # delete
+        self.cmd(
+            "aks delete -g {resource_group} -n {name} --yes --no-wait",
+            checks=[self.is_empty()],
+        )
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(
