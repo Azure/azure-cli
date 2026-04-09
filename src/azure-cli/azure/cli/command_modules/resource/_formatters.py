@@ -81,7 +81,10 @@ _property_change_type_to_weight = {
 }
 
 
-def format_what_if_operation_result(what_if_operation_result: DeploymentModels.WhatIfOperationResult, enable_color=True):
+def format_what_if_operation_result(
+    what_if_operation_result: DeploymentModels.WhatIfOperationResult,
+    enable_color=True
+):
     builder = ColoredStringBuilder(enable_color)
     _format_noise_notice(builder)
     _format_change_type_legend(builder, what_if_operation_result.changes)
@@ -146,7 +149,11 @@ def _format_change_type_legend(builder, resource_changes: t.Optional[list[Deploy
         builder.append_line(change_type.title())
 
 
-def _format_resource_changes_stats(builder, resource_changes: t.Optional[list[DeploymentModels.WhatIfChange]], definite_changes=True):
+def _format_resource_changes_stats(
+    builder,
+    resource_changes: t.Optional[list[DeploymentModels.WhatIfChange]],
+    definite_changes=True
+):
     if definite_changes:
         builder.append_line().append("Resource changes: ")
 
@@ -214,7 +221,11 @@ def _format_diagnostics(builder, resource_changes, potential_changes, diagnostic
                 builder.append_line()
 
 
-def _format_resource_changes(builder, resource_changes: t.Optional[list[DeploymentModels.WhatIfChange]], definite_changes=True):
+def _format_resource_changes(
+    builder,
+    resource_changes: t.Optional[list[DeploymentModels.WhatIfChange]],
+    definite_changes=True
+):
     if not resource_changes:
         return
 
@@ -457,7 +468,7 @@ def _get_api_version(resource_change: DeploymentModels.WhatIfChange):
 def _get_scope(resource_change: DeploymentModels.WhatIfChange):
     if resource_change.resource_id:
         return split_resource_id(resource_change.resource_id)[0]
-    elif resource_change.extension:
+    if resource_change.extension:
         # TODO: eventually this should include the extension config with key=value pairs
         return f"{resource_change.extension.name}@{resource_change.extension.version}"
     return "Unknown"
@@ -470,7 +481,7 @@ def _get_scope_uppercase(resource_change: DeploymentModels.WhatIfChange):
 def _get_relative_resource_id(resource_change: DeploymentModels.WhatIfChange):
     if resource_change.resource_id:
         return split_resource_id(resource_change.resource_id)[1]
-    elif resource_change.identifiers:
+    if resource_change.identifiers:
         return _format_ext_resource_identifiers(resource_change.identifiers)
     return None
 
