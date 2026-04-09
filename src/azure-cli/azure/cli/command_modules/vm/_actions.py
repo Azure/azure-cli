@@ -19,8 +19,6 @@ from knack.log import get_logger
 from azure.cli.core.commands.parameters import get_one_of_subscription_locations
 from azure.cli.core.commands.arm import resource_exists
 
-from ._client_factory import _compute_client_factory
-
 from .generated.action import *  # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
 try:
     from .manual.action import *  # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
