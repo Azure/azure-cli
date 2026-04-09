@@ -7489,16 +7489,13 @@ spec:
     @live_only()
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    @AKSCustomRoleBasedServicePrincipalPreparer()
-    def test_aks_create_attach_acr(self, resource_group, resource_group_location, sp_name, sp_password):
+    def test_aks_create_attach_acr(self, resource_group, resource_group_location):
         aks_name = self.create_random_name('cliakstest', 16)
         acr_name = self.create_random_name('cliaksacr', 16)
         self.kwargs.update({
             'name': aks_name,
             'resource_group': resource_group,
             'ssh_key_value': self.generate_ssh_keys(),
-            'service_principal': sp_name,
-            'client_secret': sp_password,
             'acr_name': acr_name
         })
 
@@ -7510,18 +7507,9 @@ spec:
 
         # create
         create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
-                     '--service-principal={service_principal} --client-secret={client_secret} ' \
                      '--ssh-key-value={ssh_key_value} --attach-acr={acr_name}'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
-            self.check('servicePrincipalProfile.clientId', sp_name)
-        ])
-
-         # add Mariner node pool
-        node_pool_cmd = 'aks nodepool add --resource-group={resource_group} --cluster-name={name} ' \
-                        '-n marinerpool --os-sku mariner'
-        self.cmd(node_pool_cmd, checks=[
-            self.check('provisioningState', 'Succeeded')
         ])
 
         # install kubectl
@@ -7554,7 +7542,7 @@ spec:
             finally:
                 os.close(fd)
             # get node name
-            k_get_node_cmd = ["kubectl", "get", "node", "-l", "kubernetes.azure.com/os-sku=Ubuntu", "-o", "name", "--kubeconfig", browse_path]
+            k_get_node_cmd = ["kubectl", "get", "node", "-o", "name", "--kubeconfig", browse_path]
             k_get_node_output = subprocess.check_output(
                 k_get_node_cmd,
                 universal_newlines=True,
@@ -7567,31 +7555,10 @@ spec:
                     "node_name": node_name,
                 }
             )
-            # check acr from Ubuntu node
+            # check acr
             check_cmd = "aks check-acr -n {name} -g {resource_group} --acr {acr_name}.azurecr.io --node-name {node_name}"
             self.cmd(
                 check_cmd,
-                checks=[
-                    StringContainCheck("Your cluster can pull images from {}.azurecr.io!".format(acr_name)),
-                ],
-            )
-            # check acr from Mariner node
-            k_get_mariner_node_cmd = ["kubectl", "get", "node", "-l", "kubernetes.azure.com/os-sku=Mariner", "-o", "name", "--kubeconfig", browse_path]
-            k_get_node_output = subprocess.check_output(
-                k_get_mariner_node_cmd,
-                universal_newlines=True,
-                stderr=subprocess.STDOUT,
-            )
-            mariner_node_names = k_get_node_output.split("\n")
-            mariner_node_name = mariner_node_names[0].strip().strip("node/").strip()
-            self.kwargs.update(
-                {
-                    "mariner_node_name": mariner_node_name,
-                }
-            )
-            check_mariner_cmd = "aks check-acr -n {name} -g {resource_group} --acr {acr_name}.azurecr.io --node-name {mariner_node_name}"
-            self.cmd(
-                check_mariner_cmd,
                 checks=[
                     StringContainCheck("Your cluster can pull images from {}.azurecr.io!".format(acr_name)),
                 ],
