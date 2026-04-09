@@ -2063,14 +2063,19 @@ def merge_kubernetes_configurations(existing_file, addition_file, replace, conte
     try:
         with os.fdopen(tmp_fd, 'w') as stream:
             yaml.safe_dump(existing, stream, default_flow_style=False)
-        os.chmod(tmp_path, 0o600)
+        # Preserve existing file permissions if available, otherwise default to 0600
+        if os.path.exists(existing_file):
+            existing_mode = stat.S_IMODE(os.stat(existing_file).st_mode)
+            os.chmod(tmp_path, existing_mode)
+        else:
+            os.chmod(tmp_path, 0o600)
         os.replace(tmp_path, existing_file)
-    except OSError as ex:
+    except Exception as ex:  # pylint: disable=broad-except
         try:
             os.unlink(tmp_path)
         except OSError:
             pass
-        if getattr(ex, 'errno', 0) in (errno.EACCES, errno.EPERM, errno.EROFS):
+        if isinstance(ex, OSError) and getattr(ex, 'errno', 0) in (errno.EACCES, errno.EPERM, errno.EROFS):
             raise FileOperationError(
                 'Permission denied when trying to write to {}. '
                 'Please ensure you have write access to this file, or specify a different file path '
