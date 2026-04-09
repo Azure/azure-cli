@@ -2050,10 +2050,26 @@ def merge_kubernetes_configurations(existing_file, addition_file, replace, conte
                 existing_file_perms,
             )
 
+    # Refuse to write through a symlink
+    if os.path.islink(existing_file):
+        raise CLIError(
+            'Kubeconfig path "{}" is a symbolic link. '
+            'Refusing to write to prevent symlink-following attacks.'.format(existing_file)
+        )
+
+    # Atomic write: write to a temp file in the same directory, then replace
+    parent_dir = os.path.dirname(existing_file) or '.'
+    tmp_fd, tmp_path = tempfile.mkstemp(dir=parent_dir)
     try:
-        with open(existing_file, 'w+') as stream:
+        with os.fdopen(tmp_fd, 'w') as stream:
             yaml.safe_dump(existing, stream, default_flow_style=False)
+        os.chmod(tmp_path, 0o600)
+        os.replace(tmp_path, existing_file)
     except OSError as ex:
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
         if getattr(ex, 'errno', 0) in (errno.EACCES, errno.EPERM, errno.EROFS):
             raise FileOperationError(
                 'Permission denied when trying to write to {}. '
