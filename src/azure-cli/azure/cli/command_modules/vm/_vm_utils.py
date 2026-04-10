@@ -93,9 +93,10 @@ def check_existence(cli_ctx, value, resource_group, provider_namespace, resource
         resource_name = id_parts['name']
         resource_type = id_parts.get('type', resource_type)
 
-    api_version = _resolve_api_version(cli_ctx, provider_namespace, resource_type, parent_path)
-    if static_version:  # only for vnet
+    if static_version:
         api_version = static_version
+    else:
+        api_version = _resolve_api_version(cli_ctx, provider_namespace, resource_type, parent_path)
 
     try:
         resource_client.get(rg, ns, parent_path, resource_type, resource_name, api_version)
@@ -809,6 +810,12 @@ class VMGuestPatchClassificationLinux(Enum):
     CRITICAL = 'Critical'
     OTHER = 'Other'
     SECURITY = 'Security'
+
+
+class CachingTypes(Enum):
+    NONE = 'None'
+    READ_ONLY = 'ReadOnly'
+    READ_WRITE = 'ReadWrite'
 
 
 class DiskCreateOptionTypes(Enum):

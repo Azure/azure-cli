@@ -40,6 +40,7 @@ CONST_OS_SKU_AZURELINUX = "AzureLinux"
 CONST_OS_SKU_AZURELINUX3 = "AzureLinux3"
 CONST_OS_SKU_UBUNTU2204 = "Ubuntu2204"
 CONST_OS_SKU_UBUNTU2404 = "Ubuntu2404"
+CONST_OS_SKU_AZURECONTAINERLINUX = "AzureContainerLinux"
 
 # vm set type
 CONST_VIRTUAL_MACHINE_SCALE_SETS = "VirtualMachineScaleSets"
@@ -143,6 +144,10 @@ CONST_ADVANCED_NETWORKPOLICIES_L7 = "L7"
 # network pod ip allocation mode
 CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDUAL = "DynamicIndividual"
 CONST_NETWORK_POD_IP_ALLOCATION_MODE_STATIC_BLOCK = "StaticBlock"
+
+# advanced container networking services (ACNS) datapath acceleration mode
+CONST_ACNS_DATAPATH_ACCELERATION_MODE_BPFVETH = "BpfVeth"
+CONST_ACNS_DATAPATH_ACCELERATION_MODE_NONE = "None"
 
 # consts for addons
 # http application routing
@@ -266,6 +271,10 @@ CONST_NODE_PROVISIONING_DEFAULT_POOLS_AUTO = "Auto"
 
 # consts for workloadruntime
 CONST_WORKLOAD_RUNTIME_KATA_VM_ISOLATION = "KataVmIsolation"
+
+# consts for acns transit encryption
+CONST_TRANSIT_ENCRYPTION_WIREGUARD = "WireGuard"
+CONST_TRANSIT_ENCRYPTION_NONE = "None"
 
 
 # consts for decorator pattern

@@ -201,7 +201,7 @@ def aks_managed_namespace_update(cmd, client, raw_parameters, headers, existedNa
     namespace_name = raw_parameters.get("name")
 
     namespace_config = updateNamespace(cmd, raw_parameters, existedNamespace)
-    namespace_config.location = get_cluster_location(cmd, resource_group_name, cluster_name)
+    namespace_config.location = existedNamespace.location
 
     return sdk_no_wait(
         no_wait,
