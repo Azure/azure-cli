@@ -5,6 +5,7 @@
 
 import unittest
 import os
+import time
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
 
@@ -160,9 +161,21 @@ class CognitiveServicesManagedNetworkTests(ScenarioTest):
             'storage_id': storage_id
         })
 
-        # Create cognitive services account
-        self.cmd('az cognitiveservices account create -n {sname} -g {rg} --kind {kind} --sku {sku} -l {location} --yes',
+        # Create cognitive services account with system-assigned identity
+        self.cmd('az cognitiveservices account create -n {sname} -g {rg} --kind {kind} --sku {sku} -l {location} --assign-identity --yes',
                  checks=[self.check('name', '{sname}')])
+
+        # Get the managed identity principal ID
+        identity = self.cmd('az cognitiveservices account show -n {sname} -g {rg}').get_output_in_json()
+        principal_id = identity['identity']['principalId']
+        self.kwargs['principal_id'] = principal_id
+
+        # Grant the CS account's identity "Contributor" on the storage account
+        # (needs privateEndpointConnectionsApproval/action which Network Contributor lacks)
+        self.cmd('az role assignment create --assignee-object-id {principal_id} --assignee-principal-type ServicePrincipal --role "Contributor" --scope {storage_id}')
+
+        # Wait for RBAC propagation
+        time.sleep(60)
 
         # Create managed network
         self.cmd('az cognitiveservices account managed-network create -n {sname} -g {rg} --managed-network allow_only_approved_outbound')
@@ -187,7 +200,6 @@ class CognitiveServicesManagedNetworkTests(ScenarioTest):
         ret = self.cmd('az cognitiveservices account delete -n {sname} -g {rg}')
         self.assertEqual(ret.exit_code, 0)
 
-    # @unittest.skip("ServiceTag rule LRO polling returns 404 - service-side issue")
     @ResourceGroupPreparer(random_name_length=20, parameter_name_for_location='location')
     def test_outbound_rule_service_tag(self, resource_group):
         """Test Service Tag outbound rule operations."""
