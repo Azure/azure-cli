@@ -63,6 +63,7 @@ from azure.cli.command_modules.acs._helpers import (
     check_is_apiserver_vnet_integration_cluster,
     check_is_private_cluster,
     format_parameter_name_to_option_name,
+    get_monitoring_addon_key,
     get_user_assigned_identity_by_resource_id,
     get_shared_control_plane_identity,
     map_azure_error_to_cli_error,
@@ -159,6 +160,14 @@ ManagedClusterIngressProfile = TypeVar("ManagedClusterIngressProfile")
 ManagedClusterIngressProfileWebAppRouting = TypeVar("ManagedClusterIngressProfileWebAppRouting")
 ManagedClusterIngressProfileNginx = TypeVar("ManagedClusterIngressProfileNginx")
 ServiceMeshProfile = TypeVar("ServiceMeshProfile")
+
+
+def _get_monitoring_addon_key_from_consts(addon_profiles, addon_consts):
+    """Thin wrapper around get_monitoring_addon_key that unpacks addon_consts dict."""
+    return get_monitoring_addon_key(
+        addon_profiles,
+        addon_consts.get("CONST_MONITORING_ADDON_NAME"),
+    )
 
 # TODO
 # 1. remove enable_rbac related implementation
@@ -2012,6 +2021,64 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need validation
         return http_proxy_config
 
+    def get_disable_http_proxy(self) -> bool:
+        """Obtain the value of disable_http_proxy.
+
+        This function will verify the parameter by default. If both enable_http_proxy and disable_http_proxy are
+        specified, raise a MutuallyExclusiveArgumentError.
+
+        :return: bool
+        """
+        return self._get_disable_http_proxy(enable_validation=True)
+
+    def _get_disable_http_proxy(self, enable_validation: bool = False) -> bool:
+        """Internal function to obtain the value of disable_http_proxy.
+
+        This function supports the option of enable_validation. When enabled, if both enable_http_proxy and
+        disable_http_proxy are specified, raise a MutuallyExclusiveArgumentError.
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        disable_http_proxy = self.raw_param.get("disable_http_proxy")
+
+        if enable_validation:
+            if disable_http_proxy and self._get_enable_http_proxy(enable_validation=False):
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify --enable-http-proxy and --disable-http-proxy at the same time."
+                )
+
+        return disable_http_proxy
+
+    def get_enable_http_proxy(self) -> bool:
+        """Obtain the value of enable_http_proxy.
+
+        This function will verify the parameter by default. If both enable_http_proxy and disable_http_proxy are
+        specified, raise a MutuallyExclusiveArgumentError.
+
+        :return: bool
+        """
+        return self._get_enable_http_proxy(enable_validation=True)
+
+    def _get_enable_http_proxy(self, enable_validation: bool = False) -> bool:
+        """Internal function to obtain the value of enable_http_proxy.
+
+        This function supports the option of enable_validation. When enabled, if both enable_http_proxy and
+        disable_http_proxy are specified, raise a MutuallyExclusiveArgumentError.
+
+        :return: bool
+        """
+        # read the original value passed by the command
+        enable_http_proxy = self.raw_param.get("enable_http_proxy")
+
+        if enable_validation:
+            if enable_http_proxy and self._get_disable_http_proxy(enable_validation=False):
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify --enable-http-proxy and --disable-http-proxy at the same time."
+                )
+
+        return enable_http_proxy
+
     def get_assignee_from_identity_or_sp_profile(self) -> Tuple[str, bool]:
         """Helper function to obtain the value of assignee from identity_profile or service_principal_profile.
 
@@ -2642,10 +2709,12 @@ class AKSManagedClusterContext(BaseAKSContext):
         monitoring_via_enable_addons = enable_addons and "monitoring" in enable_addons
 
         # Check if monitoring is already enabled on the cluster
+        addon_consts = self.get_addon_consts()
+        monitoring_addon_key = _get_monitoring_addon_key_from_consts(mc.addon_profiles, addon_consts)
         monitoring_on_cluster = (
             mc.addon_profiles and
-            mc.addon_profiles.get("omsagent") and
-            mc.addon_profiles["omsagent"].enabled
+            mc.addon_profiles.get(monitoring_addon_key) and
+            mc.addon_profiles[monitoring_addon_key].enabled
         )
 
         # Check if ACNS is being enabled or already enabled
@@ -3115,11 +3184,16 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         # determine the value of constants
         addon_consts = self.get_addon_consts()
-        CONST_MONITORING_ADDON_NAME = addon_consts.get("CONST_MONITORING_ADDON_NAME")
         CONST_MONITORING_USING_AAD_MSI_AUTH = addon_consts.get("CONST_MONITORING_USING_AAD_MSI_AUTH")
 
         # read the original value passed by the command
         enable_msi_auth_for_monitoring = self.raw_param.get("enable_msi_auth_for_monitoring")
+
+        # Use helper to find the correct monitoring addon key (handles omsagent/omsAgent variants)
+        monitoring_addon_key = _get_monitoring_addon_key_from_consts(
+            self.mc.addon_profiles if self.mc else None, addon_consts
+        )
+
         if (
             self.mc and
             self.mc.service_principal_profile and
@@ -3130,14 +3204,14 @@ class AKSManagedClusterContext(BaseAKSContext):
         if (
             self.mc and
             self.mc.addon_profiles and
-            CONST_MONITORING_ADDON_NAME in self.mc.addon_profiles and
+            monitoring_addon_key in self.mc.addon_profiles and
             self.mc.addon_profiles.get(
-                CONST_MONITORING_ADDON_NAME
+                monitoring_addon_key
             ).config.get(CONST_MONITORING_USING_AAD_MSI_AUTH) is not None
         ):
             enable_msi_auth_for_monitoring = (
                 safe_lower(
-                    self.mc.addon_profiles.get(CONST_MONITORING_ADDON_NAME).config.get(
+                    self.mc.addon_profiles.get(monitoring_addon_key).config.get(
                         CONST_MONITORING_USING_AAD_MSI_AUTH
                     )
                 ) == "true"
@@ -7563,10 +7637,10 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             elif self.context.raw_param.get("enable_addons") is not None:
                 # Create the DCR Association here
                 addon_consts = self.context.get_addon_consts()
-                CONST_MONITORING_ADDON_NAME = addon_consts.get("CONST_MONITORING_ADDON_NAME")
+                monitoring_addon_key = _get_monitoring_addon_key_from_consts(cluster.addon_profiles, addon_consts)
                 self.context.external_functions.ensure_container_insights_for_monitoring(
                     self.cmd,
-                    cluster.addon_profiles[CONST_MONITORING_ADDON_NAME],
+                    cluster.addon_profiles[monitoring_addon_key],
                     self.context.get_subscription_id(),
                     self.context.get_resource_group_name(),
                     self.context.get_name(),
@@ -7854,7 +7928,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             self.context.get_load_balancer_idle_timeout() is None and
             self.context.get_load_balancer_outbound_ports() is None and
             self.context.get_nat_gateway_managed_outbound_ip_count() is None and
-            self.context.get_nat_gateway_idle_timeout() is None
+            self.context.get_nat_gateway_idle_timeout() is None and
+            self.context.raw_param.get("enable_high_log_scale_mode") is None
         )
 
         if not is_changed and is_default:
@@ -8341,6 +8416,24 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         return mc
 
+    def _ensure_acns_security(self, acns):
+        """Lazily initialize the ACNS security sub-object."""
+        if acns.security is None:
+            acns.security = self.models.AdvancedNetworkingSecurity()
+        return acns.security
+
+    def _ensure_acns_observability(self, acns):
+        """Lazily initialize the ACNS observability sub-object."""
+        if acns.observability is None:
+            acns.observability = self.models.AdvancedNetworkingObservability()
+        return acns.observability
+
+    def _ensure_acns_performance(self, acns):
+        """Lazily initialize the ACNS performance sub-object."""
+        if acns.performance is None:
+            acns.performance = self.models.AdvancedNetworkingPerformance()
+        return acns.performance
+
     def update_network_profile_advanced_networking(self, mc: ManagedCluster) -> ManagedCluster:
         """Update advanced networking settings of network profile for the ManagedCluster object.
 
@@ -8350,58 +8443,65 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         acns_advanced_networkpolicies = self.context.get_acns_advanced_networkpolicies()
         (acns_enabled, acns_observability, acns_security, acns_perf_enabled) = self.context.get_acns_enablement_with_perf()
         acns_transit_encryption = self.context.get_acns_transit_encryption_type()
-        if acns_enabled is not None:
-            acns = self.models.AdvancedNetworking(
-                enabled=acns_enabled,
-            )
-            if acns_observability is not None:
-                acns.observability = self.models.AdvancedNetworkingObservability(
-                    enabled=acns_observability,
-                )
-            if acns_security is not None:
-                acns.security = self.models.AdvancedNetworkingSecurity(
-                    enabled=acns_security,
-                )
-            if acns_advanced_networkpolicies is not None:
-                if acns.security is None:
-                    acns.security = self.models.AdvancedNetworkingSecurity(
-                        advanced_network_policies=acns_advanced_networkpolicies
-                    )
-                else:
-                    acns.security.advanced_network_policies = acns_advanced_networkpolicies
-            if acns_perf_enabled is not None:
-                acns.performance = self.models.AdvancedNetworkingPerformance(
-                    acceleration_mode=self.context.get_acns_datapath_acceleration_mode(),
-                )
-            elif not acns_enabled:
-                acns.performance = self.models.AdvancedNetworkingPerformance(
-                    acceleration_mode=CONST_ACNS_DATAPATH_ACCELERATION_MODE_NONE,
-                )
-            elif mc.network_profile.advanced_networking is not None:
-                acns.performance = mc.network_profile.advanced_networking.performance
 
-        if acns_enabled is not None:
-            if acns_transit_encryption is not None:
-                if acns.security is None:
-                    acns.security = self.models.AdvancedNetworkingSecurity()
-                acns.security.transit_encryption = self.models.AdvancedNetworkingSecurityTransitEncryption(
-                    type=acns_transit_encryption,
-                )
-            mc.network_profile.advanced_networking = acns
-        elif acns_transit_encryption is not None:
+        if acns_enabled is None and acns_transit_encryption is not None:
+            # Transit encryption update without --enable-acns requires ACNS already enabled
             if (mc.network_profile.advanced_networking is None or
                     not mc.network_profile.advanced_networking.enabled):
                 raise MutuallyExclusiveArgumentError(
                     "--acns-transit-encryption-type requires ACNS to be enabled on the cluster. "
                     "Use --enable-acns together with --acns-transit-encryption-type."
                 )
-            if mc.network_profile.advanced_networking.security is None:
-                mc.network_profile.advanced_networking.security = self.models.AdvancedNetworkingSecurity()
-            mc.network_profile.advanced_networking.security.transit_encryption = (
-                self.models.AdvancedNetworkingSecurityTransitEncryption(
-                    type=acns_transit_encryption,
-                )
+            self._ensure_acns_security(mc.network_profile.advanced_networking).transit_encryption = (
+                self.models.AdvancedNetworkingSecurityTransitEncryption(type=acns_transit_encryption)
             )
+            return mc
+
+        if acns_enabled is None:
+            return mc
+
+        # Preserve existing advanced_networking settings, only overwrite fields the user specified
+        if mc.network_profile.advanced_networking is None:
+            mc.network_profile.advanced_networking = self.models.AdvancedNetworking()
+        acns = mc.network_profile.advanced_networking
+
+        acns.enabled = acns_enabled
+
+        # When disabling ACNS, explicitly disable sub-features for a consistent payload
+        if not acns_enabled:
+            if acns.observability is not None:
+                acns.observability.enabled = False
+            if acns.security is not None:
+                acns.security.enabled = False
+            if acns_perf_enabled is None:
+                self._ensure_acns_performance(acns).acceleration_mode = (
+                    CONST_ACNS_DATAPATH_ACCELERATION_MODE_NONE
+                )
+
+        # When enabling ACNS, default observability and security to enabled
+        # (matching create-path behavior). The RP rejects enabling ACNS when both
+        # observability and security are disabled, so we must set safe defaults.
+        if acns_enabled:
+            if acns_observability is None:
+                self._ensure_acns_observability(acns).enabled = True
+            if acns_security is None:
+                self._ensure_acns_security(acns).enabled = True
+
+        if acns_observability is not None:
+            self._ensure_acns_observability(acns).enabled = acns_observability
+        if acns_security is not None:
+            self._ensure_acns_security(acns).enabled = acns_security
+        if acns_advanced_networkpolicies is not None:
+            self._ensure_acns_security(acns).advanced_network_policies = acns_advanced_networkpolicies
+        if acns_transit_encryption is not None:
+            self._ensure_acns_security(acns).transit_encryption = (
+                self.models.AdvancedNetworkingSecurityTransitEncryption(type=acns_transit_encryption)
+            )
+        if acns_perf_enabled is not None:
+            self._ensure_acns_performance(acns).acceleration_mode = (
+                self.context.get_acns_datapath_acceleration_mode()
+            )
+
         return mc
 
     def update_monitoring_profile_flow_logs(self, mc: ManagedCluster) -> ManagedCluster:
@@ -8411,32 +8511,100 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         """
         self._ensure_mc(mc)
 
+        addon_consts = self.context.get_addon_consts()
+        CONST_MONITORING_USING_AAD_MSI_AUTH = addon_consts.get("CONST_MONITORING_USING_AAD_MSI_AUTH")
+        monitoring_addon_key = _get_monitoring_addon_key_from_consts(mc.addon_profiles, addon_consts)
+
+        enable_high_log_scale_mode = self.context.get_enable_high_log_scale_mode()
+        enable_cnl = self.context.raw_param.get("enable_container_network_logs")
+
         # Trigger validation for high log scale mode when container network logs are enabled.
         # This ensures proper error messages are raised before cluster update if the user
         # explicitly disables high log scale mode while enabling container network logs.
-        if self.context.raw_param.get("enable_container_network_logs"):
+        if enable_cnl:
             self.context.get_enable_high_log_scale_mode()
+
+        # Validate HLSM on the update path
+        if enable_high_log_scale_mode is True and not enable_cnl:
+            # HLSM requires monitoring addon with MSI auth to be enabled
+            monitoring_addon_profile = mc.addon_profiles.get(monitoring_addon_key) if mc.addon_profiles else None
+            if (
+                not monitoring_addon_profile or
+                not monitoring_addon_profile.enabled or
+                safe_lower(
+                    (monitoring_addon_profile.config or {}).get(CONST_MONITORING_USING_AAD_MSI_AUTH)
+                ) != "true"
+            ):
+                raise RequiredArgumentMissingError(
+                    "--enable-high-log-scale-mode requires the monitoring addon to be enabled with MSI auth "
+                    "(useAADAuth=true). Please enable the monitoring addon with --enable-addons monitoring first."
+                )
+
+        if enable_high_log_scale_mode is False:
+            # Check if CNL is already enabled on the cluster — cannot disable HLSM while CNL is active
+            monitoring_addon_profile = mc.addon_profiles.get(monitoring_addon_key) if mc.addon_profiles else None
+            if monitoring_addon_profile and monitoring_addon_profile.config:
+                existing_cnl = safe_lower(
+                    monitoring_addon_profile.config.get("enableRetinaNetworkFlags")
+                )
+                if existing_cnl == "true":
+                    raise MutuallyExclusiveArgumentError(
+                        "Cannot disable --enable-high-log-scale-mode while container network logs are enabled. "
+                        "Please disable container network logs first with --disable-container-network-logs."
+                    )
 
         container_network_logs_enabled = self.context.get_container_network_logs(mc)
         if container_network_logs_enabled is not None:
             if mc.addon_profiles:
-                addon_consts = self.context.get_addon_consts()
-                CONST_MONITORING_ADDON_NAME = addon_consts.get("CONST_MONITORING_ADDON_NAME")
-                monitoring_addon_profile = mc.addon_profiles.get(CONST_MONITORING_ADDON_NAME)
+                monitoring_addon_profile = mc.addon_profiles.get(monitoring_addon_key)
                 if monitoring_addon_profile:
                     config = monitoring_addon_profile.config or {}
                     config["enableRetinaNetworkFlags"] = str(container_network_logs_enabled)
-                    mc.addon_profiles[CONST_MONITORING_ADDON_NAME].config = config
+                    mc.addon_profiles[monitoring_addon_key].config = config
+
+        # When CNL or HLSM flags are provided, mark that monitoring postprocessing is needed
+        # so the DCR gets updated with the correct streams
+        if container_network_logs_enabled is not None or enable_high_log_scale_mode is not None:
+            self.context.set_intermediate(
+                "monitoring_addon_postprocessing_required", True, overwrite_exists=True
+            )
         return mc
 
     def update_http_proxy_config(self, mc: ManagedCluster) -> ManagedCluster:
         """Set up http proxy config for the ManagedCluster object.
 
+        Only updates if --http-proxy-config was explicitly provided, to avoid wiping existing config.
+
         :return: the ManagedCluster object
         """
         self._ensure_mc(mc)
 
-        mc.http_proxy_config = self.context.get_http_proxy_config()
+        http_proxy_config = self.context.get_http_proxy_config()
+        if http_proxy_config is not None:
+            mc.http_proxy_config = http_proxy_config
+        return mc
+
+    def update_http_proxy_enabled(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update http proxy enabled/disabled state for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        if self.context.get_disable_http_proxy():
+            if mc.http_proxy_config is None:
+                mc.http_proxy_config = (
+                    self.models.ManagedClusterHTTPProxyConfig()  # pylint: disable=no-member
+                )
+            mc.http_proxy_config.enabled = False
+
+        if self.context.get_enable_http_proxy():
+            if mc.http_proxy_config is None:
+                mc.http_proxy_config = (
+                    self.models.ManagedClusterHTTPProxyConfig()  # pylint: disable=no-member
+                )
+            mc.http_proxy_config.enabled = True
+
         return mc
 
     def update_identity(self, mc: ManagedCluster) -> ManagedCluster:
@@ -8592,9 +8760,6 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         # determine the value of constants
         addon_consts = self.context.get_addon_consts()
-        CONST_MONITORING_ADDON_NAME = addon_consts.get(
-            "CONST_MONITORING_ADDON_NAME"
-        )
         CONST_INGRESS_APPGW_ADDON_NAME = addon_consts.get(
             "CONST_INGRESS_APPGW_ADDON_NAME"
         )
@@ -8607,9 +8772,10 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         azure_keyvault_secrets_provider_addon_profile = None
         if mc.addon_profiles is not None:
+            monitoring_addon_key = _get_monitoring_addon_key_from_consts(mc.addon_profiles, addon_consts)
             monitoring_addon_enabled = (
-                CONST_MONITORING_ADDON_NAME in mc.addon_profiles and
-                mc.addon_profiles[CONST_MONITORING_ADDON_NAME].enabled
+                monitoring_addon_key in mc.addon_profiles and
+                mc.addon_profiles[monitoring_addon_key].enabled
             )
             ingress_appgw_addon_enabled = (
                 CONST_INGRESS_APPGW_ADDON_NAME in mc.addon_profiles and
@@ -9744,6 +9910,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_identity_profile(mc)
         # set up http proxy config
         mc = self.update_http_proxy_config(mc)
+        # update http proxy enabled/disabled state
+        mc = self.update_http_proxy_enabled(mc)
         # update workload autoscaler profile
         mc = self.update_workload_auto_scaler_profile(mc)
         # update kubernetes support plan
@@ -9810,6 +9978,9 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         from azure.cli.command_modules.acs._consts import CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME
         # some addons require post cluster creation role assigment
         monitoring_addon_enabled = self.context.get_intermediate("monitoring_addon_enabled", default_value=False)
+        monitoring_addon_postprocessing_required = self.context.get_intermediate(
+            "monitoring_addon_postprocessing_required", default_value=False
+        )
         ingress_appgw_addon_enabled = self.context.get_intermediate("ingress_appgw_addon_enabled", default_value=False)
         virtual_node_addon_enabled = self.context.get_intermediate("virtual_node_addon_enabled", default_value=False)
         enable_managed_identity = check_is_msi_cluster(mc)
@@ -9827,6 +9998,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         # pylint: disable=too-many-boolean-expressions
         if (
             monitoring_addon_enabled or
+            monitoring_addon_postprocessing_required or
             ingress_appgw_addon_enabled or
             virtual_node_addon_enabled or
             (enable_managed_identity and attach_acr) or
@@ -9853,6 +10025,9 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         """
         # monitoring addon
         monitoring_addon_enabled = self.context.get_intermediate("monitoring_addon_enabled", default_value=False)
+        monitoring_addon_postprocessing_required = self.context.get_intermediate(
+            "monitoring_addon_postprocessing_required", default_value=False
+        )
         if monitoring_addon_enabled:
             enable_msi_auth_for_monitoring = self.context.get_enable_msi_auth_for_monitoring()
             if not enable_msi_auth_for_monitoring:
@@ -9872,23 +10047,22 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                     self.context.external_functions.add_monitoring_role_assignment(
                         cluster, cluster_resource_id, self.cmd
                     )
-            elif (
-                self.context.raw_param.get("enable_addons") is not None
-            ):
-                # Create the DCR Association here
+            if (
+                enable_msi_auth_for_monitoring and self.context.raw_param.get("enable_addons") is not None
+            ) or monitoring_addon_postprocessing_required:
                 addon_consts = self.context.get_addon_consts()
-                CONST_MONITORING_ADDON_NAME = addon_consts.get("CONST_MONITORING_ADDON_NAME")
+                monitoring_addon_key = _get_monitoring_addon_key_from_consts(cluster.addon_profiles, addon_consts)
                 self.context.external_functions.ensure_container_insights_for_monitoring(
                     self.cmd,
-                    cluster.addon_profiles[CONST_MONITORING_ADDON_NAME],
+                    cluster.addon_profiles[monitoring_addon_key],
                     self.context.get_subscription_id(),
                     self.context.get_resource_group_name(),
                     self.context.get_name(),
                     self.context.get_location(),
                     remove_monitoring=False,
-                    aad_route=self.context.get_enable_msi_auth_for_monitoring(),
-                    create_dcr=False,
-                    create_dcra=True,
+                    aad_route=True,
+                    create_dcr=monitoring_addon_postprocessing_required,
+                    create_dcra=enable_msi_auth_for_monitoring,
                     enable_syslog=self.context.get_enable_syslog(),
                     data_collection_settings=self.context.get_data_collection_settings(),
                     is_private_cluster=self.context.get_enable_private_cluster(),

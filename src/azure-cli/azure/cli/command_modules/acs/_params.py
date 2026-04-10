@@ -42,6 +42,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_NAMESPACE_DELETE_POLICY_KEEP,
     CONST_NAMESPACE_DELETE_POLICY_DELETE,
     CONST_OS_SKU_AZURELINUX, CONST_OS_SKU_AZURELINUX3,
+    CONST_OS_SKU_AZURECONTAINERLINUX,
     CONST_OS_SKU_CBLMARINER, CONST_OS_SKU_MARINER,
     CONST_OS_SKU_UBUNTU, CONST_OS_SKU_UBUNTU2204, CONST_OS_SKU_UBUNTU2404,
     CONST_OS_SKU_WINDOWS2019, CONST_OS_SKU_WINDOWS2022,
@@ -186,9 +187,9 @@ node_priorities = [CONST_SCALE_SET_PRIORITY_REGULAR, CONST_SCALE_SET_PRIORITY_SP
 node_eviction_policies = [CONST_SPOT_EVICTION_POLICY_DELETE, CONST_SPOT_EVICTION_POLICY_DEALLOCATE]
 node_os_disk_types = [CONST_OS_DISK_TYPE_MANAGED, CONST_OS_DISK_TYPE_EPHEMERAL]
 node_mode_types = [CONST_NODEPOOL_MODE_SYSTEM, CONST_NODEPOOL_MODE_USER, CONST_NODEPOOL_MODE_GATEWAY]
-node_os_skus_create = [CONST_OS_SKU_AZURELINUX, CONST_OS_SKU_AZURELINUX3, CONST_OS_SKU_UBUNTU, CONST_OS_SKU_CBLMARINER, CONST_OS_SKU_MARINER, CONST_OS_SKU_UBUNTU2204, CONST_OS_SKU_UBUNTU2404]
+node_os_skus_create = [CONST_OS_SKU_AZURELINUX, CONST_OS_SKU_AZURELINUX3, CONST_OS_SKU_AZURECONTAINERLINUX, CONST_OS_SKU_UBUNTU, CONST_OS_SKU_CBLMARINER, CONST_OS_SKU_MARINER, CONST_OS_SKU_UBUNTU2204, CONST_OS_SKU_UBUNTU2404]
 node_os_skus = node_os_skus_create + [CONST_OS_SKU_WINDOWS2019, CONST_OS_SKU_WINDOWS2022]
-node_os_skus_update = [CONST_OS_SKU_AZURELINUX, CONST_OS_SKU_AZURELINUX3, CONST_OS_SKU_UBUNTU, CONST_OS_SKU_UBUNTU2204, CONST_OS_SKU_UBUNTU2404]
+node_os_skus_update = [CONST_OS_SKU_AZURELINUX, CONST_OS_SKU_AZURELINUX3, CONST_OS_SKU_AZURECONTAINERLINUX, CONST_OS_SKU_UBUNTU, CONST_OS_SKU_UBUNTU2204, CONST_OS_SKU_UBUNTU2404]
 scale_down_modes = [CONST_SCALE_DOWN_MODE_DELETE, CONST_SCALE_DOWN_MODE_DEALLOCATE]
 pod_ip_allocation_modes = [CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDUAL, CONST_NETWORK_POD_IP_ALLOCATION_MODE_STATIC_BLOCK]
 
@@ -690,6 +691,8 @@ def load_arguments(self, _):
             help="Set the datapath acceleration mode for Azure Container Networking Solution (ACNS). Valid values are 'BpfVeth' and 'None'."
         )
         c.argument('acns_transit_encryption_type', arg_type=get_enum_type(transit_encryption_types))
+        # monitoring addons
+        c.argument('enable_high_log_scale_mode', arg_type=get_three_state_flag())
         # private cluster parameters
         c.argument('enable_apiserver_vnet_integration', action='store_true')
         c.argument('apiserver_subnet_id', validator=validate_apiserver_subnet_id)
@@ -741,6 +744,8 @@ def load_arguments(self, _):
         c.argument('disable_image_cleaner', action='store_true', validator=validate_image_cleaner_enable_disable_mutually_exclusive)
         c.argument('image_cleaner_interval_hours', type=int)
         c.argument('http_proxy_config')
+        c.argument('disable_http_proxy', action='store_true')
+        c.argument('enable_http_proxy', action='store_true')
         c.argument('custom_ca_trust_certificates', options_list=["--custom-ca-trust-certificates", "--ca-certs"], validator=validate_custom_ca_trust_certificates, help="path to file containing list of new line separated CAs")
         c.argument('enable_run_command', action='store_true')
         c.argument('disable_run_command', action='store_true')

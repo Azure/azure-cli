@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from enum import Enum
-
 from azure.cli.core import telemetry
 from knack.log import get_logger
 
@@ -12,80 +10,9 @@ from knack.log import get_logger
 logger = get_logger(__name__)
 
 
-class AladdinUserFaultType(Enum):
-    """Define the userfault types required by aladdin service
-    to get the command recommendations"""
-
-    ExpectedArgument = 'ExpectedArgument'
-    UnrecognizedArguments = 'UnrecognizedArguments'
-    ValidationError = 'ValidationError'
-    UnknownSubcommand = 'UnknownSubcommand'
-    MissingRequiredParameters = 'MissingRequiredParameters'
-    MissingRequiredSubcommand = 'MissingRequiredSubcommand'
-    StorageAccountNotFound = 'StorageAccountNotFound'
-    Unknown = 'Unknown'
-    InvalidJMESPathQuery = 'InvalidJMESPathQuery'
-    InvalidOutputType = 'InvalidOutputType'
-    InvalidParameterValue = 'InvalidParameterValue'
-    UnableToParseCommandInput = 'UnableToParseCommandInput'
-    ResourceGroupNotFound = 'ResourceGroupNotFound'
-    InvalidDateTimeArgumentValue = 'InvalidDateTimeArgumentValue'
-    InvalidResourceGroupName = 'InvalidResourceGroupName'
-    AzureResourceNotFound = 'AzureResourceNotFound'
-    InvalidAccountName = 'InvalidAccountName'
-
-
-def get_error_type(error_msg):
-    """The the error type of the failed command from the error message.
-    The error types are only consumed by aladdin service for better recommendations.
-    """
-
-    error_type = AladdinUserFaultType.Unknown
-    if not error_msg:
-        return error_type.value
-
-    error_msg = error_msg.lower()
-    if 'unrecognized' in error_msg:
-        error_type = AladdinUserFaultType.UnrecognizedArguments
-    elif 'expected one argument' in error_msg or 'expected at least one argument' in error_msg \
-            or 'value required' in error_msg:
-        error_type = AladdinUserFaultType.ExpectedArgument
-    elif 'misspelled' in error_msg:
-        error_type = AladdinUserFaultType.UnknownSubcommand
-    elif 'arguments are required' in error_msg or 'argument required' in error_msg:
-        error_type = AladdinUserFaultType.MissingRequiredParameters
-        if '_subcommand' in error_msg:
-            error_type = AladdinUserFaultType.MissingRequiredSubcommand
-        elif '_command_package' in error_msg:
-            error_type = AladdinUserFaultType.UnableToParseCommandInput
-    elif 'not found' in error_msg or 'could not be found' in error_msg \
-            or 'resource not found' in error_msg:
-        error_type = AladdinUserFaultType.AzureResourceNotFound
-        if 'storage_account' in error_msg or 'storage account' in error_msg:
-            error_type = AladdinUserFaultType.StorageAccountNotFound
-        elif 'resource_group' in error_msg or 'resource group' in error_msg:
-            error_type = AladdinUserFaultType.ResourceGroupNotFound
-    elif 'pattern' in error_msg or 'is not a valid value' in error_msg or 'invalid' in error_msg:
-        error_type = AladdinUserFaultType.InvalidParameterValue
-        if 'jmespath_type' in error_msg:
-            error_type = AladdinUserFaultType.InvalidJMESPathQuery
-        elif 'datetime_type' in error_msg:
-            error_type = AladdinUserFaultType.InvalidDateTimeArgumentValue
-        elif '--output' in error_msg:
-            error_type = AladdinUserFaultType.InvalidOutputType
-        elif 'resource_group' in error_msg:
-            error_type = AladdinUserFaultType.InvalidResourceGroupName
-        elif 'storage_account' in error_msg:
-            error_type = AladdinUserFaultType.InvalidAccountName
-    elif "validation error" in error_msg:
-        error_type = AladdinUserFaultType.ValidationError
-
-    return error_type.value
-
-
 class CommandRecommender:  # pylint: disable=too-few-public-methods
     """Recommend a command for user when user's command fails.
-    It combines Aladdin recommendations and examples in help files."""
+    It uses examples from help files to provide recommendations."""
 
     def __init__(self, command, parameters, extension, error_msg, cli_ctx):
         """
@@ -107,8 +34,6 @@ class CommandRecommender:  # pylint: disable=too-few-public-methods
         self.cli_ctx = cli_ctx
         # the item is a dict with the form {'command': #, 'description': #}
         self.help_examples = []
-        # the item is a dict with the form {'command': #, 'description': #, 'link': #}
-        self.aladdin_recommendations = []
 
     def set_help_examples(self, examples):
         """Set help examples.
@@ -119,89 +44,10 @@ class CommandRecommender:  # pylint: disable=too-few-public-methods
 
         self.help_examples.extend(examples)
 
-    def _set_aladdin_recommendations(self):  # pylint: disable=too-many-locals
-        """Set Aladdin recommendations.
-        Call the API, parse the response and set aladdin_recommendations.
-        """
-
-        import hashlib
-        import json
-        import requests
-        from requests import RequestException
-        from http import HTTPStatus
-        from azure.cli.core import __version__ as version
-
-        api_url = 'https://app.aladdin.microsoft.com/api/v1.0/suggestions'
-        correlation_id = telemetry._session.correlation_id  # pylint: disable=protected-access
-        subscription_id = telemetry._get_azure_subscription_id()  # pylint: disable=protected-access
-        event_id = telemetry._session.event_id  # pylint: disable=protected-access
-        # Used for DDOS protection and rate limiting
-        user_id = telemetry._get_user_azure_id()  # pylint: disable=protected-access
-        hashed_user_id = hashlib.sha256(user_id.encode('utf-8')).hexdigest()
-
-        headers = {
-            'Content-Type': 'application/json',
-            'X-UserId': hashed_user_id
-        }
-        context = {
-            'versionNumber': version,
-            'errorType': get_error_type(self.error_msg)
-        }
-
-        if telemetry.is_telemetry_enabled():
-            if correlation_id:
-                context['correlationId'] = correlation_id
-            if subscription_id:
-                context['subscriptionId'] = subscription_id
-            if event_id:
-                context['eventId'] = event_id
-
-        parameters = self._normalize_parameters(self.parameters)
-        parameters = [item for item in set(parameters) if item not in ['--debug', '--verbose', '--only-show-errors']]
-        query = {
-            "command": self.command,
-            "parameters": ','.join(parameters)
-        }
-
-        response = None
-        try:
-            response = requests.get(
-                api_url,
-                params={
-                    'query': json.dumps(query),
-                    'clientType': 'AzureCli',
-                    'context': json.dumps(context)
-                },
-                headers=headers,
-                timeout=1)
-            telemetry.set_debug_info('AladdinResponseTime', response.elapsed.total_seconds())
-
-        except RequestException as ex:
-            logger.debug('Recommendation requests.get() exception: %s', ex)
-            telemetry.set_debug_info('AladdinException', ex.__class__.__name__)
-
-        recommendations = []
-        if response and response.status_code == HTTPStatus.OK:
-            for result in response.json():
-                # parse the response to get the raw command
-                raw_command = 'az {} '.format(result['command'])
-                for parameter, placeholder in zip(result['parameters'].split(','), result['placeholders'].split('♠')):
-                    raw_command += '{} {}{}'.format(parameter, placeholder, ' ' if placeholder else '')
-
-                # format the recommendation
-                recommendation = {
-                    'command': raw_command.strip(),
-                    'description': result['description'],
-                    'link': result['link']
-                }
-                recommendations.append(recommendation)
-
-        self.aladdin_recommendations.extend(recommendations)
-
     def provide_recommendations(self):
         """Provide recommendations when a command fails.
 
-        The recommendations are either from Aladdin service or CLI help examples,
+        The recommendations are from CLI help examples,
         which include both commands and reference links along with their descriptions.
 
         :return: The decorated recommendations
@@ -273,14 +119,7 @@ class CommandRecommender:  # pylint: disable=too-few-public-methods
         if self.cli_ctx and self.cli_ctx.config.get('core', 'error_recommendation', 'on').upper() == 'OFF':
             return []
 
-        # get recommendations from Aladdin service
-        if not self._disable_aladdin_service():
-            self._set_aladdin_recommendations()
-
-        # recommendations are either all from Aladdin or all from help examples
-        recommendations = self.aladdin_recommendations
-        if not recommendations:
-            recommendations = self.help_examples
+        recommendations = self.help_examples
 
         # sort the recommendations by parameter matching, get the top 3 recommended commands
         recommendations = sort_recommendations(recommendations)[:3]
@@ -305,8 +144,6 @@ class CommandRecommender:  # pylint: disable=too-few-public-methods
 
         # add reference link as a recommendation
         decorated_link = [(Style.HYPERLINK, OVERVIEW_REFERENCE)]
-        if self.aladdin_recommendations:
-            decorated_link = [(Style.HYPERLINK, self.aladdin_recommendations[0]['link'])]
 
         decorated_description = [(Style.SECONDARY, 'Read more about the command in reference docs')]
         decorated_recommendations.append((decorated_link, decorated_description))
@@ -319,49 +156,11 @@ class CommandRecommender:  # pylint: disable=too-few-public-methods
     def _set_recommended_command_to_telemetry(self, raw_commands):
         """Set the recommended commands to Telemetry
 
-        Aladdin recommended commands and commands from CLI help examples are
-        set to different properties in Telemetry.
-
         :param raw_commands: The recommended raw commands
         :type raw_commands: list
         """
 
-        if self.aladdin_recommendations:
-            telemetry.set_debug_info('AladdinRecommendCommand', ';'.join(raw_commands))
-        else:
-            telemetry.set_debug_info('ExampleRecommendCommand', ';'.join(raw_commands))
-
-    def _disable_aladdin_service(self):
-        """Decide whether to disable aladdin request when a command fails.
-
-        The possible cases to disable it are:
-            1. CLI context is missing
-            2. In air-gapped clouds
-            3. In testing environments
-            4. In autocomplete mode
-
-        :return: whether Aladdin service need to be disabled or not
-        :type: bool
-        """
-
-        from azure.cli.core.cloud import CLOUDS_FORBIDDING_ALADDIN_REQUEST
-
-        # CLI is not started well
-        if not self.cli_ctx or not self.cli_ctx.cloud:
-            return True
-
-        # for air-gapped clouds
-        if self.cli_ctx.cloud.name in CLOUDS_FORBIDDING_ALADDIN_REQUEST:
-            return True
-
-        # for testing environments
-        if self.cli_ctx.__class__.__name__ == 'DummyCli':
-            return True
-
-        if self.cli_ctx.data['completer_active']:
-            return True
-
-        return False
+        telemetry.set_debug_info('ExampleRecommendCommand', ';'.join(raw_commands))
 
     def _normalize_parameters(self, args):
         """Normalize a parameter list.

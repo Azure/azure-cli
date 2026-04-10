@@ -13,6 +13,7 @@ from azure.cli.command_modules.acs._helpers import (
     check_is_private_cluster,
     check_is_private_link_cluster,
     format_parameter_name_to_option_name,
+    get_monitoring_addon_key,
     get_property_from_dict_or_object,
     get_snapshot,
     get_snapshot_by_snapshot_id,
@@ -345,6 +346,48 @@ class GetUserAssignedIdentityTestCase(unittest.TestCase):
             return_value=mock_user_assigned_identity_operations_3,
         ), self.assertRaises(ServiceError):
             get_user_assigned_identity("mock_cli_ctx", "mock_sub_id", "mock_rg", "mock_identity_name")
+
+
+class TestGetMonitoringAddonKey(unittest.TestCase):
+    """Tests for the shared get_monitoring_addon_key helper."""
+
+    def test_returns_default_when_addon_profiles_is_none(self):
+        result = get_monitoring_addon_key(None, "omsagent")
+        self.assertEqual(result, "omsagent")
+
+    def test_returns_lowercase_key_when_present(self):
+        addon_profiles = {"omsagent": object()}
+        result = get_monitoring_addon_key(addon_profiles, "omsagent")
+        self.assertEqual(result, "omsagent")
+
+    def test_normalizes_camelcase_key(self):
+        profile = object()
+        addon_profiles = {"omsAgent": profile}
+        result = get_monitoring_addon_key(addon_profiles, "omsagent")
+        self.assertEqual(result, "omsagent")
+        self.assertIn("omsagent", addon_profiles)
+        self.assertNotIn("omsAgent", addon_profiles)
+
+    def test_prefers_lowercase_when_both_present(self):
+        addon_profiles = {"omsagent": object(), "omsAgent": object()}
+        result = get_monitoring_addon_key(addon_profiles, "omsagent")
+        self.assertEqual(result, "omsagent")
+
+    def test_returns_default_when_key_not_present(self):
+        addon_profiles = {"someOtherAddon": object()}
+        result = get_monitoring_addon_key(addon_profiles, "omsagent")
+        self.assertEqual(result, "omsagent")
+
+    def test_normalizes_nonstandard_casing(self):
+        """A key like 'oMSaGent' should be re-keyed to the canonical form."""
+        profile = object()
+        addon_profiles = {"oMSaGent": profile}
+        result = get_monitoring_addon_key(addon_profiles, "omsagent")
+        self.assertEqual(result, "omsagent")
+        # The dict should now contain the canonical key, not the old one.
+        self.assertIn("omsagent", addon_profiles)
+        self.assertNotIn("oMSaGent", addon_profiles)
+        self.assertIs(addon_profiles["omsagent"], profile)
 
 
 if __name__ == "__main__":

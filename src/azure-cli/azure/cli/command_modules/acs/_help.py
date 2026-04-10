@@ -91,7 +91,7 @@ parameters:
       - "`az aks get-versions`"
   - name: --os-sku
     type: string
-    short-summary: The OS SKU of the agent node pool. Ubuntu or AzureLinux.
+    short-summary: The OS SKU of the agent node pool. Ubuntu, AzureLinux, AzureLinux3, AzureContainerLinux, Ubuntu2204, or Ubuntu2404.
   - name: --ssh-key-value
     type: string
     short-summary: Public key path or key contents to install on node VMs for SSH access. For example, 'ssh-rsa AAAAB...snip...UcyupgH azureuser@linuxvm'.
@@ -1015,6 +1015,12 @@ parameters:
   - name: --http-proxy-config
     type: string
     short-summary: HTTP Proxy configuration for this cluster.
+  - name: --disable-http-proxy
+    type: bool
+    short-summary: Disable HTTP Proxy Configuration on the cluster.
+  - name: --enable-http-proxy
+    type: bool
+    short-summary: Enable HTTP Proxy Configuration on the cluster.
   - name: --enable-oidc-issuer
     type: bool
     short-summary: Enable OIDC issuer.
@@ -1112,6 +1118,9 @@ parameters:
     type: string
     short-summary: Set transit encryption type for ACNS security.
     long-summary: Configures pod-to-pod encryption for Cilium-based clusters. Once enabled, all traffic between Cilium managed pods will be encrypted when it leaves the node boundary. Valid values are "WireGuard" and "None". When creating a cluster, this option must be used together with "--enable-acns"; when updating a cluster, it can be used on its own to modify the transit encryption type for an existing ACNS-enabled cluster.
+  - name: --enable-high-log-scale-mode
+    type: bool
+    short-summary: Enable High Log Scale Mode for Container Logs. Auto-enabled when --enable-container-network-logs is specified.
   - name: --nrg-lockdown-restriction-level
     type: string
     short-summary: Restriction level on the managed node resource group.
@@ -1883,7 +1892,7 @@ parameters:
     short-summary: The OS Type. Linux or Windows.
   - name: --os-sku
     type: string
-    short-summary: The OS SKU of the agent node pool. Ubuntu, Ubuntu2204, Ubuntu2404, AzureLinux or AzureLinux3 for Linux. Windows2019 or Windows2022 for Windows.
+    short-summary: The OS SKU of the agent node pool. Ubuntu, Ubuntu2204, Ubuntu2404, AzureLinux, AzureLinux3, or AzureContainerLinux for Linux. Windows2019 or Windows2022 for Windows.
   - name: --enable-cluster-autoscaler -e
     type: bool
     short-summary: Enable cluster autoscaler.

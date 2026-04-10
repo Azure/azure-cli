@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 import os
-import shutil
 import configparser
 import enum
 
@@ -132,6 +131,7 @@ class AzCLILocalContext:  # pylint: disable=too-many-instance-attributes
                 os.remove(local_context_file.config_path)
                 parent_dir = os.path.dirname(local_context_file.config_path)
                 if not os.listdir(parent_dir):
+                    import shutil
                     shutil.rmtree(parent_dir)
                 logger.warning('Parameter persistence file in working directory %s is deleted.',
                                os.path.dirname(local_context_file.config_dir))
