@@ -853,13 +853,13 @@ helps['role deny-assignment create'] = """
 type: command
 short-summary: Create a user-assigned deny assignment.
 long-summary: >-
-    Creates a deny assignment that blocks specific actions for all principals at the given scope,
-    excluding the specified principals. This is a PP1 (Private Preview 1) feature with the following constraints:
-    principals are always Everyone (SystemDefined), at least one excluded principal is required,
-    DataActions are not supported, DoNotApplyToChildScopes is not supported, and read actions (*/read)
-    are not permitted.
+    Creates a deny assignment that blocks specific actions at the given scope. Two modes are supported:
+    (1) Everyone mode (default) — denies actions for all principals, requiring at least one excluded principal;
+    (2) Per-principal mode — denies actions for a specific User or ServicePrincipal specified via --principal-id.
+    DataActions are not supported, DoNotApplyToChildScopes is not supported, read actions (*/read) are not
+    permitted, and Group type principals are not allowed.
 examples:
-  - name: Create a deny assignment that blocks role assignment writes, excluding a specific service principal.
+  - name: Create a deny assignment blocking role assignment writes for everyone, excluding a service principal.
     text: >-
         az role deny-assignment create
         --name "Block role assignment changes"
@@ -867,15 +867,25 @@ examples:
         --actions "Microsoft.Authorization/roleAssignments/write" "Microsoft.Authorization/roleAssignments/delete"
         --exclude-principal-ids 00000000-0000-0000-0000-000000000001
         --exclude-principal-types ServicePrincipal
-  - name: Create a deny assignment with multiple excluded principals and a description.
+  - name: Create a deny assignment targeting a specific user.
     text: >-
         az role deny-assignment create
-        --name "Deny resource deletion"
+        --name "Deny resource deletion for user"
         --scope /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myGroup
         --actions "*/delete"
-        --description "Prevent accidental resource deletion"
-        --exclude-principal-ids 00000000-0000-0000-0000-000000000001 00000000-0000-0000-0000-000000000002
-        --exclude-principal-types ServicePrincipal User
+        --principal-id 00000000-0000-0000-0000-000000000001
+        --principal-type User
+  - name: Create a deny assignment targeting a specific service principal with exclusions.
+    text: >-
+        az role deny-assignment create
+        --name "Deny write actions for app"
+        --scope /subscriptions/00000000-0000-0000-0000-000000000000
+        --actions "*/write"
+        --principal-id 00000000-0000-0000-0000-000000000001
+        --principal-type ServicePrincipal
+        --exclude-principal-ids 00000000-0000-0000-0000-000000000002
+        --exclude-principal-types ServicePrincipal
+        --description "Block write operations for this application"
 """
 
 helps['role deny-assignment delete'] = """

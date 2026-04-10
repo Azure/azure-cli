@@ -578,16 +578,22 @@ def show_deny_assignment(cmd, deny_assignment_id=None, deny_assignment_name=None
 def create_deny_assignment(cmd, scope=None, deny_assignment_name=None,
                            actions=None, not_actions=None,
                            description=None,
+                           principal_id=None, principal_type=None,
                            exclude_principal_ids=None, exclude_principal_types=None,
                            assignment_name=None):
-    """Create a user-assigned deny assignment (PP1).
+    """Create a user-assigned deny assignment.
 
-    Under PP1 constraints:
-    - Principals is always Everyone (SystemDefined, 00000000-0000-0000-0000-000000000000)
-    - ExcludePrincipals is required (at least one)
+    Two modes are supported:
+    - Everyone mode (default): Denies actions for all principals at the scope. Requires at least one
+      excluded principal via --exclude-principal-ids.
+    - Per-principal mode: Denies actions for a specific User or ServicePrincipal. Specify the target
+      with --principal-id and --principal-type. Excluded principals are optional in this mode.
+
+    Constraints:
     - DataActions and NotDataActions are not supported
     - DoNotApplyToChildScopes is not supported
     - Read actions (*/read) are not permitted
+    - Group type principals are not permitted
     """
     if not scope:
         raise CLIError('--scope is required for creating a deny assignment.')
@@ -601,33 +607,48 @@ def create_deny_assignment(cmd, scope=None, deny_assignment_name=None,
     if not actions:
         raise CLIError('At least one action is required via --actions.')
 
-    if not exclude_principal_ids:
-        raise CLIError('At least one excluded principal is required via --exclude-principal-ids. '
-                       'User-assigned deny assignments deny Everyone and require at least one exclusion.')
-
     # Validate no read actions
     for action in actions:
         if action.lower().endswith('/read'):
             raise CLIError(f"Read actions are not permitted for user-assigned deny assignments: '{action}'. "
                            "Only write, delete, and action operations can be denied.")
 
+    # Build principals list
+    if principal_type and not principal_id:
+        raise CLIError('--principal-id is required when --principal-type is specified. '
+                       'Provide both --principal-id and --principal-type together, '
+                       'or omit both for Everyone mode.')
+    if principal_id:
+        if not principal_type:
+            raise CLIError('--principal-type is required when --principal-id is specified. '
+                           'Accepted values: User, ServicePrincipal.')
+        if principal_type == 'Group':
+            raise CLIError('Group type principals are not permitted for user-assigned deny assignments. '
+                           'Use User or ServicePrincipal instead.')
+        principals = [{'id': principal_id, 'type': principal_type}]
+    else:
+        # Everyone mode — deny applies to all principals at the scope
+        if not exclude_principal_ids:
+            raise CLIError('At least one excluded principal is required via --exclude-principal-ids '
+                           'when using Everyone mode (no --principal-id specified). '
+                           'User-assigned deny assignments that deny Everyone require at least one exclusion.')
+        principals = [{'id': '00000000-0000-0000-0000-000000000000', 'type': 'SystemDefined'}]
+
     if not assignment_name:
         assignment_name = str(uuid.uuid4())
 
     # Build exclude principals list
     exclude_principals = []
-    if exclude_principal_types and len(exclude_principal_types) != len(exclude_principal_ids):
-        raise CLIError('--exclude-principal-types must have the same number of entries as --exclude-principal-ids.')
+    if exclude_principal_ids:
+        if exclude_principal_types and len(exclude_principal_types) != len(exclude_principal_ids):
+            raise CLIError('--exclude-principal-types must have the same number of entries as --exclude-principal-ids.')
 
-    for i, pid in enumerate(exclude_principal_ids):
-        principal = {
-            'id': pid,
-            'type': exclude_principal_types[i] if exclude_principal_types else 'ServicePrincipal'
-        }
-        exclude_principals.append(principal)
-
-    # PP1: Principals must be Everyone (SystemDefined)
-    principals = [{'id': '00000000-0000-0000-0000-000000000000', 'type': 'SystemDefined'}]
+        for i, pid in enumerate(exclude_principal_ids):
+            principal = {
+                'id': pid,
+                'type': exclude_principal_types[i] if exclude_principal_types else 'ServicePrincipal'
+            }
+            exclude_principals.append(principal)
 
     deny_assignment_params = {
         'deny_assignment_name': deny_assignment_name,

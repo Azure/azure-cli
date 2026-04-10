@@ -47,20 +47,19 @@ class DenyAssignmentCrudTest(LiveScenarioTest):
 
     These are LiveScenarioTest because they require:
     - A subscription with UserAssignedDenyAssignment feature flag enabled
-    - Real Azure API calls (PP1 feature, not in recordings)
+    - Real Azure API calls (not in recordings)
     """
 
-    def test_deny_assignment_create_and_delete(self):
-        """Create a deny assignment, show it, then delete it."""
+    def test_deny_assignment_create_everyone_and_delete(self):
+        """Create a deny assignment in Everyone mode (default), show it, then delete it."""
         self.kwargs.update({
             'scope': '/subscriptions/{sub}',
-            'name': 'CLI Test Deny Assignment',
+            'name': 'CLI Test Deny Assignment Everyone',
             'action': 'Microsoft.Authorization/roleAssignments/write',
-            # Use a well-known object ID for exclusion (replace with a real SP in your test env)
             'exclude_id': self.create_guid()
         })
 
-        # Create
+        # Create in Everyone mode (no --principal-id)
         result = self.cmd(
             'role deny-assignment create '
             '--name "{name}" '
@@ -68,7 +67,7 @@ class DenyAssignmentCrudTest(LiveScenarioTest):
             '--actions {action} '
             '--exclude-principal-ids {exclude_id} '
             '--exclude-principal-types ServicePrincipal '
-            '--description "CLI test deny assignment"',
+            '--description "CLI test deny assignment - Everyone mode"',
             checks=[
                 self.check('denyAssignmentName', '{name}'),
                 self.exists('name')
@@ -94,6 +93,65 @@ class DenyAssignmentCrudTest(LiveScenarioTest):
         # Delete by name + scope
         self.cmd('role deny-assignment delete --name {da_name} --scope {scope} --yes')
 
+    def test_deny_assignment_create_per_principal_and_delete(self):
+        """Create a deny assignment targeting a specific User principal, then delete it."""
+        self.kwargs.update({
+            'scope': '/subscriptions/{sub}',
+            'name': 'CLI Test Deny Assignment Per-Principal',
+            'action': 'Microsoft.Authorization/roleAssignments/write',
+            'principal_id': self.create_guid()
+        })
+
+        # Create in per-principal mode
+        result = self.cmd(
+            'role deny-assignment create '
+            '--name "{name}" '
+            '--scope {scope} '
+            '--actions {action} '
+            '--principal-id {principal_id} '
+            '--principal-type User '
+            '--description "CLI test deny assignment - per-principal mode"',
+            checks=[
+                self.check('denyAssignmentName', '{name}'),
+                self.exists('name')
+            ]
+        ).get_output_in_json()
+
+        self.kwargs['da_name'] = result['name']
+
+        # Delete
+        self.cmd('role deny-assignment delete --name {da_name} --scope {scope} --yes')
+
+    def test_deny_assignment_create_per_principal_with_exclusions_and_delete(self):
+        """Create a per-principal deny assignment with exclude-principals, then delete it."""
+        self.kwargs.update({
+            'scope': '/subscriptions/{sub}',
+            'name': 'CLI Test Per-Principal With Exclusions',
+            'action': 'Microsoft.Authorization/roleAssignments/write',
+            'principal_id': self.create_guid(),
+            'exclude_id': self.create_guid()
+        })
+
+        result = self.cmd(
+            'role deny-assignment create '
+            '--name "{name}" '
+            '--scope {scope} '
+            '--actions {action} '
+            '--principal-id {principal_id} '
+            '--principal-type ServicePrincipal '
+            '--exclude-principal-ids {exclude_id} '
+            '--exclude-principal-types ServicePrincipal '
+            '--description "Per-principal with exclusions"',
+            checks=[
+                self.check('denyAssignmentName', '{name}'),
+                self.exists('name')
+            ]
+        ).get_output_in_json()
+
+        self.kwargs['da_name'] = result['name']
+
+        self.cmd('role deny-assignment delete --name {da_name} --scope {scope} --yes')
+
     def test_deny_assignment_create_validation_no_actions(self):
         """Should fail if no actions are provided."""
         with self.assertRaises(SystemExit):
@@ -104,8 +162,8 @@ class DenyAssignmentCrudTest(LiveScenarioTest):
                 '--exclude-principal-ids 00000000-0000-0000-0000-000000000001'
             )
 
-    def test_deny_assignment_create_validation_no_exclusions(self):
-        """Should fail if no excluded principals are provided."""
+    def test_deny_assignment_create_validation_no_exclusions_everyone_mode(self):
+        """Should fail if no excluded principals are provided in Everyone mode."""
         with self.assertRaises(SystemExit):
             self.cmd(
                 'role deny-assignment create '
@@ -122,5 +180,40 @@ class DenyAssignmentCrudTest(LiveScenarioTest):
                 '--name "Test" '
                 '--scope /subscriptions/{sub} '
                 '--actions "Microsoft.Authorization/roleAssignments/read" '
+                '--exclude-principal-ids 00000000-0000-0000-0000-000000000001'
+            )
+
+    def test_deny_assignment_create_validation_group_rejected(self):
+        """Should fail if Group principal type is specified."""
+        with self.assertRaises(SystemExit):
+            self.cmd(
+                'role deny-assignment create '
+                '--name "Test" '
+                '--scope /subscriptions/{sub} '
+                '--actions "Microsoft.Authorization/roleAssignments/write" '
+                '--principal-id 00000000-0000-0000-0000-000000000001 '
+                '--principal-type Group'
+            )
+
+    def test_deny_assignment_create_validation_principal_type_required(self):
+        """Should fail if --principal-id is given without --principal-type."""
+        with self.assertRaises(SystemExit):
+            self.cmd(
+                'role deny-assignment create '
+                '--name "Test" '
+                '--scope /subscriptions/{sub} '
+                '--actions "Microsoft.Authorization/roleAssignments/write" '
+                '--principal-id 00000000-0000-0000-0000-000000000001'
+            )
+
+    def test_deny_assignment_create_validation_principal_id_required(self):
+        """Should fail if --principal-type is given without --principal-id."""
+        with self.assertRaises(SystemExit):
+            self.cmd(
+                'role deny-assignment create '
+                '--name "Test" '
+                '--scope /subscriptions/{sub} '
+                '--actions "Microsoft.Authorization/roleAssignments/write" '
+                '--principal-type User '
                 '--exclude-principal-ids 00000000-0000-0000-0000-000000000001'
             )
