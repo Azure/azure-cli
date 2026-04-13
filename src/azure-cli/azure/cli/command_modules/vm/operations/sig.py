@@ -65,7 +65,6 @@ class SigIdentityRemove(_SigIdentityRemove):
     def _execute_operations(self):
         self.pre_operations()
         self.GalleriesGet(ctx=self.ctx)()
-        self.post_instance_update(self.ctx.selectors.subresource.get())
         yield self.GalleriesUpdate(ctx=self.ctx)()
         self.post_operations()
 
