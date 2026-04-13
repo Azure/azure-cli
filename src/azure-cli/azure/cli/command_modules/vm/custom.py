@@ -6672,7 +6672,6 @@ def _transform_community_gallery_list_output(result):
         output.append(output_item)
 
     return output
-# endRegion
 
 
 def list_vm_sizes(cmd, location):
@@ -6680,3 +6679,6 @@ def list_vm_sizes(cmd, location):
     return VMListSizes(cli_ctx=cmd.cli_ctx)(command_args={
         "location": location,
     })
+
+
+# endRegion
