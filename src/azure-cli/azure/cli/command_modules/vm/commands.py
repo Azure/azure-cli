@@ -420,7 +420,7 @@ def load_command_table(self, _):
         from .operations.vmss_vms import VMSSGetResiliencyView
         self.command_table['vmss get-resiliency-view'] = VMSSGetResiliencyView(loader=self)
 
-    with self.command_group('vmss diagnostics', compute_vmss_sdk) as g:
+    with self.command_group('vmss diagnostics') as g:
         g.custom_command('set', 'set_vmss_diagnostics_extension')
         g.custom_command('get-default-config', 'show_default_diagnostics_configuration')
 

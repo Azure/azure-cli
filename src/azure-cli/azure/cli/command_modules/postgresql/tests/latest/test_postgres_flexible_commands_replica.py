@@ -40,14 +40,14 @@ class PostgreSQLFlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pyli
         master_server = self.create_random_name(SERVER_NAME_PREFIX, 32)
         replicas = [self.create_random_name(F'azuredbclirep{i+1}', SERVER_NAME_MAX_LENGTH) for i in range(2)]
 
-        # create a server
+        # Create a server
         self.cmd('postgres flexible-server create -g {} --name {} -l {} --storage-size {} --tier GeneralPurpose --sku-name Standard_D2ds_v4 --public-access none --yes'
                  .format(resource_group, master_server, location, 256))
         result = self.cmd('postgres flexible-server show -g {} --name {} '
                           .format(resource_group, master_server),
                           checks=[JMESPathCheck('replica.role', primary_role)]).get_output_in_json()
         
-        # test replica create
+        # Test replica create
         self.cmd('postgres flexible-server replica create -g {} --name {} --source-server {}'
                  .format(resource_group, replicas[0], result['id']),
                  checks=[
@@ -58,12 +58,12 @@ class PostgreSQLFlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pyli
                      JMESPathCheck('replica.role', replica_role),
                      JMESPathCheck('sourceServerResourceId', result['id'])])
 
-        # test replica list
+        # Test replica list
         self.cmd('postgres flexible-server replica list -g {} --name {}'
                  .format(resource_group, master_server),
                  checks=[JMESPathCheck('length(@)', 1)])
 
-        # test replica promote
+        # Test replica promote
         self.cmd('postgres flexible-server replica promote -g {} --name {} --yes'
                  .format(resource_group, replicas[0]),
                  checks=[
@@ -72,7 +72,7 @@ class PostgreSQLFlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pyli
                      JMESPathCheck('replica.role', primary_role),
                      JMESPathCheck('sourceServerResourceId', 'None')])
 
-        # test show server with replication info, master becomes normal server
+        # Test show server with replication info, master becomes normal server
         self.cmd('postgres flexible-server show -g {} --name {}'
                  .format(resource_group, master_server),
                  checks=[
@@ -89,12 +89,12 @@ class PostgreSQLFlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pyli
                     JMESPathCheck('replica.role', replica_role),
                     JMESPathCheck('sourceServerResourceId', result['id'])])
 
-        # in postgres we can't delete master server if it has replicas
+        # In Postgres we can't delete master server if it has replicas
         self.cmd('postgres flexible-server delete -g {} --name {} --yes'
                     .format(resource_group, master_server),
                     expect_failure=True)
 
-        # test virtual-endpoint create
+        # Test virtual-endpoint create
         self.cmd('postgres flexible-server virtual-endpoint create -g {} --server-name {} --name {} --endpoint-type {} --members {}'
                 .format(resource_group, master_server, virtual_endpoint_name, read_write_endpoint_type, master_server),
                 checks=[
@@ -102,17 +102,17 @@ class PostgreSQLFlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pyli
                     JMESPathCheck('name', virtual_endpoint_name),
                     JMESPathCheck('length(virtualEndpoints)', 2)])
 
-        # test virtual-endpoint update
+        # Test virtual-endpoint update
         update_result = self.cmd('postgres flexible-server virtual-endpoint update -g {} --server-name {} --name {} --endpoint-type {} --members {}'
                 .format(resource_group, master_server, virtual_endpoint_name, read_write_endpoint_type, replicas[1]),
                 checks=[JMESPathCheck('length(members)', 2)]).get_output_in_json()
 
-        # test virtual-endpoint show
+        # Test virtual-endpoint show
         self.cmd('postgres flexible-server virtual-endpoint show -g {} --server-name {} --name {}'
                 .format(resource_group, master_server, virtual_endpoint_name),
                 checks=[JMESPathCheck('members', update_result['members'])])
 
-        # test replica switchover planned
+        # Test replica switchover planned
         switchover_result = self.cmd('postgres flexible-server replica promote -g {} --name {} --promote-mode switchover --promote-option planned --yes'
                 .format(resource_group, replicas[1]),
                 checks=[
@@ -120,14 +120,14 @@ class PostgreSQLFlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pyli
                     JMESPathCheck('replica.role', primary_role),
                     JMESPathCheck('sourceServerResourceId', 'None')]).get_output_in_json()
 
-        # test show server with replication info, master became replica server
+        # Test show server with replication info, master became replica server
         self.cmd('postgres flexible-server show -g {} --name {}'
                 .format(resource_group, master_server),
                 checks=[
                     JMESPathCheck('replica.role',replica_role),
                     JMESPathCheck('sourceServerResourceId', switchover_result['id'])])
 
-        # test replica switchover forced
+        # Test replica switchover forced
         self.cmd('postgres flexible-server replica promote -g {} --name {} --promote-mode switchover --promote-option forced --yes'
                 .format(resource_group, master_server),
                 checks=[
@@ -135,7 +135,7 @@ class PostgreSQLFlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pyli
                     JMESPathCheck('replica.role', primary_role),
                     JMESPathCheck('sourceServerResourceId', 'None')])
 
-        # test promote replica standalone forced
+        # Test promote replica standalone forced
         self.cmd('postgres flexible-server replica promote -g {} --name {} --promote-mode standalone --promote-option forced --yes'
                 .format(resource_group, replicas[1]),
                 checks=[
@@ -143,21 +143,21 @@ class PostgreSQLFlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pyli
                     JMESPathCheck('replica.role', primary_role),
                     JMESPathCheck('sourceServerResourceId', 'None')])
 
-        # test replica list
+        # Test replica list
         self.cmd('postgres flexible-server replica list -g {} --name {}'
                  .format(resource_group, master_server),
                  checks=[JMESPathCheck('length(@)', 0)])
 
-        # test virtual-endpoint delete
+        # Test virtual-endpoint delete
         self.cmd('postgres flexible-server virtual-endpoint delete -g {} --server-name {} --name {} --yes'
                 .format(resource_group, master_server, virtual_endpoint_name))
 
-        # test virtual-endpoint list
+        # Test virtual-endpoint list
         self.cmd('postgres flexible-server virtual-endpoint list -g {} --server-name {}'
                 .format(resource_group, master_server),
                 expect_failure=True)
 
-        # clean up servers
+        # Clean up servers
         self.cmd('postgres flexible-server delete -g {} --name {} --yes'
                  .format(resource_group, replicas[0]), checks=NoneCheck())
         self.cmd('postgres flexible-server delete -g {} --name {} --yes'
@@ -177,14 +177,14 @@ class PostgreSQLFlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pyli
         master_vnet_args = F'--vnet {master_vnet} --subnet {master_subnet} --address-prefixes 10.0.0.0/16 --subnet-prefixes 10.0.0.0/24'
         master_vnet_check = [JMESPathCheck('network.delegatedSubnetResourceId', F'/subscriptions/{self.get_subscription_id()}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{master_vnet}/subnets/{master_subnet}')]
 
-        # create a server
+        # Create a server
         self.cmd('postgres flexible-server create -g {} --name {} -l {} --storage-size {} {} --tier GeneralPurpose --sku-name Standard_D2ds_v4 --yes'
                  .format(resource_group, master_server, location, 256, master_vnet_args))
         result = self.cmd('postgres flexible-server show -g {} --name {} '
                           .format(resource_group, master_server),
                           checks=[JMESPathCheck('replica.role', primary_role)] + master_vnet_check).get_output_in_json()
         
-        # test replica create
+        # Test replica create
         replica = self.create_random_name(F'azuredbclirep', SERVER_NAME_MAX_LENGTH)
         replica_subnet = self.create_random_name(F'SUBNET1', SERVER_NAME_MAX_LENGTH)
         replica_vnet_args = F'--vnet {master_vnet} --subnet {replica_subnet} --address-prefixes 10.0.0.0/16 --subnet-prefixes 10.0.1.0/24 --yes'
@@ -200,12 +200,12 @@ class PostgreSQLFlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pyli
                      JMESPathCheck('replica.role', replica_role),
                      JMESPathCheck('sourceServerResourceId', result['id'])] + replica_vnet_check + public_access_check)
 
-        # test replica list
+        # Test replica list
         self.cmd('postgres flexible-server replica list -g {} --name {}'
                  .format(resource_group, master_server),
                  checks=[JMESPathCheck('length(@)', 1)])
 
-        # test replica promote
+        # Test replica promote
         self.cmd('postgres flexible-server replica promote -g {} --name {} --yes'
                  .format(resource_group, replica),
                  checks=[
@@ -214,14 +214,14 @@ class PostgreSQLFlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pyli
                      JMESPathCheck('replica.role', primary_role),
                      JMESPathCheck('sourceServerResourceId', 'None')])
 
-        # test show server with replication info, master becomes normal server
+        # Test show server with replication info, master becomes normal server
         self.cmd('postgres flexible-server show -g {} --name {}'
                  .format(resource_group, master_server),
                  checks=[
                      JMESPathCheck('replica.role', primary_role),
                      JMESPathCheck('sourceServerResourceId', 'None')])
 
-        # clean up servers
+        # Clean up servers
         self.cmd('postgres flexible-server delete -g {} --name {} --yes'
                  .format(resource_group, replica), checks=NoneCheck())
         self.cmd('postgres flexible-server delete -g {} --name {} --yes'
@@ -236,7 +236,7 @@ class PostgreSQLFlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pyli
         replicas = [self.create_random_name(F'azuredbclirep{i+1}', SERVER_NAME_MAX_LENGTH) for i in range(2)]
         storage_auto_grow = "Enabled"
 
-        # create a server
+        # Create a server
         self.cmd('postgres flexible-server create -g {} --name {} -l {} --storage-size {} --public-access none --tier GeneralPurpose --sku-name Standard_D4ds_v5 --yes --storage-auto-grow Enabled'
                  .format(resource_group, master_server, location, 256))
         result = self.cmd('postgres flexible-server show -g {} --name {} '
@@ -245,7 +245,7 @@ class PostgreSQLFlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pyli
                               JMESPathCheck('replica.role', primary_role),
                               JMESPathCheck('storage.autoGrow', storage_auto_grow)]).get_output_in_json()
         
-        # test replica create
+        # Test replica create
         self.cmd('postgres flexible-server replica create -g {} --name {} --source-server {} --zone 2 {}'
                  .format(resource_group, replicas[0], result['id'], public_access_arg),
                  checks=[
@@ -258,10 +258,10 @@ class PostgreSQLFlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pyli
                      JMESPathCheck('sourceServerResourceId', result['id']),
                      JMESPathCheck('storage.autoGrow', storage_auto_grow)])
 
-        # delete replica server first
+        # Delete replica server first
         self.cmd('postgres flexible-server delete -g {} --name {} --yes'
                     .format(resource_group, replicas[0]))
 
-        # now we can delete master server
+        # Now we can delete master server
         self.cmd('postgres flexible-server delete -g {} --name {} --yes'
                     .format(resource_group, master_server))

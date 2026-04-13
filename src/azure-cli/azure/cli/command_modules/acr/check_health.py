@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import re
+import json
 from knack.util import CLIError
 from knack.log import get_logger
 from .custom import get_docker_command
@@ -73,11 +74,11 @@ def _subprocess_communicate(command_parts, shell=False):
 
 
 # Checks for the environment
-# Checks docker command, docker daemon, docker version and docker pull
+# Checks container command, daemon, version and image pull
 def _get_docker_status_and_version(ignore_errors, yes):
     from ._errors import DOCKER_DAEMON_ERROR, DOCKER_PULL_ERROR, DOCKER_VERSION_ERROR
 
-    # Docker command and docker daemon check
+    # Container command and daemon check
     docker_command, error = get_docker_command(is_diagnostics_context=True)
     docker_daemon_available = True
 
@@ -88,18 +89,31 @@ def _get_docker_status_and_version(ignore_errors, yes):
         docker_daemon_available = False
 
     if docker_daemon_available:
-        logger.warning("Docker daemon status: available")
+        logger.warning("%s daemon status: available", docker_command.title())
 
     # Docker version check
-    output, warning, stderr, succeeded = _subprocess_communicate(
-        [docker_command, "version", "--format", "'Docker version {{.Server.Version}}, "
-         "build {{.Server.GitCommit}}, platform {{.Server.Os}}/{{.Server.Arch}}'"])
+    output, warning, stderr, succeeded = _subprocess_communicate([docker_command, "version", "--format", "json"])
     if not succeeded:
         _handle_error(DOCKER_VERSION_ERROR.append_error_message(stderr), ignore_errors)
     else:
         if warning:
             logger.warning(warning)
-        logger.warning("Docker version: %s", output)
+        try:
+            json_output = json.loads(output).get("Client")
+        except json.decoder.JSONDecodeError:
+            json_output = {}
+        version = json_output.get("Version", "unknown")
+        commit = json_output.get("GitCommit", "unknown")[:7]
+        if docker_command == "docker":
+            os = json_output.get("Os", "unknown")
+            arch = json_output.get("Arch", "unknown")
+        else:
+            try:
+                os, arch = json_output.get("OsArch", "unknown").split("/")
+            except ValueError:
+                os = "unknown"
+                arch = "unknown"
+        logger.warning("%s version: %s, build %s, platform %s/%s", docker_command.title(), version, commit, os, arch)
 
     # Docker pull check - only if docker daemon is available
     if docker_daemon_available:
@@ -114,14 +128,14 @@ def _get_docker_status_and_version(ignore_errors, yes):
 
         if not succeeded:
             if stderr and DOCKER_PULL_WRONG_PLATFORM in stderr:
-                print_pass("Docker pull of '{}'".format(IMAGE))
+                print_pass(f"{docker_command.title()} pull of '{IMAGE}'")
                 logger.warning("Image '%s' can be pulled but cannot be used on this platform", IMAGE)
                 return
             _handle_error(DOCKER_PULL_ERROR.append_error_message(stderr), ignore_errors)
         else:
             if warning:
                 logger.warning(warning)
-            print_pass("Docker pull of '{}'".format(IMAGE))
+            print_pass(f"{docker_command.title()} pull of '{IMAGE}'")
 
 
 # Get current CLI version
