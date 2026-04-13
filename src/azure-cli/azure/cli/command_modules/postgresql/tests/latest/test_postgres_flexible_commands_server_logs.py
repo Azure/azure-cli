@@ -26,32 +26,33 @@ class FlexibleServerLogsMgmtScenarioTest(ScenarioTest):
         self._test_server_logs_mgmt(resource_group, server)
 
     def _test_server_logs_mgmt(self, resource_group, server):
-        # enable server logs for server
+        # Enable server logs for server
         self.cmd('postgres flexible-server parameter set -g {} --server-name {} --name logfiles.download_enable --value on'
                     .format(resource_group, server),
                     checks=[JMESPathCheck('value', "on"),
                             JMESPathCheck('name', "logfiles.download_enable")]).get_output_in_json()
         
-        # set retention period for server logs for server
+        # Set retention period for server logs for server
         self.cmd('postgres flexible-server parameter set -g {} --server-name {} --name logfiles.retention_days --value 1'
                     .format(resource_group, server),
                     checks=[JMESPathCheck('value', "1"),
                             JMESPathCheck('name', "logfiles.retention_days")]).get_output_in_json()
 
-        os.environ.get(ENV_LIVE_TEST, False) and sleep(30*60)  # wait for around 30 min to allow log files to be generated
+        # Wait for around 30 min to allow log files to be generated
+        os.environ.get(ENV_LIVE_TEST, False) and sleep(1800)
 
-        # list server log files
+        # List server log files
         server_log_files = self.cmd('postgres flexible-server server-logs list -g {} --server-name {} '
                                     .format(resource_group, server)).get_output_in_json()
         
         self.assertGreater(len(server_log_files), 0, "Server logFiles are not yet created")
         
-        # download server log files
+        # Download server log files
         self.cmd('postgres flexible-server server-logs download -g {} --server-name {} --name {}'
                     .format(resource_group, server, server_log_files[0]['name']),
                     checks=NoneCheck())
         
-        # disable server logs for server
+        # Disable server logs for server
         self.cmd('postgres flexible-server parameter set -g {} --server-name {} --name logfiles.download_enable --value off'
                     .format(resource_group, server),
                     checks=[JMESPathCheck('value', "off"),
