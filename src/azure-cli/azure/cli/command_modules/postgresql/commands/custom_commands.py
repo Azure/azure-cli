@@ -624,18 +624,17 @@ def _update_login(server_name, resource_group_name, auth_config, password_auth, 
 def _confirm_restart_server(instance, sku_name, storage_gb, yes):
     show_confirmation = False
 
-    if instance.storage.type != "PremiumV2_LRS":
-        # check if sku_name is changed
-        if sku_name and sku_name != instance.sku.name:
-            show_confirmation = True
+    # check if sku_name is changed
+    if sku_name and sku_name != instance.sku.name:
+        show_confirmation = True
 
-        # check if requested storage growth is crossing the 4096 threshold
-        if storage_gb and storage_gb > 4096 and instance.storage.storage_size_gb <= 4096:
-            show_confirmation = True
+    # check if requested storage growth is crossing the 4096 threshold
+    if storage_gb and storage_gb > 4096 and instance.storage.storage_size_gb <= 4096 and instance.storage.type != "PremiumV2_LRS":
+        show_confirmation = True
 
-        if not yes and show_confirmation:
-            user_confirmation("You are trying to change the compute or the size of storage assigned to your server in a way that \
-                requires a server restart. During the restart, you'll experience some downtime of the server. Do you want to proceed?", yes=yes)
+    if not yes and show_confirmation:
+        user_confirmation("You are trying to change the compute or the size of storage assigned to your server in a way that \
+            requires a server restart. During the restart, you'll experience some downtime of the server. Do you want to proceed?", yes=yes)
 
 
 def flexible_server_delete(cmd, client, resource_group_name, server_name, yes=False):
