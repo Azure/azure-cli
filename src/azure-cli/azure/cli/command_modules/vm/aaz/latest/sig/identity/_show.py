@@ -17,8 +17,8 @@ from azure.cli.core.aaz import *
 class Show(AAZCommand):
     """Show the details of managed identities.
 
-    :example: Get a community gallery.
-        az sig identity show --resource-group myResourceGroup --gallery-name myGalleryName
+    :example: Show the managed identity.
+        az sig identity show -g myResourceGroup -r myGalleryName
     """
 
     _aaz_info = {

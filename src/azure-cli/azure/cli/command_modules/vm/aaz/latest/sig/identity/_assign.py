@@ -11,8 +11,23 @@
 from azure.cli.core.aaz import *
 
 
+@register_command(
+    "sig identity assign",
+)
 class Assign(AAZCommand):
     """Assign the user or system managed identities.
+
+    :example: Enable the system assigned identity.
+        az sig identity assign -g MyResourceGroup -r MyGalleryName --system-assigned
+
+    :example: Add a user assigned identity.
+        az sig identity assign -g MyResourceGroup -r MyGalleryName --user-assigned id1
+
+    :example: Add 2 user assigned identities.
+        az sig identity assign -g MyResourceGroup -r MyGalleryName --user-assigned id1 id2
+
+    :example: Enable system assigned identity and add a user assigned identity.
+        az sig identity assign -g MyResourceGroup -r MyGalleryName --system-assigned --user-assigned id1
     """
 
     _aaz_info = {

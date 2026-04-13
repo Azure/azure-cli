@@ -18,10 +18,19 @@ class Remove(AAZCommand):
     """Remove the user or system managed identities.
 
     :example: Remove the system assigned identity.
-        az sig identity remove --resource-group myResourceGroup --gallery-name myGalleryName
+        az sig identity remove -g myResourceGroup -r myGalleryName --system-assigned
 
     :example: Remove a user assigned identity.
-        az sig identity remove --resource-group myResourceGroup --gallery-name myGalleryName --identities readerId
+        az sig identity remove -g myResourceGroup -r myGalleryName --user-assigned id1
+
+    :example: Remove 2 user assigned identities.
+        az sig identity remove -g myResourceGroup -r myGalleryName --user-assigned id1 id2
+
+    :example: Remove all user assigned identities.
+        az sig identity remove -g myResourceGroup -r myGalleryName --user-assigned
+
+    :example: Remove the system assigned ientity and user assigned identity.
+        az sig identity remove -g myResourceGroup -r myGalleryName --system-assigned --user-assigned
     """
 
     _aaz_info = {
@@ -208,6 +217,8 @@ class Remove(AAZCommand):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
+            print(1, self.ctx.vars.instance.to_serialized_data())
+            print(2, self.ctx.args.to_serialized_data())
             request = self.make_request()
             session = self.client.send_request(request=request, stream=False, **kwargs)
             if session.http_response.status_code in [202]:

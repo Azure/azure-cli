@@ -42,11 +42,11 @@ class Wait(AAZWaitCommand):
         _args_schema = cls._args_schema
         _args_schema.gallery_name = AAZStrArg(
             options=["-r", "--gallery-name"],
-            help="The name of the Shared Image Gallery to be deleted.",
+            help="The name of the Shared Image Gallery.",
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
-                pattern="^[^\\W_][\\w._-]{0,79}(?<![-.])$",
+                pattern="^[^_\\W][\\w._-]{0,79}(?<![-.])$",
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(

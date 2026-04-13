@@ -19,6 +19,15 @@ class Create(AAZCommand):
 
     :example: Create a shared image gallery
         az sig create --resource-group MyResourceGroup --gallery-name MyGallery
+
+    :example: Create a shared image gallery with enabled system assigned identity.
+        az sig create --resource-group MyResourceGroup --gallery-name MyGallery123 --system-assigned
+
+    :example: Create a shared image gallery with a user assigned identity.
+        az sig create --resource-group MyResourceGroup --gallery-name MyGallery123 --user-assigned id1
+
+    :example: Create a shared image gallery with both system and user assigned identity.
+        az sig create --resource-group MyResourceGroup --gallery-name MyGallery123 --system-assigned --user-assigned id1
     """
 
     _aaz_info = {
@@ -47,10 +56,10 @@ class Create(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.gallery_name = AAZStrArg(
             options=["-r", "--gallery-name"],
-            help="The name of the Shared Image Gallery to be deleted.",
+            help="The name of the Shared Image Gallery.",
             required=True,
             fmt=AAZStrArgFormat(
-                pattern="^[^\\W_][\\w._-]{0,79}(?<![-.])$",
+                pattern="^[^_\\W][\\w._-]{0,79}(?<![-.])$",
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
