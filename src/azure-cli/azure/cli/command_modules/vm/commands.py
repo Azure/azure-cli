@@ -446,8 +446,8 @@ def load_command_table(self, _):
         g.custom_command('update', 'vmss_run_command_update', supports_no_wait=True)
 
     with self.command_group('sig', operation_group='galleries') as g:
-        g.custom_command('create', 'create_sig', supports_no_wait=True, validator=process_sig_create_namespace)
-        from .operations.sig import SigUpdate, SigShow
+        from .operations.sig import SigCreate, SigUpdate, SigShow
+        self.command_table['sig create'] = SigCreate(loader=self)
         self.command_table['sig update'] = SigUpdate(loader=self)
         self.command_table['sig show'] = SigShow(loader=self)
 
@@ -455,10 +455,8 @@ def load_command_table(self, _):
         g.custom_command('list-community', 'sig_community_gallery_list')
 
     with self.command_group('sig identity') as g:
-        g.custom_command('assign', 'assign_sig_identity', validator=process_sig_assign_identity_namespace)
-        g.custom_command('remove', 'remove_sig_identity', validator=process_sig_remove_identity_namespace)
-        from .operations.sig import SigIdentityShow
-        self.command_table['sig identity show'] = SigIdentityShow(loader=self)
+        from .operations.sig import SigIdentityRemove
+        self.command_table['sig identity remove'] = SigIdentityRemove(loader=self)
 
     with self.command_group('sig image-definition', compute_gallery_images_sdk, operation_group='gallery_images', min_api='2018-06-01') as g:
         g.custom_command('create', 'create_gallery_image')

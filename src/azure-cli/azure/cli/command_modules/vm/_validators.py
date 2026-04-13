@@ -1411,66 +1411,13 @@ def _validate_vm_vmss_msi(cmd, namespace, is_identity_assign=False):
         _enable_msi_for_trusted_launch(namespace)
 
 
-def process_sig_create_namespace(cmd, namespace):
-    validate_tags(namespace)
-
-    if not namespace.location:
-        get_default_location_from_resource_group(cmd, namespace)
-
-    _validate_sig_msi(cmd, namespace)
-
-
-def process_sig_assign_identity_namespace(cmd, namespace):
-    _validate_sig_msi(cmd, namespace, is_identity_assign=True)
-
-
 def process_sig_remove_identity_namespace(cmd, namespace):
     if namespace.identities:
-        from ._vm_utils import MSI_LOCAL_ID
         for i, identity in enumerate(namespace.identities):
-            if identity != MSI_LOCAL_ID:
-                namespace.identities[i] = _get_resource_id(cmd.cli_ctx, identity,
-                                                           namespace.resource_group_name,
-                                                           'userAssignedIdentities',
-                                                           'Microsoft.ManagedIdentity')
-
-
-def _validate_sig_msi(cmd, namespace, is_identity_assign=False):
-
-    # For the creation of sig, "--role" and "--scope" should be passed in at the same time
-    # when assigning a role to the managed identity
-    if not is_identity_assign and namespace.assign_identity is not None:
-        if (namespace.identity_scope and not namespace.identity_role) or \
-                (not namespace.identity_scope and namespace.identity_role):
-            raise ArgumentUsageError(
-                "usage error: please specify both --role and --scope when assigning a role to the managed identity")
-
-    # For "az sig identity assign", "--role" and "--scope" should be passed in at the same time
-    # when assigning a role to the managed identity
-    if is_identity_assign:
-        if (namespace.identity_scope and not namespace.identity_role) or \
-                (not namespace.identity_scope and namespace.identity_role):
-            raise ArgumentUsageError(
-                "usage error: please specify both --role and --scope when assigning a role to the managed identity")
-
-    # Assign managed identity
-    if is_identity_assign or namespace.assign_identity is not None:
-        identities = namespace.assign_identity or []
-        from ._vm_utils import MSI_LOCAL_ID
-        for i, _ in enumerate(identities):
-            if identities[i] != MSI_LOCAL_ID:
-                identities[i] = _get_resource_id(cmd.cli_ctx, identities[i], namespace.resource_group_name,
-                                                 'userAssignedIdentities', 'Microsoft.ManagedIdentity')
-
-        if namespace.identity_scope:
-            if identities and MSI_LOCAL_ID not in identities:
-                raise ArgumentUsageError("usage error: '--scope'/'--role' is only applicable when "
-                                         "assign system identity")
-            # keep 'identity_role' for output as logical name is more readable
-            setattr(namespace, 'identity_role_id', _resolve_role_id(cmd.cli_ctx, namespace.identity_role,
-                                                                    namespace.identity_scope))
-    elif namespace.identity_scope or namespace.identity_role:
-        raise ArgumentUsageError('usage error: --assign-identity [--scope SCOPE] [--role ROLE]')
+            namespace.identities[i] = _get_resource_id(cmd.cli_ctx, identity,
+                                                       namespace.resource_group_name,
+                                                       'userAssignedIdentities',
+                                                       'Microsoft.ManagedIdentity')
 
 
 def _enable_msi_for_trusted_launch(namespace):

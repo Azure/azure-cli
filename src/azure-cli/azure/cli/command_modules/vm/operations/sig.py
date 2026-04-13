@@ -10,8 +10,8 @@ from knack.util import CLIError
 from azure.cli.core.azclierror import RequiredArgumentMissingError
 from azure.cli.core.aaz import has_value
 from ..aaz.latest.sig import Create as _SigCreate, Update as _SigUpdate, Show as _SigShow
-from ..aaz.latest.sig.identity import Remove as _SigIdentityRemove, Show as _SigIdentityShow
-from .._vm_utils import MSI_LOCAL_ID, IdentityType
+from ..aaz.latest.sig.identity import Remove as _SigIdentityRemove
+from .._vm_utils import IdentityType
 
 logger = get_logger(__name__)
 
@@ -63,110 +63,45 @@ class SigShow(_SigShow):
 
 
 class SigIdentityRemove(_SigIdentityRemove):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-
-        args_schema.mi_system_assigned._registered = False
-        args_schema.mi_user_assigned._registered = False
-
-        args_schema.identities = AAZListArg(
-            help="Space-separated identities to remove. Use '{0}' to refer to the system assigned identity. Default: '{0}'".format(MSI_LOCAL_ID),
-        )
-        args_schema.identities.Element = AAZStrArg()
-
-        return args_schema
-
-    def pre_instance_update(self, instance):
-        # Get existing identity in json
-        existing_identity = instance.to_serialized_data()
-
-        # If currently do not have any identity, return
-        if not existing_identity:
-            return
-
-        identities_to_be_removed = self.ctx.args.identities.to_serialized_data()
-
-        remove_system_assigned_identity = False
-
-        # If user not specifying any identity, means it is to remove system assigned identity
-        if not identities_to_be_removed or len(identities_to_be_removed) < 1:
-            remove_system_assigned_identity = True
-
-        # Assign system assigned identity as a variable, so identity can be formatted
-        if identities_to_be_removed and MSI_LOCAL_ID in identities_to_be_removed:
-            remove_system_assigned_identity = True
-            identities_to_be_removed.remove(MSI_LOCAL_ID)
-
-        # Collect existing user assigned identity
-        existing_emsis = [x.lower() for x in (existing_identity.get('userAssignedIdentities', {})).keys()]
-        existing_identity['userAssignedIdentities'] = {}
-
-        # If user is removing identities
-        if identities_to_be_removed and len(identities_to_be_removed) > 0:
-            emsis_to_remove = [x.lower() for x in identities_to_be_removed]
-
-            # Check for invalid identity to be removed
-            non_existing = [emsis for emsis in emsis_to_remove if emsis not in existing_emsis]
-            if non_existing:
-                raise CLIError("'{}' are not associated with '{}'".format(
-                    ','.join(non_existing), self.ctx.args.gallery_name))
-
-            # Collect emsis to be retained
-            emsis_to_retain = [emsis for emsis in existing_emsis if emsis not in emsis_to_remove]
-
-            if len(emsis_to_retain) < 1:  # if all emsis are gone, we need to update the type
-                if existing_identity['type'] == IdentityType.USER_ASSIGNED.value:
-                    existing_identity['type'] = IdentityType.NONE.value
-                    existing_identity.pop('userAssignedIdentities')
-                elif existing_identity['type'] == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value:
-                    existing_identity['type'] = IdentityType.SYSTEM_ASSIGNED.value
-
-            # Set {'x_emsis': {}} to remove x emsis when parse to API
-            for emsis in emsis_to_remove:
-                existing_identity['userAssignedIdentities'][emsis] = {}
-
-        # If user is removing system assigned identity
-        if remove_system_assigned_identity:
-            if existing_identity['type'] == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value \
-                    or existing_identity['type'] == IdentityType.USER_ASSIGNED.value:
-                existing_identity['type'] = IdentityType.USER_ASSIGNED.value
-            else:
-                existing_identity['type'] = IdentityType.NONE.value
-
-        if existing_identity['type'] == IdentityType.NONE.value \
-                or existing_identity['type'] == IdentityType.SYSTEM_ASSIGNED.value:
-            existing_identity.pop('userAssignedIdentities', None)
-
-        self.ctx.vars.instance.identity = existing_identity
-
-    class SubresourceSelector(_SigIdentityRemove.SubresourceSelector):
-        def required(self):
-            return self._get()
+    def _execute_operations(self):
+        self.pre_operations()
+        self.GalleriesGet(ctx=self.ctx)()
+        self.post_instance_update(self.ctx.selectors.subresource.get())
+        yield self.GalleriesUpdate(ctx=self.ctx)()
+        self.post_operations()
 
     class GalleriesUpdate(_SigIdentityRemove.GalleriesUpdate):
         def _format_content(self, content):
             if isinstance(content, str):
                 content = json.loads(content)
 
-            if not content.get('identity'):
-                content['identity'] = {
-                    'userAssignedIdentities': None,
-                    'type': IdentityType.NONE.value
-                }
+            existing_id = self.ctx.vars.instance.identity.userAssignedIdentities.to_serialized_data()
+            if not existing_id:
                 return json.dumps(content)
 
-            identities = content.get('identity', {}).get('userAssignedIdentities')
-            if identities:
-                if 'UserAssigned' in identities.keys():
-                    identities.pop('UserAssigned')
+            id_to_remove = self.ctx.args.mi_user_assigned.to_serialized_data()
+            if id_to_remove == []:
+                id_to_remove = existing_id
+            elif not id_to_remove:
+                return json.dumps(content)
 
-                for key in list(identities.keys()):
-                    identities[key] = None
+            if not (content.get('identity', {}).get('type') == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value \
+                    or content.get('identity', {}).get('type') == IdentityType.USER_ASSIGNED.value):
+                return json.dumps(content)
 
-            if not content.get('identity', {}).get('userAssignedIdentities', {}):
-                content['identity']['userAssignedIdentities'] = None
+            id_to_retain = [id for id in existing_id if id not in id_to_remove]
+
+            if not id_to_retain:
+                if content.get('identity', {}).get('type') == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value:
+                    content['identity']['type'] = IdentityType.SYSTEM_ASSIGNED.value
+                elif content.get('identity', {}).get('type') == IdentityType.USER_ASSIGNED.value:
+                    content['identity']['type'] = IdentityType.NONE.value
+                content['identity'].pop('userAssignedIdentities', None)
+                return json.dumps(content)
+
+            if id_to_remove:
+                for key in list(id_to_remove):
+                    content['identity']['userAssignedIdentities'][key] = None
 
             return json.dumps(content)
 
@@ -185,11 +120,3 @@ class SigIdentityRemove(_SigIdentityRemove):
                 )
 
             return self.on_error(session.http_response)
-
-
-class SigIdentityShow(_SigIdentityShow):
-    def _output(self, *args, **kwargs):
-        # This is to fix "When user is trying to run az sig show on sig that is not being assigned any identity,
-        # it will raise ResourceNotFoundError" issue
-        result = self.deserialize_output(self.ctx.selectors.subresource.get(), client_flatten=True)
-        return result

@@ -1351,35 +1351,6 @@ def load_arguments(self, _):
         c.argument('gallery_image_name', options_list=['--gallery-image-definition', '-i'], help='gallery image definition')
         c.argument('gallery_image_version', options_list=['--gallery-image-version', '-e'], help='gallery image version')
 
-    with self.argument_context('sig create') as c:
-        c.argument('eula', arg_group='CommunityGalleryInfo', help='Community gallery publisher eula')
-        c.argument('public_name_prefix', arg_group='CommunityGalleryInfo', help='Community gallery public name prefix')
-        c.argument('publisher_contact', arg_group='CommunityGalleryInfo', options_list=["--publisher-email", "--publisher-contact"], help='Community gallery publisher contact email')
-        c.argument('publisher_uri', arg_group='CommunityGalleryInfo', help='Community gallery publisher uri')
-        c.argument('location', get_location_type(self.cli_ctx), arg_group='Gallery',
-                   help='Location in which to create VM and related resources. If default location is not configured, will default to the resource group\'s location')
-        c.argument('tags', tags_type, arg_group='Gallery')
-        c.argument('description', arg_group='Properties', help='The description of the gallery.')
-        c.argument('permissions', arg_group='SharingProfile', arg_type=get_enum_type(['Community', 'Groups', 'Private']),
-                   help='This property allows you to specify the permission of sharing gallery.')
-        c.argument('soft_delete', arg_group='SoftDeletePolicy', arg_type=get_three_state_flag(), help='Enable soft-deletion for resources in this gallery, allowing them to be recovered within retention time.')
-        c.argument('assign_identity', nargs='*', arg_group='Managed Service Identity', help="accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity, or a resource id to refer user assigned identity. Check out help for more examples")
-
-    with self.argument_context('sig identity remove') as c:
-        c.argument('identities', nargs='*', help="Space-separated identities to remove. Use '{0}' to refer to the system assigned identity. Default: '{0}'".format(MSI_LOCAL_ID))
-
-    with self.argument_context('sig identity assign') as c:
-        c.argument('assign_identity', options_list=['--identities'], nargs='*', help="Space-separated identities to assign. Use '{0}' to refer to the system assigned identity. Default: '{0}'".format(MSI_LOCAL_ID))
-
-    for scope in ['sig create', 'sig identity assign']:
-        with self.argument_context(scope) as c:
-            arg_group = 'Managed Service Identity' if scope.split()[-1] == 'create' else None
-            c.argument('identity_scope', options_list=['--scope'], arg_group=arg_group,
-                       help="Scope that the system assigned identity can access. ")
-            c.argument('identity_role', options_list=['--role'], arg_group=arg_group,
-                       help='Role name or id the system assigned identity will have. ')
-            c.ignore('identity_role_id')
-
     with self.argument_context('sig image-definition create') as c:
         c.argument('offer', options_list=['--offer', '-f'], help='image offer')
         c.argument('sku', options_list=['--sku', '-s'], help='image sku')
