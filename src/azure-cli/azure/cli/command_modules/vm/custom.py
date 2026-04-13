@@ -5082,16 +5082,15 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
 
 
 # region VirtualMachineScaleSets Diagnostics
-def set_vmss_diagnostics_extension(
-        cmd, resource_group_name, vmss_name, settings, protected_settings=None, version=None,
-        no_auto_upgrade=False):
-    client = _compute_client_factory(cmd.cli_ctx)
-    vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+def set_vmss_diagnostics_extension(cmd, resource_group_name, vmss_name, settings, protected_settings=None,
+                                   version=None, no_auto_upgrade=False):
+    from ._vm_utils import UpgradeMode
+    vmss = get_vmss_by_aaz(cmd, resource_group_name, vmss_name)
     # pylint: disable=no-member
-    is_linux_os = _is_linux_os(vmss.virtual_machine_profile)
+    is_linux_os = _is_linux_os_aaz(vmss['virtualMachineProfile'])
     vm_extension_name = _LINUX_DIAG_EXT if is_linux_os else _WINDOWS_DIAG_EXT
-    if is_linux_os and vmss.virtual_machine_profile.extension_profile:  # check incompatibles
-        exts = vmss.virtual_machine_profile.extension_profile.extensions or []
+    if is_linux_os and vmss.get('virtualMachineProfile', {}).get('extensionProfile'):  # check incompatibles
+        exts = vmss.get('virtualMachineProfile', {}).get('extensionProfile', {}).get('extensions', [])
         major_ver = extension_mappings[_LINUX_DIAG_EXT]['version'].split('.', maxsplit=1)[0]
         # For VMSS, we don't do auto-removal like VM because there is no reliable API to wait for
         # the removal done before we can install the newer one
@@ -5111,8 +5110,7 @@ def set_vmss_diagnostics_extension(
                                 no_auto_upgrade)
 
     result = LongRunningOperation(cmd.cli_ctx)(poller)
-    UpgradeMode = cmd.get_models('UpgradeMode')
-    if vmss.upgrade_policy.mode == UpgradeMode.manual:
+    if vmss.get('upgradePolicy', {}).get('mode') == UpgradeMode.MANUAL.value:
         poller2 = update_vmss_instances(cmd, resource_group_name, vmss_name, ['*'])
         LongRunningOperation(cmd.cli_ctx)(poller2)
     return result

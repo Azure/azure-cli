@@ -19,6 +19,28 @@ from ..utils.validators import validate_citus_cluster, validate_resource_group
 logger = get_logger(__name__)
 
 
+def _sanitize_log_file(log_obj):
+    # Convert log object to dict
+    result = log_obj.as_dict()
+
+    # Flatten properties from nested structure and reshape to legacy format
+    if 'properties' in result and isinstance(result['properties'], dict):
+        properties = result.pop('properties')
+        # Extract type from properties and rename to typePropertiesType
+        if 'createdTime' in properties:
+            del properties['createdTime']  # Remove createdTime as it's not in the original SDK model
+        if 'type' in properties:
+            result['typePropertiesType'] = properties.pop('type')
+        # Merge remaining properties into root level
+        result.update(properties)
+
+    # Add systemData if not present (for backward compatibility)
+    if 'systemData' not in result:
+        result['systemData'] = None
+
+    return result
+
+
 def flexible_server_download_log_files(client, resource_group_name, server_name, file_name):
     validate_resource_group(resource_group_name)
 
@@ -50,8 +72,7 @@ def flexible_server_list_log_files_with_filter(client, resource_group_name, serv
         if max_file_size is not None and f.size_in_kb > max_file_size:
             continue
 
-        del f.created_time
-        files.append(f)
+        files.append(_sanitize_log_file(f))
 
     return files
 
@@ -75,8 +96,7 @@ def flexible_server_log_list(client, resource_group_name, server_name, filename_
         if max_file_size is not None and f.size_in_kb > max_file_size:
             continue
 
-        del f.created_time
-        files.append(f)
+        files.append(_sanitize_log_file(f))
 
     return files
 

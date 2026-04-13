@@ -387,6 +387,181 @@ def register_command(
 AAZ_PACKAGE_FULL_LOAD_ENV_NAME = 'AZURE_AAZ_FULL_LOAD'
 
 
+def load_aaz_command_table_args_guided(loader, aaz_pkg_name, args):
+    """Args-guided AAZ command tree loader.
+
+    Instead of importing the entire AAZ package tree (all __init__.py files which eagerly
+    import all command classes), this function navigates only to the relevant subtree based
+    on CLI args. For example, ``az monitor log-analytics workspace create --help`` only loads
+    the ``workspace`` sub-package and the ``_create`` module, skipping all other commands.
+
+    This requires that AAZ ``__init__.py`` files do NOT contain wildcard imports
+    (``from ._create import *`` etc.) -- they should be empty (just the license header).
+    """
+    profile_pkg = _get_profile_pkg(aaz_pkg_name, loader.cli_ctx.cloud)
+
+    command_table = {}
+    command_group_table = {}
+    if args is None or os.environ.get(AAZ_PACKAGE_FULL_LOAD_ENV_NAME, 'False').lower() == 'true':
+        effective_args = None  # fully load
+    else:
+        effective_args = list(args)
+    if profile_pkg is not None:
+        _load_aaz_by_pkg(loader, profile_pkg, effective_args,
+                         command_table, command_group_table)
+
+    for group_name, command_group in command_group_table.items():
+        loader.command_group_table[group_name] = command_group
+    for command_name, command in command_table.items():
+        loader.command_table[command_name] = command
+    return command_table, command_group_table
+
+
+def _try_import_module(relative_name, package):
+    """Try to import a module by relative name, return None on failure."""
+    try:
+        return importlib.import_module(relative_name, package)
+    except ModuleNotFoundError as ex:
+        # Only treat "module not found" for the requested module as a benign miss.
+        target_mod_name = f"{package}.{relative_name.lstrip('.')}"
+        if ex.name == target_mod_name:
+            return None
+        # Different module is missing; propagate so the real error surfaces.
+        raise
+    except ImportError:
+        logger.error("Error importing module %r from package %r", relative_name, package)
+        raise
+
+
+def _register_from_module(loader, mod, command_table, command_group_table):
+    """Scan a module's namespace for AAZCommand/AAZCommandGroup classes and register them."""
+    for value in mod.__dict__.values():
+        if not isinstance(value, type):
+            continue
+        if value.__module__ != mod.__name__:  # skip imported classes
+            continue
+        if issubclass(value, AAZCommandGroup) and value.AZ_NAME:
+            command_group_table[value.AZ_NAME] = value(cli_ctx=loader.cli_ctx)
+        elif issubclass(value, AAZCommand) and value.AZ_NAME:
+            command_table[value.AZ_NAME] = value(loader=loader)
+
+
+def _get_pkg_children(pkg):
+    """List child entries of a package using pkgutil.
+
+    Returns two sets: (file_stems, subdir_names).
+    - file_stems: module-like stems, e.g. {'_create', '_list', '__cmd_group'}
+    - subdir_names: sub-package directory names, e.g. {'namespace', 'eventhub'}
+    """
+    import pkgutil
+    file_stems = set()
+    subdir_names = set()
+
+    pkg_path = getattr(pkg, '__path__', None)
+    if not pkg_path:
+        return file_stems, subdir_names
+
+    for _importer, name, ispkg in pkgutil.iter_modules(pkg_path):
+        if ispkg:
+            if not name.startswith('_'):
+                subdir_names.add(name)
+        else:
+            file_stems.add(name)
+
+    return file_stems, subdir_names
+
+
+def _load_aaz_by_pkg(loader, pkg, args, command_table, command_group_table):
+    """Recursively navigate the AAZ package tree guided by CLI args.
+
+    - args is None           -> full recursive load of all commands under this package.
+    - args is empty list     -> args exhausted; load current level's commands and sub-group headers.
+    - args has items         -> try to match first arg as a command module or sub-package,
+                                recurse with remaining args on match.
+    - no match on first arg  -> load current level's commands and sub-group headers.
+    """
+    base_module = pkg.__name__
+    file_stems, subdir_names = _get_pkg_children(pkg)
+
+    if args is not None and args and not args[0].startswith('-'):
+        first_arg = args[0].lower().replace('-', '_')
+
+        # First arg matches a command module (e.g. "create" -> "_create")
+        if f"_{first_arg}" in file_stems:
+            mod = _try_import_module(f"._{first_arg}", base_module)
+            if mod:
+                _register_from_module(loader, mod, command_table, command_group_table)
+                return
+
+        # First arg matches a sub-package (command group)
+        if first_arg in subdir_names:
+            sub_module = f"{base_module}.{first_arg}"
+            mod = _try_import_module('.__cmd_group', sub_module)
+            if mod:
+                _register_from_module(loader, mod, command_table, command_group_table)
+            sub_pkg = _try_import_module(f'.{first_arg}', base_module)
+            if sub_pkg:
+                _load_aaz_by_pkg(loader, sub_pkg, args[1:], command_table, command_group_table)
+                return
+
+    # Load __cmd_group + all command modules at this level
+    mod = _try_import_module('.__cmd_group', base_module)
+    if mod:
+        _register_from_module(loader, mod, command_table, command_group_table)
+
+    for stem in file_stems:
+        if stem.startswith('_') and not stem.startswith('__'):
+            mod = _try_import_module(f'.{stem}', base_module)
+            if mod:
+                _register_from_module(loader, mod, command_table, command_group_table)
+
+    for subdir in subdir_names:
+        sub_module = f"{base_module}.{subdir}"
+        if args is None:
+            # Full load -> recurse into every sub-package
+            sub_pkg = _try_import_module(f'.{subdir}', base_module)
+            if sub_pkg:
+                _load_aaz_by_pkg(loader, sub_pkg, None, command_table, command_group_table)
+        else:
+            # Args exhausted / not matched -> load sub-group header and the first
+            # command so the group is non-empty and the parser creates a subparser
+            # for it (required for help output).
+            # TODO: After optimized loading is applied to the whole CLI, revisit
+            # this and consider a lighter approach (e.g. parser-level fix) to
+            # avoid importing one command per trimmed sub-group.
+            mod = _try_import_module('.__cmd_group', sub_module)
+            if mod:
+                _register_from_module(loader, mod, command_table, command_group_table)
+            sub_pkg = _try_import_module(f'.{subdir}', base_module)
+            if sub_pkg:
+                _load_first_command(loader, sub_pkg, command_table)
+
+
+def _load_first_command(loader, pkg, command_table):
+    """Load the first available command module from a package.
+
+    This ensures the command group is non-empty so the parser creates a subparser
+    for it, which is required for it to appear in help output.
+    """
+    file_stems, subdir_names = _get_pkg_children(pkg)
+    base_module = pkg.__name__
+
+    # Try to load a command module at this level first
+    for stem in sorted(file_stems):
+        if stem.startswith('_') and not stem.startswith('__'):
+            mod = _try_import_module(f'.{stem}', base_module)
+            if mod:
+                _register_from_module(loader, mod, command_table, {})
+                return
+
+    # No command at this level, recurse into the first sub-package
+    for subdir in sorted(subdir_names):
+        sub_pkg = _try_import_module(f'.{subdir}', base_module)
+        if sub_pkg:
+            _load_first_command(loader, sub_pkg, command_table)
+            return
+
+
 def load_aaz_command_table(loader, aaz_pkg_name, args):
     """ This function is used in AzCommandsLoader.load_command_table.
     It will load commands in module's aaz package.

@@ -3500,10 +3500,10 @@ class DiagnosticsExtensionInstallTest(ScenarioTest):
 
         self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:16.04-LTS:latest '
                  '--authentication-type password --lb-sku Standard --admin-username user11 '
-                 '--admin-password TestTest12#$ --orchestration-mode Uniform --vm-sku Standard_B1ls')
+                 '--admin-password TestTest12#$ --orchestration-mode Uniform --vm-sku Standard_D2s_v3')
         self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:16.04-LTS:latest '
                  '--authentication-type password --admin-username user11 --admin-password TestTest12#$ '
-                 '--use-unmanaged-disk --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --size Standard_B2ms')
+                 '--use-unmanaged-disk --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --size Standard_D2s_v3')
 
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
