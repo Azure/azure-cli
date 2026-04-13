@@ -26,8 +26,7 @@ from azure.cli.command_modules.vm._validators import (
     process_remove_identity_namespace, process_vm_secret_format, process_vm_vmss_stop, validate_vmss_update_namespace,
     process_vm_update_namespace, process_set_applications_namespace, process_vm_disk_attach_namespace,
     process_image_version_create_namespace, process_image_version_update_namespace,
-    process_image_version_undelete_namespace, process_vm_disk_detach_namespace, process_sig_create_namespace,
-    process_sig_assign_identity_namespace, process_sig_remove_identity_namespace)
+    process_image_version_undelete_namespace, process_vm_disk_detach_namespace)
 
 from azure.cli.command_modules.vm._image_builder import (
     process_image_template_create_namespace, process_img_tmpl_output_add_namespace,

@@ -5,7 +5,6 @@
 # pylint: disable=no-self-use, line-too-long, protected-access, too-few-public-methods, unused-argument
 import json
 from knack.log import get_logger
-from knack.util import CLIError
 
 from azure.cli.core.azclierror import RequiredArgumentMissingError
 from azure.cli.core.aaz import has_value
@@ -85,8 +84,8 @@ class SigIdentityRemove(_SigIdentityRemove):
             elif not id_to_remove:
                 return json.dumps(content)
 
-            if not (content.get('identity', {}).get('type') == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value \
-                    or content.get('identity', {}).get('type') == IdentityType.USER_ASSIGNED.value):
+            if not content.get('identity', {}).get('type') == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value \
+                    or content.get('identity', {}).get('type') == IdentityType.USER_ASSIGNED.value:
                 return json.dumps(content)
 
             id_to_retain = [id for id in existing_id if id not in id_to_remove]
