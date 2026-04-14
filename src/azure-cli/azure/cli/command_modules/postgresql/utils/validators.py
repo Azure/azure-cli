@@ -79,8 +79,8 @@ def configuration_value_validator(ns):
 
 def tls_validator(ns):
     if ns.minimal_tls_version:
-        if ns.ssl_enforcement is not None and ns.ssl_enforcement != 'Enabled':
-            raise CLIError('Cannot specify TLS version when ssl_enforcement is explicitly Disabled')
+        if ns.ssl_enforcement is not None and ns.ssl_enforcement.lower() != 'enabled':
+            raise CLIError('Cannot specify --minimal-tls-version when --ssl-enforcement is set to "Disabled".')
 
 
 def password_validator(ns):
@@ -88,27 +88,27 @@ def password_validator(ns):
         try:
             ns.administrator_login_password = prompt_pass(msg='Admin Password: ')
         except NoTTYException:
-            raise CLIError('Please specify password in non-interactive mode.')
+            raise CLIError('Specify --administrator-login-password when running in non-interactive mode.')
 
 
 def retention_validator(ns):
     if ns.backup_retention is not None:
         val = ns.backup_retention
         if not 7 <= int(val) <= 35:
-            raise CLIError('incorrect usage: --backup-retention. Range is 7 to 35 days.')
+            raise CLIError('Invalid value for --backup-retention. Allowed values: 7 to 35 days.')
 
 
 def node_count_validator(ns):
     if ns.cluster_size is not None:
         val = ns.cluster_size
         if not 1 <= int(val) <= 10:
-            raise CLIError('incorrect usage: --node-count. Range is 1 to 10 for an elastic cluster.')
+            raise CLIError('Invalid value for --node-count. Allowed values: 1 to 10 for an elastic cluster.')
 
 
 def db_renaming_cluster_validator(ns):
-    if ns.database_name is not None and ns.create_cluster != 'ElasticCluster':
-        raise ArgumentUsageError('incorrect usage: --database-name can only be '
-                                 'used when --cluster-option is set to ElasticCluster.')
+    if ns.database_name is not None and ns.create_cluster.lower() != 'elasticcluster':
+        raise ArgumentUsageError('The --database-name argument can only be used '
+                                 'when --cluster-option is set to "ElasticCluster".')
 
 
 # Validates if a subnet id or name have been given by the user. If subnet id is given, vnet-name should not be provided.
@@ -130,7 +130,7 @@ def validate_subnet(cmd, namespace):
             child_type_1='subnets',
             child_name_1=subnet)
     else:
-        raise CLIError('incorrect usage: [--subnet ID | --subnet NAME --vnet-name NAME]')
+        raise CLIError('Specify either --subnet <subnet-identifier> or --subnet <subnet-name> --vnet-name <vnet-name>.')
     delattr(namespace, 'vnet_name')
 
 
@@ -144,7 +144,8 @@ def validate_private_endpoint_connection_id(cmd, namespace):
         namespace.resource_group_name = _get_resource_group_from_server_name(cmd.cli_ctx, namespace.server_name)
 
     if not all([namespace.server_name, namespace.resource_group_name, namespace.private_endpoint_connection_name]):
-        raise CLIError('incorrect usage: [--id ID | --name NAME --server-name NAME]')
+        raise CLIError('Specify either --id <private-endpoint-connection-identifier> '
+                       'or --name <private-endpoint-connection-name> --server-name <server-name>.')
 
     del namespace.connection_id
 
@@ -205,37 +206,39 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
 
 
 def _cluster_validator(create_cluster, cluster_size, auto_grow, version, tier, instance):
-    if create_cluster == 'ElasticCluster' or (instance and instance.cluster and instance.cluster.cluster_size > 0):
+    if (create_cluster and create_cluster.lower() == 'elasticcluster') or \
+       (instance and instance.cluster and instance.cluster.cluster_size > 0):
         if instance is None and version != '17':
-            raise ValidationError("Elastic cluster is only supported for PostgreSQL version 17.")
+            raise ValidationError('Elastic cluster is only supported for PostgreSQL version 17.')
 
         if cluster_size and instance and instance.cluster.cluster_size > cluster_size:
             raise ValidationError('Updating node count cannot be less than the current size of {} nodes.'
                                   .format(instance.cluster.cluster_size))
         if auto_grow and auto_grow.lower() != 'disabled':
-            raise ValidationError("Storage Auto-grow is currently not supported for elastic cluster.")
-        if tier == 'Burstable':
-            raise ValidationError("Burstable tier is currently not supported for elastic cluster.")
+            raise ValidationError('Storage Auto-grow is currently not supported for elastic cluster.')
+        if tier and tier.lower() == 'burstable':
+            raise ValidationError('Burstable tier is currently not supported for elastic cluster.')
 
     if cluster_size and instance and not instance.cluster:
-        raise ValidationError("Node count can only be specified for an elastic cluster.")
+        raise ValidationError('Node count can only be specified for an elastic cluster.')
 
 
 def _pg_storage_validator(storage_gb, sku_info, tier, storage_type, iops, throughput, instance):
-    is_ssdv2 = storage_type == "PremiumV2_LRS" or instance is not None and instance.storage.type == "PremiumV2_LRS"
+    is_ssdv2 = ((storage_type and storage_type.lower() == 'premiumv2_lrs') or
+                (instance and instance.storage.type and
+                 instance.storage.type.lower() == 'premiumv2_lrs'))
     # storage_gb range validation
     if storage_gb is not None:
         if instance is not None:
             original_size = instance.storage.storage_size_gb
             if original_size > storage_gb:
-                raise CLIError('Decrease of current storage size isn\'t supported. Current storage size is {} GiB \
-                                and you\'re trying to set it to {} GiB.'
-                               .format(original_size, storage_gb))
+                raise CLIError('Decreasing storage size is not supported. Current storage size is {} GiB, '
+                               'and you are trying to set it to {} GiB.'.format(original_size, storage_gb))
         if not is_ssdv2:
             storage_sizes = get_postgres_storage_sizes(sku_info, tier)
             if storage_gb not in storage_sizes:
                 storage_sizes = sorted([int(size) for size in storage_sizes])
-                raise CLIError('Incorrect value for --storage-size : Allowed values (in GiB) : {}'
+                raise CLIError('Invalid value for --storage-size. Allowed values (in GiB): {}.'
                                .format(storage_sizes))
 
     # ssdv2 range validation
@@ -286,7 +289,7 @@ def _pg_tier_validator(tier, sku_info):
     if tier:
         tiers = [item.lower() for item in get_postgres_tiers(sku_info)]
         if tier.lower() not in tiers:
-            raise CLIError('Incorrect value for --tier. Allowed values : {}'.format(tiers))
+            raise CLIError('Invalid value for --tier. Allowed values: {}'.format(tiers))
 
 
 def compare_sku_names(sku_1, sku_2):
@@ -319,9 +322,9 @@ def _pg_sku_name_validator(sku_name, sku_info, tier, instance):
     if sku_name:
         skus = [item.lower() for item in get_postgres_skus(sku_info, tier.lower())]
         if sku_name.lower() not in skus:
-            raise CLIError('Incorrect value for --sku-name. The SKU name does not exist in {} tier. {}'
-                           'Provide a valid SKU name for this tier, or specify --tier with the right tier for the '
-                           'SKU name chosen. Allowed values : {}'
+            raise CLIError('Invalid value for --sku-name. The SKU name is not available in the {} tier. {}'
+                           'Provide a valid SKU name for this tier, or specify --tier with the correct tier. '
+                           'Allowed values: {}'
                            .format(tier, additional_error, sorted(skus, key=cmp_to_key(compare_sku_names))))
 
 
@@ -338,20 +341,20 @@ def _pg_storage_performance_tier_validator(performance_tier, sku_info, tier=None
                                      storage_size=storage_size)]
 
             if performance_tier.lower() not in performance_tiers:
-                raise CLIError('Incorrect value for --performance-tier for storage-size: {}.'
-                               ' Allowed values : {}'.format(storage_size, performance_tiers))
+                raise CLIError('Invalid value for --performance-tier for storage size {}. '
+                               'Allowed values: {}'.format(storage_size, performance_tiers))
 
 
 def pg_version_validator(version, versions):
     if version:
         if version not in versions:
-            raise CLIError('Incorrect value for --version. Allowed values : {}'.format(sorted(versions)))
+            raise CLIError('Invalid value for --version. Allowed values: {}'.format(sorted(versions)))
         if version in ('11', '12', '13'):
-            logger.warning("The version selected is a retired community version of PostgreSQL. "
-                           "To use this version, you will automatically be enrolled in our extended "
-                           "support plan for an additional charge starting August 1, 2026. "
-                           "Upgrade to PostgreSQL 14 or later as soon as possible to "
-                           "maintain security, performance, and supportability.")
+            logger.warning('The version selected is a retired community version of PostgreSQL. '
+                           'To use this version, you will automatically be enrolled in our extended '
+                           'support plan for an additional charge starting August 1, 2026. '
+                           'Upgrade to PostgreSQL 14 or later as soon as possible to '
+                           'maintain security, performance, and supportability.')
 
 
 def _pg_high_availability_validator(high_availability, zonal_resiliency, allow_same_zone,
@@ -361,88 +364,87 @@ def _pg_high_availability_validator(high_availability, zonal_resiliency, allow_s
     high_availability_zone_redundant = (high_availability_enabled and high_availability.lower() == 'zoneredundant')
 
     if high_availability_enabled and zonal_resiliency_enabled:
-        raise ArgumentUsageError("Setting both --high-availability and --zonal-resiliency is not allowed. "
-                                 "Please set only --zonal-resiliency to move forward.")
+        raise ArgumentUsageError('Setting both --high-availability and --zonal-resiliency is not allowed. '
+                                 'To proceed, set only --zonal-resiliency.')
 
     if instance:
         tier = instance.sku.tier if tier is None else tier
         zone = instance.availability_zone if zone is None else zone
 
     if high_availability_enabled:
-        if tier == 'Burstable':
-            raise ArgumentUsageError("High availability is not supported for Burstable tier")
+        if tier.lower() == 'burstable':
+            raise ArgumentUsageError('High availability is not supported for the Burstable tier.')
         if single_az and high_availability_zone_redundant:
-            raise ArgumentUsageError("This region is single availability zone. "
-                                     "Zone redundant high availability is not supported "
-                                     "in a single availability zone region.")
+            raise ArgumentUsageError('This location has a single availability zone. '
+                                     'Zone-redundant high availability is not supported for this location.')
 
     if zonal_resiliency_enabled:
-        if tier == 'Burstable':
-            raise ArgumentUsageError("High availability is not supported for Burstable tier")
+        if tier.lower() == 'burstable':
+            raise ArgumentUsageError('High availability is not supported for the Burstable tier.')
         if single_az and allow_same_zone is False:
-            raise ArgumentUsageError("This region is single availability zone. "
-                                     "To proceed, please set --allow-same-zone.")
+            raise ArgumentUsageError('This location has a single availability zone. '
+                                     'To proceed, set --allow-same-zone.')
 
     if standby_availability_zone:
         if not high_availability_zone_redundant and not zonal_resiliency_enabled:
-            raise ArgumentUsageError("You need to enable high availability by setting --zonal-resiliency to Enabled "
-                                     "to set standby availability zone.")
+            raise ArgumentUsageError('To set --standby-availability-zone, enable --zonal-resiliency.')
         if zone == standby_availability_zone:
-            raise ArgumentUsageError("Your server is in availability zone {}. "
-                                     "The zone of the server cannot be same as the standby zone.".format(zone))
+            raise ArgumentUsageError('Your server is in availability zone {}. '
+                                     'The standby availability zone must be different from the server zone.'
+                                     .format(zone))
 
     if allow_same_zone and not zonal_resiliency_enabled:
-        raise ArgumentUsageError("You can only set --allow-same-zone when --zonal-resiliency is Enabled.")
+        raise ArgumentUsageError('You can only set --allow-same-zone when --zonal-resiliency is set to "Enabled".')
 
 
 def _pg_georedundant_backup_validator(geo_redundant_backup, geo_backup_supported):
     if (geo_redundant_backup and geo_redundant_backup.lower() == 'enabled') and not geo_backup_supported:
-        raise ArgumentUsageError("The region of the server does not support geo-restore feature.")
+        raise ArgumentUsageError('This location does not support geo-redundant backup.')
 
 
 def pg_byok_validator(byok_identity, byok_key, backup_byok_identity=None, backup_byok_key=None,
                       geo_redundant_backup=None, instance=None):
     if bool(byok_identity is None) ^ bool(byok_key is None):
-        raise ArgumentUsageError("User assigned identity and keyvault key need to be provided together. "
-                                 "Please provide --identity and --key together.")
+        raise ArgumentUsageError('A user-assigned identity and Key Vault key must be provided together. '
+                                 'Provide --identity and --key together.')
 
     if bool(backup_byok_identity is None) ^ bool(backup_byok_key is None):
-        raise ArgumentUsageError("User assigned identity and keyvault key need to be provided together. "
-                                 "Please provide --backup-identity and --backup-key together.")
+        raise ArgumentUsageError('A user-assigned identity and Key Vault key must be provided together. '
+                                 'Provide --backup-identity and --backup-key together.')
 
     if bool(byok_identity is not None) and bool(backup_byok_identity is not None) and \
        byok_identity.lower() == backup_byok_identity.lower():
-        raise ArgumentUsageError("Primary user assigned identity and backup identity cannot be same. "
-                                 "Please provide different identities for --identity and --backup-identity.")
+        raise ArgumentUsageError('The primary user-assigned identity and backup identity cannot be the same. '
+                                 'Provide different identities for --identity and --backup-identity.')
 
     if (instance is not None) and \
        not (instance.data_encryption and instance.data_encryption.type == 'AzureKeyVault') and \
        (byok_key or backup_byok_key):
-        raise ArgumentUsageError("You cannot enable data encryption on a server "
-                                 "that was not created with data encryption.")
+        raise ArgumentUsageError('You cannot enable data encryption on a server '
+                                 'that was not created with data encryption.')
 
     if geo_redundant_backup is None or geo_redundant_backup.lower() == 'disabled':
         if backup_byok_identity or backup_byok_key:
-            raise ArgumentUsageError("Geo-redundant backup is not enabled. "
-                                     "You cannot provide Geo-location user assigned identity and keyvault key.")
+            raise ArgumentUsageError('Geo-redundant backup is not enabled. '
+                                     'Do not provide --backup-identity or --backup-key.')
     else:
         if instance is None and (bool(byok_key is not None) ^ bool(backup_byok_key is not None)):
-            raise ArgumentUsageError("Please provide both primary as well as geo-back user assigned identity "
-                                     "and keyvault key to enable Data encryption for geo-redundant backup.")
+            raise ArgumentUsageError('To enable data encryption for geo-redundant backup, provide both the '
+                                     'primary and geo-backup user-assigned identities and Key Vault keys.')
         if instance is not None and (bool(byok_identity is None) ^ bool(backup_byok_identity is None)):
             primary_user_assigned_identity_id = byok_identity if byok_identity else \
                 instance.data_encryption.primary_user_assigned_identity_id
             geo_backup_user_assigned_identity_id = backup_byok_identity if backup_byok_identity else \
                 instance.data_encryption.geo_backup_user_assigned_identity_id
             if primary_user_assigned_identity_id.lower() == geo_backup_user_assigned_identity_id.lower():
-                raise ArgumentUsageError("Primary user assigned identity and backup identity cannot be same. "
-                                         "Please provide different identities for --identity and --backup-identity.")
+                raise ArgumentUsageError('The primary user-assigned identity and backup identity cannot be the same. '
+                                         'Provide different identities for --identity and --backup-identity.')
 
 
 def _network_arg_validator(subnet, public_access):
     if subnet is not None and public_access is not None:
-        raise CLIError("Incorrect usage : A combination of the parameters --subnet "
-                       "and --public-access is invalid. Use either one of them.")
+        raise CLIError('The --subnet and --public-access arguments cannot be used together. '
+                       'Use only one of them.')
 
 
 def maintenance_window_validator(ns):
@@ -450,30 +452,27 @@ def maintenance_window_validator(ns):
     if ns.maintenance_window:
         parsed_input = ns.maintenance_window.split(':')
         if not parsed_input or len(parsed_input) > 3:
-            raise CLIError('Incorrect value for --maintenance-window. '
-                           'Enter <Day>:<Hour>:<Minute>. Example: "Mon:8:30" to schedule on Monday, 8:30 UTC')
+            raise CLIError('Invalid value for --maintenance-window. '
+                           'Use <Day>:<Hour>:<Minute>. Example: "Mon:8:30" schedules maintenance '
+                           'on Monday at 8:30 UTC.')
         if len(parsed_input) >= 1 and parsed_input[0].lower() not in options:
-            raise CLIError('Incorrect value for --maintenance-window. '
-                           'The first value means the scheduled day in a week or '
-                           'can be "Disabled" to reset maintenance window. '
-                           'Allowed values: {"Sun","Mon","Tue","Wed","Thu","Fri","Sat"}')
+            raise CLIError('Invalid value for --maintenance-window. '
+                           'The first value must be a day of the week or "Disabled". '
+                           'Allowed values: {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"}.')
         if len(parsed_input) >= 2 and \
            (not parsed_input[1].isdigit() or int(parsed_input[1]) < 0 or int(parsed_input[1]) > 23):
-            raise CLIError('Incorrect value for --maintenance-window. '
-                           'The second number means the scheduled hour in the scheduled day. '
-                           'Allowed values: {0, 1, ... 23}')
+            raise CLIError('Invalid value for --maintenance-window. '
+                           'The hour must be between 0 and 23. Allowed values: {0, 1, ... 23}.')
         if len(parsed_input) >= 3 and \
            (not parsed_input[2].isdigit() or int(parsed_input[2]) < 0 or int(parsed_input[2]) > 59):
-            raise CLIError('Incorrect value for --maintenance-window. '
-                           'The third number means the scheduled minute in the scheduled hour. '
-                           'Allowed values: {0, 1, ... 59}')
+            raise CLIError('Invalid value for --maintenance-window. '
+                           'The minute must be between 0 and 59. Allowed values: {0, 1, ... 59}.')
 
 
 def ip_address_validator(ns):
     if (ns.end_ip_address and not _validate_ip(ns.end_ip_address)) or \
        (ns.start_ip_address and not _validate_ip(ns.start_ip_address)):
-        raise CLIError('Incorrect value for ip address. '
-                       'Ip address should be IPv4 format. Example: 12.12.12.12. ')
+        raise CLIError('Invalid IP address. Provide an IPv4 address, for example 12.12.12.12.')
     if ns.start_ip_address and ns.end_ip_address:
         _validate_start_and_end_ip_address_order(ns.start_ip_address, ns.end_ip_address)
 
@@ -484,10 +483,9 @@ def public_access_validator(ns):
         if not (val in ['disabled', 'enabled', 'all', 'none'] or
                 (len(val.split('-')) == 1 and _validate_ip(val)) or
                 (len(val.split('-')) == 2 and _validate_ip(val))):
-            raise CLIError('incorrect usage: --public-access. '
-                           'Acceptable values are \'Disabled\', \'Enabled\', \'All\', \'None\',\'<startIP>\' and '
-                           '\'<startIP>-<destinationIP>\' where startIP and destinationIP ranges from '
-                           '0.0.0.0 to 255.255.255.255')
+            raise CLIError('Invalid value for --public-access. '
+                           'Allowed values: \'Disabled\', \'Enabled\', \'All\', \'None\', \'<startIP>\', '
+                           'or \'<startIP>-<endIP>\', where each IP ranges from 0.0.0.0 to 255.255.255.255.')
         if len(val.split('-')) == 2:
             vals = val.split('-')
             _validate_start_and_end_ip_address_order(vals[0], vals[1])
@@ -501,7 +499,7 @@ def _validate_start_and_end_ip_address_order(start_ip, end_ip):
         if start_ip_elements[idx] < end_ip_elements[idx]:
             break
         if start_ip_elements[idx] > end_ip_elements[idx]:
-            raise ArgumentUsageError("The end IP address is smaller than the start IP address.")
+            raise ArgumentUsageError('The end IP address is smaller than the start IP address.')
 
 
 def _validate_ip(ips):
@@ -536,28 +534,28 @@ def _valid_range(addr_range):
 
 def virtual_endpoint_name_validator(ns):
     if not re.search(r'^(?=[a-z0-9].*)(?=.*[a-z-])(?!.*[^a-z0-9-])(?=.*[a-z0-9]$)', ns.virtual_endpoint_name):
-        raise ValidationError("The virtual endpoint name can only contain 0-9, a-z, and \'-\'. "
-                              "The virtual endpoint name must not start or end in a hyphen. "
-                              "Additionally, the name of the virtual endpoint must be at least 3 characters "
-                              "and no more than 63 characters in length. ")
+        raise ValidationError('The virtual endpoint name can only contain 0-9, a-z, and \'-\'. '
+                              'The virtual endpoint name must not start or end in a hyphen. '
+                              'Additionally, the name of the virtual endpoint must be at least 3 characters '
+                              'and no more than 63 characters in length. ')
 
 
 def firewall_rule_name_validator(ns):
     if not ns.firewall_rule_name:
         return
     if not re.search(r'^[a-zA-Z0-9][-_a-zA-Z0-9]{1,126}[_a-zA-Z0-9]$', ns.firewall_rule_name):
-        raise ValidationError("The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. "
-                              "Additionally, the name of the firewall rule must be at least 3 characters "
-                              "and no more than 128 characters in length. ")
+        raise ValidationError('The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. '
+                              'Additionally, the name of the firewall rule must be at least 3 characters '
+                              'and no more than 128 characters in length. ')
 
 
 def postgres_firewall_rule_name_validator(ns):
     if not ns.firewall_rule_name:
         return
     if not re.search(r'^[a-zA-Z0-9][-_a-zA-Z0-9]{0,79}(?<!-)$', ns.firewall_rule_name):
-        raise ValidationError("The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. "
-                              "Additionally, the name of the firewall rule must be at least 1, "
-                              "and no more than 80 characters in length. Firewall rule must not end with '-'.")
+        raise ValidationError('The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. '
+                              'Additionally, the name of the firewall rule must be at least 1, '
+                              'and no more than 80 characters in length. Firewall rule must not end with \'-\'.')
 
 
 def validate_server_name(db_context, server_name, type_):
@@ -567,7 +565,7 @@ def validate_server_name(db_context, server_name, type_):
         return
 
     if len(server_name) < 3 or len(server_name) > 63:
-        raise ValidationError("Server name must be at least 3 characters and at most 63 characters.")
+        raise ValidationError('Server name must be at least 3 characters and at most 63 characters.')
     try:
         result = client.check_with_location(db_context.location,
                                             parameters={
@@ -589,47 +587,49 @@ def validate_virtual_endpoint_name_availability(cmd, virtual_endpoint_name):
     resource_type = 'Microsoft.DBforPostgreSQL/flexibleServers/virtualendpoints'
     result = client.check_globally(parameters={'name': virtual_endpoint_name, 'type': resource_type})
     if result and result.name_available is False:
-        raise ValidationError("Virtual endpoint's base name is not available.")
+        raise ValidationError('Virtual endpoint\'s base name is not available.')
 
 
 def validate_migration_runtime_server(cmd, migrationInstanceResourceId, target_resource_group_name, target_server_name):
     id_comps = parse_resource_id(migrationInstanceResourceId)
     runtime_server_resource_resource_type = id_comps['resource_type'].lower()
-    if "flexibleservers" != runtime_server_resource_resource_type:
-        raise ValidationError("Migration Runtime Resource ID provided should be Flexible server.")
+    if 'flexibleservers' != runtime_server_resource_resource_type:
+        raise ValidationError('The migration runtime resource ID must reference a flexible server.')
 
     server_operations_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
     target_server = server_operations_client.get(target_resource_group_name, target_server_name)
     if target_server.id.lower() == migrationInstanceResourceId.lower():
-        raise ValidationError("Migration Runtime server is same as Target Flexible server. "
-                              "Please change the values accordingly.")
+        raise ValidationError('The migration runtime server cannot be the same as the target flexible server. '
+                              'Use different values.')
 
 
 def validate_private_dns_zone(db_context, server_name, private_dns_zone, private_dns_zone_suffix):
     cmd = db_context.cmd
     server_endpoint = cmd.cli_ctx.cloud.suffixes.postgresql_server_endpoint
     if private_dns_zone == server_name + server_endpoint:
-        raise ValidationError("private dns zone name cannot be same as the server's fully qualified domain name")
+        raise ValidationError('The private DNS zone name cannot be the same as the server\'s fully qualified '
+                              'domain name.')
 
     if private_dns_zone[-len(private_dns_zone_suffix):] != private_dns_zone_suffix:
-        raise ValidationError('The suffix of the private DNS zone should be "{}"'.format(private_dns_zone_suffix))
+        raise ValidationError('The suffix of the private DNS zone should be "{}".'
+                              .format(private_dns_zone_suffix))
 
     if _is_resource_name(private_dns_zone) and not is_valid_resource_name(private_dns_zone) \
             or not _is_resource_name(private_dns_zone) and not is_valid_resource_id(private_dns_zone):
-        raise ValidationError("Check if the private dns zone name or Id is in correct format.")
+        raise ValidationError('The private DNS zone name or ID is not in a valid format.')
 
 
 def validate_vnet_location(vnet, location):
     if vnet["location"] != location:
-        raise ValidationError("The location of Vnet should be same as the location of the server")
+        raise ValidationError('The virtual network must be in the same location as the server.')
 
 
 def validate_postgres_replica(cmd, tier, location, instance, sku_name,
                               storage_gb, performance_tier=None, list_location_capability_info=None):
     # Tier validation
     if tier == 'Burstable':
-        raise ValidationError("Read replica is not supported for the Burstable pricing tier. "
-                              "Scale up the source server to General Purpose or Memory Optimized. ")
+        raise ValidationError('Read replica is not supported for the Burstable pricing tier. '
+                              'Scale up the source server to General Purpose or Memory Optimized. ')
 
     if not list_location_capability_info:
         list_location_capability_info = get_postgres_location_capability_info(cmd, location)
@@ -645,16 +645,16 @@ def validate_postgres_replica(cmd, tier, location, instance, sku_name,
 
 def validate_georestore_network(source_server_object, public_access, vnet, subnet, db_engine):
     if source_server_object.network.public_network_access == 'Disabled' and not any((public_access, vnet, subnet)):
-        raise ValidationError("Please specify network parameters if you are geo-restoring a private access server. "
-                              F"Run 'az {db_engine} flexible-server geo-restore --help' command to see examples")
+        raise ValidationError('Specify network parameters if you are geo-restoring a private access server. '
+                              F'Run \'az {db_engine} flexible-server geo-restore --help\' command to see examples.')
 
 
 def validate_and_format_restore_point_in_time(restore_time):
     try:
         return parser.parse(restore_time)
     except:
-        raise ValidationError("The restore point in time value has incorrect date format. "
-                              "Please use ISO format e.g., 2024-10-22T00:08:23+00:00.")
+        raise ValidationError('The restore point in time value has incorrect date format. '
+                              'Use ISO format e.g., 2026-03-22T18:20:22+00:00.')
 
 
 def is_citus_cluster(cmd, resource_group_name, server_name):
@@ -666,7 +666,7 @@ def is_citus_cluster(cmd, resource_group_name, server_name):
 
 def validate_citus_cluster(cmd, resource_group_name, server_name):
     if is_citus_cluster(cmd, resource_group_name, server_name):
-        raise ValidationError("Elastic cluster does not currently support this operation.")
+        raise ValidationError('Elastic cluster does not currently support this operation.')
 
 
 def validate_public_access_server(cmd, resource_group_name, server_name):
@@ -674,8 +674,8 @@ def validate_public_access_server(cmd, resource_group_name, server_name):
 
     server = server_operations_client.get(resource_group_name, server_name)
     if server.network.public_network_access == 'Disabled':
-        raise ValidationError("Firewall rule operations cannot be requested for "
-                              "a server that doesn't have public access enabled.")
+        raise ValidationError('Firewall rule operations are not supported for a server '
+                              'without public access enabled.')
 
 
 def _validate_identity(cmd, namespace, identity):
@@ -713,52 +713,59 @@ def validate_identities(cmd, namespace):
 
 def _pg_storage_type_validator(storage_type, auto_grow, performance_tier, tier,
                                supported_storageV2_size, iops, throughput, instance):
-    is_create_ssdv2 = storage_type == "PremiumV2_LRS"
-    is_update_ssdv2 = instance is not None and instance.storage.type == "PremiumV2_LRS"
+    is_create_ssdv2 = storage_type and storage_type.lower() == 'premiumv2_lrs'
+    is_update_ssdv2 = (instance and instance.storage.type and instance.storage.type.lower() == 'premiumv2_lrs')
 
     if is_create_ssdv2:
         if supported_storageV2_size is None:
-            raise CLIError('Storage type set to PremiumV2_LRS is not supported for this region.')
+            raise CLIError('Invalid value for --storage-type. "PremiumV2_LRS" is not supported for this location.')
         if iops is None or throughput is None:
             raise CLIError('To set --storage-type, required to provide --iops and --throughput.')
     elif instance is None and (throughput is not None or iops is not None):
         raise CLIError('To provide values for both --iops and --throughput, '
-                       'please set "--storage-type" to "PremiumV2_LRS".')
+                       'set --storage-type to "PremiumV2_LRS".')
 
     if is_create_ssdv2 or is_update_ssdv2:
         if auto_grow and auto_grow.lower() != 'disabled':
-            raise ValidationError("Storage Auto-grow is not supported for servers with Premium SSD V2.")
+            raise ValidationError('Invalid value for --storage-auto-grow. "Enabled" is not supported for '
+                                  'servers with --storage-type set to "PremiumV2_LRS".')
         if performance_tier:
-            raise ValidationError("Performance tier is not supported for servers with Premium SSD V2.")
+            raise ValidationError('Invalid value for --performance-tier. Performance tier is not supported for '
+                                  'servers with --storage-type set to "PremiumV2_LRS".')
         if tier and tier.lower() == 'burstable':
-            raise ValidationError("Burstable tier is not supported for servers with Premium SSD V2.")
+            raise ValidationError('Invalid value for --storage-type. Servers with Burstable tier '
+                                  'don\'t support --storage-type set to "PremiumV2_LRS".')
     else:
         if throughput is not None:
-            raise CLIError('Updating throughput is only capable for server created with Premium SSD v2.')
+            raise CLIError('Invalid value for --throughput. Updating throughput is only supported for '
+                           'servers created with --storage-type set to "PremiumV2_LRS".')
         if iops is not None:
-            raise CLIError('Updating storage iops is only capable for server created with Premium SSD v2.')
+            raise CLIError('Invalid value for --iops. Updating storage iops is only supported for '
+                           'servers created with --storage-type set to "PremiumV2_LRS".')
 
 
 def pg_restore_validator(compute_tier, **args):
-    is_ssdv2_enabled = args.get('storage_type', None) == "PremiumV2_LRS"
+    is_ssdv2_enabled = args.get('storage_type', None) is not None \
+        and args.get('storage_type').lower() == 'premiumv2_lrs'
 
     if is_ssdv2_enabled and compute_tier.lower() == 'burstable':
-        raise ValidationError("Burstable tier is not supported for servers with Premium SSD V2.")
+        raise ValidationError('Invalid value for --tier. Burstable tier is not supported for servers with '
+                              '--storage-type set to "PremiumV2_LRS".')
 
 
 def _pg_authentication_validator(password_auth, is_microsoft_entra_auth_enabled,
                                  admin_name, admin_id, admin_type, instance):
     if instance is None:
         if (password_auth is not None and password_auth.lower() == 'disabled') and not is_microsoft_entra_auth_enabled:
-            raise CLIError('Need to have an authentication method enabled, please set --microsoft-entra-auth '
-                           'to "Enabled" or --password-auth to "Enabled".')
+            raise CLIError('At least one authentication method must be enabled. '
+                           'Set --microsoft-entra-auth and/or --password-auth to "Enabled".')
 
         if not is_microsoft_entra_auth_enabled and (admin_name or admin_id or admin_type):
-            raise CLIError('To provide values for --admin-object-id, --admin-display-name, and --admin-type '
-                           'please set --microsoft-entra-auth to "Enabled".')
+            raise CLIError('To provide values for --admin-object-id, --admin-display-name, and --admin-type, '
+                           'set --microsoft-entra-auth to "Enabled".')
         if (admin_name is not None or admin_id is not None or admin_type is not None) and \
            not (admin_name is not None and admin_id is not None and admin_type is not None):
-            raise CLIError('To add Microsoft Entra admin, please provide values for --admin-object-id, '
+            raise CLIError('To add a Microsoft Entra admin, provide values for --admin-object-id, '
                            '--admin-display-name, and --admin-type.')
 
 
@@ -793,7 +800,7 @@ def validate_backup_name(backup_name):
 
     # check if backup_name is empty or contains only whitespace after removing the quote
     if not backup_name or backup_name.isspace():
-        raise CLIError('Backup name cannot be empty or contain only whitespaces.')
+        raise CLIError('Backup name cannot be empty or contain only whitespace.')
 
     # check if backup_name exceeds 128 characters
     if len(backup_name) > 128:
@@ -802,6 +809,6 @@ def validate_backup_name(backup_name):
 
 def validate_database_name(database_name):
     if database_name is not None and not re.match(r'^[a-zA-Z_][\w\-]{0,62}$', database_name):
-        raise ValidationError("Database name must begin with a letter (a-z) or underscore (_). "
-                              "Subsequent characters in a name can be letters, digits (0-9), hyphens (-), "
-                              "or underscores. Database name length must be less than 64 characters.")
+        raise ValidationError('Database name must begin with a letter (a-z) or underscore (_). '
+                              'Subsequent characters in a name can be letters, digits (0-9), hyphens (-), '
+                              'or underscores. Database name length must be less than 64 characters.')
