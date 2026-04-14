@@ -55,11 +55,11 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
     source_location = prepare_source_location(
         cmd, source_location, client_registries, registry_name, resource_group_name)
 
-    platform_os, platform_arch, platform_variant = get_validate_platform(cmd, platform)
+    platform_os, platform_arch, platform_variant = get_validate_platform(platform)
 
-    EncodedTaskRunRequest, FileTaskRunRequest, PlatformProperties, RoleAssignmentMode = cmd.get_models(
-        'EncodedTaskRunRequest', 'FileTaskRunRequest', 'PlatformProperties', 'RoleAssignmentMode',
-        operation_group='runs')
+    from azure.mgmt.containerregistrytasks.models import (
+        EncodedTaskRunRequest, FileTaskRunRequest, PlatformProperties)
+    RoleAssignmentMode = cmd.get_models('RoleAssignmentMode')
 
     registry_abac_enabled = registry.role_assignment_mode == RoleAssignmentMode.ABAC_REPOSITORY_PERMISSIONS
     credentials = get_source_and_custom_registry_credentials(
@@ -74,7 +74,7 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
         request = FileTaskRunRequest(
             task_file_path=file if file else ACR_TASK_YAML_DEFAULT_NAME,
             values_file_path=values,
-            values=(set_value if set_value else []) + (set_secret if set_secret else []),
+            values_property=(set_value if set_value else []) + (set_secret if set_secret else []),
             source_location=source_location,
             timeout=timeout,
             platform=PlatformProperties(
@@ -91,7 +91,7 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
         import base64
         request = EncodedTaskRunRequest(
             encoded_task_content=base64.b64encode(yaml_template.encode()).decode(),
-            values=(set_value if set_value else []) + (set_secret if set_secret else []),
+            values_property=(set_value if set_value else []) + (set_secret if set_secret else []),
             source_location=source_location,
             timeout=timeout,
             platform=PlatformProperties(
@@ -119,6 +119,6 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
 
     if no_logs:
         from ._run_polling import get_run_with_polling
-        return get_run_with_polling(cmd, client, run_id, registry_name, resource_group_name)
+        return get_run_with_polling(client, run_id, registry_name, resource_group_name)
 
     return stream_logs(cmd, client, run_id, registry_name, resource_group_name, timeout, no_format, True)

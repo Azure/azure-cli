@@ -1113,11 +1113,12 @@ class NetworkAppGatewayZoneScenario(ScenarioTest):
 
 
 class NetworkAppGatewayAuthCertScenario(ScenarioTest):
-
+    @unittest.skip('not registered for feature Microsoft.Network/AllowBringYourOwnPublicIpAddress required to carry out the requested operation')
     @ResourceGroupPreparer(name_prefix='cli_test_ag_auth_cert')
     def test_network_ag_auth_cert(self, resource_group):
         self.kwargs.update({
             'gateway': 'ag1',
+            'ip1': 'ip1',
             'cert1': 'cert1',
             'cert1_file': os.path.join(TEST_DIR, 'AuthCert.pfx'),
             'cert2': 'cert2',
@@ -1126,7 +1127,8 @@ class NetworkAppGatewayAuthCertScenario(ScenarioTest):
             'cert3_file': os.path.join(TEST_DIR, 'AuthCert3.pfx'),
             'settings': 'https_settings'
         })
-        self.cmd('network application-gateway create -g {rg} -n {gateway} --priority 1001 --no-wait')
+        self.cmd('network public-ip create -g {rg} -n {ip1} --sku Standard --ip-tags FirstPartyUsage=/NonProd')
+        self.cmd('network application-gateway create -g {rg} -n {gateway} --priority 1001 --public-ip-address {ip1} --sku Standard_v2')
         self.cmd('network application-gateway wait -g {rg} -n {gateway} --exists')
         self.cmd('network application-gateway auth-cert create -g {rg} --gateway-name {gateway} -n {cert1} --cert-file "{cert1_file}" --no-wait')
         self.cmd('network application-gateway auth-cert create -g {rg} --gateway-name {gateway} -n {cert2} --cert-file "{cert2_file}" --no-wait')
@@ -1155,7 +1157,7 @@ class NetworkAppGatewayAuthCertScenario(ScenarioTest):
 
 
 class NetworkAppGatewayTrustedRootCertScenario(ScenarioTest):
-
+    @unittest.skip('not registered for feature Microsoft.Network/AllowBringYourOwnPublicIpAddress required to carry out the requested operation')
     @ResourceGroupPreparer(name_prefix='cli_test_ag_root_cert')
     def test_network_ag_root_cert(self, resource_group):
         self.kwargs.update({
@@ -1897,7 +1899,7 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
             'rg': resource_group
         })
         self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
-        self.cmd('network application-gateway create -g {rg} -n {ag} --public-ip-address {ip} --sku Standard_v2 --priority 1001 --no-wait')
+        self.cmd('network application-gateway create -g {rg} -n {ag} --public-ip-address {ip} --sku Standard_v2 --priority 1001')
         self.cmd('network application-gateway wait -g {rg} -n {ag} --exists')
 
         self.cmd('network application-gateway http-listener create -g {rg} --gateway-name {ag} -n mylistener --no-wait --frontend-port appGatewayFrontendPort --host-name www.test.com')
@@ -1946,7 +1948,7 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
         })
         self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
         self.cmd(
-            'network application-gateway create -g {rg} -n {ag} --public-ip-address {ip} --sku Standard_v2 --priority 1001 --no-wait')
+            'network application-gateway create -g {rg} -n {ag} --public-ip-address {ip} --sku Standard_v2 --priority 1001')
         self.cmd('network application-gateway wait -g {rg} -n {ag} --exists')
 
         self.cmd(
@@ -3758,6 +3760,92 @@ class NetworkExpressRoutePortScenarioTest(ScenarioTest):
         ])
 
         self.cmd('network express-route port generate-loa --customer-name MyCustomer -g {rg} --name {name} -f loa1')
+
+class NetworkExpressRouteCircuitLinkFailoverBasicScenarioTest(ScenarioTest):
+    @live_only()
+    def test_start_circuit_link_failover_test(self): # live_only as the express route is extremely expensive, contact service team for an available ER
+        resource_group = "CircuitFailoverTestsBothLinks04"  
+        circuit_name = "ErCircuit01"
+        peering_location = "Noida2"
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'circuit': circuit_name,
+            'peering_loc': peering_location,
+            'link_type': 'Secondary',
+            'maintenance_category': 'BgpDisconnect',
+            'fetch_latest': True,
+            'test_type': 'LinkFailover',
+        })
+
+        # Run the command
+        result = self.cmd(
+            'network express-route start-link-failover-test '
+            '-g {rg} --name {circuit} '
+            '--link-type {link_type} '
+            '--maintenance-category {maintenance_category}'
+        ).get_output_in_json()
+
+        # Validate that result is a string (per _schema_on_200 = AAZStrType())
+        self.assertIsInstance(result, dict)
+
+    @live_only()
+    def test_stop_circuit_link_failover_test(self): # live_only as the express route is extremely expensive, contact service team for an available ER
+        import time
+
+        time.sleep(2 * 60)  # 120 seconds To wait for sometime before stopping the test failover
+        resource_group = "CircuitFailoverTestsBothLinks04"  
+        circuit_name = "ErCircuit01"
+        peering_location = "Noida2"
+        simulation_successful = True
+        test_guid = "c84fe369-b52c-4b66-87c7-ec873235c9c1"
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'circuit': circuit_name,
+            'peering_loc': peering_location,
+            'link_type': 'Secondary',
+            'maintenance_category': 'BgpDisconnect',
+            'fetch_latest': True,
+            'test_type': 'LinkFailover',
+            'simulation_successful': simulation_successful,
+            'is_verified': True,
+            'test_guid': test_guid,
+        })
+
+        # Run the command
+        result = self.cmd(
+            'network express-route stop-link-failover-test '
+            '-g {rg} --name {circuit} '
+            '--circuit-test-category {maintenance_category} '
+            '--link-type {link_type} '
+            '--simulation-successful {simulation_successful} '
+            '--is-verified {is_verified}'
+        ).get_output_in_json()
+
+        # Validate
+        self.assertTrue(isinstance(result, (str, dict)))
+
+        # Run all tests detail command to validate the stop operation
+        tests_link_latest = self.cmd(
+            'network express-route get-link-failover-all-tests-detail '
+            '-g {rg} --name {circuit} '
+            '--fetch-latest True --type LinkFailover'
+        ).get_output_in_json()
+
+        self.assertIsInstance(tests_link_latest, dict)
+
+        #
+        single_test_result = self.cmd(
+                'network express-route get-link-failover-single-test-detail '
+                '-g {rg} --name {circuit} '
+                '--failover-test-id {test_guid} '
+                '--link-type {link_type} '
+                '--maintenance-category {maintenance_category}'
+            ).get_output_in_json()
+
+        # Validate response structure
+        self.assertIsInstance(single_test_result, dict)
 
 
 class NetworkExpressRouteIPv6PeeringScenarioTest(ScenarioTest):
@@ -7687,8 +7775,8 @@ class NetworkWatcherScenarioTest(ScenarioTest):
             'vnet': 'vnet1'
         })
 
-        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password --admin-username deploy '
-                 '--admin-password PassPass10!) --nsg {vm} --subnet {subnet} --vnet-name {vnet} --nsg-rule None')
+        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:16.04-LTS:latest --authentication-type password --admin-username deploy '
+                 '--admin-password PassPass10!) --nsg {vm} --subnet {subnet} --vnet-name {vnet} --nsg-rule None --size Standard_D2s_v3')
 
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
@@ -7717,7 +7805,7 @@ class NetworkWatcherScenarioTest(ScenarioTest):
             'capture1': 'captureVMSS1',
             'capture2': 'captureVMSS2'
         })
-        self.cmd('vmss create -g {rg} --name {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --location {loc} --admin-username azureuser --generate-ssh-keys --upgrade-policy-mode Automatic')
+        self.cmd('vmss create -g {rg} --name {vmss} --image Canonical:UbuntuServer:16.04-LTS:latest --location {loc} --admin-username azureuser --generate-ssh-keys --upgrade-policy-mode Automatic --vm-sku Standard_D2s_v3 --orchestration-mode Uniform')
         self.cmd('vmss extension set --name NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher --resource-group {rg} --vmss-name  {vmss}')
 
         self.cmd('network watcher packet-capture create -g {rg} --target {vmss} -n {capture} --target-type AzureVMSS --file-path capture/capture.cap', checks=[
@@ -8945,6 +9033,153 @@ class NetworkVnetGatewayRoutesAndResiliencyInfoScenarioTest(ScenarioTest):
             self.check('type(components)', 'array')
         ])
 
+class NetworkExpressRouteGatewayFailoverSimulationScenarioTest(ScenarioTest):
+    @live_only()
+    def test_network_express_route_gateway_failover(self): # live_only as the express route is extremely expensive, contact service team for an available ER
+        resource_group = "bhavana-vwan-failover"  
+        er_gateway_name = "422dcfc236aa44f6838f556330b628e1-centraluseuap-er-gw"
+        peering_location = "DataPathLocation1"
+        test_guid = "fb5c66a6-6852-49d9-bf56-fc3e8d2f2a3b"
+        was_simulation_successful = True
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'er_gw': er_gateway_name,
+            'peering_loc': peering_location
+        })
+
+        # Run the command
+        result = self.cmd(
+            'network express-route gateway start-site-failover-test '
+            '--resource-group {rg} --name {er_gw} --peering-location {peering_loc}'
+        ).get_output_in_json()
+
+        # Validate that result is a string (per _schema_on_200 = AAZStrType())
+        self.assertIsInstance(result, dict)
+        
+        import time
+        time.sleep(2 * 60)  # 120 seconds To wait for sometime before stopping the test failover 
+
+        # Construct failover test connection details
+        failover_details = [
+            {
+                "failover-connection-name": "ExRConnection-centraluseuap-1772183583607",
+                "failover-location": "DataPathLocation1",
+                "is-verified": True
+            }
+        ]
+
+        # Convert details list to CLI argument format
+        details_arg = "[" + ",".join(
+            "{{failover-connection-name:{},failover-location:{},is-verified:{}}}".format(
+                d["failover-connection-name"],
+                d["failover-location"],
+                str(d["is-verified"]).lower()
+            ) for d in failover_details
+        ) + "]"
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'er_gw': er_gateway_name,
+            'peering_loc': peering_location,
+            'was_successful': was_simulation_successful,
+            'details_arg': details_arg,
+            'test_guid': test_guid
+        })
+
+        # Run the command
+        result = self.cmd(
+            'network express-route gateway stop-site-failover-test '
+            '--resource-group {rg} --name {er_gw} '
+            '--peering-location {peering_loc} '
+            '--simulation-successful {was_successful} '
+            '--details \'{details_arg}\''
+        ).get_output_in_json()
+
+        # Validate
+        self.assertTrue(isinstance(result, (str, dict)))
+
+        # Run all tests detail command to validate the stop operation
+        tests_link_latest = self.cmd(
+            'network express-route gateway get-failover-all-tests-detail '
+            '--resource-group {rg} --name {er_gw} '
+            '--fetch-latest True --type SingleSiteFailover'
+        ).get_output_in_json()
+
+        self.assertIsInstance(tests_link_latest, dict)
+
+        #
+        single_test_result = self.cmd(
+                'network express-route gateway get-failover-single-test-detail '
+                '--resource-group {rg} --name {er_gw} '
+                '--failover-test-id {test_guid} '
+                '--peering-location {peering_loc} '
+            ).get_output_in_json()
+
+        # Validate response structure
+        self.assertIsInstance(single_test_result, dict)
+
+
+class NetworkExpressRouteGatewayRoutesResiliencyScenarioTest(ScenarioTest):
+
+    @live_only()  # live_only as express route gateways require expensive resources
+    @ResourceGroupPreparer(name_prefix='test_express_route_gateway_routes_resiliency', location='eastus')
+    @AllowLargeResponse(size_kb=9999)
+    def test_network_express_route_gateway_routes_and_resiliency(self, resource_group):
+        """
+        Test Express Route Gateway routes and resiliency information operations:
+        - Get routes information
+        - Get resiliency information
+        """
+        from time import sleep
+
+        resource_group = "bhavana-vwan-failover"  
+        er_gateway_name = "422dcfc236aa44f6838f556330b628e1-centraluseuap-er-gw"
+        attempt_refresh = True
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'er_gw': er_gateway_name,
+            'attempt_refresh': attempt_refresh
+        })
+
+        # Test 1: Get Routes Information
+        routes_result = self.cmd(
+            'network express-route gateway get-routes-information '
+            '--resource-group {rg} --name {er_gw} --attempt-refresh {attempt_refresh}'
+        ).get_output_in_json()
+
+        # Validate routes information response structure
+        self.assertIsInstance(routes_result, dict)
+        self.assertIn('routeSetVersion', routes_result)
+        self.assertIn('lastComputedTime', routes_result)
+        self.assertIn('nextEligibleComputeTime', routes_result)
+        if 'routeSets' in routes_result:
+            self.assertIsInstance(routes_result['routeSets'], list)
+        if 'circuitsMetadataMap' in routes_result:
+            self.assertIsInstance(routes_result['circuitsMetadataMap'], dict)
+
+        # Test 2: Get Resiliency Information
+        resiliency_result = self.cmd(
+            'network express-route gateway get-resiliency-information '
+            '--resource-group {rg} --name {er_gw} --attempt-refresh {attempt_refresh}'
+        ).get_output_in_json()
+
+        # Validate resiliency information response structure
+        self.assertIsInstance(resiliency_result, dict)
+        self.assertIn('overallScore', resiliency_result)
+        self.assertIn('lastComputedTime', resiliency_result)
+        self.assertIn('nextEligibleComputeTime', resiliency_result)
+        if 'components' in resiliency_result:
+            self.assertIsInstance(resiliency_result['components'], list)
+            if len(resiliency_result['components']) > 0:
+                component = resiliency_result['components'][0]
+                self.assertIn('name', component)
+                self.assertIn('currentScore', component)
+                if 'recommendations' in component:
+                    self.assertIsInstance(component['recommendations'], list)
+
+
 class NetworkVirtualNetworkApplianceScenario(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='test_vna', location='eastus')
     def test_network_virtual_network_appliance(self, resource_group):
@@ -9065,6 +9300,263 @@ class DdosCustomPolicyScenarioTest(ScenarioTest):
         ])
 
         self.cmd('network ddos-custom-policy delete -g {rg} -n {policy_name} -y', checks=self.is_empty())
+
+
+class NetworkPrivateEndpointScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='test_network_private_endpoint_ip_version_type', location='eastus2euap')
+    @StorageAccountPreparer(name_prefix='saplr', kind='StorageV2')
+    def test_network_private_endpoint_ip_version_type(self, resource_group, storage_account):
+        self.kwargs.update({
+            'sa': storage_account,
+            'rg': resource_group,
+            'location': 'eastus2euap',
+
+            'vnet': 'vnetipvt',
+            'subnet_pls': 'subnetpls',
+            'subnet_pe': 'subnetpe',
+
+            'pe_conn': 'cn',
+            'pe_v4': 'peipv4',
+            'pe_v6': 'peipv6',
+            'pe_ds': 'peds',
+
+            'nic_v4': 'nicv4',
+            'nic_v6': 'nicv6',
+            'nic_ds': 'nicds',
+
+            # Dual-stack VNet/Subnet prefixes (ULA for IPv6 is fine for private addressing)
+            'vnet_ipv4': '10.0.0.0/16',
+            'vnet_ipv6': 'fd00:db8:0:0::/56',
+
+            'subnet_pls_ipv4': '10.0.0.0/24',
+            'subnet_pe_ipv4': '10.0.1.0/24',
+            'subnet_pe_ipv6': 'fd00:db8:0:1::/64',
+        })
+
+        # VNet (dual-stack) + PLS subnet
+        self.cmd(
+            'network vnet create -g {rg} -n {vnet} -l {location} '
+            '--address-prefixes {vnet_ipv4} {vnet_ipv6} '
+            '--subnet-name {subnet_pls} --subnet-prefixes {subnet_pls_ipv4}'
+        )
+
+        # Enable High Scale Private Endpoints (IPv6 / DualStack prerequisite)
+        self.cmd(
+            'network vnet update -g {rg} -n {vnet} '
+            '--private-endpoint-vnet-policies Basic'
+        )
+
+        self.cmd(
+            'network vnet subnet update -g {rg} -n {subnet_pls} --vnet-name {vnet} '
+            '--disable-private-link-service-network-policies'
+        )
+
+        # Private Endpoint subnet (dual-stack)
+        self.cmd(
+            'network vnet subnet create -g {rg} -n {subnet_pe} --vnet-name {vnet} '
+            '--address-prefixes {subnet_pe_ipv4} {subnet_pe_ipv6} '
+            '--default-outbound false'
+        )
+
+        self.cmd(
+            'network vnet subnet update -g {rg} -n {subnet_pe} --vnet-name {vnet} '
+            '--private-endpoint-network-policies RouteTableEnabled'
+        )
+
+        # ---- Storage PLR ----
+        pr = self.cmd(
+            'storage account private-link-resource list --account-name {sa} -g {rg}'
+        ).get_output_in_json()
+        self.kwargs['group_id'] = pr[0]['groupId']
+
+        storage = self.cmd(
+            'storage account show -n {sa} -g {rg}'
+        ).get_output_in_json()
+        self.kwargs['sa_id'] = storage['id']
+
+        # IPv4
+        self.cmd(
+            'network private-endpoint create -g {rg} -n {pe_v4} '
+            '--vnet-name {vnet} --subnet {subnet_pe} '
+            '--group-id {group_id} '
+            '--private-connection-resource-id {sa_id} '
+            '--connection-name {pe_conn} '
+            '-l {location} --nic-name {nic_v4} '
+            '--ip-version-type IPv4',
+            checks=[
+                self.check('ipVersionType', 'IPv4'),
+            ]
+        )
+
+        # IPv6
+        self.cmd(
+            'network private-endpoint create -g {rg} -n {pe_v6} '
+            '--vnet-name {vnet} --subnet {subnet_pe} '
+            '--group-id {group_id} '
+            '--private-connection-resource-id {sa_id} '
+            '--connection-name {pe_conn} '
+            '-l {location} --nic-name {nic_v6} '
+            '--ip-version-type IPv6',
+            checks=[
+                self.check('ipVersionType', 'IPv6'),
+            ]
+        )
+
+        # DualStack
+        self.cmd(
+            'network private-endpoint create -g {rg} -n {pe_ds} '
+            '--vnet-name {vnet} --subnet {subnet_pe} '
+            '--group-id {group_id} '
+            '--private-connection-resource-id {sa_id} '
+            '--connection-name {pe_conn} '
+            '-l {location} --nic-name {nic_ds} '
+            '--ip-version-type DualStack',
+            checks=[
+                self.check('ipVersionType', 'DualStack'),
+            ]
+        )
+
+        # Update PE: IPv4 -> DualStack
+        self.cmd(
+            'network private-endpoint update -g {rg} -n {pe_v4} '
+            '--ip-version-type DualStack',
+            checks=[
+                self.check('name', '{pe_v4}'),
+                self.check('ipVersionType', 'DualStack'),
+                self.check('provisioningState', 'Succeeded'),
+            ]
+        )
+
+        # Update PE: DualStack -> IPv6 (not allowed, expect failure)
+        self.cmd(
+            'network private-endpoint update -g {rg} -n {pe_v4} '
+            '--ip-version-type IPv6',
+            expect_failure=True
+        )
+
+        # Basic list checks
+        self.cmd('network private-endpoint list -g {rg}', checks=[
+            self.check('length(@)', 3)
+        ])
+
+
+class NetworkApplicationGatewayHttpSettingsScenario(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='test_ag', location='eastus')
+    def test_network_application_gateway_http_settings_validate_flags(self, resource_group):
+        self.kwargs.update({
+            'vnet': 'vnet1',
+            'subnet': 'subnet1',
+            'vnet_prefix': '10.0.0.0/16',
+            'subnet_prefix': '10.0.0.0/24',
+            'pip': 'pip1',
+            'ag': 'ag1',
+            'httpsettingname': 'mysettings1',
+            'addresspool': 'myaddresspool1',
+            'listener': 'mylistener1',
+            'rule': 'myrule1',
+        })
+
+        # Create vnet, pip, application-gateway
+        self.cmd('network vnet create -g {rg} -n {vnet} --address-prefix {vnet_prefix} --subnet-name {subnet} --subnet-prefix {subnet_prefix}')
+        self.cmd('network public-ip create -g {rg} -n {pip} --sku Standard --allocation-method Static')
+        self.cmd('network application-gateway create -g {rg} -n {ag} --vnet-name {vnet} --subnet {subnet} --public-ip-address {pip} --priority 1001 --sku Standard_v2')
+
+        # Create http settings
+        self.cmd('network application-gateway http-settings create -g {rg} --gateway-name {ag} -n {httpsettingname} '
+                 '--port 443 --protocol Https --cookie-based-affinity disabled '
+                 '--validate-cert-chain-and-expiry false --validate-sni true', checks=[
+            self.check('name', '{httpsettingname}'),
+            self.check('port', 443),
+            self.check('protocol', 'Https'),
+            self.check('cookieBasedAffinity', 'Disabled'),
+            self.check('validateCertChainAndExpiry', False),
+            self.check('validateSNI', True),
+        ])
+
+        # validate flags under backendHttpSettingsCollection for the created http setting
+        self.cmd('network application-gateway show -g {rg} -n {ag}', checks=[
+            self.check("backendHttpSettingsCollection[?name=='mysettings1'] | [0].validateCertChainAndExpiry", False),
+            self.check("backendHttpSettingsCollection[?name=='mysettings1'] | [0].validateSNI", True),
+        ])
+
+        # Create address-pool and http-listener
+        self.cmd('network application-gateway address-pool create -g {rg} --gateway-name {ag} -n {addresspool}')
+        self.cmd('network application-gateway http-listener create -g {rg} --gateway-name {ag} -n {listener} --no-wait '
+                 '--frontend-port appGatewayFrontendPort --host-name www.test.com')
+
+        # Create rule, then show app-gateway again and check validate flags are still the same
+        self.cmd('network application-gateway rule create -g {rg} --gateway-name {ag} -n {rule} --rule-type Basic '
+                 '--http-listener {listener} --address-pool {addresspool} --http-settings {httpsettingname} --priority 1004')
+
+        self.cmd('network application-gateway show -g {rg} -n {ag}', checks=[
+            self.check("backendHttpSettingsCollection[?name=='mysettings1'] | [0].validateCertChainAndExpiry", False),
+            self.check("backendHttpSettingsCollection[?name=='mysettings1'] | [0].validateSNI", True),
+        ])
+
+
+class ApplicationGatewayValidateFlagsScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_validate_flags', location='eastus')
+    def test_ag_rule_create_preserves_http_settings_validate_flags(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'rg': resource_group,
+            'loc': resource_group_location,
+            'vnet': self.create_random_name('vnet', 15),
+            'subnet': 'subnet1',
+            'pip': self.create_random_name('pip', 15),
+            'ag': self.create_random_name('ag', 15),
+            'settings': 'mysettings1',
+            'pool': 'myaddresspool1',
+            'listener': 'mylistener',
+            'rule': 'repro-rule'
+        })
+
+        self.cmd(
+            'az network vnet create -g {rg} -n {vnet} '
+            '--address-prefix 10.0.0.0/16 '
+            '--subnet-name {subnet} --subnet-prefix 10.0.0.0/24'
+        )
+        self.cmd('az network public-ip create -g {rg} -n {pip} --sku Standard --allocation-method Static')
+
+        self.cmd(
+            'az network application-gateway create -g {rg} -n {ag} '
+            '--vnet-name {vnet} --subnet {subnet} '
+            '--public-ip-address {pip} '
+            '--priority 1001 --sku Standard_v2'
+        )
+
+        self.cmd(
+            'az network application-gateway http-settings create -g {rg} --gateway-name {ag} '
+            '-n {settings} --port 443 --protocol Https '
+            '--cookie-based-affinity disabled '
+            '--validate-cert-chain-and-expiry false --validate-sni false',
+            checks=[
+                self.check('validateCertChainAndExpiry', False),
+                self.check('validateSNI', False)
+            ]
+        )
+
+        self.cmd('az network application-gateway address-pool create -g {rg} --gateway-name {ag} -n {pool}')
+        self.cmd(
+            'az network application-gateway http-listener create -g {rg} --gateway-name {ag} -n {listener} '
+            '--frontend-port appGatewayFrontendPort --host-name www.test.com'
+        )
+
+        self.cmd(
+            'az network application-gateway rule create -g {rg} --gateway-name {ag} -n {rule} '
+            '--rule-type Basic --http-listener {listener} '
+            '--address-pool {pool} --http-settings {settings} '
+            '--priority 1004'
+        )
+
+        self.cmd(
+            'az network application-gateway show -g {rg} -n {ag} '
+            '--query "backendHttpSettingsCollection[?name==\'{settings}\'] | [0]"',
+            checks=[
+                self.check('validateCertChainAndExpiry', False),
+                self.check('validateSNI', False)
+            ]
+        )
+
 
 if __name__ == '__main__':
     unittest.main()

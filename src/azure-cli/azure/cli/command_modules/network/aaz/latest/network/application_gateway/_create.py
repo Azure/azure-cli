@@ -16,9 +16,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-11-01",
+        "version": "2024-10-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgateways/{}", "2023-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgateways/{}", "2024-10-01"],
         ]
     }
 
@@ -75,15 +75,28 @@ class Create(AAZCommand):
         )
 
         identity = cls._args_schema.identity
+        identity.mi_system_assigned = AAZStrArg(
+            options=["system-assigned", "mi-system-assigned"],
+            help="Set the system managed identity.",
+            blank="True",
+        )
         identity.type = AAZStrArg(
             options=["type"],
             help="The type of identity used for the resource. The type 'SystemAssigned, UserAssigned' includes both an implicitly created identity and a set of user assigned identities. The type 'None' will remove any identities from the virtual machine.",
             enum={"None": "None", "SystemAssigned": "SystemAssigned", "SystemAssigned, UserAssigned": "SystemAssigned, UserAssigned", "UserAssigned": "UserAssigned"},
         )
+        identity.mi_user_assigned = AAZListArg(
+            options=["user-assigned", "mi-user-assigned"],
+            help="Set the user managed identities.",
+            blank=[],
+        )
         identity.user_assigned_identities = AAZDictArg(
             options=["user-assigned-identities"],
             help="The list of user identities associated with resource. The user identity dictionary key references will be ARM resource ids in the form: '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identityName}'.",
         )
+
+        mi_user_assigned = cls._args_schema.identity.mi_user_assigned
+        mi_user_assigned.Element = AAZStrArg()
 
         user_assigned_identities = cls._args_schema.identity.user_assigned_identities
         user_assigned_identities.Element = AAZObjectArg(
@@ -350,6 +363,10 @@ class Create(AAZCommand):
             help="Cookie based affinity.",
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
+        _element.dedicated_backend_connection = AAZBoolArg(
+            options=["dedicated-backend-connection"],
+            help="Enable or disable dedicated connection per backend server. Default is set to false.",
+        )
         _element.host_name = AAZStrArg(
             options=["host-name"],
             help="Host header to be sent to the backend servers.",
@@ -384,9 +401,23 @@ class Create(AAZCommand):
             options=["request-timeout"],
             help="Request timeout in seconds. Application Gateway will fail the request if response is not received within RequestTimeout. Acceptable values are from 1 second to 86400 seconds.",
         )
+        _element.sni_name = AAZStrArg(
+            options=["sni-name"],
+            help="Specify an SNI value to match the common name of the certificate on the backend. By default, the application gateway uses the incoming request’s host header as the SNI. Default value is null.",
+        )
         _element.trusted_root_certificates = AAZListArg(
             options=["trusted-root-certificates"],
             help="Array of references to application gateway trusted root certificates.",
+        )
+        _element.validate_cert_chain_and_expiry = AAZBoolArg(
+            options=["validate-cert-chain-and-expiry"],
+            help="Verify or skip both chain and expiry validations of the certificate on the backend server. Default is set to true.",
+            default=True,
+        )
+        _element.validate_sni = AAZBoolArg(
+            options=["validate-sni"],
+            help="When enabled, verifies if the Common Name of the certificate provided by the backend server matches the Server Name Indication (SNI) value. Default value is true.",
+            default=True,
         )
 
         authentication_certificates = cls._args_schema.backend_http_settings_collection.Element.authentication_certificates
@@ -1620,7 +1651,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-11-01",
+                    "api-version", "2024-10-01",
                     required=True,
                 ),
             }
@@ -1645,7 +1676,7 @@ class Create(AAZCommand):
                 typ=AAZObjectType,
                 typ_kwargs={"flags": {"required": True, "client_flatten": True}}
             )
-            _builder.set_prop("identity", AAZObjectType, ".identity")
+            _builder.set_prop("identity", AAZIdentityObjectType, ".identity")
             _builder.set_prop("location", AAZStrType, ".location")
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
             _builder.set_prop("tags", AAZDictType, ".tags")
@@ -1655,10 +1686,16 @@ class Create(AAZCommand):
             if identity is not None:
                 identity.set_prop("type", AAZStrType, ".type")
                 identity.set_prop("userAssignedIdentities", AAZDictType, ".user_assigned_identities")
+                identity.set_prop("userAssigned", AAZListType, ".mi_user_assigned", typ_kwargs={"flags": {"action": "create"}})
+                identity.set_prop("systemAssigned", AAZStrType, ".mi_system_assigned", typ_kwargs={"flags": {"action": "create"}})
 
             user_assigned_identities = _builder.get(".identity.userAssignedIdentities")
             if user_assigned_identities is not None:
                 user_assigned_identities.set_elements(AAZObjectType, ".")
+
+            user_assigned = _builder.get(".identity.userAssigned")
+            if user_assigned is not None:
+                user_assigned.set_elements(AAZStrType, ".")
 
             properties = _builder.get(".properties")
             if properties is not None:
@@ -1752,6 +1789,7 @@ class Create(AAZCommand):
                 properties.set_prop("authenticationCertificates", AAZListType, ".authentication_certificates")
                 properties.set_prop("connectionDraining", AAZObjectType, ".connection_draining")
                 properties.set_prop("cookieBasedAffinity", AAZStrType, ".cookie_based_affinity")
+                properties.set_prop("dedicatedBackendConnection", AAZBoolType, ".dedicated_backend_connection")
                 properties.set_prop("hostName", AAZStrType, ".host_name")
                 properties.set_prop("path", AAZStrType, ".path")
                 properties.set_prop("pickHostNameFromBackendAddress", AAZBoolType, ".pick_host_name_from_backend_address")
@@ -1760,7 +1798,10 @@ class Create(AAZCommand):
                 properties.set_prop("probeEnabled", AAZBoolType, ".probe_enabled")
                 properties.set_prop("protocol", AAZStrType, ".protocol")
                 properties.set_prop("requestTimeout", AAZIntType, ".request_timeout")
+                properties.set_prop("sniName", AAZStrType, ".sni_name")
                 properties.set_prop("trustedRootCertificates", AAZListType, ".trusted_root_certificates")
+                properties.set_prop("validateCertChainAndExpiry", AAZBoolType, ".validate_cert_chain_and_expiry")
+                properties.set_prop("validateSNI", AAZBoolType, ".validate_sni")
 
             authentication_certificates = _builder.get(".properties.backendHttpSettingsCollection[].properties.authenticationCertificates")
             if authentication_certificates is not None:
@@ -2319,7 +2360,8 @@ class Create(AAZCommand):
                 flags={"read_only": True},
             )
             _schema_on_200_201.id = AAZStrType()
-            _schema_on_200_201.identity = AAZObjectType()
+            _schema_on_200_201.identity = AAZIdentityObjectType()
+            _CreateHelper._build_schema_managed_service_identity_read(_schema_on_200_201.identity)
             _schema_on_200_201.location = AAZStrType()
             _schema_on_200_201.name = AAZStrType(
                 flags={"read_only": True},
@@ -2332,33 +2374,6 @@ class Create(AAZCommand):
                 flags={"read_only": True},
             )
             _schema_on_200_201.zones = AAZListType()
-
-            identity = cls._schema_on_200_201.identity
-            identity.principal_id = AAZStrType(
-                serialized_name="principalId",
-                flags={"read_only": True},
-            )
-            identity.tenant_id = AAZStrType(
-                serialized_name="tenantId",
-                flags={"read_only": True},
-            )
-            identity.type = AAZStrType()
-            identity.user_assigned_identities = AAZDictType(
-                serialized_name="userAssignedIdentities",
-            )
-
-            user_assigned_identities = cls._schema_on_200_201.identity.user_assigned_identities
-            user_assigned_identities.Element = AAZObjectType()
-
-            _element = cls._schema_on_200_201.identity.user_assigned_identities.Element
-            _element.client_id = AAZStrType(
-                serialized_name="clientId",
-                flags={"read_only": True},
-            )
-            _element.principal_id = AAZStrType(
-                serialized_name="principalId",
-                flags={"read_only": True},
-            )
 
             properties = cls._schema_on_200_201.properties
             properties.authentication_certificates = AAZListType(
@@ -2536,6 +2551,9 @@ class Create(AAZCommand):
             properties.cookie_based_affinity = AAZStrType(
                 serialized_name="cookieBasedAffinity",
             )
+            properties.dedicated_backend_connection = AAZBoolType(
+                serialized_name="dedicatedBackendConnection",
+            )
             properties.host_name = AAZStrType(
                 serialized_name="hostName",
             )
@@ -2557,8 +2575,17 @@ class Create(AAZCommand):
             properties.request_timeout = AAZIntType(
                 serialized_name="requestTimeout",
             )
+            properties.sni_name = AAZStrType(
+                serialized_name="sniName",
+            )
             properties.trusted_root_certificates = AAZListType(
                 serialized_name="trustedRootCertificates",
+            )
+            properties.validate_cert_chain_and_expiry = AAZBoolType(
+                serialized_name="validateCertChainAndExpiry",
+            )
+            properties.validate_sni = AAZBoolType(
+                serialized_name="validateSNI",
             )
 
             authentication_certificates = cls._schema_on_200_201.properties.backend_http_settings_collection.Element.properties.authentication_certificates
@@ -3986,6 +4013,51 @@ class _CreateHelper:
         _schema.name = cls._schema_ip_configuration_read.name
         _schema.properties = cls._schema_ip_configuration_read.properties
 
+    _schema_managed_service_identity_read = None
+
+    @classmethod
+    def _build_schema_managed_service_identity_read(cls, _schema):
+        if cls._schema_managed_service_identity_read is not None:
+            _schema.principal_id = cls._schema_managed_service_identity_read.principal_id
+            _schema.tenant_id = cls._schema_managed_service_identity_read.tenant_id
+            _schema.type = cls._schema_managed_service_identity_read.type
+            _schema.user_assigned_identities = cls._schema_managed_service_identity_read.user_assigned_identities
+            return
+
+        cls._schema_managed_service_identity_read = _schema_managed_service_identity_read = AAZIdentityObjectType()
+
+        managed_service_identity_read = _schema_managed_service_identity_read
+        managed_service_identity_read.principal_id = AAZStrType(
+            serialized_name="principalId",
+            flags={"read_only": True},
+        )
+        managed_service_identity_read.tenant_id = AAZStrType(
+            serialized_name="tenantId",
+            flags={"read_only": True},
+        )
+        managed_service_identity_read.type = AAZStrType()
+        managed_service_identity_read.user_assigned_identities = AAZDictType(
+            serialized_name="userAssignedIdentities",
+        )
+
+        user_assigned_identities = _schema_managed_service_identity_read.user_assigned_identities
+        user_assigned_identities.Element = AAZObjectType()
+
+        _element = _schema_managed_service_identity_read.user_assigned_identities.Element
+        _element.client_id = AAZStrType(
+            serialized_name="clientId",
+            flags={"read_only": True},
+        )
+        _element.principal_id = AAZStrType(
+            serialized_name="principalId",
+            flags={"read_only": True},
+        )
+
+        _schema.principal_id = cls._schema_managed_service_identity_read.principal_id
+        _schema.tenant_id = cls._schema_managed_service_identity_read.tenant_id
+        _schema.type = cls._schema_managed_service_identity_read.type
+        _schema.user_assigned_identities = cls._schema_managed_service_identity_read.user_assigned_identities
+
     _schema_network_interface_ip_configuration_read = None
 
     @classmethod
@@ -4106,6 +4178,7 @@ class _CreateHelper:
         properties.location = AAZStrType()
         properties.outbound_rule = AAZObjectType(
             serialized_name="outboundRule",
+            flags={"read_only": True},
         )
         cls._build_schema_sub_resource_read(properties.outbound_rule)
         properties.outbound_rules = AAZListType(
@@ -4161,6 +4234,7 @@ class _CreateHelper:
         cls._build_schema_sub_resource_read(properties.load_balancer_frontend_ip_configuration)
         properties.network_interface_ip_configuration = AAZObjectType(
             serialized_name="networkInterfaceIPConfiguration",
+            flags={"read_only": True},
         )
         cls._build_schema_sub_resource_read(properties.network_interface_ip_configuration)
         properties.subnet = AAZObjectType()
@@ -4224,6 +4298,7 @@ class _CreateHelper:
         cls._build_schema_sub_resource_read(properties.backend_address_pool)
         properties.backend_ip_configuration = AAZObjectType(
             serialized_name="backendIPConfiguration",
+            flags={"read_only": True},
         )
         cls._build_schema_network_interface_ip_configuration_read(properties.backend_ip_configuration)
         properties.backend_port = AAZIntType(
@@ -4371,6 +4446,10 @@ class _CreateHelper:
         properties.auxiliary_sku = AAZStrType(
             serialized_name="auxiliarySku",
         )
+        properties.default_outbound_connectivity_enabled = AAZBoolType(
+            serialized_name="defaultOutboundConnectivityEnabled",
+            flags={"read_only": True},
+        )
         properties.disable_tcp_state_tracking = AAZBoolType(
             serialized_name="disableTcpStateTracking",
         )
@@ -4379,6 +4458,7 @@ class _CreateHelper:
         )
         properties.dscp_configuration = AAZObjectType(
             serialized_name="dscpConfiguration",
+            flags={"read_only": True},
         )
         cls._build_schema_sub_resource_read(properties.dscp_configuration)
         properties.enable_accelerated_networking = AAZBoolType(
@@ -4433,6 +4513,7 @@ class _CreateHelper:
         )
         properties.virtual_machine = AAZObjectType(
             serialized_name="virtualMachine",
+            flags={"read_only": True},
         )
         cls._build_schema_sub_resource_read(properties.virtual_machine)
         properties.vnet_encryption_supported = AAZBoolType(
@@ -4503,6 +4584,9 @@ class _CreateHelper:
         )
         properties.auto_approval = AAZObjectType(
             serialized_name="autoApproval",
+        )
+        properties.destination_ip_address = AAZStrType(
+            serialized_name="destinationIPAddress",
         )
         properties.enable_proxy_protocol = AAZBoolType(
             serialized_name="enableProxyProtocol",
@@ -4719,6 +4803,8 @@ class _CreateHelper:
             flags={"read_only": True},
         )
         _element.id = AAZStrType()
+        _element.identity = AAZIdentityObjectType()
+        cls._build_schema_managed_service_identity_read(_element.identity)
         _element.location = AAZStrType()
         _element.name = AAZStrType(
             flags={"read_only": True},
@@ -4733,6 +4819,9 @@ class _CreateHelper:
 
         properties = _schema_network_security_group_read.properties.flow_logs.Element.properties
         properties.enabled = AAZBoolType()
+        properties.enabled_filtering_criteria = AAZStrType(
+            serialized_name="enabledFilteringCriteria",
+        )
         properties.flow_analytics_configuration = AAZObjectType(
             serialized_name="flowAnalyticsConfiguration",
         )
@@ -5085,6 +5174,7 @@ class _CreateHelper:
         )
         properties.ip_configuration = AAZObjectType(
             serialized_name="ipConfiguration",
+            flags={"read_only": True},
         )
         cls._build_schema_ip_configuration_read(properties.ip_configuration)
         properties.ip_tags = AAZListType(
@@ -5183,13 +5273,23 @@ class _CreateHelper:
         properties.public_ip_addresses = AAZListType(
             serialized_name="publicIpAddresses",
         )
+        properties.public_ip_addresses_v6 = AAZListType(
+            serialized_name="publicIpAddressesV6",
+        )
         properties.public_ip_prefixes = AAZListType(
             serialized_name="publicIpPrefixes",
+        )
+        properties.public_ip_prefixes_v6 = AAZListType(
+            serialized_name="publicIpPrefixesV6",
         )
         properties.resource_guid = AAZStrType(
             serialized_name="resourceGuid",
             flags={"read_only": True},
         )
+        properties.source_virtual_network = AAZObjectType(
+            serialized_name="sourceVirtualNetwork",
+        )
+        cls._build_schema_sub_resource_read(properties.source_virtual_network)
         properties.subnets = AAZListType(
             flags={"read_only": True},
         )
@@ -5198,9 +5298,17 @@ class _CreateHelper:
         public_ip_addresses.Element = AAZObjectType()
         cls._build_schema_sub_resource_read(public_ip_addresses.Element)
 
+        public_ip_addresses_v6 = _schema_public_ip_address_read.properties.nat_gateway.properties.public_ip_addresses_v6
+        public_ip_addresses_v6.Element = AAZObjectType()
+        cls._build_schema_sub_resource_read(public_ip_addresses_v6.Element)
+
         public_ip_prefixes = _schema_public_ip_address_read.properties.nat_gateway.properties.public_ip_prefixes
         public_ip_prefixes.Element = AAZObjectType()
         cls._build_schema_sub_resource_read(public_ip_prefixes.Element)
+
+        public_ip_prefixes_v6 = _schema_public_ip_address_read.properties.nat_gateway.properties.public_ip_prefixes_v6
+        public_ip_prefixes_v6.Element = AAZObjectType()
+        cls._build_schema_sub_resource_read(public_ip_prefixes_v6.Element)
 
         subnets = _schema_public_ip_address_read.properties.nat_gateway.properties.subnets
         subnets.Element = AAZObjectType()
@@ -5401,6 +5509,9 @@ class _CreateHelper:
             serialized_name="ipConfigurations",
             flags={"read_only": True},
         )
+        properties.ipam_pool_prefix_allocations = AAZListType(
+            serialized_name="ipamPoolPrefixAllocations",
+        )
         properties.nat_gateway = AAZObjectType(
             serialized_name="natGateway",
         )
@@ -5515,10 +5626,29 @@ class _CreateHelper:
         ip_configurations.Element = AAZObjectType()
         cls._build_schema_ip_configuration_read(ip_configurations.Element)
 
-        private_endpoints = _schema_subnet_read.properties.private_endpoints
-        private_endpoints.Element = AAZObjectType(
+        ipam_pool_prefix_allocations = _schema_subnet_read.properties.ipam_pool_prefix_allocations
+        ipam_pool_prefix_allocations.Element = AAZObjectType()
+
+        _element = _schema_subnet_read.properties.ipam_pool_prefix_allocations.Element
+        _element.allocated_address_prefixes = AAZListType(
+            serialized_name="allocatedAddressPrefixes",
             flags={"read_only": True},
         )
+        _element.number_of_ip_addresses = AAZStrType(
+            serialized_name="numberOfIpAddresses",
+        )
+        _element.pool = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+
+        allocated_address_prefixes = _schema_subnet_read.properties.ipam_pool_prefix_allocations.Element.allocated_address_prefixes
+        allocated_address_prefixes.Element = AAZStrType()
+
+        pool = _schema_subnet_read.properties.ipam_pool_prefix_allocations.Element.pool
+        pool.id = AAZStrType()
+
+        private_endpoints = _schema_subnet_read.properties.private_endpoints
+        private_endpoints.Element = AAZObjectType()
         cls._build_schema_private_endpoint_read(private_endpoints.Element)
 
         resource_navigation_links = _schema_subnet_read.properties.resource_navigation_links
@@ -5603,6 +5733,7 @@ class _CreateHelper:
         )
         properties.has_bgp_override = AAZBoolType(
             serialized_name="hasBgpOverride",
+            flags={"read_only": True},
         )
         properties.next_hop_ip_address = AAZStrType(
             serialized_name="nextHopIpAddress",
@@ -5744,6 +5875,10 @@ class _CreateHelper:
 
         _element = _schema_subnet_read.properties.service_endpoints.Element
         _element.locations = AAZListType()
+        _element.network_identifier = AAZObjectType(
+            serialized_name="networkIdentifier",
+        )
+        cls._build_schema_sub_resource_read(_element.network_identifier)
         _element.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
             flags={"read_only": True},

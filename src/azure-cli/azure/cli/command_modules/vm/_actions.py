@@ -19,8 +19,6 @@ from knack.log import get_logger
 from azure.cli.core.commands.parameters import get_one_of_subscription_locations
 from azure.cli.core.commands.arm import resource_exists
 
-from ._client_factory import _compute_client_factory
-
 from .generated.action import *  # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
 try:
     from .manual.action import *  # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
@@ -298,7 +296,10 @@ def load_extension_images_thru_services(cli_ctx, publisher, name, version, locat
 
 
 def get_vm_sizes(cli_ctx, location):
-    return list(_compute_client_factory(cli_ctx).virtual_machine_sizes.list(location))
+    from .operations.vm import VMListSizes
+    return VMListSizes(cli_ctx=cli_ctx)(command_args={
+        'location': location
+    })
 
 
 def _matched(pattern, string, partial_match=True):
@@ -315,28 +316,6 @@ def _create_image_instance(publisher, offer, sku, version):
         'sku': sku,
         'version': version
     }
-
-
-def _get_latest_image_version(cli_ctx, location, publisher, offer, sku, edge_zone=None):
-    from azure.cli.core.azclierror import InvalidArgumentValueError
-    if edge_zone is not None:
-        from azure.cli.core.commands.client_factory import get_mgmt_service_client
-        from azure.cli.core.profiles import ResourceType
-        edge_zone_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_COMPUTE).virtual_machine_images_edge_zone
-        top_one = edge_zone_client.list(location, edge_zone, publisher, offer, sku, top=1, orderby='name desc')
-        if not top_one:
-            raise InvalidArgumentValueError("Can't resolve the version of '{}:{}:{}:{}'"
-                                            .format(publisher, offer, sku, edge_zone))
-    else:
-        top_one = _compute_client_factory(cli_ctx).virtual_machine_images.list(location,
-                                                                               publisher,
-                                                                               offer,
-                                                                               sku,
-                                                                               top=1,
-                                                                               orderby='name desc')
-        if not top_one:
-            raise InvalidArgumentValueError("Can't resolve the version of '{}:{}:{}'".format(publisher, offer, sku))
-    return top_one[0].name
 
 
 def _get_latest_image_version_by_aaz(cli_ctx, location, publisher, offer, sku, edge_zone=None):

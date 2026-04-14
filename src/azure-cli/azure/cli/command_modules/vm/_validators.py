@@ -90,7 +90,8 @@ def _validate_proximity_placement_group(cmd, namespace):
         parsed = parse_resource_id(namespace.proximity_placement_group)
         rg, name = parsed['resource_group'], parsed['name']
 
-        if not check_existence(cmd.cli_ctx, name, rg, 'Microsoft.Compute', 'proximityPlacementGroups'):
+        if not check_existence(cmd.cli_ctx, name, rg, 'Microsoft.Compute',
+                               'proximityPlacementGroups', static_version='2024-07-01'):
             raise CLIError("Proximity Placement Group '{}' does not exist.".format(name))
 
 
@@ -692,7 +693,8 @@ def _validate_vm_create_storage_account(cmd, namespace):
     if namespace.storage_account:
         storage_id = parse_resource_id(namespace.storage_account)
         rg = storage_id.get('resource_group', namespace.resource_group_name)
-        if check_existence(cmd.cli_ctx, storage_id['name'], rg, 'Microsoft.Storage', 'storageAccounts'):
+        if check_existence(cmd.cli_ctx, storage_id['name'], rg, 'Microsoft.Storage',
+                           'storageAccounts', static_version='2024-01-01'):
             # 1 - existing storage account specified
             namespace.storage_account_type = 'existing'
             logger.debug("using specified existing storage account '%s'", storage_id['name'])
@@ -735,7 +737,8 @@ def _validate_vm_create_availability_set(cmd, namespace):
         name = as_id['name']
         rg = as_id.get('resource_group', namespace.resource_group_name)
 
-        if not check_existence(cmd.cli_ctx, name, rg, 'Microsoft.Compute', 'availabilitySets'):
+        if not check_existence(cmd.cli_ctx, name, rg, 'Microsoft.Compute',
+                               'availabilitySets', static_version='2024-07-01'):
             raise CLIError("Availability set '{}' does not exist.".format(name))
 
         namespace.availability_set = resource_id(
@@ -755,7 +758,8 @@ def _validate_vm_create_vmss(cmd, namespace):
         name = as_id['name']
         rg = as_id.get('resource_group', namespace.resource_group_name)
 
-        if not check_existence(cmd.cli_ctx, name, rg, 'Microsoft.Compute', 'virtualMachineScaleSets'):
+        if not check_existence(cmd.cli_ctx, name, rg, 'Microsoft.Compute',
+                               'virtualMachineScaleSets', static_version='2025-04-01'):
             raise CLIError("virtual machine scale set '{}' does not exist.".format(name))
 
         namespace.vmss = resource_id(
@@ -1035,7 +1039,8 @@ def _validate_vm_create_nsg(cmd, namespace):
 
     if namespace.nsg:
         if check_existence(cmd.cli_ctx, namespace.nsg, namespace.resource_group_name,
-                           'Microsoft.Network', 'networkSecurityGroups'):
+                           'Microsoft.Network', 'networkSecurityGroups',
+                           static_version="2023-11-01"):
             namespace.nsg_type = 'existing'
             logger.debug("using specified NSG '%s'", namespace.nsg)
         else:
@@ -1058,7 +1063,8 @@ def _validate_vmss_create_nsg(cmd, namespace):
 def _validate_vm_vmss_create_public_ip(cmd, namespace):
     if namespace.public_ip_address:
         if check_existence(cmd.cli_ctx, namespace.public_ip_address, namespace.resource_group_name,
-                           'Microsoft.Network', 'publicIPAddresses'):
+                           'Microsoft.Network', 'publicIPAddresses',
+                           static_version='2022-05-01'):
             namespace.public_ip_address_type = 'existing'
             logger.debug("using existing specified public IP '%s'", namespace.public_ip_address)
         else:
@@ -1824,6 +1830,7 @@ def process_vmss_create_namespace(cmd, namespace):
             raise ArgumentUsageError('usage error: please specify the --image when you want to specify the VM SKU')
 
         _validate_trusted_launch(namespace)
+        _validate_vmss_create_auto_zone_placement(namespace)
         if namespace.image:
 
             if namespace.vm_sku is None:
@@ -1920,6 +1927,7 @@ def process_vmss_create_namespace(cmd, namespace):
     _validate_vmss_terminate_notification(cmd, namespace)
     _validate_vmss_create_automatic_repairs(cmd, namespace)
     _validate_vmss_create_host_group(cmd, namespace)
+    _validate_vmss_create_auto_zone_placement(namespace)
 
     if namespace.secrets:
         _validate_secrets(namespace.secrets, namespace.os_type)
@@ -2049,7 +2057,7 @@ def process_disk_create_namespace(cmd, namespace):
                       '--source VHD_BLOB_URI [--source-storage-account-id ID]'
         try:
             namespace.source_blob_uri, namespace.source_disk, namespace.source_snapshot, \
-                namespace.source_restore_point, _ = _figure_out_storage_source(
+                namespace.source_restore_point, _ = _figure_out_storage_source_by_aaz(
                     cmd.cli_ctx, namespace.resource_group_name, namespace.source)
             if not namespace.source_blob_uri and namespace.source_storage_account_id:
                 raise ArgumentUsageError(usage_error)
@@ -2161,27 +2169,33 @@ def process_image_create_namespace(cmd, namespace):
                                   'virtualMachines', 'Microsoft.Compute')
         res = parse_resource_id(res_id)
         if res['type'] == 'virtualMachines':
-            compute_client = _compute_client_factory(cmd.cli_ctx, subscription_id=res['subscription'])
-            vm_info = compute_client.virtual_machines.get(res['resource_group'], res['name'])
+            from .operations.vm import VMShow
+            command_args = {
+                'subscription': res['subscription'],
+                'resource_group': res['resource_group'],
+                'vm_name': res['name']
+            }
+            vm_info = VMShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
             source_from_vm = True
     except ResourceNotFoundError:
         pass
 
     if source_from_vm:
         # pylint: disable=no-member
-        namespace.os_type = vm_info.storage_profile.os_disk.os_type
+        namespace.os_type = vm_info.get('storageProfile', {}).get('osDisk', {}).get('osType')
         namespace.source_virtual_machine = res_id
         if namespace.data_disk_sources:
             raise CLIError("'--data-disk-sources' is not allowed when capturing "
                            "images from virtual machines")
     else:
-        namespace.os_blob_uri, namespace.os_disk, namespace.os_snapshot, _, _ = _figure_out_storage_source(cmd.cli_ctx, namespace.resource_group_name, namespace.source)  # pylint: disable=line-too-long
+        namespace.os_blob_uri, namespace.os_disk, namespace.os_snapshot, _, _ = \
+            _figure_out_storage_source_by_aaz(cmd.cli_ctx, namespace.resource_group_name, namespace.source)
         namespace.data_blob_uris = []
         namespace.data_disks = []
         namespace.data_snapshots = []
         if namespace.data_disk_sources:
             for data_disk_source in namespace.data_disk_sources:
-                source_blob_uri, source_disk, source_snapshot, _, _ = _figure_out_storage_source(
+                source_blob_uri, source_disk, source_snapshot, _, _ = _figure_out_storage_source_by_aaz(
                     cmd.cli_ctx, namespace.resource_group_name, data_disk_source)
                 if source_blob_uri:
                     namespace.data_blob_uris.append(source_blob_uri)
@@ -2218,6 +2232,30 @@ def _figure_out_storage_source(cli_ctx, resource_group_name, source):
     return (source_blob_uri, source_disk, source_snapshot, source_restore_point, source_info)
 
 
+def _figure_out_storage_source_by_aaz(cli_ctx, resource_group_name, source):
+    source_blob_uri = None
+    source_disk = None
+    source_snapshot = None
+    source_info = None
+    source_restore_point = None
+    if urlparse(source).scheme:  # a uri?
+        source_blob_uri = source
+    elif '/disks/' in source.lower():
+        source_disk = source
+    elif '/snapshots/' in source.lower():
+        source_snapshot = source
+    elif '/restorepoints/' in source.lower():
+        source_restore_point = source
+    else:
+        source_info, is_snapshot = _get_disk_or_snapshot_info_by_aaz(cli_ctx, resource_group_name, source)
+        if is_snapshot:
+            source_snapshot = source_info.get('id')
+        else:
+            source_disk = source_info.get('id')
+
+    return (source_blob_uri, source_disk, source_snapshot, source_restore_point, source_info)
+
+
 def _get_disk_or_snapshot_info(cli_ctx, resource_group_name, source):
     compute_client = _compute_client_factory(cli_ctx)
     is_snapshot = True
@@ -2227,6 +2265,28 @@ def _get_disk_or_snapshot_info(cli_ctx, resource_group_name, source):
     except ResourceNotFoundError:
         is_snapshot = False
         info = compute_client.disks.get(resource_group_name, source)
+
+    return info, is_snapshot
+
+
+def _get_disk_or_snapshot_info_by_aaz(cli_ctx, resource_group_name, source):
+    from .aaz.latest.snapshot import Show as SnapshotShow
+    from .aaz.latest.disk import Show as DiskShow
+    is_snapshot = True
+
+    try:
+        command_args = {
+            'resource_group': resource_group_name,
+            'snapshot_name': source
+        }
+        info = SnapshotShow(cli_ctx=cli_ctx)(command_args=command_args)
+    except ResourceNotFoundError:
+        command_args = {
+            'resource_group': resource_group_name,
+            'disk_name': source
+        }
+        is_snapshot = False
+        info = DiskShow(cli_ctx=cli_ctx)(command_args=command_args)
 
     return info, is_snapshot
 
@@ -2634,6 +2694,85 @@ def _validate_vmss_create_host_group(cmd, namespace):
                 subscription=get_subscription_id(cmd.cli_ctx), resource_group=namespace.resource_group_name,
                 namespace='Microsoft.Compute', type='hostGroups', name=namespace.host_group
             )
+
+
+def _validate_vmss_create_auto_zone_placement(namespace):
+    zpp = getattr(namespace, 'zone_placement_policy', None)
+    zones = getattr(namespace, 'zones', None)
+    zone_balance = getattr(namespace, 'zone_balance', None)
+    max_zone_count = getattr(namespace, 'max_zone_count', None)
+    disable_overprovision = getattr(namespace, 'disable_overprovision', None)
+    ppg = getattr(namespace, 'ppg', None)
+    crg = getattr(namespace, 'capacity_reservation_group', None)
+    orchestration_mode = getattr(namespace, 'orchestration_mode', None)
+    instance_percent_policy = getattr(namespace, 'instance_percent_policy', None)
+    max_instance_percent = getattr(namespace, 'max_instance_percent', None)
+
+    # "zones", zonePlacementPolicy cannot be enabled if "zones" list exists on the scale set
+    if zpp and zones:
+        raise ArgumentUsageError(
+            "usage error: --zone-placement-policy cannot be used with --zones. "
+            "Specify either fixed zones (--zones) or automatic zone placement (--zone-placement-policy)."
+        )
+
+    # max-zone-count must be positive
+    if max_zone_count is not None and max_zone_count <= 0:
+        raise ArgumentUsageError(
+            "usage error: --max-zone-count must be a positive integer."
+        )
+
+    # zoneBalance=true requires maxZoneCount
+    if zone_balance is True and max_zone_count is None:
+        raise ArgumentUsageError(
+            "usage error: --zone-balance requires --max-zone-count to be specified."
+        )
+
+    # Zones=Auto does not support overprovisioning
+    if zpp and orchestration_mode and orchestration_mode.lower() == 'uniform':
+        if not disable_overprovision:
+            raise ArgumentUsageError(
+                "usage error: zone placement policy does not support overprovisioning. "
+                "Set --disable-overprovision when using --zone-placement-policy Auto."
+            )
+
+    # zones=Auto does not support Proximity Placement Group
+    if zpp and ppg:
+        raise ArgumentUsageError(
+            "usage error: zone placement policy does not support proximity placement groups."
+        )
+
+    # zones=Auto does not support Capacity Reservation Group
+    if zpp and crg:
+        raise ArgumentUsageError(
+            "usage error: zone placement policy does not support capacity reservation groups."
+        )
+
+    if instance_percent_policy is not None:
+        # enable=true requires value
+        if instance_percent_policy is True and max_instance_percent is None:
+            raise ArgumentUsageError(
+                "usage error: --instance-percent-policy true requires "
+                "(--max-instance-percent / --value-max-instance-percent-per-zone)."
+            )
+
+        # enable=false should not be combined with value
+        if instance_percent_policy is False and max_instance_percent is not None:
+            raise ArgumentUsageError(
+                "usage error: (--max-instance-percent / --value-max-instance-percent-per-zone) cannot be used when "
+                "--instance-percent-policy is false."
+            )
+
+    # value range
+    if max_instance_percent is not None:
+        if instance_percent_policy is None:
+            raise ArgumentUsageError(
+                "usage error: (--max-instance-percent / --value-max-instance-percent-per-zone) cannot be used when "
+                "--instance-percent-policy is not set."
+            )
+
+        if max_instance_percent < 1 or max_instance_percent > 100:
+            raise ArgumentUsageError("usage error: (--max-instance-percent / --value-max-instance-percent-per-zone) "
+                                     "must be an integer between 1 and 100.")
 
 
 def _validate_count(namespace):

@@ -16,15 +16,12 @@ from azure.cli.core.aaz import *
 )
 class Delete(AAZCommand):
     """Delete an application gateway.
-
-    :example: Delete an application gateway.
-        az network application-gateway delete -g MyResourceGroup -n MyAppGateway
     """
 
     _aaz_info = {
-        "version": "2023-11-01",
+        "version": "2024-10-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgateways/{}", "2023-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgateways/{}", "2024-10-01"],
         ]
     }
 
@@ -142,7 +139,7 @@ class Delete(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-11-01",
+                    "api-version", "2024-10-01",
                     required=True,
                 ),
             }

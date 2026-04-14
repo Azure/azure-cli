@@ -275,6 +275,58 @@ class AcrCommandsTests(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer()
+    def test_acr_cache_managed_identity(self, resource_group, resource_group_location):
+        registry_name = self.create_random_name('clireg', 20)
+
+        self.kwargs.update({
+            'registry_name': registry_name,
+            'rg_loc': resource_group_location,
+            'sku': 'Standard',
+            'cr_name': 'test-mi',
+            'source_repo': 'upstreamregistry.azurecr.io/hello-world',
+            'target_repo': 'hello-world-mi',
+            'identity_name': self.create_random_name('cache-identity', 20),
+            'identity_name2': self.create_random_name('cache-identity2', 20)
+        })
+
+        # Create registry
+        self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku}',
+                 checks=[self.check('name', '{registry_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('sku.name', 'Standard'),
+                         self.check('provisioningState', 'Succeeded')])
+
+        # Create user-assigned managed identities
+        result = self.cmd('identity create --name {identity_name} -g {rg}')
+        self.kwargs['identity_id'] = result.get_output_in_json()['id']
+
+        result = self.cmd('identity create --name {identity_name2} -g {rg}')
+        self.kwargs['identity_id2'] = result.get_output_in_json()['id']
+
+        # Test cache create with managed identity
+        self.cmd('acr cache create -n {cr_name} -r {registry_name} -s {source_repo} -t {target_repo} --identity {identity_id}',
+                 checks=[self.check('name', '{cr_name}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('identity.type', 'userAssigned')])
+
+        # Test cache show includes identity
+        self.cmd('acr cache show -n {cr_name} -r {registry_name} -g {rg}',
+                 checks=[self.check('name', '{cr_name}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('identity.type', 'userAssigned')])
+
+        # Test cache update with different managed identity
+        self.cmd('acr cache update -n {cr_name} -r {registry_name} --identity {identity_id2}',
+                 checks=[self.check('name', '{cr_name}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('identity.type', 'userAssigned')])
+
+        # Clean up
+        self.cmd('acr cache delete -n {cr_name} -r {registry_name} -y')
+        self.cmd('acr delete -n {registry_name} -g {rg} -y')
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer()
     def test_acr_create_replication(self, resource_group, resource_group_location):
         registry_name = self.create_random_name('clireg', 20)
         # replication location should be different from registry location
