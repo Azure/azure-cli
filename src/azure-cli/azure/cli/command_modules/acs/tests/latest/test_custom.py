@@ -484,6 +484,41 @@ class AcsCustomCommandTest(unittest.TestCase):
         self.assertEqual(merged['users'], expected_users)
         self.assertEqual(merged['current-context'], obj2['current-context'])
 
+    @unittest.skipIf(os.name == 'nt', 'Symlink test not applicable on Windows')
+    def test_merge_credentials_rejects_symlink(self):
+        # Create a real kubeconfig file and a symlink pointing to it
+        target = tempfile.NamedTemporaryFile(delete=False, suffix='.kubeconfig')
+        target.close()
+        with open(target.name, 'w') as f:
+            yaml.safe_dump({'clusters': [], 'contexts': [], 'users': [],
+                            'current-context': '', 'kind': 'Config'}, f)
+        self.addCleanup(os.remove, target.name)
+
+        symlink_path = target.name + '.link'
+        os.symlink(target.name, symlink_path)
+        self.addCleanup(lambda: os.remove(symlink_path) if os.path.islink(symlink_path) else None)
+
+        addition = tempfile.NamedTemporaryFile(delete=False)
+        addition.close()
+        obj = {
+            'clusters': [{'cluster': {'server': 'https://test'}, 'name': 'c1'}],
+            'contexts': [{'context': {'cluster': 'c1', 'user': 'u1'}, 'name': 'ctx1'}],
+            'users': [{'name': 'u1', 'user': {'token': 'tok'}}],
+            'current-context': 'ctx1',
+        }
+        with open(addition.name, 'w') as f:
+            yaml.safe_dump(obj, f)
+        self.addCleanup(os.remove, addition.name)
+
+        # Should raise CLIError when existing_file is a symlink
+        with self.assertRaises(CLIError):
+            merge_kubernetes_configurations(symlink_path, addition.name, False)
+
+        # Verify the symlink target was not modified
+        with open(target.name, 'r') as f:
+            content = yaml.safe_load(f)
+        self.assertEqual(content['clusters'], [])
+
     @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_rg_location', return_value='eastus')
     @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resource_groups_client', autospec=True)
     @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resources_client', autospec=True)

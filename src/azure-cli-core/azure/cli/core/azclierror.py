@@ -33,8 +33,8 @@ class AzCLIError(CLIError):
         self.recommendations = []
         self.set_recommendation(recommendation)
 
-        # AI recommendations provided by Aladdin service, with tuple form: (recommendation, description)
-        self.aladdin_recommendations = []
+        # example recommendations with tuple form: (recommendation, description)
+        self.example_recommendations = []
 
         # exception trace for the error
         self.exception_trace = None
@@ -50,11 +50,11 @@ class AzCLIError(CLIError):
         elif isinstance(recommendation, list):
             self.recommendations.extend(recommendation)
 
-    def set_aladdin_recommendation(self, recommendations):
-        """ Set aladdin recommendations for the error.
+    def set_example_recommendation(self, recommendations):
+        """ Set example recommendations for the error.
         One item should be a tuple with the form: (recommendation, description)
         """
-        self.aladdin_recommendations.extend(recommendations)
+        self.example_recommendations.extend(recommendations)
 
     def set_exception_trace(self, exception_trace):
         self.exception_trace = exception_trace
@@ -80,9 +80,12 @@ class AzCLIError(CLIError):
             for recommendation in self.recommendations:
                 print(recommendation, file=sys.stderr)
 
-        if self.aladdin_recommendations:
-            print('\nExamples from AI knowledge base:', file=sys.stderr)
-            for recommendation, description in self.aladdin_recommendations:
+        if self.example_recommendations:
+            print(file=sys.stderr)
+            if len(self.example_recommendations) > 1:  # contains help examples
+                print("Examples from command's help:", file=sys.stderr)
+
+            for recommendation, description in self.example_recommendations:
                 print_styled_text(recommendation, file=sys.stderr)
                 print_styled_text(description, file=sys.stderr)
 

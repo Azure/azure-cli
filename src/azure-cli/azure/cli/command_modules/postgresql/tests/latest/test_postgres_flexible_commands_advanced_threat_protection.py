@@ -25,7 +25,7 @@ class FlexibleServerAdvancedThreatProtectionSettingMgmtScenarioTest(ScenarioTest
         self._test_advanced_threat_protection_setting_mgmt(resource_group, server)
 
     def _test_advanced_threat_protection_setting_mgmt(self, resource_group, server):
-        # show advanced threat protection setting for server
+        # Confirm that advanced threat protection setting for server is disabled by default
         self.cmd('postgres flexible-server advanced-threat-protection-setting show -g {} --server-name {} '
                     .format(resource_group, server),
                     checks=[JMESPathCheck('state', "Disabled")]).get_output_in_json()
@@ -36,7 +36,8 @@ class FlexibleServerAdvancedThreatProtectionSettingMgmtScenarioTest(ScenarioTest
 
         os.environ.get(ENV_LIVE_TEST, False) and sleep(2 * 60)
         
-        # show advanced threat protection setting for server
+        # Confirm that advanced threat protection setting for server is enabled
+
         self.cmd('postgres flexible-server advanced-threat-protection-setting show -g {} --server-name {} '
                     .format(resource_group, server),
                     checks=[JMESPathCheck('state', "Enabled")]).get_output_in_json()
@@ -47,7 +48,7 @@ class FlexibleServerAdvancedThreatProtectionSettingMgmtScenarioTest(ScenarioTest
 
         os.environ.get(ENV_LIVE_TEST, False) and sleep(2 * 60)
 
-        # show advanced threat protection setting for server
+        # Confirm that advanced threat protection setting for server is disabled
         self.cmd('postgres flexible-server advanced-threat-protection-setting show -g {} --server-name {} '
                     .format(resource_group, server),
                     checks=[JMESPathCheck('state', "Disabled")]).get_output_in_json()

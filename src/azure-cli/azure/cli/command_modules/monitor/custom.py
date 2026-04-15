@@ -21,7 +21,7 @@ def list_activity_log(cmd, correlation_id=None, resource_group=None, resource_id
     logger.info('OData Filter: %s', odata_filters)
     logger.info('Select Filter: %s', select_filters)
 
-    from .aaz.latest.monitor.activity_log import List
+    from .aaz.latest.monitor.activity_log._list import List
     # activity_log = client.list(filter=odata_filters, select=select_filters)
     activity_log = List(cli_ctx=cmd.cli_ctx)(command_args={
         "filter": odata_filters,
@@ -124,7 +124,7 @@ def list_metrics(cmd, resource,
 
     timespan = '{}/{}'.format(start_time, end_time)
 
-    from .aaz.latest.monitor.metrics import List
+    from .aaz.latest.monitor.metrics._list import List
     return List(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_uri": resource,
         "timespan": quote_plus(timespan),
@@ -140,7 +140,7 @@ def list_metrics(cmd, resource,
 
 
 def list_definations(cmd, resource_uri, metricnamespace=None):
-    from .aaz.latest.monitor.metrics import ListDefinitions
+    from .aaz.latest.monitor.metrics._list_definitions import ListDefinitions
     return ListDefinitions(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_uri": resource_uri,
         "metricnamespace": metricnamespace
@@ -148,7 +148,7 @@ def list_definations(cmd, resource_uri, metricnamespace=None):
 
 
 def list_namespaces(cmd, resource_uri, start_time=None):
-    from .aaz.latest.monitor.metrics import ListNamespaces
+    from .aaz.latest.monitor.metrics._list_namespaces import ListNamespaces
     return ListNamespaces(cli_ctx=cmd.cli_ctx)(command_args={
         "resource_uri": resource_uri,
         "start_time": start_time

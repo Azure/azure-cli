@@ -1411,6 +1411,15 @@ def _validate_vm_vmss_msi(cmd, namespace, is_identity_assign=False):
         _enable_msi_for_trusted_launch(namespace)
 
 
+def process_sig_remove_identity_namespace(cmd, namespace):
+    if namespace.identities:
+        for i, identity in enumerate(namespace.identities):
+            namespace.identities[i] = _get_resource_id(cmd.cli_ctx, identity,
+                                                       namespace.resource_group_name,
+                                                       'userAssignedIdentities',
+                                                       'Microsoft.ManagedIdentity')
+
+
 def _enable_msi_for_trusted_launch(namespace):
     # Enable system assigned msi by default when Trusted Launch configuration is met
     is_trusted_launch = namespace.security_type and namespace.security_type.lower() == 'trustedlaunch' \
@@ -2057,7 +2066,7 @@ def process_disk_create_namespace(cmd, namespace):
                       '--source VHD_BLOB_URI [--source-storage-account-id ID]'
         try:
             namespace.source_blob_uri, namespace.source_disk, namespace.source_snapshot, \
-                namespace.source_restore_point, _ = _figure_out_storage_source(
+                namespace.source_restore_point, _ = _figure_out_storage_source_by_aaz(
                     cmd.cli_ctx, namespace.resource_group_name, namespace.source)
             if not namespace.source_blob_uri and namespace.source_storage_account_id:
                 raise ArgumentUsageError(usage_error)
