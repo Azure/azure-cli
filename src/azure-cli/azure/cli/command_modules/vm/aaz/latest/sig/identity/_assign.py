@@ -12,31 +12,36 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "sig update",
+    "sig identity assign",
 )
-class Update(AAZCommand):
-    """Update a Shared Image Gallery.
+class Assign(AAZCommand):
+    """Assign the user or system managed identities.
 
-    :example: Enable gallery to be shared to subscription or tenant
-        az sig update --resource-group myResourceGroup --gallery-name myGallery --permissions groups
+    :example: Enable the system assigned identity.
+        az sig identity assign -g MyResourceGroup -r MyGalleryName --system-assigned
 
-    :example: Update gallery from private to community
-        az sig update -g myResourceGroup --gallery-name myGallery --permissions Community --publisher-uri myPublisherUri --publisher-email myPublisherEmail --eula myEula --public-name-prefix myPublicNamePrefix
+    :example: Add a user assigned identity.
+        az sig identity assign -g MyResourceGroup -r MyGalleryName --user-assigned id1
+
+    :example: Add 2 user assigned identities.
+        az sig identity assign -g MyResourceGroup -r MyGalleryName --user-assigned id1 id2
+
+    :example: Enable system assigned identity and add a user assigned identity.
+        az sig identity assign -g MyResourceGroup -r MyGalleryName --system-assigned --user-assigned id1
     """
 
     _aaz_info = {
-        "version": "2021-10-01",
+        "version": "2025-03-03",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/galleries/{}", "2021-10-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/galleries/{}", "2025-03-03", "identity"],
         ]
     }
 
     AZ_SUPPORT_NO_WAIT = True
 
-    AZ_SUPPORT_GENERIC_UPDATE = True
-
     def _handler(self, command_args):
         super()._handler(command_args)
+        self.SubresourceSelector(ctx=self.ctx, name="subresource")
         return self.build_lro_poller(self._execute_operations, self._output)
 
     _args_schema = None
@@ -52,85 +57,43 @@ class Update(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.gallery_name = AAZStrArg(
             options=["-r", "--gallery-name"],
-            help="The name of the Shared Image Gallery to be deleted.",
+            help="The name of the Shared Image Gallery.",
             required=True,
-            id_part="name",
+            fmt=AAZStrArgFormat(
+                pattern="^[^_\\W][\\w._-]{0,79}(?<![-.])$",
+            ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
 
-        # define Arg Group "CommunityGalleryInfo"
+        # define Arg Group "Gallery.identity"
 
         _args_schema = cls._args_schema
-        _args_schema.eula = AAZStrArg(
-            options=["--eula"],
-            arg_group="CommunityGalleryInfo",
-            help="Community gallery publisher eula",
-            nullable=True,
+        _args_schema.mi_system_assigned = AAZStrArg(
+            options=["--system-assigned", "--mi-system-assigned"],
+            arg_group="Gallery.identity",
+            help="Set the system managed identity.",
+            blank="True",
         )
-        _args_schema.public_name_prefix = AAZStrArg(
-            options=["--public-name-prefix"],
-            arg_group="CommunityGalleryInfo",
-            help="Community gallery public name prefix",
-            nullable=True,
-        )
-        _args_schema.publisher_contact = AAZStrArg(
-            options=["--publisher-email", "--publisher-contact"],
-            arg_group="CommunityGalleryInfo",
-            help="Community gallery publisher contact email",
-            nullable=True,
-        )
-        _args_schema.publisher_uri = AAZStrArg(
-            options=["--publisher-uri"],
-            arg_group="CommunityGalleryInfo",
-            help="Community gallery publisher uri",
-            nullable=True,
+        _args_schema.mi_user_assigned = AAZListArg(
+            options=["--user-assigned", "--mi-user-assigned"],
+            arg_group="Gallery.identity",
+            help="Set the user managed identities.",
+            blank=[],
         )
 
-        # define Arg Group "Gallery"
-
-        _args_schema = cls._args_schema
-        _args_schema.location = AAZResourceLocationArg(
-            arg_group="Gallery",
-            help="Resource location",
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group",
-            ),
-        )
-
-        # define Arg Group "Properties"
-
-        # define Arg Group "SharingProfile"
-
-        _args_schema = cls._args_schema
-        _args_schema.permissions = AAZStrArg(
-            options=["--permissions"],
-            arg_group="SharingProfile",
-            help="This property allows you to specify the permission of sharing gallery.",
-            nullable=True,
-            enum={"Community": "Community", "Groups": "Groups", "Private": "Private"},
-        )
-
-        # define Arg Group "SoftDeletePolicy"
-
-        _args_schema = cls._args_schema
-        _args_schema.soft_delete = AAZBoolArg(
-            options=["--soft-delete"],
-            arg_group="SoftDeletePolicy",
-            help="Enable soft-deletion for resources in this gallery, allowing them to be recovered within retention time.",
-            nullable=True,
-        )
+        mi_user_assigned = cls._args_schema.mi_user_assigned
+        mi_user_assigned.Element = AAZStrArg()
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
         self.GalleriesGet(ctx=self.ctx)()
-        self.pre_instance_update(self.ctx.vars.instance)
+        self.pre_instance_update(self.ctx.selectors.subresource.get())
         self.InstanceUpdateByJson(ctx=self.ctx)()
-        self.InstanceUpdateByGeneric(ctx=self.ctx)()
-        self.post_instance_update(self.ctx.vars.instance)
-        yield self.GalleriesCreateOrUpdate(ctx=self.ctx)()
+        self.post_instance_update(self.ctx.selectors.subresource.get())
+        yield self.GalleriesUpdate(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -150,8 +113,19 @@ class Update(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        result = self.deserialize_output(self.ctx.selectors.subresource.get(), client_flatten=True)
         return result
+
+    class SubresourceSelector(AAZJsonSelector):
+
+        def _get(self):
+            result = self.ctx.vars.instance
+            return result.identity
+
+        def _set(self, value):
+            result = self.ctx.vars.instance
+            result.identity = value
+            return
 
     class GalleriesGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
@@ -201,7 +175,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2021-10-01",
+                    "api-version", "2025-03-03",
                     required=True,
                 ),
             }
@@ -232,11 +206,11 @@ class Update(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _UpdateHelper._build_schema_gallery_read(cls._schema_on_200)
+            _AssignHelper._build_schema_gallery_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
-    class GalleriesCreateOrUpdate(AAZHttpOperation):
+    class GalleriesUpdate(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -246,18 +220,18 @@ class Update(AAZCommand):
                 return self.client.build_lro_polling(
                     self.ctx.args.no_wait,
                     session,
-                    self.on_200_201,
+                    self.on_200,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
-            if session.http_response.status_code in [200, 201]:
+            if session.http_response.status_code in [200]:
                 return self.client.build_lro_polling(
                     self.ctx.args.no_wait,
                     session,
-                    self.on_200_201,
+                    self.on_200,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
 
@@ -272,7 +246,7 @@ class Update(AAZCommand):
 
         @property
         def method(self):
-            return "PUT"
+            return "PATCH"
 
         @property
         def error_format(self):
@@ -300,7 +274,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2021-10-01",
+                    "api-version", "2025-03-03",
                     required=True,
                 ),
             }
@@ -320,81 +294,52 @@ class Update(AAZCommand):
 
         @property
         def content(self):
-            _content_value, _builder = self.new_content_builder(
-                self.ctx.args,
-                value=self.ctx.vars.instance,
-            )
+            identity = self.serialize_content(self.ctx.selectors.subresource.required())
+            return {"identity": identity}
 
-            return self.serialize_content(_content_value)
-
-        def on_200_201(self, session):
+        def on_200(self, session):
             data = self.deserialize_http_content(session)
             self.ctx.set_var(
                 "instance",
                 data,
-                schema_builder=self._build_schema_on_200_201
+                schema_builder=self._build_schema_on_200
             )
 
-        _schema_on_200_201 = None
+        _schema_on_200 = None
 
         @classmethod
-        def _build_schema_on_200_201(cls):
-            if cls._schema_on_200_201 is not None:
-                return cls._schema_on_200_201
+        def _build_schema_on_200(cls):
+            if cls._schema_on_200 is not None:
+                return cls._schema_on_200
 
-            cls._schema_on_200_201 = AAZObjectType()
-            _UpdateHelper._build_schema_gallery_read(cls._schema_on_200_201)
+            cls._schema_on_200 = AAZObjectType()
+            _AssignHelper._build_schema_gallery_read(cls._schema_on_200)
 
-            return cls._schema_on_200_201
+            return cls._schema_on_200
 
     class InstanceUpdateByJson(AAZJsonInstanceUpdateOperation):
 
         def __call__(self, *args, **kwargs):
-            self._update_instance(self.ctx.vars.instance)
+            self._update_instance(self.ctx.selectors.subresource.get())
 
         def _update_instance(self, instance):
             _instance_value, _builder = self.new_content_builder(
                 self.ctx.args,
                 value=instance,
-                typ=AAZObjectType
+                typ=AAZIdentityObjectType
             )
-            _builder.set_prop("location", AAZStrType, ".location", typ_kwargs={"flags": {"required": True}})
-            _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+            _builder.set_prop("userAssigned", AAZListType, ".mi_user_assigned", typ_kwargs={"flags": {"action": "assign"}})
+            _builder.set_prop("systemAssigned", AAZStrType, ".mi_system_assigned", typ_kwargs={"flags": {"action": "assign"}})
 
-            properties = _builder.get(".properties")
-            if properties is not None:
-                properties.set_prop("sharingProfile", AAZObjectType)
-                properties.set_prop("softDeletePolicy", AAZObjectType)
-
-            sharing_profile = _builder.get(".properties.sharingProfile")
-            if sharing_profile is not None:
-                sharing_profile.set_prop("communityGalleryInfo", AAZObjectType)
-                sharing_profile.set_prop("permissions", AAZStrType, ".permissions")
-
-            community_gallery_info = _builder.get(".properties.sharingProfile.communityGalleryInfo")
-            if community_gallery_info is not None:
-                community_gallery_info.set_prop("eula", AAZStrType, ".eula")
-                community_gallery_info.set_prop("publicNamePrefix", AAZStrType, ".public_name_prefix")
-                community_gallery_info.set_prop("publisherContact", AAZStrType, ".publisher_contact")
-                community_gallery_info.set_prop("publisherUri", AAZStrType, ".publisher_uri")
-
-            soft_delete_policy = _builder.get(".properties.softDeletePolicy")
-            if soft_delete_policy is not None:
-                soft_delete_policy.set_prop("isSoftDeleteEnabled", AAZBoolType, ".soft_delete")
+            user_assigned = _builder.get(".userAssigned")
+            if user_assigned is not None:
+                user_assigned.set_elements(AAZStrType, ".")
 
             return _instance_value
 
-    class InstanceUpdateByGeneric(AAZGenericInstanceUpdateOperation):
 
-        def __call__(self, *args, **kwargs):
-            self._update_instance_by_generic(
-                self.ctx.vars.instance,
-                self.ctx.generic_update_args
-            )
-
-
-class _UpdateHelper:
-    """Helper class for Update"""
+class _AssignHelper:
+    """Helper class for Assign"""
 
     _schema_gallery_read = None
 
@@ -402,9 +347,11 @@ class _UpdateHelper:
     def _build_schema_gallery_read(cls, _schema):
         if cls._schema_gallery_read is not None:
             _schema.id = cls._schema_gallery_read.id
+            _schema.identity = cls._schema_gallery_read.identity
             _schema.location = cls._schema_gallery_read.location
             _schema.name = cls._schema_gallery_read.name
             _schema.properties = cls._schema_gallery_read.properties
+            _schema.system_data = cls._schema_gallery_read.system_data
             _schema.tags = cls._schema_gallery_read.tags
             _schema.type = cls._schema_gallery_read.type
             return
@@ -415,6 +362,7 @@ class _UpdateHelper:
         gallery_read.id = AAZStrType(
             flags={"read_only": True},
         )
+        gallery_read.identity = AAZIdentityObjectType()
         gallery_read.location = AAZStrType(
             flags={"required": True},
         )
@@ -424,8 +372,39 @@ class _UpdateHelper:
         gallery_read.properties = AAZObjectType(
             flags={"client_flatten": True},
         )
+        gallery_read.system_data = AAZObjectType(
+            serialized_name="systemData",
+            flags={"read_only": True},
+        )
         gallery_read.tags = AAZDictType()
         gallery_read.type = AAZStrType(
+            flags={"read_only": True},
+        )
+
+        identity = _schema_gallery_read.identity
+        identity.principal_id = AAZStrType(
+            serialized_name="principalId",
+            flags={"read_only": True},
+        )
+        identity.tenant_id = AAZStrType(
+            serialized_name="tenantId",
+            flags={"read_only": True},
+        )
+        identity.type = AAZStrType()
+        identity.user_assigned_identities = AAZDictType(
+            serialized_name="userAssignedIdentities",
+        )
+
+        user_assigned_identities = _schema_gallery_read.identity.user_assigned_identities
+        user_assigned_identities.Element = AAZObjectType()
+
+        _element = _schema_gallery_read.identity.user_assigned_identities.Element
+        _element.client_id = AAZStrType(
+            serialized_name="clientId",
+            flags={"read_only": True},
+        )
+        _element.principal_id = AAZStrType(
+            serialized_name="principalId",
             flags={"read_only": True},
         )
 
@@ -517,15 +496,37 @@ class _UpdateHelper:
             serialized_name="isSoftDeleteEnabled",
         )
 
+        system_data = _schema_gallery_read.system_data
+        system_data.created_at = AAZStrType(
+            serialized_name="createdAt",
+        )
+        system_data.created_by = AAZStrType(
+            serialized_name="createdBy",
+        )
+        system_data.created_by_type = AAZStrType(
+            serialized_name="createdByType",
+        )
+        system_data.last_modified_at = AAZStrType(
+            serialized_name="lastModifiedAt",
+        )
+        system_data.last_modified_by = AAZStrType(
+            serialized_name="lastModifiedBy",
+        )
+        system_data.last_modified_by_type = AAZStrType(
+            serialized_name="lastModifiedByType",
+        )
+
         tags = _schema_gallery_read.tags
         tags.Element = AAZStrType()
 
         _schema.id = cls._schema_gallery_read.id
+        _schema.identity = cls._schema_gallery_read.identity
         _schema.location = cls._schema_gallery_read.location
         _schema.name = cls._schema_gallery_read.name
         _schema.properties = cls._schema_gallery_read.properties
+        _schema.system_data = cls._schema_gallery_read.system_data
         _schema.tags = cls._schema_gallery_read.tags
         _schema.type = cls._schema_gallery_read.type
 
 
-__all__ = ["Update"]
+__all__ = ["Assign"]

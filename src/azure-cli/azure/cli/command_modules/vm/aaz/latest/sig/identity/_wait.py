@@ -12,36 +12,22 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "sig create",
+    "sig identity wait",
 )
-class Create(AAZCommand):
-    """Create a shared image gallery.
-
-    :example: Create a shared image gallery
-        az sig create --resource-group MyResourceGroup --gallery-name MyGallery
-
-    :example: Create a shared image gallery with enabled system assigned identity.
-        az sig create --resource-group MyResourceGroup --gallery-name MyGallery123 --system-assigned
-
-    :example: Create a shared image gallery with a user assigned identity.
-        az sig create --resource-group MyResourceGroup --gallery-name MyGallery123 --user-assigned id1
-
-    :example: Create a shared image gallery with both system and user assigned identity.
-        az sig create --resource-group MyResourceGroup --gallery-name MyGallery123 --system-assigned --user-assigned id1
+class Wait(AAZWaitCommand):
+    """Place the CLI in a waiting state until a condition is met.
     """
 
     _aaz_info = {
-        "version": "2025-03-03",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/galleries/{}", "2025-03-03"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/galleries/{}", "2025-03-03", "identity"],
         ]
     }
 
-    AZ_SUPPORT_NO_WAIT = True
-
     def _handler(self, command_args):
         super()._handler(command_args)
-        return self.build_lro_poller(self._execute_operations, self._output)
+        self._execute_operations()
+        return self._output()
 
     _args_schema = None
 
@@ -58,6 +44,7 @@ class Create(AAZCommand):
             options=["-r", "--gallery-name"],
             help="The name of the Shared Image Gallery.",
             required=True,
+            id_part="name",
             fmt=AAZStrArgFormat(
                 pattern="^[^_\\W][\\w._-]{0,79}(?<![-.])$",
             ),
@@ -65,102 +52,11 @@ class Create(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-
-        # define Arg Group "CommunityGalleryInfo"
-
-        _args_schema = cls._args_schema
-        _args_schema.eula = AAZStrArg(
-            options=["--eula"],
-            arg_group="CommunityGalleryInfo",
-            help="Community gallery publisher eula",
-        )
-        _args_schema.public_name_prefix = AAZStrArg(
-            options=["--public-name-prefix"],
-            arg_group="CommunityGalleryInfo",
-            help="Community gallery public name prefix",
-        )
-        _args_schema.publisher_contact = AAZStrArg(
-            options=["--publisher-email", "--publisher-contact"],
-            arg_group="CommunityGalleryInfo",
-            help="Community gallery publisher contact email",
-        )
-        _args_schema.publisher_uri = AAZStrArg(
-            options=["--publisher-uri"],
-            arg_group="CommunityGalleryInfo",
-            help="Community gallery publisher uri",
-        )
-
-        # define Arg Group "Gallery"
-
-        _args_schema = cls._args_schema
-        _args_schema.location = AAZResourceLocationArg(
-            arg_group="Gallery",
-            help="Resource location",
-            required=True,
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group",
-            ),
-        )
-        _args_schema.tags = AAZDictArg(
-            options=["--tags"],
-            arg_group="Gallery",
-            help="Space-separated tags: key[=value] [key[=value] ...]. Use \"\" to clear existing tags.",
-        )
-
-        tags = cls._args_schema.tags
-        tags.Element = AAZStrArg()
-
-        # define Arg Group "Identity"
-
-        _args_schema = cls._args_schema
-        _args_schema.mi_system_assigned = AAZStrArg(
-            options=["--system-assigned", "--mi-system-assigned"],
-            arg_group="Identity",
-            help="Set the system managed identity.",
-            blank="True",
-        )
-        _args_schema.mi_user_assigned = AAZListArg(
-            options=["--user-assigned", "--mi-user-assigned"],
-            arg_group="Identity",
-            help="Set the user managed identities.",
-            blank=[],
-        )
-
-        mi_user_assigned = cls._args_schema.mi_user_assigned
-        mi_user_assigned.Element = AAZStrArg()
-
-        # define Arg Group "Properties"
-
-        _args_schema = cls._args_schema
-        _args_schema.description = AAZStrArg(
-            options=["--description"],
-            arg_group="Properties",
-            help="The description of the gallery.",
-        )
-
-        # define Arg Group "SharingProfile"
-
-        _args_schema = cls._args_schema
-        _args_schema.permissions = AAZStrArg(
-            options=["--permissions"],
-            arg_group="SharingProfile",
-            help="This property allows you to specify the permission of sharing gallery.",
-            enum={"Community": "Community", "Groups": "Groups", "Private": "Private"},
-        )
-
-        # define Arg Group "SoftDeletePolicy"
-
-        _args_schema = cls._args_schema
-        _args_schema.soft_delete = AAZBoolArg(
-            options=["--soft-delete"],
-            arg_group="SoftDeletePolicy",
-            help="Enable soft-deletion for resources in this gallery, allowing them to be recovered within retention time.",
-        )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.GalleriesCreateOrUpdate(ctx=self.ctx)()
+        self.GalleriesGet(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -172,33 +68,17 @@ class Create(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=False)
         return result
 
-    class GalleriesCreateOrUpdate(AAZHttpOperation):
+    class GalleriesGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
             request = self.make_request()
             session = self.client.send_request(request=request, stream=False, **kwargs)
-            if session.http_response.status_code in [202]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_200_201,
-                    self.on_error,
-                    lro_options={"final-state-via": "location"},
-                    path_format_arguments=self.url_parameters,
-                )
-            if session.http_response.status_code in [200, 201]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_200_201,
-                    self.on_error,
-                    lro_options={"final-state-via": "location"},
-                    path_format_arguments=self.url_parameters,
-                )
+            if session.http_response.status_code in [200]:
+                return self.on_200(session)
 
             return self.on_error(session.http_response)
 
@@ -211,7 +91,7 @@ class Create(AAZCommand):
 
         @property
         def method(self):
-            return "PUT"
+            return "GET"
 
         @property
         def error_format(self):
@@ -249,86 +129,34 @@ class Create(AAZCommand):
         def header_parameters(self):
             parameters = {
                 **self.serialize_header_param(
-                    "Content-Type", "application/json",
-                ),
-                **self.serialize_header_param(
                     "Accept", "application/json",
                 ),
             }
             return parameters
 
-        @property
-        def content(self):
-            _content_value, _builder = self.new_content_builder(
-                self.ctx.args,
-                typ=AAZObjectType,
-                typ_kwargs={"flags": {"required": True, "client_flatten": True}}
-            )
-            _builder.set_prop("identity", AAZIdentityObjectType)
-            _builder.set_prop("location", AAZStrType, ".location", typ_kwargs={"flags": {"required": True}})
-            _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-            _builder.set_prop("tags", AAZDictType, ".tags")
-
-            identity = _builder.get(".identity")
-            if identity is not None:
-                identity.set_prop("userAssigned", AAZListType, ".mi_user_assigned", typ_kwargs={"flags": {"action": "create"}})
-                identity.set_prop("systemAssigned", AAZStrType, ".mi_system_assigned", typ_kwargs={"flags": {"action": "create"}})
-
-            user_assigned = _builder.get(".identity.userAssigned")
-            if user_assigned is not None:
-                user_assigned.set_elements(AAZStrType, ".")
-
-            properties = _builder.get(".properties")
-            if properties is not None:
-                properties.set_prop("description", AAZStrType, ".description")
-                properties.set_prop("sharingProfile", AAZObjectType)
-                properties.set_prop("softDeletePolicy", AAZObjectType)
-
-            sharing_profile = _builder.get(".properties.sharingProfile")
-            if sharing_profile is not None:
-                sharing_profile.set_prop("communityGalleryInfo", AAZObjectType)
-                sharing_profile.set_prop("permissions", AAZStrType, ".permissions")
-
-            community_gallery_info = _builder.get(".properties.sharingProfile.communityGalleryInfo")
-            if community_gallery_info is not None:
-                community_gallery_info.set_prop("eula", AAZStrType, ".eula")
-                community_gallery_info.set_prop("publicNamePrefix", AAZStrType, ".public_name_prefix")
-                community_gallery_info.set_prop("publisherContact", AAZStrType, ".publisher_contact")
-                community_gallery_info.set_prop("publisherUri", AAZStrType, ".publisher_uri")
-
-            soft_delete_policy = _builder.get(".properties.softDeletePolicy")
-            if soft_delete_policy is not None:
-                soft_delete_policy.set_prop("isSoftDeleteEnabled", AAZBoolType, ".soft_delete")
-
-            tags = _builder.get(".tags")
-            if tags is not None:
-                tags.set_elements(AAZStrType, ".")
-
-            return self.serialize_content(_content_value)
-
-        def on_200_201(self, session):
+        def on_200(self, session):
             data = self.deserialize_http_content(session)
             self.ctx.set_var(
                 "instance",
                 data,
-                schema_builder=self._build_schema_on_200_201
+                schema_builder=self._build_schema_on_200
             )
 
-        _schema_on_200_201 = None
+        _schema_on_200 = None
 
         @classmethod
-        def _build_schema_on_200_201(cls):
-            if cls._schema_on_200_201 is not None:
-                return cls._schema_on_200_201
+        def _build_schema_on_200(cls):
+            if cls._schema_on_200 is not None:
+                return cls._schema_on_200
 
-            cls._schema_on_200_201 = AAZObjectType()
-            _CreateHelper._build_schema_gallery_read(cls._schema_on_200_201)
+            cls._schema_on_200 = AAZObjectType()
+            _WaitHelper._build_schema_gallery_read(cls._schema_on_200)
 
-            return cls._schema_on_200_201
+            return cls._schema_on_200
 
 
-class _CreateHelper:
-    """Helper class for Create"""
+class _WaitHelper:
+    """Helper class for Wait"""
 
     _schema_gallery_read = None
 
@@ -518,4 +346,4 @@ class _CreateHelper:
         _schema.type = cls._schema_gallery_read.type
 
 
-__all__ = ["Create"]
+__all__ = ["Wait"]

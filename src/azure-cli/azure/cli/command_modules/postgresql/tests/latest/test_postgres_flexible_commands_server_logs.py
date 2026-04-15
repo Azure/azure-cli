@@ -38,8 +38,11 @@ class FlexibleServerLogsMgmtScenarioTest(ScenarioTest):
                     checks=[JMESPathCheck('value', "1"),
                             JMESPathCheck('name', "logfiles.retention_days")]).get_output_in_json()
 
-        # Wait for around 30 min to allow log files to be generated
-        os.environ.get(ENV_LIVE_TEST, False) and sleep(1800)
+        if os.environ.get(ENV_LIVE_TEST, True):
+            return
+
+        # wait for around 30 min to allow log files to be generated
+        sleep(30 * 60)
 
         # List server log files
         server_log_files = self.cmd('postgres flexible-server server-logs list -g {} --server-name {} '
