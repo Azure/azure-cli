@@ -4351,10 +4351,18 @@ def update_container_settings(cmd, resource_group_name, name, container_registry
                               slot=None, min_replicas=None, max_replicas=None,
                               assign_identities=None, role='AcrPull', scope=None,
                               acr_use_identity=None, acr_identity=None):
-    # Read existing app settings so we can preserve non-container settings and Key Vault references
-    existing_app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
-                                                    'list_application_settings', slot)
-    existing_properties = existing_app_settings.properties or {}
+    # Only read existing app settings when we have container-related parameters to process.
+    # This avoids an unnecessary API call when only site-config or identity changes are requested.
+    has_container_params = (container_registry_url is not None or container_registry_user is not None or
+                           container_registry_password is not None or websites_enable_app_service_storage)
+
+    if has_container_params:
+        existing_app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
+                                                        'list_application_settings', slot)
+        existing_properties = existing_app_settings.properties or {}
+    else:
+        existing_app_settings = None
+        existing_properties = {}
 
     # Skip credential lookup entirely when managed identity ACR pull is enabled
     if acr_use_identity:
