@@ -20,7 +20,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2025-06-01&$expand=kerb
   response:
     body:
-      string: '{"keys":[{"creationTime":"2026-04-13T08:55:08.8763714Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2026-04-13T08:55:08.8763714Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+      string: '{"keys":[{"creationTime":"2026-04-15T03:07:21.5911404Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2026-04-15T03:07:21.5911404Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
     headers:
       cache-control:
       - no-cache
@@ -29,7 +29,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Mon, 13 Apr 2026 08:55:37 GMT
+      - Wed, 15 Apr 2026 03:07:50 GMT
       expires:
       - '-1'
       pragma:
@@ -41,9 +41,9 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=ed94de55-1f87-4278-9651-525e7ba467d6,objectId=9189af77-1924-4997-8bea-dc08f6bf83e0/eastus2euap/59b8612c-d4ec-4ce7-bc8f-f51c82bd4c18
+      - tenantId=ed94de55-1f87-4278-9651-525e7ba467d6,objectId=9189af77-1924-4997-8bea-dc08f6bf83e0/eastus2euap/627df744-950f-4cf0-8d6f-92551ae13cf8
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '798'
+      - '0'
       x-ms-throttling-version:
       - v1
     status:
@@ -67,7 +67,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.85.0 azsdk-python-storage-file-share/12.25.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Mon, 13 Apr 2026 08:55:37 GMT
+      - Wed, 15 Apr 2026 03:07:51 GMT
       x-ms-version:
       - '2026-04-06'
     method: PUT
@@ -79,11 +79,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 13 Apr 2026 08:55:39 GMT
+      - Wed, 15 Apr 2026 03:07:52 GMT
       etag:
-      - '"0x8DE993A6FF6A52D"'
+      - '"0x8DE9A9C2F40509A"'
       last-modified:
-      - Mon, 13 Apr 2026 08:55:39 GMT
+      - Wed, 15 Apr 2026 03:07:53 GMT
       server:
       - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
@@ -120,11 +120,11 @@ interactions:
       content-type:
       - application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8
       date:
-      - Mon, 13 Apr 2026 08:55:41 GMT
+      - Wed, 15 Apr 2026 03:07:54 GMT
       odata-version:
       - '4.0'
       request-id:
-      - 59260207-21fe-4253-abfe-9ea623ba0657
+      - da094bbd-174a-4f04-aa23-6cad4c2ba759
       strict-transport-security:
       - max-age=31536000
       transfer-encoding:
@@ -134,7 +134,7 @@ interactions:
       x-cache:
       - CONFIG_NOCACHE
       x-ms-ags-diagnostic:
-      - '{"ServerInfo":{"DataCenter":"Southeast Asia","Slice":"E","Ring":"5","ScaleUnit":"005","RoleInstance":"SG1PEPF000101BF"}}'
+      - '{"ServerInfo":{"DataCenter":"Southeast Asia","Slice":"E","Ring":"5","ScaleUnit":"000","RoleInstance":"SI1PEPF0003B303"}}'
       x-ms-resource-unit:
       - '1'
     status:
@@ -143,7 +143,7 @@ interactions:
 - request:
     body: '<?xml version=''1.0'' encoding=''utf-8''?>
 
-      <KeyInfo><Start>2026-04-13T08:55:41Z</Start><Expiry>2026-04-13T09:55:00Z</Expiry></KeyInfo>'
+      <KeyInfo><Start>2026-04-15T03:07:54Z</Start><Expiry>2026-04-15T04:07:00Z</Expiry><DelegatedUserTid>ed94de55-1f87-4278-9651-525e7ba467d6</DelegatedUserTid></KeyInfo>'
     headers:
       Accept:
       - application/xml
@@ -154,28 +154,28 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '130'
+      - '203'
       Content-Type:
       - application/xml
       ParameterSetName:
       - --account-name -n --expiry --permissions --https-only --as-user --auth-mode
-        --backup-intent --user-delegation-oid
+        --backup-intent --user-delegation-oid --user-delegation-tid
       User-Agent:
       - AZURECLI/2.85.0 azsdk-python-storage-file-share/12.25.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Mon, 13 Apr 2026 08:55:41 GMT
+      - Wed, 15 Apr 2026 03:07:54 GMT
       x-ms-version:
       - '2026-04-06'
     method: POST
     uri: https://clitest000002.file.core.windows.net/?restype=service&comp=userdelegationkey
   response:
     body:
-      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><UserDelegationKey><SignedOid>9189af77-1924-4997-8bea-dc08f6bf83e0</SignedOid><SignedTid>ed94de55-1f87-4278-9651-525e7ba467d6</SignedTid><SignedStart>2026-04-13T08:55:41Z</SignedStart><SignedExpiry>2026-04-13T09:55:00Z</SignedExpiry><SignedService>f</SignedService><SignedVersion>2026-04-06</SignedVersion><Value>W4Y87QF66IpeBPOVHa36da8416Aa4Xl5M//+dj2ysXk=</Value></UserDelegationKey>"
+      string: "\uFEFF<?xml version=\"1.0\" encoding=\"utf-8\"?><UserDelegationKey><SignedOid>9189af77-1924-4997-8bea-dc08f6bf83e0</SignedOid><SignedTid>ed94de55-1f87-4278-9651-525e7ba467d6</SignedTid><SignedStart>2026-04-15T03:07:54Z</SignedStart><SignedExpiry>2026-04-15T04:07:00Z</SignedExpiry><SignedService>f</SignedService><SignedVersion>2026-04-06</SignedVersion><SignedDelegatedUserTid>ed94de55-1f87-4278-9651-525e7ba467d6</SignedDelegatedUserTid><Value>Kp2zW2aSWpavOw6R5CTmQBPD+CI0SZjuobL8tsY/rIM=</Value></UserDelegationKey>"
     headers:
       content-type:
       - application/xml
       date:
-      - Mon, 13 Apr 2026 08:55:42 GMT
+      - Wed, 15 Apr 2026 03:07:56 GMT
       server:
       - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
@@ -207,7 +207,7 @@ interactions:
       x-ms-content-length:
       - '1048576'
       x-ms-date:
-      - Mon, 13 Apr 2026 08:55:44 GMT
+      - Wed, 15 Apr 2026 03:07:57 GMT
       x-ms-file-request-intent:
       - backup
       x-ms-type:
@@ -215,7 +215,7 @@ interactions:
       x-ms-version:
       - '2026-04-06'
     method: PUT
-    uri: https://clitest000002.file.core.windows.net/share000003/tmp092z7xva?se=2026-04-13T09%3A55Z&sp=rcwdl&spr=https&sv=2026-04-06&sduoid=9189af77-1924-4997-8bea-dc08f6bf83e0&sr=s&skoid=9189af77-1924-4997-8bea-dc08f6bf83e0&sktid=ed94de55-1f87-4278-9651-525e7ba467d6&skt=2026-04-13T08%3A55%3A41Z&ske=2026-04-13T09%3A55%3A00Z&sks=f&skv=2026-04-06&sig=g9ZpUbnvFzdhLBqhC8ryo%2BHZZ8Mhq4FIdAvVgeTgz2I%3D
+    uri: https://clitest000002.file.core.windows.net/share000003/tmpqwx66qg1?se=2026-04-15T04%3A07Z&sp=rcwdl&spr=https&sv=2026-04-06&sduoid=9189af77-1924-4997-8bea-dc08f6bf83e0&sr=s&skoid=9189af77-1924-4997-8bea-dc08f6bf83e0&sktid=ed94de55-1f87-4278-9651-525e7ba467d6&skt=2026-04-15T03%3A07%3A54Z&ske=2026-04-15T04%3A07%3A00Z&sks=f&skv=2026-04-06&skdutid=ed94de55-1f87-4278-9651-525e7ba467d6&sig=%2Bd0ZauRoMhZSZddlF5GmR2oihZ7LkabdATLpv0vEDds%3D
   response:
     body:
       string: ''
@@ -223,27 +223,27 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 13 Apr 2026 08:55:45 GMT
+      - Wed, 15 Apr 2026 03:07:58 GMT
       etag:
-      - '"0x8DE993A739CC328"'
+      - '"0x8DE9A9C32E7E3E9"'
       last-modified:
-      - Mon, 13 Apr 2026 08:55:45 GMT
+      - Wed, 15 Apr 2026 03:07:59 GMT
       server:
       - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
       x-ms-file-attributes:
       - Archive
       x-ms-file-change-time:
-      - '2026-04-13T08:55:45.9995432Z'
+      - '2026-04-15T03:07:59.2822761Z'
       x-ms-file-creation-time:
-      - '2026-04-13T08:55:45.9995432Z'
+      - '2026-04-15T03:07:59.2822761Z'
       x-ms-file-id:
       - '13835128424026341376'
       x-ms-file-last-write-time:
-      - '2026-04-13T08:55:45.9995432Z'
+      - '2026-04-15T03:07:59.2822761Z'
       x-ms-file-parent-id:
       - '0'
       x-ms-file-permission-key:
-      - 2610915182534459018*10131759715727578628
+      - 16808997314607171958*4748313250520244728
       x-ms-request-server-encrypted:
       - 'true'
       x-ms-version:
@@ -273,7 +273,7 @@ interactions:
       x-ms-allow-trailing-dot:
       - 'true'
       x-ms-date:
-      - Mon, 13 Apr 2026 08:55:46 GMT
+      - Wed, 15 Apr 2026 03:07:59 GMT
       x-ms-file-request-intent:
       - backup
       x-ms-range:
@@ -283,7 +283,7 @@ interactions:
       x-ms-write:
       - update
     method: PUT
-    uri: https://clitest000002.file.core.windows.net/share000003/tmp092z7xva?comp=range&se=2026-04-13T09%3A55Z&sp=rcwdl&spr=https&sv=2026-04-06&sduoid=9189af77-1924-4997-8bea-dc08f6bf83e0&sr=s&skoid=9189af77-1924-4997-8bea-dc08f6bf83e0&sktid=ed94de55-1f87-4278-9651-525e7ba467d6&skt=2026-04-13T08%3A55%3A41Z&ske=2026-04-13T09%3A55%3A00Z&sks=f&skv=2026-04-06&sig=g9ZpUbnvFzdhLBqhC8ryo%2BHZZ8Mhq4FIdAvVgeTgz2I%3D
+    uri: https://clitest000002.file.core.windows.net/share000003/tmpqwx66qg1?comp=range&se=2026-04-15T04%3A07Z&sp=rcwdl&spr=https&sv=2026-04-06&sduoid=9189af77-1924-4997-8bea-dc08f6bf83e0&sr=s&skoid=9189af77-1924-4997-8bea-dc08f6bf83e0&sktid=ed94de55-1f87-4278-9651-525e7ba467d6&skt=2026-04-15T03%3A07%3A54Z&ske=2026-04-15T04%3A07%3A00Z&sks=f&skv=2026-04-06&skdutid=ed94de55-1f87-4278-9651-525e7ba467d6&sig=%2Bd0ZauRoMhZSZddlF5GmR2oihZ7LkabdATLpv0vEDds%3D
   response:
     body:
       string: ''
@@ -293,15 +293,15 @@ interactions:
       content-md5:
       - ttgbNgpWctgMJ0MPORU+LA==
       date:
-      - Mon, 13 Apr 2026 08:55:48 GMT
+      - Wed, 15 Apr 2026 03:08:02 GMT
       etag:
-      - '"0x8DE993A7572C4C8"'
+      - '"0x8DE9A9C34CF6F21"'
       last-modified:
-      - Mon, 13 Apr 2026 08:55:49 GMT
+      - Wed, 15 Apr 2026 03:08:02 GMT
       server:
       - Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0
       x-ms-file-last-write-time:
-      - '2026-04-13T08:55:49.0797768Z'
+      - '2026-04-15T03:08:02.4774433Z'
       x-ms-request-server-encrypted:
       - 'true'
       x-ms-version:

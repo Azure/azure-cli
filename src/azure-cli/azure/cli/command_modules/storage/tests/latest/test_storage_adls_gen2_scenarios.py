@@ -603,7 +603,8 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
 
         fs_sas = self.cmd('storage fs generate-sas --account-name {} -n {} --expiry {} --permissions '
                           'dlrwop --https-only --as-user --auth-mode login --user-delegation-oid '
-                          '{}'.format(storage_account, f, expiry, logged_in_user)).output
+                          '{} --user-delegation-tid ed94de55-1f87-4278-9651-525e7ba467d6'.format(
+            storage_account, f, expiry, logged_in_user)).output
         self.assertIn('&sig=', fs_sas)
         self.assertIn('skoid=', fs_sas)
         self.assertIn('sktid=', fs_sas)
@@ -612,6 +613,7 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
         self.assertIn('sks=', fs_sas)
         self.assertIn('skv=', fs_sas)
         self.assertIn('sduoid=', fs_sas)
+        self.assertIn('skdutid=', fs_sas)
 
         if self.is_live:
             self.cmd('storage fs file upload --account-name {} -f {} -s "{}" -p {} --overwrite --sas-token {} '
@@ -678,7 +680,8 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
 
         fs_sas = self.cmd('storage fs directory generate-sas --account-name {} -n {} -f {} --expiry {} --permissions '
                           'dlrwop --https-only --as-user --auth-mode login --user-delegation-oid '
-                          '{}'.format(storage_account, directory, filesystem, expiry, logged_in_user)).output
+                          '{} --user-delegation-tid ed94de55-1f87-4278-9651-525e7ba467d6'.format(
+            storage_account, directory, filesystem, expiry, logged_in_user)).output
         self.assertIn('&sig=', fs_sas)
         self.assertIn('skoid=', fs_sas)
         self.assertIn('sktid=', fs_sas)
@@ -689,6 +692,7 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
         self.assertIn('sr=d', fs_sas)
         self.assertIn('sdd=2', fs_sas)
         self.assertIn('skoid=', fs_sas)
+        self.assertIn('skdutid=', fs_sas)
 
         if self.is_live:
             self.cmd('storage fs directory show --account-name {} -n {} -f {} --sas-token {} '
@@ -744,7 +748,8 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
 
         file_sas = self.cmd('storage fs file generate-sas --account-name {} -p {} -f {} --expiry {} --permissions '
                           'dlrwop --https-only --as-user --auth-mode login --user-delegation-oid '
-                          '{}'.format(storage_account, file_path, filesystem, expiry, logged_in_user)).output
+                          '{} --user-delegation-tid ed94de55-1f87-4278-9651-525e7ba467d6'.format(
+            storage_account, file_path, filesystem, expiry, logged_in_user)).output
 
         self.assertIn('&sig=', file_sas)
         self.assertIn('skoid=', file_sas)
@@ -755,6 +760,7 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
         self.assertIn('skv=', file_sas)
         self.assertIn('sr=b', file_sas)
         self.assertIn('sduoid=', file_sas)
+        self.assertIn('skdutid=', file_sas)
 
         if self.is_live:
             self.cmd('storage fs file upload --account-name {} -f {} -s "{}" -p {} --sas-token {} '

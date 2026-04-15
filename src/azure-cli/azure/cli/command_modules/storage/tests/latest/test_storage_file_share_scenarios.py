@@ -200,7 +200,8 @@ class StorageShareScenarioTests(StorageScenarioMixin, ScenarioTest):
 
         share_sas = self.cmd('storage share generate-sas --account-name {} -n {} --expiry {} --permissions crwld '
                              '--https-only --as-user --auth-mode login --backup-intent --user-delegation-oid '
-                             '{}'.format(storage_account, share, expiry, logged_in_user)).output
+                             '{} --user-delegation-tid ed94de55-1f87-4278-9651-525e7ba467d6'.format(
+            storage_account, share, expiry, logged_in_user)).output
         self.assertIn('&sig=', share_sas)
         self.assertIn('skoid=', share_sas)
         self.assertIn('sktid=', share_sas)
@@ -209,6 +210,7 @@ class StorageShareScenarioTests(StorageScenarioMixin, ScenarioTest):
         self.assertIn('sks=', share_sas)
         self.assertIn('skv=', share_sas)
         self.assertIn('sduoid=', share_sas)
+        self.assertIn('skdutid=', share_sas)
 
         if self.is_live:
             self.cmd('storage file upload --account-name {} --source "{}" -s {} --sas-token {} '
