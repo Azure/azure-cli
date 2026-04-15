@@ -4354,7 +4354,7 @@ def update_container_settings(cmd, resource_group_name, name, container_registry
     # Only read existing app settings when we have container-related parameters to process.
     # This avoids an unnecessary API call when only site-config or identity changes are requested.
     has_container_params = (container_registry_url is not None or container_registry_user is not None or
-                           container_registry_password is not None or websites_enable_app_service_storage)
+                            container_registry_password is not None or websites_enable_app_service_storage)
 
     if has_container_params:
         existing_app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
