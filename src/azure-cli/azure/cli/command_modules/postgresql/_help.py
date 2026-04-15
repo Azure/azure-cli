@@ -66,21 +66,19 @@ examples:
     text: >
       az postgres flexible-server create --resource-group testGroup --name testserver --public-access 125.23.54.31-125.23.54.35
   - name: >
-      Create a PostgreSQL flexible server with private access. If provided virtual network and subnet do not exists, virtual network and subnet with the specified address prefixes will be created.
+      Create a PostgreSQL flexible server with private access using existing virtual network and subnet names.
     text: >
-      az postgres flexible-server create --resource-group testGroup --name testserver --vnet myVnet --subnet mySubnet --address-prefixes 10.0.0.0/16 --subnet-prefixes 10.0.0.0/24
+      az postgres flexible-server create --resource-group testGroup --name testserver --vnet myVnet --subnet mySubnet
   - name: >
-      Create a PostgreSQL flexible server using a new subnet resource ID and new private DNS zone resource ID. The subnet and DNS zone can be created in different subscription or resource group.
+      Create a PostgreSQL flexible server using existing subnet and private DNS zone resource IDs. The subnet and DNS zone can be in different subscriptions or resource groups.
     text: |
       az postgres flexible-server create \\
         --resource-group testGroup --name testserver \\
         --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNetName}/subnets/{SubnetName} \\
-        --private-dns-zone /subscriptions/{SubID}/resourceGroups/{resourceGroup}/providers/Microsoft.Network/privateDnsZones/testPostgreSQLFlexibleDnsZone.private.postgres.database.azure.com \\
-        --address-prefixes 172.0.0.0/16 --subnet-prefixes 172.0.0.0/24
+        --private-dns-zone /subscriptions/{SubID}/resourceGroups/{resourceGroup}/providers/Microsoft.Network/privateDnsZones/testPostgreSQLFlexibleDnsZone.private.postgres.database.azure.com
   - name: >
       Create a PostgreSQL flexible server using existing network resources in the same resource group.
-      The provided subnet should not have any other resource deployed in it and this subnet will be delegated to Microsoft.DBforPostgreSQL/flexibleServers, if not already delegated.
-      The private DNS zone will be linked to the virtual network if not already linked.
+      The provided subnet and private DNS zone must already exist.
     text: >
       # create vnet
 
@@ -307,14 +305,14 @@ examples:
     text: az postgres flexible-server restore --resource-group testGroup --name testserverNew --source-server testserver
   - name: >
       Restore 'testserver' to current point-in-time as a new server 'testserverNew' in a different resource group. \\
-      Here --resource-group is for the target server's resource group, and --source-server must be passed as resource ID.
+      Here --resource-group is for the target server's resource group, and --source-server must be passed as resource identifier.
     text: >
       az postgres flexible-server restore --resource-group testGroup --name testserverNew \\
         --source-server /subscriptions/{testSubscription}/resourceGroups/{sourceResourceGroup}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{sourceServerName}
   - name: >
       Restore 'testserver' to current point-in-time as a new server 'testserverNew' in a different subscription. \\
-      Here --resource-group is for the target server's resource group, and --source-server must be passed as resource ID. \\
-      This resource ID can be in a subscription different than the subscription used for az account set.
+      Here --resource-group is for the target server's resource group, and --source-server must be passed as resource identifier. \\
+      This resource identifier can be in a subscription different than the subscription used for az account set.
     text: >
       az postgres flexible-server restore --resource-group testGroup --name testserverNew \\
         --source-server /subscriptions/{sourceSubscriptionId}/resourceGroups/{sourceResourceGroup}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{sourceServerName}
@@ -608,7 +606,7 @@ examples:
         --migration-name testmigration --properties "migrationConfig.json"
   - name: >
       Start a private endpoint enabled migration workflow on the target server by specifying migrationRuntimeResourceId in properties file. This property is defined as: \n
-      migrationRuntimeResourceId: The resource ID of the migration runtime server that is responsible for migrating data between source and target server. \n
+      migrationRuntimeResourceId: The resource identifier of the migration runtime server that is responsible for migrating data between source and target server. \n
       Sample migrationConfig.json shown below. \n
       {
         "properties": {
@@ -832,12 +830,11 @@ short-summary: Create a read replica for a server.
 examples:
   - name: Create a read replica 'testreplicaserver' for 'testserver' with public or private access in the specified zone and location if available.
     text: az postgres flexible-server replica create --name testreplicaserver -g testGroup --source-server testserver --zone 3 --location testLocation
-  - name: Create a read replica 'testreplicaserver' with new subnet for 'testserver' with private access.
+  - name: Create a read replica 'testreplicaserver' for 'testserver' with private access using existing network resources.
     text: >
       az postgres flexible-server replica create --name testreplicaserver -g testGroup \\
         --source-server testserver --zone 3 --location testLocation \\
         --vnet newVnet --subnet newSubnet \\
-        --address-prefixes 172.0.0.0/16 --subnet-prefixes 172.0.0.0/24 \\
         --private-dns-zone testDNS.postgres.database.azure.com \\
         --tags "key=value"
   - name: >
@@ -849,7 +846,7 @@ examples:
   - name: Create a read replica 'testreplicaserver' for 'testserver' with custom --storage-size and --sku.
     text: az postgres flexible-server replica create --name testreplicaserver -g testGroup --source-server testserver --sku-name Standard_D4ds_v5 --storage-size 256
   - name: Create a read replica 'testreplicaserver' for 'testserver', where 'testreplicaserver' is in a different resource group 'newTestGroup'. \
-      Here --resource-group is for the read replica's resource group, and --source-server must be passed as resource ID.
+      Here --resource-group is for the read replica's resource group, and --source-server must be passed as resource identifier.
     text: >
       az postgres flexible-server replica create --name testreplicaserver -g newTestGroup \
         --source-server /subscriptions/{sourceSubscriptionId}/resourceGroups/{sourceResourceGroup}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{sourceServerName} --location testLocation
@@ -885,17 +882,15 @@ examples:
       Geo-restore public access server 'testserver' to a new server 'testserverNew' in location 'newLocation' with public access.
     text: az postgres flexible-server geo-restore --resource-group testGroup --name testserverNew --source-server testserver --location newLocation
   - name: >
-      Geo-restore private access server 'testserver' as a new server 'testserverNew' with new subnet.
-      New vnet, subnet, and private dns zone for the restored server will be provisioned. Please refer to 'flexible-server create' command for more private access scenarios.
+      Geo-restore private access server 'testserver' as a new server 'testserverNew' using existing private networking resources.
     text: >
       az postgres flexible-server geo-restore --resource-group testGroup --name testserverNew \\
         --source-server testserver --vnet newVnet --subnet newSubnet \\
-        --address-prefixes 172.0.0.0/16 --subnet-prefixes 172.0.0.0/24 \\
         --private-dns-zone testDNS.postgres.database.azure.com --location newLocation
   - name: >
       Geo-restore 'testserver' to current point-in-time as a new server 'testserverNew' in a different subscription / resource group. \\
-      Here --resource-group is for the target server's resource group, and --source-server must be passed as resource ID. \\
-      This resource ID can be in a subscription different than the subscription used for az account set.
+      Here --resource-group is for the target server's resource group, and --source-server must be passed as resource identifier. \\
+      This resource identifier can be in a subscription different than the subscription used for az account set.
     text: >
       az postgres flexible-server geo-restore --resource-group testGroup --name testserverNew --location newLocation \\
         --source-server /subscriptions/{sourceSubscriptionId}/resourceGroups/{sourceResourceGroup}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{sourceServerName}
@@ -977,7 +972,7 @@ helps['postgres flexible-server microsoft-entra-admin create'] = """
 type: command
 short-summary: Create a Microsoft Entra administrator.
 examples:
-  - name: Create Microsoft Entra administrator with user 'john@contoso.com', administrator ID '00000000-0000-0000-0000-000000000000' and type User.
+  - name: Create Microsoft Entra administrator with user 'john@contoso.com', administrator identifier '00000000-0000-0000-0000-000000000000' and type User.
     text: az postgres flexible-server microsoft-entra-admin create -g testgroup -s testsvr -u john@contoso.com -i 00000000-0000-0000-0000-000000000000 -t User
 """
 
@@ -985,7 +980,7 @@ helps['postgres flexible-server microsoft-entra-admin delete'] = """
 type: command
 short-summary: Delete a Microsoft Entra administrator.
 examples:
-  - name: Delete Microsoft Entra administrator with ID '00000000-0000-0000-0000-000000000000'.
+  - name: Delete Microsoft Entra administrator with identifier '00000000-0000-0000-0000-000000000000'.
     text: az postgres flexible-server microsoft-entra-admin delete -g testgroup -s testsvr -i 00000000-0000-0000-0000-000000000000
 """
 
@@ -1001,7 +996,7 @@ helps['postgres flexible-server microsoft-entra-admin show'] = """
 type: command
 short-summary: Get a Microsoft Entra administrator.
 examples:
-  - name: Get Microsoft Entra administrator with ID '00000000-0000-0000-0000-000000000000'.
+  - name: Get Microsoft Entra administrator with identifier '00000000-0000-0000-0000-000000000000'.
     text: az postgres flexible-server microsoft-entra-admin show -g testgroup -s testsvr -i 00000000-0000-0000-0000-000000000000
 """
 

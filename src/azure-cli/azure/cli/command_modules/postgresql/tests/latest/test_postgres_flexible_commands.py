@@ -186,73 +186,115 @@ class PostgreSQLFlexibleServerValidatorScenarioTest(ScenarioTest):
         valid_tier = 'GeneralPurpose'
         invalid_backup_retention = 40
         ha_value = 'ZoneRedundant'
+        vnet_name = self.create_random_name('vnet', RANDOM_VARIABLE_MAX_LENGTH)
+        subnet_name = self.create_random_name('subnet', RANDOM_VARIABLE_MAX_LENGTH)
+        vnet_identifier = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resource-group/providers/Microsoft.Network/virtualNetworks/{}'.format(vnet_name)
+        subnet_identifier = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resource-group/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(vnet_name, subnet_name)
+        valid_private_dns_zone = '{}.private.postgres.database.azure.com'.format(server_name)
+        invalid_private_dns_zones = ['{}.postgres.database.azure.com'.format(server_name), 'invalidprivate.dns.zone', '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resource-group/providers/Microsoft.Network/privateDnsZones/invalidprivate.dns.zone']
 
-        # Create server with invalid server name
+        # Create server with invalid server name.
         self.cmd('postgres flexible-server create -g {} -n Wrongserver.Name -l {}'.format(
                 resource_group, location),
                 expect_failure=True)
 
-        # Create server with invalid tier
+        # Create server with invalid tier.
         self.cmd('postgres flexible-server create -g {} -n {} -l {} --tier {}'.format(
                  resource_group, server_name, location, invalid_tier),
                  expect_failure=True)
 
-        # Create server with invalid version
+        # Create server with invalid version.
         self.cmd('postgres flexible-server create -g {} -n {} -l {} --version {}'.format(
                  resource_group, server_name, location, invalid_version),
                  expect_failure=True)
 
-        # Create server with invalid sku name
+        # Create server with invalid SKU name.
         self.cmd('postgres flexible-server create -g {} -n {} -l {} --tier {} --sku-name {}'.format(
                  resource_group, server_name, location, valid_tier, invalid_sku_name),
                  expect_failure=True)
 
-        # Create server with invalid backup retention days
+        # Create server with invalid backup retention days.
         self.cmd('postgres flexible-server create -g {} -n {} -l {} --backup-retention {}'.format(
                  resource_group, server_name, location, invalid_backup_retention),
                  expect_failure=True)
 
-        # Create server with zone redundant high availability in a location that does not support it, because it's a single zone location
+        # Create server with zone redundant high availability in a location that does not support it, because it's a single zone location.
         self.cmd('postgres flexible-server create -g {} -n {} -l {} --high-availability {} '.format(
                  resource_group, server_name, location, ha_value),
                  expect_failure=True)
 
-        # Create server with zone redundant high availability with a tier that does not support it
+        # Create server with zone redundant high availability with a tier that does not support it.
         self.cmd('postgres flexible-server create -g {} -n {} -l {} --tier Burstable --sku-name Standard_B1ms --high-availability {}'.format(
                  resource_group, server_name, location, ha_value),
                  expect_failure=True)
 
-        # Create server with zone redundant high availability in a location that does not support it, because it's a single zone location
+        # Create server with zone redundant high availability in a location that does not support it, because it's a single zone location.
         self.cmd('postgres flexible-server create -g {} -n {} -l {} --tier GeneralPurpose --sku-name Standard_D4ds_v4 --high-availability {}'.format(
                  resource_group, server_name, location, ha_value),
                  expect_failure=True)
 
-        # Create server with zone redundant high availability and forcing same zone for primary and standby
+        # Create server with zone redundant high availability and forcing same zone for primary and standby.
         self.cmd('postgres flexible-server create -g {} -n {} -l {} --tier GeneralPurpose --sku-name Standard_D2ads_v5 --high-availability {} --zone 1 --standby-zone 1'.format(
                  resource_group, server_name, location, ha_value),
                  expect_failure=True)
 
-        # Create server with public access and subnet id at the same time
-        self.cmd('postgres flexible-server create -g {} -n {} -l {} --vnet testvnet --subnet testsubnet --public-access All'.format(
-                 resource_group, server_name, location),
+        # Create server with private network arguments but without a private DNS zone.
+        self.cmd('postgres flexible-server create -g {} -n {} -l {} --vnet {} --subnet {}'.format(
+                 resource_group, server_name, location, vnet_name, subnet_name),
                  expect_failure=True)
 
-        # Create server with subnet id that does not exist
-        self.cmd('postgres flexible-server create -g {} -n {} -l {} --subnet testsubnet'.format(
-                 resource_group, server_name, location),
+        # Create server with public access, virtual network name and subnet name at the same time.
+        self.cmd('postgres flexible-server create -g {} -n {} -l {} --vnet {} --subnet {} --public-access All'.format(
+                 resource_group, server_name, location, vnet_name, subnet_name),
                  expect_failure=True)
 
-        # Create server with invalid public access value (end-ip is not a valid IPv4 address)
+        # Create server with an incorrectly formed subnet identifier.
+        self.cmd('postgres flexible-server create -g {} -n {} -l {} --subnet {} --private-dns-zone {}'.format(
+                 resource_group, server_name, location, subnet_identifier, valid_private_dns_zone),
+                 expect_failure=True)
+
+        # Create server with the resource identifier of a virtual network and the resource identifier of a subnet at the same time.
+        self.cmd('postgres flexible-server create -g {} -n {} -l {} --vnet {} --subnet {} --private-dns-zone {}'.format(
+                 resource_group, server_name, location, vnet_identifier, subnet_identifier, valid_private_dns_zone),
+                 expect_failure=True)
+
+        # Create server with the resource identifier of a subnet, and the name of a virtual network at the same time.
+        self.cmd('postgres flexible-server create -g {} -n {} -l {} --vnet {} --subnet {} --private-dns-zone {}'.format(
+                 resource_group, server_name, location, vnet_name, subnet_identifier, valid_private_dns_zone),
+                 expect_failure=True)
+
+        # Create server with a private DNS zone, but without virtual network and subnet.
+        self.cmd('postgres flexible-server create -g {} -n {} -l {} --private-dns-zone {}'.format(
+                 resource_group, server_name, location, valid_private_dns_zone),
+                 expect_failure=True)
+
+        # Create server with a private DNS zone and a virtual network name, but without a subnet name.
+        self.cmd('postgres flexible-server create -g {} -n {} -l {} --vnet {} --private-dns-zone {}'.format(
+                 resource_group, server_name, location, vnet_name, valid_private_dns_zone),
+                 expect_failure=True)
+
+        # Create server with a private DNS zone and a subnet name, but without a virtual network.
+        self.cmd('postgres flexible-server create -g {} -n {} -l {} --subnet {} --private-dns-zone {}'.format(
+                 resource_group, server_name, location, subnet_name, valid_private_dns_zone),
+                 expect_failure=True)
+
+        # Create server with an multiple forms of invalid private DNS zones.
+        for invalid_private_dns_zone in invalid_private_dns_zones:
+            self.cmd('postgres flexible-server create -g {} -n {} -l {} --private-dns-zone {}'.format(
+                     resource_group, server_name, location, invalid_private_dns_zone),
+                     expect_failure=True)
+
+        # Create server with invalid public access value (end-ip is not a valid IPv4 address).
         self.cmd('postgres flexible-server create -g {} -n {} -l {} --public-access 12.0.0.0-10.0.0.0.0'.format(
                  resource_group, server_name, location),
                  expect_failure=True)
 
-        # Create server with invalid public access value (start-ip greater than end-ip)
+        # Create server with invalid public access value (start-ip greater than end-ip).
         self.cmd('postgres flexible-server create -g {} -n {} -l {} --public-access 12.0.0.0-10.0.0.0'.format(
                  resource_group, server_name, location),
                  expect_failure=True)
 
-        # Create server with invalid storage size (in Premium_LRS, valid storage sizes are 32, 64, 128, 256, 512, 1024, 2048, 4095, 4096, 8192, 16384, 32768, 65536)
+        # Create server with invalid storage size (in Premium_LRS, valid storage sizes are 32, 64, 128, 256, 512, 1024, 2048, 4095, 4096, 8192, 16384, 32768, 65536).
         invalid_storage_size = 60
         self.cmd('postgres flexible-server create -g {} -l {} --storage-size {} --public-access none'.format(
                  resource_group, location, invalid_storage_size),
