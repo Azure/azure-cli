@@ -244,6 +244,15 @@ def create_condition(match_variable,
     return condition
 
 
+def _resolve_origin_group(origin_group):
+    if has_value(origin_group):
+        try:
+            return origin_group.to_serialized_data()
+        except AttributeError:
+            return origin_group
+    return None
+
+
 def create_action(action_name, cache_behavior=None, cache_duration=None, header_action=None,
                   header_name=None, header_value=None, query_string_behavior=None, query_parameters=None,
                   redirect_type=None, redirect_protocol=None, custom_hostname=None, custom_path=None,
@@ -328,14 +337,7 @@ def create_action(action_name, cache_behavior=None, cache_duration=None, header_
         }
         return action
     if action_name == "OriginGroupOverride":
-        formatetd_origin_group = None
-        if has_value(origin_group):
-            try:
-                formatetd_origin_group = origin_group.to_serialized_data()
-            except AttributeError:
-                formatetd_origin_group = origin_group
-        else:
-            formatetd_origin_group = None
+        formatetd_origin_group = _resolve_origin_group(origin_group)
 
         if not is_valid_resource_id(formatetd_origin_group):
             # Ideally we should use resource_id but Auzre FrontDoor portal extension has some case-sensitive issues
@@ -356,14 +358,7 @@ def create_action(action_name, cache_behavior=None, cache_duration=None, header_
         return action
     if action_name == "RouteConfigurationOverride":
         origin_group_override = None
-        formatetd_origin_group = None
-        if has_value(origin_group):
-            try:
-                formatetd_origin_group = origin_group.to_serialized_data()
-            except AttributeError:
-                formatetd_origin_group = origin_group
-        else:
-            formatetd_origin_group = None
+        formatetd_origin_group = _resolve_origin_group(origin_group)
         if formatetd_origin_group is not None:
             if is_valid_resource_id(formatetd_origin_group):
                 origin_group_override = {
@@ -400,12 +395,7 @@ def create_action(action_name, cache_behavior=None, cache_duration=None, header_
         }
         return action
     if action_name == "EdgeAction":
-        formatted_edge_action_id = None
-        if has_value(edge_action_id):
-            try:
-                formatted_edge_action_id = edge_action_id.to_serialized_data()
-            except AttributeError:
-                formatted_edge_action_id = edge_action_id
+        formatted_edge_action_id = _resolve_origin_group(edge_action_id)
         action = {
             "edge_action": {
                 "parameters": {
