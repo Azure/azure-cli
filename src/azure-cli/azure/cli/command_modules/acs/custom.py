@@ -80,7 +80,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_VIRTUAL_MACHINES,
 )
 from azure.cli.command_modules.acs._polling import RunCommandLocationPolling
-from azure.cli.command_modules.acs._helpers import get_snapshot_by_snapshot_id, check_is_private_link_cluster, build_etag_kwargs
+from azure.cli.command_modules.acs._helpers import get_snapshot_by_snapshot_id, get_monitoring_addon_key, check_is_private_link_cluster, build_etag_kwargs
 from azure.cli.command_modules.acs._resourcegroup import get_rg_location
 from azure.cli.command_modules.acs.managednamespace import aks_managed_namespace_add, aks_managed_namespace_update
 from azure.cli.command_modules.acs._validators import extract_comma_separated_string
@@ -1148,6 +1148,8 @@ def aks_update(
     disable_image_cleaner=False,
     image_cleaner_interval_hours=None,
     http_proxy_config=None,
+    disable_http_proxy=False,
+    enable_http_proxy=False,
     enable_keda=False,
     disable_keda=False,
     enable_vpa=False,
@@ -1168,6 +1170,8 @@ def aks_update(
     disable_container_network_logs=None,
     acns_datapath_acceleration_mode=None,
     acns_transit_encryption_type=None,
+    # monitoring addons
+    enable_high_log_scale_mode=None,
     # network isoalted cluster
     bootstrap_artifact_source=None,
     bootstrap_container_registry_resource_id=None,
@@ -1516,15 +1520,18 @@ def _remove_nulls(managed_clusters):
 def aks_disable_addons(cmd, client, resource_group_name, name, addons, no_wait=False):
     instance = client.get(resource_group_name, name)
     subscription_id = get_subscription_id(cmd.cli_ctx)
+    monitoring_addon_key = get_monitoring_addon_key(
+        instance.addon_profiles, CONST_MONITORING_ADDON_NAME
+    )
     try:
-        if addons == "monitoring" and CONST_MONITORING_ADDON_NAME in instance.addon_profiles and \
-                instance.addon_profiles[CONST_MONITORING_ADDON_NAME].enabled and \
-                CONST_MONITORING_USING_AAD_MSI_AUTH in instance.addon_profiles[CONST_MONITORING_ADDON_NAME].config and \
-                str(instance.addon_profiles[CONST_MONITORING_ADDON_NAME].config[CONST_MONITORING_USING_AAD_MSI_AUTH]).lower() == 'true':
+        if addons == "monitoring" and monitoring_addon_key in instance.addon_profiles and \
+                instance.addon_profiles[monitoring_addon_key].enabled and \
+                CONST_MONITORING_USING_AAD_MSI_AUTH in instance.addon_profiles[monitoring_addon_key].config and \
+                str(instance.addon_profiles[monitoring_addon_key].config[CONST_MONITORING_USING_AAD_MSI_AUTH]).lower() == 'true':
             # remove the DCR association because otherwise the DCR can't be deleted
             ensure_container_insights_for_monitoring(
                 cmd,
-                instance.addon_profiles[CONST_MONITORING_ADDON_NAME],
+                instance.addon_profiles[monitoring_addon_key],
                 subscription_id,
                 resource_group_name,
                 name,
@@ -1614,12 +1621,20 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
 
     if need_pull_for_result:
         if enable_monitoring:
-            if CONST_MONITORING_USING_AAD_MSI_AUTH in instance.addon_profiles[CONST_MONITORING_ADDON_NAME].config and \
-               str(instance.addon_profiles[CONST_MONITORING_ADDON_NAME].config[CONST_MONITORING_USING_AAD_MSI_AUTH]).lower() == 'true':
+            monitoring_addon_key = get_monitoring_addon_key(
+                instance.addon_profiles, CONST_MONITORING_ADDON_NAME
+            )
+            if CONST_MONITORING_USING_AAD_MSI_AUTH in instance.addon_profiles[monitoring_addon_key].config and \
+               str(instance.addon_profiles[monitoring_addon_key].config[CONST_MONITORING_USING_AAD_MSI_AUTH]).lower() == 'true':
                 if msi_auth:
+                    # Auto-enable HLSM when CNL is active and HLSM not explicitly set
+                    if enable_high_log_scale_mode is None and \
+                       (instance.addon_profiles[monitoring_addon_key].config or {}).get(
+                           "enableRetinaNetworkFlags", "").lower() == "true":
+                        enable_high_log_scale_mode = True
                     # create a Data Collection Rule (DCR) and associate it with the cluster
                     ensure_container_insights_for_monitoring(
-                        cmd, instance.addon_profiles[CONST_MONITORING_ADDON_NAME],
+                        cmd, instance.addon_profiles[monitoring_addon_key],
                         subscription_id,
                         resource_group_name,
                         name,
@@ -1650,7 +1665,7 @@ def aks_enable_addons(cmd, client, resource_group_name, name, addons,
                     raise ArgumentUsageError(
                         "--ampls-resource-id supported only in MSI auth mode.")
                 ensure_container_insights_for_monitoring(
-                    cmd, instance.addon_profiles[CONST_MONITORING_ADDON_NAME], subscription_id, resource_group_name, name, instance.location, aad_route=False)
+                    cmd, instance.addon_profiles[monitoring_addon_key], subscription_id, resource_group_name, name, instance.location, aad_route=False)
 
         # adding a wait here since we rely on the result for role assignment
         result = LongRunningOperation(cmd.cli_ctx)(
@@ -2035,11 +2050,32 @@ def merge_kubernetes_configurations(existing_file, addition_file, replace, conte
                 existing_file_perms,
             )
 
+    # Refuse to write through a symlink
+    if os.path.islink(existing_file):
+        raise CLIError(
+            'Kubeconfig path "{}" is a symbolic link. '
+            'Refusing to write to prevent symlink-following attacks.'.format(existing_file)
+        )
+
+    # Atomic write: write to a temp file in the same directory, then replace
+    parent_dir = os.path.dirname(existing_file) or '.'
+    tmp_fd, tmp_path = tempfile.mkstemp(dir=parent_dir)
     try:
-        with open(existing_file, 'w+') as stream:
+        with os.fdopen(tmp_fd, 'w') as stream:
             yaml.safe_dump(existing, stream, default_flow_style=False)
-    except OSError as ex:
-        if getattr(ex, 'errno', 0) in (errno.EACCES, errno.EPERM, errno.EROFS):
+        # Preserve existing file permissions if available, otherwise default to 0600
+        if os.path.exists(existing_file):
+            existing_mode = stat.S_IMODE(os.stat(existing_file).st_mode)
+            os.chmod(tmp_path, existing_mode)
+        else:
+            os.chmod(tmp_path, 0o600)
+        os.replace(tmp_path, existing_file)
+    except Exception as ex:  # pylint: disable=broad-except
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+        if isinstance(ex, OSError) and getattr(ex, 'errno', 0) in (errno.EACCES, errno.EPERM, errno.EROFS):
             raise FileOperationError(
                 'Permission denied when trying to write to {}. '
                 'Please ensure you have write access to this file, or specify a different file path '
@@ -2146,8 +2182,8 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr, node_name=None):
         # Get kubectl minor version
         kubectl_minor_version = -1
         try:
-            cmd = f"kubectl version -o json --kubeconfig {browse_path}"
-            output = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+            kubectl_cmd = ["kubectl", "version", "-o", "json", "--kubeconfig", browse_path]
+            output = subprocess.Popen(kubectl_cmd, stdout=subprocess.PIPE)
             jsonS, _ = output.communicate()
             kubectl_version = json.loads(jsonS)
             # Remove any non-numeric characters like + from minor version
@@ -4078,8 +4114,11 @@ def is_monitoring_addon_enabled(addons, instance):
                     break
 
         addon_profiles = instance.addon_profiles or {}
-        monitoring_addon_enabled = is_monitoring_addon and CONST_MONITORING_ADDON_NAME in addon_profiles and addon_profiles[
-            CONST_MONITORING_ADDON_NAME].enabled
+        monitoring_addon_key = get_monitoring_addon_key(
+            addon_profiles, CONST_MONITORING_ADDON_NAME
+        )
+        monitoring_addon_enabled = is_monitoring_addon and monitoring_addon_key in addon_profiles and addon_profiles[
+            monitoring_addon_key].enabled
     except Exception as ex:  # pylint: disable=broad-except
         logger.debug("failed to check monitoring addon enabled: %s", ex)
     return monitoring_addon_enabled

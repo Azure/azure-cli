@@ -6,10 +6,10 @@
 from azure.cli.command_modules.vm._client_factory import (cf_vm,
                                                           cf_vm_ext, cf_vm_ext_image,
                                                           cf_vm_image_term, cf_usage,
-                                                          cf_vmss, cf_images,
-                                                          cf_galleries, cf_gallery_images, cf_gallery_image_versions,
+                                                          cf_vmss,
+                                                          cf_gallery_images, cf_gallery_image_versions,
                                                           cf_proximity_placement_groups,
-                                                          cf_dedicated_hosts, cf_dedicated_host_groups,
+                                                          cf_dedicated_hosts,
                                                           cf_log_analytics_data_plane,
                                                           cf_capacity_reservation_groups, cf_capacity_reservations,
                                                           cf_community_gallery)
@@ -62,11 +62,6 @@ def load_command_table(self, _):
         operation_group='availability_sets'
     )
 
-    compute_image_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#ImagesOperations.{}',
-        client_factory=cf_images
-    )
-
     compute_vm_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations#VirtualMachinesOperations.{}',
         client_factory=cf_vm
@@ -106,11 +101,6 @@ def load_command_table(self, _):
         operation_group='virtual_machine_scale_sets'
     )
 
-    compute_galleries_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#GalleriesOperations.{}',
-        client_factory=cf_galleries,
-    )
-
     compute_gallery_images_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations#GalleryImagesOperations.{}',
         client_factory=cf_gallery_images,
@@ -136,11 +126,6 @@ def load_command_table(self, _):
     compute_dedicated_host_sdk = CliCommandType(
         operations_tmpl="azure.mgmt.compute.operations#DedicatedHostsOperations.{}",
         client_factory=cf_dedicated_hosts,
-    )
-
-    compute_dedicated_host_groups_sdk = CliCommandType(
-        operations_tmpl="azure.mgmt.compute.operations#DedicatedHostGroupsOperations.{}",
-        client_factory=cf_dedicated_host_groups,
     )
 
     image_builder_image_templates_sdk = CliCommandType(
@@ -216,7 +201,7 @@ def load_command_table(self, _):
         self.command_table['disk-encryption-set identity remove'] = DiskEncryptionSetIdentityRemove(loader=self)
         g.custom_show_command('show', 'show_disk_encryption_set_identity')
 
-    with self.command_group('image', compute_image_sdk) as g:
+    with self.command_group('image') as g:
         g.custom_command('create', 'create_image', validator=process_image_create_namespace)
 
     with self.command_group('image builder', image_builder_image_templates_sdk, custom_command_type=image_builder_custom) as g:
@@ -387,11 +372,12 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_dedicated_host')
         g.generic_update_command('update', setter_name='begin_create_or_update')
 
-    with self.command_group('vm host group', compute_dedicated_host_groups_sdk, client_factory=cf_dedicated_host_groups,
-                            min_api='2019-03-01') as g:
-        g.custom_command('get-instance-view', 'get_dedicated_host_group_instance_view', min_api='2020-06-01')
+    with self.command_group('vm host group') as g:
+        g.custom_command('get-instance-view', 'get_dedicated_host_group_instance_view')
         g.custom_command('create', 'create_dedicated_host_group')
-        g.generic_update_command('update')
+
+        from .operations.vm_host_group import VMHostGroupShow
+        self.command_table['vm host group show'] = VMHostGroupShow(loader=self)
 
     with self.command_group('vmss') as g:
         g.custom_command('create', 'create_vmss',
@@ -429,7 +415,7 @@ def load_command_table(self, _):
         from .operations.vmss_vms import VMSSGetResiliencyView
         self.command_table['vmss get-resiliency-view'] = VMSSGetResiliencyView(loader=self)
 
-    with self.command_group('vmss diagnostics', compute_vmss_sdk) as g:
+    with self.command_group('vmss diagnostics') as g:
         g.custom_command('set', 'set_vmss_diagnostics_extension')
         g.custom_command('get-default-config', 'show_default_diagnostics_configuration')
 
@@ -458,7 +444,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'vmss_run_command_create', supports_no_wait=True)
         g.custom_command('update', 'vmss_run_command_update', supports_no_wait=True)
 
-    with self.command_group('sig', compute_galleries_sdk, operation_group='galleries') as g:
+    with self.command_group('sig', operation_group='galleries') as g:
         from .operations.sig import SigCreate, SigUpdate, SigShow
         self.command_table['sig create'] = SigCreate(loader=self)
         self.command_table['sig update'] = SigUpdate(loader=self)
@@ -466,6 +452,10 @@ def load_command_table(self, _):
 
     with self.command_group('sig', community_gallery_sdk, client_factory=cf_community_gallery, operation_group='shared_galleries', min_api='2022-01-03') as g:
         g.custom_command('list-community', 'sig_community_gallery_list')
+
+    with self.command_group('sig identity') as g:
+        from .operations.sig import SigIdentityRemove
+        self.command_table['sig identity remove'] = SigIdentityRemove(loader=self)
 
     with self.command_group('sig image-definition', compute_gallery_images_sdk, operation_group='gallery_images', min_api='2018-06-01') as g:
         g.custom_command('create', 'create_gallery_image')

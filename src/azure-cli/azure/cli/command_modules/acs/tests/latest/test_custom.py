@@ -17,6 +17,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME,
     CONST_KUBE_DASHBOARD_ADDON_NAME,
     CONST_MONITORING_ADDON_NAME,
+    CONST_MONITORING_USING_AAD_MSI_AUTH,
 )
 from azure.cli.command_modules.acs.addonconfiguration import (
     ensure_default_log_analytics_workspace_for_monitoring,
@@ -24,7 +25,9 @@ from azure.cli.command_modules.acs.addonconfiguration import (
 from azure.cli.command_modules.acs.custom import (
     _get_command_context,
     _update_addons,
+    aks_enable_addons,
     aks_stop,
+    is_monitoring_addon_enabled,
     k8s_install_kubectl,
     k8s_install_kubelogin,
     merge_kubernetes_configurations,
@@ -45,6 +48,7 @@ from azure.cli.command_modules.acs.tests.latest.utils import (
 )
 from azure.cli.core.util import CLIError
 from azure.cli.core.profiles import ResourceType
+from azure.core.exceptions import HttpResponseError
 from azure.mgmt.containerservice.models import (
     ManagedClusterAddonProfile,
 )
@@ -480,6 +484,41 @@ class AcsCustomCommandTest(unittest.TestCase):
         self.assertEqual(merged['users'], expected_users)
         self.assertEqual(merged['current-context'], obj2['current-context'])
 
+    @unittest.skipIf(os.name == 'nt', 'Symlink test not applicable on Windows')
+    def test_merge_credentials_rejects_symlink(self):
+        # Create a real kubeconfig file and a symlink pointing to it
+        target = tempfile.NamedTemporaryFile(delete=False, suffix='.kubeconfig')
+        target.close()
+        with open(target.name, 'w') as f:
+            yaml.safe_dump({'clusters': [], 'contexts': [], 'users': [],
+                            'current-context': '', 'kind': 'Config'}, f)
+        self.addCleanup(os.remove, target.name)
+
+        symlink_path = target.name + '.link'
+        os.symlink(target.name, symlink_path)
+        self.addCleanup(lambda: os.remove(symlink_path) if os.path.islink(symlink_path) else None)
+
+        addition = tempfile.NamedTemporaryFile(delete=False)
+        addition.close()
+        obj = {
+            'clusters': [{'cluster': {'server': 'https://test'}, 'name': 'c1'}],
+            'contexts': [{'context': {'cluster': 'c1', 'user': 'u1'}, 'name': 'ctx1'}],
+            'users': [{'name': 'u1', 'user': {'token': 'tok'}}],
+            'current-context': 'ctx1',
+        }
+        with open(addition.name, 'w') as f:
+            yaml.safe_dump(obj, f)
+        self.addCleanup(os.remove, addition.name)
+
+        # Should raise CLIError when existing_file is a symlink
+        with self.assertRaises(CLIError):
+            merge_kubernetes_configurations(symlink_path, addition.name, False)
+
+        # Verify the symlink target was not modified
+        with open(target.name, 'r') as f:
+            content = yaml.safe_load(f)
+        self.assertEqual(content['clusters'], [])
+
     @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_rg_location', return_value='eastus')
     @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resource_groups_client', autospec=True)
     @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resources_client', autospec=True)
@@ -611,6 +650,78 @@ class AcsCustomCommandTest(unittest.TestCase):
                                   'clitest000001', 'clitest000001', 'ingress-appgw', enable=False)
         addon_profile = instance.addon_profiles['ingressApplicationGateway']
         self.assertFalse(addon_profile.enabled)
+
+        # monitoring enable with camelCase addon key does NOT preserve enableRetinaNetworkFlags
+        instance = mock.MagicMock()
+        instance.addon_profiles = {
+            "omsAgent": ManagedClusterAddonProfile(
+                enabled=False,
+                config={
+                    'logAnalyticsWorkspaceResourceID': '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.OperationalInsights/workspaces/ws',
+                    CONST_MONITORING_USING_AAD_MSI_AUTH: 'true',
+                    'enableRetinaNetworkFlags': 'True',
+                },
+            ),
+        }
+        instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'clitest000001', 'monitoring', enable=True)
+        monitoring_profile = instance.addon_profiles[CONST_MONITORING_ADDON_NAME]
+        self.assertTrue(monitoring_profile.enabled)
+        self.assertIsNone(monitoring_profile.config.get('enableRetinaNetworkFlags'))
+
+        # monitoring disable sets config to None
+        instance = mock.MagicMock()
+        instance.addon_profiles = {
+            CONST_MONITORING_ADDON_NAME: ManagedClusterAddonProfile(
+                enabled=True,
+                config={
+                    'logAnalyticsWorkspaceResourceID': '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.OperationalInsights/workspaces/ws',
+                    CONST_MONITORING_USING_AAD_MSI_AUTH: 'true',
+                    'enableRetinaNetworkFlags': 'True',
+                },
+            ),
+        }
+        instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'clitest000001', 'monitoring', enable=False)
+        monitoring_profile = instance.addon_profiles[CONST_MONITORING_ADDON_NAME]
+        self.assertFalse(monitoring_profile.enabled)
+        self.assertIsNone(monitoring_profile.config)
+
+        # monitoring disable without CNL also sets config to None
+        instance = mock.MagicMock()
+        instance.addon_profiles = {
+            CONST_MONITORING_ADDON_NAME: ManagedClusterAddonProfile(
+                enabled=True,
+                config={
+                    'logAnalyticsWorkspaceResourceID': '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.OperationalInsights/workspaces/ws',
+                    CONST_MONITORING_USING_AAD_MSI_AUTH: 'true',
+                },
+            ),
+        }
+        instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'clitest000001', 'monitoring', enable=False)
+        monitoring_profile = instance.addon_profiles[CONST_MONITORING_ADDON_NAME]
+        self.assertFalse(monitoring_profile.enabled)
+        self.assertIsNone(monitoring_profile.config)
+
+        # monitoring disable with camelCase key (omsAgent) sets config to None
+        instance = mock.MagicMock()
+        instance.addon_profiles = {
+            "omsAgent": ManagedClusterAddonProfile(
+                enabled=True,
+                config={
+                    'logAnalyticsWorkspaceResourceID': '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.OperationalInsights/workspaces/ws',
+                    CONST_MONITORING_USING_AAD_MSI_AUTH: 'true',
+                    'enableRetinaNetworkFlags': 'True',
+                },
+            ),
+        }
+        # The addon key normalization in _update_addons remaps camelCase to lowercase
+        instance = _update_addons(MockCmd(self.cli), instance, '00000000-0000-0000-0000-000000000000',
+                                  'clitest000001', 'clitest000001', 'monitoring', enable=False)
+        monitoring_profile = instance.addon_profiles[CONST_MONITORING_ADDON_NAME]
+        self.assertFalse(monitoring_profile.enabled)
+        self.assertIsNone(monitoring_profile.config)
 
     @mock.patch('azure.cli.command_modules.acs.custom._urlretrieve')
     @mock.patch('azure.cli.command_modules.acs.custom.logger')
@@ -1170,6 +1281,178 @@ class TestAddonConfigurationAzureDelosCloud(unittest.TestCase):
         # Verify the workspace resource ID contains the default region code
         self.assertIn('DefaultResourceGroup-DELOSC', result)
         self.assertIn(f'DefaultWorkspace-{subscription_id}-DELOSC', result)
+
+
+class TestIsMonitoringAddonEnabled(unittest.TestCase):
+    """Tests for the is_monitoring_addon_enabled helper in custom.py."""
+
+    def test_monitoring_enabled_with_lowercase_key(self):
+        instance = mock.Mock()
+        instance.addon_profiles = {
+            CONST_MONITORING_ADDON_NAME: ManagedClusterAddonProfile(enabled=True, config={}),
+        }
+        self.assertTrue(is_monitoring_addon_enabled("monitoring", instance))
+
+    def test_monitoring_enabled_with_camelcase_key(self):
+        instance = mock.Mock()
+        instance.addon_profiles = {
+            "omsAgent": ManagedClusterAddonProfile(enabled=True, config={}),
+        }
+        self.assertTrue(is_monitoring_addon_enabled("monitoring", instance))
+
+    def test_monitoring_disabled_with_camelcase_key(self):
+        instance = mock.Mock()
+        instance.addon_profiles = {
+            "omsAgent": ManagedClusterAddonProfile(enabled=False, config={}),
+        }
+        self.assertFalse(is_monitoring_addon_enabled("monitoring", instance))
+
+    def test_no_monitoring_addon_at_all(self):
+        instance = mock.Mock()
+        instance.addon_profiles = {}
+        self.assertFalse(is_monitoring_addon_enabled("monitoring", instance))
+
+    def test_non_monitoring_addon(self):
+        instance = mock.Mock()
+        instance.addon_profiles = {
+            CONST_MONITORING_ADDON_NAME: ManagedClusterAddonProfile(enabled=True, config={}),
+        }
+        self.assertFalse(is_monitoring_addon_enabled("http_application_routing", instance))
+
+
+class TestAksEnableAddonsAutoHLSM(unittest.TestCase):
+    """Tests for auto-detection of HLSM when CNL is active in aks_enable_addons."""
+
+    def setUp(self):
+        self.cli = MockCLI()
+        self.cmd = MockCmd(self.cli)
+
+    def _build_instance(self, cnl_flag=None, addon_key=CONST_MONITORING_ADDON_NAME):
+        """Build a mock cluster instance with monitoring addon."""
+        config = {
+            'logAnalyticsWorkspaceResourceID': '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.OperationalInsights/workspaces/ws',
+            CONST_MONITORING_USING_AAD_MSI_AUTH: 'true',
+        }
+        if cnl_flag is not None:
+            config['enableRetinaNetworkFlags'] = cnl_flag
+        instance = mock.MagicMock()
+        instance.addon_profiles = {
+            addon_key: ManagedClusterAddonProfile(enabled=True, config=config),
+        }
+        instance.service_principal_profile.client_id = "msi"
+        instance.api_server_access_profile = None
+        instance.location = "eastus"
+        return instance
+
+    @mock.patch("azure.cli.command_modules.acs.custom.ensure_container_insights_for_monitoring")
+    @mock.patch("azure.cli.command_modules.acs.custom.LongRunningOperation")
+    @mock.patch("azure.cli.command_modules.acs.custom._update_addons")
+    @mock.patch("azure.cli.command_modules.acs.custom.get_subscription_id", return_value="00000000-0000-0000-0000-000000000000")
+    def test_hlsm_auto_enabled_when_cnl_active(self, _mock_sub, mock_update, mock_lro, mock_ensure):
+        """When CNL is active and HLSM not set, HLSM should auto-enable."""
+        instance = self._build_instance(cnl_flag="True")
+        mock_update.return_value = instance
+        mock_lro.return_value = lambda x: instance
+        client = mock.Mock()
+        client.get.return_value = instance
+
+        aks_enable_addons(self.cmd, client, "rg", "cluster", "monitoring")
+
+        mock_ensure.assert_called_once()
+        _, kwargs = mock_ensure.call_args
+        self.assertTrue(kwargs.get("enable_high_log_scale_mode"))
+
+    @mock.patch("azure.cli.command_modules.acs.custom.ensure_container_insights_for_monitoring")
+    @mock.patch("azure.cli.command_modules.acs.custom.LongRunningOperation")
+    @mock.patch("azure.cli.command_modules.acs.custom._update_addons")
+    @mock.patch("azure.cli.command_modules.acs.custom.get_subscription_id", return_value="00000000-0000-0000-0000-000000000000")
+    def test_hlsm_not_auto_enabled_when_cnl_inactive(self, _mock_sub, mock_update, mock_lro, mock_ensure):
+        """When CNL is not active and HLSM not set, HLSM should remain None."""
+        instance = self._build_instance(cnl_flag=None)
+        mock_update.return_value = instance
+        mock_lro.return_value = lambda x: instance
+        client = mock.Mock()
+        client.get.return_value = instance
+
+        aks_enable_addons(self.cmd, client, "rg", "cluster", "monitoring")
+
+        mock_ensure.assert_called_once()
+        _, kwargs = mock_ensure.call_args
+        self.assertIsNone(kwargs.get("enable_high_log_scale_mode"))
+
+    @mock.patch("azure.cli.command_modules.acs.custom.ensure_container_insights_for_monitoring")
+    @mock.patch("azure.cli.command_modules.acs.custom.LongRunningOperation")
+    @mock.patch("azure.cli.command_modules.acs.custom._update_addons")
+    @mock.patch("azure.cli.command_modules.acs.custom.get_subscription_id", return_value="00000000-0000-0000-0000-000000000000")
+    def test_hlsm_explicit_true_not_overridden(self, _mock_sub, mock_update, mock_lro, mock_ensure):
+        """When HLSM is explicitly True, auto-detection should not change it."""
+        instance = self._build_instance(cnl_flag="True")
+        mock_update.return_value = instance
+        mock_lro.return_value = lambda x: instance
+        client = mock.Mock()
+        client.get.return_value = instance
+
+        aks_enable_addons(self.cmd, client, "rg", "cluster", "monitoring",
+                          enable_high_log_scale_mode=True)
+
+        mock_ensure.assert_called_once()
+        _, kwargs = mock_ensure.call_args
+        self.assertTrue(kwargs.get("enable_high_log_scale_mode"))
+
+    @mock.patch("azure.cli.command_modules.acs.custom.ensure_container_insights_for_monitoring")
+    @mock.patch("azure.cli.command_modules.acs.custom.LongRunningOperation")
+    @mock.patch("azure.cli.command_modules.acs.custom._update_addons")
+    @mock.patch("azure.cli.command_modules.acs.custom.get_subscription_id", return_value="00000000-0000-0000-0000-000000000000")
+    def test_hlsm_explicit_false_not_overridden_by_cnl(self, _mock_sub, mock_update, mock_lro, mock_ensure):
+        """When HLSM is explicitly False, auto-detection should not override even with CNL active."""
+        instance = self._build_instance(cnl_flag="True")
+        mock_update.return_value = instance
+        mock_lro.return_value = lambda x: instance
+        client = mock.Mock()
+        client.get.return_value = instance
+
+        aks_enable_addons(self.cmd, client, "rg", "cluster", "monitoring",
+                          enable_high_log_scale_mode=False)
+
+        mock_ensure.assert_called_once()
+        _, kwargs = mock_ensure.call_args
+        self.assertFalse(kwargs.get("enable_high_log_scale_mode"))
+
+    @mock.patch("azure.cli.command_modules.acs.custom.ensure_container_insights_for_monitoring")
+    @mock.patch("azure.cli.command_modules.acs.custom.LongRunningOperation")
+    @mock.patch("azure.cli.command_modules.acs.custom._update_addons")
+    @mock.patch("azure.cli.command_modules.acs.custom.get_subscription_id", return_value="00000000-0000-0000-0000-000000000000")
+    def test_hlsm_auto_enabled_with_cnl_lowercase_true(self, _mock_sub, mock_update, mock_lro, mock_ensure):
+        """CNL flag value 'true' (lowercase) should also trigger auto-HLSM."""
+        instance = self._build_instance(cnl_flag="true")
+        mock_update.return_value = instance
+        mock_lro.return_value = lambda x: instance
+        client = mock.Mock()
+        client.get.return_value = instance
+
+        aks_enable_addons(self.cmd, client, "rg", "cluster", "monitoring")
+
+        mock_ensure.assert_called_once()
+        _, kwargs = mock_ensure.call_args
+        self.assertTrue(kwargs.get("enable_high_log_scale_mode"))
+
+    @mock.patch("azure.cli.command_modules.acs.custom.ensure_container_insights_for_monitoring")
+    @mock.patch("azure.cli.command_modules.acs.custom.LongRunningOperation")
+    @mock.patch("azure.cli.command_modules.acs.custom._update_addons")
+    @mock.patch("azure.cli.command_modules.acs.custom.get_subscription_id", return_value="00000000-0000-0000-0000-000000000000")
+    def test_hlsm_not_auto_enabled_when_cnl_false(self, _mock_sub, mock_update, mock_lro, mock_ensure):
+        """When CNL flag is 'false', HLSM should not auto-enable."""
+        instance = self._build_instance(cnl_flag="false")
+        mock_update.return_value = instance
+        mock_lro.return_value = lambda x: instance
+        client = mock.Mock()
+        client.get.return_value = instance
+
+        aks_enable_addons(self.cmd, client, "rg", "cluster", "monitoring")
+
+        mock_ensure.assert_called_once()
+        _, kwargs = mock_ensure.call_args
+        self.assertIsNone(kwargs.get("enable_high_log_scale_mode"))
 
 
 if __name__ == "__main__":

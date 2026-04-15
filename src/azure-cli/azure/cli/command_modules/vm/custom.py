@@ -822,12 +822,7 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
 def show_vm_identity(cmd, resource_group_name, vm_name):
     vm = get_vm_by_aaz(cmd, resource_group_name, vm_name)
 
-    identity = vm.get("identity", {}) if vm else None
-
-    if identity and not identity.get('userAssignedIdentities'):
-        identity['userAssignedIdentities'] = None
-
-    return identity or None
+    return vm.get("identity") if vm else None
 
 
 def show_vmss_identity(cmd, resource_group_name, vm_name):
@@ -1761,13 +1756,7 @@ def set_vm_by_aaz(cmd, vm, no_wait=False):
                     if has_value(resource.type):
                         resource.type = AAZUndefined
 
-            result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-            if result.get('osProfile', {}).get('secrets', []):
-                for secret in result['osProfile']['secrets']:
-                    for cert in secret.get('vaultCertificates', []):
-                        if not cert.get('certificateStore'):
-                            cert['certificateStore'] = None
-            return result
+            return self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
 
     vm = LongRunningOperation(cmd.cli_ctx)(
         SetVM(cli_ctx=cmd.cli_ctx)(command_args=vm))
@@ -2646,10 +2635,7 @@ def _remove_identities_by_aaz(cmd, resource_group_name, name, identities, getter
 
     result = LongRunningOperation(cmd.cli_ctx)(setter(resource_group_name, name, resource))
 
-    if not result:
-        return None
-
-    return result.get('identity') or None
+    return result.get('identity') if result else None
 
 
 def remove_vm_identity(cmd, resource_group_name, vm_name, identities=None):
@@ -3374,13 +3360,6 @@ def add_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate, cert
 
 def list_vm_secrets(cmd, resource_group_name, vm_name):
     vm = get_vm_by_aaz(cmd, resource_group_name, vm_name)
-
-    if vm.get('osProfile', {}).get('secrets', []):
-        for secret in vm['osProfile']['secrets']:
-            for cert in secret.get('vaultCertificates', []):
-                if not cert.get('certificateStore'):
-                    cert['certificateStore'] = None
-
     return vm.get('osProfile', {}).get('secrets', [])
 
 
@@ -5082,16 +5061,15 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
 
 
 # region VirtualMachineScaleSets Diagnostics
-def set_vmss_diagnostics_extension(
-        cmd, resource_group_name, vmss_name, settings, protected_settings=None, version=None,
-        no_auto_upgrade=False):
-    client = _compute_client_factory(cmd.cli_ctx)
-    vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+def set_vmss_diagnostics_extension(cmd, resource_group_name, vmss_name, settings, protected_settings=None,
+                                   version=None, no_auto_upgrade=False):
+    from ._vm_utils import UpgradeMode
+    vmss = get_vmss_by_aaz(cmd, resource_group_name, vmss_name)
     # pylint: disable=no-member
-    is_linux_os = _is_linux_os(vmss.virtual_machine_profile)
+    is_linux_os = _is_linux_os_aaz(vmss['virtualMachineProfile'])
     vm_extension_name = _LINUX_DIAG_EXT if is_linux_os else _WINDOWS_DIAG_EXT
-    if is_linux_os and vmss.virtual_machine_profile.extension_profile:  # check incompatibles
-        exts = vmss.virtual_machine_profile.extension_profile.extensions or []
+    if is_linux_os and vmss.get('virtualMachineProfile', {}).get('extensionProfile'):  # check incompatibles
+        exts = vmss.get('virtualMachineProfile', {}).get('extensionProfile', {}).get('extensions', [])
         major_ver = extension_mappings[_LINUX_DIAG_EXT]['version'].split('.', maxsplit=1)[0]
         # For VMSS, we don't do auto-removal like VM because there is no reliable API to wait for
         # the removal done before we can install the newer one
@@ -5111,8 +5089,7 @@ def set_vmss_diagnostics_extension(
                                 no_auto_upgrade)
 
     result = LongRunningOperation(cmd.cli_ctx)(poller)
-    UpgradeMode = cmd.get_models('UpgradeMode')
-    if vmss.upgrade_policy.mode == UpgradeMode.manual:
+    if vmss.get('upgradePolicy', {}).get('mode') == UpgradeMode.MANUAL.value:
         poller2 = update_vmss_instances(cmd, resource_group_name, vmss_name, ['*'])
         LongRunningOperation(cmd.cli_ctx)(poller2)
     return result
@@ -5903,22 +5880,41 @@ def update_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
 
 
 # region dedicated host
-def create_dedicated_host_group(cmd, client, host_group_name, resource_group_name, platform_fault_domain_count,
+def create_dedicated_host_group(cmd, host_group_name, resource_group_name, platform_fault_domain_count,
                                 automatic_placement=None, location=None, zones=None, tags=None, ultra_ssd_enabled=None):
-    DedicatedHostGroup = cmd.get_models('DedicatedHostGroup')
+    from .aaz.latest.vm.host.group import Create as VmHostGroupCreate
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
+    command_args = {
+        'host_group_name': host_group_name,
+        'resource_group': resource_group_name,
+        'location': location,
+        'platform_fault_domain_count': platform_fault_domain_count,
+        'tags': tags,
+        'zones': zones,
+        'support_automatic_placement': automatic_placement
+    }
 
-    host_group_params = DedicatedHostGroup(location=location, platform_fault_domain_count=platform_fault_domain_count,
-                                           support_automatic_placement=automatic_placement, zones=zones, tags=tags)
     if ultra_ssd_enabled is not None:
-        additionalCapabilities = {'ultraSSDEnabled': ultra_ssd_enabled}
-        host_group_params.additional_capabilities = additionalCapabilities
+        command_args['additional_capabilities'] = {
+            'ultra_ssd_enabled': ultra_ssd_enabled
+        }
 
-    return client.create_or_update(resource_group_name, host_group_name, parameters=host_group_params)
+    return VmHostGroupCreate(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
-def get_dedicated_host_group_instance_view(client, host_group_name, resource_group_name):
-    return client.get(resource_group_name, host_group_name, expand="instanceView")
+def get_dedicated_host_group_instance_view(cmd, host_group_name, resource_group_name):
+    return get_dedicated_host_group(cmd, host_group_name, resource_group_name, 'instanceView')
+
+
+def get_dedicated_host_group(cmd, host_group_name, resource_group_name, expand=None):
+    from .operations.vm_host_group import VMHostGroupShow
+    command_args = {
+        'host_group_name': host_group_name,
+        'resource_group': resource_group_name,
+    }
+    if expand:
+        command_args['expand'] = expand
+    return VMHostGroupShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
 def create_dedicated_host(cmd, client, host_group_name, host_name, resource_group_name, sku, platform_fault_domain=None,
@@ -5938,7 +5934,6 @@ def create_dedicated_host(cmd, client, host_group_name, host_name, resource_grou
 
 def get_dedicated_host_instance_view(client, host_group_name, host_name, resource_group_name):
     return client.get(resource_group_name, host_group_name, host_name, expand="instanceView")
-
 # endregion
 
 
