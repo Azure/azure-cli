@@ -1196,7 +1196,7 @@ subscription than the app service environment, please use the resource ID for --
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                    configured_default='appserviceplan', id_part='name',
                    local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
-        c.argument('is_linux', arg_type=get_three_state_flag(return_label=True), required=False,
+        c.argument('is_linux', arg_type=get_three_state_flag(), required=False,
                    help='host function app on Linux worker')
         c.argument('number_of_workers', options_list=['--number-of-workers', '--min-instances'],
                    help='The number of workers for the app service plan.')
