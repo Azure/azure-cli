@@ -1,0 +1,5 @@
+```json
+{
+  "rewritten_help": "# monitor autoscale profile list-timezones\n\n## Description\nLook up available time zone information for Azure Monitor autoscale profiles. This command returns a list of time zones that can be used when configuring autoscaling settings in Azure.\n\n## Parameters\n\n- **--change-reference**: Provide a change reference ID related to this resource operation.\n\n- **--acquire-policy-token**: Automatically acquire an Azure Policy token required for this resource operation.\n\n- **--offset**: Filter time zones based on their UTC hour offset.\n\n- **--search-query (-q)**: Search for a specific time zone using query text.\n\n## Examples\n\n1. **List all time zones without any filters**\n   ```shell\n   az monitor autoscale profile list-timezones\n   ```\n\n2. **Find time zones with a specific UTC offset**\n   ```shell\n   az monitor autoscale profile list-timezones --offset +5\n   ```\n\n3. **Search for time zones containing 'Pacific' in their name**\n   ```shell\n   az monitor autoscale profile list-timezones --search-query \"Pacific\"\n   ```"
+}
+```
