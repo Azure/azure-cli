@@ -115,14 +115,17 @@ examples:
 
 helps['search service shared-private-link-resource create'] = """
 type: command
-short-summary: Create a shared private link resource for a given Azure Search service.
+short-summary: Create or update a shared private link resource managed by the Azure AI Search service.
 examples:
   - name: Create a shared private link resource for a Search service.
     text: >
-        az search service shared-private-link-resource create --resource-group MyResourceGroup --search-service-name MySearchService --name MySharedPrivateLinkResource --group-id MyGroupId --resource-id /subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/{provider}/{resourceType}/{resourceName}
-  - name: Create a shared private link resource and specify a request message.
+        az search service shared-private-link-resource create --resource-group myResourceGroup --search-service-name mySearchService --name mySharedPrivateLinkResource --group-id myGroupId --resource-id /subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/{provider}/{resourceType}/{resourceName}
+  - name: Create a shared private link resource with a request message.
     text: >
-        az search service shared-private-link-resource create --resource-group MyResourceGroup --search-service-name MySearchService --name MySharedPrivateLinkResource --group-id MyGroupId --resource-id /subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/{provider}/{resourceType}/{resourceName} --request-message "Please approve this connection."
+        az search service shared-private-link-resource create --resource-group myResourceGroup --search-service-name mySearchService --name mySharedPrivateLinkResource --group-id myGroupId --resource-id /subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/{provider}/{resourceType}/{resourceName} --request-message "Please approve this connection."
+  - name: Create a shared private link resource without waiting for the operation to complete.
+    text: >
+        az search service shared-private-link-resource create --resource-group myResourceGroup --search-service-name mySearchService --name mySharedPrivateLinkResource --group-id myGroupId --resource-id /subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/{provider}/{resourceType}/{resourceName} --no-wait
 """
 
 helps['search service shared-private-link-resource update'] = """
