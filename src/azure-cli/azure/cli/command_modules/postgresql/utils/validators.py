@@ -715,7 +715,11 @@ def resolve_private_dns_zone_id(db_context, resource_group_name, server_name, pr
 def resolve_public_access_range(public_access, yes):
     if public_access is None:
         try:
-            ip_address = get(IP_ADDRESS_CHECKER).text
+            response = get(IP_ADDRESS_CHECKER, timeout=5)
+            response.raise_for_status()
+            ip_address = response.text.strip()
+            if not _validate_ranges_in_ip(ip_address):
+                raise ValueError('The detection service returned an invalid IPv4 address.')
         except Exception as ex:
             raise CLIError('Unable to detect your current IP address. Please provide a valid IP address or CIDR '
                            'range for --public-access parameter or set --public-access Disabled. Error: {}'
