@@ -170,26 +170,28 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         auto_grow_arg_type = CLIArgumentType(
             arg_type=get_enum_type(['Enabled', 'Disabled']),
             options_list=['--storage-auto-grow'],
-            help='Enable or disable autogrow of the storage. Default value is Enabled.'
+            help='Enable or disable autogrow of the storage. Default value is Disabled.'
         )
 
         storage_type_arg_type = CLIArgumentType(
             arg_type=get_enum_type(['PremiumV2_LRS', 'Premium_LRS']),
             options_list=['--storage-type'],
-            help='Storage type for the server. Allowed values are Premium_LRS and PremiumV2_LRS. Default value is Premium_LRS.'
-                 'Must set iops and throughput if using PremiumV2_LRS.'
+            help='Storage type for the server. Allowed values are Premium_LRS and PremiumV2_LRS. '
+            'Default value is Premium_LRS. Must set --iops and --throughput if using PremiumV2_LRS.'
         )
 
         storage_type_replica_arg_type = CLIArgumentType(
             arg_type=get_enum_type(['PremiumV2_LRS']),
             options_list=['--storage-type'],
-            help='Storage type for the read replica. Allowed value is PremiumV2_LRS. Default is for the read replica to match storage type of the primary server.'
+            help='Storage type for the read replica. Allowed value is PremiumV2_LRS. '
+            'Default is for the read replica to match storage type of the primary server.'
         )
 
         storage_type_restore_arg_type = CLIArgumentType(
             arg_type=get_enum_type(['PremiumV2_LRS']),
             options_list=['--storage-type'],
-            help='Storage type for the new server. Allowed value is PremiumV2_LRS. Default is for the new server to match storage type of the source server.'
+            help='Storage type for the new server. Allowed value is PremiumV2_LRS. '
+            'Default is for the new server to match storage type of the source server.'
         )
 
         performance_tier_arg_type = CLIArgumentType(
@@ -281,7 +283,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         restore_point_in_time_arg_type = CLIArgumentType(
             options_list=['--restore-time'],
             default=get_current_time(),
-            help='The point in time in UTC to restore from (ISO8601 format), e.g., 2017-04-26T02:10:00+00:00'
+            help='The point in time in UTC to restore from (ISO8601 format), e.g., 2026-03-22T18:20:22+00:00 '
                  'The default value is set to current time.'
         )
 
