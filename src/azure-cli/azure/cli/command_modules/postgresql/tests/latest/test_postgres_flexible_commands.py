@@ -5,7 +5,7 @@
 import os
 
 from time import sleep
-from azure.cli.core._profile import CLIError
+from knack.util import CLIError
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk.scenario_tests.const import ENV_LIVE_TEST
 from azure.cli.testsdk import (
@@ -188,9 +188,9 @@ class PostgreSQLFlexibleServerValidatorScenarioTest(ScenarioTest):
         invalid_backup_retention = 40
         ha_value = 'ZoneRedundant'
         valid_vnet_name = self.create_random_name('vnet', RANDOM_VARIABLE_MAX_LENGTH)
-        invalid_vnet_name = self.create_random_name('vnet(/?\)', RANDOM_VARIABLE_MAX_LENGTH)
+        invalid_vnet_name = self.create_random_name('vnet(/?\\)', RANDOM_VARIABLE_MAX_LENGTH)
         valid_subnet_name = self.create_random_name('subnet', RANDOM_VARIABLE_MAX_LENGTH)
-        invalid_subnet_name = self.create_random_name('subnet(/?\)', RANDOM_VARIABLE_MAX_LENGTH)
+        invalid_subnet_name = self.create_random_name('subnet(/?\\)', RANDOM_VARIABLE_MAX_LENGTH)
         valid_vnet_identifier = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resource-group/providers/Microsoft.Network/virtualNetworks/{}'.format(valid_vnet_name)
         invalid_vnet_identifier = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resource-group/providers/Microsoft.Network/virtualNetworks/{}'.format(invalid_vnet_name)
         valid_subnet_identifier = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resource-group/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(valid_vnet_name, valid_subnet_name)

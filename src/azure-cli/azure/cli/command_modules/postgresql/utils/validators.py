@@ -41,7 +41,6 @@ from ._flexible_server_util import (
     parse_public_access_input)
 
 logger = get_logger(__name__)
-DELEGATION_SERVICE_NAME = "Microsoft.DBforPostgreSQL/flexibleServers"
 IP_ADDRESS_CHECKER = 'https://api.ipify.org'
 
 
@@ -645,7 +644,7 @@ def resolve_private_subnet_id(cmd, resource_group_name, vnet, subnet):
                                            'in the form of subnet name.')
 
     if is_valid_resource_id(vnet):
-        if not _is_resource_name(subnet):
+        if not _is_resource_name(subnet) or not is_valid_resource_name(subnet):
             raise ValidationError('If you pass --vnet as a resource identifier, --subnet '
                                   'must be a subnet name.')
         vnet_subscription, vnet_resource_group, vnet_name, _ = get_id_components(vnet)
@@ -657,7 +656,8 @@ def resolve_private_subnet_id(cmd, resource_group_name, vnet, subnet):
                            child_type_1='subnets',
                            child_name_1=subnet)
 
-    if _is_resource_name(vnet) and is_valid_resource_name(vnet) and _is_resource_name(subnet):
+    if _is_resource_name(vnet) and is_valid_resource_name(vnet) and \
+            _is_resource_name(subnet) and is_valid_resource_name(subnet):
         return resource_id(subscription=get_subscription_id(cmd.cli_ctx),
                            resource_group=resource_group_name,
                            namespace='Microsoft.Network',
