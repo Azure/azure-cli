@@ -170,7 +170,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         auto_grow_arg_type = CLIArgumentType(
             arg_type=get_enum_type(['Enabled', 'Disabled']),
             options_list=['--storage-auto-grow'],
-            help='Enable or disable autogrow of the storage. Default value is Enabled.'
+            help='Enable or disable autogrow of the storage. Default value is Disabled.'
         )
 
         storage_type_arg_type = CLIArgumentType(
