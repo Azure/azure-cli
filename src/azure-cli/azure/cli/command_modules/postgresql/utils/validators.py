@@ -667,7 +667,7 @@ def resolve_private_subnet_id(cmd, resource_group_name, vnet, subnet):
 
 
 def _get_private_dns_zone_suffix(cmd, db_context, location, subscription):
-    cluster = get_cloud_cluster(cmd, location.replace('/ +/g', '').lower(), subscription)
+    cluster = get_cloud_cluster(cmd, re.sub(r'\s+', '', location).lower(), subscription)
 
     if cluster is not None:
         private_dns_zone_suffix = cluster['privateDnsZoneDomain']
