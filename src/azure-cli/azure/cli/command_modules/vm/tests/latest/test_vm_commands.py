@@ -6407,6 +6407,104 @@ class MSIScenarioTest(ScenarioTest):
             self.check('type', 'SystemAssigned'),
         ])
 
+    @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(random_name_length=20, name_prefix='cli_test_vm_msi')
+    def test_sig_msi(self, resource_group):
+        self.kwargs.update({
+            'emsi': 'id1',
+            'emsi2': 'id2',
+            'sig1': 'sig1',
+            'sig2': 'sig2',
+            'sig3': 'sig3',
+            'sig4': 'sig4',
+        })
+
+        # Create user-assigned managed identities
+        emsi_result = self.cmd('identity create -g {rg} -n {emsi}').get_output_in_json()
+        emsi2_result = self.cmd('identity create -g {rg} -n {emsi2}').get_output_in_json()
+        self.kwargs.update({
+            'emsi_id': emsi_result['id'],
+            'emsi2_id': emsi2_result['id'],
+        })
+
+        # 1. Create a gallery with system-assigned identity
+        self.cmd('sig create -g {rg} -r {sig1} --system-assigned', checks=[
+            self.check('identity.type', 'SystemAssigned'),
+            self.exists('identity.principalId'),
+            self.exists('identity.tenantId'),
+        ])
+
+        # 2. Assign a user-assigned identity to the gallery
+        self.cmd('sig identity assign -g {rg} -r {sig1} --user-assigned {emsi_id}')
+
+        # 3. Verify identity show returns SystemAssigned, UserAssigned
+        result = self.cmd('sig identity show -g {rg} -r {sig1}', checks=[
+            self.check('type', 'SystemAssigned, UserAssigned'),
+        ]).get_output_in_json()
+        emsis = [x.lower() for x in result['userAssignedIdentities'].keys()]
+        self.assertEqual(emsis, [emsi_result['id'].lower()])
+
+        # 4. Validate sig show also includes identity
+        result = self.cmd('sig show -g {rg} -r {sig1}', checks=[
+            self.check('identity.type', 'SystemAssigned, UserAssigned'),
+        ]).get_output_in_json()
+        emsis = [x.lower() for x in result['identity']['userAssignedIdentities'].keys()]
+        self.assertEqual(emsis, [emsi_result['id'].lower()])
+
+        # 5. Assign a second user-assigned identity
+        self.cmd('sig identity assign -g {rg} -r {sig1} --user-assigned {emsi2_id}')
+        result = self.cmd('sig identity show -g {rg} -r {sig1}').get_output_in_json()
+        emsis = [x.lower() for x in result['userAssignedIdentities'].keys()]
+        self.assertEqual(set(emsis), {emsi_result['id'].lower(), emsi2_result['id'].lower()})
+
+        # 6. Remove the first user-assigned identity
+        self.cmd('sig identity remove -g {rg} -r {sig1} --user-assigned {emsi_id}')
+        result = self.cmd('sig identity show -g {rg} -r {sig1}', checks=[
+            self.check('type', 'SystemAssigned, UserAssigned'),
+        ]).get_output_in_json()
+        emsis = [x.lower() for x in result['userAssignedIdentities'].keys()]
+        self.assertEqual(emsis, [emsi2_result['id'].lower()])
+
+        # 7. Remove the second user-assigned identity, system-assigned should remain
+        self.cmd('sig identity remove -g {rg} -r {sig1} --user-assigned {emsi2_id}')
+        self.cmd('sig identity show -g {rg} -r {sig1}', checks=[
+            self.check('type', 'SystemAssigned'),
+            self.check('userAssignedIdentities', None),
+        ])
+
+        # 8. Remove system-assigned identity
+        self.cmd('sig identity remove -g {rg} -r {sig1} --system-assigned')
+
+        # 9. Create a gallery without identity, then assign system-assigned
+        self.cmd('sig create -g {rg} -r {sig2}')
+        self.cmd('sig identity assign -g {rg} -r {sig2} --system-assigned', checks=[
+            self.check('type', 'SystemAssigned'),
+            self.exists('principalId'),
+        ])
+
+        # 10. Create a gallery with only user-assigned identity
+        self.cmd('sig create -g {rg} -r {sig3} --user-assigned {emsi_id}', checks=[
+            self.check('identity.type', 'UserAssigned'),
+        ])
+        result = self.cmd('sig identity show -g {rg} -r {sig3}').get_output_in_json()
+        emsis = [x.lower() for x in result['userAssignedIdentities'].keys()]
+        self.assertEqual(emsis, [emsi_result['id'].lower()])
+
+        # 11. Create a gallery with both system and user-assigned identities
+        self.cmd('sig create -g {rg} -r {sig4} --system-assigned --user-assigned {emsi_id} {emsi2_id}', checks=[
+            self.check('identity.type', 'SystemAssigned, UserAssigned'),
+        ])
+        result = self.cmd('sig identity show -g {rg} -r {sig4}').get_output_in_json()
+        emsis = [x.lower() for x in result['userAssignedIdentities'].keys()]
+        self.assertEqual(set(emsis), {emsi_result['id'].lower(), emsi2_result['id'].lower()})
+
+        # 12. Remove all user-assigned identities at once
+        self.cmd('sig identity remove -g {rg} -r {sig4} --user-assigned')
+        self.cmd('sig identity show -g {rg} -r {sig4}', checks=[
+            self.check('type', 'SystemAssigned'),
+            self.check('userAssignedIdentities', None),
+        ])
+
 
 class VMLiveScenarioTest(LiveScenarioTest):
 
@@ -8754,8 +8852,8 @@ class VMGalleryImage(ScenarioTest):
                  '--os-type linux --os-state Specialized -p publisher1 -f offer1 -s sku1 --hyper-v-generation v1')
 
         vm_id = self.cmd(
-            'vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --data-disk-sizes-gb 10 '
-            '--admin-username clitest1 --generate-ssh-key --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE').get_output_in_json()['id']
+            'vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:16.04-LTS:latest --data-disk-sizes-gb 10 '
+            '--admin-username clitest1 --generate-ssh-key --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --size Standard_D2s_v3').get_output_in_json()['id']
         self.kwargs.update({"vm_id": vm_id})
 
         # Disable default outbound access

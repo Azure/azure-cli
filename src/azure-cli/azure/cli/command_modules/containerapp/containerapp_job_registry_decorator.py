@@ -21,7 +21,6 @@ from azure.cli.core.azclierror import (
 
 from knack.log import get_logger
 
-from ._constants import ACR_IMAGE_SUFFIX
 from .base_resource import BaseResource
 from ._client_factory import handle_raw_exception, handle_non_404_status_code_exception
 
@@ -33,7 +32,8 @@ from ._utils import (store_as_secret_and_return_secret_ref,
                      safe_set,
                      safe_get,
                      _remove_registry_secret,
-                     _get_acr_cred)
+                     _get_acr_cred,
+                     is_acr_url)
 
 logger = get_logger(__name__)
 
@@ -163,7 +163,7 @@ class ContainerAppJobRegistrySetDecorator(ContainerAppJobRegistryDecorator):
 
         if (not self.get_argument_username() or not self.get_argument_password()) and not self.get_argument_identity():
             # If registry is Azure Container Registry, we can try inferring credentials
-            if ACR_IMAGE_SUFFIX not in self.get_argument_server():
+            if not is_acr_url(self.get_argument_server()):
                 raise RequiredArgumentMissingError(
                     'Registry username and password are required if you are not using Azure Container Registry.')
             not self.get_argument_disable_warnings() and logger.warning(
