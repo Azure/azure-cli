@@ -70,14 +70,14 @@ class PostgreSQLFlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pyli
                      JMESPathCheck('name', replicas[0]),
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('replica.role', primary_role),
-                     JMESPathCheck('sourceServerResourceId', 'None')])
+                     JMESPathCheck('sourceServerResourceId', None)])
 
         # Test show server with replication info, master becomes normal server
         self.cmd('postgres flexible-server show -g {} --name {}'
                  .format(resource_group, master_server),
                  checks=[
                      JMESPathCheck('replica.role', primary_role),
-                     JMESPathCheck('sourceServerResourceId', 'None')])
+                     JMESPathCheck('sourceServerResourceId', None)])
 
         # Create second replica
         self.cmd('postgres flexible-server replica create -g {} --name {} --source-server {}'
@@ -118,7 +118,7 @@ class PostgreSQLFlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pyli
                 checks=[
                     JMESPathCheck('name', replicas[1]),
                     JMESPathCheck('replica.role', primary_role),
-                    JMESPathCheck('sourceServerResourceId', 'None')]).get_output_in_json()
+                    JMESPathCheck('sourceServerResourceId', None)]).get_output_in_json()
 
         # Test show server with replication info, master became replica server
         self.cmd('postgres flexible-server show -g {} --name {}'
@@ -133,7 +133,7 @@ class PostgreSQLFlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pyli
                 checks=[
                     JMESPathCheck('name', master_server),
                     JMESPathCheck('replica.role', primary_role),
-                    JMESPathCheck('sourceServerResourceId', 'None')])
+                    JMESPathCheck('sourceServerResourceId', None)])
 
         # Test promote replica standalone forced
         self.cmd('postgres flexible-server replica promote -g {} --name {} --promote-mode standalone --promote-option forced --yes'
@@ -141,7 +141,7 @@ class PostgreSQLFlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pyli
                 checks=[
                     JMESPathCheck('name',replicas[1]),
                     JMESPathCheck('replica.role', primary_role),
-                    JMESPathCheck('sourceServerResourceId', 'None')])
+                    JMESPathCheck('sourceServerResourceId', None)])
 
         # Test replica list
         self.cmd('postgres flexible-server replica list -g {} --name {}'
@@ -256,7 +256,7 @@ class PostgreSQLFlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pyli
                     checks=[
                         JMESPathCheck('name', server_two),
                         JMESPathCheck('replica.role', primary_role),
-                        JMESPathCheck('sourceServerResourceId', 'None')])
+                        JMESPathCheck('sourceServerResourceId', None)])
 
         # Validate that server one shows correct replication info after switchover, server one is playing the replica role, and source server is server two.
         self.cmd('postgres flexible-server show -g {} --name {} '
@@ -278,14 +278,14 @@ class PostgreSQLFlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pyli
                      JMESPathCheck('name', server_one),
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('replica.role', primary_role),
-                     JMESPathCheck('sourceServerResourceId', 'None')])
+                     JMESPathCheck('sourceServerResourceId', None)])
 
         # Validate that server two shows correct replication info after promotion, server two is playing the primary role, and has no source server.
         self.cmd('postgres flexible-server show -g {} --name {}'
                  .format(resource_group, server_two),
                  checks=[
                      JMESPathCheck('replica.role', primary_role),
-                     JMESPathCheck('sourceServerResourceId', 'None')])
+                     JMESPathCheck('sourceServerResourceId', None)])
 
         # Clean up
         # Delete servers
