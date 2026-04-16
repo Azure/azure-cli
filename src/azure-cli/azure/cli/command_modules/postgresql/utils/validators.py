@@ -98,13 +98,6 @@ def retention_validator(ns):
             raise CLIError('Invalid value for --backup-retention. Allowed values: 7 to 35 days.')
 
 
-def node_count_validator(ns):
-    if ns.cluster_size is not None:
-        val = ns.cluster_size
-        if not 1 <= int(val) <= 10:
-            raise CLIError('Invalid value for --node-count. Allowed values: 1 to 10 for an elastic cluster.')
-
-
 def db_renaming_cluster_validator(ns):
     if ns.database_name is not None and ns.create_cluster.lower() != 'elasticcluster':
         raise ArgumentUsageError('The --database-name argument can only be used '

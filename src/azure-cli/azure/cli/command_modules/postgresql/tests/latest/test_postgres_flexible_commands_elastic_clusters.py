@@ -52,6 +52,10 @@ class ElasticClustersMgmtScenarioTest(ScenarioTest):
                  .format(resource_group, cluster_name), expect_failure=True)
         self.cmd('postgres flexible-server update -g {} -n {} --node-count {}'
                  .format(resource_group, cluster_name, cluster_size - 1), expect_failure=True)
+        self.cmd('postgres flexible-server update -g {} -n {} --node-count {}'
+                 .format(resource_group, cluster_name, 21), expect_failure=True)
+        self.cmd('postgres flexible-server update -g {} -n {} --node-count {}'
+                 .format(resource_group, cluster_name, 0), expect_failure=True)
         self.cmd('postgres flexible-server replica list -g {} -n {}'
                  .format(resource_group, cluster_name), expect_failure=True)
         self.cmd('postgres flexible-server db create -g {} -s {} -d dbclusterfail'
