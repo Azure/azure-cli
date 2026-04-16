@@ -49,7 +49,7 @@ class FlexibleServerIndexTuningOptionsResourceMgmtScenarioTest(ScenarioTest):
         self.cmd('postgres flexible-server index-tuning show-settings -g {} -s {} -n {}'.format(resource_group, server_name, 'mode'),
                  checks=[JMESPathCheck('value', 'report')])
         self.cmd('postgres flexible-server parameter show --name {} -g {} -s {}'.format('pg_qs.query_capture_mode', resource_group, server_name),
-                 checks=[JMESPathCheck('value', 'all')])
+                 checks=[JMESPathCheck('value', 'top')])
 
         # Set new value of index tuning setting for server
         value = '1006'
@@ -105,7 +105,7 @@ class FlexibleServerAutonomousTuningOptionsResourceMgmtScenarioTest(ScenarioTest
         self.cmd('postgres flexible-server autonomous-tuning show-settings -g {} -s {} -n {}'.format(resource_group, server_name, 'mode'),
                  checks=[JMESPathCheck('value', 'report')])
         self.cmd('postgres flexible-server parameter show --name {} -g {} -s {}'.format('pg_qs.query_capture_mode', resource_group, server_name),
-                 checks=[JMESPathCheck('value', 'all')])
+                 checks=[JMESPathCheck('value', 'top')])
 
         # Set new value of autonomous tuning setting for server
         value = '1006'

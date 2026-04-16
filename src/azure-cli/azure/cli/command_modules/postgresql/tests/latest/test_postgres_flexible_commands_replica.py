@@ -179,7 +179,7 @@ class PostgreSQLFlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pyli
         self.cmd('postgres flexible-server delete -g {} --name {} --yes'
                  .format(resource_group, replica_ssdv2), checks=NoneCheck())
         self.cmd('postgres flexible-server delete -g {} --name {} --yes'
-                    .format(resource_group, master_server))
+                    .format(resource_group, master_server), checks=NoneCheck())
         
     def _test_postgres_flexible_server_vnet_replica(self, resource_group):
         location = self.postgres_location
