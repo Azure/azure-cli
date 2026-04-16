@@ -1,0 +1,5 @@
+```json
+{
+  "rewritten_help": "# monitor diagnostic-settings subscription show\n\n## Description\n\nRetrieve the active diagnostic settings for a subscription associated with a specified resource.\n\n## Parameters\n\n- **--name** or **-n** *(required)*: Specifies the name of the diagnostic setting to be retrieved. This parameter is mandatory and should correspond to the name assigned to the diagnostic setting.\n\n## Examples\n\n### Example 1: Retrieve a diagnostic setting by name\n\n```bash\naz monitor diagnostic-settings subscription show --name MyDiagnosticSetting\n```\n\n### Example 2: Using the short option to retrieve a diagnostic setting\n\n```bash\naz monitor diagnostic-settings subscription show -n MyDiagnosticSetting\n```\n\nUse these commands to access detailed diagnostic settings for monitoring purposes."
+}
+```

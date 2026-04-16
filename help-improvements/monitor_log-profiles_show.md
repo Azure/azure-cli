@@ -1,0 +1,5 @@
+```json
+{
+  "rewritten_help": "# monitor log-profiles show\n\n## Description\nRetrieve the details of a log profile in Azure Monitor. A log profile is a centralized definition for logging Azure activity into storage or Event Hub, allowing you to configure diagnostic data collection settings.\n\n## Parameters\n- **--name** or **-n**: [Required] Specifies the name of the log profile you wish to access.\n\n## Examples\n\n### Example 1: Retrieve a log profile by name\n```bash\naz monitor log-profiles show --name myLogProfile\n```\nUse this command to get details on the log profile named 'myLogProfile'.\n\n### Example 2: Retrieve a log profile using shorthand option\n```bash\naz monitor log-profiles show -n anotherLogProfile\n```\nThis command fetches information for the log profile named 'anotherLogProfile' using the shorthand option.\n\n## Notes\n- Ensure you have the necessary Azure permissions to access log profile details.\n- The `name` parameter is required, and it must match the exact name of the log profile you wish to view."
+}
+```
