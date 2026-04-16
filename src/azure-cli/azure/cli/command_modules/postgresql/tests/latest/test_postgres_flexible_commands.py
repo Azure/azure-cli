@@ -196,7 +196,7 @@ class PostgreSQLFlexibleServerValidatorScenarioTest(ScenarioTest):
         valid_subnet_identifier = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resource-group/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(valid_vnet_name, valid_subnet_name)
         invalid_subnet_identifier = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resource-group/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(invalid_vnet_name, invalid_subnet_name)
         valid_private_dns_zone = '{}.private.postgres.database.azure.com'.format(server_name)
-        invalid_private_dns_zones = ['{}.postgres.database.azure.com'.format(server_name), 'invalidprivate.dns.zone', '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resource-group/providers/Microsoft.Network/privateDnsZones/{}.invalid(/?\)segment.postgres.database.azure.com'.format(server_name)]
+        invalid_private_dns_zones = ['{}.postgres.database.azure.com'.format(server_name), 'invalidprivate.dns.zone', '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resource-group/providers/Microsoft.Network/privateDnsZones/{}.invalid(/?\\)segment.postgres.database.azure.com'.format(server_name)]
 
         # Create server with invalid server name.
         self.cmd('postgres flexible-server create -g {} -n Wrongserver.Name -l {}'.format(
