@@ -631,19 +631,23 @@ def validate_private_dns_zone(db_context, server_name, private_dns_zone, private
 def resolve_private_subnet_id(cmd, resource_group_name, vnet, subnet):
     if subnet is not None and vnet is None:
         if not is_valid_resource_id(subnet):
-            raise ValidationError('Incorrectly formed subnet identifier. If you are providing only --subnet but not --vnet, '
-                                  'the --subnet parameter should be in resource identifier format.')
+            raise ValidationError('Incorrectly formed subnet identifier. If you are providing '
+                                  'only --subnet but not --vnet, the --subnet parameter '
+                                  'should be in resource identifier format.')
         parsed_subnet = parse_resource_id(subnet)
         if 'child_name_1' not in parsed_subnet:
-            raise ValidationError('Incorrectly formed subnet identifier. Check if the subnet identifier is in the right format.')
+            raise ValidationError('Incorrectly formed subnet identifier. Check if the subnet '
+                                  'identifier is in the right format.')
         return subnet
 
     if subnet is None:
-        raise RequiredArgumentMissingError('When --vnet is provided, --subnet must also be provided in the form of subnet name.')
+        raise RequiredArgumentMissingError('When --vnet is provided, --subnet must also be provided '
+                                           'in the form of subnet name.')
 
     if is_valid_resource_id(vnet):
         if not _is_resource_name(subnet):
-            raise ValidationError('If you pass --vnet as a resource identifier, --subnet must be a subnet name.')
+            raise ValidationError('If you pass --vnet as a resource identifier, --subnet '
+                                  'must be a subnet name.')
         vnet_subscription, vnet_resource_group, vnet_name, _ = get_id_components(vnet)
         return resource_id(subscription=vnet_subscription,
                            resource_group=vnet_resource_group,
@@ -662,8 +666,9 @@ def resolve_private_subnet_id(cmd, resource_group_name, vnet, subnet):
                            child_type_1='subnets',
                            child_name_1=subnet)
 
-    raise ValidationError('Specify either --subnet as a subnet resource identifier, --vnet as a vnet resource identifier with '
-                          '--subnet as a subnet name, or both --vnet and --subnet as resource names.')
+    raise ValidationError('Specify either --subnet as a subnet resource identifier, '
+                          '--vnet as a vnet resource identifier with --subnet as a '
+                          'subnet name, or both --vnet and --subnet as resource names.')
 
 
 def _get_private_dns_zone_suffix(cmd, db_context, location, subscription):
