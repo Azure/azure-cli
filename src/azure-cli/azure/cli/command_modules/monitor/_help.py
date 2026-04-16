@@ -34,10 +34,15 @@ short-summary: Manage activity log alert rules.
 
 helps['monitor activity-log alert list'] = """
 type: command
-short-summary: List activity log alert rules under a resource group or the current subscription.
+short-summary: List activity log alert rules under a specified resource group or the current subscription.
 parameters:
   - name: --resource-group -g
-    short-summary: Name of the resource group under which the activity log alert rules are being listed. If it is omitted, all the activity log alert rules under the current subscription are listed.
+    short-summary: Specify the name of the resource group to list its activity log alert rules. If omitted, lists all the activity log alert rules under the current subscription.
+examples:
+  - name: List all activity log alert rules in a specific resource group
+    text: az monitor activity-log alert list --resource-group myResourceGroup
+  - name: List all activity log alert rules in the current subscription
+    text: az monitor activity-log alert list
 """
 
 helps['monitor activity-log list'] = """
@@ -624,4 +629,52 @@ examples:
   - name: Clone the metric alert settings from one VM to another
     text: |
         az monitor clone --source-resource /subscriptions/{subscriptionID}/resourceGroups/Space1999/providers/Microsoft.Compute/virtualMachines/vm1 --target-resource /subscriptions/{subscriptionID}/resourceGroups/Space1999/providers/Microsoft.Compute/virtualMachines/vm2
+"""
+
+helps['monitor diagnostic-settings subscription list'] = """
+type: command
+short-summary: List the active subscription diagnostic settings for the specified subscription.
+"""
+
+helps['monitor log-profiles list'] = """
+type: command
+short-summary: List the log profiles.
+examples:
+  - name: List all log profiles
+    text: |
+        az monitor log-profiles list
+"""
+
+helps['monitor diagnostic-settings subscription delete'] = """
+type: command
+short-summary: Delete existing subscription diagnostic settings for a specified resource.
+parameters:
+  - name: --name -n
+    short-summary: The name of the diagnostic setting.
+  - name: --yes -y
+    short-summary: Do not prompt for confirmation.
+examples:
+  - name: Delete diagnostic settings without confirmation
+    text: |
+        az monitor diagnostic-settings subscription delete --name MyDiagnosticSetting --yes
+  - name: Delete diagnostic settings prompting for confirmation
+    text: |
+        az monitor diagnostic-settings subscription delete --name MyDiagnosticSetting
+"""
+
+helps['monitor activity-log list-categories'] = """
+type: command
+short-summary: List the available event categories supported in the Activity Logs Service.
+parameters:
+  - name: --change-reference
+    short-summary: The related change reference ID for this resource operation
+  - name: --acquire-policy-token
+    short-summary: Acquiring an Azure Policy token automatically for this resource operation
+examples:
+  - name: List available event categories with a specific change reference ID
+    text: |
+        az monitor activity-log list-categories --change-reference 12345
+  - name: List available event categories while acquiring a policy token
+    text: |
+        az monitor activity-log list-categories --acquire-policy-token
 """
