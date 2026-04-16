@@ -5,6 +5,7 @@
 import os
 
 from time import sleep
+from azure.cli.core._profile import CLIError
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk.scenario_tests.const import ENV_LIVE_TEST
 from azure.cli.testsdk import (
@@ -177,7 +178,7 @@ class PostgreSQLFlexibleServerValidatorScenarioTest(ScenarioTest):
 
     def _test_mgmt_create_validator(self, resource_group):
 
-        RANDOM_VARIABLE_MAX_LENGTH = 30
+        RANDOM_VARIABLE_MAX_LENGTH = 15
         location = self.postgres_location
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         invalid_version = self.create_random_name('version', RANDOM_VARIABLE_MAX_LENGTH)
@@ -186,12 +187,16 @@ class PostgreSQLFlexibleServerValidatorScenarioTest(ScenarioTest):
         valid_tier = 'GeneralPurpose'
         invalid_backup_retention = 40
         ha_value = 'ZoneRedundant'
-        vnet_name = self.create_random_name('vnet', RANDOM_VARIABLE_MAX_LENGTH)
-        subnet_name = self.create_random_name('subnet', RANDOM_VARIABLE_MAX_LENGTH)
-        vnet_identifier = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resource-group/providers/Microsoft.Network/virtualNetworks/{}'.format(vnet_name)
-        subnet_identifier = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resource-group/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(vnet_name, subnet_name)
+        valid_vnet_name = self.create_random_name('vnet', RANDOM_VARIABLE_MAX_LENGTH)
+        invalid_vnet_name = self.create_random_name('vnet(/?\)', RANDOM_VARIABLE_MAX_LENGTH)
+        valid_subnet_name = self.create_random_name('subnet', RANDOM_VARIABLE_MAX_LENGTH)
+        invalid_subnet_name = self.create_random_name('subnet(/?\)', RANDOM_VARIABLE_MAX_LENGTH)
+        valid_vnet_identifier = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resource-group/providers/Microsoft.Network/virtualNetworks/{}'.format(valid_vnet_name)
+        invalid_vnet_identifier = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resource-group/providers/Microsoft.Network/virtualNetworks/{}'.format(invalid_vnet_name)
+        valid_subnet_identifier = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resource-group/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(valid_vnet_name, valid_subnet_name)
+        invalid_subnet_identifier = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resource-group/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(invalid_vnet_name, invalid_subnet_name)
         valid_private_dns_zone = '{}.private.postgres.database.azure.com'.format(server_name)
-        invalid_private_dns_zones = ['{}.postgres.database.azure.com'.format(server_name), 'invalidprivate.dns.zone', '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resource-group/providers/Microsoft.Network/privateDnsZones/invalidprivate.dns.zone']
+        invalid_private_dns_zones = ['{}.postgres.database.azure.com'.format(server_name), 'invalidprivate.dns.zone', '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resource-group/providers/Microsoft.Network/privateDnsZones/{}.invalid(/?\)segment.postgres.database.azure.com'.format(server_name)]
 
         # Create server with invalid server name.
         self.cmd('postgres flexible-server create -g {} -n Wrongserver.Name -l {}'.format(
@@ -239,50 +244,66 @@ class PostgreSQLFlexibleServerValidatorScenarioTest(ScenarioTest):
                  expect_failure=True)
 
         # Create server with private network arguments but without a private DNS zone.
-        self.cmd('postgres flexible-server create -g {} -n {} -l {} --vnet {} --subnet {}'.format(
-                 resource_group, server_name, location, vnet_name, subnet_name),
-                 expect_failure=True)
+        with self.assertRaisesRegex(CLIError, "When --vnet or --subnet is provided, --private-dns-zone is required."):
+            self.cmd(
+                'postgres flexible-server create -g {} -n {} -l {} --vnet {} --subnet {}'.format(
+                    resource_group, server_name, location, valid_vnet_name, valid_subnet_name))
+        
+        # Create server with public access, virtual network name, and subnet name at the same time.
+        with self.assertRaisesRegex(CLIError, "The --subnet and --public-access arguments cannot be used together. Use only one of them."):
+            self.cmd('postgres flexible-server create -g {} -n {} -l {} --vnet {} --subnet {} --public-access All'.format(
+                    resource_group, server_name, location, valid_vnet_name, valid_subnet_name))
 
-        # Create server with public access, virtual network name and subnet name at the same time.
-        self.cmd('postgres flexible-server create -g {} -n {} -l {} --vnet {} --subnet {} --public-access All'.format(
-                 resource_group, server_name, location, vnet_name, subnet_name),
-                 expect_failure=True)
+        # Create server with an incorrectly formed virtual network identifier.
+        with self.assertRaisesRegex(CLIError, "Specify either --subnet as a subnet resource identifier, --vnet as a vnet resource identifier with --subnet as a subnet name, or both --vnet and --subnet as resource names."):
+            self.cmd('postgres flexible-server create -g {} -n {} -l {} --vnet {} --subnet {} --private-dns-zone {}'.format(
+                    resource_group, server_name, location, invalid_vnet_identifier, valid_subnet_name, valid_private_dns_zone))
 
-        # Create server with an incorrectly formed subnet identifier.
-        self.cmd('postgres flexible-server create -g {} -n {} -l {} --subnet {} --private-dns-zone {}'.format(
-                 resource_group, server_name, location, subnet_identifier, valid_private_dns_zone),
-                 expect_failure=True)
+        # Create server with an incorrectly formed subnet name.
+        with self.assertRaisesRegex(CLIError, "Specify either --subnet as a subnet resource identifier, --vnet as a vnet resource identifier with --subnet as a subnet name, or both --vnet and --subnet as resource names."):
+            self.cmd('postgres flexible-server create -g {} -n {} -l {} --vnet {} --subnet {} --private-dns-zone {}'.format(
+                    resource_group, server_name, location, valid_vnet_name, invalid_subnet_name, valid_private_dns_zone))
+
+        # Create server with an incorrectly formed virtual network name.
+        with self.assertRaisesRegex(CLIError, "Specify either --subnet as a subnet resource identifier, --vnet as a vnet resource identifier with --subnet as a subnet name, or both --vnet and --subnet as resource names."):
+            self.cmd('postgres flexible-server create -g {} -n {} -l {} --vnet {} --subnet {} --private-dns-zone {}'.format(
+                    resource_group, server_name, location, invalid_vnet_name, valid_subnet_name, valid_private_dns_zone))
 
         # Create server with the resource identifier of a virtual network and the resource identifier of a subnet at the same time.
-        self.cmd('postgres flexible-server create -g {} -n {} -l {} --vnet {} --subnet {} --private-dns-zone {}'.format(
-                 resource_group, server_name, location, vnet_identifier, subnet_identifier, valid_private_dns_zone),
-                 expect_failure=True)
+        with self.assertRaisesRegex(CLIError, "If you pass --vnet as a resource identifier, --subnet must be a subnet name."):
+            self.cmd('postgres flexible-server create -g {} -n {} -l {} --vnet {} --subnet {} --private-dns-zone {}'.format(
+                    resource_group, server_name, location, valid_vnet_identifier, valid_subnet_identifier, valid_private_dns_zone))
 
         # Create server with the resource identifier of a subnet, and the name of a virtual network at the same time.
-        self.cmd('postgres flexible-server create -g {} -n {} -l {} --vnet {} --subnet {} --private-dns-zone {}'.format(
-                 resource_group, server_name, location, vnet_name, subnet_identifier, valid_private_dns_zone),
-                 expect_failure=True)
+        with self.assertRaisesRegex(CLIError, "Specify either --subnet as a subnet resource identifier, --vnet as a vnet resource identifier with --subnet as a subnet name, or both --vnet and --subnet as resource names."):
+            self.cmd('postgres flexible-server create -g {} -n {} -l {} --vnet {} --subnet {} --private-dns-zone {}'.format(
+                    resource_group, server_name, location, valid_vnet_name, valid_subnet_identifier, valid_private_dns_zone))
 
         # Create server with a private DNS zone, but without virtual network and subnet.
-        self.cmd('postgres flexible-server create -g {} -n {} -l {} --private-dns-zone {}'.format(
-                 resource_group, server_name, location, valid_private_dns_zone),
-                 expect_failure=True)
+        with self.assertRaisesRegex(CLIError, "Private DNS zone can only be used with private access network. Use --vnet or/and --subnet parameters."):
+            self.cmd('postgres flexible-server create -g {} -n {} -l {} --private-dns-zone {}'.format(
+                    resource_group, server_name, location, valid_private_dns_zone))
 
         # Create server with a private DNS zone and a virtual network name, but without a subnet name.
-        self.cmd('postgres flexible-server create -g {} -n {} -l {} --vnet {} --private-dns-zone {}'.format(
-                 resource_group, server_name, location, vnet_name, valid_private_dns_zone),
-                 expect_failure=True)
+        with self.assertRaisesRegex(CLIError, "When --vnet is provided, --subnet must also be provided in the form of subnet name."):
+            self.cmd('postgres flexible-server create -g {} -n {} -l {} --vnet {} --private-dns-zone {}'.format(
+                    resource_group, server_name, location, valid_vnet_name, valid_private_dns_zone))
 
         # Create server with a private DNS zone and a subnet name, but without a virtual network.
-        self.cmd('postgres flexible-server create -g {} -n {} -l {} --subnet {} --private-dns-zone {}'.format(
-                 resource_group, server_name, location, subnet_name, valid_private_dns_zone),
-                 expect_failure=True)
+        with self.assertRaisesRegex(CLIError, "Incorrectly formed subnet identifier. If you are providing only --subnet but not --vnet, the --subnet parameter should be in resource identifier format."):
+            self.cmd('postgres flexible-server create -g {} -n {} -l {} --subnet {} --private-dns-zone {}'.format(
+                    resource_group, server_name, location, valid_subnet_name, valid_private_dns_zone))
 
-        # Create server with an multiple forms of invalid private DNS zones.
+        # Create server with multiple forms of invalid private DNS zones.
+        messages = [
+            "The private DNS zone name cannot be the same as the server's fully qualified domain name.",
+            "The suffix of the private DNS zone should be '.postgres.database.azure.com'.",
+            "The private DNS zone name or identifier is not in a valid format."
+        ]
         for invalid_private_dns_zone in invalid_private_dns_zones:
-            self.cmd('postgres flexible-server create -g {} -n {} -l {} --private-dns-zone {}'.format(
-                     resource_group, server_name, location, invalid_private_dns_zone),
-                     expect_failure=True)
+            with self.assertRaisesRegex(CLIError, messages[invalid_private_dns_zones.index(invalid_private_dns_zone)]):
+                self.cmd('postgres flexible-server create -g {} -n {} -l {} --vnet {} --subnet {} --private-dns-zone {}'.format(
+                        resource_group, server_name, location, valid_vnet_name, valid_subnet_name, invalid_private_dns_zone))
 
         # Create server with invalid public access value (end-ip is not a valid IPv4 address).
         self.cmd('postgres flexible-server create -g {} -n {} -l {} --public-access 12.0.0.0-10.0.0.0.0'.format(

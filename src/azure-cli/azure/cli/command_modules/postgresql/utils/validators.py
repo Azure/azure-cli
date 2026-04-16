@@ -619,7 +619,7 @@ def validate_private_dns_zone(db_context, server_name, private_dns_zone, private
                               'domain name.')
 
     if private_dns_zone[-len(private_dns_zone_suffix):] != private_dns_zone_suffix:
-        raise ValidationError('The suffix of the private DNS zone should be "{}".'
+        raise ValidationError("The suffix of the private DNS zone should be '{}'."
                               .format(private_dns_zone_suffix))
 
     if _is_resource_name(private_dns_zone) and not is_valid_resource_name(private_dns_zone) \
@@ -631,7 +631,7 @@ def validate_private_dns_zone(db_context, server_name, private_dns_zone, private
 def resolve_private_subnet_id(cmd, resource_group_name, vnet, subnet):
     if subnet is not None and vnet is None:
         if not is_valid_resource_id(subnet):
-            raise ValidationError('Incorrectly formed subnet identifier. If you are providing only --subnet (not --vnet), '
+            raise ValidationError('Incorrectly formed subnet identifier. If you are providing only --subnet but not --vnet, '
                                   'the --subnet parameter should be in resource identifier format.')
         parsed_subnet = parse_resource_id(subnet)
         if 'child_name_1' not in parsed_subnet:
@@ -768,7 +768,7 @@ def build_network_configuration(cmd, resource_group_name, server_name,
         if private_dns_zone_id is not None:
             network.private_dns_zone_arm_resource_id = private_dns_zone_id
     elif subnet is None and vnet is None and private_dns_zone_arguments is not None:
-        raise RequiredArgumentMissingError('Private DNS zone can only be used with private access setting. '
+        raise RequiredArgumentMissingError('Private DNS zone can only be used with private access network. '
                                            'Use --vnet or/and --subnet parameters.')
     else:
         start_ip, end_ip = resolve_public_access_range(public_access, yes=yes)
