@@ -61,7 +61,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
         migration_id_arg_type = CLIArgumentType(
             metavar='NAME',
-            help="ID of the migration.",
+            help="Identifier of the migration.",
             local_context_attribute=LocalContextAttribute(
                 name='migration_id',
                 actions=[LocalContextAction.SET, LocalContextAction.GET],
@@ -170,26 +170,28 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         auto_grow_arg_type = CLIArgumentType(
             arg_type=get_enum_type(['Enabled', 'Disabled']),
             options_list=['--storage-auto-grow'],
-            help='Enable or disable autogrow of the storage. Default value is Enabled.'
+            help='Enable or disable autogrow of the storage. Default value is Disabled.'
         )
 
         storage_type_arg_type = CLIArgumentType(
             arg_type=get_enum_type(['PremiumV2_LRS', 'Premium_LRS']),
             options_list=['--storage-type'],
-            help='Storage type for the server. Allowed values are Premium_LRS and PremiumV2_LRS. Default value is Premium_LRS.'
-                 'Must set iops and throughput if using PremiumV2_LRS.'
+            help='Storage type for the server. Allowed values are Premium_LRS and PremiumV2_LRS. '
+            'Default value is Premium_LRS. Must set --iops and --throughput if using PremiumV2_LRS.'
         )
 
         storage_type_replica_arg_type = CLIArgumentType(
             arg_type=get_enum_type(['PremiumV2_LRS']),
             options_list=['--storage-type'],
-            help='Storage type for the read replica. Allowed value is PremiumV2_LRS. Default is for the read replica to match storage type of the primary server.'
+            help='Storage type for the read replica. Allowed value is PremiumV2_LRS. '
+            'Default is for the read replica to match storage type of the primary server.'
         )
 
         storage_type_restore_arg_type = CLIArgumentType(
             arg_type=get_enum_type(['PremiumV2_LRS']),
             options_list=['--storage-type'],
-            help='Storage type for the new server. Allowed value is PremiumV2_LRS. Default is for the new server to match storage type of the source server.'
+            help='Storage type for the new server. Allowed value is PremiumV2_LRS. '
+            'Default is for the new server to match storage type of the source server.'
         )
 
         performance_tier_arg_type = CLIArgumentType(
@@ -205,30 +207,22 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
         vnet_arg_type = CLIArgumentType(
             options_list=['--vnet'],
-            help='Name or ID of a new or existing virtual network. '
-                 'If you want to use a vnet from different resource group or subscription, '
-                 'please provide a resource ID. The name must be between 2 to 64 characters. '
+            help='Name or identifier of an existing virtual network. '
+                 'If you want to use a vnet from a different resource group or subscription, '
+                 'please provide a resource identifier. The name must be between 2 to 64 characters. '
                  'The name must begin with a letter or number, end with a letter, number or underscore, '
                  'and may contain only letters, numbers, underscores, periods, or hyphens.'
         )
 
-        vnet_address_prefix_arg_type = CLIArgumentType(
-            options_list=['--address-prefixes'],
-            help='The IP address prefix to use when creating a new virtual network in CIDR format. '
-                 'Default value is 10.0.0.0/16.'
-        )
-
         subnet_arg_type = CLIArgumentType(
             options_list=['--subnet'],
-            help='Name or resource ID of a new or existing subnet. '
-                 'If you want to use a subnet from different resource group or subscription, please provide resource ID instead of name. '
-                 'Please note that the subnet will be delegated to flexibleServers. '
-                 'After delegation, this subnet cannot be used for any other type of Azure resources.'
+            help='Name or identifier of an existing subnet. '
+                 'If you want to use a subnet from a different resource group or subscription, please provide its resource identifier instead of name.'
         )
 
         subnet_address_prefix_arg_type = CLIArgumentType(
             options_list=['--subnet-prefixes'],
-            help='The subnet IP address prefix to use when creating a new subnet in CIDR format. Default value is 10.0.0.0/24.'
+            help='The subnet IP address prefix to use when creating a new subnet in CIDR format. Default value is 10.0.0.0/24.'
         )
 
         zone_arg_type = CLIArgumentType(
@@ -285,23 +279,22 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
         private_dns_zone_arguments_arg_type = CLIArgumentType(
             options_list=['--private-dns-zone'],
-            help='This parameter only applies for a server with private access. '
-                 'The name or id of new or existing private dns zone. '
-                 'You can use the private dns zone from same resource group, different resource group, or different subscription. '
-                 'If you want to use a zone from different resource group or subscription, please provide resource Id. '
-                 'CLI creates a new private dns zone within the same resource group as virtual network if not provided by users.'
+            help='This parameter only applies for a server with private access and is required when using --vnet or --subnet. '
+                 'The name or resource identifier of an existing private DNS zone. '
+                 'You can use a private DNS zone from the same resource group, a different resource group, or a different subscription. '
+                 'If you want to use a zone from a different resource group or subscription, please provide its resource identifier.'
         )
 
         restore_point_in_time_arg_type = CLIArgumentType(
             options_list=['--restore-time'],
             default=get_current_time(),
-            help='The point in time in UTC to restore from (ISO8601 format), e.g., 2017-04-26T02:10:00+00:00'
+            help='The point in time in UTC to restore from (ISO8601 format), e.g., 2026-03-22T18:20:22+00:00 '
                  'The default value is set to current time.'
         )
 
         source_server_arg_type = CLIArgumentType(
             options_list=['--source-server'],
-            help='The name or resource ID of the source server to restore from.'
+            help='The name or resource identifier of the source server to restore from.'
         )
 
         geo_redundant_backup_arg_type = CLIArgumentType(
@@ -312,30 +305,30 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
         identity_arg_type = CLIArgumentType(
             options_list=['--identity'],
-            help='The name or resource ID of the user assigned identity for data encryption.',
+            help='The name or resource identifier of the user assigned identity for data encryption.',
             validator=validate_byok_identity
         )
 
         backup_identity_arg_type = CLIArgumentType(
             options_list=['--backup-identity'],
-            help='The name or resource ID of the geo backup user identity for data encryption. The identity needs to be in the same region as the backup region.',
+            help='The name or resource identifier of the geo backup user identity for data encryption. The identity needs to be in the same region as the backup region.',
             validator=validate_byok_identity
         )
 
         key_arg_type = CLIArgumentType(
             options_list=['--key'],
-            help='The resource ID of the primary keyvault key for data encryption.'
+            help='The resource identifier of the primary keyvault key for data encryption.'
         )
 
         backup_key_arg_type = CLIArgumentType(
             options_list=['--backup-key'],
-            help='The resource ID of the geo backup keyvault key for data encryption. The key needs to be in the same region as the backup region.'
+            help='The resource identifier of the geo backup keyvault key for data encryption. The key needs to be in the same region as the backup region.'
         )
 
         identities_arg_type = CLIArgumentType(
             options_list=['--identity', '-n'],
             nargs='+',
-            help='Space-separated names or ID\'s of identities.',
+            help='Space-separated names or identifiers of identities.',
             validator=validate_identities
         )
 
@@ -400,7 +393,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('version', arg_type=version_arg_type)
             c.argument('backup_retention', default=7, arg_type=pg_backup_retention_arg_type)
             c.argument('microsoft_entra_auth', default='Disabled', arg_type=microsoft_entra_auth_arg_type)
-            c.argument('admin_id', options_list=['--admin-object-id', '-i'], help='The unique ID of the Microsoft Entra administrator.')
+            c.argument('admin_id', options_list=['--admin-object-id', '-i'], help='The unique identifier of the Microsoft Entra administrator.')
             c.argument('admin_name', options_list=['--admin-display-name', '-m'], help='Display name of the Microsoft Entra administrator user or group.')
             c.argument('admin_type', options_list=['--admin-type', '-t'],
                        arg_type=get_enum_type(['User', 'Group', 'ServicePrincipal', 'Unknown']), help='Type of the Microsoft Entra administrator.')
@@ -676,7 +669,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('identities', arg_type=identities_arg_type)
 
         with self.argument_context('{} flexible-server identity show'.format(command_group)) as c:
-            c.argument('identity', options_list=['--identity', '-n'], help='Name or ID of identity to show.', validator=validate_identity)
+            c.argument('identity', options_list=['--identity', '-n'], help='Name or identifier of identity to show.', validator=validate_identity)
 
         with self.argument_context('{} flexible-server identity update'.format(command_group)) as c:
             c.argument('system_assigned', options_list=['--system-assigned'], arg_type=get_enum_type(['Enabled', 'Disabled']),
@@ -699,12 +692,12 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
         for scope in ['create', 'show', 'delete', 'wait']:
             with self.argument_context('{} flexible-server microsoft-entra-admin {}'.format(command_group, scope)) as c:
-                c.argument('sid', options_list=['--object-id', '-i'], help='The unique ID of the Microsoft Entra administrator.')
+                c.argument('sid', options_list=['--object-id', '-i'], help='The unique identifier of the Microsoft Entra administrator.')
 
         with self.argument_context('{} flexible-server microsoft-entra-admin create'.format(command_group)) as c:
             c.argument('login', options_list=['--display-name', '-u'], help='Display name of the Microsoft Entra administrator user or group.')
             c.argument('principal_type', options_list=['--type', '-t'], default='User', arg_type=get_enum_type(['User', 'Group', 'ServicePrincipal', 'Unknown']), help='Type of the Microsoft Entra administrator.')
-            c.argument('identity', help='Name or ID of identity used for Microsoft Entra Authentication.', validator=validate_identity)
+            c.argument('identity', help='Name or identifier of identity used for Microsoft Entra Authentication.', validator=validate_identity)
 
         # server advanced threat protection settings
         for scope in ['update', 'show']:
@@ -741,7 +734,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                            help='The name of the private endpoint connection associated with the Server. '
                            'Required if --id is not specified')
                 c.extra('connection_id', options_list=['--id'], required=False,
-                        help='The ID of the private endpoint connection associated with the Server. '
+                        help='The identifier of the private endpoint connection associated with the Server. '
                         'If specified --server-name/-s and --name/-n, this should be omitted.')
                 if scope == "approve" or scope == "reject":
                     c.argument('description', help='Comments for {} operation.'.format(scope), required=True)
