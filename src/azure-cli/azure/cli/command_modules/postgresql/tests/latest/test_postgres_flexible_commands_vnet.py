@@ -46,15 +46,15 @@ class PostgreSQLFlexibleServerVnetMgmtScenarioTest(ScenarioTest):
         server_subnet_prefixes = '10.0.0.0/24'
         server_private_dns_zone_name = '{}.private.postgres.database.azure.com'.format(server_name)
 
-        # Create a virtual network and subnet for server
+        # Create a virtual network and subnet for server.
         result_vnet = self.cmd('network vnet create -g {} -l {} -n {} --address-prefixes {} --subnet-name {} --subnet-prefixes {}'.format(
                  resource_group, location, server_vnet_name, server_vnet_prefixes, server_subnet_name, server_subnet_prefixes)).get_output_in_json()
         
-        # Delegate the subnet to Microsoft.DBforPostgreSQL/flexibleServers
+        # Delegate the subnet to Microsoft.DBforPostgreSQL/flexibleServers.
         self.cmd('network vnet subnet update -g {} --vnet-name {} -n {} --delegations Microsoft.DBforPostgreSQL/flexibleServers'.format(
                  resource_group, server_vnet_name, server_subnet_name))
         
-        # Create a private DNS zone for server
+        # Create a private DNS zone for server.
         result_dns = self.cmd('network private-dns zone create -g {} -n {}'.format(resource_group, server_private_dns_zone_name)).get_output_in_json()
 
         # Scenario: Provision a server with supplied subnet identifier and private DNS zone identifier.
@@ -77,15 +77,15 @@ class PostgreSQLFlexibleServerVnetMgmtScenarioTest(ScenarioTest):
                         JMESPathCheck('network.privateDnsZoneArmResourceId', None),
                         JMESPathCheck('network.delegatedSubnetResourceId', None)])
 
-        # Clean up
-        # Delete server
+        # Clean up.
+        # Delete server.
         self.cmd('postgres flexible-server delete -g {} --name {} --yes'
                  .format(resource_group, server_name), checks=NoneCheck())
-        # Delete private DNS zone
+        # Delete private DNS zone.
         self.cmd('network private-dns zone delete -g {} -n {} --yes'.format(resource_group, server_private_dns_zone_name), checks=NoneCheck())
-        # Remove delegation from subnet
+        # Remove delegation from subnet.
         self.cmd('network vnet subnet update -g {} --vnet-name {} -n {} --remove delegations'.format(resource_group, server_vnet_name, server_subnet_name))
-        # Delete virtual network
+        # Delete virtual network.
         self.cmd('network vnet delete -g {} -n {}'.format(resource_group, server_vnet_name), checks=NoneCheck())
 
 
@@ -101,15 +101,15 @@ class PostgreSQLFlexibleServerVnetMgmtScenarioTest(ScenarioTest):
         server_subnet_prefixes = '10.0.0.0/24'
         server_private_dns_zone_name = '{}.private.postgres.database.azure.com'.format(server_name)
 
-        # Create a virtual network and subnet for server
+        # Create a virtual network and subnet for server.
         result_vnet = self.cmd('network vnet create -g {} -l {} -n {} --address-prefixes {} --subnet-name {} --subnet-prefixes {}'.format(
                  resource_group, location, server_vnet_name, server_vnet_prefixes, server_subnet_name, server_subnet_prefixes)).get_output_in_json()
         
-        # Delegate the subnet to Microsoft.DBforPostgreSQL/flexibleServers
+        # Delegate the subnet to Microsoft.DBforPostgreSQL/flexibleServers.
         self.cmd('network vnet subnet update -g {} --vnet-name {} -n {} --delegations Microsoft.DBforPostgreSQL/flexibleServers'.format(
                  resource_group, server_vnet_name, server_subnet_name))
         
-        # Create a private DNS zone for server
+        # Create a private DNS zone for server.
         result_dns = self.cmd('network private-dns zone create -g {} -n {}'.format(resource_group, server_private_dns_zone_name)).get_output_in_json()
 
         # Scenario: Provision a server with supplied virtual network name, subnet name, and private DNS zone name.
@@ -132,15 +132,15 @@ class PostgreSQLFlexibleServerVnetMgmtScenarioTest(ScenarioTest):
                         JMESPathCheck('network.privateDnsZoneArmResourceId', None),
                         JMESPathCheck('network.delegatedSubnetResourceId', None)])
 
-        # Clean up
-        # Delete server
+        # Clean up.
+        # Delete server.
         self.cmd('postgres flexible-server delete -g {} --name {} --yes'
                  .format(resource_group, server_name), checks=NoneCheck())
-        # Delete private DNS zone
+        # Delete private DNS zone.
         self.cmd('network private-dns zone delete -g {} -n {} --yes'.format(resource_group, server_private_dns_zone_name), checks=NoneCheck())
-        # Remove delegation from subnet
+        # Remove delegation from subnet.
         self.cmd('network vnet subnet update -g {} --name {} --vnet-name {} --remove delegations'.format(resource_group, server_subnet_name, server_vnet_name))
-        # Delete virtual network
+        # Delete virtual network.
         self.cmd('network vnet delete -g {} -n {}'.format(resource_group, server_vnet_name), checks=NoneCheck())
 
     def _test_flexible_server_vnet_mgmt_subnetid_and_privatednszoneid_in_different_resource_groups(self, resource_group_vnet, resource_group_private_dns_zone, resource_group_server):
@@ -159,11 +159,11 @@ class PostgreSQLFlexibleServerVnetMgmtScenarioTest(ScenarioTest):
         result_vnet = self.cmd('network vnet create -g {} -l {} -n {} --address-prefixes {} --subnet-name {} --subnet-prefixes {}'.format(
                  resource_group_vnet, location, server_vnet_name, server_vnet_prefixes, server_subnet_name, server_subnet_prefixes)).get_output_in_json()
         
-        # Delegate the subnet to Microsoft.DBforPostgreSQL/flexibleServers
+        # Delegate the subnet to Microsoft.DBforPostgreSQL/flexibleServers.
         self.cmd('network vnet subnet update -g {} --vnet-name {} -n {} --delegations Microsoft.DBforPostgreSQL/flexibleServers'.format(
                  resource_group_vnet, server_vnet_name, server_subnet_name))
         
-        # Create a private DNS zone for server
+        # Create a private DNS zone for server.
         result_dns = self.cmd('network private-dns zone create -g {} -n {}'.format(resource_group_private_dns_zone, server_private_dns_zone_name)).get_output_in_json()
 
         # Scenario: Provision a server with supplied virtual network name, subnet name, and private DNS zone name.
@@ -186,13 +186,13 @@ class PostgreSQLFlexibleServerVnetMgmtScenarioTest(ScenarioTest):
                         JMESPathCheck('network.privateDnsZoneArmResourceId', None),
                         JMESPathCheck('network.delegatedSubnetResourceId', None)])
 
-        # Clean up
-        # Delete server
+        # Clean up.
+        # Delete server.
         self.cmd('postgres flexible-server delete -g {} --name {} --yes'
                  .format(resource_group_server, server_name), checks=NoneCheck())
-        # Delete private DNS zone
+        # Delete private DNS zone.
         self.cmd('network private-dns zone delete -g {} -n {} --yes'.format(resource_group_private_dns_zone, server_private_dns_zone_name), checks=NoneCheck())
-        # Remove delegation from subnet
+        # Remove delegation from subnet.
         self.cmd('network vnet subnet update -g {} --name {} --vnet-name {} --remove delegations'.format(resource_group_vnet, server_subnet_name, server_vnet_name))
-        # Delete virtual network
+        # Delete virtual network.
         self.cmd('network vnet delete -g {} -n {}'.format(resource_group_vnet, server_vnet_name), checks=NoneCheck())
