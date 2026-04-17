@@ -188,7 +188,7 @@ def get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
         retry_status=9,
         retry_backoff_factor=0.5,
         retry_backoff_max=30,
-        timeout=100 # seconds
+        timeout=100  # seconds
     )
 
     if auth_mode == "anonymous":
