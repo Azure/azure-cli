@@ -15,6 +15,7 @@ from azure.cli.core.azclierror import (ValidationError,
                                        ResourceNotFoundError,
                                        RequiredArgumentMissingError,
                                        MutuallyExclusiveArgumentError)
+from azure.core.pipeline.policies import RetryPolicy
 from azure.core.pipeline.transport import RequestsTransport  # pylint: disable=no-name-in-module
 from ._client_factory import cf_configstore
 from ._constants import HttpHeaders, FeatureFlagConstants
@@ -172,6 +173,23 @@ class AuthHeaderRequestsTransport(RequestsTransport):  # pylint: disable=too-few
 
 def get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint):
     azconfig_client = None
+    # Retry backoff schedule (exponential, factor=0.5, cap=30s, timeout=100s):
+    #   Retry 1: 0.5s  (cumulative:  0.5s)
+    #   Retry 2: 1.0s  (cumulative:  1.5s)
+    #   Retry 3: 2.0s  (cumulative:  3.5s)
+    #   Retry 4: 4.0s  (cumulative:  7.5s)
+    #   Retry 5: 8.0s  (cumulative: 15.5s)
+    #   Retry 6: 16.0s (cumulative: 31.5s)
+    #   Retry 7: 30.0s (cumulative: 61.5s)
+    #   Retry 8: 30.0s (cumulative: 91.5s)
+    #   Retry 9: timeout fires (~100s)
+    retry_policy = RetryPolicy(
+        retry_total=9,
+        retry_status=9,
+        retry_backoff_factor=0.5,
+        retry_backoff_max=30,
+        timeout=100 # seconds
+    )
 
     if auth_mode == "anonymous":
         try:
@@ -180,7 +198,8 @@ def get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
                 credential=AzureKeyCredential(key=""),
                 id_credential="",
                 user_agent=HttpHeaders.USER_AGENT,
-                transport=AuthHeaderRequestsTransport())
+                transport=AuthHeaderRequestsTransport(),
+                retry_policy=retry_policy)
         except (ValueError, TypeError) as ex:
             raise CLIError("Failed to initialize AzureAppConfigurationClient due to an exception: {}".format(str(ex)))
 
@@ -188,7 +207,8 @@ def get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
         connection_string = resolve_connection_string(cmd, name, connection_string)
         try:
             azconfig_client = AzureAppConfigurationClient.from_connection_string(connection_string=connection_string,
-                                                                                 user_agent=HttpHeaders.USER_AGENT)
+                                                                                 user_agent=HttpHeaders.USER_AGENT,
+                                                                                 retry_policy=retry_policy)
         except ValueError as ex:
             raise CLIError("Failed to initialize AzureAppConfigurationClient due to an exception: {}".format(str(ex)))
 
@@ -216,7 +236,8 @@ def get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
         try:
             azconfig_client = AzureAppConfigurationClient(credential=AppConfigurationCliCredential(cred, token_audience),
                                                           base_url=endpoint,
-                                                          user_agent=HttpHeaders.USER_AGENT)
+                                                          user_agent=HttpHeaders.USER_AGENT,
+                                                          retry_policy=retry_policy)
         except (ValueError, TypeError) as ex:
             raise CLIError("Failed to initialize AzureAppConfigurationClient due to an exception: {}".format(str(ex)))
 
