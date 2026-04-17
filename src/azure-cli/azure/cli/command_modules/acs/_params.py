@@ -1253,7 +1253,6 @@ def load_arguments(self, _):
         c.argument('root_cert_object_name')
         c.argument('cert_chain_object_name')
         c.argument('proxy_redirection_mechanism',
-                   options_list=['--proxy-redirection-mechanism', '--prm'],
                    arg_type=get_enum_type(["CNIChaining", "InitContainers"]),
                    help='Set the proxy redirection mechanism for Azure Service Mesh.')
 
