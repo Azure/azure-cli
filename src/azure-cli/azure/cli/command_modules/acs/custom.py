@@ -3167,6 +3167,8 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
         instance.upgrade_settings.node_soak_duration_in_minutes = node_soak_duration
     if undrainable_node_behavior:
         instance.upgrade_settings.undrainable_node_behavior = undrainable_node_behavior
+    if max_unavailable:
+        instance.upgrade_settings.max_unavailable = max_unavailable
 
     # custom headers
     aks_custom_headers = extract_comma_separated_string(
