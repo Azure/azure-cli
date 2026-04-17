@@ -2315,10 +2315,10 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_azure_service_mesh_enable_disable_istio_cni(self, resource_group, resource_group_location):
-        """ This test case exercises enabling and disabling Istio CNI for the service mesh profile.
-        It creates a cluster, enables azure service mesh, then enables Istio CNI
-        by running `aks mesh enable-istio-cni` followed by disabling by running
-        `aks mesh disable-istio-cni`.
+        """ This test case exercises setting the proxy redirection mechanism for the service mesh profile.
+        It creates a cluster, enables azure service mesh, then switches the proxy redirection
+        mechanism between CNIChaining and InitContainers using both `aks mesh enable --proxy-redirection-mechanism`
+        and `aks mesh proxy-redirection-mechanism --mechanism`.
         """
 
         # reset the count so in replay mode the random names will start with 0
@@ -2357,17 +2357,72 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('serviceMeshProfile.mode', 'Istio'),
         ])
 
-        # enable Istio CNI
-        enable_cni_cmd = 'aks mesh enable-istio-cni --resource-group={resource_group} --name={name}'
-        self.cmd(enable_cni_cmd, checks=[
-            self.check('serviceMeshProfile.istio.components.proxyRedirectionMechanism', 'CNIChaining'),
-        ])
+        # check initial proxy redirection mechanism to determine test order
+        # asm-1-30+ defaults to CNIChaining, older revisions default to InitContainers
+        show_cmd = 'aks show --resource-group={resource_group} --name={name} --output=json'
+        show_result = self.cmd(show_cmd).get_output_in_json()
+        initial_mechanism = show_result.get('serviceMeshProfile', {}).get('istio', {}).get('components', {}).get('proxyRedirectionMechanism', 'InitContainers')
 
-        # disable Istio CNI
-        disable_cni_cmd = 'aks mesh disable-istio-cni --resource-group={resource_group} --name={name}'
-        self.cmd(disable_cni_cmd, checks=[
-            self.check('serviceMeshProfile.istio.components.proxyRedirectionMechanism', 'InitContainers'),
-        ])
+        if initial_mechanism == 'CNIChaining':
+            # CNI is already enabled by default, so test switching to InitContainers first
+
+            # verify idempotency: setting same mechanism fails
+            self.cmd(
+                'aks mesh proxy-redirection-mechanism --resource-group={resource_group} --name={name} --mechanism CNIChaining',
+                expect_failure=True,
+            )
+
+            # switch to InitContainers
+            self.cmd(
+                'aks mesh proxy-redirection-mechanism --resource-group={resource_group} --name={name} --mechanism InitContainers',
+                checks=[
+                    self.check('serviceMeshProfile.istio.components.proxyRedirectionMechanism', 'InitContainers'),
+                ],
+            )
+
+            # verify idempotency: setting same mechanism fails
+            self.cmd(
+                'aks mesh proxy-redirection-mechanism --resource-group={resource_group} --name={name} --mechanism InitContainers',
+                expect_failure=True,
+            )
+
+            # switch back to CNIChaining
+            self.cmd(
+                'aks mesh proxy-redirection-mechanism --resource-group={resource_group} --name={name} --mechanism CNIChaining',
+                checks=[
+                    self.check('serviceMeshProfile.istio.components.proxyRedirectionMechanism', 'CNIChaining'),
+                ],
+            )
+        else:
+            # default is InitContainers, so test switching to CNIChaining first
+
+            # verify idempotency: setting same mechanism fails
+            self.cmd(
+                'aks mesh proxy-redirection-mechanism --resource-group={resource_group} --name={name} --mechanism InitContainers',
+                expect_failure=True,
+            )
+
+            # switch to CNIChaining
+            self.cmd(
+                'aks mesh proxy-redirection-mechanism --resource-group={resource_group} --name={name} --mechanism CNIChaining',
+                checks=[
+                    self.check('serviceMeshProfile.istio.components.proxyRedirectionMechanism', 'CNIChaining'),
+                ],
+            )
+
+            # verify idempotency: setting same mechanism fails
+            self.cmd(
+                'aks mesh proxy-redirection-mechanism --resource-group={resource_group} --name={name} --mechanism CNIChaining',
+                expect_failure=True,
+            )
+
+            # switch back to InitContainers
+            self.cmd(
+                'aks mesh proxy-redirection-mechanism --resource-group={resource_group} --name={name} --mechanism InitContainers',
+                checks=[
+                    self.check('serviceMeshProfile.istio.components.proxyRedirectionMechanism', 'InitContainers'),
+                ],
+            )
 
         # delete the cluster
         delete_cmd = 'aks delete --resource-group={resource_group} --name={name} --yes --no-wait'

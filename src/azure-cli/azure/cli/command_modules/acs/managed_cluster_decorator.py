@@ -5037,50 +5037,41 @@ class AKSManagedClusterContext(BaseAKSContext):
         return new_profile, updated
 
     def _handle_istio_cni_asm(self, new_profile: ServiceMeshProfile) -> Tuple[ServiceMeshProfile, bool]:
-        """Handle enable/disable Istio CNI proxy redirection mechanism."""
+        """Handle proxy redirection mechanism for Azure Service Mesh."""
         updated = False
-        enable_istio_cni = self.raw_param.get("enable_istio_cni", False)
-        disable_istio_cni = self.raw_param.get("disable_istio_cni", False)
+        proxy_redirection_mechanism = self.raw_param.get("proxy_redirection_mechanism", None)
 
-        if enable_istio_cni and disable_istio_cni:
-            raise MutuallyExclusiveArgumentError(
-                "Cannot specify --enable-istio-cni and "
-                "--disable-istio-cni at the same time."
+        if proxy_redirection_mechanism is None:
+            return new_profile, updated
+
+        # Check if service mesh is enabled before allowing changes
+        if new_profile is None or new_profile.mode == CONST_AZURE_SERVICE_MESH_MODE_DISABLED:
+            raise ArgumentUsageError(
+                "Istio has not been enabled for this cluster, please refer to https://aka.ms/asm-aks-addon-docs "
+                "for more details on enabling Azure Service Mesh."
             )
 
-        # Check if service mesh is enabled before allowing CNI changes
-        if enable_istio_cni or disable_istio_cni:
-            if new_profile is None or new_profile.mode == CONST_AZURE_SERVICE_MESH_MODE_DISABLED:
-                raise ArgumentUsageError(
-                    "Istio has not been enabled for this cluster, please refer to https://aka.ms/asm-aks-addon-docs "
-                    "for more details on enabling Azure Service Mesh."
-                )
+        # Ensure istio profile exists
+        if new_profile.istio is None:
+            new_profile.istio = self.models.IstioServiceMesh()  # pylint: disable=no-member
 
-            # Ensure istio profile exists
-            if new_profile.istio is None:
-                new_profile.istio = self.models.IstioServiceMesh()  # pylint: disable=no-member
+        # Ensure components exist
+        if new_profile.istio.components is None:
+            new_profile.istio.components = self.models.IstioComponents()  # pylint: disable=no-member
 
-            # Ensure components exist
-            if new_profile.istio.components is None:
-                new_profile.istio.components = self.models.IstioComponents()  # pylint: disable=no-member
+        current_mechanism = getattr(
+            new_profile.istio.components,
+            "proxy_redirection_mechanism",
+            None,
+        )
 
-            # Only update when the proxy redirection mechanism actually changes
-            current_mechanism = getattr(
-                new_profile.istio.components,
-                "proxy_redirection_mechanism",
-                None,
+        if current_mechanism == proxy_redirection_mechanism:
+            raise ArgumentUsageError(
+                f"Proxy redirection mechanism is already set to '{proxy_redirection_mechanism}' for this cluster."
             )
 
-            if enable_istio_cni:
-                if current_mechanism != CONST_AZURE_SERVICE_MESH_PROXY_REDIRECTION_CNI_CHAINING:
-                    new_profile.istio.components.proxy_redirection_mechanism = \
-                        CONST_AZURE_SERVICE_MESH_PROXY_REDIRECTION_CNI_CHAINING
-                    updated = True
-            elif disable_istio_cni:
-                if current_mechanism != CONST_AZURE_SERVICE_MESH_PROXY_REDIRECTION_INIT_CONTAINERS:
-                    new_profile.istio.components.proxy_redirection_mechanism = \
-                        CONST_AZURE_SERVICE_MESH_PROXY_REDIRECTION_INIT_CONTAINERS
-                    updated = True
+        new_profile.istio.components.proxy_redirection_mechanism = proxy_redirection_mechanism
+        updated = True
 
         return new_profile, updated
 

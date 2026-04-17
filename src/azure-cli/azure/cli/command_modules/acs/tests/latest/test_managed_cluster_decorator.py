@@ -6040,12 +6040,12 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         ))
 
     def test_handle_istio_cni_asm(self):
-        # Test enable Istio CNI on a cluster with ASM enabled
-        ctx_enable = AKSManagedClusterContext(
+        # Test set proxy redirection mechanism to CNIChaining
+        ctx_cni = AKSManagedClusterContext(
             self.cmd,
             AKSManagedClusterParamDict(
                 {
-                    "enable_istio_cni": True,
+                    "proxy_redirection_mechanism": "CNIChaining",
                 }
             ),
             self.models,
@@ -6058,19 +6058,19 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
                 components=self.models.IstioComponents(),
             ),
         )
-        new_profile, updated = ctx_enable._handle_istio_cni_asm(old_profile)
+        new_profile, updated = ctx_cni._handle_istio_cni_asm(old_profile)
         self.assertEqual(updated, True)
         self.assertEqual(
             new_profile.istio.components.proxy_redirection_mechanism,
             "CNIChaining",
         )
 
-        # Test disable Istio CNI on a cluster with ASM enabled
-        ctx_disable = AKSManagedClusterContext(
+        # Test set proxy redirection mechanism to InitContainers
+        ctx_init = AKSManagedClusterContext(
             self.cmd,
             AKSManagedClusterParamDict(
                 {
-                    "disable_istio_cni": True,
+                    "proxy_redirection_mechanism": "InitContainers",
                 }
             ),
             self.models,
@@ -6085,7 +6085,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
                 ),
             ),
         )
-        new_profile, updated = ctx_disable._handle_istio_cni_asm(old_profile)
+        new_profile, updated = ctx_init._handle_istio_cni_asm(old_profile)
         self.assertEqual(updated, True)
         self.assertEqual(
             new_profile.istio.components.proxy_redirection_mechanism,
@@ -6093,11 +6093,11 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         )
 
         # Test error when ASM is not enabled
-        ctx_enable_no_asm = AKSManagedClusterContext(
+        ctx_no_asm = AKSManagedClusterContext(
             self.cmd,
             AKSManagedClusterParamDict(
                 {
-                    "enable_istio_cni": True,
+                    "proxy_redirection_mechanism": "CNIChaining",
                 }
             ),
             self.models,
@@ -6107,24 +6107,9 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             mode="Disabled",
         )
         with self.assertRaises(ArgumentUsageError):
-            ctx_enable_no_asm._handle_istio_cni_asm(disabled_profile)
+            ctx_no_asm._handle_istio_cni_asm(disabled_profile)
 
-        # Test error when both enable and disable are specified
-        ctx_both = AKSManagedClusterContext(
-            self.cmd,
-            AKSManagedClusterParamDict(
-                {
-                    "enable_istio_cni": True,
-                    "disable_istio_cni": True,
-                }
-            ),
-            self.models,
-            decorator_mode=DecoratorMode.UPDATE,
-        )
-        with self.assertRaises(MutuallyExclusiveArgumentError):
-            ctx_both._handle_istio_cni_asm(old_profile)
-
-        # Test no-op when neither enable nor disable is specified
+        # Test no-op when proxy_redirection_mechanism is not specified
         ctx_noop = AKSManagedClusterContext(
             self.cmd,
             AKSManagedClusterParamDict({}),
@@ -6138,12 +6123,12 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         new_profile, updated = ctx_noop._handle_istio_cni_asm(old_profile)
         self.assertEqual(updated, False)
 
-        # Test idempotency: enable CNI when already CNIChaining → no-op
-        ctx_enable_idempotent = AKSManagedClusterContext(
+        # Test idempotency: setting same mechanism raises error
+        ctx_idempotent_cni = AKSManagedClusterContext(
             self.cmd,
             AKSManagedClusterParamDict(
                 {
-                    "enable_istio_cni": True,
+                    "proxy_redirection_mechanism": "CNIChaining",
                 }
             ),
             self.models,
@@ -6158,19 +6143,15 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
                 ),
             ),
         )
-        new_profile, updated = ctx_enable_idempotent._handle_istio_cni_asm(already_cni_profile)
-        self.assertEqual(updated, False)
-        self.assertEqual(
-            new_profile.istio.components.proxy_redirection_mechanism,
-            "CNIChaining",
-        )
+        with self.assertRaises(ArgumentUsageError):
+            ctx_idempotent_cni._handle_istio_cni_asm(already_cni_profile)
 
-        # Test idempotency: disable CNI when already InitContainers → no-op
-        ctx_disable_idempotent = AKSManagedClusterContext(
+        # Test idempotency: setting InitContainers when already InitContainers raises error
+        ctx_idempotent_init = AKSManagedClusterContext(
             self.cmd,
             AKSManagedClusterParamDict(
                 {
-                    "disable_istio_cni": True,
+                    "proxy_redirection_mechanism": "InitContainers",
                 }
             ),
             self.models,
@@ -6185,12 +6166,8 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
                 ),
             ),
         )
-        new_profile, updated = ctx_disable_idempotent._handle_istio_cni_asm(already_init_profile)
-        self.assertEqual(updated, False)
-        self.assertEqual(
-            new_profile.istio.components.proxy_redirection_mechanism,
-            "InitContainers",
-        )
+        with self.assertRaises(ArgumentUsageError):
+            ctx_idempotent_init._handle_istio_cni_asm(already_init_profile)
 
     def test_handle_ingress_gateways_asm(self):
         ctx_0 = AKSManagedClusterContext(
