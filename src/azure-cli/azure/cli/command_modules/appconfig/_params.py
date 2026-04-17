@@ -326,6 +326,12 @@ def load_arguments(self, _):
         c.argument('tags', arg_type=tags_type)
         c.argument('secret_identifier', validator=validate_secret_identifier, help="ID of the Key Vault object. Can be found using 'az keyvault {collection} show' command, where collection is key, secret or certificate. To set reference to the latest version of your secret, remove version information from secret identifier.")
 
+    with self.argument_context('appconfig kv set-snapshot-ref') as c:
+        c.argument('key', validator=validate_key, help="Key to be set. Key cannot be a '.' or '..', or contain the '%%' character.")
+        c.argument('label', help="If no label specified, set the key with null label by default")
+        c.argument('tags', arg_type=tags_type)
+        c.argument('snapshot_name', help='Name of the snapshot to reference. This is required.')
+
     with self.argument_context('appconfig kv delete') as c:
         c.argument('key', validator=validate_key, help='Support star sign as filters, for instance * means all key and abc* means keys with abc as prefix.')
         c.argument('label', help="If no label specified, delete entry with null label. Support star sign as filters, for instance * means all label and abc* means labels with abc as prefix.")
@@ -341,6 +347,7 @@ def load_arguments(self, _):
         c.argument('tags', arg_type=tags_arg_type, help="If no tags are specified, return all key-values with any tags. Support space-separated tags: key[=value] [key[=value] ...].")
         c.argument('snapshot', help="List all keys in a given snapshot of the App Configuration store. If no snapshot is specified, the keys currently in the store are listed.")
         c.argument('resolve_keyvault', arg_type=get_three_state_flag(), help="Resolve the content of key vault reference. This argument should NOT be specified along with --fields. Instead use --query for customized query.")
+        c.argument('resolve_snapshot_ref', arg_type=get_three_state_flag(), help="Resolve snapshot references and return all key-values from the referenced snapshot. When false (default), only the snapshot reference key-value itself is returned.")
 
     with self.argument_context('appconfig kv restore') as c:
         c.argument('key', help='If no key specified, restore all keys by default. Support star sign as filters, for instance abc* means keys with abc as prefix.')

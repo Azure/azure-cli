@@ -108,6 +108,7 @@ def load_command_table(self, _):
         g.command('import', 'import_config')
         g.command('export', 'export_config')
         g.command('set-keyvault', 'set_keyvault')
+        g.command('set-snapshot-ref', 'set_snapshot_ref')
 
     # FeatureManagement Commands
     with self.command_group('appconfig feature',
