@@ -25,6 +25,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_MONITORING_ADDON_NAME,
     CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
     CONST_OPEN_SERVICE_MESH_ADDON_NAME,
+    CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
     CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
     CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY,
     CONST_OUTBOUND_TYPE_LOAD_BALANCER,
@@ -2121,6 +2122,94 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         outbound_type_13 = ctx_13._get_outbound_type()
         expect_outbound_type_13 = CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY
         self.assertEqual(outbound_type_13,expect_outbound_type_13)
+
+    def test_get_outbound_type_update_udr_byo_vnet(self):
+        """UPDATE mode with UDR and BYO VNet (vnet_subnet_id present) should succeed."""
+        ctx = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "outbound_type": CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        ctx.agentpool_context = mock.MagicMock()
+        ctx.agentpool_context.get_vnet_subnet_id.return_value = (
+            "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/"
+            "providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet"
+        )
+        self.assertEqual(ctx.get_outbound_type(), CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING)
+
+    def test_get_outbound_type_update_udr_managed_vnet(self):
+        """UPDATE mode with UDR and managed VNet (no vnet_subnet_id) should raise InvalidArgumentValueError."""
+        ctx = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "outbound_type": CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        agentpool_ctx = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({}),
+            self.models,
+            DecoratorMode.UPDATE,
+            AgentPoolDecoratorMode.MANAGED_CLUSTER,
+        )
+        ctx.attach_agentpool_context(agentpool_ctx)
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx.get_outbound_type()
+
+    def test_get_outbound_type_update_user_assigned_nat_gw_managed_vnet(self):
+        """UPDATE mode with userAssignedNATGateway and managed VNet should raise InvalidArgumentValueError."""
+        ctx = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "outbound_type": CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        agentpool_ctx = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({}),
+            self.models,
+            DecoratorMode.UPDATE,
+            AgentPoolDecoratorMode.MANAGED_CLUSTER,
+        )
+        ctx.attach_agentpool_context(agentpool_ctx)
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx.get_outbound_type()
+
+    def test_get_outbound_type_create_udr_no_subnet(self):
+        """CREATE mode with UDR and no vnet_subnet_id should still raise RequiredArgumentMissingError."""
+        ctx = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "outbound_type": CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        agentpool_ctx = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({}),
+            self.models,
+            DecoratorMode.CREATE,
+            AgentPoolDecoratorMode.MANAGED_CLUSTER,
+        )
+        ctx.attach_agentpool_context(agentpool_ctx)
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx.get_outbound_type()
 
     def test_get_network_plugin_mode(self):
         # default

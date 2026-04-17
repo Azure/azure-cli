@@ -2362,7 +2362,7 @@ class AKSManagedClusterContext(BaseAKSContext):
                 skuName = CONST_MANAGED_CLUSTER_SKU_NAME_BASE
         return skuName
 
-    def _get_outbound_type(
+    def _get_outbound_type(  # pylint: disable=too-many-branches
         self,
         enable_validation: bool = False,
         read_only: bool = False,
@@ -2436,15 +2436,31 @@ class AKSManagedClusterContext(BaseAKSContext):
 
             if outbound_type == CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING:
                 if self.get_vnet_subnet_id() in ["", None]:
-                    raise RequiredArgumentMissingError(
-                        "--vnet-subnet-id must be specified for userDefinedRouting and it must "
-                        "be pre-configured with a route table with egress rules"
+                    if self.decorator_mode == DecoratorMode.CREATE:
+                        raise RequiredArgumentMissingError(
+                            "--vnet-subnet-id must be specified for userDefinedRouting and it must "
+                            "be pre-configured with a route table with egress rules"
+                        )
+                    raise InvalidArgumentValueError(
+                        "Updating outbound type to userDefinedRouting is only supported for "
+                        "clusters using a custom (BYO) virtual network. Managed VNet clusters "
+                        "cannot be updated to userDefinedRouting. Please refer to "
+                        "https://learn.microsoft.com/en-us/azure/aks/egress-outboundtype"
+                        "#updating-outboundtype-after-cluster-creation for supported migration paths."
                     )
             if outbound_type == CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY:
                 if self.get_vnet_subnet_id() in ["", None]:
-                    raise RequiredArgumentMissingError(
-                        "--vnet-subnet-id must be specified for userAssignedNATGateway and it must "
-                        "be pre-configured with a NAT gateway with outbound ips"
+                    if self.decorator_mode == DecoratorMode.CREATE:
+                        raise RequiredArgumentMissingError(
+                            "--vnet-subnet-id must be specified for userAssignedNATGateway and it must "
+                            "be pre-configured with a NAT gateway with outbound ips"
+                        )
+                    raise InvalidArgumentValueError(
+                        "Updating outbound type to userAssignedNATGateway is only supported for "
+                        "clusters using a custom (BYO) virtual network. Managed VNet clusters "
+                        "cannot be updated to userAssignedNATGateway. Please refer to "
+                        "https://learn.microsoft.com/en-us/azure/aks/egress-outboundtype"
+                        "#updating-outboundtype-after-cluster-creation for supported migration paths."
                     )
             if outbound_type == CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY:
                 if self.get_vnet_subnet_id() not in ["", None]:
