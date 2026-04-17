@@ -11,6 +11,8 @@
 from .__cmd_group import *
 from ._create import *
 from ._delete import *
+from ._get_link_failover_all_tests_detail import *
+from ._get_link_failover_single_test_detail import *
 from ._get_stats import *
 from ._list import *
 from ._list_arp_tables import *
@@ -18,5 +20,7 @@ from ._list_route_tables import *
 from ._list_route_tables_summary import *
 from ._list_service_providers import *
 from ._show import *
+from ._start_link_failover_test import *
+from ._stop_link_failover_test import *
 from ._update import *
 from ._wait import *

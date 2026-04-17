@@ -2050,11 +2050,32 @@ def merge_kubernetes_configurations(existing_file, addition_file, replace, conte
                 existing_file_perms,
             )
 
+    # Refuse to write through a symlink
+    if os.path.islink(existing_file):
+        raise CLIError(
+            'Kubeconfig path "{}" is a symbolic link. '
+            'Refusing to write to prevent symlink-following attacks.'.format(existing_file)
+        )
+
+    # Atomic write: write to a temp file in the same directory, then replace
+    parent_dir = os.path.dirname(existing_file) or '.'
+    tmp_fd, tmp_path = tempfile.mkstemp(dir=parent_dir)
     try:
-        with open(existing_file, 'w+') as stream:
+        with os.fdopen(tmp_fd, 'w') as stream:
             yaml.safe_dump(existing, stream, default_flow_style=False)
-    except OSError as ex:
-        if getattr(ex, 'errno', 0) in (errno.EACCES, errno.EPERM, errno.EROFS):
+        # Preserve existing file permissions if available, otherwise default to 0600
+        if os.path.exists(existing_file):
+            existing_mode = stat.S_IMODE(os.stat(existing_file).st_mode)
+            os.chmod(tmp_path, existing_mode)
+        else:
+            os.chmod(tmp_path, 0o600)
+        os.replace(tmp_path, existing_file)
+    except Exception as ex:  # pylint: disable=broad-except
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+        if isinstance(ex, OSError) and getattr(ex, 'errno', 0) in (errno.EACCES, errno.EPERM, errno.EROFS):
             raise FileOperationError(
                 'Permission denied when trying to write to {}. '
                 'Please ensure you have write access to this file, or specify a different file path '
@@ -2161,8 +2182,8 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr, node_name=None):
         # Get kubectl minor version
         kubectl_minor_version = -1
         try:
-            cmd = f"kubectl version -o json --kubeconfig {browse_path}"
-            output = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+            kubectl_cmd = ["kubectl", "version", "-o", "json", "--kubeconfig", browse_path]
+            output = subprocess.Popen(kubectl_cmd, stdout=subprocess.PIPE)
             jsonS, _ = output.communicate()
             kubectl_version = json.loads(jsonS)
             # Remove any non-numeric characters like + from minor version

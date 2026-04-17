@@ -67,10 +67,6 @@ def cf_rolling_upgrade_commands(cli_ctx, _):
     return _compute_client_factory(cli_ctx).virtual_machine_scale_set_rolling_upgrades
 
 
-def cf_galleries(cli_ctx, _):
-    return _compute_client_factory(cli_ctx).galleries
-
-
 def cf_gallery_images(cli_ctx, _):
     return _compute_client_factory(cli_ctx).gallery_images
 

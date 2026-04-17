@@ -4254,7 +4254,7 @@ has been deployed ".format(app_service_environment)
     # the api is odd on parameter naming, have to live with it for now
     sku_def = SkuDescription(tier=get_sku_tier(sku), name=_normalize_sku(sku), capacity=number_of_workers)
     plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def,
-                              reserved=(is_linux or None), hyper_v=(hyper_v or None),
+                              reserved=is_linux, hyper_v=(hyper_v or None),
                               per_site_scaling=per_site_scaling, hosting_environment_profile=ase_def,
                               async_scaling_enabled=async_scaling_enabled)
 
@@ -7100,7 +7100,7 @@ def create_functionapp_app_service_plan(cmd, resource_group_name, name, is_linux
         number_of_workers = validate_range_of_int_flag('--number-of-workers', number_of_workers, min_val=0, max_val=20)
     sku_def = SkuDescription(tier=tier, name=sku, capacity=number_of_workers)
     plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def,
-                              reserved=(is_linux or None), maximum_elastic_worker_count=max_burst,
+                              reserved=is_linux, maximum_elastic_worker_count=max_burst,
                               hyper_v=None, name=name)
 
     if zone_redundant:
