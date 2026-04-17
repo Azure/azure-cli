@@ -190,7 +190,7 @@ class AzureNetAppFilesCacheServiceScenarioTest(ScenarioTest):
                          (account_name, pool_name, cache_name)).get_output_in_json()
         assert cache['tags']['Tag1'] == 'Value1'
         assert cache['tags']['Tag2'] == 'Value2'
-        assert cache['properties']['size'] == new_size
+        assert cache['size'] == new_size
 
     @unittest.skip('Cache Tests are failing due issues in the environment, no way to test until fixed re enable when fixed.')
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_cache_', additional_tags={'owner': 'cli_test'})
