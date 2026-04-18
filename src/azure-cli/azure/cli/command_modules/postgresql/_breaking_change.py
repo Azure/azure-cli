@@ -109,9 +109,11 @@ register_other_breaking_change('postgres flexible-server migration',
 # Replica command argument changes
 register_argument_deprecate('postgres flexible-server replica create', '--replica-name', redirect='--name')
 
-# Elastic cluster command argument deprecated and will be removed in the future as cluster option will be determined by node count argument alone, where any value provided for node count will indicate an elastic cluster.
-register_argument_deprecate(command='postgres flexible-server create', argument='--cluster-option', 
-                            message='The --cluster-option argument has been deprecated and will be removed. '
-                            'When --node-count argument is passed, it will assume it refers to an '
-                            'elastic cluster. This change will take effect in next breaking change '
-                            'release scheduled for May 2026.')
+# Elastic cluster command argument deprecated and will be removed in the future as cluster
+# option will be determined by node count argument alone, where any value provided for node
+# count will indicate an elastic cluster.
+register_argument_deprecate(command='postgres flexible-server create', argument='--cluster-option',
+                            message='The --cluster-option argument has been deprecated and will be '
+                            'removed. When --node-count argument is passed, it will assume it refers '
+                            'to an elastic cluster. This change will take effect in next breaking '
+                            'change release scheduled for May 2026.')
