@@ -169,7 +169,7 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     sku_info = {k.lower(): v for k, v in sku_info.items()}
     single_az = list_location_capability_info['single_az']
     geo_backup_supported = list_location_capability_info['geo_backup_supported']
-    _cluster_validator(create_cluster, cluster_size, auto_grow, version, tier, instance)
+    _cluster_validator(create_cluster, cluster_size, auto_grow, version, instance)
     _network_arg_validator(subnet, public_access)
     _pg_tier_validator(tier, sku_info)  # need to be validated first
     if tier is None and instance is not None:
@@ -198,7 +198,7 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
                                  admin_name, admin_id, admin_type, instance)
 
 
-def _cluster_validator(create_cluster, cluster_size, auto_grow, version, tier, instance):
+def _cluster_validator(create_cluster, cluster_size, auto_grow, version, instance):
     if (create_cluster and create_cluster.lower() == 'elasticcluster') or \
        (instance and instance.cluster and instance.cluster.cluster_size > 0):
         if instance is None and version != '17':
@@ -206,8 +206,6 @@ def _cluster_validator(create_cluster, cluster_size, auto_grow, version, tier, i
 
         if auto_grow and auto_grow.lower() != 'disabled':
             raise ValidationError('Storage auto-grow is not supported for elastic cluster.')
-        if tier and tier.lower() == 'burstable':
-            raise ValidationError('Burstable tier is not supported for elastic cluster.')
 
     if cluster_size and instance and not instance.cluster:
         raise ValidationError('Node count can only be specified for an elastic cluster.')
