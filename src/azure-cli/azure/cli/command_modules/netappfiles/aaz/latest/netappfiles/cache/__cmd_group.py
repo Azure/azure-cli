@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "netappfiles cache",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Manage Cach
+    """Manage Cache resources
 
     Manage Azure NetApp Files (ANF) Cache Resources.
     """

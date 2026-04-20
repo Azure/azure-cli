@@ -54,7 +54,7 @@ class GenerateCredential(AAZCommand):
             ),
         )
         _args_schema.bucket_name = AAZStrArg(
-            options=["--bucket-name"],
+            options=["-b", "-n", "--bucket-name"],
             help="The name of the bucket",
             required=True,
             id_part="child_name_3",
