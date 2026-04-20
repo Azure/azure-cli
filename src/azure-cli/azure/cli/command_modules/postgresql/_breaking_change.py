@@ -4,10 +4,10 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.breaking_change import (
-NextBreakingChangeWindow,
-register_argument_deprecate,
-register_command_group_deprecate,
-register_other_breaking_change
+    NextBreakingChangeWindow,
+    register_argument_deprecate,
+    register_command_group_deprecate,
+    register_other_breaking_change
 )
 
 NETWORK_RESOURCE_BREAKING_CHANGE_MESSAGE = (
