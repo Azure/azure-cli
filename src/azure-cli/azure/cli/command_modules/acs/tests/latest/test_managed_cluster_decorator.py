@@ -8327,6 +8327,67 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         )
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
 
+    def test_set_up_azure_monitor_profile_app_monitoring_enabled(self):
+        # Test enabling app monitoring on create with no existing azure_monitor_profile
+        dec_1 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_azure_monitor_app_monitoring": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.set_up_azure_monitor_profile(mc_1)
+
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile)
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile.app_monitoring)
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile.app_monitoring.auto_instrumentation)
+        self.assertTrue(dec_mc_1.azure_monitor_profile.app_monitoring.auto_instrumentation.enabled)
+
+    def test_set_up_azure_monitor_profile_app_monitoring_not_enabled(self):
+        # Test that app monitoring is not set when flag is False
+        dec_1 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_azure_monitor_app_monitoring": False,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.set_up_azure_monitor_profile(mc_1)
+
+        if dec_mc_1.azure_monitor_profile is not None:
+            self.assertIsNone(dec_mc_1.azure_monitor_profile.app_monitoring)
+
+    def test_set_up_azure_monitor_profile_app_monitoring_with_existing_metrics(self):
+        # Test enabling app monitoring on a cluster that already has metrics profile
+        dec_1 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_azure_monitor_app_monitoring": True,
+                "enable_azure_monitor_metrics": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            identity=self.models.ManagedClusterIdentity(type="SystemAssigned"),
+        )
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.set_up_azure_monitor_profile(mc_1)
+
+        # Both metrics and app_monitoring should be set
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile)
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile.metrics)
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile.app_monitoring)
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile.app_monitoring.auto_instrumentation)
+        self.assertTrue(dec_mc_1.azure_monitor_profile.app_monitoring.auto_instrumentation.enabled)
+
     def test_set_up_azure_service_mesh(self):
         dec_1 = AKSManagedClusterCreateDecorator(
             self.cmd,
@@ -15732,6 +15793,38 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         self.assertIsNotNone(dec_mc_1.azure_monitor_profile.app_monitoring.auto_instrumentation)
         self.assertTrue(dec_mc_1.azure_monitor_profile.app_monitoring.auto_instrumentation.enabled)
 
+    def test_update_azure_monitor_profile_enable_app_monitoring_with_existing_metrics(self):
+        # Test enabling app monitoring on a cluster that already has metrics profile
+        dec_1 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_azure_monitor_app_monitoring": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            azure_monitor_profile=self.models.ManagedClusterAzureMonitorProfile(
+                metrics=self.models.ManagedClusterAzureMonitorProfileMetrics(
+                    enabled=True,
+                    kube_state_metrics=self.models.ManagedClusterAzureMonitorProfileKubeStateMetrics(
+                        metric_labels_allowlist="",
+                        metric_annotations_allow_list="",
+                    )
+                )
+            )
+        )
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.update_azure_monitor_profile(mc_1)
+
+        # app_monitoring should be added without overwriting existing metrics
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile)
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile.metrics)
+        self.assertTrue(dec_mc_1.azure_monitor_profile.metrics.enabled)
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile.app_monitoring)
+        self.assertTrue(dec_mc_1.azure_monitor_profile.app_monitoring.auto_instrumentation.enabled)
+
     def test_update_azure_monitor_profile_disable_app_monitoring(self):
         # Test disabling app monitoring on a cluster with existing azure_monitor_profile
         dec_1 = AKSManagedClusterUpdateDecorator(
@@ -15756,6 +15849,52 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         dec_mc_1 = dec_1.update_azure_monitor_profile(mc_1)
 
         self.assertIsNotNone(dec_mc_1.azure_monitor_profile)
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile.app_monitoring)
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile.app_monitoring.auto_instrumentation)
+        self.assertFalse(dec_mc_1.azure_monitor_profile.app_monitoring.auto_instrumentation.enabled)
+
+    def test_update_azure_monitor_profile_disable_app_monitoring_no_existing_profile(self):
+        # Test disabling app monitoring on a cluster with no existing azure_monitor_profile (null-safety)
+        dec_1 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "disable_azure_monitor_app_monitoring": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.update_azure_monitor_profile(mc_1)
+
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile)
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile.app_monitoring)
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile.app_monitoring.auto_instrumentation)
+        self.assertFalse(dec_mc_1.azure_monitor_profile.app_monitoring.auto_instrumentation.enabled)
+
+    def test_update_azure_monitor_profile_disable_app_monitoring_no_existing_app_monitoring(self):
+        # Test disabling app monitoring on a cluster with azure_monitor_profile but no app_monitoring
+        dec_1 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "disable_azure_monitor_app_monitoring": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            azure_monitor_profile=self.models.ManagedClusterAzureMonitorProfile(
+                metrics=self.models.ManagedClusterAzureMonitorProfileMetrics(
+                    enabled=True,
+                )
+            )
+        )
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.update_azure_monitor_profile(mc_1)
+
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile)
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile.metrics)
         self.assertIsNotNone(dec_mc_1.azure_monitor_profile.app_monitoring)
         self.assertIsNotNone(dec_mc_1.azure_monitor_profile.app_monitoring.auto_instrumentation)
         self.assertFalse(dec_mc_1.azure_monitor_profile.app_monitoring.auto_instrumentation.enabled)
