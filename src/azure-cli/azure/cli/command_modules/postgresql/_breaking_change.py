@@ -3,8 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.breaking_change import (NextBreakingChangeWindow, register_argument_deprecate, register_command_group_deprecate,
-                                            register_other_breaking_change)
+from azure.cli.core.breaking_change import (
+NextBreakingChangeWindow,
+register_argument_deprecate,
+register_command_group_deprecate,
+register_other_breaking_change
+)
 
 NETWORK_RESOURCE_BREAKING_CHANGE_MESSAGE = (
     'This command will stop creating new network resources or altering existing ones which are required '
