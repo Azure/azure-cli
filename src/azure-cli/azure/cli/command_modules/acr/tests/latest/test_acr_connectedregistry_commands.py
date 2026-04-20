@@ -118,6 +118,10 @@ class AcrConnectedRegistryCommandsTests(ScenarioTest):
         self.cmd('acr connected-registry list-client-tokens -n {root_name} -r {registry_name}',
                  checks=[self.check('[0].name', '{clientToken2}')])
 
+        self.cmd('acr connected-registry resync -n {root_name} -r {registry_name}',
+                  checks=[self.check('name', '{root_name}'),
+                          self.check('registrySyncResult.syncTrigger', 'ManualResync')])
+
         # Show connected registry properties
         self.cmd('acr connected-registry show -n {cr_name} -r {registry_name}',
                  checks=[self.check('name', '{cr_name}')])
