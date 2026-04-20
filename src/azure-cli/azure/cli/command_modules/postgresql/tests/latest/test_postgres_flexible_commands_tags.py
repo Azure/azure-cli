@@ -5,6 +5,7 @@
 
 import os
 import time
+from datetime import datetime, timezone
 from azure.cli.testsdk.scenario_tests.const import ENV_LIVE_TEST
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (
@@ -42,6 +43,7 @@ class PostgreSQLFlexibleServerTagsMgmtScenarioTest(ScenarioTest):
         initial_tags = "tag1=value1 tag2=value2 tag3=value3"
         new_tags = "tag4=value4 tag5=value5"
         new_repeated_tags = "tag6=value6a tag6=value6b tag7=value7"
+        # Following two are defined for the future, for when backend supports properly using passed tags to restore and revive operations.
         restored_server_tags = "tag8=value8 tag9=value9"
         revived_server_tags = "tag10=value10 tag11=value11"
 
@@ -118,28 +120,22 @@ class PostgreSQLFlexibleServerTagsMgmtScenarioTest(ScenarioTest):
         self.cmd('postgres flexible-server backup list -g {} -n {}'.format(resource_group, primary_server),
                  checks=[JMESPathCheck("length(@) >= `1`", True)])
 
+        restore_time_utc = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+
         # Restore server from backup without specific tags, to validate that tags on the restored server are inherited from those on the source server.
         self.cmd('postgres flexible-server restore -g {} -n {} --source-server {} --restore-time {} --yes'
-                 .format(resource_group, restored_server_1, primary_server, time.strftime('%Y-%m-%dT%H:%M:%S')),
+                 .format(resource_group, restored_server_1, primary_server, restore_time_utc),
                  checks=[_unique_tag_subset_check(initial_tags)])
         
-        # Delete restored server to clean up before next restore test.
-        self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, restored_server_1),
-                 checks=NoneCheck())
-
         # Update server tags with empty tags.
         self.cmd('postgres flexible-server update -g {} -n {} --tags {}'
                  .format(resource_group, primary_server, ""),
                  checks=[_unique_tag_subset_check("")])
 
-        # Restore server from backup with tags and validate that tags are properly set on the restored server.
+        # Restore server from backup without specific tags, to validate that tags on the restored server are inherited from those on the source server.
         self.cmd('postgres flexible-server restore -g {} -n {} --source-server {} --restore-time {} --yes'
-                 .format(resource_group, restored_server_2, primary_server, time.strftime('%Y-%m-%dT%H:%M:%S')),
+                 .format(resource_group, restored_server_2, primary_server, restore_time_utc),
                  checks=[_unique_tag_subset_check("")])
-
-        # Delete restored server to clean up before next restore test.
-        self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, restored_server_2),
-                 checks=NoneCheck())
 
         # Update server tags with original tags.
         self.cmd('postgres flexible-server update -g {} -n {} --tags {}'
@@ -159,15 +155,17 @@ class PostgreSQLFlexibleServerTagsMgmtScenarioTest(ScenarioTest):
                  checks=NoneCheck())
         self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, first_level_replica_2),
                  checks=NoneCheck())
-        self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, restored_server_2),
-                 checks=NoneCheck())
         self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, primary_server),
+                 checks=NoneCheck())
+        self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, restored_server_1),
+                 checks=NoneCheck())
+        self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, restored_server_2),
                  checks=NoneCheck())
 
         # Sleep for 5 minutes to ensure that the deleted primary server is fully deleted before attempting revive operation, as revive operation on a server that is not fully deleted is not allowed.
         os.environ.get(ENV_LIVE_TEST, False) and time.sleep(5 * 60)
 
-        # Revive restored server passing some new tags and validate that passed tags are properly set on the revived server.
+        # Revive dropped server without specific tags, to validate that tags on the revived server are inherited from those on the tombstoned server.
         self.cmd('postgres flexible-server revive-dropped -g {} -n {} --source-server {} --location {}'
                  .format(resource_group, revive_dropped_server, primary_server_resource_id, location),
                  checks=[_unique_tag_subset_check(initial_tags)])
