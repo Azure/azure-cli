@@ -324,8 +324,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('account_name', acct_name_type, options_list=['--name', '-n'], local_context_attribute=None)
 
     with self.argument_context('storage account create', resource_type=ResourceType.MGMT_STORAGE) as c:
-        t_account_type, t_sku_name, t_kind, t_tls_version, t_dns_endpoint_type, t_zone_placement_policy = \
-            self.get_models('AccountType', 'SkuName', 'Kind', 'MinimumTlsVersion', 'DnsEndpointType',
+        t_account_type, t_sku_name, t_kind, t_dns_endpoint_type, t_zone_placement_policy = \
+            self.get_models('AccountType', 'SkuName', 'Kind', 'DnsEndpointType',
                             'ZonePlacementPolicy',
                             resource_type=ResourceType.MGMT_STORAGE)
         t_identity_type = self.get_models('IdentityType', resource_type=ResourceType.MGMT_STORAGE)
@@ -388,10 +388,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    'be configured for public access. Note that setting this property to true does '
                    'not enable anonymous access to any data in the account. The additional step of configuring the '
                    'public access setting for a container is required to enable anonymous access.')
-        c.argument('min_tls_version', arg_type=get_enum_type(t_tls_version),
+        c.argument('min_tls_version', arg_type=get_enum_type(['TLS1_2', 'TLS1_3']),
                    help='The minimum TLS version to be permitted on requests to storage. '
-                        ' Values TLS1_0 and TLS1_1 have been retired on 2026/02/03 and will be removed on 2026/03/03.'
-                        ' Microsoft recommends setting MinimumTlsVersion to TLS1_2')
+                        'Microsoft recommends setting MinimumTlsVersion to TLS1_2')
         c.argument('allow_shared_key_access', allow_shared_key_access_type)
         c.argument('edge_zone', edge_zone_type)
         c.argument('identity_type', arg_type=get_enum_type(t_identity_type), arg_group='Identity',
@@ -468,7 +467,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
             c.argument('description', help='Comments for {} operation.'.format(item))
 
     with self.argument_context('storage account update', resource_type=ResourceType.MGMT_STORAGE) as c:
-        t_tls_version = self.get_models('MinimumTlsVersion', resource_type=ResourceType.MGMT_STORAGE)
         t_identity_type = self.get_models('IdentityType', resource_type=ResourceType.MGMT_STORAGE)
         c.register_common_storage_account_options()
         c.argument('sku', arg_type=get_enum_type(t_sku_name),
@@ -507,10 +505,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    'in the account may be configured for public access. Note that setting this property to true does '
                    'not enable anonymous access to any data in the account. The additional step of configuring the '
                    'public access setting for a container is required to enable anonymous access.')
-        c.argument('min_tls_version', arg_type=get_enum_type(t_tls_version),
+        c.argument('min_tls_version', arg_type=get_enum_type(['TLS1_2', 'TLS1_3']),
                    help='The minimum TLS version to be permitted on requests to storage. '
-                        ' Values TLS1_0 and TLS1_1 have been retired on 2026/02/03 and will be removed on 2026/03/03.'
-                        ' Microsoft recommends setting MinimumTlsVersion to TLS1_2')
+                        'Microsoft recommends setting MinimumTlsVersion to TLS1_2')
         c.argument('allow_shared_key_access', allow_shared_key_access_type)
         c.argument('identity_type', arg_type=get_enum_type(t_identity_type), arg_group='Identity',
                    help='The identity type.')

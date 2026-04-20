@@ -438,33 +438,25 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
 
     @ResourceGroupPreparer(location='eastus', name_prefix='cli_storage_account')
     def test_storage_create_with_min_tls(self, resource_group):
-        name1 = self.create_random_name(prefix='cli', length=24)
-        name2 = self.create_random_name(prefix='cli', length=24)
-        name3 = self.create_random_name(prefix='cli', length=24)
-        name4 = self.create_random_name(prefix='cli', length=24)
+        name_0 = self.create_random_name(prefix='cli', length=24)
+        name_1_2 = self.create_random_name(prefix='cli', length=24)
+        name_1_3 = self.create_random_name(prefix='cli', length=24)
 
-        self.cmd('az storage account create -n {} -g {} --min-tls-version TLS1_0'.format(name1, resource_group),
-                 checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_2')])
+        # service should default to tls1.2, currently service issue
+        # self.cmd('az storage account create -n {} -g {}'.format(name_0, resource_group),
+        #          checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_2')])
 
-        self.cmd('az storage account create -n {} -g {} --min-tls-version TLS1_1'.format(name2, resource_group),
-                 checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_2')])
-
-        self.cmd('az storage account create -n {} -g {} --min-tls-version TLS1_2'.format(name3, resource_group),
+        self.cmd('az storage account create -n {} -g {} --min-tls-version TLS1_2'.format(name_1_2, resource_group),
                  checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_2')])
 
         # setting minimumTlsVersion 1.3 is not supported yet,
         # https://learn.microsoft.com/en-us/azure/storage/common/transport-layer-security-configure-minimum-version?tabs=portal
-        # self.cmd('az storage account create -n {} -g {} --min-tls-version TLS1_3'.format(name4, resource_group),
+        # self.cmd('az storage account create -n {} -g {} --min-tls-version TLS1_3'.format(name_1_3, resource_group),
         #          checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_3')])
 
     @ResourceGroupPreparer(location='eastus', name_prefix='cli_storage_account')
     @StorageAccountPreparer(name_prefix='tls')
     def test_storage_update_with_min_tls(self, storage_account, resource_group):
-        self.cmd('az storage account update -n {} -g {} --min-tls-version TLS1_0'.format(
-            storage_account, resource_group), checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_2')])
-
-        self.cmd('az storage account update -n {} -g {} --min-tls-version TLS1_1'.format(
-            storage_account, resource_group), checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_2')])
 
         self.cmd('az storage account update -n {} -g {} --min-tls-version TLS1_2'.format(
             storage_account, resource_group), checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_2')])
