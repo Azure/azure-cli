@@ -91,7 +91,7 @@ class Create(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.certificate_key_vault_uri = AAZStrArg(
-            options=["--certificate-key-vault-uri"],
+            options=["--cert-kv-uri", "--certificate-key-vault-uri"],
             arg_group="CertificateAkvDetails",
             help="The base URI of the Azure Key Vault that is used when retrieving the bucket certificate.",
         )
@@ -119,14 +119,14 @@ class Create(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.credentials_key_vault_uri = AAZStrArg(
-            options=["--credentials-key-vault-uri"],
+            options=["--creds-kv-uri", "--credentials-key-vault-uri"],
             arg_group="CredentialsAkvDetails",
             help="The base URI of the Azure Key Vault that is used when storing the bucket credentials.",
         )
         _args_schema.secret_name = AAZStrArg(
             options=["--secret-name"],
             arg_group="CredentialsAkvDetails",
-            help="The name of the secret stored in Azure Key Vault. The associated key pair has the following structure:  { \"access_key_id\": \"<REDACTED>\", \"secret_access_key\": \"<REDACTED>\" }",
+            help="The name of the secret stored in Azure Key Vault. The associated key pair has the following structure:  { \"access_key_id\": `\"<REDACTED>\"`, \"secret_access_key\": `\"<REDACTED>\"` }",
             fmt=AAZStrArgFormat(
                 pattern="^[a-zA-Z0-9-]{1,127}$",
                 max_length=127,
@@ -186,7 +186,7 @@ class Create(AAZCommand):
             help="The host part of the bucket URL, resolving to the bucket IP address and allowed by the server certificate.",
         )
         _args_schema.on_certificate_conflict_action = AAZStrArg(
-            options=["--on-certificate-conflict-action"],
+            options=["--cert-conflict-action", "--on-certificate-conflict-action"],
             arg_group="Server",
             help="Action to take when there is a certificate conflict. Possible values include: 'Update', 'Fail'",
             enum={"Fail": "Fail", "Update": "Update"},

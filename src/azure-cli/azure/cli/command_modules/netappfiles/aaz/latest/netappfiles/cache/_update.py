@@ -194,14 +194,14 @@ class Update(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.cifs_change_notifications = AAZStrArg(
-            options=["--cifs-change-notifications"],
+            options=["--cifs-change-notify", "--cifs-change-notifications"],
             arg_group="Properties",
             help="Flag indicating whether a CIFS change notification is enabled for the cache.",
             nullable=True,
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
         _args_schema.key_vault_private_endpoint_resource_id = AAZResourceIdArg(
-            options=["--key-vault-private-endpoint-resource-id"],
+            options=["--kv-private-endpoint-id", "--key-vault-private-endpoint-resource-id"],
             arg_group="Properties",
             help="The resource ID of private endpoint for KeyVault. It must reside in the same VNET as the volume. Only applicable if encryptionKeySource = 'Microsoft.KeyVault'.",
             nullable=True,
@@ -245,7 +245,7 @@ class Update(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.smb_access_based_enumeration = AAZStrArg(
-            options=["--smb-access-based-enumeration"],
+            options=["--smb-access-enumeration", "--smb-access-based-enumeration"],
             arg_group="SmbSettings",
             help="Enables access-based enumeration share property for SMB Shares. Only applicable for SMB/DualProtocol volume",
             nullable=True,

@@ -97,7 +97,7 @@ class Update(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.certificate_key_vault_uri = AAZStrArg(
-            options=["--certificate-key-vault-uri"],
+            options=["--cert-kv-uri", "--certificate-key-vault-uri"],
             arg_group="CertificateAkvDetails",
             help="The base URI of the Azure Key Vault that is used when retrieving the bucket certificate.",
             nullable=True,
@@ -128,7 +128,7 @@ class Update(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.credentials_key_vault_uri = AAZStrArg(
-            options=["--credentials-key-vault-uri"],
+            options=["--creds-kv-uri", "--credentials-key-vault-uri"],
             arg_group="CredentialsAkvDetails",
             help="The base URI of the Azure Key Vault that is used when storing the bucket credentials.",
             nullable=True,
@@ -136,7 +136,7 @@ class Update(AAZCommand):
         _args_schema.secret_name = AAZStrArg(
             options=["--secret-name"],
             arg_group="CredentialsAkvDetails",
-            help="The name of the secret stored in Azure Key Vault. The associated key pair has the following structure:  { \"access_key_id\": \"<REDACTED>\", \"secret_access_key\": \"<REDACTED>\" }",
+            help="The name of the secret stored in Azure Key Vault. The associated key pair has the following structure:  { \"access_key_id\": `\"<REDACTED>\"`, \"secret_access_key\": `\"<REDACTED>\"` }",
             nullable=True,
             fmt=AAZStrArgFormat(
                 pattern="^[a-zA-Z0-9-]{1,127}$",
@@ -195,7 +195,7 @@ class Update(AAZCommand):
             nullable=True,
         )
         _args_schema.on_certificate_conflict_action = AAZStrArg(
-            options=["--on-certificate-conflict-action"],
+            options=["--cert-conflict-action", "--on-certificate-conflict-action"],
             arg_group="Server",
             help="Action to take when there is a certificate conflict. Possible values include: 'Update', 'Fail'",
             nullable=True,

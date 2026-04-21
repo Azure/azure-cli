@@ -226,13 +226,13 @@ class Create(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.cache_subnet_resource_id = AAZResourceIdArg(
-            options=["--cache-subnet-resource-id"],
+            options=["--cache-subnet-id", "--cache-subnet-resource-id"],
             arg_group="Properties",
             help="The Azure Resource URI for a delegated cache subnet that will be used to allocate data IPs.",
             required=True,
         )
         _args_schema.cifs_change_notifications = AAZStrArg(
-            options=["--cifs-change-notifications"],
+            options=["--cifs-change-notify", "--cifs-change-notifications"],
             arg_group="Properties",
             help="Flag indicating whether a CIFS change notification is enabled for the cache.",
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
@@ -268,7 +268,7 @@ class Create(AAZCommand):
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
         _args_schema.key_vault_private_endpoint_resource_id = AAZResourceIdArg(
-            options=["--key-vault-private-endpoint-resource-id"],
+            options=["--kv-private-endpoint-id", "--key-vault-private-endpoint-resource-id"],
             arg_group="Properties",
             help="The resource ID of private endpoint for KeyVault. It must reside in the same VNET as the volume. Only applicable if encryptionKeySource = 'Microsoft.KeyVault'.",
         )
@@ -285,7 +285,7 @@ class Create(AAZCommand):
             enum={"ActiveDirectory": "ActiveDirectory", "OpenLDAP": "OpenLDAP"},
         )
         _args_schema.peering_subnet_resource_id = AAZResourceIdArg(
-            options=["--peering-subnet-resource-id"],
+            options=["--peering-subnet-id", "--peering-subnet-resource-id"],
             arg_group="Properties",
             help="The Azure Resource URI for a delegated subnet that will be used for ANF Intercluster Interface IP addresses.",
             required=True,
@@ -326,7 +326,7 @@ class Create(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.smb_access_based_enumeration = AAZStrArg(
-            options=["--smb-access-based-enumeration"],
+            options=["--smb-access-enumeration", "--smb-access-based-enumeration"],
             arg_group="SmbSettings",
             help="Enables access-based enumeration share property for SMB Shares. Only applicable for SMB/DualProtocol volume",
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
