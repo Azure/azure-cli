@@ -1562,8 +1562,13 @@ def as_user_validator(namespace):
 def user_delegation_oid_validator(namespace):
     if namespace.user_delegation_oid and not namespace.as_user:
         raise argparse.ArgumentError(
-            None, "incorrect usage: need to specify '--as-user' when '--user-delegation-oid' is "
-                  "provided")
+            None, "incorrect usage: need to specify '--as-user' when '--user-delegation-oid' is provided")
+
+
+def user_delegation_tid_validator(namespace):
+    if namespace.user_delegation_tid and not namespace.user_delegation_oid:
+        raise argparse.ArgumentError(
+            None, "incorrect usage: need to specify '--user-delegation-oid' when '--user-delegation-tid' is provided")
 
 
 def validator_change_feed_retention_days(namespace):

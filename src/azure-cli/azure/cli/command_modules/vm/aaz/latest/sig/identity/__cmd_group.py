@@ -12,10 +12,10 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "cdn edge-action version",
+    "sig identity",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Manage Version
+    """Manage Identity
     """
     pass
 

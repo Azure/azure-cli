@@ -156,12 +156,28 @@ class PostgreSQLFlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pyli
         self.cmd('postgres flexible-server virtual-endpoint list -g {} --server-name {}'
                 .format(resource_group, master_server),
                 expect_failure=True)
+        
+        # test replica create ssdv2
+        replica_ssdv2 = self.create_random_name(F'azuredbclirepssdv2', SERVER_NAME_MAX_LENGTH)
+        storage_type = 'PremiumV2_LRS'
+        self.cmd('postgres flexible-server replica create -g {} --name {} --source-server {} --storage-type {}'
+                 .format(resource_group, replica_ssdv2, result['id'], storage_type),
+                 checks=[
+                     JMESPathCheck('name', replica_ssdv2),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('sku.tier', result['sku']['tier']),
+                     JMESPathCheck('sku.name', result['sku']['name']),
+                     JMESPathCheck('storage.type', storage_type),
+                     JMESPathCheck('replica.role', replica_role),
+                     JMESPathCheck('sourceServerResourceId', result['id'])])
 
         # Clean up servers
         self.cmd('postgres flexible-server delete -g {} --name {} --yes'
                  .format(resource_group, replicas[0]), checks=NoneCheck())
         self.cmd('postgres flexible-server delete -g {} --name {} --yes'
                  .format(resource_group, replicas[1]), checks=NoneCheck())
+        self.cmd('postgres flexible-server delete -g {} --name {} --yes'
+                 .format(resource_group, replica_ssdv2), checks=NoneCheck())
         self.cmd('postgres flexible-server delete -g {} --name {} --yes'
                     .format(resource_group, master_server))
         

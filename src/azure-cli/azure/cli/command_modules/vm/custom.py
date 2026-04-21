@@ -822,12 +822,7 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
 def show_vm_identity(cmd, resource_group_name, vm_name):
     vm = get_vm_by_aaz(cmd, resource_group_name, vm_name)
 
-    identity = vm.get("identity", {}) if vm else None
-
-    if identity and not identity.get('userAssignedIdentities'):
-        identity['userAssignedIdentities'] = None
-
-    return identity or None
+    return vm.get("identity") if vm else None
 
 
 def show_vmss_identity(cmd, resource_group_name, vm_name):
@@ -1761,13 +1756,7 @@ def set_vm_by_aaz(cmd, vm, no_wait=False):
                     if has_value(resource.type):
                         resource.type = AAZUndefined
 
-            result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-            if result.get('osProfile', {}).get('secrets', []):
-                for secret in result['osProfile']['secrets']:
-                    for cert in secret.get('vaultCertificates', []):
-                        if not cert.get('certificateStore'):
-                            cert['certificateStore'] = None
-            return result
+            return self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
 
     vm = LongRunningOperation(cmd.cli_ctx)(
         SetVM(cli_ctx=cmd.cli_ctx)(command_args=vm))
@@ -2646,10 +2635,7 @@ def _remove_identities_by_aaz(cmd, resource_group_name, name, identities, getter
 
     result = LongRunningOperation(cmd.cli_ctx)(setter(resource_group_name, name, resource))
 
-    if not result:
-        return None
-
-    return result.get('identity') or None
+    return result.get('identity') if result else None
 
 
 def remove_vm_identity(cmd, resource_group_name, vm_name, identities=None):
@@ -3374,13 +3360,6 @@ def add_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate, cert
 
 def list_vm_secrets(cmd, resource_group_name, vm_name):
     vm = get_vm_by_aaz(cmd, resource_group_name, vm_name)
-
-    if vm.get('osProfile', {}).get('secrets', []):
-        for secret in vm['osProfile']['secrets']:
-            for cert in secret.get('vaultCertificates', []):
-                if not cert.get('certificateStore'):
-                    cert['certificateStore'] = None
-
     return vm.get('osProfile', {}).get('secrets', [])
 
 

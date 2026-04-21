@@ -7,7 +7,7 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm,
                                                           cf_vm_ext, cf_vm_ext_image,
                                                           cf_vm_image_term, cf_usage,
                                                           cf_vmss,
-                                                          cf_galleries, cf_gallery_images, cf_gallery_image_versions,
+                                                          cf_gallery_images, cf_gallery_image_versions,
                                                           cf_proximity_placement_groups,
                                                           cf_dedicated_hosts,
                                                           cf_log_analytics_data_plane,
@@ -99,11 +99,6 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.compute.operations#VirtualMachineScaleSetsOperations.{}',
         client_factory=cf_vmss,
         operation_group='virtual_machine_scale_sets'
-    )
-
-    compute_galleries_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#GalleriesOperations.{}',
-        client_factory=cf_galleries,
     )
 
     compute_gallery_images_sdk = CliCommandType(
@@ -449,7 +444,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'vmss_run_command_create', supports_no_wait=True)
         g.custom_command('update', 'vmss_run_command_update', supports_no_wait=True)
 
-    with self.command_group('sig', compute_galleries_sdk, operation_group='galleries') as g:
+    with self.command_group('sig', operation_group='galleries') as g:
         from .operations.sig import SigCreate, SigUpdate, SigShow
         self.command_table['sig create'] = SigCreate(loader=self)
         self.command_table['sig update'] = SigUpdate(loader=self)
@@ -457,6 +452,10 @@ def load_command_table(self, _):
 
     with self.command_group('sig', community_gallery_sdk, client_factory=cf_community_gallery, operation_group='shared_galleries', min_api='2022-01-03') as g:
         g.custom_command('list-community', 'sig_community_gallery_list')
+
+    with self.command_group('sig identity') as g:
+        from .operations.sig import SigIdentityRemove
+        self.command_table['sig identity remove'] = SigIdentityRemove(loader=self)
 
     with self.command_group('sig image-definition', compute_gallery_images_sdk, operation_group='gallery_images', min_api='2018-06-01') as g:
         g.custom_command('create', 'create_gallery_image')

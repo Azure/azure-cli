@@ -574,7 +574,8 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
 
         blob_sas = self.cmd('storage blob generate-sas --account-name {} -n {} -c {} --expiry {} --permissions '
                             'wr --as-user --auth-mode login --user-delegation-oid '
-                            '{}'.format(storage_account, b, c, expiry, logged_in_user)).output
+                            '{} --user-delegation-tid ed94de55-1f87-4278-9651-525e7ba467d6'.format(
+            storage_account, b, c, expiry, logged_in_user)).output
         self.assertIn('&sig=', blob_sas)
         self.assertIn('skoid=', blob_sas)
         self.assertIn('sktid=', blob_sas)
@@ -583,6 +584,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         self.assertIn('sks=', blob_sas)
         self.assertIn('skv=', blob_sas)
         self.assertIn('sduoid=', blob_sas)
+        self.assertIn('skdutid=', blob_sas)
 
         if self.is_live:
             self.cmd('storage blob upload --account-name {} -c {} -n {} -f "{}" --overwrite --sas-token {} '
@@ -590,7 +592,8 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
 
         container_sas = self.cmd('storage container generate-sas --account-name {} -n {} --expiry {} --permissions '
                                  'wr --https-only --as-user --auth-mode login --user-delegation-oid '
-                                 '{}'.format(storage_account, c, expiry, logged_in_user)).output
+                                 '{} --user-delegation-tid ed94de55-1f87-4278-9651-525e7ba467d6'.format(
+            storage_account, c, expiry, logged_in_user)).output
         self.assertIn('&sig=', container_sas)
         self.assertIn('skoid=', container_sas)
         self.assertIn('sktid=', container_sas)
@@ -600,6 +603,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         self.assertIn('skv=', container_sas)
         self.assertIn('skv=', container_sas)
         self.assertIn('sduoid=', container_sas)
+        self.assertIn('skdutid=', container_sas)
 
         if self.is_live:
             self.cmd('storage blob upload --account-name {} -c {} -n {} -f "{}" --overwrite --sas-token {} '

@@ -1411,6 +1411,15 @@ def _validate_vm_vmss_msi(cmd, namespace, is_identity_assign=False):
         _enable_msi_for_trusted_launch(namespace)
 
 
+def process_sig_remove_identity_namespace(cmd, namespace):
+    if namespace.identities:
+        for i, identity in enumerate(namespace.identities):
+            namespace.identities[i] = _get_resource_id(cmd.cli_ctx, identity,
+                                                       namespace.resource_group_name,
+                                                       'userAssignedIdentities',
+                                                       'Microsoft.ManagedIdentity')
+
+
 def _enable_msi_for_trusted_launch(namespace):
     # Enable system assigned msi by default when Trusted Launch configuration is met
     is_trusted_launch = namespace.security_type and namespace.security_type.lower() == 'trustedlaunch' \
