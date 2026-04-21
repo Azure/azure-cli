@@ -619,6 +619,9 @@ parameters:
   - name: --enable-ai-toolchain-operator
     type: bool
     short-summary: Enable AI toolchain operator to the cluster.
+  - name: --enable-gateway-api
+    type: bool
+    short-summary: Enable managed installation of Gateway API CRDs from the standard release channel. Requires at least one managed Gateway API ingress provider to be enabled.
   - name: --bootstrap-container-registry-resource-id
     type: string
     short-summary: Configure container registry resource ID. Must use "Cache" as bootstrap artifact source.
@@ -728,6 +731,8 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --node-provisioning-mode Auto --node-provisioning-default-pools None
   - name: Create a Kubernetes cluster with KataVmIsolation enabled.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --os-sku AzureLinux --vm-size Standard_D4s_v3 --workload-runtime KataVmIsolation --node-count 1
+  - name: Create a kubernetes cluster with the Azure Service Mesh addon enabled with a managed installation of Gateway API CRDs from the standard release channel.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-azure-service-mesh --enable-gateway-api
 """
 
 helps["aks update"] = """
@@ -1151,6 +1156,12 @@ parameters:
   - name: --disable-ai-toolchain-operator
     type: bool
     short-summary: Disable AI toolchain operator.
+  - name: --enable-gateway-api
+    type: bool
+    short-summary: Enable managed installation of Gateway API CRDs from the standard release channel. Requires at least one managed Gateway API ingress provider to be enabled.
+  - name: --disable-gateway-api
+    type: bool
+    short-summary: Disable managed installation of Gateway API CRDs.
   - name: --bootstrap-container-registry-resource-id
     type: string
     short-summary: Configure container registry resource ID. Must use "Cache" as bootstrap artifact source.
@@ -1239,6 +1250,10 @@ examples:
     text: az aks update -g MyResourceGroup -n MyManagedCluster --node-provisioning-mode Auto --node-provisioning-default-pools None
   - name: Upgrade load balancer sku to standard
     text: az aks update --load-balancer-sku standard -g MyResourceGroup -n MyManagedCluster
+  - name: Update a kubernetes cluster to enable a managed installation of Gateway API CRDs from the standard release channel.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-gateway-api
+  - name: Update a kubernetes cluster to disable the managed installation of Gateway API CRDs.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --disable-gateway-api
 """
 
 helps["aks delete"] = """
