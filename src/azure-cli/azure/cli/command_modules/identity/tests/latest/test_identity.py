@@ -26,13 +26,13 @@ class TestIdentity(ScenarioTest):
             self.check('name', '{identity}'),
             self.check('resourceGroup', '{rg}'),
             self.check('isolationScope', 'None'),
-            self.check('resourceRestriction', None)
+            self.check('assignmentRestrictions.providers', [])
         ])
 
         self.cmd('identity list-resources -g {rg} -n {identity}')
 
         self.cmd('identity list -g {rg}', checks=self.check('length(@)', 1))
-        self.cmd('identity delete -n {identity} -g {rg}')
+        self.cmd('identity delete -n {identity} -g {rg} --yes')
 
         self.cmd('identity create -n {identity} -g {rg} --isolation-scope Regional', checks=[
             self.check('name', '{identity}'),
@@ -46,18 +46,18 @@ class TestIdentity(ScenarioTest):
             self.check('isolationScope', 'None')
         ])
 
-        self.cmd('identity delete -n {identity} -g {rg}')
+        self.cmd('identity delete -n {identity} -g {rg} --yes')
 
         self.cmd('identity create -n {identity} -g {rg} --resource-restriction {resource_restriction_compute}', checks=[
             self.check('name', '{identity}'),
             self.check('resourceGroup', '{rg}'),
-            self.check('resourceRestriction.providers[0]', 'Microsoft.Compute')
+            self.check('assignmentRestrictions.providers[0]', 'Microsoft.Compute')
         ])
 
         self.cmd('identity update -n {identity} -g {rg} --resource-restriction {resource_restriction_empty}', checks=[
             self.check('name', '{identity}'),
             self.check('resourceGroup', '{rg}'),
-            self.check('resourceRestriction.providers', [])
+            self.check('assignmentRestrictions.providers', [])
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_federated_identity_credential_', location='centraluseuap')

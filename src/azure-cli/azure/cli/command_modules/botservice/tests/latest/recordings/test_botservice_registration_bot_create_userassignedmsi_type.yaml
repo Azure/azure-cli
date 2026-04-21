@@ -13,12 +13,12 @@ interactions:
       ParameterSetName:
       - -g -n --tags
       User-Agent:
-      - AZURECLI/2.79.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+      - AZURECLI/2.84.0 azsdk-python-core/1.38.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2024-11-01
+    uri: https://eastus2euap.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2024-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","test":"test_botservice_registration_bot_create_userassignedmsi_type","date":"2025-11-24T06:43:55Z","module":"botservice"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","test":"test_botservice_registration_bot_create_userassignedmsi_type","date":"2026-03-16T23:33:14Z","module":"botservice"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -27,7 +27,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 24 Nov 2025 06:43:56 GMT
+      - Mon, 16 Mar 2026 23:33:19 GMT
       expires:
       - '-1'
       pragma:
@@ -38,15 +38,15 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-global-reads:
-      - '16499'
+      x-ms-throttling-version:
+      - v2
       x-msedge-ref:
-      - 'Ref A: C9C5338339D748A39D0ED13B326BABA3 Ref B: CO6AA3150218049 Ref C: 2025-11-24T06:43:56Z'
+      - 'Ref A: 69A87D2E23644346874D2EB2372C05A5 Ref B: CO6AA3150218011 Ref C: 2026-03-16T23:33:20Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"tags": {"tag1": "d1"}, "location": "westus"}'
+    body: '{"location": "westus", "tags": {"tag1": "d1"}}'
     headers:
       Accept:
       - application/json
@@ -63,21 +63,21 @@ interactions:
       ParameterSetName:
       - -g -n --tags
       User-Agent:
-      - AZURECLI/2.79.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+      - AZURECLI/2.84.0 azsdk-python-core/1.38.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/botCreateCliTestMsi?api-version=2024-11-30
+    uri: https://eastus2euap.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/botCreateCliTestMsi?api-version=2025-05-31-preview
   response:
     body:
-      string: '{"location":"westus","tags":{"tag1":"d1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/botCreateCliTestMsi","name":"botCreateCliTestMsi","type":"Microsoft.ManagedIdentity/userAssignedIdentities","properties":{"isolationScope":"None","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"6daf46c6-e6cd-4cff-b166-5a45c14bb13e","clientId":"5dc91aa2-f6e0-4b74-b99d-a7000a0d70c8"}}'
+      string: '{"location":"westus","tags":{"tag1":"d1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/botCreateCliTestMsi","name":"botCreateCliTestMsi","type":"Microsoft.ManagedIdentity/userAssignedIdentities","properties":{"isolationScope":"None","assignmentRestrictions":{"providers":[]},"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"5cc17fe3-9bf5-4032-8cda-bf3eb4d1a7c9","clientId":"cfb75675-9ad6-43ff-8c1d-4e805233868c"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '491'
+      - '533'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 24 Nov 2025 06:43:58 GMT
+      - Mon, 16 Mar 2026 23:33:23 GMT
       expires:
       - '-1'
       location:
@@ -91,13 +91,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=a16ec1df-b555-4191-bf58-04352f47c61d/westus/6e99cb60-9832-4935-8052-383bc777c253
-      x-ms-ratelimit-remaining-subscription-global-writes:
-      - '11999'
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=a16ec1df-b555-4191-bf58-04352f47c61d/eastus2euap/5b625a9f-73ab-4650-bd80-584ead7cd887
       x-ms-ratelimit-remaining-subscription-writes:
       - '799'
+      x-ms-throttling-version:
+      - v2
       x-msedge-ref:
-      - 'Ref A: DCAE582CC0534FE2975F2C953136F557 Ref B: CO6AA3150218045 Ref C: 2025-11-24T06:43:57Z'
+      - 'Ref A: 6A583CBD030B4B05B48A4E8E48B1B089 Ref B: MWH011020809042 Ref C: 2026-03-16T23:33:20Z'
     status:
       code: 201
       message: Created
@@ -119,9 +119,9 @@ interactions:
       ParameterSetName:
       - -g -n -d -e --appid --app-type --tenant-id --msi-resource-id --tags -l
       User-Agent:
-      - AZURECLI/2.79.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+      - AZURECLI/2.84.0 azsdk-python-core/1.38.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
     method: POST
-    uri: https://management.azure.com/providers/Microsoft.BotService/checkNameAvailability?api-version=2021-05-01-preview
+    uri: https://eastus2euap.management.azure.com/providers/Microsoft.BotService/checkNameAvailability?api-version=2021-05-01-preview
   response:
     body:
       string: '{"valid":true,"message":"","absCode":null}'
@@ -133,7 +133,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 24 Nov 2025 06:43:58 GMT
+      - Mon, 16 Mar 2026 23:33:24 GMT
       expires:
       - '-1'
       pragma:
@@ -150,8 +150,10 @@ interactions:
       - ''
       x-ms-ratelimit-remaining-tenant-writes:
       - '799'
+      x-ms-throttling-version:
+      - v2
       x-msedge-ref:
-      - 'Ref A: 48DA39B0AFB94446BC4D903DBBBF9B31 Ref B: MWH011020806034 Ref C: 2025-11-24T06:43:58Z'
+      - 'Ref A: 7CB57894B06249419C2F61E7DC897E9F Ref B: CO6AA3150219021 Ref C: 2026-03-16T23:33:24Z'
     status:
       code: 200
       message: OK
@@ -159,7 +161,7 @@ interactions:
     body: '{"location": "global", "tags": {"key1": "value1"}, "sku": {"name": "F0"},
       "kind": "azurebot", "properties": {"displayName": "cli000002", "description":
       "description1", "endpoint": "https://www.google.com/api/messages", "msaAppType":
-      "UserAssignedMSI", "msaAppId": "693859c1-58bc-48cc-8445-90e0e1087e15", "msaAppTenantId":
+      "UserAssignedMSI", "msaAppId": "d43e7471-b443-48a7-a3b0-a0962877351f", "msaAppTenantId":
       "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a", "msaAppMSIResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/botCreateCliTestMsi",
       "isCmekEnabled": false, "publicNetworkAccess": "Enabled", "isStreamingSupported":
       false}}'
@@ -179,12 +181,12 @@ interactions:
       ParameterSetName:
       - -g -n -d -e --appid --app-type --tenant-id --msi-resource-id --tags -l
       User-Agent:
-      - AZURECLI/2.79.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+      - AZURECLI/2.84.0 azsdk-python-core/1.38.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002?api-version=2021-05-01-preview
+    uri: https://eastus2euap.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002?api-version=2021-05-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","name":"cli000002","type":"Microsoft.BotService/botServices","etag":"\"ac038b79-0000-0200-0000-6923feb00000\"","location":"global","sku":{"name":"F0"},"kind":"azurebot","tags":{"key1":"value1"},"properties":{"displayName":"cli000002","description":"description1","iconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://www.google.com/api/messages","msaAppId":"693859c1-58bc-48cc-8445-90e0e1087e15","msaAppTenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","msaAppType":"UserAssignedMSI","msaAppMSIResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/botCreateCliTestMsi","developerAppInsightKey":null,"developerAppInsightsApplicationId":null,"luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat","directline"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"isStreamingSupported":false,"schemaTransformationVersion":"1.3","publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":null,"storageResourceId":null,"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","migrationToken":null,"isCmekEnabled":false,"cmekKeyVaultUrl":null,"openWithHint":null,"appPasswordHint":null,"botDefinition":null,"mcsFederatedCredentialSubjectId":null,"isAzureBotCreatedInMcsByAbs":false,"publicNetworkAccess":"Enabled","disableLocalAuth":false,"cmekEncryptionStatus":"Off","provisioningState":"Succeeded"},"zones":[]}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","name":"cli000002","type":"Microsoft.BotService/botServices","etag":"\"ea02e444-0000-0200-0000-69b893480000\"","location":"global","sku":{"name":"F0"},"kind":"azurebot","tags":{"key1":"value1"},"properties":{"displayName":"cli000002","description":"description1","iconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://www.google.com/api/messages","msaAppId":"d43e7471-b443-48a7-a3b0-a0962877351f","msaAppTenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","msaAppType":"UserAssignedMSI","msaAppMSIResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/botCreateCliTestMsi","developerAppInsightKey":null,"developerAppInsightsApplicationId":null,"luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat","directline"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"isStreamingSupported":false,"schemaTransformationVersion":"1.3","publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":null,"storageResourceId":null,"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","migrationToken":null,"isCmekEnabled":false,"cmekKeyVaultUrl":null,"openWithHint":null,"appPasswordHint":null,"botDefinition":null,"mcsFederatedCredentialSubjectId":null,"isAzureBotCreatedInMcsByAbs":false,"publicNetworkAccess":"Enabled","disableLocalAuth":false,"cmekEncryptionStatus":"Off","provisioningState":"Succeeded"},"zones":[]}'
     headers:
       cache-control:
       - no-cache
@@ -193,9 +195,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 24 Nov 2025 06:44:00 GMT
+      - Mon, 16 Mar 2026 23:33:29 GMT
       etag:
-      - '"ac038b79-0000-0200-0000-6923feb00000"'
+      - '"ea02e444-0000-0200-0000-69b893480000"'
       expires:
       - '-1'
       pragma:
@@ -207,13 +209,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=a16ec1df-b555-4191-bf58-04352f47c61d/eastus2/9e60e5ae-3280-4426-a77f-fe7fa6e720c5
-      x-ms-ratelimit-remaining-subscription-global-writes:
-      - '11999'
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=a16ec1df-b555-4191-bf58-04352f47c61d/eastus2euap/f09f7c2b-ddac-48ae-ae3b-1bf9b4e37a47
       x-ms-ratelimit-remaining-subscription-writes:
       - '799'
+      x-ms-throttling-version:
+      - v2
       x-msedge-ref:
-      - 'Ref A: C11A9A46CA8640D8B7C2509749A68EB9 Ref B: CO6AA3150220031 Ref C: 2025-11-24T06:43:58Z'
+      - 'Ref A: 87BBE26D1EB345E9BE046117B5BD7D99 Ref B: MWH011020807029 Ref C: 2026-03-16T23:33:24Z'
     status:
       code: 201
       message: Created
@@ -231,12 +233,12 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.79.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+      - AZURECLI/2.84.0 azsdk-python-core/1.38.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002?api-version=2021-05-01-preview
+    uri: https://eastus2euap.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002?api-version=2021-05-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","name":"cli000002","type":"Microsoft.BotService/botServices","etag":"\"ac038b79-0000-0200-0000-6923feb00000\"","location":"global","sku":{"name":"F0"},"kind":"azurebot","tags":{"key1":"value1"},"properties":{"displayName":"cli000002","description":"description1","iconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://www.google.com/api/messages","msaAppId":"693859c1-58bc-48cc-8445-90e0e1087e15","msaAppTenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","msaAppType":"UserAssignedMSI","msaAppMSIResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/botCreateCliTestMsi","developerAppInsightKey":null,"developerAppInsightsApplicationId":null,"luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat","directline"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"isStreamingSupported":false,"schemaTransformationVersion":"1.3","publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":null,"storageResourceId":null,"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","migrationToken":null,"isCmekEnabled":false,"cmekKeyVaultUrl":null,"openWithHint":null,"appPasswordHint":null,"botDefinition":null,"mcsFederatedCredentialSubjectId":null,"isAzureBotCreatedInMcsByAbs":false,"publicNetworkAccess":"Enabled","disableLocalAuth":false,"cmekEncryptionStatus":"Off","provisioningState":"Succeeded"},"zones":[]}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","name":"cli000002","type":"Microsoft.BotService/botServices","etag":"\"ea02e444-0000-0200-0000-69b893480000\"","location":"global","sku":{"name":"F0"},"kind":"azurebot","tags":{"key1":"value1"},"properties":{"displayName":"cli000002","description":"description1","iconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://www.google.com/api/messages","msaAppId":"d43e7471-b443-48a7-a3b0-a0962877351f","msaAppTenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","msaAppType":"UserAssignedMSI","msaAppMSIResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/botCreateCliTestMsi","developerAppInsightKey":null,"developerAppInsightsApplicationId":null,"luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat","directline"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"isStreamingSupported":false,"schemaTransformationVersion":"1.3","publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":null,"storageResourceId":null,"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","migrationToken":null,"isCmekEnabled":false,"cmekKeyVaultUrl":null,"openWithHint":null,"appPasswordHint":null,"botDefinition":null,"mcsFederatedCredentialSubjectId":null,"isAzureBotCreatedInMcsByAbs":false,"publicNetworkAccess":"Enabled","disableLocalAuth":false,"cmekEncryptionStatus":"Off","provisioningState":"Succeeded"},"zones":[]}'
     headers:
       cache-control:
       - no-cache
@@ -245,9 +247,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 24 Nov 2025 06:44:01 GMT
+      - Mon, 16 Mar 2026 23:33:30 GMT
       etag:
-      - '"ac038b79-0000-0200-0000-6923feb00000"'
+      - '"ea02e444-0000-0200-0000-69b893480000"'
       expires:
       - '-1'
       pragma:
@@ -260,10 +262,10 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-global-reads:
-      - '16499'
+      x-ms-throttling-version:
+      - v2
       x-msedge-ref:
-      - 'Ref A: 360FDEC7A5944856BD9CD3023F591D73 Ref B: MWH011020808036 Ref C: 2025-11-24T06:44:01Z'
+      - 'Ref A: A38E6A1DBC7B46FB887C4E506FF90274 Ref B: MWH011020806031 Ref C: 2026-03-16T23:33:29Z'
     status:
       code: 200
       message: OK
@@ -281,12 +283,12 @@ interactions:
       ParameterSetName:
       - --description -g -n
       User-Agent:
-      - AZURECLI/2.79.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+      - AZURECLI/2.84.0 azsdk-python-core/1.38.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002?api-version=2021-05-01-preview
+    uri: https://eastus2euap.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002?api-version=2021-05-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","name":"cli000002","type":"Microsoft.BotService/botServices","etag":"\"ac038b79-0000-0200-0000-6923feb00000\"","location":"global","sku":{"name":"F0"},"kind":"azurebot","tags":{"key1":"value1"},"properties":{"displayName":"cli000002","description":"description1","iconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://www.google.com/api/messages","msaAppId":"693859c1-58bc-48cc-8445-90e0e1087e15","msaAppTenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","msaAppType":"UserAssignedMSI","msaAppMSIResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/botCreateCliTestMsi","developerAppInsightKey":null,"developerAppInsightsApplicationId":null,"luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat","directline"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"isStreamingSupported":false,"schemaTransformationVersion":"1.3","publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":null,"storageResourceId":null,"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","migrationToken":null,"isCmekEnabled":false,"cmekKeyVaultUrl":null,"openWithHint":null,"appPasswordHint":null,"botDefinition":null,"mcsFederatedCredentialSubjectId":null,"isAzureBotCreatedInMcsByAbs":false,"publicNetworkAccess":"Enabled","disableLocalAuth":false,"cmekEncryptionStatus":"Off","provisioningState":"Succeeded"},"zones":[]}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","name":"cli000002","type":"Microsoft.BotService/botServices","etag":"\"ea02e444-0000-0200-0000-69b893480000\"","location":"global","sku":{"name":"F0"},"kind":"azurebot","tags":{"key1":"value1"},"properties":{"displayName":"cli000002","description":"description1","iconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://www.google.com/api/messages","msaAppId":"d43e7471-b443-48a7-a3b0-a0962877351f","msaAppTenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","msaAppType":"UserAssignedMSI","msaAppMSIResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/botCreateCliTestMsi","developerAppInsightKey":null,"developerAppInsightsApplicationId":null,"luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat","directline"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"isStreamingSupported":false,"schemaTransformationVersion":"1.3","publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":null,"storageResourceId":null,"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","migrationToken":null,"isCmekEnabled":false,"cmekKeyVaultUrl":null,"openWithHint":null,"appPasswordHint":null,"botDefinition":null,"mcsFederatedCredentialSubjectId":null,"isAzureBotCreatedInMcsByAbs":false,"publicNetworkAccess":"Enabled","disableLocalAuth":false,"cmekEncryptionStatus":"Off","provisioningState":"Succeeded"},"zones":[]}'
     headers:
       cache-control:
       - no-cache
@@ -295,9 +297,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 24 Nov 2025 06:44:01 GMT
+      - Mon, 16 Mar 2026 23:33:30 GMT
       etag:
-      - '"ac038b79-0000-0200-0000-6923feb00000"'
+      - '"ea02e444-0000-0200-0000-69b893480000"'
       expires:
       - '-1'
       pragma:
@@ -310,10 +312,10 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-global-reads:
-      - '16499'
+      x-ms-throttling-version:
+      - v2
       x-msedge-ref:
-      - 'Ref A: 14EE25A3A3B347748EB4C26E7EAC86CC Ref B: MWH011020807034 Ref C: 2025-11-24T06:44:01Z'
+      - 'Ref A: 34F9AEBC10134B12BA69184B4C7D90BB Ref B: MWH011020808042 Ref C: 2026-03-16T23:33:30Z'
     status:
       code: 200
       message: OK
@@ -321,7 +323,7 @@ interactions:
     body: '{"sku": {"name": "F0"}, "properties": {"displayName": "cli000002", "description":
       "description2", "iconUrl": "https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png",
       "endpoint": "https://www.google.com/api/messages", "msaAppType": "UserAssignedMSI",
-      "msaAppId": "693859c1-58bc-48cc-8445-90e0e1087e15", "msaAppTenantId": "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a",
+      "msaAppId": "d43e7471-b443-48a7-a3b0-a0962877351f", "msaAppTenantId": "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a",
       "msaAppMSIResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/botCreateCliTestMsi",
       "luisAppIds": [], "isCmekEnabled": false, "publicNetworkAccess": "Enabled",
       "isStreamingSupported": false, "disableLocalAuth": false, "schemaTransformationVersion":
@@ -342,12 +344,12 @@ interactions:
       ParameterSetName:
       - --description -g -n
       User-Agent:
-      - AZURECLI/2.79.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+      - AZURECLI/2.84.0 azsdk-python-core/1.38.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002?api-version=2021-05-01-preview
+    uri: https://eastus2euap.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002?api-version=2021-05-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","name":"cli000002","type":"Microsoft.BotService/botServices","etag":"\"ac03e979-0000-0200-0000-6923feb30000\"","location":"global","sku":{"name":"F0"},"kind":"azurebot","tags":{"key1":"value1"},"properties":{"displayName":"cli000002","description":"description2","iconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://www.google.com/api/messages","msaAppId":"693859c1-58bc-48cc-8445-90e0e1087e15","msaAppTenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","msaAppType":"UserAssignedMSI","msaAppMSIResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/botCreateCliTestMsi","developerAppInsightKey":null,"developerAppInsightsApplicationId":null,"luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat","directline"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"isStreamingSupported":false,"schemaTransformationVersion":"1.3","publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":null,"storageResourceId":null,"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","migrationToken":null,"isCmekEnabled":false,"cmekKeyVaultUrl":null,"openWithHint":null,"appPasswordHint":null,"botDefinition":null,"mcsFederatedCredentialSubjectId":null,"isAzureBotCreatedInMcsByAbs":false,"publicNetworkAccess":"Enabled","disableLocalAuth":false,"cmekEncryptionStatus":"Off","provisioningState":"Succeeded"},"zones":[]}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002","name":"cli000002","type":"Microsoft.BotService/botServices","etag":"\"ea023845-0000-0200-0000-69b8934c0000\"","location":"global","sku":{"name":"F0"},"kind":"azurebot","tags":{"key1":"value1"},"properties":{"displayName":"cli000002","description":"description2","iconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://www.google.com/api/messages","msaAppId":"d43e7471-b443-48a7-a3b0-a0962877351f","msaAppTenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","msaAppType":"UserAssignedMSI","msaAppMSIResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/botCreateCliTestMsi","developerAppInsightKey":null,"developerAppInsightsApplicationId":null,"luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat","directline"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"isStreamingSupported":false,"schemaTransformationVersion":"1.3","publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":null,"storageResourceId":null,"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","migrationToken":null,"isCmekEnabled":false,"cmekKeyVaultUrl":null,"openWithHint":null,"appPasswordHint":null,"botDefinition":null,"mcsFederatedCredentialSubjectId":null,"isAzureBotCreatedInMcsByAbs":false,"publicNetworkAccess":"Enabled","disableLocalAuth":false,"cmekEncryptionStatus":"Off","provisioningState":"Succeeded"},"zones":[]}'
     headers:
       cache-control:
       - no-cache
@@ -356,9 +358,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 24 Nov 2025 06:44:03 GMT
+      - Mon, 16 Mar 2026 23:33:32 GMT
       etag:
-      - '"ac03e979-0000-0200-0000-6923feb30000"'
+      - '"ea023845-0000-0200-0000-69b8934c0000"'
       expires:
       - '-1'
       pragma:
@@ -372,13 +374,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=a16ec1df-b555-4191-bf58-04352f47c61d/westus/1d4c8a6e-d27a-47c7-9ded-d4c1e660c157
-      x-ms-ratelimit-remaining-subscription-global-writes:
-      - '11999'
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=a16ec1df-b555-4191-bf58-04352f47c61d/eastus2euap/ae0b2eb8-51ce-405a-8db9-98e0123509e5
       x-ms-ratelimit-remaining-subscription-writes:
       - '799'
+      x-ms-throttling-version:
+      - v2
       x-msedge-ref:
-      - 'Ref A: 6D5217D5D88E46288693D6545C735CEB Ref B: MWH011020809031 Ref C: 2025-11-24T06:44:02Z'
+      - 'Ref A: 5F1D41DE740E42CCBE826FAEE93C6F45 Ref B: MWH011020809031 Ref C: 2026-03-16T23:33:30Z'
     status:
       code: 200
       message: OK
@@ -398,9 +400,9 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.79.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+      - AZURECLI/2.84.0 azsdk-python-core/1.38.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002?api-version=2021-05-01-preview
+    uri: https://eastus2euap.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000002?api-version=2021-05-01-preview
   response:
     body:
       string: ''
@@ -410,7 +412,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 24 Nov 2025 06:44:07 GMT
+      - Mon, 16 Mar 2026 23:33:36 GMT
       expires:
       - '-1'
       pragma:
@@ -422,13 +424,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=a16ec1df-b555-4191-bf58-04352f47c61d/westus/9933762c-4e0b-49be-b509-a754f30b0ee0
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=a16ec1df-b555-4191-bf58-04352f47c61d/eastus2euap/9d16c858-f1a9-4b99-b84a-981a7350f6dd
       x-ms-ratelimit-remaining-subscription-deletes:
       - '799'
-      x-ms-ratelimit-remaining-subscription-global-deletes:
-      - '11999'
+      x-ms-throttling-version:
+      - v2
       x-msedge-ref:
-      - 'Ref A: 4925711501C44A3C9429029A2697C9E3 Ref B: CO6AA3150217029 Ref C: 2025-11-24T06:44:04Z'
+      - 'Ref A: 24F5D6341A5C4D7BB027C993766D00F6 Ref B: MWH011020807054 Ref C: 2026-03-16T23:33:33Z'
     status:
       code: 200
       message: OK
@@ -446,12 +448,12 @@ interactions:
       ParameterSetName:
       - -g -n --tags
       User-Agent:
-      - AZURECLI/2.79.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+      - AZURECLI/2.84.0 azsdk-python-core/1.38.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2024-11-01
+    uri: https://eastus2euap.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2024-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","test":"test_botservice_registration_bot_create_userassignedmsi_type","date":"2025-11-24T06:43:55Z","module":"botservice"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","test":"test_botservice_registration_bot_create_userassignedmsi_type","date":"2026-03-16T23:33:14Z","module":"botservice"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -460,7 +462,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 24 Nov 2025 06:44:07 GMT
+      - Mon, 16 Mar 2026 23:33:36 GMT
       expires:
       - '-1'
       pragma:
@@ -471,15 +473,15 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-global-reads:
-      - '16499'
+      x-ms-throttling-version:
+      - v2
       x-msedge-ref:
-      - 'Ref A: 5601FD8B75ED4BFDA81FECA7158AAC94 Ref B: MWH011020807023 Ref C: 2025-11-24T06:44:08Z'
+      - 'Ref A: C241A6FCC5C44289AC9CC43BFE504630 Ref B: MWH011020808052 Ref C: 2026-03-16T23:33:37Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"tags": {"tag1": "d1"}, "location": "westus"}'
+    body: '{"location": "westus", "tags": {"tag1": "d1"}}'
     headers:
       Accept:
       - application/json
@@ -496,21 +498,21 @@ interactions:
       ParameterSetName:
       - -g -n --tags
       User-Agent:
-      - AZURECLI/2.79.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+      - AZURECLI/2.84.0 azsdk-python-core/1.38.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/botCreateCliTestMsi?api-version=2024-11-30
+    uri: https://eastus2euap.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/botCreateCliTestMsi?api-version=2025-05-31-preview
   response:
     body:
-      string: '{"location":"westus","tags":{"tag1":"d1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/botCreateCliTestMsi","name":"botCreateCliTestMsi","type":"Microsoft.ManagedIdentity/userAssignedIdentities","properties":{"isolationScope":"None","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"6daf46c6-e6cd-4cff-b166-5a45c14bb13e","clientId":"5dc91aa2-f6e0-4b74-b99d-a7000a0d70c8"}}'
+      string: '{"location":"westus","tags":{"tag1":"d1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/botCreateCliTestMsi","name":"botCreateCliTestMsi","type":"Microsoft.ManagedIdentity/userAssignedIdentities","properties":{"isolationScope":"None","assignmentRestrictions":{"providers":[]},"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"5cc17fe3-9bf5-4032-8cda-bf3eb4d1a7c9","clientId":"cfb75675-9ad6-43ff-8c1d-4e805233868c"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '491'
+      - '533'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 24 Nov 2025 06:44:08 GMT
+      - Mon, 16 Mar 2026 23:33:37 GMT
       expires:
       - '-1'
       pragma:
@@ -522,13 +524,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=a16ec1df-b555-4191-bf58-04352f47c61d/westus/5dd0620d-c577-49fd-a040-48a30bafbc3d
-      x-ms-ratelimit-remaining-subscription-global-writes:
-      - '11999'
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=a16ec1df-b555-4191-bf58-04352f47c61d/eastus2euap/3c322372-1eef-4b62-9f71-730f47cc1cd2
       x-ms-ratelimit-remaining-subscription-writes:
       - '799'
+      x-ms-throttling-version:
+      - v2
       x-msedge-ref:
-      - 'Ref A: D99540BBF9A144F0B99982C7685320A1 Ref B: CO6AA3150220053 Ref C: 2025-11-24T06:44:08Z'
+      - 'Ref A: E078C8FA7C1A481EAE866170A8C72F73 Ref B: CO6AA3150217025 Ref C: 2026-03-16T23:33:37Z'
     status:
       code: 200
       message: OK
@@ -550,9 +552,9 @@ interactions:
       ParameterSetName:
       - -g -n -d -e --appid --app-type --tenant-id --msi-resource-id --tags -l
       User-Agent:
-      - AZURECLI/2.79.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+      - AZURECLI/2.84.0 azsdk-python-core/1.38.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
     method: POST
-    uri: https://management.azure.com/providers/Microsoft.BotService/checkNameAvailability?api-version=2021-05-01-preview
+    uri: https://eastus2euap.management.azure.com/providers/Microsoft.BotService/checkNameAvailability?api-version=2021-05-01-preview
   response:
     body:
       string: '{"valid":true,"message":"","absCode":null}'
@@ -564,7 +566,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 24 Nov 2025 06:44:09 GMT
+      - Mon, 16 Mar 2026 23:33:38 GMT
       expires:
       - '-1'
       pragma:
@@ -581,8 +583,10 @@ interactions:
       - ''
       x-ms-ratelimit-remaining-tenant-writes:
       - '799'
+      x-ms-throttling-version:
+      - v2
       x-msedge-ref:
-      - 'Ref A: 974B7A8250F348428434479427DD63D5 Ref B: CO6AA3150220045 Ref C: 2025-11-24T06:44:09Z'
+      - 'Ref A: 04DF496129C1411DAD644436FF3E3C9C Ref B: MWH011020807034 Ref C: 2026-03-16T23:33:38Z'
     status:
       code: 200
       message: OK
@@ -590,7 +594,7 @@ interactions:
     body: '{"location": "westus", "tags": {"key1": "value1"}, "sku": {"name": "F0"},
       "kind": "azurebot", "properties": {"displayName": "cli000003", "description":
       "description1", "endpoint": "https://www.google.com/api/messages", "msaAppType":
-      "UserAssignedMSI", "msaAppId": "54bb061a-88da-4652-a0ab-f3625d00984c", "msaAppTenantId":
+      "UserAssignedMSI", "msaAppId": "d17f1a30-4677-4f3b-89e3-714185d63656", "msaAppTenantId":
       "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a", "msaAppMSIResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/botCreateCliTestMsi",
       "isCmekEnabled": false, "publicNetworkAccess": "Enabled", "isStreamingSupported":
       false}}'
@@ -610,12 +614,12 @@ interactions:
       ParameterSetName:
       - -g -n -d -e --appid --app-type --tenant-id --msi-resource-id --tags -l
       User-Agent:
-      - AZURECLI/2.79.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+      - AZURECLI/2.84.0 azsdk-python-core/1.38.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000003?api-version=2021-05-01-preview
+    uri: https://eastus2euap.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000003?api-version=2021-05-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000003","name":"cli000003","type":"Microsoft.BotService/botServices","etag":"\"8205bacc-0000-0200-0000-6923febb0000\"","location":"westus","sku":{"name":"F0"},"kind":"azurebot","tags":{"key1":"value1"},"properties":{"displayName":"cli000003","description":"description1","iconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://www.google.com/api/messages","msaAppId":"54bb061a-88da-4652-a0ab-f3625d00984c","msaAppTenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","msaAppType":"UserAssignedMSI","msaAppMSIResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/botCreateCliTestMsi","developerAppInsightKey":null,"developerAppInsightsApplicationId":null,"luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat","directline"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"isStreamingSupported":false,"schemaTransformationVersion":"1.3","publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":null,"storageResourceId":null,"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","migrationToken":null,"isCmekEnabled":false,"cmekKeyVaultUrl":null,"openWithHint":null,"appPasswordHint":null,"botDefinition":null,"mcsFederatedCredentialSubjectId":null,"isAzureBotCreatedInMcsByAbs":false,"publicNetworkAccess":"Enabled","disableLocalAuth":false,"cmekEncryptionStatus":"Off","provisioningState":"Succeeded"},"zones":[]}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000003","name":"cli000003","type":"Microsoft.BotService/botServices","etag":"\"20002b2c-0000-0200-0000-69b893540000\"","location":"westus","sku":{"name":"F0"},"kind":"azurebot","tags":{"key1":"value1"},"properties":{"displayName":"cli000003","description":"description1","iconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://www.google.com/api/messages","msaAppId":"d17f1a30-4677-4f3b-89e3-714185d63656","msaAppTenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","msaAppType":"UserAssignedMSI","msaAppMSIResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/botCreateCliTestMsi","developerAppInsightKey":null,"developerAppInsightsApplicationId":null,"luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat","directline"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"isStreamingSupported":false,"schemaTransformationVersion":"1.3","publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":null,"storageResourceId":null,"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","migrationToken":null,"isCmekEnabled":false,"cmekKeyVaultUrl":null,"openWithHint":null,"appPasswordHint":null,"botDefinition":null,"mcsFederatedCredentialSubjectId":null,"isAzureBotCreatedInMcsByAbs":false,"publicNetworkAccess":"Enabled","disableLocalAuth":false,"cmekEncryptionStatus":"Off","provisioningState":"Succeeded"},"zones":[]}'
     headers:
       cache-control:
       - no-cache
@@ -624,9 +628,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 24 Nov 2025 06:44:11 GMT
+      - Mon, 16 Mar 2026 23:33:40 GMT
       etag:
-      - '"8205bacc-0000-0200-0000-6923febb0000"'
+      - '"20002b2c-0000-0200-0000-69b893540000"'
       expires:
       - '-1'
       pragma:
@@ -638,13 +642,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=a16ec1df-b555-4191-bf58-04352f47c61d/westus2/a7edcf24-8052-4b90-bc06-918019eb16e4
-      x-ms-ratelimit-remaining-subscription-global-writes:
-      - '11999'
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=a16ec1df-b555-4191-bf58-04352f47c61d/eastus2euap/6be4c509-8348-4061-b8b2-134ff167ed97
       x-ms-ratelimit-remaining-subscription-writes:
       - '799'
+      x-ms-throttling-version:
+      - v2
       x-msedge-ref:
-      - 'Ref A: 7B3DA9F67B524A15B85017EC6C67D6B3 Ref B: CO6AA3150219029 Ref C: 2025-11-24T06:44:09Z'
+      - 'Ref A: C0AE17EE09944362A9FF89D314FF3C14 Ref B: CO6AA3150220039 Ref C: 2026-03-16T23:33:38Z'
     status:
       code: 201
       message: Created
@@ -662,12 +666,12 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.79.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+      - AZURECLI/2.84.0 azsdk-python-core/1.38.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000003?api-version=2021-05-01-preview
+    uri: https://eastus2euap.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000003?api-version=2021-05-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000003","name":"cli000003","type":"Microsoft.BotService/botServices","etag":"\"8205bacc-0000-0200-0000-6923febb0000\"","location":"westus","sku":{"name":"F0"},"kind":"azurebot","tags":{"key1":"value1"},"properties":{"displayName":"cli000003","description":"description1","iconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://www.google.com/api/messages","msaAppId":"54bb061a-88da-4652-a0ab-f3625d00984c","msaAppTenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","msaAppType":"UserAssignedMSI","msaAppMSIResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/botCreateCliTestMsi","developerAppInsightKey":null,"developerAppInsightsApplicationId":null,"luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat","directline"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"isStreamingSupported":false,"schemaTransformationVersion":"1.3","publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":null,"storageResourceId":null,"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","migrationToken":null,"isCmekEnabled":false,"cmekKeyVaultUrl":null,"openWithHint":null,"appPasswordHint":null,"botDefinition":null,"mcsFederatedCredentialSubjectId":null,"isAzureBotCreatedInMcsByAbs":false,"publicNetworkAccess":"Enabled","disableLocalAuth":false,"cmekEncryptionStatus":"Off","provisioningState":"Succeeded"},"zones":[]}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000003","name":"cli000003","type":"Microsoft.BotService/botServices","etag":"\"20002b2c-0000-0200-0000-69b893540000\"","location":"westus","sku":{"name":"F0"},"kind":"azurebot","tags":{"key1":"value1"},"properties":{"displayName":"cli000003","description":"description1","iconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://www.google.com/api/messages","msaAppId":"d17f1a30-4677-4f3b-89e3-714185d63656","msaAppTenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","msaAppType":"UserAssignedMSI","msaAppMSIResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/botCreateCliTestMsi","developerAppInsightKey":null,"developerAppInsightsApplicationId":null,"luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat","directline"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"isStreamingSupported":false,"schemaTransformationVersion":"1.3","publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":null,"storageResourceId":null,"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","migrationToken":null,"isCmekEnabled":false,"cmekKeyVaultUrl":null,"openWithHint":null,"appPasswordHint":null,"botDefinition":null,"mcsFederatedCredentialSubjectId":null,"isAzureBotCreatedInMcsByAbs":false,"publicNetworkAccess":"Enabled","disableLocalAuth":false,"cmekEncryptionStatus":"Off","provisioningState":"Succeeded"},"zones":[]}'
     headers:
       cache-control:
       - no-cache
@@ -676,9 +680,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 24 Nov 2025 06:44:12 GMT
+      - Mon, 16 Mar 2026 23:33:41 GMT
       etag:
-      - '"8205bacc-0000-0200-0000-6923febb0000"'
+      - '"20002b2c-0000-0200-0000-69b893540000"'
       expires:
       - '-1'
       pragma:
@@ -691,10 +695,10 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-global-reads:
-      - '16499'
+      x-ms-throttling-version:
+      - v2
       x-msedge-ref:
-      - 'Ref A: 2291CF440C544DE7BD9B5259E8F7A7E2 Ref B: MWH011020807060 Ref C: 2025-11-24T06:44:12Z'
+      - 'Ref A: ACDD4309CA1249F189EBFC43E640B747 Ref B: CO6AA3150219045 Ref C: 2026-03-16T23:33:41Z'
     status:
       code: 200
       message: OK
@@ -712,12 +716,12 @@ interactions:
       ParameterSetName:
       - --description -g -n
       User-Agent:
-      - AZURECLI/2.79.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+      - AZURECLI/2.84.0 azsdk-python-core/1.38.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000003?api-version=2021-05-01-preview
+    uri: https://eastus2euap.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000003?api-version=2021-05-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000003","name":"cli000003","type":"Microsoft.BotService/botServices","etag":"\"8205bacc-0000-0200-0000-6923febb0000\"","location":"westus","sku":{"name":"F0"},"kind":"azurebot","tags":{"key1":"value1"},"properties":{"displayName":"cli000003","description":"description1","iconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://www.google.com/api/messages","msaAppId":"54bb061a-88da-4652-a0ab-f3625d00984c","msaAppTenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","msaAppType":"UserAssignedMSI","msaAppMSIResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/botCreateCliTestMsi","developerAppInsightKey":null,"developerAppInsightsApplicationId":null,"luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat","directline"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"isStreamingSupported":false,"schemaTransformationVersion":"1.3","publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":null,"storageResourceId":null,"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","migrationToken":null,"isCmekEnabled":false,"cmekKeyVaultUrl":null,"openWithHint":null,"appPasswordHint":null,"botDefinition":null,"mcsFederatedCredentialSubjectId":null,"isAzureBotCreatedInMcsByAbs":false,"publicNetworkAccess":"Enabled","disableLocalAuth":false,"cmekEncryptionStatus":"Off","provisioningState":"Succeeded"},"zones":[]}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000003","name":"cli000003","type":"Microsoft.BotService/botServices","etag":"\"20002b2c-0000-0200-0000-69b893540000\"","location":"westus","sku":{"name":"F0"},"kind":"azurebot","tags":{"key1":"value1"},"properties":{"displayName":"cli000003","description":"description1","iconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://www.google.com/api/messages","msaAppId":"d17f1a30-4677-4f3b-89e3-714185d63656","msaAppTenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","msaAppType":"UserAssignedMSI","msaAppMSIResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/botCreateCliTestMsi","developerAppInsightKey":null,"developerAppInsightsApplicationId":null,"luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat","directline"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"isStreamingSupported":false,"schemaTransformationVersion":"1.3","publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":null,"storageResourceId":null,"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","migrationToken":null,"isCmekEnabled":false,"cmekKeyVaultUrl":null,"openWithHint":null,"appPasswordHint":null,"botDefinition":null,"mcsFederatedCredentialSubjectId":null,"isAzureBotCreatedInMcsByAbs":false,"publicNetworkAccess":"Enabled","disableLocalAuth":false,"cmekEncryptionStatus":"Off","provisioningState":"Succeeded"},"zones":[]}'
     headers:
       cache-control:
       - no-cache
@@ -726,9 +730,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 24 Nov 2025 06:44:13 GMT
+      - Mon, 16 Mar 2026 23:33:41 GMT
       etag:
-      - '"8205bacc-0000-0200-0000-6923febb0000"'
+      - '"20002b2c-0000-0200-0000-69b893540000"'
       expires:
       - '-1'
       pragma:
@@ -741,10 +745,10 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-global-reads:
-      - '16499'
+      x-ms-throttling-version:
+      - v2
       x-msedge-ref:
-      - 'Ref A: 421E2CC1D6B5408EA7B164C4E25C3A57 Ref B: MWH011020807060 Ref C: 2025-11-24T06:44:13Z'
+      - 'Ref A: D5C04AE12F53445B8C601022D67082CA Ref B: CO6AA3150218049 Ref C: 2026-03-16T23:33:42Z'
     status:
       code: 200
       message: OK
@@ -752,7 +756,7 @@ interactions:
     body: '{"sku": {"name": "F0"}, "properties": {"displayName": "cli000003", "description":
       "description2", "iconUrl": "https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png",
       "endpoint": "https://www.google.com/api/messages", "msaAppType": "UserAssignedMSI",
-      "msaAppId": "54bb061a-88da-4652-a0ab-f3625d00984c", "msaAppTenantId": "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a",
+      "msaAppId": "d17f1a30-4677-4f3b-89e3-714185d63656", "msaAppTenantId": "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a",
       "msaAppMSIResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/botCreateCliTestMsi",
       "luisAppIds": [], "isCmekEnabled": false, "publicNetworkAccess": "Enabled",
       "isStreamingSupported": false, "disableLocalAuth": false, "schemaTransformationVersion":
@@ -773,12 +777,12 @@ interactions:
       ParameterSetName:
       - --description -g -n
       User-Agent:
-      - AZURECLI/2.79.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+      - AZURECLI/2.84.0 azsdk-python-core/1.38.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000003?api-version=2021-05-01-preview
+    uri: https://eastus2euap.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000003?api-version=2021-05-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000003","name":"cli000003","type":"Microsoft.BotService/botServices","etag":"\"8205ddcc-0000-0200-0000-6923febf0000\"","location":"westus","sku":{"name":"F0"},"kind":"azurebot","tags":{"key1":"value1"},"properties":{"displayName":"cli000003","description":"description2","iconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://www.google.com/api/messages","msaAppId":"54bb061a-88da-4652-a0ab-f3625d00984c","msaAppTenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","msaAppType":"UserAssignedMSI","msaAppMSIResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/botCreateCliTestMsi","developerAppInsightKey":null,"developerAppInsightsApplicationId":null,"luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat","directline"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"isStreamingSupported":false,"schemaTransformationVersion":"1.3","publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":null,"storageResourceId":null,"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","migrationToken":null,"isCmekEnabled":false,"cmekKeyVaultUrl":null,"openWithHint":null,"appPasswordHint":null,"botDefinition":null,"mcsFederatedCredentialSubjectId":null,"isAzureBotCreatedInMcsByAbs":false,"publicNetworkAccess":"Enabled","disableLocalAuth":false,"cmekEncryptionStatus":"Off","provisioningState":"Succeeded"},"zones":[]}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000003","name":"cli000003","type":"Microsoft.BotService/botServices","etag":"\"20007f2c-0000-0200-0000-69b893590000\"","location":"westus","sku":{"name":"F0"},"kind":"azurebot","tags":{"key1":"value1"},"properties":{"displayName":"cli000003","description":"description2","iconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://www.google.com/api/messages","msaAppId":"d17f1a30-4677-4f3b-89e3-714185d63656","msaAppTenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","msaAppType":"UserAssignedMSI","msaAppMSIResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/botCreateCliTestMsi","developerAppInsightKey":null,"developerAppInsightsApplicationId":null,"luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat","directline"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"isStreamingSupported":false,"schemaTransformationVersion":"1.3","publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":null,"storageResourceId":null,"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","migrationToken":null,"isCmekEnabled":false,"cmekKeyVaultUrl":null,"openWithHint":null,"appPasswordHint":null,"botDefinition":null,"mcsFederatedCredentialSubjectId":null,"isAzureBotCreatedInMcsByAbs":false,"publicNetworkAccess":"Enabled","disableLocalAuth":false,"cmekEncryptionStatus":"Off","provisioningState":"Succeeded"},"zones":[]}'
     headers:
       cache-control:
       - no-cache
@@ -787,9 +791,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 24 Nov 2025 06:44:15 GMT
+      - Mon, 16 Mar 2026 23:33:45 GMT
       etag:
-      - '"8205ddcc-0000-0200-0000-6923febf0000"'
+      - '"20007f2c-0000-0200-0000-69b893590000"'
       expires:
       - '-1'
       pragma:
@@ -803,13 +807,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=a16ec1df-b555-4191-bf58-04352f47c61d/westus/febf2db1-7289-4d28-a1fe-b6914427976f
-      x-ms-ratelimit-remaining-subscription-global-writes:
-      - '11999'
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=a16ec1df-b555-4191-bf58-04352f47c61d/eastus2euap/651f37a8-eb3d-4a6c-a32c-5663c1a60ffa
       x-ms-ratelimit-remaining-subscription-writes:
       - '799'
+      x-ms-throttling-version:
+      - v2
       x-msedge-ref:
-      - 'Ref A: 8501C1AEAD9B46A09A5E90C6542A13C8 Ref B: MWH011020809060 Ref C: 2025-11-24T06:44:13Z'
+      - 'Ref A: CB42BEAD67E347A0AC9926BF8D3C3877 Ref B: MWH011020808040 Ref C: 2026-03-16T23:33:42Z'
     status:
       code: 200
       message: OK
@@ -829,9 +833,9 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.79.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+      - AZURECLI/2.84.0 azsdk-python-core/1.38.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000003?api-version=2021-05-01-preview
+    uri: https://eastus2euap.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000003?api-version=2021-05-01-preview
   response:
     body:
       string: ''
@@ -841,7 +845,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 24 Nov 2025 06:44:19 GMT
+      - Mon, 16 Mar 2026 23:33:50 GMT
       expires:
       - '-1'
       pragma:
@@ -853,13 +857,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=a16ec1df-b555-4191-bf58-04352f47c61d/westus/d58157d0-68f0-4409-87ea-58fb1be0bf10
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=a16ec1df-b555-4191-bf58-04352f47c61d/eastus2euap/e3dbefc9-daac-434c-b863-c1be5e441114
       x-ms-ratelimit-remaining-subscription-deletes:
       - '799'
-      x-ms-ratelimit-remaining-subscription-global-deletes:
-      - '11999'
+      x-ms-throttling-version:
+      - v2
       x-msedge-ref:
-      - 'Ref A: 5372A8BEB0CE4251BECFA889D7C019DE Ref B: CO6AA3150217037 Ref C: 2025-11-24T06:44:16Z'
+      - 'Ref A: F6B5603D6E41488B8F8B80F7629970AE Ref B: CO6AA3150217047 Ref C: 2026-03-16T23:33:46Z'
     status:
       code: 200
       message: OK
@@ -877,12 +881,12 @@ interactions:
       ParameterSetName:
       - -g -n --tags
       User-Agent:
-      - AZURECLI/2.79.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+      - AZURECLI/2.84.0 azsdk-python-core/1.38.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2024-11-01
+    uri: https://eastus2euap.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2024-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","test":"test_botservice_registration_bot_create_userassignedmsi_type","date":"2025-11-24T06:43:55Z","module":"botservice"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","test":"test_botservice_registration_bot_create_userassignedmsi_type","date":"2026-03-16T23:33:14Z","module":"botservice"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -891,7 +895,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 24 Nov 2025 06:44:19 GMT
+      - Mon, 16 Mar 2026 23:33:50 GMT
       expires:
       - '-1'
       pragma:
@@ -902,15 +906,15 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-global-reads:
-      - '16499'
+      x-ms-throttling-version:
+      - v2
       x-msedge-ref:
-      - 'Ref A: 90305AAFC28C4185B3F27AE58DACC9A8 Ref B: MWH011020808023 Ref C: 2025-11-24T06:44:19Z'
+      - 'Ref A: 6532E66A856D430EBD604264CF7919B6 Ref B: MWH011020809034 Ref C: 2026-03-16T23:33:51Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"tags": {"tag1": "d1"}, "location": "westus"}'
+    body: '{"location": "westus", "tags": {"tag1": "d1"}}'
     headers:
       Accept:
       - application/json
@@ -927,21 +931,21 @@ interactions:
       ParameterSetName:
       - -g -n --tags
       User-Agent:
-      - AZURECLI/2.79.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+      - AZURECLI/2.84.0 azsdk-python-core/1.38.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/botCreateCliTestMsi?api-version=2024-11-30
+    uri: https://eastus2euap.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/botCreateCliTestMsi?api-version=2025-05-31-preview
   response:
     body:
-      string: '{"location":"westus","tags":{"tag1":"d1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/botCreateCliTestMsi","name":"botCreateCliTestMsi","type":"Microsoft.ManagedIdentity/userAssignedIdentities","properties":{"isolationScope":"None","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"6daf46c6-e6cd-4cff-b166-5a45c14bb13e","clientId":"5dc91aa2-f6e0-4b74-b99d-a7000a0d70c8"}}'
+      string: '{"location":"westus","tags":{"tag1":"d1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/botCreateCliTestMsi","name":"botCreateCliTestMsi","type":"Microsoft.ManagedIdentity/userAssignedIdentities","properties":{"isolationScope":"None","assignmentRestrictions":{"providers":[]},"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"5cc17fe3-9bf5-4032-8cda-bf3eb4d1a7c9","clientId":"cfb75675-9ad6-43ff-8c1d-4e805233868c"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '491'
+      - '533'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 24 Nov 2025 06:44:20 GMT
+      - Mon, 16 Mar 2026 23:33:52 GMT
       expires:
       - '-1'
       pragma:
@@ -953,13 +957,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=a16ec1df-b555-4191-bf58-04352f47c61d/westus/c4b3165b-1079-4ade-96c7-97a3cf2321cb
-      x-ms-ratelimit-remaining-subscription-global-writes:
-      - '11999'
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=a16ec1df-b555-4191-bf58-04352f47c61d/eastus2euap/619f5cda-a61c-44d3-b6bb-018a2075fc28
       x-ms-ratelimit-remaining-subscription-writes:
       - '799'
+      x-ms-throttling-version:
+      - v2
       x-msedge-ref:
-      - 'Ref A: 648F6F8C2F094CC5B953C26417F66EF8 Ref B: MWH011020808025 Ref C: 2025-11-24T06:44:20Z'
+      - 'Ref A: 283E7B9DC0F24DF2BA50462660FA569F Ref B: MWH011020808023 Ref C: 2026-03-16T23:33:52Z'
     status:
       code: 200
       message: OK
@@ -981,9 +985,9 @@ interactions:
       ParameterSetName:
       - -g -n -d -e --appid --app-type --tenant-id --msi-resource-id --tags -l
       User-Agent:
-      - AZURECLI/2.79.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+      - AZURECLI/2.84.0 azsdk-python-core/1.38.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
     method: POST
-    uri: https://management.azure.com/providers/Microsoft.BotService/checkNameAvailability?api-version=2021-05-01-preview
+    uri: https://eastus2euap.management.azure.com/providers/Microsoft.BotService/checkNameAvailability?api-version=2021-05-01-preview
   response:
     body:
       string: '{"valid":true,"message":"","absCode":null}'
@@ -995,7 +999,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 24 Nov 2025 06:44:20 GMT
+      - Mon, 16 Mar 2026 23:33:52 GMT
       expires:
       - '-1'
       pragma:
@@ -1012,8 +1016,10 @@ interactions:
       - ''
       x-ms-ratelimit-remaining-tenant-writes:
       - '799'
+      x-ms-throttling-version:
+      - v2
       x-msedge-ref:
-      - 'Ref A: 8CEE2E31638B45F5B784E36FA718B85B Ref B: MWH011020806023 Ref C: 2025-11-24T06:44:20Z'
+      - 'Ref A: 0A24EEE5303E47F188A46528A404751B Ref B: CO6AA3150219033 Ref C: 2026-03-16T23:33:53Z'
     status:
       code: 200
       message: OK
@@ -1021,7 +1027,7 @@ interactions:
     body: '{"location": "westeurope", "tags": {"key1": "value1"}, "sku": {"name":
       "F0"}, "kind": "azurebot", "properties": {"displayName": "cli000004", "description":
       "description1", "endpoint": "https://www.google.com/api/messages", "msaAppType":
-      "UserAssignedMSI", "msaAppId": "c51df584-6474-415b-80df-8edf6a868da4", "msaAppTenantId":
+      "UserAssignedMSI", "msaAppId": "a33b4a31-e11c-4160-b45d-db1e8a013c49", "msaAppTenantId":
       "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a", "msaAppMSIResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/botCreateCliTestMsi",
       "isCmekEnabled": false, "publicNetworkAccess": "Enabled", "isStreamingSupported":
       false}}'
@@ -1041,12 +1047,12 @@ interactions:
       ParameterSetName:
       - -g -n -d -e --appid --app-type --tenant-id --msi-resource-id --tags -l
       User-Agent:
-      - AZURECLI/2.79.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+      - AZURECLI/2.84.0 azsdk-python-core/1.38.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000004?api-version=2021-05-01-preview
+    uri: https://eastus2euap.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000004?api-version=2021-05-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000004","name":"cli000004","type":"Microsoft.BotService/botServices","etag":"\"f601e615-0000-0d00-0000-6923fec80000\"","location":"westeurope","sku":{"name":"F0"},"kind":"azurebot","tags":{"key1":"value1"},"properties":{"displayName":"cli000004","description":"description1","iconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://www.google.com/api/messages","msaAppId":"c51df584-6474-415b-80df-8edf6a868da4","msaAppTenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","msaAppType":"UserAssignedMSI","msaAppMSIResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/botCreateCliTestMsi","developerAppInsightKey":null,"developerAppInsightsApplicationId":null,"luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat","directline"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"isStreamingSupported":false,"schemaTransformationVersion":"1.3","publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":null,"storageResourceId":null,"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","migrationToken":null,"isCmekEnabled":false,"cmekKeyVaultUrl":null,"openWithHint":null,"appPasswordHint":null,"botDefinition":null,"mcsFederatedCredentialSubjectId":null,"isAzureBotCreatedInMcsByAbs":false,"publicNetworkAccess":"Enabled","disableLocalAuth":false,"cmekEncryptionStatus":"Off","provisioningState":"Succeeded"},"zones":[]}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000004","name":"cli000004","type":"Microsoft.BotService/botServices","etag":"\"940035af-0000-0d00-0000-69b893640000\"","location":"westeurope","sku":{"name":"F0"},"kind":"azurebot","tags":{"key1":"value1"},"properties":{"displayName":"cli000004","description":"description1","iconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://www.google.com/api/messages","msaAppId":"a33b4a31-e11c-4160-b45d-db1e8a013c49","msaAppTenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","msaAppType":"UserAssignedMSI","msaAppMSIResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/botCreateCliTestMsi","developerAppInsightKey":null,"developerAppInsightsApplicationId":null,"luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat","directline"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"isStreamingSupported":false,"schemaTransformationVersion":"1.3","publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":null,"storageResourceId":null,"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","migrationToken":null,"isCmekEnabled":false,"cmekKeyVaultUrl":null,"openWithHint":null,"appPasswordHint":null,"botDefinition":null,"mcsFederatedCredentialSubjectId":null,"isAzureBotCreatedInMcsByAbs":false,"publicNetworkAccess":"Enabled","disableLocalAuth":false,"cmekEncryptionStatus":"Off","provisioningState":"Succeeded"},"zones":[]}'
     headers:
       cache-control:
       - no-cache
@@ -1055,9 +1061,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 24 Nov 2025 06:44:24 GMT
+      - Mon, 16 Mar 2026 23:33:56 GMT
       etag:
-      - '"f601e615-0000-0d00-0000-6923fec80000"'
+      - '"940035af-0000-0d00-0000-69b893640000"'
       expires:
       - '-1'
       pragma:
@@ -1069,13 +1075,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=a16ec1df-b555-4191-bf58-04352f47c61d/westus/487cf15b-d21c-4bbf-9b1f-dc5faa62b544
-      x-ms-ratelimit-remaining-subscription-global-writes:
-      - '11999'
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=a16ec1df-b555-4191-bf58-04352f47c61d/eastus2euap/65941e53-eced-48d1-b0da-0decdd4ab508
       x-ms-ratelimit-remaining-subscription-writes:
-      - '799'
+      - '798'
+      x-ms-throttling-version:
+      - v2
       x-msedge-ref:
-      - 'Ref A: 0FBE9DAE8D94414BBB4DD9288C5D620F Ref B: CO6AA3150218033 Ref C: 2025-11-24T06:44:20Z'
+      - 'Ref A: 358D6BF21DD54DA7B21D3D3009DADD54 Ref B: MWH011020807052 Ref C: 2026-03-16T23:33:53Z'
     status:
       code: 201
       message: Created
@@ -1093,12 +1099,12 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.79.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+      - AZURECLI/2.84.0 azsdk-python-core/1.38.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000004?api-version=2021-05-01-preview
+    uri: https://eastus2euap.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000004?api-version=2021-05-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000004","name":"cli000004","type":"Microsoft.BotService/botServices","etag":"\"f601e615-0000-0d00-0000-6923fec80000\"","location":"westeurope","sku":{"name":"F0"},"kind":"azurebot","tags":{"key1":"value1"},"properties":{"displayName":"cli000004","description":"description1","iconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://www.google.com/api/messages","msaAppId":"c51df584-6474-415b-80df-8edf6a868da4","msaAppTenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","msaAppType":"UserAssignedMSI","msaAppMSIResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/botCreateCliTestMsi","developerAppInsightKey":null,"developerAppInsightsApplicationId":null,"luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat","directline"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"isStreamingSupported":false,"schemaTransformationVersion":"1.3","publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":null,"storageResourceId":null,"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","migrationToken":null,"isCmekEnabled":false,"cmekKeyVaultUrl":null,"openWithHint":null,"appPasswordHint":null,"botDefinition":null,"mcsFederatedCredentialSubjectId":null,"isAzureBotCreatedInMcsByAbs":false,"publicNetworkAccess":"Enabled","disableLocalAuth":false,"cmekEncryptionStatus":"Off","provisioningState":"Succeeded"},"zones":[]}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000004","name":"cli000004","type":"Microsoft.BotService/botServices","etag":"\"940035af-0000-0d00-0000-69b893640000\"","location":"westeurope","sku":{"name":"F0"},"kind":"azurebot","tags":{"key1":"value1"},"properties":{"displayName":"cli000004","description":"description1","iconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://www.google.com/api/messages","msaAppId":"a33b4a31-e11c-4160-b45d-db1e8a013c49","msaAppTenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","msaAppType":"UserAssignedMSI","msaAppMSIResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/botCreateCliTestMsi","developerAppInsightKey":null,"developerAppInsightsApplicationId":null,"luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat","directline"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"isStreamingSupported":false,"schemaTransformationVersion":"1.3","publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":null,"storageResourceId":null,"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","migrationToken":null,"isCmekEnabled":false,"cmekKeyVaultUrl":null,"openWithHint":null,"appPasswordHint":null,"botDefinition":null,"mcsFederatedCredentialSubjectId":null,"isAzureBotCreatedInMcsByAbs":false,"publicNetworkAccess":"Enabled","disableLocalAuth":false,"cmekEncryptionStatus":"Off","provisioningState":"Succeeded"},"zones":[]}'
     headers:
       cache-control:
       - no-cache
@@ -1107,9 +1113,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 24 Nov 2025 06:44:25 GMT
+      - Mon, 16 Mar 2026 23:33:58 GMT
       etag:
-      - '"f601e615-0000-0d00-0000-6923fec80000"'
+      - '"940035af-0000-0d00-0000-69b893640000"'
       expires:
       - '-1'
       pragma:
@@ -1122,10 +1128,10 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-global-reads:
-      - '16499'
+      x-ms-throttling-version:
+      - v2
       x-msedge-ref:
-      - 'Ref A: F512E5282E9F4DB2B631D4CBD7C121C9 Ref B: MWH011020807034 Ref C: 2025-11-24T06:44:24Z'
+      - 'Ref A: 1969057FE45B4254BED4F70DB8652FB2 Ref B: MWH011020806031 Ref C: 2026-03-16T23:33:57Z'
     status:
       code: 200
       message: OK
@@ -1143,12 +1149,12 @@ interactions:
       ParameterSetName:
       - --description -g -n
       User-Agent:
-      - AZURECLI/2.79.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+      - AZURECLI/2.84.0 azsdk-python-core/1.38.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000004?api-version=2021-05-01-preview
+    uri: https://eastus2euap.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000004?api-version=2021-05-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000004","name":"cli000004","type":"Microsoft.BotService/botServices","etag":"\"f601e615-0000-0d00-0000-6923fec80000\"","location":"westeurope","sku":{"name":"F0"},"kind":"azurebot","tags":{"key1":"value1"},"properties":{"displayName":"cli000004","description":"description1","iconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://www.google.com/api/messages","msaAppId":"c51df584-6474-415b-80df-8edf6a868da4","msaAppTenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","msaAppType":"UserAssignedMSI","msaAppMSIResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/botCreateCliTestMsi","developerAppInsightKey":null,"developerAppInsightsApplicationId":null,"luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat","directline"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"isStreamingSupported":false,"schemaTransformationVersion":"1.3","publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":null,"storageResourceId":null,"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","migrationToken":null,"isCmekEnabled":false,"cmekKeyVaultUrl":null,"openWithHint":null,"appPasswordHint":null,"botDefinition":null,"mcsFederatedCredentialSubjectId":null,"isAzureBotCreatedInMcsByAbs":false,"publicNetworkAccess":"Enabled","disableLocalAuth":false,"cmekEncryptionStatus":"Off","provisioningState":"Succeeded"},"zones":[]}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000004","name":"cli000004","type":"Microsoft.BotService/botServices","etag":"\"940035af-0000-0d00-0000-69b893640000\"","location":"westeurope","sku":{"name":"F0"},"kind":"azurebot","tags":{"key1":"value1"},"properties":{"displayName":"cli000004","description":"description1","iconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://www.google.com/api/messages","msaAppId":"a33b4a31-e11c-4160-b45d-db1e8a013c49","msaAppTenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","msaAppType":"UserAssignedMSI","msaAppMSIResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/botCreateCliTestMsi","developerAppInsightKey":null,"developerAppInsightsApplicationId":null,"luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat","directline"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"isStreamingSupported":false,"schemaTransformationVersion":"1.3","publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":null,"storageResourceId":null,"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","migrationToken":null,"isCmekEnabled":false,"cmekKeyVaultUrl":null,"openWithHint":null,"appPasswordHint":null,"botDefinition":null,"mcsFederatedCredentialSubjectId":null,"isAzureBotCreatedInMcsByAbs":false,"publicNetworkAccess":"Enabled","disableLocalAuth":false,"cmekEncryptionStatus":"Off","provisioningState":"Succeeded"},"zones":[]}'
     headers:
       cache-control:
       - no-cache
@@ -1157,9 +1163,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 24 Nov 2025 06:44:26 GMT
+      - Mon, 16 Mar 2026 23:33:58 GMT
       etag:
-      - '"f601e615-0000-0d00-0000-6923fec80000"'
+      - '"940035af-0000-0d00-0000-69b893640000"'
       expires:
       - '-1'
       pragma:
@@ -1172,10 +1178,10 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-global-reads:
-      - '16499'
+      x-ms-throttling-version:
+      - v2
       x-msedge-ref:
-      - 'Ref A: 5CF3A00E4FDB48E2AD84533014B7B4D9 Ref B: CO6AA3150218033 Ref C: 2025-11-24T06:44:25Z'
+      - 'Ref A: 0E36EB0F3F014090B5969ACF88190351 Ref B: MWH011020808025 Ref C: 2026-03-16T23:33:58Z'
     status:
       code: 200
       message: OK
@@ -1183,7 +1189,7 @@ interactions:
     body: '{"sku": {"name": "F0"}, "properties": {"displayName": "cli000004", "description":
       "description2", "iconUrl": "https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png",
       "endpoint": "https://www.google.com/api/messages", "msaAppType": "UserAssignedMSI",
-      "msaAppId": "c51df584-6474-415b-80df-8edf6a868da4", "msaAppTenantId": "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a",
+      "msaAppId": "a33b4a31-e11c-4160-b45d-db1e8a013c49", "msaAppTenantId": "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a",
       "msaAppMSIResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/botCreateCliTestMsi",
       "luisAppIds": [], "isCmekEnabled": false, "publicNetworkAccess": "Enabled",
       "isStreamingSupported": false, "disableLocalAuth": false, "schemaTransformationVersion":
@@ -1204,12 +1210,12 @@ interactions:
       ParameterSetName:
       - --description -g -n
       User-Agent:
-      - AZURECLI/2.79.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+      - AZURECLI/2.84.0 azsdk-python-core/1.38.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
     method: PATCH
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000004?api-version=2021-05-01-preview
+    uri: https://eastus2euap.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000004?api-version=2021-05-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000004","name":"cli000004","type":"Microsoft.BotService/botServices","etag":"\"f6011616-0000-0d00-0000-6923fecc0000\"","location":"westeurope","sku":{"name":"F0"},"kind":"azurebot","tags":{"key1":"value1"},"properties":{"displayName":"cli000004","description":"description2","iconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://www.google.com/api/messages","msaAppId":"c51df584-6474-415b-80df-8edf6a868da4","msaAppTenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","msaAppType":"UserAssignedMSI","msaAppMSIResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/botCreateCliTestMsi","developerAppInsightKey":null,"developerAppInsightsApplicationId":null,"luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat","directline"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"isStreamingSupported":false,"schemaTransformationVersion":"1.3","publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":null,"storageResourceId":null,"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","migrationToken":null,"isCmekEnabled":false,"cmekKeyVaultUrl":null,"openWithHint":null,"appPasswordHint":null,"botDefinition":null,"mcsFederatedCredentialSubjectId":null,"isAzureBotCreatedInMcsByAbs":false,"publicNetworkAccess":"Enabled","disableLocalAuth":false,"cmekEncryptionStatus":"Off","provisioningState":"Succeeded"},"zones":[]}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000004","name":"cli000004","type":"Microsoft.BotService/botServices","etag":"\"940073af-0000-0d00-0000-69b893690000\"","location":"westeurope","sku":{"name":"F0"},"kind":"azurebot","tags":{"key1":"value1"},"properties":{"displayName":"cli000004","description":"description2","iconUrl":"https://docs.botframework.com/static/devportal/client/images/bot-framework-default.png","endpoint":"https://www.google.com/api/messages","msaAppId":"a33b4a31-e11c-4160-b45d-db1e8a013c49","msaAppTenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","msaAppType":"UserAssignedMSI","msaAppMSIResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/botCreateCliTestMsi","developerAppInsightKey":null,"developerAppInsightsApplicationId":null,"luisAppIds":[],"endpointVersion":"3.0","configuredChannels":["webchat","directline"],"enabledChannels":["webchat","directline"],"isDeveloperAppInsightsApiKeySet":false,"isStreamingSupported":false,"schemaTransformationVersion":"1.3","publishingCredentials":null,"parameters":null,"allSettings":null,"manifestUrl":null,"storageResourceId":null,"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","migrationToken":null,"isCmekEnabled":false,"cmekKeyVaultUrl":null,"openWithHint":null,"appPasswordHint":null,"botDefinition":null,"mcsFederatedCredentialSubjectId":null,"isAzureBotCreatedInMcsByAbs":false,"publicNetworkAccess":"Enabled","disableLocalAuth":false,"cmekEncryptionStatus":"Off","provisioningState":"Succeeded"},"zones":[]}'
     headers:
       cache-control:
       - no-cache
@@ -1218,9 +1224,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Mon, 24 Nov 2025 06:44:28 GMT
+      - Mon, 16 Mar 2026 23:34:01 GMT
       etag:
-      - '"f6011616-0000-0d00-0000-6923fecc0000"'
+      - '"940073af-0000-0d00-0000-69b893690000"'
       expires:
       - '-1'
       pragma:
@@ -1234,13 +1240,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=a16ec1df-b555-4191-bf58-04352f47c61d/westus/7e814d70-6a72-4d41-9aeb-51d11a2a1fc0
-      x-ms-ratelimit-remaining-subscription-global-writes:
-      - '11999'
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=a16ec1df-b555-4191-bf58-04352f47c61d/eastus2euap/f2e6316c-66a6-4c5d-abf9-d329862372fe
       x-ms-ratelimit-remaining-subscription-writes:
       - '799'
+      x-ms-throttling-version:
+      - v2
       x-msedge-ref:
-      - 'Ref A: 83D358C87DBE493A8FE3762A7AFE0F11 Ref B: CO6AA3150217023 Ref C: 2025-11-24T06:44:26Z'
+      - 'Ref A: 40550915F35F463E99E75978F5FEDB54 Ref B: CO6AA3150218045 Ref C: 2026-03-16T23:33:59Z'
     status:
       code: 200
       message: OK
@@ -1260,9 +1266,9 @@ interactions:
       ParameterSetName:
       - -g -n
       User-Agent:
-      - AZURECLI/2.79.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+      - AZURECLI/2.84.0 azsdk-python-core/1.38.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000004?api-version=2021-05-01-preview
+    uri: https://eastus2euap.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BotService/botServices/cli000004?api-version=2021-05-01-preview
   response:
     body:
       string: ''
@@ -1272,7 +1278,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Mon, 24 Nov 2025 06:44:35 GMT
+      - Mon, 16 Mar 2026 23:34:06 GMT
       expires:
       - '-1'
       pragma:
@@ -1284,13 +1290,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=a16ec1df-b555-4191-bf58-04352f47c61d/eastus2/86b91047-dfe7-4f1d-8ee2-7a2f48fdb924
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=a16ec1df-b555-4191-bf58-04352f47c61d/eastus2euap/bd949b80-7205-46da-a814-0109e1ccb387
       x-ms-ratelimit-remaining-subscription-deletes:
       - '799'
-      x-ms-ratelimit-remaining-subscription-global-deletes:
-      - '11999'
+      x-ms-throttling-version:
+      - v2
       x-msedge-ref:
-      - 'Ref A: 41F767938A2A4E3D93277722528BEC4D Ref B: CO6AA3150219019 Ref C: 2025-11-24T06:44:28Z'
+      - 'Ref A: 3F3EDF02AAB04CA990AC6F3EC41C70FB Ref B: MWH011020807025 Ref C: 2026-03-16T23:34:02Z'
     status:
       code: 200
       message: OK
