@@ -337,7 +337,8 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         if not value_type:
             return False
 
-        if value_type is str or value_type is bool or value_type is int or value_type is float or issubclass(value_type, Enum):
+        if value_type is str or value_type is bool or value_type is int or value_type is float\
+                or issubclass(value_type, Enum):
             if self._format_primitive_change(change, parent_path, is_array_item):
                 return True
         elif value_type is list:
