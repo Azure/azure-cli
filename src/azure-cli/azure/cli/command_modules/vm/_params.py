@@ -475,6 +475,7 @@ def load_arguments(self, _):
             c.argument('align_regional_disks_to_vm_zone', options_list=['--align-regional-disks-to-vm-zone', '--align-regional-disks'], arg_type=get_three_state_flag(), min_api='2024-11-01', help='Specify whether the regional disks should be aligned/moved to the VM zone. This is applicable only for VMs with placement property set. Please note that this change is irreversible.')
             c.argument('key_incarnation_id', type=int, min_api='2024-11-01', help='Increase the value of this property allows user to reset the key used for securing communication channel between guest and host.')
             c.argument('security_type', arg_type=get_enum_type(["TrustedLaunch", "Standard", "ConfidentialVM"], default=None), help='Specify the security type of the virtual machine. The value Standard can be used if subscription has feature flag UseStandardSecurityType registered under Microsoft.Compute namespace. Refer to https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/preview-features for steps to enable required feature.')
+            c.argument('zone_movement', arg_type=get_three_state_flag(), help='Indicates if zone movement is enabled. By default isEnabled is set to false i.e VM can\'t be moved from one zone to another.')
 
     with self.argument_context('vm create', arg_group='Storage') as c:
         c.argument('attach_os_disk', help='Attach an existing OS disk to the VM. Can use the name or ID of a managed disk or the URI to an unmanaged disk VHD.')
