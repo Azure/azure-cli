@@ -67,16 +67,16 @@ class Create(AAZCommand):
             options=["--pip-addresses"],
             help="Space-separated list of public IP addresses (Names or IDs).",
         )
-        _args_schema.pip_addresses_v6 = AAZListArg(
-            options=["--pip-addresses-v6"],
+        _args_schema.pip_addrs_v6 = AAZListArg(
+            options=["--pip-addrs-v6"],
             help="An array of public ip addresses V6 associated with the nat gateway resource.",
         )
         _args_schema.pip_prefixes = AAZListArg(
             options=["--pip-prefixes"],
             help="Space-separated list of public IP prefixes (Names or IDs).",
         )
-        _args_schema.pip_prefixes_v6 = AAZListArg(
-            options=["--pip-prefixes-v6"],
+        _args_schema.pip_prefs_v6 = AAZListArg(
+            options=["--pip-prefs-v6"],
             help="An array of public ip prefixes V6 associated with the nat gateway resource.",
         )
         _args_schema.source_vnet = AAZObjectArg(
@@ -108,9 +108,9 @@ class Create(AAZCommand):
             help="Resource ID.",
         )
 
-        pip_addresses_v6 = cls._args_schema.pip_addresses_v6
-        pip_addresses_v6.Element = AAZObjectArg()
-        cls._build_args_sub_resource_create(pip_addresses_v6.Element)
+        pip_addrs_v6 = cls._args_schema.pip_addrs_v6
+        pip_addrs_v6.Element = AAZObjectArg()
+        cls._build_args_sub_resource_create(pip_addrs_v6.Element)
 
         pip_prefixes = cls._args_schema.pip_prefixes
         pip_prefixes.Element = AAZObjectArg()
@@ -121,9 +121,9 @@ class Create(AAZCommand):
             help="Resource ID.",
         )
 
-        pip_prefixes_v6 = cls._args_schema.pip_prefixes_v6
-        pip_prefixes_v6.Element = AAZObjectArg()
-        cls._build_args_sub_resource_create(pip_prefixes_v6.Element)
+        pip_prefs_v6 = cls._args_schema.pip_prefs_v6
+        pip_prefs_v6.Element = AAZObjectArg()
+        cls._build_args_sub_resource_create(pip_prefs_v6.Element)
 
         tags = cls._args_schema.tags
         tags.Element = AAZStrArg()
@@ -268,9 +268,9 @@ class Create(AAZCommand):
             if properties is not None:
                 properties.set_prop("idleTimeoutInMinutes", AAZIntType, ".idle_timeout")
                 properties.set_prop("publicIpAddresses", AAZListType, ".pip_addresses")
-                properties.set_prop("publicIpAddressesV6", AAZListType, ".pip_addresses_v6")
+                properties.set_prop("publicIpAddressesV6", AAZListType, ".pip_addrs_v6")
                 properties.set_prop("publicIpPrefixes", AAZListType, ".pip_prefixes")
-                properties.set_prop("publicIpPrefixesV6", AAZListType, ".pip_prefixes_v6")
+                properties.set_prop("publicIpPrefixesV6", AAZListType, ".pip_prefs_v6")
                 _CreateHelper._build_schema_sub_resource_create(properties.set_prop("sourceVirtualNetwork", AAZObjectType, ".source_vnet"))
 
             public_ip_addresses = _builder.get(".properties.publicIpAddresses")
