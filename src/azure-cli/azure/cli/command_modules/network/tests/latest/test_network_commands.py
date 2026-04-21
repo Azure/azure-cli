@@ -5300,7 +5300,7 @@ class NetworkRouteTableOperationScenarioTest(ScenarioTest):
         self.cmd('network route-table delete --resource-group {rg} --name {table}')
         self.cmd('network route-table list --resource-group {rg}', checks=self.is_empty())
 
-    @ResourceGroupPreparer(name_prefix='cli_test_route_table_disable_peering', location='centraluseuap')
+    @ResourceGroupPreparer(name_prefix='cli_test_route_table_disable_peering')
     def test_network_route_table_disable_peering_route(self, resource_group):
         self.kwargs.update({
             'table': 'cli-test-rt-peering',
