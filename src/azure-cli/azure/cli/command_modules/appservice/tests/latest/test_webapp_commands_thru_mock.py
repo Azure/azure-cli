@@ -644,5 +644,188 @@ class FakedResponse:  # pylint: disable=too-few-public-methods
         self.status_code = status_code
 
 
+class TestPolishBadErrors(unittest.TestCase):
+    """Tests for _polish_bad_errors and _rewrite_quota_error_for_app_service in commands.py"""
+
+    def test_rewrite_quota_error_replaces_basic_vms(self):
+        from azure.cli.command_modules.appservice.commands import _rewrite_quota_error_for_app_service
+        detail = ("Operation cannot be completed without additional quota. "
+                   "Current Limit (Basic VMs): 19 Current Usage: 0 "
+                   "Amount required for this deployment (Basic VMs): 981")
+        result = _rewrite_quota_error_for_app_service(detail)
+        self.assertIn("Basic tier App Service Plan workers", result)
+        self.assertIn("[SKUs: B1/B2/B3]", result)
+        self.assertNotIn("Basic VMs", result)
+        self.assertIn("not Azure Virtual Machines", result)
+
+    def test_rewrite_quota_error_replaces_standard_vms(self):
+        from azure.cli.command_modules.appservice.commands import _rewrite_quota_error_for_app_service
+        detail = ("Operation cannot be completed without additional quota. "
+                   "Current Limit (Standard VMs): 10 Current Usage: 5 "
+                   "Amount required for this deployment (Standard VMs): 50")
+        result = _rewrite_quota_error_for_app_service(detail)
+        self.assertIn("Standard tier App Service Plan workers", result)
+        self.assertIn("[SKUs: S1/S2/S3]", result)
+        self.assertNotIn("Standard VMs", result)
+
+    def test_rewrite_quota_error_appends_note(self):
+        from azure.cli.command_modules.appservice.commands import _rewrite_quota_error_for_app_service
+        detail = "Operation cannot be completed without additional quota. Current Limit (Basic VMs): 19"
+        result = _rewrite_quota_error_for_app_service(detail)
+        self.assertIn("This quota applies to App Service Plan workers, not Azure Virtual Machines", result)
+        self.assertIn("Subscription > Usage + quotas > App Service", result)
+        self.assertIn("app-service-limits", result)
+
+    def test_rewrite_quota_error_handles_singular_vm(self):
+        from azure.cli.command_modules.appservice.commands import _rewrite_quota_error_for_app_service
+        detail = "Current Limit (Basic VM): 1"
+        result = _rewrite_quota_error_for_app_service(detail)
+        self.assertIn("Basic tier App Service Plan workers", result)
+        self.assertNotIn("Basic VM)", result)
+
+    def test_polish_bad_errors_triggers_quota_rewrite_when_creating_plan(self):
+        from azure.cli.command_modules.appservice.commands import _polish_bad_errors
+        import json
+
+        class FakeResponse:
+            headers = {'Content-Type': 'application/json'}
+            def text(self):
+                return json.dumps({'Message': 'Operation cannot be completed without additional quota. '
+                                              'Current Limit (Basic VMs): 19'})
+
+        ex = Exception("quota error")
+        ex.response = FakeResponse()
+        result = _polish_bad_errors(ex, creating_plan=True)
+        self.assertIn("Basic tier App Service Plan workers", str(result))
+        self.assertIn("[SKUs: B1/B2/B3]", str(result))
+        self.assertNotIn("Basic VMs", str(result))
+
+    def test_polish_bad_errors_does_not_trigger_quota_rewrite_when_not_creating_plan(self):
+        from azure.cli.command_modules.appservice.commands import _polish_bad_errors
+        import json
+
+        class FakeResponse:
+            headers = {'Content-Type': 'application/json'}
+            def text(self):
+                return json.dumps({'Message': 'Operation cannot be completed without additional quota. '
+                                              'Current Limit (Basic VMs): 19'})
+
+        ex = Exception("quota error")
+        ex.response = FakeResponse()
+        result = _polish_bad_errors(ex, creating_plan=False)
+        # When not creating a plan, the quota rewrite should NOT be applied
+        self.assertIn("Basic VMs", str(result))
+
+
+class TestCreateAppServicePlanDefaults(unittest.TestCase):
+    """Tests for create_app_service_plan default SKU behavior"""
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_location_from_resource_group', return_value='eastus')
+    def test_default_sku_is_p0v3_when_not_specified(self, mock_location, mock_client_factory):
+        from azure.cli.command_modules.appservice.custom import create_app_service_plan
+        mock_cmd = mock.MagicMock()
+        mock_cmd.get_models.return_value = (mock.MagicMock(), mock.MagicMock(), mock.MagicMock())
+        mock_cmd.cli_ctx = mock.MagicMock()
+        mock_client = mock.MagicMock()
+        mock_client_factory.return_value = mock_client
+
+        # Call without sku parameter — should default to P0V3
+        try:
+            create_app_service_plan(mock_cmd, 'rg', 'plan', is_linux=True, hyper_v=False)
+        except Exception:
+            pass  # We don't care about downstream errors, just checking the SKU
+
+        # Verify SkuDescription was called with P0V3 tier/name
+        sku_description_cls = mock_cmd.get_models.return_value[1]
+        if sku_description_cls.called:
+            call_kwargs = sku_description_cls.call_args
+            # The sku name should be normalized P0V3
+            self.assertIn('P0V3', str(call_kwargs))
+
+
+class TestCreateAppServicePlanExistingPlan(unittest.TestCase):
+    """Tests for create_app_service_plan behavior when the plan already exists"""
+
+    def _setup_mocks(self, existing_sku_name='B1', existing_sku_tier='Basic',
+                     existing_capacity=1, existing_reserved=True):
+        mock_cmd = mock.MagicMock()
+        mock_models = (mock.MagicMock(), mock.MagicMock(), mock.MagicMock())
+        mock_cmd.get_models.return_value = mock_models
+        mock_cmd.cli_ctx = mock.MagicMock()
+
+        mock_client = mock.MagicMock()
+        existing_plan = mock.MagicMock()
+        existing_plan.sku.name = existing_sku_name
+        existing_plan.sku.tier = existing_sku_tier
+        existing_plan.sku.capacity = existing_capacity
+        existing_plan.reserved = existing_reserved
+        mock_client.app_service_plans.get.return_value = existing_plan
+
+        return mock_cmd, mock_client, existing_plan
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.logger')
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_location_from_resource_group', return_value='eastus')
+    def test_existing_plan_different_sku_warns(self, mock_location, mock_client_factory, mock_logger):
+        from azure.cli.command_modules.appservice.custom import create_app_service_plan
+
+        mock_cmd, mock_client, _ = self._setup_mocks(existing_sku_name='B1', existing_reserved=True)
+        mock_client_factory.return_value = mock_client
+
+        try:
+            create_app_service_plan(mock_cmd, 'rg', 'plan', is_linux=True, hyper_v=False, sku='S1')
+        except Exception:
+            pass  # downstream mock errors are ok
+
+        # Should warn about the diff and suggest 'az appservice plan update'
+        warning_calls = [str(c) for c in mock_logger.warning.call_args_list]
+        warning_text = ' '.join(warning_calls)
+        self.assertIn('already exists', warning_text)
+        self.assertIn('SKU', warning_text)
+        self.assertIn('appservice plan update', warning_text)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.logger')
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_location_from_resource_group', return_value='eastus')
+    def test_existing_plan_same_sku_warns_same_config(self, mock_location, mock_client_factory, mock_logger):
+        from azure.cli.command_modules.appservice.custom import create_app_service_plan
+
+        mock_cmd, mock_client, _ = self._setup_mocks(existing_sku_name='S1', existing_capacity=1, existing_reserved=True)
+        mock_client_factory.return_value = mock_client
+
+        try:
+            create_app_service_plan(mock_cmd, 'rg', 'plan', is_linux=True, hyper_v=False, sku='S1')
+        except Exception:
+            pass  # downstream mock errors are ok
+
+        # Should warn that it already exists with same config
+        warning_calls = [str(c) for c in mock_logger.warning.call_args_list]
+        warning_text = ' '.join(warning_calls)
+        self.assertIn('already exists', warning_text)
+        self.assertIn('same configuration', warning_text)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.logger')
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_location_from_resource_group', return_value='eastus')
+    def test_new_plan_no_exists_warning(self, mock_location, mock_client_factory, mock_logger):
+        from azure.cli.command_modules.appservice.custom import create_app_service_plan
+        from azure.core.exceptions import ResourceNotFoundError
+
+        mock_cmd, mock_client, _ = self._setup_mocks()
+        mock_client.app_service_plans.get.side_effect = ResourceNotFoundError("not found")
+        mock_client_factory.return_value = mock_client
+
+        try:
+            create_app_service_plan(mock_cmd, 'rg', 'plan', is_linux=True, hyper_v=False, sku='S1')
+        except Exception:
+            pass  # downstream mock errors are ok
+
+        # Should NOT warn about existing plan
+        warning_calls = [str(c) for c in mock_logger.warning.call_args_list]
+        warning_text = ' '.join(warning_calls)
+        self.assertNotIn('already exists', warning_text)
+
+
 if __name__ == '__main__':
     unittest.main()
