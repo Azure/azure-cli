@@ -59,11 +59,17 @@ examples:
 
 helps['acr check-name'] = """
 type: command
-short-summary: Checks if an Azure Container Registry name is valid and available for use.
+short-summary: Check if an Azure Container Registry name is valid and available to use.
+parameters:
+  - name: --name -n
+    short-summary: The name of the container registry to check. Must be in lowercase.
 examples:
-  - name: Check if a registry name already exists.
-    text: >
+  - name: Check if a registry name already exists
+    text: |
         az acr check-name -n doesthisnameexist
+  - name: Check availability for another registry name
+    text: |
+        az acr check-name --name myregistry
 """
 
 helps['acr config'] = """
@@ -232,13 +238,13 @@ short-summary: Manage helm charts for Azure Container Registries.
 
 helps['acr helm delete'] = """
 type: command
-short-summary: Delete a helm chart version in an Azure Container Registry.
+short-summary: Delete a Helm chart or a specific version of a Helm chart in an Azure Container Registry.
 examples:
-  - name: Delete all versions of a helm chart in an Azure Container Registry
-    text: >
+  - name: Delete all versions of a Helm chart in an Azure Container Registry
+    text: |
         az acr helm delete -n myregistry mychart
-  - name: Delete a helm chart version in an Azure Container Registry
-    text: >
+  - name: Delete a specific version of a Helm chart in an Azure Container Registry
+    text: |
         az acr helm delete -n myregistry mychart --version 0.3.2
 """
 
@@ -270,12 +276,19 @@ short-summary: Manage helm chart repositories for Azure Container Registries.
 
 helps['acr helm repo add'] = """
 type: command
-short-summary: Add a helm chart repository from an Azure Container Registry through the Helm CLI.
-long-summary: Helm must be installed on your machine.
+short-summary: Add a Helm chart repository from an Azure Container Registry using the Helm CLI.
+long-summary: |
+    Ensure Helm is installed on your machine before adding the repository.
+parameters:
+  - name: --name -n
+    short-summary: The name of the Azure Container Registry. Must be lowercase.
 examples:
-  - name: Add a helm chart repository from an Azure Container Registry to manage helm charts.
-    text: >
+  - name: Add a Helm chart repository from an Azure Container Registry to manage Helm charts.
+    text: |
         az acr helm repo add -n myregistry
+  - name: Add a Helm chart repository with a username and password.
+    text: |
+        az acr helm repo add -n myregistry -u myusername -p mypassword
 """
 
 helps['acr helm show'] = """
@@ -751,7 +764,25 @@ short-summary: Manage artifact manifest metadata in Azure Container Registries.
 
 helps['acr manifest metadata show'] = """
 type: command
-short-summary: Get the metadata of an artifact in an Azure Container Registry.
+short-summary: Retrieve the metadata of a specific artifact in an Azure Container Registry.
+parameters:
+  - name: --registry -r
+    short-summary: The name of the Azure Container Registry. Configure the default registry with `az configure --defaults acr=<registry_name>`.
+  - name: --name -n
+    short-summary: The artifact name. Include a tag in 'name:tag' format or a digest in 'name@digest' format.
+  - name: --suffix
+    short-summary: Tenant suffix for the registry login server. Use this if accessing the registry under differing subscription contexts.
+  - name: --username -u
+    short-summary: Username for logging into the container registry.
+  - name: --password -p
+    short-summary: Password for logging into the container registry.
+examples:
+  - name: Show artifact metadata using tag
+    text: |
+      az acr manifest metadata show --registry myRegistry --name "myartifact:latest"
+  - name: Show artifact metadata using digest
+    text: |
+      az acr manifest metadata show --registry myRegistry --name "myartifact@sha256:abc123"
 """
 
 helps['acr manifest metadata list'] = """
@@ -1826,8 +1857,28 @@ long-summary: To create a private endpoint connection use "az network private-en
 
 helps['acr private-endpoint-connection delete'] = """
 type: command
-short-summary:  Delete a private endpoint connection request for a container registry
-long-summary: To create a private endpoint connection use "az network private-endpoint create". For more information see https://aka.ms/acr/private-link
+short-summary: Delete a private endpoint connection request for a specified container registry.
+long-summary: |
+  To create a private endpoint connection, use "az network private-endpoint create". For more information, see https://aka.ms/acr/private-link
+parameters:
+  - name: --registry-name -r
+    short-summary: The name of the container registry.
+    long-summary: |
+      The name of the container registry. You can configure the default registry name using `az configure --defaults acr=<registry name>`.
+  - name: --name -n
+    short-summary: The name of the private endpoint connection.
+  - name: --resource-group -g
+    short-summary: Name of the resource group.
+    long-summary: |
+      Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.
+  - name: --change-reference
+    short-summary: The related change reference ID for this resource operation.
+  - name: --acquire-policy-token
+    short-summary: Automatically acquire an Azure Policy token for the resource operation.
+examples:
+  - name: Delete a private endpoint connection for a registry
+    text: |
+      az acr private-endpoint-connection delete --name myPrivateEndpointConnection --registry-name myRegistry --resource-group myResourceGroup
 """
 
 helps['acr private-link-resource'] = """
