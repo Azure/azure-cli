@@ -87,48 +87,68 @@
             "name": "defResource"
           },
           "managementStatusChange": {
+            "before": "Managed",
+            "after": "Unmanaged"
+          },
+          "denyStatusChange": {
+            "before": "NotSupported",
+            "after": "None"
+          },
+          "resourceConfigurationChanges": {
+            "before": {
+              "extension": {
+                "name": "Contoso",
+                "version": "2.0.0"
+              },
+              "identifiers": {
+                "name": "defResource"
+              },
+              "type": "Contoso/example",
+              "properties": {
+                "property1": "resourceDef-before"
+              }
+            },
+            "after": null,
+            "delta": []
+          }
+        },
+        {
+          "changeType": "Unsupported",
+          "changeCertainty": "Potential",
+          "extension": {
+            "name": "Contoso",
+            "version": "2.0.0"
+          },
+          "type": "Contoso/noPreview",
+          "identifiers": null,
+          "managementStatusChange": {
             "before": null,
             "after": "Managed"
           },
           "denyStatusChange": {
             "before": null,
-            "after": "NotApplicable"
+            "after": "NotSupported"
           },
           "resourceConfigurationChanges": {
-            "before": {
-              "apiVersion": "2021-05-01",
-              "id": "/subscriptions/6d41d86d-eb6b-473a-b31d-bbd084e1814d/resourceGroups/503ace4c-9b1c-4059-a3e9-09553d24e9e1/providers/Microsoft.Test/testA/resourceA",
-              "location": "westus",
-              "name": "resourceA",
-              "type": "Microsoft.Test/testA",
-              "properties": {
-                "property1": "resourceA-before"
-              }
-            },
+            "before": null,
             "after": {
-              "apiVersion": "2021-05-01",
-              "id": "/subscriptions/6d41d86d-eb6b-473a-b31d-bbd084e1814d/resourceGroups/503ace4c-9b1c-4059-a3e9-09553d24e9e1/providers/Microsoft.Test/testA/resourceA",
-              "location": "westus",
-              "name": "resourceA",
-              "type": "Microsoft.Test/testA",
+              "extension": {
+                "name": "Contoso",
+                "version": "2.0.0"
+              },
+              "identifiers": null,
+              "type": "Contoso/noPreview",
               "properties": {
-                "property1": "resourceA-after"
+                "property1": "noPreview-after"
               }
             },
-            "delta": [
-              {
-                "path": "properties.properties1",
-                "changeType": "Modify",
-                "before": "resourceA-before",
-                "after": "resourceA-after",
-                "children": []
-              }
-            ]
+            "delta": []
           }
         },
         {
           "changeType": "Modify",
           "changeCertainty": "Definite",
+          "apiVersion": "v1",
           "extension": {
             "name": "Contoso",
             "version": "2.0.0"
@@ -138,32 +158,40 @@
             "name": "abcResource"
           },
           "managementStatusChange": {
-            "before": null,
+            "before": "Managed",
             "after": "Managed"
           },
           "denyStatusChange": {
-            "before": null,
-            "after": "NotApplicable"
+            "before": "NotSupported",
+            "after": "NotSupported"
           },
           "resourceConfigurationChanges": {
             "before": {
-              "apiVersion": "2021-05-01",
-              "id": "/subscriptions/6d41d86d-eb6b-473a-b31d-bbd084e1814d/resourceGroups/503ace4c-9b1c-4059-a3e9-09553d24e9e1/providers/Microsoft.Test/testA/resourceA",
-              "location": "westus",
-              "name": "resourceA",
-              "type": "Microsoft.Test/testA",
+              "apiVersion": "v1",
+              "extension": {
+                "name": "Contoso",
+                "version": "2.0.0"
+              },
+              "identifiers": {
+                "name": "abcResource"
+              },
+              "type": "Contoso/example",
               "properties": {
-                "property1": "resourceA-before"
+                "property1": "abcResource-before"
               }
             },
             "after": {
-              "apiVersion": "2021-05-01",
-              "id": "/subscriptions/6d41d86d-eb6b-473a-b31d-bbd084e1814d/resourceGroups/503ace4c-9b1c-4059-a3e9-09553d24e9e1/providers/Microsoft.Test/testA/resourceA",
-              "location": "westus",
-              "name": "resourceA",
-              "type": "Microsoft.Test/testA",
+              "apiVersion": "v1",
+              "extension": {
+                "name": "Contoso",
+                "version": "2.0.0"
+              },
+              "identifiers": {
+                "name": "abcResource"
+              },
+              "type": "Contoso/example",
               "properties": {
-                "property1": "resourceA-after"
+                "property1": "abcResource-after"
               }
             },
             "delta": [
@@ -323,7 +351,7 @@
           },
           "type": "app/Deployment",
           "identifiers": {
-            "name": "abcResource"
+            "name": "kubeAppDeployment"
           },
           "managementStatusChange": {
             "before": null,
@@ -334,32 +362,25 @@
             "after": "NotApplicable"
           },
           "resourceConfigurationChanges": {
-            "before": {
-              "apiVersion": "2021-05-01",
-              "id": "/subscriptions/6d41d86d-eb6b-473a-b31d-bbd084e1814d/resourceGroups/503ace4c-9b1c-4059-a3e9-09553d24e9e1/providers/Microsoft.Test/testA/resourceA",
-              "location": "westus",
-              "name": "resourceA",
-              "type": "Microsoft.Test/testA",
-              "properties": {
-                "property1": "resourceA-before"
-              }
-            },
+            "before": null,
             "after": {
-              "apiVersion": "2021-05-01",
-              "id": "/subscriptions/6d41d86d-eb6b-473a-b31d-bbd084e1814d/resourceGroups/503ace4c-9b1c-4059-a3e9-09553d24e9e1/providers/Microsoft.Test/testA/resourceA",
-              "location": "westus",
-              "name": "resourceA",
-              "type": "Microsoft.Test/testA",
+              "apiVersion": "v1",
+              "extension": {
+                "name": "Kubernetes",
+                "version": "2.0.0",
+                "configId": "kubeConfigHash"
+              },
+              "type": "app/Deployment",
               "properties": {
-                "property1": "resourceA-after"
+                "property1": "kubeAppDeployment-after"
               }
             },
             "delta": [
               {
-                "path": "properties.properties1",
+                "path": "properties.property1",
                 "changeType": "Modify",
-                "before": "resourceA-before",
-                "after": "resourceA-after",
+                "before": "kubeAppDeployment-before",
+                "after": "kubeAppDeployment-after",
                 "children": []
               }
             ]
