@@ -43,7 +43,8 @@ def queue_exists(cmd, client, **kwargs):
 
 
 def generate_queue_sas(cmd, client, queue_name=None, permission=None, expiry=None, start=None,
-                       policy_id=None, ip=None, protocol=None, as_user=False, user_delegation_oid=None):
+                       policy_id=None, ip=None, protocol=None, as_user=False, user_delegation_oid=None,
+                       user_delegation_tid=None):
     generate_queue_sas_fn = cmd.get_models('_shared_access_signature#generate_queue_sas')
 
     sas_kwargs = {'protocol': protocol}
@@ -54,7 +55,8 @@ def generate_queue_sas(cmd, client, queue_name=None, permission=None, expiry=Non
         from datetime import datetime
         user_delegation_key = client.get_user_delegation_key(
             start=get_datetime_from_string(start) if start else datetime.utcnow(),
-            expiry=get_datetime_from_string(expiry))
+            expiry=get_datetime_from_string(expiry),
+            delegated_user_tid=user_delegation_tid)
     else:
         account_key = client.credential.account_key
 

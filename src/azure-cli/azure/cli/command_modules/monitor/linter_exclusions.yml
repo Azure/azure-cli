@@ -1,4 +1,5 @@
 ---
+# Pre-existing parameter exclusions
 monitor activity-log alert update:
     parameters:
         enabled:
@@ -31,4 +32,167 @@ monitor action-group update:
         azure_function_receivers:
             rule_exclusions:
             - option_length_too_long
-...
+# Commands below are not new — they were re-registered via AAZ operations/latest/
+# during the optimized-loading refactor, causing the linter diff to flag them.
+monitor activity-log alert scope add:
+    rule_exclusions:
+    - missing_command_example
+monitor activity-log alert action-group add:
+    rule_exclusions:
+    - missing_command_example
+monitor log-profiles update:
+    rule_exclusions:
+    - missing_command_example
+monitor diagnostic-settings update:
+    rule_exclusions:
+    - missing_command_example
+monitor action-group enable-receiver:
+    rule_exclusions:
+    - missing_command_example
+monitor diagnostic-settings subscription update:
+    rule_exclusions:
+    - missing_command_example
+monitor activity-log list:
+    rule_exclusions:
+    - missing_command_test_coverage
+monitor action-group wait:
+    rule_exclusions:
+    - missing_command_test_coverage
+monitor autoscale create:
+    rule_exclusions:
+    - missing_command_test_coverage
+monitor autoscale profile create:
+    rule_exclusions:
+    - missing_command_test_coverage
+monitor autoscale profile delete:
+    rule_exclusions:
+    - missing_command_test_coverage
+monitor autoscale profile list:
+    rule_exclusions:
+    - missing_command_test_coverage
+monitor autoscale profile list-timezones:
+    rule_exclusions:
+    - missing_command_test_coverage
+monitor autoscale profile show:
+    rule_exclusions:
+    - missing_command_test_coverage
+monitor autoscale rule copy:
+    rule_exclusions:
+    - missing_command_test_coverage
+    - missing_command_example
+monitor autoscale rule create:
+    rule_exclusions:
+    - missing_command_test_coverage
+monitor autoscale rule delete:
+    rule_exclusions:
+    - missing_command_test_coverage
+monitor autoscale rule list:
+    rule_exclusions:
+    - missing_command_test_coverage
+monitor log-analytics workspace recover:
+    rule_exclusions:
+    - missing_command_test_coverage
+monitor log-analytics workspace linked-storage add:
+    rule_exclusions:
+    - missing_command_test_coverage
+monitor log-analytics workspace linked-storage remove:
+    rule_exclusions:
+    - missing_command_test_coverage
+monitor log-analytics workspace saved-search create:
+    rule_exclusions:
+    - missing_command_test_coverage
+monitor log-analytics workspace saved-search update:
+    rule_exclusions:
+    - missing_command_test_coverage
+monitor log-analytics workspace table create:
+    rule_exclusions:
+    - missing_command_test_coverage
+monitor log-analytics workspace table update:
+    rule_exclusions:
+    - missing_command_test_coverage
+monitor log-analytics workspace table restore create:
+    rule_exclusions:
+    - missing_command_test_coverage
+monitor log-analytics workspace table search-job create:
+    rule_exclusions:
+    - missing_command_test_coverage
+monitor metrics list:
+    rule_exclusions:
+    - missing_command_test_coverage
+    parameters:
+        metadata:
+            rule_exclusions:
+            - missing_parameter_test_coverage
+        dimension:
+            rule_exclusions:
+            - missing_parameter_test_coverage
+        aggregation:
+            rule_exclusions:
+            - missing_parameter_test_coverage
+        metrics:
+            rule_exclusions:
+            - missing_parameter_test_coverage
+        orderby:
+            rule_exclusions:
+            - missing_parameter_test_coverage
+        top:
+            rule_exclusions:
+            - missing_parameter_test_coverage
+        start_time:
+            rule_exclusions:
+            - missing_parameter_test_coverage
+        end_time:
+            rule_exclusions:
+            - missing_parameter_test_coverage
+        offset:
+            rule_exclusions:
+            - missing_parameter_test_coverage
+        interval:
+            rule_exclusions:
+            - missing_parameter_test_coverage
+monitor metrics list-definitions:
+    rule_exclusions:
+    - missing_command_test_coverage
+monitor metrics list-namespaces:
+    rule_exclusions:
+    - missing_command_test_coverage
+    parameters:
+        resource_uri:
+            rule_exclusions:
+            - missing_parameter_test_coverage
+        start_time:
+            rule_exclusions:
+            - missing_parameter_test_coverage
+monitor metrics "create":
+    rule_exclusions:
+    - missing_command_test_coverage
+monitor:
+    parameters:
+        location:
+            rule_exclusions:
+            - missing_parameter_test_coverage
+        tags:
+            rule_exclusions:
+            - missing_parameter_test_coverage
+monitor metrics:
+    parameters:
+        namespace:
+            rule_exclusions:
+            - missing_parameter_test_coverage
+monitor metrics alert:
+    parameters:
+        rule_name:
+            rule_exclusions:
+            - missing_parameter_test_coverage
+        severity:
+            rule_exclusions:
+            - missing_parameter_test_coverage
+        window_size:
+            rule_exclusions:
+            - missing_parameter_test_coverage
+        evaluation_frequency:
+            rule_exclusions:
+            - missing_parameter_test_coverage
+        auto_mitigate:
+            rule_exclusions:
+            - missing_parameter_test_coverage

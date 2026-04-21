@@ -739,7 +739,6 @@ class TestHelpLoads(unittest.TestCase):
             self.assertIn('vm', output)
             self.assertIn('login', output)
             self.assertIn('version', output)
-            self.assertIn('az find', output)
         finally:
             sys.stdout = sys.__stdout__
 

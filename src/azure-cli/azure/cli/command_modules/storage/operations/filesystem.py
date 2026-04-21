@@ -39,14 +39,15 @@ def generate_sas_fs_uri(client, cmd, file_system, permission=None,
                         protocol=None, cache_control=None, content_disposition=None,
                         content_encoding=None, content_language=None,
                         content_type=None, full_uri=False, as_user=False, encryption_scope=None,
-                        user_delegation_oid=None):
+                        user_delegation_oid=None, user_delegation_tid=None):
     generate_file_system_sas = cmd.get_models('_shared_access_signature#generate_file_system_sas')
 
     sas_kwargs = {}
     if as_user:
         user_delegation_key = client.get_user_delegation_key(
             get_datetime_from_string(start) if start else datetime.utcnow(),
-            get_datetime_from_string(expiry))
+            get_datetime_from_string(expiry),
+            delegated_user_tid=user_delegation_tid)
 
     sas_token = generate_file_system_sas(account_name=client.account_name, file_system_name=file_system,
                                          credential=user_delegation_key if as_user else client.credential.account_key,

@@ -24,7 +24,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           get_api_version_type, blob_download_file_path_validator, blob_tier_validator, validate_subnet,
                           validate_immutability_arguments, validate_blob_name_for_upload, validate_share_close_handle,
                           blob_tier_validator_track2, services_type_v2, resource_type_type_v2, PermissionScopeAddAction,
-                          SshPublicKeyAddAction, user_delegation_oid_validator)
+                          SshPublicKeyAddAction, user_delegation_oid_validator, user_delegation_tid_validator)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines, too-many-branches, line-too-long
@@ -979,6 +979,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Specifies the Entra ID of the user that is authorized to use the resulting SAS URL. '
                         'The resulting SAS URL must be used in conjunction with an Entra ID token that has been issued '
                         'to the user specified in this value.')
+        c.argument('user_delegation_tid', validator=user_delegation_tid_validator, is_preview=True,
+                   help='The delegated user tenant id in Azure AD. '
+                        'This parameter can only be specified when using OAuth.')
 
     with self.argument_context('storage blob restore', resource_type=ResourceType.MGMT_STORAGE) as c:
         from ._validators import BlobRangeAddAction
@@ -1702,6 +1705,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Specifies the Entra ID of the user that is authorized to use the resulting SAS URL. '
                         'The resulting SAS URL must be used in conjunction with an Entra ID token that has been issued '
                         'to the user specified in this value.')
+        c.argument('user_delegation_tid', validator=user_delegation_tid_validator, is_preview=True,
+                   help='The delegated user tenant id in Azure AD. '
+                        'This parameter can only be specified when using OAuth.')
 
     for cmd in ['acquire', 'renew', 'break', 'change', 'release']:
         with self.argument_context(f'storage container lease {cmd}') as c:
@@ -1970,6 +1976,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Specifies the Entra ID of the user that is authorized to use the resulting SAS URL. '
                         'The resulting SAS URL must be used in conjunction with an Entra ID token that has been issued '
                         'to the user specified in this value.')
+        c.argument('user_delegation_tid', validator=user_delegation_tid_validator, is_preview=True,
+                   help='The delegated user tenant id in Azure AD. '
+                        'This parameter can only be specified when using OAuth.')
 
     with self.argument_context('storage share update') as c:
         c.extra('share_name', share_name_type, options_list=('--name', '-n'), required=True)
@@ -2185,6 +2194,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                 help='Specifies the Entra ID of the user that is authorized to use the resulting SAS URL. '
                      'The resulting SAS URL must be used in conjunction with an Entra ID token that has been issued '
                      'to the user specified in this value.')
+        c.extra('user_delegation_tid', validator=user_delegation_tid_validator, is_preview=True,
+                help='The delegated user tenant id in Azure AD. This parameter can only be specified when using OAuth.')
 
     with self.argument_context('storage file list') as c:
         c.extra('share_name', share_name_type, required=True)
@@ -2338,6 +2349,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Specifies the Entra ID of the user that is authorized to use the resulting SAS URL. '
                         'The resulting SAS URL must be used in conjunction with an Entra ID token that has been issued '
                         'to the user specified in this value.')
+        c.argument('user_delegation_tid', validator=user_delegation_tid_validator, is_preview=True,
+                   help='The delegated user tenant id in Azure AD. '
+                        'This parameter can only be specified when using OAuth.')
 
     with self.argument_context('storage queue list') as c:
         c.argument('include_metadata', help='Specify that queue metadata be returned in the response.')
@@ -2587,6 +2601,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Specifies the Entra ID of the user that is authorized to use the resulting SAS URL. '
                         'The resulting SAS URL must be used in conjunction with an Entra ID token that has been issued '
                         'to the user specified in this value.')
+        c.argument('user_delegation_tid', validator=user_delegation_tid_validator, is_preview=True,
+                   help='The delegated user tenant id in Azure AD. '
+                        'This parameter can only be specified when using OAuth.')
 
     with self.argument_context('storage fs list') as c:
         c.argument('include_metadata', arg_type=get_three_state_flag(),
@@ -2717,6 +2734,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Specifies the Entra ID of the user that is authorized to use the resulting SAS URL. '
                         'The resulting SAS URL must be used in conjunction with an Entra ID token that has been issued '
                         'to the user specified in this value.')
+        c.argument('user_delegation_tid', validator=user_delegation_tid_validator, is_preview=True,
+                   help='The delegated user tenant id in Azure AD. '
+                        'This parameter can only be specified when using OAuth.')
 
     with self.argument_context('storage fs file generate-sas') as c:
         t_file_system_permissions = self.get_sdk('_models#FileSystemSasPermissions',
@@ -2753,6 +2773,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Specifies the Entra ID of the user that is authorized to use the resulting SAS URL. '
                         'The resulting SAS URL must be used in conjunction with an Entra ID token that has been issued '
                         'to the user specified in this value.')
+        c.argument('user_delegation_tid', validator=user_delegation_tid_validator, is_preview=True,
+                   help='The delegated user tenant id in Azure AD. '
+                        'This parameter can only be specified when using OAuth.')
 
     with self.argument_context('storage fs file list') as c:
         c.extra('file_system_name', options_list=['-f', '--file-system'],

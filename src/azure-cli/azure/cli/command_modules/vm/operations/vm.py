@@ -196,16 +196,7 @@ class VMIdentityRemove(_VMPatch):
                 if has_value(resource.type):
                     resource.type = AAZUndefined
 
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-
-        identity = result.get('identity')
-        if not identity:
-            return result
-
-        if not identity.get('userAssignedIdentities'):
-            identity['userAssignedIdentities'] = None
-
-        return result
+        return self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
 
     class VirtualMachinesUpdate(_VMPatch.VirtualMachinesUpdate):
         # Override to solve key conflict of _schema_on_200.resources.Element.properties.type when deserializing

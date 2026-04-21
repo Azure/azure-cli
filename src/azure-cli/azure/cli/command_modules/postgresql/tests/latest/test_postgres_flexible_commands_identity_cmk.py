@@ -46,7 +46,7 @@ class FlexibleServerIdentityCMKMgmtScenarioTest(ScenarioTest):
             self.cmd('role assignment create --assignee-object-id {} --assignee-principal-type ServicePrincipal --role "Key Vault Crypto User" --scope {}'.format( identity['principalId'], scope))
             self.cmd('role assignment create --assignee-object-id {} --assignee-principal-type ServicePrincipal --role "Key Vault Certificate User" --scope {}'.format( identity['principalId'], scope))
 
-        # create primary flexible server with data encryption
+        # Create primary flexible server with data encryption
         self.cmd('postgres flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --key {} --identity {} --location {}'.format(
                     resource_group,
                     server_name,
@@ -61,16 +61,16 @@ class FlexibleServerIdentityCMKMgmtScenarioTest(ScenarioTest):
             JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(identity['id']))
         ]
 
-        # check data encryption is set correctly
+        # Check data encryption is set correctly
         self.cmd('postgres flexible-server show -g {} -n {}'.format(resource_group, server_name),
                  checks=main_checks)
 
-        # should fail because we can't remove identity used for data encryption
+        # Should fail because we can't remove identity used for data encryption
         self.cmd('postgres flexible-server identity remove -g {} -s {} -n {} --yes'
                     .format(resource_group, server_name, identity['id']),
                     expect_failure=True)
 
-        # create replica 1 with data encryption            
+        # Create replica 1 with data encryption            
         replica_1_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
 
         self.cmd('postgres flexible-server replica create -g {} --name {} --source-server {} --key {} --identity {}'.format(
@@ -81,6 +81,6 @@ class FlexibleServerIdentityCMKMgmtScenarioTest(ScenarioTest):
                     identity['id']
         ), checks=main_checks + [JMESPathCheck('replicationRole', replication_role)])
 
-        # delete all servers
+        # Clean up
         self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, replica_1_name))
         self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, server_name))
