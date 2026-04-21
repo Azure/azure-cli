@@ -15071,7 +15071,7 @@ spec:
         # create with app monitoring enabled
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
                      '--ssh-key-value={ssh_key_value} --node-count=1 --enable-managed-identity ' \
-                     '--enable-azure-monitor-app-monitoring '
+                     '--enable-azure-monitor-app-monitoring'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('azureMonitorProfile.appMonitoring.autoInstrumentation.enabled', True),
@@ -15106,7 +15106,7 @@ spec:
 
         # update to enable app monitoring
         update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
-                     '--enable-azure-monitor-app-monitoring '
+                     '--enable-azure-monitor-app-monitoring'
         self.cmd(update_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('azureMonitorProfile.appMonitoring.autoInstrumentation.enabled', True),
@@ -15118,7 +15118,7 @@ spec:
 
         # update to disable app monitoring
         update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
-                     '--disable-azure-monitor-app-monitoring '
+                     '--disable-azure-monitor-app-monitoring'
         self.cmd(update_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('azureMonitorProfile.appMonitoring.autoInstrumentation.enabled', False),

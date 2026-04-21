@@ -6249,7 +6249,6 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         self.assertIsNotNone(certs_empty)
         self.assertEqual(certs_empty, [])
 
-
     def test_get_enable_azure_monitor_app_monitoring(self):
         # default value
         ctx_1 = AKSManagedClusterContext(
@@ -6276,6 +6275,30 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_2.get_enable_azure_monitor_app_monitoring(), True)
+
+        # create mode: mc-precedence - getter reads from mc when field is pre-populated
+        ctx_3 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_azure_monitor_app_monitoring": False,
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            azure_monitor_profile=self.models.ManagedClusterAzureMonitorProfile(
+                app_monitoring=self.models.ManagedClusterAzureMonitorProfileAppMonitoring(
+                    auto_instrumentation=self.models.ManagedClusterAzureMonitorProfileAppMonitoringAutoInstrumentation(
+                        enabled=True
+                    )
+                )
+            )
+        )
+        ctx_3.attach_mc(mc_3)
+        self.assertEqual(ctx_3.get_enable_azure_monitor_app_monitoring(), True)
 
     def test_get_disable_azure_monitor_app_monitoring(self):
         # default value
@@ -15772,8 +15795,6 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         with self.assertRaises(MutuallyExclusiveArgumentError):
             dec_17.update_monitoring_profile_flow_logs(mc_17)
 
-
-
     def test_update_azure_monitor_profile_enable_app_monitoring(self):
         # Test enabling app monitoring on a cluster without existing azure_monitor_profile
         dec_1 = AKSManagedClusterUpdateDecorator(
@@ -15898,6 +15919,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         self.assertIsNotNone(dec_mc_1.azure_monitor_profile.app_monitoring)
         self.assertIsNotNone(dec_mc_1.azure_monitor_profile.app_monitoring.auto_instrumentation)
         self.assertFalse(dec_mc_1.azure_monitor_profile.app_monitoring.auto_instrumentation.enabled)
+
 
 if __name__ == "__main__":
     unittest.main()

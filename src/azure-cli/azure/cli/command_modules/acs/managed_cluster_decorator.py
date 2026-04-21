@@ -5770,6 +5770,18 @@ class AKSManagedClusterContext(BaseAKSContext):
         :return: bool
         """
         enable_azure_monitor_app_monitoring = self.raw_param.get("enable_azure_monitor_app_monitoring")
+        # In create mode, try to read the property value corresponding to the parameter from the `mc` object.
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                hasattr(self.mc, "azure_monitor_profile") and
+                self.mc.azure_monitor_profile and
+                self.mc.azure_monitor_profile.app_monitoring and
+                self.mc.azure_monitor_profile.app_monitoring.auto_instrumentation
+            ):
+                enable_azure_monitor_app_monitoring = (
+                    self.mc.azure_monitor_profile.app_monitoring.auto_instrumentation.enabled
+                )
         if enable_validation:
             if enable_azure_monitor_app_monitoring and self._get_disable_azure_monitor_app_monitoring(False):
                 raise MutuallyExclusiveArgumentError(
@@ -7381,9 +7393,10 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         if self.context.get_enable_azure_monitor_app_monitoring():
             if mc.azure_monitor_profile is None:
                 mc.azure_monitor_profile = self.models.ManagedClusterAzureMonitorProfile()
-            mc.azure_monitor_profile.app_monitoring = (
-                self.models.ManagedClusterAzureMonitorProfileAppMonitoring()
-            )
+            if mc.azure_monitor_profile.app_monitoring is None:
+                mc.azure_monitor_profile.app_monitoring = (
+                    self.models.ManagedClusterAzureMonitorProfileAppMonitoring()
+                )
             mc.azure_monitor_profile.app_monitoring.auto_instrumentation = (
                 self.models.ManagedClusterAzureMonitorProfileAppMonitoringAutoInstrumentation(enabled=True)
             )
