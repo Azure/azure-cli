@@ -2956,10 +2956,16 @@ def create_deployment_stack_what_if_at_resource_group(
 
     what_if_result = LongRunningOperation(cmd.cli_ctx)(whatif_poller)
 
+    # fetch with property changes which requires a POST request
+    what_if_result = rcf.deployment_stacks_what_if_results_at_resource_group.begin_what_if(
+        resource_group, name, polling=False).result()
+
     return _print_deployment_stack_what_if_result(what_if_result, no_pretty_print, no_color)
 
 
-def show_deployment_stack_what_if_at_resource_group(cmd, name=None, resource_group=None, id=None, no_pretty_print=None, no_color=None):  # pylint: disable=redefined-builtin
+def show_deployment_stack_what_if_at_resource_group(
+    cmd, name=None, resource_group=None, id=None, no_pretty_print=None, no_color=None, with_property_changes=None
+):  # pylint: disable=redefined-builtin
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
     if id:
@@ -2967,11 +2973,17 @@ def show_deployment_stack_what_if_at_resource_group(cmd, name=None, resource_gro
         if len(stack_arr) < 5:
             raise InvalidArgumentValueError("Please enter a valid id")
 
-        what_if_result = rcf.deployment_stacks_what_if_results_at_resource_group.get(stack_arr[4], stack_arr[-1])
+        resource_group, name = stack_arr[4], stack_arr[-1]
     elif name and resource_group:
-        what_if_result = rcf.deployment_stacks_what_if_results_at_resource_group.get(resource_group, name)
+        pass
     else:
         raise InvalidArgumentValueError("Please enter the (stack what-if result name and resource group) or stack what-if result resource id")
+
+    if with_property_changes:
+        what_if_result = rcf.deployment_stacks_what_if_results_at_resource_group.begin_what_if(
+            resource_group, name, polling=False).result()
+    else:
+        what_if_result = rcf.deployment_stacks_what_if_results_at_resource_group.get(resource_group, name)
 
     return _print_deployment_stack_what_if_result(what_if_result, no_pretty_print, no_color)
 
@@ -3042,18 +3054,30 @@ def create_deployment_stack_what_if_at_subscription(
 
     what_if_result = LongRunningOperation(cmd.cli_ctx)(whatif_poller)
 
+    # fetch with property changes which requires a POST request
+    what_if_result = rcf.deployment_stacks_what_if_results_at_subscription.begin_what_if(
+        name, polling=False).result()
+
     return _print_deployment_stack_what_if_result(what_if_result, no_pretty_print, no_color)
 
 
-def show_deployment_stack_what_if_at_subscription(cmd, name=None, id=None, no_pretty_print=None, no_color=None):  # pylint: disable=redefined-builtin
+def show_deployment_stack_what_if_at_subscription(
+    cmd, name=None, id=None, no_pretty_print=None, no_color=None, with_property_changes=None
+):  # pylint: disable=redefined-builtin
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
     if name:
-        what_if_result = rcf.deployment_stacks_what_if_results_at_subscription.get(name)
+        pass
     elif id:
-        what_if_result = rcf.deployment_stacks_what_if_results_at_subscription.get(id.split('/')[-1])
+        name = id.split('/')[-1]
     else:
         raise InvalidArgumentValueError("Please enter the stack what-if result name or stack what-if result resource id.")
+
+    if with_property_changes:
+        what_if_result = rcf.deployment_stacks_what_if_results_at_subscription.begin_what_if(
+            name, polling=False).result()
+    else:
+        what_if_result = rcf.deployment_stacks_what_if_results_at_subscription.get(name)
 
     return _print_deployment_stack_what_if_result(what_if_result, no_pretty_print, no_color)
 
@@ -3116,18 +3140,30 @@ def create_deployment_stack_what_if_at_management_group(
 
     what_if_result = LongRunningOperation(cmd.cli_ctx)(whatif_poller)
 
+    # fetch with property changes which requires a POST request
+    what_if_result = rcf.deployment_stacks_what_if_results_at_management_group.begin_what_if(
+        management_group_id, name, polling=False).result()
+
     return _print_deployment_stack_what_if_result(what_if_result, no_pretty_print, no_color)
 
 
-def show_deployment_stack_what_if_at_management_group(cmd, management_group_id, name=None, id=None, no_pretty_print=None, no_color=None):  # pylint: disable=redefined-builtin
+def show_deployment_stack_what_if_at_management_group(
+    cmd, management_group_id, name=None, id=None, no_pretty_print=None, no_color=None, with_property_changes=None
+):  # pylint: disable=redefined-builtin
     rcf = _resource_deploymentstacks_client_factory(cmd.cli_ctx)
 
     if name:
-        what_if_result = rcf.deployment_stacks_what_if_results_at_management_group.get(management_group_id, name)
+        pass
     elif id:
-        what_if_result = rcf.deployment_stacks_what_if_results_at_management_group.get(management_group_id, id.split('/')[-1])
+        name = id.split('/')[-1]
     else:
         raise InvalidArgumentValueError("Please enter the stack what-if result name or stack what-if result resource id.")
+
+    if with_property_changes:
+        what_if_result = rcf.deployment_stacks_what_if_results_at_management_group.begin_what_if(
+            management_group_id, name, polling=False).result()
+    else:
+        what_if_result = rcf.deployment_stacks_what_if_results_at_management_group.get(management_group_id, name)
 
     return _print_deployment_stack_what_if_result(what_if_result, no_pretty_print, no_color=no_color)
 

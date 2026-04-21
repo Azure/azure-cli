@@ -121,6 +121,9 @@ def load_arguments(self, _):
     stacks_whatif_retention_interval_type = CLIArgumentType(
         options_list=['--retention-interval', '--ri'], type=iso_8601_duration,
         help='The retention interval for What-If results. The value must be in ISO 8601 format and between 1 day and 30 days.')
+    stacks_whatif_with_property_changes_type = CLIArgumentType(
+        arg_type=get_three_state_flag(), options_list=['--with-property-changes', '--wpc'],
+        help='Flag to return the What-If results with resource property changes included.')
 
     bicep_file_type = CLIArgumentType(options_list=['--file', '-f'], completer=FilesCompleter(), type=file_type)
     bicep_force_type = CLIArgumentType(options_list=['--force'], action='store_true')
@@ -687,6 +690,7 @@ def load_arguments(self, _):
                         if resource_type == 'stack-whatif':
                             c.argument('no_pretty_print', arg_type=deployment_what_if_no_pretty_print_type)
                             c.argument('no_color', arg_type=deployment_what_if_no_color_type)
+                            c.argument('with_property_changes', arg_type=stacks_whatif_with_property_changes_type)
                     elif action == 'list':
                         if scope == 'sub':
                             continue  # only uses global arguments
