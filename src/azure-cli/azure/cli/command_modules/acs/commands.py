@@ -39,7 +39,7 @@ def load_command_table(self, _):
 
     managed_clusters_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.containerservice.operations.'
-                        '_managed_clusters_operations#ManagedClustersOperations.{}',
+                        '_operations#ManagedClustersOperations.{}',
         operation_group='managed_clusters',
         resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         client_factory=cf_managed_clusters
@@ -47,7 +47,7 @@ def load_command_table(self, _):
 
     agent_pools_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.containerservice.operations.'
-                        '_agent_pools_operations#AgentPoolsOperations.{}',
+                        '_operations#AgentPoolsOperations.{}',
         operation_group='agent_pools',
         resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         client_factory=cf_managed_clusters
@@ -60,8 +60,8 @@ def load_command_table(self, _):
     )
 
     maintenance_configuration_sdk = CliCommandType(
-        operations_tmpl='aazure.mgmt.containerservice.operations.'
-                        '_maintenance_configurations_operations#MaintenanceConfigurationsOperations.{}',
+        operations_tmpl='azure.mgmt.containerservice.operations.'
+                        '_operations#MaintenanceConfigurationsOperations.{}',
         operation_group='maintenance_configurations',
         resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         client_factory=cf_maintenance_configurations
@@ -69,7 +69,7 @@ def load_command_table(self, _):
 
     managed_namespaces_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.containerservice.operations.'
-                        '_managed_namespaces_operations#ManagedNamespacesOperations.{}',
+                        '_operations#ManagedNamespacesOperations.{}',
         operation_group='managed_namespaces',
         resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         client_factory=cf_managed_namespaces,
@@ -77,7 +77,7 @@ def load_command_table(self, _):
 
     snapshot_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.containerservice.operations.'
-                        '_snapshots_operations#SnapshotsOperations.{}',
+                        '_operations#SnapshotsOperations.{}',
         operation_group='snapshots',
         resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         client_factory=cf_snapshots
@@ -85,7 +85,7 @@ def load_command_table(self, _):
 
     trustedaccess_role_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.containerservice.operations.'
-                        '_trusted_access_roles_operations#TrustedAccessRolesOperations.{}',
+                        '_operations#TrustedAccessRolesOperations.{}',
         operation_group='trustedaccess_role',
         resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         client_factory=cf_trustedaccess_role
@@ -93,7 +93,7 @@ def load_command_table(self, _):
 
     trustedaccess_role_binding_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.containerservice.operations.'
-                        '_trusted_access_role_bindings_operations#TrustedAccessRoleBindingsOperations.{}',
+                        '_operations#TrustedAccessRoleBindingsOperations.{}',
         operation_group='trustedaccess_role_binding',
         resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         client_factory=cf_trustedaccess_role_binding
@@ -109,8 +109,8 @@ def load_command_table(self, _):
                   table_transformer=aks_upgrades_table_format)
         g.custom_command('upgrade', 'aks_upgrade', supports_no_wait=True)
         g.custom_command('scale', 'aks_scale', supports_no_wait=True)
-        g.command('delete', 'begin_delete',
-                  supports_no_wait=True, confirmation=True)
+        g.custom_command('delete', 'aks_delete',
+                         supports_no_wait=True, confirmation=True)
         g.custom_show_command('show', 'aks_show',
                               table_transformer=aks_show_table_format)
         g.custom_command('list', 'aks_list',

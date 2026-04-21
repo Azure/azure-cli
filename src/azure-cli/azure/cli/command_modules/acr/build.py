@@ -95,13 +95,10 @@ def acr_build(cmd,  # pylint: disable=too-many-locals
 
     is_push_enabled = _get_push_enabled_status(no_push, image_names)
 
-    platform_os, platform_arch, platform_variant = get_validate_platform(cmd, platform)
+    platform_os, platform_arch, platform_variant = get_validate_platform(platform)
 
-    DockerBuildRequest, PlatformProperties, RoleAssignmentMode = cmd.get_models(
-        'DockerBuildRequest',
-        'PlatformProperties',
-        'RoleAssignmentMode',
-        operation_group='runs')
+    from azure.mgmt.containerregistrytasks.models import DockerBuildRequest, PlatformProperties
+    RoleAssignmentMode = cmd.get_models('RoleAssignmentMode')
 
     registry_abac_enabled = registry.role_assignment_mode == RoleAssignmentMode.ABAC_REPOSITORY_PERMISSIONS
 
@@ -144,7 +141,7 @@ def acr_build(cmd,  # pylint: disable=too-many-locals
 
     if no_logs:
         from ._run_polling import get_run_with_polling
-        return get_run_with_polling(cmd, client, run_id, registry_name, resource_group_name)
+        return get_run_with_polling(client, run_id, registry_name, resource_group_name)
 
     return stream_logs(cmd, client, run_id, registry_name, resource_group_name, timeout, no_format, True)
 

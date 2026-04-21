@@ -29,7 +29,6 @@ from azure.cli.core.util import (
     get_command_type_kwarg, read_file_content, get_arg_list, poller_classes)
 from azure.cli.core.local_context import LocalContextAction
 from azure.cli.core import telemetry
-from azure.cli.core.commands.progress import IndeterminateProgressBar
 
 from knack.arguments import CLICommandArgument
 from knack.commands import CLICommand, CommandGroup, PREVIEW_EXPERIMENTAL_CONFLICT_ERROR
@@ -512,14 +511,11 @@ class AzCliCommandInvoker(CommandInvoker):
                                   EVENT_INVOKER_FILTER_RESULT)
         from azure.cli.core.commands.events import (
             EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE, EVENT_INVOKER_PRE_LOAD_ARGUMENTS, EVENT_INVOKER_POST_LOAD_ARGUMENTS)
-        from azure.cli.core.util import roughly_parse_command_with_casing
 
-        # TODO: Can't simply be invoked as an event because args are transformed
-        command_preserve_casing = roughly_parse_command_with_casing(args)
         args = _pre_command_table_create(self.cli_ctx, args)
 
         if self._should_show_cached_help(args):
-            result = self._try_show_cached_help(command_preserve_casing, args)
+            result = self._try_show_cached_help(args)
             if result:
                 return result
 
@@ -593,7 +589,7 @@ class AzCliCommandInvoker(CommandInvoker):
                     logger.debug("Failed to cache help data: %s", ex)
 
             # TODO: No event in base with which to target
-            telemetry.set_command_details('az', command_preserve_casing=command_preserve_casing)
+            telemetry.set_command_details('az')
             telemetry.set_success(summary='welcome')
             return CommandResultItem(None, exit_code=0)
 
@@ -648,8 +644,7 @@ class AzCliCommandInvoker(CommandInvoker):
             pass
         telemetry.set_command_details(self.cli_ctx.data['command'], self.data['output'],
                                       self.cli_ctx.data['safe_params'],
-                                      extension_name=extension_name, extension_version=extension_version,
-                                      command_preserve_casing=command_preserve_casing)
+                                      extension_name=extension_name, extension_version=extension_version)
         if extension_name:
             self.data['command_extension_name'] = extension_name
             self.cli_ctx.logging.log_cmd_metadata_extension_info(extension_name, extension_version)
@@ -740,19 +735,32 @@ class AzCliCommandInvoker(CommandInvoker):
                 self._is_top_level_help_request(args) and
                 not self.cli_ctx.data.get('completer_active'))
 
-    def _try_show_cached_help(self, command_preserve_casing, args):
+    def _try_show_cached_help(self, args):
         """Try to show cached help for top-level help request.
 
         Returns CommandResultItem if cached help was shown, None otherwise.
         """
-        from azure.cli.core import CommandIndex
+        from azure.cli.core import CommandIndex, REFRESH_EXTENSION_HELP_OVERLAY_SENTINEL
         command_index = CommandIndex(self.cli_ctx)
         help_index = command_index.get_help_index()
+
+        if not help_index and command_index.needs_latest_extension_help_overlay_refresh():
+            logger.debug("Top-level cached help is unavailable on latest profile. "
+                         "Refreshing extension help overlay without full core module load.")
+            try:
+                if self.cli_ctx.invocation.data.get('command_string') is None:
+                    self.cli_ctx.invocation.data['command_string'] = ''
+                # Unknown top-level command forces extension-only load path on latest profile.
+                self.commands_loader.load_command_table([REFRESH_EXTENSION_HELP_OVERLAY_SENTINEL])
+                help_index = command_index.get_help_index()
+            except Exception as ex:  # pylint: disable=broad-except
+                # Keep cached-help refresh best-effort; normal invocation flow can still continue.
+                logger.debug("Failed to refresh latest extension help overlay: %s", ex)
 
         if help_index:
             # Display cached help using the help system
             self.help.show_cached_help(help_index, args)
-            telemetry.set_command_details('az', command_preserve_casing=command_preserve_casing, parameters=['--help'])
+            telemetry.set_command_details('az', parameters=['--help'])
             telemetry.set_success(summary='show help')
             return CommandResultItem(None, exit_code=0)
 
@@ -1026,10 +1034,20 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
         self.deploy_dict = {}
         self.last_progress_report = datetime.datetime.now()
 
-        self.progress_bar = None
+        self._progress_bar = None
         disable_progress_bar = self.cli_ctx.config.getboolean('core', 'disable_progress_bar', False)
-        if not disable_progress_bar and not cli_ctx.only_show_errors:
-            self.progress_bar = progress_bar if progress_bar is not None else IndeterminateProgressBar(cli_ctx)
+        self.disable_progress_bar = disable_progress_bar or cli_ctx.only_show_errors
+        if not self.disable_progress_bar:
+            self._progress_bar = progress_bar
+
+    @property
+    def progress_bar(self):
+        if self.disable_progress_bar:
+            return None
+        if self._progress_bar is None:
+            from azure.cli.core.commands.progress import IndeterminateProgressBar
+            self._progress_bar = IndeterminateProgressBar(self.cli_ctx)
+        return self._progress_bar
 
     def _delay(self):
         time.sleep(self.poller_done_interval_ms / 1000.0)

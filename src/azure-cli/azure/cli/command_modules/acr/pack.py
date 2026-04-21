@@ -52,8 +52,8 @@ def acr_pack_build(cmd,  # pylint: disable=too-many-locals
     if not source_location:
         raise CLIError('Building with Buildpacks requires a valid source location.')
 
-    platform_os, platform_arch, platform_variant = get_validate_platform(cmd, platform)
-    OS = cmd.get_models('OS', operation_group='task_runs')
+    platform_os, platform_arch, platform_variant = get_validate_platform(platform)
+    from azure.mgmt.containerregistrytasks.models import OS
     if platform_os != OS.linux.value.lower():
         raise CLIError('Building with Buildpacks is only supported on Linux.')
 
@@ -73,10 +73,7 @@ def acr_pack_build(cmd,  # pylint: disable=too-many-locals
         pack_image_tag=pack_image_tag,
         no_pull='--no-pull' if not pull else '')
 
-    EncodedTaskRunRequest, PlatformProperties = cmd.get_models(
-        'EncodedTaskRunRequest',
-        'PlatformProperties',
-        operation_group='task_runs')
+    from azure.mgmt.containerregistrytasks.models import EncodedTaskRunRequest, PlatformProperties
 
     request = EncodedTaskRunRequest(
         encoded_task_content=base64.b64encode(yaml_body.encode()).decode(),
@@ -109,6 +106,6 @@ def acr_pack_build(cmd,  # pylint: disable=too-many-locals
 
     if no_logs:
         from ._run_polling import get_run_with_polling
-        return get_run_with_polling(cmd, client, run_id, registry_name, resource_group_name)
+        return get_run_with_polling(client, run_id, registry_name, resource_group_name)
 
     return stream_logs(cmd, client, run_id, registry_name, resource_group_name, timeout, no_format, True)
