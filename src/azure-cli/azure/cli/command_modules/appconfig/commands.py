@@ -7,7 +7,7 @@
 
 from azure.cli.core.commands import CliCommandType
 
-from ._client_factory import cf_configstore, cf_configstore_operations, cf_replicas
+from ._client_factory import cf_configstore, cf_configstore_operations, cf_replicas, cf_nsp_configurations
 from ._format import (configstore_credential_format,
                       configstore_identity_format,
                       configstore_output_format,
@@ -140,3 +140,13 @@ def load_command_table(self, _):
         g.command('list', 'list_snapshots')
         g.command('archive', 'archive_snapshot')
         g.command('recover', 'recover_snapshot')
+
+    configstore_nsp_util = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.appconfig.network_security_perimeter#{}',
+        client_factory=cf_nsp_configurations
+    )
+
+    with self.command_group('appconfig network-security-perimeter-configuration', configstore_nsp_util) as g:
+        g.command('list', 'list_nsp_configurations')
+        g.show_command('show', 'show_nsp_configuration')
+        g.command('reconcile', 'reconcile_nsp_configuration')

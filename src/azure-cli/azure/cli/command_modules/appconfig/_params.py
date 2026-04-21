@@ -474,3 +474,12 @@ def load_arguments(self, _):
         c.argument('snapshot_name', options_list=['--snapshot-name', '-s'], help='If no name specified, return all snapshots by default. Support star sign as filters, for instance abc* means snapshots with abc as prefix to the name.')
         c.argument('status', arg_type=snapshot_status_arg_type)
         c.argument('fields', arg_type=snapshot_fields_arg_type)
+
+    with self.argument_context('appconfig network-security-perimeter-configuration') as c:
+        c.argument('store_name', arg_type=store_name_arg_type)
+
+    with self.argument_context('appconfig network-security-perimeter-configuration show') as c:
+        c.argument('name', options_list=['--name', '-n'], help='Name of the network security perimeter configuration to show.', required=True)
+
+    with self.argument_context('appconfig network-security-perimeter-configuration reconcile') as c:
+        c.argument('name', options_list=['--name', '-n'], help='Name of the network security perimeter configuration to reconcile.', required=True)
