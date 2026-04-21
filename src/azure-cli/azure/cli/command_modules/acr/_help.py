@@ -1793,7 +1793,7 @@ examples:
 
 helps['acr connected-registry resync'] = """
 type: command
-short-summary: triggers a manual resync between the connected registry and its parent.
+short-summary: Trigger a manual resync between the connected registry and its parent.
 long-summary: The connected registry agent must be online for the sync to execute. The returned syncState is typically 'Pending'; use 'az acr connected-registry show' to track progress.
 examples:
   - name: Resync a connected registry 'myconnectedregistry'.
