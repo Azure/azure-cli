@@ -5,6 +5,7 @@
 
 import json
 import typing as t
+from enum import Enum
 
 from requests.structures import CaseInsensitiveDict
 
@@ -333,7 +334,10 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
 
         value_type = self._get_value_type_from_change(change)
 
-        if value_type is str or value_type is bool or value_type is int or value_type is float:
+        if not value_type:
+            return False
+
+        if value_type is str or value_type is bool or value_type is int or value_type is float or issubclass(value_type, Enum):
             if self._format_primitive_change(change, parent_path, is_array_item):
                 return True
         elif value_type is list:
@@ -444,9 +448,11 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         self.builder.pop_indent()
 
     @staticmethod
-    def _format_primitive_value(value: t.Optional[t.Union[str, bool, int, float]]):
+    def _format_primitive_value(value: t.Optional[t.Union[str, bool, int, float, Enum]]):
         if value is None:
             return "null"
+        if isinstance(value, Enum):
+            return DeploymentStacksWhatIfResultFormatter._format_primitive_value(value.value)
         return f'"{value}"' if isinstance(value, str) else str(value)
 
     @staticmethod
