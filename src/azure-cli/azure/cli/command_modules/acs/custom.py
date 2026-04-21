@@ -1036,6 +1036,8 @@ def aks_create(
     # node provisioning
     node_provisioning_mode=None,
     node_provisioning_default_pools=None,
+    # gateway api
+    enable_gateway_api=False,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -1231,6 +1233,9 @@ def aks_update(
     # node provisioning
     node_provisioning_mode=None,
     node_provisioning_default_pools=None,
+    # gateway api
+    enable_gateway_api=False,
+    disable_gateway_api=False,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
