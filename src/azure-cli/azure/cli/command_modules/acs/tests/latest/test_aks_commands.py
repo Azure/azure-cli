@@ -15112,6 +15112,10 @@ spec:
             self.check('azureMonitorProfile.appMonitoring.autoInstrumentation.enabled', True),
         ])
 
+        # wait between back-to-back updates to avoid 409 conflicts during live/re-record runs
+        if self.is_live or self.in_recording:
+            time.sleep(60)
+
         # update to disable app monitoring
         update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
                      '--disable-azure-monitor-app-monitoring '
