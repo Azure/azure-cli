@@ -277,7 +277,8 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         if is_potential_change:
             self.builder.append("[Potential] ", Color.CYAN)
 
-        api_version_suffix = f" [{resource_change.api_version}]" if resource_change.api_version else ""
+        api_version = self._get_resource_api_version(resource_change)
+        api_version_suffix = f" [{api_version}]" if api_version else ""
         resource_id = resource_change.id if resource_change.id else\
             f"{resource_change.type} {_format_ext_resource_identifiers(resource_change.identifiers)}"
         self.builder.append_line(f"{resource_id}{api_version_suffix}", color)
@@ -544,3 +545,16 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
                     result += f" {', '.join(config_parts)}"
 
         return result
+
+    @staticmethod
+    def _get_resource_api_version(resource: StackModels.DeploymentStacksWhatIfResourceChange) -> t.Optional[str]:
+        if resource.api_version:
+            return resource.api_version
+
+        if resource.resource_configuration_changes:
+            if resource.resource_configuration_changes.after:
+                return resource.resource_configuration_changes.after.get("apiVersion", None)
+            if resource.resource_configuration_changes.before:
+                return resource.resource_configuration_changes.before.get("apiVersion", None)
+
+        return None
