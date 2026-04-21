@@ -31,7 +31,7 @@ class DeploymentStacksWhatIfTest(ScenarioTest):
             checks=self.check('properties.provisioningState', 'succeeded'))
 
         self.cmd(
-            'stack-whatif group show --name {name} --resource-group {resource-group}')
+            'stack-whatif group show --name {name} --resource-group {resource-group} --with-property-changes')
 
         self.cmd(
             'stack-whatif group list --resource-group {resource-group}',
