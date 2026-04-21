@@ -64,7 +64,12 @@ class AcrConnectedRegistryCommandsTests(ScenarioTest):
                          self.check('provisioningState', 'Succeeded'),
                          self.check('resourceGroup', '{rg}'),
                          self.check('garbageCollection.enabled', False)])
-
+        
+        # Resync should fail since it requires a deployed, on prem agent that has completed the initial sync.
+        # The test environment doesn't have this and we assert the CLI surfaces this error properly. 
+        self.cmd('acr connected-registry resync -n {cr_name} -r {registry_name}',
+                expect_failure=True)
+ 
         # Create a custom connected-registry with a previously created token.
         self.cmd('acr token create -r {registry_name} -n {syncToken} --repository {repo_1} content/read metadata/read --gateway {root_name} config/read config/write message/read message/write --no-passwords')
         self.cmd('acr token create -r {registry_name} -n {clientToken} --repository {repo_1} content/read --no-passwords')
@@ -117,10 +122,6 @@ class AcrConnectedRegistryCommandsTests(ScenarioTest):
         # List client tokens
         self.cmd('acr connected-registry list-client-tokens -n {root_name} -r {registry_name}',
                  checks=[self.check('[0].name', '{clientToken2}')])
-
-        self.cmd('acr connected-registry resync -n {root_name} -r {registry_name}',
-                  checks=[self.check('name', '{root_name}'),
-                          self.check('registrySyncResult.syncTrigger', 'ManualResync')])
 
         # Show connected registry properties
         self.cmd('acr connected-registry show -n {cr_name} -r {registry_name}',
