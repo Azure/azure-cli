@@ -651,6 +651,11 @@ def load_arguments(self, _):
                 'by that action.'
             )
         )
+        c.argument(
+            "enable_gateway_api",
+            action="store_true",
+            help="Enable managed installation of Gateway API CRDs from the standard release channel."
+        )
 
     with self.argument_context('aks update') as c:
         # managed cluster paramerters
@@ -875,6 +880,16 @@ def load_arguments(self, _):
                 'It is strongly recommended to not do this unless there are idle nodes ready to take the pods evicted '
                 'by that action.'
             )
+        )
+        c.argument(
+            "enable_gateway_api",
+            action="store_true",
+            help="Enable managed installation of Gateway API CRDs from the standard release channel."
+        )
+        c.argument(
+            "disable_gateway_api",
+            action="store_true",
+            help="Disable managed installation of Gateway API CRDs."
         )
     with self.argument_context('aks delete') as c:
         c.argument("if_match")
