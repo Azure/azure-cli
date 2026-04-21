@@ -764,10 +764,11 @@ class TestCreateAppServicePlanExistingPlan(unittest.TestCase):
 
         return mock_cmd, mock_client, existing_plan
 
+    @mock.patch('azure.cli.command_modules.appservice.custom.prompt_y_n', return_value=True)
     @mock.patch('azure.cli.command_modules.appservice.custom.logger')
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
     @mock.patch('azure.cli.command_modules.appservice.custom._get_location_from_resource_group', return_value='eastus')
-    def test_existing_plan_different_sku_warns(self, mock_location, mock_client_factory, mock_logger):
+    def test_existing_plan_different_sku_prompts_and_proceeds(self, mock_location, mock_client_factory, mock_logger, mock_prompt):
         from azure.cli.command_modules.appservice.custom import create_app_service_plan
 
         mock_cmd, mock_client, _ = self._setup_mocks(existing_sku_name='B1', existing_reserved=True)
@@ -778,12 +779,28 @@ class TestCreateAppServicePlanExistingPlan(unittest.TestCase):
         except Exception:
             pass  # downstream mock errors are ok
 
-        # Should warn about the diff and suggest 'az appservice plan update'
+        # Should warn about the diff and prompt
         warning_calls = [str(c) for c in mock_logger.warning.call_args_list]
         warning_text = ' '.join(warning_calls)
         self.assertIn('already exists', warning_text)
         self.assertIn('SKU', warning_text)
-        self.assertIn('appservice plan update', warning_text)
+        mock_prompt.assert_called_once()
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.prompt_y_n', return_value=False)
+    @mock.patch('azure.cli.command_modules.appservice.custom.logger')
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_location_from_resource_group', return_value='eastus')
+    def test_existing_plan_different_sku_cancelled_returns_existing(self, mock_location, mock_client_factory, mock_logger, mock_prompt):
+        from azure.cli.command_modules.appservice.custom import create_app_service_plan
+
+        mock_cmd, mock_client, existing_plan = self._setup_mocks(existing_sku_name='B1', existing_reserved=True)
+        mock_client_factory.return_value = mock_client
+
+        result = create_app_service_plan(mock_cmd, 'rg', 'plan', is_linux=True, hyper_v=False, sku='S1')
+
+        # User said 'n' — should return existing plan without calling the API
+        self.assertEqual(result, existing_plan)
+        mock_prompt.assert_called_once()
 
     @mock.patch('azure.cli.command_modules.appservice.custom.logger')
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')

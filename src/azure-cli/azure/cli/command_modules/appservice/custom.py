@@ -4284,7 +4284,13 @@ has been deployed ".format(app_service_environment)
                            "with the following changes:", name)
             for change in changes:
                 logger.warning(change)
-            logger.warning("To update specific properties, consider using 'az appservice plan update'.")
+            try:
+                if not prompt_y_n("\nDo you want to update the existing plan?"):
+                    logger.warning("Operation cancelled. Use 'az appservice plan update' to update specific properties.")
+                    return existing_plan
+            except NoTTYException:
+                logger.warning("Running in non-interactive mode. Proceeding with update. "
+                               "To update specific properties, consider using 'az appservice plan update'.")
         else:
             logger.warning("App Service Plan '%s' already exists with the same configuration.", name)
 
