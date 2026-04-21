@@ -428,16 +428,18 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
         property_path = self._get_change_path(primitive_change, parent_path)
         symbol, color = self._get_change_type_formatting(change_type)
 
-        self.builder.append(f"{symbol} " if is_array_item else f"{symbol} {property_path}: ", color)
+        self.builder.append(f"{symbol} ", color)
+        if not is_array_item:
+            self.builder.append(f"{property_path}: ")
+
         if str_lower_eq(change_type, StackModels.DeploymentStacksWhatIfPropertyChangeType.MODIFY):
-            self.builder.append_line(
-                f"{self._format_primitive_value(primitive_change.before)}"
-                f" => {self._format_primitive_value(primitive_change.after)}")
+            self.builder.append(self._format_primitive_value(primitive_change.before), color)
+            self.builder.append(" => ")
+            self.builder.append_line(self._format_primitive_value(primitive_change.after), color)
         else:
             value = primitive_change.before if str_lower_eq(
                 change_type, StackModels.DeploymentStacksWhatIfPropertyChangeType.DELETE) else primitive_change.after
-            self.builder.append_line(
-                self._format_primitive_value(value), color if is_array_item else None)
+            self.builder.append_line(self._format_primitive_value(value), color)
 
         return True
 
