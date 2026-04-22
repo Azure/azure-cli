@@ -13,7 +13,7 @@ class AdvancedPlatformMetricUpdate(_AdvancedPlatformMetricUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.advanced_platform_metrics_rule_type._required = False
+        args_schema.advanced_platform_metrics_rule_type._required = False  # pylint: disable=protected-access
         return args_schema
 
     def pre_operations(self):
