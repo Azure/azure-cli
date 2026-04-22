@@ -1799,7 +1799,7 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
               align_regional_disks_to_vm_zone=None, wire_server_mode=None, imds_mode=None,
               add_proxy_agent_extension=None,
               wire_server_access_control_profile_reference_id=None, imds_access_control_profile_reference_id=None,
-              key_incarnation_id=None, zone_movement=None, **kwargs):
+              key_incarnation_id=None, zone_movement=None, zone=None, **kwargs):
     from azure.mgmt.core.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching_by_aaz
     from .operations.vm import convert_show_result_to_snake_case as vm_convert_show_result_to_snake_case
@@ -2076,6 +2076,28 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
             }
         }
 
+    # Zone move orchestration: force deallocate → PUT with new zone → start
+    zone_change = False
+    if zone is not None:
+        target_zones = [str(z) for z in zone] if isinstance(zone, list) else [str(zone)]
+        current_zones = vm.get('zones', [])
+        if current_zones != target_zones:
+            zone_change = True
+
+            vm['zones'] = target_zones
+
+            # Step 1: Force deallocate the VM
+            logger.warning('Changing to zone %s. Force-deallocating VM...', target_zones)
+            from .aaz.latest.vm import Deallocate as VMDeallocate
+            command_args = {
+                'resource_group': resource_group_name,
+                'vm_name': vm_name,
+                'force_deallocate': True
+            }
+            deallocate_poller = VMDeallocate(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+            LongRunningOperation(cmd.cli_ctx)(deallocate_poller)
+            logger.warning('VM deallocated successfully.')
+
     if wire_server_access_control_profile_reference_id is not None or \
             imds_access_control_profile_reference_id is not None or \
             add_proxy_agent_extension is not None:
@@ -2086,6 +2108,38 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
     vm["no_wait"] = no_wait
 
     from .operations.vm import VMCreate
+    from .aaz.latest.vm import Start as VMStart
+
+    # Step 2: PUT VM (with updated zone if applicable)
+    if zone_change:
+        try:
+            logger.warning('Updating VM with new zone...')
+            create_poller = VMCreate(cli_ctx=cmd.cli_ctx)(command_args=vm)
+            LongRunningOperation(cmd.cli_ctx)(create_poller)
+            result = create_poller.result()
+        except Exception as put_error:
+            logger.warning('VM update failed after force-deallocate. Attempting to restart VM...')
+            try:
+                start_poller = VMStart(cli_ctx=cmd.cli_ctx)(command_args={
+                    'resource_group': resource_group_name,
+                    'vm_name': vm_name
+                })
+                LongRunningOperation(cmd.cli_ctx)(start_poller)
+                logger.warning('VM restarted successfully, but zone update failed.')
+            except Exception as start_error:
+                logger.warning('Failed to restart VM after failed update: %s', start_error)
+            raise put_error
+
+        # Step 3: Start VM
+        logger.warning('VM updated successfully. Starting VM...')
+        start_poller = VMStart(cli_ctx=cmd.cli_ctx)(command_args={
+            'resource_group': resource_group_name,
+            'vm_name': vm_name
+        })
+        LongRunningOperation(cmd.cli_ctx)(start_poller)
+        logger.warning('VM started successfully in zone %s.', zone)
+        return result
+
     return VMCreate(cli_ctx=cmd.cli_ctx)(command_args=vm)
 # endregion
 
