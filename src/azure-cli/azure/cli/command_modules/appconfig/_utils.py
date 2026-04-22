@@ -183,9 +183,14 @@ def get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
     #   Retry 7: 30.0s (cumulative: 61.5s)
     #   Retry 8: 30.0s (cumulative: 91.5s)
     #   Retry 9: timeout fires (~100s)
+    # We set retry count to a high number to allow the retry policy to retry until the timeout is reached,
+    # as the presence of a retry-after header from the service will cause the retry policy to ignore the exponential backoff
+    retry_count = 9999
     retry_policy = RetryPolicy(
-        retry_total=9,
-        retry_status=9,
+        retry_total=retry_count,
+        retry_connect=retry_count,
+        retry_read=retry_count,
+        retry_status=retry_count,
         retry_backoff_factor=0.5,
         retry_backoff_max=30,
         timeout=100  # seconds
