@@ -14548,7 +14548,7 @@ class VMSSUpdateZoneAllocationPolicyTest(ScenarioTest):
         ])
 
 
-class VMZoneMovementTest(ScenarioTest):
+class VMZoneMovementScenarioTest(ScenarioTest):
 
     @live_only()
     @AllowLargeResponse(size_kb=999999)
@@ -14558,44 +14558,51 @@ class VMZoneMovementTest(ScenarioTest):
             'vm': self.create_random_name('vm', 15),
         })
 
-        # Create VM with zone-movement enabled
-        self.cmd(
-            'vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:16.04-LTS:latest --zone 1 '
-            '--zone-movement true --admin-username azureuser --generate-ssh-keys --nsg-rule NONE '
-            '--size Standard_D2s_v3 --storage-sku Premium_ZRS --public-ip-address vm0001PIP',
-            checks=[
-                self.check('powerState', 'VM running'),
-            ]
+        # Create a VM in zone 1 with zone movement enabled and ZRS disks
+        self.cmd('vm create -g {rg} -n {vm} --image ubuntu2204 --zone 1 '
+            '--zone-movement true --nsg-rule NONE '
+            '--storage-sku Premium_ZRS --admin-username azureuser --generate-ssh-keys '
+            '--size Standard_D2s_v3',
+                 checks=[
+                     self.check('powerState', 'VM running')
+                 ]
         )
 
-        # Verify zone movement is enabled via show
+        # Verify zone and zone movement enabled
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('provisioningState', 'Succeeded'),
-            self.check('resiliencyProfile.zoneMovement.isEnabled', True),
             self.check('zones[0]', '1'),
+            self.check('resiliencyProfile.zoneMovement.isEnabled', True),
         ])
 
-        # Disable zone movement via update
-        self.cmd(
-            'vm update -g {rg} -n {vm} --zone-movement false',
+        # Disable zone movement
+        self.cmd('vm update -g {rg} -n {vm} --zone-movement false',
             checks=[
                 self.check('resiliencyProfile.zoneMovement.isEnabled', False),
             ]
         )
 
-        # Verify zone movement is disabled
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('resiliencyProfile.zoneMovement.isEnabled', False),
         ])
 
-        # Re-enable zone movement via update
-        self.cmd(
-            'vm update -g {rg} -n {vm} --zone-movement true',
+        # Re-enable zone movement
+        self.cmd('vm update -g {rg} -n {vm} --zone-movement true',
             checks=[
                 self.check('resiliencyProfile.zoneMovement.isEnabled', True),
             ]
         )
 
+        # Move the VM to zone 2
+        self.cmd('vm update -g {rg} -n {vm} --zone 2', checks=[
+            self.check('zones[0]', '2'),
+        ])
+
+        # Verify VM is in the new zone with zone movement still enabled
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('zones[0]', '2'),
+            self.check('resiliencyProfile.zoneMovement.isEnabled', True),
+        ])
 
 if __name__ == '__main__':
     unittest.main()
