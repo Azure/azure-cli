@@ -15151,6 +15151,9 @@ spec:
     def test_aks_create_with_gateway_api_and_azureservicemesh(
         self, resource_group, resource_group_location
     ):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+
         aks_name = self.create_random_name("cliakstest", 16)
         _, create_version = self._get_versions(resource_group_location)
         asm_revision = self._get_asm_supported_revision(resource_group_location)
@@ -15204,6 +15207,12 @@ spec:
                 self.check("provisioningState", "Succeeded"),
                 self.check("ingressProfile.gatewayApi.installation", "Standard"),
             ],
+        )
+
+        # Cleanup
+        self.cmd(
+            "aks delete --resource-group={resource_group} --name={name} --yes --no-wait",
+            checks=[self.is_empty()],
         )
 
 
