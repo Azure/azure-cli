@@ -2069,12 +2069,11 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
                     "automatically_approve": enable_user_reboot_scheduled_events
                 }
 
-    if zone_movement is not None:
-        vm['resiliency_profile'] = {
-            'zone_movement': {
-                'is_enabled': zone_movement
-            }
-        }
+    if vm.get("resiliency_profile") is None:
+        vm["resiliency_profile"] = {}
+    if vm["resiliency_profile"].get("zone_movement") is None:
+        vm["resiliency_profile"]["zone_movement"] = {}
+    vm["resiliency_profile"]["zone_movement"]["is_enabled"] = zone_movement
 
     # Zone move orchestration: force deallocate → PUT with new zone → start
     zone_change = False
