@@ -2087,7 +2087,6 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
             vm['zones'] = target_zones
 
             # Step 1: Force deallocate the VM
-            logger.warning('Changing to zone %s. Force-deallocating VM...', target_zones)
             from .aaz.latest.vm import Deallocate as VMDeallocate
             command_args = {
                 'resource_group': resource_group_name,
@@ -2096,7 +2095,6 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
             }
             deallocate_poller = VMDeallocate(cli_ctx=cmd.cli_ctx)(command_args=command_args)
             LongRunningOperation(cmd.cli_ctx)(deallocate_poller)
-            logger.warning('VM deallocated successfully.')
 
     if wire_server_access_control_profile_reference_id is not None or \
             imds_access_control_profile_reference_id is not None or \
@@ -2113,31 +2111,26 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
     # Step 2: PUT VM (with updated zone if applicable)
     if zone_change:
         try:
-            logger.warning('Updating VM with new zone...')
             create_poller = VMCreate(cli_ctx=cmd.cli_ctx)(command_args=vm)
             LongRunningOperation(cmd.cli_ctx)(create_poller)
             result = create_poller.result()
         except Exception as put_error:
-            logger.warning('VM update failed after force-deallocate. Attempting to restart VM...')
             try:
                 start_poller = VMStart(cli_ctx=cmd.cli_ctx)(command_args={
                     'resource_group': resource_group_name,
                     'vm_name': vm_name
                 })
                 LongRunningOperation(cmd.cli_ctx)(start_poller)
-                logger.warning('VM restarted successfully, but zone update failed.')
             except Exception as start_error:
                 logger.warning('Failed to restart VM after failed update: %s', start_error)
             raise put_error
 
         # Step 3: Start VM
-        logger.warning('VM updated successfully. Starting VM...')
         start_poller = VMStart(cli_ctx=cmd.cli_ctx)(command_args={
             'resource_group': resource_group_name,
             'vm_name': vm_name
         })
         LongRunningOperation(cmd.cli_ctx)(start_poller)
-        logger.warning('VM started successfully in zone %s.', zone)
         return result
 
     return VMCreate(cli_ctx=cmd.cli_ctx)(command_args=vm)
