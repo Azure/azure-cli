@@ -173,18 +173,11 @@ class AuthHeaderRequestsTransport(RequestsTransport):  # pylint: disable=too-few
 
 def get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint):
     azconfig_client = None
-    # Retry backoff schedule (exponential, factor=0.5, cap=30s, timeout=100s):
-    #   Retry 1: 0.5s  (cumulative:  0.5s)
-    #   Retry 2: 1.0s  (cumulative:  1.5s)
-    #   Retry 3: 2.0s  (cumulative:  3.5s)
-    #   Retry 4: 4.0s  (cumulative:  7.5s)
-    #   Retry 5: 8.0s  (cumulative: 15.5s)
-    #   Retry 6: 16.0s (cumulative: 31.5s)
-    #   Retry 7: 30.0s (cumulative: 61.5s)
-    #   Retry 8: 30.0s (cumulative: 91.5s)
-    #   Retry 9: timeout fires (~100s)
-    # We set retry count to a high number to allow the retry policy to retry until the timeout is reached,
-    # as the presence of a retry-after header from the service will cause the retry policy to ignore the exponential backoff
+    # Configure retries with exponential backoff (factor=0.5) capped at 30 seconds,
+    # with an overall retry timeout of 100 seconds.
+    # We set retry count to a high number so the retry policy can continue retrying until
+    # the timeout is reached. The actual retry timing may vary, for example when the service
+    # returns a Retry-After header and the policy uses that delay instead of the exponential backoff.
     retry_count = 9999
     retry_policy = RetryPolicy(
         retry_total=retry_count,
