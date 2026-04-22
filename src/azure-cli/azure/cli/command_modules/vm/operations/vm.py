@@ -270,6 +270,16 @@ def convert_show_result_to_snake_case(result):
     if "zones" in result:
         new_result["zones"] = result["zones"]
 
+    if "resiliencyProfile" in result:
+        resiliency_profile = result["resiliencyProfile"]
+        if "zoneMovement" in resiliency_profile:
+            resiliency_profile['zone_movement'] = resiliency_profile["zoneMovement"]
+            resiliency_profile.pop('zoneMovement')
+            if "isEnabled" in resiliency_profile['zone_movement']:
+                resiliency_profile['zone_movement']['is_enabled'] = resiliency_profile['zone_movement']['isEnabled']
+                resiliency_profile['zone_movement'].pop('isEnabled')
+        new_result["resiliency_profile"] = resiliency_profile
+
     identity = new_result.get("identity", {}) or {}
     if "userAssignedIdentities" in identity:
         identity["user_assigned_identities"] = identity["userAssignedIdentities"]
