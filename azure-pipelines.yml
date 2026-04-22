@@ -1177,8 +1177,10 @@ jobs:
       if [[ "$(System.PullRequest.TargetBranch)" != "" ]]; then
         # If CI is set to shallow fetch, target branch should be expilictly fetched.
         git fetch origin --depth=1 $(System.PullRequest.TargetBranch)
+        python scripts/ci/check_aliases_source_url.py --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch)
         azdev linter --ci-exclusions --min-severity medium --repo=./ --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch)
       else
+        python scripts/ci/check_aliases_source_url.py --src=HEAD --tgt=HEAD~1
         azdev linter --ci-exclusions --min-severity medium
       fi
 
