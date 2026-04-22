@@ -17,6 +17,9 @@ from azure.cli.core.aaz import *
 )
 class List(AAZCommand):
     """List the advanced platform metrics rules associated with the storage account.
+
+    :example: List advanced platform metrics rules
+        az storage advanced-platform-metric list -g resource_group_name --account-name storage_account_name
     """
 
     _aaz_info = {

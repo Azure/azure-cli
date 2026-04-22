@@ -8,7 +8,7 @@ from azure.cli.testsdk import (ScenarioTest, JMESPathCheck, ResourceGroupPrepare
 from ..storage_test_util import StorageScenarioMixin
 
 
-class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
+class StorageAdvancedPlatformMetricTests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_storage_advanced_platform_metric')
     @StorageAccountPreparer()
     def test_storage_advanced_platform_metric(self, resource_group, storage_account):

@@ -17,6 +17,9 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update the advanced platform metrics rule for the storage account.
+
+    :example: Update advanced platform metrics rule
+        az storage advanced-platform-metric create -g resource_group_name --account-name storage_account_name --enabled --rule-config-filter-type AllContainersFilter
     """
 
     _aaz_info = {
@@ -60,7 +63,6 @@ class Update(AAZCommand):
             help="The type of the advanced platform metrics rule.",
             required=True,
             id_part="child_name_1",
-            default="ContainerLevelCapacityMetrics",
             enum={"ContainerLevelCapacityMetrics": "ContainerLevelCapacityMetrics"},
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(

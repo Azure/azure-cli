@@ -18,6 +18,9 @@ from azure.cli.core.aaz import *
 )
 class Delete(AAZCommand):
     """Delete the advanced platform metrics rule for the storage account by rule type.
+
+    :example: Delete advanced platform metrics rule
+        az storage advanced-platform-metric delete -g resource_group_name --account-name storage_account_name
     """
 
     _aaz_info = {

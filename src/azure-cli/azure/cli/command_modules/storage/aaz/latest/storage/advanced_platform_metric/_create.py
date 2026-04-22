@@ -17,6 +17,15 @@ from azure.cli.core.aaz import *
 )
 class Create(AAZCommand):
     """Create the advanced platform metrics rule for the storage account.
+
+    :example: Create AllContainersFilter AdvancedPlatformMetric
+        az storage advanced-platform-metric create -g resource_group_name --account-name storage_account_name --enabled --rule-config-filter-type AllContainersFilter
+
+    :example: Create ContainerPrefixFilter AdvancedPlatformMetric
+        az storage advanced-platform-metric create -g resource_group_name --account-name storage_account_name --enabled --rule-config-filter-type ContainerPrefixFilter --rule-config-filter-value logsprefix dataprefix
+
+    :example: Create ContainerListFilter AdvancedPlatformMetric
+        az storage advanced-platform-metric create -g resource_group_name --account-name storage_account_name --enabled --rule-config-filter-type ContainerListFilter --rule-config-filter-value logs data
     """
 
     _aaz_info = {

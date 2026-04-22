@@ -17,6 +17,9 @@ from azure.cli.core.aaz import *
 )
 class Show(AAZCommand):
     """Get the advanced platform metrics rule for the storage account by rule type.
+
+    :example: Get advanced platform metrics rule
+        az storage advanced-platform-metric show -g resource_group_name --account-name storage_account_name
     """
 
     _aaz_info = {
