@@ -328,7 +328,7 @@ def _connected_registry_format_group(item):
         ('LAST SYNC (UTC)', _get_value(item, 'parent', 'syncProperties', 'lastSyncTime')),
         ('SYNC SCHEDULE', _get_value(item, 'parent', 'syncProperties', 'schedule')),
         ('SYNC WINDOW', _get_value(item, 'parent', 'syncProperties', 'syncWindow')),
-        ('SYNC STATUS', _get_value(item, 'registrySyncResult', 'syncState'))
+        ('SYNC STATE', _get_value(item, 'registrySyncResult', 'syncState'))
     ])
 
 
@@ -340,7 +340,7 @@ def _connected_registry_list_format_group(item):
         ('PARENT', _get_value(item, 'parent_name')),
         ('LOGIN SERVER', _get_value(item, 'loginServer_host')),
         ('LAST SYNC (UTC)', _get_value(item, 'parent_syncProperties_lastSyncTime')),
-        ('SYNC STATUS', _get_value(item, 'registrySyncResult_syncState'))
+        ('SYNC STATE', _get_value(item, 'registrySyncResult_syncState'))
     ])
 
 
