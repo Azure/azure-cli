@@ -31,7 +31,7 @@ class ElasticClustersMgmtScenarioTest(ScenarioTest):
         location = self.postgres_location
         sku_name = 'Standard_D2ds_v4'
         tier = 'GeneralPurpose'
-        non_cluster =self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        non_cluster = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         cluster = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         cluster_restore = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         node_count = 2
@@ -62,13 +62,13 @@ class ElasticClustersMgmtScenarioTest(ScenarioTest):
                               format(resource_group, cluster),
                               checks=[
                                   JMESPathCheck('name', cluster),
-                                  JMESPathCheck(str(basic_info['location']).replace(' ', '').lower(), location),
                                   JMESPathCheck('resourceGroup', resource_group),
                                   JMESPathCheck('sku.name', sku_name),
                                   JMESPathCheck('sku.tier', tier),
                                   JMESPathCheck('version', version),
                                   JMESPathCheck('cluster.clusterSize', node_count)
                               ]).get_output_in_json()
+        self.assertEqual(basic_info['location'].replace(' ', '').lower(), location)
 
         # Test failures
         self.cmd('postgres flexible-server update -g {} -n {} --storage-auto-grow Enabled'

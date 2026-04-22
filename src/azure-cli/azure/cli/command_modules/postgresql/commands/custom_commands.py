@@ -142,7 +142,7 @@ def flexible_server_create(cmd, client,
                            backup_byok_key=backup_byok_key,
                            performance_tier=performance_tier,
                            password_auth=password_auth, microsoft_entra_auth=microsoft_entra_auth,
-                           admin_name=admin_name, admin_id=admin_id, admin_type=admin_type,)
+                           admin_name=admin_name, admin_id=admin_id, admin_type=admin_type, database_name=database_name)
 
     cluster = None
     if cluster_size is not None:

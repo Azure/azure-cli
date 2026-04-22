@@ -199,7 +199,7 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
 
 
 def _cluster_validator(cluster_size, instance):
-    if cluster_size and instance and not instance.cluster:
+    if cluster_size is not None and instance and not instance.cluster:
         raise ValidationError('Node count can only be specified for an elastic cluster.')
 
 
