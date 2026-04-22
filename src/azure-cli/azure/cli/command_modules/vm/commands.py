@@ -268,6 +268,9 @@ def load_command_table(self, _):
         g.generic_update_command('update', getter_name='get_vm_to_update_by_aaz', setter_name='update_vm', setter_type=compute_custom, command_type=compute_custom, supports_no_wait=True, validator=process_vm_update_namespace)
         g.custom_command('open-port', 'open_vm_port')
 
+        from .operations.vm import VMDeallocate
+        self.command_table['vm deallocate'] = VMDeallocate(loader=self)
+
     with self.command_group('vm', compute_vm_sdk) as g:
         g.custom_command('application set', 'set_vm_applications', validator=process_set_applications_namespace, min_api='2021-07-01')
         g.custom_command('application list', 'list_vm_applications', min_api='2021-07-01')
