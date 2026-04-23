@@ -5597,6 +5597,76 @@ def list_deployment_logs(cmd, resource_group, name, slot=None):
     return response.json() or []
 
 
+def list_startup_logs(cmd, resource_group, name, slot=None, outcome=None, instance=None):
+    import requests
+
+    scm_url = _get_scm_url(cmd, resource_group, name, slot)
+    headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group, slot)
+
+    params = {}
+    if outcome:
+        params['type'] = outcome
+    if instance:
+        params['instance'] = instance
+
+    url = '{}/api/startuplogs'.format(scm_url)
+    response = requests.get(url, headers=headers, params=params)
+
+    if response.status_code == 404:
+        logger.warning(
+            'Startup logs are not available for this app. '
+            'This feature requires a platform version that may not have rolled out to your app\'s region yet.')
+        return []
+    if response.status_code != 200:
+        raise CLIError("Failed to retrieve startup logs from '{}' with status code '{}' and reason '{}'".format(
+            url, response.status_code, response.reason))
+
+    result = response.json()
+    return result.get('files', result) if isinstance(result, dict) else result
+
+
+def show_startup_log(cmd, resource_group, name, slot=None, filename=None):
+    import requests
+
+    scm_url = _get_scm_url(cmd, resource_group, name, slot)
+    headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group, slot)
+
+    if filename:
+        url = '{}/api/startuplogs/{}'.format(scm_url, quote(filename, safe=''))
+    else:
+        url = '{}/api/startuplogs?latest=true'.format(scm_url)
+
+    response = requests.get(url, headers=headers)
+
+    if response.status_code == 404:
+        if filename:
+            logger.warning('Startup log file \'%s\' was not found.', filename)
+        else:
+            logger.warning(
+                'Startup logs are not available for this app. '
+                'This feature requires a platform version that may not have rolled out to your app\'s region yet.')
+        return None
+    if response.status_code != 200:
+        raise CLIError("Failed to retrieve startup log from '{}' with status code '{}' and reason '{}'".format(
+            url, response.status_code, response.reason))
+
+    content_type = response.headers.get('Content-Type', '')
+    if 'text/plain' in content_type:
+        # Raw log content — return metadata from headers along with content
+        log_content = response.text
+        metadata = {}
+        for header_name in ['X-StartupLog-Filename', 'X-StartupLog-Date', 'X-StartupLog-Instance',
+                            'X-StartupLog-Outcome']:
+            value = response.headers.get(header_name)
+            if value:
+                key = header_name.replace('X-StartupLog-', '').lower()
+                metadata[key] = value
+        metadata['content'] = log_content
+        return metadata
+
+    return response.json()
+
+
 def config_slot_auto_swap(cmd, resource_group_name, webapp, slot, auto_swap_slot=None, disable=None):
     client = web_client_factory(cmd.cli_ctx)
     site_config = client.web_apps.get_configuration_slot(resource_group_name, webapp, slot)
@@ -8521,6 +8591,11 @@ def _poll_deployment_runtime_status(cmd, resource_group_name, webapp_name, slot,
             if failure_logs is not None and len(failure_logs) > 0:
                 failure_logs = failure_logs[0]
             error_text += "Please check the runtime logs for more info: {}\n".format(failure_logs)
+            tip_cmd = "az webapp log startup show -n {} -g {}".format(webapp_name, resource_group_name)
+            if slot:
+                tip_cmd += " --slot {}".format(slot)
+            error_text += ("TIP: Run '{}' "
+                           "to view container startup logs.\n").format(tip_cmd)
             if site_started_partially:
                 logger.warning(error_text)
                 break
@@ -8565,6 +8640,11 @@ def _poll_deployment_runtime_status(cmd, resource_group_name, webapp_name, slot,
                           deployment_properties.get('numberOfInstancesInProgress'),
                           deployment_properties.get('numberOfInstancesSuccessful'),
                           deployment_properties.get('numberOfInstancesFailed'))
+        tip_cmd = "az webapp log startup show -n {} -g {}".format(webapp_name, resource_group_name)
+        if slot:
+            tip_cmd += " --slot {}".format(slot)
+        error_text += ("\nTIP: Run '{}' "
+                       "to view container startup logs.").format(tip_cmd)
         raise CLIError(error_text)
     return response_body
 
