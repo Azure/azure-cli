@@ -2407,7 +2407,19 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         skuName = self.get_sku_name()
         isVnetSubnetIdEmpty = self.get_vnet_subnet_id() in ["", None]
-        if skuName is not None and skuName == CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC and isVnetSubnetIdEmpty:
+        # For BYO VNet HOBO (Automatic SKU with system-node/node subnet trio), the user's
+        # subnet IDs replace --vnet-subnet-id; don't force ManagedNATGateway in that case.
+        byo_hobo_subnets_set = bool(
+            self.raw_param.get("system_node_subnet_id") or
+            self.raw_param.get("node_subnet_id")
+        )
+        if (
+            skuName is not None and
+            skuName == CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC and
+            isVnetSubnetIdEmpty and
+            not byo_hobo_subnets_set and
+            self.raw_param.get("outbound_type") is None
+        ):
             # outbound_type of Automatic SKU should be ManagedNATGateway if no subnet id provided.
             outbound_type = CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY
 
@@ -7096,6 +7108,14 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             if api_server_access_profile is None:
                 api_server_access_profile = self.models.ManagedClusterAPIServerAccessProfile()
             api_server_access_profile.subnet_id = self.context.get_apiserver_subnet_id()
+            # BYO VNet HOBO (Automatic SKU) requires apiserver VNet integration. When the
+            # BYO HOBO subnet trio is provided, auto-enable vnet integration so users are
+            # not forced to pass --enable-apiserver-vnet-integration alongside the subnet IDs.
+            if (
+                self.context.get_system_node_subnet_id() or
+                self.context.get_node_subnet_id()
+            ):
+                api_server_access_profile.enable_vnet_integration = True
         mc.api_server_access_profile = api_server_access_profile
 
         fqdn_subdomain = self.context.get_fqdn_subdomain()
@@ -7131,10 +7151,18 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         if system_node_subnet_id or node_subnet_id:
             if mc.hosted_system_profile is None:
                 mc.hosted_system_profile = self.models.ManagedClusterHostedSystemProfile()
+            # BYO VNet HOBO requires explicit enablement so the RP treats this as
+            # a BYO VNet cluster (not default-vnet) when BYO subnets are supplied.
+            mc.hosted_system_profile.enabled = True
             if system_node_subnet_id:
                 mc.hosted_system_profile.system_node_subnet_id = system_node_subnet_id
             if node_subnet_id:
                 mc.hosted_system_profile.node_subnet_id = node_subnet_id
+            # The HOBO server manages node pools; drop the default agent pool so the
+            # RP doesn't reject the request for having an unrelated default nodepool
+            # in a VNet other than the BYO HOBO trio's VNet.
+            if mc.agent_pool_profiles is not None:
+                mc.agent_pool_profiles = None
         return mc
 
     def set_up_identity(self, mc: ManagedCluster) -> ManagedCluster:
