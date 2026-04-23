@@ -64,7 +64,7 @@ Release History
 
 **Container**
 
-* Fix #32899: `az container create`: Add `--environment-variables-file` and `--secure-environment-variables-file` parameters to load environment variables from a JSON file, allowing values that contain special shell characters such as double-quotes and carets that are stripped by PowerShell or CMD (#32899)
+* Fix #32899: `az container create` and `az container container-group-profile create`: Add `--environment-variables-file` and `--secure-environment-variables-file` parameters to load environment variables from a JSON file, allowing values that contain special shell characters such as double-quotes and carets that are stripped by PowerShell or CMD (#32899)
 
 **Event Hubs**
 

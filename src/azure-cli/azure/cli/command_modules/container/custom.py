@@ -92,7 +92,7 @@ def _load_env_vars_from_file(file_path, secure=False):
     if not isinstance(data, dict):
         raise CLIError(
             f'Environment variables file "{file_path}" must contain a JSON object '
-            '(key-value pairs), not a {}.'.format(type(data).__name__)
+            f'(key-value pairs), not a {type(data).__name__}.'
         )
 
     result = []
@@ -274,12 +274,20 @@ def create_container(cmd,
     # Merge environment variables from files with those supplied on the command line.
     # File-based variables allow values containing special shell characters (e.g. " ^)
     # that would be stripped by PowerShell or CMD before reaching the CLI.
+    # CLI-provided values take precedence: if the same key appears in both sources,
+    # the value from --environment-variables is used and the file-sourced entry is dropped.
     if environment_variables_file:
         file_env_vars = _load_env_vars_from_file(environment_variables_file, secure=False)
-        environment_variables = (environment_variables or []) + file_env_vars
+        cli_env_keys = {v['name'] for v in (environment_variables or [])}
+        environment_variables = (environment_variables or []) + [
+            v for v in file_env_vars if v['name'] not in cli_env_keys
+        ]
     if secure_environment_variables_file:
         file_secure_env_vars = _load_env_vars_from_file(secure_environment_variables_file, secure=True)
-        secure_environment_variables = (secure_environment_variables or []) + file_secure_env_vars
+        cli_secure_keys = {v['name'] for v in (secure_environment_variables or [])}
+        secure_environment_variables = (secure_environment_variables or []) + [
+            v for v in file_secure_env_vars if v['name'] not in cli_secure_keys
+        ]
 
     # Concatenate secure and standard environment variables
     if environment_variables and secure_environment_variables:
@@ -508,12 +516,20 @@ def create_container_group_profile(cmd,
     # Merge environment variables from files with those supplied on the command line.
     # File-based variables allow values containing special shell characters (e.g. " ^)
     # that would be stripped by PowerShell or CMD before reaching the CLI.
+    # CLI-provided values take precedence: if the same key appears in both sources,
+    # the value from --environment-variables is used and the file-sourced entry is dropped.
     if environment_variables_file:
         file_env_vars = _load_env_vars_from_file(environment_variables_file, secure=False)
-        environment_variables = (environment_variables or []) + file_env_vars
+        cli_env_keys = {v['name'] for v in (environment_variables or [])}
+        environment_variables = (environment_variables or []) + [
+            v for v in file_env_vars if v['name'] not in cli_env_keys
+        ]
     if secure_environment_variables_file:
         file_secure_env_vars = _load_env_vars_from_file(secure_environment_variables_file, secure=True)
-        secure_environment_variables = (secure_environment_variables or []) + file_secure_env_vars
+        cli_secure_keys = {v['name'] for v in (secure_environment_variables or [])}
+        secure_environment_variables = (secure_environment_variables or []) + [
+            v for v in file_secure_env_vars if v['name'] not in cli_secure_keys
+        ]
 
     # Concatenate secure and standard environment variables
     if environment_variables and secure_environment_variables:
