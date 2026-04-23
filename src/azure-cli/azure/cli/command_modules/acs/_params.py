@@ -657,6 +657,12 @@ def load_arguments(self, _):
             help="Enable managed installation of Gateway API CRDs from the standard release channel. "
                  "Requires a Gateway API implementation to be installed on the cluster (e.g., Azure Service Mesh)."
         )
+        c.argument(
+            "enable_app_routing_istio",
+            options_list=["--enable-app-routing-istio", "--enable-ari"],
+            action="store_true",
+            help="Enable Gateway API based ingress on App Routing via Istio"
+        )
 
     with self.argument_context('aks update') as c:
         # managed cluster paramerters
@@ -892,6 +898,18 @@ def load_arguments(self, _):
             "disable_gateway_api",
             action="store_true",
             help="Disable managed installation of Gateway API CRDs."
+        )
+        c.argument(
+            "enable_app_routing_istio",
+            options_list=["--enable-app-routing-istio", "--enable-ari"],
+            action="store_true",
+            help="Enable Gateway API based ingress on App Routing via Istio."
+        )
+        c.argument(
+            "disable_app_routing_istio",
+            options_list=["--disable-app-routing-istio", "--disable-ari"],
+            action="store_true",
+            help="Disable Gateway API based ingress on App Routing via Istio."
         )
     with self.argument_context('aks delete') as c:
         c.argument("if_match")
