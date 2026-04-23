@@ -15115,8 +15115,10 @@ spec:
 
         # wait for cluster to fully settle before issuing next update
         # Use subprocess to bypass VCR — aks wait makes a non-deterministic number
-        # of GET requests that would break cassette playback ordering
-        if self.in_recording:
+        # of GET requests that would break cassette playback ordering.
+        # In playback mode the cluster doesn't exist so the subprocess will fail;
+        # we suppress that error since no real wait is needed during playback.
+        try:
             subprocess.check_call([
                 sys.executable, '-m', 'azure.cli',
                 'aks', 'wait',
@@ -15127,6 +15129,8 @@ spec:
                 '--timeout', '600',
             ])
             time.sleep(60)
+        except subprocess.CalledProcessError:
+            pass
 
         # update to disable app monitoring
         update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
