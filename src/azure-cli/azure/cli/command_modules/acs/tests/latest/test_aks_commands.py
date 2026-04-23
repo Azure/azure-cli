@@ -6,6 +6,7 @@
 import json
 import os
 import subprocess
+import sys
 import tempfile
 import time
 import unittest
@@ -15113,10 +15114,18 @@ spec:
         ])
 
         # wait for cluster to fully settle before issuing next update
-        # only in live mode — aks wait polling GETs must not be recorded into the
-        # cassette, otherwise playback response ordering will be wrong
-        if self.is_live:
-            self.cmd('aks wait --resource-group={resource_group} --name={name} --updated --interval 30 --timeout 600')
+        # Use subprocess to bypass VCR — aks wait makes a non-deterministic number
+        # of GET requests that would break cassette playback ordering
+        if self.in_recording:
+            subprocess.check_call([
+                sys.executable, '-m', 'azure.cli',
+                'aks', 'wait',
+                '-g', resource_group,
+                '-n', aks_name,
+                '--updated',
+                '--interval', '30',
+                '--timeout', '600',
+            ])
             time.sleep(60)
 
         # update to disable app monitoring
