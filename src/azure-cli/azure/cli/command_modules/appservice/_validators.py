@@ -111,12 +111,12 @@ def validate_asp_create(namespace):
     validate_tags(namespace)
     if namespace.sku is None:
         namespace.sku = 'P0V3'
-        from knack.log import get_logger
-        _logger = get_logger(__name__)
-        _logger.warning("No --sku specified. Using default: P0V3 (Premium V3 Extra Small, ~$74/mo). "
-                        "Other common options: F1 (Free), B1 (Basic, ~$55/mo), S1 (Standard, ~$73/mo), "
-                        "P1V3 (Premium V3 Small, ~$138/mo). "
-                        "See all options: az appservice plan create --help")
+        logger.warning("No --sku specified. Using default: P0V3 (Premium V3 Extra Small). "
+                       "Other common options: F1 (Free), B1 (Basic), S1 (Standard), "
+                       "P1V3 (Premium V3 Small). "
+                       "See all options: az appservice plan create --help. "
+                       "For current pricing, visit: "
+                       "https://azure.microsoft.com/pricing/details/app-service/")
     sku = _normalize_sku(namespace.sku)
     _validate_asp_sku(sku, namespace.app_service_environment, namespace.zone_redundant)
     if namespace.is_linux and namespace.hyper_v:

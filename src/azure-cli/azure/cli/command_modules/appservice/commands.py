@@ -122,15 +122,16 @@ def _rewrite_quota_error_for_app_service(detail):
         return '({tier} tier App Service Plan workers{sku_hint})'.format(tier=tier, sku_hint=sku_hint)
 
     # Replace patterns like "(Basic VMs)" with "(Basic tier App Service Plan workers [SKUs: B1/B2/B3])"
-    detail = re.sub(r'\((\w+)\s+VMs?\)', _replace_tier_vms, detail)
+    detail, tier_vm_replacements = re.subn(r'\((\w+)\s+VMs?\)', _replace_tier_vms, detail)
     # Replace standalone "VMs" that appear in quota context
-    detail = re.sub(r'\bVMs?\b(?=\s*\))', 'App Service Plan workers', detail)
-    detail += ("\n\nNote: This quota applies to App Service Plan workers, not Azure Virtual Machines. "
-               "The tier name (e.g. 'Basic') corresponds to App Service Plan SKUs (e.g. B1/B2/B3). "
-               "To request a quota increase, go to the Azure portal: "
-               "Subscription > Usage + quotas > App Service. "
-               "See: https://learn.microsoft.com/en-us/azure/azure-resource-manager/"
-               "management/azure-subscription-service-limits#app-service-limits")
+    detail, standalone_vm_replacements = re.subn(r'\bVMs?\b(?=\s*\))', 'App Service Plan workers', detail)
+    if tier_vm_replacements or standalone_vm_replacements:
+        detail += ("\n\nNote: This quota applies to App Service Plan workers, not Azure Virtual Machines. "
+                   "The tier name (e.g. 'Basic') corresponds to App Service Plan SKUs (e.g. B1/B2/B3). "
+                   "To request a quota increase, go to the Azure portal: "
+                   "Subscription > Usage + quotas > App Service. "
+                   "See: https://learn.microsoft.com/en-us/azure/azure-resource-manager/"
+                   "management/azure-subscription-service-limits#app-service-limits")
     return detail
 
 

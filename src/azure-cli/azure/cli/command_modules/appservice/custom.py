@@ -4261,40 +4261,15 @@ has been deployed ".format(app_service_environment)
                               per_site_scaling=per_site_scaling, hosting_environment_profile=ase_def,
                               async_scaling_enabled=async_scaling_enabled)
 
-    existing_plan = get_resource_if_exists(client.app_service_plans,
-                                           resource_group_name=resource_group_name, name=name)
-    if existing_plan:
-        if sku.upper() in ['WS1', 'WS2', 'WS3'] and existing_plan.sku.tier != "WorkflowStandard":
-            raise ValidationError("Plan {} in resource group {} already exists and "
-                                  "cannot be updated to a logic app SKU (WS1, WS2, or WS3)")
-
-        changes = []
-        if existing_plan.sku.name.upper() != _normalize_sku(sku).upper():
-            changes.append("  SKU: {} -> {}".format(existing_plan.sku.name, _normalize_sku(sku)))
-        if number_of_workers is not None and existing_plan.sku.capacity != number_of_workers:
-            changes.append("  Workers: {} -> {}".format(existing_plan.sku.capacity, number_of_workers))
-        existing_is_linux = bool(existing_plan.reserved)
-        if existing_is_linux != is_linux:
-            changes.append("  OS: {} -> {}".format(
-                'Linux' if existing_is_linux else 'Windows',
-                'Linux' if is_linux else 'Windows'))
-
-        if changes:
-            logger.warning("App Service Plan '%s' already exists. The command will update the existing plan "
-                           "with the following changes:", name)
-            for change in changes:
-                logger.warning(change)
-            try:
-                if not prompt_y_n("\nDo you want to update the existing plan?"):
-                    logger.warning("Operation cancelled. Use 'az appservice plan update' to update specific properties.")
-                    return existing_plan
-            except NoTTYException:
-                logger.warning("Running in non-interactive mode. Proceeding with update. "
-                               "To update specific properties, consider using 'az appservice plan update'.")
-        else:
-            logger.warning("App Service Plan '%s' already exists with the same configuration.", name)
-
     if sku.upper() in ['WS1', 'WS2', 'WS3']:
+        existing_plan = get_resource_if_exists(client.app_service_plans,
+                                               resource_group_name=resource_group_name,
+                                               name=name)
+        if existing_plan and existing_plan.sku.tier != "WorkflowStandard":
+            raise ValidationError(
+                "Plan '{}' in resource group '{}' already exists and "
+                "cannot be updated to a logic app SKU (WS1, WS2, or WS3)"
+                .format(name, resource_group_name))
         plan_def.type = "elastic"
 
     if zone_redundant:
