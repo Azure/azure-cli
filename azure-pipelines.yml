@@ -1180,7 +1180,6 @@ jobs:
         python scripts/ci/validate_external_source_urls.py --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch)
         azdev linter --ci-exclusions --min-severity medium --repo=./ --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch)
       else
-        python scripts/ci/validate_external_source_urls.py --src=HEAD --tgt=HEAD~1
         azdev linter --ci-exclusions --min-severity medium
       fi
 
