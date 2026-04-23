@@ -10,7 +10,8 @@ from azure.core.exceptions import HttpResponseError
 
 from azure.mgmt.web import WebSiteManagementClient
 from knack.util import CLIError
-from azure.cli.core.azclierror import (InvalidArgumentValueError,
+from azure.cli.core.azclierror import (ArgumentUsageError,
+                                       InvalidArgumentValueError,
                                        MutuallyExclusiveArgumentError,
                                        AzureResponseError)
 from azure.cli.command_modules.appservice.custom import (set_deployment_user,
@@ -26,6 +27,7 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          get_streaming_log,
                                                          download_historical_logs,
                                                          validate_container_app_create_options,
+                                                         create_webapp,
                                                          restore_deleted_webapp,
                                                          list_snapshots,
                                                          restore_snapshot,
@@ -435,6 +437,36 @@ class TestWebappMocked(unittest.TestCase):
         self.assertFalse(validate_container_app_create_options(some_runtime, test_docker_image, test_multi_container_config, None))
         self.assertFalse(validate_container_app_create_options(None, None, test_multi_container_config, None))
         self.assertFalse(validate_container_app_create_options(None, None, None, None))
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._StackRuntimeHelper', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_site_availability', autospec=True)
+    def test_linux_webapp_create_no_runtime_raises_error(self, get_site_avail_mock,
+                                                         stack_helper_mock, web_client_mock):
+        cmd_mock = _get_test_cmd()
+        SiteConfig, SkuDescription, NameValuePair = cmd_mock.get_models(
+            'SiteConfig', 'SkuDescription', 'NameValuePair')
+        cmd_mock.get_models = mock.MagicMock(return_value=(SiteConfig, SkuDescription, NameValuePair))
+
+        # Mock a Linux plan (reserved=True)
+        plan_info = mock.MagicMock()
+        plan_info.reserved = True
+        plan_info.location = 'eastus'
+        plan_info.id = '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan'
+        plan_info.sku = SkuDescription(name='F1')
+        web_client_mock.return_value.app_service_plans.get.return_value = plan_info
+
+        # Mock site availability (new app name)
+        name_validation = mock.MagicMock()
+        name_validation.name_available = True
+        get_site_avail_mock.return_value = name_validation
+
+        with self.assertRaises(ArgumentUsageError) as context:
+            create_webapp(cmd_mock, 'test-rg', 'test-app', 'test-plan')
+
+        self.assertIn('Creating a Linux webapp requires one of the following', str(context.exception))
+        self.assertIn('--runtime', str(context.exception))
+        self.assertIn('--os-type linux', str(context.exception))
 
     @mock.patch('azure.cli.command_modules.appservice.custom._verify_hostname_binding', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)

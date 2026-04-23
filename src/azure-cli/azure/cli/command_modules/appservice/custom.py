@@ -272,18 +272,18 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                                          '--runtime, --container-image-name, '
                                          '--multicontainer-config-type with --multicontainer-config-file, '
                                          'or --sitecontainers-app. '
-                                         "Run 'az webapp list-runtimes --os linux' for supported runtimes.")
+                                         "Run 'az webapp list-runtimes --os-type linux' for supported runtimes.")
             if deployment_container_image_name:
                 raise ArgumentUsageError('Please specify both --multicontainer-config-type TYPE '
                                          'and --multicontainer-config-file FILE, '
                                          'and only specify one out of --runtime, '
                                          '--deployment-container-image-name, --multicontainer-config-type '
-                                         'or --sitecontainers_app')
+                                         'or --sitecontainers-app')
             raise ArgumentUsageError('Please specify both --multicontainer-config-type TYPE '
                                      'and --multicontainer-config-file FILE, '
                                      'and only specify one out of --runtime, '
                                      '--container-image-name, --multicontainer-config-type '
-                                     'or --sitecontainers_app')
+                                     'or --sitecontainers-app')
         if startup_file:
             site_config.app_command_line = startup_file
         if sitecontainers_app:
