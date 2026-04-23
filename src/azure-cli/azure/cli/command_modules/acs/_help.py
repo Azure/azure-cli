@@ -2010,6 +2010,9 @@ parameters:
     long-summary: |
         Azure provides a different workload-runtime to enable Kata supported workloads in your nodepools. The following values can be specified:
           - "KataVmIsolation" for Kata.
+  - name: --enable-artifact-streaming
+    type: bool
+    short-summary: Enable artifact streaming for VHDs to speed up the cold-start of containers on a node pool through on-demand image loading. To use this feature, the container images must also enable artifact streaming on ACR. If not specified, the default is false.
 
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
@@ -2168,6 +2171,12 @@ parameters:
   - name: --gpu-driver
     type: string
     short-summary: Whether to install driver for GPU node pool. Possible values are "Install" or "None".
+  - name: --enable-artifact-streaming
+    type: bool
+    short-summary: Enable artifact streaming for VHDs to speed up the cold-start of containers on a node pool through on-demand image loading. To use this feature, the container images must also enable artifact streaming on ACR.
+  - name: --disable-artifact-streaming
+    type: bool
+    short-summary: Disable artifact streaming for VHDs on the node pool.
 examples:
   - name: Reconcile the nodepool back to its current state.
     text: az aks nodepool update -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster
