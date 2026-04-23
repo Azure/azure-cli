@@ -5271,7 +5271,7 @@ class NetworkRouteTableOperationScenarioTest(ScenarioTest):
         ])
         self.cmd('network route-table route create --address-prefix 10.0.5.0/24 -n {route} -g {rg} --next-hop-type None --route-table-name {table}')
 
-        self.cmd('network route-table list',
+        self.cmd('network route-table list -g {rg}',
                  checks=self.check('type(@)', 'array'))
         self.cmd('network route-table list --resource-group {rg}', checks=[
             self.check('type(@)', 'array'),
@@ -5299,6 +5299,48 @@ class NetworkRouteTableOperationScenarioTest(ScenarioTest):
         self.cmd('network route-table route list --resource-group {rg} --route-table-name {table}', checks=self.is_empty())
         self.cmd('network route-table delete --resource-group {rg} --name {table}')
         self.cmd('network route-table list --resource-group {rg}', checks=self.is_empty())
+
+    @ResourceGroupPreparer(name_prefix='cli_test_route_table_disable_peering', location='centraluseuap')
+    def test_network_route_table_disable_peering_route(self, resource_group):
+        self.kwargs.update({
+            'table': 'cli-test-rt-peering',
+        })
+
+        # create route table without --disable-peering-route (default None)
+        self.cmd('network route-table create -n {table} -g {rg}', checks=[
+            self.check('disablePeeringRoute', None)
+        ])
+
+        self.cmd('network route-table show -g {rg} -n {table}', checks=[
+            self.check('disablePeeringRoute', None)
+        ])
+
+        # update with --disable-peering-route All
+        self.cmd('network route-table update -n {table} -g {rg} --disable-peering-route All', checks=[
+            self.check('disablePeeringRoute', 'All')
+        ])
+
+        self.cmd('network route-table show -g {rg} -n {table}', checks=[
+            self.check('disablePeeringRoute', 'All')
+        ])
+
+        self.cmd('network route-table list -g {rg}', checks=[
+            self.check('[0].disablePeeringRoute', 'All')
+        ])
+
+        # create a new route table with --disable-peering-route All directly
+        self.kwargs['table2'] = 'cli-test-rt-peering2'
+        self.cmd('network route-table create -n {table2} -g {rg} --disable-peering-route All', checks=[
+            self.check('disablePeeringRoute', 'All')
+        ])
+
+        # update to reset --disable-peering-route to None
+        self.cmd('network route-table update -n {table2} -g {rg} --disable-peering-route None', checks=[
+            self.check('disablePeeringRoute', None)
+        ])
+
+        self.cmd('network route-table delete -g {rg} -n {table}')
+        self.cmd('network route-table delete -g {rg} -n {table2}')
 
 
 class NetworkVNetScenarioTest(ScenarioTest):
