@@ -345,6 +345,25 @@ parameters:
   - name: --apiserver-subnet-id
     type: string
     short-summary: The ID of a subnet in an existing VNet into which to assign control plane apiserver pods(requires --enable-apiserver-vnet-integration)
+  - name: --system-node-subnet-id
+    type: string
+    short-summary: (Automatic SKU) Subnet ID of an existing VNet for the hosted system node pool (BYO VNet HOBO).
+    long-summary: |
+      When provided alongside `--node-subnet-id` and `--apiserver-subnet-id` on `--sku automatic`,
+      the cluster is created with BYO VNet for its Hosted Overlay System Pool. All three subnets
+      must be supplied together.
+  - name: --node-subnet-id
+    type: string
+    short-summary: (Automatic SKU) Subnet ID of an existing VNet for user node pools (BYO VNet HOBO).
+    long-summary: |
+      Used together with `--system-node-subnet-id` and `--apiserver-subnet-id` on `--sku automatic`
+      to bring your own VNet for the cluster.
+  - name: --disable-hosted-system
+    type: bool
+    short-summary: (Automatic SKU) Deterministically opt this cluster out of the Hosted Overlay System Pool (HOBO).
+    long-summary: |
+      Only valid on `--sku automatic`. Cannot be combined with `--system-node-subnet-id`
+      or `--node-subnet-id`.
   - name: --enable-private-cluster
     type: string
     short-summary: Enable private cluster.

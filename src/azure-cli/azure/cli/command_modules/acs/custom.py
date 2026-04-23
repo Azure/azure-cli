@@ -1032,6 +1032,10 @@ def aks_create(
     # apiserver vnet integration
     enable_apiserver_vnet_integration=False,
     apiserver_subnet_id=None,
+    # BYO VNet HOBO (Automatic SKU)
+    system_node_subnet_id=None,
+    node_subnet_id=None,
+    disable_hosted_system=False,
     # node provisioning
     node_provisioning_mode=None,
     node_provisioning_default_pools=None,
@@ -1273,7 +1277,7 @@ def aks_upgrade(cmd,
     instance = client.get(resource_group_name, name)
 
     vmas_cluster = False
-    for agent_profile in instance.agent_pool_profiles:
+    for agent_profile in (instance.agent_pool_profiles or []):
         if agent_profile.type.lower() == "availabilityset":
             vmas_cluster = True
             break
@@ -1290,7 +1294,7 @@ def aks_upgrade(cmd,
 
         # This only provide convenience for customer at client side so they can run az aks upgrade to upgrade all
         # nodepools of a cluster. The SDK only support upgrade single nodepool at a time.
-        for agent_pool_profile in instance.agent_pool_profiles:
+        for agent_pool_profile in (instance.agent_pool_profiles or []):
             if vmas_cluster:
                 raise CLIError('This cluster is using AvailabilitySet. Node image upgrade only operation '
                                'can only be applied on VirtualMachineScaleSets or VirtualMachines cluster.')
@@ -1354,7 +1358,7 @@ def aks_upgrade(cmd,
                 return None
 
     if upgrade_all:
-        for agent_profile in instance.agent_pool_profiles:
+        for agent_profile in (instance.agent_pool_profiles or []):
             agent_profile.orchestrator_version = kubernetes_version
             agent_profile.creation_data = None
 

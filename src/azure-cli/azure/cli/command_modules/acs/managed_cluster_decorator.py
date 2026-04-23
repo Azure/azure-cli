@@ -4240,6 +4240,85 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         return self._get_apiserver_subnet_id(enable_validation=True)
 
+    def get_system_node_subnet_id(self) -> Union[str, None]:
+        """Obtain the value of system_node_subnet_id (BYO VNet HOBO).
+
+        :return: str or None
+        """
+        system_node_subnet_id = self.raw_param.get("system_node_subnet_id")
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.hosted_system_profile and
+                getattr(self.mc.hosted_system_profile, "system_node_subnet_id", None) is not None
+            ):
+                system_node_subnet_id = self.mc.hosted_system_profile.system_node_subnet_id
+        return system_node_subnet_id
+
+    def get_node_subnet_id(self) -> Union[str, None]:
+        """Obtain the value of node_subnet_id (BYO VNet HOBO).
+
+        :return: str or None
+        """
+        node_subnet_id = self.raw_param.get("node_subnet_id")
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.hosted_system_profile and
+                getattr(self.mc.hosted_system_profile, "node_subnet_id", None) is not None
+            ):
+                node_subnet_id = self.mc.hosted_system_profile.node_subnet_id
+        return node_subnet_id
+
+    def get_disable_hosted_system(self) -> bool:
+        """Obtain the value of disable_hosted_system.
+
+        :return: bool
+        """
+        return bool(self.raw_param.get("disable_hosted_system"))
+
+    def _validate_byo_hobo_subnets(self) -> None:
+        """Validate BYO HOBO subnet trio and mutual exclusion with --disable-hosted-system.
+
+        - If any of system-node / node / apiserver subnet is set, all three must be provided.
+        - --disable-hosted-system cannot be combined with any of the three subnets.
+        - BYO HOBO (subnet trio) requires --sku automatic.
+        """
+        if self.decorator_mode != DecoratorMode.CREATE:
+            return
+        system_node_subnet_id = self.raw_param.get("system_node_subnet_id")
+        node_subnet_id = self.raw_param.get("node_subnet_id")
+        apiserver_subnet_id = self.raw_param.get("apiserver_subnet_id")
+        disable_hosted_system = self.get_disable_hosted_system()
+
+        any_set = any([system_node_subnet_id, node_subnet_id])
+        if disable_hosted_system and any_set:
+            raise MutuallyExclusiveArgumentError(
+                '"--disable-hosted-system" cannot be combined with '
+                '"--system-node-subnet-id" or "--node-subnet-id".'
+            )
+        if any_set:
+            missing = []
+            if not system_node_subnet_id:
+                missing.append("--system-node-subnet-id")
+            if not node_subnet_id:
+                missing.append("--node-subnet-id")
+            if not apiserver_subnet_id:
+                missing.append("--apiserver-subnet-id")
+            if missing:
+                raise RequiredArgumentMissingError(
+                    "BYO VNet for Automatic (HOBO) clusters requires all three subnets. "
+                    "Missing: " + ", ".join(missing) + "."
+                )
+            if self.get_sku_name() != CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC:
+                raise RequiredArgumentMissingError(
+                    '"--system-node-subnet-id" / "--node-subnet-id" require "--sku automatic".'
+                )
+        if disable_hosted_system and self.get_sku_name() != CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC:
+            raise RequiredArgumentMissingError(
+                '"--disable-hosted-system" requires "--sku automatic".'
+            )
+
     def _get_enable_private_cluster(self, enable_validation: bool = False) -> bool:
         """Internal function to obtain the value of enable_private_cluster.
 
@@ -7004,6 +7083,41 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc.fqdn_subdomain = fqdn_subdomain
         return mc
 
+    def set_up_hosted_system_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Set up hosted_system_profile on the ManagedCluster for Automatic SKU clusters.
+
+        - When any of `--system-node-subnet-id` / `--node-subnet-id` / `--apiserver-subnet-id`
+          are provided (BYO VNet HOBO), validate the trio and populate
+          `mc.hosted_system_profile.{system_node_subnet_id, node_subnet_id}`. `enabled` is left
+          unset so the server side keeps ownership of the default/opt-in decision.
+        - When `--disable-hosted-system` is provided, set
+          `mc.hosted_system_profile = ManagedClusterHostedSystemProfile(enabled=False)` so
+          HOBO is deterministically opted out for Automatic clusters.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        # Run cross-flag validation (mutual exclusion + trio completeness + SKU gate)
+        self.context._validate_byo_hobo_subnets()
+
+        system_node_subnet_id = self.context.get_system_node_subnet_id()
+        node_subnet_id = self.context.get_node_subnet_id()
+        disable_hosted_system = self.context.get_disable_hosted_system()
+
+        if disable_hosted_system:
+            mc.hosted_system_profile = self.models.ManagedClusterHostedSystemProfile(enabled=False)
+            return mc
+
+        if system_node_subnet_id or node_subnet_id:
+            if mc.hosted_system_profile is None:
+                mc.hosted_system_profile = self.models.ManagedClusterHostedSystemProfile()
+            if system_node_subnet_id:
+                mc.hosted_system_profile.system_node_subnet_id = system_node_subnet_id
+            if node_subnet_id:
+                mc.hosted_system_profile.node_subnet_id = node_subnet_id
+        return mc
+
     def set_up_identity(self, mc: ManagedCluster) -> ManagedCluster:
         """Set up identity for the ManagedCluster object.
 
@@ -7484,6 +7598,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_oidc_issuer_profile(mc)
         # set up api server access profile and fqdn subdomain
         mc = self.set_up_api_server_access_profile(mc)
+        # set up hosted system profile (BYO VNet HOBO)
+        mc = self.set_up_hosted_system_profile(mc)
         # set up identity
         mc = self.set_up_identity(mc)
         # set up identity profile

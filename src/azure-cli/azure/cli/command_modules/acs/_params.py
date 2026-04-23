@@ -133,6 +133,7 @@ from azure.cli.command_modules.acs._validators import (
     validate_disable_windows_outbound_nat,
     validate_asm_egress_name,
     validate_crg_id, validate_apiserver_subnet_id,
+    validate_system_node_subnet_id, validate_node_subnet_id,
     validate_azure_service_mesh_revision,
     validate_message_of_the_day,
     validate_custom_ca_trust_certificates,
@@ -443,6 +444,13 @@ def load_arguments(self, _):
         c.argument('enable_private_cluster', action='store_true')
         c.argument('enable_apiserver_vnet_integration', action='store_true')
         c.argument('apiserver_subnet_id', validator=validate_apiserver_subnet_id)
+        c.argument(
+            'system_node_subnet_id',
+            options_list=['--system-node-subnet-id', '--sys-node-subnet-id'],
+            validator=validate_system_node_subnet_id,
+        )
+        c.argument('node_subnet_id', validator=validate_node_subnet_id)
+        c.argument('disable_hosted_system', action='store_true')
         c.argument('private_dns_zone')
         c.argument('disable_public_fqdn', action='store_true')
         c.argument('service_principal')
