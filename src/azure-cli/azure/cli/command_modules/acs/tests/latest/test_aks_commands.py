@@ -15112,8 +15112,11 @@ spec:
             self.check('azureMonitorProfile.appMonitoring.autoInstrumentation.enabled', True),
         ])
 
-        # wait between back-to-back updates to avoid 409 conflicts during live/re-record runs
-        if self.is_live or self.in_recording:
+        # wait for cluster to fully settle before issuing next update
+        # only in live mode — aks wait polling GETs must not be recorded into the
+        # cassette, otherwise playback response ordering will be wrong
+        if self.is_live:
+            self.cmd('aks wait --resource-group={resource_group} --name={name} --updated --interval 30 --timeout 600')
             time.sleep(60)
 
         # update to disable app monitoring
