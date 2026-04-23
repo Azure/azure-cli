@@ -11,7 +11,7 @@ from azure.cli.command_modules.profile.custom import (
 
 from azure.cli.core.mock import DummyCli
 from knack.util import CLIError
-
+from azure.cli.testsdk.scenario_tests.const import MOCKED_TENANT_ID, MOCKED_SUBSCRIPTION_ID
 
 class ProfileCommandTest(unittest.TestCase):
     @mock.patch('azure.cli.core.api.load_subscriptions', autospec=True)
@@ -106,6 +106,27 @@ class ProfileCommandTest(unittest.TestCase):
 
         # assert
         self.assertTrue(invoked)
+
+    @mock.patch('sys.stdin.isatty', return_value=True)
+    @mock.patch('sys.stdout.isatty', return_value=True)
+    @mock.patch('azure.cli.command_modules.profile._subscription_selector.SubscriptionSelector')
+    @mock.patch('azure.cli.core._profile.Profile.set_active_subscription')
+    @mock.patch('azure.cli.core._profile.Profile.login')
+    def test_login_with_subscription(self, login_mock, set_active_subscription_mock, subscription_selector_mock, *_):
+        cmd = mock.MagicMock()
+        login_mock.return_value = [{
+            'environmentName': 'AzureCloud',
+            'homeTenantId': MOCKED_TENANT_ID,
+            'id': MOCKED_SUBSCRIPTION_ID,
+            'isDefault': False,
+            'managedByTenants': [],
+            'name': 'test subscription name',
+            'state': 'Enabled',
+            'tenantId': MOCKED_TENANT_ID,
+            'user': {'name': 'test@microsoft.com', 'type': 'user'}}]
+        login(cmd, subscription=MOCKED_SUBSCRIPTION_ID)
+        subscription_selector_mock.assert_not_called()
+        set_active_subscription_mock.assert_called_with(MOCKED_SUBSCRIPTION_ID)
 
     def test_login_validate_tenant(self):
         from azure.cli.command_modules.profile._validators import validate_tenant

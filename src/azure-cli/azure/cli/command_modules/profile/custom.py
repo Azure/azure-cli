@@ -121,7 +121,9 @@ def account_clear(cmd):
 
 
 # pylint: disable=too-many-branches, too-many-locals
-def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_subscriptions=False,
+def login(cmd, username=None, password=None,
+          tenant=None, subscription=None,
+          scopes=None, allow_no_subscriptions=False,
           claims_challenge=None,
           # Device code flow
           use_device_code=False,
@@ -187,7 +189,8 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
     from azure.cli.core.telemetry import set_login_experience_v2
     set_login_experience_v2(login_experience_v2)
 
-    select_subscription = interactive and sys.stdin.isatty() and sys.stdout.isatty() and login_experience_v2
+    select_subscription = (not subscription and
+                           interactive and sys.stdin.isatty() and sys.stdout.isatty() and login_experience_v2)
 
     subscriptions = profile.login(
         interactive,
@@ -214,6 +217,9 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
         print(LOGIN_ANNOUNCEMENT)
         logger.warning(LOGIN_OUTPUT_WARNING)
         return
+
+    if subscription:
+        profile.set_active_subscription(subscription)
 
     all_subscriptions = list(subscriptions)
     for sub in all_subscriptions:
