@@ -4426,6 +4426,95 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         with self.assertRaises(RequiredArgumentMissingError):
             ctx_6.get_apiserver_subnet_id()
 
+    def test_byo_hobo_subnets_validation(self):
+        system_subnet = "/subscriptions/s/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/v/subnets/sys"
+        node_subnet = "/subscriptions/s/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/v/subnets/nod"
+        api_subnet = "/subscriptions/s/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/v/subnets/api"
+
+        # disable + subnet -> MutuallyExclusiveArgumentError
+        ctx = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({
+                "sku": "automatic",
+                "disable_hosted_system": True,
+                "system_node_subnet_id": system_subnet,
+            }),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx._validate_byo_hobo_subnets()
+
+        # partial trio -> RequiredArgumentMissingError
+        ctx = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({
+                "sku": "automatic",
+                "system_node_subnet_id": system_subnet,
+            }),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx._validate_byo_hobo_subnets()
+
+        # trio without --sku automatic -> RequiredArgumentMissingError
+        ctx = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({
+                "sku": "base",
+                "system_node_subnet_id": system_subnet,
+                "node_subnet_id": node_subnet,
+                "apiserver_subnet_id": api_subnet,
+            }),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx._validate_byo_hobo_subnets()
+
+        # disable_hosted_system without automatic -> RequiredArgumentMissingError
+        ctx = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({
+                "sku": "base",
+                "disable_hosted_system": True,
+            }),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx._validate_byo_hobo_subnets()
+
+        # happy path: full trio + automatic
+        ctx = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({
+                "sku": "automatic",
+                "system_node_subnet_id": system_subnet,
+                "node_subnet_id": node_subnet,
+                "apiserver_subnet_id": api_subnet,
+            }),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        ctx._validate_byo_hobo_subnets()
+        self.assertEqual(ctx.get_system_node_subnet_id(), system_subnet)
+        self.assertEqual(ctx.get_node_subnet_id(), node_subnet)
+
+        # happy path: disable + automatic
+        ctx = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({
+                "sku": "automatic",
+                "disable_hosted_system": True,
+            }),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        ctx._validate_byo_hobo_subnets()
+        self.assertTrue(ctx.get_disable_hosted_system())
+
     def test_get_private_dns_zone(self):
         # default
         ctx_1 = AKSManagedClusterContext(
