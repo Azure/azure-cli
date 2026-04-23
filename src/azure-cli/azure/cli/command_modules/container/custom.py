@@ -54,6 +54,66 @@ GITREPO_VOLUME_NAME = 'gitrepo'
 MSI_LOCAL_ID = '[system]'
 
 
+def _load_env_vars_from_file(file_path, secure=False):
+    """Load environment variables from a JSON file.
+
+    The file must contain a JSON object where each key-value pair represents
+    an environment variable name and its value. This allows passing values
+    that contain special characters (e.g. quotes, carets) that would otherwise
+    be mishandled by the shell before reaching the CLI.
+
+    Example file content::
+
+        {
+            "APP_DB_PASSWORD": "p@ssw0rd^with\"quotes",
+            "SMTP_HOST": "mail.example.com"
+        }
+
+    :param file_path: Path to the JSON file.
+    :param secure: When True, variables are returned with the ``secureValue``
+                   key (masked in logs and output) instead of ``value``.
+    :returns: List of dicts compatible with the ``--environment-variables``
+              argument, i.e. ``[{'name': 'K', 'value': 'V'}, ...]``.
+    """
+    import json
+
+    try:
+        with open(file_path, 'r', encoding='utf-8') as env_file:
+            data = json.load(env_file)
+    except (IOError, OSError) as exc:
+        raise CLIError(f'Failed to read environment variables file "{file_path}": {exc}')
+    except json.JSONDecodeError as exc:
+        raise CLIError(
+            f'Failed to parse environment variables file "{file_path}" as JSON: {exc}. '
+            'The file must contain a JSON object with string keys and string values, '
+            'e.g. {"KEY1": "value1", "KEY2": "value2"}.'
+        )
+
+    if not isinstance(data, dict):
+        raise CLIError(
+            f'Environment variables file "{file_path}" must contain a JSON object '
+            '(key-value pairs), not a {}.'.format(type(data).__name__)
+        )
+
+    result = []
+    value_key = 'secureValue' if secure else 'value'
+    for key, value in data.items():
+        if not isinstance(key, str):
+            raise CLIError(
+                f'Environment variable name must be a string, got {type(key).__name__!r} '
+                f'for key {key!r} in "{file_path}".'
+            )
+        if not isinstance(value, str):
+            logger.warning(
+                'Environment variable "%s" has a non-string value (%s); converting to string.',
+                key, type(value).__name__
+            )
+            value = str(value)
+        result.append({'name': key, value_key: value})
+
+    return result
+
+
 def list_containers(client, resource_group_name=None):
     """List all container groups in a resource group. """
     if resource_group_name is None:
@@ -89,6 +149,8 @@ def create_container(cmd,
                      command_line=None,
                      environment_variables=None,
                      secure_environment_variables=None,
+                     environment_variables_file=None,
+                     secure_environment_variables_file=None,
                      registry_login_server=None,
                      registry_username=None,
                      registry_password=None,
@@ -208,6 +270,16 @@ def create_container(cmd,
     if gitrepo_volume:
         volumes.append(gitrepo_volume)
         mounts.append(gitrepo_volume_mount)
+
+    # Merge environment variables from files with those supplied on the command line.
+    # File-based variables allow values containing special shell characters (e.g. " ^)
+    # that would be stripped by PowerShell or CMD before reaching the CLI.
+    if environment_variables_file:
+        file_env_vars = _load_env_vars_from_file(environment_variables_file, secure=False)
+        environment_variables = (environment_variables or []) + file_env_vars
+    if secure_environment_variables_file:
+        file_secure_env_vars = _load_env_vars_from_file(secure_environment_variables_file, secure=True)
+        secure_environment_variables = (secure_environment_variables or []) + file_secure_env_vars
 
     # Concatenate secure and standard environment variables
     if environment_variables and secure_environment_variables:
@@ -331,6 +403,8 @@ def create_container_group_profile(cmd,
                                    command_line=None,
                                    environment_variables=None,
                                    secure_environment_variables=None,
+                                   environment_variables_file=None,
+                                   secure_environment_variables_file=None,
                                    registry_login_server=None,
                                    registry_username=None,
                                    registry_password=None,
@@ -430,6 +504,16 @@ def create_container_group_profile(cmd,
     if gitrepo_volume:
         volumes.append(gitrepo_volume)
         mounts.append(gitrepo_volume_mount)
+
+    # Merge environment variables from files with those supplied on the command line.
+    # File-based variables allow values containing special shell characters (e.g. " ^)
+    # that would be stripped by PowerShell or CMD before reaching the CLI.
+    if environment_variables_file:
+        file_env_vars = _load_env_vars_from_file(environment_variables_file, secure=False)
+        environment_variables = (environment_variables or []) + file_env_vars
+    if secure_environment_variables_file:
+        file_secure_env_vars = _load_env_vars_from_file(secure_environment_variables_file, secure=True)
+        secure_environment_variables = (secure_environment_variables or []) + file_secure_env_vars
 
     # Concatenate secure and standard environment variables
     if environment_variables and secure_environment_variables:
