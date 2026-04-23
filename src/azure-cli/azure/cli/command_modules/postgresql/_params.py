@@ -17,7 +17,7 @@ from azure.cli.command_modules.postgresql.utils._flexible_server_util import get
 from azure.cli.command_modules.postgresql.utils._util import get_autonomous_tuning_settings_map
 from azure.cli.command_modules.postgresql.utils.validators import public_access_validator, maintenance_window_validator, ip_address_validator, \
     retention_validator, validate_identity, validate_byok_identity, validate_identities, \
-    virtual_endpoint_name_validator, node_count_validator, postgres_firewall_rule_name_validator, \
+    virtual_endpoint_name_validator, postgres_firewall_rule_name_validator, \
     db_renaming_cluster_validator
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction
 from .randomname.generate import generate_username
@@ -156,15 +156,13 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         create_node_count_arg_type = CLIArgumentType(
             type=int,
             options_list=['--node-count'],
-            help='The number of nodes for elastic cluster. Range of 1 to 10. Default is 2 nodes.',
-            validator=node_count_validator
+            help='The number of nodes for elastic cluster. Default is 2 nodes.'
         )
 
         update_node_count_arg_type = CLIArgumentType(
             type=int,
             options_list=['--node-count'],
-            help='The number of nodes for elastic cluster. Range of 1 to 10.',
-            validator=node_count_validator
+            help='The number of nodes for elastic cluster.'
         )
 
         auto_grow_arg_type = CLIArgumentType(

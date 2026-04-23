@@ -12,7 +12,8 @@ from copy import deepcopy
 from unittest import mock
 
 from azure.cli.core._profile import (Profile, SubscriptionFinder, _attach_token_tenant,
-                                     _transform_subscription_for_multiapi)
+                                     _transform_subscription_for_multiapi,
+                                     _TENANT_LEVEL_ACCOUNT_NAME)
 from azure.cli.core.auth.util import AccessToken
 from azure.cli.core.mock import DummyCli
 from azure.mgmt.resource.subscriptions.models import \
@@ -551,7 +552,7 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(len(subscriptions), 1)
         s = subscriptions[0]
 
-        self.assertEqual(s['name'], 'N/A(tenant level account)')
+        self.assertEqual(s['name'], _TENANT_LEVEL_ACCOUNT_NAME)
         self.assertEqual(s['id'], self.test_mi_tenant)
         self.assertEqual(s['tenantId'], self.test_mi_tenant)
 
@@ -656,8 +657,31 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(subs[0]['id'], self.tenant_id)
         self.assertEqual(subs[0]['state'], 'Enabled')
         self.assertEqual(subs[0]['tenantId'], self.tenant_id)
-        self.assertEqual(subs[0]['name'], 'N/A(tenant level account)')
+        self.assertEqual(subs[0]['name'], _TENANT_LEVEL_ACCOUNT_NAME)
         self.assertTrue(profile.is_tenant_level_account())
+
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
+    @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', autospec=True)
+    @mock.patch('azure.cli.core.auth.identity.Identity.login_with_auth_code', autospec=True)
+    @mock.patch('azure.cli.core._profile.can_launch_browser', autospec=True, return_value=True)
+    def test_login_no_subscription_raises_error(self, can_launch_browser_mock,
+                                                login_with_auth_code_mock, get_user_credential_mock,
+                                                create_subscription_client_mock):
+        """No subscriptions found without --allow-no-subscriptions raises CLIError."""
+        login_with_auth_code_mock.return_value = self.user_identity_mock
+
+        cli = DummyCli()
+        mock_subscription_client = mock.MagicMock()
+        mock_subscription_client.tenants.list.return_value = [TenantStub(self.tenant_id)]
+        mock_subscription_client.subscriptions.list.return_value = []
+        create_subscription_client_mock.return_value = mock_subscription_client
+
+        storage_mock = {'subscriptions': None}
+        profile = Profile(cli_ctx=cli, storage=storage_mock)
+
+        with self.assertRaisesRegex(CLIError, "No subscriptions found"):
+            profile.login(True, None, None, False, None, use_device_code=False,
+                          allow_no_subscriptions=False)
 
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
     @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', autospec=True)
@@ -1636,6 +1660,526 @@ class TestUtils(unittest.TestCase):
         d = {}
         _transform_subscription_for_multiapi(s, d)
         assert d == {'managedByTenants': [{"tenantId": tenant_id}]}
+
+
+class TestLoginSubscriptionFilter(unittest.TestCase):
+    """Tests for Profile.login() with --skip-subscription-discovery and --subscription parameters."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.tenant_id = 'test.onmicrosoft.com'
+        cls.user1 = 'foo@foo.com'
+        cls.user_identity_mock = {
+            'username': cls.user1,
+            'tenantId': cls.tenant_id
+        }
+
+        cls.sub_id = '00000000-0000-0000-0000-000000000001'
+        cls.subscription_raw = SubscriptionStub(
+            'subscriptions/{}'.format(cls.sub_id),
+            'test sub', 'Enabled', tenant_id=cls.tenant_id,
+            home_tenant_id=cls.tenant_id)
+
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
+    @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', autospec=True)
+    @mock.patch('azure.cli.core.auth.identity.Identity.login_with_auth_code', autospec=True)
+    @mock.patch('azure.cli.core._profile.can_launch_browser', autospec=True, return_value=True)
+    def test_skip_discovery_with_subscription(self, can_launch_browser_mock, login_with_auth_code_mock,
+                                              get_user_credential_mock, create_subscription_client_mock):
+        """--skip-subscription-discovery --subscription S: calls GET /subscriptions/S (1 API call), S is default."""
+        login_with_auth_code_mock.return_value = self.user_identity_mock
+
+        cli = DummyCli()
+        mock_subscription_client = mock.MagicMock()
+        mock_subscription_client.subscriptions.get.return_value = deepcopy(self.subscription_raw)
+        create_subscription_client_mock.return_value = mock_subscription_client
+
+        storage_mock = {'subscriptions': None}
+        profile = Profile(cli_ctx=cli, storage=storage_mock)
+        subs = profile.login(True, None, None, False, self.tenant_id,
+                             allow_no_subscriptions=False,
+                             skip_subscription_discovery=True, subscription=self.sub_id)
+
+        # Assert GET was called, not LIST
+        mock_subscription_client.subscriptions.get.assert_called_once_with(self.sub_id)
+        mock_subscription_client.subscriptions.list.assert_not_called()
+
+        # Assert subscription returned and is default
+        self.assertEqual(len(subs), 1)
+        self.assertEqual(subs[0]['id'], self.sub_id)
+        self.assertEqual(subs[0]['name'], 'test sub')
+        self.assertTrue(subs[0]['isDefault'])
+
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
+    @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', autospec=True)
+    @mock.patch('azure.cli.core.auth.identity.Identity.login_with_auth_code', autospec=True)
+    @mock.patch('azure.cli.core._profile.can_launch_browser', autospec=True, return_value=True)
+    def test_skip_discovery_bare_mode(self, can_launch_browser_mock, login_with_auth_code_mock,
+                                      get_user_credential_mock, create_subscription_client_mock):
+        """--skip-subscription-discovery (no --subscription): 0 ARM calls, tenant-level account created."""
+        login_with_auth_code_mock.return_value = self.user_identity_mock
+
+        cli = DummyCli()
+        mock_subscription_client = mock.MagicMock()
+        create_subscription_client_mock.return_value = mock_subscription_client
+
+        storage_mock = {'subscriptions': None}
+        profile = Profile(cli_ctx=cli, storage=storage_mock)
+        subs = profile.login(True, None, None, False, self.tenant_id,
+                             allow_no_subscriptions=False,
+                             skip_subscription_discovery=True)
+
+        # Assert no ARM subscription calls were made
+        mock_subscription_client.subscriptions.get.assert_not_called()
+        mock_subscription_client.subscriptions.list.assert_not_called()
+
+        # Assert tenant-level account created
+        self.assertEqual(len(subs), 1)
+        self.assertEqual(subs[0]['id'], self.tenant_id)
+        self.assertEqual(subs[0]['name'], _TENANT_LEVEL_ACCOUNT_NAME)
+        self.assertEqual(subs[0]['tenantId'], self.tenant_id)
+        self.assertTrue(profile.is_tenant_level_account())
+
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
+    @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', autospec=True)
+    @mock.patch('azure.cli.core.auth.identity.Identity.login_with_auth_code', autospec=True)
+    @mock.patch('azure.cli.core._profile.can_launch_browser', autospec=True, return_value=True)
+    def test_skip_discovery_with_subscription_inaccessible(self, can_launch_browser_mock,
+                                                           login_with_auth_code_mock,
+                                                           get_user_credential_mock,
+                                                           create_subscription_client_mock):
+        """--skip-subscription-discovery --subscription S where S is inaccessible: raises CLIError."""
+        login_with_auth_code_mock.return_value = self.user_identity_mock
+
+        cli = DummyCli()
+        mock_subscription_client = mock.MagicMock()
+        mock_subscription_client.subscriptions.get.side_effect = Exception("Not found")
+        create_subscription_client_mock.return_value = mock_subscription_client
+
+        storage_mock = {'subscriptions': None}
+        profile = Profile(cli_ctx=cli, storage=storage_mock)
+
+        with self.assertRaisesRegex(CLIError, "could not be retrieved"):
+            profile.login(True, None, None, False, self.tenant_id,
+                          allow_no_subscriptions=False,
+                          skip_subscription_discovery=True, subscription=self.sub_id)
+
+    @mock.patch('azure.cli.core._profile.logger', autospec=True)
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
+    @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', autospec=True)
+    @mock.patch('azure.cli.core.auth.identity.Identity.login_with_auth_code', autospec=True)
+    @mock.patch('azure.cli.core._profile.can_launch_browser', autospec=True, return_value=True)
+    def test_skip_discovery_with_subscription_inaccessible_allow_no_subs(self, can_launch_browser_mock,
+                                                                         login_with_auth_code_mock,
+                                                                         get_user_credential_mock,
+                                                                         create_subscription_client_mock,
+                                                                         logger_mock):
+        """--skip-subscription-discovery --subscription S (inaccessible) --allow-no-subscriptions:
+        tenant-level account created, warning logged."""
+        login_with_auth_code_mock.return_value = self.user_identity_mock
+
+        cli = DummyCli()
+        mock_subscription_client = mock.MagicMock()
+        mock_subscription_client.subscriptions.get.side_effect = Exception("Not found")
+        create_subscription_client_mock.return_value = mock_subscription_client
+
+        storage_mock = {'subscriptions': None}
+        profile = Profile(cli_ctx=cli, storage=storage_mock)
+        subs = profile.login(True, None, None, False, self.tenant_id,
+                             allow_no_subscriptions=True,
+                             skip_subscription_discovery=True, subscription=self.sub_id)
+
+        # Tenant-level account created since subscription was inaccessible
+        self.assertEqual(len(subs), 1)
+        self.assertEqual(subs[0]['name'], _TENANT_LEVEL_ACCOUNT_NAME)
+
+        # Warning logged about inaccessible subscription
+        logger_mock.warning.assert_any_call(
+            "Subscription '%s' not found. Profile has tenant-level account only.",
+            self.sub_id)
+
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
+    @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', autospec=True)
+    @mock.patch('azure.cli.core.auth.identity.Identity.login_with_auth_code', autospec=True)
+    @mock.patch('azure.cli.core._profile.can_launch_browser', autospec=True, return_value=True)
+    def test_no_skip_with_subscription_sets_default(self, can_launch_browser_mock, login_with_auth_code_mock,
+                                                     get_user_credential_mock,
+                                                     create_subscription_client_mock):
+        """--subscription S (without skip): full discovery unchanged, S set as default."""
+        login_with_auth_code_mock.return_value = self.user_identity_mock
+
+        cli = DummyCli()
+        mock_subscription_client = mock.MagicMock()
+        mock_subscription_client.tenants.list.return_value = [TenantStub(self.tenant_id)]
+        mock_subscription_client.subscriptions.list.return_value = [deepcopy(self.subscription_raw)]
+        create_subscription_client_mock.return_value = mock_subscription_client
+
+        storage_mock = {'subscriptions': None}
+        profile = Profile(cli_ctx=cli, storage=storage_mock)
+        subs = profile.login(True, None, None, False, self.tenant_id,
+                             allow_no_subscriptions=False,
+                             subscription=self.sub_id)
+
+        # Assert LIST was called (full discovery), not just GET
+        mock_subscription_client.subscriptions.list.assert_called()
+        mock_subscription_client.subscriptions.get.assert_not_called()
+
+        # Assert subscription returned and is default
+        self.assertEqual(len(subs), 1)
+        self.assertEqual(subs[0]['id'], self.sub_id)
+        self.assertTrue(subs[0]['isDefault'])
+
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
+    @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', autospec=True)
+    @mock.patch('azure.cli.core.auth.identity.Identity.login_with_auth_code', autospec=True)
+    @mock.patch('azure.cli.core._profile.can_launch_browser', autospec=True, return_value=True)
+    def test_no_skip_with_subscription_not_found_raises_error(self, can_launch_browser_mock,
+                                                               login_with_auth_code_mock,
+                                                               get_user_credential_mock,
+                                                               create_subscription_client_mock):
+        """--subscription S (no skip), S not in discovered list: raises CLIError."""
+        login_with_auth_code_mock.return_value = self.user_identity_mock
+
+        cli = DummyCli()
+        mock_subscription_client = mock.MagicMock()
+        mock_subscription_client.tenants.list.return_value = [TenantStub(self.tenant_id)]
+        mock_subscription_client.subscriptions.list.return_value = [deepcopy(self.subscription_raw)]
+        create_subscription_client_mock.return_value = mock_subscription_client
+
+        storage_mock = {'subscriptions': None}
+        profile = Profile(cli_ctx=cli, storage=storage_mock)
+
+        with self.assertRaisesRegex(CLIError, "Subscription 'non-existent' not found"):
+            profile.login(True, None, None, False, self.tenant_id,
+                          allow_no_subscriptions=False,
+                          subscription='non-existent')
+
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
+    @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', autospec=True)
+    @mock.patch('azure.cli.core.auth.identity.Identity.login_with_auth_code', autospec=True)
+    @mock.patch('azure.cli.core._profile.can_launch_browser', autospec=True, return_value=True)
+    def test_skip_discovery_preserves_prior_subscriptions(self, can_launch_browser_mock,
+                                                          login_with_auth_code_mock,
+                                                          get_user_credential_mock,
+                                                          create_subscription_client_mock):
+        """Profile merge: prior subscriptions in azureProfile.json are preserved."""
+        login_with_auth_code_mock.return_value = self.user_identity_mock
+
+        cli = DummyCli()
+        mock_subscription_client = mock.MagicMock()
+        mock_subscription_client.subscriptions.get.return_value = deepcopy(self.subscription_raw)
+        create_subscription_client_mock.return_value = mock_subscription_client
+
+        # Pre-existing subscription in profile
+        existing_sub_id = '00000000-0000-0000-0000-000000000099'
+        existing_sub = {
+            'id': existing_sub_id,
+            'name': 'existing sub',
+            'state': 'Enabled',
+            'user': {'name': self.user1, 'type': 'user'},
+            'isDefault': True,
+            'tenantId': self.tenant_id,
+            'environmentName': 'AzureCloud'
+        }
+        storage_mock = {'subscriptions': [existing_sub]}
+        profile = Profile(cli_ctx=cli, storage=storage_mock)
+        subs = profile.login(True, None, None, False, self.tenant_id,
+                             allow_no_subscriptions=False,
+                             skip_subscription_discovery=True, subscription=self.sub_id)
+
+        # Both the new and existing subscriptions should be in storage (merge)
+        stored = storage_mock['subscriptions']
+        stored_ids = {s['id'] for s in stored}
+        self.assertIn(self.sub_id, stored_ids)
+        self.assertIn(existing_sub_id, stored_ids)
+
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
+    @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', autospec=True)
+    @mock.patch('azure.cli.core.auth.identity.Identity.login_with_auth_code', autospec=True)
+    @mock.patch('azure.cli.core._profile.can_launch_browser', autospec=True, return_value=True)
+    def test_skip_discovery_bare_preserves_prior_subscriptions(self, can_launch_browser_mock,
+                                                               login_with_auth_code_mock,
+                                                               get_user_credential_mock,
+                                                               create_subscription_client_mock):
+        """Bare --skip-subscription-discovery preserves prior subscriptions in azureProfile.json."""
+        login_with_auth_code_mock.return_value = self.user_identity_mock
+
+        cli = DummyCli()
+        mock_subscription_client = mock.MagicMock()
+        create_subscription_client_mock.return_value = mock_subscription_client
+
+        # Pre-existing subscription in profile
+        existing_sub_id = '00000000-0000-0000-0000-000000000099'
+        existing_sub = {
+            'id': existing_sub_id,
+            'name': 'existing sub',
+            'state': 'Enabled',
+            'user': {'name': self.user1, 'type': 'user'},
+            'isDefault': True,
+            'tenantId': self.tenant_id,
+            'environmentName': 'AzureCloud'
+        }
+        storage_mock = {'subscriptions': [existing_sub]}
+        profile = Profile(cli_ctx=cli, storage=storage_mock)
+        subs = profile.login(True, None, None, False, self.tenant_id,
+                             allow_no_subscriptions=False,
+                             skip_subscription_discovery=True)
+
+        # No ARM calls in bare mode
+        mock_subscription_client.subscriptions.get.assert_not_called()
+        mock_subscription_client.subscriptions.list.assert_not_called()
+
+        # Tenant-level account created
+        self.assertEqual(len(subs), 1)
+        self.assertEqual(subs[0]['name'], _TENANT_LEVEL_ACCOUNT_NAME)
+
+        # Prior subscription preserved in storage
+        stored = storage_mock['subscriptions']
+        stored_ids = {s['id'] for s in stored}
+        self.assertIn(existing_sub_id, stored_ids)
+        self.assertIn(self.tenant_id, stored_ids)
+
+    def test_set_subscriptions_preferred_subscription(self):
+        """preferred_subscription overrides the active subscription in _set_subscriptions."""
+        cli = DummyCli()
+        storage_mock = {'subscriptions': []}
+        profile = Profile(cli_ctx=cli, storage=storage_mock)
+
+        # sub1 is Enabled (would be picked by _pick_working_subscription)
+        sub1 = SubscriptionStub('subscriptions/sub1-id', 'sub1', 'Enabled',
+                                tenant_id=self.tenant_id, home_tenant_id=self.tenant_id)
+        sub2 = SubscriptionStub('subscriptions/sub2-id', 'sub2', 'Enabled',
+                                tenant_id=self.tenant_id, home_tenant_id=self.tenant_id)
+        consolidated = profile._normalize_properties(self.user1, [sub1, sub2], False)
+
+        # First call: sub1 becomes default (first Enabled)
+        profile._set_subscriptions(consolidated)
+        self.assertTrue(storage_mock['subscriptions'][0]['isDefault'])  # sub1
+        self.assertFalse(storage_mock['subscriptions'][1]['isDefault'])  # sub2
+
+        # Second call with preferred_subscription=sub2: sub2 becomes default
+        profile._set_subscriptions(consolidated, preferred_subscription='sub2-id')
+        sub1_stored = next(s for s in storage_mock['subscriptions'] if s['id'] == 'sub1-id')
+        sub2_stored = next(s for s in storage_mock['subscriptions'] if s['id'] == 'sub2-id')
+        self.assertFalse(sub1_stored['isDefault'])
+        self.assertTrue(sub2_stored['isDefault'])
+
+    def test_set_subscriptions_preferred_subscription_by_name(self):
+        """preferred_subscription can match by name (case-insensitive)."""
+        cli = DummyCli()
+        storage_mock = {'subscriptions': []}
+        profile = Profile(cli_ctx=cli, storage=storage_mock)
+
+        sub1 = SubscriptionStub('subscriptions/sub1-id', 'Alpha Sub', 'Enabled',
+                                tenant_id=self.tenant_id, home_tenant_id=self.tenant_id)
+        sub2 = SubscriptionStub('subscriptions/sub2-id', 'Beta Sub', 'Enabled',
+                                tenant_id=self.tenant_id, home_tenant_id=self.tenant_id)
+        consolidated = profile._normalize_properties(self.user1, [sub1, sub2], False)
+
+        profile._set_subscriptions(consolidated, preferred_subscription='beta sub')
+        sub1_stored = next(s for s in storage_mock['subscriptions'] if s['id'] == 'sub1-id')
+        sub2_stored = next(s for s in storage_mock['subscriptions'] if s['id'] == 'sub2-id')
+        self.assertFalse(sub1_stored['isDefault'])
+        self.assertTrue(sub2_stored['isDefault'])
+
+    def test_set_subscriptions_preferred_subscription_not_found_falls_back(self):
+        """preferred_subscription not found falls back to previously active subscription."""
+        cli = DummyCli()
+        storage_mock = {'subscriptions': []}
+        profile = Profile(cli_ctx=cli, storage=storage_mock)
+
+        sub1 = SubscriptionStub('subscriptions/sub1-id', 'sub1', 'Enabled',
+                                tenant_id=self.tenant_id, home_tenant_id=self.tenant_id)
+        sub2 = SubscriptionStub('subscriptions/sub2-id', 'sub2', 'Enabled',
+                                tenant_id=self.tenant_id, home_tenant_id=self.tenant_id)
+        consolidated = profile._normalize_properties(self.user1, [sub1, sub2], False)
+
+        # First call: set sub2 as active
+        profile._set_subscriptions(consolidated, preferred_subscription='sub2-id')
+        sub2_stored = next(s for s in storage_mock['subscriptions'] if s['id'] == 'sub2-id')
+        self.assertTrue(sub2_stored['isDefault'])
+
+        # Second call: preferred not found → should fall back to previously active (sub2)
+        profile._set_subscriptions(consolidated, preferred_subscription='nonexistent')
+        sub1_stored = next(s for s in storage_mock['subscriptions'] if s['id'] == 'sub1-id')
+        sub2_stored = next(s for s in storage_mock['subscriptions'] if s['id'] == 'sub2-id')
+        self.assertFalse(sub1_stored['isDefault'])
+        self.assertTrue(sub2_stored['isDefault'])
+
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
+    @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', autospec=True)
+    @mock.patch('azure.cli.core.auth.identity.Identity.login_with_auth_code', autospec=True)
+    @mock.patch('azure.cli.core._profile.can_launch_browser', autospec=True, return_value=True)
+    def test_login_with_subscription_in_two_tenants_returns_filtered(self, can_launch_browser_mock,
+                                                                     login_with_auth_code_mock,
+                                                                     get_user_credential_mock,
+                                                                     create_subscription_client_mock):
+        """--subscription matching 2 tenants returns only the 2 filtered subs, first one is default."""
+        login_with_auth_code_mock.return_value = self.user_identity_mock
+
+        cli = DummyCli()
+        mock_subscription_client = mock.MagicMock()
+
+        home_tenant = 'home-tenant-id'
+        delegated_tenant = 'delegated-tenant-id'
+        # Same sub name and ID, but in different tenants
+        sub_in_home = SubscriptionStub(
+            'subscriptions/{}'.format(self.sub_id), 'test sub', 'Enabled',
+            tenant_id=home_tenant, home_tenant_id=home_tenant)
+        sub_in_delegated = SubscriptionStub(
+            'subscriptions/{}'.format(self.sub_id), 'test sub', 'Enabled',
+            tenant_id=delegated_tenant, home_tenant_id=home_tenant)
+        # Also a different sub that should be filtered out
+        other_sub = SubscriptionStub(
+            'subscriptions/other-sub-id', 'other sub', 'Enabled',
+            tenant_id=home_tenant, home_tenant_id=home_tenant)
+
+        mock_subscription_client.tenants.list.return_value = [
+            TenantStub(home_tenant), TenantStub(delegated_tenant)]
+        mock_subscription_client.subscriptions.list.return_value = [
+            deepcopy(sub_in_home), deepcopy(sub_in_delegated), deepcopy(other_sub)]
+        create_subscription_client_mock.return_value = mock_subscription_client
+
+        storage_mock = {'subscriptions': []}
+        profile = Profile(cli_ctx=cli, storage=storage_mock)
+        subs = profile.login(True, None, None, False, home_tenant,
+                             allow_no_subscriptions=False,
+                             subscription=self.sub_id)
+
+        # Only the 2 matching subs are returned, not 'other sub'
+        self.assertEqual(len(subs), 2)
+        self.assertTrue(all(s['id'] == self.sub_id for s in subs))
+        # First match is set as default by preferred_subscription
+        self.assertTrue(subs[0]['isDefault'])
+
+
+class TestSubscriptionFinderFindSpecific(unittest.TestCase):
+    """Tests for SubscriptionFinder.find_specific_subscriptions()"""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.tenant_id = 'test.onmicrosoft.com'
+        cls.sub_id_1 = '00000000-0000-0000-0000-000000000001'
+        cls.sub_id_2 = '00000000-0000-0000-0000-000000000002'
+
+        cls.subscription1_raw = SubscriptionStub(
+            'subscriptions/{}'.format(cls.sub_id_1),
+            'sub1', 'Enabled', tenant_id=cls.tenant_id)
+        cls.subscription2_raw = SubscriptionStub(
+            'subscriptions/{}'.format(cls.sub_id_2),
+            'sub2', 'Enabled', tenant_id=cls.tenant_id)
+
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
+    def test_find_specific_subscriptions_single(self, create_subscription_client_mock):
+        """Single subscription ID is fetched via GET, not LIST."""
+        cli = DummyCli()
+        mock_client = mock.MagicMock()
+        mock_client.subscriptions.get.return_value = deepcopy(self.subscription1_raw)
+        create_subscription_client_mock.return_value = mock_client
+
+        finder = SubscriptionFinder(cli)
+        credential = mock.MagicMock()
+        result = finder.find_specific_subscriptions(self.tenant_id, credential, [self.sub_id_1])
+
+        # Assert GET was called, LIST was not
+        mock_client.subscriptions.get.assert_called_once_with(self.sub_id_1)
+        mock_client.subscriptions.list.assert_not_called()
+
+        # Assert result
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0].subscription_id, self.sub_id_1)
+        # Assert tenant_id is attached (by _attach_token_tenant)
+        self.assertEqual(result[0].tenant_id, self.tenant_id)
+        # Assert tenant is tracked
+        self.assertIn(self.tenant_id, finder.tenants)
+
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
+    def test_find_specific_subscriptions_multiple(self, create_subscription_client_mock):
+        """Multiple subscription IDs are each fetched individually via GET."""
+        cli = DummyCli()
+        mock_client = mock.MagicMock()
+        mock_client.subscriptions.get.side_effect = [
+            deepcopy(self.subscription1_raw),
+            deepcopy(self.subscription2_raw)
+        ]
+        create_subscription_client_mock.return_value = mock_client
+
+        finder = SubscriptionFinder(cli)
+        credential = mock.MagicMock()
+        result = finder.find_specific_subscriptions(
+            self.tenant_id, credential, [self.sub_id_1, self.sub_id_2])
+
+        # Assert GET was called for each sub
+        self.assertEqual(mock_client.subscriptions.get.call_count, 2)
+        mock_client.subscriptions.get.assert_any_call(self.sub_id_1)
+        mock_client.subscriptions.get.assert_any_call(self.sub_id_2)
+        mock_client.subscriptions.list.assert_not_called()
+
+        # Assert both results returned
+        self.assertEqual(len(result), 2)
+        self.assertEqual(result[0].subscription_id, self.sub_id_1)
+        self.assertEqual(result[1].subscription_id, self.sub_id_2)
+
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
+    def test_find_specific_subscriptions_inaccessible_warns_and_continues(self, create_subscription_client_mock):
+        """If a subscription is inaccessible, log warning and continue with others."""
+        cli = DummyCli()
+        mock_client = mock.MagicMock()
+        mock_client.subscriptions.get.side_effect = [
+            Exception("Subscription not found or not accessible"),
+            deepcopy(self.subscription2_raw)
+        ]
+        create_subscription_client_mock.return_value = mock_client
+
+        finder = SubscriptionFinder(cli)
+        credential = mock.MagicMock()
+
+        with mock.patch('azure.cli.core._profile.logger') as mock_logger:
+            result = finder.find_specific_subscriptions(
+                self.tenant_id, credential, [self.sub_id_1, self.sub_id_2])
+
+            # Assert warning was logged for the failed sub
+            mock_logger.warning.assert_called_once()
+            self.assertIn(self.sub_id_1, mock_logger.warning.call_args[0][1])
+
+        # Assert only the accessible sub is returned
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0].subscription_id, self.sub_id_2)
+        # Assert tenant is still tracked
+        self.assertIn(self.tenant_id, finder.tenants)
+
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
+    def test_find_specific_subscriptions_all_inaccessible(self, create_subscription_client_mock):
+        """If all subscriptions are inaccessible, return empty list."""
+        cli = DummyCli()
+        mock_client = mock.MagicMock()
+        mock_client.subscriptions.get.side_effect = Exception("Not found")
+        create_subscription_client_mock.return_value = mock_client
+
+        finder = SubscriptionFinder(cli)
+        credential = mock.MagicMock()
+        result = finder.find_specific_subscriptions(
+            self.tenant_id, credential, [self.sub_id_1])
+
+        self.assertEqual(len(result), 0)
+        # Tenant is still tracked even with no results
+        self.assertIn(self.tenant_id, finder.tenants)
+
+    @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
+    def test_find_specific_subscriptions_empty_list(self, create_subscription_client_mock):
+        """Empty subscription_ids list returns empty result."""
+        cli = DummyCli()
+        mock_client = mock.MagicMock()
+        create_subscription_client_mock.return_value = mock_client
+
+        finder = SubscriptionFinder(cli)
+        credential = mock.MagicMock()
+        result = finder.find_specific_subscriptions(self.tenant_id, credential, [])
+
+        mock_client.subscriptions.get.assert_not_called()
+        mock_client.subscriptions.list.assert_not_called()
+        self.assertEqual(len(result), 0)
+        self.assertIn(self.tenant_id, finder.tenants)
 
 
 if __name__ == '__main__':
