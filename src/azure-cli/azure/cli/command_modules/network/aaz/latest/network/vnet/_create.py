@@ -166,7 +166,7 @@ class Create(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.summarized_gateway_prefixes = AAZObjectArg(
-            options=["--summarized-gateway-prefixes"],
+            options=["--sgp", "--summarized-gateway-prefixes"],
             arg_group="Properties",
             help="A configurable list of summarized gateway prefixes advertised for the virtual network.",
             is_preview=True,
