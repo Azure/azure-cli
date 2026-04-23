@@ -8,15 +8,46 @@
 """Fail CI if forbidden raw GitHub aliases URL is introduced in new diff lines."""
 
 import argparse
+import fnmatch
 import re
 import subprocess
 import sys
 
 
 FORBIDDEN_URL_PATTERN = re.compile(
-    r"https://raw\.githubusercontent\.com/Azure/azure-rest-api-specs/[A-Za-z0-9._/-]+/arm-compute/quickstart-templates/aliases\.json"
+    r"https://raw\.githubusercontent\.com"
 )
-RECOMMENDED_ALIAS_URL = "https://azcliprod.blob.core.windows.net/cli/vm/aliases.json"
+RECOMMENDED_ALIAS_URL = "https://azcliprod.blob.core.windows.net/cli"
+
+# Paths matching these glob patterns are excluded from the check.
+# Exclusions cover documentation, test source files, test recordings, and test data.
+EXCLUDED_PATH_PATTERNS = [
+    "*.md",
+    "*.rst",
+    "doc/*",
+    "docs/*",
+    "*/doc/*",
+    "*/docs/*",
+    "scripts/*",
+    "*/tests/recordings/*",
+    "*/tests/*.py",
+    "*/tests/*.json",
+    "*/tests/*.yaml",
+    "*/tests/*.yml",
+    "*/tests/*/recordings/*",
+    "*/tests/*/test_*.py",
+    "*/tests/*/*.json",
+    "*/tests/*/*.yaml",
+    "*/tests/*/*.yml",
+]
+
+
+def _is_excluded(file_path: str) -> bool:
+    """Return True if *file_path* matches one of the exclusion glob patterns."""
+    for pattern in EXCLUDED_PATH_PATTERNS:
+        if fnmatch.fnmatch(file_path, pattern):
+            return True
+    return False
 
 
 def _run_diff(src: str, tgt: str, cached: bool = False) -> str:
@@ -51,7 +82,7 @@ def _find_violations(diff_text: str):
             continue
 
         added_line = line[1:]
-        if FORBIDDEN_URL_PATTERN.search(added_line):
+        if FORBIDDEN_URL_PATTERN.search(added_line) and not _is_excluded(current_file):
             violations.append((current_file or "<unknown>", added_line.strip()))
 
     return violations
@@ -83,7 +114,7 @@ def main() -> int:
         print(f"  - {file_path}: {content}", file=sys.stderr)
 
     print(
-        f"Use '{RECOMMENDED_ALIAS_URL}' instead of raw GitHub URLs for aliases.json.",
+        f"Use '{RECOMMENDED_ALIAS_URL}' instead of raw GitHub URLs to limit external systems access.",
         file=sys.stderr,
     )
     return 1
