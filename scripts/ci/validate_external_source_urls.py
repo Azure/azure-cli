@@ -5,7 +5,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-"""Fail CI if forbidden raw GitHub aliases URL is introduced in new diff lines."""
+"""Fail CI if forbidden raw GitHub URL is introduced in new diff lines."""
 
 import argparse
 import fnmatch
@@ -14,10 +14,10 @@ import subprocess
 import sys
 
 
-FORBIDDEN_URL_PATTERN = re.compile(
+FORBIDDEN_EXTERNAL_URL_PATTERN = re.compile(
     r"https://raw\.githubusercontent\.com"
 )
-RECOMMENDED_ALIAS_URL = "https://azcliprod.blob.core.windows.net/cli"
+RECOMMENDED_INTERNAL_URL = "https://azcliprod.blob.core.windows.net/cli"
 
 # Paths matching these glob patterns are excluded from the check.
 # Exclusions cover documentation, test source files, test recordings, and test data.
@@ -82,14 +82,14 @@ def _find_violations(diff_text: str):
             continue
 
         added_line = line[1:]
-        if FORBIDDEN_URL_PATTERN.search(added_line) and not _is_excluded(current_file):
+        if FORBIDDEN_EXTERNAL_URL_PATTERN.search(added_line) and not _is_excluded(current_file):
             violations.append((current_file or "<unknown>", added_line.strip()))
 
     return violations
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Check diff for forbidden raw aliases URL usage.")
+    parser = argparse.ArgumentParser(description="Check diff for forbidden raw github URL usage.")
     parser.add_argument("--src", default="HEAD", help="Source ref/commit for git diff.")
     parser.add_argument("--tgt", default="HEAD~1", help="Target ref/commit for git diff.")
     parser.add_argument("--cached", action="store_true", help="Check staged changes in git index.")
@@ -106,15 +106,15 @@ def main() -> int:
 
     violations = _find_violations(diff_text)
     if not violations:
-        print("No forbidden aliases source URL found in added lines.")
+        print("No forbidden external github URL found in added lines.")
         return 0
 
-    print("Found forbidden aliases source URL in this change:", file=sys.stderr)
+    print("Found forbidden external github URL in this change:", file=sys.stderr)
     for file_path, content in violations:
         print(f"  - {file_path}: {content}", file=sys.stderr)
 
     print(
-        f"Use '{RECOMMENDED_ALIAS_URL}' instead of raw GitHub URLs to limit external systems access.",
+        f"Use '{RECOMMENDED_INTERNAL_URL}' instead of raw GitHub URLs to limit external system access.",
         file=sys.stderr,
     )
     return 1
