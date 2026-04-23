@@ -16,7 +16,7 @@ from azure.cli.core._profile import (Profile, SubscriptionFinder, _attach_token_
                                      _TENANT_LEVEL_ACCOUNT_NAME)
 from azure.cli.core.auth.util import AccessToken
 from azure.cli.core.mock import DummyCli
-from azure.mgmt.resource.subscriptions.models import \
+from azure.mgmt.resource.subscriptions.models import \ 
     (Subscription, SubscriptionPolicies, SpendingLimit, ManagedByTenant)
 
 from knack.util import CLIError
