@@ -1442,12 +1442,17 @@ def _upgrade_single_nodepool_image_version(no_wait, client, resource_group_name,
 def aks_scale(cmd, client, resource_group_name, name, node_count, nodepool_name="", no_wait=False):
     instance = client.get(resource_group_name, name)
 
-    if len(instance.agent_pool_profiles) > 1 and nodepool_name == "":
+    agent_pool_profiles = instance.agent_pool_profiles or []
+    if not agent_pool_profiles:
+        raise CLIError('The cluster has no scalable node pools (this may be a Hosted System Pool / Automatic cluster). '
+                       'Use az aks nodepool add/scale against a user node pool instead.')
+
+    if len(agent_pool_profiles) > 1 and nodepool_name == "":
         raise CLIError('There are more than one node pool in the cluster. '
                        'Please specify nodepool name or use az aks nodepool command to scale node pool')
 
-    for agent_profile in instance.agent_pool_profiles:
-        if agent_profile.name == nodepool_name or (nodepool_name == "" and len(instance.agent_pool_profiles) == 1):
+    for agent_profile in agent_pool_profiles:
+        if agent_profile.name == nodepool_name or (nodepool_name == "" and len(agent_pool_profiles) == 1):
             if agent_profile.enable_auto_scaling:
                 raise CLIError(
                     "Cannot scale cluster autoscaler enabled node pool.")

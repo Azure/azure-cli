@@ -4211,7 +4211,14 @@ class AKSManagedClusterContext(BaseAKSContext):
         if enable_validation:
             if self.decorator_mode == DecoratorMode.CREATE:
                 vnet_subnet_id = self.get_vnet_subnet_id()
-                if apiserver_subnet_id and vnet_subnet_id is None:
+                # For BYO VNet HOBO (--sku automatic with subnet trio), --vnet-subnet-id is
+                # not used: system-node / node subnets replace it. Only require --vnet-subnet-id
+                # when neither --system-node-subnet-id nor --node-subnet-id is provided.
+                byo_hobo_subnets_set = (
+                    self.raw_param.get("system_node_subnet_id") or
+                    self.raw_param.get("node_subnet_id")
+                )
+                if apiserver_subnet_id and vnet_subnet_id is None and not byo_hobo_subnets_set:
                     raise RequiredArgumentMissingError(
                         '"--apiserver-subnet-id" requires "--vnet-subnet-id".')
 
@@ -4291,13 +4298,20 @@ class AKSManagedClusterContext(BaseAKSContext):
         apiserver_subnet_id = self.raw_param.get("apiserver_subnet_id")
         disable_hosted_system = self.get_disable_hosted_system()
 
-        any_set = any([system_node_subnet_id, node_subnet_id])
-        if disable_hosted_system and any_set:
+        hobo_specific_set = bool(system_node_subnet_id or node_subnet_id)
+        any_trio_set = bool(hobo_specific_set or apiserver_subnet_id)
+
+        # --disable-hosted-system is mutually exclusive with any HOBO-specific subnet flag.
+        # (We deliberately don't include --apiserver-subnet-id here: it keeps its existing
+        # general-purpose meaning for --enable-apiserver-vnet-integration flows.)
+        if disable_hosted_system and hobo_specific_set:
             raise MutuallyExclusiveArgumentError(
                 '"--disable-hosted-system" cannot be combined with '
                 '"--system-node-subnet-id" or "--node-subnet-id".'
             )
-        if any_set:
+
+        # Partial trio: if any HOBO-specific subnet is set, require the full trio.
+        if hobo_specific_set:
             missing = []
             if not system_node_subnet_id:
                 missing.append("--system-node-subnet-id")
@@ -4318,6 +4332,7 @@ class AKSManagedClusterContext(BaseAKSContext):
             raise RequiredArgumentMissingError(
                 '"--disable-hosted-system" requires "--sku automatic".'
             )
+        _ = any_trio_set  # reserved for future per-flag gating
 
     def _get_enable_private_cluster(self, enable_validation: bool = False) -> bool:
         """Internal function to obtain the value of enable_private_cluster.
@@ -7056,6 +7071,10 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         :return: the ManagedCluster object
         """
         self._ensure_mc(mc)
+
+        # Run BYO HOBO trio validation first so clearer errors surface before the
+        # generic --apiserver-subnet-id checks inside _get_apiserver_subnet_id.
+        self.context._validate_byo_hobo_subnets()
 
         api_server_access_profile = None
         api_server_authorized_ip_ranges = self.context.get_api_server_authorized_ip_ranges()
