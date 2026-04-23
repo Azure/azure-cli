@@ -686,8 +686,9 @@ class VMCustomImageTest(ScenarioTest):
             'nsg': 'nsg',
         })
 
-        self.cmd('vm create -g {rg} -n {vm2} --image Debian:debian-10:10:latest --storage-sku standard_lrs --data-disk-sizes-gb 1 1 1 1 '
-                 '--admin-username sdk-test-admin --admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} --size Standard_B2ms --nsg-rule NONE')
+        self.cmd('vm create -g {rg} -n {vm2} --image Debian:debian-10:10:latest --storage-sku standard_lrs '
+                 '--data-disk-sizes-gb 1 1 1 1 --admin-username sdk-test-admin --admin-password testPassword0 '
+                 '--subnet {subnet} --vnet-name {vnet} --size Standard_D2s_v3 --nsg-rule NONE')
         data_disks = self.cmd('vm show -g {rg} -n {vm2}').get_output_in_json()['storageProfile']['dataDisks']
         self.kwargs['disk_0_name'] = data_disks[0]['name']
         self.kwargs['disk_2_name'] = data_disks[2]['name']
@@ -707,7 +708,7 @@ class VMCustomImageTest(ScenarioTest):
         self.cmd('network nsg create -g {rg} -n {nsg}')
 
         self.cmd('vmss create -g {rg} -n vmss2 --image {image2} --admin-username sdk-test-admin --admin-password testPassword0 '
-                 '--authentication-type password --orchestration-mode Uniform --lb-sku Standard --nsg {nsg} --vm-sku Standard_B2ms', checks=[
+                 '--authentication-type password --orchestration-mode Uniform --lb-sku Standard --nsg {nsg} --vm-sku Standard_D2s_v3', checks=[
             self.check('vmss.virtualMachineProfile.storageProfile.imageReference.resourceGroup', '{rg}'),
             self.check('vmss.virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage'),
             self.check("length(vmss.virtualMachineProfile.storageProfile.dataDisks)", 2),
@@ -902,8 +903,9 @@ class VMCreateWithSpecializedUnmanagedDiskTest(ScenarioTest):
         })
 
         # create a vm with unmanaged os disk
-        self.cmd('vm create -g {rg} -n vm1 --image Debian:debian-10:10:latest --use-unmanaged-disk --admin-username ubuntu --admin-password testPassword0 '
-                 '--authentication-type password --subnet {subnet} --vnet-name {vnet} --size Standard_B2ms --nsg-rule NONE')
+        self.cmd('vm create -g {rg} -n vm1 --image Debian:debian-10:10:latest --use-unmanaged-disk '
+                 '--admin-username ubuntu --admin-password testPassword0 --authentication-type password '
+                 '--subnet {subnet} --vnet-name {vnet} --size Standard_D2s_v3 --nsg-rule NONE')
 
         # Disable default outbound access
         self.cmd(
@@ -915,8 +917,8 @@ class VMCreateWithSpecializedUnmanagedDiskTest(ScenarioTest):
         self.cmd('vm delete -g {rg} -n vm1 -y')
 
         # create a vm by attaching the OS disk from the deleted VM
-        self.cmd('vm create -g {rg} -n vm2 --attach-os-disk {disk_uri} --os-type linux --size Standard_B2ms '
-                 '--use-unmanaged-disk --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE',
+        self.cmd('vm create -g {rg} -n vm2 --attach-os-disk {disk_uri} --os-type linux --use-unmanaged-disk '
+                 '--subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --size Standard_D2s_v3',
                  checks=self.check('powerState', 'VM running'))
 
     @AllowLargeResponse(size_kb=99999)
@@ -1361,7 +1363,8 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         ]).get_output_in_json()
         # create a vm
         vm = self.cmd('vm create -n {vm_name} -g {rg} --image {vm_image} --attach-data-disks {disk_name1} '
-                      '--admin-username rp_disk_test --size Standard_B2ms --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE').get_output_in_json()
+                      '--admin-username rp_disk_test --size Standard_D2s_v3 --subnet {subnet} --vnet-name {vnet} '
+                      '--nsg-rule NONE').get_output_in_json()
 
         # Disable default outbound access
         self.cmd(
@@ -1951,7 +1954,8 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
             'vnet': 'vnet1'
         })
         self.cmd('vm create -g {rg} -n vm --image Win2022Datacenter --admin-username AzureUser '
-                 '--admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --size Standard_B2ms')
+                 '--admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE '
+                 '--size Standard_D2s_v3')
 
         # Disable default outbound access
         self.cmd(
@@ -3950,8 +3954,9 @@ class VMDiskAttachDetachTest(ScenarioTest):
             'vnet': 'vnet1'
         })
 
-        self.cmd('vm create -g {rg} --location {loc} -n {vm} --admin-username admin123 --image OpenLogic:CentOS:7.5:latest '
-                 '--admin-password testPassword0 --authentication-type password --size Standard_B2ms --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+        self.cmd('vm create -g {rg} --location {loc} -n {vm} --admin-username admin123 --admin-password testPassword0 '
+                 '--image OpenLogic:CentOS:7.5:latest --authentication-type password --size Standard_D2s_v3 '
+                 '--subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
 
         # Disable default outbound access
         self.cmd(
@@ -4406,8 +4411,9 @@ class VMCreateCustomDataScenarioTest(ScenarioTest):
             'vnet': 'vnet1'
         })
 
-        self.cmd('vm create -g {rg} -n {vm} --admin-username {username} --authentication-type {auth} --image {image} --size Standard_B2ms '
-                 '--ssh-key-value \'{ssh_key}\' -l {loc} --user-data \'{user_data}\' --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+        self.cmd('vm create -g {rg} -n {vm} --admin-username {username} --authentication-type {auth} --image {image} '
+                 '--size Standard_D2s_v3 --ssh-key-value \'{ssh_key}\' -l {loc} --user-data \'{user_data}\' '
+                 '--subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
 
         # Disable default outbound access
         self.cmd(
@@ -8126,7 +8132,7 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} '
                  '--os-type linux -p publisher1 -f offer1 -s sku1 --hyper-v-generation v1')
         self.cmd('vm create -g {rg} -n {vm} --image Debian:debian-10:10:latest --data-disk-sizes-gb 10 --admin-username clitest1 '
-                 '--generate-ssh-key --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+                 '--generate-ssh-key --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --size Standard_D2s_v3')
 
         # Disable default outbound access
         self.cmd(
@@ -8333,7 +8339,8 @@ class VMGalleryImage(ScenarioTest):
             self.check('name', '{image}'),
             self.check('features', None),
         ])
-        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username clitest1 --generate-ssh-key --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:16.04-LTS:latest --admin-username clitest1 '
+                 '--generate-ssh-key --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --size Standard_D2s_v3')
 
         # Disable default outbound access
         self.cmd(
@@ -8367,8 +8374,8 @@ class VMGalleryImage(ScenarioTest):
             self.check('name', '{image}'),
             self.check('features', None),
         ])
-        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username clitest1 '
-                 '--generate-ssh-key --subnet {subnet} --vnet-name {vnet} --size Standard_B2ms --nsg-rule NONE')
+        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:16.04-LTS:latest --admin-username clitest1 '
+                 '--generate-ssh-key --subnet {subnet} --vnet-name {vnet} --size Standard_D2s_v3 --nsg-rule NONE')
 
         # Disable default outbound access
         self.cmd(
@@ -8378,7 +8385,7 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('vm generalize -g {rg} -n {vm}')
         self.cmd('image create -g {rg} -n {captured} --source {vm}')
         self.cmd('sig image-version create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} '
-                 '--gallery-image-version {version} --managed-image {captured} --end-of-life-date "2025-12-31" --block-deletion-before-end-of-life true', checks=[
+                 '--gallery-image-version {version} --managed-image {captured} --end-of-life-date "2026-12-31" --block-deletion-before-end-of-life true', checks=[
             self.check('safetyProfile.blockDeletionBeforeEndOfLife', True)
         ])
         self.cmd('sig image-version update -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version} --block-deletion-before-end-of-life False', checks=[
@@ -11362,7 +11369,8 @@ class VMAutoShutdownScenarioTest(ScenarioTest):
             'vnet': 'vnet1'
         })
         self.cmd('vm create -g {rg} -n {vm} --image OpenLogic:CentOS:7.5:latest --nsg-rule NONE --admin-username azureuser '
-                 '--admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet}')
+                 '--admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} '
+                 '--size Standard_D2s_v3')
 
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
@@ -11862,8 +11870,9 @@ class VMAutoUpdateScenarioTest(ScenarioTest):
             'subnet': 'subnet1',
             'vnet': 'vnet1'
         })
-        self.cmd('vm create -g {rg} -n vm1 --image Canonical:UbuntuServer:18.04-LTS:latest --enable-agent --patch-mode AutomaticByPlatform '
-                 '--generate-ssh-keys --nsg-rule NONE --admin-username vmtest --subnet {subnet} --vnet-name {vnet} --size Standard_B2ms')
+        self.cmd('vm create -g {rg} -n vm1 --image Canonical:UbuntuServer:16.04-LTS:latest --enable-agent '
+                 '--patch-mode AutomaticByPlatform --generate-ssh-keys --nsg-rule NONE --admin-username vmtest '
+                 '--subnet {subnet} --vnet-name {vnet} --size Standard_D2s_v3')
 
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
