@@ -98,13 +98,6 @@ def retention_validator(ns):
             raise CLIError('Invalid value for --backup-retention. Allowed values: 7 to 35 days.')
 
 
-def node_count_validator(ns):
-    if ns.cluster_size is not None:
-        val = ns.cluster_size
-        if not 1 <= int(val) <= 10:
-            raise CLIError('Invalid value for --node-count. Allowed values: 1 to 10 for an elastic cluster.')
-
-
 def db_renaming_cluster_validator(ns):
     if ns.database_name is not None and ns.create_cluster.lower() != 'elasticcluster':
         raise ArgumentUsageError('The --database-name argument can only be used '
@@ -176,7 +169,7 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     sku_info = {k.lower(): v for k, v in sku_info.items()}
     single_az = list_location_capability_info['single_az']
     geo_backup_supported = list_location_capability_info['geo_backup_supported']
-    _cluster_validator(create_cluster, cluster_size, auto_grow, version, tier, instance)
+    _cluster_validator(create_cluster, cluster_size, auto_grow, version, instance)
     _network_arg_validator(subnet, public_access)
     _pg_tier_validator(tier, sku_info)  # need to be validated first
     if tier is None and instance is not None:
@@ -205,19 +198,14 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
                                  admin_name, admin_id, admin_type, instance)
 
 
-def _cluster_validator(create_cluster, cluster_size, auto_grow, version, tier, instance):
+def _cluster_validator(create_cluster, cluster_size, auto_grow, version, instance):
     if (create_cluster and create_cluster.lower() == 'elasticcluster') or \
        (instance and instance.cluster and instance.cluster.cluster_size > 0):
         if instance is None and version != '17':
             raise ValidationError('Elastic cluster is only supported for PostgreSQL version 17.')
 
-        if cluster_size and instance and instance.cluster.cluster_size > cluster_size:
-            raise ValidationError('Updating node count cannot be less than the current size of {} nodes.'
-                                  .format(instance.cluster.cluster_size))
         if auto_grow and auto_grow.lower() != 'disabled':
-            raise ValidationError('Storage Auto-grow is currently not supported for elastic cluster.')
-        if tier and tier.lower() == 'burstable':
-            raise ValidationError('Burstable tier is currently not supported for elastic cluster.')
+            raise ValidationError('Storage auto-grow is not supported for elastic cluster.')
 
     if cluster_size and instance and not instance.cluster:
         raise ValidationError('Node count can only be specified for an elastic cluster.')
