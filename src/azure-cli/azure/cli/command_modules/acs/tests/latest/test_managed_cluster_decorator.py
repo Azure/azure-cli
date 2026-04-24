@@ -7102,6 +7102,54 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             dec_3.process_attach_acr(mc_3)
         ensure_assignment.assert_called_once_with(self.cmd, "test_service_principal", "test_registry_id", False, True, None)
 
+    def test_set_up_hosted_system_profile(self):
+        system_subnet = "/subscriptions/s/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/v/subnets/system"
+        node_subnet = "/subscriptions/s/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/v/subnets/node"
+        api_subnet = "/subscriptions/s/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/v/subnets/api"
+
+        dec_1 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "sku": "automatic",
+                "system_node_subnet_id": system_subnet,
+                "node_subnet_id": node_subnet,
+                "apiserver_subnet_id": api_subnet,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+        cli_default_pool = self.models.ManagedClusterAgentPoolProfile(name="nodepool1")
+        mc_1.agent_pool_profiles = [cli_default_pool]
+
+        dec_1.set_up_hosted_system_profile(mc_1)
+
+        self.assertTrue(mc_1.hosted_system_profile.enabled)
+        self.assertEqual(mc_1.hosted_system_profile.system_node_subnet_id, system_subnet)
+        self.assertEqual(mc_1.hosted_system_profile.node_subnet_id, node_subnet)
+        self.assertIsNone(mc_1.agent_pool_profiles)
+
+        dec_2 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "sku": "automatic",
+                "enable_hosted_system": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_2 = self.models.ManagedCluster(location="test_location")
+        dec_2.context.attach_mc(mc_2)
+        cli_default_pool = self.models.ManagedClusterAgentPoolProfile(name="nodepool1")
+        user_pool = self.models.ManagedClusterAgentPoolProfile(name="userpool")
+        mc_2.agent_pool_profiles = [cli_default_pool, user_pool]
+
+        dec_2.set_up_hosted_system_profile(mc_2)
+
+        self.assertTrue(mc_2.hosted_system_profile.enabled)
+        self.assertEqual(mc_2.agent_pool_profiles, [user_pool])
+
     def test_set_up_network_profile(self):
         # default value in `aks_create`
         dec_1 = AKSManagedClusterCreateDecorator(
