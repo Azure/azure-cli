@@ -1172,7 +1172,7 @@ jobs:
   - bash: |
       set -ev
       if [[ "$(System.PullRequest.TargetBranch)" != "" ]]; then
-        # If CI is set to shallow fetch, target branch should be expilictly fetched.
+        # If CI is set to shallow fetch, target branch should be explicitly fetched.
         git fetch origin --depth=1 $(System.PullRequest.TargetBranch)
         python scripts/ci/validate_external_source_urls.py --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch)
       else
