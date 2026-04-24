@@ -10,10 +10,10 @@ from azure.core.exceptions import HttpResponseError
 
 from azure.mgmt.web import WebSiteManagementClient
 from knack.util import CLIError
-from azure.cli.core.azclierror import (ArgumentUsageError,
-                                       InvalidArgumentValueError,
+from azure.cli.core.azclierror import (InvalidArgumentValueError,
                                        MutuallyExclusiveArgumentError,
-                                       AzureResponseError)
+                                       AzureResponseError,
+                                       ArgumentUsageError)
 from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          update_git_token, add_hostname,
                                                          update_site_configs,
@@ -27,7 +27,6 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          get_streaming_log,
                                                          download_historical_logs,
                                                          validate_container_app_create_options,
-                                                         create_webapp,
                                                          restore_deleted_webapp,
                                                          list_snapshots,
                                                          restore_snapshot,
@@ -35,7 +34,8 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          add_github_actions,
                                                          update_app_settings,
                                                          update_application_settings_polling,
-                                                         update_webapp)
+                                                         update_webapp,
+                                                         create_webapp)
 
 # pylint: disable=line-too-long
 from azure.cli.core.profiles import ResourceType
