@@ -444,10 +444,12 @@ class VMGeneralizeScenarioTest(ScenarioTest):
         })
 
         # Create a public IP resource with service tag
-        self.cmd('network public-ip create --name {pubip} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
+        self.cmd('network public-ip create --name {pubip} -g {rg}')
 
-        self.cmd('vm create -g {rg} --location {loc} -n {vm} --admin-username ubuntu --image OpenLogic:CentOS:7.5:latest --public-ip-address {pubip} '
-                 '--admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+        self.cmd('vm create -g {rg} --location {loc} -n {vm} --admin-username ubuntu '
+                 '--image OpenLogic:CentOS:7.5:latest --public-ip-address {pubip} --admin-password testPassword0 '
+                 '--authentication-type password --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE '
+                 '--size Standard_D2s_v3')
 
         # Disable default outbound access
         self.cmd(
