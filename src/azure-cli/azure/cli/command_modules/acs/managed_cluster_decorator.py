@@ -6454,6 +6454,19 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             mc.service_principal_profile = service_principal_profile
         return mc
 
+    def _get_byo_hosted_system_subnet_ids(self) -> List[str]:
+        if not self.context.get_enable_hosted_system():
+            return []
+
+        subnet_ids = []
+        seen = set()
+        for raw_key in ("system_node_subnet_id", "node_subnet_id", "apiserver_subnet_id"):
+            subnet_id = self.context.raw_param.get(raw_key)
+            if subnet_id and subnet_id not in seen:
+                subnet_ids.append(subnet_id)
+                seen.add(subnet_id)
+        return subnet_ids
+
     def process_add_role_assignment_for_vnet_subnet(self, mc: ManagedCluster) -> None:
         """Add role assignment for vent subnet.
 
@@ -6469,6 +6482,10 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         :return: None
         """
         self._ensure_mc(mc)
+
+        # Validate before granting roles so a malformed BYO trio does not leave
+        # partial Network Contributor assignments behind.
+        self.context.validate_byo_hobo_subnets()
 
         need_post_creation_vnet_permission_granting = False
         vnet_subnet_id = self.context.get_vnet_subnet_id()
@@ -6514,6 +6531,50 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                     ):
                         logger.warning(
                             "Could not create a role assignment for subnet. Are you an Owner on this subscription?"
+                        )
+        byo_hosted_system_subnet_ids = self._get_byo_hosted_system_subnet_ids()
+        if byo_hosted_system_subnet_ids and not skip_subnet_role_assignment:
+            service_principal_profile = mc.service_principal_profile
+            assign_identity = self.context.get_assign_identity()
+            pending_post_creation_subnets = []
+            if service_principal_profile is None and not assign_identity:
+                for subnet_id in byo_hosted_system_subnet_ids:
+                    if not self.context.external_functions.subnet_role_assignment_exists(self.cmd, subnet_id):
+                        pending_post_creation_subnets.append(subnet_id)
+                if pending_post_creation_subnets:
+                    need_post_creation_vnet_permission_granting = True
+                    self.context.set_intermediate(
+                        "byo_hosted_system_subnets_pending_grant",
+                        pending_post_creation_subnets,
+                        overwrite_exists=True,
+                    )
+            else:
+                identity_object_id = None
+                if assign_identity:
+                    identity_object_id = self.context.get_user_assigned_identity_object_id()
+                for subnet_id in byo_hosted_system_subnet_ids:
+                    if self.context.external_functions.subnet_role_assignment_exists(self.cmd, subnet_id):
+                        continue
+                    if assign_identity:
+                        added = self.context.external_functions.add_role_assignment(
+                            self.cmd,
+                            "Network Contributor",
+                            identity_object_id,
+                            is_service_principal=False,
+                            scope=subnet_id,
+                        )
+                    else:
+                        added = self.context.external_functions.add_role_assignment(
+                            self.cmd,
+                            "Network Contributor",
+                            service_principal_profile.client_id,
+                            scope=subnet_id,
+                        )
+                    if not added:
+                        logger.warning(
+                            "Could not create a role assignment for subnet %s. "
+                            "Are you an Owner on this subscription?",
+                            subnet_id,
                         )
         # store need_post_creation_vnet_permission_granting as an intermediate
         self.context.set_intermediate(
@@ -7767,16 +7828,27 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             # Grant vnet permission to system assigned identity RIGHT AFTER the cluster is put, this operation can
             # reduce latency for the role assignment take effect
             instant_cluster = self.client.get(self.context.get_resource_group_name(), self.context.get_name())
-            if not self.context.external_functions.add_role_assignment(
-                self.cmd,
-                "Network Contributor",
-                instant_cluster.identity.principal_id,
-                scope=self.context.get_vnet_subnet_id(),
-                is_service_principal=False,
-            ):
-                logger.warning(
-                    "Could not create a role assignment for subnet. Are you an Owner on this subscription?"
-                )
+            scopes = []
+            vnet_subnet_id = self.context.get_vnet_subnet_id()
+            if vnet_subnet_id:
+                scopes.append(vnet_subnet_id)
+            byo_hosted_system_subnet_ids = self.context.get_intermediate(
+                "byo_hosted_system_subnets_pending_grant", default_value=[]
+            )
+            for subnet_id in byo_hosted_system_subnet_ids or []:
+                if subnet_id and subnet_id not in scopes:
+                    scopes.append(subnet_id)
+            for scope in scopes:
+                if not self.context.external_functions.add_role_assignment(
+                    self.cmd,
+                    "Network Contributor",
+                    instant_cluster.identity.principal_id,
+                    scope=scope,
+                    is_service_principal=False,
+                ):
+                    logger.warning(
+                        "Could not create a role assignment for subnet. Are you an Owner on this subscription?"
+                    )
 
     # pylint: disable=too-many-locals
     def postprocessing_after_mc_created(self, cluster: ManagedCluster) -> None:

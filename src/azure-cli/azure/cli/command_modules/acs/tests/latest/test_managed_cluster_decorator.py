@@ -6885,6 +6885,101 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
                 False,
             )
 
+        # BYO VNet for Managed System Pool with user-assigned identity grants all BYO subnets.
+        system_subnet = "/subscriptions/s/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/v/subnets/system"
+        node_subnet = "/subscriptions/s/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/v/subnets/node"
+        api_subnet = "/subscriptions/s/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/v/subnets/api"
+        identity_obj = Mock(
+            principal_id="test_object_id",
+        )
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.AKSManagedClusterContext.get_identity_by_msi_client",
+            return_value=identity_obj,
+        ):
+            dec_6 = AKSManagedClusterCreateDecorator(
+                self.cmd,
+                self.client,
+                {
+                    "enable_managed_identity": True,
+                    "sku": "automatic",
+                    "system_node_subnet_id": system_subnet,
+                    "node_subnet_id": node_subnet,
+                    "apiserver_subnet_id": api_subnet,
+                    "skip_subnet_role_assignment": False,
+                    "assign_identity": "test_assign_identity",
+                },
+                ResourceType.MGMT_CONTAINERSERVICE,
+            )
+            mc_6 = self.models.ManagedCluster(location="test_location")
+            dec_6.context.attach_mc(mc_6)
+            with patch(
+                "azure.cli.command_modules.acs.managed_cluster_decorator.subnet_role_assignment_exists",
+                return_value=False,
+            ), patch(
+                "azure.cli.command_modules.acs.managed_cluster_decorator.add_role_assignment",
+                return_value=True,
+            ) as add_role_assignment:
+                dec_6.process_add_role_assignment_for_vnet_subnet(mc_6)
+            add_role_assignment.assert_has_calls([
+                call(
+                    self.cmd,
+                    "Network Contributor",
+                    "test_object_id",
+                    is_service_principal=False,
+                    scope=system_subnet,
+                ),
+                call(
+                    self.cmd,
+                    "Network Contributor",
+                    "test_object_id",
+                    is_service_principal=False,
+                    scope=node_subnet,
+                ),
+                call(
+                    self.cmd,
+                    "Network Contributor",
+                    "test_object_id",
+                    is_service_principal=False,
+                    scope=api_subnet,
+                ),
+            ])
+            self.assertEqual(add_role_assignment.call_count, 3)
+            self.assertEqual(
+                dec_6.context.get_intermediate("need_post_creation_vnet_permission_granting"),
+                False,
+            )
+
+        # BYO VNet for Managed System Pool with system-assigned identity defers all BYO subnets.
+        dec_7 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_managed_identity": True,
+                "sku": "automatic",
+                "system_node_subnet_id": system_subnet,
+                "node_subnet_id": node_subnet,
+                "apiserver_subnet_id": api_subnet,
+                "skip_subnet_role_assignment": False,
+                "assign_identity": None,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_7 = self.models.ManagedCluster(location="test_location")
+        dec_7.context.attach_mc(mc_7)
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.subnet_role_assignment_exists",
+            return_value=False,
+        ):
+            dec_7.process_add_role_assignment_for_vnet_subnet(mc_7)
+        self.assertEqual(
+            dec_7.context.get_intermediate("need_post_creation_vnet_permission_granting"),
+            True,
+        )
+        self.assertEqual(
+            dec_7.context.get_intermediate("byo_hosted_system_subnets_pending_grant"),
+            [system_subnet, node_subnet, api_subnet],
+        )
+
     def test_process_attach_acr(self):
         # default value in `aks_create`
         dec_1 = AKSManagedClusterCreateDecorator(
@@ -8616,6 +8711,49 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             scope="test_vnet_subnet_id",
             is_service_principal=False,
         )
+
+        dec_2 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_2 = self.models.ManagedCluster(location="test_location")
+        dec_2.context.attach_mc(mc_2)
+        dec_2.context.set_intermediate("need_post_creation_vnet_permission_granting", True)
+        dec_2.context.set_intermediate(
+            "byo_hosted_system_subnets_pending_grant",
+            ["test_system_subnet_id", "test_node_subnet_id", "test_api_subnet_id"],
+        )
+        self.client.get = Mock(return_value=Mock(identity=Mock(principal_id="test_principal_id")))
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.add_role_assignment", return_value=True
+        ) as mock_add:
+            dec_2.immediate_processing_after_request(mc_2)
+        mock_add.assert_has_calls([
+            call(
+                self.cmd,
+                "Network Contributor",
+                "test_principal_id",
+                scope="test_system_subnet_id",
+                is_service_principal=False,
+            ),
+            call(
+                self.cmd,
+                "Network Contributor",
+                "test_principal_id",
+                scope="test_node_subnet_id",
+                is_service_principal=False,
+            ),
+            call(
+                self.cmd,
+                "Network Contributor",
+                "test_principal_id",
+                scope="test_api_subnet_id",
+                is_service_principal=False,
+            ),
+        ])
+        self.assertEqual(mock_add.call_count, 3)
 
     def test_postprocessing_after_mc_created(self):
         dec_1 = AKSManagedClusterCreateDecorator(
