@@ -5366,7 +5366,7 @@ class NetworkVNetScenarioTest(ScenarioTest):
         self.cmd('network vnet check-ip-address -g {rg} -n {vnet} --ip-address 10.0.0.0',
                  checks=self.check('available', False))
 
-        self.cmd('network vnet list', checks=[
+        self.cmd('network vnet list -g {rg}', checks=[
             self.check('type(@)', 'array'),
             self.check("length([?type == '{rt}']) == length(@)", True)
         ])
@@ -5374,7 +5374,7 @@ class NetworkVNetScenarioTest(ScenarioTest):
             self.check('type(@)', 'array'),
             self.check("length([?type == '{rt}']) == length(@)", True),
         ])
-        self.cmd("network vnet list -o table")
+        self.cmd("network vnet list -o table -g {rg}")
         self.cmd('network vnet show --resource-group {rg} --name {vnet}', checks=[
             self.check('type(@)', 'object'),
             self.check('name', '{vnet}'),
