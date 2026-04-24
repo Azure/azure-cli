@@ -74,3 +74,37 @@ if ($installed_version -ne $artifact_version){
 # Test bundled pip with extension installation
 & $az_full_path extension add -n account
 & $az_full_path self-test
+
+# ---------------------------------------------------------------------
+# azps.ps1 wrapper regression tests
+# ---------------------------------------------------------------------
+$azps_full_path = Join-Path (Split-Path $az_full_path -Parent) "azps.ps1"
+if (-not (Test-Path $azps_full_path)) {
+    Write-Output "azps.ps1 was not installed at $azps_full_path"
+    Exit 1
+}
+
+# Baseline: the wrapper runs and --version returns success.
+& $azps_full_path --version
+if ($LASTEXITCODE -ne 0) {
+    Write-Output "azps.ps1 --version returned $LASTEXITCODE (expected 0)"
+    Exit 1
+}
+
+# A .ps1 wrapper must propagate non-zero exit codes from the
+# child process. Unknown commands exit with code 2; an unfixed wrapper
+# would exit 0 here.
+& $azps_full_path this-command-does-not-exist-xyz *> $null
+if ($LASTEXITCODE -eq 0) {
+    Write-Output "azps.ps1 did not propagate a failure exit code"
+    Exit 1
+}
+
+# When pwsh.exe invokes a .ps1 via
+# -Command, the script's exit code is only surfaced if the script
+# itself calls 'exit N'.
+& pwsh.exe -NoProfile -Command "& '$azps_full_path' this-command-does-not-exist-xyz *> `$null; exit `$LASTEXITCODE"
+if ($LASTEXITCODE -eq 0) {
+    Write-Output "azps.ps1 exit code swallowed when invoked via 'pwsh.exe -Command'"
+    Exit 1
+}
