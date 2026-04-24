@@ -15221,16 +15221,16 @@ spec:
     @AKSCustomResourceGroupPreparer(
         random_name_length=17, name_prefix="clitest", location="centraluseuap"
     )
-    def test_aks_managed_gateway_requires_service_mesh(
+    def test_aks_managed_gateway_without_gateway_implementation(
         self, resource_group, resource_group_location
     ):
         """
-        Verify that enabling managed Gateway API requires a Gateway API implementation (e.g., Azure Service Mesh).
+        Verify that managed Gateway API can be enabled without a Gateway API implementation
+        (e.g., Azure Service Mesh) on the cluster.
 
         This test:
-        - Attempts and fails to create a cluster with --enable-gateway-api without ASM enabled.
-        - Creates a minimal cluster.
-        - Attempts and fails to update it with --enable-gateway-api (still without ASM).
+        - Creates a cluster with --enable-gateway-api but no gateway implementation enabled.
+        - Disables and re-enables Gateway API on the existing cluster.
         """
 
         # reset the count so in replay mode the random names will start with 0
@@ -15246,34 +15246,46 @@ spec:
             }
         )
 
-        # Attempt and expect failure to create a cluster with Gateway API but without ASM
-        create_with_gateway_cmd = (
+        # Create a cluster with Gateway API enabled and no gateway implementation
+        create_cmd = (
             "aks create --resource-group={resource_group} --name={name} "
             "--enable-app-routing "
             "--enable-gateway-api "
             "--ssh-key-value={ssh_key_value} -o json "
         )
-        self.cmd(create_with_gateway_cmd, expect_failure=True)
-
-        # Create a minimal cluster without Gateway API or ASM
-        create_minimal_cmd = (
-            "aks create --resource-group={resource_group} --name={name} "
-            "--enable-app-routing "
-            "--ssh-key-value={ssh_key_value} -o json"
-        )
         self.cmd(
-            create_minimal_cmd,
+            create_cmd,
             checks=[
                 self.check("provisioningState", "Succeeded"),
+                self.check("ingressProfile.gatewayApi.installation", "Standard"),
             ],
         )
 
-        # Attempt and expect failure to enable Gateway API on an existing cluster without ASM
-        update_enable_gateway_cmd = (
+        # Disable Gateway API
+        disable_cmd = (
+            "aks update --resource-group={resource_group} --name={name} "
+            "--disable-gateway-api "
+        )
+        self.cmd(
+            disable_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("ingressProfile.gatewayApi.installation", "Disabled"),
+            ],
+        )
+
+        # Re-enable Gateway API
+        enable_cmd = (
             "aks update --resource-group={resource_group} --name={name} "
             "--enable-gateway-api "
         )
-        self.cmd(update_enable_gateway_cmd, expect_failure=True)
+        self.cmd(
+            enable_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("ingressProfile.gatewayApi.installation", "Standard"),
+            ],
+        )
 
         # Cleanup
         delete_cmd = "aks delete --resource-group={resource_group} --name={name} --yes --no-wait"

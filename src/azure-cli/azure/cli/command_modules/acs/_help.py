@@ -621,7 +621,7 @@ parameters:
     short-summary: Enable AI toolchain operator to the cluster.
   - name: --enable-gateway-api
     type: bool
-    short-summary: Enable managed installation of Gateway API CRDs from the standard release channel. Requires at least one managed Gateway API ingress provider to be enabled.
+    short-summary: Enable managed installation of Gateway API CRDs from the standard release channel.
   - name: --bootstrap-container-registry-resource-id
     type: string
     short-summary: Configure container registry resource ID. Must use "Cache" as bootstrap artifact source.
@@ -731,8 +731,8 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --node-provisioning-mode Auto --node-provisioning-default-pools None
   - name: Create a Kubernetes cluster with KataVmIsolation enabled.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --os-sku AzureLinux --vm-size Standard_D4s_v3 --workload-runtime KataVmIsolation --node-count 1
-  - name: Create a kubernetes cluster with the Azure Service Mesh addon enabled with a managed installation of Gateway API CRDs from the standard release channel.
-    text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-azure-service-mesh --enable-gateway-api
+  - name: Create a kubernetes cluster with a managed installation of Gateway API CRDs from the standard release channel.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-gateway-api
 """
 
 helps["aks update"] = """
@@ -1158,7 +1158,7 @@ parameters:
     short-summary: Disable AI toolchain operator.
   - name: --enable-gateway-api
     type: bool
-    short-summary: Enable managed installation of Gateway API CRDs from the standard release channel. Requires at least one managed Gateway API ingress provider to be enabled.
+    short-summary: Enable managed installation of Gateway API CRDs from the standard release channel.
   - name: --disable-gateway-api
     type: bool
     short-summary: Disable managed installation of Gateway API CRDs.
