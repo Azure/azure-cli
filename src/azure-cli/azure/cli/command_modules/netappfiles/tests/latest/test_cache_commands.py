@@ -2,20 +2,81 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+import json
+import os
+import sys
+import time
 import unittest
 
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, live_only
+from azure.cli.testsdk.decorators import serial_test
 
 LOCATION = "eastus"
 VNET_LOCATION = "eastus"
 POOL_DEFAULT = "--service-level Premium --size 4"
 
+# Env-var gate for the interactive on-prem peering test. Even with @live_only(),
+# we don't want scheduled live pipelines to run a test that waits up to an hour
+# for a human to SSH into a CVO and paste commands. Engineer must opt-in.
+INTERACTIVE_ENV_VAR = "ANF_ALLOW_INTERACTIVE"
+CACHE_STATE_POLL_INTERVAL_SECONDS = 30
+CACHE_STATE_POLL_TIMEOUT_SECONDS = 60 * 60  # 1 hour budget per wait
+CACHE_TERMINAL_STATES = {"Succeeded", "Failed", "Cancelled"}
+
 # No tidy up of tests required. The resource group is automatically removed
-
+#
 # Cache Tests are failing due issues in the environment, no way to test until fixed re enable when fixed
-
+#
 # As a refactoring consideration for the future, consider use of authoring patterns described here
 # https://github.com/Azure/azure-cli/blob/dev/doc/authoring_tests.md#sample-5-get-more-from-resourcegrouppreparer
+#
+# -----------------------------------------------------------------------------
+# How to run these tests
+# -----------------------------------------------------------------------------
+# All cache tests are decorated with @live_only(), so they are skipped unless
+# AZURE_TEST_RUN_LIVE is set. `test_create_delete_cache` additionally requires
+# ANF_ALLOW_INTERACTIVE=1 because it pauses for an engineer to perform two
+# manual on-prem (CVO) peering steps; it polls cacheState as the sync signal
+# and prints copy-pasteable commands to STDERR.
+#
+# IMPORTANT: pass `-s` (a.k.a. `--capture=no`) to pytest so the on-prem
+# instruction blocks written to stderr are shown in real time. Without `-s`
+# pytest will buffer the output and you won't see the commands until the test
+# ends (long after the engineer needed them).
+#
+# PowerShell (Windows) - run the full interactive create/delete flow:
+#
+#   $env:AZURE_TEST_RUN_LIVE = "True"
+#   $env:ANF_ALLOW_INTERACTIVE = "1"
+#   pytest -s -vv `
+#     src/azure-cli/azure/cli/command_modules/netappfiles/tests/latest/test_cache_commands.py::AzureNetAppFilesCacheServiceScenarioTest::test_create_delete_cache
+#
+# PowerShell - run all live cache tests except the interactive one
+# (leave ANF_ALLOW_INTERACTIVE unset so the interactive test is skipped):
+#
+#   $env:AZURE_TEST_RUN_LIVE = "True"
+#   Remove-Item Env:ANF_ALLOW_INTERACTIVE -ErrorAction SilentlyContinue
+#   pytest -s -vv `
+#     src/azure-cli/azure/cli/command_modules/netappfiles/tests/latest/test_cache_commands.py
+#
+# bash/zsh equivalent:
+#
+#   AZURE_TEST_RUN_LIVE=True ANF_ALLOW_INTERACTIVE=1 \
+#     pytest -s -vv \
+#     src/azure-cli/azure/cli/command_modules/netappfiles/tests/latest/test_cache_commands.py::AzureNetAppFilesCacheServiceScenarioTest::test_create_delete_cache
+#
+# Via azdev (also live):
+#
+#   $env:AZURE_TEST_RUN_LIVE = "True"
+#   $env:ANF_ALLOW_INTERACTIVE = "1"
+#   azdev test test_create_delete_cache --live --pytest-args "-s -vv"
+#
+# Useful pytest flags:
+#   -s / --capture=no   show stderr/stdout live (REQUIRED for the interactive test)
+#   -vv                 verbose test names + full assert diffs
+#   -k <expr>           filter by test name substring
+#   --log-cli-level=INFO show CLI logging in real time
+# -----------------------------------------------------------------------------
 
 
 class AzureNetAppFilesCacheServiceScenarioTest(ScenarioTest):
@@ -68,7 +129,104 @@ class AzureNetAppFilesCacheServiceScenarioTest(ScenarioTest):
                         (account_name, pool_name, cache_name, LOCATION,
                          file_path, cache_subnet_id, peering_subnet_id)).get_output_in_json()
 
-    @unittest.skip('Cache Tests are failing due issues in the environment, no way to test until fixed re enable when fixed.')
+    def _wait_for_cache_state(self, account_name, pool_name, cache_name, target_states,
+                              timeout=CACHE_STATE_POLL_TIMEOUT_SECONDS,
+                              interval=CACHE_STATE_POLL_INTERVAL_SECONDS):
+        """Poll `az netappfiles cache show` until cacheState is in target_states.
+
+        Returns the cache JSON when the state is matched. Fails the test on
+        timeout, including the last observed cacheState in the failure message.
+        """
+        target_states = set(target_states)
+        deadline = time.time() + timeout
+        last_state = None
+        while time.time() < deadline:
+            cache = self.cmd("az netappfiles cache show -g {rg} -a %s -p %s -n %s" %
+                             (account_name, pool_name, cache_name)).get_output_in_json()
+            # cacheState may live at top level or under properties depending on
+            # how the SDK projects the response.
+            last_state = cache.get('cacheState') or cache.get('properties', {}).get('cacheState')
+            if last_state in target_states:
+                return cache
+            if self.is_live or self.in_recording:
+                time.sleep(interval)
+            else:
+                # In playback we never reach here (test is @live_only), but
+                # avoid a hot loop just in case.
+                break
+        self.fail("Timed out after %ds waiting for cacheState in %s; last observed state: %r" %
+                  (timeout, sorted(target_states), last_state))
+
+    @staticmethod
+    def _emit_engineer_instructions(passphrases_object, step):
+        """Print on-prem peering instructions to stderr for the engineer to act on.
+
+        Emits BOTH a labeled JSON dump (full reference) and a literal
+        copy-pasteable command block (no shell quoting added) so the engineer
+        can paste verbatim into the CVO CLI under time pressure.
+
+        `step` must be "cluster" or "vserver".
+        """
+        assert step in ("cluster", "vserver"), "step must be 'cluster' or 'vserver'"
+
+        json_dump = json.dumps(passphrases_object, indent=2, sort_keys=True)
+
+        if step == "cluster":
+            cmd_line = passphrases_object.get('clusterPeeringCommand', '<missing clusterPeeringCommand>')
+            passphrase = passphrases_object.get('clusterPeeringPassphrase', '<missing clusterPeeringPassphrase>')
+            steps = (
+                "  1. SSH into the CVO.\n"
+                "  2. Paste the COMMAND below into the CVO CLI and execute it.\n"
+                "  3. When prompted for a passphrase, paste the PASSPHRASE below.\n"
+                "     (NOTE: there is no API alternative to this step.)\n"
+            )
+            paste_block = (
+                "COMMAND:\n"
+                "%s\n\n"
+                "PASSPHRASE:\n"
+                "%s\n"
+            ) % (cmd_line, passphrase)
+            header = "ON-PREM ACTION REQUIRED: cluster peering"
+            wait_for = "VserverPeeringOfferSent"
+        else:
+            cmd_line = passphrases_object.get('vserverPeeringCommand', '<missing vserverPeeringCommand>')
+            steps = (
+                "  1. SSH into the CVO.\n"
+                "  2. Paste the COMMAND below into the CVO CLI and execute it.\n"
+                "     (NOTE: there is no API alternative to this step.)\n"
+            )
+            paste_block = (
+                "COMMAND:\n"
+                "%s\n"
+            ) % (cmd_line,)
+            header = "ON-PREM ACTION REQUIRED: vserver peering"
+            wait_for = "a terminal cacheState (Succeeded/Failed/Cancelled)"
+
+        block = (
+            "\n"
+            "================================================================\n"
+            "%s\n"
+            "================================================================\n"
+            "%s"
+            "----------------------------------------------------------------\n"
+            "FULL passphrases JSON (reference):\n"
+            "%s\n"
+            "----------------------------------------------------------------\n"
+            "COPY-PASTEABLE BLOCK (paste verbatim into CVO CLI):\n"
+            "%s"
+            "----------------------------------------------------------------\n"
+            "Test will continue polling until cacheState reaches: %s\n"
+            "================================================================\n"
+        ) % (header, steps, json_dump, paste_block, wait_for)
+
+        sys.stderr.write(block)
+        sys.stderr.flush()
+
+    @live_only()
+    @unittest.skipUnless(
+        os.environ.get(INTERACTIVE_ENV_VAR) == "1",
+        "Requires manual on-prem (CVO) peering steps; set %s=1 to run." % INTERACTIVE_ENV_VAR)
+    @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_cache_', additional_tags={'owner': 'cli_test'})
     def test_create_delete_cache(self):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
@@ -83,6 +241,34 @@ class AzureNetAppFilesCacheServiceScenarioTest(ScenarioTest):
         assert cache['originClusterInformation']['peerVserverName'] == 'vserver1'
         assert cache['originClusterInformation']['peerVolumeName'] == 'originvol1'
         assert len(cache['originClusterInformation']['peerAddresses']) == 2
+
+        # 1) Wait until the cache has emitted the cluster peering offer.
+        self._wait_for_cache_state(account_name, pool_name, cache_name,
+                                   target_states={"ClusterPeeringOfferSent"})
+
+        # 2) Fetch peering passphrase + commands and surface them to the engineer.
+        passphrases_object = self.cmd(
+            "az netappfiles cache list-peering-passphrase -g {rg} -a %s -p %s -c %s" %
+            (account_name, pool_name, cache_name)).get_output_in_json()
+        assert passphrases_object is not None
+        self._emit_engineer_instructions(passphrases_object, step="cluster")
+
+        # 3) Engineer pastes the cluster peering command + passphrase on CVO.
+        #    The service advances cacheState to VserverPeeringOfferSent on success.
+        self._wait_for_cache_state(account_name, pool_name, cache_name,
+                                   target_states={"VserverPeeringOfferSent"})
+
+        # 4) Surface the vserver peering command for the second on-prem step.
+        self._emit_engineer_instructions(passphrases_object, step="vserver")
+
+        # 5) Engineer pastes the vserver peering command on CVO.
+        #    The cache should now drive itself to a terminal state.
+        terminal_cache = self._wait_for_cache_state(account_name, pool_name, cache_name,
+                                                   target_states=CACHE_TERMINAL_STATES)
+        terminal_state = (terminal_cache.get('cacheState')
+                          or terminal_cache.get('properties', {}).get('cacheState'))
+        assert terminal_state == "Succeeded", \
+            "Cache reached terminal state %r, expected 'Succeeded'" % terminal_state
 
         # verify cache exists in list
         cache_list = self.cmd("az netappfiles cache list -g {rg} -a %s -p %s" %
@@ -118,7 +304,7 @@ class AzureNetAppFilesCacheServiceScenarioTest(ScenarioTest):
                               (account_name, pool_name)).get_output_in_json()
         assert len(cache_list) == 0
 
-    @unittest.skip('Cache Tests are failing due issues in the environment, no way to test until fixed re enable when fixed.')
+    @live_only()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_cache_', additional_tags={'owner': 'cli_test'})
     def test_list_caches(self):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
@@ -152,7 +338,7 @@ class AzureNetAppFilesCacheServiceScenarioTest(ScenarioTest):
                               (account_name, pool_name)).get_output_in_json()
         assert len(cache_list) == 0
 
-    @unittest.skip('Cache Tests are failing due issues in the environment, no way to test until fixed re enable when fixed.')
+    @live_only()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_cache_', additional_tags={'owner': 'cli_test'})
     def test_get_cache_by_name(self):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
@@ -170,7 +356,7 @@ class AzureNetAppFilesCacheServiceScenarioTest(ScenarioTest):
         cache_from_id = self.cmd("az netappfiles cache show --ids %s" % cache['id']).get_output_in_json()
         assert cache_from_id['name'] == account_name + '/' + pool_name + '/' + cache_name
 
-    @unittest.skip('Cache Tests are failing due issues in the environment, no way to test until fixed re enable when fixed.')
+    @live_only()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_cache_', additional_tags={'owner': 'cli_test'})
     def test_update_cache(self):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
@@ -192,7 +378,7 @@ class AzureNetAppFilesCacheServiceScenarioTest(ScenarioTest):
         assert cache['tags']['Tag2'] == 'Value2'
         assert cache['size'] == new_size
 
-    @unittest.skip('Cache Tests are failing due issues in the environment, no way to test until fixed re enable when fixed.')
+    @live_only()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_cache_', additional_tags={'owner': 'cli_test'})
     def test_cache_pool_change(self):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
@@ -219,21 +405,11 @@ class AzureNetAppFilesCacheServiceScenarioTest(ScenarioTest):
                                     (account_name, pool_name_2)).get_output_in_json()
         assert len(cache_list_pool2) == 1
 
-    @unittest.skip('Cache Tests are failing due issues in the environment, no way to test until fixed re enable when fixed.')
-    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_cache_', additional_tags={'owner': 'cli_test'})
-    def test_cache_list_peering_passphrase(self):
-        account_name = self.create_random_name(prefix='cli-acc-', length=24)
-        pool_name = self.create_random_name(prefix='cli-pool-', length=24)
-        cache_name = self.create_random_name(prefix='cli-cache-', length=24)
+    # Note: `az netappfiles cache list-peering-passphrase` is exercised as part
+    # of `test_create_delete_cache` (which orchestrates the full on-prem peering
+    # flow), so a standalone smoke test for it is intentionally not provided.
 
-        self.create_cache(account_name, pool_name, cache_name)
-
-        # list peering passphrase
-        result = self.cmd("az netappfiles cache list-peering-passphrase -g {rg} -a %s -p %s -c %s" %
-                          (account_name, pool_name, cache_name)).get_output_in_json()
-        assert result is not None
-
-    @unittest.skip('Cache Tests are failing due issues in the environment, no way to test until fixed re enable when fixed.')
+    @live_only()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_cache_', additional_tags={'owner': 'cli_test'})
     def test_cache_reset_smb_password(self):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
