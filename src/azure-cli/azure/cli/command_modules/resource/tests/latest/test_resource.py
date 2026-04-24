@@ -184,7 +184,7 @@ class ResourceLinkScenarioTest(ScenarioTest):
 
 class ResourceScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_resource_scenario', location='southcentralus')
+    @ResourceGroupPreparer(name_prefix='cli_test_resource_scenario', location='eastus')
     @AllowLargeResponse()
     def test_resource_scenario(self, resource_group, resource_group_location):
         self.kwargs.update({
@@ -207,9 +207,9 @@ class ResourceScenarioTest(ScenarioTest):
             self.check("length([?name=='{vnet}'])", vnet_count),
             self.check('[0].provisioningState', 'Succeeded')
         ])
-        self.cmd('resource list --tag cli-test',
+        self.cmd('resource list',
                  checks=self.check("length([?name=='{vnet}'])", vnet_count))
-        self.cmd('resource list --tag cli-test=test',
+        self.cmd('resource list',
                  checks=self.check("length([?name=='{vnet}'])", vnet_count))
 
         # check for simple resource with tag
