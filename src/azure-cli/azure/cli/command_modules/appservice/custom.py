@@ -852,7 +852,7 @@ def enable_zip_deploy_flex(cmd, resource_group_name, name, src, timeout=None, sl
     # check the status of async deployment
     if res.status_code == 202:
         response = _check_zip_deployment_status_flex(cmd, resource_group_name, name, deployment_status_url,
-                                                     timeout)
+                                                     timeout=timeout)
         return response
 
     # check if there's an ongoing process
@@ -8569,6 +8569,54 @@ def _poll_deployment_runtime_status(cmd, resource_group_name, webapp_name, slot,
     return response_body
 
 
+_DEPLOYMENT_LOG_TYPE_MAP = {
+    0: "[INFO]",
+    1: "[WARNING]",
+    2: "[ERROR]",
+}
+
+
+def _update_deployment_progress(cmd, rg_name, name, progress_hook, deployment_id, last_log_time):
+    """Fetches new deployment log entries and updates the progress spinner.
+
+    Filters entries to only those with a log_time strictly after last_log_time.
+    Returns the updated last_log_time. Errors (type 2) are also persisted
+    via logger.error so they are not overwritten by the spinner.
+    """
+    try:
+        entries = show_deployment_log(cmd, rg_name, name, deployment_id=deployment_id)
+    except Exception:  # pylint: disable=broad-except
+        return last_log_time
+
+    if not isinstance(entries, list):
+        return last_log_time
+
+    for entry in entries:
+        log_time = entry.get('log_time')
+        if not log_time:
+            continue
+        if last_log_time and log_time <= last_log_time:
+            continue
+
+        message = entry.get('message', '').strip() if entry.get('message') else ''
+        if not message:
+            last_log_time = log_time
+            continue
+
+        log_type = entry.get('type', 0)
+        prefix = _DEPLOYMENT_LOG_TYPE_MAP.get(log_type, "[INFO]")
+        progress_message = '{} {}'.format(prefix, message)
+
+        if log_type == 2:
+            logger.error(progress_message)
+        else:
+            progress_hook.add(message=progress_message)
+
+        last_log_time = log_time
+
+    return last_log_time
+
+
 def _check_zip_deployment_status_flex(cmd, rg_name, name, deployment_status_url, timeout=None):
     import requests
     from azure.cli.core.util import should_disable_connection_verify
@@ -8579,47 +8627,75 @@ def _check_zip_deployment_status_flex(cmd, rg_name, name, deployment_status_url,
     # Indicates whether the status has been non empty in previous calls
     has_response = False
     has_partial_success = False
-    while num_trials < total_trials:
-        time.sleep(1)
-        response = requests.get(deployment_status_url, headers=headers,
-                                verify=not should_disable_connection_verify())
-        try:
-            if response.status_code == 202 and not has_partial_success:
-                has_partial_success = True
-            if response.status_code == 404 and has_partial_success:
+    deployment_id = None
+    last_log_time = None
+    log_poll_interval = 5
+    iterations_since_log_poll = 0
+
+    progress_hook = cmd.cli_ctx.get_progress_controller()
+    progress_hook.begin(message="Waiting for deployment status...")
+
+    try:
+        while num_trials < total_trials:
+            time.sleep(1)
+            response = requests.get(deployment_status_url, headers=headers,
+                                    verify=not should_disable_connection_verify())
+            try:
+                if response.status_code == 202 and not has_partial_success:
+                    has_partial_success = True
+                if response.status_code == 404 and has_partial_success:
+                    break
+                if (response.status_code == 404 or response.json().get('status') is None) and has_response:
+                    raise CLIError("Failed to retrieve deployment status. Please try again in a few minutes.")
+                if (response.status_code != 404 and response.json().get('status') is not None) and not has_response:
+                    has_response = True
+
+                res_dict = response.json()
+            except json.decoder.JSONDecodeError:
+                logger.warning("Deployment status endpoint %s returns malformed data. Retrying...",
+                               deployment_status_url)
+                res_dict = {}
+            finally:
+                num_trials = num_trials + 1
+
+            if not deployment_id:
+                deployment_id = res_dict.get('id')
+
+            status = res_dict.get('status', 0)
+
+            if status == -1:
+                raise CLIError("Deployment was cancelled.")
+            if status == 3:
+                raise CLIError("Zip deployment failed. {}. These are the deployment logs: \n{}".format(
+                               res_dict, json.dumps(show_deployment_log(cmd, rg_name, name,
+                                                                        deployment_id=deployment_id))))
+            if status == 4:
                 break
-            if (response.status_code == 404 or response.json().get('status') is None) and has_response:
-                raise CLIError("Failed to retrieve deployment status. Please try again in a few minutes.")
-            if (response.status_code != 404 and response.json().get('status') is not None) and not has_response:
-                has_response = True
+            if status == 5:
+                raise CLIError("Deployment was cancelled and another deployment is in progress.")
+            if status == 6:
+                raise CLIError("Deployment was partially successful. These are the deployment logs:\n{}".format(
+                               json.dumps(show_deployment_log(cmd, rg_name, name,
+                                                              deployment_id=deployment_id))))
 
-            res_dict = response.json()
-        except json.decoder.JSONDecodeError:
-            logger.warning("Deployment status endpoint %s returns malformed data. Retrying...", deployment_status_url)
-            res_dict = {}
-        finally:
-            num_trials = num_trials + 1
+            # Poll deployment logs periodically and update progress spinner
+            iterations_since_log_poll += 1
+            if deployment_id and iterations_since_log_poll >= log_poll_interval:
+                last_log_time = _update_deployment_progress(
+                    cmd, rg_name, name, progress_hook, deployment_id, last_log_time)
+                iterations_since_log_poll = 0
 
-        status = res_dict.get('status', 0)
+        # Final log fetch on completion or partial success
+        if deployment_id:
+            _update_deployment_progress(cmd, rg_name, name, progress_hook, deployment_id, last_log_time)
 
-        if status == -1:
-            raise CLIError("Deployment was cancelled.")
-        if status == 3:
-            raise CLIError("Zip deployment failed. {}. These are the deployment logs: \n{}".format(
-                           res_dict, json.dumps(show_deployment_log(cmd, rg_name, name))))
-        if status == 4:
-            break
-        if status == 5:
-            raise CLIError("Deployment was cancelled and another deployment is in progress.")
-        if status == 6:
-            raise CLIError("Deployment was partially successful. These are the deployment logs:\n{}".format(
-                           json.dumps(show_deployment_log(cmd, rg_name, name))))
-        if 'progress' in res_dict:
-            logger.info(res_dict['progress'])  # show only in debug mode, customers seem to find this confusing
-    # if the deployment is taking longer than expected
-    if res_dict.get('status', 0) != 4 and not has_partial_success:
-        raise CLIError("""Timeout reached by the command, however, the deployment operation
-                       is still on-going. Navigate to your scm site to check the deployment status""")
+        # if the deployment is taking longer than expected
+        if res_dict.get('status', 0) != 4 and not has_partial_success:
+            raise CLIError("""Timeout reached by the command, however, the deployment operation
+                           is still on-going. Navigate to your scm site to check the deployment status""")
+    finally:
+        progress_hook.end()
+
     return res_dict
 
 
