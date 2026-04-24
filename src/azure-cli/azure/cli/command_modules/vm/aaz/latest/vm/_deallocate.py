@@ -73,7 +73,7 @@ class Deallocate(AAZCommand):
         )
         _args_schema.hibernate = AAZBoolArg(
             options=["--hibernate"],
-            help="Optional parameter to hibernate a virtual machine. (Feature in Preview)",
+            help="Optional parameter to hibernate a virtual machine.",
         )
         return cls._args_schema
 
@@ -102,7 +102,7 @@ class Deallocate(AAZCommand):
                     session,
                     self.on_200,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
             if session.http_response.status_code in [200]:
@@ -111,7 +111,7 @@ class Deallocate(AAZCommand):
                     session,
                     self.on_200,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
 
