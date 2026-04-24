@@ -26,7 +26,7 @@ class StorageAdvancedPlatformMetricTests(StorageScenarioMixin, ScenarioTest):
 
         self.cmd('storage advanced-platform-metric update -g {rg} --account-name {sa} --enabled '
                  '--rule-config-filter-type ContainerPrefixFilter '
-                 '--rule-config-filter-value logs data'.format(**kwargs),
+                 '--rule-config-filter-values logs data'.format(**kwargs),
                  checks=[
                      JMESPathCheck('properties.ruleConfig.filterType', 'ContainerPrefixFilter'),
                      JMESPathCheck('properties.ruleConfig.filterValues', ['logs', 'data'])])
@@ -38,14 +38,14 @@ class StorageAdvancedPlatformMetricTests(StorageScenarioMixin, ScenarioTest):
 
         self.cmd('storage advanced-platform-metric create -g {rg} --account-name {sa} --enabled '
                  '--rule-config-filter-type ContainerPrefixFilter '
-                 '--rule-config-filter-value logs data'.format(**kwargs),
+                 '--rule-config-filter-values logs data'.format(**kwargs),
                  checks=[
                      JMESPathCheck('properties.ruleConfig.filterType', 'ContainerPrefixFilter'),
                      JMESPathCheck('properties.ruleConfig.filterValues', ['logs', 'data'])])
 
         self.cmd('storage advanced-platform-metric update -g {rg} --account-name {sa} --enabled '
                  '--rule-config-filter-type ContainerListFilter '
-                 '--rule-config-filter-value logs1 data1'.format(**kwargs),
+                 '--rule-config-filter-values logs1 data1'.format(**kwargs),
                  checks=[
                      JMESPathCheck('properties.ruleConfig.filterType', 'ContainerListFilter'),
                      JMESPathCheck('properties.ruleConfig.filterValues', ['logs1', 'data1'])])
@@ -54,7 +54,7 @@ class StorageAdvancedPlatformMetricTests(StorageScenarioMixin, ScenarioTest):
 
         self.cmd('storage advanced-platform-metric create -g {rg} --account-name {sa} --enabled '
                  '--rule-config-filter-type ContainerListFilter '
-                 '--rule-config-filter-value logs data'.format(**kwargs),
+                 '--rule-config-filter-values logs data'.format(**kwargs),
                  checks=[
                      JMESPathCheck('properties.ruleConfig.filterType', 'ContainerListFilter'),
                      JMESPathCheck('properties.ruleConfig.filterValues', ['logs', 'data'])])

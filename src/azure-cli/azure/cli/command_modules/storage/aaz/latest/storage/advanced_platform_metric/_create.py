@@ -22,10 +22,10 @@ class Create(AAZCommand):
         az storage advanced-platform-metric create -g resource_group_name --account-name storage_account_name --enabled --rule-config-filter-type AllContainersFilter
 
     :example: Create ContainerPrefixFilter AdvancedPlatformMetric
-        az storage advanced-platform-metric create -g resource_group_name --account-name storage_account_name --enabled --rule-config-filter-type ContainerPrefixFilter --rule-config-filter-value logsprefix dataprefix
+        az storage advanced-platform-metric create -g resource_group_name --account-name storage_account_name --enabled --rule-config-filter-type ContainerPrefixFilter --rule-config-filter-values logsprefix dataprefix
 
     :example: Create ContainerListFilter AdvancedPlatformMetric
-        az storage advanced-platform-metric create -g resource_group_name --account-name storage_account_name --enabled --rule-config-filter-type ContainerListFilter --rule-config-filter-value logs data
+        az storage advanced-platform-metric create -g resource_group_name --account-name storage_account_name --enabled --rule-config-filter-type ContainerListFilter --rule-config-filter-values logs data
     """
 
     _aaz_info = {
