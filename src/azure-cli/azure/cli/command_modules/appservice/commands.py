@@ -86,53 +86,12 @@ def _polish_bad_errors(ex, creating_plan):
                                   "If creating an App Service Plan with --zone-redundant/-z, "
                                   "please see supported regions here: "
                                   "https://learn.microsoft.com/en-us/azure/app-service/how-to-zone-redundancy#requirements")
-                    elif 'additional quota' in detail.lower() or 'quotaexceeded' in detail.lower():
-                        detail = _rewrite_quota_error_for_app_service(detail)
         else:
             detail = json.loads(ex.error_msg.response.text())['Message']
         ex = CLIError(detail)
     except Exception:  # pylint: disable=broad-except
         pass
     return ex
-
-
-_TIER_TO_SKUS = {
-    'Free': 'F1',
-    'Shared': 'D1',
-    'Basic': 'B1/B2/B3',
-    'Standard': 'S1/S2/S3',
-    'Premium': 'P1v2/P2v2/P3v2',
-    'PremiumV2': 'P1v2/P2v2/P3v2',
-    'Premium0V3': 'P0v3',
-    'PremiumV3': 'P0v3/P1v3/P2v3/P3v3',
-    'Isolated': 'I1/I2/I3',
-    'IsolatedV2': 'I1v2/I2v2/I3v2',
-}
-
-
-def _rewrite_quota_error_for_app_service(detail):
-    """Rewrite misleading quota error messages that reference 'VMs' to correctly
-    refer to App Service Plan workers instead."""
-    import re
-
-    def _replace_tier_vms(match):
-        tier = match.group(1)
-        skus = _TIER_TO_SKUS.get(tier, '')
-        sku_hint = ' [SKUs: {}]'.format(skus) if skus else ''
-        return '({tier} tier App Service Plan workers{sku_hint})'.format(tier=tier, sku_hint=sku_hint)
-
-    # Replace patterns like "(Basic VMs)" with "(Basic tier App Service Plan workers [SKUs: B1/B2/B3])"
-    detail, tier_vm_replacements = re.subn(r'\((\w+)\s+VMs?\)', _replace_tier_vms, detail)
-    # Replace standalone "VMs" that appear in quota context
-    detail, standalone_vm_replacements = re.subn(r'\bVMs?\b(?=\s*\))', 'App Service Plan workers', detail)
-    if tier_vm_replacements or standalone_vm_replacements:
-        detail += ("\n\nNote: This quota applies to App Service Plan workers, not Azure Virtual Machines. "
-                   "The tier name (e.g. 'Basic') corresponds to App Service Plan SKUs (e.g. B1/B2/B3). "
-                   "To request a quota increase, go to the Azure portal: "
-                   "Subscription > Usage + quotas > App Service. "
-                   "See: https://learn.microsoft.com/en-us/azure/azure-resource-manager/"
-                   "management/azure-subscription-service-limits#azure-app-service-limits")
-    return detail
 
 
 # pylint: disable=too-many-statements
