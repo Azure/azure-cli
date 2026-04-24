@@ -15170,6 +15170,7 @@ spec:
         # Test successful creation with Gateway API and Azure Service Mesh addon
         create_cmd = (
             "aks create --resource-group={resource_group} --name={name} "
+            "--enable-app-routing "
             "--enable-azure-service-mesh "
             "--enable-gateway-api "
             "--ssh-key-value={ssh_key_value} -o json "
@@ -15248,6 +15249,7 @@ spec:
         # Attempt and expect failure to create a cluster with Gateway API but without ASM
         create_with_gateway_cmd = (
             "aks create --resource-group={resource_group} --name={name} "
+            "--enable-app-routing "
             "--enable-gateway-api "
             "--ssh-key-value={ssh_key_value} -o json "
         )
@@ -15256,6 +15258,7 @@ spec:
         # Create a minimal cluster without Gateway API or ASM
         create_minimal_cmd = (
             "aks create --resource-group={resource_group} --name={name} "
+            "--enable-app-routing "
             "--ssh-key-value={ssh_key_value} -o json"
         )
         self.cmd(
