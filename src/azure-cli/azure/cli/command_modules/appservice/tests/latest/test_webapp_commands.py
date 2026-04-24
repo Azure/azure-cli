@@ -3253,7 +3253,7 @@ class WebappSiteContainersTests(ScenarioTest):
             resource_group, webapp_name, plan_name, acr_registry_name, creds['username'], creds['passwords'][0]['value']
         ))
 
-        self.cmd('webapp sitecontainers convert --mode sitecontainers --resource-group {} --name {}'.
+        self.cmd('webapp sitecontainers convert --mode sitecontainers --resource-group {} --name {} --yes'.
                   format(resource_group, webapp_name))
         self.cmd('webapp sitecontainers list --name {} --resource-group {}'.
                   format(webapp_name, resource_group)).assert_with_checks([

@@ -2125,7 +2125,7 @@ def get_webapp_sitecontainer_log(cmd, name, resource_group, container_name, slot
         raise AzureInternalError("Failed to fetch sitecontainer logs. Error: {}".format(str(ex)))
 
 
-def convert_webapp_sitecontainers(cmd, name, resource_group, mode, slot=None, main_container_name=None):
+def convert_webapp_sitecontainers(cmd, name, resource_group, mode, slot=None, main_container_name=None, yes=False):
     """
     Convert a webapp between classic (docker/compose) and sitecontainers mode.
 
@@ -2135,8 +2135,9 @@ def convert_webapp_sitecontainers(cmd, name, resource_group, mode, slot=None, ma
     :param mode: Target mode, either 'docker' or 'sitecontainers'
     :param slot: Optional deployment slot
     :param main_container_name: For compose conversion, the name of the service to be the main container
+    :param yes: Do not prompt for confirmation.
     """
-    if not slot and mode == 'sitecontainers':
+    if not slot and mode == 'sitecontainers' and not yes:
         logger.warning("")
         logger.warning("WARNING: You are about to convert the production site directly. "
                        "It is recommended to perform the conversion on a deployment slot first, "
@@ -2163,9 +2164,9 @@ def convert_webapp_sitecontainers(cmd, name, resource_group, mode, slot=None, ma
             return None
 
     if mode == 'sitecontainers':
-        _convert_webapp_to_sitecontainers(cmd, name, resource_group, slot, main_container_name)
+        _convert_webapp_to_sitecontainers(cmd, name, resource_group, slot, main_container_name, yes=yes)
     elif mode == 'docker':
-        _convert_webapp_to_docker(cmd, name, resource_group, slot)
+        _convert_webapp_to_docker(cmd, name, resource_group, slot, yes=yes)
     else:
         raise InvalidArgumentValueError(
             "Invalid mode '{}'. Allowed values: docker, sitecontainers.".format(mode)
@@ -2468,7 +2469,7 @@ def _build_plan_default_identity_sdk(default_identity):
     }
 
 
-def _convert_webapp_to_sitecontainers(cmd, name, resource_group, slot, main_container_name=None):
+def _convert_webapp_to_sitecontainers(cmd, name, resource_group, slot, main_container_name=None, yes=False):
     site_config = get_site_configs(cmd, resource_group, name, slot)
     linux_fx_version = getattr(site_config, "linux_fx_version", None)
 
@@ -2482,7 +2483,7 @@ def _convert_webapp_to_sitecontainers(cmd, name, resource_group, slot, main_cont
 
     if is_compose:
         _convert_compose_to_sitecontainers(cmd, name, resource_group, slot, site_config,
-                                           linux_fx_version, main_container_name)
+                                           linux_fx_version, main_container_name, yes=yes)
     else:
         _convert_docker_to_sitecontainers(cmd, name, resource_group, slot, site_config, linux_fx_version)
 
@@ -2500,7 +2501,7 @@ def _convert_docker_to_sitecontainers(cmd, name, resource_group, slot, site_conf
     slot_segment = f"/slots/{slot}" if slot else ""
     url = (
         f"/subscriptions/{subscription_id}/resourceGroups/{resource_group}/"
-        f"providers/Microsoft.Web/sites/{name}{slot_segment}/config/appsettings/list?api-version=2024-11-01"
+        f"providers/Microsoft.Web/sites/{name}{slot_segment}/config/appsettings/list?api-version=2023-12-01"
     )
     request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + url
     response = send_raw_request(cmd.cli_ctx, "POST", request_url)
@@ -2727,8 +2728,7 @@ def _parse_compose_volumes(volumes_node, top_level_volumes):
             else:
                 # Named volume – resolve against top-level volumes
                 mount = _make_named_volume_mount(source, target, read_only, top_level_volumes, warnings)
-                if mount:
-                    mounts.append(mount)
+                mounts.append(mount)
         else:
             # Short syntax: "source:target" or "source:target:ro"
             parts = str(item).split(':')
@@ -2752,8 +2752,7 @@ def _parse_compose_volumes(volumes_node, top_level_volumes):
             else:
                 # Named volume
                 mount = _make_named_volume_mount(source, target, read_only, top_level_volumes, warnings)
-                if mount:
-                    mounts.append(mount)
+                mounts.append(mount)
 
     return mounts, warnings
 
@@ -2825,7 +2824,7 @@ def _sanitize_container_name(service_name):
 
 
 def _convert_compose_to_sitecontainers(cmd, name, resource_group, slot,  # pylint: disable=too-many-branches
-                                       site_config, linux_fx_version, main_container_name=None):
+                                       site_config, linux_fx_version, main_container_name=None, yes=False):
     """Convert a COMPOSE| multi-container app to sitecontainers mode.
 
     Steps:
@@ -2898,6 +2897,7 @@ def _convert_compose_to_sitecontainers(cmd, name, resource_group, slot,  # pylin
     sitecontainer_specs = []
     service_names = list(services.keys())
     seen_ports = {}  # port → service_name for conflict detection
+    seen_names = {}  # sanitized container name → service_name for collision detection
     services_with_ports = []
 
     for svc_name in service_names:
@@ -2907,6 +2907,12 @@ def _convert_compose_to_sitecontainers(cmd, name, resource_group, slot,  # pylin
             continue
 
         container_name = _sanitize_container_name(svc_name)
+        if container_name in seen_names:
+            raise ValidationError(
+                f"Container name collision: services '{seen_names[container_name]}' and '{svc_name}' "
+                f"both sanitize to container name '{container_name}'. Rename one of the services to avoid this."
+            )
+        seen_names[container_name] = svc_name
         logger.warning("Processing service '%s' (container name: '%s')...", svc_name, container_name)
 
         # Warn about unsupported keys
@@ -3027,17 +3033,6 @@ def _convert_compose_to_sitecontainers(cmd, name, resource_group, slot,  # pylin
     if not sitecontainer_specs:
         raise ValidationError("No valid services found in the Docker Compose file.")
 
-    # Check for container name collisions after sanitization
-    seen_names = {}
-    for spec in sitecontainer_specs:
-        cname = spec["container_name"]
-        if cname in seen_names:
-            raise ValidationError(
-                f"Container name collision: services '{seen_names[cname]}' and '{spec['service_name']}' "
-                f"both sanitize to container name '{cname}'. Rename one of the services to avoid this."
-            )
-        seen_names[cname] = spec["service_name"]
-
     # -----------------------------------------------------------------------
     # Step 4: Determine main container
     # -----------------------------------------------------------------------
@@ -3094,7 +3089,7 @@ def _convert_compose_to_sitecontainers(cmd, name, resource_group, slot,  # pylin
                    "service names (e.g., 'http://redis:6379'), you must update them to use "
                    "'localhost' and ensure each container listens on a unique port.")
 
-    if all_warnings:
+    if all_warnings and not yes:
         logger.warning("")
         if not prompt_y_n("Do you want to proceed with the conversion?"):
             logger.warning("Conversion aborted.")
@@ -3197,7 +3192,7 @@ def _convert_compose_to_sitecontainers(cmd, name, resource_group, slot,  # pylin
         logger.warning("  %d app setting(s) created for environment variable references.", len(new_app_settings))
 
 
-def _convert_webapp_to_docker(cmd, name, resource_group, slot):
+def _convert_webapp_to_docker(cmd, name, resource_group, slot, yes=False):
     site_config = get_site_configs(cmd, resource_group, name, slot)
     linux_fx_version = getattr(site_config, "linux_fx_version", None)
     if linux_fx_version and not linux_fx_version.lower().startswith('sitecontainers'):
@@ -3208,7 +3203,7 @@ def _convert_webapp_to_docker(cmd, name, resource_group, slot):
     main_container = next((c for c in sitecontainers if getattr(c, "is_main", False)), None)
     if not main_container:
         raise ResourceNotFoundError("No main sitecontainer found. Cannot convert to classic mode (docker).")
-    if len(sitecontainers) > 1:
+    if len(sitecontainers) > 1 and not yes:
         option = prompt_y_n('More than one sitecontainer exists. Do you want to continue with the conversion?')
         if not option:
             raise ValidationError("Skipped converting to classic (docker) mode as more than one sitecontainer exists."

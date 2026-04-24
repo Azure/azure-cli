@@ -387,6 +387,8 @@ subscription than the app service environment, please use the resource ID for --
                    help='For COMPOSE to sitecontainers conversion, specifies which '
                         'compose service should be the main container. If not provided, '
                         'the service with a port mapping is auto-detected.')
+        c.argument('yes', options_list=['--yes', '-y'], action='store_true',
+                   help='Do not prompt for confirmation.')
 
     with self.argument_context('webapp show') as c:
         c.argument('name', arg_type=webapp_name_arg_type)

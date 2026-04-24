@@ -26,7 +26,7 @@ services:
     environment:
       WORDPRESS_DB_HOST: "localhost:3306"
       WORDPRESS_DB_USER: wp_user
-      WORDPRESS_DB_PASSWORD: "wp_s3cret"
+      WORDPRESS_DB_PASSWORD: "not-a-real-password"
       WORDPRESS_DB_NAME: wordpress
       WORDPRESS_TABLE_PREFIX: wp_
       WORDPRESS_CONFIG_EXTRA: |
@@ -41,10 +41,10 @@ services:
     volumes:
       - "${WEBAPP_STORAGE_HOME}/mysql/data:/var/lib/mysql"
     environment:
-      - MYSQL_ROOT_PASSWORD=rootpass123
+      - MYSQL_ROOT_PASSWORD=not-a-real-root-password
       - MYSQL_DATABASE=wordpress
       - MYSQL_USER=wp_user
-      - MYSQL_PASSWORD=wp_s3cret
+      - MYSQL_PASSWORD=not-a-real-password
     command: "--default-authentication-plugin=mysql_native_password"
     restart: always
 
