@@ -347,17 +347,20 @@ parameters:
     short-summary: The ID of a subnet in an existing VNet into which to assign control plane apiserver pods(requires --enable-apiserver-vnet-integration)
   - name: --system-node-subnet-id
     type: string
-    short-summary: (Automatic SKU) Subnet ID of an existing VNet for the Managed System Pool for Automatic cluster.
+    short-summary: (Automatic SKU) Subnet ID of an existing VNet to be used by the Managed System Pool in the Automatic cluster.
     long-summary: |
-      When provided alongside `--node-subnet-id` and `--apiserver-subnet-id` on `--sku automatic`,
-      the cluster is created with a bring-your-own VNet for its Managed System Pool. All three
-      subnets must be supplied together.
+      Bring-your-own VNet for an Automatic cluster requires three subnets supplied together:
+      `--system-node-subnet-id` (this flag, for the Managed System Pool), `--node-subnet-id`
+      (for user node pools), and `--apiserver-subnet-id` (for the control plane API server).
+      All three subnets must belong to the same VNet and can only be used with `--sku automatic`.
   - name: --node-subnet-id
     type: string
-    short-summary: (Automatic SKU) Subnet ID of an existing VNet for user node pools of an Automatic cluster.
+    short-summary: (Automatic SKU) Subnet ID of an existing VNet to be used by user node pools in the Automatic cluster.
     long-summary: |
-      Used together with `--system-node-subnet-id` and `--apiserver-subnet-id` on `--sku automatic`
-      to bring your own VNet for the cluster.
+      Bring-your-own VNet for an Automatic cluster requires three subnets supplied together:
+      `--system-node-subnet-id` (for the Managed System Pool), `--node-subnet-id` (this flag,
+      for user node pools), and `--apiserver-subnet-id` (for the control plane API server).
+      All three subnets must belong to the same VNet and can only be used with `--sku automatic`.
   - name: --enable-private-cluster
     type: string
     short-summary: Enable private cluster.
