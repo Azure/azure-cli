@@ -26,6 +26,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
     CONST_OPEN_SERVICE_MESH_ADDON_NAME,
     CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
+    CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
     CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY,
     CONST_OUTBOUND_TYPE_LOAD_BALANCER,
     CONST_PRIVATE_DNS_ZONE_NONE,
@@ -2140,6 +2141,43 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         ctx_14.agentpool_context.get_vnet_subnet_id.return_value = None
         ctx_14.attach_mc(mc_14)
         self.assertEqual(ctx_14.get_outbound_type(), CONST_OUTBOUND_TYPE_LOAD_BALANCER)
+
+        byo_params = {
+            "sku": "automatic",
+            "system_node_subnet_id": "/subscriptions/s/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/v/subnets/sys",
+            "node_subnet_id": "/subscriptions/s/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/v/subnets/node",
+            "apiserver_subnet_id": "/subscriptions/s/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/v/subnets/api",
+        }
+        ctx_15 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({**byo_params, "outbound_type": CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY}),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        ctx_15.agentpool_context = mock.MagicMock()
+        ctx_15.agentpool_context.get_vnet_subnet_id.return_value = None
+        self.assertEqual(ctx_15.get_outbound_type(), CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY)
+
+        ctx_16 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({**byo_params, "outbound_type": CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING}),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        ctx_16.agentpool_context = mock.MagicMock()
+        ctx_16.agentpool_context.get_vnet_subnet_id.return_value = None
+        self.assertEqual(ctx_16.get_outbound_type(), CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING)
+
+        ctx_17 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({**byo_params, "outbound_type": CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY}),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        ctx_17.agentpool_context = mock.MagicMock()
+        ctx_17.agentpool_context.get_vnet_subnet_id.return_value = None
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx_17.get_outbound_type()
 
     def test_get_network_plugin_mode(self):
         # default

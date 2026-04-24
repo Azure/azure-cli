@@ -2447,21 +2447,22 @@ class AKSManagedClusterContext(BaseAKSContext):
                 return outbound_type  # basic sku lb doesn't support outbound type
 
             if outbound_type == CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING:
-                if self.get_vnet_subnet_id() in ["", None]:
+                if self.get_vnet_subnet_id() in ["", None] and not byo_subnets_set:
                     raise RequiredArgumentMissingError(
                         "--vnet-subnet-id must be specified for userDefinedRouting and it must "
                         "be pre-configured with a route table with egress rules"
                     )
             if outbound_type == CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY:
-                if self.get_vnet_subnet_id() in ["", None]:
+                if self.get_vnet_subnet_id() in ["", None] and not byo_subnets_set:
                     raise RequiredArgumentMissingError(
                         "--vnet-subnet-id must be specified for userAssignedNATGateway and it must "
                         "be pre-configured with a NAT gateway with outbound ips"
                     )
             if outbound_type == CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY:
-                if self.get_vnet_subnet_id() not in ["", None]:
+                if self.get_vnet_subnet_id() not in ["", None] or byo_subnets_set:
                     raise InvalidArgumentValueError(
-                        "--vnet-subnet-id cannot be specified for managedNATGateway"
+                        "--vnet-subnet-id, --system-node-subnet-id and --node-subnet-id cannot be "
+                        "specified for managedNATGateway"
                     )
             if outbound_type != CONST_OUTBOUND_TYPE_LOAD_BALANCER:
                 if (
