@@ -131,7 +131,7 @@ def _rewrite_quota_error_for_app_service(detail):
                    "To request a quota increase, go to the Azure portal: "
                    "Subscription > Usage + quotas > App Service. "
                    "See: https://learn.microsoft.com/en-us/azure/azure-resource-manager/"
-                   "management/azure-subscription-service-limits#app-service-limits")
+                   "management/azure-subscription-service-limits#azure-app-service-limits")
     return detail
 
 

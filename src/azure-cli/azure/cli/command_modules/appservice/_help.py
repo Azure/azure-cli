@@ -51,7 +51,7 @@ examples:
         az appservice plan create -g MyResourceGroup -n MyPlan --sku B1
   - name: Create a standard app service plan with four Linux workers.
     text: >
-        az appservice plan create -g MyResourceGroup -n MyPlan --is-linux --number-of-workers 4 --sku S1
+        az appservice plan create -g MyResourceGroup -n MyPlan --is-linux --number-of-workers 4 --sku P0V3
   - name: Create a Windows container app service plan.
     text: >
         az appservice plan create -g MyResourceGroup -n MyPlan --hyper-v --sku P1V3

@@ -674,7 +674,7 @@ class TestPolishBadErrors(unittest.TestCase):
         result = _rewrite_quota_error_for_app_service(detail)
         self.assertIn("This quota applies to App Service Plan workers, not Azure Virtual Machines", result)
         self.assertIn("Subscription > Usage + quotas > App Service", result)
-        self.assertIn("app-service-limits", result)
+        self.assertIn("azure-app-service-limits", result)
 
     def test_rewrite_quota_error_handles_singular_vm(self):
         from azure.cli.command_modules.appservice.commands import _rewrite_quota_error_for_app_service
