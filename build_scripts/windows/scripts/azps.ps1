@@ -1,5 +1,10 @@
 $env:AZ_INSTALLER="MSI"
-$input | & "$PSScriptRoot\..\python.exe" -IBm azure.cli $args
+if ($MyInvocation.ExpectingInput) {
+    $input | & "$PSScriptRoot\..\python.exe" -IBm azure.cli $args
+}
+else {
+    & "$PSScriptRoot\..\python.exe" -IBm azure.cli $args
+}
 exit $LASTEXITCODE
 
 # SIG # Begin signature block

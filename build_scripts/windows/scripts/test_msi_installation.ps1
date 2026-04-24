@@ -102,9 +102,16 @@ if ($LASTEXITCODE -eq 0) {
 
 # When pwsh.exe invokes a .ps1 via
 # -Command, the script's exit code is only surfaced if the script
-# itself calls 'exit N'.
-& pwsh.exe -NoProfile -Command "& '$azps_full_path' this-command-does-not-exist-xyz *> `$null; exit `$LASTEXITCODE"
-if ($LASTEXITCODE -eq 0) {
-    Write-Output "azps.ps1 exit code swallowed when invoked via 'pwsh.exe -Command'"
-    Exit 1
+# itself calls 'exit N'. Skip this check if pwsh.exe is unavailable
+# so we don't false-pass on a stale $LASTEXITCODE value.
+if (Get-Command pwsh.exe -ErrorAction SilentlyContinue) {
+    $global:LASTEXITCODE = 0
+    & pwsh.exe -NoProfile -Command "& '$azps_full_path' this-command-does-not-exist-xyz *> `$null; exit `$LASTEXITCODE"
+    if (-not $? -or $LASTEXITCODE -eq 0) {
+        Write-Output "azps.ps1 exit code swallowed when invoked via 'pwsh.exe -Command'"
+        Exit 1
+    }
+}
+else {
+    Write-Output "pwsh.exe not found; skipping pwsh.exe -Command regression check"
 }

@@ -1,12 +1,22 @@
 $env:AZ_INSTALLER="PIP"
 
 if (Test-Path "$PSScriptRoot\python.exe") {
-    # Perfer python.exe in venv
-    $input | & "$PSScriptRoot\python.exe" -m azure.cli $args
+    # Prefer python.exe in venv
+    if ($MyInvocation.ExpectingInput) {
+        $input | & "$PSScriptRoot\python.exe" -m azure.cli $args
+    }
+    else {
+        & "$PSScriptRoot\python.exe" -m azure.cli $args
+    }
 }
 else {
     # Run system python.exe
-    $input | python.exe -m azure.cli $args
+    if ($MyInvocation.ExpectingInput) {
+        $input | python.exe -m azure.cli $args
+    }
+    else {
+        python.exe -m azure.cli $args
+    }
 }
 
 exit $LASTEXITCODE
