@@ -2417,8 +2417,7 @@ class AKSManagedClusterContext(BaseAKSContext):
             skuName is not None and
             skuName == CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC and
             isVnetSubnetIdEmpty and
-            not byo_hobo_subnets_set and
-            self.raw_param.get("outbound_type") is None
+            not byo_hobo_subnets_set
         ):
             # outbound_type of Automatic SKU should be ManagedNATGateway if no subnet id provided.
             outbound_type = CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY
@@ -8146,6 +8145,12 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         :return: the ManagedCluster object
         """
         self._ensure_mc(mc)
+
+        # HOBO (Hosted Overlay System Pool) clusters manage node pools on the
+        # server side and surface `agent_pool_profiles` as None. Skip the
+        # default agent pool update in that case.
+        if mc.hosted_system_profile and mc.hosted_system_profile.enabled:
+            return mc
 
         if not mc.agent_pool_profiles:
             raise UnknownError(
