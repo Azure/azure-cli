@@ -27,6 +27,20 @@ type: group
 short-summary: Manage Azure Search services.
 """
 
+helps['search offering'] = """
+type: group
+short-summary: Manage Azure Search offerings.
+"""
+
+helps['search offering list'] = """
+type: command
+short-summary: List Azure AI Search offerings by region.
+examples:
+  - name: List Azure AI Search offerings by region.
+    text: >
+        az search offering list
+"""
+
 helps['search private-endpoint-connection'] = """
 type: group
 short-summary: Manage Azure Search private endpoint connections.

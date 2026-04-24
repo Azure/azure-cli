@@ -19,9 +19,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-05-01",
+        "version": "2026-03-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.search/searchservices/{}", "2025-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.search/searchservices/{}", "2026-03-01-preview"],
         ]
     }
 
@@ -157,6 +157,13 @@ class Update(AAZCommand):
             nullable=True,
             enum={"disabled": "disabled", "free": "free", "standard": "standard"},
         )
+        _args_schema.knowledge_retrieval = AAZStrArg(
+            options=["--knowledge-retrieval"],
+            arg_group="Properties",
+            help="Specifies the billing plan for agentic retrieval on the Azure AI Search service.",
+            nullable=True,
+            enum={"free": "free", "standard": "standard"},
+        )
 
         data_exfiltration_protections = cls._args_schema.data_exfiltration_protections
         data_exfiltration_protections.Element = AAZStrArg(
@@ -272,7 +279,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-05-01",
+                    "api-version", "2026-03-01-preview",
                     required=True,
                 ),
             }
@@ -371,7 +378,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-05-01",
+                    "api-version", "2026-03-01-preview",
                     required=True,
                 ),
             }
@@ -444,6 +451,7 @@ class Update(AAZCommand):
                 properties.set_prop("dataExfiltrationProtections", AAZListType, ".data_exfiltration_protections")
                 properties.set_prop("disableLocalAuth", AAZBoolType, ".disable_local_auth", typ_kwargs={"nullable": True})
                 properties.set_prop("encryptionWithCmk", AAZObjectType, ".encryption_with_cmk")
+                properties.set_prop("knowledgeRetrieval", AAZStrType, ".knowledge_retrieval", typ_kwargs={"nullable": True})
                 properties.set_prop("networkRuleSet", AAZObjectType)
                 properties.set_prop("partitionCount", AAZIntType, ".partition_count")
                 properties.set_prop("publicNetworkAccess", AAZStrType, ".public_network_access")
@@ -579,6 +587,10 @@ class _UpdateHelper:
         )
         properties.hosting_mode = AAZStrType(
             serialized_name="hostingMode",
+        )
+        properties.knowledge_retrieval = AAZStrType(
+            serialized_name="knowledgeRetrieval",
+            nullable=True,
         )
         properties.network_rule_set = AAZObjectType(
             serialized_name="networkRuleSet",

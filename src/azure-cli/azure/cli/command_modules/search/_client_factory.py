@@ -7,7 +7,7 @@
 def cf_search(cli_ctx, **_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.search import SearchManagementClient
-    return get_mgmt_service_client(cli_ctx, SearchManagementClient)
+    return get_mgmt_service_client(cli_ctx, SearchManagementClient, api_version='2026-03-01-preview')
 
 
 def cf_search_services(cli_ctx, _):

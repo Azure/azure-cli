@@ -12,16 +12,16 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "search service query-key list",
+    "search offering list",
 )
 class List(AAZCommand):
-    """Returns the list of query API keys for the given Azure AI Search service.
+    """List all Azure AI Search offerings by region.
     """
 
     _aaz_info = {
         "version": "2026-03-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.search/searchservices/{}/listquerykeys", "2026-03-01-preview"],
+            ["mgmt-plane", "/providers/microsoft.search/offerings", "2026-03-01-preview"],
         ]
     }
 
@@ -39,25 +39,11 @@ class List(AAZCommand):
             return cls._args_schema
         cls._args_schema = super()._build_arguments_schema(*args, **kwargs)
 
-        # define Arg Group ""
-
-        _args_schema = cls._args_schema
-        _args_schema.resource_group = AAZResourceGroupNameArg(
-            required=True,
-        )
-        _args_schema.search_service_name = AAZStrArg(
-            options=["--search-service-name"],
-            help="The name of the Azure AI Search service associated with the specified resource group.",
-            required=True,
-            fmt=AAZStrArgFormat(
-                pattern="^(?=.{2,60}$)[a-z0-9][a-z0-9]+(-[a-z0-9]+)*$",
-            ),
-        )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.QueryKeysListBySearchService(ctx=self.ctx)()
+        self.OfferingsList(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -73,7 +59,7 @@ class List(AAZCommand):
         next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
         return result, next_link
 
-    class QueryKeysListBySearchService(AAZHttpOperation):
+    class OfferingsList(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -87,35 +73,16 @@ class List(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Search/searchServices/{searchServiceName}/listQueryKeys",
-                **self.url_parameters
+                "/providers/Microsoft.Search/offerings",
             )
 
         @property
         def method(self):
-            return "POST"
+            return "GET"
 
         @property
         def error_format(self):
             return "ODataV4Format"
-
-        @property
-        def url_parameters(self):
-            parameters = {
-                **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.resource_group,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "searchServiceName", self.ctx.args.search_service_name,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "subscriptionId", self.ctx.subscription_id,
-                    required=True,
-                ),
-            }
-            return parameters
 
         @property
         def query_parameters(self):
@@ -166,12 +133,42 @@ class List(AAZCommand):
             value.Element = AAZObjectType()
 
             _element = cls._schema_on_200.value.Element
-            _element.key = AAZStrType(
-                flags={"read_only": True},
+            _element.features = AAZListType()
+            _element.region_name = AAZStrType(
+                serialized_name="regionName",
             )
-            _element.name = AAZStrType(
-                flags={"read_only": True},
+            _element.skus = AAZListType()
+
+            features = cls._schema_on_200.value.Element.features
+            features.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.features.Element
+            _element.name = AAZStrType()
+
+            skus = cls._schema_on_200.value.Element.skus
+            skus.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.skus.Element
+            _element.limits = AAZObjectType()
+            _element.sku = AAZObjectType()
+
+            limits = cls._schema_on_200.value.Element.skus.Element.limits
+            limits.indexers = AAZIntType()
+            limits.indexes = AAZIntType()
+            limits.partition_storage_in_gigabytes = AAZFloatType(
+                serialized_name="partitionStorageInGigabytes",
             )
+            limits.partition_vector_storage_in_gigabytes = AAZFloatType(
+                serialized_name="partitionVectorStorageInGigabytes",
+            )
+            limits.partitions = AAZIntType()
+            limits.replicas = AAZIntType()
+            limits.search_units = AAZIntType(
+                serialized_name="searchUnits",
+            )
+
+            sku = cls._schema_on_200.value.Element.skus.Element.sku
+            sku.name = AAZStrType()
 
             return cls._schema_on_200
 
@@ -181,3 +178,4 @@ class _ListHelper:
 
 
 __all__ = ["List"]
+

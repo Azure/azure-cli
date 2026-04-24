@@ -19,9 +19,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-05-01",
+        "version": "2026-03-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.search/searchservices/{}", "2025-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.search/searchservices/{}", "2026-03-01-preview"],
         ]
     }
 
@@ -173,6 +173,13 @@ class Create(AAZCommand):
             nullable=True,
             enum={"disabled": "disabled", "free": "free", "standard": "standard"},
         )
+        _args_schema.knowledge_retrieval = AAZStrArg(
+            options=["--knowledge-retrieval"],
+            arg_group="Properties",
+            help="Specifies the billing plan for agentic retrieval on the Azure AI Search service.",
+            nullable=True,
+            enum={"free": "free", "standard": "standard"},
+        )
         _args_schema.upgrade_available = AAZStrArg(
             options=["--upgrade-available"],
             arg_group="Properties",
@@ -301,7 +308,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-05-01",
+                    "api-version", "2026-03-01-preview",
                     required=True,
                 ),
             }
@@ -345,6 +352,7 @@ class Create(AAZCommand):
                 properties.set_prop("encryptionWithCmk", AAZObjectType, ".encryption_with_cmk")
                 properties.set_prop("endpoint", AAZStrType, ".endpoint")
                 properties.set_prop("hostingMode", AAZStrType, ".hosting_mode")
+                properties.set_prop("knowledgeRetrieval", AAZStrType, ".knowledge_retrieval", typ_kwargs={"nullable": True})
                 properties.set_prop("networkRuleSet", AAZObjectType)
                 properties.set_prop("partitionCount", AAZIntType, ".partition_count")
                 properties.set_prop("publicNetworkAccess", AAZStrType, ".public_network_access")
@@ -487,6 +495,10 @@ class Create(AAZCommand):
             properties.endpoint = AAZStrType()
             properties.hosting_mode = AAZStrType(
                 serialized_name="hostingMode",
+            )
+            properties.knowledge_retrieval = AAZStrType(
+                serialized_name="knowledgeRetrieval",
+                nullable=True,
             )
             properties.network_rule_set = AAZObjectType(
                 serialized_name="networkRuleSet",
