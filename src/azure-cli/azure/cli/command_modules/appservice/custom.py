@@ -4218,7 +4218,7 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, p
                             default_identity=None, rdp_enabled=None, vnet=None, subnet=None,
                             registry_adapters=None, install_scripts=None, storage_mounts=None):
     if sku is None:
-        sku = 'P0V3'
+        sku = 'P0V3' if is_linux else 'B1'
 
     HostingEnvironmentProfile, SkuDescription, AppServicePlan = cmd.get_models(
         'HostingEnvironmentProfile', 'SkuDescription', 'AppServicePlan')
