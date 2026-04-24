@@ -2122,6 +2122,25 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         expect_outbound_type_13 = CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY
         self.assertEqual(outbound_type_13,expect_outbound_type_13)
 
+        network_profile_14 = self.models.ContainerServiceNetworkProfile(
+            outbound_type=CONST_OUTBOUND_TYPE_LOAD_BALANCER
+        )
+        mc_14 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=network_profile_14,
+            sku=self.models.ManagedClusterSKU(name="Automatic"),
+        )
+        ctx_14 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({}),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        ctx_14.agentpool_context = mock.MagicMock()
+        ctx_14.agentpool_context.get_vnet_subnet_id.return_value = None
+        ctx_14.attach_mc(mc_14)
+        self.assertEqual(ctx_14.get_outbound_type(), CONST_OUTBOUND_TYPE_LOAD_BALANCER)
+
     def test_get_network_plugin_mode(self):
         # default
         ctx_1 = AKSManagedClusterContext(

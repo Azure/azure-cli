@@ -2417,6 +2417,7 @@ class AKSManagedClusterContext(BaseAKSContext):
             skuName is not None and
             skuName == CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC and
             isVnetSubnetIdEmpty and
+            not read_from_mc and
             not byo_subnets_set
         ):
             # outbound_type of Automatic SKU should be ManagedNATGateway if no subnet id provided.
