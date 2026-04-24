@@ -1159,6 +1159,28 @@ jobs:
   #     azdev perf benchmark "version" "network vnet -h" "rest -h" "storage account"
   #   displayName: "Execution Performance"
 
+- job: CheckExternalUrls
+  displayName: "Check External Source URLs"
+
+  pool:
+    name: ${{ variables.ubuntu_pool }}
+  steps:
+  - task: UsePythonVersion@0
+    displayName: 'Use Python 3.13'
+    inputs:
+      versionSpec: 3.13
+  - bash: |
+      set -ev
+      if [[ "$(System.PullRequest.TargetBranch)" != "" ]]; then
+        # If CI is set to shallow fetch, target branch should be expilictly fetched.
+        git fetch origin --depth=1 $(System.PullRequest.TargetBranch)
+        python scripts/ci/validate_external_source_urls.py --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch)
+      else
+        # Non-PR builds may use shallow checkout where HEAD^ is missing.
+        printf "Skipping external Url checks for Non-PR builds"
+      fi
+    displayName: 'Validate External Source URLs'
+
 - job: CheckLinter
   displayName: "Check CLI Linter"
 
@@ -1177,7 +1199,6 @@ jobs:
       if [[ "$(System.PullRequest.TargetBranch)" != "" ]]; then
         # If CI is set to shallow fetch, target branch should be expilictly fetched.
         git fetch origin --depth=1 $(System.PullRequest.TargetBranch)
-        python scripts/ci/validate_external_source_urls.py --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch)
         azdev linter --ci-exclusions --min-severity medium --repo=./ --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch)
       else
         azdev linter --ci-exclusions --min-severity medium
