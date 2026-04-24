@@ -272,7 +272,7 @@ class GetSnapShotTestCase(unittest.TestCase):
             self.assertEqual(snapshot, mock_snapshot)
             mock_get_snapshot.assert_called_once_with("mock_cli_ctx", "test_sub", "test_rg", "test_snapshot")
 
-    def test_get_snapshot(self):
+    def test_get_snapshot_helper(self):
         mock_snapshot = Mock()
         mock_snapshot_operations = Mock(get=Mock(return_value=mock_snapshot))
         with patch("azure.cli.command_modules.acs._helpers.get_snapshots_client", return_value=mock_snapshot_operations):

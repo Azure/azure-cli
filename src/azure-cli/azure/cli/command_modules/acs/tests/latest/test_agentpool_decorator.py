@@ -1842,7 +1842,7 @@ class AKSAgentPoolContextStandaloneModeTestCase(AKSAgentPoolContextCommonTestCas
     def test_get_snapshot_id(self):
         self.common_get_snapshot_id()
 
-    def test_get_snapshot(self):
+    def test_get_snapshot_standalone(self):
         self.common_get_snapshot()
 
     def test_get_host_group_id(self):
@@ -2038,7 +2038,7 @@ class AKSAgentPoolContextManagedClusterModeTestCase(AKSAgentPoolContextCommonTes
     def test_get_snapshot_id(self):
         self.common_get_snapshot_id()
 
-    def test_get_snapshot(self):
+    def test_get_snapshot_managed_cluster(self):
         self.common_get_snapshot()
 
     def test_get_host_group_id(self):
