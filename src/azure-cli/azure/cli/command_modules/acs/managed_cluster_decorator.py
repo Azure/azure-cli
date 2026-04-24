@@ -6336,13 +6336,11 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         """
         self._ensure_mc(mc)
 
+        if self.context.get_enable_hosted_system():
+            return mc
+
         agentpool_profile = self.agentpool_decorator.construct_agentpool_profile_default()
         mc.agent_pool_profiles = [agentpool_profile]
-        self.context.set_intermediate(
-            "cli_synthesized_default_agent_pool",
-            agentpool_profile,
-            overwrite_exists=True,
-        )
         return mc
 
     def set_up_mc_properties(self, mc: ManagedCluster) -> ManagedCluster:
@@ -7201,28 +7199,6 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc.fqdn_subdomain = fqdn_subdomain
         return mc
 
-    def _remove_cli_synthesized_default_agent_pool(self, mc: ManagedCluster) -> None:
-        agent_pool_profiles = mc.agent_pool_profiles
-        if not agent_pool_profiles:
-            return
-
-        cli_default_agent_pool = self.context.get_intermediate(
-            "cli_synthesized_default_agent_pool", default_value=None
-        )
-        if cli_default_agent_pool is None:
-            return
-
-        # Remove only the exact pool object created by `set_up_agentpool_profile`.
-        # A Managed System Pool cluster gets that system pool from `hosted_system_profile`;
-        # preserve any additional pools that may have been appended by other create-time logic.
-        remaining_agent_pool_profiles = [
-            profile for profile in agent_pool_profiles
-            if profile is not cli_default_agent_pool
-        ]
-        if len(remaining_agent_pool_profiles) == len(agent_pool_profiles):
-            return
-        mc.agent_pool_profiles = remaining_agent_pool_profiles or None
-
     def set_up_hosted_system_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Set up hosted_system_profile on the ManagedCluster for Automatic SKU clusters.
 
@@ -7232,9 +7208,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
           - `mc.hosted_system_profile.enabled` is set to True so the RP treats this
             as a Managed System Pool request.
           - `system_node_subnet_id` / `node_subnet_id` are populated when supplied.
-          - The CLI-synthesized default agent pool is removed. On a Managed System
-            Pool cluster the system pool is provisioned server-side from
-            `hosted_system_profile`, so the CLI default is stale.
+          - `set_up_agentpool_profile` does not synthesize the default agent pool,
+            because the system pool is provisioned server-side from `hosted_system_profile`.
 
         :return: the ManagedCluster object
         """
@@ -7256,7 +7231,6 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 mc.hosted_system_profile.system_node_subnet_id = system_node_subnet_id
             if node_subnet_id:
                 mc.hosted_system_profile.node_subnet_id = node_subnet_id
-            self._remove_cli_synthesized_default_agent_pool(mc)
         return mc
 
     def set_up_identity(self, mc: ManagedCluster) -> ManagedCluster:
