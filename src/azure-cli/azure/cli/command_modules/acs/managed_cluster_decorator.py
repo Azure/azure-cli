@@ -7130,10 +7130,12 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
     def set_up_hosted_system_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Set up hosted_system_profile on the ManagedCluster for Automatic SKU clusters.
 
-        - When any of `--system-node-subnet-id` / `--node-subnet-id` / `--apiserver-subnet-id`
-          are provided (BYO VNet HOBO), validate the trio and populate
-          `mc.hosted_system_profile.{system_node_subnet_id, node_subnet_id}`. `enabled` is left
-          unset so the server side keeps ownership of the default/opt-in decision.
+        - When the BYO VNet HOBO trio (`--system-node-subnet-id` / `--node-subnet-id` /
+          `--apiserver-subnet-id`) is provided, populate
+          `mc.hosted_system_profile.{enabled=True, system_node_subnet_id, node_subnet_id}`
+          and clear `mc.agent_pool_profiles` because HOBO manages node pools server-side.
+          The RP requires `enabled=True` to treat the request as BYO VNet rather than
+          default-VNet mode.
         - When `--disable-hosted-system` is provided, set
           `mc.hosted_system_profile = ManagedClusterHostedSystemProfile(enabled=False)` so
           HOBO is deterministically opted out for Automatic clusters.
