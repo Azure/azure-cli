@@ -39,6 +39,54 @@ CACHE_TERMINAL_STATES = {"Succeeded", "Failed", "Cancelled"}
 # manual on-prem (CVO) peering steps; it polls cacheState as the sync signal
 # and prints copy-pasteable commands to STDERR.
 #
+# -----------------------------------------------------------------------------
+# Prerequisite: NetApp Cloud Volumes ONTAP (CVO) instance
+# -----------------------------------------------------------------------------
+# `test_create_delete_cache` requires an ALREADY-PROVISIONED, REACHABLE CVO
+# (Cloud Volumes ONTAP) instance that the engineer can SSH into during the
+# test run. The test does NOT provision CVO for you - CVO is a NetApp
+# product, not a first-class Azure resource, and there is no `az` command
+# that creates it.
+#
+# The CVO must satisfy ALL of the following before running this test:
+#
+#   1. Single-node CVO (HA pair also fine) deployed in Azure, in a VNet that
+#      can route to the ANF cache's `--peering-subnet-resource-id`. The
+#      tests in this file create their own VNets in 10.5.0.0/16 (cache) and
+#      10.6.0.0/16 (peering) - see `setup_vnets`. The CVO VNet must be
+#      peered with - or otherwise routable to - the peering VNet.
+#
+#   2. ONTAP cluster name, vserver name, intercluster LIF addresses, and
+#      origin volume name on the CVO must match the values currently
+#      hard-coded in `create_cache(...)`:
+#         --peer-cluster-name cluster1
+#         --peer-addresses    192.0.2.10 192.0.2.11   <-- PLACEHOLDERS
+#         --peer-vserver-name vserver1
+#         --peer-volume-name  originvol1
+#      The 192.0.2.x values are RFC-5737 documentation addresses and will
+#      NOT work as-is. Update those literals (or parameterize them via env
+#      vars) to match your CVO's real intercluster LIFs before running.
+#
+#   3. The engineer must have an SSH session ready to the CVO admin
+#      endpoint (ONTAP `admin` role or equivalent) BEFORE starting the
+#      test. The test prints the cluster-peering command + passphrase the
+#      moment it observes `ClusterPeeringOfferSent`, then immediately
+#      starts polling for `VserverPeeringOfferSent`; if the engineer is
+#      not already SSH'd in, they will lose minutes of the 1-hour wait
+#      budget.
+#
+#   4. CVO provisioning is a one-time, out-of-band setup. Recommended:
+#      provision a long-lived shared CVO via NetApp BlueXP (formerly Cloud
+#      Manager) and document admin host / SSH key location in a team
+#      runbook or Key Vault. CVO provisioning is NOT automated by this
+#      repo and is intentionally out of scope for the Azure CLI.
+#
+# If CVO is not available the test will hang at the first
+# `_wait_for_cache_state` call until `CACHE_STATE_POLL_TIMEOUT_SECONDS`
+# elapses (default 1 hour) and then fail with the last observed
+# cacheState. That is the expected behaviour, not a bug.
+# -----------------------------------------------------------------------------
+#
 # IMPORTANT: pass `-s` (a.k.a. `--capture=no`) to pytest so the on-prem
 # instruction blocks written to stderr are shown in real time. Without `-s`
 # pytest will buffer the output and you won't see the commands until the test
