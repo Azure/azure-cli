@@ -16,12 +16,15 @@ from azure.cli.core.aaz import *
 )
 class Assign(AAZCommand):
     """Assign the user or system managed identities.
+
+    :example: Accounts_CreateOrUpdate
+        az netappfiles account identity assign --resource-group myRG --account-name account1
     """
 
     _aaz_info = {
-        "version": "2025-06-01",
+        "version": "2026-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}", "2025-06-01", "identity"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}", "2026-01-01", "identity"],
         ]
     }
 
@@ -163,7 +166,7 @@ class Assign(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-06-01",
+                    "api-version", "2026-01-01",
                     required=True,
                 ),
             }
@@ -262,7 +265,7 @@ class Assign(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-06-01",
+                    "api-version", "2026-01-01",
                     required=True,
                 ),
             }
