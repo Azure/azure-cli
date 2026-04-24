@@ -4298,9 +4298,17 @@ class AKSManagedClusterContext(BaseAKSContext):
     def _validate_byo_hobo_subnets(self) -> None:
         """Validate BYO HOBO subnet trio and mutual exclusion with --disable-hosted-system.
 
-        - If any of system-node / node / apiserver subnet is set, all three must be provided.
-        - --disable-hosted-system cannot be combined with any of the three subnets.
-        - BYO HOBO (subnet trio) requires --sku automatic.
+        BYO VNet HOBO is triggered by --system-node-subnet-id / --node-subnet-id
+        (the HOBO-specific flags). --apiserver-subnet-id is intentionally NOT part of the
+        trigger because it keeps its existing general-purpose meaning for
+        --enable-apiserver-vnet-integration flows on non-HOBO clusters.
+
+        - If either --system-node-subnet-id or --node-subnet-id is set, the full trio
+          (--system-node-subnet-id, --node-subnet-id, --apiserver-subnet-id) must be
+          provided and --sku must be automatic.
+        - --disable-hosted-system is mutually exclusive with the HOBO-specific
+          subnet flags (--system-node-subnet-id, --node-subnet-id) and also requires
+          --sku automatic.
         """
         if self.decorator_mode != DecoratorMode.CREATE:
             return
@@ -4310,7 +4318,6 @@ class AKSManagedClusterContext(BaseAKSContext):
         disable_hosted_system = self.get_disable_hosted_system()
 
         hobo_specific_set = bool(system_node_subnet_id or node_subnet_id)
-        any_trio_set = bool(hobo_specific_set or apiserver_subnet_id)
 
         # --disable-hosted-system is mutually exclusive with any HOBO-specific subnet flag.
         # (We deliberately don't include --apiserver-subnet-id here: it keeps its existing
@@ -4343,7 +4350,6 @@ class AKSManagedClusterContext(BaseAKSContext):
             raise RequiredArgumentMissingError(
                 '"--disable-hosted-system" requires "--sku automatic".'
             )
-        _ = any_trio_set  # reserved for future per-flag gating
 
     def _get_enable_private_cluster(self, enable_validation: bool = False) -> bool:
         """Internal function to obtain the value of enable_private_cluster.
