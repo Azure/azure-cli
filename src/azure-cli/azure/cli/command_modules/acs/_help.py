@@ -347,7 +347,7 @@ parameters:
     short-summary: The ID of a subnet in an existing VNet into which to assign control plane apiserver pods(requires --enable-apiserver-vnet-integration)
   - name: --system-node-subnet-id
     type: string
-    short-summary: (Automatic SKU) Subnet ID of an existing VNet to be used by the Managed System Pool in the Automatic cluster.
+    short-summary: (Automatic SKU) The ID of a subnet in an existing VNet to be used by the Managed System Pool in an Automatic cluster.
     long-summary: |
       Bring-your-own VNet for an Automatic cluster requires three subnets supplied together:
       `--system-node-subnet-id` (this flag, for the Managed System Pool), `--node-subnet-id`
@@ -355,7 +355,7 @@ parameters:
       All three subnets must belong to the same VNet and can only be used with `--sku automatic`.
   - name: --node-subnet-id
     type: string
-    short-summary: (Automatic SKU) Subnet ID of an existing VNet to be used by user node pools in the Automatic cluster.
+    short-summary: (Automatic SKU) The ID of a subnet in an existing VNet to be used by user node pools in an Automatic cluster.
     long-summary: |
       Bring-your-own VNet for an Automatic cluster requires three subnets supplied together:
       `--system-node-subnet-id` (for the Managed System Pool), `--node-subnet-id` (this flag,

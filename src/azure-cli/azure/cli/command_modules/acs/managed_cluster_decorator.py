@@ -7135,9 +7135,12 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 mc.hosted_system_profile.system_node_subnet_id = system_node_subnet_id
             if node_subnet_id:
                 mc.hosted_system_profile.node_subnet_id = node_subnet_id
-            # The Managed System Pool manages node pools; drop the default agent pool so
-            # the RP doesn't reject the request for having an unrelated default nodepool
-            # in a VNet other than the BYO trio's VNet.
+            # On an Automatic cluster with BYO VNet, the system pool is provisioned by
+            # the RP from `hosted_system_profile` (using `system_node_subnet_id`), so
+            # the CLI-synthesized default `agent_pool_profiles` entry is unnecessary
+            # and would conflict: its `vnet_subnet_id` is unset (or bound to the
+            # default VNet), which the RP rejects against the BYO trio. Clear it and
+            # let the RP populate pools from `hosted_system_profile`.
             if mc.agent_pool_profiles is not None:
                 mc.agent_pool_profiles = None
         return mc
