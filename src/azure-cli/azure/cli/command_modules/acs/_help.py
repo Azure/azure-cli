@@ -361,6 +361,14 @@ parameters:
       `--system-node-subnet-id` (for the Managed System Pool), `--node-subnet-id` (this flag,
       for user node pools), and `--apiserver-subnet-id` (for the control plane API server).
       All three subnets must belong to the same VNet and can only be used with `--sku automatic`.
+  - name: --enable-hosted-system
+    type: bool
+    short-summary: (Automatic SKU) Explicitly opt in to a Managed System Pool for the Automatic cluster.
+    long-summary: |
+      Only valid with `--sku automatic`. Use this flag when you want to deterministically
+      request a Managed System Pool regardless of region defaults. It is also implied when
+      you supply the bring-your-own VNet subnet trio (`--system-node-subnet-id`,
+      `--node-subnet-id`, `--apiserver-subnet-id`).
   - name: --enable-private-cluster
     type: string
     short-summary: Enable private cluster.

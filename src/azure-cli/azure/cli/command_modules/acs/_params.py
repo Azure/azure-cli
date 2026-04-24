@@ -446,6 +446,7 @@ def load_arguments(self, _):
         c.argument('apiserver_subnet_id', validator=validate_apiserver_subnet_id)
         c.argument('system_node_subnet_id', validator=validate_system_node_subnet_id)
         c.argument('node_subnet_id', validator=validate_node_subnet_id)
+        c.argument('enable_hosted_system', action='store_true')
         c.argument('private_dns_zone')
         c.argument('disable_public_fqdn', action='store_true')
         c.argument('service_principal')

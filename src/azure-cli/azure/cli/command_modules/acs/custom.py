@@ -1035,6 +1035,7 @@ def aks_create(
     # BYO VNet for Managed System Pool (Automatic SKU)
     system_node_subnet_id=None,
     node_subnet_id=None,
+    enable_hosted_system=False,
     # node provisioning
     node_provisioning_mode=None,
     node_provisioning_default_pools=None,

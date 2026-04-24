@@ -4474,6 +4474,33 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         ctx.validate_byo_hobo_subnets()
         self.assertEqual(ctx.get_system_node_subnet_id(), system_subnet)
         self.assertEqual(ctx.get_node_subnet_id(), node_subnet)
+        self.assertTrue(ctx.get_enable_hosted_system())  # BYO trio implies enable_hosted_system
+
+        # --enable-hosted-system without --sku automatic -> RequiredArgumentMissingError
+        ctx = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({
+                "sku": "base",
+                "enable_hosted_system": True,
+            }),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx.validate_byo_hobo_subnets()
+
+        # happy path: --enable-hosted-system alone on automatic
+        ctx = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({
+                "sku": "automatic",
+                "enable_hosted_system": True,
+            }),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        ctx.validate_byo_hobo_subnets()
+        self.assertTrue(ctx.get_enable_hosted_system())
 
     def test_get_private_dns_zone(self):
         # default

@@ -4289,8 +4289,25 @@ class AKSManagedClusterContext(BaseAKSContext):
                 node_subnet_id = self.mc.hosted_system_profile.node_subnet_id
         return node_subnet_id
 
+    def get_enable_hosted_system(self) -> bool:
+        """Obtain the value of enable_hosted_system.
+
+        Returns True when the user explicitly opts in via --enable-hosted-system,
+        or implicitly via the BYO VNet subnet trio (which is HOBO-only).
+
+        :return: bool
+        """
+        if self.decorator_mode != DecoratorMode.CREATE:
+            return False
+        explicit = bool(self.raw_param.get("enable_hosted_system"))
+        implicit = bool(
+            self.raw_param.get("system_node_subnet_id") or
+            self.raw_param.get("node_subnet_id")
+        )
+        return explicit or implicit
+
     def validate_byo_hobo_subnets(self) -> None:
-        """Validate the BYO VNet subnet trio for Managed System Pool (Automatic cluster).
+        """Validate the BYO VNet subnet trio and the --enable-hosted-system flag.
 
         BYO VNet for a Managed System Pool is triggered by --system-node-subnet-id /
         --node-subnet-id. --apiserver-subnet-id is intentionally NOT part of the trigger
@@ -4300,14 +4317,22 @@ class AKSManagedClusterContext(BaseAKSContext):
         - If either --system-node-subnet-id or --node-subnet-id is set, the full trio
           (--system-node-subnet-id, --node-subnet-id, --apiserver-subnet-id) must be
           provided and --sku must be automatic.
+        - --enable-hosted-system is only valid with --sku automatic.
         """
         if self.decorator_mode != DecoratorMode.CREATE:
             return
         system_node_subnet_id = self.raw_param.get("system_node_subnet_id")
         node_subnet_id = self.raw_param.get("node_subnet_id")
         apiserver_subnet_id = self.raw_param.get("apiserver_subnet_id")
+        enable_hosted_system = bool(self.raw_param.get("enable_hosted_system"))
 
         byo_specific_set = bool(system_node_subnet_id or node_subnet_id)
+
+        # --enable-hosted-system requires --sku automatic.
+        if enable_hosted_system and self.get_sku_name() != CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC:
+            raise RequiredArgumentMissingError(
+                '"--enable-hosted-system" requires "--sku automatic".'
+            )
 
         # Partial trio: if any BYO subnet is set, require the full trio.
         if byo_specific_set:
@@ -7108,39 +7133,42 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
     def set_up_hosted_system_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Set up hosted_system_profile on the ManagedCluster for Automatic SKU clusters.
 
-        When the BYO VNet trio (`--system-node-subnet-id` / `--node-subnet-id` /
-        `--apiserver-subnet-id`) is provided, populate
-        `mc.hosted_system_profile.{enabled=True, system_node_subnet_id, node_subnet_id}`
-        and clear `mc.agent_pool_profiles` because the Managed System Pool manages node
-        pools server-side. The RP requires `enabled=True` to treat the request as BYO
-        VNet rather than default-VNet mode.
+        Triggered when the user explicitly opts in via `--enable-hosted-system`, or
+        implicitly by supplying the BYO VNet subnet trio (`--system-node-subnet-id` /
+        `--node-subnet-id` / `--apiserver-subnet-id`). In either case:
+          - `mc.hosted_system_profile.enabled` is set to True so the RP treats this
+            as a Managed System Pool request.
+          - `system_node_subnet_id` / `node_subnet_id` are populated when supplied.
+          - `mc.agent_pool_profiles` is cleared. The CLI unconditionally synthesizes
+            a default agent pool via `set_up_agentpool_profile`; on a Managed System
+            Pool cluster the system pool is provisioned server-side from
+            `hosted_system_profile`, so the CLI default is stale and (in the BYO case)
+            actively conflicts with the BYO VNet.
 
         :return: the ManagedCluster object
         """
         self._ensure_mc(mc)
 
-        # Run cross-flag validation (trio completeness + SKU gate)
+        # Run cross-flag validation (--enable-hosted-system SKU gate + BYO trio completeness)
         self.context.validate_byo_hobo_subnets()
 
         system_node_subnet_id = self.context.get_system_node_subnet_id()
         node_subnet_id = self.context.get_node_subnet_id()
+        enable_hosted_system = self.context.get_enable_hosted_system()
 
-        if system_node_subnet_id or node_subnet_id:
+        if enable_hosted_system:
             if mc.hosted_system_profile is None:
                 mc.hosted_system_profile = self.models.ManagedClusterHostedSystemProfile()
-            # BYO VNet requires explicit enablement so the RP treats this as a BYO VNet
-            # cluster (not default-vnet) when BYO subnets are supplied.
+            # Explicit enablement so the RP treats this as a Managed System Pool cluster.
             mc.hosted_system_profile.enabled = True
             if system_node_subnet_id:
                 mc.hosted_system_profile.system_node_subnet_id = system_node_subnet_id
             if node_subnet_id:
                 mc.hosted_system_profile.node_subnet_id = node_subnet_id
-            # On an Automatic cluster with BYO VNet, the system pool is provisioned by
-            # the RP from `hosted_system_profile` (using `system_node_subnet_id`), so
-            # the CLI-synthesized default `agent_pool_profiles` entry is unnecessary
-            # and would conflict: its `vnet_subnet_id` is unset (or bound to the
-            # default VNet), which the RP rejects against the BYO trio. Clear it and
-            # let the RP populate pools from `hosted_system_profile`.
+            # Clear the CLI-synthesized default agent pool — the RP provisions the
+            # system pool from hosted_system_profile instead. Leaving it in causes
+            # the RP to reject BYO VNet clusters and produces a ghost pool on
+            # non-BYO Automatic clusters.
             if mc.agent_pool_profiles is not None:
                 mc.agent_pool_profiles = None
         return mc
