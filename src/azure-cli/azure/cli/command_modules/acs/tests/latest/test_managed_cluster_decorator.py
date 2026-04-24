@@ -4483,7 +4483,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         with self.assertRaises(RequiredArgumentMissingError):
             ctx_6.get_apiserver_subnet_id()
 
-    def test_byo_hobo_subnets_validation(self):
+    def test_byo_hosted_system_subnets_validation(self):
         system_subnet = "/subscriptions/s/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/v/subnets/sys"
         node_subnet = "/subscriptions/s/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/v/subnets/nod"
         api_subnet = "/subscriptions/s/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/v/subnets/api"
@@ -4499,7 +4499,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             decorator_mode=DecoratorMode.CREATE,
         )
         with self.assertRaises(RequiredArgumentMissingError):
-            ctx.validate_byo_hobo_subnets()
+            ctx.validate_byo_hosted_system_subnets()
 
         # trio without --sku automatic -> RequiredArgumentMissingError
         ctx = AKSManagedClusterContext(
@@ -4514,7 +4514,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             decorator_mode=DecoratorMode.CREATE,
         )
         with self.assertRaises(RequiredArgumentMissingError):
-            ctx.validate_byo_hobo_subnets()
+            ctx.validate_byo_hosted_system_subnets()
 
         # happy path: full trio + automatic
         ctx = AKSManagedClusterContext(
@@ -4528,7 +4528,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
-        ctx.validate_byo_hobo_subnets()
+        ctx.validate_byo_hosted_system_subnets()
         self.assertEqual(ctx.get_system_node_subnet_id(), system_subnet)
         self.assertEqual(ctx.get_node_subnet_id(), node_subnet)
         self.assertTrue(ctx.get_enable_hosted_system())  # BYO trio implies enable_hosted_system
@@ -4544,7 +4544,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             decorator_mode=DecoratorMode.CREATE,
         )
         with self.assertRaises(RequiredArgumentMissingError):
-            ctx.validate_byo_hobo_subnets()
+            ctx.validate_byo_hosted_system_subnets()
 
         # happy path: --enable-hosted-system alone on automatic
         ctx = AKSManagedClusterContext(
@@ -4556,7 +4556,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             self.models,
             decorator_mode=DecoratorMode.CREATE,
         )
-        ctx.validate_byo_hobo_subnets()
+        ctx.validate_byo_hosted_system_subnets()
         self.assertTrue(ctx.get_enable_hosted_system())
 
     def test_get_private_dns_zone(self):

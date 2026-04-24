@@ -4295,7 +4295,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         """Obtain the value of enable_hosted_system.
 
         Returns True when the user explicitly opts in via --enable-hosted-system,
-        or implicitly via the BYO VNet subnet trio (which is HOBO-only).
+        or implicitly via the BYO VNet subnet trio for Managed System Pool.
 
         :return: bool
         """
@@ -4311,7 +4311,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         )
         return explicit or implicit
 
-    def validate_byo_hobo_subnets(self) -> None:
+    def validate_byo_hosted_system_subnets(self) -> None:
         """Validate the BYO VNet subnet trio and the --enable-hosted-system flag.
 
         BYO VNet for a Managed System Pool is triggered by --system-node-subnet-id /
@@ -6493,7 +6493,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
 
         # Validate before granting roles so a malformed BYO trio does not leave
         # partial Network Contributor assignments behind.
-        self.context.validate_byo_hobo_subnets()
+        self.context.validate_byo_hosted_system_subnets()
 
         need_post_creation_vnet_permission_granting = False
         vnet_subnet_id = self.context.get_vnet_subnet_id()
@@ -7162,7 +7162,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
 
         # Run BYO VNet trio validation first so clearer errors surface before the
         # generic --apiserver-subnet-id checks inside _get_apiserver_subnet_id.
-        self.context.validate_byo_hobo_subnets()
+        self.context.validate_byo_hosted_system_subnets()
 
         api_server_access_profile = None
         api_server_authorized_ip_ranges = self.context.get_api_server_authorized_ip_ranges()
@@ -7216,7 +7216,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         self._ensure_mc(mc)
 
         # Run cross-flag validation (--enable-hosted-system SKU gate + BYO trio completeness)
-        self.context.validate_byo_hobo_subnets()
+        self.context.validate_byo_hosted_system_subnets()
 
         system_node_subnet_id = self.context.get_system_node_subnet_id()
         node_subnet_id = self.context.get_node_subnet_id()
