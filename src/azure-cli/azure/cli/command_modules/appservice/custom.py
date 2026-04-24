@@ -5625,7 +5625,7 @@ def list_startup_logs(cmd, resource_group, name, slot=None, outcome=None, instan
     return result.get('files', result) if isinstance(result, dict) else result
 
 
-def show_startup_log(cmd, resource_group, name, slot=None, filename=None):
+def show_startup_log(cmd, resource_group, name, slot=None, filename=None, instance=None):
     import requests
 
     scm_url = _get_scm_url(cmd, resource_group, name, slot)
@@ -5635,6 +5635,8 @@ def show_startup_log(cmd, resource_group, name, slot=None, filename=None):
         url = '{}/api/startuplogs/{}'.format(scm_url, quote(filename, safe=''))
     else:
         url = '{}/api/startuplogs?latest=true'.format(scm_url)
+        if instance:
+            url += '&instance={}'.format(quote(instance, safe=''))
 
     response = requests.get(url, headers=headers)
 

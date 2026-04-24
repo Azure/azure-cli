@@ -2388,12 +2388,14 @@ examples:
 helps['webapp log startup show'] = """
 type: command
 short-summary: Show the content of a container startup log.
-long-summary: By default, shows the most recent startup log, preferring failure logs. Use --filename to view a specific log file.
+long-summary: By default, shows the most recent startup log, preferring failure logs. Use --filename to view a specific log file, or --instance to scope to a specific worker.
 examples:
   - name: Show the latest startup log (prefers failures)
     text: az webapp log startup show --name MyWebApp --resource-group MyResourceGroup
   - name: Show a specific startup log file
     text: az webapp log startup show --name MyWebApp --resource-group MyResourceGroup --filename 2026_04_13_lw0sdlwk000002_failure.log
+  - name: Show the latest startup log for a specific worker instance
+    text: az webapp log startup show --name MyWebApp --resource-group MyResourceGroup --instance lw0sdlwk000002
 """
 
 helps['functionapp log'] = """

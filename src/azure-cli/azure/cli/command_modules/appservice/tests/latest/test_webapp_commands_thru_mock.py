@@ -785,6 +785,31 @@ class TestStartupLogsMocked(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
                 return_value='https://myapp.scm.azurewebsites.net')
     @mock.patch('requests.get')
+    def test_show_startup_log_with_instance(self, requests_get_mock, _scm_url_mock, _headers_mock):
+        requests_get_mock.return_value = self._make_response(
+            200, text='instance log content',
+            headers={
+                'Content-Type': 'text/plain',
+                'X-StartupLog-Filename': '2026_04_13_lw0sdlwk000002_failure.log',
+                'X-StartupLog-Instance': 'lw0sdlwk000002',
+                'X-StartupLog-Outcome': 'failure',
+            }
+        )
+
+        result = show_startup_log(_get_test_cmd(), 'myRG', 'myApp', instance='lw0sdlwk000002')
+
+        self.assertEqual(result['content'], 'instance log content')
+        self.assertEqual(result['instance'], 'lw0sdlwk000002')
+        requests_get_mock.assert_called_once_with(
+            'https://myapp.scm.azurewebsites.net/api/startuplogs?latest=true&instance=lw0sdlwk000002',
+            headers={'Authorization': 'Bearer token'}
+        )
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': 'Bearer token'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('requests.get')
     def test_show_startup_log_404_no_filename(self, requests_get_mock, _scm_url_mock, _headers_mock):
         requests_get_mock.return_value = self._make_response(404)
 
