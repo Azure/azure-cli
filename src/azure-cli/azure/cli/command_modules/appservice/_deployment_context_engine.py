@@ -5,7 +5,7 @@
 
 """
 Context-enriched error builder for az webapp deploy / az webapp up.
-Enabled via the --enriched-errors flag on az webapp deploy.
+Enabled via the --enriched-errors flag on az webapp deploy / az webapp up.
 """
 
 import re
