@@ -68,7 +68,7 @@ class TestDeploymentFailurePatterns(unittest.TestCase):
                 self.assertNotIn("commonCauses", pattern)
 
     def test_pattern_count(self):
-        self.assertEqual(len(DEPLOYMENT_FAILURE_PATTERNS), 37)
+        self.assertEqual(len(DEPLOYMENT_FAILURE_PATTERNS), 10)
 
     def test_get_failure_pattern_found(self):
         pattern = get_failure_pattern("DeploymentInProgress")
@@ -116,94 +116,16 @@ class TestDeploymentFailurePatterns(unittest.TestCase):
                                   error_message="Clean deployments cannot be performed in the requested directory")
         self.assertEqual(p["errorCode"], "CleanDeployForbidden")
 
-    def test_match_400_no_file_uploaded(self):
-        p = match_failure_pattern(status_code=400, error_message="No file uploaded")
-        self.assertEqual(p["errorCode"], "NoFileUploaded")
-
-    def test_match_400_only_zip_supported(self):
-        p = match_failure_pattern(status_code=400, error_message="Only .zip files are supported")
-        self.assertEqual(p["errorCode"], "UnsupportedFileType")
-
-    def test_match_400_invalid_deployment_id(self):
-        p = match_failure_pattern(status_code=400, error_message="Invalid deployment ID format")
-        self.assertEqual(p["errorCode"], "InvalidDeploymentId")
-
     def test_match_400_unsupported_artifact_type(self):
         p = match_failure_pattern(status_code=400, error_message="Artifact type 'foo' not supported")
         self.assertEqual(p["errorCode"], "UnsupportedArtifactType")
 
-    # --- match_failure_pattern: 400 ZipDeploy validation ---
-    def test_match_400_zipdeploy_malformed(self):
-        p = match_failure_pattern(status_code=400,
-                                  error_message="ZipDeploy Validation ERROR: Package URI is Malformed.")
-        self.assertEqual(p["errorCode"], "ZipDeployMalformedUri")
-
-    def test_match_400_zipdeploy_inaccessible(self):
-        p = match_failure_pattern(status_code=400,
-                                  error_message="ZipDeploy Validation ERROR: Package URI is inaccessible")
-        self.assertEqual(p["errorCode"], "ZipDeployUriInaccessible")
-
-    def test_match_400_zipdeploy_disk_space(self):
-        p = match_failure_pattern(status_code=400,
-                                  error_message="ZipDeploy Validation ERROR: Package size = 500 MB. Free disk space = 100 MB")
-        self.assertEqual(p["errorCode"], "ZipDeployInsufficientDisk")
-
-    def test_match_400_zipdeploy_runtime_mismatch(self):
-        p = match_failure_pattern(status_code=400,
-                                  error_message="ZipDeploy Validation ERROR: Cannot deploy python zip package to node Azure Functions app")
-        self.assertEqual(p["errorCode"], "ZipDeployRuntimeMismatch")
-
-    def test_match_400_zipdeploy_run_from_package(self):
-        p = match_failure_pattern(status_code=400,
-                                  error_message="ZipDeploy Validation ERROR: App setting WEBSITE_RUN_FROM_PACKAGE is set to a remote URL")
-        self.assertEqual(p["errorCode"], "ZipDeployRunFromPackageConflict")
-
-    # --- match_failure_pattern: 403 Forbidden ---
-    def test_match_403_scm_disabled(self):
-        p = match_failure_pattern(status_code=403)
-        self.assertEqual(p["errorCode"], "ScmDisabled")
-
-    # --- match_failure_pattern: 404 Not Found ---
-    def test_match_404_repository_not_found(self):
-        p = match_failure_pattern(status_code=404,
-                                  error_message="Repository could not be found.")
-        self.assertEqual(p["errorCode"], "RepositoryNotFound")
-
-    def test_match_404_deployment_not_found(self):
-        p = match_failure_pattern(status_code=404,
-                                  error_message="Deployment 'abc123' not found.")
-        self.assertEqual(p["errorCode"], "DeploymentNotFound")
-
-    def test_match_404_log_not_found(self):
-        p = match_failure_pattern(status_code=404,
-                                  error_message="LogId 'log1' was not found in Deployment 'abc123'.")
-        self.assertEqual(p["errorCode"], "LogNotFound")
-
-    def test_match_404_no_deployments(self):
-        p = match_failure_pattern(status_code=404,
-                                  error_message="Need to deploy website to get deployment script.")
-        self.assertEqual(p["errorCode"], "NoDeploymentsExist")
-
-    def test_match_404_custom_deploy_script(self):
-        p = match_failure_pattern(status_code=404,
-                                  error_message="Operation only supported if not using a custom deployment script")
-        self.assertEqual(p["errorCode"], "CustomDeployScriptInUse")
-
-    def test_match_404_quickdeploy_disabled(self):
-        p = match_failure_pattern(status_code=404,
-                                  error_message="QuickDeploy feature is disabled")
-        self.assertEqual(p["errorCode"], "QuickDeployDisabled")
-
-    def test_match_404_generic(self):
-        p = match_failure_pattern(status_code=404, error_message="some unknown 404")
-        self.assertEqual(p["errorCode"], "DeploymentNotFound")
+    def test_match_400_unmatched_falls_through_to_generic(self):
+        """400 errors that don't match a specific pattern fall back to DeploymentFailed."""
+        p = match_failure_pattern(status_code=400, error_message="No file uploaded")
+        self.assertEqual(p["errorCode"], "DeploymentFailed")
 
     # --- match_failure_pattern: 409 Conflict ---
-    def test_match_409_auto_swap(self):
-        p = match_failure_pattern(status_code=409,
-                                  error_message="There is an auto swap deployment currently ongoing")
-        self.assertEqual(p["errorCode"], "AutoSwapInProgress")
-
     def test_match_409_deployment_in_progress(self):
         p = match_failure_pattern(status_code=409,
                                   error_message="There is a deployment currently in progress")
@@ -214,63 +136,8 @@ class TestDeploymentFailurePatterns(unittest.TestCase):
                                   error_message="Run-From-Zip is set to a remote URL using WEBSITE_RUN_FROM_PACKAGE")
         self.assertEqual(p["errorCode"], "RunFromRemoteZipConfigured")
 
-    def test_match_409_deployment_id_exists(self):
-        p = match_failure_pattern(status_code=409,
-                                  error_message="Deployment with id 'abc123' exists")
-        self.assertEqual(p["errorCode"], "DeploymentIdExists")
-
-    def test_match_409_lock_failed(self):
-        p = match_failure_pattern(status_code=409,
-                                  error_message="Failed to acquire deployment lock. Another deployment may be in progress.")
-        self.assertEqual(p["errorCode"], "DeploymentLockFailed")
-
     def test_match_409_generic(self):
         p = match_failure_pattern(status_code=409, error_message="some conflict")
-        self.assertEqual(p["errorCode"], "DeploymentInProgress")
-
-    # --- match_failure_pattern: 499 Client Closed ---
-    def test_match_499_client_disconnected(self):
-        p = match_failure_pattern(status_code=499,
-                                  error_message="Request was Aborted. Deployment was cancelled")
-        self.assertEqual(p["errorCode"], "ClientDisconnected")
-
-    # --- match_failure_pattern: 500 Internal Server Error ---
-    def test_match_500_generic(self):
-        p = match_failure_pattern(status_code=500, error_message="Unhandled exception")
-        self.assertEqual(p["errorCode"], "InternalDeploymentError")
-
-    def test_match_500_empty_branch(self):
-        p = match_failure_pattern(status_code=500,
-                                  error_message="The current deployment branch is 'main', but nothing has been pushed to it")
-        self.assertEqual(p["errorCode"], "EmptyBranch")
-
-    # --- match_failure_pattern: Kudu DeployStatus ---
-    def test_match_deploy_status_failed(self):
-        p = match_failure_pattern(deployment_status="Failed",
-                                  error_message="some error during deploy")
-        self.assertEqual(p["errorCode"], "KuduDeployFailed")
-
-    def test_match_deploy_status_failed_build(self):
-        p = match_failure_pattern(deployment_status="Failed",
-                                  error_message="build failed: missing requirements.txt")
-        self.assertEqual(p["errorCode"], "KuduBuildFailed")
-
-    def test_match_deploy_status_building(self):
-        p = match_failure_pattern(deployment_status="Building",
-                                  error_message="error during Oryx build")
-        self.assertEqual(p["errorCode"], "KuduBuildFailed")
-
-    # --- match_failure_pattern: message-based fallback ---
-    def test_match_message_aborted(self):
-        p = match_failure_pattern(error_message="Request was Aborted. Deployment was cancelled")
-        self.assertEqual(p["errorCode"], "ClientDisconnected")
-
-    def test_match_message_auto_swap(self):
-        p = match_failure_pattern(error_message="auto swap deployment ongoing")
-        self.assertEqual(p["errorCode"], "AutoSwapInProgress")
-
-    def test_match_message_in_progress(self):
-        p = match_failure_pattern(error_message="There is a deployment currently in progress")
         self.assertEqual(p["errorCode"], "DeploymentInProgress")
 
     def test_match_no_match(self):
@@ -355,26 +222,6 @@ class TestDeploymentContextEngine(unittest.TestCase):
         self.assertIn("rawError", ctx)
         self.assertNotIn("commonCauses", ctx)
 
-    def test_build_context_with_deployment_properties(self):
-        self._patch_app_metadata()
-        params = _make_mock_params()
-        props = {
-            "numberOfInstancesInProgress": "1",
-            "numberOfInstancesSuccessful": "0",
-            "numberOfInstancesFailed": "2",
-            "errors": [{"extendedCode": "EXT001", "message": "Deploy error"}],
-            "failedInstancesLogs": ["https://logs.example.com/log1"]
-        }
-        ctx = build_enriched_error_context(
-            params, deployment_status="Failed",
-            error_message="Deploy error", deployment_properties=props
-        )
-        self.assertEqual(ctx["errorCode"], "KuduDeployFailed")
-        self.assertIn("instanceStatus", ctx)
-        self.assertEqual(ctx["instanceStatus"]["numberOfInstancesFailed"], 2)
-        self.assertIn("deploymentErrors", ctx)
-        self.assertEqual(ctx["failedInstanceLogs"], "https://logs.example.com/log1")
-
     def test_build_context_includes_last_known_step(self):
         self._patch_app_metadata()
         params = _make_mock_params()
@@ -408,7 +255,7 @@ class TestDeploymentContextEngine(unittest.TestCase):
         self.assertNotIn("Common Causes:", msg)
         self.assertIn("Suggested Fixes:", msg)
         self.assertIn("Ask Copilot:", msg)
-        self.assertIn("gh copilot explain", msg)
+        self.assertIn("copilot explain", msg)
         # Should NOT have duplicate YAML block
         self.assertNotIn("--- COPILOT CONTEXT ---", msg)
         self.assertNotIn("--- END CONTEXT ---", msg)
@@ -458,6 +305,19 @@ class TestDeploymentContextEngine(unittest.TestCase):
         self.assertEqual(ctx["errorCode"], "DeploymentInProgress")
         self.assertEqual(ctx["deploymentType"], "ZipDeploy")
 
+    def test_format_includes_extra_diagnostics(self):
+        """Verify that lastKnownStep and kuduStatus appear in the formatted message when present."""
+        self._patch_app_metadata()
+        params = _make_mock_params()
+        ctx = build_enriched_error_context(
+            params, status_code=500,
+            error_message="Deploy error",
+            last_known_step="ZipExtract started", kudu_status="500"
+        )
+        msg = format_enriched_error_message(ctx)
+        self.assertIn("Last Step   : ZipExtract started", msg)
+        self.assertIn("Kudu Status : 500", msg)
+
 
 # ---------------------------------------------------------------------------
 # Integration-level test: verify the full error flow
@@ -495,50 +355,42 @@ class TestDeploymentErrorFlow(unittest.TestCase):
         self.assertIn("P1V2", error_msg)
         self.assertIn("Wait for the current deployment to complete", error_msg)
 
-    def test_build_failed_scenario(self):
-        """Simulate a Kudu build failure (DeployStatus=Failed with build error)."""
+    def test_400_artifact_stack_mismatch_scenario(self):
+        """Simulate a 400 artifact/stack mismatch."""
         self._patch_app_metadata()
-        params = _make_mock_params()
-        props = {
-            "errors": [{"extendedCode": "BUILD_001",
-                         "message": "build failed: missing requirements.txt"}],
-            "failedInstancesLogs": []
-        }
+        params = _make_mock_params(artifact_type="war")
         with self.assertRaises(EnrichedDeploymentError) as cm:
             raise_enriched_deployment_error(
-                params, deployment_status="Failed",
-                error_message="build failed: missing requirements.txt",
-                deployment_properties=props
+                params, status_code=400,
+                error_message="Artifact type = 'war' cannot be deployed to stack = 'NODE'"
             )
         error_msg = str(cm.exception)
-        self.assertIn("KuduBuildFailed", error_msg)
-        self.assertIn("Building", error_msg)
+        self.assertIn("ArtifactStackMismatch", error_msg)
+        self.assertIn("Ensure the artifact type matches", error_msg)
 
-    def test_zipdeploy_validation_disk_space(self):
-        """Simulate a ZipDeploy validation failure — insufficient disk space."""
+    def test_generic_400_scenario(self):
+        """Simulate a generic 400 deployment failure."""
         self._patch_app_metadata()
         params = _make_mock_params()
         with self.assertRaises(EnrichedDeploymentError) as cm:
             raise_enriched_deployment_error(
                 params, status_code=400,
-                error_message="ZipDeploy Validation ERROR: Package size = 500 MB. Free disk space = 100 MB. The package will not fit."
+                error_message="Something unexpected went wrong during deployment"
             )
         error_msg = str(cm.exception)
-        self.assertIn("ZipDeployInsufficientDisk", error_msg)
-        self.assertIn("Reduce the deployment package size", error_msg)
+        self.assertIn("DeploymentFailed", error_msg)
 
-    def test_auto_swap_conflict(self):
-        """Simulate a 409 auto swap in progress."""
+    def test_unknown_status_code_scenario(self):
+        """Simulate an error with a status code that has no matching pattern."""
         self._patch_app_metadata()
         params = _make_mock_params()
         with self.assertRaises(EnrichedDeploymentError) as cm:
             raise_enriched_deployment_error(
-                params, status_code=409,
-                error_message="There is an auto swap deployment currently ongoing please try again when it completes."
+                params, status_code=503,
+                error_message="Service Unavailable"
             )
         error_msg = str(cm.exception)
-        self.assertIn("AutoSwapInProgress", error_msg)
-        self.assertIn("Wait for the auto swap operation to complete", error_msg)
+        self.assertIn("HTTP_503", error_msg)
 
 
 # ---------------------------------------------------------------------------

@@ -59,7 +59,7 @@ from ._client_factory import (web_client_factory, ex_handler_factory, providers_
 from ._appservice_utils import _generic_site_operation, _generic_settings_operation
 from ._appservice_utils import MSI_LOCAL_ID
 from ._deployment_context_engine import (
-    raise_enriched_deployment_error, extract_status_code_from_message, EnrichedDeploymentError
+    raise_enriched_deployment_error, EnrichedDeploymentError
 )
 from .utils import (_normalize_sku,
                     get_sku_tier,
@@ -896,10 +896,9 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     app_is_linux_webapp = is_linux_webapp(app)
     app_is_function_app = is_functionapp(app)
 
-    # Enriched errors are enabled via --enriched-errors flag on 'az webapp deploy' or 'az webapp up'.
-    _should_enrich_errors = enriched_errors and not app_is_function_app
+    _should_enrich_errors = enriched_errors and not app_is_function_app and app_is_linux_webapp
     if enriched_errors and app_is_function_app:
-        logger.warning("--enriched-errors is not supported for function apps and will be ignored.")
+        logger.info("--enriched-errors is only supported for Linux web apps.")
 
     # Read file content
     with open(os.path.realpath(os.path.expanduser(src)), 'rb') as fs:
@@ -933,28 +932,15 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     # check the status of async deployment
     if res.status_code == 202:
         response_body = None
-        try:
-            if track_status:
-                response_body = _check_runtimestatus_with_deploymentstatusapi(cmd, resource_group_name, name, slot,
-                                                                              deployment_status_url, is_async=True,
-                                                                              timeout=timeout)
-            else:
-                response_body = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
-                                                             slot, timeout)
-        except CLIError as deploy_err:
-            if _should_enrich_errors:
-                _deploy_err_str = str(deploy_err)
-                raise_enriched_deployment_error(
-                    cmd=cmd,
-                    resource_group_name=resource_group_name,
-                    webapp_name=name,
-                    slot=slot,
-                    artifact_type="zip",
-                    status_code=extract_status_code_from_message(_deploy_err_str),
-                    error_message=_deploy_err_str,
-                    last_known_step="Zip deployment accepted (HTTP 202), tracking status"
-                )
-            raise
+        if track_status:
+            response_body = _check_runtimestatus_with_deploymentstatusapi(
+                cmd, resource_group_name, name, slot,
+                deployment_status_url, is_async=True,
+                timeout=timeout)
+        else:
+            response_body = _check_zip_deployment_status(
+                cmd, resource_group_name, name, deployment_status_url,
+                slot, timeout)
         return response_body
 
     # check if there's an ongoing process
@@ -9945,29 +9931,18 @@ def _make_onedeploy_request(params):
     if response.status_code == 202 or response.status_code == 200:
         response_body = None
         if poll_async_deployment_for_debugging:
-            try:
-                if params.track_status is not None and params.track_status:
-                    response_body = _check_runtimestatus_with_deploymentstatusapi(params.cmd,
-                                                                                  params.resource_group_name,
-                                                                                  params.webapp_name, params.slot,
-                                                                                  deployment_status_url,
-                                                                                  params.is_async_deployment,
-                                                                                  params.timeout)
-                else:
-                    response_body = _check_zip_deployment_status(params.cmd, params.resource_group_name,
-                                                                 params.webapp_name,
-                                                                 deployment_status_url, params.slot, params.timeout)
-            except CLIError as deploy_err:
-                if params.enriched_errors:
-                    # Enrich the downstream deployment-tracking error with context
-                    _deploy_err_str = str(deploy_err)
-                    raise_enriched_deployment_error(
-                        params=params,
-                        status_code=extract_status_code_from_message(_deploy_err_str),
-                        error_message=_deploy_err_str,
-                        last_known_step="Deployment accepted (HTTP 200/202), tracking status"
-                    )
-                raise
+            if params.track_status is not None and params.track_status:
+                response_body = _check_runtimestatus_with_deploymentstatusapi(
+                    params.cmd, params.resource_group_name,
+                    params.webapp_name, params.slot,
+                    deployment_status_url,
+                    params.is_async_deployment,
+                    params.timeout)
+            else:
+                response_body = _check_zip_deployment_status(
+                    params.cmd, params.resource_group_name,
+                    params.webapp_name,
+                    deployment_status_url, params.slot, params.timeout)
             logger.info('Server response: %s', response_body)
         else:
             if 'application/json' in response.headers.get('content-type', ""):
@@ -9984,15 +9959,28 @@ def _make_onedeploy_request(params):
     if response.status_code == 404:
         raise ResourceNotFoundError("This API isn't available in this environment yet!")
 
+    _should_enrich_errors = params.enriched_errors and params.is_linux_webapp and not params.is_functionapp
     # check if there's an ongoing process
     if response.status_code == 409:
+        if _should_enrich_errors:
+            raise_enriched_deployment_error(
+                params=params,
+                status_code=409,
+                error_message=response.text if response.text else "Deployment conflict (HTTP 409)",
+                last_known_step="OneDeploy HTTP request",
+                kudu_status="409"
+            )
         raise ValidationError("Another deployment is in progress. Please wait until that process is complete before "
                               "starting a new deployment. You can track the ongoing deployment at {}"
                               .format(deployment_status_url))
 
     # check if an error occurred during deployment
     if response.status_code and response.status_code >= 400:
-        if params.enriched_errors:
+        scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
+        latest_deploymentinfo_url = scm_url + "/api/deployments/latest"
+        logger.warning("Deployment failed. Visit %s to get more information about your deployment.",
+                       latest_deploymentinfo_url)
+        if _should_enrich_errors:
             raise_enriched_deployment_error(
                 params=params,
                 status_code=response.status_code,
@@ -10000,12 +9988,19 @@ def _make_onedeploy_request(params):
                 last_known_step="HTTP request sent to deployment API",
                 kudu_status=str(response.status_code)
             )
-        scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
-        latest_deploymentinfo_url = scm_url + "/api/deployments/latest"
         raise CLIError("An error occurred during deployment. Status Code: {}, {} Please visit {}"
                        " to get more information about your deployment"
                        .format(response.status_code, f"Details: {response.text}," if response.text else "",
                                latest_deploymentinfo_url))
+
+
+def _try_enrich_and_raise(params, **kwargs):
+    try:
+        raise_enriched_deployment_error(params=params, **kwargs)
+    except EnrichedDeploymentError:
+        raise
+    except Exception:  # pylint: disable=broad-except
+        logger.debug("Failed to enrich deployment error, re-raising original.")
 
 
 # OneDeploy
@@ -10013,61 +10008,18 @@ def _perform_onedeploy_internal(params):
 
     # Update artifact type, if required
     _update_artifact_type(params)
+    _should_enrich_errors = params.enriched_errors and params.is_linux_webapp and not params.is_functionapp
 
     # Now make the OneDeploy API call
     logger.warning("Initiating deployment")
     try:
         response = _make_onedeploy_request(params)
         return response
-    except (ValidationError, ResourceNotFoundError):
-        # Known CLI validation errors (e.g. 409 conflict, 404 API not available) — re-raise as-is
-        raise
-    except EnrichedDeploymentError:
-        # Already enriched by _make_onedeploy_request — re-raise as-is
-        raise
-    except CLIError as ex:
-        if params.enriched_errors:
-            try:
-                _ex_str = str(ex)
-                raise_enriched_deployment_error(
-                    params=params,
-                    status_code=extract_status_code_from_message(_ex_str),
-                    error_message=_ex_str,
-                    last_known_step="Deployment request"
-                )
-            except EnrichedDeploymentError:
-                raise
-            except Exception:  # pylint: disable=broad-except
-                logger.debug("Failed to enrich deployment error, re-raising original.")
-        raise
-    except HttpResponseError as ex:
-        if params.enriched_errors:
-            try:
-                # Azure SDK errors (e.g. Bad Request from ARM)
-                raise_enriched_deployment_error(
-                    params=params,
-                    status_code=ex.status_code if hasattr(ex, 'status_code') else None,
-                    error_message=str(ex),
-                    last_known_step="ARM deployment request"
-                )
-            except EnrichedDeploymentError:
-                raise
-            except Exception:  # pylint: disable=broad-except
-                logger.debug("Failed to enrich deployment error, re-raising original.")
+    except (ValidationError, ResourceNotFoundError, EnrichedDeploymentError):
         raise
     except Exception as ex:  # pylint: disable=broad-except
-        if params.enriched_errors:
-            try:
-                # Catch-all for unexpected errors (connection errors, timeouts, etc.)
-                raise_enriched_deployment_error(
-                    params=params,
-                    error_message=str(ex),
-                    last_known_step="Deployment request"
-                )
-            except EnrichedDeploymentError:
-                raise
-            except Exception:  # pylint: disable=broad-except
-                logger.debug("Failed to enrich deployment error, re-raising original.")
+        if _should_enrich_errors:
+            _try_enrich_and_raise(params, error_message=str(ex), last_known_step="Deployment request")
         raise
 
 
