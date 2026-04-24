@@ -4295,7 +4295,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         return bool(self.raw_param.get("disable_hosted_system"))
 
-    def _validate_byo_hobo_subnets(self) -> None:
+    def validate_byo_hobo_subnets(self) -> None:
         """Validate BYO HOBO subnet trio and mutual exclusion with --disable-hosted-system.
 
         BYO VNet HOBO is triggered by --system-node-subnet-id / --node-subnet-id
@@ -7091,7 +7091,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
 
         # Run BYO HOBO trio validation first so clearer errors surface before the
         # generic --apiserver-subnet-id checks inside _get_apiserver_subnet_id.
-        self.context._validate_byo_hobo_subnets()
+        self.context.validate_byo_hobo_subnets()
 
         api_server_access_profile = None
         api_server_authorized_ip_ranges = self.context.get_api_server_authorized_ip_ranges()
@@ -7143,7 +7143,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         self._ensure_mc(mc)
 
         # Run cross-flag validation (mutual exclusion + trio completeness + SKU gate)
-        self.context._validate_byo_hobo_subnets()
+        self.context.validate_byo_hobo_subnets()
 
         system_node_subnet_id = self.context.get_system_node_subnet_id()
         node_subnet_id = self.context.get_node_subnet_id()
