@@ -4431,20 +4431,6 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         node_subnet = "/subscriptions/s/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/v/subnets/nod"
         api_subnet = "/subscriptions/s/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/v/subnets/api"
 
-        # disable + subnet -> MutuallyExclusiveArgumentError
-        ctx = AKSManagedClusterContext(
-            self.cmd,
-            AKSManagedClusterParamDict({
-                "sku": "automatic",
-                "disable_hosted_system": True,
-                "system_node_subnet_id": system_subnet,
-            }),
-            self.models,
-            decorator_mode=DecoratorMode.CREATE,
-        )
-        with self.assertRaises(MutuallyExclusiveArgumentError):
-            ctx.validate_byo_hobo_subnets()
-
         # partial trio -> RequiredArgumentMissingError
         ctx = AKSManagedClusterContext(
             self.cmd,
@@ -4473,19 +4459,6 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         with self.assertRaises(RequiredArgumentMissingError):
             ctx.validate_byo_hobo_subnets()
 
-        # disable_hosted_system without automatic -> RequiredArgumentMissingError
-        ctx = AKSManagedClusterContext(
-            self.cmd,
-            AKSManagedClusterParamDict({
-                "sku": "base",
-                "disable_hosted_system": True,
-            }),
-            self.models,
-            decorator_mode=DecoratorMode.CREATE,
-        )
-        with self.assertRaises(RequiredArgumentMissingError):
-            ctx.validate_byo_hobo_subnets()
-
         # happy path: full trio + automatic
         ctx = AKSManagedClusterContext(
             self.cmd,
@@ -4501,19 +4474,6 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         ctx.validate_byo_hobo_subnets()
         self.assertEqual(ctx.get_system_node_subnet_id(), system_subnet)
         self.assertEqual(ctx.get_node_subnet_id(), node_subnet)
-
-        # happy path: disable + automatic
-        ctx = AKSManagedClusterContext(
-            self.cmd,
-            AKSManagedClusterParamDict({
-                "sku": "automatic",
-                "disable_hosted_system": True,
-            }),
-            self.models,
-            decorator_mode=DecoratorMode.CREATE,
-        )
-        ctx.validate_byo_hobo_subnets()
-        self.assertTrue(ctx.get_disable_hosted_system())
 
     def test_get_private_dns_zone(self):
         # default

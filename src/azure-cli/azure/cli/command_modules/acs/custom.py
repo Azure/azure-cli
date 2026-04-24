@@ -1032,10 +1032,9 @@ def aks_create(
     # apiserver vnet integration
     enable_apiserver_vnet_integration=False,
     apiserver_subnet_id=None,
-    # BYO VNet HOBO (Automatic SKU)
+    # BYO VNet for Managed System Pool (Automatic SKU)
     system_node_subnet_id=None,
     node_subnet_id=None,
-    disable_hosted_system=False,
     # node provisioning
     node_provisioning_mode=None,
     node_provisioning_default_pools=None,
@@ -1444,8 +1443,8 @@ def aks_scale(cmd, client, resource_group_name, name, node_count, nodepool_name=
 
     agent_pool_profiles = instance.agent_pool_profiles or []
     if not agent_pool_profiles:
-        raise CLIError('The cluster has no scalable node pools (this may be a Hosted System Pool / Automatic cluster). '
-                       'Use az aks nodepool add/scale against a user node pool instead.')
+        raise CLIError('The cluster has no scalable node pools (this may be a Managed System Pool for '
+                       'Automatic cluster). Use az aks nodepool add/scale against a user node pool instead.')
 
     if len(agent_pool_profiles) > 1 and nodepool_name == "":
         raise CLIError('There are more than one node pool in the cluster. '
