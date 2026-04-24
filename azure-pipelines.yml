@@ -1177,7 +1177,7 @@ jobs:
         python scripts/ci/validate_external_source_urls.py --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch)
       else
         # Non-PR builds may use shallow checkout where HEAD^ is missing.
-        printf "Skipping external Url checks for Non-PR builds"
+        echo "Skipping external URL checks for Non-PR builds"
       fi
     displayName: 'Validate External Source URLs'
 
