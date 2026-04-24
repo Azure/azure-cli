@@ -68,7 +68,7 @@ Release History
 
 **Key Vault**
 
-* `az keyvault create`: Fix `RequestDisallowedByPolicy` error by explicitly setting `enableSoftDelete` in the request body to satisfy Azure Policy checks
+* `az keyvault create`: Fix `RequestDisallowedByPolicy` error by explicitly setting `enableSoftDelete` in the request body to satisfy Azure Policy checks (#<PR_OR_ISSUE_NUMBER>)
 
 **NetAppFiles**
 
