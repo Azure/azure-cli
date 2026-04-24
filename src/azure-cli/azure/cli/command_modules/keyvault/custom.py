@@ -649,6 +649,7 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
                                  enabled_for_disk_encryption=enabled_for_disk_encryption,
                                  enabled_for_template_deployment=enabled_for_template_deployment,
                                  enable_rbac_authorization=enable_rbac_authorization,
+                                 enable_soft_delete=True,
                                  enable_purge_protection=enable_purge_protection,
                                  soft_delete_retention_in_days=int(retention_days),
                                  public_network_access=public_network_access)
