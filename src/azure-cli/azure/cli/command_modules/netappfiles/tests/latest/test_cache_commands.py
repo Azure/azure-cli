@@ -39,54 +39,6 @@ CACHE_TERMINAL_STATES = {"Succeeded", "Failed", "Cancelled"}
 # manual on-prem (CVO) peering steps; it polls cacheState as the sync signal
 # and prints copy-pasteable commands to STDERR.
 #
-# -----------------------------------------------------------------------------
-# Prerequisite: NetApp Cloud Volumes ONTAP (CVO) instance
-# -----------------------------------------------------------------------------
-# `test_create_delete_cache` requires an ALREADY-PROVISIONED, REACHABLE CVO
-# (Cloud Volumes ONTAP) instance that the engineer can SSH into during the
-# test run. The test does NOT provision CVO for you - CVO is a NetApp
-# product, not a first-class Azure resource, and there is no `az` command
-# that creates it.
-#
-# The CVO must satisfy ALL of the following before running this test:
-#
-#   1. Single-node CVO (HA pair also fine) deployed in Azure, in a VNet that
-#      can route to the ANF cache's `--peering-subnet-resource-id`. The
-#      tests in this file create their own VNets in 10.5.0.0/16 (cache) and
-#      10.6.0.0/16 (peering) - see `setup_vnets`. The CVO VNet must be
-#      peered with - or otherwise routable to - the peering VNet.
-#
-#   2. ONTAP cluster name, vserver name, intercluster LIF addresses, and
-#      origin volume name on the CVO must match the values currently
-#      hard-coded in `create_cache(...)`:
-#         --peer-cluster-name cluster1
-#         --peer-addresses    192.0.2.10 192.0.2.11   <-- PLACEHOLDERS
-#         --peer-vserver-name vserver1
-#         --peer-volume-name  originvol1
-#      The 192.0.2.x values are RFC-5737 documentation addresses and will
-#      NOT work as-is. Update those literals (or parameterize them via env
-#      vars) to match your CVO's real intercluster LIFs before running.
-#
-#   3. The engineer must have an SSH session ready to the CVO admin
-#      endpoint (ONTAP `admin` role or equivalent) BEFORE starting the
-#      test. The test prints the cluster-peering command + passphrase the
-#      moment it observes `ClusterPeeringOfferSent`, then immediately
-#      starts polling for `VserverPeeringOfferSent`; if the engineer is
-#      not already SSH'd in, they will lose minutes of the 1-hour wait
-#      budget.
-#
-#   4. CVO provisioning is a one-time, out-of-band setup. Recommended:
-#      provision a long-lived shared CVO via NetApp BlueXP (formerly Cloud
-#      Manager) and document admin host / SSH key location in a team
-#      runbook or Key Vault. CVO provisioning is NOT automated by this
-#      repo and is intentionally out of scope for the Azure CLI.
-#
-# If CVO is not available the test will hang at the first
-# `_wait_for_cache_state` call until `CACHE_STATE_POLL_TIMEOUT_SECONDS`
-# elapses (default 1 hour) and then fail with the last observed
-# cacheState. That is the expected behaviour, not a bug.
-# -----------------------------------------------------------------------------
-#
 # IMPORTANT: pass `-s` (a.k.a. `--capture=no`) to pytest so the on-prem
 # instruction blocks written to stderr are shown in real time. Without `-s`
 # pytest will buffer the output and you won't see the commands until the test
@@ -318,6 +270,35 @@ class AzureNetAppFilesCacheServiceScenarioTest(ScenarioTest):
         assert terminal_state == "Succeeded", \
             "Cache reached terminal state %r, expected 'Succeeded'" % terminal_state
 
+        # The following assertions are folded in here (instead of standalone
+        # tests) to avoid re-running the expensive CVO peering setup. They
+        # exercise show / update / reset-smb-password against the cache that
+        # we just brought to a Succeeded state.
+
+        # --- folded from test_get_cache_by_name ---
+        shown = self.cmd("az netappfiles cache show -g {rg} -a %s -p %s -n %s" %
+                         (account_name, pool_name, cache_name)).get_output_in_json()
+        assert shown['name'] == account_name + '/' + pool_name + '/' + cache_name
+        shown_by_id = self.cmd("az netappfiles cache show --ids %s" %
+                               shown['id']).get_output_in_json()
+        assert shown_by_id['name'] == shown['name']
+
+        # --- folded from test_update_cache ---
+        tags = "Tag1=Value1 Tag2=Value2"
+        new_size = 214748364800
+        self.cmd("az netappfiles cache update -g {rg} -a %s -p %s -n %s --tags %s --size %s" %
+                 (account_name, pool_name, cache_name, tags, new_size))
+        updated = self.cmd("az netappfiles cache show -g {rg} -a %s -p %s -n %s" %
+                           (account_name, pool_name, cache_name)).get_output_in_json()
+        assert updated['tags']['Tag1'] == 'Value1'
+        assert updated['tags']['Tag2'] == 'Value2'
+        assert updated['size'] == new_size
+
+        # --- folded from test_cache_reset_smb_password ---
+        # Verify the command completes without error.
+        self.cmd("az netappfiles cache reset-smb-password -g {rg} -a %s -p %s -c %s" %
+                 (account_name, pool_name, cache_name))
+
         # verify cache exists in list
         cache_list = self.cmd("az netappfiles cache list -g {rg} -a %s -p %s" %
                               (account_name, pool_name)).get_output_in_json()
@@ -386,45 +367,13 @@ class AzureNetAppFilesCacheServiceScenarioTest(ScenarioTest):
                               (account_name, pool_name)).get_output_in_json()
         assert len(cache_list) == 0
 
-    @live_only()
-    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_cache_', additional_tags={'owner': 'cli_test'})
-    def test_get_cache_by_name(self):
-        account_name = self.create_random_name(prefix='cli-acc-', length=24)
-        pool_name = self.create_random_name(prefix='cli-pool-', length=24)
-        cache_name = self.create_random_name(prefix='cli-cache-', length=24)
-
-        self.create_cache(account_name, pool_name, cache_name)
-
-        # get cache by name
-        cache = self.cmd("az netappfiles cache show -g {rg} -a %s -p %s -n %s" %
-                         (account_name, pool_name, cache_name)).get_output_in_json()
-        assert cache['name'] == account_name + '/' + pool_name + '/' + cache_name
-
-        # get cache by resource id
-        cache_from_id = self.cmd("az netappfiles cache show --ids %s" % cache['id']).get_output_in_json()
-        assert cache_from_id['name'] == account_name + '/' + pool_name + '/' + cache_name
-
-    @live_only()
-    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_cache_', additional_tags={'owner': 'cli_test'})
-    def test_update_cache(self):
-        account_name = self.create_random_name(prefix='cli-acc-', length=24)
-        pool_name = self.create_random_name(prefix='cli-pool-', length=24)
-        cache_name = self.create_random_name(prefix='cli-cache-', length=24)
-
-        self.create_cache(account_name, pool_name, cache_name)
-
-        # update cache tags and size
-        tags = "Tag1=Value1 Tag2=Value2"
-        new_size = 214748364800
-        self.cmd("az netappfiles cache update -g {rg} -a %s -p %s -n %s --tags %s --size %s" %
-                 (account_name, pool_name, cache_name, tags, new_size))
-
-        # verify update
-        cache = self.cmd("az netappfiles cache show -g {rg} -a %s -p %s -n %s" %
-                         (account_name, pool_name, cache_name)).get_output_in_json()
-        assert cache['tags']['Tag1'] == 'Value1'
-        assert cache['tags']['Tag2'] == 'Value2'
-        assert cache['size'] == new_size
+    # The following commands are folded into `test_create_delete_cache` to
+    # avoid re-running the expensive CVO peering setup, and so are not
+    # provided as standalone tests:
+    #   - `az netappfiles cache show` (by name and by --ids)
+    #   - `az netappfiles cache update` (tags + size)
+    #   - `az netappfiles cache list-peering-passphrase`
+    #   - `az netappfiles cache reset-smb-password`
 
     @live_only()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_cache_', additional_tags={'owner': 'cli_test'})
@@ -452,20 +401,3 @@ class AzureNetAppFilesCacheServiceScenarioTest(ScenarioTest):
         cache_list_pool2 = self.cmd("az netappfiles cache list -g {rg} -a %s -p %s" %
                                     (account_name, pool_name_2)).get_output_in_json()
         assert len(cache_list_pool2) == 1
-
-    # Note: `az netappfiles cache list-peering-passphrase` is exercised as part
-    # of `test_create_delete_cache` (which orchestrates the full on-prem peering
-    # flow), so a standalone smoke test for it is intentionally not provided.
-
-    @live_only()
-    @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_cache_', additional_tags={'owner': 'cli_test'})
-    def test_cache_reset_smb_password(self):
-        account_name = self.create_random_name(prefix='cli-acc-', length=24)
-        pool_name = self.create_random_name(prefix='cli-pool-', length=24)
-        cache_name = self.create_random_name(prefix='cli-cache-', length=24)
-
-        self.create_cache(account_name, pool_name, cache_name)
-
-        # reset smb password - verify the command completes without error
-        self.cmd("az netappfiles cache reset-smb-password -g {rg} -a %s -p %s -c %s" %
-                 (account_name, pool_name, cache_name))
