@@ -7122,6 +7122,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         dec_1.context.attach_mc(mc_1)
         cli_default_pool = self.models.ManagedClusterAgentPoolProfile(name="nodepool1")
         mc_1.agent_pool_profiles = [cli_default_pool]
+        dec_1.context.set_intermediate("cli_synthesized_default_agent_pool", cli_default_pool)
 
         dec_1.set_up_hosted_system_profile(mc_1)
 
@@ -7144,11 +7145,31 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         cli_default_pool = self.models.ManagedClusterAgentPoolProfile(name="nodepool1")
         user_pool = self.models.ManagedClusterAgentPoolProfile(name="userpool")
         mc_2.agent_pool_profiles = [cli_default_pool, user_pool]
+        dec_2.context.set_intermediate("cli_synthesized_default_agent_pool", cli_default_pool)
 
         dec_2.set_up_hosted_system_profile(mc_2)
 
         self.assertTrue(mc_2.hosted_system_profile.enabled)
         self.assertEqual(mc_2.agent_pool_profiles, [user_pool])
+
+        dec_3 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "sku": "automatic",
+                "enable_hosted_system": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_3 = self.models.ManagedCluster(location="test_location")
+        dec_3.context.attach_mc(mc_3)
+        user_pool = self.models.ManagedClusterAgentPoolProfile(name="userpool")
+        mc_3.agent_pool_profiles = [user_pool]
+
+        dec_3.set_up_hosted_system_profile(mc_3)
+
+        self.assertTrue(mc_3.hosted_system_profile.enabled)
+        self.assertEqual(mc_3.agent_pool_profiles, [user_pool])
 
     def test_set_up_network_profile(self):
         # default value in `aks_create`

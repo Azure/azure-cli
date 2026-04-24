@@ -6338,6 +6338,11 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
 
         agentpool_profile = self.agentpool_decorator.construct_agentpool_profile_default()
         mc.agent_pool_profiles = [agentpool_profile]
+        self.context.set_intermediate(
+            "cli_synthesized_default_agent_pool",
+            agentpool_profile,
+            overwrite_exists=True,
+        )
         return mc
 
     def set_up_mc_properties(self, mc: ManagedCluster) -> ManagedCluster:
@@ -7201,13 +7206,22 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         if not agent_pool_profiles:
             return
 
-        # `set_up_agentpool_profile` always adds the first pool for `az aks create`.
+        cli_default_agent_pool = self.context.get_intermediate(
+            "cli_synthesized_default_agent_pool", default_value=None
+        )
+        if cli_default_agent_pool is None:
+            return
+
+        # Remove only the exact pool object created by `set_up_agentpool_profile`.
         # A Managed System Pool cluster gets that system pool from `hosted_system_profile`;
         # preserve any additional pools that may have been appended by other create-time logic.
-        if len(agent_pool_profiles) == 1:
-            mc.agent_pool_profiles = None
-        else:
-            mc.agent_pool_profiles = agent_pool_profiles[1:]
+        remaining_agent_pool_profiles = [
+            profile for profile in agent_pool_profiles
+            if profile is not cli_default_agent_pool
+        ]
+        if len(remaining_agent_pool_profiles) == len(agent_pool_profiles):
+            return
+        mc.agent_pool_profiles = remaining_agent_pool_profiles or None
 
     def set_up_hosted_system_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Set up hosted_system_profile on the ManagedCluster for Automatic SKU clusters.
