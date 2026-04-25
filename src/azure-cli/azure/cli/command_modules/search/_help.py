@@ -9,27 +9,27 @@ from knack.help_files import helps  # pylint: disable=unused-import
 
 helps['search'] = """
 type: group
-short-summary: Manage Azure Search services, admin keys and query keys.
+short-summary: Manage Azure AI Search services, offerings, admin keys and query keys.
 """
 
 helps['search admin-key'] = """
 type: group
-short-summary: Manage Azure Search admin keys.
+short-summary: Manage Azure AI Search admin keys.
 """
 
 helps['search query-key'] = """
 type: group
-short-summary: Manage Azure Search query keys.
+short-summary: Manage Azure AI Search query keys.
 """
 
 helps['search service'] = """
 type: group
-short-summary: Manage Azure Search services.
+short-summary: Manage Azure AI Search services.
 """
 
 helps['search offering'] = """
 type: group
-short-summary: Manage Azure Search offerings.
+short-summary: Manage Azure AI Search offerings.
 """
 
 helps['search offering list'] = """
@@ -43,17 +43,17 @@ examples:
 
 helps['search private-endpoint-connection'] = """
 type: group
-short-summary: Manage Azure Search private endpoint connections.
+short-summary: Manage Azure AI Search private endpoint connections.
 """
 
 helps['search private-link-resource'] = """
 type: group
-short-summary: Manage Azure Search private link resources.
+short-summary: Manage Azure AI Search private link resources.
 """
 
 helps['search shared-private-link-resource'] = """
 type: group
-short-summary: Manage Azure Search shared private link resources.
+short-summary: Manage Azure AI Search shared private link resources.
 """
 
 helps['search shared-private-link-resource wait'] = """
@@ -81,7 +81,7 @@ short-summary: Wait for async service operations.
 
 helps['search service query-key create'] = """
 type: command
-short-summary: Creates a query key for a given Azure Search service.
+short-summary: Creates a query key for a given Azure AI Search service.
 examples:
   - name: Create a query key for a Search service.
     text: >
@@ -90,7 +90,7 @@ examples:
 
 helps['search service admin-key regenerate'] = """
 type: command
-short-summary: Regenerate an admin key for a given Azure Search service.
+short-summary: Regenerate an admin key for a given Azure AI Search service.
 examples:
   - name: Regenerate the primary admin key for a Search service.
     text: >
@@ -102,7 +102,7 @@ examples:
 
 helps['search service check-name-availability'] = """
 type: command
-short-summary: Check the availability of a given Azure Search service name.
+short-summary: Check the availability of a given Azure AI Search service name.
 examples:
   - name: Check if a Search service name is available.
     text: >
@@ -111,7 +111,7 @@ examples:
 
 helps['search service upgrade'] = """
 type: command
-short-summary: Upgrade a given Azure Search service.
+short-summary: Upgrade a given Azure AI Search service.
 examples:
   - name: Upgrade a Search service.
     text: >
@@ -120,7 +120,7 @@ examples:
 
 helps['search service network-security-perimeter-configuration reconcile'] = """
 type: command
-short-summary: Reconcile network security perimeter configuration for a given Azure Search service.
+short-summary: Reconcile network security perimeter configuration for a given Azure AI Search service.
 examples:
   - name: Reconcile network security perimeter configuration and specify a perimeter name.
     text: >
@@ -129,7 +129,7 @@ examples:
 
 helps['search service shared-private-link-resource create'] = """
 type: command
-short-summary: Create a shared private link resource for a given Azure Search service.
+short-summary: Create a shared private link resource for a given Azure AI Search service.
 examples:
   - name: Create a shared private link resource for a Search service.
     text: >
@@ -141,7 +141,7 @@ examples:
 
 helps['search service shared-private-link-resource update'] = """
 type: command
-short-summary: Update a shared private link resource for a given Azure Search service.
+short-summary: Update a shared private link resource for a given Azure AI Search service.
 examples:
   - name: Update the request message for a shared private link resource.
     text: >
@@ -153,7 +153,7 @@ examples:
 
 helps['search service private-endpoint-connection update'] = """
 type: command
-short-summary: Update a private endpoint connection for a given Azure Search service.
+short-summary: Update a private endpoint connection for a given Azure AI Search service.
 examples:
   - name: Approve a private endpoint connection.
     text: >

@@ -231,6 +231,10 @@ class Show(AAZCommand):
             properties.hosting_mode = AAZStrType(
                 serialized_name="hostingMode",
             )
+            properties.knowledge_retrieval = AAZStrType(
+                serialized_name="knowledgeRetrieval",
+                nullable=True,
+            )
             properties.network_rule_set = AAZObjectType(
                 serialized_name="networkRuleSet",
             )

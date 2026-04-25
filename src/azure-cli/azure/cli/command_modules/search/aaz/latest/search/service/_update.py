@@ -153,7 +153,7 @@ class Update(AAZCommand):
         _args_schema.semantic_search = AAZStrArg(
             options=["--semantic-search"],
             arg_group="Properties",
-            help="Sets options that control the availability of semantic search. This configuration is only possible for certain Azure Cognitive Search SKUs in certain locations.",
+            help="Sets options that control the availability of semantic search. This configuration is only possible for certain Azure AI Search SKUs in certain locations.",
             nullable=True,
             enum={"disabled": "disabled", "free": "free", "standard": "standard"},
         )

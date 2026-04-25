@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "search offering",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Manage Offering
+    """Manage Azure AI Search offerings
     """
     pass
 

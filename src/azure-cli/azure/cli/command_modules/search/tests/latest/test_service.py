@@ -500,5 +500,49 @@ class AzureSearchServicesTests(ScenarioTest):
         self.assertTrue(len(_search_service['dataExfiltrationProtections']) == 1)
         self.assertTrue(_search_service['dataExfiltrationProtections'][0] == 'BlockAll')
 
+    @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
+    def test_service_knowledge_retrieval(self, resource_group):
+        self.kwargs.update({
+            'sku_name': 'standard',
+            'name': self.create_random_name(prefix='test', length=24),
+            'standard_name': self.create_random_name(prefix='test', length=24),
+            'replica_count': 1,
+            'partition_count': 1,
+            'knowledge_retrieval': 'free'
+        })
+
+        self.cmd(
+            'az search service create -n {name} -g {rg} --sku {sku_name}'
+            ' --replica-count {replica_count} --partition-count {partition_count}'
+            ' --knowledge-retrieval {knowledge_retrieval}',
+            checks=[self.check('name', '{name}'),
+                    self.check('sku.name', '{sku_name}'),
+                    self.check('replicaCount', '{replica_count}'),
+                    self.check('partitionCount', '{partition_count}'),
+                    self.check('knowledgeRetrieval', '{knowledge_retrieval}')])
+
+        self.cmd('az search service show -n {name} -g {rg}',
+                 checks=[self.check('name', '{name}'),
+                         self.check('knowledgeRetrieval', '{knowledge_retrieval}')])
+
+        self.cmd('az search service list -g {rg}',
+                 checks=[self.check('[0].name', '{name}')])
+
+        self.kwargs.update({
+            'knowledge_retrieval': 'standard'
+        })
+
+        self.cmd('az search service update -n {name} -g {rg} --knowledge-retrieval {knowledge_retrieval}',
+                 checks=[self.check('name', '{name}')])
+
+        self.cmd('az search service show -n {name} -g {rg}',
+                 checks=[self.check('name', '{name}')])
+
+        self.cmd(
+            'az search service create -n {standard_name} -g {rg} --sku {sku_name}'
+            ' --replica-count {replica_count} --partition-count {partition_count}'
+            ' --knowledge-retrieval {knowledge_retrieval}',
+            checks=[self.check('name', '{standard_name}')])
+
 if __name__ == '__main__':
     unittest.main()
