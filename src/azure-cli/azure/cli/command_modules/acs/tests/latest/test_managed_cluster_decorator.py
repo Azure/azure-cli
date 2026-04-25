@@ -2142,6 +2142,40 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         ctx_14.attach_mc(mc_14)
         self.assertEqual(ctx_14.get_outbound_type(), CONST_OUTBOUND_TYPE_LOAD_BALANCER)
 
+        ctx_14_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({
+                "sku": "automatic",
+                "outbound_type": CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
+            }),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        ctx_14_1.agentpool_context = mock.MagicMock()
+        ctx_14_1.agentpool_context.get_vnet_subnet_id.return_value = None
+        with self.assertRaisesRegex(
+            RequiredArgumentMissingError,
+            "--system-node-subnet-id, --node-subnet-id and --apiserver-subnet-id",
+        ):
+            ctx_14_1.get_outbound_type()
+
+        ctx_14_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({
+                "sku": "automatic",
+                "outbound_type": CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
+            }),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        ctx_14_2.agentpool_context = mock.MagicMock()
+        ctx_14_2.agentpool_context.get_vnet_subnet_id.return_value = None
+        with self.assertRaisesRegex(
+            RequiredArgumentMissingError,
+            "--system-node-subnet-id, --node-subnet-id and --apiserver-subnet-id",
+        ):
+            ctx_14_2.get_outbound_type()
+
         byo_params = {
             "sku": "automatic",
             "system_node_subnet_id": "/subscriptions/s/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/v/subnets/sys",

@@ -2418,7 +2418,8 @@ class AKSManagedClusterContext(BaseAKSContext):
             skuName == CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC and
             isVnetSubnetIdEmpty and
             not read_from_mc and
-            not byo_subnets_set
+            not byo_subnets_set and
+            outbound_type == CONST_OUTBOUND_TYPE_LOAD_BALANCER
         ):
             # outbound_type of Automatic SKU should be ManagedNATGateway if no subnet id provided.
             outbound_type = CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY
@@ -2448,12 +2449,26 @@ class AKSManagedClusterContext(BaseAKSContext):
 
             if outbound_type == CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING:
                 if self.get_vnet_subnet_id() in ["", None] and not byo_subnets_set:
+                    if skuName == CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC:
+                        raise RequiredArgumentMissingError(
+                            "--vnet-subnet-id must be specified for userDefinedRouting. For an Automatic cluster "
+                            "using Managed System Pool BYO VNet, specify --system-node-subnet-id, --node-subnet-id "
+                            "and --apiserver-subnet-id instead. The subnet must be pre-configured with a route "
+                            "table with egress rules"
+                        )
                     raise RequiredArgumentMissingError(
                         "--vnet-subnet-id must be specified for userDefinedRouting and it must "
                         "be pre-configured with a route table with egress rules"
                     )
             if outbound_type == CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY:
                 if self.get_vnet_subnet_id() in ["", None] and not byo_subnets_set:
+                    if skuName == CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC:
+                        raise RequiredArgumentMissingError(
+                            "--vnet-subnet-id must be specified for userAssignedNATGateway. For an Automatic cluster "
+                            "using Managed System Pool BYO VNet, specify --system-node-subnet-id, --node-subnet-id "
+                            "and --apiserver-subnet-id instead. The subnet must be pre-configured with a NAT gateway "
+                            "with outbound ips"
+                        )
                     raise RequiredArgumentMissingError(
                         "--vnet-subnet-id must be specified for userAssignedNATGateway and it must "
                         "be pre-configured with a NAT gateway with outbound ips"
