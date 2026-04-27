@@ -179,7 +179,7 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     else:
         supported_storageV2_size = None
     _pg_storage_type_validator(storage_type, auto_grow, performance_tier,
-                               tier, supported_storageV2_size, iops, throughput, instance)
+                               tier, supported_storageV2_size, iops, throughput, instance, version)
     _pg_storage_performance_tier_validator(performance_tier,
                                            sku_info,
                                            tier,
@@ -700,11 +700,13 @@ def validate_identities(cmd, namespace):
 
 
 def _pg_storage_type_validator(storage_type, auto_grow, performance_tier, tier,
-                               supported_storageV2_size, iops, throughput, instance):
+                               supported_storageV2_size, iops, throughput, instance, version):
     is_create_ssdv2 = storage_type and storage_type.lower() == 'premiumv2_lrs'
     is_update_ssdv2 = (instance and instance.storage.type and instance.storage.type.lower() == 'premiumv2_lrs')
 
     if is_create_ssdv2:
+        if version and int(version) < 14:
+            raise CLIError('Storage type PremiumV2_LRS is only supported for PostgreSQL version 14 and above.')
         if supported_storageV2_size is None:
             raise CLIError('Invalid value for --storage-type. "PremiumV2_LRS" is not supported for this location.')
         if iops is None or throughput is None:

@@ -568,6 +568,7 @@ def load_arguments(self, _):
         c.argument('ksm_metric_annotations_allow_list')
         c.argument('grafana_resource_id', validator=validate_grafanaresourceid)
         c.argument('enable_windows_recording_rules', action='store_true')
+        c.argument('enable_azure_monitor_app_monitoring', action='store_true')
         c.argument('node_public_ip_tags', arg_type=tags_type, validator=validate_node_public_ip_tags,
                    help='space-separated tags: key[=value] [key[=value] ...].')
         # azure container storage
@@ -795,6 +796,8 @@ def load_arguments(self, _):
         c.argument('grafana_resource_id', validator=validate_grafanaresourceid)
         c.argument('enable_windows_recording_rules', action='store_true')
         c.argument('disable_azure_monitor_metrics', action='store_true')
+        c.argument('enable_azure_monitor_app_monitoring', action='store_true')
+        c.argument('disable_azure_monitor_app_monitoring', action='store_true')
         # azure container storage
         c.argument(
             "enable_azure_container_storage",
