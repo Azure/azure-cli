@@ -35,6 +35,10 @@ def show_webapp_access_restrictions(cmd, resource_group_name, name, slot=None):
     return access_rules
 
 
+# pylint: disable=too-many-locals
+# Adding the hoisted ``new_headers`` local plus the existing ones in this function
+# pushes the count just past pylint's default cap; the readability gain of computing
+# the normalized header dict once is worth the suppression.
 def add_webapp_access_restriction(
         cmd, resource_group_name, name, priority, rule_name=None,
         action='Allow', ip_address=None, subnet=None,
@@ -61,12 +65,18 @@ def add_webapp_access_restriction(
         if not ignore_missing_vnet_service_endpoint:
             _ensure_subnet_service_endpoint(cmd.cli_ctx, subnet_id)
         # check for duplicates (header-aware: same subnet + identical http-header filter)
+        new_headers = _normalize_http_headers(http_headers)
         for rule in list(access_rules):
             if not rule.vnet_subnet_resource_id:
                 continue
             if rule.vnet_subnet_resource_id.lower() != subnet_id.lower():
                 continue
-            if _normalize_http_headers(rule.headers) == _normalize_http_headers(http_headers):
+            if _normalize_http_headers(rule.headers) == new_headers:
+                if not new_headers:
+                    raise ArgumentUsageError(
+                        "A service-endpoint access-restriction rule for subnet '{}' already "
+                        "exists. Cannot add a duplicate rule. Use a different subnet, or add a "
+                        "--http-header filter to create an additional rule.".format(subnet_id))
                 raise ArgumentUsageError(
                     "A service-endpoint access-restriction rule for subnet '{}' with the same "
                     "HTTP header filter already exists. Cannot add a duplicate rule. Use a "

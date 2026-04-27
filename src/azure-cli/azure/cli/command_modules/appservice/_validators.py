@@ -325,6 +325,11 @@ def _validate_ip_address_existence(cmd, namespace):
         if _normalize_ip_address_list(rule.ip_address) != new_ip_set:
             continue
         if _normalize_http_headers(rule.headers) == new_headers:
+            if not new_headers:
+                raise ArgumentUsageError(
+                    "An access-restriction rule with IP address '{}' already exists. Cannot add a "
+                    "duplicate rule. Use a different IP address, or add a --http-header filter to "
+                    "create an additional rule.".format(namespace.ip_address))
             raise ArgumentUsageError(
                 "An access-restriction rule with IP address '{}' and the same HTTP header filter "
                 "already exists. Cannot add a duplicate rule. Use a different IP address or vary "
@@ -434,6 +439,11 @@ def _validate_service_tag_existence(cmd, namespace):
         if not rule.ip_address or rule.ip_address.lower() != input_tag_value.lower():
             continue
         if _normalize_http_headers(rule.headers) == new_headers:
+            if not new_headers:
+                raise ArgumentUsageError(
+                    "A service-tag access-restriction rule with value '{}' already exists. Cannot "
+                    "add a duplicate rule. Use a different service tag, or add a --http-header "
+                    "filter to create an additional rule.".format(namespace.service_tag))
             raise ArgumentUsageError(
                 "A service-tag access-restriction rule with value '{}' and the same HTTP header "
                 "filter already exists. Cannot add a duplicate rule. Use a different service tag "

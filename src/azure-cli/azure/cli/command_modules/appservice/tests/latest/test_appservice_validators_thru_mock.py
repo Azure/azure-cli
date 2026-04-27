@@ -109,8 +109,12 @@ class ValidateIpAddressExistenceTest(unittest.TestCase):
         cmd = mock.MagicMock()
         ns = self._make_namespace('36.12.195.236/32')
         with self._patch_configs([_StubRule('36.12.195.236/32')]):
-            with self.assertRaises(ArgumentUsageError):
+            with self.assertRaises(ArgumentUsageError) as ctx:
                 _validate_ip_address_existence(cmd, ns)
+        msg = str(ctx.exception)
+        self.assertIn('already exists', msg)
+        self.assertNotIn('HTTP header filter', msg)
+        self.assertIn('add a --http-header filter', msg)
 
     def test_allows_same_ip_with_different_xff(self):
         cmd = mock.MagicMock()
@@ -151,8 +155,11 @@ class ValidateIpAddressExistenceTest(unittest.TestCase):
             headers={'x-forwarded-for': ['10.0.0.1/32']},
         )
         with self._patch_configs([existing]):
-            with self.assertRaises(ArgumentUsageError):
+            with self.assertRaises(ArgumentUsageError) as ctx:
                 _validate_ip_address_existence(cmd, ns)
+        msg = str(ctx.exception)
+        self.assertIn('HTTP header filter', msg)
+        self.assertIn('vary the --http-header values', msg)
 
     def test_blocks_when_value_order_differs_for_same_header(self):
         cmd = mock.MagicMock()

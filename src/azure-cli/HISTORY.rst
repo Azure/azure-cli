@@ -3,13 +3,6 @@
 Release History
 ===============
 
-Upcoming Release
-++++++++++++++++
-
-**App Service**
-
-* `az webapp/functionapp config access-restriction add`: Allow adding multiple access-restriction rules with the same source IP, service tag, or subnet when the ``--http-header`` filters differ. The duplicate-rule check is now header-aware, matching the ARM API behavior. The IP comparison is also order-insensitive when multiple comma-separated CIDRs are provided in a single rule.
-
 2.85.0
 ++++++
 
@@ -47,6 +40,7 @@ Upcoming Release
 * `az appservice plan update`: Remove preview flag for `--elastic-scale` and `--max-elastic-worker-count` parameters (#32807)
 * `az webapp update`: Remove preview flag for `--minimum-elastic-instance-count` and `--prewarmed-instance-count` parameters (#32807)
 * `az webapp up`: Add parameter `--domain-name-scope` to support specifying the scope of uniqueness for the default hostname during resource creation (#32930)
+* `az webapp/functionapp config access-restriction add`: Allow adding multiple access-restriction rules with the same source IP, service tag, or subnet when the ``--http-header`` filters differ. The duplicate-rule check is now header-aware, matching the ARM API behavior. The IP comparison is also order-insensitive when multiple comma-separated CIDRs are provided in a single rule (#33272)
 
 **Cloud**
 
