@@ -9978,7 +9978,7 @@ def _make_onedeploy_request(params):
         latest_deploymentinfo_url = scm_url + "/api/deployments/latest"
         if _should_enrich_errors and response.status_code >= 400:
             logger.error("Deployment failed. Visit %s to get more information about your deployment.",
-                       latest_deploymentinfo_url)
+                         latest_deploymentinfo_url)
             raise_enriched_deployment_error(
                 params=params,
                 status_code=response.status_code,
