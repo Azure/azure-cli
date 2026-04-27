@@ -1036,8 +1036,6 @@ def aks_create(
     # node provisioning
     node_provisioning_mode=None,
     node_provisioning_default_pools=None,
-    # gateway api
-    enable_gateway_api=False,
     # app routing istio
     enable_app_routing_istio=False,
 ):
@@ -1235,9 +1233,6 @@ def aks_update(
     # node provisioning
     node_provisioning_mode=None,
     node_provisioning_default_pools=None,
-    # gateway api
-    enable_gateway_api=False,
-    disable_gateway_api=False,
     # app routing istio
     enable_app_routing_istio=False,
     disable_app_routing_istio=False,

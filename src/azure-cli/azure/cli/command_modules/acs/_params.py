@@ -652,12 +652,6 @@ def load_arguments(self, _):
             )
         )
         c.argument(
-            "enable_gateway_api",
-            action="store_true",
-            help="Enable managed installation of Gateway API CRDs from the standard release channel. "
-                 "Requires a Gateway API implementation to be installed on the cluster (e.g., Azure Service Mesh)."
-        )
-        c.argument(
             "enable_app_routing_istio",
             options_list=["--enable-app-routing-istio", "--enable-ari"],
             action="store_true",
@@ -887,17 +881,6 @@ def load_arguments(self, _):
                 'It is strongly recommended to not do this unless there are idle nodes ready to take the pods evicted '
                 'by that action.'
             )
-        )
-        c.argument(
-            "enable_gateway_api",
-            action="store_true",
-            help="Enable managed installation of Gateway API CRDs from the standard release channel. "
-                 "Requires a Gateway API implementation to be installed on the cluster (e.g., Azure Service Mesh)."
-        )
-        c.argument(
-            "disable_gateway_api",
-            action="store_true",
-            help="Disable managed installation of Gateway API CRDs."
         )
         c.argument(
             "enable_app_routing_istio",

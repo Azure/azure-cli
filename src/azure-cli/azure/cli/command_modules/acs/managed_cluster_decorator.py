@@ -50,8 +50,6 @@ from azure.cli.command_modules.acs._consts import (
     CONST_VIRTUAL_MACHINES,
     CONST_ACNS_DATAPATH_ACCELERATION_MODE_BPFVETH,
     CONST_ACNS_DATAPATH_ACCELERATION_MODE_NONE,
-    CONST_MANAGED_GATEWAY_INSTALLATION_DISABLED,
-    CONST_MANAGED_GATEWAY_INSTALLATION_STANDARD,
     CONST_APP_ROUTING_ISTIO_MODE_ENABLED,
     CONST_APP_ROUTING_ISTIO_MODE_DISABLED,
 )
@@ -6037,20 +6035,6 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         return self.raw_param.get("node_provisioning_default_pools")
 
-    def get_enable_gateway_api(self) -> bool:
-        """Obtain the value of enable_gateway_api.
-
-        :return: bool
-        """
-        return self.raw_param.get("enable_gateway_api", False)
-
-    def get_disable_gateway_api(self) -> bool:
-        """Obtain the value of disable_gateway_api.
-
-        :return: bool
-        """
-        return self.raw_param.get("disable_gateway_api", False)
-
     def get_enable_app_routing_istio(self) -> bool:
         """Obtain the value of enable_app_routing_istio.
 
@@ -7464,19 +7448,6 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
 
         return mc
 
-    def set_up_ingress_profile_gateway_api(self, mc: ManagedCluster) -> ManagedCluster:
-        self._ensure_mc(mc)
-        if self.context.get_enable_gateway_api():
-            if mc.ingress_profile is None:
-                mc.ingress_profile = self.models.ManagedClusterIngressProfile()
-            if mc.ingress_profile.gateway_api is None:
-                mc.ingress_profile.gateway_api = (
-                    self.models.ManagedClusterIngressProfileGatewayConfiguration(
-                        installation=CONST_MANAGED_GATEWAY_INSTALLATION_STANDARD
-                    )
-                )
-        return mc
-
     def set_up_ingress_profile_app_routing_istio(self, mc: ManagedCluster) -> ManagedCluster:
         """Set up App Routing Istio configuration in ingress profile for the ManagedCluster object.
 
@@ -7655,8 +7626,6 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_workload_auto_scaler_profile(mc)
         # set up app routing profile
         mc = self.set_up_ingress_web_app_routing(mc)
-        # set up gateway api
-        mc = self.set_up_ingress_profile_gateway_api(mc)
         # set up app routing istio
         mc = self.set_up_ingress_profile_app_routing_istio(mc)
         # set up custom ca trust certificates
@@ -9156,31 +9125,6 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         else:
             raise CLIError('App Routing must be enabled to modify the default nginx ingress controller.\n')
 
-    def update_ingress_profile_gateway_api(self, mc: ManagedCluster) -> ManagedCluster:
-        """Update gateway api installation in the ingress profile for the ManagedCluster object.
-
-        :return: the ManagedCluster object
-        """
-        self._ensure_mc(mc)
-        enable_gateway_api = self.context.get_enable_gateway_api()
-        disable_gateway_api = self.context.get_disable_gateway_api()
-        if enable_gateway_api and disable_gateway_api:
-            raise MutuallyExclusiveArgumentError(
-                "Cannot specify --enable-gateway-api and --disable-gateway-api at the same time."
-            )
-        if enable_gateway_api or disable_gateway_api:
-            if mc.ingress_profile is None:
-                mc.ingress_profile = self.models.ManagedClusterIngressProfile()  # pylint: disable=no-member
-            if mc.ingress_profile.gateway_api is None:
-                mc.ingress_profile.gateway_api = (
-                    self.models.ManagedClusterIngressProfileGatewayConfiguration()  # pylint: disable=no-member
-                )
-            if enable_gateway_api:
-                mc.ingress_profile.gateway_api.installation = CONST_MANAGED_GATEWAY_INSTALLATION_STANDARD
-            elif disable_gateway_api:
-                mc.ingress_profile.gateway_api.installation = CONST_MANAGED_GATEWAY_INSTALLATION_DISABLED
-        return mc
-
     def update_ingress_profile_app_routing_istio(self, mc: ManagedCluster) -> ManagedCluster:
         """Update App Routing Istio configuration in ingress profile for the ManagedCluster object.
 
@@ -10156,8 +10100,6 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_node_resource_group_profile(mc)
         # update AI toolchain operator
         mc = self.update_ai_toolchain_operator(mc)
-        # update gateway api
-        mc = self.update_ingress_profile_gateway_api(mc)
         # update app routing istio
         mc = self.update_ingress_profile_app_routing_istio(mc)
         # update bootstrap profile
