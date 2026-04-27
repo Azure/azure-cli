@@ -15,10 +15,41 @@ short-summary: Manage Azure HorizonDB.
 """
 
 
+helps['horizondb create'] = """
+type: command
+short-summary: Create a new Azure HorizonDB cluster.
+examples:
+  - name: Create a new HorizonDB cluster.
+    text: az horizondb create --name examplecluster --resource-group exampleresourcegroup --location westus2 --admin-user myadmin --admin-password examplepassword --version 17 --v-cores 4 --replica-count 3
+  - name: Create a HorizonDB cluster with zone placement policy.
+    text: az horizondb create --name examplecluster --resource-group exampleresourcegroup --location westus2 --admin-user myadmin --admin-password examplepassword --version 17 --v-cores 4 --replica-count 3 --zone-placement-policy Strict
+"""
+
+
+helps['horizondb delete'] = """
+type: command
+short-summary: Delete an Azure HorizonDB cluster.
+examples:
+  - name: Delete an Azure HorizonDB cluster.
+    text: az horizondb delete --name examplecluster --resource-group exampleresourcegroup
+"""
+
+
 helps['horizondb show'] = """
 type: command
-short-summary: Show details of an Azure HorizonDB instance.
+short-summary: Show details of an Azure HorizonDB cluster.
 examples:
-  - name: Show details of an Azure HorizonDB instance.
+  - name: Show details of an Azure HorizonDB cluster.
     text: az horizondb show --name examplecluster --resource-group exampleresourcegroup
+"""
+
+
+helps['horizondb list'] = """
+type: command
+short-summary: List Azure HorizonDB clusters.
+examples:
+  - name: List all HorizonDB clusters in a resource group.
+    text: az horizondb list --resource-group exampleresourcegroup
+  - name: List all HorizonDB clusters in the current subscription.
+    text: az horizondb list
 """

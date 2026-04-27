@@ -22,7 +22,7 @@ def load_command_table(self, _):
     # commands
     custom_commands = CliCommandType(
         operations_tmpl='azure.cli.command_modules.horizondb.commands.custom_commands#{}')
-    with self.command_group('horizondb clusters', horizondb_clusters_sdk,
+    with self.command_group('horizondb', horizondb_clusters_sdk,
                             custom_command_type=custom_commands,
                             client_factory=cf_horizondb_clusters) as g:
         g.custom_command('create', 'horizondb_cluster_create', table_transformer=table_transform_output)

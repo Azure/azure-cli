@@ -8,7 +8,10 @@
 
 from knack.arguments import CLIArgumentType
 from azure.cli.core.commands.parameters import (
-    resource_group_name_type)
+    resource_group_name_type,
+    get_location_type,
+    tags_type,
+    get_enum_type)
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction
 
 
@@ -41,5 +44,54 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         with self.argument_context('horizondb') as c:
             c.argument('resource_group_name', arg_type=resource_group_name_type)
             c.argument('cluster_name', arg_type=cluster_name_arg_type)
+
+        administrator_login_arg_type = CLIArgumentType(
+            options_list=['--admin-user', '-u'],
+            help='The administrator login name for the cluster.')
+
+        administrator_login_password_arg_type = CLIArgumentType(
+            options_list=['--admin-password', '-p'],
+            help='The administrator login password.')
+
+        version_arg_type = CLIArgumentType(
+            options_list=['--version', '-v'],
+            help='The version of the HorizonDb cluster.')
+
+        point_in_time_utc_arg_type = CLIArgumentType(
+            options_list=['--point-in-time-utc'],
+            help='Restore point creation time (ISO 8601 format) specifying the time to restore from.')
+
+        source_cluster_resource_id_arg_type = CLIArgumentType(
+            options_list=['--source-cluster-id'],
+            help='The source cluster resource ID for restore or replica creation.')
+
+        pool_name_arg_type = CLIArgumentType(
+            options_list=['--pool-name'],
+            help='The pool name for restore or replica operations.')
+
+        replica_count_arg_type = CLIArgumentType(
+            options_list=['--replica-count'],
+            type=int,
+            help='Number of replicas.')
+
+        v_cores_arg_type = CLIArgumentType(
+            options_list=['--v-cores'],
+            type=int,
+            help='Number of vCores.')
+
+        zone_placement_policy_arg_type = CLIArgumentType(
+            options_list=['--zone-placement-policy'],
+            arg_type=get_enum_type(['Strict', 'BestEffort']),
+            help='Defines how replicas are placed across availability zones.')
+
+        with self.argument_context('horizondb create') as c:
+            c.argument('location', arg_type=get_location_type(self.cli_ctx))
+            c.argument('tags', tags_type)
+            c.argument('administrator_login', arg_type=administrator_login_arg_type)
+            c.argument('administrator_login_password', arg_type=administrator_login_password_arg_type)
+            c.argument('version', arg_type=version_arg_type)
+            c.argument('replica_count', arg_type=replica_count_arg_type)
+            c.argument('v_cores', arg_type=v_cores_arg_type)
+            c.argument('zone_placement_policy', arg_type=zone_placement_policy_arg_type)
 
     _horizondb_params()
