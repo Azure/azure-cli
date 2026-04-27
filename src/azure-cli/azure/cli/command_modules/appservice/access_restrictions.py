@@ -13,6 +13,7 @@ from importlib import import_module
 from knack.log import get_logger
 
 from ._appservice_utils import _generic_site_operation
+from ._validators import _normalize_http_headers
 from .custom import get_site_configs
 
 logger = get_logger(__name__)
@@ -59,11 +60,18 @@ def add_webapp_access_restriction(
         subnet_id = _validate_subnet(cmd.cli_ctx, subnet, vnet_name, vnet_rg)
         if not ignore_missing_vnet_service_endpoint:
             _ensure_subnet_service_endpoint(cmd.cli_ctx, subnet_id)
-        # check for duplicates
+        # check for duplicates (header-aware: same subnet + identical http-header filter)
         for rule in list(access_rules):
-            if rule.vnet_subnet_resource_id and rule.vnet_subnet_resource_id.lower() == subnet_id.lower():
-                raise ArgumentUsageError('Service endpoint rule for: ' + subnet_id + ' already exists. '
-                                         'Cannot add duplicate service endpoint rules.')
+            if not rule.vnet_subnet_resource_id:
+                continue
+            if rule.vnet_subnet_resource_id.lower() != subnet_id.lower():
+                continue
+            if _normalize_http_headers(rule.headers) == _normalize_http_headers(http_headers):
+                raise ArgumentUsageError(
+                    "A service-endpoint access-restriction rule for subnet '{}' with the same "
+                    "HTTP header filter already exists. Cannot add a duplicate rule. Use a "
+                    "different subnet or vary the --http-header values to create an additional "
+                    "rule.".format(subnet_id))
         rule_instance = IpSecurityRestriction(
             name=rule_name, vnet_subnet_resource_id=subnet_id,
             priority=priority, action=action, tag='Default', description=description)
