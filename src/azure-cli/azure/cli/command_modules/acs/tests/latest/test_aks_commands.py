@@ -32,7 +32,7 @@ from azure.cli.command_modules.acs.tests.latest.recording_processors import \
 
 from azure.cli.command_modules.acs._consts import CONST_WORKLOAD_RUNTIME_KATA_VM_ISOLATION
 from azure.cli.command_modules.acs.tests.latest.utils import get_test_data_file_path
-from azure.cli.core.azclierror import BadRequestError, ClientRequestError, CLIInternalError, InvalidArgumentValueError, MutuallyExclusiveArgumentError
+from azure.cli.core.azclierror import BadRequestError, ClientRequestError, CLIInternalError, InvalidArgumentValueError
 from azure.core.exceptions import HttpResponseError
 from azure.cli.testsdk import ScenarioTest, live_only
 from azure.cli.testsdk.checkers import (StringCheck, StringContainCheck,
