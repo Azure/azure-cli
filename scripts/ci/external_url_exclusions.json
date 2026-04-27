@@ -1,0 +1,40 @@
+{
+  "tool": "External URL Validation",
+  "exclusions": [
+    {
+      "file": [
+        "*.md",
+        "*.rst",
+        "docs/*",
+        "*/doc/*",
+        "*/docs/*"
+      ],
+      "_justification": "Documentation content may intentionally reference external URLs and is excluded from this source-code-focused validation."
+    },
+    {
+      "file": [
+        "scripts/*"
+      ],
+      "_justification": "CI and tooling scripts are maintained separately from extension source content and are excluded to avoid self-flagging the validator configuration."
+    },
+    {
+      "file": [
+        "*/tests/recordings/*",
+        "*/tests/*.py",
+        "*/tests/*.json",
+        "*/tests/*.yaml",
+        "*/tests/*.yml",
+        "*/tests/*/recordings/*",
+        "*/tests/*/test_*.py",
+        "*/tests/*/*.json",
+        "*/tests/*/*.yaml",
+        "*/tests/*/*.yml"
+      ],
+      "_justification": "Test sources, recordings, and test data can contain external sample URLs that are not shipped as runtime source dependencies."
+    }
+
+  ]
+}
+
+
+

@@ -9,42 +9,77 @@
 
 import argparse
 import fnmatch
+import json
 import re
 import subprocess
 import sys
+from pathlib import Path
 
 
 FORBIDDEN_EXTERNAL_URL_PATTERN = re.compile(
     r"https://raw\.githubusercontent\.com"
 )
 RECOMMENDED_INTERNAL_URL = "https://azcliprod.blob.core.windows.net/cli"
+EXCLUSION_CONFIG_PATH = Path(__file__).with_name("external_url_exclusions.json")
 
 # Paths matching these glob patterns are excluded from the check.
-# Exclusions cover documentation, test source files, test recordings, and test data.
-EXCLUDED_PATH_PATTERNS = [
-    "*.md",
-    "*.rst",
-    "doc/*",
-    "docs/*",
-    "*/doc/*",
-    "*/docs/*",
-    "scripts/*",
-    "*/tests/recordings/*",
-    "*/tests/*.py",
-    "*/tests/*.json",
-    "*/tests/*.yaml",
-    "*/tests/*.yml",
-    "*/tests/*/recordings/*",
-    "*/tests/*/test_*.py",
-    "*/tests/*/*.json",
-    "*/tests/*/*.yaml",
-    "*/tests/*/*.yml",
-]
+# Exclusions are loaded from external_url_exclusions.json.
+EXCLUDED_PATH_PATTERNS = None
+
+
+def _load_excluded_path_patterns():
+    """Load excluded path glob patterns from the JSON configuration file."""
+    try:
+        with EXCLUSION_CONFIG_PATH.open(encoding="utf-8") as input_file:
+            config = json.load(input_file)
+    except (OSError, ValueError) as ex:
+        raise RuntimeError(f"Unable to load exclusion patterns from '{EXCLUSION_CONFIG_PATH}': {ex}") from ex
+
+    if not isinstance(config, dict):
+        raise RuntimeError(
+            f"Invalid exclusion pattern configuration in '{EXCLUSION_CONFIG_PATH}': expected a JSON object"
+        )
+
+    exclusions = config.get("exclusions")
+    if not isinstance(exclusions, list):
+        raise RuntimeError(
+            f"Invalid exclusion pattern configuration in '{EXCLUSION_CONFIG_PATH}': expected 'exclusions' to be a JSON array"
+        )
+
+    patterns = []
+    for exclusion in exclusions:
+        if not isinstance(exclusion, dict):
+            raise RuntimeError(
+                f"Invalid exclusion pattern configuration in '{EXCLUSION_CONFIG_PATH}': each exclusion must be a JSON object"
+            )
+
+        files = exclusion.get("file")
+        if isinstance(files, str):
+            files = [files]
+
+        if not isinstance(files, list) or not all(isinstance(pattern, str) for pattern in files):
+            raise RuntimeError(
+                f"Invalid exclusion pattern configuration in '{EXCLUSION_CONFIG_PATH}': each exclusion 'file' must be a string or JSON array of strings"
+            )
+
+        patterns.extend(pattern.replace("\\", "/") for pattern in files)
+
+    return patterns
+
+
+def _get_excluded_path_patterns():
+    """Return cached excluded path glob patterns."""
+    global EXCLUDED_PATH_PATTERNS  # pylint: disable=global-statement
+
+    if EXCLUDED_PATH_PATTERNS is None:
+        EXCLUDED_PATH_PATTERNS = _load_excluded_path_patterns()
+
+    return EXCLUDED_PATH_PATTERNS
 
 
 def _is_excluded(file_path: str) -> bool:
     """Return True if *file_path* matches one of the exclusion glob patterns."""
-    for pattern in EXCLUDED_PATH_PATTERNS:
+    for pattern in _get_excluded_path_patterns():
         if fnmatch.fnmatch(file_path, pattern):
             return True
     return False
@@ -96,6 +131,7 @@ def main() -> int:
     args = parser.parse_args()
 
     try:
+        _get_excluded_path_patterns()
         diff_text = _run_diff(src=args.src, tgt=args.tgt, cached=args.cached)
     except Exception as ex:  # pylint: disable=broad-except
         if args.cached:
