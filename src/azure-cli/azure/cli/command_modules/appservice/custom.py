@@ -897,8 +897,6 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     app_is_function_app = is_functionapp(app)
 
     _should_enrich_errors = enriched_errors and not app_is_function_app and app_is_linux_webapp
-    if enriched_errors and app_is_function_app:
-        logger.info("--enriched-errors is only supported for Linux web apps.")
 
     # Read file content
     with open(os.path.realpath(os.path.expanduser(src)), 'rb') as fs:
@@ -9978,9 +9976,9 @@ def _make_onedeploy_request(params):
     if response.status_code:
         scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
         latest_deploymentinfo_url = scm_url + "/api/deployments/latest"
-        logger.warning("Deployment failed. Visit %s to get more information about your deployment.",
-                       latest_deploymentinfo_url)
         if _should_enrich_errors and response.status_code >= 400:
+            logger.error("Deployment failed. Visit %s to get more information about your deployment.",
+                       latest_deploymentinfo_url)
             raise_enriched_deployment_error(
                 params=params,
                 status_code=response.status_code,

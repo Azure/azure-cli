@@ -200,8 +200,8 @@ def format_enriched_error_message(context):
 
     # Copilot prompt
     lines.append("-" * 72)
-    lines.append("Ask Copilot:")
-    lines.append("  Paste the error above into GitHub Copilot Chat for fursther analysis and troubleshooting guidance.")
+    lines.append("  Copy the full error output above and paste it into GitHub Copilot Chat")
+    lines.append("  with the prompt: 'Why did my Linux App Service deployment fail and how do I fix it?'")
     lines.append("-" * 72)
 
     return "\n".join(lines)
