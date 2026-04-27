@@ -7863,7 +7863,7 @@ class VMGalleryImage(ScenarioTest):
 
         # Create a public IP resource with service tag
         self.cmd('network public-ip create --name {pubip} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
-        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --data-disk-sizes-gb 10 --admin-username clitest1 '
+        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:16.04-LTS:latest --data-disk-sizes-gb 10 --admin-username clitest1 '
                  '--generate-ssh-key --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip} --nsg-rule NONE')
 
         # Disable default outbound access
@@ -8806,7 +8806,7 @@ class VMGalleryImage(ScenarioTest):
 
         # Create a public IP resource with service tag
         self.cmd('network public-ip create --name {pubip} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
-        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --data-disk-sizes-gb 10 --admin-username clitest1 --generate-ssh-key --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip} --nsg-rule None')
+        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:16.04-LTS:latest --data-disk-sizes-gb 10 --admin-username clitest1 --generate-ssh-key --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip} --nsg-rule None')
 
         # Disable default outbound access
         self.cmd(
