@@ -15053,6 +15053,11 @@ spec:
             checks=[self.is_empty()],
         )
 
+    # NOTE: The managed Gateway API tests below temporarily pass --enable-app-routing
+    # on cluster creation. This is a workaround for the current datamodel setup, which
+    # requires the WebAppRouting ingress profile to be non-nil before the GatewayAPI
+    # field can be manipulated. Once the new RP release rolls out, this workaround
+    # can be removed and these tests should be updated to drop --enable-app-routing.
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest',
                                     location='westus2', preserve_default_location=True)
