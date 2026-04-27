@@ -654,8 +654,7 @@ def load_arguments(self, _):
         c.argument(
             "enable_gateway_api",
             action="store_true",
-            help="Enable managed installation of Gateway API CRDs from the standard release channel. "
-                 "Requires a Gateway API implementation to be installed on the cluster (e.g., Azure Service Mesh)."
+            help="Enable managed installation of Gateway API CRDs from the standard release channel."
         )
 
     with self.argument_context('aks update') as c:
@@ -885,8 +884,7 @@ def load_arguments(self, _):
         c.argument(
             "enable_gateway_api",
             action="store_true",
-            help="Enable managed installation of Gateway API CRDs from the standard release channel. "
-                 "Requires a Gateway API implementation to be installed on the cluster (e.g., Azure Service Mesh)."
+            help="Enable managed installation of Gateway API CRDs from the standard release channel."
         )
         c.argument(
             "disable_gateway_api",
