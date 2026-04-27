@@ -66,7 +66,7 @@ type: command
 short-summary: Creates a Search service in the given resource group.
 parameters:
   - name: --sku
-    short-summary: 'The SKU of the search service, which determines price tier and capacity limits. Accepted Values: Free, Basic, Standard, Standard2, Standard3'
+    short-summary: 'The SKU of the search service, which determines price tier and capacity limits. Accepted Values: free, basic, standard, standard2, standard3, storage_optimized_l1, storage_optimized_l2, serverless'
 """
 
 helps['search service update'] = """
