@@ -43,10 +43,10 @@ helps['appservice plan create'] = """
 type: command
 short-summary: Create an app service plan.
 examples:
-  - name: Create a Linux app service plan (defaults to P0V3 when --sku is not specified).
+  - name: Create a Linux app service plan.
     text: >
         az appservice plan create -g MyResourceGroup -n MyPlan --is-linux
-  - name: Create a Windows app service plan (defaults to B1 when --sku is not specified).
+  - name: Create a Windows app service plan.
     text: >
         az appservice plan create -g MyResourceGroup -n MyPlan
   - name: Create a Windows app service plan with a specific SKU.
