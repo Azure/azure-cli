@@ -966,8 +966,8 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
                                     "to delete them.".format(deployment_status_url))
 
     # check if an error occured during deployment
-    if res.status_code and res.status_code >= 400:
-        if _should_enrich_errors:
+    if res.status_code:
+        if _should_enrich_errors and res.status_code >= 400:
             raise_enriched_deployment_error(
                 cmd=cmd,
                 resource_group_name=resource_group_name,
@@ -9975,12 +9975,12 @@ def _make_onedeploy_request(params):
                               .format(deployment_status_url))
 
     # check if an error occurred during deployment
-    if response.status_code and response.status_code >= 400:
+    if response.status_code:
         scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
         latest_deploymentinfo_url = scm_url + "/api/deployments/latest"
         logger.warning("Deployment failed. Visit %s to get more information about your deployment.",
                        latest_deploymentinfo_url)
-        if _should_enrich_errors:
+        if _should_enrich_errors and response.status_code >= 400:
             raise_enriched_deployment_error(
                 params=params,
                 status_code=response.status_code,

@@ -255,7 +255,7 @@ class TestDeploymentContextEngine(unittest.TestCase):
         self.assertNotIn("Common Causes:", msg)
         self.assertIn("Suggested Fixes:", msg)
         self.assertIn("Ask Copilot:", msg)
-        self.assertIn("copilot explain", msg)
+        self.assertIn("GitHub Copilot Chat", msg)
         # Should NOT have duplicate YAML block
         self.assertNotIn("--- COPILOT CONTEXT ---", msg)
         self.assertNotIn("--- END CONTEXT ---", msg)

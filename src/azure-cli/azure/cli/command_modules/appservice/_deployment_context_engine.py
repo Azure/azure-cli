@@ -201,9 +201,7 @@ def format_enriched_error_message(context):
     # Copilot prompt
     lines.append("-" * 72)
     lines.append("Ask Copilot:")
-    lines.append("  Paste the error above into GitHub Copilot Chat, or run:")
-    lines.append('  copilot explain "why did my deployment fail with')
-    lines.append(f'    {context.get("errorCode", "this error")} and what should I do"')
+    lines.append("  Paste the error above into GitHub Copilot Chat for fursther analysis and troubleshooting guidance.")
     lines.append("-" * 72)
 
     return "\n".join(lines)
