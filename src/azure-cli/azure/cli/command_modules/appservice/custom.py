@@ -272,7 +272,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                                          '--runtime, --container-image-name, '
                                          'or --sitecontainers-app. '
                                          "Run 'az webapp list-runtimes --os-type linux' for supported runtimes. "
-                                         "For custom containers, see 'az webapp sitecontainers create': "
+                                         "For custom containers, see 'az webapp sitecontainers create --help': "
                                          "https://learn.microsoft.com/cli/azure/webapp/sitecontainers")
             if deployment_container_image_name:
                 raise ArgumentUsageError('Please specify both --multicontainer-config-type TYPE '
