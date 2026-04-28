@@ -6,4 +6,4 @@
 # Constants
 CLUSTER_NAME_PREFIX = 'horizondbclitest-'
 CLUSTER_NAME_MAX_LENGTH = 40
-DEFAULT_LOCATION = 'westus2'
+DEFAULT_LOCATION = 'centralus'

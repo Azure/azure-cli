@@ -20,9 +20,9 @@ type: command
 short-summary: Create a new Azure HorizonDB cluster.
 examples:
   - name: Create a new HorizonDB cluster.
-    text: az horizondb create --name examplecluster --resource-group exampleresourcegroup --location westus2 --admin-user myadmin --admin-password examplepassword --version 17 --v-cores 4 --replica-count 3
+    text: az horizondb create --name examplecluster --resource-group exampleresourcegroup --location centralus --admin-user myadmin --admin-password examplepassword --version 17 --v-cores 4 --replica-count 3
   - name: Create a HorizonDB cluster with zone placement policy.
-    text: az horizondb create --name examplecluster --resource-group exampleresourcegroup --location westus2 --admin-user myadmin --admin-password examplepassword --version 17 --v-cores 4 --replica-count 3 --zone-placement-policy Strict
+    text: az horizondb create --name examplecluster --resource-group exampleresourcegroup --location centralus --admin-user myadmin --admin-password examplepassword --version 17 --v-cores 4 --replica-count 3 --zone-placement-policy Strict
 """
 
 

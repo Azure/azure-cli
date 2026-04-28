@@ -21,6 +21,12 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
     # pylint: disable=too-many-locals, too-many-branches
     def _horizondb_params():
 
+        yes_arg_type = CLIArgumentType(
+            options_list=['--yes', '-y'],
+            action='store_true',
+            help='Do not prompt for confirmation.'
+        )
+
         cluster_name_arg_type = CLIArgumentType(
             metavar='NAME',
             options_list=['--name', '-n'],
@@ -93,5 +99,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('replica_count', arg_type=replica_count_arg_type)
             c.argument('v_cores', arg_type=v_cores_arg_type)
             c.argument('zone_placement_policy', arg_type=zone_placement_policy_arg_type)
+
+        with self.argument_context('horizondb delete') as c:
+            c.argument('yes', arg_type=yes_arg_type)
 
     _horizondb_params()
