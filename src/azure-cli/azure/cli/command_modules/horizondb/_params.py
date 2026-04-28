@@ -37,16 +37,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 actions=[LocalContextAction.SET, LocalContextAction.GET],
                 scopes=['horizondb']))
 
-        cluster_name_resource_arg_type = CLIArgumentType(
-            metavar='NAME',
-            options_list=['--cluster-name', '-c'],
-            id_part='name',
-            help="Name of the cluster.",
-            local_context_attribute=LocalContextAttribute(
-                name='cluster_name',
-                actions=[LocalContextAction.SET, LocalContextAction.GET],
-                scopes=['horizondb']))
-
         administrator_login_arg_type = CLIArgumentType(
             options_list=['--admin-user', '-u'],
             help='The administrator login name for the cluster.')
@@ -58,18 +48,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         version_arg_type = CLIArgumentType(
             options_list=['--version', '-v'],
             help='The version of the HorizonDb cluster.')
-
-        point_in_time_utc_arg_type = CLIArgumentType(
-            options_list=['--point-in-time-utc'],
-            help='Restore point creation time (ISO 8601 format) specifying the time to restore from.')
-
-        source_cluster_resource_id_arg_type = CLIArgumentType(
-            options_list=['--source-cluster-id'],
-            help='The source cluster resource ID for restore or replica creation.')
-
-        pool_name_arg_type = CLIArgumentType(
-            options_list=['--pool-name'],
-            help='The pool name for restore or replica operations.')
 
         replica_count_arg_type = CLIArgumentType(
             options_list=['--replica-count'],

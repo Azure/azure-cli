@@ -17,7 +17,8 @@ class HorizonDBCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
 
-        horizondb_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.horizondb.commands.custom_commands#{}')
+        horizondb_custom = CliCommandType(
+            operations_tmpl='azure.cli.command_modules.horizondb.commands.custom_commands#{}')
         super().__init__(
             cli_ctx=cli_ctx,
             resource_type=ResourceType.MGMT_HORIZONDB,
@@ -25,18 +26,6 @@ class HorizonDBCommandsLoader(AzCommandsLoader):
             argument_context_cls=HorizonDBArgumentContext)
 
     def load_command_table(self, args):
-        from azure.cli.core.aaz import load_aaz_command_table
-        try:
-            from . import aaz
-        except ImportError:
-            aaz = None
-        if aaz:
-            load_aaz_command_table(
-                loader=self,
-                aaz_pkg_name=aaz.__name__,
-                args=args
-            )
-
         load_command_table(self, args)
         return self.command_table
 

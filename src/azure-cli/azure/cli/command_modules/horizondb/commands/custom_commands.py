@@ -11,9 +11,9 @@ from azure.cli.core.util import CLIError, sdk_no_wait, user_confirmation
 logger = get_logger(__name__)
 
 
-def horizondb_cluster_create(cmd, client, resource_group_name, cluster_name, location,
+def horizondb_cluster_create(client, resource_group_name, cluster_name, location,
                              administrator_login, administrator_login_password,
-                             tags=None, version=None, 
+                             tags=None, version=None,
                              replica_count=None, v_cores=None,
                              zone_placement_policy=None,
                              no_wait=False):
@@ -45,11 +45,11 @@ def horizondb_cluster_delete(cmd, client, resource_group_name, cluster_name, no_
     if not yes:
         user_confirmation(
             "Are you sure you want to delete the cluster '{0}' in resource group '{1}'".format(cluster_name,
-                                                                                              resource_group_name), yes=yes)
+                                                                                               resource_group_name), yes=yes)
     try:
         result = sdk_no_wait(no_wait, client.begin_delete,
-                       resource_group_name=resource_group_name,
-                       cluster_name=cluster_name)
+                             resource_group_name=resource_group_name,
+                             cluster_name=cluster_name)
         if cmd.cli_ctx.local_context.is_on:
             local_context_file = cmd.cli_ctx.local_context._get_local_context_file()  # pylint: disable=protected-access
             local_context_file.remove_option('horizondb', 'cluster_name')
@@ -59,7 +59,7 @@ def horizondb_cluster_delete(cmd, client, resource_group_name, cluster_name, no_
     return result
 
 
-def horizondb_cluster_list(cmd, client, resource_group_name=None):
+def horizondb_cluster_list(client, resource_group_name=None):
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name=resource_group_name)
     return client.list_by_subscription()

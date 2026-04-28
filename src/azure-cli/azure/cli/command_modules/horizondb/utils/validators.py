@@ -8,6 +8,7 @@ from knack.util import CLIError
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_tags)
 
+
 def password_validator(ns):
     if not ns.administrator_login_password:
         try:
