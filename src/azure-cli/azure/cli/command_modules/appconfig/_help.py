@@ -243,7 +243,7 @@ examples:
   - name: List all key-values with tag name "tag1" with null value
     text: az appconfig kv list -n MyAppConfiguration --tags tag1=\\0
   - name: Resolve a snapshot reference and list all key-values from the referenced snapshot.
-    text: az appconfig kv list -n MyAppConfiguration --key MySnapshotRef --resolve-snapshot-ref
+    text: az appconfig kv list -n MyAppConfiguration --key MySnapshotRef --resolve-snapshot-references
 """
 
 helps['appconfig kv lock'] = """
@@ -298,16 +298,16 @@ examples:
     text: az appconfig kv set-keyvault --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --key HostSecret --secret-identifier https://contoso.vault.azure.net/Secrets/DummySecret --tags tag1=value1 tag2=value2
 """
 
-helps['appconfig kv set-snapshot-ref'] = """
+helps['appconfig kv set-snapshot-reference'] = """
 type: command
 short-summary: Set a snapshot reference.
 examples:
   - name: Set a snapshot reference with label MyLabel.
-    text: az appconfig kv set-snapshot-ref -n MyAppConfiguration --key MySnapshotRef --label MyLabel --snapshot-name MySnapshot
+    text: az appconfig kv set-snapshot-reference -n MyAppConfiguration --key MySnapshotRef --label MyLabel --snapshot-name MySnapshot
   - name: Set a snapshot reference using login-based authentication.
-    text: az appconfig kv set-snapshot-ref --endpoint https://myappconfiguration.azconfig.io --key MySnapshotRef --snapshot-name MySnapshot --auth-mode login
+    text: az appconfig kv set-snapshot-reference --endpoint https://myappconfiguration.azconfig.io --key MySnapshotRef --snapshot-name MySnapshot --auth-mode login
   - name: Set a snapshot reference with tags using connection string.
-    text: az appconfig kv set-snapshot-ref --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --key MySnapshotRef --snapshot-name MySnapshot --tags tag1=value1 tag2=value2
+    text: az appconfig kv set-snapshot-reference --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --key MySnapshotRef --snapshot-name MySnapshot --tags tag1=value1 tag2=value2
 """
 
 helps['appconfig kv show'] = """

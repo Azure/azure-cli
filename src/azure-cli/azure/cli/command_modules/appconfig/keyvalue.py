@@ -649,7 +649,7 @@ def set_keyvault(cmd,
     raise CLIError("Failed to set the keyvault reference '{}' due to a conflicting operation.".format(key))
 
 
-def set_snapshot_ref(cmd,
+def set_snapshot_reference(cmd,
                      key,
                      snapshot_name,
                      name=None,
@@ -659,9 +659,6 @@ def set_snapshot_ref(cmd,
                      connection_string=None,
                      auth_mode="key",
                      endpoint=None):
-    if not snapshot_name:
-        raise CLIErrors.RequiredArgumentMissingError("--snapshot-name is required and cannot be empty.")
-
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     snapshot_ref_value = json.dumps({SnapshotReferenceConstants.SNAPSHOT_NAME_KEY: snapshot_name}, ensure_ascii=False)
@@ -904,14 +901,11 @@ def list_key(cmd,
              top=None,
              all_=False,
              resolve_keyvault=False,
-             resolve_snapshot_ref=False,
+             resolve_snapshot_references=False,
              auth_mode="key",
              endpoint=None):
     if fields and resolve_keyvault:
         raise CLIErrors.MutuallyExclusiveArgumentError("Please provide only one of these arguments: '--fields' or '--resolve-keyvault'. See 'az appconfig kv list -h' for examples.")
-
-    if fields and resolve_snapshot_ref:
-        raise CLIErrors.MutuallyExclusiveArgumentError("Please provide only one of these arguments: '--fields' or '--resolve-snapshot-ref'. See 'az appconfig kv list -h' for examples.")
 
     if snapshot and (key or label or datetime):
         raise CLIErrors.MutuallyExclusiveArgumentError("'snapshot' cannot be specified with 'key', 'label', or 'datetime' filters.")
@@ -929,64 +923,43 @@ def list_key(cmd,
                                             all_=all_,
                                             cli_ctx=cmd.cli_ctx if resolve_keyvault else None)
 
-    if resolve_snapshot_ref:
+    if resolve_snapshot_references:
         keyvalues = __resolve_snapshot_references(azconfig_client, keyvalues)
 
     return keyvalues
 
 
 def __resolve_snapshot_references(azconfig_client, keyvalues):
-    """Resolve snapshot references by fetching key-values from the referenced snapshots.
-
-    Resolution follows platform semantics:
-    - Only top-level snapshot references are resolved (not transitive).
-    - If the referenced snapshot does not exist or is archived, the reference is ignored.
-    - Snapshot key-values are merged based on lexicographic order of the snapshot reference key.
-    - Later key-values override earlier ones.
+    """Return key-values in the referenced snapshot. The result may contain duplicate keys,
+    which the caller is responsible for handling.
     """
-    # Collect snapshot references sorted by key (lexicographic order)
-    snapshot_refs = []
-    non_refs = []
-    for kv in keyvalues:
-        ct = getattr(kv, 'content_type', None) or (kv.get('content_type') if isinstance(kv, dict) else None)
-        if ct and SnapshotReferenceConstants.SNAPSHOT_REFERENCE_CONTENT_TYPE in ct:
-            snapshot_refs.append(kv)
-        else:
-            non_refs.append(kv)
+    resolved_keyvalues = []
+    for keyvalue in keyvalues:
+        content_type = getattr(keyvalue, 'content_type', None)
+        if not (content_type and SnapshotReferenceConstants.SNAPSHOT_REFERENCE_CONTENT_TYPE in content_type):
+            resolved_keyvalues.append(keyvalue)
+            continue
 
-    if not snapshot_refs:
-        return keyvalues
-
-    # Sort by key for deterministic merge order
-    snapshot_refs.sort(key=lambda x: x.key if hasattr(x, 'key') else x.get('key', ''))
-
-    # Merge all resolved key-values; later snapshot refs override earlier ones
-    merged = {}
-    for ref in snapshot_refs:
-        value_str = ref.value if hasattr(ref, 'value') else ref.get('value', '{}')
+        reference_value = getattr(keyvalue, 'value', None) or '{}'
         try:
-            ref_data = json.loads(value_str)
-            snap_name = ref_data.get(SnapshotReferenceConstants.SNAPSHOT_NAME_KEY)
+            snapshot_name = json.loads(reference_value).get(SnapshotReferenceConstants.SNAPSHOT_NAME_KEY)
         except (json.JSONDecodeError, TypeError):
-            logger.warning("Skipping snapshot reference with key '%s': invalid value format.",
-                           ref.key if hasattr(ref, 'key') else ref.get('key'))
+            logger.warning("Skipping snapshot reference with key '%s': invalid value format.", getattr(keyvalue, 'key', None))
             continue
 
-        if not snap_name:
+        if not snapshot_name:
+            logger.warning("Skipping snapshot reference with key '%s': missing snapshot name.", getattr(keyvalue, 'key', None))
             continue
 
         try:
-            snapshot_kvs = __read_kv_from_config_store(azconfig_client, snapshot=snap_name)
+            snapshot_keyvalues = __read_kv_from_config_store(azconfig_client, snapshot=snapshot_name)
         except Exception as ex:  # pylint: disable=broad-except
-            logger.warning("Skipping snapshot reference '%s': %s",
-                           snap_name, str(ex))
+            logger.warning("Skipping snapshot reference '%s': %s", snapshot_name, str(ex))
             continue
 
-        for skv in snapshot_kvs:
-            kv_key = skv.key if hasattr(skv, 'key') else skv.get('key')
-            merged[kv_key] = skv
+        resolved_keyvalues.extend(snapshot_keyvalues)
 
-    return list(merged.values())
+    return resolved_keyvalues
 
 
 def restore_key(cmd,

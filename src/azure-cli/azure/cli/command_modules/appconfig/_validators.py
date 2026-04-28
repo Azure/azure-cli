@@ -308,6 +308,11 @@ def validate_key(namespace):
         raise InvalidArgumentValueError("Key is invalid. Key cannot be a '.' or '..', or contain the '%' character.")
 
 
+def validate_snapshot_reference(namespace):
+    snapshot_name = getattr(namespace, 'snapshot_name', None)
+    if not snapshot_name or str(snapshot_name).isspace():
+        raise RequiredArgumentMissingError("--snapshot-name is required and cannot be empty.")
+
 def validate_resolve_keyvault(namespace):
     if namespace.resolve_keyvault:
         identifier = getattr(namespace, 'destination', None)
