@@ -5597,8 +5597,21 @@ def list_deployment_logs(cmd, resource_group, name, slot=None):
     return response.json() or []
 
 
+def _ensure_linux_webapp_for_startup_logs(cmd, resource_group, name, slot=None):
+    client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        app = client.web_apps.get_slot(resource_group, name, slot)
+    else:
+        app = client.web_apps.get(resource_group, name)
+    if app is None or not is_linux_webapp(app):
+        raise ArgumentUsageError(
+            "'az webapp log startup' is only supported for Linux web apps.")
+
+
 def list_startup_logs(cmd, resource_group, name, slot=None, outcome=None, instance=None):
     import requests
+
+    _ensure_linux_webapp_for_startup_logs(cmd, resource_group, name, slot)
 
     scm_url = _get_scm_url(cmd, resource_group, name, slot)
     headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group, slot)
@@ -5613,9 +5626,15 @@ def list_startup_logs(cmd, resource_group, name, slot=None, outcome=None, instan
     response = requests.get(url, headers=headers, params=params)
 
     if response.status_code == 404:
-        logger.warning(
-            'Startup logs are not available for this app. '
-            'This feature requires a platform version that may not have rolled out to your app\'s region yet.')
+        if instance:
+            logger.warning(
+                "No startup logs found for instance '%s'. "
+                "Run 'az webapp log startup list' to see available instances.", instance)
+        else:
+            # TODO: remove rollout-aware wording after KuduLite/LWASv2 GA (see Phase 4 in feature memory).
+            logger.warning(
+                'Startup logs are not available for this app. '
+                'This feature requires a platform version that may not have rolled out to your app\'s region yet.')
         return []
     if response.status_code != 200:
         raise CLIError("Failed to retrieve startup logs from '{}' with status code '{}' and reason '{}'".format(
@@ -5628,12 +5647,21 @@ def list_startup_logs(cmd, resource_group, name, slot=None, outcome=None, instan
 def show_startup_log(cmd, resource_group, name, slot=None, filename=None, instance=None):
     import requests
 
+    if filename and instance:
+        raise MutuallyExclusiveArgumentError(
+            '--filename and --instance cannot be used together. '
+            '--filename selects a specific log file; --instance scopes the latest-log lookup to a worker.')
+
+    _ensure_linux_webapp_for_startup_logs(cmd, resource_group, name, slot)
+
     scm_url = _get_scm_url(cmd, resource_group, name, slot)
     headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group, slot)
 
     if filename:
         url = '{}/api/startuplogs/{}'.format(scm_url, quote(filename, safe=''))
     else:
+        # Server-side selection: most recent date, prefers a failure log if one exists
+        # for that date, otherwise returns the success log for that date.
         url = '{}/api/startuplogs?latest=true'.format(scm_url)
         if instance:
             url += '&instance={}'.format(quote(instance, safe=''))
@@ -5643,7 +5671,12 @@ def show_startup_log(cmd, resource_group, name, slot=None, filename=None, instan
     if response.status_code == 404:
         if filename:
             logger.warning('Startup log file \'%s\' was not found.', filename)
+        elif instance:
+            logger.warning(
+                "No startup logs found for instance '%s'. "
+                "Run 'az webapp log startup list' to see available instances.", instance)
         else:
+            # TODO: remove rollout-aware wording after KuduLite/LWASv2 GA (see Phase 4 in feature memory).
             logger.warning(
                 'Startup logs are not available for this app. '
                 'This feature requires a platform version that may not have rolled out to your app\'s region yet.')
