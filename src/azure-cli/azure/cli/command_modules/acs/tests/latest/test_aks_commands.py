@@ -84,22 +84,14 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             os.close(fd)
         return pathname.replace('\\', '\\\\')
 
-    def generate_vnet_subnet_id(self, resource_group, location=None):
+    def generate_vnet_subnet_id(self, resource_group):
         vnet_name = self.create_random_name('clivnet', 16)
         subnet_name = self.create_random_name('clisubnet', 16)
         address_prefix = "192.168.0.0/16"
         subnet_prefix = "192.168.0.0/24"
-
-        cmd = (
-            'az network vnet create -n {} -g {} '
-            '--address-prefix {} --subnet-name {} --subnet-prefix {}'
-        ).format(vnet_name, resource_group, address_prefix, subnet_name, subnet_prefix)
-
-        if location:
-            cmd += ' -l {}'.format(location)
-
-        vnet_subnet = self.cmd(cmd).get_output_in_json()
-        return vnet_subnet["newVNet"]["subnets"][0]["id"]
+        vnet_subnet = self.cmd('az network vnet create -n {} -g {} --address-prefix {} --subnet-name {} --subnet-prefix {}'
+                               .format(vnet_name, resource_group, address_prefix, subnet_name, subnet_prefix)).get_output_in_json()
+        return vnet_subnet.get("newVNet").get("subnets")[0].get("id")
 
     def generate_ppg_id(self, resource_group, location):
         ppg_name = self.create_random_name('clippg', 16)
@@ -341,13 +333,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # get-credentials
         fd, temp_path = tempfile.mkstemp()
-        os.close(fd)
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd(
                 'aks get-credentials -g {resource_group} -n {name} --file "{file}"')
             self.assertGreater(os.path.getsize(temp_path), 0)
         finally:
+            os.close(fd)
             os.remove(temp_path)
 
         # get-credentials to stdout
@@ -428,13 +420,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # get-credentials
         fd, temp_path = tempfile.mkstemp()
-        os.close(fd)
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd(
                 'aks get-credentials -g {resource_group} -n {name} --file "{file}"')
             self.assertGreater(os.path.getsize(temp_path), 0)
         finally:
+            os.close(fd)
             os.remove(temp_path)
 
         # get-credentials to stdout
@@ -933,13 +925,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # get-credentials
         fd, temp_path = tempfile.mkstemp()
-        os.close(fd)
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd(
                 'aks get-credentials -g {resource_group} -n {name} --file "{file}"')
             self.assertGreater(os.path.getsize(temp_path), 0)
         finally:
+            os.close(fd)
             os.remove(temp_path)
 
         # get-credentials to stdout
@@ -1500,13 +1492,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # get-credentials
         fd, temp_path = tempfile.mkstemp()
-        os.close(fd)
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd(
                 'aks get-credentials -g {resource_group} -n {name} --file "{file}"')
             self.assertGreater(os.path.getsize(temp_path), 0)
         finally:
+            os.close(fd)
             os.remove(temp_path)
 
         # delete
@@ -1577,12 +1569,12 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # get-credentials
         fd, temp_path = tempfile.mkstemp()
-        os.close(fd)
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd(
                 'aks get-credentials -g {resource_group} -n {name} --file "{file}"')
         finally:
+            os.close(fd)
             os.remove(temp_path)
 
         # get-credentials to stdout
@@ -1667,13 +1659,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # get-credentials
         fd, temp_path = tempfile.mkstemp()
-        os.close(fd)
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd(
                 'aks get-credentials -g {resource_group} -n {name} --file "{file}"')
             self.assertGreater(os.path.getsize(temp_path), 0)
         finally:
+            os.close(fd)
             os.remove(temp_path)
 
         # update managed outbound IP
@@ -1782,13 +1774,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # get-credentials
         fd, temp_path = tempfile.mkstemp()
-        os.close(fd)
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd(
                 'aks get-credentials -g {resource_group} -n {name} --file "{file}"')
             self.assertGreater(os.path.getsize(temp_path), 0)
         finally:
+            os.close(fd)
             os.remove(temp_path)
 
         # update outbound IP
@@ -1889,13 +1881,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # get-credentials
         fd, temp_path = tempfile.mkstemp()
-        os.close(fd)
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd(
                 'aks get-credentials -g {resource_group} -n {name} --file "{file}"')
             self.assertGreater(os.path.getsize(temp_path), 0)
         finally:
+            os.close(fd)
             os.remove(temp_path)
 
         # update outbound IP
@@ -1970,13 +1962,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # get-credentials
         fd, temp_path = tempfile.mkstemp()
-        os.close(fd)
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd(
                 'aks get-credentials -g {resource_group} -n {name} --file "{file}"')
             self.assertGreater(os.path.getsize(temp_path), 0)
         finally:
+            os.close(fd)
             os.remove(temp_path)
 
         # nodepool add
@@ -2101,13 +2093,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # get-credentials
         fd, temp_path = tempfile.mkstemp()
-        os.close(fd)
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd(
                 'aks get-credentials -g {resource_group} -n {name} --file "{file}"')
             self.assertGreater(os.path.getsize(temp_path), 0)
         finally:
+            os.close(fd)
             os.remove(temp_path)
 
         # nodepool add user mode pool
@@ -2219,13 +2211,13 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # get-credentials
         fd, temp_path = tempfile.mkstemp()
-        os.close(fd)
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd(
                 'aks get-credentials -g {resource_group} -n {name} --file "{file}"')
             self.assertGreater(os.path.getsize(temp_path), 0)
         finally:
+            os.close(fd)
             os.remove(temp_path)
 
         # nodepool add
@@ -3313,12 +3305,12 @@ spec:
 
         # get-credentials
         fd, temp_path = tempfile.mkstemp()
-        os.close(fd)
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd(
                 'aks get-credentials -g {resource_group} -n {name} --file "{file}"')
         finally:
+            os.close(fd)
             os.remove(temp_path)
 
         # get-credentials to stdout
@@ -4098,7 +4090,6 @@ spec:
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westcentralus')
-    @unittest.skip('Insufficient regional vcpu quota')
     def test_aks_control_plane_user_assigned_identity(self, resource_group, resource_group_location):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
@@ -4115,7 +4106,7 @@ spec:
         })
         self.kwargs.update({
             'new_identity_resource_id': self._get_user_assigned_identity(resource_group, excluded_identity=self.kwargs.get("identity_resource_id")),
-            'vnet_subnet_id': self.generate_vnet_subnet_id(resource_group, resource_group_location),
+            'vnet_subnet_id': self.generate_vnet_subnet_id(resource_group),
         })
 
         # create
@@ -4167,12 +4158,12 @@ spec:
 
         # get-credentials
         fd, temp_path = tempfile.mkstemp()
-        os.close(fd)
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd(
                 'aks get-credentials -g {resource_group} -n {name} --file "{file}"')
         finally:
+            os.close(fd)
             os.remove(temp_path)
 
         # get-credentials to stdout
@@ -4457,13 +4448,13 @@ spec:
 
         # get-credentials
         fd, temp_path = tempfile.mkstemp()
-        os.close(fd)
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd(
                 'aks get-credentials -g {resource_group} -n {name} --file "{file}"')
             self.assertGreater(os.path.getsize(temp_path), 0)
         finally:
+            os.close(fd)
             os.remove(temp_path)
 
         # get-credentials to stdout
@@ -4810,13 +4801,13 @@ spec:
 
         # get-credentials
         fd, temp_path = tempfile.mkstemp()
-        os.close(fd)
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd(
                 'aks get-credentials -g {resource_group} -n {name} --file "{file}"')
             self.assertGreater(os.path.getsize(temp_path), 0)
         finally:
+            os.close(fd)
             os.remove(temp_path)
 
         # delete
@@ -4883,12 +4874,12 @@ spec:
 
         # get-credentials
         fd, temp_path = tempfile.mkstemp()
-        os.close(fd)
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd(
                 'aks get-credentials -g {resource_group} -n {name} --file "{file}"')
         finally:
+            os.close(fd)
             os.remove(temp_path)
 
         # get-credentials to stdout
@@ -4969,13 +4960,13 @@ spec:
 
         # get-credentials
         fd, temp_path = tempfile.mkstemp()
-        os.close(fd)
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd(
                 'aks get-credentials -g {resource_group} -n {name} --file "{file}"')
             self.assertGreater(os.path.getsize(temp_path), 0)
         finally:
+            os.close(fd)
             os.remove(temp_path)
 
         # update managed outbound IP
@@ -5080,13 +5071,13 @@ spec:
 
         # get-credentials
         fd, temp_path = tempfile.mkstemp()
-        os.close(fd)
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd(
                 'aks get-credentials -g {resource_group} -n {name} --file "{file}"')
             self.assertGreater(os.path.getsize(temp_path), 0)
         finally:
+            os.close(fd)
             os.remove(temp_path)
 
         # update outbound IP
@@ -5183,13 +5174,13 @@ spec:
 
         # get-credentials
         fd, temp_path = tempfile.mkstemp()
-        os.close(fd)
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd(
                 'aks get-credentials -g {resource_group} -n {name} --file "{file}"')
             self.assertGreater(os.path.getsize(temp_path), 0)
         finally:
+            os.close(fd)
             os.remove(temp_path)
 
         # update outbound IP
@@ -5258,13 +5249,13 @@ spec:
 
         # get-credentials
         fd, temp_path = tempfile.mkstemp()
-        os.close(fd)
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd(
                 'aks get-credentials -g {resource_group} -n {name} --file "{file}"')
             self.assertGreater(os.path.getsize(temp_path), 0)
         finally:
+            os.close(fd)
             os.remove(temp_path)
 
         # nodepool add
@@ -5379,13 +5370,13 @@ spec:
 
         # get-credentials
         fd, temp_path = tempfile.mkstemp()
-        os.close(fd)
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd(
                 'aks get-credentials -g {resource_group} -n {name} --file "{file}"')
             self.assertGreater(os.path.getsize(temp_path), 0)
         finally:
+            os.close(fd)
             os.remove(temp_path)
 
         # nodepool add user mode pool
@@ -5492,13 +5483,13 @@ spec:
 
         # get-credentials
         fd, temp_path = tempfile.mkstemp()
-        os.close(fd)
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd(
                 'aks get-credentials -g {resource_group} -n {name} --file "{file}"')
             self.assertGreater(os.path.getsize(temp_path), 0)
         finally:
+            os.close(fd)
             os.remove(temp_path)
 
         self.cmd('aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={nodepool1_name} --labels {labels}', checks=[
@@ -5585,13 +5576,13 @@ spec:
 
         # get-credentials
         fd, temp_path = tempfile.mkstemp()
-        os.close(fd)
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd(
                 'aks get-credentials -g {resource_group} -n {name} --file "{file}"')
             self.assertGreater(os.path.getsize(temp_path), 0)
         finally:
+            os.close(fd)
             os.remove(temp_path)
 
         self.cmd('aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={nodepool1_name} --node-taints {taints}', checks=[
@@ -5805,13 +5796,13 @@ spec:
 
         # get-credentials
         fd, temp_path = tempfile.mkstemp()
-        os.close(fd)
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd(
                 'aks get-credentials -g {resource_group} -n {name} --file "{file}"')
             self.assertGreater(os.path.getsize(temp_path), 0)
         finally:
+            os.close(fd)
             os.remove(temp_path)
 
 
@@ -5897,13 +5888,13 @@ spec:
 
         # get-credentials
         fd, temp_path = tempfile.mkstemp()
-        os.close(fd)
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd(
                 'aks get-credentials -g {resource_group} -n {name} --file "{file}"')
             self.assertGreater(os.path.getsize(temp_path), 0)
         finally:
+            os.close(fd)
             os.remove(temp_path)
 
         # nodepool add
@@ -7234,7 +7225,6 @@ spec:
         assert len(namespace_list) > 0
 
         fd, temp_path = tempfile.mkstemp()
-        os.close(fd)
         self.kwargs.update({"file": temp_path})
         try:
             self.cmd(
@@ -7242,6 +7232,7 @@ spec:
             )
             self.assertGreater(os.path.getsize(temp_path), 0)
         finally:
+            os.close(fd)
             os.remove(temp_path)
 
         update_namespace_cmd = (
@@ -7338,13 +7329,13 @@ spec:
 
         # get-credentials
         fd, temp_path = tempfile.mkstemp()
-        os.close(fd)
         self.kwargs.update({'file': temp_path})
         try:
             self.cmd(
                 'aks get-credentials -g {resource_group} -n {name} --file "{file}"')
             self.assertGreater(os.path.getsize(temp_path), 0)
         finally:
+            os.close(fd)
             os.remove(temp_path)
 
         # scale the cluster
