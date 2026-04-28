@@ -920,7 +920,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               plan_promotion_code=None, license_type=None, assign_identity=None, identity_scope=None,
               identity_role=None, identity_role_id=None, encryption_identity=None,
               application_security_groups=None, zone=None, boot_diagnostics_storage=None, ultra_ssd_enabled=None,
-              ephemeral_os_disk=None, ephemeral_os_disk_placement=None,
+              ephemeral_os_disk=None, ephemeral_os_disk_placement=None, ephemeral_os_disk_enable_full_caching=None,
               proximity_placement_group=None, dedicated_host=None, dedicated_host_group=None, aux_subscriptions=None,
               priority=None, max_price=None, eviction_policy=None, enable_agent=None, workspace=None, vmss=None,
               os_disk_encryption_set=None, data_disk_encryption_sets=None, specialized=None,
@@ -1792,6 +1792,7 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
               priority=None, max_price=None, proximity_placement_group=None, workspace=None, enable_secure_boot=None,
               enable_vtpm=None, user_data=None, capacity_reservation_group=None,
               dedicated_host=None, dedicated_host_group=None, size=None, ephemeral_os_disk_placement=None,
+              ephemeral_os_disk_enable_full_caching=None,
               enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None, disk_controller_type=None,
               security_type=None, enable_proxy_agent=None, proxy_agent_mode=None, additional_scheduled_events=None,
               enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None,
@@ -2027,6 +2028,14 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
             vm["storage_profile"]["os_disk"]["diff_disk_settings"]["placement"] = ephemeral_os_disk_placement
         else:
             raise ValidationError("Please update the argument '--ephemeral-os-disk-placement' when "
+                                  "creating VM with the option '--ephemeral-os-disk true'")
+
+    if ephemeral_os_disk_enable_full_caching is not None:
+        if vm.get("storage_profile", {}).get("os_disk", {}).get("diff_disk_settings", None) is not None:
+            vm["storage_profile"]["os_disk"]["diff_disk_settings"]["enable_full_caching"] = \
+                ephemeral_os_disk_enable_full_caching
+        else:
+            raise ValidationError("Please update the argument '--ephemeral-os-disk-enable-full-caching' when "
                                   "creating VM with the option '--ephemeral-os-disk true'")
 
     if disk_controller_type is not None:
@@ -3667,7 +3676,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 assign_identity=None, identity_scope=None, identity_role=None, encryption_identity=None,
                 identity_role_id=None, zones=None, priority=None, eviction_policy=None,
                 application_security_groups=None, ultra_ssd_enabled=None,
-                ephemeral_os_disk=None, ephemeral_os_disk_placement=None,
+                ephemeral_os_disk=None, ephemeral_os_disk_placement=None, ephemeral_os_disk_enable_full_caching=None,
                 proximity_placement_group=None, aux_subscriptions=None, terminate_notification_time=None,
                 max_price=None, computer_name_prefix=None, orchestration_mode=None, scale_in_policy=None,
                 os_disk_encryption_set=None, data_disk_encryption_sets=None, data_disk_iops=None, data_disk_mbps=None,
@@ -4565,7 +4574,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 security_type=None, enable_proxy_agent=None, proxy_agent_mode=None,
                 security_posture_reference_id=None, security_posture_reference_exclude_extensions=None,
                 max_surge=None, enable_resilient_creation=None, enable_resilient_deletion=None,
-                ephemeral_os_disk=None, ephemeral_os_disk_option=None, zones=None, additional_scheduled_events=None,
+                ephemeral_os_disk=None, ephemeral_os_disk_option=None, ephemeral_os_disk_enable_full_caching=None,
+                zones=None, additional_scheduled_events=None,
                 enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None,
                 upgrade_policy_mode=None, enable_auto_os_upgrade=None, skuprofile_vmsizes=None,
                 skuprofile_allostrat=None, skuprofile_rank=None,
@@ -4940,7 +4950,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             sku_profile['allocation_strategy'] = skuprofile_allostrat
         vmss["sku_profile"] = sku_profile
 
-    if ephemeral_os_disk_placement is not None or ephemeral_os_disk_option is not None or ephemeral_os_disk is not None:
+    if ephemeral_os_disk_placement is not None or ephemeral_os_disk_option is not None or \
+            ephemeral_os_disk is not None or ephemeral_os_disk_enable_full_caching is not None:
         if vmss.get("virtual_machine_profile", None) is None:
             vmss["virtual_machine_profile"] = {}
         if vmss["virtual_machine_profile"].get("storage_profile", None) is None:
@@ -4956,6 +4967,9 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
         if ephemeral_os_disk_option is not None:
             vmss["virtual_machine_profile"]["storage_profile"]["os_disk"]["diff_disk_settings"]["option"] \
                 = ephemeral_os_disk_option
+        if ephemeral_os_disk_enable_full_caching is not None:
+            vmss["virtual_machine_profile"]["storage_profile"]["os_disk"]["diff_disk_settings"]["enable_full_caching"] \
+                = ephemeral_os_disk_enable_full_caching
         if ephemeral_os_disk is False:
             vmss["virtual_machine_profile"]["storage_profile"]["os_disk"]["diff_disk_settings"] = {}
 

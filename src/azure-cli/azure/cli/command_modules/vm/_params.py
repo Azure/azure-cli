@@ -475,6 +475,8 @@ def load_arguments(self, _):
             c.argument('align_regional_disks_to_vm_zone', options_list=['--align-regional-disks-to-vm-zone', '--align-regional-disks'], arg_type=get_three_state_flag(), min_api='2024-11-01', help='Specify whether the regional disks should be aligned/moved to the VM zone. This is applicable only for VMs with placement property set. Please note that this change is irreversible.')
             c.argument('key_incarnation_id', type=int, min_api='2024-11-01', help='Increase the value of this property allows user to reset the key used for securing communication channel between guest and host.')
             c.argument('security_type', arg_type=get_enum_type(["TrustedLaunch", "Standard", "ConfidentialVM"], default=None), help='Specify the security type of the virtual machine. The value Standard can be used if subscription has feature flag UseStandardSecurityType registered under Microsoft.Compute namespace. Refer to https://learn.microsoft.com/en-us/azure/azure-resource-manager/management/preview-features for steps to enable required feature.')
+            c.argument('ephemeral_os_disk_enable_full_caching', arg_type=get_three_state_flag(), options_list=['--ephemeral-os-disk-enable-full-caching', '--ephemeral-full-caching'],
+                       help='Specifies whether or not to enable full caching for this VM which will cache the OS disk locally on the host and make this VM more resilient to storage outages')
 
     with self.argument_context('vm create', arg_group='Storage') as c:
         c.argument('attach_os_disk', help='Attach an existing OS disk to the VM. Can use the name or ID of a managed disk or the URI to an unmanaged disk VHD.')
@@ -863,6 +865,9 @@ def load_arguments(self, _):
         c.argument('custom_data', help='Custom init script file or text (cloud-init, cloud-config, etc..)', completer=FilesCompleter(), type=file_type)
         c.argument('ephemeral_os_disk', arg_type=get_three_state_flag(), min_api='2024-03-01', help='Allow you to specify the ephemeral disk settings for the operating system disk. Specify it to false to set ephemeral disk setting as empty and migrate it to non ephemeral')
         c.argument('ephemeral_os_disk_option', options_list=['--ephemeral-os-disk-option', '--ephemeral-option'], arg_type=get_enum_type(self.get_models('DiffDiskOptions')), min_api='2024-03-01', help='Specify the ephemeral disk settings for operating system disk.')
+        c.argument('ephemeral_os_disk_enable_full_caching', arg_type=get_three_state_flag(),
+                   options_list=['--ephemeral-os-disk-enable-full-caching', '--ephemeral-full-caching'],
+                   help='Specifies whether or not to enable full caching for this VMSS which will cache the OS disk locally on the host and make this VMSS more resilient to storage outages')
         c.argument('zones', zones_type, min_api='2023-03-01')
         c.argument('skuprofile_vmsizes', nargs='+', min_api='2024-07-01', help='A list of VM sizes in the scale set. See https://azure.microsoft.com/pricing/details/virtual-machines/ for size info.')
         c.argument('skuprofile_allostrat', options_list=['--skuprofile-allocation-strategy', '--sku-allocat-strat'], arg_type=get_enum_type(['LowestPrice', 'CapacityOptimized', 'Prioritized']), min_api='2024-07-01', help='Allocation strategy for vm sizes in SKU profile.')
@@ -1200,6 +1205,9 @@ def load_arguments(self, _):
                        help='Allows you to create an OS disk directly on the host node, providing local disk performance and faster VM/VMSS reimage time.')
             c.argument('ephemeral_os_disk_placement', arg_type=ephemeral_placement_type,
                        help='Only applicable when used with `--ephemeral-os-disk`. Allows you to choose the Ephemeral OS disk provisioning location.')
+            c.argument('ephemeral_os_disk_enable_full_caching', arg_type=get_three_state_flag(),
+                       options_list=['--ephemeral-os-disk-enable-full-caching', '--ephemeral-full-caching'],
+                       help='Specifies whether or not to enable full caching for this VMSS which will cache the OS disk locally on the host and make this VMSS more resilient to storage outages')
             c.argument('os_disk_encryption_set', min_api='2019-07-01', help='Name or ID of disk encryption set for OS disk.')
             c.argument('data_disk_encryption_sets', nargs='+', min_api='2019-07-01',
                        help='Names or IDs (space delimited) of disk encryption sets for data disks.')

@@ -679,6 +679,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                                               data_disk_cachings=namespace.data_caching,
                                               ephemeral_os_disk=getattr(namespace, 'ephemeral_os_disk', None),
                                               ephemeral_os_disk_placement=getattr(namespace, 'ephemeral_os_disk_placement', None),
+                                              ephemeral_os_disk_enable_full_caching=getattr(namespace, 'ephemeral_os_disk_enable_full_caching', None),
                                               data_disk_delete_option=getattr(
                                                   namespace, 'data_disk_delete_option', None),
                                               source_snapshots_or_disks=getattr(namespace, 'source_snapshots_or_disks', None),
