@@ -928,7 +928,7 @@ def _privatedns_add_record(record_set, record, record_type, is_list=False):
         record_set[record_property] = record
 
 
-def _privatedns_add_save_record(cmd, record, record_type, relative_record_set_name, resource_group_name, private_zone_name, is_list=True):
+def _privatedns_add_save_record(cmd, record, record_type, relative_record_set_name, resource_group_name, private_zone_name, is_list=True, ttl=None):
     record_snake, record_camel = _privatedns_type_to_property_name(record_type)
     is_empty = False
 
@@ -947,6 +947,9 @@ def _privatedns_add_save_record(cmd, record, record_type, relative_record_set_na
     except HttpResponseError:
         record_set = {"ttl": 3600}
         is_empty = True
+
+    if ttl is not None:
+        record_set["ttl"] = ttl
 
     _privatedns_add_record(record_set, record, record_type, is_list)
 
@@ -970,37 +973,37 @@ def _privatedns_add_save_record(cmd, record, record_type, relative_record_set_na
     })
 
 
-def add_privatedns_aaaa_record(cmd, resource_group_name, private_zone_name, relative_record_set_name, ipv6_address):
+def add_privatedns_aaaa_record(cmd, resource_group_name, private_zone_name, relative_record_set_name, ipv6_address, ttl=None):
     record = {"ipv6_address": ipv6_address}
     record_type = 'aaaa'
-    return _privatedns_add_save_record(cmd, record, record_type, relative_record_set_name, resource_group_name, private_zone_name)
+    return _privatedns_add_save_record(cmd, record, record_type, relative_record_set_name, resource_group_name, private_zone_name, ttl=ttl)
 
 
-def add_privatedns_a_record(cmd, resource_group_name, private_zone_name, relative_record_set_name, ipv4_address):
+def add_privatedns_a_record(cmd, resource_group_name, private_zone_name, relative_record_set_name, ipv4_address, ttl=None):
     record = {"ipv4_address": ipv4_address}
     record_type = 'a'
-    return _privatedns_add_save_record(cmd, record, record_type, relative_record_set_name, resource_group_name, private_zone_name)
+    return _privatedns_add_save_record(cmd, record, record_type, relative_record_set_name, resource_group_name, private_zone_name, ttl=ttl)
 
 
-def add_privatedns_mx_record(cmd, resource_group_name, private_zone_name, relative_record_set_name, preference, exchange):
+def add_privatedns_mx_record(cmd, resource_group_name, private_zone_name, relative_record_set_name, preference, exchange, ttl=None):
     record = {"preference": int(preference), "exchange": exchange}
     record_type = 'mx'
-    return _privatedns_add_save_record(cmd, record, record_type, relative_record_set_name, resource_group_name, private_zone_name)
+    return _privatedns_add_save_record(cmd, record, record_type, relative_record_set_name, resource_group_name, private_zone_name, ttl=ttl)
 
 
-def add_privatedns_ptr_record(cmd, resource_group_name, private_zone_name, relative_record_set_name, dname):
+def add_privatedns_ptr_record(cmd, resource_group_name, private_zone_name, relative_record_set_name, dname, ttl=None):
     record = {"ptrdname": dname}
     record_type = 'ptr'
-    return _privatedns_add_save_record(cmd, record, record_type, relative_record_set_name, resource_group_name, private_zone_name)
+    return _privatedns_add_save_record(cmd, record, record_type, relative_record_set_name, resource_group_name, private_zone_name, ttl=ttl)
 
 
-def add_privatedns_srv_record(cmd, resource_group_name, private_zone_name, relative_record_set_name, priority, weight, port, target):
+def add_privatedns_srv_record(cmd, resource_group_name, private_zone_name, relative_record_set_name, priority, weight, port, target, ttl=None):
     record = {"priority": priority, "weight": weight, "port": port, "target": target}
     record_type = 'srv'
-    return _privatedns_add_save_record(cmd, record, record_type, relative_record_set_name, resource_group_name, private_zone_name)
+    return _privatedns_add_save_record(cmd, record, record_type, relative_record_set_name, resource_group_name, private_zone_name, ttl=ttl)
 
 
-def add_privatedns_txt_record(cmd, resource_group_name, private_zone_name, relative_record_set_name, value):
+def add_privatedns_txt_record(cmd, resource_group_name, private_zone_name, relative_record_set_name, value, ttl=None):
     record = {"value": value}
     record_type = 'txt'
     long_text = ''.join(x for x in record["value"])
@@ -1013,13 +1016,13 @@ def add_privatedns_txt_record(cmd, resource_group_name, private_zone_name, relat
     final_str = ''.join(record["value"])
     final_len = len(final_str)
     assert original_len == final_len
-    return _privatedns_add_save_record(cmd, record, record_type, relative_record_set_name, resource_group_name, private_zone_name)
+    return _privatedns_add_save_record(cmd, record, record_type, relative_record_set_name, resource_group_name, private_zone_name, ttl=ttl)
 
 
-def add_privatedns_cname_record(cmd, resource_group_name, private_zone_name, relative_record_set_name, cname):
+def add_privatedns_cname_record(cmd, resource_group_name, private_zone_name, relative_record_set_name, cname, ttl=None):
     record = {"cname": cname}
     record_type = 'cname'
-    return _privatedns_add_save_record(cmd, record, record_type, relative_record_set_name, resource_group_name, private_zone_name, is_list=False)
+    return _privatedns_add_save_record(cmd, record, record_type, relative_record_set_name, resource_group_name, private_zone_name, is_list=False, ttl=ttl)
 
 
 def update_privatedns_soa_record(cmd, resource_group_name, private_zone_name, host=None, email=None,
