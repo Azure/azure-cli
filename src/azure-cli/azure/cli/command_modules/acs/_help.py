@@ -2173,10 +2173,10 @@ parameters:
     short-summary: Whether to install driver for GPU node pool. Possible values are "Install" or "None".
   - name: --enable-artifact-streaming
     type: bool
-    short-summary: Enable artifact streaming for VirtualMachineScaleSets managed by a node pool, to speed up the cold-start of containers on a node through on-demand image loading. To use this feature, container images must also enable artifact streaming on ACR. If not specified, the default is false.
+    short-summary: Enable artifact streaming for VirtualMachineScaleSets managed by a Linux node pool, to speed up the cold-start of containers on a node through on-demand image loading. To use this feature, container images must also enable artifact streaming on ACR. If not specified, the default is false.
   - name: --disable-artifact-streaming
     type: bool
-    short-summary: Disable artifact streaming for VirtualMachineScaleSets managed by a node pool.
+    short-summary: Disable artifact streaming for VirtualMachineScaleSets managed by a Linux node pool.
 examples:
   - name: Reconcile the nodepool back to its current state.
     text: az aks nodepool update -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster
