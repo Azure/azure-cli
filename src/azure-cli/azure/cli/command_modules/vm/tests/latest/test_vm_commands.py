@@ -7848,7 +7848,7 @@ class VMGalleryImage(ScenarioTest):
             'version': '1.1.2',
             'captured': 'managedImage1',
             'location': resource_group_location,
-            'subId': '0b1f6471-1bf0-4dda-aec3-cb9272f09590',  # share the gallery to tester's subscription, so the tester can get shared galleries
+            'subId': '88939486-3f56-4b35-bd43-5d6b34df022f',  # share the gallery to tester's subscription, so the tester can get shared galleries
             'tenantId': '2f4a9838-26b7-47ee-be60-ccc1fdec5953',
             'sharedSubId': '34a4ab42-0d72-47d9-bd1a-aed207386dac',
             'subnet': 'subnet1',
@@ -7862,9 +7862,10 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('sig image-definition show -g {rg} --gallery-name {gallery} --gallery-image-definition {image}')
 
         # Create a public IP resource with service tag
-        self.cmd('network public-ip create --name {pubip} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
-        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:16.04-LTS:latest --data-disk-sizes-gb 10 --admin-username clitest1 '
-                 '--generate-ssh-key --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip} --nsg-rule NONE')
+        self.cmd('network public-ip create --name {pubip} -g {rg}')
+        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:16.04-LTS:latest --data-disk-sizes-gb 10 '
+                 '--admin-username clitest1 --generate-ssh-key --subnet {subnet} --vnet-name {vnet} '
+                 '--public-ip-address {pubip} --nsg-rule NONE --size Standard_D2s_v3')
 
         # Disable default outbound access
         self.cmd(
@@ -8793,7 +8794,7 @@ class VMGalleryImage(ScenarioTest):
             'version': '1.1.2',
             'captured': 'managedImage1',
             'location': resource_group_location,
-            'subId': '0b1f6471-1bf0-4dda-aec3-cb9272f09590',  # share the gallery to tester's subscription, so the tester can get shared galleries
+            'subId': '88939486-3f56-4b35-bd43-5d6b34df022f',  # share the gallery to tester's subscription, so the tester can get shared galleries
             'tenantId': '2f4a9838-26b7-47ee-be60-ccc1fdec5953',
             'subnet': 'subnet1',
             'vnet': 'vnet1',
@@ -8805,8 +8806,10 @@ class VMGalleryImage(ScenarioTest):
         self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --os-type linux -p publisher1 -f offer1 -s sku1 --hyper-v-generation v1')
 
         # Create a public IP resource with service tag
-        self.cmd('network public-ip create --name {pubip} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
-        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:16.04-LTS:latest --data-disk-sizes-gb 10 --admin-username clitest1 --generate-ssh-key --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip} --nsg-rule None')
+        self.cmd('network public-ip create --name {pubip} -g {rg}')
+        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:16.04-LTS:latest --data-disk-sizes-gb 10 '
+                 '--admin-username clitest1 --generate-ssh-key --subnet {subnet} --vnet-name {vnet} '
+                 '--public-ip-address {pubip} --nsg-rule None --size Standard_D2s_v3')
 
         # Disable default outbound access
         self.cmd(
@@ -8823,9 +8826,14 @@ class VMGalleryImage(ScenarioTest):
 
         self.cmd('sig share add --gallery-name {gallery} -g {rg} --subscription-ids {subId} --tenant-ids {tenantId}')
 
-        self.kwargs['shared_gallery_image_version'] = self.cmd('sig image-version show-shared --gallery-image-definition {image} --gallery-unique-name {unique_name} --location {location} --gallery-image-version {version}').get_output_in_json()['uniqueId']
+        self.kwargs['shared_gallery_image_version'] = \
+            self.cmd('sig image-version show-shared --gallery-image-definition {image} '
+                     '--gallery-unique-name {unique_name} --location {location} '
+                     '--gallery-image-version {version}').get_output_in_json()['uniqueId']
 
-        self.cmd('vm create -g {rg} -n {vm_with_shared_gallery_version} --image {shared_gallery_image_version} --admin-username clitest1 --generate-ssh-key --subnet {subnet} --vnet-name {vnet} --nsg-rule None')
+        self.cmd('vm create -g {rg} -n {vm_with_shared_gallery_version} --image {shared_gallery_image_version} '
+                 '--admin-username clitest1 --generate-ssh-key --subnet {subnet} --vnet-name {vnet} --nsg-rule None '
+                 '--size Standard_D2s_v3')
 
         self.cmd('vm show -g {rg} -n {vm_with_shared_gallery_version}', checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -8834,11 +8842,14 @@ class VMGalleryImage(ScenarioTest):
 
         from azure.cli.core.azclierror import ArgumentUsageError
         with self.assertRaises(ArgumentUsageError):
-            self.cmd('vm create -g {rg} -n {vm_with_shared_gallery_version2} --image {shared_gallery_image_version} --admin-username clitest1 --generate-ssh-key --nsg-rule None --os-type windows')
+            self.cmd('vm create -g {rg} -n {vm_with_shared_gallery_version2} --image {shared_gallery_image_version} '
+                     '--admin-username clitest1 --generate-ssh-key --nsg-rule None --os-type windows '
+                     '--size Standard_D2s_v3')
 
         self.cmd('network nsg create -g {rg} -n {nsg}')
         self.cmd('vmss create -g {rg} -n {vmss_with_shared_gallery_version} --image {shared_gallery_image_version} '
-                 '--generate-ssh-keys --admin-username clitest1 --orchestration-mode Flexible --nsg {nsg}')
+                 '--generate-ssh-keys --admin-username clitest1 --orchestration-mode Flexible --nsg {nsg} '
+                 '--vm-sku Standard_D2s_v3')
 
         self.cmd('vmss show -g {rg} -n {vmss_with_shared_gallery_version}', checks=[
             self.check('provisioningState', 'Succeeded'),
