@@ -41,10 +41,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 actions=[LocalContextAction.SET, LocalContextAction.GET],
                 scopes=['horizondb']))
 
-        with self.argument_context('horizondb') as c:
-            c.argument('resource_group_name', arg_type=resource_group_name_type)
-            c.argument('cluster_name', arg_type=cluster_name_arg_type)
-
         administrator_login_arg_type = CLIArgumentType(
             options_list=['--admin-user', '-u'],
             help='The administrator login name for the cluster.')
@@ -83,6 +79,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             options_list=['--zone-placement-policy'],
             arg_type=get_enum_type(['Strict', 'BestEffort']),
             help='Defines how replicas are placed across availability zones.')
+
+        with self.argument_context('horizondb') as c:
+            c.argument('resource_group_name', arg_type=resource_group_name_type)
+            c.argument('cluster_name', arg_type=cluster_name_arg_type)
 
         with self.argument_context('horizondb create') as c:
             c.argument('location', arg_type=get_location_type(self.cli_ctx))

@@ -7,8 +7,7 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.horizondb._client_factory import (
     cf_horizondb_clusters)
 from azure.cli.command_modules.horizondb.utils._transformers import (
-    table_transform_output,
-    table_transform_output_list_clusters)
+    table_transform_output)
 
 
 # pylint: disable=too-many-locals, too-many-statements, line-too-long
@@ -28,4 +27,3 @@ def load_command_table(self, _):
         g.custom_command('create', 'horizondb_cluster_create', table_transformer=table_transform_output)
         g.custom_command('delete', 'horizondb_cluster_delete')
         g.show_command('show', 'get')
-        g.custom_command('list', 'horizondb_cluster_list', table_transformer=table_transform_output_list_clusters)
