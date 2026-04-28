@@ -133,6 +133,7 @@ Release History
 
 * `az cosmosdb update`: Add support for Microsoft Fabric workspace resource IDs in `--network-acl-bypass-resource-ids` (#32797)
 * Fix #32608: `az cosmosdb restore`: Fix "Database Account does not exist" error during polling (#32752)
+* `az cosmosdb restore`: Preserve source region in top-level location for cross-region restore
 
 **Maps**
 
