@@ -68,7 +68,7 @@ Release History
 * `az postgresql flexible-server replica create`: New argument `--storage-type` to select storage type as PremiumV2_LRS for read replica (#33134)
 * Fix #33205: `az postgres flexible-server create`: Update help text for `--storage-auto-grow` argument to reflect actual default value (#33206)
 * `az postgres flexible-server update`: Restart is no longer required for scaling storage size of Premium SSDv2 server (#33178)
-* `az postgres flexible-server create/upgrade`: Block SSDv2 creation for PG version < 14 (#33119)
+* `az postgres flexible-server create/upgrade`: Block SSDv2 creation for PG version earlier than 14 (#33119)
 
 **Profile**
 
