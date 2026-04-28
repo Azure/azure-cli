@@ -16,6 +16,9 @@ from azure.cli.command_modules.acs._consts import (
     CONST_DEFAULT_WINDOWS_VMS_VM_SIZE,
     CONST_NODEPOOL_MODE_SYSTEM,
     CONST_NODEPOOL_MODE_USER,
+    CONST_OS_SKU_WINDOWS2019,
+    CONST_OS_SKU_WINDOWS2022,
+    CONST_OS_SKU_WINDOWS2025,
     CONST_SCALE_DOWN_MODE_DEALLOCATE,
     CONST_SCALE_DOWN_MODE_DELETE,
     CONST_SCALE_SET_PRIORITY_REGULAR,
@@ -654,6 +657,24 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
                 ctx_4.get_os_type()
         else:
             self.assertEqual(ctx_4.get_os_type(), "windows")
+
+        # windows os-sku with default (Linux) os type should surface a helpful error
+        # in STANDALONE mode (aks nodepool add)
+        if self.agentpool_decorator_mode == AgentPoolDecoratorMode.STANDALONE:
+            for windows_sku in (
+                CONST_OS_SKU_WINDOWS2019,
+                CONST_OS_SKU_WINDOWS2022,
+                CONST_OS_SKU_WINDOWS2025,
+            ):
+                ctx_win = AKSAgentPoolContext(
+                    self.cmd,
+                    AKSAgentPoolParamDict({"os_type": None, "os_sku": windows_sku}),
+                    self.models,
+                    DecoratorMode.CREATE,
+                    self.agentpool_decorator_mode,
+                )
+                with self.assertRaises(InvalidArgumentValueError):
+                    ctx_win.get_os_type()
 
     def common_get_os_sku(self):
         # default

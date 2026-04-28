@@ -1,0 +1,54 @@
+# Full realistic scenario: WordPress + MariaDB + Redis + Nginx reverse proxy
+# Tests: multiple services, all field types, volume mapping, env vars, main detection
+version: '3.8'
+services:
+  nginx:
+    image: "myacr.azurecr.io/nginx-proxy:latest"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "${WEBAPP_STORAGE_HOME}/nginx/nginx.conf:/etc/nginx/nginx.conf"
+      - "${WEBAPP_STORAGE_HOME}/nginx/certs:/etc/nginx/certs"
+    entrypoint: ["nginx"]
+    command: ["-g", "daemon off;"]
+    restart: always
+
+  wordpress:
+    image: "wordpress:6.4-php8.2-fpm"
+    ports:
+      - "9000:9000"
+    volumes:
+      - "${WEBAPP_STORAGE_HOME}/site/wwwroot:/var/www/html"
+      - type: bind
+        source: "${WEBAPP_STORAGE_HOME}/wordpress/uploads"
+        target: /var/www/html/wp-content/uploads
+    environment:
+      WORDPRESS_DB_HOST: "localhost:3306"
+      WORDPRESS_DB_USER: wp_user
+      WORDPRESS_DB_PASSWORD: "not-a-real-password"
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_TABLE_PREFIX: wp_
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_REDIS_HOST', 'localhost');
+        define('WP_REDIS_PORT', 6379);
+    restart: always
+
+  mariadb:
+    image: "mariadb:11"
+    ports:
+      - "3306:3306"
+    volumes:
+      - "${WEBAPP_STORAGE_HOME}/mysql/data:/var/lib/mysql"
+    environment:
+      - MYSQL_ROOT_PASSWORD=not-a-real-root-password
+      - MYSQL_DATABASE=wordpress
+      - MYSQL_USER=wp_user
+      - MYSQL_PASSWORD=not-a-real-password
+    command: "--default-authentication-plugin=mysql_native_password"
+    restart: always
+
+  redis:
+    image: "redis:7-alpine"
+    command: "redis-server --maxmemory 128mb --maxmemory-policy allkeys-lru"
+    restart: always

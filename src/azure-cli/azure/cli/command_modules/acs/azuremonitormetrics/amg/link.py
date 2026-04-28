@@ -4,13 +4,17 @@
 # --------------------------------------------------------------------------------------------
 import json
 import uuid
+from knack.log import get_logger
 from knack.util import CLIError
+from azure.core.exceptions import HttpResponseError
 from azure.cli.command_modules.acs.azuremonitormetrics.constants import (
     GRAFANA_API,
     GRAFANA_ROLE_ASSIGNMENT_API,
     GrafanaLink
 )
 from azure.cli.command_modules.acs.azuremonitormetrics.helper import sanitize_resource_id
+
+logger = get_logger(__name__)
 
 
 # pylint: disable=line-too-long
@@ -70,9 +74,14 @@ def link_grafana_instance(cmd, raw_parameters, azure_monitor_workspace_resource_
                 GRAFANA_ROLE_ASSIGNMENT_API,
                 association_body
             )
-        except CLIError as e:
-            # If already exists (409), ignore, else print error
-            if not (hasattr(e, "status_code") and e.status_code == 409):
+        except HttpResponseError as e:
+            # If already exists (RoleAssignmentExists), warn and continue, else print error
+            if e.error and e.error.code == "RoleAssignmentExists":
+                logger.warning(
+                    "Monitoring Data Reader role assignment already exists on the Azure Monitor Workspace "
+                    "for the Grafana managed identity. Skipping role assignment."
+                )
+            else:
                 erroString = (
                     f"Role Assignment failed. Please manually assign the `Monitoring Data Reader` role\n"
                     f"to the Azure Monitor Workspace ({azure_monitor_workspace_resource_id}) "

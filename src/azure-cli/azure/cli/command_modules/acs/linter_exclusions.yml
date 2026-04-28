@@ -1,6 +1,15 @@
 ---
 aks create:
   parameters:
+      system_node_subnet_id:
+          rule_exclusions:
+          - missing_parameter_test_coverage
+      node_subnet_id:
+          rule_exclusions:
+          - missing_parameter_test_coverage
+      enable_hosted_system:
+          rule_exclusions:
+          - missing_parameter_test_coverage
       appgw_watch_namespace:
           rule_exclusions:
           - option_length_too_long
@@ -261,6 +270,11 @@ aks nodepool update:
 aks nodepool upgrade:
   parameters:
       undrainable_node_behavior:
+        rule_exclusions:
+        - option_length_too_long
+aks mesh enable:
+  parameters:
+      proxy_redirection_mechanism:
         rule_exclusions:
         - option_length_too_long
 ...

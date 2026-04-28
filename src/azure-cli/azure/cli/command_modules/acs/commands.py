@@ -299,6 +299,11 @@ def load_command_table(self, _):
             'get-upgrades',
             'aks_mesh_get_upgrades',
             table_transformer=aks_mesh_upgrades_table_format)
+        g.custom_command(
+            "proxy-redirection-mechanism",
+            "aks_mesh_proxy_redirection_mechanism",
+            supports_no_wait=True,
+        )
 
     # AKS mesh upgrade commands
     with self.command_group('aks mesh upgrade', managed_clusters_sdk, client_factory=cf_managed_clusters) as g:
