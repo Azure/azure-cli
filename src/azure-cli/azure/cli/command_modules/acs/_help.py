@@ -345,6 +345,30 @@ parameters:
   - name: --apiserver-subnet-id
     type: string
     short-summary: The ID of a subnet in an existing VNet into which to assign control plane apiserver pods(requires --enable-apiserver-vnet-integration)
+  - name: --system-node-subnet-id
+    type: string
+    short-summary: (Automatic SKU) The ID of a subnet in an existing VNet to be used by the Managed System Pool in an Automatic cluster.
+    long-summary: |
+      Bring-your-own VNet for an Automatic cluster requires three subnets supplied together:
+      `--system-node-subnet-id` (this flag, for the Managed System Pool), `--node-subnet-id`
+      (for user node pools), and `--apiserver-subnet-id` (for the control plane API server).
+      All three subnets must belong to the same VNet and can only be used with `--sku automatic`.
+  - name: --node-subnet-id
+    type: string
+    short-summary: (Automatic SKU) The ID of a subnet in an existing VNet to be used by user node pools in an Automatic cluster.
+    long-summary: |
+      Bring-your-own VNet for an Automatic cluster requires three subnets supplied together:
+      `--system-node-subnet-id` (for the Managed System Pool), `--node-subnet-id` (this flag,
+      for user node pools), and `--apiserver-subnet-id` (for the control plane API server).
+      All three subnets must belong to the same VNet and can only be used with `--sku automatic`.
+  - name: --enable-hosted-system
+    type: bool
+    short-summary: (Automatic SKU) Explicitly opt in to a Managed System Pool for the Automatic cluster.
+    long-summary: |
+      Only valid with `--sku automatic`. Use this flag when you want to deterministically
+      request a Managed System Pool regardless of region defaults. It is also implied when
+      you supply the bring-your-own VNet subnet trio (`--system-node-subnet-id`,
+      `--node-subnet-id`, `--apiserver-subnet-id`).
   - name: --enable-private-cluster
     type: string
     short-summary: Enable private cluster.
@@ -1901,7 +1925,7 @@ parameters:
     short-summary: The OS Type. Linux or Windows.
   - name: --os-sku
     type: string
-    short-summary: The OS SKU of the agent node pool. Ubuntu, Ubuntu2204, Ubuntu2404, AzureLinux, AzureLinux3, or AzureContainerLinux for Linux. Windows2019 or Windows2022 for Windows.
+    short-summary: The OS SKU of the agent node pool. Ubuntu, Ubuntu2204, Ubuntu2404, AzureLinux, AzureLinux3, or AzureContainerLinux for Linux. Windows2019, Windows2022, or Windows2025 for Windows.
   - name: --enable-cluster-autoscaler -e
     type: bool
     short-summary: Enable cluster autoscaler.
@@ -2745,11 +2769,17 @@ helps["aks mesh enable"] = """
       - name: --root-cert-object-name
         type: string
         short-summary: Root cert object name in the Azure Keyvault.
+      - name: --proxy-redirection-mechanism
+        type: string
+        short-summary: Set the proxy redirection mechanism.
+        long-summary: Allowed values are "CNIChaining" which uses CNI plugins for traffic redirection, and "InitContainers" which uses privileged init containers.
     examples:
       - name: Enable Azure Service Mesh with selfsigned CA.
         text: az aks mesh enable --resource-group MyResourceGroup --name MyManagedCluster
       - name: Enable Azure Service Mesh with plugin CA.
         text: az aks mesh enable --resource-group MyResourceGroup --name MyManagedCluster --key-vault-id /subscriptions/00000/resourceGroups/foo/providers/Microsoft.KeyVault/vaults/foo --ca-cert-object-name my-ca-cert --ca-key-object-name my-ca-key --cert-chain-object-name my-cert-chain --root-cert-object-name my-root-cert
+      - name: Enable Azure Service Mesh with CNI chaining.
+        text: az aks mesh enable --resource-group MyResourceGroup --name MyManagedCluster --proxy-redirection-mechanism CNIChaining
 """
 
 helps["aks mesh disable"] = """
@@ -2880,6 +2910,24 @@ helps["aks mesh upgrade rollback"] = """
     examples:
       - name: Rollback Azure Service Mesh upgrade.
         text: az aks mesh upgrade rollback --resource-group MyResourceGroup --name MyManagedCluster
+"""
+
+helps['aks mesh proxy-redirection-mechanism'] = """
+    type: command
+    short-summary: Set the proxy redirection mechanism for Azure Service Mesh.
+    long-summary: >
+      This command sets the proxy redirection mechanism for Azure Service Mesh
+      on a cluster that already has the service mesh enabled.
+    parameters:
+      - name: --mechanism
+        type: string
+        short-summary: The proxy redirection mechanism.
+        long-summary: Allowed values are "CNIChaining" which uses CNI plugins for traffic redirection, and "InitContainers" which uses privileged init containers.
+    examples:
+      - name: Set proxy redirection mechanism to CNI chaining.
+        text: az aks mesh proxy-redirection-mechanism --resource-group MyResourceGroup --name MyManagedCluster --mechanism CNIChaining
+      - name: Set proxy redirection mechanism to init containers.
+        text: az aks mesh proxy-redirection-mechanism --resource-group MyResourceGroup --name MyManagedCluster --mechanism InitContainers
 """
 
 helps["aks approuting"] = """
