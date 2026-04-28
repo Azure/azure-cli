@@ -650,15 +650,15 @@ def set_keyvault(cmd,
 
 
 def set_snapshot_reference(cmd,
-                     key,
-                     snapshot_name,
-                     name=None,
-                     label=None,
-                     tags=None,
-                     yes=False,
-                     connection_string=None,
-                     auth_mode="key",
-                     endpoint=None):
+                           key,
+                           snapshot_name,
+                           name=None,
+                           label=None,
+                           tags=None,
+                           yes=False,
+                           connection_string=None,
+                           auth_mode="key",
+                           endpoint=None):
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     snapshot_ref_value = json.dumps({SnapshotReferenceConstants.SNAPSHOT_NAME_KEY: snapshot_name}, ensure_ascii=False)
