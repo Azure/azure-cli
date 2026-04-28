@@ -2012,7 +2012,7 @@ parameters:
           - "KataVmIsolation" for Kata.
   - name: --enable-artifact-streaming
     type: bool
-    short-summary: Enable artifact streaming for VirtualMachineScaleSets managed by a node pool, to speed up the cold-start of containers on a node through on-demand image loading. To use this feature, container images must also enable artifact streaming on ACR. If not specified, the default is false.
+    short-summary: Enable artifact streaming for VirtualMachineScaleSets managed by a node pool, to speed up the cold-start of containers on a node through on-demand image loading. This option is only valid for Linux nodepools. To use this feature, container images must also enable artifact streaming on ACR. If not specified, the default is false.
 
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
