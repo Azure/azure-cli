@@ -2988,7 +2988,6 @@ def aks_agentpool_add(
     gateway_prefix_size=None,
     # local DNS
     localdns_config=None,
-    # artifact streaming
     enable_artifact_streaming=False,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
@@ -3053,7 +3052,6 @@ def aks_agentpool_update(
     # local DNS
     localdns_config=None,
     gpu_driver=None,
-    # artifact streaming
     enable_artifact_streaming=False,
     disable_artifact_streaming=False,
 ):

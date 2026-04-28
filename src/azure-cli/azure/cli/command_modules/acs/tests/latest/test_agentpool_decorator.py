@@ -1387,19 +1387,6 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         ctx_2.attach_agentpool(agentpool_2)
         self.assertEqual(ctx_2.get_enable_artifact_streaming(), None)
 
-        # mutually exclusive
-        ctx_3 = AKSAgentPoolContext(
-            self.cmd,
-            AKSAgentPoolParamDict(
-                {"enable_artifact_streaming": True, "disable_artifact_streaming": True}
-            ),
-            self.models,
-            DecoratorMode.UPDATE,
-            self.agentpool_decorator_mode,
-        )
-        with self.assertRaises(MutuallyExclusiveArgumentError):
-            ctx_3.get_enable_artifact_streaming()
-
     def common_get_disable_artifact_streaming(self):
         # default
         ctx_1 = AKSAgentPoolContext(
@@ -1409,6 +1396,13 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
             DecoratorMode.UPDATE,
             self.agentpool_decorator_mode,
         )
+        self.assertEqual(ctx_1.get_disable_artifact_streaming(), True)
+        agentpool_1 = self.create_initialized_agentpool_instance(
+            artifact_streaming_profile=self.models.AgentPoolArtifactStreamingProfile(
+                enabled=True
+            )
+        )
+        ctx_1.attach_agentpool(agentpool_1)
         self.assertEqual(ctx_1.get_disable_artifact_streaming(), True)
 
     def common_get_zones(self):

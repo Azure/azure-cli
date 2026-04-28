@@ -1372,15 +1372,15 @@ class AKSAgentPoolContext(BaseAKSContext):
 
         if enable_artifact_streaming and self.get_disable_artifact_streaming():
             raise MutuallyExclusiveArgumentError(
-                'Cannot specify "--enable-artifact-streaming" and "--disable-artifact-streaming" at the same time.'
+                'Cannot specify both --enable-artifact-streaming and --disable-artifact-streaming.'
             )
         return enable_artifact_streaming
 
     def get_disable_artifact_streaming(self) -> bool:
         """Obtain the value of disable_artifact_streaming.
-
         :return: bool
         """
+
         return self.raw_param.get("disable_artifact_streaming")
 
     def get_zones(self) -> Union[List[str], None]:
@@ -2215,22 +2215,18 @@ class AKSAgentPoolAddDecorator:
             agentpool.gpu_profile = self.models.GPUProfile()
             agentpool.gpu_profile.driver = gpu_driver
 
-
         return agentpool
 
     def set_up_artifact_streaming(self, agentpool: AgentPool) -> AgentPool:
-        """Set up artifact streaming for the AgentPool object.
-
-        :return: the AgentPool object
-        """
+        """Set up artifact streaming property for the AgentPool object."""
         self._ensure_agentpool(agentpool)
 
         if self.context.get_enable_artifact_streaming():
             if agentpool.artifact_streaming_profile is None:
                 agentpool.artifact_streaming_profile = self.models.AgentPoolArtifactStreamingProfile()  # pylint: disable=no-member
             agentpool.artifact_streaming_profile.enabled = True
-
         return agentpool
+
     def set_up_agentpool_gateway_profile(self, agentpool: AgentPool) -> AgentPool:
         """Set up agentpool gateway profile for the AgentPool object.
 
@@ -2682,8 +2678,7 @@ class AKSAgentPoolUpdateDecorator:
         return agentpool
 
     def update_artifact_streaming(self, agentpool: AgentPool) -> AgentPool:
-        """Update artifact streaming for the AgentPool object.
-
+        """Update artifact streaming property for the AgentPool object.
         :return: the AgentPool object
         """
         self._ensure_agentpool(agentpool)
@@ -2697,7 +2692,6 @@ class AKSAgentPoolUpdateDecorator:
             if agentpool.artifact_streaming_profile is None:
                 agentpool.artifact_streaming_profile = self.models.AgentPoolArtifactStreamingProfile()  # pylint: disable=no-member
             agentpool.artifact_streaming_profile.enabled = False
-
         return agentpool
 
     def update_agentpool_profile_default(self, agentpools: List[AgentPool] = None) -> AgentPool:
