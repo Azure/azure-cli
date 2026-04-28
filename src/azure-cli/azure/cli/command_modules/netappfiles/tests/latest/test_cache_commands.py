@@ -8,7 +8,7 @@ import sys
 import time
 import unittest
 
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, live_only
 from azure.cli.testsdk.decorators import serial_test
 
 LOCATION = "eastus"
@@ -236,6 +236,10 @@ class AzureNetAppFilesCacheServiceScenarioTest(ScenarioTest):
         sys.stderr.write(block)
         sys.stderr.flush()
 
+    @live_only()
+    @unittest.skipUnless(
+        os.environ.get(INTERACTIVE_ENV_VAR) == "1",
+        "Requires manual on-prem (CVO) peering steps; set %s=1 to run." % INTERACTIVE_ENV_VAR)
     @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_cache_', additional_tags={'owner': 'cli_test'})
     def test_create_delete_cache(self):
@@ -336,6 +340,10 @@ class AzureNetAppFilesCacheServiceScenarioTest(ScenarioTest):
                               (account_name, pool_name)).get_output_in_json()
         assert len(cache_list) == 0
 
+    @live_only()
+    @unittest.skipUnless(
+        os.environ.get(INTERACTIVE_ENV_VAR) == "1",
+        "Requires manual on-prem (CVO) peering steps; set %s=1 to run." % INTERACTIVE_ENV_VAR)
     @unittest.skip('Cache Tests are failing due issues in the environment, no way to test until fixed re enable when fixed.')
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_cache_', additional_tags={'owner': 'cli_test'})
     def test_create_delete_cache_with_wait(self):
@@ -356,6 +364,10 @@ class AzureNetAppFilesCacheServiceScenarioTest(ScenarioTest):
                               (account_name, pool_name)).get_output_in_json()
         assert len(cache_list) == 0
 
+    @live_only()
+    @unittest.skipUnless(
+        os.environ.get(INTERACTIVE_ENV_VAR) == "1",
+        "Requires manual on-prem (CVO) peering steps; set %s=1 to run." % INTERACTIVE_ENV_VAR)
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_cache_', additional_tags={'owner': 'cli_test'})
     def test_list_caches(self):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
@@ -397,6 +409,10 @@ class AzureNetAppFilesCacheServiceScenarioTest(ScenarioTest):
     #   - `az netappfiles cache list-peering-passphrase`
     #   - `az netappfiles cache reset-smb-password`
 
+    @live_only()
+    @unittest.skipUnless(
+        os.environ.get(INTERACTIVE_ENV_VAR) == "1",
+        "Requires manual on-prem (CVO) peering steps; set %s=1 to run." % INTERACTIVE_ENV_VAR)
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_cache_', additional_tags={'owner': 'cli_test'})
     def test_cache_pool_change(self):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)
