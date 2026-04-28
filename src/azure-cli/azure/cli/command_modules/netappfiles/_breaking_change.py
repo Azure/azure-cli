@@ -4,8 +4,6 @@
 # --------------------------------------------------------------------------------------------
 from azure.cli.core.breaking_change import (
     register_argument_deprecate,
-    register_default_value_breaking_change,
-    register_other_breaking_change,
 )
 register_argument_deprecate('netappfiles volume create', '--is-default-quota-enabled',
                             redirect='netappfiles volume quota-rule')
