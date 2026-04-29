@@ -63,7 +63,7 @@ class PostgreSQLFlexibleServerTagsMgmtScenarioTest(ScenarioTest):
         revive_dropped_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
 
         # Create server with three tags.
-        self.cmd('postgres flexible-server create -g {} -n {} -l {} --tags {} --yes'
+        self.cmd('postgres flexible-server create -g {} -n {} -l {} --tags {} --public-access enabled --yes'
                  .format(resource_group, primary_server, location, initial_tags))
 
         # Validate that tags are added to the created server.
