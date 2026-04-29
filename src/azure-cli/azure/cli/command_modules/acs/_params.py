@@ -655,6 +655,12 @@ def load_arguments(self, _):
                 'by that action.'
             )
         )
+        c.argument(
+            "enable_app_routing_istio",
+            options_list=["--enable-app-routing-istio", "--enable-ari"],
+            action="store_true",
+            help="Enable Gateway API based ingress on App Routing via Istio"
+        )
 
     with self.argument_context('aks update') as c:
         # managed cluster paramerters
@@ -879,6 +885,18 @@ def load_arguments(self, _):
                 'It is strongly recommended to not do this unless there are idle nodes ready to take the pods evicted '
                 'by that action.'
             )
+        )
+        c.argument(
+            "enable_app_routing_istio",
+            options_list=["--enable-app-routing-istio", "--enable-ari"],
+            action="store_true",
+            help="Enable Gateway API based ingress on App Routing via Istio."
+        )
+        c.argument(
+            "disable_app_routing_istio",
+            options_list=["--disable-app-routing-istio", "--disable-ari"],
+            action="store_true",
+            help="Disable Gateway API based ingress on App Routing via Istio."
         )
     with self.argument_context('aks delete') as c:
         c.argument("if_match")
