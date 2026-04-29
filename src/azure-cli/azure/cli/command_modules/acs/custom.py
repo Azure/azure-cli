@@ -1042,6 +1042,8 @@ def aks_create(
     node_provisioning_default_pools=None,
     # app routing istio
     enable_app_routing_istio=False,
+    # gateway api
+    enable_gateway_api=False,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -1240,6 +1242,9 @@ def aks_update(
     # app routing istio
     enable_app_routing_istio=False,
     disable_app_routing_istio=False,
+    # gateway api
+    enable_gateway_api=False,
+    disable_gateway_api=False,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()

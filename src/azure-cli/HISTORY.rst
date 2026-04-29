@@ -3,6 +3,13 @@
 Release History
 ===============
 
+2.86.1
+++++++
+
+**AKS**
+
+* Hotfix: `az aks create/update`: Add `--enable-gateway-api` and `--disable-gateway-api` to manage Managed Gateway API installation (#33238)
+
 2.86.0
 ++++++
 
