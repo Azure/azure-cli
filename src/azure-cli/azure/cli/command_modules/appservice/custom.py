@@ -303,6 +303,15 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
             if name_validation.name_available:
                 site_config.app_settings.append(NameValuePair(name="WEBSITES_ENABLE_APP_SERVICE_STORAGE",
                                                               value="false"))
+                if container_registry_url:
+                    site_config.app_settings.append(NameValuePair(name="DOCKER_REGISTRY_SERVER_URL",
+                                                                  value=container_registry_url))
+                if container_registry_user:
+                    site_config.app_settings.append(NameValuePair(name="DOCKER_REGISTRY_SERVER_USERNAME",
+                                                                  value=container_registry_user))
+                if container_registry_password:
+                    site_config.app_settings.append(NameValuePair(name="DOCKER_REGISTRY_SERVER_PASSWORD",
+                                                                  value=container_registry_password))
         elif multicontainer_config_type and multicontainer_config_file:
             encoded_config_file = _get_linux_multicontainer_encoded_config_from_file(multicontainer_config_file)
             site_config.linux_fx_version = _format_fx_version(encoded_config_file, multicontainer_config_type)
@@ -4818,6 +4827,30 @@ def list_app_service_plans(cmd, resource_group_name=None):
     return plans
 
 
+def list_plan_skus(cmd, resource_group_name, name):
+    client = web_client_factory(cmd.cli_ctx)
+    return client.app_service_plans.get_server_farm_skus(resource_group_name, name)
+
+
+def list_plan_slots(cmd, resource_group_name, name):
+    client = web_client_factory(cmd.cli_ctx)
+    apps = list(client.app_service_plans.list_web_apps(resource_group_name, name))
+    results = []
+    for app in apps:
+        app_name = app.name
+        slots = list(client.web_apps.list_slots(resource_group_name, app_name))
+        for slot in slots:
+            slot_name = slot.id.split('/slots/')[-1] if slot.id and '/slots/' in slot.id else slot.name.split('/')[-1]
+            results.append({
+                'appName': app_name,
+                'slotName': slot_name,
+                'resourceGroup': resource_group_name,
+                'status': slot.state,
+                'defaultHostName': slot.default_host_name,
+            })
+    return results
+
+
 # TODO use zone_redundant field on ASP model when we switch to SDK version 5.0.0
 def _enable_zone_redundant(plan_def, sku_def, number_of_workers):
     plan_def.enable_additional_properties_sending()
@@ -6209,10 +6242,12 @@ def _get_url(cmd, resource_group_name, name, slot=None):
 def config_diagnostics(cmd, resource_group_name, name, level=None,
                        application_logging=None, web_server_logging=None,
                        docker_container_logging=None, detailed_error_messages=None,
-                       failed_request_tracing=None, slot=None):
+                       failed_request_tracing=None, slot=None,
+                       web_server_log_sas_url=None, web_server_log_retention=None):
     from azure.mgmt.web.models import (FileSystemApplicationLogsConfig, ApplicationLogsConfig,
                                        AzureBlobStorageApplicationLogsConfig, SiteLogsConfig,
                                        HttpLogsConfig, FileSystemHttpLogsConfig,
+                                       AzureBlobStorageHttpLogsConfig,
                                        EnabledConfig)
     client = web_client_factory(cmd.cli_ctx)
     # TODO: ensure we call get_site only once
@@ -6237,15 +6272,23 @@ def config_diagnostics(cmd, resource_group_name, name, level=None,
     http_logs = None
     server_logging_option = web_server_logging or docker_container_logging
     if server_logging_option:
-        # TODO: az blob storage log config currently not in use, will be impelemented later.
-        # Tracked as Issue: #4764 on Github
         filesystem_log_config = None
+        blob_log_config = None
         turned_on = server_logging_option != 'off'
         if server_logging_option in ['filesystem', 'off']:
             # 100 mb max log size, retention lasts 3 days. Yes we hard code it, portal does too
             filesystem_log_config = FileSystemHttpLogsConfig(retention_in_mb=100, retention_in_days=3,
                                                              enabled=turned_on)
-        http_logs = HttpLogsConfig(file_system=filesystem_log_config, azure_blob_storage=None)
+        if server_logging_option == 'azureblobstorage':
+            if not web_server_log_sas_url:
+                raise RequiredArgumentMissingError(
+                    '--web-server-log-sas-url is required when --web-server-logging is set to azureblobstorage.')
+            retention = web_server_log_retention if web_server_log_retention is not None else 3
+            blob_log_config = AzureBlobStorageHttpLogsConfig(
+                sas_url=web_server_log_sas_url,
+                retention_in_days=retention,
+                enabled=True)
+        http_logs = HttpLogsConfig(file_system=filesystem_log_config, azure_blob_storage=blob_log_config)
 
     detailed_error_messages_logs = (None if detailed_error_messages is None
                                     else EnabledConfig(enabled=detailed_error_messages))
@@ -6355,6 +6398,27 @@ def swap_slot(cmd, resource_group_name, webapp, slot, target_slot=None, preserve
     return None
 
 
+def copy_slot(cmd, resource_group_name, webapp, slot, target_slot=None):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    client = web_client_factory(cmd.cli_ctx)
+    target_slot = target_slot or 'production'
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    url = ("/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}"
+           "/slots/{}/slotcopy?api-version={}").format(
+               subscription_id, resource_group_name, webapp, slot,
+               client.DEFAULT_API_VERSION)
+    body = json.dumps({"targetSlot": target_slot, "siteConfig": {}})
+    response = send_raw_request(cmd.cli_ctx, method='post', url=url, body=body)
+    if response.status_code == 200:
+        return response.json() if response.text else None
+    if response.status_code == 202:
+        logger.warning("Slot copy operation accepted and is in progress. "
+                       "Content from slot '%s' is being copied to '%s'.",
+                       slot, target_slot)
+        return None
+    return response.json() if response.text else None
+
+
 def delete_slot(cmd, resource_group_name, webapp, slot):
     client = web_client_factory(cmd.cli_ctx)
     # TODO: once swagger finalized, expose other parameters like: delete_all_slots, etc...
@@ -6367,6 +6431,8 @@ def set_traffic_routing(cmd, resource_group_name, name, distribution):
     site = client.web_apps.get(resource_group_name, name)
     if not site:
         raise ResourceNotFoundError("'{}' app doesn't exist".format(name))
+    logger.warning('Traffic routing updates the site configuration, which may cause a brief restart. '
+                   'This is a known platform behavior.')
     configs = get_site_configs(cmd, resource_group_name, name)
     host_name_split = site.default_host_name.split('.', 1)
     host_name_suffix = '.' + host_name_split[1]
@@ -6620,6 +6686,51 @@ def delete_ssl_cert(cmd, resource_group_name, certificate_thumbprint):
         if webapp_cert.thumbprint == certificate_thumbprint:
             return client.certificates.delete(resource_group_name, webapp_cert.name)
     raise ResourceNotFoundError("Certificate for thumbprint '{}' not found".format(certificate_thumbprint))
+
+
+def upload_public_cert(cmd, resource_group_name, name, public_certificate_name,
+                       certificate_file, slot=None,
+                       public_certificate_location='CurrentUserMy'):
+    PublicCertificate = cmd.get_models('PublicCertificate')
+    client = web_client_factory(cmd.cli_ctx)
+    with open(certificate_file, 'rb') as f:
+        cert_contents = f.read()
+    import base64
+    cert_blob = base64.b64encode(cert_contents)
+    public_cert = PublicCertificate(
+        blob=cert_blob,
+        public_certificate_location=public_certificate_location
+    )
+    if slot:
+        return client.web_apps.create_or_update_public_certificate_slot(
+            resource_group_name, name, public_certificate_name, public_cert, slot)
+    return client.web_apps.create_or_update_public_certificate(
+        resource_group_name, name, public_certificate_name, public_cert)
+
+
+def list_public_certs(cmd, resource_group_name, name, slot=None):
+    client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        return client.web_apps.list_public_certificates_slot(resource_group_name, name, slot)
+    return client.web_apps.list_public_certificates(resource_group_name, name)
+
+
+def delete_public_cert(cmd, resource_group_name, name, public_certificate_name, slot=None):
+    client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        return client.web_apps.delete_public_certificate_slot(
+            resource_group_name, name, public_certificate_name, slot)
+    return client.web_apps.delete_public_certificate(
+        resource_group_name, name, public_certificate_name)
+
+
+def show_public_cert(cmd, resource_group_name, name, public_certificate_name, slot=None):
+    client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        return client.web_apps.get_public_certificate_slot(
+            resource_group_name, name, public_certificate_name, slot)
+    return client.web_apps.get_public_certificate(
+        resource_group_name, name, public_certificate_name)
 
 
 def import_ssl_cert(cmd, resource_group_name, key_vault, key_vault_certificate_name, name=None, certificate_name=None):

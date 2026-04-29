@@ -181,6 +181,12 @@ subscription than the app service environment, please use the resource ID for --
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                    configured_default='appserviceplan', id_part='name', local_context_attribute=None)
 
+    with self.argument_context('appservice plan list-skus') as c:
+        c.argument('name', id_part=None)
+
+    with self.argument_context('appservice plan list-slots') as c:
+        c.argument('name', id_part=None)
+
     with self.argument_context('appservice plan managed-instance install-script') as c:
         c.argument('name', arg_type=name_arg_type, help='The name of the app service plan',
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
@@ -315,7 +321,7 @@ subscription than the app service environment, please use the resource ID for --
                                         "Example script file: \"startup.sh\".")
         c.argument('sitecontainers_app', help="If true, a webapp which supports sitecontainers will be created", arg_type=get_three_state_flag())
         c.argument('deployment_container_image_name', options_list=['--deployment-container-image-name', '-i'], help='Container image name from container registry, e.g. publisher/image-name:tag', deprecate_info=c.deprecate(target='--deployment-container-image-name'))
-        c.argument('container_registry_url', options_list=['--container-registry-url'], help='The container registry server url')
+        c.argument('container_registry_url', options_list=['--container-registry-url', c.deprecate(target='--docker-registry-server-url', redirect='--container-registry-url')], help='The container registry server url')
         c.argument('container_image_name', options_list=['--container-image-name', '-c'],
                    help='The container custom image name and optionally the tag name (e.g., `<registry-name>/<image-name>:<tag>`). Note: if --container-registry-url is also provided, use `<image-name>:<tag>` without the registry name.')
         c.argument('container_registry_user', options_list=['--container-registry-user', '-s', c.deprecate(target='--docker-registry-server-user', redirect='--container-registry-user')], help='The container registry server username')
@@ -643,6 +649,21 @@ subscription than the app service environment, please use the resource ID for --
             c.argument('enable', options_list=['--enable-cd', '-e'], help='enable/disable continuous deployment',
                        arg_type=get_three_state_flag(return_label=True))
 
+    with self.argument_context('webapp config public-cert') as c:
+        c.argument('public_certificate_name', options_list=['--public-certificate-name', '--cert-name'],
+                   help='The name of the public certificate.')
+        c.argument('slot', options_list=['--slot', '-s'],
+                   help='The name of the slot. Default to the productions slot if not specified')
+    with self.argument_context('webapp config public-cert upload') as c:
+        c.argument('certificate_file', type=file_type,
+                   help='The filepath for the .cer or .crt public certificate file')
+        c.argument('public_certificate_location', options_list=['--certificate-location'],
+                   help='Location (certificate store) for the public certificate',
+                   arg_type=get_enum_type(['CurrentUserMy', 'LocalMachineMy', 'Unknown']),
+                   default='CurrentUserMy')
+    with self.argument_context('webapp config public-cert list') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+
     with self.argument_context('webapp config container') as c:
         c.argument('container_registry_url',
                    options_list=['--container-registry-url', '-r', c.deprecate(target='--docker-registry-server-url', redirect='--container-registry-url')],
@@ -733,6 +754,9 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('action',
                    help="swap types. use 'preview' to apply target slot's settings on the source slot first; use 'swap' to complete it; use 'reset' to reset the swap",
                    arg_type=get_enum_type(['swap', 'preview', 'reset']))
+    with self.argument_context('webapp deployment slot copy') as c:
+        c.argument('slot', help='the name of the source slot to copy from')
+        c.argument('target_slot', help="the name of the destination slot to copy to, default to 'production'")
 
     with self.argument_context('webapp deployment github-actions')as c:
         c.argument('name', arg_type=webapp_name_arg_type)
@@ -763,9 +787,18 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('level', help='logging level',
                    arg_type=get_enum_type(['error', 'warning', 'information', 'verbose']))
         c.argument('web_server_logging', help='configure Web server logging',
+                   arg_type=get_enum_type(['off', 'filesystem', 'azureblobstorage']))
+        c.argument('docker_container_logging',
+                   help="Configure gathering STDOUT and STDERR output from container. "
+                        "'filesystem' enables collection and storage on the web app's file system "
+                        "(accessible via log stream and log download). "
+                        "'off' disables container output collection. "
+                        "Applies to Linux web apps and Windows container web apps.",
                    arg_type=get_enum_type(['off', 'filesystem']))
-        c.argument('docker_container_logging', help='configure gathering STDOUT and STDERR output from container',
-                   arg_type=get_enum_type(['off', 'filesystem']))
+        c.argument('web_server_log_sas_url', options_list=['--web-server-log-sas-url'],
+                   help='SAS URL to an Azure Blob Storage container for web server log storage. Required when --web-server-logging is set to azureblobstorage.')
+        c.argument('web_server_log_retention', type=int, options_list=['--web-server-log-retention', '--retention'],
+                   help='Number of days to retain web server logs when using Azure Blob Storage. Default: 3.')
 
     with self.argument_context('webapp log tail') as c:
         c.argument('provider',
@@ -808,14 +841,6 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('webapp config connection-string') as c:
         c.argument('connection_string_type', options_list=['--connection-string-type', '-t'],
                    help='connection string type', arg_type=get_enum_type(ConnectionStringType))
-        c.argument('ids', options_list=['--ids'],
-                   help="One or more resource IDs (space delimited). If provided no other 'Resource Id' arguments should be specified.",
-                   required=True)
-        c.argument('resource_group', options_list=['--resource-group', '-g'],
-                   help='Name of resource group. You can configure the default group using `az configure --default-group=<name>`. If `--ids` is provided this should NOT be specified.')
-        c.argument('name', options_list=['--name', '-n'],
-                   help='Name of the web app. You can configure the default using `az configure --defaults web=<name>`. If `--ids` is provided this should NOT be specified.',
-                   local_context_attribute=LocalContextAttribute(name='web_name', actions=[LocalContextAction.GET]))
 
     with self.argument_context('webapp config storage-account') as c:
         c.argument('custom_id', options_list=['--custom-id', '-i'], help='name of the share configured within the web app')

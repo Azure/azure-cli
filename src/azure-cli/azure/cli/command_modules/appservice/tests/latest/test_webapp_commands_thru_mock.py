@@ -8,12 +8,12 @@ import os
 
 from azure.core.exceptions import HttpResponseError
 
-from azure.mgmt.web import WebSiteManagementClient
 from knack.util import CLIError
 from azure.cli.core.azclierror import (InvalidArgumentValueError,
                                        MutuallyExclusiveArgumentError,
                                        AzureResponseError,
-                                       ArgumentUsageError)
+                                       ArgumentUsageError,
+                                       RequiredArgumentMissingError)
 from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          update_git_token, add_hostname,
                                                          update_site_configs,
@@ -31,11 +31,14 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          list_snapshots,
                                                          restore_snapshot,
                                                          create_managed_ssl_cert,
+                                                         copy_slot,
                                                          add_github_actions,
                                                          update_app_settings,
                                                          update_application_settings_polling,
                                                          update_webapp,
-                                                         create_webapp)
+                                                         create_webapp,
+                                                         config_diagnostics,
+                                                         set_traffic_routing)
 
 # pylint: disable=line-too-long
 from azure.cli.core.profiles import ResourceType
@@ -54,8 +57,6 @@ def _get_test_cmd():
 
 
 class TestWebappMocked(unittest.TestCase):
-    def setUp(self):
-        self.client = WebSiteManagementClient(mock.MagicMock(), '123455678')
 
     @mock.patch('azure.cli.command_modules.appservice.custom._update_site_source_control_properties_for_gh_action')
     @mock.patch('azure.cli.command_modules.appservice.custom._add_publish_profile_to_github')
@@ -635,6 +636,68 @@ class TestWebappMocked(unittest.TestCase):
         mock_client.web_apps.update_slot_configuration_names.assert_called_once()
         mock_build.assert_called_once()
 
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
+    def test_config_diagnostics_blob_storage_requires_sas_url(self, mock_client_factory):
+        """Test that RequiredArgumentMissingError is raised when azureblobstorage is set without SAS URL."""
+        cmd_mock = _get_test_cmd()
+
+        mock_client = mock.MagicMock()
+        mock_client.web_apps.get.return_value = mock.MagicMock()
+        mock_client_factory.return_value = mock_client
+
+        with self.assertRaisesRegex(RequiredArgumentMissingError,
+                                    '--web-server-log-sas-url is required'):
+            config_diagnostics(cmd_mock, 'test-rg', 'test-app',
+                               web_server_logging='azureblobstorage')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
+    def test_config_diagnostics_blob_storage_with_sas_url(self, mock_client_factory, mock_site_op):
+        """Test that blob storage logging is configured when SAS URL is provided."""
+        cmd_mock = _get_test_cmd()
+
+        mock_client = mock.MagicMock()
+        mock_client.web_apps.get.return_value = mock.MagicMock()
+        mock_client_factory.return_value = mock_client
+        mock_site_op.return_value = mock.MagicMock()
+
+        sas_url = 'https://mystorageaccount.blob.core.windows.net/logs?sv=2021-06-08&sig=abc'
+        config_diagnostics(cmd_mock, 'test-rg', 'test-app',
+                           web_server_logging='azureblobstorage',
+                           web_server_log_sas_url=sas_url,
+                           web_server_log_retention=7)
+
+        mock_site_op.assert_called_once()
+        call_args = mock_site_op.call_args
+        site_log_config = call_args[0][5]
+        self.assertIsNotNone(site_log_config.http_logs)
+        self.assertIsNotNone(site_log_config.http_logs.azure_blob_storage)
+        self.assertEqual(site_log_config.http_logs.azure_blob_storage.sas_url, sas_url)
+        self.assertEqual(site_log_config.http_logs.azure_blob_storage.retention_in_days, 7)
+        self.assertTrue(site_log_config.http_logs.azure_blob_storage.enabled)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_site_configs')
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
+    def test_set_traffic_routing_warns_about_restart(self, mock_client_factory, mock_get_configs, mock_site_op):
+        """Test that set_traffic_routing emits a warning about potential restart."""
+        cmd_mock = _get_test_cmd()
+
+        mock_site = mock.MagicMock()
+        mock_site.default_host_name = 'myapp.azurewebsites.net'
+        mock_client = mock.MagicMock()
+        mock_client.web_apps.get.return_value = mock_site
+        mock_client_factory.return_value = mock_client
+
+        mock_configs = mock.MagicMock()
+        mock_configs.experiments.ramp_up_rules = []
+        mock_get_configs.return_value = mock_configs
+
+        import logging
+        with self.assertLogs('cli.azure.cli.command_modules.appservice.custom', level=logging.WARNING) as log:
+            set_traffic_routing(cmd_mock, 'test-rg', 'myapp', ['staging=50'])
+            self.assertTrue(any('restart' in msg.lower() for msg in log.output))
+
 
 class TestUpdateWebapp(unittest.TestCase):
 
@@ -701,6 +764,132 @@ class TestCreateAppServicePlanDefaults(unittest.TestCase):
         call_kwargs = sku_description_cls.call_args
         # The sku name should be normalized P0V3
         self.assertIn('P0V3', str(call_kwargs))
+
+
+class TestAppServicePlanFeatures(unittest.TestCase):
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    def test_list_plan_skus(self, client_factory_mock):
+        from azure.cli.command_modules.appservice.custom import list_plan_skus
+        mock_client = mock.MagicMock()
+        client_factory_mock.return_value = mock_client
+        expected = {'resourceType': 'serverfarms', 'skus': [{'name': 'S1'}]}
+        mock_client.app_service_plans.get_server_farm_skus.return_value = expected
+
+        cmd = _get_test_cmd()
+        result = list_plan_skus(cmd, 'rg', 'plan1')
+        self.assertEqual(result, expected)
+        mock_client.app_service_plans.get_server_farm_skus.assert_called_once_with('rg', 'plan1')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    def test_list_plan_slots(self, client_factory_mock):
+        from azure.cli.command_modules.appservice.custom import list_plan_slots
+        mock_client = mock.MagicMock()
+        client_factory_mock.return_value = mock_client
+
+        mock_app = mock.MagicMock()
+        mock_app.name = 'app1'
+        mock_client.app_service_plans.list_web_apps.return_value = [mock_app]
+
+        mock_slot = mock.MagicMock()
+        mock_slot.id = '/subscriptions/sub1/resourceGroups/rg/providers/Microsoft.Web/sites/app1/slots/staging'
+        mock_slot.name = 'app1/staging'
+        mock_slot.state = 'Running'
+        mock_slot.default_host_name = 'app1-staging.azurewebsites.net'
+        mock_client.web_apps.list_slots.return_value = [mock_slot]
+
+        cmd = _get_test_cmd()
+        result = list_plan_slots(cmd, 'rg', 'plan1')
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]['appName'], 'app1')
+        self.assertEqual(result[0]['slotName'], 'staging')
+        self.assertEqual(result[0]['status'], 'Running')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    def test_list_plan_slots_no_slots(self, client_factory_mock):
+        from azure.cli.command_modules.appservice.custom import list_plan_slots
+        mock_client = mock.MagicMock()
+        client_factory_mock.return_value = mock_client
+
+        mock_app = mock.MagicMock()
+        mock_app.name = 'app1'
+        mock_client.app_service_plans.list_web_apps.return_value = [mock_app]
+        mock_client.web_apps.list_slots.return_value = []
+
+        cmd = _get_test_cmd()
+        result = list_plan_slots(cmd, 'rg', 'plan1')
+        self.assertEqual(result, [])
+
+class TestCopySlot(unittest.TestCase):
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    def test_copy_slot_success(self, client_factory_mock, send_raw_request_mock):
+        """Test copy_slot sends correct REST call and returns on 200."""
+        client = mock.MagicMock()
+        client.DEFAULT_API_VERSION = '2024-04-01'
+        client_factory_mock.return_value = client
+        cmd_mock = _get_test_cmd()
+        cli_ctx_mock = mock.MagicMock()
+        cli_ctx_mock.data = {'subscription_id': 'sub1'}
+        cmd_mock.cli_ctx = cli_ctx_mock
+
+        response = mock.MagicMock()
+        response.status_code = 200
+        response.text = '{"status": "completed"}'
+        response.json.return_value = {"status": "completed"}
+        send_raw_request_mock.return_value = response
+
+        result = copy_slot(cmd_mock, 'rg1', 'myapp', 'staging', 'production')
+        self.assertEqual(result, {"status": "completed"})
+        send_raw_request_mock.assert_called_once()
+        call_args = send_raw_request_mock.call_args
+        self.assertIn('/slotcopy', call_args[1].get('url', '') or str(call_args))
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    def test_copy_slot_accepted(self, client_factory_mock, send_raw_request_mock):
+        """Test copy_slot returns None on 202 accepted."""
+        client = mock.MagicMock()
+        client.DEFAULT_API_VERSION = '2024-04-01'
+        client_factory_mock.return_value = client
+        cmd_mock = _get_test_cmd()
+        cli_ctx_mock = mock.MagicMock()
+        cli_ctx_mock.data = {'subscription_id': 'sub1'}
+        cmd_mock.cli_ctx = cli_ctx_mock
+
+        response = mock.MagicMock()
+        response.status_code = 202
+        response.text = ''
+        send_raw_request_mock.return_value = response
+
+        result = copy_slot(cmd_mock, 'rg1', 'myapp', 'staging')
+        self.assertIsNone(result)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    def test_copy_slot_default_target(self, client_factory_mock, send_raw_request_mock):
+        """Test copy_slot defaults target_slot to 'production'."""
+        client = mock.MagicMock()
+        client.DEFAULT_API_VERSION = '2024-04-01'
+        client_factory_mock.return_value = client
+        cmd_mock = _get_test_cmd()
+        cli_ctx_mock = mock.MagicMock()
+        cli_ctx_mock.data = {'subscription_id': 'sub1'}
+        cmd_mock.cli_ctx = cli_ctx_mock
+
+        response = mock.MagicMock()
+        response.status_code = 200
+        response.text = '{}'
+        response.json.return_value = {}
+        send_raw_request_mock.return_value = response
+
+        copy_slot(cmd_mock, 'rg1', 'myapp', 'staging')
+        call_args = send_raw_request_mock.call_args
+        body_arg = call_args[1].get('body', '')
+        import json
+        body = json.loads(body_arg)
+        self.assertEqual(body['targetSlot'], 'production')
 
 
 if __name__ == '__main__':

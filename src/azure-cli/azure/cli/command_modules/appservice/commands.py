@@ -203,6 +203,12 @@ def load_command_table(self, _):
         g.custom_command('import', 'import_ssl_cert', exception_handler=ex_handler_factory())
         g.custom_command('create', 'create_managed_ssl_cert', exception_handler=ex_handler_factory(), is_preview=True)
 
+    with self.command_group('webapp config public-cert') as g:
+        g.custom_command('upload', 'upload_public_cert')
+        g.custom_command('list', 'list_public_certs')
+        g.custom_show_command('show', 'show_public_cert')
+        g.custom_command('delete', 'delete_public_cert', confirmation=True)
+
     with self.command_group('webapp config backup') as g:
         g.custom_command('list', 'list_backups')
         g.custom_show_command('show', 'show_backup_configuration')
@@ -256,6 +262,7 @@ def load_command_table(self, _):
         g.custom_command('auto-swap', 'config_slot_auto_swap')
         g.custom_command('swap', 'swap_slot', exception_handler=ex_handler_factory())
         g.custom_command('create', 'create_webapp_slot', exception_handler=ex_handler_factory())
+        g.custom_command('copy', 'copy_slot', exception_handler=ex_handler_factory(), is_preview=True)
 
     with self.command_group('webapp deployment') as g:
         g.custom_command('list-publishing-profiles', 'list_publish_profiles')
@@ -313,6 +320,8 @@ def load_command_table(self, _):
                          exception_handler=ex_handler_factory(creating_plan=True), validator=validate_asp_create)
         g.command('delete', 'delete', confirmation=True)
         g.custom_command('list', 'list_app_service_plans')
+        g.custom_command('list-skus', 'list_plan_skus', is_preview=True)
+        g.custom_command('list-slots', 'list_plan_slots', is_preview=True)
         g.custom_show_command('show', 'show_plan')
         g.generic_update_command('update', setter_name='update_app_service_plan_with_progress', custom_func_name='update_app_service_plan',
                                  setter_arg_name='app_service_plan', setter_type=appservice_custom, supports_no_wait=True,
