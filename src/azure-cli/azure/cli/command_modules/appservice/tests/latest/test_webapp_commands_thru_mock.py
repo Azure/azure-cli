@@ -21,8 +21,10 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          view_in_browser,
                                                          sync_site_repo,
                                                          _match_host_names_from_cert,
+                                                         _is_json_settings,
                                                          bind_ssl_cert,
                                                          list_publish_profiles,
+                                                         list_ssl_certs,
                                                          show_app,
                                                          get_streaming_log,
                                                          download_historical_logs,
@@ -33,9 +35,12 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          create_managed_ssl_cert,
                                                          add_github_actions,
                                                          update_app_settings,
+                                                         update_connection_strings,
                                                          update_application_settings_polling,
                                                          update_webapp,
-                                                         create_webapp)
+                                                         create_webapp,
+                                                         add_azure_storage_account,
+                                                         update_azure_storage_account)
 
 # pylint: disable=line-too-long
 from azure.cli.core.profiles import ResourceType
@@ -500,6 +505,90 @@ class TestWebappMocked(unittest.TestCase):
         client.certificates.create_or_update.assert_called_once_with(name=host_name, resource_group_name=rg_name,
                                                                      certificate_envelope=cert_def)
 
+    @mock.patch('azure.cli.command_modules.appservice.custom._verify_hostname_binding', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
+    def test_create_managed_ssl_cert_with_domain_validation_method(self, generic_site_op_mock, client_factory_mock, verify_binding_mock):
+        webapp_name = 'someWebAppName'
+        rg_name = 'someRgName'
+        farm_id = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg1/providers/Microsoft.Web/serverfarms/farm1'
+        host_name = 'child.mycustomdomain.com'
+
+        client = mock.MagicMock()
+        client_factory_mock.return_value = client
+        cmd_mock = _get_test_cmd()
+        cli_ctx_mock = mock.MagicMock()
+        cli_ctx_mock.data = {'subscription_id': 'sub1'}
+        cmd_mock.cli_ctx = cli_ctx_mock
+        Site, Certificate = cmd_mock.get_models('Site', 'Certificate')
+        site = Site(name=webapp_name, location='westeurope')
+        site.server_farm_id = farm_id
+        generic_site_op_mock.return_value = site
+
+        verify_binding_mock.return_value = True
+        create_managed_ssl_cert(cmd_mock, rg_name, webapp_name, host_name, None,
+                                domain_validation_method='TXT')
+
+        cert_def = Certificate(location='westeurope', canonical_name=host_name,
+                               server_farm_id=farm_id, password='', domain_validation_method='TXT')
+        client.certificates.create_or_update.assert_called_once_with(name=host_name, resource_group_name=rg_name,
+                                                                     certificate_envelope=cert_def)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_settings_operation', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
+    def test_add_azure_storage_account_with_protocol(self, generic_site_op_mock, client_factory_mock, settings_op_mock):
+        rg_name = 'someRgName'
+        webapp_name = 'someWebAppName'
+
+        cmd_mock = _get_test_cmd()
+        AzureStorageInfoValue = cmd_mock.get_models('AzureStorageInfoValue')
+
+        storage_accounts = mock.MagicMock()
+        storage_accounts.properties = {}
+        generic_site_op_mock.return_value = storage_accounts
+
+        result_mock = mock.MagicMock()
+        result_mock.properties = {}
+        settings_op_mock.return_value = result_mock
+
+        add_azure_storage_account(cmd_mock, rg_name, webapp_name, custom_id='myId',
+                                  storage_type='AzureFiles', account_name='myAccount',
+                                  share_name='myShare', access_key='myKey',
+                                  mount_path='/mnt/share', protocol='Nfs')
+
+        expected = AzureStorageInfoValue(type='AzureFiles', account_name='myAccount',
+                                         share_name='myShare', access_key='myKey',
+                                         mount_path='/mnt/share', protocol='Nfs')
+        self.assertEqual(storage_accounts.properties['myId'].protocol, expected.protocol)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_settings_operation', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
+    def test_update_azure_storage_account_with_protocol(self, generic_site_op_mock, client_factory_mock, settings_op_mock):
+        rg_name = 'someRgName'
+        webapp_name = 'someWebAppName'
+
+        cmd_mock = _get_test_cmd()
+        AzureStorageInfoValue = cmd_mock.get_models('AzureStorageInfoValue')
+
+        existing_config = AzureStorageInfoValue(type='AzureFiles', account_name='myAccount',
+                                                share_name='myShare', access_key='myKey',
+                                                mount_path='/mnt/share', protocol='Smb')
+        storage_accounts = mock.MagicMock()
+        storage_accounts.properties = {'myId': existing_config}
+        generic_site_op_mock.return_value = storage_accounts
+
+        result_mock = mock.MagicMock()
+        result_mock.properties = {}
+        settings_op_mock.return_value = result_mock
+
+        update_azure_storage_account(cmd_mock, rg_name, webapp_name, custom_id='myId',
+                                     protocol='Nfs')
+
+        new_config = storage_accounts.properties['myId']
+        self.assertEqual(new_config.protocol, 'Nfs')
+
 
     def test_update_app_settings_error_handling_no_parameters(self):
         """Test that MutuallyExclusiveArgumentError is raised when neither settings nor slot_settings are provided."""
@@ -669,6 +758,172 @@ class TestUpdateWebapp(unittest.TestCase):
         result = update_webapp(cmd_mock, instance, platform_release_channel='Latest')
 
         self.assertEqual(result.additional_properties["properties"]["platformReleaseChannel"], "Latest")
+
+
+class TestIsJsonSettings(unittest.TestCase):
+    """Tests for _is_json_settings helper (Issue #30597)."""
+
+    def test_json_array_input_detected(self):
+        settings = ['[{"name":"conn1","value":"val1","type":"SQLAzure"}]']
+        self.assertTrue(_is_json_settings(settings))
+
+    def test_json_object_input_detected(self):
+        settings = ['{"name":"conn1","value":"val1","type":"SQLAzure"}']
+        self.assertTrue(_is_json_settings(settings))
+
+    def test_key_value_input_not_json(self):
+        settings = ['conn1=Server=tcp:myserver;Database=mydb']
+        self.assertFalse(_is_json_settings(settings))
+
+    def test_empty_input(self):
+        self.assertFalse(_is_json_settings(None))
+        self.assertFalse(_is_json_settings([]))
+
+    def test_multi_key_value_not_json(self):
+        settings = ['key1=value1', 'key2=value2']
+        self.assertFalse(_is_json_settings(settings))
+
+
+class TestUpdateConnectionStringsReplace(unittest.TestCase):
+    """Tests for update_connection_strings JSON replace-all semantics (Issue #30597)."""
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_settings_operation')
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
+    @mock.patch('azure.cli.command_modules.appservice.custom._redact_connection_strings')
+    def test_json_settings_replaces_all(self, mock_redact, mock_client_factory, mock_site_op, mock_settings_op):
+        """When settings are JSON, existing connection strings not in the JSON should be removed."""
+        from azure.mgmt.web.models import ConnStringValueTypePair
+        cmd_mock = _get_test_cmd()
+
+        existing_conn_strings = mock.MagicMock()
+        existing_conn_strings.properties = {
+            'OldConn': ConnStringValueTypePair(value='old_val', type='SQLAzure'),
+            'KeepConn': ConnStringValueTypePair(value='keep_val', type='Custom'),
+        }
+        mock_site_op.return_value = existing_conn_strings
+
+        result_mock = mock.MagicMock()
+        result_mock.properties = {}
+        mock_settings_op.return_value = result_mock
+        mock_redact.return_value = {}
+
+        client_mock = mock.MagicMock()
+        mock_client_factory.return_value = client_mock
+
+        # Simulate stale slot config names for connection strings that will be removed
+        slot_cfg_mock = mock.MagicMock()
+        slot_cfg_mock.connection_string_names = ['OldConn', 'KeepConn']
+        client_mock.web_apps.list_slot_configuration_names.return_value = slot_cfg_mock
+
+        json_settings = ['[{"name":"NewConn","value":"new_val","type":"SQLAzure"}]']
+        update_connection_strings(cmd_mock, 'rg', 'app', settings=json_settings)
+
+        # OldConn and KeepConn should have been cleared; only NewConn should remain
+        self.assertNotIn('OldConn', existing_conn_strings.properties)
+        self.assertNotIn('KeepConn', existing_conn_strings.properties)
+        self.assertIn('NewConn', existing_conn_strings.properties)
+
+        # Stale slot config names should be cleared in replace-all mode
+        client_mock.web_apps.update_slot_configuration_names.assert_called_once()
+        updated_cfg = client_mock.web_apps.update_slot_configuration_names.call_args[0][2]
+        self.assertEqual(updated_cfg.connection_string_names, [])
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_settings_operation')
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
+    @mock.patch('azure.cli.command_modules.appservice.custom._redact_connection_strings')
+    def test_key_value_settings_merges(self, mock_redact, mock_client_factory, mock_site_op, mock_settings_op):
+        """When settings are key=value, existing connection strings should be preserved (merge)."""
+        from azure.mgmt.web.models import ConnStringValueTypePair
+        cmd_mock = _get_test_cmd()
+
+        existing_conn_strings = mock.MagicMock()
+        existing_conn_strings.properties = {
+            'OldConn': ConnStringValueTypePair(value='old_val', type='SQLAzure'),
+        }
+        mock_site_op.return_value = existing_conn_strings
+
+        result_mock = mock.MagicMock()
+        result_mock.properties = {}
+        mock_settings_op.return_value = result_mock
+        mock_redact.return_value = {}
+
+        client_mock = mock.MagicMock()
+        mock_client_factory.return_value = client_mock
+
+        kv_settings = ['NewConn=new_val']
+        update_connection_strings(cmd_mock, 'rg', 'app', connection_string_type='SQLAzure', settings=kv_settings)
+
+        # OldConn should still be present (merge behavior)
+        self.assertIn('OldConn', existing_conn_strings.properties)
+        self.assertIn('NewConn', existing_conn_strings.properties)
+
+
+class TestListSslCertsPagination(unittest.TestCase):
+    """Tests for list_ssl_certs pagination behavior."""
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
+    def test_list_ssl_certs_returns_list(self, mock_client_factory):
+        """list_ssl_certs should return a list, not a pager object."""
+        cmd_mock = _get_test_cmd()
+        mock_client = mock.MagicMock()
+        mock_client_factory.return_value = mock_client
+
+        mock_pager = mock.MagicMock()
+        mock_pager.__iter__ = mock.MagicMock(return_value=iter(['cert1', 'cert2', 'cert3']))
+        mock_client.certificates.list_by_resource_group.return_value = mock_pager
+
+        result = list_ssl_certs(cmd_mock, 'test-rg')
+        self.assertIsInstance(result, list)
+        self.assertEqual(len(result), 3)
+
+
+class TestSlotIdParsing(unittest.TestCase):
+    """Tests for --ids slot resource ID parsing (Issue #26334)."""
+
+    def test_parse_resource_id_extracts_slot(self):
+        """Verify parse_resource_id returns slot name as child_name_1 from a slot resource ID."""
+        from azure.mgmt.core.tools import parse_resource_id
+
+        slot_rid = ('/subscriptions/00000000-0000-0000-0000-000000000000'
+                     '/resourceGroups/myRG/providers/Microsoft.Web'
+                     '/sites/mySite/slots/staging')
+        parsed = parse_resource_id(slot_rid)
+
+        self.assertEqual(parsed.get('name'), 'mySite')
+        self.assertEqual(parsed.get('child_name_1'), 'staging')
+        self.assertEqual(parsed.get('child_type_1'), 'slots')
+        self.assertEqual(parsed.get('resource_group'), 'myRG')
+
+    def test_parse_resource_id_no_slot(self):
+        """Verify parse_resource_id returns no child_name_1 for a production site resource ID."""
+        from azure.mgmt.core.tools import parse_resource_id
+
+        prod_rid = ('/subscriptions/00000000-0000-0000-0000-000000000000'
+                     '/resourceGroups/myRG/providers/Microsoft.Web'
+                     '/sites/mySite')
+        parsed = parse_resource_id(prod_rid)
+
+        self.assertEqual(parsed.get('name'), 'mySite')
+        self.assertIsNone(parsed.get('child_name_1'))
+
+    def test_slot_param_configured_with_id_part(self):
+        """Verify the slot argument in _params.py includes id_part='child_name_1'.
+
+        This ensures the --ids parameter correctly populates the slot argument
+        when a slot resource ID is provided."""
+        import inspect
+        from azure.cli.command_modules.appservice import _params
+
+        source = inspect.getsource(_params.load_arguments)
+        # Find the specific line that configures the slot argument with id_part
+        slot_lines = [line.strip() for line in source.splitlines()
+                      if "argument('slot'" in line and "id_part=" in line]
+        self.assertTrue(len(slot_lines) > 0,
+                        "Expected c.argument('slot', ..., id_part=...) in load_arguments")
+        self.assertTrue(any("child_name_1" in line for line in slot_lines),
+                        "slot argument must have id_part='child_name_1' for --ids slot parsing")
 
 
 class FakedResponse:  # pylint: disable=too-few-public-methods

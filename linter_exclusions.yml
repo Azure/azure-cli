@@ -2005,6 +2005,11 @@ functionapp config ssl delete:
     certificate_thumbprint:
       rule_exclusions:
       - option_length_too_long
+functionapp config ssl create:
+  parameters:
+    domain_validation_method:
+      rule_exclusions:
+      - missing_parameter_test_coverage
 functionapp config ssl import:
   parameters:
     key_vault_certificate_name:
@@ -3922,6 +3927,11 @@ webapp config ssl delete:
     certificate_thumbprint:
       rule_exclusions:
       - option_length_too_long
+webapp config ssl create:
+  parameters:
+    domain_validation_method:
+      rule_exclusions:
+      - missing_parameter_test_coverage
 webapp config ssl import:
   parameters:
     key_vault_certificate_name:
@@ -3932,6 +3942,16 @@ webapp config ssl unbind:
     certificate_thumbprint:
       rule_exclusions:
       - option_length_too_long
+webapp config storage-account add:
+  parameters:
+    protocol:
+      rule_exclusions:
+      - missing_parameter_test_coverage
+webapp config storage-account update:
+  parameters:
+    protocol:
+      rule_exclusions:
+      - missing_parameter_test_coverage
 webapp create:
   parameters:
     multicontainer_config_file:

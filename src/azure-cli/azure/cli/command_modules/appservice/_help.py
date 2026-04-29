@@ -1782,6 +1782,8 @@ short-summary: Create a Managed Certificate for a hostname in a webapp app.
 examples:
   - name: Create a Managed Certificate for cname.mycustomdomain.com.
     text: az webapp config ssl create --resource-group MyResourceGroup --name MyWebapp --hostname cname.mycustomdomain.com
+  - name: Create a Managed Certificate for a child DNS zone using domain validation method.
+    text: az webapp config ssl create --resource-group MyResourceGroup --name MyWebapp --hostname child.mycustomdomain.com --domain-validation-method TXT
 """
 
 helps['webapp config storage-account'] = """
@@ -1803,6 +1805,16 @@ examples:
           --share-name MyShare \\
           --access-key MyAccessKey \\
           --mount-path /path/to/mount
+  - name: Add an NFS Azure Files connection with Nfs protocol.
+    text: >
+        az webapp config storage-account add -g MyResourceGroup -n MyUniqueApp \\
+          --custom-id NfsId \\
+          --storage-type AzureFiles \\
+          --account-name MyStorageAccount \\
+          --share-name MyNfsShare \\
+          --access-key MyAccessKey \\
+          --mount-path /path/to/mount \\
+          --protocol Nfs
 """
 
 helps['webapp config storage-account delete'] = """
@@ -1834,6 +1846,11 @@ examples:
         az webapp config storage-account update -g MyResourceGroup -n MyUniqueApp \\
           --custom-id CustomId \\
           --mount-path /path/to/new/mount
+  - name: Update the protocol for an existing Azure storage account configuration.
+    text: >
+        az webapp config storage-account update -g MyResourceGroup -n MyUniqueApp \\
+          --custom-id CustomId \\
+          --protocol Nfs
   - name: Update an existing Azure storage account configuration on a web app.
     text: az webapp config storage-account update --access-key MyAccessKey --account-name MyAccount --custom-id CustomId --mount-path /path/to/new/mount --name MyUniqueApp --resource-group MyResourceGroup --share-name MyShare --storage-type AzureFiles
     crafted: true
