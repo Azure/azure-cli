@@ -47,6 +47,12 @@ examples:
       text: az login --identity --client-id 00000000-0000-0000-0000-000000000000
     - name: Log in with a user-assigned managed identity's resource ID.
       text: az login --identity --resource-id /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MyIdentity
+    - name: Log in and skip subscription discovery, fetching only a single subscription (fastest for tenants with many subscriptions).
+      text: az login --tenant TENANT_ID --skip-subscription-discovery --subscription SUBSCRIPTION_ID
+    - name: Log in and skip subscription discovery entirely for tenant-level operations only (e.g., 'az ad').
+      text: az login --tenant TENANT_ID --skip-subscription-discovery
+    - name: Log in with full discovery but set a specific subscription as the default.
+      text: az login --subscription SUBSCRIPTION_ID
 """
 
 helps['account'] = """

@@ -3,8 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.breaking_change import (register_argument_deprecate, register_command_group_deprecate,
-                                            register_other_breaking_change)
+from azure.cli.core.breaking_change import (
+    NextBreakingChangeWindow,
+    register_argument_deprecate,
+    register_command_group_deprecate,
+    register_other_breaking_change
+)
 
 # High availability command argument changes
 register_argument_deprecate('postgres flexible-server create', '--high-availability', redirect='--zonal-resiliency')
@@ -81,3 +85,12 @@ register_other_breaking_change('postgres flexible-server migration',
 
 # Replica command argument changes
 register_argument_deprecate('postgres flexible-server replica create', '--replica-name', redirect='--name')
+
+# Elastic cluster command argument deprecated and will be removed in the future. Today,
+# users must specify both --cluster-option ElasticCluster and --node-count to create an
+# elastic cluster. In the future, providing --node-count alone will imply an elastic cluster.
+register_argument_deprecate(command='postgres flexible-server create', argument='--cluster-option',
+                            message='Currently, to create an elastic cluster you must specify '
+                            '--cluster-option ElasticCluster together with --node-count. In the '
+                            'future, providing --node-count alone will imply an elastic cluster.',
+                            target_version=NextBreakingChangeWindow())
