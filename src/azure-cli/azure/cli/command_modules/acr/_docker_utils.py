@@ -126,6 +126,22 @@ def _handle_challenge_phase(login_server,
     return token_params
 
 
+def _acquire_aad_token_for_acr_exchange(cli_ctx, profile):
+    unknown_resource_markers = ('invalid_resource', 'AADSTS50001')
+    subscription = get_subscription_id(cli_ctx)
+    acr_resource = "https://{}.azure.net".format(ACR_AUDIENCE_RESOURCE_NAME)
+    try:
+        creds, _, tenant = profile.get_raw_token(subscription=subscription, resource=acr_resource)
+    except CLIError as e:
+        arm_resource = getattr(cli_ctx.cloud.endpoints, 'active_directory_resource_id', None)
+        if not arm_resource or not any(m in str(e) for m in unknown_resource_markers):
+            raise
+        logger.warning("AAD resource '%s' not registered in this cloud; falling back to ARM resource '%s' "
+                       "(expected in disconnected environments such as ALDO).", acr_resource, arm_resource)
+        creds, _, tenant = profile.get_raw_token(subscription=subscription, resource=arm_resource)
+    return creds, tenant
+
+
 def _get_aad_token_after_challenge(cli_ctx,
                                    token_params,
                                    login_server,
@@ -141,11 +157,7 @@ def _get_aad_token_after_challenge(cli_ctx,
     from azure.cli.core._profile import Profile
     profile = Profile(cli_ctx=cli_ctx)
 
-    scope = "https://{}.azure.net".format(ACR_AUDIENCE_RESOURCE_NAME)
-
-    # this might be a cross tenant scenario, so pass subscription to get_raw_token
-    creds, _, tenant = profile.get_raw_token(subscription=get_subscription_id(cli_ctx),
-                                             resource=scope)
+    creds, tenant = _acquire_aad_token_for_acr_exchange(cli_ctx, profile)
 
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
     content = {
