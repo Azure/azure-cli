@@ -13,7 +13,8 @@ from knack.util import CLIError
 from azure.cli.core.azclierror import (InvalidArgumentValueError,
                                        MutuallyExclusiveArgumentError,
                                        AzureResponseError,
-                                       ArgumentUsageError)
+                                       ArgumentUsageError,
+                                       ResourceNotFoundError)
 from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          update_git_token, add_hostname,
                                                          update_site_configs,
@@ -21,6 +22,7 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          view_in_browser,
                                                          sync_site_repo,
                                                          _match_host_names_from_cert,
+                                                         _update_host_name_ssl_state,
                                                          bind_ssl_cert,
                                                          list_publish_profiles,
                                                          show_app,
@@ -31,6 +33,8 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          list_snapshots,
                                                          restore_snapshot,
                                                          create_managed_ssl_cert,
+                                                         list_ssl_certs,
+                                                         delete_ssl_cert,
                                                          add_github_actions,
                                                          update_app_settings,
                                                          update_application_settings_polling,
@@ -501,6 +505,94 @@ class TestWebappMocked(unittest.TestCase):
                                                                      certificate_envelope=cert_def)
 
 
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._verify_hostname_binding', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
+    def test_create_managed_ssl_cert_wait_timeout_raises_error(self, generic_site_op_mock, client_factory_mock,
+                                                                verify_binding_mock, send_raw_request_mock):
+        """Test that --wait raises CLIError on timeout instead of returning None."""
+        webapp_name = 'someWebAppName'
+        rg_name = 'someRgName'
+        farm_id = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg1/providers/Microsoft.Web/serverfarms/farm1'
+        host_name = 'www.contoso.com'
+
+        client = mock.MagicMock()
+        client_factory_mock.return_value = client
+        cmd_mock = _get_test_cmd()
+        cli_ctx_mock = mock.MagicMock()
+        cli_ctx_mock.data = {'subscription_id': 'sub1'}
+        cmd_mock.cli_ctx = cli_ctx_mock
+        Site, Certificate = cmd_mock.get_models('Site', 'Certificate')
+        site = Site(name=webapp_name, location='westeurope')
+        site.server_farm_id = farm_id
+        generic_site_op_mock.return_value = site
+        verify_binding_mock.return_value = True
+
+        # Simulate 202 with Location header
+        ex_response = mock.MagicMock()
+        ex_response.status_code = 202
+        ex_response.headers = {'Location': 'https://polling-url'}
+        api_exception = Exception('accepted')
+        api_exception.response = ex_response
+        client.certificates.create_or_update.side_effect = api_exception
+
+        # Polling always returns 202 (never completes)
+        poll_response = mock.MagicMock()
+        poll_response.status_code = 202
+        send_raw_request_mock.return_value = poll_response
+
+        # With wait=True and mocked time to simulate immediate timeout
+        with mock.patch('azure.cli.command_modules.appservice.custom.time') as time_mock:
+            time_mock.time.side_effect = [0, 999999]  # Start, then past timeout
+            time_mock.sleep = mock.MagicMock()
+            with self.assertRaises(CLIError):
+                create_managed_ssl_cert(cmd_mock, rg_name, webapp_name, host_name, None, wait=True)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._verify_hostname_binding', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
+    def test_create_managed_ssl_cert_no_wait_returns_none(self, generic_site_op_mock, client_factory_mock,
+                                                           verify_binding_mock, send_raw_request_mock):
+        """Test that without --wait, timeout returns None with a warning (default behavior)."""
+        webapp_name = 'someWebAppName'
+        rg_name = 'someRgName'
+        farm_id = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg1/providers/Microsoft.Web/serverfarms/farm1'
+        host_name = 'www.contoso.com'
+
+        client = mock.MagicMock()
+        client_factory_mock.return_value = client
+        cmd_mock = _get_test_cmd()
+        cli_ctx_mock = mock.MagicMock()
+        cli_ctx_mock.data = {'subscription_id': 'sub1'}
+        cmd_mock.cli_ctx = cli_ctx_mock
+        Site, Certificate = cmd_mock.get_models('Site', 'Certificate')
+        site = Site(name=webapp_name, location='westeurope')
+        site.server_farm_id = farm_id
+        generic_site_op_mock.return_value = site
+        verify_binding_mock.return_value = True
+
+        # Simulate 202 with Location header
+        ex_response = mock.MagicMock()
+        ex_response.status_code = 202
+        ex_response.headers = {'Location': 'https://polling-url'}
+        api_exception = Exception('accepted')
+        api_exception.response = ex_response
+        client.certificates.create_or_update.side_effect = api_exception
+
+        # Polling always returns 202
+        poll_response = mock.MagicMock()
+        poll_response.status_code = 202
+        send_raw_request_mock.return_value = poll_response
+
+        # Without wait (default), should return None, not raise
+        with mock.patch('azure.cli.command_modules.appservice.custom.time') as time_mock:
+            time_mock.time.side_effect = [0, 999999]
+            time_mock.sleep = mock.MagicMock()
+            result = create_managed_ssl_cert(cmd_mock, rg_name, webapp_name, host_name, None, wait=False)
+            self.assertIsNone(result)
+
     def test_update_app_settings_error_handling_no_parameters(self):
         """Test that MutuallyExclusiveArgumentError is raised when neither settings nor slot_settings are provided."""
         cmd_mock = _get_test_cmd()
@@ -671,6 +763,61 @@ class TestUpdateWebapp(unittest.TestCase):
         self.assertEqual(result.additional_properties["properties"]["platformReleaseChannel"], "Latest")
 
 
+class TestUpdateHostNameSslState(unittest.TestCase):
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
+    def test_update_host_name_ssl_state_passes_full_site(self, generic_site_op_mock):
+        """Test that _update_host_name_ssl_state passes the full Site object (not a partial one)
+        to begin_create_or_update, preserving policy-sensitive fields like https_only."""
+        cmd_mock = _get_test_cmd()
+        Site, HostNameSslState, SslState = cmd_mock.get_models('Site', 'HostNameSslState', 'SslState')
+
+        webapp = Site(name='mySite', location='eastus', tags={'env': 'prod'})
+        webapp.https_only = True
+        webapp.host_name_ssl_states = [
+            HostNameSslState(name='existing.contoso.com',
+                             ssl_state=SslState.sni_enabled,
+                             thumbprint='EXISTINGTHUMB')
+        ]
+
+        _update_host_name_ssl_state(cmd_mock, 'myRg', 'mySite', webapp,
+                                    'www.contoso.com', SslState.sni_enabled, 'NEWTHUMB')
+
+        generic_site_op_mock.assert_called_once()
+        call_args = generic_site_op_mock.call_args
+        passed_site = call_args[0][5]  # (cli_ctx, rg, name, op, slot, site)
+
+        # The passed object should be the original webapp, preserving all fields
+        self.assertTrue(passed_site.https_only,
+                        "https_only must be preserved to avoid Azure Policy denial")
+        self.assertEqual(passed_site.location, 'eastus')
+        self.assertEqual(passed_site.tags, {'env': 'prod'})
+
+        # host_name_ssl_states should contain only the binding being updated
+        self.assertEqual(len(passed_site.host_name_ssl_states), 1)
+        ssl_state = passed_site.host_name_ssl_states[0]
+        self.assertEqual(ssl_state.name, 'www.contoso.com')
+        self.assertEqual(ssl_state.thumbprint, 'NEWTHUMB')
+        self.assertTrue(ssl_state.to_update)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
+    def test_update_host_name_ssl_state_with_slot(self, generic_site_op_mock):
+        """Test that slot parameter is correctly forwarded."""
+        cmd_mock = _get_test_cmd()
+        Site, SslState = cmd_mock.get_models('Site', 'SslState')
+        webapp = Site(name='mySite', location='westus')
+
+        _update_host_name_ssl_state(cmd_mock, 'myRg', 'mySite', webapp,
+                                    'www.contoso.com', SslState.sni_enabled, 'THUMB', slot='staging')
+
+        call_args = generic_site_op_mock.call_args
+        # slot is the 5th positional arg (index 4) after cli_ctx, rg, name, operation_name
+        self.assertEqual(call_args[0][4], 'staging')
+        # site is the 6th positional arg (index 5); verify it has the expected properties
+        site_arg = call_args[0][5]
+        self.assertEqual(site_arg.name, webapp.name)
+        self.assertEqual(site_arg.location, webapp.location)
+
+
 class FakedResponse:  # pylint: disable=too-few-public-methods
     def __init__(self, status_code):
         self.status_code = status_code
@@ -701,6 +848,114 @@ class TestCreateAppServicePlanDefaults(unittest.TestCase):
         call_kwargs = sku_description_cls.call_args
         # The sku name should be normalized P0V3
         self.assertIn('P0V3', str(call_kwargs))
+
+
+class _FakePagedIterator:
+    """Simulates an Azure SDK paged iterator that yields items across multiple pages.
+
+    Unlike a plain list or iter(), this class mimics the SDK behavior where
+    items are fetched page-by-page via continuation tokens. The pages_fetched
+    property tracks how many pages have been consumed, allowing tests to verify
+    both full-consumption (list_ssl_certs) and early-break (delete, bind) behavior.
+    """
+
+    def __init__(self, pages):
+        self._pages = pages
+        self._page_fetch_count = 0
+
+    def __iter__(self):
+        for page in self._pages:
+            self._page_fetch_count += 1
+            yield from page
+
+    @property
+    def pages_fetched(self):
+        return self._page_fetch_count
+
+
+def _make_cert(name, thumbprint=''):
+    cert = mock.MagicMock()
+    cert.name = name
+    cert.thumbprint = thumbprint
+    return cert
+
+
+class TestSSLCertPagination(unittest.TestCase):
+    """Tests for SSL certificate pagination fix (#29403, #28722, #27950)."""
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    def test_list_ssl_certs_returns_all_pages(self, client_factory_mock):
+        """Ensure list_ssl_certs fully consumes the pager and returns a concrete list."""
+        cmd_mock = _get_test_cmd()
+
+        page1 = [_make_cert('cert1'), _make_cert('cert2')]
+        page2 = [_make_cert('cert3')]
+        pager = _FakePagedIterator([page1, page2])
+
+        client = mock.MagicMock()
+        client_factory_mock.return_value = client
+        client.certificates.list_by_resource_group.return_value = pager
+
+        result = list_ssl_certs(cmd_mock, 'myRG')
+
+        # Must be a concrete list (not a lazy iterator) so the CLI framework
+        # can serialize all results, and must contain items from every page.
+        self.assertIsInstance(result, list)
+        self.assertEqual(len(result), 3)
+        self.assertEqual(pager.pages_fetched, 2)
+        client.certificates.list_by_resource_group.assert_called_once_with('myRG')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    def test_delete_ssl_cert_finds_cert_beyond_first_page(self, client_factory_mock):
+        """Ensure delete_ssl_cert can find a cert on a later page."""
+        cmd_mock = _get_test_cmd()
+
+        # Target cert is on page 2 — would be missed without full pagination
+        page1 = [_make_cert(f'cert{i}', f'THUMB{i:04d}') for i in range(50)]
+        page2 = [_make_cert(f'cert{i}', f'THUMB{i:04d}') for i in range(50, 100)]
+        pager = _FakePagedIterator([page1, page2])
+
+        client = mock.MagicMock()
+        client_factory_mock.return_value = client
+        client.certificates.list_by_resource_group.return_value = pager
+
+        delete_ssl_cert(cmd_mock, 'myRG', 'THUMB0099')
+
+        self.assertEqual(pager.pages_fetched, 2)
+        client.certificates.delete.assert_called_once_with('myRG', 'cert99')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    def test_delete_ssl_cert_early_break_skips_remaining_pages(self, client_factory_mock):
+        """Ensure delete_ssl_cert stops iterating once the cert is found (lazy)."""
+        cmd_mock = _get_test_cmd()
+
+        page1 = [_make_cert('cert0', 'TARGET')]
+        page2 = [_make_cert('cert1', 'OTHER')]
+        pager = _FakePagedIterator([page1, page2])
+
+        client = mock.MagicMock()
+        client_factory_mock.return_value = client
+        client.certificates.list_by_resource_group.return_value = pager
+
+        delete_ssl_cert(cmd_mock, 'myRG', 'TARGET')
+
+        # Only page 1 should be fetched — early break avoids page 2
+        self.assertEqual(pager.pages_fetched, 1)
+        client.certificates.delete.assert_called_once_with('myRG', 'cert0')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    def test_delete_ssl_cert_not_found_raises_error(self, client_factory_mock):
+        """Ensure delete_ssl_cert raises ResourceNotFoundError for missing thumbprint."""
+        cmd_mock = _get_test_cmd()
+
+        pager = _FakePagedIterator([[_make_cert('cert1', 'AAAA')]])
+
+        client = mock.MagicMock()
+        client_factory_mock.return_value = client
+        client.certificates.list_by_resource_group.return_value = pager
+
+        with self.assertRaises(ResourceNotFoundError):
+            delete_ssl_cert(cmd_mock, 'myRG', 'NONEXISTENT')
 
 
 if __name__ == '__main__':

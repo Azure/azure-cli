@@ -534,6 +534,9 @@ subscription than the app service environment, please use the resource ID for --
             c.argument('hostname', help='The custom domain name')
             c.argument('name', options_list=['--name', '-n'], help='Name of the web app.')
             c.argument('resource-group', options_list=['--resource-group', '-g'], help='Name of resource group.')
+            c.argument('wait', options_list=['--wait'], action='store_true', default=False,
+                       help='Wait up to 10 minutes for the certificate to be created. '
+                            'Returns an error if creation times out instead of silently returning.')
         with self.argument_context(scope + ' config hostname') as c:
             c.argument('hostname', completer=get_hostname_completion_list,
                        help="hostname assigned to the site, such as custom domains", id_part='child_name_1')

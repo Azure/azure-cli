@@ -6605,7 +6605,7 @@ def _get_cert(certificate_password, certificate_file):
 
 def list_ssl_certs(cmd, resource_group_name):
     client = web_client_factory(cmd.cli_ctx)
-    return client.certificates.list_by_resource_group(resource_group_name)
+    return list(client.certificates.list_by_resource_group(resource_group_name))
 
 
 def show_ssl_cert(cmd, resource_group_name, certificate_name):
@@ -6615,8 +6615,7 @@ def show_ssl_cert(cmd, resource_group_name, certificate_name):
 
 def delete_ssl_cert(cmd, resource_group_name, certificate_thumbprint):
     client = web_client_factory(cmd.cli_ctx)
-    webapp_certs = client.certificates.list_by_resource_group(resource_group_name)
-    for webapp_cert in webapp_certs:
+    for webapp_cert in client.certificates.list_by_resource_group(resource_group_name):
         if webapp_cert.thumbprint == certificate_thumbprint:
             return client.certificates.delete(resource_group_name, webapp_cert.name)
     raise ResourceNotFoundError("Certificate for thumbprint '{}' not found".format(certificate_thumbprint))
@@ -6705,7 +6704,7 @@ def import_ssl_cert(cmd, resource_group_name, key_vault, key_vault_certificate_n
                                                 certificate_envelope=kv_cert_def)
 
 
-def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None, certificate_name=None):
+def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None, certificate_name=None, wait=False):
     Certificate = cmd.get_models('Certificate')
     hostname = hostname.lower()
     client = web_client_factory(cmd.cli_ctx)
@@ -6742,7 +6741,8 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None,
         poll_url = ex.response.headers['Location'] if 'Location' in ex.response.headers else None
         if ex.response.status_code == 202 and poll_url:
             r = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
-            poll_timeout = time.time() + 60 * 2  # 2 minute timeout
+            poll_timeout_minutes = 10 if wait else 2
+            poll_timeout = time.time() + 60 * poll_timeout_minutes
 
             while r.status_code != 200 and time.time() < poll_timeout:
                 time.sleep(5)
@@ -6753,6 +6753,11 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None,
                     return r.json()
                 except ValueError:
                     return r.text
+            if wait:
+                raise CLIError("Managed Certificate creation for '{}' timed out after {} minutes. "
+                               "Check status with 'az webapp config ssl show -g {} "
+                               "--certificate-name {}'.".format(hostname, poll_timeout_minutes,
+                                                                resource_group_name, certificate_name))
             logger.warning("Managed Certificate creation in progress. Please use the command "
                            "'az webapp config ssl show -g %s --certificate-name %s' "
                            " to view your certificate once it is created", resource_group_name, certificate_name)
@@ -6787,40 +6792,43 @@ def _check_service_principal_permissions(cmd, resource_group_name, key_vault_nam
 
 def _update_host_name_ssl_state(cmd, resource_group_name, webapp_name, webapp,
                                 host_name, ssl_state, thumbprint, slot=None):
-    Site, HostNameSslState = cmd.get_models('Site', 'HostNameSslState')
-    updated_webapp = Site(host_name_ssl_states=[HostNameSslState(name=host_name,
-                                                                 ssl_state=ssl_state,
-                                                                 thumbprint=thumbprint,
-                                                                 to_update=True)],
-                          location=webapp.location, tags=webapp.tags)
+    HostNameSslState = cmd.get_models('HostNameSslState')
+    webapp.host_name_ssl_states = [HostNameSslState(name=host_name,
+                                                    ssl_state=ssl_state,
+                                                    thumbprint=thumbprint,
+                                                    to_update=True)]
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp_name, 'begin_create_or_update',
-                                   slot, updated_webapp)
+                                   slot, webapp)
 
 
 def _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint, ssl_type, hostname, slot=None):
     client = web_client_factory(cmd.cli_ctx)
-    webapp = client.web_apps.get(resource_group_name, name)
+    if slot:
+        webapp = client.web_apps.get_slot(resource_group_name, name, slot)
+    else:
+        webapp = client.web_apps.get(resource_group_name, name)
     if not webapp:
         raise ResourceNotFoundError("'{}' app doesn't exist".format(name))
 
     cert_resource_group_name = parse_resource_id(webapp.server_farm_id)['resource_group']
-    webapp_certs = client.certificates.list_by_resource_group(cert_resource_group_name)
 
     found_cert = None
     # search for a cert that matches in the app service plan's RG
-    for webapp_cert in webapp_certs:
+    for webapp_cert in client.certificates.list_by_resource_group(cert_resource_group_name):
         if webapp_cert.thumbprint == certificate_thumbprint:
             found_cert = webapp_cert
+            break
     # search for a cert that matches in the webapp's RG
     if not found_cert:
-        webapp_certs = client.certificates.list_by_resource_group(resource_group_name)
-        for webapp_cert in webapp_certs:
+        for webapp_cert in client.certificates.list_by_resource_group(resource_group_name):
             if webapp_cert.thumbprint == certificate_thumbprint:
                 found_cert = webapp_cert
+                break
     # search for a cert that matches in the subscription, filtering on the serverfarm
     if not found_cert:
-        sub_certs = client.certificates.list(filter=f"ServerFarmId eq '{webapp.server_farm_id}'")
-        found_cert = next(iter([c for c in sub_certs if c.thumbprint == certificate_thumbprint]), None)
+        found_cert = next((c for c in client.certificates.list(
+            filter=f"ServerFarmId eq '{webapp.server_farm_id}'")
+            if c.thumbprint == certificate_thumbprint), None)
     if found_cert:
         if not hostname:
             if len(found_cert.host_names) == 1 and not found_cert.host_names[0].startswith('*'):
