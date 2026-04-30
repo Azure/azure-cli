@@ -257,12 +257,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             help="The availability zone information of the standby server when high availability is enabled."
         )
 
-        high_availability_arg_type = CLIArgumentType(
-            arg_type=get_enum_type(['ZoneRedundant', 'SameZone', 'Disabled']),
-            options_list=['--high-availability'],
-            help='Enable (ZoneRedundant or SameZone) or disable high availability feature.'
-        )
-
         zonal_resiliency_arg_type = CLIArgumentType(
             arg_type=get_enum_type(['Enabled', 'Disabled']),
             options_list=['--zonal-resiliency'],
@@ -421,7 +415,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('location', arg_type=get_location_type(self.cli_ctx))
             c.argument('administrator_login', default=generate_username(), arg_type=administrator_login_arg_type)
             c.argument('administrator_login_password', arg_type=administrator_login_password_arg_type)
-            c.argument('high_availability', arg_type=high_availability_arg_type, default="Disabled")
             c.argument('public_access', arg_type=public_access_create_arg_type)
             c.argument('vnet', arg_type=vnet_arg_type)
             c.argument('vnet_address_prefix', arg_type=vnet_address_prefix_arg_type)
@@ -501,7 +494,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('sku_name', arg_type=sku_name_arg_type)
             c.argument('storage_gb', arg_type=storage_gb_arg_type)
             c.argument('standby_availability_zone', arg_type=standby_availability_zone_arg_type)
-            c.argument('high_availability', arg_type=high_availability_arg_type)
             c.argument('byok_key', arg_type=key_arg_type)
             c.argument('byok_identity', arg_type=identity_arg_type)
             c.argument('backup_byok_identity', arg_type=backup_identity_arg_type)

@@ -35,11 +35,6 @@ for network_command in (
         'postgres flexible-server revive-dropped'):
     _register_network_resource_breaking_change(network_command)
 
-
-# High availability command argument changes
-register_argument_deprecate('postgres flexible-server create', '--high-availability', redirect='--zonal-resiliency')
-register_argument_deprecate('postgres flexible-server update', '--high-availability', redirect='--zonal-resiliency')
-
 # Index Tuning command group renamed to Autonomous Tuning as the feature has expanded to
 # include more types of recommendations beyond just index tuning
 register_command_group_deprecate(command_group='postgres flexible-server index-tuning',
