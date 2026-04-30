@@ -2768,8 +2768,9 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         if enable_cnl and (not acns_enabled or not monitoring_enabled or not cilium_enabled):
             raise InvalidArgumentValueError(
-                "Container network logs requires ACNS to be enabled, the monitoring addon to be enabled, "
-                "and the cilium network dataplane."
+                "Container network logs require Advanced Container Networking Services to be enabled. "
+                "Activate this service through the portal or use the CLI with --enable-acns flag. "
+                "Additionally, the monitoring addon must be enabled and the cilium network dataplane is required."
             )
         enable_cnl = bool(enable_cnl) if enable_cnl is not None else False
         disable_cnl = bool(disable_cnl) if disable_cnl is not None else False
