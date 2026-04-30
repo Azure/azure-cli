@@ -309,14 +309,11 @@ def load_command_table(self, _):
                          transform=DeploymentOutputLongRunningOperation(self.cli_ctx, 'Starting vmss create'),
                          supports_no_wait=True, table_transformer=deployment_validate_table_format,
                          validator=process_vmss_create_namespace, exception_handler=handle_template_based_exception)
-        g.custom_show_command('show', 'get_vmss_by_aaz', table_transformer=get_vmss_table_output_transformer(self, False))
-        g.generic_update_command('update', getter_name='get_vmss_modified_by_aaz', setter_name='update_vmss', supports_no_wait=True, command_type=compute_custom, validator=validate_vmss_update_namespace)
-        g.wait_command('wait', getter_name='get_vmss_by_aaz', getter_type=compute_custom)
+        g.custom_command('deallocate', 'deallocate_vmss', supports_no_wait=True)
+        g.custom_command('get-instance-view', 'get_vmss_instance_view', table_transformer='{ProvisioningState:statuses[0].displayStatus, PowerState:statuses[1].displayStatus}')
         g.custom_command('identity assign', 'assign_vmss_identity', validator=process_assign_identity_namespace)
         g.custom_command('identity remove', 'remove_vmss_identity', validator=process_remove_identity_namespace, is_preview=True)
         g.custom_show_command('identity show', 'show_vmss_identity')
-        g.custom_command('deallocate', 'deallocate_vmss', supports_no_wait=True)
-        g.custom_command('get-instance-view', 'get_vmss_instance_view', table_transformer='{ProvisioningState:statuses[0].displayStatus, PowerState:statuses[1].displayStatus}')
         g.custom_command('list-instance-connection-info', 'list_vmss_instance_connection_info')
         g.custom_command('list-instance-public-ips', 'list_vmss_instance_public_ips')
         g.custom_command('list-instances', 'get_instances_list')
@@ -324,19 +321,11 @@ def load_command_table(self, _):
         g.custom_command('restart', 'restart_vmss', supports_no_wait=True)
         g.custom_command('scale', 'scale_vmss', supports_no_wait=True)
         g.custom_command('set-orchestration-service-state', 'set_orchestration_service_state', supports_no_wait=True)
-        g.custom_command('stop', 'stop_vmss', supports_no_wait=True, validator=process_vm_vmss_stop)
-
-    with self.command_group('vmss application', operation_group='virtual_machine_scale_sets') as g:
-        g.custom_command('set', 'set_vmss_applications', validator=process_set_applications_namespace)
-        g.custom_command('list', 'list_vmss_applications')
-
-    with self.command_group('vmss', compute_vmss_sdk, operation_group='virtual_machine_scale_sets') as g:
-        g.custom_command('get-instance-view', 'get_vmss_instance_view', table_transformer='{ProvisioningState:statuses[0].displayStatus, PowerState:statuses[1].displayStatus}')
-        g.custom_command('create', 'create_vmss', transform=DeploymentOutputLongRunningOperation(self.cli_ctx, 'Starting vmss create'), supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_vmss_create_namespace, exception_handler=handle_template_based_exception)
-        g.custom_show_command('show', 'get_vmss', table_transformer=get_vmss_table_output_transformer(self, False))
+        g.custom_show_command('show', 'get_vmss_by_aaz', table_transformer=get_vmss_table_output_transformer(self, False))
         g.custom_command('stop', 'stop_vmss', supports_no_wait=True, validator=process_vm_vmss_stop)
         g.generic_update_command('update', getter_name='get_vmss_modified_by_aaz', setter_name='update_vmss', supports_no_wait=True, command_type=compute_custom, validator=validate_vmss_update_namespace)
         g.custom_command('update-instances', 'update_vmss_instances', supports_no_wait=True)
+        g.wait_command('wait', getter_name='get_vmss_by_aaz', getter_type=compute_custom)
 
         from .aaz.latest.vmss import List as VMSSList
         self.command_table['vmss list'] = VMSSList(loader=self,
@@ -344,6 +333,10 @@ def load_command_table(self, _):
 
         from .operations.vmss_vms import VMSSGetResiliencyView
         self.command_table['vmss get-resiliency-view'] = VMSSGetResiliencyView(loader=self)
+
+    with self.command_group('vmss application', operation_group='virtual_machine_scale_sets') as g:
+        g.custom_command('set', 'set_vmss_applications', validator=process_set_applications_namespace)
+        g.custom_command('list', 'list_vmss_applications')
 
     with self.command_group('vmss diagnostics') as g:
         g.custom_command('set', 'set_vmss_diagnostics_extension')
