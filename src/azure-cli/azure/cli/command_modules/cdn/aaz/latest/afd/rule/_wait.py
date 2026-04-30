@@ -20,7 +20,7 @@ class Wait(AAZWaitCommand):
 
     _aaz_info = {
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/rulesets/{}/rules/{}", "2025-06-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/rulesets/{}/rules/{}", "2025-09-01-preview"],
         ]
     }
 
@@ -141,7 +141,7 @@ class Wait(AAZWaitCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-06-01",
+                    "api-version", "2025-09-01-preview",
                     required=True,
                 ),
             }
@@ -192,9 +192,7 @@ class Wait(AAZWaitCommand):
             )
 
             properties = cls._schema_on_200.properties
-            properties.actions = AAZListType(
-                flags={"required": True},
-            )
+            properties.actions = AAZListType()
             properties.conditions = AAZListType()
             properties.deployment_status = AAZStrType(
                 serialized_name="deploymentStatus",
@@ -203,9 +201,7 @@ class Wait(AAZWaitCommand):
             properties.match_processing_behavior = AAZStrType(
                 serialized_name="matchProcessingBehavior",
             )
-            properties.order = AAZIntType(
-                flags={"required": True},
-            )
+            properties.order = AAZIntType()
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
@@ -222,6 +218,30 @@ class Wait(AAZWaitCommand):
             _element.name = AAZStrType(
                 flags={"required": True},
             )
+
+            disc_afd_url_signing = cls._schema_on_200.properties.actions.Element.discriminate_by("name", "AfdUrlSigning")
+            disc_afd_url_signing.parameters = AAZObjectType(
+                flags={"required": True},
+            )
+
+            parameters = cls._schema_on_200.properties.actions.Element.discriminate_by("name", "AfdUrlSigning").parameters
+            parameters.algorithm = AAZStrType()
+            parameters.key_group_reference = AAZObjectType(
+                serialized_name="keyGroupReference",
+                flags={"required": True},
+            )
+            _WaitHelper._build_schema_resource_reference_read(parameters.key_group_reference)
+            parameters.parameter_name_override = AAZListType(
+                serialized_name="parameterNameOverride",
+            )
+            parameters.type_name = AAZStrType(
+                serialized_name="typeName",
+                flags={"required": True},
+            )
+
+            parameter_name_override = cls._schema_on_200.properties.actions.Element.discriminate_by("name", "AfdUrlSigning").parameters.parameter_name_override
+            parameter_name_override.Element = AAZObjectType()
+            _WaitHelper._build_schema_url_signing_param_identifier_read(parameter_name_override.Element)
 
             disc_cache_expiration = cls._schema_on_200.properties.actions.Element.discriminate_by("name", "CacheExpiration")
             disc_cache_expiration.parameters = AAZObjectType(
@@ -265,6 +285,26 @@ class Wait(AAZWaitCommand):
                 flags={"required": True},
             )
 
+            disc_edge_action = cls._schema_on_200.properties.actions.Element.discriminate_by("name", "EdgeAction")
+            disc_edge_action.parameters = AAZObjectType(
+                flags={"required": True},
+            )
+
+            parameters = cls._schema_on_200.properties.actions.Element.discriminate_by("name", "EdgeAction").parameters
+            parameters.edge_action_reference = AAZObjectType(
+                serialized_name="edgeActionReference",
+                flags={"required": True},
+            )
+            _WaitHelper._build_schema_resource_reference_read(parameters.edge_action_reference)
+            parameters.invocation_point = AAZStrType(
+                serialized_name="invocationPoint",
+                flags={"required": True},
+            )
+            parameters.type_name = AAZStrType(
+                serialized_name="typeName",
+                flags={"required": True},
+            )
+
             disc_modify_request_header = cls._schema_on_200.properties.actions.Element.discriminate_by("name", "ModifyRequestHeader")
             disc_modify_request_header.parameters = AAZObjectType(
                 flags={"required": True},
@@ -287,13 +327,11 @@ class Wait(AAZWaitCommand):
                 serialized_name="originGroup",
                 flags={"required": True},
             )
+            _WaitHelper._build_schema_resource_reference_read(parameters.origin_group)
             parameters.type_name = AAZStrType(
                 serialized_name="typeName",
                 flags={"required": True},
             )
-
-            origin_group = cls._schema_on_200.properties.actions.Element.discriminate_by("name", "OriginGroupOverride").parameters.origin_group
-            origin_group.id = AAZStrType()
 
             disc_route_configuration_override = cls._schema_on_200.properties.actions.Element.discriminate_by("name", "RouteConfigurationOverride")
             disc_route_configuration_override.parameters = AAZObjectType(
@@ -336,9 +374,7 @@ class Wait(AAZWaitCommand):
             origin_group_override.origin_group = AAZObjectType(
                 serialized_name="originGroup",
             )
-
-            origin_group = cls._schema_on_200.properties.actions.Element.discriminate_by("name", "RouteConfigurationOverride").parameters.origin_group_override.origin_group
-            origin_group.id = AAZStrType()
+            _WaitHelper._build_schema_resource_reference_read(origin_group_override.origin_group)
 
             disc_url_redirect = cls._schema_on_200.properties.actions.Element.discriminate_by("name", "UrlRedirect")
             disc_url_redirect.parameters = AAZObjectType(
@@ -408,16 +444,7 @@ class Wait(AAZWaitCommand):
 
             parameter_name_override = cls._schema_on_200.properties.actions.Element.discriminate_by("name", "UrlSigning").parameters.parameter_name_override
             parameter_name_override.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.properties.actions.Element.discriminate_by("name", "UrlSigning").parameters.parameter_name_override.Element
-            _element.param_indicator = AAZStrType(
-                serialized_name="paramIndicator",
-                flags={"required": True},
-            )
-            _element.param_name = AAZStrType(
-                serialized_name="paramName",
-                flags={"required": True},
-            )
+            _WaitHelper._build_schema_url_signing_param_identifier_read(parameter_name_override.Element)
 
             conditions = cls._schema_on_200.properties.conditions
             conditions.Element = AAZObjectType()
@@ -1001,6 +1028,45 @@ class _WaitHelper:
         _schema.header_name = cls._schema_header_action_parameters_read.header_name
         _schema.type_name = cls._schema_header_action_parameters_read.type_name
         _schema.value = cls._schema_header_action_parameters_read.value
+
+    _schema_resource_reference_read = None
+
+    @classmethod
+    def _build_schema_resource_reference_read(cls, _schema):
+        if cls._schema_resource_reference_read is not None:
+            _schema.id = cls._schema_resource_reference_read.id
+            return
+
+        cls._schema_resource_reference_read = _schema_resource_reference_read = AAZObjectType()
+
+        resource_reference_read = _schema_resource_reference_read
+        resource_reference_read.id = AAZStrType()
+
+        _schema.id = cls._schema_resource_reference_read.id
+
+    _schema_url_signing_param_identifier_read = None
+
+    @classmethod
+    def _build_schema_url_signing_param_identifier_read(cls, _schema):
+        if cls._schema_url_signing_param_identifier_read is not None:
+            _schema.param_indicator = cls._schema_url_signing_param_identifier_read.param_indicator
+            _schema.param_name = cls._schema_url_signing_param_identifier_read.param_name
+            return
+
+        cls._schema_url_signing_param_identifier_read = _schema_url_signing_param_identifier_read = AAZObjectType()
+
+        url_signing_param_identifier_read = _schema_url_signing_param_identifier_read
+        url_signing_param_identifier_read.param_indicator = AAZStrType(
+            serialized_name="paramIndicator",
+            flags={"required": True},
+        )
+        url_signing_param_identifier_read.param_name = AAZStrType(
+            serialized_name="paramName",
+            flags={"required": True},
+        )
+
+        _schema.param_indicator = cls._schema_url_signing_param_identifier_read.param_indicator
+        _schema.param_name = cls._schema_url_signing_param_identifier_read.param_name
 
 
 __all__ = ["Wait"]

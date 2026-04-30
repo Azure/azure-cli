@@ -44,7 +44,8 @@ class MonitorCloneVMScenarios(ScenarioTest):
             self.check('evaluationFrequency', 'PT1M'),
             self.check('length(scopes)', 2)
         ])
-        with mock.patch('azure.cli.command_modules.monitor.operations.monitor_clone_util.gen_guid', side_effect=self.create_guid):
+        with mock.patch('azure.cli.command_modules.monitor.operations.monitor_clone_util.gen_guid', side_effect=self.create_guid), \
+             mock.patch('azure.cli.command_modules.monitor._legacy.operations.monitor_clone_util.gen_guid', side_effect=self.create_guid):
             self.cmd('monitor clone --source-resource {vm1_id} --target-resource {vm3_id}', checks=[
                 self.check('metricsAlert[0].description', 'High CPU'),
                 self.check('metricsAlert[0].severity', 2),
@@ -96,7 +97,8 @@ class MonitorCloneStorageAccountScenarios(ScenarioTest):
             self.check('length(criteria.allOf[1].dimensions)', 1)
         ])
 
-        with mock.patch('azure.cli.command_modules.monitor.operations.monitor_clone_util.gen_guid', side_effect=self.create_guid):
+        with mock.patch('azure.cli.command_modules.monitor.operations.monitor_clone_util.gen_guid', side_effect=self.create_guid), \
+             mock.patch('azure.cli.command_modules.monitor._legacy.operations.monitor_clone_util.gen_guid', side_effect=self.create_guid):
             self.cmd('monitor clone --source-resource {sa_id} --target-resource {sa_id_2}', checks=[
                 self.check('metricsAlert[0].description', 'Test'),
                 self.check('metricsAlert[0].severity', 2),
@@ -162,7 +164,8 @@ class MonitorCloneStorageAccountAlwaysScenarios(ScenarioTest):
             self.check('length(criteria.allOf[1].dimensions)', 1)
         ])
 
-        with mock.patch('azure.cli.command_modules.monitor.operations.monitor_clone_util.gen_guid', side_effect=self.create_guid):
+        with mock.patch('azure.cli.command_modules.monitor.operations.monitor_clone_util.gen_guid', side_effect=self.create_guid), \
+             mock.patch('azure.cli.command_modules.monitor._legacy.operations.monitor_clone_util.gen_guid', side_effect=self.create_guid):
             self.cmd('monitor clone --source-resource {sa_id} --target-resource {sa_id_2} --always-clone', checks=[
                 self.check('metricsAlert[0].description', 'Test'),
                 self.check('metricsAlert[0].severity', 2),
@@ -221,7 +224,8 @@ class MonitorClonePublicIpScenarios(ScenarioTest):
             self.check('length(scopes)', 1)
         ])
 
-        with mock.patch('azure.cli.command_modules.monitor.operations.monitor_clone_util.gen_guid', side_effect=self.create_guid):
+        with mock.patch('azure.cli.command_modules.monitor.operations.monitor_clone_util.gen_guid', side_effect=self.create_guid), \
+             mock.patch('azure.cli.command_modules.monitor._legacy.operations.monitor_clone_util.gen_guid', side_effect=self.create_guid):
             self.cmd('monitor clone --source-resource {ip1_id} --target-resource {ip2_id}', checks=[
                 self.check('length(metricsAlert)', 2),
             ])
@@ -273,7 +277,8 @@ class MonitorCloneStorageAccountAcrossSubsScenarios(ScenarioTest):
                      self.check('length(criteria.allOf[1].dimensions)', 1)
                  ])
 
-        with mock.patch('azure.cli.command_modules.monitor.operations.monitor_clone_util.gen_guid', side_effect=self.create_guid):
+        with mock.patch('azure.cli.command_modules.monitor.operations.monitor_clone_util.gen_guid', side_effect=self.create_guid), \
+             mock.patch('azure.cli.command_modules.monitor._legacy.operations.monitor_clone_util.gen_guid', side_effect=self.create_guid):
             self.cmd('monitor clone --source-resource {sa_id} --target-resource {sa_id_2}', checks=[
                 self.check('metricsAlert[0].description', 'Test'),
                 self.check('metricsAlert[0].severity', 2),

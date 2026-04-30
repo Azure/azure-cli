@@ -200,11 +200,11 @@ def _invalid_sku_downgrade():
         "Managed registries could not be downgraded to Classic SKU.")
 
 
-def get_validate_platform(cmd, platform):
+def get_validate_platform(platform):
     """Gets and validates the Platform from both flags
     :param str platform: The name of Platform passed by user in --platform flag
     """
-    OS, Architecture = cmd.get_models('OS', 'Architecture', operation_group='runs')
+    from azure.mgmt.containerregistrytasks.models import OS, Architecture
 
     # Defaults
     platform_os = OS.linux.value
@@ -220,9 +220,9 @@ def get_validate_platform(cmd, platform):
     platform_os = platform_os.lower()
     platform_arch = platform_arch.lower()
 
-    valid_os = get_valid_os(cmd)
-    valid_arch = get_valid_architecture(cmd)
-    valid_variant = get_valid_variant(cmd)
+    valid_os = get_valid_os()
+    valid_arch = get_valid_architecture()
+    valid_variant = get_valid_variant()
 
     if platform_os not in valid_os:
         raise CLIError(
@@ -301,16 +301,14 @@ def get_source_and_custom_registry_credentials(cmd,
     :param bool registry_abac_enabled: whether the registry is ABAC-enabled
     :param bool deprecate_auth_mode: whether to print the auth mode deprecation warning
     """
-    Credentials, CustomRegistryCredentials, SourceRegistryCredentials, SecretObject, \
-        SecretObjectType = cmd.get_models(
-            'Credentials', 'CustomRegistryCredentials', 'SourceRegistryCredentials', 'SecretObject',
-            'SecretObjectType',
-            operation_group='tasks')
+    from azure.mgmt.containerregistrytasks.models import (
+        Credentials, CustomRegistryCredentials, SourceRegistryCredentials, SecretObject, SecretObjectType)
 
     if deprecate_auth_mode:
         check_auth_mode_for_abac(registry_abac_enabled, auth_mode)
 
     source_registry_identity = None
+    clear_source_identity = False
     if source_acr_auth_id:
         # "Default" and "None" are the allowed values for source registry auth mode.
         # For a non-ABAC-enabled registry, "--source-acr-auth-id" will not take effect, and authentication
@@ -322,7 +320,7 @@ def get_source_and_custom_registry_credentials(cmd,
                            'resolve this conflict.')
 
         if source_acr_auth_id.lower() == "none":
-            source_registry_identity = None
+            clear_source_identity = True  # explicitly send null to clear the identity field in PATCH
         elif source_acr_auth_id.startswith('/subscriptions/'):  # user-assigned MI resource ID
             source_registry_identity = resolve_identity_client_id(cmd.cli_ctx, source_acr_auth_id)
         elif source_acr_auth_id == CALLER_IDENTITY_ALIAS or source_acr_auth_id == SYSTEM_ASSIGNED_IDENTITY_ALIAS:
@@ -331,9 +329,10 @@ def get_source_and_custom_registry_credentials(cmd,
             raise CLIError('Error: Invalid value for --source-acr-auth-id.')
 
     source_registry_credentials = None
-    if auth_mode or source_registry_identity:
+    if auth_mode or source_registry_identity or clear_source_identity:
+        from azure.core.serialization import NULL
         source_registry_credentials = SourceRegistryCredentials(
-            login_mode=auth_mode, identity=source_registry_identity)
+            login_mode=auth_mode, identity=NULL if clear_source_identity else source_registry_identity)
 
     custom_registries = None
     if login_server:
@@ -372,9 +371,9 @@ def get_source_and_custom_registry_credentials(cmd,
     )
 
 
-def build_timers_info(cmd, schedules):
+def build_timers_info(schedules):
     timer_triggers = []
-    TriggerStatus, TimerTrigger = cmd.get_models('TriggerStatus', 'TimerTrigger', operation_group='tasks')
+    from azure.mgmt.containerregistrytasks.models import TriggerStatus, TimerTrigger
 
     # Provide a default name for the timer if no name was provided.
     for index, schedule in enumerate(schedules, start=1):
@@ -574,10 +573,8 @@ def create_default_scope_map(cmd,
     except ResourceNotFoundError:
         pass
     logger.info('Creating a scope map "%s" for provided permissions.', scope_map_name)
-    scope_map_request = {
-        'actions': actions,
-        'scope_map_description': scope_map_description
-    }
+    ScopeMap = cmd.get_models('ScopeMap')
+    scope_map_request = ScopeMap(actions=actions, description=scope_map_description)
     poller = scope_map_client.begin_create(resource_group_name, registry_name, scope_map_name, scope_map_request)
     scope_map = LongRunningOperation(cmd.cli_ctx)(poller)
     return scope_map

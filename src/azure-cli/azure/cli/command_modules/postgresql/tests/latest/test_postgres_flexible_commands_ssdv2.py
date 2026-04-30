@@ -40,7 +40,7 @@ class FlexibleServerSSDV2MgmtScenarioTest(ScenarioTest):
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         location = self.postgres_location
 
-        # test create
+        # Create server
         self.cmd('postgres flexible-server create -g {} -n {} --backup-retention {} --sku-name {} --tier {} \
                   --storage-size {} -u {} --version {} --tags keys=3 --storage-type {} \
                   --iops {} --throughput {} --public-access None --location {}'.format(resource_group, server_name,
@@ -63,7 +63,7 @@ class FlexibleServerSSDV2MgmtScenarioTest(ScenarioTest):
         # Wait until snapshot is created
         os.environ.get(ENV_LIVE_TEST, False) and sleep(1800)
 
-        # test updates
+        # Test updates
         self.cmd('postgres flexible-server update -g {} -n {} --storage-size 300 --yes'
                  .format(resource_group, server_name),
                  checks=[JMESPathCheck('storage.storageSizeGb', 300 )])
@@ -76,17 +76,17 @@ class FlexibleServerSSDV2MgmtScenarioTest(ScenarioTest):
                  .format(resource_group, server_name),
                  checks=[JMESPathCheck('storage.throughput', 400 )])
 
-        # test failures
+        # Test failures
         self.cmd('postgres flexible-server update -g {} -n {} --storage-auto-grow Enabled'
                  .format(resource_group, server_name),
                  expect_failure=True)
         
-        # test restore
+        # Test restore
         target_server_ssdv2 = self.create_random_name(SERVER_NAME_PREFIX + 'ssdv2-restore-', 40)
         restore_ssdv2_result = self.cmd('postgres flexible-server restore -g {} --name {} --source-server {}'
                                   .format(resource_group, target_server_ssdv2, server_name)).get_output_in_json()
         self.assertEqual(restore_ssdv2_result['storage']['type'], storage_type)
 
-        # clean up
+        # Clean up
         self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, server_name), checks=NoneCheck())
         self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, target_server_ssdv2), checks=NoneCheck())

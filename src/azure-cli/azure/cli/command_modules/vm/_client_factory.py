@@ -35,16 +35,8 @@ def cf_vmss(cli_ctx, _):
     return _compute_client_factory(cli_ctx).virtual_machine_scale_sets
 
 
-def cf_images(cli_ctx, _):
-    return _compute_client_factory(cli_ctx).images
-
-
 def cf_dedicated_hosts(cli_ctx, _):
     return _compute_client_factory(cli_ctx).dedicated_hosts
-
-
-def cf_dedicated_host_groups(cli_ctx, _):
-    return _compute_client_factory(cli_ctx).dedicated_host_groups
 
 
 def _log_analytics_client_factory(cli_ctx, subscription_id, *_):

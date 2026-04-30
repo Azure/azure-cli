@@ -24,7 +24,13 @@ from azure.mgmt.cognitiveservices.models import Account as CognitiveServicesAcco
     Deployment, DeploymentModel, DeploymentScaleSettings, DeploymentProperties, \
     CommitmentPlan, CommitmentPlanProperties, CommitmentPeriod, \
     ConnectionPropertiesV2BasicResource, ConnectionUpdateContent, \
-    Project, ProjectProperties
+    Project, ProjectProperties, \
+    RegenerateKeyParameters, \
+    ManagedNetworkSettingsPropertiesBasicResource, ManagedNetworkSettingsProperties, \
+    ManagedNetworkSettingsEx, \
+    OutboundRuleBasicResource, FqdnOutboundRule, \
+    PrivateEndpointOutboundRule, PrivateEndpointOutboundRuleDestination, \
+    ServiceTagOutboundRule, ServiceTagOutboundRuleDestination
 from azure.cli.command_modules.cognitiveservices._client_factory import cf_accounts, cf_resource_skus
 from azure.cli.core.azclierror import (
     BadRequestError,
@@ -38,7 +44,8 @@ from azure.cli.core.azclierror import (
     CLIInternalError,
     ResourceNotFoundError,
 )
-from azure.cli.command_modules.cognitiveservices._utils import load_connection_from_source, compose_identity
+from azure.cli.command_modules.cognitiveservices._utils import load_connection_from_source, compose_identity, \
+    _load_source_as_dict
 
 logger = get_logger(__name__)
 
@@ -51,6 +58,14 @@ steps:
   - push: ["{image_name_full}"]
     timeout: 1800
 """
+
+
+def regenerate_key(client, resource_group_name, account_name, key_name):
+    """
+    Regenerate a key for an Azure Cognitive Services account.
+    """
+    parameters = RegenerateKeyParameters(key_name=key_name)
+    return client.regenerate_key(resource_group_name, account_name, parameters)
 
 
 def list_resources(client, resource_group_name=None):
@@ -159,8 +174,8 @@ def create(
 
     properties = CognitiveServicesAccountProperties()
     if api_properties is not None:
-        api_properties = CognitiveServicesAccountApiProperties.deserialize(
-            api_properties
+        api_properties = CognitiveServicesAccountApiProperties._deserialize(  # pylint: disable=protected-access
+            api_properties, []
         )
         properties.api_properties = api_properties
     if custom_domain:
@@ -206,8 +221,8 @@ def update(
 
     properties = CognitiveServicesAccountProperties()
     if api_properties is not None:
-        api_properties = CognitiveServicesAccountApiProperties.deserialize(
-            api_properties
+        api_properties = CognitiveServicesAccountApiProperties._deserialize(  # pylint: disable=protected-access
+            api_properties, []
         )
         properties.api_properties = api_properties
     if custom_domain:
@@ -414,6 +429,18 @@ def commitment_plan_create_or_update(
 
 
 AGENT_API_VERSION_PARAMS = {"api-version": "2025-11-15-preview"}
+
+# Roles that grant pull access to ACR. Used by _check_project_acr_access.
+_ACR_PULL_ROLES = {
+    'AcrPull',
+    'AcrPush',
+    'Container Registry Repository Reader',
+    'Container Registry Repository Writer',
+    'Container Registry Repository Contributor',
+    'Reader',
+    'Contributor',
+    'Owner',
+}
 
 
 def _validate_image_tag(image_uri):
@@ -772,10 +799,21 @@ def _build_image_remotely(cmd, source_dir, image_name,  # pylint: disable=too-ma
     # Use ACR module client factories and utility functions for build operations.
     # These private APIs are pinned to specific preview API versions and handle complex
     # operations like source upload, task scheduling, and log streaming.
-    from azure.cli.command_modules.acr._client_factory import cf_acr_registries_tasks, cf_acr_runs
-    from azure.cli.command_modules.acr._stream_utils import stream_logs
-    from azure.cli.command_modules.acr._utils import prepare_source_location, get_resource_group_name_by_registry_name
     import base64
+
+    from azure.cli.command_modules.acr._client_factory import (
+        cf_acr_registries, cf_acr_registries_tasks, cf_acr_runs,
+    )
+    from azure.cli.command_modules.acr._stream_utils import stream_logs
+    from azure.cli.command_modules.acr._utils import (
+        prepare_source_location,
+        get_resource_group_name_by_registry_name,
+    )
+    from azure.mgmt.containerregistry.models import RoleAssignmentMode
+    from azure.mgmt.containerregistrytasks.models import (
+        Credentials as AcrCredentials,
+        SourceRegistryCredentials,
+    )
 
     logger.warning("Building image remotely using ACR Task: %s", image_name)
 
@@ -787,7 +825,34 @@ def _build_image_remotely(cmd, source_dir, image_name,  # pylint: disable=too-ma
     resource_group_name = get_resource_group_name_by_registry_name(
         cmd.cli_ctx, registry_name)
 
+    # For ABAC-enabled registries, one-off build runs (schedule_run) require
+    # SourceRegistryCredentials with identity='[caller]' so the ACR task
+    # authenticates as the signed-in CLI user for push. This matches
+    # `az acr build --source-acr-auth-id [caller]` behavior.
+    # For non-ABAC registries (or if ABAC mode cannot be determined), no
+    # explicit credentials are needed.
+    build_credentials = None
+
     try:
+        try:
+            registry = cf_acr_registries(cmd.cli_ctx).get(
+                resource_group_name, registry_name)
+            registry_abac_enabled = (
+                getattr(registry, 'role_assignment_mode', None) ==
+                RoleAssignmentMode.ABAC_REPOSITORY_PERMISSIONS
+            )
+            if registry_abac_enabled:
+                build_credentials = AcrCredentials(
+                    source_registry=SourceRegistryCredentials(identity='[caller]')
+                )
+        except Exception as registry_lookup_error:  # pylint: disable=broad-except
+            logger.debug(
+                "Unable to detect ACR ABAC mode for '%s': %s. "
+                "Continuing without explicit source registry credentials.",
+                registry_name,
+                registry_lookup_error,
+            )
+
         # Extract just the image name and tag (without registry)
         if '/' in image_name:
             image_without_registry = image_name.split('/', 1)[1]
@@ -807,7 +872,7 @@ def _build_image_remotely(cmd, source_dir, image_name,  # pylint: disable=too-ma
             logger.warning("Dockerfile found - using Docker build")
             logger.warning("Queueing build task...")
 
-            from azure.mgmt.containerregistry.models import (
+            from azure.mgmt.containerregistrytasks.models import (
                 DockerBuildRequest, PlatformProperties
             )
 
@@ -817,7 +882,8 @@ def _build_image_remotely(cmd, source_dir, image_name,  # pylint: disable=too-ma
                 source_location=source_location,
                 platform=PlatformProperties(os='Linux', architecture='amd64'),
                 docker_file_path=dockerfile_name,
-                timeout=3600
+                timeout=3600,
+                credentials=build_credentials,
             )
 
             queued = client_registries.schedule_run(
@@ -830,7 +896,7 @@ def _build_image_remotely(cmd, source_dir, image_name,  # pylint: disable=too-ma
             logger.warning("Buildpacks will detect Python, Node.js, .NET, etc.")
             logger.warning("Queueing build task...")
 
-            from azure.mgmt.containerregistry.models import (
+            from azure.mgmt.containerregistrytasks.models import (
                 EncodedTaskRunRequest, PlatformProperties
             )
 
@@ -843,7 +909,8 @@ def _build_image_remotely(cmd, source_dir, image_name,  # pylint: disable=too-ma
                 encoded_task_content=base64.b64encode(yaml_body.encode()).decode(),
                 source_location=source_location,
                 timeout=3600,
-                platform=PlatformProperties(os='Linux', architecture='amd64')
+                platform=PlatformProperties(os='Linux', architecture='amd64'),
+                credentials=build_credentials,
             )
 
             queued = client_registries.schedule_run(
@@ -1729,6 +1796,10 @@ def _check_project_acr_access(cmd, client, account_name, project_name, registry_
     """
     Check if AI Foundry project's managed identity has AcrPull access to container registry.
 
+    When ABAC is enabled on the registry and assignments have conditions, this function
+    treats them as granting access (warn-but-don't-block) because ABAC condition strings
+    are complex and cannot be reliably evaluated client-side.
+
     Args:
         cmd: CLI command context
         client: Service client
@@ -1737,13 +1808,14 @@ def _check_project_acr_access(cmd, client, account_name, project_name, registry_
         registry_name: ACR registry name (without .azurecr.io)
 
     Returns:
-        tuple: (has_access: bool, principal_id: str, error_message: str)
+        tuple: (has_access: bool, principal_id: str, error_message: str, abac_enabled: bool)
 
     Limitations:
         - Only validates well-known role names (AcrPull, AcrPush, Reader, Contributor, Owner, etc.)
         - Custom roles with pull permissions may not be detected
         - Inherited permissions from parent scopes (resource group, subscription) are not checked
         - Only validates direct role assignments on the ACR resource
+        - ABAC conditions are not evaluated; a warning is logged instead
     """
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.command_modules.role.custom import list_role_assignments
@@ -1752,12 +1824,9 @@ def _check_project_acr_access(cmd, client, account_name, project_name, registry_
         # Get resource group from account name
         resource_group_name = _get_resource_group_by_account_name(cmd, account_name)
 
-        # Get project to find its managed identity
+        # Get project to find its managed identity (project-level identity, not account-level)
         from azure.cli.command_modules.cognitiveservices._client_factory import cf_projects
-        projects_client = cf_projects(cmd.cli_ctx)
-
-        # Get project resource (project-level identity, not account-level)
-        project = projects_client.get(
+        project = cf_projects(cmd.cli_ctx).get(
             resource_group_name=resource_group_name,
             account_name=account_name,
             project_name=project_name
@@ -1767,19 +1836,32 @@ def _check_project_acr_access(cmd, client, account_name, project_name, registry_
         if not project.identity or not project.identity.principal_id:
             return (False, None,
                     f"Project '{project_name}' does not have a system-assigned managed identity enabled. "
-                    f"A project identity is automatically created when the project is created.")
+                    f"A project identity is automatically created when the project is created.",
+                    False)
 
         principal_id = project.identity.principal_id
 
-        # Get ACR resource ID
+        # Get ACR resource ID and check ABAC mode
+        from azure.cli.command_modules.acr._client_factory import cf_acr_registries
         from azure.cli.command_modules.acr._utils import get_resource_group_name_by_registry_name
-        subscription_id = get_subscription_id(cmd.cli_ctx)
+        from azure.mgmt.containerregistry.models import RoleAssignmentMode
         acr_resource_group = get_resource_group_name_by_registry_name(
             cmd.cli_ctx, registry_name)
         acr_resource_id = (
-            f"/subscriptions/{subscription_id}/resourceGroups/{acr_resource_group}/"
+            f"/subscriptions/{get_subscription_id(cmd.cli_ctx)}/resourceGroups/{acr_resource_group}/"
             f"providers/Microsoft.ContainerRegistry/registries/{registry_name}"
         )
+
+        # Detect whether ABAC is enabled on the registry
+        try:
+            acr_registry = cf_acr_registries(cmd.cli_ctx).get(acr_resource_group, registry_name)
+            abac_enabled = (
+                getattr(acr_registry, 'role_assignment_mode', None) ==
+                RoleAssignmentMode.ABAC_REPOSITORY_PERMISSIONS
+            )
+        except Exception:  # pylint: disable=broad-except
+            abac_enabled = False
+            logger.debug("Could not determine ACR ABAC mode, assuming standard RBAC")
 
         # Check role assignments for AcrPull or higher permissions
         #
@@ -1796,45 +1878,45 @@ def _check_project_acr_access(cmd, client, account_name, project_name, registry_
         # However, this is significantly more complex and slower. The current approach
         # follows the pattern used by AKS (see acs/_roleassignments.py) and covers
         # the most common scenarios. Users with custom roles can use --skip-acr-check.
-        #
-        # Acceptable roles include:
-        # Standard ACR roles:
-        # - AcrPull: Can pull images
-        # - AcrPush: Can pull and push images
-        # Repository-scoped roles:
-        # - Container Registry Repository Reader: Read access (includes pull)
-        # - Container Registry Repository Writer: Read/write access (includes pull)
-        # - Container Registry Repository Contributor: Full repository access (includes pull)
-        # General Azure roles:
-        # - Reader: Can view resources (includes pull)
-        # - Contributor, Owner: Full access
-        acceptable_roles = [
-            'AcrPull',
-            'AcrPush',
-            'Container Registry Repository Reader',
-            'Container Registry Repository Writer',
-            'Container Registry Repository Contributor',
-            'Reader',
-            'Contributor',
-            'Owner'
-        ]
 
         # Get role assignments for the principal on the ACR
         assignments = list_role_assignments(cmd, assignee=principal_id, scope=acr_resource_id)
 
-        # Check if any assignment has acceptable role
+        # Check if any assignment has an acceptable role (see _ACR_PULL_ROLES),
+        # accounting for ABAC conditions
         for assignment in assignments:
             role_name = assignment.get('roleDefinitionName', '')
-            if role_name in acceptable_roles:
+            if role_name in _ACR_PULL_ROLES:
+                condition = assignment.get('condition', None)
+                if condition and abac_enabled:
+                    # ABAC is enabled and this assignment has a condition.
+                    # We cannot reliably evaluate ABAC condition strings client-side,
+                    # so we treat the assignment as valid and warn the user.
+                    logger.warning(
+                        "Found '%s' role on ACR '%s' with an ABAC condition. "
+                        "Cannot verify whether the condition grants access to the "
+                        "target repository. If the deployment fails with a permission "
+                        "error, verify the ABAC condition covers the required repository.",
+                        role_name, registry_name)
+                    return (True, principal_id, None, abac_enabled)
+                # No condition = full scope access (or ABAC not enabled)
                 logger.info(
                     "Found %s role for project identity on ACR %s",
                     role_name, registry_name)
-                return (True, principal_id, None)
+                return (True, principal_id, None, abac_enabled)
 
         # No suitable role found
+        if abac_enabled:
+            return (
+                False, principal_id,
+                f"Project managed identity does not have any recognized pull role on "
+                f"ABAC-enabled registry '{registry_name}'",
+                abac_enabled
+            )
         return (
             False, principal_id,
-            f"Project managed identity does not have AcrPull access to '{registry_name}'"
+            f"Project managed identity does not have AcrPull access to '{registry_name}'",
+            abac_enabled
         )
 
     except Exception as e:  # pylint: disable=broad-except
@@ -1844,7 +1926,7 @@ def _check_project_acr_access(cmd, client, account_name, project_name, registry_
             "use --skip-acr-check to bypass this validation."
         )
         logger.error("ACR access check failed: %s", str(e))
-        return (False, None, error_msg)
+        return (False, None, error_msg, False)
 
 
 def _validate_agent_create_parameters(image, source, build_remote, no_start, min_replicas, max_replicas):
@@ -1886,6 +1968,26 @@ def _validate_agent_create_parameters(image, source, build_remote, no_start, min
         )
 
     _validate_scaling_options(no_start, min_replicas, max_replicas)
+
+
+def _extract_repository_name_for_acr(image, source, agent_name, registry):
+    """Extract ACR repository path (without tag/digest) for ABAC guidance."""
+    if source:
+        return agent_name
+
+    if not image:
+        return None
+
+    if '.azurecr.io/' in image:
+        repository = image.split('.azurecr.io/', 1)[1]
+    elif registry:
+        repository = image
+    else:
+        return None
+
+    repository = repository.split('@', 1)[0]
+    repository = repository.split(':', 1)[0]
+    return repository or None
 
 
 def agent_create(  # pylint: disable=too-many-locals
@@ -1952,10 +2054,12 @@ def agent_create(  # pylint: disable=too-many-locals
 
     registry_name = _determine_registry_for_access_check(image, registry, source)
 
+    image_repo = _extract_repository_name_for_acr(image, source, agent_name, registry)
+
     if registry_name and not skip_acr_check:
         logger.info("Checking if project has access to ACR %s...", registry_name)
 
-        has_access, principal_id, error_msg = _check_project_acr_access(
+        has_access, principal_id, error_msg, acr_abac_enabled = _check_project_acr_access(
             cmd, client, account_name, project_name, registry_name
         )
 
@@ -1973,21 +2077,43 @@ def agent_create(  # pylint: disable=too-many-locals
             except Exception:  # pylint: disable=broad-except
                 acr_rg = '<acr-resource-group>'
 
-            error_message = (
-                f"{error_msg}\n\n"
-                f"AI Foundry needs permission to pull the container image from ACR.\n"
-                f"Grant AcrPull role to the project's managed identity:\n\n"
-                f"  az role assignment create --assignee {principal_id} "
-                f"--role AcrPull "
-                f"--scope /subscriptions/{subscription_id}/resourceGroups/{acr_rg}/"
-                f"providers/Microsoft.ContainerRegistry/registries/{registry_name}\n\n"
-                f"Or use Azure Portal:\n"
-                f"  1. Open ACR '{registry_name}' → Access Control (IAM)\n"
-                f"  2. Add role assignment → AcrPull\n"
-                f"  3. Assign access to: Managed Identity\n"
-                f"  4. Select the project's managed identity\n\n"
-                f"To skip this check (not recommended), use: --skip-acr-check"
+            acr_scope = (
+                f"/subscriptions/{subscription_id}/resourceGroups/{acr_rg}/"
+                f"providers/Microsoft.ContainerRegistry/registries/{registry_name}"
             )
+
+            if acr_abac_enabled and image_repo:
+                error_message = (
+                    f"{error_msg}\n\n"
+                    f"This registry has ABAC (repository-level permissions) enabled.\n"
+                    f"Grant repository-scoped access to the project's managed identity:\n\n"
+                    f"  az role assignment create --assignee {principal_id} "
+                    f"--role \"Container Registry Repository Reader\" "
+                    f"--scope {acr_scope} "
+                    f"--condition \"@Resource[Microsoft.ContainerRegistry/registries/"
+                    f"repositories] StringEquals '{image_repo}'\" "
+                    f"--condition-version \"2.0\"\n\n"
+                    f"Or grant broad access (bypasses ABAC scoping):\n\n"
+                    f"  az role assignment create --assignee {principal_id} "
+                    f"--role AcrPull "
+                    f"--scope {acr_scope}\n\n"
+                    f"To skip this check (not recommended), use: --skip-acr-check"
+                )
+            else:
+                error_message = (
+                    f"{error_msg}\n\n"
+                    f"AI Foundry needs permission to pull the container image from ACR.\n"
+                    f"Grant AcrPull role to the project's managed identity:\n\n"
+                    f"  az role assignment create --assignee {principal_id} "
+                    f"--role AcrPull "
+                    f"--scope {acr_scope}\n\n"
+                    f"Or use Azure Portal:\n"
+                    f"  1. Open ACR '{registry_name}' → Access Control (IAM)\n"
+                    f"  2. Add role assignment → AcrPull\n"
+                    f"  3. Assign access to: Managed Identity\n"
+                    f"  4. Select the project's managed identity\n\n"
+                    f"To skip this check (not recommended), use: --skip-acr-check"
+                )
             raise ValidationError(error_message)
 
     image_uri = _resolve_agent_image_uri(
@@ -2080,6 +2206,259 @@ def agent_create(  # pylint: disable=too-many-locals
     return version_response
 
 
+# --------------------------------------------------------------------------------------------
+# Managed Network commands
+# --------------------------------------------------------------------------------------------
+
+
+_ISOLATION_MODE_MAP = {
+    'allow_internet_outbound': 'AllowInternetOutbound',
+    'allow_only_approved_outbound': 'AllowOnlyApprovedOutbound',
+}
+
+
+def managed_network_create(
+    client,
+    resource_group_name,
+    account_name,
+    managed_network,
+    managed_network_name='default',
+    firewall_sku=None,
+):
+    """
+    Create a managed network for an Azure Cognitive Services account.
+    """
+    isolation_mode = _ISOLATION_MODE_MAP.get(managed_network, managed_network)
+    managed_network_settings = ManagedNetworkSettingsEx(
+        isolation_mode=isolation_mode,
+        firewall_sku=firewall_sku,
+    )
+    properties = ManagedNetworkSettingsProperties(managed_network=managed_network_settings)
+    body = ManagedNetworkSettingsPropertiesBasicResource(properties=properties)
+    return client.begin_put(resource_group_name, account_name, managed_network_name, body)
+
+
+def managed_network_update(
+    client,
+    resource_group_name,
+    account_name,
+    managed_network_name='default',
+    managed_network=None,
+    firewall_sku=None,
+):
+    """
+    Update managed network settings for an Azure Cognitive Services account.
+    """
+    isolation_mode = _ISOLATION_MODE_MAP.get(managed_network, managed_network) if managed_network else None
+    managed_network_settings = ManagedNetworkSettingsEx(
+        isolation_mode=isolation_mode,
+        firewall_sku=firewall_sku,
+    )
+    properties = ManagedNetworkSettingsProperties(managed_network=managed_network_settings)
+    body = ManagedNetworkSettingsPropertiesBasicResource(properties=properties)
+    return client.begin_patch(resource_group_name, account_name, managed_network_name, body)
+
+
+def managed_network_provision(
+    client,
+    resource_group_name,
+    account_name,
+    managed_network_name='default',
+):
+    """
+    Provision the managed network for an Azure Cognitive Services account.
+    """
+    # Pass body as pre-serialized bytes to work around an issue where empty dict {}
+    # is falsy in Python, causing content_type to be set to None while body is still serialized.
+    return client.begin_provision_managed_network(resource_group_name, account_name, managed_network_name, body=b'{}')
+
+
+def managed_network_show(
+    client,
+    resource_group_name,
+    account_name,
+    managed_network_name='default',
+):
+    """
+    Show managed network settings for an Azure Cognitive Services account.
+    """
+    return client.get(resource_group_name, account_name, managed_network_name)
+
+
+# --------------------------------------------------------------------------------------------
+# Outbound Rule commands
+# --------------------------------------------------------------------------------------------
+
+
+_RULE_TYPE_MAP = {
+    'fqdn': 'FQDN',
+    'privateendpoint': 'PrivateEndpoint',
+    'servicetag': 'ServiceTag',
+}
+
+
+def _build_outbound_rule(rule_type, category=None, destination=None, subresource_target=None):
+    """Build an outbound rule SDK model object based on rule type."""
+    normalized_type = _RULE_TYPE_MAP.get(rule_type.lower(), rule_type)
+
+    if normalized_type == 'FQDN':
+        return FqdnOutboundRule(
+            category=category,
+            destination=destination
+        )
+    if normalized_type == 'PrivateEndpoint':
+        # PrivateEndpoint requires a structured destination object
+        if isinstance(destination, PrivateEndpointOutboundRuleDestination):
+            dest_obj = destination
+        elif isinstance(destination, dict):
+            dest_obj = PrivateEndpointOutboundRuleDestination(**destination)
+        elif isinstance(destination, str):
+            try:
+                dest_dict = json.loads(destination)
+                dest_obj = PrivateEndpointOutboundRuleDestination(**dest_dict)
+            except (json.JSONDecodeError, TypeError):
+                dest_obj = PrivateEndpointOutboundRuleDestination(
+                    service_resource_id=destination,
+                    subresource_target=subresource_target
+                )
+        else:
+            dest_obj = PrivateEndpointOutboundRuleDestination(
+                service_resource_id=destination,
+                subresource_target=subresource_target
+            )
+        return PrivateEndpointOutboundRule(
+            category=category,
+            destination=dest_obj
+        )
+    if normalized_type == 'ServiceTag':
+        # ServiceTag requires a structured destination object with serviceTag field
+        # Map camelCase keys (from JSON examples) to snake_case (SDK model kwargs)
+        _service_tag_key_map = {
+            'serviceTag': 'service_tag',
+            'portRanges': 'port_ranges',
+        }
+
+        def _normalize_service_tag_keys(d):
+            return {_service_tag_key_map.get(k, k): v for k, v in d.items()}
+
+        if isinstance(destination, ServiceTagOutboundRuleDestination):
+            dest_obj = destination
+        elif isinstance(destination, dict):
+            dest_obj = ServiceTagOutboundRuleDestination(**_normalize_service_tag_keys(destination))
+        elif isinstance(destination, str):
+            try:
+                dest_dict = json.loads(destination)
+                dest_obj = ServiceTagOutboundRuleDestination(**_normalize_service_tag_keys(dest_dict))
+            except (json.JSONDecodeError, TypeError):
+                dest_obj = ServiceTagOutboundRuleDestination(
+                    service_tag=destination,
+                    protocol='TCP',
+                    port_ranges='443'
+                )
+        else:
+            dest_obj = ServiceTagOutboundRuleDestination(
+                service_tag=destination,
+                protocol='TCP',
+                port_ranges='443'
+            )
+        return ServiceTagOutboundRule(
+            category=category,
+            destination=dest_obj
+        )
+    raise InvalidArgumentValueError(
+        f"Unknown rule type: {rule_type}. Must be one of: fqdn, privateendpoint, servicetag")
+
+
+def outbound_rule_set(
+    client,
+    resource_group_name,
+    account_name,
+    rule_name,
+    rule_type,
+    managed_network_name='default',
+    category=None,
+    destination=None,
+    subresource_target=None,
+):
+    """
+    Create or update a single outbound rule for the managed network.
+    """
+    rule = _build_outbound_rule(rule_type, category=category, destination=destination,
+                                subresource_target=subresource_target)
+    body = OutboundRuleBasicResource(properties=rule)
+    return client.begin_create_or_update(
+        resource_group_name, account_name, managed_network_name, rule_name, body)
+
+
+def outbound_rule_remove(
+    client,
+    resource_group_name,
+    account_name,
+    rule_name,
+    managed_network_name='default',
+):
+    """
+    Delete an outbound rule. Handles 404 during LRO polling when the resource
+    is already gone before the poller checks status.
+    """
+    from azure.core.exceptions import HttpResponseError
+    poller = client.begin_delete(
+        resource_group_name, account_name, managed_network_name, rule_name)
+    try:
+        return poller.result()
+    except HttpResponseError as ex:
+        if ex.status_code == 404:
+            return None
+        raise
+
+
+def outbound_rule_bulk_set(
+    client,
+    resource_group_name,
+    account_name,
+    file,
+    managed_network_name='default',
+):
+    """
+    Bulk create or update outbound rules from a YAML/JSON file.
+    Uses individual set calls for each rule.
+    """
+    rules_dict = _load_source_as_dict(file)
+
+    # Build the outbound rules list from file content
+    outbound_rules = {}
+    rules_data = rules_dict.get('rules', rules_dict)
+    if isinstance(rules_data, dict):
+        for name, rule_data in rules_data.items():
+            rt = rule_data.get('type', 'FQDN')
+            cat = rule_data.get('category', None)
+            dest = rule_data.get('destination', None)
+            subresource = rule_data.get('subresourceTarget', None)
+            outbound_rules[name] = _build_outbound_rule(
+                rt, category=cat, destination=dest, subresource_target=subresource)
+    elif isinstance(rules_data, list):
+        for rule_data in rules_data:
+            name = rule_data.get('name')
+            if not name:
+                raise InvalidArgumentValueError(
+                    "Each rule in the list must have a 'name' field.")
+            rt = rule_data.get('type', 'FQDN')
+            cat = rule_data.get('category', None)
+            dest = rule_data.get('destination', None)
+            subresource = rule_data.get('subresourceTarget', None)
+            outbound_rules[name] = _build_outbound_rule(rt, category=cat, destination=dest,
+                                                        subresource_target=subresource)
+
+    # Create each rule individually
+    results = []
+    for rule_name, rule in outbound_rules.items():
+        body = OutboundRuleBasicResource(properties=rule)
+        poller = client.begin_create_or_update(
+            resource_group_name, account_name, managed_network_name, rule_name, body)
+        results.append(poller.result())
+    return results
+
+
 def project_create(
         client,
         resource_group_name,
@@ -2121,6 +2500,17 @@ def project_update(
         project_props.display_name = display_name
     project = Project(properties=project_props)
     return client.begin_update(resource_group_name, account_name, project_name, project)
+
+
+def project_delete(client, resource_group_name, account_name, project_name):
+    """Delete a project. Works around SDK rejecting 200 OK (only accepts 202/204)."""
+    from azure.core.exceptions import HttpResponseError
+    try:
+        return client.begin_delete(resource_group_name, account_name, project_name)
+    except HttpResponseError as ex:
+        if ex.response and ex.response.status_code == 200:
+            return None
+        raise
 
 
 def account_connection_create(
