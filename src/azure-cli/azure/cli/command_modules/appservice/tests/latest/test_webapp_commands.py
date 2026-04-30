@@ -151,7 +151,7 @@ class WebappQuickCreateTest(ScenarioTest):
         self.assertTrue(r['ftpPublishingUrl'].startswith('ftps://'))
         self.cmd('webapp config appsettings list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('[0].name', 'WEBSITE_NODE_DEFAULT_VERSION'),
-            JMESPathCheck('[0].value', '~20'),
+            JMESPathCheck('[0].value', '~22'),
         ])
 
     @live_only()
@@ -162,12 +162,12 @@ class WebappQuickCreateTest(ScenarioTest):
         webapp_name_2 = self.create_random_name(prefix='webapp-quick', length=24)
         plan = self.create_random_name(prefix='plan-quick', length=24)
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
-        r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "node|20LTS"'.format(
+        r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "node|22LTS"'.format(
             resource_group, webapp_name, plan)).get_output_in_json()
         self.assertTrue(r['ftpPublishingUrl'].startswith('ftps://'))
         self.cmd('webapp config appsettings list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('[0].name', 'WEBSITE_NODE_DEFAULT_VERSION'),
-            JMESPathCheck('[0].value', '~20'),
+            JMESPathCheck('[0].value', '~22'),
         ])
         r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "dotnet:8"'.format(
             resource_group, webapp_name_2, plan)).get_output_in_json()
@@ -180,7 +180,7 @@ class WebappQuickCreateTest(ScenarioTest):
         webapp_name = self.create_random_name(prefix='webapp-quick-cd', length=24)
         plan = self.create_random_name(prefix='plan-quick', length=24)
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url {} -r "node|20LTS"'.format(
+        self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url {} -r "node|22LTS"'.format(
             resource_group, webapp_name, plan, TEST_REPO_URL))
         # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
         time.sleep(30)
@@ -234,7 +234,7 @@ class WebappQuickCreateTest(ScenarioTest):
         plan = 'plan-quick-linux-cd'
         self.cmd(
             'appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {} -u {} -r "NODE|20-lts"'.format(resource_group, webapp_name,
+        self.cmd('webapp create -g {} -n {} --plan {} -u {} -r "NODE|22-lts"'.format(resource_group, webapp_name,
                                                                                     plan, TEST_REPO_URL))
         # 45 seconds should be enough for the deployment finished(Skipped under playback mode)
         time.sleep(45)
@@ -490,7 +490,7 @@ class AppServiceLogTest(ScenarioTest):
             prefix='webapp-win-log', length=24)
         plan = self.create_random_name(prefix='win-log', length=24)
         self.cmd(f'appservice plan create -g {resource_group} -n {plan} -l eastus')
-        self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url {} -r "node|20LTS"'.format(
+        self.cmd('webapp create -g {} -n {} --plan {} --deployment-source-url {} -r "node|22LTS"'.format(
             resource_group, webapp_name, plan, TEST_REPO_URL))
         # 30 seconds should be enough for the deployment finished(Skipped under playback mode)
         time.sleep(30)
@@ -813,7 +813,7 @@ class WebappConfigureTest(ScenarioTest):
                      JMESPathCheck('[0].name', '{0}.azurewebsites.net'.format(webapp_name))])
 
         # site azure storage account configurations tests
-        runtime = 'NODE|20-lts'
+        runtime = 'NODE|22-lts'
         linux_plan = self.create_random_name(
             prefix='webapp-linux-plan', length=24)
         linux_webapp = self.create_random_name(
@@ -924,9 +924,9 @@ class WebappConfigureTest(ScenarioTest):
             JMESPathCheck("javaContainer", None),
             JMESPathCheck("javaContainerVersion", None),         
         ])
-        self.cmd('webapp config set -g {} -n {} --runtime NODE:20LTS'.format(resource_group, webapp_name))
+        self.cmd('webapp config set -g {} -n {} --runtime NODE:22LTS'.format(resource_group, webapp_name))
         self.cmd('webapp config appsettings list -g {} -n {}'.format(resource_group, webapp_name)).assert_with_checks([
-            JMESPathCheck("[?name=='WEBSITE_NODE_DEFAULT_VERSION']|[0].value", "~20"),
+            JMESPathCheck("[?name=='WEBSITE_NODE_DEFAULT_VERSION']|[0].value", "~22"),
         ])
         #linux
         self.cmd('webapp config set -g {} -n {} --runtime TOMCAT:11.0-java21'.format(resource_group, linux_webapp)).assert_with_checks([
@@ -953,11 +953,11 @@ class WebappConfigureTest(ScenarioTest):
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, linux_webapp)).assert_with_checks([
             JMESPathCheck("linuxFxVersion", "DOTNETCORE|8.0"),
         ])        
-        self.cmd('webapp config set -g {} -n {} --runtime NODE:20-lts'.format(resource_group, linux_webapp)).assert_with_checks([
-            JMESPathCheck("linuxFxVersion", "NODE|20-lts"),
+        self.cmd('webapp config set -g {} -n {} --runtime NODE:22-lts'.format(resource_group, linux_webapp)).assert_with_checks([
+            JMESPathCheck("linuxFxVersion", "NODE|22-lts"),
         ])
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, linux_webapp)).assert_with_checks([
-            JMESPathCheck("linuxFxVersion", "NODE|20-lts"),  
+            JMESPathCheck("linuxFxVersion", "NODE|22-lts"),  
         ])                                  
 
     @AllowLargeResponse()
@@ -1268,7 +1268,7 @@ class LinuxWebappScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP)
     def test_linux_webapp(self, resource_group):
-        runtime = 'NODE|20-lts'
+        runtime = 'NODE|22-lts'
         plan = self.create_random_name(prefix='webapp-linux-plan', length=24)
         webapp = self.create_random_name(prefix='webapp-linux', length=24)
         self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan), checks=[
@@ -1354,7 +1354,7 @@ class LinuxWebappSSHScenarioTest(ScenarioTest):
         if platform.system() == "Windows":
             return
 
-        runtime = 'node|20-lts'
+        runtime = 'node|22-lts'
         plan = self.create_random_name(prefix='webapp-ssh-plan', length=24)
         webapp = self.create_random_name(prefix='webapp-ssh', length=24)
         self.cmd(
@@ -1374,7 +1374,7 @@ class LinuxWebappRemoteSSHScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP)
     def test_linux_webapp_remote_ssh(self, resource_group):
-        runtime = 'node|20-lts'
+        runtime = 'node|22-lts'
         plan = self.create_random_name(
             prefix='webapp-remote-ssh-plan', length=40)
         webapp = self.create_random_name(prefix='webapp-remote-ssh', length=40)
@@ -1438,7 +1438,7 @@ class WebappACRScenarioTest(ScenarioTest):
     def test_acr_integration(self, resource_group):
         plan = self.create_random_name(prefix='acrtestplan', length=24)
         webapp = self.create_random_name(prefix='webappacrtest', length=24)
-        runtime = 'NODE|20-lts'
+        runtime = 'NODE|22-lts'
         acr_registry_name = webapp
         self.cmd('acr create --admin-enabled -g {} -n {} --sku Basic'.format(
             resource_group, acr_registry_name))
@@ -2523,7 +2523,7 @@ class WebappWindowsContainerBasicE2ETest(ScenarioTest):
             # this weird field means it is a linux
             JMESPathCheck('reserved', True),
             JMESPathCheck('sku.tier', 'LinuxFree')])
-        self.cmd('webapp create -g {} -n {} --plan {} -u {} -r "NODE|20-lts"'.format(resource_group, webapp_name, plan,
+        self.cmd('webapp create -g {} -n {} --plan {} -u {} -r "NODE|22-lts"'.format(resource_group, webapp_name, plan,
                                                                                     TEST_REPO_URL))
         # verify alwaysOn
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name)).assert_with_checks([
@@ -2606,7 +2606,7 @@ class WebappAcrUseManagedIdentityCredsTests(ScenarioTest):
         plan = self.create_random_name(prefix='plan-linux', length=24)
 
         self.cmd('appservice plan create -g {} -n {} --is-linux'.format(resource_group, plan))
-        self.cmd('webapp create -g {} -n {} --plan {} -u {} -r "NODE|20-lts" --assign-identity [system] --acr-use-identity --acr-identity [system]'
+        self.cmd('webapp create -g {} -n {} --plan {} -u {} -r "NODE|22-lts" --assign-identity [system] --acr-use-identity --acr-identity [system]'
                  .format(resource_group, system_identity_webapp_name, plan, TEST_REPO_URL), checks=[
             JMESPathCheck('state', 'Running'),
             JMESPathCheck('name', system_identity_webapp_name),
@@ -2615,7 +2615,7 @@ class WebappAcrUseManagedIdentityCredsTests(ScenarioTest):
 
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, system_identity_webapp_name), checks=[
             JMESPathCheck('windowsFxVersion', None),
-            JMESPathCheck('linuxFxVersion', "NODE|20-lts"),
+            JMESPathCheck('linuxFxVersion', "NODE|22-lts"),
             JMESPathCheck('acrUseManagedIdentityCreds', True)
         ])
 
@@ -2623,7 +2623,7 @@ class WebappAcrUseManagedIdentityCredsTests(ScenarioTest):
         identity_name = self.create_random_name('app-linux', 16)
         msi_result = self.cmd('identity create -g {} -n {}'.format(
             resource_group, identity_name)).get_output_in_json()
-        self.cmd('webapp create -g {} -n {} --plan {} -u {} -r "NODE|20-lts" --assign-identity {} --acr-use-identity --acr-identity {}'
+        self.cmd('webapp create -g {} -n {} --plan {} -u {} -r "NODE|22-lts" --assign-identity {} --acr-use-identity --acr-identity {}'
                  .format(resource_group, user_identity_webapp_name, plan, TEST_REPO_URL, msi_result['id'], msi_result['id']), checks=[
             JMESPathCheck('state', 'Running'),
             JMESPathCheck('name', user_identity_webapp_name),
@@ -2632,7 +2632,7 @@ class WebappAcrUseManagedIdentityCredsTests(ScenarioTest):
 
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, user_identity_webapp_name), checks=[
             JMESPathCheck('windowsFxVersion', None),
-            JMESPathCheck('linuxFxVersion', "NODE|20-lts"),
+            JMESPathCheck('linuxFxVersion', "NODE|22-lts"),
             JMESPathCheck('acrUseManagedIdentityCreds', True),
             JMESPathCheck('acrUserManagedIdentityId', msi_result['clientId'])
         ])            
@@ -3324,7 +3324,7 @@ class TrackRuntimeStatusTest(ScenarioTest):
         self.cmd(
             'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
         self.cmd(
-            'webapp create -g {} -n {} --plan {} -r "NODE|20-LTS"'.format(resource_group, webapp_name, plan_name))
+            'webapp create -g {} -n {} --plan {} -r "NODE|22-LTS"'.format(resource_group, webapp_name, plan_name))
         with self.assertRaisesRegex(CLIError, "Deployment failed because the build process failed"):
             self.cmd('webapp deploy -g {} --n {} --src-path "{}" --type zip --async'.format(resource_group, webapp_name, zip_file))
 
@@ -3338,7 +3338,7 @@ class TrackRuntimeStatusTest(ScenarioTest):
         self.cmd(
             'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
         self.cmd(
-            'webapp create -g {} -n {} --plan {} -r "NODE|20-LTS"'.format(resource_group, webapp_name, plan_name))
+            'webapp create -g {} -n {} --plan {} -r "NODE|22-LTS"'.format(resource_group, webapp_name, plan_name))
         with self.assertRaisesRegex(CLIError, "Deployment failed because the site failed to start within 10 mins."):
             self.cmd('webapp deploy -g {} --n {} --src-path "{}" --type zip --async'.format(resource_group, webapp_name, zip_file))
 
@@ -3387,7 +3387,7 @@ class TrackRuntimeStatusTest(ScenarioTest):
         self.cmd(
             'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
         self.cmd(
-            'webapp create -g {} -n {} --plan {} -r "NODE|20-LTS"'.format(resource_group, webapp_name, plan_name))
+            'webapp create -g {} -n {} --plan {} -r "NODE|22-LTS"'.format(resource_group, webapp_name, plan_name))
         with self.assertRaisesRegex(CLIError, "Deployment failed because the build process failed"):
             self.cmd('webapp deployment source config-zip -g {} --n {} --src "{}"'.format(resource_group, webapp_name, zip_file))
 
@@ -3401,7 +3401,7 @@ class TrackRuntimeStatusTest(ScenarioTest):
         self.cmd(
             'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
         self.cmd(
-            'webapp create -g {} -n {} --plan {} -r "NODE|20-LTS"'.format(resource_group, webapp_name, plan_name))
+            'webapp create -g {} -n {} --plan {} -r "NODE|22-LTS"'.format(resource_group, webapp_name, plan_name))
         with self.assertRaisesRegex(CLIError, "Deployment failed because the site failed to start within 10 mins."):
             self.cmd('webapp deployment source config-zip -g {} --n {} --src "{}"'.format(resource_group, webapp_name, zip_file))
 
