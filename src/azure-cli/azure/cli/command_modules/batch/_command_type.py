@@ -689,11 +689,26 @@ class AzureBatchDataPlaneCommand:
         return filtered_members
 
     def convert_to_track1_type(self, original_type):
+        # Handle Python 3.14 pipe union syntax at the top level: "A | B | None"
+        # Only applies when not inside brackets (e.g. not List[A | B])
+        if original_type is not None and " | " in original_type and "[" not in original_type:
+            parts = [p.strip() for p in original_type.split(' | ')]
+            non_none_parts = [p for p in parts if p != 'None']
+            if non_none_parts:
+                original_type = non_none_parts[0]
+        # Handle Python 3.14 pipe union syntax inside brackets: "List[str | SomeType]"
+        # Replace inner "str | X" with just "X"
+        if original_type is not None and " | " in original_type:
+            original_type = re.sub(r'str \| (\w)', r'\1', original_type)
         if original_type is not None and "ForwardRef" in original_type:
             pattern = r"ForwardRef\('_models\.(.*?)'\)"
             original_type = re.sub(pattern, r'\1', original_type)
         if original_type is not None and "_models." in original_type:
             original_type = original_type.replace("_models.", "")
+        if original_type is not None and "_enums." in original_type:
+            original_type = original_type.replace("_enums.", "")
+        if original_type is not None and "azure.batch.models." in original_type:
+            original_type = original_type.replace("azure.batch.models.", "")
         if original_type is not None and "typing.List" in original_type:
             original_type = original_type.replace("typing.List", "List")
         if original_type is not None and "typing.Dict" in original_type:
@@ -710,8 +725,8 @@ class AzureBatchDataPlaneCommand:
                 pattern = r"typing\.Union\[str, (.+?)\]"
                 original_type = re.sub(pattern, r"\1", original_type)
 
-        if original_type is not None and "<class" in original_type:
-            pattern = r"<class '([\w\.]+)'>"
+        if original_type is not None and ("<class" in original_type or "<enum" in original_type):
+            pattern = r"<(?:class|enum) '([\w\.]+)'>"
             match = re.search(pattern, original_type)
             if match:
                 original_type = match.group(1)
@@ -738,25 +753,52 @@ class AzureBatchDataPlaneCommand:
     def get_track1_attribute_map(self, cls):
         # pylint: disable=protected-access
         member_types = {}
-        pattern1 = r"^typing\.Union\[str, (.+), NoneType\]$"
-        pattern2 = r"^typing\.Union\[(.+), NoneType\]$"
-        pattern3 = r"^typing\.Optional\[(.+)\]$"
 
         rest_names = self.get_track1_rest_names(cls)
-        for name, typ in cls.__annotations__.items():
-            if hasattr(typ, '_name') and typ._name is not None and typ._name == 'Optional':
-                track1_type = self.convert_to_track1_type(str(get_args(typ)[0]))
-            else:
-                track1_type = str(typ)
 
-                if re.match(pattern1, track1_type):
-                    track1_type = self.convert_to_track1_type(str(get_args(typ)[1]))
-                elif re.match(pattern2, track1_type):
-                    track1_type = self.convert_to_track1_type(str(get_args(typ)[0]))
-                elif re.match(pattern3, track1_type):
-                    track1_type = self.convert_to_track1_type(str(get_args(typ)[0]))
+        # Use get_type_hints to resolve ForwardRef strings and get resolved type information
+        globalns = {}
+        globalns.update(vars(importlib.import_module(cls.__module__)))
+        # azure batch models uses an alias _models which throws off the get_type_hints eval, need this to correct
+        globalns['_models'] = importlib.import_module('azure.batch.models')
+        hints = get_type_hints(cls, globalns=globalns)
+
+        for name, type_hint in hints.items():
+            args = get_args(type_hint)
+
+            # Check if this is an optional type (Union with None)
+            is_optional = type(None) in args
+
+            if is_optional:
+                # Extract non-None types from the union
+                non_none_args = tuple(arg for arg in args if arg is not type(None))
+                if non_none_args:
+                    # Use the first non-None type (or first non-str type if multiple)
+                    if len(non_none_args) == 1:
+                        track1_type = self.convert_to_track1_type(str(non_none_args[0]))
+                    else:
+                        # Multiple non-None types: prefer first non-str type
+                        track1_type = None
+                        for arg in non_none_args:
+                            if arg != str:
+                                track1_type = self.convert_to_track1_type(str(arg))
+                                break
+                        if track1_type is None:
+                            # All were str or similar, use first
+                            track1_type = self.convert_to_track1_type(str(non_none_args[0]))
                 else:
-                    track1_type = self.convert_to_track1_type(track1_type)
+                    # No non-None args (shouldn't happen), use original
+                    track1_type = self.convert_to_track1_type(str(type_hint))
+            else:
+                # Not optional. If it's a Union (e.g. Union[str, SomeEnum]), extract the non-str type.
+                if args and str in args:
+                    non_str_args = [a for a in args if a != str]
+                    if non_str_args:
+                        track1_type = self.convert_to_track1_type(str(non_str_args[0]))
+                    else:
+                        track1_type = self.convert_to_track1_type(str(type_hint))
+                else:
+                    track1_type = self.convert_to_track1_type(str(type_hint))
 
             if rest_names[name] is None:
                 print("none")
@@ -776,8 +818,9 @@ class AzureBatchDataPlaneCommand:
         members = get_type_hints(cls, globalns=globalns)
         filtered_members = {}
         for name, type_hint in members.items():
-            is_optional = (type_hint._name == 'Optional' or type_hint._name is None
-                           if hasattr(type_hint, '_name') else False)
+            # Use get_args() to detect optional types (stable across Python 3.13 and 3.14)
+            args = get_args(type_hint)
+            is_optional = type(None) in args
             filtered_members[name] = {'required': not is_optional}
         return filtered_members
 
