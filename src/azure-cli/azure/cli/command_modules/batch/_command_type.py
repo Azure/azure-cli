@@ -753,6 +753,25 @@ class AzureBatchDataPlaneCommand:
                 rest_names[name] = rest_name
         return rest_names
 
+    def _resolve_track1_type_hint(self, type_hint):
+        """Resolve type hints to the legacy track1 type string format."""
+        args = get_args(type_hint)
+
+        # Optional[T] / Union[..., None] -> select the best non-None candidate.
+        if type(None) in args:
+            non_none_args = [arg for arg in args if arg is not type(None)]
+            preferred_args = [arg for arg in non_none_args if arg != str] or non_none_args
+            selected = preferred_args[0] if preferred_args else type_hint
+            return self.convert_to_track1_type(str(selected))
+
+        # Union[str, X] -> prefer X for command argument flattening.
+        if args and str in args:
+            non_str_args = [arg for arg in args if arg != str]
+            if non_str_args:
+                return self.convert_to_track1_type(str(non_str_args[0]))
+
+        return self.convert_to_track1_type(str(type_hint))
+
     def get_track1_attribute_map(self, cls):
         # pylint: disable=protected-access
         member_types = {}
@@ -769,42 +788,7 @@ class AzureBatchDataPlaneCommand:
         hints = get_type_hints(cls, globalns=globalns)
 
         for name, type_hint in hints.items():
-            args = get_args(type_hint)
-
-            # Check if this is an optional type (Union with None)
-            is_optional = type(None) in args
-
-            if is_optional:
-                # Extract non-None types from the union
-                non_none_args = tuple(arg for arg in args if arg is not type(None))
-                if non_none_args:
-                    # Use the first non-None type (or first non-str type if multiple)
-                    if len(non_none_args) == 1:
-                        track1_type = self.convert_to_track1_type(str(non_none_args[0]))
-                    else:
-                        # Multiple non-None types: prefer first non-str type
-                        track1_type = None
-                        for arg in non_none_args:
-                            if arg != str:
-                                track1_type = self.convert_to_track1_type(str(arg))
-                                break
-                        if track1_type is None:
-                            # All were str or similar, use first
-                            track1_type = self.convert_to_track1_type(str(non_none_args[0]))
-                else:
-                    # No non-None args (shouldn't happen), use original
-                    track1_type = self.convert_to_track1_type(str(type_hint))
-            else:
-                # Not optional. If it's a Union (e.g. Union[str, SomeEnum]), extract the non-str type.
-                if args and str in args:
-                    non_str_args = [a for a in args if a != str]
-                    if non_str_args:
-                        track1_type = self.convert_to_track1_type(str(non_str_args[0]))
-                    else:
-                        track1_type = self.convert_to_track1_type(str(type_hint))
-                else:
-                    track1_type = self.convert_to_track1_type(str(type_hint))
-
+            track1_type = self._resolve_track1_type_hint(type_hint)
             member_types[name] = {'key': rest_names[name], 'type': track1_type}
 
         return member_types
