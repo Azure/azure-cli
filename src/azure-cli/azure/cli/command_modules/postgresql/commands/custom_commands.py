@@ -561,7 +561,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
 
     # High availability can't be updated with existing properties
     high_availability_param = postgresql_flexibleservers.models.HighAvailability()
-    high_availability = "Disabled"
+    high_availability = None
     if zonal_resiliency is not None:
         if zonal_resiliency.lower() == 'disabled':
             high_availability = 'Disabled'

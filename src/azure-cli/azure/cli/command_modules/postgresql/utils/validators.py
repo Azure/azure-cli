@@ -362,7 +362,7 @@ def _pg_zonal_resiliency_validator(zonal_resiliency, allow_same_zone,
 
     if standby_availability_zone:
         if not zonal_resiliency_enabled:
-            raise ArgumentUsageError('To set --standby-availability-zone, enable --zonal-resiliency.')
+            raise ArgumentUsageError('To set --standby-zone, enable --zonal-resiliency.')
         if zone == standby_availability_zone:
             raise ArgumentUsageError('Your server is in availability zone {}. '
                                      'The standby availability zone must be different from the server zone.'
