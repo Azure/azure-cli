@@ -147,9 +147,17 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         container_registry_url = parse_docker_image_name(deployment_container_image_name)
 
     if container_image_name:
-        container_image_name = container_image_name if not container_registry_url else "{}/{}".format(
-            urlparse(container_registry_url).hostname,
-            container_image_name[1:] if container_image_name.startswith('/') else container_image_name)
+        if container_registry_url:
+            registry_host = urlparse(container_registry_url).hostname
+            # Warn if image name already includes the registry host
+            if registry_host and container_image_name.lower().startswith(registry_host.lower() + "/"):
+                logger.warning("Note: --container-image-name '%s' appears to include the registry host. "
+                               "The --container-registry-url host is prepended automatically. "
+                               "The resulting image will be: %s/%s",
+                               container_image_name, registry_host, container_image_name)
+            container_image_name = container_image_name if not container_registry_url else "{}/{}".format(
+                urlparse(container_registry_url).hostname,
+                container_image_name[1:] if container_image_name.startswith('/') else container_image_name)
     if deployment_container_image_name:
         container_image_name = deployment_container_image_name
 
@@ -363,6 +371,11 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         update_site_configs(cmd, resource_group_name, name, acr_identity=acr_identity)
 
     _enable_basic_auth(cmd, name, None, resource_group_name, basic_auth.lower())
+    # Only suggest deployment command when no deployment method is already configured
+    if not using_webapp_up and not any([container_image_name, deployment_container_image_name,
+                                        multicontainer_config_type, sitecontainers_app,
+                                        deployment_source_url, deployment_local_git]):
+        logger.warning("Webapp '%s' created. Deploy your code with: az webapp deploy", name)
     return webapp
 
 
@@ -2153,7 +2166,8 @@ def set_webapp(cmd, resource_group_name, name, slot=None, skip_dns_registration=
 
 
 def update_webapp(cmd, instance, client_affinity_enabled=None, https_only=None, minimum_elastic_instance_count=None,
-                  prewarmed_instance_count=None, end_to_end_encryption_enabled=None):
+                  prewarmed_instance_count=None, end_to_end_encryption_enabled=None,
+                  platform_release_channel=None):
     if 'function' in instance.kind:
         raise ValidationError("please use 'az functionapp update' to update this function app")
     if minimum_elastic_instance_count or prewarmed_instance_count:
@@ -2189,6 +2203,10 @@ def update_webapp(cmd, instance, client_affinity_enabled=None, https_only=None, 
 
     if prewarmed_instance_count is not None:
         instance.site_config.pre_warmed_instance_count = prewarmed_instance_count
+
+    if platform_release_channel is not None:
+        use_additional_properties(instance)
+        instance.additional_properties["properties"]["platformReleaseChannel"] = platform_release_channel
 
     return instance
 
@@ -2811,6 +2829,9 @@ def delete_function_app(cmd, resource_group_name, name, keep_empty_plan=None, sl
 def delete_webapp(cmd, resource_group_name, name, keep_metrics=None, keep_empty_plan=None,
                   keep_dns_registration=None, slot=None):  # pylint: disable=unused-argument
     client = web_client_factory(cmd.cli_ctx)
+    if not keep_empty_plan and not slot:
+        logger.warning("Note: If this is the last app on the plan, the plan will also be deleted. "
+                       "Use --keep-empty-plan to prevent this.")
     if slot:
         client.web_apps.delete_slot(resource_group_name, name, slot,
                                     delete_metrics=False if keep_metrics else None,
@@ -3832,9 +3853,17 @@ def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_sou
         container_registry_url = parse_docker_image_name(deployment_container_image_name)
 
     if container_image_name:
-        container_image_name = container_image_name if not container_registry_url else "{}/{}".format(
-            urlparse(container_registry_url).hostname,
-            container_image_name[1:] if container_image_name.startswith('/') else container_image_name)
+        if container_registry_url:
+            registry_host = urlparse(container_registry_url).hostname
+            # Warn if image name already includes the registry host
+            if registry_host and container_image_name.lower().startswith(registry_host.lower() + "/"):
+                logger.warning("Note: --container-image-name '%s' appears to include the registry host. "
+                               "The --container-registry-url host is prepended automatically. "
+                               "The resulting image will be: %s/%s",
+                               container_image_name, registry_host, container_image_name)
+            container_image_name = container_image_name if not container_registry_url else "{}/{}".format(
+                urlparse(container_registry_url).hostname,
+                container_image_name[1:] if container_image_name.startswith('/') else container_image_name)
     if deployment_container_image_name:
         container_image_name = deployment_container_image_name
 
@@ -4053,6 +4082,8 @@ def enable_local_git(cmd, resource_group_name, name, slot=None):
     site_config = get_site_configs(cmd, resource_group_name, name, slot)
     site_config.scm_type = 'LocalGit'
     _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'create_or_update_configuration', slot, site_config)
+    logger.warning("Note: The default deployment branch is 'master'. If your local branch is 'main', "
+                   "either push with: git push azure main:master, or set app setting DEPLOYMENT_BRANCH=main.")
     return {'url': _get_local_git_url(cmd.cli_ctx, client, resource_group_name, name, slot)}
 
 
@@ -4223,7 +4254,7 @@ has been deployed ".format(app_service_environment)
     # the api is odd on parameter naming, have to live with it for now
     sku_def = SkuDescription(tier=get_sku_tier(sku), name=_normalize_sku(sku), capacity=number_of_workers)
     plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def,
-                              reserved=(is_linux or None), hyper_v=(hyper_v or None),
+                              reserved=is_linux, hyper_v=(hyper_v or None),
                               per_site_scaling=per_site_scaling, hosting_environment_profile=ase_def,
                               async_scaling_enabled=async_scaling_enabled)
 
@@ -4292,6 +4323,9 @@ has been deployed ".format(app_service_environment)
         "install_scripts": install_scripts,
         "storage_mounts": storage_mounts,
     })
+
+    os_type = 'Linux' if is_linux else ('Hyper-V' if hyper_v else 'Windows')
+    logger.warning("Creating App Service Plan '%s' (%s).", name, os_type)
 
     if no_wait:
         return poller.result()
@@ -7066,7 +7100,7 @@ def create_functionapp_app_service_plan(cmd, resource_group_name, name, is_linux
         number_of_workers = validate_range_of_int_flag('--number-of-workers', number_of_workers, min_val=0, max_val=20)
     sku_def = SkuDescription(tier=tier, name=sku, capacity=number_of_workers)
     plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def,
-                              reserved=(is_linux or None), maximum_elastic_worker_count=max_burst,
+                              reserved=is_linux, maximum_elastic_worker_count=max_burst,
                               hyper_v=None, name=name)
 
     if zone_redundant:
@@ -9077,7 +9111,8 @@ def get_history_triggered_webjob(cmd, resource_group_name, name, webjob_name, sl
 
 def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None, sku=None,  # pylint: disable=too-many-statements,too-many-branches
               os_type=None, runtime=None, dryrun=False, logs=False, launch_browser=False, html=False,
-              app_service_environment=None, track_status=True, enable_kudu_warmup=True, basic_auth=""):
+              app_service_environment=None, track_status=True, enable_kudu_warmup=True, basic_auth="",
+              auto_generated_domain_name_label_scope=None):
     if not name:
         name = generate_default_app_name(cmd)
 
@@ -9093,6 +9128,8 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
     _create_new_app = _site_availability.name_available
     runtime = _StackRuntimeHelper.remove_delimiters(runtime)
     os_name = os_type if os_type else detect_os_from_src(src_dir, html, runtime)
+    if not os_type:
+        logger.warning("No --os-type specified. Defaulting to '%s'.", os_name)
     _is_linux = os_name.lower() == LINUX_OS_NAME
     helper = _StackRuntimeHelper(cmd, linux=_is_linux, windows=not _is_linux)
 
@@ -9112,6 +9149,13 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
         _data = get_runtime_version_details(_lang_details.get('file_loc'), language, helper, _is_linux)
         version_used_create = _data.get('to_create')
         detected_version = _data.get('detected')
+        if language and language.lower() != 'static':
+            if not version_used_create or version_used_create == '-':
+                logger.warning("No --runtime specified. Could not auto-detect a valid %s version. "
+                               "Please specify --runtime explicitly. "
+                               "Use 'az webapp list-runtimes' for available options.", language.upper())
+            else:
+                logger.warning("No --runtime specified. Using %s version: %s.", language, version_used_create)
 
     runtime_version = "{}|{}".format(language, version_used_create) if \
         version_used_create != "-" else version_used_create
@@ -9166,6 +9210,7 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
         loc = set_location(cmd, sku, location)
         rg_name = get_rg_to_use(user, resource_group_name)
         _create_new_rg = not check_resource_group_exists(cmd, rg_name)
+        _plan_not_provided = plan is None
         plan = get_plan_to_use(cmd=cmd,
                                user=user,
                                loc=loc,
@@ -9175,6 +9220,8 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
                                plan=plan,
                                is_linux=_is_linux,
                                client=client)
+        if _plan_not_provided:
+            logger.warning("No --plan specified. Auto-generated plan: '%s'.", plan)
     dry_run_str = r""" {
                 "name" : "%s",
                 "appserviceplan" : "%s",
@@ -9200,7 +9247,7 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
         create_resource_group(cmd, rg_name, loc)
         logger.warning("Resource group creation complete")
     # create ASP
-    logger.warning("Creating AppServicePlan '%s' or Updating if already exists", plan)
+    logger.warning("Creating AppServicePlan '%s' in '%s' or Updating if already exists", plan, loc)
     # we will always call the ASP create or update API so that in case of re-deployment, if the SKU or plan setting are
     # updated we update those
     try:
@@ -9223,7 +9270,8 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
     if _create_new_app:
         logger.warning("Creating webapp '%s' ...", name)
         create_webapp(cmd, rg_name, name, plan, runtime_version if not html else None,
-                      using_webapp_up=True, language=language)
+                      using_webapp_up=True, language=language,
+                      auto_generated_domain_name_label_scope=auto_generated_domain_name_label_scope)
         _configure_default_logging(cmd, rg_name, name)
     else:  # for existing app if we might need to update the stack runtime settings
         helper = _StackRuntimeHelper(cmd, linux=_is_linux, windows=not _is_linux)
@@ -9517,6 +9565,15 @@ def perform_onedeploy_webapp(cmd,
     client = web_client_factory(cmd.cli_ctx)
     app = client.web_apps.get(resource_group_name, name)
     params.is_linux_webapp = is_linux_webapp(app)
+
+    # Warn that zip deploy won't auto-build on Linux
+    if params.is_linux_webapp and artifact_type in (None, 'zip'):
+        logger.warning(
+            "Note: 'az webapp deploy' does not run build automation (dependency installation, "
+            "compilation, etc.) by default for Linux web apps. If your package is not pre-built, "
+            "set the app setting SCM_DO_BUILD_DURING_DEPLOYMENT=true to enable builds during deployment."
+        )
+
     params.is_functionapp = False
     return _perform_onedeploy_internal(params)
 

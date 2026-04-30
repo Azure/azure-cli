@@ -24,13 +24,13 @@ class PostgreSQLFlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
         new_version = '18'
         location = DEFAULT_LOCATION
 
-        # create server
+        # Create server
         self.cmd('postgres flexible-server create -g {} -n {} --tier GeneralPurpose --location {} --version {} --public-access none --yes'.format(
             resource_group, server_name, location, current_version))
 
         self.cmd('postgres flexible-server show -g {} -n {}'.format(resource_group, server_name),
                  checks=[JMESPathCheck('version', current_version)])
 
-        # upgrade server
+        # Upgrade server
         result = self.cmd('postgres flexible-server upgrade -g {} -n {} --version {} --yes'.format(resource_group, server_name, new_version)).get_output_in_json()
         self.assertTrue(result['version'].startswith(new_version))

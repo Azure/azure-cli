@@ -719,6 +719,166 @@ examples:
     text: az cognitiveservices agent update --account-name myAccount --project-name myProject --name myAgent --agent-version 1 --min-replicas 1 --max-replicas 2
 """
 
+helps['cognitiveservices account managed-network'] = """
+    type: group
+    short-summary: Manage the managed network settings for an Azure Cognitive Services account.
+    long-summary: >
+        Managed network settings control the network isolation mode and firewall configuration
+        for AI Foundry accounts.
+"""
+
+helps['cognitiveservices account managed-network create'] = """
+    type: command
+    short-summary: Create a managed network for an Azure Cognitive Services account.
+    examples:
+    - name: Create a managed network with internet outbound access.
+      text: >
+        az cognitiveservices account managed-network create
+        --name my-account
+        --resource-group my-resource-group
+        --managed-network allow_internet_outbound
+    - name: Create a managed network with approved outbound only and a standard firewall.
+      text: >
+        az cognitiveservices account managed-network create
+        --name my-account
+        --resource-group my-resource-group
+        --managed-network allow_only_approved_outbound
+        --firewall-sku Standard
+"""
+
+helps['cognitiveservices account managed-network update'] = """
+    type: command
+    short-summary: Update managed network settings for an Azure Cognitive Services account.
+    examples:
+    - name: Update the firewall SKU.
+      text: >
+        az cognitiveservices account managed-network update
+        --name my-account
+        --resource-group my-resource-group
+        --firewall-sku Standard
+    - name: Change the isolation mode.
+      text: >
+        az cognitiveservices account managed-network update
+        --name my-account
+        --resource-group my-resource-group
+        --managed-network allow_only_approved_outbound
+"""
+
+helps['cognitiveservices account managed-network show'] = """
+    type: command
+    short-summary: Show the managed network settings for an Azure Cognitive Services account.
+    examples:
+    - name: Show managed network settings.
+      text: >
+        az cognitiveservices account managed-network show
+        --name my-account
+        --resource-group my-resource-group
+"""
+
+helps['cognitiveservices account managed-network provision-network'] = """
+    type: command
+    short-summary: Provision the managed network for an Azure Cognitive Services account.
+    long-summary: >
+        Triggers provisioning of the managed network. This is a long-running operation.
+    examples:
+    - name: Provision the managed network.
+      text: >
+        az cognitiveservices account managed-network provision-network
+        --name my-account
+        --resource-group my-resource-group
+"""
+
+helps['cognitiveservices account managed-network outbound-rule'] = """
+    type: group
+    short-summary: Manage outbound rules for the managed network of an Azure Cognitive Services account.
+    long-summary: >
+        Outbound rules control egress traffic from the managed network. Rules can be
+        of type FQDN, PrivateEndpoint, or ServiceTag.
+"""
+
+helps['cognitiveservices account managed-network outbound-rule list'] = """
+    type: command
+    short-summary: List all outbound rules for the managed network.
+    examples:
+    - name: List all outbound rules.
+      text: >
+        az cognitiveservices account managed-network outbound-rule list
+        --name my-account
+        --resource-group my-resource-group
+"""
+
+helps['cognitiveservices account managed-network outbound-rule show'] = """
+    type: command
+    short-summary: Show details of an outbound rule.
+    examples:
+    - name: Show an outbound rule.
+      text: >
+        az cognitiveservices account managed-network outbound-rule show
+        --name my-account
+        --resource-group my-resource-group
+        --rule my-rule
+"""
+
+helps['cognitiveservices account managed-network outbound-rule remove'] = """
+    type: command
+    short-summary: Remove an outbound rule from the managed network.
+    examples:
+    - name: Remove an outbound rule.
+      text: >
+        az cognitiveservices account managed-network outbound-rule remove
+        --name my-account
+        --resource-group my-resource-group
+        --rule my-rule
+"""
+
+helps['cognitiveservices account managed-network outbound-rule set'] = """
+    type: command
+    short-summary: Create or update a single outbound rule for the managed network.
+    long-summary: >
+        Creates or updates an outbound rule of the specified type (FQDN, PrivateEndpoint, or ServiceTag).
+    examples:
+    - name: Create an FQDN outbound rule.
+      text: >
+        az cognitiveservices account managed-network outbound-rule set
+        --name my-account
+        --resource-group my-resource-group
+        --rule my-fqdn-rule
+        --type fqdn
+        --destination "*.example.com"
+    - name: Create a ServiceTag outbound rule.
+      text: >
+        az cognitiveservices account managed-network outbound-rule set
+        --name my-account
+        --resource-group my-resource-group
+        --rule my-servicetag-rule
+        --type servicetag
+        --category UserDefined
+        --destination '{"serviceTag": "Storage", "protocol": "TCP", "portRanges": "443"}'
+    - name: Create a PrivateEndpoint outbound rule.
+      text: >
+        az cognitiveservices account managed-network outbound-rule set
+        --name my-account
+        --resource-group my-resource-group
+        --rule my-pe-rule
+        --type privateendpoint
+        --destination /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/my-rg/providers/Microsoft.Storage/storageAccounts/mystorageaccount
+        --subresource-target blob
+"""
+
+helps['cognitiveservices account managed-network outbound-rule bulk-set'] = """
+    type: command
+    short-summary: Bulk create or update outbound rules from a YAML or JSON file.
+    long-summary: >
+        Reads outbound rules from a YAML or JSON file and creates or updates them in bulk.
+    examples:
+    - name: Bulk set outbound rules from a YAML file.
+      text: >
+        az cognitiveservices account managed-network outbound-rule bulk-set
+        --name my-account
+        --resource-group my-resource-group
+        --file rules.yaml
+"""
+
 helps['cognitiveservices account connection'] = """
     type: group
     short-summary: Manage Azure Cognitive Services connection and its more specific derivatives.

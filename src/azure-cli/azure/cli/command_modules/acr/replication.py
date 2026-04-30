@@ -30,10 +30,15 @@ def acr_replication_create(cmd,
                            resource_group_name=None,
                            replication_name=None,
                            region_endpoint_enabled=None,
+                           global_endpoint_routing=None,
                            zone_redundancy=None,
                            tags=None):
     registry, resource_group_name = validate_premium_registry(
         cmd, registry_name, resource_group_name, REPLICATIONS_NOT_SUPPORTED)
+
+    # --global-endpoint-routing takes precedence over deprecated --region-endpoint-enabled
+    if global_endpoint_routing is not None:
+        region_endpoint_enabled = global_endpoint_routing
 
     normalized_location = "".join(location.split()).lower()
     if registry.location == normalized_location:
@@ -80,12 +85,15 @@ def acr_replication_show(cmd,
     return client.get(resource_group_name, registry_name, replication_name)
 
 
-def acr_replication_update_custom(instance, region_endpoint_enabled=None, tags=None):
+def acr_replication_update_custom(instance, region_endpoint_enabled=None, global_endpoint_routing=None, tags=None):
     if tags is not None:
         instance.tags = tags
 
-    if region_endpoint_enabled is not None:
-        instance.region_endpoint_enabled = region_endpoint_enabled
+    # --global-endpoint-routing takes precedence over deprecated --region-endpoint-enabled
+    effective_value = global_endpoint_routing if global_endpoint_routing is not None \
+        else region_endpoint_enabled
+    if effective_value is not None:
+        instance.region_endpoint_enabled = effective_value
 
     return instance
 

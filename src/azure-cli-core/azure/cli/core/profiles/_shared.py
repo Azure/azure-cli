@@ -51,6 +51,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_NETWORK_PRIVATEDNS = ('azure.mgmt.privatedns', 'PrivateDnsManagementClient')
     MGMT_AUTHORIZATION = ('azure.mgmt.authorization', 'AuthorizationManagementClient')
     MGMT_CONTAINERREGISTRY = ('azure.mgmt.containerregistry', 'ContainerRegistryManagementClient')
+    MGMT_CONTAINERREGISTRYTASKS = ('azure.mgmt.containerregistrytasks', 'ContainerRegistryTasksMgmtClient')
     MGMT_RESOURCE_FEATURES = ('azure.mgmt.resource.features', 'FeatureClient')
     MGMT_RESOURCE_LINKS = ('azure.mgmt.resource.links', 'ManagementLinkClient')
     MGMT_RESOURCE_LOCKS = ('azure.mgmt.resource.locks', 'ManagementLockClient')
@@ -187,15 +188,8 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_NETWORK_PRIVATEDNS: None,
         ResourceType.MGMT_KEYVAULT: None,
         ResourceType.MGMT_AUTHORIZATION: None,
-        ResourceType.MGMT_CONTAINERREGISTRY: SDKProfile('2025-03-01-preview', {
-            'agent_pools': '2025-03-01-preview',
-            'tasks': '2025-03-01-preview',
-            'task_runs': '2025-03-01-preview',
-            'runs': '2025-03-01-preview',
-            'network_rule': '2021-08-01-preview',
-            'cache_rules': '2023-01-01-preview',
-            'credential_sets': '2023-01-01-preview'
-        }),
+        ResourceType.MGMT_CONTAINERREGISTRY: None,
+        ResourceType.MGMT_CONTAINERREGISTRYTASKS: None,
         # The order does make things different.
         # Please keep ResourceType.DATA_KEYVAULT_KEYS before ResourceType.DATA_KEYVAULT
         ResourceType.DATA_KEYVAULT_CERTIFICATES: None,
@@ -233,18 +227,6 @@ AD_HOC_API_VERSIONS = {
     ResourceType.MGMT_APPSERVICE: {
         # src/azure-cli/azure/cli/command_modules/appservice/_constants.py:68
         'app_service_certificate_orders': '2022-09-01'
-    },
-    ResourceType.MGMT_CONTAINERREGISTRY: {
-        # src/azure-cli/azure/cli/command_modules/acr/_client_factory.py:8
-        'VERSION_2019_05_01_PREVIEW': "2019-05-01-preview",
-        'VERSION_2019_06_01_PREVIEW': "2019-06-01-preview",
-        'VERSION_2020_11_01_PREVIEW': "2020-11-01-preview",
-        'VERSION_2021_08_01_PREVIEW': "2021-08-01-preview",
-        'VERSION_2022_02_01_PREVIEW': "2022-02-01-preview",
-        'VERSION_2023_11_01_PREVIEW': "2023-11-01-preview",
-        'VERSION_2024_11_01_PREVIEW': "2024-11-01-preview",
-        'VERSION_2025_03_01_PREVIEW': "2025-03-01-preview",
-        'VERSION_2025_04_01': "2025-04-01"
     },
     ResourceType.MGMT_MSI: {
         'user_assigned_identities': '2022-01-31-preview',

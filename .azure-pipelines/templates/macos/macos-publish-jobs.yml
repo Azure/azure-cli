@@ -1,0 +1,312 @@
+# macOS Publish Jobs Template
+#
+# Purpose: Publish signed tarballs to GitHub and update Homebrew cask
+# Usage: Called after test jobs pass
+#
+# Parameters:
+#   - PublishToGitHub: Whether to create GitHub release
+#   - UpdateHomebrew: Whether to update Homebrew cask
+#   - TestAfterPublish: Whether to test installation after publishing
+#   - GitHubRepo: GitHub repository (owner/repo)
+#   - HomebrewTapRepo: Homebrew tap repository
+#   - MacosArm64Image: VM image for ARM64 tests
+#   - MacosIntelImage: VM image for Intel tests
+#   - PythonVersion: Homebrew Python version for testing
+#   - Debug: Enable debug diagnostics
+#   - dependsOn: Jobs this depends on (typically test jobs)
+#
+# Requires:
+#   - Artifacts: macos-cli-signed-notarized-arm64, macos-cli-signed-notarized-x86_64, macos-cask-definition
+#   - Repository resource: homebrewtap (for Homebrew cask updates)
+
+parameters:
+  - name: PublishToGitHub
+    type: boolean
+    default: true
+  - name: UpdateHomebrew
+    type: boolean
+    default: true
+  - name: TestAfterPublish
+    type: boolean
+    default: true
+  - name: GitHubRepo
+    type: string
+    default: ''
+  - name: GitHubServiceConnection
+    type: string
+    default: 'Azure'
+  - name: HomebrewTapRepo
+    type: string
+    default: ''
+  - name: MacosArm64Image
+    type: string
+    default: 'macos-15-arm64'
+  - name: MacosIntelImage
+    type: string
+    default: 'macos-15'
+  - name: PythonVersion
+    type: string
+    default: '3.13'
+  - name: Debug
+    type: boolean
+    default: false
+  - name: condition
+    type: string
+    default: 'succeeded()'
+  - name: dependsOn
+    type: object
+    default: ['TestTempTapCask', 'TestOfflineInstall']
+
+jobs:
+# ============================================================================
+# JOB: GITHUB RELEASE
+# ============================================================================
+- ${{ if eq(parameters.PublishToGitHub, true) }}:
+  - job: CreateGitHubRelease
+    displayName: 'macOS | Create GitHub Release'
+    dependsOn: ${{ parameters.dependsOn }}
+    condition: succeeded()
+    pool:
+      vmImage: 'ubuntu-latest'
+    
+    steps:
+    - checkout: none
+    
+    - download: current
+      artifact: 'macos-cli-signed-notarized-arm64'
+      displayName: 'Download signed tarball (ARM64)'
+    
+    - download: current
+      artifact: 'macos-cli-signed-notarized-x86_64'
+      displayName: 'Download signed tarball (Intel)'
+    
+    - task: CopyFiles@2
+      displayName: 'Copy ARM64 release files'
+      inputs:
+        SourceFolder: '$(Pipeline.Workspace)/macos-cli-signed-notarized-arm64'
+        Contents: |
+          azure-cli-*.tar.gz
+          azure-cli-*.tar.gz.sha256
+        TargetFolder: '$(Build.ArtifactStagingDirectory)/release'
+        flattenFolders: true
+    
+    - task: CopyFiles@2
+      displayName: 'Copy Intel release files'
+      inputs:
+        SourceFolder: '$(Pipeline.Workspace)/macos-cli-signed-notarized-x86_64'
+        Contents: |
+          azure-cli-*.tar.gz
+          azure-cli-*.tar.gz.sha256
+        TargetFolder: '$(Build.ArtifactStagingDirectory)/release'
+        flattenFolders: true
+    
+    - bash: |
+        ARM64_TARBALL=$(find "$(Build.ArtifactStagingDirectory)/release" -name "azure-cli-*-macos-arm64.tar.gz" | head -1)
+        VERSION=$(basename "$ARM64_TARBALL" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+([a-z0-9]+)?' | head -1)
+        
+        echo "=== GitHub Release ==="
+        echo "Version: $VERSION"
+        ls -lh "$(Build.ArtifactStagingDirectory)/release/"
+        
+        echo "##vso[task.setvariable variable=ReleaseTag]azure-cli-${VERSION}"
+        echo "##vso[task.setvariable variable=AzureCliVersion]${VERSION}"
+        
+      displayName: 'Prepare release files'
+    
+    - task: GitHubRelease@1
+      displayName: 'Delete existing release if present'
+      continueOnError: true
+      inputs:
+        gitHubConnection: '${{ parameters.GitHubServiceConnection }}'
+        repositoryName: '${{ parameters.GitHubRepo }}'
+        action: 'delete'
+        tag: '$(ReleaseTag)'
+    
+    - task: GitHubRelease@1
+      displayName: 'Create GitHub Release'
+      inputs:
+        gitHubConnection: '${{ parameters.GitHubServiceConnection }}'
+        repositoryName: '${{ parameters.GitHubRepo }}'
+        action: 'create'
+        target: 'main'
+        tagSource: 'userSpecifiedTag'
+        tag: '$(ReleaseTag)'
+        title: 'Azure CLI $(AzureCliVersion) - macOS (Homebrew Python)'
+        releaseNotesSource: 'inline'
+        releaseNotesInline: |
+          ## Azure CLI $(AzureCliVersion) - macOS (Homebrew Python)
+          
+          ### Available Architectures
+          - **Apple Silicon (arm64)**: azure-cli-$(AzureCliVersion)-macos-arm64.tar.gz
+          - **Intel (x86_64)**: azure-cli-$(AzureCliVersion)-macos-x86_64.tar.gz
+          
+          ### Requirements
+          - macOS 11+ (Big Sur or later)
+          - Homebrew Python ${{ parameters.PythonVersion }}
+          
+          ### Installation via Homebrew Cask
+          ```bash
+          brew tap ${{ parameters.HomebrewTapRepo }}
+          brew install --cask azure-cli
+          ```
+        assets: '$(Build.ArtifactStagingDirectory)/release/*'
+        addChangeLog: false
+
+# ============================================================================
+# JOB: UPDATE HOMEBREW CASK
+# ============================================================================
+- ${{ if eq(parameters.UpdateHomebrew, true) }}:
+  - job: UpdateHomebrewCask
+    displayName: 'macOS | Update Homebrew Cask'
+    dependsOn:
+    - ${{ parameters.dependsOn }}
+    - ${{ if eq(parameters.PublishToGitHub, true) }}:
+      - CreateGitHubRelease
+    condition: succeeded()
+    pool:
+      vmImage: 'ubuntu-latest'
+    
+    steps:
+    - checkout: homebrewtap
+      persistCredentials: true
+      path: homebrew-tap
+    
+    - download: current
+      artifact: 'macos-cask-definition'
+      displayName: 'Download cask definition'
+    
+    - bash: |
+        set -e
+        
+        echo "=== Updating Homebrew Cask from artifact ==="
+        
+        cd $(Pipeline.Workspace)/homebrew-tap
+        
+        # Always start from the latest origin/main to avoid rebase conflicts
+        git fetch origin main
+        git reset --hard origin/main
+        
+        # Homebrew uses sharded cask layout: Casks/<first-letter>/<name>.rb
+        CASK_DIR="Casks/a"
+        mkdir -p "$CASK_DIR"
+        
+        # Copy the pre-generated cask from artifact
+        cp $(Pipeline.Workspace)/macos-cask-definition/azure-cli.rb "$CASK_DIR/azure-cli.rb"
+        
+        echo "=== Cask Definition ==="
+        cat "$CASK_DIR/azure-cli.rb"
+        
+        # Extract version from cask for commit message
+        VERSION=$(grep -oP 'version "\K[^"]+' "$CASK_DIR/azure-cli.rb" | head -1)
+        echo "Version: $VERSION"
+        
+        git config user.name "Azure Pipeline"
+        git config user.email "azure-pipeline@microsoft.com"
+        git add "$CASK_DIR/azure-cli.rb"
+        git commit -m "Update azure-cli to $VERSION" || echo "No changes"
+        git push origin HEAD:main
+        
+        echo "Homebrew cask updated successfully"
+        
+      displayName: 'Push cask to Homebrew tap'
+
+# ============================================================================
+# JOB: TEST PUBLISHED CASK (Optional)
+# ============================================================================
+- ${{ if and(eq(parameters.TestAfterPublish, true), eq(parameters.UpdateHomebrew, true)) }}:
+  - job: TestPublishedCask
+    displayName: 'macOS | Test Published Cask'
+    dependsOn: UpdateHomebrewCask
+    condition: succeeded()
+    strategy:
+      matrix:
+        ARM64:
+          Architecture: 'arm64'
+          vmImageName: ${{ parameters.MacosArm64Image }}
+        Intel:
+          Architecture: 'x86_64'
+          vmImageName: ${{ parameters.MacosIntelImage }}
+    pool:
+      vmImage: $(vmImageName)
+    
+    steps:
+    - checkout: none
+    
+    - bash: |
+        echo "=== Cleanup: Remove pre-installed Azure CLI ($(Architecture)) ==="
+        
+        if command -v az &> /dev/null; then
+          echo "Pre-installed Azure CLI detected: $(which az)"
+          
+          brew uninstall azure-cli 2>/dev/null || true
+          brew uninstall --cask azure-cli 2>/dev/null || true
+          
+          sudo rm -f /usr/local/bin/az
+          sudo rm -f /opt/homebrew/bin/az
+          
+          hash -r
+        fi
+        echo "Cleanup complete"
+      displayName: 'Remove pre-installed Azure CLI'
+    
+    - bash: |
+        set -e
+        
+        echo "=== Testing Published Homebrew Cask ($(Architecture)) ==="
+        
+        if ! brew list python@${{ parameters.PythonVersion }} &>/dev/null; then
+          echo "Installing Python ${{ parameters.PythonVersion }}..."
+          brew install python@${{ parameters.PythonVersion }}
+        fi
+        
+        brew tap ${{ parameters.HomebrewTapRepo }}
+        brew install --cask azure-cli
+        
+        which az
+        az version
+        
+        INSTALLED_VERSION=$(az version -o tsv --query '"azure-cli"' 2>/dev/null || echo "unknown")
+        
+        echo ""
+        echo "Installed version: $INSTALLED_VERSION"
+        echo "Published cask installation successful ($(Architecture))"
+        
+        brew uninstall --cask azure-cli
+      displayName: 'Test published cask install'
+
+# ============================================================================
+# JOB: PRINT SUMMARY
+# ============================================================================
+- job: PrintSummary
+  displayName: 'macOS | Print Summary'
+  dependsOn:
+  - ${{ parameters.dependsOn }}
+  - ${{ if eq(parameters.PublishToGitHub, true) }}:
+    - CreateGitHubRelease
+  - ${{ if eq(parameters.UpdateHomebrew, true) }}:
+    - UpdateHomebrewCask
+  - ${{ if and(eq(parameters.TestAfterPublish, true), eq(parameters.UpdateHomebrew, true)) }}:
+    - TestPublishedCask
+  condition: always()
+  pool:
+    vmImage: 'ubuntu-latest'
+  
+  steps:
+  - checkout: none
+  
+  - bash: |
+      echo "╔══════════════════════════════════════════════════════════════════╗"
+      echo "║      AZURE CLI MACOS PUBLISH SUMMARY                             ║"
+      echo "╠══════════════════════════════════════════════════════════════════╣"
+      echo "║ Architectures:  ARM64 (Apple Silicon) + x86_64 (Intel)           ║"
+      echo "║ GitHub Release: ${{ parameters.PublishToGitHub }}                                           ║"
+      echo "║ Homebrew Update: ${{ parameters.UpdateHomebrew }}                                          ║"
+      echo "║ Test After Publish: ${{ parameters.TestAfterPublish }}                                       ║"
+      echo "╠══════════════════════════════════════════════════════════════════╣"
+      echo "║ ARTIFACTS CONSUMED                                               ║"
+      echo "╠══════════════════════════════════════════════════════════════════╣"
+      echo "║ • macos-cli-signed-notarized-arm64 (tarballs)                          ║"
+      echo "║ • macos-cli-signed-notarized-x86_64 (tarballs)                         ║"
+      echo "║ • macos-cask-definition (azure-cli.rb)                                 ║"
+      echo "╚══════════════════════════════════════════════════════════════════╝"
+    displayName: 'Print Summary'

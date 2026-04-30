@@ -365,10 +365,12 @@ class ContainerAppEnvUpdateDecorator(ContainerAppEnvDecorator):
         workload_profile_name = self.get_argument_workload_profile_name()
         workload_profile_type = self.get_argument_workload_profile_type()
 
+        workload_profile_name = workload_profile_type if workload_profile_name is None else workload_profile_name
+
         if workload_profile_name:
             if "workloadProfiles" not in r["properties"] or not r["properties"]["workloadProfiles"]:
                 raise ValidationError(
-                    "This environment does not allow for workload profiles. Can create a compatible environment with 'az containerapp env create --enable-workload-profiles'")
+                    "This environment does not allow for workload profiles. You can create a compatible environment with 'az containerapp env create --enable-workload-profiles'")
 
             if workload_profile_type:
                 workload_profile_type = workload_profile_type.upper()

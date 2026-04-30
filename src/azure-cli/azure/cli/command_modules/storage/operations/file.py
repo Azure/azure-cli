@@ -538,7 +538,8 @@ def _file_share_exists(client, resource_group_name, account_name, share_name):
 
 # pylint: disable=redefined-builtin
 def generate_sas_file(cmd, client, share_name=None, directory_name=None, file_name=None, permission=None, expiry=None,
-                      start=None, id=None, ip=None, protocol=None, as_user=False, user_delegation_oid=None, **kwargs):
+                      start=None, id=None, ip=None, protocol=None, as_user=False, user_delegation_oid=None,
+                      user_delegation_tid=None, **kwargs):
     t_generate_file_sas = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_FILESHARE,
                                   '_shared_access_signature#generate_file_sas')
     file_path = file_name
@@ -552,7 +553,8 @@ def generate_sas_file(cmd, client, share_name=None, directory_name=None, file_na
         from datetime import datetime
         user_delegation_key = client.get_user_delegation_key(
             start=get_datetime_from_string(start) if start else datetime.utcnow(),
-            expiry=get_datetime_from_string(expiry))
+            expiry=get_datetime_from_string(expiry),
+            delegated_user_tid=user_delegation_tid)
     else:
         account_key = client.credential.account_key
 

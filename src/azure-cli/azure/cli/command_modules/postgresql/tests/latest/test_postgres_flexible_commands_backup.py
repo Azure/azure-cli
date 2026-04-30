@@ -43,22 +43,24 @@ class PostgreSQLFlexibleServerBackupsMgmtScenarioTest(ScenarioTest):
 
         self.assertDictEqual(automatic_backup, backups[0])
 
-        # test on-demand backup create
+        # Create on-demand backup
         backup_name = self.create_random_name(F'backup', 16)
 
         self.cmd('postgres flexible-server backup create -g {} -n {} --backup-name {}'
                 .format(resource_group, server, backup_name),
                 checks=[JMESPathCheck('name', backup_name)])
 
+        # Confirm that on-demand backup is created
         backups_update = self.cmd('postgres flexible-server backup list -g {} -n {}'
                         .format(resource_group, server)).get_output_in_json()
 
         self.assertTrue(backups_length < len(backups_update))
 
-        # test on-demand backup delete
+        # Delete on-demand backup
         self.cmd('postgres flexible-server backup delete -g {} -n {} --backup-name {} --yes'
                 .format(resource_group, server, backup_name))
 
+        # Confirm that on-demand backup is deleted
         backups_update = self.cmd('postgres flexible-server backup list -g {} -n {}'
                         .format(resource_group, server)).get_output_in_json()
 

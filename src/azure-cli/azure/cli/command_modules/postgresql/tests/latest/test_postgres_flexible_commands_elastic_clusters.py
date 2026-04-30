@@ -33,7 +33,7 @@ class ElasticClustersMgmtScenarioTest(ScenarioTest):
         cluster_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         cluster_size = 2
 
-        # create elastic cluster
+        # Create elastic cluster
         self.cmd('postgres flexible-server create -g {} -n {} --sku-name {} \
                    --version {} --cluster-option ElasticCluster --public-access Enabled'
                   .format(resource_group, cluster_name, sku_name, version))
@@ -47,7 +47,7 @@ class ElasticClustersMgmtScenarioTest(ScenarioTest):
         self.assertEqual(basic_info['version'], version)
         self.assertEqual(basic_info['cluster']['clusterSize'], cluster_size)
 
-        # test failures
+        # Test failures
         self.cmd('postgres flexible-server update -g {} -n {} --storage-auto-grow Enabled'
                  .format(resource_group, cluster_name), expect_failure=True)
         self.cmd('postgres flexible-server update -g {} -n {} --node-count {}'
@@ -57,7 +57,7 @@ class ElasticClustersMgmtScenarioTest(ScenarioTest):
         self.cmd('postgres flexible-server db create -g {} -s {} -d dbclusterfail'
                  .format(resource_group, cluster_name), expect_failure=True)
 
-        # update cluster
+        # Update cluster
         update_cluster_size = 4
         update_info = self.cmd('postgres flexible-server update -g {} -n {} --node-count {}'
                                .format(resource_group, cluster_name, update_cluster_size)).get_output_in_json()
@@ -73,6 +73,6 @@ class ElasticClustersMgmtScenarioTest(ScenarioTest):
         self.assertEqual(restore_result['name'], cluster_restore_name)
         self.assertEqual(restore_result['cluster']['clusterSize'], update_cluster_size)
 
-        # delete everything
+        # Clean up
         self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, cluster_name))
         self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, cluster_restore_name))

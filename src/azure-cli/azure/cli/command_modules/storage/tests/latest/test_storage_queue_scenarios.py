@@ -303,6 +303,7 @@ class StorageQueueScenarioTests(StorageScenarioMixin, ScenarioTest):
 
         queue_sas = self.cmd('storage queue generate-sas --account-name {} -n {} --expiry {} --permissions raup '
                              '--https-only --as-user --user-delegation-oid {} '
+                             '--user-delegation-tid ed94de55-1f87-4278-9651-525e7ba467d6 '
                              '--auth-mode login'.format(storage_account, queue, expiry, logged_in_user)).output
 
         self.assertIn('&sig=', queue_sas)
@@ -313,6 +314,7 @@ class StorageQueueScenarioTests(StorageScenarioMixin, ScenarioTest):
         self.assertIn('sks=', queue_sas)
         self.assertIn('skv=', queue_sas)
         self.assertIn('sduoid=', queue_sas)
+        self.assertIn('skdutid=', queue_sas)
 
         if self.is_live:
             self.cmd('storage message put --account-name {} --content {} -q {} --auth-mode login '

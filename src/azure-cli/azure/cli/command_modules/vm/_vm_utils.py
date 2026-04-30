@@ -93,9 +93,10 @@ def check_existence(cli_ctx, value, resource_group, provider_namespace, resource
         resource_name = id_parts['name']
         resource_type = id_parts.get('type', resource_type)
 
-    api_version = _resolve_api_version(cli_ctx, provider_namespace, resource_type, parent_path)
-    if static_version:  # only for vnet
+    if static_version:
         api_version = static_version
+    else:
+        api_version = _resolve_api_version(cli_ctx, provider_namespace, resource_type, parent_path)
 
     try:
         resource_client.get(rg, ns, parent_path, resource_type, resource_name, api_version)
@@ -619,6 +620,12 @@ def raise_unsupported_error_for_flex_vmss(vmss, error_message):
         raise ArgumentUsageError(error_message)
 
 
+def raise_unsupported_error_for_flex_vmss_by_aaz(vmss, error_message):
+    if vmss.get('orchestrationMode', '').lower() == 'flexible':
+        from azure.cli.core.azclierror import ArgumentUsageError
+        raise ArgumentUsageError(error_message)
+
+
 def is_trusted_launch_supported(supported_features):
     if not supported_features:
         return False
@@ -805,6 +812,12 @@ class VMGuestPatchClassificationLinux(Enum):
     SECURITY = 'Security'
 
 
+class CachingTypes(Enum):
+    NONE = 'None'
+    READ_ONLY = 'ReadOnly'
+    READ_WRITE = 'ReadWrite'
+
+
 class DiskCreateOptionTypes(Enum):
     ATTACH = 'Attach'
     COPY = 'Copy'
@@ -817,3 +830,12 @@ class UpgradeMode(Enum):
     AUTOMATIC = 'Automatic'
     MANUAL = 'Manual'
     ROLLING = 'Rolling'
+
+
+class OrchestrationServiceNames(Enum):
+    AUTOMATIC_REPAIRS = 'AutomaticRepairs'
+
+
+class OrchestrationServiceStateAction(Enum):
+    RESUME = 'Resume'
+    SUSPEND = 'Suspend'
