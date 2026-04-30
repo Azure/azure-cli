@@ -3,13 +3,6 @@
 Release History
 ===============
 
-2.86.1
-++++++
-
-**AKS**
-
-* Hotfix: `az aks create/update`: Add `--enable-app-routing-istio` and `--disable-app-routing-istio` to manage App Routing Istio gateway implementation (#33254)
-
 2.86.0
 ++++++
 
