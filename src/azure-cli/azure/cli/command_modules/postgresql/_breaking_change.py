@@ -3,15 +3,18 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.breaking_change import (register_argument_deprecate, register_command_group_deprecate,
-                                            register_other_breaking_change)
+from azure.cli.core.breaking_change import (
+    NextBreakingChangeWindow,
+    register_argument_deprecate,
+    register_command_group_deprecate,
+    register_other_breaking_change
+)
 
 NETWORK_RESOURCE_BREAKING_CHANGE_MESSAGE = (
     'This command will stop creating new network resources or altering existing ones which are required '
     'for the server to function, such as virtual networks, subnets, IP ranges, etc. It will instead '
     'require users to provide the necessary network resources created beforehand using the corresponding '
-    'commands from the `az network` module. This change will take effect in next breaking change '
-    'release scheduled for May 2026.'
+    'commands from the `az network` module.'
 )
 
 
@@ -108,3 +111,12 @@ register_other_breaking_change('postgres flexible-server migration',
 
 # Replica command argument changes
 register_argument_deprecate('postgres flexible-server replica create', '--replica-name', redirect='--name')
+
+# Elastic cluster command argument deprecated and will be removed in the future. Today,
+# users must specify both --cluster-option ElasticCluster and --node-count to create an
+# elastic cluster. In the future, providing --node-count alone will imply an elastic cluster.
+register_argument_deprecate(command='postgres flexible-server create', argument='--cluster-option',
+                            message='Currently, to create an elastic cluster you must specify '
+                            '--cluster-option ElasticCluster together with --node-count. In the '
+                            'future, providing --node-count alone will imply an elastic cluster.',
+                            target_version=NextBreakingChangeWindow())
