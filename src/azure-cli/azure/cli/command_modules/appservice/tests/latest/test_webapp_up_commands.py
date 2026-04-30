@@ -1077,7 +1077,7 @@ class WebAppUpE2ETests(ScenarioTest):
     @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(random_name_length=24, name_prefix='clitest', location=WINDOWS_ASP_LOCATION_WEBAPP)
-    def test_webapp_up_change_runtime_version_windows(self, resource_group):
+    def test_webapp_up_runtime_case_insensitivity_windows(self, resource_group):
         plan = self.create_random_name('up-nodeplan', 24)
         webapp_name = self.create_random_name('up-nodeapp', 24)
         zip_file_name = os.path.join(TEST_DIR, 'node_app.zip')
@@ -1108,16 +1108,18 @@ class WebAppUpE2ETests(ScenarioTest):
         app_settings = self.cmd('webapp config appsettings list').get_output_in_json()
         app_settings = {s["name"] : s["value"] for s in app_settings}
         self.assertIn("WEBSITE_NODE_DEFAULT_VERSION", app_settings)
-        self.assertIn("22", app_settings["WEBSITE_NODE_DEFAULT_VERSION"].lower())
+        self.assertEqual(app_settings["WEBSITE_NODE_DEFAULT_VERSION"], "~22")
 
-        # test changing runtime to newer version
+        # re-run with a differently-cased runtime alias to verify idempotency / case-insensitivity
+        # (Windows App Service currently only exposes Node 22 LTS, so we cannot switch to another
+        # Node major; this exercise confirms 'webapp up' treats runtime tokens case-insensitively.)
         self.cmd('webapp up -n {} -g {} --plan {} --os "windows" --runtime "node|22-lts"'.format(webapp_name, resource_group, plan))
 
-        # verify newer version
+        # verify the runtime is unchanged
         app_settings = self.cmd('webapp config appsettings list').get_output_in_json()
         app_settings = {s["name"] : s["value"] for s in app_settings}
         self.assertIn("WEBSITE_NODE_DEFAULT_VERSION", app_settings)
-        self.assertIn("22", app_settings["WEBSITE_NODE_DEFAULT_VERSION"].lower())
+        self.assertEqual(app_settings["WEBSITE_NODE_DEFAULT_VERSION"], "~22")
 
         # cleanup
         # switch back the working dir
