@@ -327,7 +327,7 @@ def load_arguments(self, _):
         c.argument('secret_identifier', validator=validate_secret_identifier, help="ID of the Key Vault object. Can be found using 'az keyvault {collection} show' command, where collection is key, secret or certificate. To set reference to the latest version of your secret, remove version information from secret identifier.")
 
     with self.argument_context('appconfig kv set-snapshot-reference') as c:
-        c.argument('key', validator=validate_key, help="Key to be set. Key cannot be a '.' or '..', or contain the '%%' character.")
+        c.argument('key', validator=validate_key, help="Key to be set. Key cannot be a '.' or '..', or contain the '%' character.")
         c.argument('label', help="If no label specified, set the key with null label by default")
         c.argument('tags', arg_type=tags_type)
         c.argument('snapshot_name', validator=validate_snapshot_reference, help='Name of the snapshot to reference. This is required.')

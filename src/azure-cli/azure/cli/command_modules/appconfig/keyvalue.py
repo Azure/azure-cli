@@ -924,19 +924,20 @@ def list_key(cmd,
                                             cli_ctx=cmd.cli_ctx if resolve_keyvault else None)
 
     if resolve_snapshot_references:
-        keyvalues = __resolve_snapshot_references(azconfig_client, keyvalues)
+        keyvalues = __resolve_snapshot_references(azconfig_client, keyvalues, cli_ctx=cmd.cli_ctx if resolve_keyvault else None)
 
     return keyvalues
 
 
-def __resolve_snapshot_references(azconfig_client, keyvalues):
+def __resolve_snapshot_references(azconfig_client, keyvalues, cli_ctx=None):
     """Return key-values in the referenced snapshot. The result may contain duplicate keys,
     which the caller is responsible for handling.
     """
     resolved_keyvalues = []
     for keyvalue in keyvalues:
         content_type = getattr(keyvalue, 'content_type', None)
-        if not (content_type and SnapshotReferenceConstants.SNAPSHOT_REFERENCE_CONTENT_TYPE in content_type):
+        if not (isinstance(content_type, str) and
+                content_type.lower() == SnapshotReferenceConstants.SNAPSHOT_REFERENCE_CONTENT_TYPE.lower()):
             resolved_keyvalues.append(keyvalue)
             continue
 
@@ -952,7 +953,7 @@ def __resolve_snapshot_references(azconfig_client, keyvalues):
             continue
 
         try:
-            snapshot_keyvalues = __read_kv_from_config_store(azconfig_client, snapshot=snapshot_name)
+            snapshot_keyvalues = __read_kv_from_config_store(azconfig_client, snapshot=snapshot_name, cli_ctx=cli_ctx)
         except Exception as ex:  # pylint: disable=broad-except
             logger.warning("Skipping snapshot reference '%s': %s", snapshot_name, str(ex))
             continue
