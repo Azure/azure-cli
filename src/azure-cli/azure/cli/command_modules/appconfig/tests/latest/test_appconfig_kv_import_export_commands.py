@@ -1277,7 +1277,7 @@ class AppConfigKubernetesConfigMapImportLiveScenarioTest(LiveScenarioTest):
         
         try:
             # Create AKS cluster and wait for completion
-            self.cmd('aks create -g {rg} -n {aks_cluster_name} -l {rg_loc} --node-count 1 --generate-ssh-keys --enable-managed-identity --enable-image-cleaner --node-os-upgrade-channel NodeImage')
+            self.cmd('aks create -g {rg} -n {aks_cluster_name} -l {rg_loc} --node-count 1 --generate-ssh-keys --enable-managed-identity --enable-image-cleaner --node-os-upgrade-channel NodeImage --os-sku AzureLinux')
             
             # Wait for AKS cluster to be ready
             self.cmd('aks wait -g {rg} -n {aks_cluster_name} --created')
