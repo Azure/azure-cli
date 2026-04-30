@@ -2786,6 +2786,44 @@ class VMUpdateTests(ScenarioTest):
             self.check('tags.tagName', 'tagValue'),
         ])
 
+    @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_vmss_ephemeral_os_disk_full_caching', location='centralus')
+    def test_vm_vmss_ephemeral_os_disk_full_caching(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'vm': 'vm1',
+            'vmss': 'vmss1',
+            'image': 'Canonical:UbuntuServer:16.04-LTS:latest',
+            'ssh_key': TEST_SSH_KEY_PUB,
+            'loc': resource_group_location,
+            'user': 'user_1',
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
+        })
+
+        # VM create with ephemeral OS disk full caching
+        self.cmd('vm create -n {vm} -g {rg} --image {image} --size Standard_D8ds_v4 --location {loc} '
+                 '--ssh-key-value \'{ssh_key}\' --ephemeral-os-disk --ephemeral-os-disk-placement CacheDisk '
+                 '--os-disk-caching ReadOnly --ephemeral-os-disk-enable-full-caching true '
+                 '--storage-sku Premium_LRS '
+                 '--admin-username {user} --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('storageProfile.osDisk.diffDiskSettings.option', 'Local'),
+            self.check('storageProfile.osDisk.diffDiskSettings.enableFullCaching', True),
+        ])
+
+        # VMSS create with ephemeral OS disk full caching (instance-count 0 to stay within quota)
+        self.cmd('vmss create -n {vmss} -g {rg} --image {image} --vm-sku Standard_D8ds_v4 '
+                 '--ephemeral-os-disk --ephemeral-os-disk-placement CacheDisk '
+                 '--os-disk-caching ReadOnly --ephemeral-os-disk-enable-full-caching true '
+                 '--storage-sku Premium_LRS --instance-count 0 '
+                 '--admin-username {user} --admin-password testPassword09! --orchestration-mode Flexible')
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.option', 'Local'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.enableFullCaching', True),
+        ])
+
 
 class VMMultiNicScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
 
