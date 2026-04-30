@@ -695,11 +695,14 @@ class AzureBatchDataPlaneCommand:
             parts = [p.strip() for p in original_type.split(' | ')]
             non_none_parts = [p for p in parts if p != 'None']
             if non_none_parts:
-                original_type = non_none_parts[0]
+                if len(non_none_parts) > 1:
+                    original_type = next((p for p in non_none_parts if p != 'str'), non_none_parts[0])
+                else:
+                    original_type = non_none_parts[0]
         # Handle Python 3.14 pipe union syntax inside brackets: "List[str | SomeType]"
         # Replace inner "str | X" with just "X"
         if original_type is not None and " | " in original_type:
-            original_type = re.sub(r'str \| (\w)', r'\1', original_type)
+            original_type = re.sub(r'\bstr\b\s*\|\s*', '', original_type)
         if original_type is not None and "ForwardRef" in original_type:
             pattern = r"ForwardRef\('_models\.(.*?)'\)"
             original_type = re.sub(pattern, r'\1', original_type)
@@ -759,8 +762,10 @@ class AzureBatchDataPlaneCommand:
         # Use get_type_hints to resolve ForwardRef strings and get resolved type information
         globalns = {}
         globalns.update(vars(importlib.import_module(cls.__module__)))
-        # azure batch models uses an alias _models which throws off the get_type_hints eval, need this to correct
+        # Azure Batch model annotations use aliases like `_models.Foo` and `_enums.Bar`.
+        # `_models` aliases resolve via azure.batch.models exports; `_enums` points to the generated enums module.
         globalns['_models'] = importlib.import_module('azure.batch.models')
+        globalns['_enums'] = importlib.import_module('azure.batch.models._enums')
         hints = get_type_hints(cls, globalns=globalns)
 
         for name, type_hint in hints.items():
@@ -800,8 +805,6 @@ class AzureBatchDataPlaneCommand:
                 else:
                     track1_type = self.convert_to_track1_type(str(type_hint))
 
-            if rest_names[name] is None:
-                print("none")
             member_types[name] = {'key': rest_names[name], 'type': track1_type}
 
         return member_types
@@ -812,8 +815,10 @@ class AzureBatchDataPlaneCommand:
         globalns = {}
         # Add the global namespace of the module where the class is defined
         globalns.update(vars(importlib.import_module(cls.__module__)))
-        # azure batch models uses an alias _models which throws off the get_type_hints eval, need this to correct
+        # Azure Batch model annotations use aliases like `_models.Foo` and `_enums.Bar`.
+        # `_models` aliases resolve via azure.batch.models exports; `_enums` points to the generated enums module.
         globalns['_models'] = importlib.import_module('azure.batch.models')
+        globalns['_enums'] = importlib.import_module('azure.batch.models._enums')
 
         members = get_type_hints(cls, globalns=globalns)
         filtered_members = {}
