@@ -50,6 +50,14 @@ class UserCredential:  # pylint: disable=too-few-public-methods
         logger.debug("UserCredential.acquire_token: scopes=%r, claims_challenge=%r, kwargs=%r",
                      scopes, claims_challenge, kwargs)
 
+        # Apply agentic session parameters for user identity flows
+        from .agentic_session import build_agentic_session_params, merge_access_token_claims
+        agentic_session_id, agentic_claims = build_agentic_session_params()
+        if agentic_session_id:
+            claims_challenge = merge_access_token_claims(claims_challenge, agentic_claims)
+            kwargs["params"] = kwargs.get("params") or {}
+            kwargs["params"]["client_session"] = agentic_session_id
+
         if claims_challenge:
             logger.info('Acquiring new access token silently with claims challenge: %s', claims_challenge)
         result = self._msal_app.acquire_token_silent_with_error(
