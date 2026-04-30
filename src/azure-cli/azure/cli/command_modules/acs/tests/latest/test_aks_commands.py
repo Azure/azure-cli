@@ -2312,6 +2312,89 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.is_empty(),
         ])
 
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_azure_service_mesh_enable_disable_istio_cni(self, resource_group, resource_group_location):
+        """ This test case exercises setting the proxy redirection mechanism for the service mesh profile.
+        It creates a cluster, enables azure service mesh with InitContainers as the initial mechanism,
+        then switches to CNIChaining and back to InitContainers using `aks mesh proxy-redirection-mechanism`.
+        """
+
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+
+        # Get the latest supported revision (compatible with current K8s versions)
+        mesh_revisions_cmd = f"aks mesh get-revisions -l {resource_group_location}"
+        mesh_revisions = self.cmd(mesh_revisions_cmd).get_output_in_json()
+        revisions = [r["revision"] for r in mesh_revisions["meshRevisions"]]
+        sorted_revisions = sort_asm_revisions(revisions)
+        latest_revision = sorted_revisions[-1]
+
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'ssh_key_value': self.generate_ssh_keys(),
+            'revision': latest_revision,
+        })
+
+        # create cluster without --enable-azure-service-mesh
+        create_cmd = (
+            'aks create --resource-group={resource_group} --name={name} --location={location} '
+            '--aks-custom-headers=AKSHTTPCustomFeatures=Microsoft.ContainerService/AzureServiceMeshPreview '
+            '--ssh-key-value={ssh_key_value} --output=json'
+        )
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # enable azure service mesh with InitContainers as the initial mechanism
+        # this ensures a deterministic test order regardless of revision defaults
+        enable_mesh_cmd = (
+            'aks mesh enable --resource-group={resource_group} --name={name} '
+            '--revision={revision} --proxy-redirection-mechanism InitContainers'
+        )
+        self.cmd(enable_mesh_cmd, checks=[
+            self.check('serviceMeshProfile.mode', 'Istio'),
+            self.check('serviceMeshProfile.istio.components.proxyRedirectionMechanism', 'InitContainers'),
+        ])
+
+        # verify idempotency: setting same mechanism fails
+        self.cmd(
+            'aks mesh proxy-redirection-mechanism --resource-group={resource_group} --name={name} --mechanism InitContainers',
+            expect_failure=True,
+        )
+
+        # switch to CNIChaining
+        self.cmd(
+            'aks mesh proxy-redirection-mechanism --resource-group={resource_group} --name={name} --mechanism CNIChaining',
+            checks=[
+                self.check('serviceMeshProfile.istio.components.proxyRedirectionMechanism', 'CNIChaining'),
+            ],
+        )
+
+        # verify idempotency: setting same mechanism fails
+        self.cmd(
+            'aks mesh proxy-redirection-mechanism --resource-group={resource_group} --name={name} --mechanism CNIChaining',
+            expect_failure=True,
+        )
+
+        # switch back to InitContainers
+        self.cmd(
+            'aks mesh proxy-redirection-mechanism --resource-group={resource_group} --name={name} --mechanism InitContainers',
+            checks=[
+                self.check('serviceMeshProfile.istio.components.proxyRedirectionMechanism', 'InitContainers'),
+            ],
+        )
+
+        # delete the cluster
+        delete_cmd = 'aks delete --resource-group={resource_group} --name={name} --yes --no-wait'
+        self.cmd(delete_cmd, checks=[
+            self.is_empty(),
+        ])
+
     # live only due to installing kubectl binary
     @live_only()
     @AllowLargeResponse()
@@ -4012,6 +4095,60 @@ spec:
             checks=[
                 self.check('provisioningState', 'Succeeded'),
                 self.check('osSku', 'Windows2022'),
+            ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_nodepool_add_with_ossku_windows2025(self, resource_group, resource_group_location):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        _, create_version = self._get_versions(resource_group_location)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'dns_name_prefix': self.create_random_name('cliaksdns', 16),
+            'location': resource_group_location,
+            'resource_type': 'Microsoft.ContainerService/ManagedClusters',
+            'windows_admin_username': 'azureuser1',
+            'windows_admin_password': 'replace-Password1234$',
+            'windows_nodepool_name': 'npwin',
+            'k8s_version': create_version,
+            'ssh_key_value': self.generate_ssh_keys()
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--dns-name-prefix={dns_name_prefix} --node-count=1 ' \
+                     '--windows-admin-username={windows_admin_username} --windows-admin-password={windows_admin_password} ' \
+                     '--load-balancer-sku=standard --vm-set-type=virtualmachinescalesets --network-plugin=azure ' \
+                     '--ssh-key-value={ssh_key_value} --kubernetes-version={k8s_version}'
+        self.cmd(create_cmd, checks=[
+            self.exists('fqdn'),
+            self.exists('nodeResourceGroup'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('windowsProfile.adminUsername', 'azureuser1')
+        ])
+
+        # add Windows2025 nodepool
+        self.cmd('aks nodepool add '
+                 '--resource-group={resource_group} '
+                 '--cluster-name={name} '
+                 '--name={windows_nodepool_name} '
+                 '--node-count=1 '
+                 '--os-type Windows '
+                 '--os-sku Windows2025 '
+                 '--enable-fips-image '
+                 '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AKSWindows2025Preview',
+            checks=[
+                self.check('provisioningState', 'Succeeded'),
+                self.check('osSku', 'Windows2025'),
+                self.check('enableFips', True),
             ])
 
         # delete
@@ -8049,7 +8186,7 @@ spec:
         # wait for cluster to fully settle before issuing next update
         self.cmd('aks wait --resource-group={resource_group} --name={name} --updated --interval 30 --timeout 600')
         if self.is_live or self.in_recording:
-            time.sleep(60)
+            time.sleep(180)
 
         # update: disable-azure-monitor-metrics
         update_cmd = 'aks update --resource-group={resource_group} --name={name} --yes --output=json ' \
@@ -15051,3 +15188,98 @@ spec:
             "aks delete --resource-group={resource_group} --name={name} --yes --no-wait",
             checks=[self.is_empty()],
         )
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest',
+                                    location='westus2', preserve_default_location=True)
+    def test_aks_create_with_enable_azure_monitor_app_monitoring(self, resource_group,
+                                                                 resource_group_location):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'ssh_key_value': self.generate_ssh_keys(),
+            'location': resource_group_location,
+        })
+
+        # create with app monitoring enabled
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--ssh-key-value={ssh_key_value} --node-count=1 --enable-managed-identity ' \
+                     '--enable-azure-monitor-app-monitoring'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('azureMonitorProfile.appMonitoring.autoInstrumentation.enabled', True),
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest',
+                                    location='westus2', preserve_default_location=True)
+    def test_aks_update_with_enable_disable_azure_monitor_app_monitoring(self, resource_group,
+                                                                         resource_group_location):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'ssh_key_value': self.generate_ssh_keys(),
+            'location': resource_group_location,
+        })
+
+        # create without app monitoring
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--ssh-key-value={ssh_key_value} --node-count=1 --enable-managed-identity '
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # update to enable app monitoring — retry on transient failures where
+        # the LRO returns before the cluster reaches provisioningState=Succeeded
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--enable-azure-monitor-app-monitoring'
+        for attempt in range(10):
+            try:
+                self.cmd(update_cmd, checks=[
+                    self.check('provisioningState', 'Succeeded'),
+                    self.check('azureMonitorProfile.appMonitoring.autoInstrumentation.enabled', True),
+                ])
+                break
+            except Exception:
+                if attempt < 9:
+                    time.sleep(60)
+                else:
+                    raise
+
+        # wait for cluster to fully settle before issuing next update
+        self.cmd('aks wait --resource-group={resource_group} --name={name} --updated --interval 30 --timeout 600')
+
+        # disable app monitoring — retry on 409 since the background
+        # PutExtensionAddonHandler.PUT may still be running after the cluster
+        # reports provisioningState=Succeeded
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--disable-azure-monitor-app-monitoring'
+        for attempt in range(10):
+            try:
+                self.cmd(update_cmd, checks=[
+                    self.check('provisioningState', 'Succeeded'),
+                    self.check('azureMonitorProfile.appMonitoring.autoInstrumentation.enabled', False),
+                ])
+                break
+            except Exception:
+                if attempt < 9:
+                    time.sleep(60)
+                else:
+                    raise
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])

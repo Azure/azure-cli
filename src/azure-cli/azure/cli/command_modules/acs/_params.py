@@ -45,7 +45,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_OS_SKU_AZURECONTAINERLINUX,
     CONST_OS_SKU_CBLMARINER, CONST_OS_SKU_MARINER,
     CONST_OS_SKU_UBUNTU, CONST_OS_SKU_UBUNTU2204, CONST_OS_SKU_UBUNTU2404,
-    CONST_OS_SKU_WINDOWS2019, CONST_OS_SKU_WINDOWS2022,
+    CONST_OS_SKU_WINDOWS2019, CONST_OS_SKU_WINDOWS2022, CONST_OS_SKU_WINDOWS2025,
     CONST_OUTBOUND_TYPE_LOAD_BALANCER, CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY,
     CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
     CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING, CONST_OUTBOUND_TYPE_NONE,
@@ -133,6 +133,7 @@ from azure.cli.command_modules.acs._validators import (
     validate_disable_windows_outbound_nat,
     validate_asm_egress_name,
     validate_crg_id, validate_apiserver_subnet_id,
+    validate_system_node_subnet_id, validate_node_subnet_id,
     validate_azure_service_mesh_revision,
     validate_message_of_the_day,
     validate_custom_ca_trust_certificates,
@@ -188,7 +189,7 @@ node_eviction_policies = [CONST_SPOT_EVICTION_POLICY_DELETE, CONST_SPOT_EVICTION
 node_os_disk_types = [CONST_OS_DISK_TYPE_MANAGED, CONST_OS_DISK_TYPE_EPHEMERAL]
 node_mode_types = [CONST_NODEPOOL_MODE_SYSTEM, CONST_NODEPOOL_MODE_USER, CONST_NODEPOOL_MODE_GATEWAY]
 node_os_skus_create = [CONST_OS_SKU_AZURELINUX, CONST_OS_SKU_AZURELINUX3, CONST_OS_SKU_AZURECONTAINERLINUX, CONST_OS_SKU_UBUNTU, CONST_OS_SKU_CBLMARINER, CONST_OS_SKU_MARINER, CONST_OS_SKU_UBUNTU2204, CONST_OS_SKU_UBUNTU2404]
-node_os_skus = node_os_skus_create + [CONST_OS_SKU_WINDOWS2019, CONST_OS_SKU_WINDOWS2022]
+node_os_skus = node_os_skus_create + [CONST_OS_SKU_WINDOWS2019, CONST_OS_SKU_WINDOWS2022, CONST_OS_SKU_WINDOWS2025]
 node_os_skus_update = [CONST_OS_SKU_AZURELINUX, CONST_OS_SKU_AZURELINUX3, CONST_OS_SKU_AZURECONTAINERLINUX, CONST_OS_SKU_UBUNTU, CONST_OS_SKU_UBUNTU2204, CONST_OS_SKU_UBUNTU2404]
 scale_down_modes = [CONST_SCALE_DOWN_MODE_DELETE, CONST_SCALE_DOWN_MODE_DEALLOCATE]
 pod_ip_allocation_modes = [CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDUAL, CONST_NETWORK_POD_IP_ALLOCATION_MODE_STATIC_BLOCK]
@@ -443,6 +444,9 @@ def load_arguments(self, _):
         c.argument('enable_private_cluster', action='store_true')
         c.argument('enable_apiserver_vnet_integration', action='store_true')
         c.argument('apiserver_subnet_id', validator=validate_apiserver_subnet_id)
+        c.argument('system_node_subnet_id', validator=validate_system_node_subnet_id)
+        c.argument('node_subnet_id', validator=validate_node_subnet_id)
+        c.argument('enable_hosted_system', action='store_true')
         c.argument('private_dns_zone')
         c.argument('disable_public_fqdn', action='store_true')
         c.argument('service_principal')
@@ -568,6 +572,7 @@ def load_arguments(self, _):
         c.argument('ksm_metric_annotations_allow_list')
         c.argument('grafana_resource_id', validator=validate_grafanaresourceid)
         c.argument('enable_windows_recording_rules', action='store_true')
+        c.argument('enable_azure_monitor_app_monitoring', action='store_true')
         c.argument('node_public_ip_tags', arg_type=tags_type, validator=validate_node_public_ip_tags,
                    help='space-separated tags: key[=value] [key[=value] ...].')
         # azure container storage
@@ -795,6 +800,8 @@ def load_arguments(self, _):
         c.argument('grafana_resource_id', validator=validate_grafanaresourceid)
         c.argument('enable_windows_recording_rules', action='store_true')
         c.argument('disable_azure_monitor_metrics', action='store_true')
+        c.argument('enable_azure_monitor_app_monitoring', action='store_true')
+        c.argument('disable_azure_monitor_app_monitoring', action='store_true')
         # azure container storage
         c.argument(
             "enable_azure_container_storage",
@@ -1252,6 +1259,15 @@ def load_arguments(self, _):
         c.argument('ca_key_object_name')
         c.argument('root_cert_object_name')
         c.argument('cert_chain_object_name')
+        c.argument('proxy_redirection_mechanism',
+                   arg_type=get_enum_type(["CNIChaining", "InitContainers"]),
+                   help='Set the proxy redirection mechanism for Azure Service Mesh.')
+
+    with self.argument_context('aks mesh proxy-redirection-mechanism') as c:
+        c.argument('mechanism',
+                   arg_type=get_enum_type(["CNIChaining", "InitContainers"]),
+                   required=True,
+                   help='The proxy redirection mechanism for Azure Service Mesh.')
 
     with self.argument_context('aks mesh get-revisions') as c:
         c.argument('location', required=True, help='Location in which to discover available Azure Service Mesh revisions.')

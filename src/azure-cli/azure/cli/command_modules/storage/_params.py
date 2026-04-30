@@ -390,8 +390,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    'public access setting for a container is required to enable anonymous access.')
         c.argument('min_tls_version', arg_type=get_enum_type(t_tls_version),
                    help='The minimum TLS version to be permitted on requests to storage. '
-                        ' Values TLS1_0 and TLS1_1 have been retired on 2026/02/03 and will be removed on 2026/03/03.'
-                        ' Microsoft recommends setting MinimumTlsVersion to TLS1_2')
+                        'TLS1_3 is not yet supported. Microsoft recommends setting MinimumTlsVersion to TLS1_2.')
         c.argument('allow_shared_key_access', allow_shared_key_access_type)
         c.argument('edge_zone', edge_zone_type)
         c.argument('identity_type', arg_type=get_enum_type(t_identity_type), arg_group='Identity',
@@ -509,8 +508,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    'public access setting for a container is required to enable anonymous access.')
         c.argument('min_tls_version', arg_type=get_enum_type(t_tls_version),
                    help='The minimum TLS version to be permitted on requests to storage. '
-                        ' Values TLS1_0 and TLS1_1 have been retired on 2026/02/03 and will be removed on 2026/03/03.'
-                        ' Microsoft recommends setting MinimumTlsVersion to TLS1_2')
+                        'TLS1_3 is not yet supported. Microsoft recommends setting MinimumTlsVersion to TLS1_2.')
         c.argument('allow_shared_key_access', allow_shared_key_access_type)
         c.argument('identity_type', arg_type=get_enum_type(t_identity_type), arg_group='Identity',
                    help='The identity type.')

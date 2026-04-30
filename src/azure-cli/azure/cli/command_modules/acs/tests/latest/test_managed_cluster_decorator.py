@@ -26,6 +26,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_MONITORING_LOG_ANALYTICS_WORKSPACE_RESOURCE_ID,
     CONST_OPEN_SERVICE_MESH_ADDON_NAME,
     CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
+    CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
     CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY,
     CONST_OUTBOUND_TYPE_LOAD_BALANCER,
     CONST_PRIVATE_DNS_ZONE_NONE,
@@ -2121,6 +2122,96 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         outbound_type_13 = ctx_13._get_outbound_type()
         expect_outbound_type_13 = CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY
         self.assertEqual(outbound_type_13,expect_outbound_type_13)
+
+        network_profile_14 = self.models.ContainerServiceNetworkProfile(
+            outbound_type=CONST_OUTBOUND_TYPE_LOAD_BALANCER
+        )
+        mc_14 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=network_profile_14,
+            sku=self.models.ManagedClusterSKU(name="Automatic"),
+        )
+        ctx_14 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({}),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        ctx_14.agentpool_context = mock.MagicMock()
+        ctx_14.agentpool_context.get_vnet_subnet_id.return_value = None
+        ctx_14.attach_mc(mc_14)
+        self.assertEqual(ctx_14.get_outbound_type(), CONST_OUTBOUND_TYPE_LOAD_BALANCER)
+
+        ctx_14_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({
+                "sku": "automatic",
+                "outbound_type": CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
+            }),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        ctx_14_1.agentpool_context = mock.MagicMock()
+        ctx_14_1.agentpool_context.get_vnet_subnet_id.return_value = None
+        with self.assertRaisesRegex(
+            RequiredArgumentMissingError,
+            "--system-node-subnet-id, --node-subnet-id and --apiserver-subnet-id",
+        ):
+            ctx_14_1.get_outbound_type()
+
+        ctx_14_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({
+                "sku": "automatic",
+                "outbound_type": CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
+            }),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        ctx_14_2.agentpool_context = mock.MagicMock()
+        ctx_14_2.agentpool_context.get_vnet_subnet_id.return_value = None
+        with self.assertRaisesRegex(
+            RequiredArgumentMissingError,
+            "--system-node-subnet-id, --node-subnet-id and --apiserver-subnet-id",
+        ):
+            ctx_14_2.get_outbound_type()
+
+        byo_params = {
+            "sku": "automatic",
+            "system_node_subnet_id": "/subscriptions/s/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/v/subnets/sys",
+            "node_subnet_id": "/subscriptions/s/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/v/subnets/node",
+            "apiserver_subnet_id": "/subscriptions/s/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/v/subnets/api",
+        }
+        ctx_15 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({**byo_params, "outbound_type": CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY}),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        ctx_15.agentpool_context = mock.MagicMock()
+        ctx_15.agentpool_context.get_vnet_subnet_id.return_value = None
+        self.assertEqual(ctx_15.get_outbound_type(), CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY)
+
+        ctx_16 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({**byo_params, "outbound_type": CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING}),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        ctx_16.agentpool_context = mock.MagicMock()
+        ctx_16.agentpool_context.get_vnet_subnet_id.return_value = None
+        self.assertEqual(ctx_16.get_outbound_type(), CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING)
+
+        ctx_17 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({**byo_params, "outbound_type": CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY}),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        ctx_17.agentpool_context = mock.MagicMock()
+        ctx_17.agentpool_context.get_vnet_subnet_id.return_value = None
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx_17.get_outbound_type()
 
     def test_get_network_plugin_mode(self):
         # default
@@ -4426,6 +4517,82 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         with self.assertRaises(RequiredArgumentMissingError):
             ctx_6.get_apiserver_subnet_id()
 
+    def test_byo_hosted_system_subnets_validation(self):
+        system_subnet = "/subscriptions/s/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/v/subnets/sys"
+        node_subnet = "/subscriptions/s/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/v/subnets/nod"
+        api_subnet = "/subscriptions/s/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/v/subnets/api"
+
+        # partial trio -> RequiredArgumentMissingError
+        ctx = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({
+                "sku": "automatic",
+                "system_node_subnet_id": system_subnet,
+            }),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx.validate_byo_hosted_system_subnets()
+
+        # trio without --sku automatic -> RequiredArgumentMissingError
+        ctx = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({
+                "sku": "base",
+                "system_node_subnet_id": system_subnet,
+                "node_subnet_id": node_subnet,
+                "apiserver_subnet_id": api_subnet,
+            }),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx.validate_byo_hosted_system_subnets()
+
+        # happy path: full trio + automatic
+        ctx = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({
+                "sku": "automatic",
+                "system_node_subnet_id": system_subnet,
+                "node_subnet_id": node_subnet,
+                "apiserver_subnet_id": api_subnet,
+            }),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        ctx.validate_byo_hosted_system_subnets()
+        self.assertEqual(ctx.get_system_node_subnet_id(), system_subnet)
+        self.assertEqual(ctx.get_node_subnet_id(), node_subnet)
+        self.assertTrue(ctx.get_enable_hosted_system())  # BYO trio implies enable_hosted_system
+
+        # --enable-hosted-system without --sku automatic -> RequiredArgumentMissingError
+        ctx = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({
+                "sku": "base",
+                "enable_hosted_system": True,
+            }),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        with self.assertRaises(RequiredArgumentMissingError):
+            ctx.validate_byo_hosted_system_subnets()
+
+        # happy path: --enable-hosted-system alone on automatic
+        ctx = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({
+                "sku": "automatic",
+                "enable_hosted_system": True,
+            }),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        ctx.validate_byo_hosted_system_subnets()
+        self.assertTrue(ctx.get_enable_hosted_system())
+
     def test_get_private_dns_zone(self):
         # default
         ctx_1 = AKSManagedClusterContext(
@@ -6039,6 +6206,136 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             mode="Istio", istio=self.models.IstioServiceMesh(revisions=["asm-1-18"])
         ))
 
+    def test_handle_istio_cni_asm(self):
+        # Test set proxy redirection mechanism to CNIChaining
+        ctx_cni = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "proxy_redirection_mechanism": "CNIChaining",
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        old_profile = self.models.ServiceMeshProfile(
+            mode="Istio",
+            istio=self.models.IstioServiceMesh(
+                revisions=["asm-1-18"],
+                components=self.models.IstioComponents(),
+            ),
+        )
+        new_profile, updated = ctx_cni._handle_istio_cni_asm(old_profile)
+        self.assertEqual(updated, True)
+        self.assertEqual(
+            new_profile.istio.components.proxy_redirection_mechanism,
+            "CNIChaining",
+        )
+
+        # Test set proxy redirection mechanism to InitContainers
+        ctx_init = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "proxy_redirection_mechanism": "InitContainers",
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        old_profile = self.models.ServiceMeshProfile(
+            mode="Istio",
+            istio=self.models.IstioServiceMesh(
+                revisions=["asm-1-18"],
+                components=self.models.IstioComponents(
+                    proxy_redirection_mechanism="CNIChaining"
+                ),
+            ),
+        )
+        new_profile, updated = ctx_init._handle_istio_cni_asm(old_profile)
+        self.assertEqual(updated, True)
+        self.assertEqual(
+            new_profile.istio.components.proxy_redirection_mechanism,
+            "InitContainers",
+        )
+
+        # Test error when ASM is not enabled
+        ctx_no_asm = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "proxy_redirection_mechanism": "CNIChaining",
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        disabled_profile = self.models.ServiceMeshProfile(
+            mode="Disabled",
+        )
+        with self.assertRaises(ArgumentUsageError):
+            ctx_no_asm._handle_istio_cni_asm(disabled_profile)
+
+        # Test no-op when proxy_redirection_mechanism is not specified
+        ctx_noop = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({}),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        old_profile = self.models.ServiceMeshProfile(
+            mode="Istio",
+            istio=self.models.IstioServiceMesh(revisions=["asm-1-18"]),
+        )
+        new_profile, updated = ctx_noop._handle_istio_cni_asm(old_profile)
+        self.assertEqual(updated, False)
+
+        # Test idempotency: setting same mechanism raises error
+        ctx_idempotent_cni = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "proxy_redirection_mechanism": "CNIChaining",
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        already_cni_profile = self.models.ServiceMeshProfile(
+            mode="Istio",
+            istio=self.models.IstioServiceMesh(
+                revisions=["asm-1-18"],
+                components=self.models.IstioComponents(
+                    proxy_redirection_mechanism="CNIChaining"
+                ),
+            ),
+        )
+        with self.assertRaises(ArgumentUsageError):
+            ctx_idempotent_cni._handle_istio_cni_asm(already_cni_profile)
+
+        # Test idempotency: setting InitContainers when already InitContainers raises error
+        ctx_idempotent_init = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "proxy_redirection_mechanism": "InitContainers",
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        already_init_profile = self.models.ServiceMeshProfile(
+            mode="Istio",
+            istio=self.models.IstioServiceMesh(
+                revisions=["asm-1-18"],
+                components=self.models.IstioComponents(
+                    proxy_redirection_mechanism="InitContainers"
+                ),
+            ),
+        )
+        with self.assertRaises(ArgumentUsageError):
+            ctx_idempotent_init._handle_istio_cni_asm(already_init_profile)
+
     def test_handle_ingress_gateways_asm(self):
         ctx_0 = AKSManagedClusterContext(
             self.cmd,
@@ -6249,6 +6546,115 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         self.assertIsNotNone(certs_empty)
         self.assertEqual(certs_empty, [])
 
+    def test_get_enable_azure_monitor_app_monitoring(self):
+        # default value
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_azure_monitor_app_monitoring": False,
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_enable_azure_monitor_app_monitoring(), False)
+
+        # custom value - enabled
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_azure_monitor_app_monitoring": True,
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_2.get_enable_azure_monitor_app_monitoring(), True)
+
+        # create mode: mc-precedence - getter reads from mc when field is pre-populated
+        ctx_3 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_azure_monitor_app_monitoring": False,
+                }
+            ),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            azure_monitor_profile=self.models.ManagedClusterAzureMonitorProfile(
+                app_monitoring=self.models.ManagedClusterAzureMonitorProfileAppMonitoring(
+                    auto_instrumentation=self.models.ManagedClusterAzureMonitorProfileAppMonitoringAutoInstrumentation(
+                        enabled=True
+                    )
+                )
+            )
+        )
+        ctx_3.attach_mc(mc_3)
+        self.assertEqual(ctx_3.get_enable_azure_monitor_app_monitoring(), True)
+
+    def test_get_disable_azure_monitor_app_monitoring(self):
+        # default value
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "disable_azure_monitor_app_monitoring": False,
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_1.get_disable_azure_monitor_app_monitoring(), False)
+
+        # custom value - disabled
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "disable_azure_monitor_app_monitoring": True,
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_2.get_disable_azure_monitor_app_monitoring(), True)
+
+    def test_get_enable_disable_azure_monitor_app_monitoring_mutually_exclusive(self):
+        # test mutually exclusive - both enabled raises error
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_azure_monitor_app_monitoring": True,
+                    "disable_azure_monitor_app_monitoring": True,
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_1.get_enable_azure_monitor_app_monitoring()
+
+        # test mutually exclusive from disable side
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_azure_monitor_app_monitoring": True,
+                    "disable_azure_monitor_app_monitoring": True,
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_2.get_disable_azure_monitor_app_monitoring()
+
 
 class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
     def setUp(self):
@@ -6407,6 +6813,22 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         ground_truth_mc_1 = self.models.ManagedCluster(location="test_location")
         ground_truth_mc_1.agent_pool_profiles = [ground_truth_agentpool_profile_1]
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+        # Managed System Pool clusters get their system pool from hosted_system_profile,
+        # so the CLI should not synthesize a default agent pool up front.
+        dec_2 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "sku": "automatic",
+                "enable_hosted_system": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_2 = self.models.ManagedCluster(location="test_location")
+        dec_2.context.attach_mc(mc_2)
+        dec_mc_2 = dec_2.set_up_agentpool_profile(mc_2)
+        self.assertIsNone(dec_mc_2.agent_pool_profiles)
 
     def test_set_up_mc_properties(self):
         dec_1 = AKSManagedClusterCreateDecorator(
@@ -6809,6 +7231,101 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
                 False,
             )
 
+        # BYO VNet for Managed System Pool with user-assigned identity grants all BYO subnets.
+        system_subnet = "/subscriptions/s/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/v/subnets/system"
+        node_subnet = "/subscriptions/s/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/v/subnets/node"
+        api_subnet = "/subscriptions/s/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/v/subnets/api"
+        identity_obj = Mock(
+            principal_id="test_object_id",
+        )
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.AKSManagedClusterContext.get_identity_by_msi_client",
+            return_value=identity_obj,
+        ):
+            dec_6 = AKSManagedClusterCreateDecorator(
+                self.cmd,
+                self.client,
+                {
+                    "enable_managed_identity": True,
+                    "sku": "automatic",
+                    "system_node_subnet_id": system_subnet,
+                    "node_subnet_id": node_subnet,
+                    "apiserver_subnet_id": api_subnet,
+                    "skip_subnet_role_assignment": False,
+                    "assign_identity": "test_assign_identity",
+                },
+                ResourceType.MGMT_CONTAINERSERVICE,
+            )
+            mc_6 = self.models.ManagedCluster(location="test_location")
+            dec_6.context.attach_mc(mc_6)
+            with patch(
+                "azure.cli.command_modules.acs.managed_cluster_decorator.subnet_role_assignment_exists",
+                return_value=False,
+            ), patch(
+                "azure.cli.command_modules.acs.managed_cluster_decorator.add_role_assignment",
+                return_value=True,
+            ) as add_role_assignment:
+                dec_6.process_add_role_assignment_for_vnet_subnet(mc_6)
+            add_role_assignment.assert_has_calls([
+                call(
+                    self.cmd,
+                    "Network Contributor",
+                    "test_object_id",
+                    is_service_principal=False,
+                    scope=system_subnet,
+                ),
+                call(
+                    self.cmd,
+                    "Network Contributor",
+                    "test_object_id",
+                    is_service_principal=False,
+                    scope=node_subnet,
+                ),
+                call(
+                    self.cmd,
+                    "Network Contributor",
+                    "test_object_id",
+                    is_service_principal=False,
+                    scope=api_subnet,
+                ),
+            ])
+            self.assertEqual(add_role_assignment.call_count, 3)
+            self.assertEqual(
+                dec_6.context.get_intermediate("need_post_creation_vnet_permission_granting"),
+                False,
+            )
+
+        # BYO VNet for Managed System Pool with system-assigned identity defers all BYO subnets.
+        dec_7 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_managed_identity": True,
+                "sku": "automatic",
+                "system_node_subnet_id": system_subnet,
+                "node_subnet_id": node_subnet,
+                "apiserver_subnet_id": api_subnet,
+                "skip_subnet_role_assignment": False,
+                "assign_identity": None,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_7 = self.models.ManagedCluster(location="test_location")
+        dec_7.context.attach_mc(mc_7)
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.subnet_role_assignment_exists",
+            return_value=False,
+        ):
+            dec_7.process_add_role_assignment_for_vnet_subnet(mc_7)
+        self.assertEqual(
+            dec_7.context.get_intermediate("need_post_creation_vnet_permission_granting"),
+            True,
+        )
+        self.assertEqual(
+            dec_7.context.get_intermediate("byo_hosted_system_subnets_pending_grant"),
+            [system_subnet, node_subnet, api_subnet],
+        )
+
     def test_process_attach_acr(self):
         # default value in `aks_create`
         dec_1 = AKSManagedClusterCreateDecorator(
@@ -6873,6 +7390,51 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         ), patch("azure.cli.command_modules.acs._roleassignments.ensure_aks_acr_role_assignment") as ensure_assignment:
             dec_3.process_attach_acr(mc_3)
         ensure_assignment.assert_called_once_with(self.cmd, "test_service_principal", "test_registry_id", False, True, None)
+
+    def test_set_up_hosted_system_profile(self):
+        system_subnet = "/subscriptions/s/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/v/subnets/system"
+        node_subnet = "/subscriptions/s/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/v/subnets/node"
+        api_subnet = "/subscriptions/s/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/v/subnets/api"
+
+        dec_1 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "sku": "automatic",
+                "system_node_subnet_id": system_subnet,
+                "node_subnet_id": node_subnet,
+                "apiserver_subnet_id": api_subnet,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+
+        dec_1.set_up_hosted_system_profile(mc_1)
+
+        self.assertTrue(mc_1.hosted_system_profile.enabled)
+        self.assertEqual(mc_1.hosted_system_profile.system_node_subnet_id, system_subnet)
+        self.assertEqual(mc_1.hosted_system_profile.node_subnet_id, node_subnet)
+        self.assertIsNone(mc_1.agent_pool_profiles)
+
+        dec_2 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "sku": "automatic",
+                "enable_hosted_system": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_2 = self.models.ManagedCluster(location="test_location")
+        dec_2.context.attach_mc(mc_2)
+        user_pool = self.models.ManagedClusterAgentPoolProfile(name="userpool")
+        mc_2.agent_pool_profiles = [user_pool]
+
+        dec_2.set_up_hosted_system_profile(mc_2)
+
+        self.assertTrue(mc_2.hosted_system_profile.enabled)
+        self.assertEqual(mc_2.agent_pool_profiles, [user_pool])
 
     def test_set_up_network_profile(self):
         # default value in `aks_create`
@@ -8241,6 +8803,67 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         )
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
 
+    def test_set_up_azure_monitor_profile_app_monitoring_enabled(self):
+        # Test enabling app monitoring on create with no existing azure_monitor_profile
+        dec_1 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_azure_monitor_app_monitoring": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.set_up_azure_monitor_profile(mc_1)
+
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile)
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile.app_monitoring)
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile.app_monitoring.auto_instrumentation)
+        self.assertTrue(dec_mc_1.azure_monitor_profile.app_monitoring.auto_instrumentation.enabled)
+
+    def test_set_up_azure_monitor_profile_app_monitoring_not_enabled(self):
+        # Test that app monitoring is not set when flag is False
+        dec_1 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_azure_monitor_app_monitoring": False,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.set_up_azure_monitor_profile(mc_1)
+
+        if dec_mc_1.azure_monitor_profile is not None:
+            self.assertIsNone(dec_mc_1.azure_monitor_profile.app_monitoring)
+
+    def test_set_up_azure_monitor_profile_app_monitoring_with_existing_metrics(self):
+        # Test enabling app monitoring on a cluster that already has metrics profile
+        dec_1 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_azure_monitor_app_monitoring": True,
+                "enable_azure_monitor_metrics": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            identity=self.models.ManagedClusterIdentity(type="SystemAssigned"),
+        )
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.set_up_azure_monitor_profile(mc_1)
+
+        # Both metrics and app_monitoring should be set
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile)
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile.metrics)
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile.app_monitoring)
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile.app_monitoring.auto_instrumentation)
+        self.assertTrue(dec_mc_1.azure_monitor_profile.app_monitoring.auto_instrumentation.enabled)
+
     def test_set_up_azure_service_mesh(self):
         dec_1 = AKSManagedClusterCreateDecorator(
             self.cmd,
@@ -8540,6 +9163,49 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             scope="test_vnet_subnet_id",
             is_service_principal=False,
         )
+
+        dec_2 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_2 = self.models.ManagedCluster(location="test_location")
+        dec_2.context.attach_mc(mc_2)
+        dec_2.context.set_intermediate("need_post_creation_vnet_permission_granting", True)
+        dec_2.context.set_intermediate(
+            "byo_hosted_system_subnets_pending_grant",
+            ["test_system_subnet_id", "test_node_subnet_id", "test_api_subnet_id"],
+        )
+        self.client.get = Mock(return_value=Mock(identity=Mock(principal_id="test_principal_id")))
+        with patch(
+            "azure.cli.command_modules.acs.managed_cluster_decorator.add_role_assignment", return_value=True
+        ) as mock_add:
+            dec_2.immediate_processing_after_request(mc_2)
+        mock_add.assert_has_calls([
+            call(
+                self.cmd,
+                "Network Contributor",
+                "test_principal_id",
+                scope="test_system_subnet_id",
+                is_service_principal=False,
+            ),
+            call(
+                self.cmd,
+                "Network Contributor",
+                "test_principal_id",
+                scope="test_node_subnet_id",
+                is_service_principal=False,
+            ),
+            call(
+                self.cmd,
+                "Network Contributor",
+                "test_principal_id",
+                scope="test_api_subnet_id",
+                is_service_principal=False,
+            ),
+        ])
+        self.assertEqual(mock_add.call_count, 3)
 
     def test_postprocessing_after_mc_created(self):
         dec_1 = AKSManagedClusterCreateDecorator(
@@ -15624,6 +16290,131 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         dec_17.context.attach_mc(mc_17)
         with self.assertRaises(MutuallyExclusiveArgumentError):
             dec_17.update_monitoring_profile_flow_logs(mc_17)
+
+    def test_update_azure_monitor_profile_enable_app_monitoring(self):
+        # Test enabling app monitoring on a cluster without existing azure_monitor_profile
+        dec_1 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_azure_monitor_app_monitoring": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.update_azure_monitor_profile(mc_1)
+
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile)
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile.app_monitoring)
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile.app_monitoring.auto_instrumentation)
+        self.assertTrue(dec_mc_1.azure_monitor_profile.app_monitoring.auto_instrumentation.enabled)
+
+    def test_update_azure_monitor_profile_enable_app_monitoring_with_existing_metrics(self):
+        # Test enabling app monitoring on a cluster that already has metrics profile
+        dec_1 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_azure_monitor_app_monitoring": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            azure_monitor_profile=self.models.ManagedClusterAzureMonitorProfile(
+                metrics=self.models.ManagedClusterAzureMonitorProfileMetrics(
+                    enabled=True,
+                    kube_state_metrics=self.models.ManagedClusterAzureMonitorProfileKubeStateMetrics(
+                        metric_labels_allowlist="",
+                        metric_annotations_allow_list="",
+                    )
+                )
+            )
+        )
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.update_azure_monitor_profile(mc_1)
+
+        # app_monitoring should be added without overwriting existing metrics
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile)
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile.metrics)
+        self.assertTrue(dec_mc_1.azure_monitor_profile.metrics.enabled)
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile.app_monitoring)
+        self.assertTrue(dec_mc_1.azure_monitor_profile.app_monitoring.auto_instrumentation.enabled)
+
+    def test_update_azure_monitor_profile_disable_app_monitoring(self):
+        # Test disabling app monitoring on a cluster with existing azure_monitor_profile
+        dec_1 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "disable_azure_monitor_app_monitoring": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            azure_monitor_profile=self.models.ManagedClusterAzureMonitorProfile(
+                app_monitoring=self.models.ManagedClusterAzureMonitorProfileAppMonitoring(
+                    auto_instrumentation=self.models.ManagedClusterAzureMonitorProfileAppMonitoringAutoInstrumentation(
+                        enabled=True
+                    )
+                )
+            )
+        )
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.update_azure_monitor_profile(mc_1)
+
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile)
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile.app_monitoring)
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile.app_monitoring.auto_instrumentation)
+        self.assertFalse(dec_mc_1.azure_monitor_profile.app_monitoring.auto_instrumentation.enabled)
+
+    def test_update_azure_monitor_profile_disable_app_monitoring_no_existing_profile(self):
+        # Test disabling app monitoring on a cluster with no existing azure_monitor_profile (null-safety)
+        dec_1 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "disable_azure_monitor_app_monitoring": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.update_azure_monitor_profile(mc_1)
+
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile)
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile.app_monitoring)
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile.app_monitoring.auto_instrumentation)
+        self.assertFalse(dec_mc_1.azure_monitor_profile.app_monitoring.auto_instrumentation.enabled)
+
+    def test_update_azure_monitor_profile_disable_app_monitoring_no_existing_app_monitoring(self):
+        # Test disabling app monitoring on a cluster with azure_monitor_profile but no app_monitoring
+        dec_1 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "disable_azure_monitor_app_monitoring": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            azure_monitor_profile=self.models.ManagedClusterAzureMonitorProfile(
+                metrics=self.models.ManagedClusterAzureMonitorProfileMetrics(
+                    enabled=True,
+                )
+            )
+        )
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.update_azure_monitor_profile(mc_1)
+
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile)
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile.metrics)
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile.app_monitoring)
+        self.assertIsNotNone(dec_mc_1.azure_monitor_profile.app_monitoring.auto_instrumentation)
+        self.assertFalse(dec_mc_1.azure_monitor_profile.app_monitoring.auto_instrumentation.enabled)
 
 
 if __name__ == "__main__":
