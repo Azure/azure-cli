@@ -64,9 +64,7 @@ class KeyVaultConstants:
 
 
 class SnapshotReferenceConstants:
-    SNAPSHOT_REFERENCE_CONTENT_TYPE = (
-        'application/json; profile="https://azconfig.io/mime-profiles/snapshot-ref"; charset=utf-8'
-    )
+    SNAPSHOT_REFERENCE_CONTENT_TYPE = 'application/json; profile="https://azconfig.io/mime-profiles/snapshot-ref"; charset=utf-8'
     SNAPSHOT_NAME_KEY = "snapshot_name"
 
 
