@@ -3,16 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.command_modules.vm._client_factory import (cf_vm,
-                                                          cf_vm_ext, cf_vm_ext_image,
-                                                          cf_vm_image_term, cf_usage,
-                                                          cf_vmss,
-                                                          cf_gallery_images, cf_gallery_image_versions,
-                                                          cf_proximity_placement_groups,
-                                                          cf_dedicated_hosts,
-                                                          cf_vm_image, cf_vm_image_term, cf_usage,
-                                                          cf_vmss, cf_images,
-                                                          cf_dedicated_hosts, cf_dedicated_host_groups,
+from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_vm_image_term, cf_usage,
+                                                          cf_vmss, cf_dedicated_hosts,
                                                           cf_log_analytics_data_plane,
                                                           cf_capacity_reservation_groups)
 from azure.cli.command_modules.vm._format import (
