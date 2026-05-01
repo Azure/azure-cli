@@ -341,7 +341,7 @@ subscription than the app service environment, please use the resource ID for --
                    arg_type=get_three_state_flag(return_label=True))
         c.argument('site_scoped_certificates_enabled',
                    options_list=['--site-scoped-certificates-enabled'],
-                   help='True if site scoped certificates are enabled; otherwise, false.',
+                   help='Enable or disable site-scoped certificates.',
                    arg_type=get_three_state_flag(return_label=True))
         c.argument('min_tls_version',
                    help="The minimum version of TLS required for SSL requests, e.g., '1.0', '1.1', '1.2'")
@@ -477,7 +477,7 @@ subscription than the app service environment, please use the resource ID for --
                    arg_type=get_enum_type(PLATFORM_RELEASE_CHANNEL_TYPES))
         c.argument('site_scoped_certificates_enabled',
                    options_list=['--site-scoped-certificates-enabled'],
-                   help='True if site scoped certificates are enabled; otherwise, false.',
+                   help='Enable or disable site-scoped certificates.',
                    arg_type=get_three_state_flag(return_label=True))
 
     with self.argument_context('webapp browse') as c:
