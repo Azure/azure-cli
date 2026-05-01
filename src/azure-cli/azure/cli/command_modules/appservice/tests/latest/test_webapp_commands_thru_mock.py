@@ -12,7 +12,8 @@ from azure.mgmt.web import WebSiteManagementClient
 from knack.util import CLIError
 from azure.cli.core.azclierror import (InvalidArgumentValueError,
                                        MutuallyExclusiveArgumentError,
-                                       AzureResponseError)
+                                       AzureResponseError,
+                                       ArgumentUsageError)
 from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          update_git_token, add_hostname,
                                                          update_site_configs,
@@ -33,7 +34,8 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          add_github_actions,
                                                          update_app_settings,
                                                          update_application_settings_polling,
-                                                         update_webapp)
+                                                         update_webapp,
+                                                         create_webapp)
 
 # pylint: disable=line-too-long
 from azure.cli.core.profiles import ResourceType
@@ -436,6 +438,36 @@ class TestWebappMocked(unittest.TestCase):
         self.assertFalse(validate_container_app_create_options(None, None, test_multi_container_config, None))
         self.assertFalse(validate_container_app_create_options(None, None, None, None))
 
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._StackRuntimeHelper', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_site_availability', autospec=True)
+    def test_linux_webapp_create_no_runtime_raises_error(self, get_site_avail_mock,
+                                                         stack_helper_mock, web_client_mock):
+        cmd_mock = _get_test_cmd()
+        SiteConfig, SkuDescription, NameValuePair = cmd_mock.get_models(
+            'SiteConfig', 'SkuDescription', 'NameValuePair')
+        cmd_mock.get_models = mock.MagicMock(return_value=(SiteConfig, SkuDescription, NameValuePair))
+
+        # Mock a Linux plan (reserved=True)
+        plan_info = mock.MagicMock()
+        plan_info.reserved = True
+        plan_info.location = 'eastus'
+        plan_info.id = '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan'
+        plan_info.sku = SkuDescription(name='F1')
+        web_client_mock.return_value.app_service_plans.get.return_value = plan_info
+
+        # Mock site availability (new app name)
+        name_validation = mock.MagicMock()
+        name_validation.name_available = True
+        get_site_avail_mock.return_value = name_validation
+
+        with self.assertRaises(ArgumentUsageError) as context:
+            create_webapp(cmd_mock, 'test-rg', 'test-app', 'test-plan')
+
+        self.assertIn('Creating a Linux webapp requires one of the following', str(context.exception))
+        self.assertIn('--runtime', str(context.exception))
+        self.assertIn('--os-type linux', str(context.exception))
+
     @mock.patch('azure.cli.command_modules.appservice.custom._verify_hostname_binding', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
@@ -642,6 +674,33 @@ class TestUpdateWebapp(unittest.TestCase):
 class FakedResponse:  # pylint: disable=too-few-public-methods
     def __init__(self, status_code):
         self.status_code = status_code
+
+
+class TestCreateAppServicePlanDefaults(unittest.TestCase):
+    """Tests for create_app_service_plan default SKU behavior"""
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_location_from_resource_group', return_value='eastus')
+    def test_default_sku_is_p0v3_when_not_specified(self, mock_location, mock_client_factory):
+        from azure.cli.command_modules.appservice.custom import create_app_service_plan
+        mock_cmd = mock.MagicMock()
+        mock_cmd.get_models.return_value = (mock.MagicMock(), mock.MagicMock(), mock.MagicMock())
+        mock_cmd.cli_ctx = mock.MagicMock()
+        mock_client = mock.MagicMock()
+        mock_client_factory.return_value = mock_client
+
+        # Call without sku parameter — should default to P0V3
+        try:
+            create_app_service_plan(mock_cmd, 'rg', 'plan', is_linux=True, hyper_v=False)
+        except Exception:
+            pass  # We don't care about downstream errors, just checking the SKU
+
+        # Verify SkuDescription was called with P0V3 tier/name
+        sku_description_cls = mock_cmd.get_models.return_value[1]
+        sku_description_cls.assert_called()
+        call_kwargs = sku_description_cls.call_args
+        # The sku name should be normalized P0V3
+        self.assertIn('P0V3', str(call_kwargs))
 
 
 if __name__ == '__main__':

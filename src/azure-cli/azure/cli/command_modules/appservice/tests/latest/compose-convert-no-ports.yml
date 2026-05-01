@@ -1,0 +1,11 @@
+# No services have port mappings
+# Tests: main container fallback to first service, warning about missing targetPort
+version: '3'
+services:
+  processor:
+    image: "myacr.azurecr.io/bg-processor:latest"
+    command: "python worker.py"
+    environment:
+      QUEUE_URL: "amqp://localhost:5672"
+  rabbitmq:
+    image: "rabbitmq:3-management-alpine"
