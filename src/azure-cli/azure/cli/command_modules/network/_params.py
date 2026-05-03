@@ -708,6 +708,14 @@ def load_arguments(self, _):
     with self.argument_context('network vnet delete') as c:
         c.argument('virtual_network_name', local_context_attribute=None)
 
+    with self.argument_context('network vnet list-available-cidrs') as c:
+        c.argument('address_prefixes', nargs='+', options_list=['--address-prefixes'],
+                   help='Space-separated list of VNet address prefixes to filter results by.', metavar='PREFIX')
+
+    with self.argument_context('network vnet list-used-cidrs') as c:
+        c.argument('address_prefixes', nargs='+', options_list=['--address-prefixes'],
+                   help='Space-separated list of VNet address prefixes to filter results by.', metavar='PREFIX')
+
     with self.argument_context('network vnet peering') as c:
         c.argument('virtual_network_name', virtual_network_name_type)
         c.argument('virtual_network_peering_name', options_list=['--name', '-n'], help='The name of the VNet peering.', id_part='child_name_1')

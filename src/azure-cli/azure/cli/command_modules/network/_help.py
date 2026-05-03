@@ -5089,6 +5089,26 @@ examples:
     text: az network vnet list-available-ips -g MyResourceGroup -n MyVNet
 """
 
+helps['network vnet list-available-cidrs'] = """
+type: command
+short-summary: List available CIDRs in an IPv4 VNET.
+examples:
+  - name: List available CIDRs in an IPv4 VNET for all address spaces.
+    text: az network vnet list-available-cidrs -g MyResourceGroup -n MyVNet
+  - name: List available CIDRs in an IPv4 VNET for a specific address space.
+    text: az network vnet list-available-cidrs -g MyResourceGroup -n MyVNet --address-prefixes "10.0.0.0/24"
+"""
+
+helps['network vnet list-used-cidrs'] = """
+type: command
+short-summary: List used CIDRs in an IPv4 VNET.
+examples:
+  - name: List used CIDRs in an IPv4 VNET for all address spaces.
+    text: az network vnet list-used-cidrs -g MyResourceGroup -n MyVNet
+  - name: List used CIDRs in an IPv4 VNET for a specific address space.
+    text: az network vnet list-used-cidrs -g MyResourceGroup -n MyVNet --address-prefixes "10.0.0.0/24"
+"""
+
 helps['network vnet subnet create'] = """
 type: command
 short-summary: Create a subnet and associate an existing NSG and route table.
