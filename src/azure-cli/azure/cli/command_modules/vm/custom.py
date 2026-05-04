@@ -5101,68 +5101,109 @@ def attach_managed_data_disk_to_vmss(cmd, resource_group_name, vmss_name, size_g
                                      caching=None, disk=None, sku=None):
 
     def _init_data_disk(storage_profile, lun, existing_disk=None):
-        data_disks = storage_profile.data_disks or []
+        from ._vm_utils import DiskCreateOptionTypes
+        data_disks = storage_profile.get('dataDisks', [])
         if lun is None:
-            lun = _get_disk_lun(data_disks)
+            lun = _get_disk_lun_by_aaz(data_disks)
         if existing_disk is None:
-            data_disk = DataDisk(lun=lun, create_option=DiskCreateOptionTypes.empty, disk_size_gb=size_gb,
-                                 caching=caching, managed_disk=ManagedDiskParameters(storage_account_type=sku))
+            data_disk = {
+                'caching': caching,
+                'createOption': DiskCreateOptionTypes.EMPTY.value,
+                'diskSizeGB': size_gb,
+                'lun': lun,
+                'managedDisk': {
+                    'storageAccountType': sku
+                }
+            }
         else:
-            data_disk = DataDisk(lun=lun, create_option=DiskCreateOptionTypes.attach, caching=caching,
-                                 managed_disk=ManagedDiskParameters(id=existing_disk, storage_account_type=sku))
+            data_disk = {
+                'caching': caching,
+                'createOption': DiskCreateOptionTypes.ATTACH.value,
+                'lun': lun,
+                'managedDisk': {
+                    'id': existing_disk,
+                    'storageAccountType': sku
+                }
+            }
 
         data_disks.append(data_disk)
-        storage_profile.data_disks = data_disks
+        storage_profile['dataDisks'] = data_disks
 
-    DiskCreateOptionTypes, ManagedDiskParameters = cmd.get_models(
-        'DiskCreateOptionTypes', 'ManagedDiskParameters')
-    if disk is None:
-        DataDisk = cmd.get_models('VirtualMachineScaleSetDataDisk')
-    else:
-        DataDisk = cmd.get_models('DataDisk')
-
-    client = _compute_client_factory(cmd.cli_ctx)
     if instance_id is None:
-        vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+        from .operations.vmss import VMSSCreate, convert_show_result_to_snake_case
+        vmss = get_vmss_by_aaz(cmd, resource_group_name, vmss_name)
         # Avoid unnecessary permission error
-        vmss.virtual_machine_profile.storage_profile.image_reference = None
+        if 'virtualMachineProfile' not in vmss:
+            vmss['virtualMachineProfile'] = {}
+        if 'storageProfile' not in vmss['virtualMachineProfile']:
+            vmss['virtualMachineProfile']['storageProfile'] = {}
+        vmss['virtualMachineProfile']['storageProfile']['imageReference'] = None
         # pylint: disable=no-member
-        _init_data_disk(vmss.virtual_machine_profile.storage_profile, lun)
-        return client.virtual_machine_scale_sets.begin_create_or_update(resource_group_name, vmss_name, vmss)
+        _init_data_disk(vmss['virtualMachineProfile']['storageProfile'], lun)
+        vmss = convert_show_result_to_snake_case(vmss)
+        vmss['resource_group'] = resource_group_name
+        vmss['vm_scale_set_name'] = vmss_name
+        return VMSSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss)
 
-    vmss_vm = client.virtual_machine_scale_set_vms.get(resource_group_name, vmss_name, instance_id)
+    from .operations.vmss_vms import VMSSVMSShow, VMSSVMSCreate, convert_show_result_to_snake_case
+    command_args = {
+        'resource_group': resource_group_name,
+        'vm_scale_set_name': vmss_name,
+        'instance_id': instance_id
+    }
+    vmss_vm = VMSSVMSShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
     # Avoid unnecessary permission error
-    vmss_vm.storage_profile.image_reference = None
-    _init_data_disk(vmss_vm.storage_profile, lun, disk)
-    return client.virtual_machine_scale_set_vms.begin_update(resource_group_name, vmss_name, instance_id, vmss_vm)
+    if 'storageProfile' not in vmss_vm:
+        vmss_vm['storageProfile'] = {}
+    vmss_vm['storageProfile']['imageReference'] = None
+    _init_data_disk(vmss_vm['storageProfile'], lun, disk)
+    vmss_vm = convert_show_result_to_snake_case(vmss_vm)
+    vmss_vm['resource_group'] = resource_group_name
+    vmss_vm['vm_scale_set_name'] = vmss_name
+    vmss_vm['instance_id'] = instance_id
+    return VMSSVMSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss_vm)
 
 
 def detach_disk_from_vmss(cmd, resource_group_name, vmss_name, lun, instance_id=None):
-    client = _compute_client_factory(cmd.cli_ctx)
+    from .operations.vmss import VMSSCreate, convert_show_result_to_snake_case as VMSSConvert
+    from .operations.vmss_vms import VMSSVMSShow, VMSSVMSCreate, convert_show_result_to_snake_case as VMSSVMSConvert
     if instance_id is None:
-        vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+        vmss = get_vmss_by_aaz(cmd, resource_group_name, vmss_name)
         # Avoid unnecessary permission error
-        vmss.virtual_machine_profile.storage_profile.image_reference = None
+        vmss['virtualMachineProfile']['storageProfile']['imageReference'] = None
         # pylint: disable=no-member
-        data_disks = vmss.virtual_machine_profile.storage_profile.data_disks
+        data_disks = vmss.get('virtualMachineProfile', {}).get('storageProfile', {}).get('dataDisks', [])
     else:
-        vmss_vm = client.virtual_machine_scale_set_vms.get(resource_group_name, vmss_name, instance_id)
+        command_args = {
+            'resource_group': resource_group_name,
+            'vm_scale_set_name': vmss_name,
+            'instance_id': instance_id
+        }
+        vmss_vm = VMSSVMSShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
         # Avoid unnecessary permission error
-        vmss_vm.storage_profile.image_reference = None
-        data_disks = vmss_vm.storage_profile.data_disks
+        vmss_vm['storageProfile']['imageReference'] = None
+        data_disks = vmss_vm.get('storageProfile', {}).get('dataDisks', [])
 
     if not data_disks:
         raise CLIError("Data disk doesn't exist")
 
-    leftovers = [d for d in data_disks if d.lun != lun]
+    leftovers = [d for d in data_disks if d['lun'] != lun]
     if len(data_disks) == len(leftovers):
         raise CLIError("Could not find the data disk with lun '{}'".format(lun))
 
     if instance_id is None:
-        vmss.virtual_machine_profile.storage_profile.data_disks = leftovers
-        return client.virtual_machine_scale_sets.begin_create_or_update(resource_group_name, vmss_name, vmss)
-    vmss_vm.storage_profile.data_disks = leftovers
-    return client.virtual_machine_scale_set_vms.begin_update(resource_group_name, vmss_name, instance_id, vmss_vm)
+        vmss['virtualMachineProfile']['storageProfile']['dataDisks'] = leftovers
+        vmss = VMSSConvert(vmss)
+        vmss['resource_group'] = resource_group_name
+        vmss['vm_scale_set_name'] = vmss_name
+        return VMSSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss)
+
+    vmss_vm['storageProfile']['dataDisks'] = leftovers
+    vmss_vm = VMSSVMSConvert(vmss_vm)
+    vmss_vm['resource_group'] = resource_group_name
+    vmss_vm['vm_scale_set_name'] = vmss_name
+    vmss_vm['instance_id'] = instance_id
+    return VMSSVMSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss_vm)
 # endregion
 
 

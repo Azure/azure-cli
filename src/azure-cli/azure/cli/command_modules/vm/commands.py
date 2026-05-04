@@ -419,7 +419,7 @@ def load_command_table(self, _):
         g.custom_command('set', 'set_vmss_diagnostics_extension')
         g.custom_command('get-default-config', 'show_default_diagnostics_configuration')
 
-    with self.command_group('vmss disk', compute_vmss_sdk, min_api='2017-03-30') as g:
+    with self.command_group('vmss disk') as g:
         g.custom_command('attach', 'attach_managed_data_disk_to_vmss')
         g.custom_command('detach', 'detach_disk_from_vmss')
 
