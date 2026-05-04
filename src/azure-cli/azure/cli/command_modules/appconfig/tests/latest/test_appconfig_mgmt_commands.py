@@ -12,7 +12,7 @@ from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest)
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
 from azure.cli.command_modules.appconfig.tests.latest._test_utils import CredentialResponseSanitizer, get_resource_name_prefix
-from azure.cli.core.azclierror import InvalidArgumentValueError
+from azure.cli.core.azclierror import InvalidArgumentValueError, MutuallyExclusiveArgumentError
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -543,10 +543,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('publicNetworkAccess', 'SecuredByPerimeter')])
 
         # Test that --enable-public-network and --public-network-access cannot be used together
-        with self.assertRaisesRegex(SystemExit, '2'):
-            self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --enable-public-network true --public-network-access Enabled --retention-days {retention_days}')
-
-        with self.assertRaisesRegex(SystemExit, '2'):
+        with self.assertRaisesRegex(MutuallyExclusiveArgumentError, "Cannot specify both '--enable-public-network' and '--public-network-access'"):
             self.cmd('appconfig update -n {config_store_name} -g {rg} --enable-public-network true --public-network-access Disabled')
 
 
