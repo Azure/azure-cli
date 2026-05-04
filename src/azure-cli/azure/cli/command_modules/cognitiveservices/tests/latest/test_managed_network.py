@@ -183,8 +183,9 @@ class CognitiveServicesManagedNetworkTests(ScenarioTest):
         self.kwargs['ra_name_2'] = self.create_guid()
         self.cmd('az role assignment create --assignee-object-id {principal_id} --assignee-principal-type ServicePrincipal --role "Contributor" --scope {cs_account_id} --name {ra_name_2}')
 
-        # Wait for RBAC propagation (can take several minutes)
-        time.sleep(180)
+        # Wait for RBAC propagation (can take several minutes; skip during playback)
+        if self.is_live or self.in_recording:
+            time.sleep(180)
 
         # Create managed network
         self.cmd('az cognitiveservices account managed-network create -n {sname} -g {rg} --managed-network allow_only_approved_outbound')
