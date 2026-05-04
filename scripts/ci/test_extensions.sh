@@ -25,7 +25,7 @@ exit_code=0
 # Disable alias temporarily: https://github.com/Azure/azure-cli/pull/27717
 # hybridaks is going to be deprecated: https://github.com/Azure/azure-cli/pull/29838
 # db-up is going to be deprecated: https://github.com/Azure/azure-cli/pull/29887
-# serviceconnector-passwordless's dependency is not compatible with 3.13 https://github.com/Azure/azure-cli/pull/31895
+# serviceconnector-passwordless's dependency is not compatible with 3.14 https://github.com/Azure/azure-cli/pull/31895
 # partnercenter is not compatible with latest pydantic: https://github.com/Azure/azure-cli/pull/31967
 ignore_list='azure-cli-ml fzf arcappliance arcdata connectedk8s k8s-extension alias hybridaks db-up serviceconnector-passwordless partnercenter'
 

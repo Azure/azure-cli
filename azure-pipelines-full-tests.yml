@@ -83,3 +83,37 @@ jobs:
       instance_idx: '$(Instance_idx)'
       fullTest: true
       jobName: 'FullTest'
+
+- job: AutomationFullTestPython314ProfileLatest
+  displayName: Automation Full Test Python314 Profile Latest
+  timeoutInMinutes: 9999
+  strategy:
+    maxParallel: 8
+    matrix:
+      instance1:
+        Instance_idx: 1
+      instance2:
+        Instance_idx: 2
+      instance3:
+        Instance_idx: 3
+      instance4:
+        Instance_idx: 4
+      instance5:
+        Instance_idx: 5
+      instance6:
+        Instance_idx: 6
+      instance7:
+        Instance_idx: 7
+      instance8:
+        Instance_idx: 8
+  pool:
+    name: ${{ variables.ubuntu_pool }}
+  steps:
+  - template: .azure-pipelines/templates/automation_test.yml
+    parameters:
+      pythonVersion: '3.14'
+      profile: 'latest'
+      instance_cnt: '8'
+      instance_idx: '$(Instance_idx)'
+      fullTest: true
+      jobName: 'FullTest'
