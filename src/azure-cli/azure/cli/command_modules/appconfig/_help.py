@@ -285,7 +285,7 @@ examples:
   - name: Set a key with null value and JSON content type.
     text: az appconfig kv set -n MyAppConfiguration --key foo --value null --content-type application/json
   - name: Set a key-value using your 'az login' credentials.
-    text: az appconfig kv set --endpoint https://myappconfiguration.azconfig.io --key color --value red --auth-mode login
+    text: az appconfig kv set --endpoint https://co.azconfig.io --key color --value red --auth-mode login
 """
 
 helps['appconfig kv set-keyvault'] = """
@@ -305,7 +305,7 @@ examples:
   - name: Set a snapshot reference with label MyLabel.
     text: az appconfig kv set-snapshot-reference -n MyAppConfiguration --key MySnapshotRef --label MyLabel --snapshot-name MySnapshot
   - name: Set a snapshot reference using login-based authentication.
-    text: az appconfig kv set-snapshot-reference --endpoint https://myappconfiguration.azconfig.io --key MySnapshotRef --snapshot-name MySnapshot --auth-mode login
+    text: az appconfig kv set-snapshot-reference --endpoint https://contoso.azconfig.io --key MySnapshotRef --snapshot-name MySnapshot --auth-mode login
   - name: Set a snapshot reference with tags using connection string.
     text: az appconfig kv set-snapshot-reference --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --key MySnapshotRef --snapshot-name MySnapshot --tags tag1=value1 tag2=value2
 """
