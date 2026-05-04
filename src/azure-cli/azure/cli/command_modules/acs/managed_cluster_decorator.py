@@ -49,7 +49,11 @@ from azure.cli.command_modules.acs._consts import (
     CONST_AVAILABILITY_SET,
     CONST_VIRTUAL_MACHINES,
     CONST_ACNS_DATAPATH_ACCELERATION_MODE_BPFVETH,
-    CONST_ACNS_DATAPATH_ACCELERATION_MODE_NONE
+    CONST_ACNS_DATAPATH_ACCELERATION_MODE_NONE,
+    CONST_APP_ROUTING_ISTIO_MODE_ENABLED,
+    CONST_APP_ROUTING_ISTIO_MODE_DISABLED,
+    CONST_MANAGED_GATEWAY_INSTALLATION_DISABLED,
+    CONST_MANAGED_GATEWAY_INSTALLATION_STANDARD,
 )
 from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
     CONST_ACSTOR_EXT_INSTALLATION_NAME,
@@ -2362,6 +2366,30 @@ class AKSManagedClusterContext(BaseAKSContext):
                 skuName = CONST_MANAGED_CLUSTER_SKU_NAME_BASE
         return skuName
 
+    @staticmethod
+    def _raise_missing_vnet_subnet_for_outbound_type(outbound_type: str, sku_name: str) -> None:
+        if outbound_type == CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING:
+            subnet_requirement = "a route table with egress rules"
+        else:
+            subnet_requirement = "a NAT gateway with outbound ips"
+
+        if sku_name == CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC:
+            raise RequiredArgumentMissingError(
+                "--vnet-subnet-id must be specified for {outbound_type}. For an Automatic cluster "
+                "using Managed System Pool BYO VNet, specify --system-node-subnet-id, --node-subnet-id "
+                "and --apiserver-subnet-id instead. The subnet must be pre-configured with {requirement}".format(
+                    outbound_type=outbound_type,
+                    requirement=subnet_requirement,
+                )
+            )
+        raise RequiredArgumentMissingError(
+            "--vnet-subnet-id must be specified for {outbound_type} and it must "
+            "be pre-configured with {requirement}".format(
+                outbound_type=outbound_type,
+                requirement=subnet_requirement,
+            )
+        )
+
     def _get_outbound_type(
         self,
         enable_validation: bool = False,
@@ -2407,7 +2435,20 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         skuName = self.get_sku_name()
         isVnetSubnetIdEmpty = self.get_vnet_subnet_id() in ["", None]
-        if skuName is not None and skuName == CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC and isVnetSubnetIdEmpty:
+        # For BYO VNet Managed System Pool (Automatic SKU with system-node/node subnet trio),
+        # the user's subnet IDs replace --vnet-subnet-id; don't force ManagedNATGateway in that case.
+        byo_subnets_set = bool(
+            self.raw_param.get("system_node_subnet_id") or
+            self.raw_param.get("node_subnet_id")
+        )
+        use_automatic_managed_nat_gateway = (
+            skuName is not None and
+            skuName == CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC and
+            isVnetSubnetIdEmpty and
+            not read_from_mc and
+            not byo_subnets_set
+        )
+        if use_automatic_managed_nat_gateway and outbound_type == CONST_OUTBOUND_TYPE_LOAD_BALANCER:
             # outbound_type of Automatic SKU should be ManagedNATGateway if no subnet id provided.
             outbound_type = CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY
 
@@ -2434,22 +2475,17 @@ class AKSManagedClusterContext(BaseAKSContext):
                     )
                 return outbound_type  # basic sku lb doesn't support outbound type
 
-            if outbound_type == CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING:
-                if self.get_vnet_subnet_id() in ["", None]:
-                    raise RequiredArgumentMissingError(
-                        "--vnet-subnet-id must be specified for userDefinedRouting and it must "
-                        "be pre-configured with a route table with egress rules"
-                    )
-            if outbound_type == CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY:
-                if self.get_vnet_subnet_id() in ["", None]:
-                    raise RequiredArgumentMissingError(
-                        "--vnet-subnet-id must be specified for userAssignedNATGateway and it must "
-                        "be pre-configured with a NAT gateway with outbound ips"
-                    )
+            if outbound_type in [
+                CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
+                CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
+            ]:
+                if self.get_vnet_subnet_id() in ["", None] and not byo_subnets_set:
+                    self._raise_missing_vnet_subnet_for_outbound_type(outbound_type, skuName)
             if outbound_type == CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY:
-                if self.get_vnet_subnet_id() not in ["", None]:
+                if self.get_vnet_subnet_id() not in ["", None] or byo_subnets_set:
                     raise InvalidArgumentValueError(
-                        "--vnet-subnet-id cannot be specified for managedNATGateway"
+                        "--vnet-subnet-id, --system-node-subnet-id and --node-subnet-id cannot be "
+                        "specified for managedNATGateway"
                     )
             if outbound_type != CONST_OUTBOUND_TYPE_LOAD_BALANCER:
                 if (
@@ -4211,7 +4247,15 @@ class AKSManagedClusterContext(BaseAKSContext):
         if enable_validation:
             if self.decorator_mode == DecoratorMode.CREATE:
                 vnet_subnet_id = self.get_vnet_subnet_id()
-                if apiserver_subnet_id and vnet_subnet_id is None:
+                # For BYO VNet Managed System Pool (--sku automatic with subnet trio),
+                # --vnet-subnet-id is not used: system-node / node subnets replace it. Only
+                # require --vnet-subnet-id when neither --system-node-subnet-id nor
+                # --node-subnet-id is provided.
+                byo_subnets_set = (
+                    self.raw_param.get("system_node_subnet_id") or
+                    self.raw_param.get("node_subnet_id")
+                )
+                if apiserver_subnet_id and vnet_subnet_id is None and not byo_subnets_set:
                     raise RequiredArgumentMissingError(
                         '"--apiserver-subnet-id" requires "--vnet-subnet-id".')
 
@@ -4239,6 +4283,103 @@ class AKSManagedClusterContext(BaseAKSContext):
         :return: bool
         """
         return self._get_apiserver_subnet_id(enable_validation=True)
+
+    def get_system_node_subnet_id(self) -> Union[str, None]:
+        """Obtain the value of system_node_subnet_id (BYO VNet for Automatic cluster).
+
+        :return: str or None
+        """
+        system_node_subnet_id = self.raw_param.get("system_node_subnet_id")
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.hosted_system_profile and
+                getattr(self.mc.hosted_system_profile, "system_node_subnet_id", None) is not None
+            ):
+                system_node_subnet_id = self.mc.hosted_system_profile.system_node_subnet_id
+        return system_node_subnet_id
+
+    def get_node_subnet_id(self) -> Union[str, None]:
+        """Obtain the value of node_subnet_id (BYO VNet for Automatic cluster).
+
+        :return: str or None
+        """
+        node_subnet_id = self.raw_param.get("node_subnet_id")
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.hosted_system_profile and
+                getattr(self.mc.hosted_system_profile, "node_subnet_id", None) is not None
+            ):
+                node_subnet_id = self.mc.hosted_system_profile.node_subnet_id
+        return node_subnet_id
+
+    def get_enable_hosted_system(self) -> bool:
+        """Obtain the value of enable_hosted_system.
+
+        Returns True when the user explicitly opts in via --enable-hosted-system,
+        or implicitly via the BYO VNet subnet trio for Managed System Pool.
+
+        :return: bool
+        """
+        if self.decorator_mode != DecoratorMode.CREATE:
+            return False
+        explicit = bool(self.raw_param.get("enable_hosted_system"))
+        implicit = all(
+            [
+                self.raw_param.get("system_node_subnet_id"),
+                self.raw_param.get("node_subnet_id"),
+                self.raw_param.get("apiserver_subnet_id"),
+            ]
+        )
+        return explicit or implicit
+
+    def validate_byo_hosted_system_subnets(self) -> None:
+        """Validate the BYO VNet subnet trio and the --enable-hosted-system flag.
+
+        BYO VNet for a Managed System Pool is triggered by --system-node-subnet-id /
+        --node-subnet-id. --apiserver-subnet-id is intentionally NOT part of the trigger
+        because it keeps its existing general-purpose meaning for
+        --enable-apiserver-vnet-integration flows on non-Automatic clusters.
+
+        - If either --system-node-subnet-id or --node-subnet-id is set, the full trio
+          (--system-node-subnet-id, --node-subnet-id, --apiserver-subnet-id) must be
+          provided and --sku must be automatic.
+        - --enable-hosted-system is only valid with --sku automatic.
+        """
+        if self.decorator_mode != DecoratorMode.CREATE:
+            return
+        system_node_subnet_id = self.raw_param.get("system_node_subnet_id")
+        node_subnet_id = self.raw_param.get("node_subnet_id")
+        apiserver_subnet_id = self.raw_param.get("apiserver_subnet_id")
+        enable_hosted_system = bool(self.raw_param.get("enable_hosted_system"))
+
+        byo_specific_set = bool(system_node_subnet_id or node_subnet_id)
+
+        # --enable-hosted-system requires --sku automatic.
+        if enable_hosted_system and self.get_sku_name() != CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC:
+            raise RequiredArgumentMissingError(
+                '"--enable-hosted-system" requires "--sku automatic".'
+            )
+
+        # Partial trio: if any BYO subnet is set, require the full trio.
+        if byo_specific_set:
+            missing = []
+            if not system_node_subnet_id:
+                missing.append("--system-node-subnet-id")
+            if not node_subnet_id:
+                missing.append("--node-subnet-id")
+            if not apiserver_subnet_id:
+                missing.append("--apiserver-subnet-id")
+            if missing:
+                raise RequiredArgumentMissingError(
+                    "BYO VNet for a Managed System Pool (Automatic cluster) requires all three "
+                    "subnets. Missing: " + ", ".join(missing) + "."
+                )
+            if self.get_sku_name() != CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC:
+                raise RequiredArgumentMissingError(
+                    '"--system-node-subnet-id" / "--node-subnet-id" require "--sku automatic".'
+                )
 
     def _get_enable_private_cluster(self, enable_validation: bool = False) -> bool:
         """Internal function to obtain the value of enable_private_cluster.
@@ -5034,6 +5175,45 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         return new_profile, updated
 
+    def _handle_istio_cni_asm(self, new_profile: ServiceMeshProfile) -> Tuple[ServiceMeshProfile, bool]:
+        """Handle proxy redirection mechanism for Azure Service Mesh."""
+        updated = False
+        proxy_redirection_mechanism = self.raw_param.get("proxy_redirection_mechanism", None)
+
+        if proxy_redirection_mechanism is None:
+            return new_profile, updated
+
+        # Check if service mesh is enabled before allowing changes
+        if new_profile is None or new_profile.mode == CONST_AZURE_SERVICE_MESH_MODE_DISABLED:
+            raise ArgumentUsageError(
+                "Istio has not been enabled for this cluster, please refer to https://aka.ms/asm-aks-addon-docs "
+                "for more details on enabling Azure Service Mesh."
+            )
+
+        # Ensure istio profile exists
+        if new_profile.istio is None:
+            new_profile.istio = self.models.IstioServiceMesh()  # pylint: disable=no-member
+
+        # Ensure components exist
+        if new_profile.istio.components is None:
+            new_profile.istio.components = self.models.IstioComponents()  # pylint: disable=no-member
+
+        current_mechanism = getattr(
+            new_profile.istio.components,
+            "proxy_redirection_mechanism",
+            None,
+        )
+
+        if current_mechanism == proxy_redirection_mechanism:
+            raise ArgumentUsageError(
+                f"Proxy redirection mechanism is already set to '{proxy_redirection_mechanism}' for this cluster."
+            )
+
+        new_profile.istio.components.proxy_redirection_mechanism = proxy_redirection_mechanism
+        updated = True
+
+        return new_profile, updated
+
     # pylint: disable=too-many-branches,too-many-locals,too-many-statements
     def update_azure_service_mesh_profile(self) -> ServiceMeshProfile:
         """ Update azure service mesh profile.
@@ -5067,6 +5247,9 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         new_profile, updated_upgrade_asm = self._handle_upgrade_asm(new_profile)
         updated |= updated_upgrade_asm
+
+        new_profile, updated_istio_cni = self._handle_istio_cni_asm(new_profile)
+        updated |= updated_istio_cni
 
         if updated:
             return new_profile
@@ -6033,6 +6216,34 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         return self.raw_param.get("node_provisioning_default_pools")
 
+    def get_enable_app_routing_istio(self) -> bool:
+        """Obtain the value of enable_app_routing_istio.
+
+        :return: bool
+        """
+        return self.raw_param.get("enable_app_routing_istio", False)
+
+    def get_disable_app_routing_istio(self) -> bool:
+        """Obtain the value of disable_app_routing_istio.
+
+        :return: bool
+        """
+        return self.raw_param.get("disable_app_routing_istio", False)
+
+    def get_enable_gateway_api(self) -> bool:
+        """Obtain the value of enable_gateway_api.
+
+        :return: bool
+        """
+        return self.raw_param.get("enable_gateway_api", False)
+
+    def get_disable_gateway_api(self) -> bool:
+        """Obtain the value of disable_gateway_api.
+
+        :return: bool
+        """
+        return self.raw_param.get("disable_gateway_api", False)
+
 
 class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
     def __init__(
@@ -6278,6 +6489,9 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         """
         self._ensure_mc(mc)
 
+        if self.context.get_enable_hosted_system():
+            return mc
+
         agentpool_profile = self.agentpool_decorator.construct_agentpool_profile_default()
         mc.agent_pool_profiles = [agentpool_profile]
         return mc
@@ -6401,6 +6615,19 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             mc.service_principal_profile = service_principal_profile
         return mc
 
+    def _get_byo_hosted_system_subnet_ids(self) -> List[str]:
+        if not self.context.get_enable_hosted_system():
+            return []
+
+        subnet_ids = []
+        seen = set()
+        for raw_key in ("system_node_subnet_id", "node_subnet_id", "apiserver_subnet_id"):
+            subnet_id = self.context.raw_param.get(raw_key)
+            if subnet_id and subnet_id not in seen:
+                subnet_ids.append(subnet_id)
+                seen.add(subnet_id)
+        return subnet_ids
+
     def process_add_role_assignment_for_vnet_subnet(self, mc: ManagedCluster) -> None:
         """Add role assignment for vent subnet.
 
@@ -6416,6 +6643,10 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         :return: None
         """
         self._ensure_mc(mc)
+
+        # Validate before granting roles so a malformed BYO trio does not leave
+        # partial Network Contributor assignments behind.
+        self.context.validate_byo_hosted_system_subnets()
 
         need_post_creation_vnet_permission_granting = False
         vnet_subnet_id = self.context.get_vnet_subnet_id()
@@ -6461,6 +6692,50 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                     ):
                         logger.warning(
                             "Could not create a role assignment for subnet. Are you an Owner on this subscription?"
+                        )
+        byo_hosted_system_subnet_ids = self._get_byo_hosted_system_subnet_ids()
+        if byo_hosted_system_subnet_ids and not skip_subnet_role_assignment:
+            service_principal_profile = mc.service_principal_profile
+            assign_identity = self.context.get_assign_identity()
+            pending_post_creation_subnets = []
+            if service_principal_profile is None and not assign_identity:
+                for subnet_id in byo_hosted_system_subnet_ids:
+                    if not self.context.external_functions.subnet_role_assignment_exists(self.cmd, subnet_id):
+                        pending_post_creation_subnets.append(subnet_id)
+                if pending_post_creation_subnets:
+                    need_post_creation_vnet_permission_granting = True
+                    self.context.set_intermediate(
+                        "byo_hosted_system_subnets_pending_grant",
+                        pending_post_creation_subnets,
+                        overwrite_exists=True,
+                    )
+            else:
+                identity_object_id = None
+                if assign_identity:
+                    identity_object_id = self.context.get_user_assigned_identity_object_id()
+                for subnet_id in byo_hosted_system_subnet_ids:
+                    if self.context.external_functions.subnet_role_assignment_exists(self.cmd, subnet_id):
+                        continue
+                    if assign_identity:
+                        added = self.context.external_functions.add_role_assignment(
+                            self.cmd,
+                            "Network Contributor",
+                            identity_object_id,
+                            is_service_principal=False,
+                            scope=subnet_id,
+                        )
+                    else:
+                        added = self.context.external_functions.add_role_assignment(
+                            self.cmd,
+                            "Network Contributor",
+                            service_principal_profile.client_id,
+                            scope=subnet_id,
+                        )
+                    if not added:
+                        logger.warning(
+                            "Could not create a role assignment for subnet %s. "
+                            "Are you an Owner on this subscription?",
+                            subnet_id,
                         )
         # store need_post_creation_vnet_permission_granting as an intermediate
         self.context.set_intermediate(
@@ -7038,6 +7313,10 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         """
         self._ensure_mc(mc)
 
+        # Run BYO VNet trio validation first so clearer errors surface before the
+        # generic --apiserver-subnet-id checks inside _get_apiserver_subnet_id.
+        self.context.validate_byo_hosted_system_subnets()
+
         api_server_access_profile = None
         api_server_authorized_ip_ranges = self.context.get_api_server_authorized_ip_ranges()
         enable_private_cluster = self.context.get_enable_private_cluster()
@@ -7058,10 +7337,53 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             if api_server_access_profile is None:
                 api_server_access_profile = self.models.ManagedClusterAPIServerAccessProfile()
             api_server_access_profile.subnet_id = self.context.get_apiserver_subnet_id()
+            # BYO VNet for Managed System Pool (Automatic SKU) requires apiserver VNet
+            # integration. When the BYO subnet trio is provided, auto-enable vnet
+            # integration so users are not forced to pass --enable-apiserver-vnet-integration
+            # alongside the subnet IDs.
+            if (
+                self.context.get_system_node_subnet_id() or
+                self.context.get_node_subnet_id()
+            ):
+                api_server_access_profile.enable_vnet_integration = True
         mc.api_server_access_profile = api_server_access_profile
 
         fqdn_subdomain = self.context.get_fqdn_subdomain()
         mc.fqdn_subdomain = fqdn_subdomain
+        return mc
+
+    def set_up_hosted_system_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Set up hosted_system_profile on the ManagedCluster for Automatic SKU clusters.
+
+        Triggered when the user explicitly opts in via `--enable-hosted-system`, or
+        implicitly by supplying the BYO VNet subnet trio (`--system-node-subnet-id` /
+        `--node-subnet-id` / `--apiserver-subnet-id`). In either case:
+          - `mc.hosted_system_profile.enabled` is set to True so the RP treats this
+            as a Managed System Pool request.
+          - `system_node_subnet_id` / `node_subnet_id` are populated when supplied.
+          - `set_up_agentpool_profile` does not synthesize the default agent pool,
+            because the system pool is provisioned server-side from `hosted_system_profile`.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        # Run cross-flag validation (--enable-hosted-system SKU gate + BYO trio completeness)
+        self.context.validate_byo_hosted_system_subnets()
+
+        system_node_subnet_id = self.context.get_system_node_subnet_id()
+        node_subnet_id = self.context.get_node_subnet_id()
+        enable_hosted_system = self.context.get_enable_hosted_system()
+
+        if enable_hosted_system:
+            if mc.hosted_system_profile is None:
+                mc.hosted_system_profile = self.models.ManagedClusterHostedSystemProfile()
+            # Explicit enablement so the RP treats this as a Managed System Pool cluster.
+            mc.hosted_system_profile.enabled = True
+            if system_node_subnet_id:
+                mc.hosted_system_profile.system_node_subnet_id = system_node_subnet_id
+            if node_subnet_id:
+                mc.hosted_system_profile.node_subnet_id = node_subnet_id
         return mc
 
     def set_up_identity(self, mc: ManagedCluster) -> ManagedCluster:
@@ -7432,6 +7754,45 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
 
         return mc
 
+    def set_up_ingress_profile_app_routing_istio(self, mc: ManagedCluster) -> ManagedCluster:
+        """Set up App Routing Istio configuration in ingress profile for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        if self.context.get_enable_app_routing_istio():
+            if mc.ingress_profile is None:
+                mc.ingress_profile = self.models.ManagedClusterIngressProfile()  # pylint: disable=no-member
+            if mc.ingress_profile.web_app_routing is None:
+                mc.ingress_profile.web_app_routing = (
+                    self.models.ManagedClusterIngressProfileWebAppRouting()  # pylint: disable=no-member
+                )
+            if mc.ingress_profile.web_app_routing.gateway_api_implementations is None:
+                mc.ingress_profile.web_app_routing.gateway_api_implementations = (
+                    self.models.ManagedClusterWebAppRoutingGatewayAPIImplementations()  # pylint: disable=no-member
+                )
+            mc.ingress_profile.web_app_routing.gateway_api_implementations.app_routing_istio = (
+                self.models.ManagedClusterAppRoutingIstio(  # pylint: disable=no-member
+                    mode=CONST_APP_ROUTING_ISTIO_MODE_ENABLED
+                )
+            )
+
+        return mc
+
+    def set_up_ingress_profile_gateway_api(self, mc: ManagedCluster) -> ManagedCluster:
+        self._ensure_mc(mc)
+        if self.context.get_enable_gateway_api():
+            if mc.ingress_profile is None:
+                mc.ingress_profile = self.models.ManagedClusterIngressProfile()
+            if mc.ingress_profile.gateway_api is None:
+                mc.ingress_profile.gateway_api = (
+                    self.models.ManagedClusterIngressProfileGatewayConfiguration(
+                        installation=CONST_MANAGED_GATEWAY_INSTALLATION_STANDARD
+                    )
+                )
+        return mc
+
     def set_up_ai_toolchain_operator(self, mc: ManagedCluster) -> ManagedCluster:
         self._ensure_mc(mc)
 
@@ -7554,6 +7915,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_oidc_issuer_profile(mc)
         # set up api server access profile and fqdn subdomain
         mc = self.set_up_api_server_access_profile(mc)
+        # set up hosted system profile (BYO VNet for Managed System Pool)
+        mc = self.set_up_hosted_system_profile(mc)
         # set up identity
         mc = self.set_up_identity(mc)
         # set up identity profile
@@ -7584,6 +7947,10 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_workload_auto_scaler_profile(mc)
         # set up app routing profile
         mc = self.set_up_ingress_web_app_routing(mc)
+        # set up app routing istio
+        mc = self.set_up_ingress_profile_app_routing_istio(mc)
+        # set up gateway api
+        mc = self.set_up_ingress_profile_gateway_api(mc)
         # set up custom ca trust certificates
         mc = self.set_up_custom_ca_trust_certificates(mc)
         # set up run command
@@ -7666,16 +8033,27 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             # Grant vnet permission to system assigned identity RIGHT AFTER the cluster is put, this operation can
             # reduce latency for the role assignment take effect
             instant_cluster = self.client.get(self.context.get_resource_group_name(), self.context.get_name())
-            if not self.context.external_functions.add_role_assignment(
-                self.cmd,
-                "Network Contributor",
-                instant_cluster.identity.principal_id,
-                scope=self.context.get_vnet_subnet_id(),
-                is_service_principal=False,
-            ):
-                logger.warning(
-                    "Could not create a role assignment for subnet. Are you an Owner on this subscription?"
-                )
+            scopes = []
+            vnet_subnet_id = self.context.get_vnet_subnet_id()
+            if vnet_subnet_id:
+                scopes.append(vnet_subnet_id)
+            byo_hosted_system_subnet_ids = self.context.get_intermediate(
+                "byo_hosted_system_subnets_pending_grant", default_value=[]
+            )
+            for subnet_id in byo_hosted_system_subnet_ids or []:
+                if subnet_id and subnet_id not in scopes:
+                    scopes.append(subnet_id)
+            for scope in scopes:
+                if not self.context.external_functions.add_role_assignment(
+                    self.cmd,
+                    "Network Contributor",
+                    instant_cluster.identity.principal_id,
+                    scope=scope,
+                    is_service_principal=False,
+                ):
+                    logger.warning(
+                        "Could not create a role assignment for subnet. Are you an Owner on this subscription?"
+                    )
 
     # pylint: disable=too-many-locals
     def postprocessing_after_mc_created(self, cluster: ManagedCluster) -> None:
@@ -8053,6 +8431,12 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         :return: the ManagedCluster object
         """
         self._ensure_mc(mc)
+
+        # Automatic clusters with a Managed System Pool manage node pools on the
+        # server side and surface `agent_pool_profiles` as None. Skip the
+        # default agent pool update in that case.
+        if mc.hosted_system_profile and mc.hosted_system_profile.enabled:
+            return mc
 
         if not mc.agent_pool_profiles:
             raise UnknownError(
@@ -9081,6 +9465,68 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         else:
             raise CLIError('App Routing must be enabled to modify the default nginx ingress controller.\n')
 
+    def update_ingress_profile_app_routing_istio(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update App Routing Istio configuration in ingress profile for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+        enable_app_routing_istio = self.context.get_enable_app_routing_istio()
+        disable_app_routing_istio = self.context.get_disable_app_routing_istio()
+        if enable_app_routing_istio and disable_app_routing_istio:
+            raise MutuallyExclusiveArgumentError(
+                "Cannot specify --enable-app-routing-istio and --disable-app-routing-istio at the same time."
+            )
+        if enable_app_routing_istio or disable_app_routing_istio:
+            if mc.ingress_profile is None:
+                mc.ingress_profile = self.models.ManagedClusterIngressProfile()  # pylint: disable=no-member
+            if mc.ingress_profile.web_app_routing is None:
+                mc.ingress_profile.web_app_routing = (
+                    self.models.ManagedClusterIngressProfileWebAppRouting()  # pylint: disable=no-member
+                )
+            if mc.ingress_profile.web_app_routing.gateway_api_implementations is None:
+                mc.ingress_profile.web_app_routing.gateway_api_implementations = (
+                    self.models.ManagedClusterWebAppRoutingGatewayAPIImplementations()  # pylint: disable=no-member
+                )
+            if enable_app_routing_istio:
+                mc.ingress_profile.web_app_routing.gateway_api_implementations.app_routing_istio = (
+                    self.models.ManagedClusterAppRoutingIstio(  # pylint: disable=no-member
+                        mode=CONST_APP_ROUTING_ISTIO_MODE_ENABLED
+                    )
+                )
+            elif disable_app_routing_istio:
+                mc.ingress_profile.web_app_routing.gateway_api_implementations.app_routing_istio = (
+                    self.models.ManagedClusterAppRoutingIstio(  # pylint: disable=no-member
+                        mode=CONST_APP_ROUTING_ISTIO_MODE_DISABLED
+                    )
+                )
+        return mc
+
+    def update_ingress_profile_gateway_api(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update gateway api installation in the ingress profile for the ManagedCluster object.
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+        enable_gateway_api = self.context.get_enable_gateway_api()
+        disable_gateway_api = self.context.get_disable_gateway_api()
+        if enable_gateway_api and disable_gateway_api:
+            raise MutuallyExclusiveArgumentError(
+                "Cannot specify --enable-gateway-api and --disable-gateway-api at the same time."
+            )
+        if enable_gateway_api or disable_gateway_api:
+            if mc.ingress_profile is None:
+                mc.ingress_profile = self.models.ManagedClusterIngressProfile()  # pylint: disable=no-member
+            if mc.ingress_profile.gateway_api is None:
+                mc.ingress_profile.gateway_api = (
+                    self.models.ManagedClusterIngressProfileGatewayConfiguration()  # pylint: disable=no-member
+                )
+            if enable_gateway_api:
+                mc.ingress_profile.gateway_api.installation = CONST_MANAGED_GATEWAY_INSTALLATION_STANDARD
+            elif disable_gateway_api:
+                mc.ingress_profile.gateway_api.installation = CONST_MANAGED_GATEWAY_INSTALLATION_DISABLED
+        return mc
+
     def update_node_resource_group_profile(self, mc: ManagedCluster) -> ManagedCluster:
         """Update node resource group profile for the ManagedCluster object.
         :return: the ManagedCluster object
@@ -10019,6 +10465,10 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_node_resource_group_profile(mc)
         # update AI toolchain operator
         mc = self.update_ai_toolchain_operator(mc)
+        # update app routing istio
+        mc = self.update_ingress_profile_app_routing_istio(mc)
+        # update gateway api
+        mc = self.update_ingress_profile_gateway_api(mc)
         # update bootstrap profile
         mc = self.update_bootstrap_profile(mc)
         # update static egress gateway
