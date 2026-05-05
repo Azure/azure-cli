@@ -9409,6 +9409,67 @@ class SqlServerSoftDeleteScenarioTest(ScenarioTest):
 
         # Note: ResourceGroupPreparer automatically handles cleanup of the resource group
 
+
+class SqlServerUpdateRetentionDaysUnitTest(unittest.TestCase):
+    """Unit tests for server_update retention_days handling."""
+
+    def _make_server_instance(self, retention_days):
+        """Create a minimal mock server instance with the given retention_days."""
+        from unittest.mock import MagicMock
+        instance = MagicMock()
+        instance.retention_days = retention_days
+        instance.identity = None
+        instance.administrator_login_password = None
+        instance.minimal_tls_version = None
+        instance.public_network_access = None
+        instance.primary_user_assigned_identity_id = None
+        instance.key_id = None
+        instance.federated_client_id = None
+        return instance
+
+    def test_server_update_negative_retention_days_is_reset_to_zero(self):
+        """
+        When server has retention_days=-1 (legacy 'not configured' value) and
+        --soft-delete-retention-days is NOT passed, server_update should set
+        retention_days to 0 to avoid 'Invalid value given for parameter RetentionDays'
+        from the API.
+        """
+        from azure.cli.command_modules.sql.custom import server_update
+        instance = self._make_server_instance(retention_days=-1)
+        result = server_update(instance)
+        self.assertEqual(result.retention_days, 0)
+
+    def test_server_update_valid_retention_days_is_cleared_when_not_specified(self):
+        """
+        When server has a valid retention_days value and --soft-delete-retention-days
+        is NOT passed, server_update should set retention_days to None (omit from PUT).
+        """
+        from azure.cli.command_modules.sql.custom import server_update
+        instance = self._make_server_instance(retention_days=5)
+        result = server_update(instance)
+        self.assertIsNone(result.retention_days)
+
+    def test_server_update_specified_retention_days_overrides_existing(self):
+        """
+        When --soft-delete-retention-days IS passed, server_update should use
+        the specified value regardless of the existing value.
+        """
+        from azure.cli.command_modules.sql.custom import server_update
+        instance = self._make_server_instance(retention_days=-1)
+        result = server_update(instance, soft_delete_retention_days=3)
+        self.assertEqual(result.retention_days, 3)
+
+    def test_server_update_zero_specified_retention_days(self):
+        """
+        When --soft-delete-retention-days 0 is passed, server_update should
+        explicitly disable soft delete by setting retention_days to 0.
+        """
+        from azure.cli.command_modules.sql.custom import server_update
+        instance = self._make_server_instance(retention_days=7)
+        result = server_update(instance, soft_delete_retention_days=0)
+        self.assertEqual(result.retention_days, 0)
+
+
 class SqlServerDeletedServerScenarioTest(ScenarioTest):
 
     def test_sql_server_restore_non_existent_deleted_server(self):

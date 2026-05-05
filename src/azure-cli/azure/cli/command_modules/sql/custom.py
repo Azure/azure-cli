@@ -4672,10 +4672,17 @@ def server_update(
 
     # Handle soft delete retention days
     # 0 = disable soft delete, 1-7 = enable with specified retention days
-    # If not specified, set to None to avoid sending existing value to API
     if soft_delete_retention_days is not None:
         instance.retention_days = soft_delete_retention_days
+    elif instance.retention_days is not None and instance.retention_days < 0:
+        # Legacy servers may have retention_days=-1 (meaning "not configured").
+        # The API now validates this field and rejects negative values, so
+        # explicitly set to 0 (disabled) to avoid a validation error when
+        # other server properties are being updated.
+        instance.retention_days = 0
     else:
+        # If not specified and existing value is valid (0-7) or None,
+        # set to None to avoid sending the existing value to the API.
         instance.retention_days = None
 
     return instance
