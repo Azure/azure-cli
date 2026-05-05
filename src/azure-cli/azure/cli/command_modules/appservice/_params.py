@@ -339,7 +339,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('end_to_end_encryption_enabled', options_list=['--end-to-end-encryption-enabled', '-e'],
                    help='Enable or disable end-to-end encryption between the Front End and the Workers.',
                    arg_type=get_three_state_flag(return_label=True))
-        c.argument('site_scoped_certificates_enabled',
+        c.argument('site_scoped_certs',
                    options_list=['--site-scoped-certificates-enabled'],
                    help='Enable or disable site-scoped certificates.',
                    arg_type=get_three_state_flag(return_label=True))
@@ -475,7 +475,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('platform_release_channel', options_list=['--platform-release-channel'],
                    help='Set the platform release channel for the web app. Possible values: Latest, Standard, Extended.',
                    arg_type=get_enum_type(PLATFORM_RELEASE_CHANNEL_TYPES))
-        c.argument('site_scoped_certificates_enabled',
+        c.argument('site_scoped_certs',
                    options_list=['--site-scoped-certificates-enabled'],
                    help='Enable or disable site-scoped certificates.',
                    arg_type=get_three_state_flag(return_label=True))
