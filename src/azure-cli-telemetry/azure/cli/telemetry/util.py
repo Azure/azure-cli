@@ -5,7 +5,6 @@
 
 import os
 import logging
-import logging.handlers
 
 
 def save_payload(config_dir, payload):
@@ -25,6 +24,7 @@ def save_payload(config_dir, payload):
 
 
 def _create_rotate_file_logger(log_dir):
+    from logging.handlers import RotatingFileHandler
     from datetime import datetime
     now = datetime.now()
     cache_name = os.path.join(log_dir, 'telemetry', now.strftime('%Y%m%d%H%M%S%f')[:-3], 'cache')
@@ -32,7 +32,7 @@ def _create_rotate_file_logger(log_dir):
         if not os.path.exists(os.path.dirname(cache_name)):
             os.makedirs(os.path.dirname(cache_name))
 
-        handler = logging.handlers.RotatingFileHandler(cache_name, maxBytes=128 * 1024, backupCount=100)
+        handler = RotatingFileHandler(cache_name, maxBytes=128 * 1024, backupCount=100)
         handler.setLevel(logging.INFO)
         handler.setFormatter(logging.Formatter(fmt='%(asctime)s,%(message)s',
                                                datefmt='%Y-%m-%dT%H:%M:%S'))

@@ -35,7 +35,12 @@ def process_query(cli_term):
         response = call_aladdin_service(cli_term)
 
         if response.status_code != 200:
-            logger.error('Unexpected Error: If it persists, please file a bug.')
+            logger.error(
+                "The `az find` command has been retired. A new experience is being developed to replace it. "
+                "In the meantime, please use `az <command> --help` to explore commands and examples, "
+                "or visit https://aka.ms/cli_ref for reference documentation."
+            )
+
         else:
             if (platform.system() == 'Windows' and should_enable_styling()):
                 colorama.init(convert=True)

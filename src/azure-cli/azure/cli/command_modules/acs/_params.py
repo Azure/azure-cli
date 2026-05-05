@@ -25,6 +25,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_NETWORK_PLUGIN_MODE_OVERLAY, CONST_NETWORK_PLUGIN_NONE,
     CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDUAL,
     CONST_NETWORK_POD_IP_ALLOCATION_MODE_STATIC_BLOCK,
+    CONST_ACNS_DATAPATH_ACCELERATION_MODE_BPFVETH, CONST_ACNS_DATAPATH_ACCELERATION_MODE_NONE,
     CONST_NODE_IMAGE_UPGRADE_CHANNEL, CONST_NONE_UPGRADE_CHANNEL,
     CONST_NODE_OS_CHANNEL_NODE_IMAGE,
     CONST_NODE_OS_CHANNEL_NONE,
@@ -41,9 +42,10 @@ from azure.cli.command_modules.acs._consts import (
     CONST_NAMESPACE_DELETE_POLICY_KEEP,
     CONST_NAMESPACE_DELETE_POLICY_DELETE,
     CONST_OS_SKU_AZURELINUX, CONST_OS_SKU_AZURELINUX3,
+    CONST_OS_SKU_AZURECONTAINERLINUX,
     CONST_OS_SKU_CBLMARINER, CONST_OS_SKU_MARINER,
     CONST_OS_SKU_UBUNTU, CONST_OS_SKU_UBUNTU2204, CONST_OS_SKU_UBUNTU2404,
-    CONST_OS_SKU_WINDOWS2019, CONST_OS_SKU_WINDOWS2022,
+    CONST_OS_SKU_WINDOWS2019, CONST_OS_SKU_WINDOWS2022, CONST_OS_SKU_WINDOWS2025,
     CONST_OUTBOUND_TYPE_LOAD_BALANCER, CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY,
     CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
     CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING, CONST_OUTBOUND_TYPE_NONE,
@@ -75,7 +77,9 @@ from azure.cli.command_modules.acs._consts import (
     CONST_NODE_PROVISIONING_MODE_AUTO,
     CONST_NODE_PROVISIONING_DEFAULT_POOLS_NONE,
     CONST_NODE_PROVISIONING_DEFAULT_POOLS_AUTO,
-    CONST_WORKLOAD_RUNTIME_KATA_VM_ISOLATION)
+    CONST_WORKLOAD_RUNTIME_KATA_VM_ISOLATION,
+    CONST_TRANSIT_ENCRYPTION_WIREGUARD,
+    CONST_TRANSIT_ENCRYPTION_NONE)
 from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
     CONST_ACSTOR_ALL,
     CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY,
@@ -129,6 +133,7 @@ from azure.cli.command_modules.acs._validators import (
     validate_disable_windows_outbound_nat,
     validate_asm_egress_name,
     validate_crg_id, validate_apiserver_subnet_id,
+    validate_system_node_subnet_id, validate_node_subnet_id,
     validate_azure_service_mesh_revision,
     validate_message_of_the_day,
     validate_custom_ca_trust_certificates,
@@ -183,9 +188,9 @@ node_priorities = [CONST_SCALE_SET_PRIORITY_REGULAR, CONST_SCALE_SET_PRIORITY_SP
 node_eviction_policies = [CONST_SPOT_EVICTION_POLICY_DELETE, CONST_SPOT_EVICTION_POLICY_DEALLOCATE]
 node_os_disk_types = [CONST_OS_DISK_TYPE_MANAGED, CONST_OS_DISK_TYPE_EPHEMERAL]
 node_mode_types = [CONST_NODEPOOL_MODE_SYSTEM, CONST_NODEPOOL_MODE_USER, CONST_NODEPOOL_MODE_GATEWAY]
-node_os_skus_create = [CONST_OS_SKU_AZURELINUX, CONST_OS_SKU_AZURELINUX3, CONST_OS_SKU_UBUNTU, CONST_OS_SKU_CBLMARINER, CONST_OS_SKU_MARINER, CONST_OS_SKU_UBUNTU2204, CONST_OS_SKU_UBUNTU2404]
-node_os_skus = node_os_skus_create + [CONST_OS_SKU_WINDOWS2019, CONST_OS_SKU_WINDOWS2022]
-node_os_skus_update = [CONST_OS_SKU_AZURELINUX, CONST_OS_SKU_AZURELINUX3, CONST_OS_SKU_UBUNTU, CONST_OS_SKU_UBUNTU2204, CONST_OS_SKU_UBUNTU2404]
+node_os_skus_create = [CONST_OS_SKU_AZURELINUX, CONST_OS_SKU_AZURELINUX3, CONST_OS_SKU_AZURECONTAINERLINUX, CONST_OS_SKU_UBUNTU, CONST_OS_SKU_CBLMARINER, CONST_OS_SKU_MARINER, CONST_OS_SKU_UBUNTU2204, CONST_OS_SKU_UBUNTU2404]
+node_os_skus = node_os_skus_create + [CONST_OS_SKU_WINDOWS2019, CONST_OS_SKU_WINDOWS2022, CONST_OS_SKU_WINDOWS2025]
+node_os_skus_update = [CONST_OS_SKU_AZURELINUX, CONST_OS_SKU_AZURELINUX3, CONST_OS_SKU_AZURECONTAINERLINUX, CONST_OS_SKU_UBUNTU, CONST_OS_SKU_UBUNTU2204, CONST_OS_SKU_UBUNTU2404]
 scale_down_modes = [CONST_SCALE_DOWN_MODE_DELETE, CONST_SCALE_DOWN_MODE_DEALLOCATE]
 pod_ip_allocation_modes = [CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDUAL, CONST_NETWORK_POD_IP_ALLOCATION_MODE_STATIC_BLOCK]
 
@@ -226,6 +231,11 @@ node_provisioning_modes = [
 node_provisioning_default_pools = [
     CONST_NODE_PROVISIONING_DEFAULT_POOLS_NONE,
     CONST_NODE_PROVISIONING_DEFAULT_POOLS_AUTO,
+]
+
+transit_encryption_types = [
+    CONST_TRANSIT_ENCRYPTION_WIREGUARD,
+    CONST_TRANSIT_ENCRYPTION_NONE,
 ]
 
 dev_space_endpoint_types = ['Public', 'Private', 'None']
@@ -363,6 +373,12 @@ workload_runtime_types = [
     CONST_WORKLOAD_RUNTIME_KATA_VM_ISOLATION,
 ]
 
+# consts for acns datapath acceleration mode
+acns_datapath_acceleration_modes = [
+    CONST_ACNS_DATAPATH_ACCELERATION_MODE_BPFVETH,
+    CONST_ACNS_DATAPATH_ACCELERATION_MODE_NONE
+]
+
 
 def load_arguments(self, _):
     acr_arg_type = CLIArgumentType(metavar='ACR_NAME_OR_RESOURCE_ID')
@@ -428,6 +444,9 @@ def load_arguments(self, _):
         c.argument('enable_private_cluster', action='store_true')
         c.argument('enable_apiserver_vnet_integration', action='store_true')
         c.argument('apiserver_subnet_id', validator=validate_apiserver_subnet_id)
+        c.argument('system_node_subnet_id', validator=validate_system_node_subnet_id)
+        c.argument('node_subnet_id', validator=validate_node_subnet_id)
+        c.argument('enable_hosted_system', action='store_true')
         c.argument('private_dns_zone')
         c.argument('disable_public_fqdn', action='store_true')
         c.argument('service_principal')
@@ -553,6 +572,7 @@ def load_arguments(self, _):
         c.argument('ksm_metric_annotations_allow_list')
         c.argument('grafana_resource_id', validator=validate_grafanaresourceid)
         c.argument('enable_windows_recording_rules', action='store_true')
+        c.argument('enable_azure_monitor_app_monitoring', action='store_true')
         c.argument('node_public_ip_tags', arg_type=tags_type, validator=validate_node_public_ip_tags,
                    help='space-separated tags: key[=value] [key[=value] ...].')
         # azure container storage
@@ -605,6 +625,12 @@ def load_arguments(self, _):
         c.argument('disable_acns_security', action='store_true')
         c.argument("acns_advanced_networkpolicies", arg_type=get_enum_type(advanced_networkpolicies))
         c.argument('enable_container_network_logs', action='store_true')
+        c.argument(
+            "acns_datapath_acceleration_mode",
+            arg_type=get_enum_type(acns_datapath_acceleration_modes),
+            help="Set the datapath acceleration mode for Azure Container Networking Solution (ACNS). Valid values are 'BpfVeth' and 'None'."
+        )
+        c.argument('acns_transit_encryption_type', arg_type=get_enum_type(transit_encryption_types))
         c.argument("if_match")
         c.argument("if_none_match")
         # node provisioning
@@ -628,6 +654,17 @@ def load_arguments(self, _):
                 'It is strongly recommended to not do this unless there are idle nodes ready to take the pods evicted '
                 'by that action.'
             )
+        )
+        c.argument(
+            "enable_app_routing_istio",
+            options_list=["--enable-app-routing-istio", "--enable-ari"],
+            action="store_true",
+            help="Enable Gateway API based ingress on App Routing via Istio"
+        )
+        c.argument(
+            "enable_gateway_api",
+            action="store_true",
+            help="Enable managed installation of Gateway API CRDs from the standard release channel."
         )
 
     with self.argument_context('aks update') as c:
@@ -664,6 +701,14 @@ def load_arguments(self, _):
         c.argument("acns_advanced_networkpolicies", arg_type=get_enum_type(advanced_networkpolicies))
         c.argument('enable_container_network_logs', action='store_true')
         c.argument('disable_container_network_logs', action='store_true')
+        c.argument(
+            "acns_datapath_acceleration_mode",
+            arg_type=get_enum_type(acns_datapath_acceleration_modes),
+            help="Set the datapath acceleration mode for Azure Container Networking Solution (ACNS). Valid values are 'BpfVeth' and 'None'."
+        )
+        c.argument('acns_transit_encryption_type', arg_type=get_enum_type(transit_encryption_types))
+        # monitoring addons
+        c.argument('enable_high_log_scale_mode', arg_type=get_three_state_flag())
         # private cluster parameters
         c.argument('enable_apiserver_vnet_integration', action='store_true')
         c.argument('apiserver_subnet_id', validator=validate_apiserver_subnet_id)
@@ -715,6 +760,8 @@ def load_arguments(self, _):
         c.argument('disable_image_cleaner', action='store_true', validator=validate_image_cleaner_enable_disable_mutually_exclusive)
         c.argument('image_cleaner_interval_hours', type=int)
         c.argument('http_proxy_config')
+        c.argument('disable_http_proxy', action='store_true')
+        c.argument('enable_http_proxy', action='store_true')
         c.argument('custom_ca_trust_certificates', options_list=["--custom-ca-trust-certificates", "--ca-certs"], validator=validate_custom_ca_trust_certificates, help="path to file containing list of new line separated CAs")
         c.argument('enable_run_command', action='store_true')
         c.argument('disable_run_command', action='store_true')
@@ -764,6 +811,8 @@ def load_arguments(self, _):
         c.argument('grafana_resource_id', validator=validate_grafanaresourceid)
         c.argument('enable_windows_recording_rules', action='store_true')
         c.argument('disable_azure_monitor_metrics', action='store_true')
+        c.argument('enable_azure_monitor_app_monitoring', action='store_true')
+        c.argument('disable_azure_monitor_app_monitoring', action='store_true')
         # azure container storage
         c.argument(
             "enable_azure_container_storage",
@@ -842,6 +891,32 @@ def load_arguments(self, _):
                 'by that action.'
             )
         )
+        c.argument(
+            "enable_app_routing_istio",
+            options_list=["--enable-app-routing-istio", "--enable-ari"],
+            action="store_true",
+            help="Enable Gateway API based ingress on App Routing via Istio."
+        )
+        c.argument(
+            "disable_app_routing_istio",
+            options_list=["--disable-app-routing-istio", "--disable-ari"],
+            action="store_true",
+            help="Disable Gateway API based ingress on App Routing via Istio."
+        )
+        c.argument(
+            "enable_gateway_api",
+            action="store_true",
+            help="Enable managed installation of Gateway API CRDs from the standard release channel."
+        )
+        c.argument(
+            "disable_gateway_api",
+            action="store_true",
+            help="Disable managed installation of Gateway API CRDs."
+        )
+    with self.argument_context('aks delete') as c:
+        c.argument("if_match")
+        c.argument("if_none_match")
+
     with self.argument_context('aks disable-addons', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('addons', options_list=['--addons', '-a'])
 
@@ -1217,6 +1292,15 @@ def load_arguments(self, _):
         c.argument('ca_key_object_name')
         c.argument('root_cert_object_name')
         c.argument('cert_chain_object_name')
+        c.argument('proxy_redirection_mechanism',
+                   arg_type=get_enum_type(["CNIChaining", "InitContainers"]),
+                   help='Set the proxy redirection mechanism for Azure Service Mesh.')
+
+    with self.argument_context('aks mesh proxy-redirection-mechanism') as c:
+        c.argument('mechanism',
+                   arg_type=get_enum_type(["CNIChaining", "InitContainers"]),
+                   required=True,
+                   help='The proxy redirection mechanism for Azure Service Mesh.')
 
     with self.argument_context('aks mesh get-revisions') as c:
         c.argument('location', required=True, help='Location in which to discover available Azure Service Mesh revisions.')

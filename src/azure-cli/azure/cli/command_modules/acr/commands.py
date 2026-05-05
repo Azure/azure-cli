@@ -44,7 +44,6 @@ from ._client_factory import (
     cf_acr_private_endpoint_connections,
     cf_acr_agentpool,
     cf_acr_connected_registries,
-    cf_acr_network_rules,
     cf_acr_cache,
     cf_acr_cred_sets
 )
@@ -139,8 +138,7 @@ def load_command_table(self, _):
     )
 
     acr_network_rule_util = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.acr.network_rule#{}',
-        client_factory=cf_acr_network_rules
+        operations_tmpl='azure.cli.command_modules.acr.network_rule#{}'
     )
 
     acr_check_health_util = CliCommandType(
@@ -436,6 +434,7 @@ def load_command_table(self, _):
                   table_transformer=token_output_format)
         g.command('repo', 'acr_connected_registry_permissions_update',
                   deprecate_info=self.deprecate(redirect='permissions update', hide=True))
+        g.command('resync', 'acr_connected_registry_resync', is_preview=True)
 
     with self.command_group('acr connected-registry install', acr_connected_registry_util,
                             deprecate_info=self.deprecate(redirect='acr connected-registry get-settings',

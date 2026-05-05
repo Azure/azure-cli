@@ -7,22 +7,20 @@
 # pylint: disable=too-many-statements
 
 from knack.arguments import CLIArgumentType
-
+from argcomplete.completers import FilesCompleter
 from azure.cli.core.commands.parameters import (
     tags_type, get_location_type,
     get_enum_type, file_type,
     resource_group_name_type,
     get_three_state_flag)
-from azure.cli.command_modules.postgresql.validators import public_access_validator, maintenance_window_validator, ip_address_validator, \
+from azure.cli.command_modules.postgresql.utils._flexible_server_util import get_current_time
+from azure.cli.command_modules.postgresql.utils._util import get_autonomous_tuning_settings_map
+from azure.cli.command_modules.postgresql.utils.validators import public_access_validator, maintenance_window_validator, ip_address_validator, \
     retention_validator, validate_identity, validate_byok_identity, validate_identities, \
-    virtual_endpoint_name_validator, node_count_validator, postgres_firewall_rule_name_validator, \
+    virtual_endpoint_name_validator, postgres_firewall_rule_name_validator, \
     db_renaming_cluster_validator
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction
-
 from .randomname.generate import generate_username
-from ._flexible_server_util import get_current_time
-from argcomplete.completers import FilesCompleter
-from ._util import get_autonomous_tuning_settings_map
 
 
 def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-locals
@@ -158,21 +156,19 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         create_node_count_arg_type = CLIArgumentType(
             type=int,
             options_list=['--node-count'],
-            help='The number of nodes for elastic cluster. Range of 1 to 10. Default is 2 nodes.',
-            validator=node_count_validator
+            help='The number of nodes for elastic cluster. Default is 2 nodes.'
         )
 
         update_node_count_arg_type = CLIArgumentType(
             type=int,
             options_list=['--node-count'],
-            help='The number of nodes for elastic cluster. Range of 1 to 10.',
-            validator=node_count_validator
+            help='The number of nodes for elastic cluster.'
         )
 
         auto_grow_arg_type = CLIArgumentType(
             arg_type=get_enum_type(['Enabled', 'Disabled']),
             options_list=['--storage-auto-grow'],
-            help='Enable or disable autogrow of the storage. Default value is Enabled.'
+            help='Enable or disable autogrow of the storage. Default value is Disabled.'
         )
 
         storage_type_arg_type = CLIArgumentType(
@@ -182,10 +178,16 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                  'Must set iops and throughput if using PremiumV2_LRS.'
         )
 
+        storage_type_replica_arg_type = CLIArgumentType(
+            arg_type=get_enum_type(['PremiumV2_LRS']),
+            options_list=['--storage-type'],
+            help='Storage type for the read replica. Allowed value is PremiumV2_LRS. Default is for the read replica to match storage type of the primary server.'
+        )
+
         storage_type_restore_arg_type = CLIArgumentType(
             arg_type=get_enum_type(['PremiumV2_LRS']),
             options_list=['--storage-type'],
-            help='Storage type for the new server. Allowed value is PremiumV2_LRS. Default value is none.'
+            help='Storage type for the new server. Allowed value is PremiumV2_LRS. Default is for the new server to match storage type of the source server.'
         )
 
         performance_tier_arg_type = CLIArgumentType(
@@ -631,6 +633,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('performance_tier', default=None, arg_type=performance_tier_arg_type)
             c.argument('yes', arg_type=yes_arg_type)
             c.argument('tags', arg_type=tags_type)
+            c.argument('storage_type', default=None, arg_type=storage_type_replica_arg_type)
 
         with self.argument_context('{} flexible-server replica promote'.format(command_group)) as c:
             c.argument('replica_name', arg_type=replica_name_arg_type)

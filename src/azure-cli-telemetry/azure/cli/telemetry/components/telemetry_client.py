@@ -6,9 +6,6 @@
 import json
 import datetime
 
-import urllib.request as http_client_t
-from urllib.error import HTTPError
-
 from applicationinsights import TelemetryClient
 from applicationinsights.channel import SynchronousSender, SynchronousQueue, TelemetryChannel
 
@@ -92,6 +89,9 @@ class _NoRetrySender(SynchronousSender):
 
     def send(self, data_to_send):
         """ Override the default resend mechanism in SenderBase. Stop resend when it fails."""
+        import urllib.request as http_client_t
+        from urllib.error import HTTPError
+
         request_payload = json.dumps([a.write() for a in data_to_send])
 
         content = bytearray(request_payload, 'utf-8')

@@ -75,8 +75,7 @@ def _create_default_passwords(cmd, resource_group_name, registry_name, token, lo
                                            password1=True, password2=True, resource_group_name=resource_group_name,
                                            expiration_in_days=expiration_in_days, expiration=expiration)
     credentials = LongRunningOperation(cmd.cli_ctx)(poller)
-    setattr(token.credentials, 'username', credentials.username)
-    setattr(token.credentials, 'passwords', credentials.passwords)
+    token.credentials = credentials
     registry_client = cf_acr_registries(cmd.cli_ctx)
     login_server = registry_client.get(resource_group_name, registry_name).login_server
     logger.warning('Please store your generated credentials safely. Meanwhile you can use it through'

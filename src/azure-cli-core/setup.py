@@ -8,7 +8,7 @@
 from codecs import open
 from setuptools import setup, find_packages
 
-VERSION = "2.84.0"
+VERSION = "2.86.0"
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -45,7 +45,7 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'argcomplete~=3.5.2',
     'azure-cli-telemetry==1.1.0.*',
-    'azure-core~=1.38.0',
+    'azure-core~=1.39.0',
     'azure-mgmt-core>=1.2.0,<2',
     'cryptography',
     # On Linux, the distribution (Ubuntu, Debian, etc) and version are logged in telemetry
@@ -84,5 +84,5 @@ setup(
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests", "azure", "azure.cli"]),
     install_requires=DEPENDENCIES,
     python_requires='>=3.10.0',
-    package_data={'azure.cli.core': ['auth/landing_pages/*.html']}
+    package_data={'azure.cli.core': ['auth/landing_pages/*.html', 'commandIndex.latest.json', 'helpIndex.latest.json']}
 )

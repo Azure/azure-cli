@@ -35,10 +35,6 @@ def cf_vm_image_term(cli_ctx, _):
     return market_place_client.marketplace_agreements
 
 
-def cf_usage(cli_ctx, _):
-    return _compute_client_factory(cli_ctx).usage
-
-
 def cf_vmss(cli_ctx, _):
     return _compute_client_factory(cli_ctx).virtual_machine_scale_sets
 
@@ -63,16 +59,8 @@ def cf_disk_accesses(cli_ctx, _):
     return _compute_client_factory(cli_ctx).disk_accesses
 
 
-def cf_images(cli_ctx, _):
-    return _compute_client_factory(cli_ctx).images
-
-
 def cf_rolling_upgrade_commands(cli_ctx, _):
     return _compute_client_factory(cli_ctx).virtual_machine_scale_set_rolling_upgrades
-
-
-def cf_galleries(cli_ctx, _):
-    return _compute_client_factory(cli_ctx).galleries
 
 
 def cf_gallery_images(cli_ctx, _):
@@ -87,12 +75,12 @@ def cf_proximity_placement_groups(cli_ctx, _):
     return _compute_client_factory(cli_ctx).proximity_placement_groups
 
 
-def cf_dedicated_hosts(cli_ctx, _):
-    return _compute_client_factory(cli_ctx).dedicated_hosts
-
-
 def cf_dedicated_host_groups(cli_ctx, _):
     return _compute_client_factory(cli_ctx).dedicated_host_groups
+
+
+def cf_dedicated_hosts(cli_ctx, _):
+    return _compute_client_factory(cli_ctx).dedicated_hosts
 
 
 def _log_analytics_client_factory(cli_ctx, subscription_id, *_):
@@ -149,10 +137,6 @@ def cf_community_gallery_image(cli_ctx, *_):
 
 def cf_community_gallery_image_version(cli_ctx, *_):
     return cf_vm_cl(cli_ctx).community_gallery_image_versions
-
-
-def cf_capacity_reservation_groups(cli_ctx, *_):
-    return cf_vm_cl(cli_ctx).capacity_reservation_groups
 
 
 def cf_capacity_reservations(cli_ctx, *_):

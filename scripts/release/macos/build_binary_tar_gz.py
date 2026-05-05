@@ -21,6 +21,10 @@ dist/binary_tar_gz/
 
 Archive Contents:
 ```
+├── LICENSE
+├── NOTICE.txt
+├── README.md
+├── ThirdPartyNotices.txt
 ├── bin/
 │   └── az → ../libexec/bin/az
 ├── completions/
@@ -33,13 +37,12 @@ Archive Contents:
 └── libexec/
     ├── bin/
     │   └── az (entry script - Homebrew or AZ_PYTHON)
-    ├── lib/
-    │   └── python3.13
-    │       └── site-packages/
-    │           ├── azure/
-    │           ├── msal/
-    │           └── ... (all CLI packages)
-    └── README.txt
+    └── lib/
+        └── python3.13
+            └── site-packages/
+                ├── azure/
+                ├── msal/
+                └── ... (all CLI packages)
 ```
 
 Usage:
@@ -69,7 +72,7 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 SRC_DIR = PROJECT_ROOT / "src"
 AZURE_CLI_CORE_DIR = SRC_DIR / "azure-cli-core"
-REQUIREMENTS_FILE = SRC_DIR / "azure-cli" / "requirements.py3.MacOS.txt"
+REQUIREMENTS_FILE = SRC_DIR / "azure-cli" / "requirements.py3.Darwin.txt"
 
 # Package configuration
 APP_NAME = "azure-cli"
@@ -77,12 +80,11 @@ CLI_EXECUTABLE_NAME = "az"
 TARBALL_NAME_TEMPLATE_DEFAULT = "{APP_NAME}-{VERSION}-{PLATFORM_TAG}-nopython.tar.gz"
 
 # Python version we're building for (must match Homebrew python@X.Y)
-# Can be overridden via --python-version CLI arg or PYTHON_MAJOR_MINOR env var
+# Can be overridden via PYTHON_MAJOR_MINOR env var
 PYTHON_MAJOR_MINOR = os.environ.get("PYTHON_MAJOR_MINOR", "3.13")
 PYTHON_BIN = "python3"
 TEMPLATE_DIR = Path(__file__).resolve().parent / "templates"
 LAUNCHER_TEMPLATE_PATH = TEMPLATE_DIR / "az_launcher.sh.in"
-README_TEMPLATE_PATH = TEMPLATE_DIR / "README.txt.in"
 
 
 class BuildError(RuntimeError):
@@ -223,7 +225,7 @@ def install_azure_cli(venv_python: Path) -> None:
     subprocess.run([str(venv_python), "-m", "azure.cli", "--version"], check=True)
 
 
-def create_install_structure(venv_dir: Path, install_dir: Path, version: str, platform_tag: str) -> None:
+def create_install_structure(venv_dir: Path, install_dir: Path) -> None:
     """Create the final installation directory structure."""
     print("\n=== Creating installation structure ===")
 
@@ -249,7 +251,7 @@ def create_install_structure(venv_dir: Path, install_dir: Path, version: str, pl
     az_symlink.symlink_to(az_target)
     print(f"Created symlink: {az_symlink} -> {az_target}")
 
-    _create_readme(install_dir=libexec_dir, version=version, platform_tag=platform_tag)
+    _copy_legal_files(install_dir=install_dir)
 
     _generate_shell_completions(venv_dir=venv_dir, install_dir=install_dir)
 
@@ -275,21 +277,26 @@ def _create_launcher_script(bin_dir: Path, python_version: str) -> None:
     print(f"Created launcher script: {az_path}")
 
 
-def _create_readme(install_dir: Path, version: str, platform_tag: str) -> None:
-    """Create README.txt."""
-    template = _load_template(path=README_TEMPLATE_PATH)
-    readme_content = _render_template(
-        template=template,
-        values={
-            "AZURE_CLI_VERSION": version,
-            "PLATFORM_TAG": platform_tag,
-            "PYTHON_MAJOR_MINOR": PYTHON_MAJOR_MINOR,
-        },
-    )
+def _copy_legal_files(install_dir: Path) -> None:
+    """Copy legal and documentation files into the install directory."""
+    print("\n=== Copying legal files ===")
 
-    readme_path = install_dir / "README.txt"
-    readme_path.write_text(readme_content, encoding="utf-8")
-    print(f"Created README: {readme_path}")
+    for filename in ("LICENSE", "NOTICE.txt", "README.md"):
+        src = PROJECT_ROOT / filename
+        if src.exists():
+            dst = install_dir / filename
+            shutil.copy2(src, dst)
+            print(f"Copied {filename}: {dst}")
+        else:
+            print(f"Warning: {filename} not found at {src}")
+
+    tpn_src = Path(__file__).resolve().parent / "resources" / "ThirdPartyNotices.txt"
+    if tpn_src.exists():
+        tpn_dst = install_dir / "ThirdPartyNotices.txt"
+        shutil.copy2(tpn_src, tpn_dst)
+        print(f"Copied ThirdPartyNotices.txt: {tpn_dst}")
+    else:
+        print(f"Warning: ThirdPartyNotices.txt not found at {tpn_src}")
 
 
 def _generate_shell_completions(venv_dir: Path, install_dir: Path) -> None:
@@ -468,8 +475,6 @@ def main() -> int:
             create_install_structure(
                 venv_dir=venv_dir,
                 install_dir=install_dir,
-                version=version,
-                platform_tag=args.platform_tag,
             )
 
             tarball_path = create_tarball(

@@ -636,7 +636,7 @@ class VMCustomImageTest(ScenarioTest):
         })
 
         self.cmd('vm create -g {rg} -n {vm1} --image Debian:debian-10:10:latest --use-unmanaged-disk --admin-username sdk-test-admin '
-                 '--admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} --size Standard_B2ms --nsg-rule NONE')
+                 '--admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} --size Standard_D2s_v3 --nsg-rule NONE')
 
         # Disable default outbound access
         self.cmd(
@@ -650,7 +650,7 @@ class VMCustomImageTest(ScenarioTest):
         self.cmd('image create -g {rg} -n {image1} --source {vm1}')
 
         self.cmd('vm create -g {rg} -n {vm2} --image Debian:debian-10:10:latest --storage-sku standard_lrs --data-disk-sizes-gb 1 1 1 1 '
-                 '--admin-username sdk-test-admin --admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} --size Standard_B2ms --nsg-rule NONE')
+                 '--admin-username sdk-test-admin --admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} --size Standard_D2s_v3 --nsg-rule NONE')
         data_disks = self.cmd('vm show -g {rg} -n {vm2}').get_output_in_json()['storageProfile']['dataDisks']
         self.kwargs['disk_0_name'] = data_disks[0]['name']
         self.kwargs['disk_2_name'] = data_disks[2]['name']
@@ -668,17 +668,10 @@ class VMCustomImageTest(ScenarioTest):
         self.cmd('image create -g {rg} -n {image2} --source {vm2}')
 
         self.cmd('vm create -g {rg} -n {newvm1} --image {image1} --admin-username sdk-test-admin --admin-password testPassword0 '
-                 '--authentication-type password --subnet {subnet} --vnet-name {vnet} --size Standard_B2ms --nsg-rule NONE')
+                 '--authentication-type password --subnet {subnet} --vnet-name {vnet} --size Standard_D2s_v3 --nsg-rule NONE')
         self.cmd('vm show -g {rg} -n {newvm1}', checks=[
             self.check('storageProfile.imageReference.resourceGroup', '{rg}'),
             self.check('storageProfile.osDisk.createOption', 'FromImage')
-        ])
-
-        self.cmd('network nsg create -g {rg} -n {nsg}')
-        self.cmd('vmss create -g {rg} -n vmss1 --image {image1} --admin-username sdk-test-admin --admin-password testPassword0 '
-                 '--authentication-type password --orchestration-mode Uniform --lb-sku Standard --nsg {nsg} --vm-sku Standard_B1ls', checks=[
-            self.check('vmss.virtualMachineProfile.storageProfile.imageReference.resourceGroup', '{rg}'),
-            self.check('vmss.virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage')
         ])
 
     @AllowLargeResponse(size_kb=99999)
@@ -3507,10 +3500,10 @@ class DiagnosticsExtensionInstallTest(ScenarioTest):
 
         self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:16.04-LTS:latest '
                  '--authentication-type password --lb-sku Standard --admin-username user11 '
-                 '--admin-password TestTest12#$ --orchestration-mode Uniform --vm-sku Standard_B1ls')
+                 '--admin-password TestTest12#$ --orchestration-mode Uniform --vm-sku Standard_D2s_v3')
         self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:16.04-LTS:latest '
                  '--authentication-type password --admin-username user11 --admin-password TestTest12#$ '
-                 '--use-unmanaged-disk --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --size Standard_B2ms')
+                 '--use-unmanaged-disk --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --size Standard_D2s_v3')
 
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
@@ -4615,7 +4608,7 @@ class VMSSCreateOptions(ScenarioTest):
             self.check('upgradePolicy.mode', self.kwargs['update'].title()),
             self.check('singlePlacementGroup', True),
             self.check('virtualMachineProfile.osProfile.computerNamePrefix', 'vmss1'),
-            self.check('virtualMachineProfile.storageProfile.osDisk.diskSizeGb', 40)
+            self.check('virtualMachineProfile.storageProfile.osDisk.diskSizeGB', 40)
         ])
         self.kwargs['id'] = self.cmd('vmss list-instances -g {rg} -n {vmss} --query "[].instanceId"').get_output_in_json()[0]
         self.cmd('vmss show -g {rg} -n {vmss} --instance-id {id}',
@@ -4624,16 +4617,16 @@ class VMSSCreateOptions(ScenarioTest):
         self.cmd('vmss disk attach -g {rg} --vmss-name {vmss} --size-gb 3')
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('length(virtualMachineProfile.storageProfile.dataDisks)', 2),
-            self.check('virtualMachineProfile.storageProfile.dataDisks[0].diskSizeGb', 1),
+            self.check('virtualMachineProfile.storageProfile.dataDisks[0].diskSizeGB', 1),
             self.check('virtualMachineProfile.storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Standard_LRS'),
-            self.check('virtualMachineProfile.storageProfile.dataDisks[1].diskSizeGb', 3),
+            self.check('virtualMachineProfile.storageProfile.dataDisks[1].diskSizeGB', 3),
             self.check('virtualMachineProfile.storageProfile.dataDisks[1].managedDisk.storageAccountType', 'Standard_LRS'),
         ])
         self.cmd('vmss disk detach -g {rg} --vmss-name {vmss} --lun 1')
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('length(virtualMachineProfile.storageProfile.dataDisks)', 1),
             self.check('virtualMachineProfile.storageProfile.dataDisks[0].lun', 0),
-            self.check('virtualMachineProfile.storageProfile.dataDisks[0].diskSizeGb', 1)
+            self.check('virtualMachineProfile.storageProfile.dataDisks[0].diskSizeGB', 1)
         ])
         result = self.cmd('vmss list -g {rg} -otable')
         table_output = set(result.output.splitlines()[2].split())
@@ -4672,16 +4665,22 @@ class VMSSCreateOptions(ScenarioTest):
         self.cmd('vmss create -g {rg} -n {vmss} --image {image} --vm-sku {sku} --admin-username vmtest --admin-password Test123456789# '
                  '--enable-resilient-creation --disable-overprovision --upgrade-policy-mode Manual --orchestration-mode Uniform --lb-sku Standard')
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
-            self.check('resiliencyPolicy.resilientVmCreationPolicy.enabled', True),
+            self.check('resiliencyPolicy.resilientVMCreationPolicy.enabled', True),
         ])
 
         self.cmd('vmss update -g {rg} -n {vmss} --enable-resilient-deletion --enable-resilient-creation false')
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
-            self.check('resiliencyPolicy.resilientVmCreationPolicy.enabled', False),
-            self.check('resiliencyPolicy.resilientVmDeletionPolicy.enabled', True),
+            self.check('resiliencyPolicy.resilientVMCreationPolicy.enabled', False),
+            self.check('resiliencyPolicy.resilientVMDeletionPolicy.enabled', True),
         ])
 
-    @ResourceGroupPreparer(name_prefix='test_vmss_with_automatic_zone_rebalancing_policy', location='eastus2')
+    @unittest.skip(
+        "Test skipped due to design conflict: "
+        "Automatic Zone Rebalancing requires a zone-spanning VMSS "
+        "(explicit zones), while Zone Placement Policy (Auto) "
+        "explicitly disallows specifying zones."
+    )
+    @ResourceGroupPreparer(name_prefix='test_vmss_with_automatic_zone_rebalancing_policy', location='eastus2euap')
     def test_vmss_with_automatic_zone_rebalancing_policy(self, resource_group):
         self.kwargs.update({
             'vmss1': self.create_random_name('vmss', 10),
@@ -5088,7 +5087,7 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
         self.cmd('vmss list-instance-connection-info -n {vmss6} -g {rg}')
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(name_prefix='cli_test_vmss_zone_balance', location='eastus2')
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_zone_balance', location='eastus2euap')
     def test_vmss_zone_balance(self, resource_group):
         self.kwargs.update({
             'nsg': self.create_random_name('nsg', 10),
@@ -5097,15 +5096,15 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
             'vmss2': self.create_random_name('vmss', 15)
         })
         self.cmd('network nsg create -g {rg} -n {nsg}')
-        self.cmd('vmss create -n {vmss1} -g {rg} --image Debian:debian-10:10:latest --zone-balance true --admin-username clittester --lb-sku standard --public-ip-per-vm --dns-servers 10.0.0.6 10.0.0.5 --nsg {nsg} --admin-username vmsstest --admin-password Test123456789# --orchestration-mode Uniform  --ssh-key-value "{ssh_key}"  --zones 1 2 -l eastus2', checks=[
+        self.cmd('vmss create -n {vmss1} -g {rg} --image Debian:debian-10:10:latest --vm-sku Standard_B2ms --zone-placement-policy Auto --zone-balance true --max-zone-count 2 --disable-overprovision --admin-username clittester --lb-sku standard --public-ip-per-vm --dns-servers 10.0.0.6 10.0.0.5 --nsg {nsg} --admin-username vmsstest --admin-password Test123456789# --orchestration-mode Uniform  --ssh-key-value "{ssh_key}" -l eastus2euap', checks=[
             self.check('vmss.zoneBalance', True),
         ])
         self.cmd('vmss update -n {vmss1} -g {rg} --zone-balance false', checks=[
             self.check('zoneBalance', False)
         ])
 
-        self.cmd('vmss create -n {vmss2} -g {rg} --image Debian:debian-10:10:latest --admin-username clittester --lb-sku standard --public-ip-per-vm --dns-servers 10.0.0.6 10.0.0.5 --nsg {nsg} --admin-username vmsstest --admin-password Test123456789# --orchestration-mode Uniform  --ssh-key-value "{ssh_key}"  --zones 1 2 -l eastus2')
-        self.cmd('vmss update -n {vmss2} -g {rg} --zone-balance True', checks=[
+        self.cmd('vmss create -n {vmss2} -g {rg} --image Debian:debian-10:10:latest --vm-sku Standard_B2ms --admin-username clittester --lb-sku standard --public-ip-per-vm --dns-servers 10.0.0.6 10.0.0.5 --nsg {nsg} --admin-username vmsstest --admin-password Test123456789# --orchestration-mode Uniform  --ssh-key-value "{ssh_key}"  --zones 1 2 -l eastus2euap')
+        self.cmd('vmss update -n {vmss2} -g {rg} --zone-balance true', checks=[
             self.check('zoneBalance', True)
         ])
 
@@ -5412,17 +5411,15 @@ class VMSSUpdateTests(ScenarioTest):
     def test_vmss_update_ephemeral_os_disk_placement(self, resource_group, resource_group_location):
         self.kwargs.update({
             'vm1': 'cli-test-vm-local-vm1',
-            'vm2': 'cli-test-vm-local-vm2',
             'image': 'OpenLogic:CentOS:7.5:latest',
             'placement1': 'ResourceDisk',
             'placement2': 'CacheDisk',
             'size1': 'Standard_DS5_v2',
             'size2': 'Standard_DS4_v2',
-            'loc': resource_group_location,
         })
 
         # check create base1
-        self.cmd('vmss create -n {vm1} -g {rg} --image {image} --vm-sku Standard_B1ls --ephemeral-os-disk --admin-username vmtest')
+        self.cmd('vmss create -n {vm1} -g {rg} --image {image} --vm-sku Standard_B1ls --ephemeral-os-disk --admin-username vmtest --vm-sku Standard_B1ls')
         self.cmd('vmss show -g {rg} -n {vm1}', checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.option', 'Local'),
@@ -6410,6 +6407,104 @@ class MSIScenarioTest(ScenarioTest):
             self.check('type', 'SystemAssigned'),
         ])
 
+    @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(random_name_length=20, name_prefix='cli_test_vm_msi')
+    def test_sig_msi(self, resource_group):
+        self.kwargs.update({
+            'emsi': 'id1',
+            'emsi2': 'id2',
+            'sig1': 'sig1',
+            'sig2': 'sig2',
+            'sig3': 'sig3',
+            'sig4': 'sig4',
+        })
+
+        # Create user-assigned managed identities
+        emsi_result = self.cmd('identity create -g {rg} -n {emsi}').get_output_in_json()
+        emsi2_result = self.cmd('identity create -g {rg} -n {emsi2}').get_output_in_json()
+        self.kwargs.update({
+            'emsi_id': emsi_result['id'],
+            'emsi2_id': emsi2_result['id'],
+        })
+
+        # 1. Create a gallery with system-assigned identity
+        self.cmd('sig create -g {rg} -r {sig1} --system-assigned', checks=[
+            self.check('identity.type', 'SystemAssigned'),
+            self.exists('identity.principalId'),
+            self.exists('identity.tenantId'),
+        ])
+
+        # 2. Assign a user-assigned identity to the gallery
+        self.cmd('sig identity assign -g {rg} -r {sig1} --user-assigned {emsi_id}')
+
+        # 3. Verify identity show returns SystemAssigned, UserAssigned
+        result = self.cmd('sig identity show -g {rg} -r {sig1}', checks=[
+            self.check('type', 'SystemAssigned, UserAssigned'),
+        ]).get_output_in_json()
+        emsis = [x.lower() for x in result['userAssignedIdentities'].keys()]
+        self.assertEqual(emsis, [emsi_result['id'].lower()])
+
+        # 4. Validate sig show also includes identity
+        result = self.cmd('sig show -g {rg} -r {sig1}', checks=[
+            self.check('identity.type', 'SystemAssigned, UserAssigned'),
+        ]).get_output_in_json()
+        emsis = [x.lower() for x in result['identity']['userAssignedIdentities'].keys()]
+        self.assertEqual(emsis, [emsi_result['id'].lower()])
+
+        # 5. Assign a second user-assigned identity
+        self.cmd('sig identity assign -g {rg} -r {sig1} --user-assigned {emsi2_id}')
+        result = self.cmd('sig identity show -g {rg} -r {sig1}').get_output_in_json()
+        emsis = [x.lower() for x in result['userAssignedIdentities'].keys()]
+        self.assertEqual(set(emsis), {emsi_result['id'].lower(), emsi2_result['id'].lower()})
+
+        # 6. Remove the first user-assigned identity
+        self.cmd('sig identity remove -g {rg} -r {sig1} --user-assigned {emsi_id}')
+        result = self.cmd('sig identity show -g {rg} -r {sig1}', checks=[
+            self.check('type', 'SystemAssigned, UserAssigned'),
+        ]).get_output_in_json()
+        emsis = [x.lower() for x in result['userAssignedIdentities'].keys()]
+        self.assertEqual(emsis, [emsi2_result['id'].lower()])
+
+        # 7. Remove the second user-assigned identity, system-assigned should remain
+        self.cmd('sig identity remove -g {rg} -r {sig1} --user-assigned {emsi2_id}')
+        self.cmd('sig identity show -g {rg} -r {sig1}', checks=[
+            self.check('type', 'SystemAssigned'),
+            self.check('userAssignedIdentities', None),
+        ])
+
+        # 8. Remove system-assigned identity
+        self.cmd('sig identity remove -g {rg} -r {sig1} --system-assigned')
+
+        # 9. Create a gallery without identity, then assign system-assigned
+        self.cmd('sig create -g {rg} -r {sig2}')
+        self.cmd('sig identity assign -g {rg} -r {sig2} --system-assigned', checks=[
+            self.check('type', 'SystemAssigned'),
+            self.exists('principalId'),
+        ])
+
+        # 10. Create a gallery with only user-assigned identity
+        self.cmd('sig create -g {rg} -r {sig3} --user-assigned {emsi_id}', checks=[
+            self.check('identity.type', 'UserAssigned'),
+        ])
+        result = self.cmd('sig identity show -g {rg} -r {sig3}').get_output_in_json()
+        emsis = [x.lower() for x in result['userAssignedIdentities'].keys()]
+        self.assertEqual(emsis, [emsi_result['id'].lower()])
+
+        # 11. Create a gallery with both system and user-assigned identities
+        self.cmd('sig create -g {rg} -r {sig4} --system-assigned --user-assigned {emsi_id} {emsi2_id}', checks=[
+            self.check('identity.type', 'SystemAssigned, UserAssigned'),
+        ])
+        result = self.cmd('sig identity show -g {rg} -r {sig4}').get_output_in_json()
+        emsis = [x.lower() for x in result['userAssignedIdentities'].keys()]
+        self.assertEqual(set(emsis), {emsi_result['id'].lower(), emsi2_result['id'].lower()})
+
+        # 12. Remove all user-assigned identities at once
+        self.cmd('sig identity remove -g {rg} -r {sig4} --user-assigned')
+        self.cmd('sig identity show -g {rg} -r {sig4}', checks=[
+            self.check('type', 'SystemAssigned'),
+            self.check('userAssignedIdentities', None),
+        ])
+
 
 class VMLiveScenarioTest(LiveScenarioTest):
 
@@ -6996,7 +7091,7 @@ class VMSecurityProfileTestForDiskEncryption(ScenarioTest):
         self.assertIsNotNone(virtualMachine['identity'])
         self.assertTrue(encryptionIdentityId.lower() in (k.lower() for k in virtualMachine['identity']['userAssignedIdentities'].keys()))
         self.assertIsNotNone(virtualMachine['virtualMachineProfile']['securityProfile'])
-        self.assertIsNone(virtualMachine['virtualMachineProfile']['securityProfile']['encryptionIdentity']) 
+        self.assertIsNone(virtualMachine['virtualMachineProfile']['securityProfile'].get('encryptionIdentity'))
         
 @api_version_constraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30')
 class VMDiskEncryptionTest(ScenarioTest):
@@ -8757,8 +8852,8 @@ class VMGalleryImage(ScenarioTest):
                  '--os-type linux --os-state Specialized -p publisher1 -f offer1 -s sku1 --hyper-v-generation v1')
 
         vm_id = self.cmd(
-            'vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --data-disk-sizes-gb 10 '
-            '--admin-username clitest1 --generate-ssh-key --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE').get_output_in_json()['id']
+            'vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:16.04-LTS:latest --data-disk-sizes-gb 10 '
+            '--admin-username clitest1 --generate-ssh-key --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --size Standard_D2s_v3').get_output_in_json()['id']
         self.kwargs.update({"vm_id": vm_id})
 
         # Disable default outbound access
@@ -9429,7 +9524,7 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
 # region dedicated host tests
 class DedicatedHostScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_host_management_', location='eastus')
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_host_management_', location='westus')
     def test_vm_host_management(self, resource_group):
         self.kwargs.update({
             'host-group': 'my-host-group',
@@ -9441,7 +9536,7 @@ class DedicatedHostScenarioTest(ScenarioTest):
             self.check('length(@)', 1),
             self.check('[0].name', '{host-group}')
         ])
-        self.cmd('vm host create -n {host} --host-group {host-group} -d 2 -g {rg} --sku DSv3-Type1')
+        self.cmd('vm host create -n {host} --host-group {host-group} -d 2 -g {rg} --sku DCSv2-Type1')
         self.cmd('vm host list --host-group {host-group} -g {rg}', checks=[
             self.check('length(@)', 1),
             self.check('[0].name', '{host}')
@@ -9495,7 +9590,7 @@ class DedicatedHostScenarioTest(ScenarioTest):
             'host-group': self.create_random_name('host', 10)
         })
         self.cmd('vm host group create -n {host-group} -g {rg} --ultra-ssd-enabled true -c 1 -l eastus2euap --zone 3', checks=[
-            self.check('additionalCapabilities.ultraSsdEnabled', True)
+            self.check('additionalCapabilities.ultraSSDEnabled', True)
         ])
 
     @AllowLargeResponse()
@@ -13969,6 +14064,488 @@ class VMUltraSSDLivedataDiskIopsMbpsScenarioTest(ScenarioTest):
         )
 
         self.assertNotEqual(r.exit_code, 0)
+
+
+class VMRestorePointInstantAccessScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_rp_ia', location='eastus2euap')
+    @AllowLargeResponse(size_kb=99999)
+    def test_vm_restore_point_instant_access(self, resource_group):
+        self.kwargs.update({
+            'vm': 'testVm1',
+            'vnet': 'testVnet1',
+            'subnet': 'testSubnet1',
+            'pip': 'testPip1',
+            'disk': 'testDdv2',
+            'rpc': 'testRpc1',
+            'rp': 'testRp1',
+            'location': 'eastus2euap'
+        })
+
+        # Create VM
+        vm = self.cmd('vm create -g {rg} -n {vm} --image Win2022Datacenter --admin-username azureuser --admin-password '
+                      '"Password12345!" --size Standard_D2s_v3 --vnet-name {vnet} -l {location} '
+                      '--subnet {subnet} --public-ip-address {pip} --zone 1').get_output_in_json()
+
+        self.kwargs.update({
+            'vm_id': vm['id']
+        })
+
+        # Create data disk
+        self.cmd('disk create -g {rg} -n {disk} --size-gb 100 --sku PremiumV2_LRS -l {location} --zone 1',
+            checks=[
+                self.check('name', '{disk}')
+            ]
+        )
+
+        # Attach data disk
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk}')
+
+        # Create restore point collection with instant access enabled
+        self.cmd('restore-point collection create -g {rg} -l {location} '
+                 '--source-id {vm_id} --collection-name {rpc} --instant-access true',
+            checks=[
+                self.check('instantAccess', True),
+                self.check('provisioningState', 'Succeeded')
+            ]
+        )
+
+        # Create restore point with instant access duration
+        self.cmd('restore-point create -g {rg} --collection-name {rpc} -n {rp} --instant-access-duration 120',
+            checks=[
+                self.check('instantAccessDurationMinutes', 120),
+                self.check('consistencyMode', 'ApplicationConsistent'),
+                self.check('provisioningState', 'Succeeded')
+            ]
+        )
+
+        # Show restore point with instance view
+        self.cmd('restore-point show -g {rg} --collection-name {rpc} -n {rp} --instance-view',
+            checks=[
+                self.check('instantAccessDurationMinutes', 120),
+                self.exists('instanceView.diskRestorePoints[0].snapshotAccessState')
+            ]
+        )
+
+        # Update restore point collection to disable instant access
+        self.cmd('restore-point collection update -g {rg} --collection-name {rpc} --instant-access false',
+            checks=[
+                self.check('instantAccess', False),
+                self.check('provisioningState', 'Succeeded')
+            ]
+        )
+
+class VMSSAutomaticZonePlacementTest(ScenarioTest):
+    """
+    Test suite for VMSS Automatic Zone Placement Policy feature.
+    This feature allows the platform to automatically select the best availability zones
+    for VMSS deployments.
+    """
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_zone_placement_include_zones_')
+    def test_vmss_zone_placement_policy_with_include_zones(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss-zone-placement-001',
+            'location': 'eastus2',
+            'image': 'MicrosoftWindowsServer:WindowsServer:2016-Datacenter:latest',
+            'admin_username': 'testadmin',
+            'admin_password': 'testPassword0',
+            'vm_sku': 'Standard_B2ms'
+        })
+
+        # create VMSS with zone placement policy and include zones
+        self.cmd(
+            'vmss create -g {rg} -n {vmss} -l {location} '
+            '--instance-count 3 '
+            '--image {image} '
+            '--admin-username {admin_username} '
+            '--admin-password {admin_password} '
+            '--upgrade-policy-mode Manual '
+            '--zone-placement-policy Auto '
+            '--include-zones 1 2 '
+            '--vm-sku {vm_sku} '
+        )
+
+        # verify the vmss was created with correct placement configuration
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('placement.zonePlacementPolicy', 'Auto'),
+            self.check('placement.includeZones', ['1', '2']),
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_zone_placement_exclude_zones_')
+    def test_vmss_zone_placement_policy_with_exclude_zones(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss-zone-placement-exclude',
+            'location': 'eastus2euap',
+            'image': 'Debian:debian-10:10:latest',
+            'admin_username': 'testadmin',
+            'admin_password': 'testPassword0',
+            'vm_sku': 'Standard_B1ms'
+        })
+
+        # create vmss with zone placement policy and exclude zones
+        self.cmd(
+            'vmss create -g {rg} -n {vmss} -l {location} '
+            '--image {image} '
+            '--admin-username {admin_username} '
+            '--admin-password {admin_password} '
+            '--instance-count 3 '
+            '--upgrade-policy-mode Manual '
+            '--zone-placement-policy Auto '
+            '--exclude-zones 1 '
+            '--vm-sku {vm_sku} '
+        )
+
+        # verify the vmss was created with correct placement configuration
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('placement.zonePlacementPolicy', 'Auto'),
+            self.check('placement.excludeZones', ['1']),
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_zone_placement_max_zone_count_')
+    def test_vmss_zone_placement_policy_with_max_zone_count(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss-zone-placement-002',
+            'location': 'eastus2',
+            'image': 'MicrosoftWindowsServer:WindowsServer:2016-Datacenter:latest',
+            'admin_username': 'testadmin',
+            'admin_password': 'testPassword0',
+            'vm_sku': 'Standard_B2ms'
+        })
+
+        # create vmss with zone placement policy and max zone count
+        self.cmd(
+            'vmss create -g {rg} -n {vmss} -l {location} '
+            '--image {image} '
+            '--admin-username {admin_username} '
+            '--admin-password {admin_password} '
+            '--upgrade-policy-mode Manual '
+            '--max-zone-count 3 '
+            '--zone-placement-policy Auto '
+            '--exclude-zones 4 '
+            '--vm-sku {vm_sku} '
+        )
+
+        # verify the vmss was created with correct zone allocation policy
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('resiliencyPolicy.zoneAllocationPolicy.maxZoneCount', 3),
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_zone_placement_instance_percent_')
+    def test_vmss_zone_placement_policy_with_max_instance_percent(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss-zone-placement-003',
+            'location': 'eastus2euap',
+            'image': 'Debian:debian-10:10:latest',
+            'admin_username': 'testadmin',
+            'admin_password': 'testPassword0',
+            'vm_sku': 'Standard_B2ms'
+        })
+
+        # create vmss with instance percent policy
+        self.cmd(
+            'vmss create -g {rg} -n {vmss} -l {location} '
+            '--image {image} '
+            '--admin-username {admin_username} '
+            '--admin-password {admin_password} '
+            '--vm-sku {vm_sku} '
+            '--zone-placement-policy Auto '
+            '--instance-percent-policy true '
+            '--max-instance-percent 50 '
+        )
+
+        # verify the vmss was created with correct max instance percent policy
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('resiliencyPolicy.zoneAllocationPolicy.maxInstancePercentPerZonePolicy.enabled', True),
+            self.check('resiliencyPolicy.zoneAllocationPolicy.maxInstancePercentPerZonePolicy.value', 50),
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_zone_placement_combined_')
+    def test_vmss_zone_placement_policy_with_combined_parameters(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss-zone-placement-combined',
+            'location': 'westus2',
+            'image': 'MicrosoftWindowsServer:WindowsServer:2016-Datacenter:latest',
+            'admin_username': 'testadmin',
+            'admin_password': 'testPassword0',
+            'vm_sku': 'Standard_B2ms'
+        })
+
+        # create vmss with combined zone placement parameters
+        self.cmd(
+            'vmss create -g {rg} -n {vmss} -l {location} '
+            '--instance-count 3 '
+            '--image {image} '
+            '--admin-username {admin_username} '
+            '--admin-password {admin_password} '
+            '--upgrade-policy-mode Manual '
+            '--zone-placement-policy Auto '
+            '--include-zones 1 2 3 '
+            '--max-zone-count 2 '
+            '--instance-percent-policy true '
+            '--max-instance-percent 80 '
+            '--vm-sku {vm_sku} '
+        )
+
+        # verify all configurations are correctly set
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('placement.zonePlacementPolicy', 'Auto'),
+            self.check('placement.includeZones', ['1', '2', '3']),
+            self.check('resiliencyPolicy.zoneAllocationPolicy.maxZoneCount', 2),
+            self.check('resiliencyPolicy.zoneAllocationPolicy.maxInstancePercentPerZonePolicy.enabled', True),
+            self.check('resiliencyPolicy.zoneAllocationPolicy.maxInstancePercentPerZonePolicy.value', 80),
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+    def test_vmss_zone_placement_policy_validation_zones_conflict(self):
+        self.kwargs.update({
+            'rg': 'rgtest',
+            'vmss': 'vmss-zone-placement-invalid',
+            'location': 'eastus2',
+            'image': 'MicrosoftWindowsServer:WindowsServer:2016-Datacenter:latest',
+            'admin_username': 'testadmin',
+            'admin_password': 'testPassword0',
+            'vm_sku': 'Standard_B2ms'
+        })
+
+        # this should fail because --zones and --zone-placement-policy are mutually exclusive
+        with self.assertRaisesRegex(Exception, 'zone-placement-policy cannot be used with --zones'):
+            self.cmd(
+                'vmss create -g {rg} -n {vmss} -l {location} '
+                '--instance-count 3 '
+                '--image {image} '
+                '--admin-username {admin_username} '
+                '--admin-password {admin_password} '
+                '--upgrade-policy-mode Manual '
+                '--zone-placement-policy Auto '
+                '--zones 1 2 '
+                '--vm-sku {vm_sku} '
+            )
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_zone_placement_overprovision_')
+    def test_vmss_zone_placement_policy_validation_overprovision_uniform(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss-zone-placement-overprovision',
+            'location': 'eastus2',
+            'image': 'MicrosoftWindowsServer:WindowsServer:2016-Datacenter:latest',
+            'admin_username': 'testadmin',
+            'admin_password': 'testPassword0',
+            'vm_sku': 'Standard_B2ms'
+        })
+
+        # this should fail for Uniform mode without --disable-overprovision
+        with self.assertRaisesRegex(Exception, 'zone placement policy does not support overprovisioning'):
+            self.cmd(
+                'vmss create -g {rg} -n {vmss} -l {location} '
+                '--instance-count 3 '
+                '--image {image} '
+                '--admin-username {admin_username} '
+                '--admin-password {admin_password} '
+                '--upgrade-policy-mode Manual '
+                '--zone-placement-policy Auto '
+                '--vm-sku {vm_sku} '
+                '--orchestration-mode Uniform'
+            )
+
+    def test_vmss_zone_placement_instance_percent_validation(self):
+        self.kwargs.update({
+            'rg': 'rgtest',
+            'vmss': 'vmss-zone-placement-percent-invalid',
+            'location': 'eastus2',
+            'image': 'MicrosoftWindowsServer:WindowsServer:2016-Datacenter:latest',
+            'admin_username': 'testadmin',
+            'admin_password': 'testPassword0',
+            'vm_sku': 'Standard_B2ms'
+        })
+
+        # this should fail because --instance-percent-policy true requires --max-instance-percent
+        with self.assertRaisesRegex(Exception, 'requires.*max-instance-percent'):
+            self.cmd(
+                'vmss create -g {rg} -n {vmss} -l {location} '
+                '--instance-count 3 '
+                '--image {image} '
+                '--admin-username {admin_username} '
+                '--admin-password {admin_password} '
+                '--upgrade-policy-mode Manual '
+                '--vm-sku {vm_sku} '
+                '--instance-percent-policy true '
+            )
+
+    def test_vmss_zone_placement_instance_percent_range_validation(self):
+        self.kwargs.update({
+            'rg': 'rgtest',
+            'vmss': 'vmss-zone-placement-percent-range',
+            'location': 'eastus2',
+            'image': 'MicrosoftWindowsServer:WindowsServer:2016-Datacenter:latest',
+            'admin_username': 'testadmin',
+            'admin_password': 'testPassword0',
+            'vm_sku': 'Standard_B2ms'
+        })
+
+        # this should fail because --max-instance-percent must be between 1 and 100
+        with self.assertRaisesRegex(Exception, 'must be an integer between 1 and 100'):
+            self.cmd(
+                'vmss create -g {rg} -n {vmss} -l {location} '
+                '--instance-count 3 '
+                '--image {image} '
+                '--admin-username {admin_username} '
+                '--admin-password {admin_password} '
+                '--upgrade-policy-mode Manual '
+                '--vm-sku {vm_sku} '
+                '--instance-percent-policy true '
+                '--max-instance-percent 150 '
+            )
+
+
+class VMSSUpdateZoneAllocationPolicyTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_max_zone_count_')
+    def test_vmss_update_max_zone_count(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss-update-zone-count',
+            'location': 'eastus2euap',
+            'image': 'OpenLogic:CentOS:7.5:latest',
+            'admin_username': 'testadmin',
+            'admin_password': 'testPassword0!@#',
+            'vm_sku': 'Standard_B2ms'
+        })
+
+        self.cmd(
+            'vmss create -g {rg} -n {vmss} -l {location} '
+            '--image {image} '
+            '--admin-username {admin_username} '
+            '--admin-password {admin_password} '
+            '--upgrade-policy-mode Manual '
+            '--zone-placement-policy Auto '
+            '--max-zone-count 3 '
+            '--vm-sku {vm_sku} '
+        )
+
+        # update vmss with max zone count
+        self.cmd(
+            'vmss update -g {rg} -n {vmss} '
+            '--max-zone-count 2'
+        )
+
+        # verify the VMSS was updated with correct max zone count
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('resiliencyPolicy.zoneAllocationPolicy.maxZoneCount', 2)
+        ])
+
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_instance_percent_')
+    def test_vmss_update_max_instance_percent_per_zone(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss-update-instance-percent',
+            'location': 'eastus2euap',
+            'image': 'OpenLogic:CentOS:7.5:latest',
+            'admin_username': 'testadmin',
+            'admin_password': 'testPassword0!@#',
+            'vm_sku': 'Standard_B2ms'
+        })
+
+        # create vmss without instance percent policy
+        self.cmd(
+            'vmss create -g {rg} -n {vmss} -l {location} '
+            '--image {image} '
+            '--admin-username {admin_username} '
+            '--admin-password {admin_password} '
+            '--upgrade-policy-mode Manual '
+            '--zone-placement-policy Auto '
+            '--vm-sku {vm_sku} '
+        )
+
+        # update vmss with instance percent policy
+        self.cmd(
+            'vmss update -g {rg} -n {vmss} '
+            '--instance-percent-policy true '
+            '--max-instance-percent 80'
+        )
+
+        # verify the policy was enabled with correct value
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('resiliencyPolicy.zoneAllocationPolicy.maxInstancePercentPerZonePolicy.enabled', True),
+            self.check('resiliencyPolicy.zoneAllocationPolicy.maxInstancePercentPerZonePolicy.value', 80)
+        ])
+
+        # update the percent value
+        self.cmd(
+            'vmss update -g {rg} -n {vmss} '
+            '--instance-percent-policy true '
+            '--max-instance-percent 90'
+        )
+
+        # verify the value was updated
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('resiliencyPolicy.zoneAllocationPolicy.maxInstancePercentPerZonePolicy.enabled', True),
+            self.check('resiliencyPolicy.zoneAllocationPolicy.maxInstancePercentPerZonePolicy.value', 90)
+        ])
+
+        # disable the policy
+        self.cmd(
+            'vmss update -g {rg} -n {vmss} '
+            '--instance-percent-policy false'
+        )
+
+        # verify the policy was disabled
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('resiliencyPolicy.zoneAllocationPolicy.maxInstancePercentPerZonePolicy.enabled', False)
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_update_combined_')
+    def test_vmss_update_combined_zone_allocation_policies(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss-update-combined',
+            'location': 'eastus2euap',
+            'image': 'MicrosoftWindowsServer:WindowsServer:2016-Datacenter:latest',
+            'admin_username': 'testadmin',
+            'admin_password': 'testPassword0!@#',
+            'vm_sku': 'Standard_B2ms'
+        })
+
+        # create vmss
+        self.cmd(
+            'vmss create -g {rg} -n {vmss} -l {location} '
+            '--image {image} '
+            '--admin-username {admin_username} '
+            '--admin-password {admin_password} '
+            '--upgrade-policy-mode Manual '
+            '--zone-placement-policy Auto '
+            '--vm-sku {vm_sku} '
+        )
+
+        # update with both max zone count and instance percent policy
+        self.cmd(
+            'vmss update -g {rg} -n {vmss} '
+            '--max-zone-count 2 '
+            '--instance-percent-policy true '
+            '--max-instance-percent 80'
+        )
+
+        # update both policies are set correctly
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('resiliencyPolicy.zoneAllocationPolicy.maxZoneCount', 2),
+            self.check('resiliencyPolicy.zoneAllocationPolicy.maxInstancePercentPerZonePolicy.enabled', True),
+            self.check('resiliencyPolicy.zoneAllocationPolicy.maxInstancePercentPerZonePolicy.value', 80)
+        ])
+
+        # update both values again
+        self.cmd(
+            'vmss update -g {rg} -n {vmss} '
+            '--max-zone-count 3 '
+            '--instance-percent-policy true '
+            '--max-instance-percent 70'
+        )
+
+        # verify the updates
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('resiliencyPolicy.zoneAllocationPolicy.maxZoneCount', 3),
+            self.check('resiliencyPolicy.zoneAllocationPolicy.maxInstancePercentPerZonePolicy.enabled', True),
+            self.check('resiliencyPolicy.zoneAllocationPolicy.maxInstancePercentPerZonePolicy.value', 70)
+        ])
 
 
 if __name__ == '__main__':

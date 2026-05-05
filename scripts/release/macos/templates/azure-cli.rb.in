@@ -1,0 +1,27 @@
+cask "azure-cli" do
+  arch arm: "arm64", intel: "x86_64"
+
+  version "{{ version }}"
+  sha256 arm:   "{{ arm64_sha }}",
+         intel: "{{ x86_64_sha }}"
+
+  url "https://github.com/{{ github_repo }}/releases/download/azure-cli-#{version}/azure-cli-#{version}-macos-#{arch}.tar.gz",
+      verified: "github.com/{{ github_repo }}/"
+  name "Azure CLI"
+  desc "Microsoft Azure CLI 2.0"
+  homepage "https://docs.microsoft.com/cli/azure/overview"
+
+  livecheck do
+    url :url
+    strategy :github_latest
+  end
+
+  depends_on formula: "python@{{ python_version }}"
+
+  binary "bin/az"
+  bash_completion "completions/bash/az"
+  fish_completion "completions/fish/az.fish"
+  zsh_completion "completions/zsh/_az"
+
+  zap trash: "~/.azure"
+end

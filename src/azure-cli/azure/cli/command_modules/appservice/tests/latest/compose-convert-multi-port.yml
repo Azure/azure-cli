@@ -1,0 +1,14 @@
+# Multiple port mappings per service
+# Tests: only first container port used as targetPort, multi-port warning
+version: '3'
+services:
+  app:
+    image: "myacr.azurecr.io/fullstack:latest"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+  metrics:
+    image: "prom/prometheus:v2.48.0"
+    ports:
+      - "9090:9090"

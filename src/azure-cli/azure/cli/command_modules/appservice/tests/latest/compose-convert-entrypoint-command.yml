@@ -1,0 +1,26 @@
+# Entrypoint and command in various forms
+# Tests: entrypoint+command merging, scalar vs sequence formats, startUpCommand generation
+version: '3'
+services:
+  web:
+    image: "myacr.azurecr.io/flask-app:latest"
+    ports:
+      - "5000:5000"
+    # Entrypoint as string, command as string → both merged
+    entrypoint: "gunicorn"
+    command: "--bind 0.0.0.0:5000 app:app --workers 4"
+  worker:
+    image: "myacr.azurecr.io/celery-worker:latest"
+    # Entrypoint as list, command as list
+    entrypoint: ["celery", "-A", "tasks"]
+    command: ["worker", "--loglevel=info", "--concurrency=2"]
+  scheduler:
+    image: "myacr.azurecr.io/celery-worker:latest"
+    # Only command (no entrypoint)
+    command: "celery -A tasks beat --loglevel=info"
+  sidecar:
+    image: "myacr.azurecr.io/monitoring:v1"
+    # Only entrypoint (no command)
+    entrypoint: ["/usr/local/bin/monitor", "--port", "9090"]
+    ports:
+      - "9090:9090"

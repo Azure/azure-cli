@@ -5,8 +5,6 @@
 
 import sys
 import os
-import subprocess
-import portalocker
 
 from azure.cli.telemetry.util import save_payload
 
@@ -16,6 +14,7 @@ DEFAULT_INSTRUMENTATION_KEY = 'c4395b75-49cc-422c-bc95-c7d51aef5d46'
 
 
 def _start(config_dir, cache_dir):
+    import subprocess
     from azure.cli.telemetry.components.telemetry_logging import get_logger
 
     logger = get_logger('process')
@@ -46,7 +45,6 @@ def _start(config_dir, cache_dir):
 
 
 def save(config_dir, payload):
-    from azure.cli.telemetry.components.telemetry_client import CliTelemetryClient
     from azure.cli.telemetry.components.telemetry_logging import get_logger
 
     logger = get_logger('main')
@@ -59,14 +57,21 @@ def save(config_dir, payload):
 
         logger.info('Begin splitting cli events and extra events, total events: %s', len(events))
         cli_events = {}
-        client = CliTelemetryClient()
+        extra_events = {}
         for key, event in events.items():
             if key == DEFAULT_INSTRUMENTATION_KEY:
                 cli_events[key] = event
             else:
-                extra_event = {key: event}
-                client.add(json.dumps(extra_event), flush=True)
-        client.flush(force=True)
+                extra_events[key] = event
+
+        if extra_events:
+            # Defer applicationinsights import to only when extra events exist
+            from azure.cli.telemetry.components.telemetry_client import CliTelemetryClient
+            client = CliTelemetryClient()
+            for key, event in extra_events.items():
+                client.add(json.dumps({key: event}), flush=True)
+            client.flush(force=True)
+
         cli_payload = json.dumps(cli_events) if cli_events else None
         logger.info('Finish splitting cli events and extra events, cli events: %s', len(cli_events))
     except Exception as ex:  # pylint: disable=broad-except
@@ -94,6 +99,7 @@ def main():
         logger.info('Attempt start. Configuration directory [%s]. Cache directory [%s].', sys.argv[1], sys.argv[2])
 
         try:
+            import portalocker
             collection = RecordsCollection(cache_dir)
             collection.snapshot_and_read()
 

@@ -21,10 +21,10 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2019-03-01",
+        "version": "2024-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/hostgroups", "2019-03-01"],
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/hostgroups", "2019-03-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/hostgroups", "2024-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/hostgroups", "2024-11-01"],
         ]
     }
 
@@ -45,9 +45,7 @@ class List(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.resource_group = AAZResourceGroupNameArg(
-            help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.",
-        )
+        _args_schema.resource_group = AAZResourceGroupNameArg()
         return cls._args_schema
 
     def _execute_operations(self):
@@ -117,7 +115,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2019-03-01",
+                    "api-version", "2024-11-01",
                     required=True,
                 ),
             }
@@ -173,6 +171,10 @@ class List(AAZCommand):
             _element.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
+            _element.system_data = AAZObjectType(
+                serialized_name="systemData",
+                flags={"read_only": True},
+            )
             _element.tags = AAZDictType()
             _element.type = AAZStrType(
                 flags={"read_only": True},
@@ -180,12 +182,27 @@ class List(AAZCommand):
             _element.zones = AAZListType()
 
             properties = cls._schema_on_200.value.Element.properties
+            properties.additional_capabilities = AAZObjectType(
+                serialized_name="additionalCapabilities",
+            )
             properties.hosts = AAZListType(
+                flags={"read_only": True},
+            )
+            properties.instance_view = AAZObjectType(
+                serialized_name="instanceView",
                 flags={"read_only": True},
             )
             properties.platform_fault_domain_count = AAZIntType(
                 serialized_name="platformFaultDomainCount",
                 flags={"required": True},
+            )
+            properties.support_automatic_placement = AAZBoolType(
+                serialized_name="supportAutomaticPlacement",
+            )
+
+            additional_capabilities = cls._schema_on_200.value.Element.properties.additional_capabilities
+            additional_capabilities.ultra_ssd_enabled = AAZBoolType(
+                serialized_name="ultraSSDEnabled",
             )
 
             hosts = cls._schema_on_200.value.Element.properties.hosts
@@ -194,6 +211,71 @@ class List(AAZCommand):
             _element = cls._schema_on_200.value.Element.properties.hosts.Element
             _element.id = AAZStrType(
                 flags={"read_only": True},
+            )
+
+            instance_view = cls._schema_on_200.value.Element.properties.instance_view
+            instance_view.hosts = AAZListType()
+
+            hosts = cls._schema_on_200.value.Element.properties.instance_view.hosts
+            hosts.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.instance_view.hosts.Element
+            _element.asset_id = AAZStrType(
+                serialized_name="assetId",
+                flags={"read_only": True},
+            )
+            _element.available_capacity = AAZObjectType(
+                serialized_name="availableCapacity",
+            )
+            _element.name = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.statuses = AAZListType()
+
+            available_capacity = cls._schema_on_200.value.Element.properties.instance_view.hosts.Element.available_capacity
+            available_capacity.allocatable_v_ms = AAZListType(
+                serialized_name="allocatableVMs",
+            )
+
+            allocatable_v_ms = cls._schema_on_200.value.Element.properties.instance_view.hosts.Element.available_capacity.allocatable_v_ms
+            allocatable_v_ms.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.instance_view.hosts.Element.available_capacity.allocatable_v_ms.Element
+            _element.count = AAZFloatType()
+            _element.vm_size = AAZStrType(
+                serialized_name="vmSize",
+            )
+
+            statuses = cls._schema_on_200.value.Element.properties.instance_view.hosts.Element.statuses
+            statuses.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.instance_view.hosts.Element.statuses.Element
+            _element.code = AAZStrType()
+            _element.display_status = AAZStrType(
+                serialized_name="displayStatus",
+            )
+            _element.level = AAZStrType()
+            _element.message = AAZStrType()
+            _element.time = AAZStrType()
+
+            system_data = cls._schema_on_200.value.Element.system_data
+            system_data.created_at = AAZStrType(
+                serialized_name="createdAt",
+            )
+            system_data.created_by = AAZStrType(
+                serialized_name="createdBy",
+            )
+            system_data.created_by_type = AAZStrType(
+                serialized_name="createdByType",
+            )
+            system_data.last_modified_at = AAZStrType(
+                serialized_name="lastModifiedAt",
+            )
+            system_data.last_modified_by = AAZStrType(
+                serialized_name="lastModifiedBy",
+            )
+            system_data.last_modified_by_type = AAZStrType(
+                serialized_name="lastModifiedByType",
             )
 
             tags = cls._schema_on_200.value.Element.tags
@@ -244,7 +326,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2019-03-01",
+                    "api-version", "2024-11-01",
                     required=True,
                 ),
             }
@@ -300,6 +382,10 @@ class List(AAZCommand):
             _element.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
+            _element.system_data = AAZObjectType(
+                serialized_name="systemData",
+                flags={"read_only": True},
+            )
             _element.tags = AAZDictType()
             _element.type = AAZStrType(
                 flags={"read_only": True},
@@ -307,12 +393,27 @@ class List(AAZCommand):
             _element.zones = AAZListType()
 
             properties = cls._schema_on_200.value.Element.properties
+            properties.additional_capabilities = AAZObjectType(
+                serialized_name="additionalCapabilities",
+            )
             properties.hosts = AAZListType(
+                flags={"read_only": True},
+            )
+            properties.instance_view = AAZObjectType(
+                serialized_name="instanceView",
                 flags={"read_only": True},
             )
             properties.platform_fault_domain_count = AAZIntType(
                 serialized_name="platformFaultDomainCount",
                 flags={"required": True},
+            )
+            properties.support_automatic_placement = AAZBoolType(
+                serialized_name="supportAutomaticPlacement",
+            )
+
+            additional_capabilities = cls._schema_on_200.value.Element.properties.additional_capabilities
+            additional_capabilities.ultra_ssd_enabled = AAZBoolType(
+                serialized_name="ultraSSDEnabled",
             )
 
             hosts = cls._schema_on_200.value.Element.properties.hosts
@@ -321,6 +422,71 @@ class List(AAZCommand):
             _element = cls._schema_on_200.value.Element.properties.hosts.Element
             _element.id = AAZStrType(
                 flags={"read_only": True},
+            )
+
+            instance_view = cls._schema_on_200.value.Element.properties.instance_view
+            instance_view.hosts = AAZListType()
+
+            hosts = cls._schema_on_200.value.Element.properties.instance_view.hosts
+            hosts.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.instance_view.hosts.Element
+            _element.asset_id = AAZStrType(
+                serialized_name="assetId",
+                flags={"read_only": True},
+            )
+            _element.available_capacity = AAZObjectType(
+                serialized_name="availableCapacity",
+            )
+            _element.name = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.statuses = AAZListType()
+
+            available_capacity = cls._schema_on_200.value.Element.properties.instance_view.hosts.Element.available_capacity
+            available_capacity.allocatable_v_ms = AAZListType(
+                serialized_name="allocatableVMs",
+            )
+
+            allocatable_v_ms = cls._schema_on_200.value.Element.properties.instance_view.hosts.Element.available_capacity.allocatable_v_ms
+            allocatable_v_ms.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.instance_view.hosts.Element.available_capacity.allocatable_v_ms.Element
+            _element.count = AAZFloatType()
+            _element.vm_size = AAZStrType(
+                serialized_name="vmSize",
+            )
+
+            statuses = cls._schema_on_200.value.Element.properties.instance_view.hosts.Element.statuses
+            statuses.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.instance_view.hosts.Element.statuses.Element
+            _element.code = AAZStrType()
+            _element.display_status = AAZStrType(
+                serialized_name="displayStatus",
+            )
+            _element.level = AAZStrType()
+            _element.message = AAZStrType()
+            _element.time = AAZStrType()
+
+            system_data = cls._schema_on_200.value.Element.system_data
+            system_data.created_at = AAZStrType(
+                serialized_name="createdAt",
+            )
+            system_data.created_by = AAZStrType(
+                serialized_name="createdBy",
+            )
+            system_data.created_by_type = AAZStrType(
+                serialized_name="createdByType",
+            )
+            system_data.last_modified_at = AAZStrType(
+                serialized_name="lastModifiedAt",
+            )
+            system_data.last_modified_by = AAZStrType(
+                serialized_name="lastModifiedBy",
+            )
+            system_data.last_modified_by_type = AAZStrType(
+                serialized_name="lastModifiedByType",
             )
 
             tags = cls._schema_on_200.value.Element.tags

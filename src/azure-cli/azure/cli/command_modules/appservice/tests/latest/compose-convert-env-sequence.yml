@@ -1,0 +1,18 @@
+# Environment variables in sequence (list) format
+# Tests: env var sequence parsing, value-less entries (app setting reference)
+version: '3'
+services:
+  app:
+    image: "myacr.azurecr.io/myapp:2.0"
+    ports:
+      - "80:80"
+    environment:
+      - REDIS_URL=redis://localhost:6379
+      - APP_SECRET=not-a-real-secret
+      - EXISTING_SETTING
+      - ANOTHER_SETTING=
+  cache:
+    image: "redis:7-alpine"
+    environment:
+      - REDIS_MAXMEMORY=256mb
+      - REDIS_MAXMEMORY_POLICY=allkeys-lru

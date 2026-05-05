@@ -91,7 +91,7 @@ parameters:
       - "`az aks get-versions`"
   - name: --os-sku
     type: string
-    short-summary: The OS SKU of the agent node pool. Ubuntu or AzureLinux.
+    short-summary: The OS SKU of the agent node pool. Ubuntu, AzureLinux, AzureLinux3, AzureContainerLinux, Ubuntu2204, or Ubuntu2404.
   - name: --ssh-key-value
     type: string
     short-summary: Public key path or key contents to install on node VMs for SSH access. For example, 'ssh-rsa AAAAB...snip...UcyupgH azureuser@linuxvm'.
@@ -345,6 +345,30 @@ parameters:
   - name: --apiserver-subnet-id
     type: string
     short-summary: The ID of a subnet in an existing VNet into which to assign control plane apiserver pods(requires --enable-apiserver-vnet-integration)
+  - name: --system-node-subnet-id
+    type: string
+    short-summary: (Automatic SKU) The ID of a subnet in an existing VNet to be used by the Managed System Pool in an Automatic cluster.
+    long-summary: |
+      Bring-your-own VNet for an Automatic cluster requires three subnets supplied together:
+      `--system-node-subnet-id` (this flag, for the Managed System Pool), `--node-subnet-id`
+      (for user node pools), and `--apiserver-subnet-id` (for the control plane API server).
+      All three subnets must belong to the same VNet and can only be used with `--sku automatic`.
+  - name: --node-subnet-id
+    type: string
+    short-summary: (Automatic SKU) The ID of a subnet in an existing VNet to be used by user node pools in an Automatic cluster.
+    long-summary: |
+      Bring-your-own VNet for an Automatic cluster requires three subnets supplied together:
+      `--system-node-subnet-id` (for the Managed System Pool), `--node-subnet-id` (this flag,
+      for user node pools), and `--apiserver-subnet-id` (for the control plane API server).
+      All three subnets must belong to the same VNet and can only be used with `--sku automatic`.
+  - name: --enable-hosted-system
+    type: bool
+    short-summary: (Automatic SKU) Explicitly opt in to a Managed System Pool for the Automatic cluster.
+    long-summary: |
+      Only valid with `--sku automatic`. Use this flag when you want to deterministically
+      request a Managed System Pool regardless of region defaults. It is also implied when
+      you supply the bring-your-own VNet subnet trio (`--system-node-subnet-id`,
+      `--node-subnet-id`, `--apiserver-subnet-id`).
   - name: --enable-private-cluster
     type: string
     short-summary: Enable private cluster.
@@ -534,6 +558,9 @@ parameters:
   - name: --enable-windows-recording-rules
     type: bool
     short-summary: Enable Windows Recording Rules when enabling the Azure Monitor Metrics addon
+  - name: --enable-azure-monitor-app-monitoring
+    type: bool
+    short-summary: Enable Azure Monitor Application Monitoring auto-instrumentation for a Kubernetes cluster.
   - name: --nodepool-taints
     type: string
     short-summary: The node taints for all node pool.
@@ -591,6 +618,13 @@ parameters:
   - name: --enable-container-network-logs
     type: bool
     short-summary: Enable container network log collection functionalities on a cluster. Automatically enables --enable-high-log-scale-mode.
+  - name: --acns-datapath-acceleration-mode
+    type: string
+    short-summary: Set the datapath acceleration mode for Azure Container Networking Solution (ACNS) Performance. Valid values are 'BpfVeth' and 'None'.
+  - name: --acns-transit-encryption-type
+    type: string
+    short-summary: Set transit encryption type for ACNS security.
+    long-summary: Configures pod-to-pod encryption for Cilium-based clusters. Once enabled, all traffic between Cilium managed pods will be encrypted when it leaves the node boundary. Valid values are "WireGuard" and "None". On cluster creation, this must be used together with "--enable-acns".
   - name: --nrg-lockdown-restriction-level
     type: string
     short-summary: Restriction level on the managed node resource group.
@@ -609,6 +643,16 @@ parameters:
   - name: --enable-ai-toolchain-operator
     type: bool
     short-summary: Enable AI toolchain operator to the cluster.
+  - name: --enable-app-routing-istio --enable-ari
+    type: bool
+    short-summary: Enable Gateway API based ingress on App Routing via Istio without service mesh functionality.
+    long-summary: |
+        This enables an ingress-only version of Istio that reconciles Gateway API resources for App Routing.
+        It does not provide service mesh functionality (e.g. mTLS, traffic management between services).
+        Cannot be used simultaneously with the Istio service mesh add-on (--enable-azure-service-mesh).
+  - name: --enable-gateway-api
+    type: bool
+    short-summary: Enable managed installation of Gateway API CRDs from the standard release channel.
   - name: --bootstrap-container-registry-resource-id
     type: string
     short-summary: Configure container registry resource ID. Must use "Cache" as bootstrap artifact source.
@@ -718,6 +762,8 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --node-provisioning-mode Auto --node-provisioning-default-pools None
   - name: Create a Kubernetes cluster with KataVmIsolation enabled.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --os-sku AzureLinux --vm-size Standard_D4s_v3 --workload-runtime KataVmIsolation --node-count 1
+  - name: Create a kubernetes cluster with a managed installation of Gateway API CRDs from the standard release channel.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --enable-gateway-api
 """
 
 helps["aks update"] = """
@@ -1008,6 +1054,12 @@ parameters:
   - name: --http-proxy-config
     type: string
     short-summary: HTTP Proxy configuration for this cluster.
+  - name: --disable-http-proxy
+    type: bool
+    short-summary: Disable HTTP Proxy Configuration on the cluster.
+  - name: --enable-http-proxy
+    type: bool
+    short-summary: Enable HTTP Proxy Configuration on the cluster.
   - name: --enable-oidc-issuer
     type: bool
     short-summary: Enable OIDC issuer.
@@ -1050,6 +1102,12 @@ parameters:
   - name: --disable-azure-monitor-metrics
     type: bool
     short-summary: Disable Azure Monitor Metrics Profile. This will delete all DCRA's associated with the cluster, any linked DCRs with the data stream = prometheus-stream and the recording rule groups created by the addon for this AKS cluster.
+  - name: --enable-azure-monitor-app-monitoring
+    type: bool
+    short-summary: Enable Azure Monitor Application Monitoring auto-instrumentation for a Kubernetes cluster.
+  - name: --disable-azure-monitor-app-monitoring
+    type: bool
+    short-summary: Disable Azure Monitor Application Monitoring auto-instrumentation for a Kubernetes cluster.
   - name: --nodepool-taints
     type: string
     short-summary: The node taints for all node pool.
@@ -1098,6 +1156,16 @@ parameters:
   - name: --disable-container-network-logs
     type: bool
     short-summary: Disable container network log collection functionalities on a cluster.
+  - name: --acns-datapath-acceleration-mode
+    type: string
+    short-summary: Set the datapath acceleration mode for Azure Container Networking Solution (ACNS) Performance. Valid values are 'BpfVeth' and 'None'.
+  - name: --acns-transit-encryption-type
+    type: string
+    short-summary: Set transit encryption type for ACNS security.
+    long-summary: Configures pod-to-pod encryption for Cilium-based clusters. Once enabled, all traffic between Cilium managed pods will be encrypted when it leaves the node boundary. Valid values are "WireGuard" and "None". When creating a cluster, this option must be used together with "--enable-acns"; when updating a cluster, it can be used on its own to modify the transit encryption type for an existing ACNS-enabled cluster.
+  - name: --enable-high-log-scale-mode
+    type: bool
+    short-summary: Enable High Log Scale Mode for Container Logs. Auto-enabled when --enable-container-network-logs is specified.
   - name: --nrg-lockdown-restriction-level
     type: string
     short-summary: Restriction level on the managed node resource group.
@@ -1119,6 +1187,22 @@ parameters:
   - name: --disable-ai-toolchain-operator
     type: bool
     short-summary: Disable AI toolchain operator.
+  - name: --enable-app-routing-istio --enable-ari
+    type: bool
+    short-summary: Enable Gateway API based ingress on App Routing via Istio without service mesh functionality.
+    long-summary: |
+        This enables an ingress-only version of Istio that reconciles Gateway API resources for App Routing.
+        It does not provide service mesh functionality (e.g. mTLS, traffic management between services).
+        Cannot be used simultaneously with the Istio service mesh add-on (--enable-azure-service-mesh).
+  - name: --disable-app-routing-istio --disable-ari
+    type: bool
+    short-summary: Disable Gateway API based ingress on App Routing via Istio.
+  - name: --enable-gateway-api
+    type: bool
+    short-summary: Enable managed installation of Gateway API CRDs from the standard release channel.
+  - name: --disable-gateway-api
+    type: bool
+    short-summary: Disable managed installation of Gateway API CRDs.
   - name: --bootstrap-container-registry-resource-id
     type: string
     short-summary: Configure container registry resource ID. Must use "Cache" as bootstrap artifact source.
@@ -1207,11 +1291,22 @@ examples:
     text: az aks update -g MyResourceGroup -n MyManagedCluster --node-provisioning-mode Auto --node-provisioning-default-pools None
   - name: Upgrade load balancer sku to standard
     text: az aks update --load-balancer-sku standard -g MyResourceGroup -n MyManagedCluster
+  - name: Update a kubernetes cluster to enable a managed installation of Gateway API CRDs from the standard release channel.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --enable-gateway-api
+  - name: Update a kubernetes cluster to disable the managed installation of Gateway API CRDs.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --disable-gateway-api
 """
 
 helps["aks delete"] = """
 type: command
 short-summary: Delete a managed Kubernetes cluster.
+parameters:
+  - name: --if-match
+    type: string
+    short-summary: The value provided will be compared to the ETag of the managed cluster, if it matches the operation will proceed. If it does not match, the request will be rejected to prevent accidental overwrites.
+  - name: --if-none-match
+    type: string
+    short-summary: Set to '*' to allow deleting a cluster only if it exists. Other values will be ignored.
 examples:
   - name: Delete a managed Kubernetes cluster. (autogenerated)
     text: az aks delete --name MyManagedCluster --resource-group MyResourceGroup
@@ -1862,7 +1957,7 @@ parameters:
     short-summary: The OS Type. Linux or Windows.
   - name: --os-sku
     type: string
-    short-summary: The OS SKU of the agent node pool. Ubuntu, Ubuntu2204, Ubuntu2404, AzureLinux or AzureLinux3 for Linux. Windows2019 or Windows2022 for Windows.
+    short-summary: The OS SKU of the agent node pool. Ubuntu, Ubuntu2204, Ubuntu2404, AzureLinux, AzureLinux3, or AzureContainerLinux for Linux. Windows2019, Windows2022, or Windows2025 for Windows.
   - name: --enable-cluster-autoscaler -e
     type: bool
     short-summary: Enable cluster autoscaler.
@@ -2706,11 +2801,17 @@ helps["aks mesh enable"] = """
       - name: --root-cert-object-name
         type: string
         short-summary: Root cert object name in the Azure Keyvault.
+      - name: --proxy-redirection-mechanism
+        type: string
+        short-summary: Set the proxy redirection mechanism.
+        long-summary: Allowed values are "CNIChaining" which uses CNI plugins for traffic redirection, and "InitContainers" which uses privileged init containers.
     examples:
       - name: Enable Azure Service Mesh with selfsigned CA.
         text: az aks mesh enable --resource-group MyResourceGroup --name MyManagedCluster
       - name: Enable Azure Service Mesh with plugin CA.
         text: az aks mesh enable --resource-group MyResourceGroup --name MyManagedCluster --key-vault-id /subscriptions/00000/resourceGroups/foo/providers/Microsoft.KeyVault/vaults/foo --ca-cert-object-name my-ca-cert --ca-key-object-name my-ca-key --cert-chain-object-name my-cert-chain --root-cert-object-name my-root-cert
+      - name: Enable Azure Service Mesh with CNI chaining.
+        text: az aks mesh enable --resource-group MyResourceGroup --name MyManagedCluster --proxy-redirection-mechanism CNIChaining
 """
 
 helps["aks mesh disable"] = """
@@ -2843,6 +2944,24 @@ helps["aks mesh upgrade rollback"] = """
         text: az aks mesh upgrade rollback --resource-group MyResourceGroup --name MyManagedCluster
 """
 
+helps['aks mesh proxy-redirection-mechanism'] = """
+    type: command
+    short-summary: Set the proxy redirection mechanism for Azure Service Mesh.
+    long-summary: >
+      This command sets the proxy redirection mechanism for Azure Service Mesh
+      on a cluster that already has the service mesh enabled.
+    parameters:
+      - name: --mechanism
+        type: string
+        short-summary: The proxy redirection mechanism.
+        long-summary: Allowed values are "CNIChaining" which uses CNI plugins for traffic redirection, and "InitContainers" which uses privileged init containers.
+    examples:
+      - name: Set proxy redirection mechanism to CNI chaining.
+        text: az aks mesh proxy-redirection-mechanism --resource-group MyResourceGroup --name MyManagedCluster --mechanism CNIChaining
+      - name: Set proxy redirection mechanism to init containers.
+        text: az aks mesh proxy-redirection-mechanism --resource-group MyResourceGroup --name MyManagedCluster --mechanism InitContainers
+"""
+
 helps["aks approuting"] = """
     type: group
     short-summary: Commands to manage App Routing addon.
@@ -2939,6 +3058,41 @@ helps["aks approuting zone list"] = """
     type: command
     short-summary: List DNS Zone IDs in App Routing.
     long-summary: This command lists the DNS zone resources used in App Routing.
+"""
+
+helps["aks approuting gateway"] = """
+    type: group
+    short-summary: Commands to manage App Routing Gateway API implementations.
+    long-summary: A group of commands to manage Gateway API implementations for App Routing in a given cluster.
+"""
+
+helps["aks approuting gateway istio"] = """
+    type: group
+    short-summary: Commands to manage the Istio Gateway API implementation for App Routing.
+    long-summary: A group of commands to manage the Istio-based Gateway API implementation for App Routing in a given cluster.
+"""
+
+helps["aks approuting gateway istio enable"] = """
+    type: command
+    short-summary: Enable Gateway API based ingress on App Routing via Istio without service mesh functionality.
+    long-summary: |
+        This command enables an ingress-only version of Istio as a Gateway API implementation for App Routing
+        in the given cluster. This Istio instance only reconciles Gateway API resources and does not provide
+        service mesh functionality (e.g. mTLS, traffic management between services). Cannot be used
+        simultaneously with Azure Service Mesh (az aks mesh enable).
+    examples:
+      - name: Enable Istio Gateway API implementation for App Routing.
+        text: az aks approuting gateway istio enable --resource-group MyResourceGroup --name MyManagedCluster
+"""
+
+helps["aks approuting gateway istio disable"] = """
+    type: command
+    short-summary: Disable Gateway API based ingress on App Routing via Istio.
+    long-summary: |
+        This command disables the ingress-only Istio Gateway API implementation for App Routing in the given cluster.
+    examples:
+      - name: Disable Istio Gateway API implementation for App Routing.
+        text: az aks approuting gateway istio disable --resource-group MyResourceGroup --name MyManagedCluster
 """
 
 helps["aks machine"] = """

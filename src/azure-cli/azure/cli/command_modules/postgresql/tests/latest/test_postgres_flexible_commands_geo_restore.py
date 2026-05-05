@@ -33,7 +33,7 @@ class FlexibleServerGeoRestoreMgmtScenarioTest(ScenarioTest):
         tier = 'GeneralPurpose'
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
 
-        # create geo redundant server
+        # Create server with geographically redundant backup
         self.cmd('postgres flexible-server create -g {} -n {} --sku-name {} \
                    --geo-redundant-backup Enabled --public-access Enabled'
                   .format(resource_group, server_name, sku_name))
@@ -49,13 +49,13 @@ class FlexibleServerGeoRestoreMgmtScenarioTest(ScenarioTest):
         # Wait until snapshot is created
         os.environ.get(ENV_LIVE_TEST, False) and sleep(1800)
 
-        # restore server
+        # Restore server
         target_server_default = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         restore_result = self.cmd('postgres flexible-server geo-restore -g {} -l {} --name {} --source-server {} --yes'
                                   .format(resource_group, BACKUP_LOCATION, target_server_default, server_name)).get_output_in_json()
         self.assertEqual(restore_result['name'], target_server_default)
         self.assertEqual(str(restore_result['location']).replace(' ', '').lower(), BACKUP_LOCATION)
 
-        # clean up
+        # Clean up
         self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(
                  resource_group, target_server_default), checks=NoneCheck())

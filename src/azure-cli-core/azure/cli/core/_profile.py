@@ -152,7 +152,9 @@ class Profile:
               allow_no_subscriptions=False,
               use_cert_sn_issuer=None,
               show_progress=False,
-              claims_challenge=None):
+              claims_challenge=None,
+              skip_subscription_discovery=False,
+              subscription=None):
         """
         For service principal, `password` is a dict returned by ServicePrincipalAuth.build_credential
         """
@@ -198,15 +200,31 @@ class Profile:
         else:
             credential = identity.get_service_principal_credential(username)
 
-        if tenant:
+        is_bare_mode = skip_subscription_discovery and not subscription
+
+        if skip_subscription_discovery and subscription:
+            # Fast path: fetch only the specified subscription (1 API call)
+            subscriptions = subscription_finder.find_specific_subscriptions(
+                tenant, credential, [subscription])
+        elif is_bare_mode:
+            # Bare mode: no ARM subscription calls. Tenant-level account will be created below
+            subscriptions = []
+            subscription_finder.tenants.append(tenant)
+        elif tenant:
             subscriptions = subscription_finder.find_using_specific_tenant(tenant, credential)
         else:
             subscriptions = subscription_finder.find_using_common_tenant(username, credential)
 
         if not subscriptions and not allow_no_subscriptions:
-            raise CLIError("No subscriptions found for {}.".format(username))
+            if skip_subscription_discovery and subscription:
+                raise CLIError(
+                    "The subscription '{}' could not be retrieved for '{}'. "
+                    "Ensure the subscription exists and that you have access to it.".format(
+                        subscription, username))
+            if not is_bare_mode:
+                raise CLIError("No subscriptions found for {}.".format(username))
 
-        if allow_no_subscriptions:
+        if allow_no_subscriptions or is_bare_mode:
             t_list = [s.tenant_id for s in subscriptions]
             bare_tenants = [t for t in subscription_finder.tenants if t not in t_list]
             tenant_accounts = self._build_tenant_level_accounts(bare_tenants)
@@ -216,8 +234,24 @@ class Profile:
 
         consolidated = self._normalize_properties(username, subscriptions,
                                                   is_service_principal, bool(use_cert_sn_issuer))
+        self._set_subscriptions(consolidated, preferred_subscription=subscription)
 
-        self._set_subscriptions(consolidated)
+        if subscription:
+            matches = [s for s in consolidated
+                       if s[_SUBSCRIPTION_ID].lower() == subscription.lower() or
+                       s.get(_SUBSCRIPTION_NAME, '').lower() == subscription.lower()]
+            if matches:
+                return deepcopy(matches)
+            if skip_subscription_discovery:
+                # --skip-subscription-discovery + --subscription S, but S is inaccessible.
+                # without --allow-no-subscriptions → already errored above
+                # with --allow-no-subscriptions → tenant-level account only (we reach here)
+                logger.warning("Subscription '%s' not found. Profile has tenant-level account only.",
+                               subscription)
+            else:
+                raise CLIError("Subscription '{}' not found. Check the ID or name and try again."
+                               .format(subscription))
+
         return deepcopy(consolidated)
 
     def login_with_managed_identity(self, client_id=None, object_id=None, resource_id=None,
@@ -463,7 +497,8 @@ class Profile:
         s.state = 'Enabled'
         return s
 
-    def _set_subscriptions(self, new_subscriptions, merge=True, secondary_key_name=None):
+    def _set_subscriptions(self, new_subscriptions, merge=True, secondary_key_name=None,
+                           preferred_subscription=None):
 
         def _get_key_name(account, secondary_key_name):
             return (account[_SUBSCRIPTION_ID] if secondary_key_name is None
@@ -489,17 +524,26 @@ class Profile:
         dic.update((_get_key_name(x, secondary_key_name), x) for x in new_subscriptions)
         subscriptions = list(dic.values())
         if subscriptions:
-            if active_one:
+            new_active_one = None
+
+            # If a preferred subscription is specified, try to use it as default
+            if preferred_subscription:
+                preferred_lower = preferred_subscription.lower()
+                new_active_one = next(
+                    (x for x in new_subscriptions
+                     if x[_SUBSCRIPTION_ID].lower() == preferred_lower or
+                     x.get(_SUBSCRIPTION_NAME, '').lower() == preferred_lower), None)
+
+            # Fall back to previously active subscription if still present
+            if not new_active_one and active_one:
                 new_active_one = next(
                     (x for x in new_subscriptions if _match_account(x, active_subscription_id, secondary_key_name,
                                                                     active_secondary_key_val)), None)
 
-                for s in subscriptions:
-                    s[_IS_DEFAULT_SUBSCRIPTION] = False
+            for s in subscriptions:
+                s[_IS_DEFAULT_SUBSCRIPTION] = False
 
-                if not new_active_one:
-                    new_active_one = Profile._pick_working_subscription(new_subscriptions)
-            else:
+            if not new_active_one:
                 new_active_one = Profile._pick_working_subscription(new_subscriptions)
 
             new_active_one[_IS_DEFAULT_SUBSCRIPTION] = True
@@ -507,6 +551,7 @@ class Profile:
 
             set_cloud_subscription(self.cli_ctx, active_cloud.name, default_sub_id)
         self._storage[_SUBSCRIPTIONS] = subscriptions
+        return subscriptions
 
     @staticmethod
     def _pick_working_subscription(subscriptions):
@@ -853,6 +898,23 @@ class SubscriptionFinder:
         for s in subscriptions:
             _attach_token_tenant(s, tenant, tenant_id_description=tenant_id_description)
             all_subscriptions.append(s)
+        self.tenants.append(tenant)
+        return all_subscriptions
+
+    def find_specific_subscriptions(self, tenant, credential, subscription_ids):
+        """Fetch specific subscriptions by ID using GET /subscriptions/{id}
+        instead of listing all subscriptions.
+        https://learn.microsoft.com/en-us/rest/api/resources/subscriptions/get
+        """
+        client = self._create_subscription_client(credential)
+        all_subscriptions = []
+        for sub_id in subscription_ids:
+            try:
+                s = client.subscriptions.get(sub_id)
+                _attach_token_tenant(s, tenant)
+                all_subscriptions.append(s)
+            except Exception as ex:  # pylint: disable=broad-except
+                logger.warning("Failed to retrieve subscription %s: %s", sub_id, ex)
         self.tenants.append(tenant)
         return all_subscriptions
 
