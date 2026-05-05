@@ -5,6 +5,7 @@
 from azure.cli.core.breaking_change import (
     register_argument_deprecate,
 )
+register_argument_deprecate('netappfiles volume update', '--remote-volume-resource-id')
 register_argument_deprecate('netappfiles volume create', '--is-default-quota-enabled',
                             redirect='netappfiles volume quota-rule')
 register_argument_deprecate('netappfiles volume update', '--is-default-quota-enabled',
