@@ -49,8 +49,11 @@ def merge_access_token_claims(existing_claims, new_claims):
     """Merge new claims into an existing claims_challenge JSON string.
 
     :param existing_claims: Existing claims_challenge JSON string (or None).
-    :param new_claims: New claims_challenge JSON string to merge in (or None).
-    :returns: Merged claims_challenge JSON string (or existing_claims if new_claims is None).
+    :param new_claims: New claims_challenge JSON string to merge in. Must not be None or empty,
+        and must contain a non-empty ``access_token`` object.
+    :returns: Merged claims_challenge JSON string.
+    :raises ValueError: If ``new_claims`` is None, empty, or does not contain a non-empty
+        ``access_token`` object.
     """
     if not new_claims:
         raise ValueError("new_claims must not be None or empty")

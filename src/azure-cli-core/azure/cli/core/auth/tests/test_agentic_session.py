@@ -111,5 +111,87 @@ class TestMergeAccessTokenClaims(unittest.TestCase):
         self.assertEqual(merged["access_token"]["xms_agent_session"], {"essential": True, "value": "s1"})
 
 
+class TestUserCredentialAgenticSession(unittest.TestCase):
+    """Verify that UserCredential.acquire_token merges agentic claims and passes
+    client_session param when COPILOT_AGENT_SESSION_ID is set."""
+
+    def _build_user_credential(self):
+        """Build a UserCredential with mocked MSAL app."""
+        from unittest.mock import MagicMock, PropertyMock
+        from azure.cli.core.auth.msal_credentials import UserCredential
+
+        cred = object.__new__(UserCredential)
+
+        cred._msal_app = MagicMock()
+        cred._msal_app.client_id = "test-client-id"
+        type(cred._msal_app).authority = PropertyMock(return_value=MagicMock(
+            instance="login.microsoftonline.com",
+            tenant="test-tenant",
+            is_adfs=False,
+        ))
+        cred._account = {
+            "home_account_id": "uid.utid",
+            "username": "user@test.com",
+        }
+        return cred
+
+    @patch.dict(os.environ, {COPILOT_AGENT_SESSION_ID: "agent-sess-1"})
+    def test_agentic_claims_and_params_passed(self):
+        """When COPILOT_AGENT_SESSION_ID is set, claims_challenge and client_session
+        param should be passed to MSAL."""
+        cred = self._build_user_credential()
+        cred._msal_app.acquire_token_silent_with_error.return_value = {
+            "access_token": "agent-tagged-token",
+            "token_type": "Bearer",
+            "expires_in": 3600,
+        }
+
+        result = cred.acquire_token(["https://management.azure.com/.default"])
+
+        self.assertEqual(result["access_token"], "agent-tagged-token")
+
+        call_kwargs = cred._msal_app.acquire_token_silent_with_error.call_args
+        claims = json.loads(call_kwargs.kwargs["claims_challenge"])
+        self.assertEqual(claims["access_token"]["xms_agent_session"]["value"], "agent-sess-1")
+        self.assertTrue(claims["access_token"]["xms_agent_session"]["essential"])
+        self.assertEqual(call_kwargs.kwargs["params"], {"client_session": "agent-sess-1"})
+
+    @patch.dict(os.environ, {}, clear=True)
+    def test_no_agentic_params_without_env(self):
+        """When COPILOT_AGENT_SESSION_ID is not set, no agentic params are added."""
+        cred = self._build_user_credential()
+        cred._msal_app.acquire_token_silent_with_error.return_value = {
+            "access_token": "normal-token",
+            "token_type": "Bearer",
+            "expires_in": 3600,
+        }
+
+        result = cred.acquire_token(["https://management.azure.com/.default"])
+
+        self.assertEqual(result["access_token"], "normal-token")
+
+        call_kwargs = cred._msal_app.acquire_token_silent_with_error.call_args
+        self.assertIsNone(call_kwargs.kwargs.get("claims_challenge"))
+        self.assertNotIn("params", call_kwargs.kwargs)
+
+    @patch.dict(os.environ, {COPILOT_AGENT_SESSION_ID: "agent-sess-2"})
+    def test_merges_with_existing_claims(self):
+        """When existing claims_challenge is provided, agentic claims are merged in."""
+        cred = self._build_user_credential()
+        cred._msal_app.acquire_token_silent_with_error.return_value = {
+            "access_token": "token",
+            "token_type": "Bearer",
+            "expires_in": 3600,
+        }
+
+        existing_claims = json.dumps({"access_token": {"nbf": {"essential": True, "value": "999"}}})
+        cred.acquire_token(["scope"], claims_challenge=existing_claims)
+
+        call_kwargs = cred._msal_app.acquire_token_silent_with_error.call_args
+        claims = json.loads(call_kwargs.kwargs["claims_challenge"])
+        self.assertEqual(claims["access_token"]["nbf"], {"essential": True, "value": "999"})
+        self.assertEqual(claims["access_token"]["xms_agent_session"]["value"], "agent-sess-2")
+
+
 if __name__ == '__main__':
     unittest.main()
