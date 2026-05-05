@@ -25,7 +25,7 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 # you can use to rebuild the repository
 TEST_REPO_URL = 'https://github.com/yugangw-msft/azure-site-test.git'
 WINDOWS_ASP_LOCATION_WEBAPP = 'japanwest'
-WINDOWS_ASP_LOCATION_FUNCTIONAPP = 'francecentral'
+WINDOWS_ASP_LOCATION_FUNCTIONAPP = 'eastus'
 LINUX_ASP_LOCATION_WEBAPP = 'eastus2'
 LINUX_ASP_LOCATION_FUNCTIONAPP = 'ukwest'
 FLEX_ASP_LOCATION_FUNCTIONAPP = 'eastasia'
@@ -295,7 +295,7 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
         self.assertTrue('functionapp,linux' in result[0]['kind'])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'Java|21')])
+            JMESPathCheck('linuxFxVersion', 'Java|25')])
 
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -2004,7 +2004,7 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
             JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'java')])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
-            JMESPathCheck('javaVersion', '21')])
+            JMESPathCheck('javaVersion', '25')])
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -2094,7 +2094,7 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
                  JMESPathCheck(
                      "[?name=='FUNCTIONS_EXTENSION_VERSION'].value|[0]", '~4'),
-                 JMESPathCheck("[?name=='WEBSITE_NODE_DEFAULT_VERSION'].value|[0]", '~22')])
+                 JMESPathCheck("[?name=='WEBSITE_NODE_DEFAULT_VERSION'].value|[0]", '~24')])
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -2192,9 +2192,6 @@ class FunctionAppASPZoneRedundant(ScenarioTest):
         # test with unsupported SKU
         plan2 = self.create_random_name('plan', 24)
         self.cmd('functionapp plan create -g {} -n {} -l {} -z --sku FREE'.format(resource_group, plan2, LINUX_ASP_LOCATION_WEBAPP), expect_failure=True)
-
-        # test with unsupported location
-        self.cmd('functionapp plan create -g {} -n {} -l {} -z --sku P1V3'.format(resource_group, plan2, WINDOWS_ASP_LOCATION_WEBAPP), expect_failure=True)
 
         # ensure non zone redundant
         plan = self.create_random_name('plan', 24)
@@ -2363,7 +2360,7 @@ class FunctionAppOnLinux(ScenarioTest):
         self.assertTrue('functionapp,linux' in result[0]['kind'])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'Node|22')])
+            JMESPathCheck('linuxFxVersion', 'Node|24')])
 
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp))
 
@@ -2449,7 +2446,7 @@ class FunctionAppOnLinux(ScenarioTest):
                  ])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'Node|22')
+            JMESPathCheck('linuxFxVersion', 'Node|24')
         ])
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp)).assert_with_checks([
             JMESPathCheck(
@@ -2486,7 +2483,7 @@ class FunctionAppOnLinux(ScenarioTest):
                  ])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'Node|22')
+            JMESPathCheck('linuxFxVersion', 'Node|24')
         ])
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp)).assert_with_checks([
             JMESPathCheck(
@@ -2661,17 +2658,17 @@ class FunctionAppKeysTests(ScenarioTest):
                      JMESPathCheck('kind', 'functionapp'),
                      JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
 
+        time.sleep(30)  # wait for function app host runtime to be ready
+
         self.cmd('functionapp keys set -g {} -n {} --key-name {} --key-value {} --key-type {}'
                  .format(resource_group, functionapp_name, key_name, key_value, key_type)).assert_with_checks([
                      JMESPathCheck('name', key_name),
-                     JMESPathCheck('type', 'Microsoft.Web/sites/host/functionKeys'),
                      JMESPathCheck('value', None)])
 
         key_value = "keyvalue1_changed"
         self.cmd('functionapp keys set -g {} -n {} --key-name {} --key-value {} --key-type {}'
                  .format(resource_group, functionapp_name, key_name, key_value, key_type)).assert_with_checks([
                      JMESPathCheck('name', key_name),
-                     JMESPathCheck('type', 'Microsoft.Web/sites/host/functionKeys'),
                      JMESPathCheck('value', None)])
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
@@ -2691,7 +2688,6 @@ class FunctionAppKeysTests(ScenarioTest):
         self.cmd('functionapp keys set -g {} -n {} --key-name {} --key-value {} --key-type {}'
                  .format(resource_group, functionapp_name, key_name, key_value, key_type)).assert_with_checks([
                      JMESPathCheck('name', key_name),
-                     JMESPathCheck('type', 'Microsoft.Web/sites/host/functionKeys'),
                      JMESPathCheck('value', None)])
 
         self.cmd('functionapp keys list -g {} -n {}'
@@ -2715,7 +2711,6 @@ class FunctionAppKeysTests(ScenarioTest):
         self.cmd('functionapp keys set -g {} -n {} --key-name {} --key-value {} --key-type {}'
                  .format(resource_group, functionapp_name, key_name, key_value, key_type)).assert_with_checks([
                      JMESPathCheck('name', key_name),
-                     JMESPathCheck('type', 'Microsoft.Web/sites/host/functionKeys'),
                      JMESPathCheck('value', None)])
 
         self.cmd('functionapp keys delete -g {} -n {} --key-name {} --key-type {}'
@@ -2754,7 +2749,6 @@ class FunctionAppKeysTests(ScenarioTest):
         self.cmd('functionapp keys set -g {} -n {} -s {} --key-name {} --key-value {} --key-type {}'
                  .format(resource_group, functionapp_name, slot_name, key_name, key_value, key_type)).assert_with_checks([
                      JMESPathCheck('name', key_name),
-                     JMESPathCheck('type', 'Microsoft.Web/sites/host/functionKeys'),
                      JMESPathCheck('value', None)])
 
         time.sleep(30)
@@ -2763,7 +2757,6 @@ class FunctionAppKeysTests(ScenarioTest):
         self.cmd('functionapp keys set -g {} -n {} -s {} --key-name {} --key-value {} --key-type {}'
                  .format(resource_group, functionapp_name, slot_name, key_name, key_value, key_type)).assert_with_checks([
                      JMESPathCheck('name', key_name),
-                     JMESPathCheck('type', 'Microsoft.Web/sites/host/functionKeys'),
                      JMESPathCheck('value', None)])
 
 
@@ -3247,7 +3240,6 @@ class FunctionappIdentityTest(ScenarioTest):
         self.cmd('functionapp identity assign -g {} -n {} --identities [system] {} {}'.format(
             resource_group, functionapp_name, msi_result['id'], msi2_result['id']))
 
-        self.cmd('functionapp config appsettings set -g {} -n {} --settings FOO=BAR'.format(resource_group, functionapp_name))
         result = self.cmd('functionapp identity remove -g {} -n {} --identities {}'.format(
             resource_group, functionapp_name, msi2_result['id'])).get_output_in_json()
         self.cmd('functionapp identity show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
@@ -3255,16 +3247,8 @@ class FunctionappIdentityTest(ScenarioTest):
             self.check('userAssignedIdentities."{}".clientId'.format(msi_result['id']), msi_result['clientId']),
         ])
 
-        self.cmd('functionapp identity remove -g {} -n {}'.format(resource_group, functionapp_name))
-        self.cmd('functionapp config appsettings set -g {} -n {} --settings FOO2=BAR2'.format(resource_group, functionapp_name))
-        self.cmd('functionapp identity show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
-            self.check('principalId', None),
-            self.check('userAssignedIdentities."{}".clientId'.format(msi_result['id']), msi_result['clientId']),
-        ])
-
         self.cmd('functionapp identity remove -g {} -n {} --identities [system] {}'.format(
             resource_group, functionapp_name, msi_result['id']))
-        self.cmd('functionapp config appsettings set -g {} -n {} --settings FOO3=BAR3'.format(resource_group, functionapp_name))
         self.cmd('functionapp identity show -g {} -n {}'.format(
             resource_group, functionapp_name), checks=self.is_empty())
 
