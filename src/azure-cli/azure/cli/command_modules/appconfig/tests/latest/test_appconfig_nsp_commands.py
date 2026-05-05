@@ -5,7 +5,7 @@
 
 # pylint: disable=line-too-long
 
-from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest
+from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest, live_only
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.core.exceptions import ResourceNotFoundError
 from azure.cli.command_modules.appconfig.tests.latest._test_utils import CredentialResponseSanitizer, get_resource_name_prefix
@@ -17,6 +17,7 @@ class AppconfigNspLiveScenarioTest(ScenarioTest):
         kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
         super().__init__(*args, **kwargs)
 
+    @live_only()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     @AllowLargeResponse(size_kb=99999)
     def test_azconfig_nsp_mgmt(self, resource_group, location):
