@@ -115,7 +115,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         # enable_broker_on_windows and enable_broker_on_mac can only be used on PublicClientApplication.
         return {**self._msal_app_kwargs,
                 "enable_broker_on_windows": self._enable_broker_on_windows,
-            "enable_broker_on_mac": self._enable_broker_on_mac,
+                "enable_broker_on_mac": self._enable_broker_on_mac,
                 "enable_pii_log": True}
 
     @property
