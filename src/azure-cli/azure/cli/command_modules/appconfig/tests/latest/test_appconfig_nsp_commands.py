@@ -18,7 +18,7 @@ class AppconfigNspLiveScenarioTest(ScenarioTest):
         super().__init__(*args, **kwargs)
 
     @ResourceGroupPreparer(parameter_name_for_location='location')
-    @AllowLargeResponse()
+    @AllowLargeResponse(size_kb=99999)
     def test_azconfig_nsp_mgmt(self, resource_group, location):
         store_name_prefix = get_resource_name_prefix('NspStore')
         nsp_name_prefix = get_resource_name_prefix('Nsp')
@@ -37,6 +37,9 @@ class AppconfigNspLiveScenarioTest(ScenarioTest):
             'retention_days': 1,
             'enable_purge_protection': False
         })
+
+        # Ensure the nsp extension is installed; `network perimeter` commands ship in this extension.
+        self.cmd('extension add -n nsp')
 
         # Create the App Configuration store
         self.cmd(

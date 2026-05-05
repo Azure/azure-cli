@@ -447,6 +447,8 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_public_network_access(self, resource_group, location):
+        """Test public network access via the deprecated --enable-public-network flag and the
+        new --public-network-access parameter (Enabled, Disabled, SecuredByPerimeter)."""
         pub_network_prefix = get_resource_name_prefix('PubNetworkTrue')
         config_store_name = self.create_random_name(prefix=pub_network_prefix, length=24)
 
@@ -494,22 +496,13 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('sku.name', sku),
                          self.check('publicNetworkAccess', 'Enabled')])
 
-    @ResourceGroupPreparer(parameter_name_for_location='location')
-    def test_azconfig_public_network_access_new_param(self, resource_group, location):
-        """Test the new --public-network-access parameter with Disabled, Enabled, and SecuredByPerimeter values."""
-        prefix = get_resource_name_prefix('PubNetAccess')
-
-        location = 'eastus'
-        sku = 'standard'
+        # Test the new --public-network-access parameter with Enabled, Disabled and SecuredByPerimeter values.
+        new_param_prefix = get_resource_name_prefix('PubNetAccess')
 
         # Test create with --public-network-access Enabled
-        enabled_store = self.create_random_name(prefix=prefix, length=24)
+        enabled_store = self.create_random_name(prefix=new_param_prefix, length=24)
         self.kwargs.update({
-            'config_store_name': enabled_store,
-            'rg_loc': location,
-            'rg': resource_group,
-            'sku': sku,
-            'retention_days': 1
+            'config_store_name': enabled_store
         })
 
         self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --public-network-access Enabled --retention-days {retention_days}',
@@ -525,7 +518,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('publicNetworkAccess', 'Disabled')])
 
         # Test create with --public-network-access Disabled
-        disabled_store = self.create_random_name(prefix=prefix, length=24)
+        disabled_store = self.create_random_name(prefix=new_param_prefix, length=24)
         self.kwargs.update({
             'config_store_name': disabled_store
         })

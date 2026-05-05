@@ -709,7 +709,7 @@ helps['appconfig network-security-perimeter-configuration show'] = """
 
 helps['appconfig network-security-perimeter-configuration reconcile'] = """
     type: command
-    short-summary: Forces a refresh of the specified network security perimeter configuration for an App Configuration store.
+    short-summary: Force a refresh of the specified network security perimeter configuration for an App Configuration store.
     examples:
         - name: Reconcile a network security perimeter configuration.
           text:
