@@ -10,7 +10,7 @@ from knack.log import get_logger
 from azure.cli.core.aaz import AAZStrType
 from ..aaz.latest.vm import (Show as _VMShow, ListSizes as _VMListSizes, Patch as _VMPatch,
                              Update as _VMUpdate, Capture as _VMCapture, Create as _VMCreate,
-                             Deallocate as _VMDeallocate)
+                             ListUsage as _VMListUsage, Deallocate as _VMDeallocate)
 from .._vm_utils import IdentityType
 
 logger = get_logger(__name__)
@@ -250,6 +250,19 @@ class VMIdentityRemove(_VMPatch):
                 )
 
             return self.on_error(session.http_response)
+
+
+class VMListUsage(_VMListUsage):
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
+        next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
+
+        for item in result:
+            item['currentValue'] = str(item['currentValue'])
+            item['limit'] = str(item['limit'])
+            item['localName'] = item['name']['localizedValue']
+
+        return result, next_link
 
 
 class VMDeallocate(_VMDeallocate):

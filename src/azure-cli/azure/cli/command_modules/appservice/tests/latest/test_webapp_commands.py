@@ -154,6 +154,7 @@ class WebappQuickCreateTest(ScenarioTest):
             JMESPathCheck('[0].value', '~20'),
         ])
 
+    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix="clitest", random_name_length=24, location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_win_webapp_quick_create_runtime(self, resource_group):
@@ -172,6 +173,7 @@ class WebappQuickCreateTest(ScenarioTest):
             resource_group, webapp_name_2, plan)).get_output_in_json()
         self.assertTrue(r['ftpPublishingUrl'].startswith('ftps://'))
 
+    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_win_webapp_quick_create_cd(self, resource_group):
@@ -223,6 +225,7 @@ class WebappQuickCreateTest(ScenarioTest):
         r = requests.get('http://{}.azurewebsites.net'.format(webapp_name), timeout=400)
         self.assertTrue('Hello World! I have been' in str(r.content))
 
+    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP)
     def test_linux_webapp_quick_create_cd(self, resource_group):
@@ -478,6 +481,7 @@ class BackupRestoreTest(ScenarioTest):
 
 # Test Framework is not able to handle binary file format, hence, only run live
 class AppServiceLogTest(ScenarioTest):
+    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_download_win_web_log(self, resource_group):
@@ -730,6 +734,7 @@ class WebappElasticScaleTest(ScenarioTest):
         ])
 
 class WebappConfigureTest(ScenarioTest):
+    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_config', location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_config(self, resource_group):
@@ -1259,6 +1264,7 @@ class AppServiceBadErrorPolishTest(ScenarioTest):
 
 # this test doesn't contain the ultimate verification which you need to manually load the frontpage in a browser
 class LinuxWebappScenarioTest(ScenarioTest):
+    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP)
     def test_linux_webapp(self, resource_group):
@@ -1364,6 +1370,7 @@ class LinuxWebappSSHScenarioTest(ScenarioTest):
 
 
 class LinuxWebappRemoteSSHScenarioTest(ScenarioTest):
+    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP)
     def test_linux_webapp_remote_ssh(self, resource_group):
@@ -1425,6 +1432,7 @@ class LinuxWebappMulticontainerSlotScenarioTest(ScenarioTest):
 
 
 class WebappACRScenarioTest(ScenarioTest):
+    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP)
     def test_acr_integration(self, resource_group):
@@ -2590,6 +2598,7 @@ class WebappAcrUseManagedIdentityCredsTests(ScenarioTest):
             JMESPathCheck('acrUserManagedIdentityId', msi_result['clientId'])
         ])
 
+    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='webapp_linux_acr_use_identity',location=LINUX_ASP_LOCATION_WEBAPP)
     def test_webapp_linux_acr_use_identity(self, resource_group):
@@ -3253,7 +3262,7 @@ class WebappSiteContainersTests(ScenarioTest):
             resource_group, webapp_name, plan_name, acr_registry_name, creds['username'], creds['passwords'][0]['value']
         ))
 
-        self.cmd('webapp sitecontainers convert --mode sitecontainers --resource-group {} --name {}'.
+        self.cmd('webapp sitecontainers convert --mode sitecontainers --resource-group {} --name {} --yes'.
                   format(resource_group, webapp_name))
         self.cmd('webapp sitecontainers list --name {} --resource-group {}'.
                   format(webapp_name, resource_group)).assert_with_checks([
@@ -3305,6 +3314,7 @@ class TrackRuntimeStatusTest(ScenarioTest):
             JMESPathCheck('type', 'Microsoft.Web/sites/deploymentStatus'),
         ])
 
+    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_deploy_runtimestatus', location='eastus')
     def test_webapp_track_runtimestatus_buildfailed(self, resource_group):
@@ -3318,6 +3328,7 @@ class TrackRuntimeStatusTest(ScenarioTest):
         with self.assertRaisesRegex(CLIError, "Deployment failed because the build process failed"):
             self.cmd('webapp deploy -g {} --n {} --src-path "{}" --type zip --async'.format(resource_group, webapp_name, zip_file))
 
+    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_deploy_runtimestatus', location='eastus')
     def test_webapp_track_runtimestatus_runtimefailed(self, resource_group):
@@ -3366,6 +3377,7 @@ class TrackRuntimeStatusTest(ScenarioTest):
             JMESPathCheck('type', 'Microsoft.Web/sites/deploymentStatus'),
         ])
 
+    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_deployment_source_configzip_runtimestatus', location='eastus')
     def test_webapp_deployment_source_track_runtimestatus_buildfailed(self, resource_group):
@@ -3379,6 +3391,7 @@ class TrackRuntimeStatusTest(ScenarioTest):
         with self.assertRaisesRegex(CLIError, "Deployment failed because the build process failed"):
             self.cmd('webapp deployment source config-zip -g {} --n {} --src "{}"'.format(resource_group, webapp_name, zip_file))
 
+    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_deployment_source_configzip_runtimestatus', location='eastus')
     def test_webapp_deployment_source_track_runtimestatus_runtimefailed(self, resource_group):
@@ -3560,6 +3573,71 @@ class WebappDNLTests(ScenarioTest):
         app_name, hash_part, region = match.groups()
         self.assertTrue(len(hash_part) == 16 and hash_part.islower(), "Hash is not 16 chars or not lowercase.")
         self.assertIn('-', region, "Region part does not have '-' separator.")
+
+
+class WebappEnrichedErrorsScenarioTest(ScenarioTest):
+    """Scenario tests for --enriched-errors flag on az webapp deploy and az webapp up."""
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_enriched_errors', location='westus2')
+    def test_webapp_deploy_enriched_errors_artifact_mismatch(self, resource_group):
+        """Deploy a .war to a Python app with --enriched-errors true — should get ArtifactStackMismatch."""
+        from azure.cli.command_modules.appservice._deployment_context_engine import EnrichedDeploymentError
+        webapp_name = self.create_random_name('webapp-enriched-test', 40)
+        plan_name = self.create_random_name('webapp-enriched-plan', 40)
+        war_file = os.path.join(TEST_DIR, 'data', 'sample.war')
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku F1 --is-linux'.format(resource_group, plan_name))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {} -r "PYTHON|3.11"'.format(resource_group, webapp_name, plan_name))
+        with self.assertRaises(EnrichedDeploymentError) as cm:
+            self.cmd('webapp deploy -g {} -n {} --src-path "{}" --type war --enriched-errors true'.format(
+                resource_group, webapp_name, war_file))
+        self.assertIn('ArtifactStackMismatch', str(cm.exception))
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_enriched_errors', location='westus2')
+    def test_webapp_deploy_without_enriched_errors(self, resource_group):
+        """Deploy a .war to a Python app without --enriched-errors — should get original CLIError."""
+        webapp_name = self.create_random_name('webapp-enriched-test', 40)
+        plan_name = self.create_random_name('webapp-enriched-plan', 40)
+        war_file = os.path.join(TEST_DIR, 'data', 'sample.war')
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku B1 --is-linux'.format(resource_group, plan_name))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {} -r "PYTHON|3.11"'.format(resource_group, webapp_name, plan_name))
+        with self.assertRaisesRegex(CLIError, "Status Code: 400"):
+            self.cmd('webapp deploy -g {} -n {} --src-path "{}" --type war'.format(
+                resource_group, webapp_name, war_file))
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_up_enriched', location='westus2')
+    def test_webapp_up_enriched_errors_flag_accepted(self, resource_group):
+        """Verify --enriched-errors flag is accepted by az webapp up with 409 conflict."""
+        from azure.cli.command_modules.appservice._deployment_context_engine import EnrichedDeploymentError
+        webapp_name = self.create_random_name('webapp-up-enr', 40)
+        plan_name = self.create_random_name('webapp-up-enr-plan', 40)
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku B1 --is-linux'.format(resource_group, plan_name))
+        self.cmd(
+            'webapp create -g {} -n {} --plan {} -r "PYTHON|3.11"'.format(resource_group, webapp_name, plan_name))
+        self.cmd('webapp config appsettings set -g {} -n {} --settings '
+                 'WEBSITE_RUN_FROM_PACKAGE="https://fake.blob.core.windows.net/c/fake.zip"'.format(
+                     resource_group, webapp_name))
+        src_dir = tempfile.mkdtemp()
+        with open(os.path.join(src_dir, 'requirements.txt'), 'w') as f:
+            f.write('flask')
+        with open(os.path.join(src_dir, 'app.py'), 'w') as f:
+            f.write('print("hello")')
+        original_dir = os.getcwd()
+        try:
+            os.chdir(src_dir)
+            with self.assertRaises(EnrichedDeploymentError):
+                self.cmd('webapp up -n {} -g {} --enriched-errors true'.format(
+                    webapp_name, resource_group))
+        finally:
+            os.chdir(original_dir)
+
 
 if __name__ == '__main__':
     unittest.main()

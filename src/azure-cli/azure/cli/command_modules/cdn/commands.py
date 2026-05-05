@@ -37,6 +37,16 @@ def load_command_table(self, _):
     cd_not_found_msg = _not_found_msg.format('Custom Domain')
     endpoint_not_found_msg = _not_found_msg.format('Endpoint')
 
+    # The `cdn` and `afd` command groups have been migrated to the `cdn` CLI extension.
+    # `load_command_table` is lazy-loaded only when a `cdn`/`afd` command is invoked, so
+    # emitting a warning here notifies users of the migration without spamming other CLI calls.
+    from knack.log import get_logger as _get_logger
+    _get_logger(__name__).warning(
+        "The 'cdn' and 'afd' command groups have moved to the 'cdn' CLI extension. "
+        "Install the latest version with: az extension add --name cdn. "
+        "The built-in cdn/afd commands in azure-cli core will be removed in a future release."
+    )
+
     cdn_endpoints_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.cdn.operations#EndpointsOperations.{}',
         client_factory=cf_endpoints,
