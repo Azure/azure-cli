@@ -51,10 +51,11 @@ class UserCredential:  # pylint: disable=too-few-public-methods
                      scopes, claims_challenge, kwargs)
 
         # Apply agentic session parameters for user identity flows
-        from .agentic_session import build_agentic_session_params, merge_access_token_claims
-        agentic_session_id, agentic_claims = build_agentic_session_params()
+        from .agentic_session import build_agentic_session_params
+        agentic_session_id, _ = build_agentic_session_params()
         if agentic_session_id:
-            claims_challenge = merge_access_token_claims(claims_challenge, agentic_claims)
+            kwargs["data"] = kwargs.get("data") or {}
+            kwargs["data"]["client_session"] = agentic_session_id
             kwargs["params"] = kwargs.get("params") or {}
             kwargs["params"]["client_session"] = agentic_session_id
 
