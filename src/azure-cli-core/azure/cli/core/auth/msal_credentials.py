@@ -58,6 +58,9 @@ class UserCredential:  # pylint: disable=too-few-public-methods
             kwargs["params"] = kwargs.get("params") or {}
             kwargs["params"]["client_session"] = agentic_session_id
 
+            from azure.cli.core.telemetry import set_agentic_session
+            set_agentic_session(True)
+
         if claims_challenge:
             logger.info('Acquiring new access token silently with claims challenge: %s', claims_challenge)
         result = self._msal_app.acquire_token_silent_with_error(
