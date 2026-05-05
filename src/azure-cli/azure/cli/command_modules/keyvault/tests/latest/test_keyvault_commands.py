@@ -2854,6 +2854,7 @@ class KeyVaultSecretCopyScenarioTest(ScenarioTest):
                  ])
 
     @AllowLargeResponse()
+    @record_only()
     @ResourceGroupPreparer(name_prefix='cli_test_kv_secret_copy', location='eastus2')
     @KeyVaultPreparer(name_prefix='cli-test-kv-src-', location='eastus2',
                      additional_params='--enable-rbac-authorization false', parameter_name='src_kv')
@@ -2897,6 +2898,7 @@ class KeyVaultSecretCopyScenarioTest(ScenarioTest):
                  checks=self.check('length(@)', 3))
 
     @AllowLargeResponse()
+    @record_only()
     @ResourceGroupPreparer(name_prefix='cli_test_kv_secret_copy', location='eastus2')
     @KeyVaultPreparer(name_prefix='cli-test-kv-src-', location='eastus2',
                      additional_params='--enable-rbac-authorization false', parameter_name='src_kv')
@@ -2942,6 +2944,7 @@ class KeyVaultSecretCopyScenarioTest(ScenarioTest):
                  checks=self.check('value', '{updated_value}'))
 
     @AllowLargeResponse()
+    @record_only()
     @ResourceGroupPreparer(name_prefix='cli_test_kv_secret_copy', location='eastus2')
     @KeyVaultPreparer(name_prefix='cli-test-kv-src-', location='eastus2',
                      additional_params='--enable-rbac-authorization false', parameter_name='src_kv')
@@ -2990,6 +2993,7 @@ class KeyVaultSecretCopyScenarioTest(ScenarioTest):
                  expect_failure=True)
 
     @AllowLargeResponse()
+    @record_only()
     @ResourceGroupPreparer(name_prefix='cli_test_kv_secret_copy', location='eastus2')
     @KeyVaultPreparer(name_prefix='cli-test-kv-src-', location='eastus2',
                      additional_params='--enable-rbac-authorization false', parameter_name='src_kv')
