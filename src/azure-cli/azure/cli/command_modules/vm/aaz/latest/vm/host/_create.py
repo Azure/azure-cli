@@ -11,14 +11,8 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "vm host show",
-)
-class Show(AAZCommand):
-    """Get the details of a dedicated host.
-
-    :example: Get the details of a dedicated host.
-        az vm host show --host-group MyHostGroup --name MyDedicatedHost --resource-group MyResourceGroup
+class Create(AAZCommand):
+    """Create a dedicated host.
     """
 
     _aaz_info = {
@@ -28,10 +22,11 @@ class Show(AAZCommand):
         ]
     }
 
+    AZ_SUPPORT_NO_WAIT = True
+
     def _handler(self, command_args):
         super()._handler(command_args)
-        self._execute_operations()
-        return self._output()
+        return self.build_lro_poller(self._execute_operations, self._output)
 
     _args_schema = None
 
@@ -48,27 +43,80 @@ class Show(AAZCommand):
             options=["--host-group", "--host-group-name"],
             help="The name of the dedicated host group.",
             required=True,
-            id_part="name",
         )
         _args_schema.host_name = AAZStrArg(
             options=["-n", "--name", "--host-name"],
             help="The name of the dedicated host.",
             required=True,
-            id_part="child_name_1",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-        _args_schema.expand = AAZStrArg(
-            options=["--expand"],
-            help="The expand expression to apply on the operation. 'InstanceView' will retrieve the list of instance views of the dedicated host. 'UserData' is not supported for dedicated host.",
-            enum={"instanceView": "instanceView", "resiliencyView": "resiliencyView", "userData": "userData"},
+
+        # define Arg Group "Parameters"
+
+        _args_schema = cls._args_schema
+        _args_schema.location = AAZResourceLocationArg(
+            arg_group="Parameters",
+            help="Resource location",
+            required=True,
+            fmt=AAZResourceLocationArgFormat(
+                resource_group_arg="resource_group",
+            ),
+        )
+        _args_schema.sku = AAZObjectArg(
+            options=["--sku"],
+            arg_group="Parameters",
+            help="SKU of the dedicated host for Hardware Generation and VM family. Only name is required to be set. List Microsoft.Compute SKUs for a list of possible values.",
+            required=True,
+        )
+        _args_schema.tags = AAZDictArg(
+            options=["--tags"],
+            arg_group="Parameters",
+            help="Resource tags",
+        )
+
+        sku = cls._args_schema.sku
+        sku.capacity = AAZIntArg(
+            options=["capacity"],
+            help="Specifies the number of virtual machines in the scale set.",
+        )
+        sku.name = AAZStrArg(
+            options=["name"],
+            help="The sku name.",
+        )
+        sku.tier = AAZStrArg(
+            options=["tier"],
+            help="Specifies the tier of virtual machines in a scale set.<br /><br /> Possible Values:<br /><br /> **Standard**<br /><br /> **Basic**",
+        )
+
+        tags = cls._args_schema.tags
+        tags.Element = AAZStrArg()
+
+        # define Arg Group "Properties"
+
+        _args_schema = cls._args_schema
+        _args_schema.auto_replace_on_failure = AAZBoolArg(
+            options=["--auto-replace-on-failure"],
+            arg_group="Properties",
+            help="Specifies whether the dedicated host should be replaced automatically in case of a failure. The value is defaulted to 'true' when not provided.",
+        )
+        _args_schema.license_type = AAZStrArg(
+            options=["--license-type"],
+            arg_group="Properties",
+            help="Specifies the software license type that will be applied to the VMs deployed on the dedicated host. <br><br> Possible values are: <br><br> **None** <br><br> **Windows_Server_Hybrid** <br><br> **Windows_Server_Perpetual** <br><br> Default: **None**",
+            enum={"None": "None", "Windows_Server_Hybrid": "Windows_Server_Hybrid", "Windows_Server_Perpetual": "Windows_Server_Perpetual"},
+        )
+        _args_schema.platform_fault_domain = AAZIntArg(
+            options=["--platform-fault-domain"],
+            arg_group="Properties",
+            help="Fault domain of the dedicated host within a dedicated host group.",
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.DedicatedHostsGet(ctx=self.ctx)()
+        yield self.DedicatedHostsCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -83,14 +131,30 @@ class Show(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class DedicatedHostsGet(AAZHttpOperation):
+    class DedicatedHostsCreateOrUpdate(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
             request = self.make_request()
             session = self.client.send_request(request=request, stream=False, **kwargs)
-            if session.http_response.status_code in [200]:
-                return self.on_200(session)
+            if session.http_response.status_code in [202]:
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_200_201,
+                    self.on_error,
+                    lro_options={"final-state-via": "location"},
+                    path_format_arguments=self.url_parameters,
+                )
+            if session.http_response.status_code in [200, 201]:
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_200_201,
+                    self.on_error,
+                    lro_options={"final-state-via": "location"},
+                    path_format_arguments=self.url_parameters,
+                )
 
             return self.on_error(session.http_response)
 
@@ -103,7 +167,7 @@ class Show(AAZCommand):
 
         @property
         def method(self):
-            return "GET"
+            return "PUT"
 
         @property
         def error_format(self):
@@ -135,9 +199,6 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "$expand", self.ctx.args.expand,
-                ),
-                **self.serialize_query_param(
                     "api-version", "2024-11-01",
                     required=True,
                 ),
@@ -148,54 +209,87 @@ class Show(AAZCommand):
         def header_parameters(self):
             parameters = {
                 **self.serialize_header_param(
+                    "Content-Type", "application/json",
+                ),
+                **self.serialize_header_param(
                     "Accept", "application/json",
                 ),
             }
             return parameters
 
-        def on_200(self, session):
+        @property
+        def content(self):
+            _content_value, _builder = self.new_content_builder(
+                self.ctx.args,
+                typ=AAZObjectType,
+                typ_kwargs={"flags": {"required": True, "client_flatten": True}}
+            )
+            _builder.set_prop("location", AAZStrType, ".location", typ_kwargs={"flags": {"required": True}})
+            _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+            _builder.set_prop("sku", AAZObjectType, ".sku", typ_kwargs={"flags": {"required": True}})
+            _builder.set_prop("tags", AAZDictType, ".tags")
+
+            properties = _builder.get(".properties")
+            if properties is not None:
+                properties.set_prop("autoReplaceOnFailure", AAZBoolType, ".auto_replace_on_failure")
+                properties.set_prop("licenseType", AAZStrType, ".license_type")
+                properties.set_prop("platformFaultDomain", AAZIntType, ".platform_fault_domain")
+
+            sku = _builder.get(".sku")
+            if sku is not None:
+                sku.set_prop("capacity", AAZIntType, ".capacity")
+                sku.set_prop("name", AAZStrType, ".name")
+                sku.set_prop("tier", AAZStrType, ".tier")
+
+            tags = _builder.get(".tags")
+            if tags is not None:
+                tags.set_elements(AAZStrType, ".")
+
+            return self.serialize_content(_content_value)
+
+        def on_200_201(self, session):
             data = self.deserialize_http_content(session)
             self.ctx.set_var(
                 "instance",
                 data,
-                schema_builder=self._build_schema_on_200
+                schema_builder=self._build_schema_on_200_201
             )
 
-        _schema_on_200 = None
+        _schema_on_200_201 = None
 
         @classmethod
-        def _build_schema_on_200(cls):
-            if cls._schema_on_200 is not None:
-                return cls._schema_on_200
+        def _build_schema_on_200_201(cls):
+            if cls._schema_on_200_201 is not None:
+                return cls._schema_on_200_201
 
-            cls._schema_on_200 = AAZObjectType()
+            cls._schema_on_200_201 = AAZObjectType()
 
-            _schema_on_200 = cls._schema_on_200
-            _schema_on_200.id = AAZStrType(
+            _schema_on_200_201 = cls._schema_on_200_201
+            _schema_on_200_201.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200.location = AAZStrType(
+            _schema_on_200_201.location = AAZStrType(
                 flags={"required": True},
             )
-            _schema_on_200.name = AAZStrType(
+            _schema_on_200_201.name = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200.properties = AAZObjectType(
+            _schema_on_200_201.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
-            _schema_on_200.sku = AAZObjectType(
+            _schema_on_200_201.sku = AAZObjectType(
                 flags={"required": True},
             )
-            _schema_on_200.system_data = AAZObjectType(
+            _schema_on_200_201.system_data = AAZObjectType(
                 serialized_name="systemData",
                 flags={"read_only": True},
             )
-            _schema_on_200.tags = AAZDictType()
-            _schema_on_200.type = AAZStrType(
+            _schema_on_200_201.tags = AAZDictType()
+            _schema_on_200_201.type = AAZStrType(
                 flags={"read_only": True},
             )
 
-            properties = cls._schema_on_200.properties
+            properties = cls._schema_on_200_201.properties
             properties.auto_replace_on_failure = AAZBoolType(
                 serialized_name="autoReplaceOnFailure",
             )
@@ -230,7 +324,7 @@ class Show(AAZCommand):
                 flags={"read_only": True},
             )
 
-            instance_view = cls._schema_on_200.properties.instance_view
+            instance_view = cls._schema_on_200_201.properties.instance_view
             instance_view.asset_id = AAZStrType(
                 serialized_name="assetId",
                 flags={"read_only": True},
@@ -240,24 +334,24 @@ class Show(AAZCommand):
             )
             instance_view.statuses = AAZListType()
 
-            available_capacity = cls._schema_on_200.properties.instance_view.available_capacity
+            available_capacity = cls._schema_on_200_201.properties.instance_view.available_capacity
             available_capacity.allocatable_v_ms = AAZListType(
                 serialized_name="allocatableVMs",
             )
 
-            allocatable_v_ms = cls._schema_on_200.properties.instance_view.available_capacity.allocatable_v_ms
+            allocatable_v_ms = cls._schema_on_200_201.properties.instance_view.available_capacity.allocatable_v_ms
             allocatable_v_ms.Element = AAZObjectType()
 
-            _element = cls._schema_on_200.properties.instance_view.available_capacity.allocatable_v_ms.Element
+            _element = cls._schema_on_200_201.properties.instance_view.available_capacity.allocatable_v_ms.Element
             _element.count = AAZFloatType()
             _element.vm_size = AAZStrType(
                 serialized_name="vmSize",
             )
 
-            statuses = cls._schema_on_200.properties.instance_view.statuses
+            statuses = cls._schema_on_200_201.properties.instance_view.statuses
             statuses.Element = AAZObjectType()
 
-            _element = cls._schema_on_200.properties.instance_view.statuses.Element
+            _element = cls._schema_on_200_201.properties.instance_view.statuses.Element
             _element.code = AAZStrType()
             _element.display_status = AAZStrType(
                 serialized_name="displayStatus",
@@ -266,20 +360,20 @@ class Show(AAZCommand):
             _element.message = AAZStrType()
             _element.time = AAZStrType()
 
-            virtual_machines = cls._schema_on_200.properties.virtual_machines
+            virtual_machines = cls._schema_on_200_201.properties.virtual_machines
             virtual_machines.Element = AAZObjectType()
 
-            _element = cls._schema_on_200.properties.virtual_machines.Element
+            _element = cls._schema_on_200_201.properties.virtual_machines.Element
             _element.id = AAZStrType(
                 flags={"read_only": True},
             )
 
-            sku = cls._schema_on_200.sku
+            sku = cls._schema_on_200_201.sku
             sku.capacity = AAZIntType()
             sku.name = AAZStrType()
             sku.tier = AAZStrType()
 
-            system_data = cls._schema_on_200.system_data
+            system_data = cls._schema_on_200_201.system_data
             system_data.created_at = AAZStrType(
                 serialized_name="createdAt",
             )
@@ -299,14 +393,14 @@ class Show(AAZCommand):
                 serialized_name="lastModifiedByType",
             )
 
-            tags = cls._schema_on_200.tags
+            tags = cls._schema_on_200_201.tags
             tags.Element = AAZStrType()
 
-            return cls._schema_on_200
+            return cls._schema_on_200_201
 
 
-class _ShowHelper:
-    """Helper class for Show"""
+class _CreateHelper:
+    """Helper class for Create"""
 
 
-__all__ = ["Show"]
+__all__ = ["Create"]
