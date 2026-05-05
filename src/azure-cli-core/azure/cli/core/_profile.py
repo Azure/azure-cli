@@ -908,8 +908,8 @@ def _create_identity_instance(cli_ctx, authority, tenant_id=None, client_id=None
 
     # On Windows, use core.enable_broker_on_windows=false to disable broker (WAM) for authentication.
     enable_broker_on_windows = cli_ctx.config.getboolean('core', 'enable_broker_on_windows', fallback=True)
-    # On macOS, use core.enable_broker_on_mac=false to disable broker for authentication.
-    enable_broker_on_mac = cli_ctx.config.getboolean('core', 'enable_broker_on_mac', fallback=True)
+    # On macOS, broker authentication is opt-in. Use core.enable_broker_on_mac=true to enable it.
+    enable_broker_on_mac = cli_ctx.config.getboolean('core', 'enable_broker_on_mac', fallback=False)
     from .telemetry import set_broker_info
     set_broker_info(enable_broker_on_windows, enable_broker_on_mac)
 
