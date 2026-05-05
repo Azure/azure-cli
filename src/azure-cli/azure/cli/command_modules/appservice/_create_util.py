@@ -67,6 +67,10 @@ def zip_contents_from_dir(dirPath, lang):
 
                 for filename in files:
                     absname = os.path.abspath(os.path.join(dirname, filename))
+
+                    if os.path.islink(absname):
+                        logger.info("Skipping symbolic link: %s", absname)
+                        continue
                     arcname = absname[len(abs_src) + 1:]
                     zf.write(absname, arcname)
 

@@ -66,8 +66,8 @@ class Update(AAZCommand):
             help="Space-separated list of public IP addresses (Names or IDs).",
             nullable=True,
         )
-        _args_schema.pip_addresses_v6 = AAZListArg(
-            options=["--pip-addresses-v6"],
+        _args_schema.pip_addrs_v6 = AAZListArg(
+            options=["--pip-addrs-v6"],
             help="An array of public ip addresses V6 associated with the nat gateway resource.",
             nullable=True,
         )
@@ -76,8 +76,8 @@ class Update(AAZCommand):
             help="Space-separated list of public IP prefixes (Names or IDs).",
             nullable=True,
         )
-        _args_schema.pip_prefixes_v6 = AAZListArg(
-            options=["--pip-prefixes-v6"],
+        _args_schema.pip_prefs_v6 = AAZListArg(
+            options=["--pip-prefs-v6"],
             help="An array of public ip prefixes V6 associated with the nat gateway resource.",
             nullable=True,
         )
@@ -105,11 +105,11 @@ class Update(AAZCommand):
             nullable=True,
         )
 
-        pip_addresses_v6 = cls._args_schema.pip_addresses_v6
-        pip_addresses_v6.Element = AAZObjectArg(
+        pip_addrs_v6 = cls._args_schema.pip_addrs_v6
+        pip_addrs_v6.Element = AAZObjectArg(
             nullable=True,
         )
-        cls._build_args_sub_resource_update(pip_addresses_v6.Element)
+        cls._build_args_sub_resource_update(pip_addrs_v6.Element)
 
         pip_prefixes = cls._args_schema.pip_prefixes
         pip_prefixes.Element = AAZObjectArg(
@@ -123,11 +123,11 @@ class Update(AAZCommand):
             nullable=True,
         )
 
-        pip_prefixes_v6 = cls._args_schema.pip_prefixes_v6
-        pip_prefixes_v6.Element = AAZObjectArg(
+        pip_prefs_v6 = cls._args_schema.pip_prefs_v6
+        pip_prefs_v6.Element = AAZObjectArg(
             nullable=True,
         )
-        cls._build_args_sub_resource_update(pip_prefixes_v6.Element)
+        cls._build_args_sub_resource_update(pip_prefs_v6.Element)
 
         tags = cls._args_schema.tags
         tags.Element = AAZStrArg(
@@ -400,9 +400,9 @@ class Update(AAZCommand):
             if properties is not None:
                 properties.set_prop("idleTimeoutInMinutes", AAZIntType, ".idle_timeout")
                 properties.set_prop("publicIpAddresses", AAZListType, ".pip_addresses")
-                properties.set_prop("publicIpAddressesV6", AAZListType, ".pip_addresses_v6")
+                properties.set_prop("publicIpAddressesV6", AAZListType, ".pip_addrs_v6")
                 properties.set_prop("publicIpPrefixes", AAZListType, ".pip_prefixes")
-                properties.set_prop("publicIpPrefixesV6", AAZListType, ".pip_prefixes_v6")
+                properties.set_prop("publicIpPrefixesV6", AAZListType, ".pip_prefs_v6")
                 _UpdateHelper._build_schema_sub_resource_update(properties.set_prop("sourceVirtualNetwork", AAZObjectType, ".source_vnet"))
 
             public_ip_addresses = _builder.get(".properties.publicIpAddresses")

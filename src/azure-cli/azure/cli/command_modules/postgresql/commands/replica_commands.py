@@ -33,7 +33,7 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
                             location=None, vnet=None, vnet_address_prefix=None, subnet=None,
                             subnet_address_prefix=None, private_dns_zone_arguments=None, no_wait=False,
                             byok_identity=None, byok_key=None,
-                            sku_name=None, tier=None,
+                            sku_name=None, tier=None, storage_type=None,
                             storage_gb=None, performance_tier=None, yes=False, tags=None):
     validate_resource_group(resource_group_name)
 
@@ -119,7 +119,7 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
 
     parameters.sku = postgresql_flexibleservers.models.Sku(name=sku_name, tier=tier)
 
-    parameters.storage = postgresql_flexibleservers.models.Storage(storage_size_gb=storage_gb, auto_grow=source_server_object.storage.auto_grow, tier=performance_tier)
+    parameters.storage = postgresql_flexibleservers.models.Storage(storage_size_gb=storage_gb, auto_grow=source_server_object.storage.auto_grow, tier=performance_tier, type=storage_type)
 
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, replica_name, parameters)
 

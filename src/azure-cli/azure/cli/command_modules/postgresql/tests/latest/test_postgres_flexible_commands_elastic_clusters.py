@@ -8,6 +8,7 @@ from time import sleep
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk.scenario_tests.const import ENV_LIVE_TEST
 from azure.cli.testsdk import (
+    JMESPathCheck,
     ResourceGroupPreparer,
     ScenarioTest)
 from .constants import SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH, DEFAULT_LOCATION
@@ -33,7 +34,7 @@ class ElasticClustersMgmtScenarioTest(ScenarioTest):
         cluster_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         cluster_size = 2
 
-        # create elastic cluster
+        # Create elastic cluster
         self.cmd('postgres flexible-server create -g {} -n {} --sku-name {} \
                    --version {} --cluster-option ElasticCluster --public-access Enabled'
                   .format(resource_group, cluster_name, sku_name, version))
@@ -47,17 +48,30 @@ class ElasticClustersMgmtScenarioTest(ScenarioTest):
         self.assertEqual(basic_info['version'], version)
         self.assertEqual(basic_info['cluster']['clusterSize'], cluster_size)
 
-        # test failures
+        # Test failures
         self.cmd('postgres flexible-server update -g {} -n {} --storage-auto-grow Enabled'
                  .format(resource_group, cluster_name), expect_failure=True)
+        # Backend silently ignores if the cluster size is smaller than current size, and does not return error.
+        # Also, the cluster size remains unchanged. Hence the check is added to verify that cluster size is not updated.
+        # When control plane adds support for scaling down cluster size, this test should be updated accordingly.
         self.cmd('postgres flexible-server update -g {} -n {} --node-count {}'
-                 .format(resource_group, cluster_name, cluster_size - 1), expect_failure=True)
+                 .format(resource_group, cluster_name, cluster_size - 1),
+                 checks=[
+                     JMESPathCheck('cluster.clusterSize', cluster_size)])
+        # Same behavior with cluster size being set to 0, it doesn't return error, neither it changes the cluster size.
+        self.cmd('postgres flexible-server update -g {} -n {} --node-count {}'
+                 .format(resource_group, cluster_name, 0),
+                 checks=[
+                     JMESPathCheck('cluster.clusterSize', cluster_size)])
+        # If the cluster size is larger than current supported maximum (20), it will return error.
+        self.cmd('postgres flexible-server update -g {} -n {} --node-count {}'
+                 .format(resource_group, cluster_name, 21), expect_failure=True)
         self.cmd('postgres flexible-server replica list -g {} -n {}'
                  .format(resource_group, cluster_name), expect_failure=True)
         self.cmd('postgres flexible-server db create -g {} -s {} -d dbclusterfail'
                  .format(resource_group, cluster_name), expect_failure=True)
 
-        # update cluster
+        # Update cluster
         update_cluster_size = 4
         update_info = self.cmd('postgres flexible-server update -g {} -n {} --node-count {}'
                                .format(resource_group, cluster_name, update_cluster_size)).get_output_in_json()
@@ -73,6 +87,6 @@ class ElasticClustersMgmtScenarioTest(ScenarioTest):
         self.assertEqual(restore_result['name'], cluster_restore_name)
         self.assertEqual(restore_result['cluster']['clusterSize'], update_cluster_size)
 
-        # delete everything
+        # Clean up
         self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, cluster_name))
         self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, cluster_restore_name))

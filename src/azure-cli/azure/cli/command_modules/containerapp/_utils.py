@@ -44,8 +44,9 @@ from knack.log import get_logger
 from ._clients import ContainerAppClient, ManagedEnvironmentClient, WorkloadProfileClient, ContainerAppsJobClient
 from ._client_factory import handle_raw_exception, providers_client_factory, cf_resource_groups, log_analytics_client_factory, log_analytics_shared_key_client_factory
 from ._constants import (MAXIMUM_CONTAINER_APP_NAME_LENGTH, SHORT_POLLING_INTERVAL_SECS, LONG_POLLING_INTERVAL_SECS,
-                         LOG_ANALYTICS_RP, CONTAINER_APPS_RP, CHECK_CERTIFICATE_NAME_AVAILABILITY_TYPE, ACR_IMAGE_SUFFIX,
-                         LOGS_STRING, PENDING_STATUS, SUCCEEDED_STATUS, UPDATING_STATUS, DEV_SERVICE_LIST)
+                         LOG_ANALYTICS_RP, CONTAINER_APPS_RP, CHECK_CERTIFICATE_NAME_AVAILABILITY_TYPE,
+                         LOGS_STRING, PENDING_STATUS, SUCCEEDED_STATUS, UPDATING_STATUS, DEV_SERVICE_LIST,
+                         ACR_IMAGE_SUFFIXES)
 from ._models import (ContainerAppCustomDomainEnvelope as ContainerAppCustomDomainEnvelopeModel,
                       ManagedCertificateEnvelop as ManagedCertificateEnvelopModel)
 from ._models import OryxMarinerRunImgTagProperty
@@ -57,6 +58,25 @@ class AppType(Enum):
 
 
 logger = get_logger(__name__)
+
+
+def is_acr_url(registry_server):
+    """Check if a registry server URL belongs to Azure Container Registry (supports sovereign clouds)."""
+    if not registry_server:
+        return False
+    registry_server_lower = registry_server.lower()
+    return any(registry_server_lower.endswith(suffix) for suffix in ACR_IMAGE_SUFFIXES)
+
+
+def get_acr_name(registry_server):
+    """Extract the ACR registry name from a registry server URL (supports sovereign clouds)."""
+    if not registry_server:
+        return None
+    registry_server_lower = registry_server.lower()
+    for suffix in ACR_IMAGE_SUFFIXES:
+        if registry_server_lower.endswith(suffix):
+            return registry_server[: registry_server_lower.rindex(suffix)]
+    return None
 
 
 def register_provider_if_needed(cmd, rp_name):
@@ -1170,7 +1190,7 @@ def _get_app_from_revision(revision):
 
 def _infer_acr_credentials(cmd, registry_server, disable_warnings=False):
     # If registry is Azure Container Registry, we can try inferring credentials
-    if ACR_IMAGE_SUFFIX not in registry_server:
+    if not is_acr_url(registry_server):
         raise RequiredArgumentMissingError('Registry username and password are required if not using Azure Container Registry.')
     not disable_warnings and logger.warning('No credential was provided to access Azure Container Registry. Trying to look up credentials...')
     parsed = urlparse(registry_server)
@@ -1656,7 +1676,10 @@ def create_acrpull_role_assignment(cmd, registry_server, registry_identity=None,
 
     client = get_mgmt_service_client(cmd.cli_ctx, ContainerRegistryManagementClient).registries
     try:
-        acr_id = acr_show(cmd, client, registry_server[: registry_server.rindex(ACR_IMAGE_SUFFIX)]).id
+        acr_name = get_acr_name(registry_server)
+        if not acr_name:
+            raise RequiredArgumentMissingError(f'Could not parse ACR name from registry server: {registry_server}')
+        acr_id = acr_show(cmd, client, acr_name).id
     except ResourceNotFound as e:
         message = (f"Role assignment failed with error message: \"{' '.join(e.args)}\". \n"
                    f"To add the role assignment manually, please run 'az role assignment create --assignee {sp_id} --scope <container-registry-resource-id> --role acrpull'. \n"

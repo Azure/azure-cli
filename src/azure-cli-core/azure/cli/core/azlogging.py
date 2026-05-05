@@ -26,6 +26,7 @@ omitted     Warning     Debug       Critical    Debug
 import os
 import logging
 import datetime
+from logging.handlers import RotatingFileHandler
 
 from azure.cli.core.commands.events import EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE
 
@@ -36,6 +37,20 @@ from knack.util import ensure_dir
 
 _UNKNOWN_COMMAND = "unknown_command"
 _CMD_LOG_LINE_PREFIX = "CMD-LOG-LINE-BEGIN"
+
+
+class SecureFileHandler(logging.FileHandler):
+    """A FileHandler that creates the log file with 600 permissions (owner read/write only)."""
+    def _open(self):
+        fd = os.open(self.baseFilename, os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600)
+        return os.fdopen(fd, self.mode, encoding=self.encoding)
+
+
+class SecureRotatingFileHandler(RotatingFileHandler):
+    """A RotatingFileHandler that creates log files with 600 permissions (owner read/write only)."""
+    def _open(self):
+        fd = os.open(self.baseFilename, os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600)
+        return os.fdopen(fd, self.mode, encoding=self.encoding)
 
 
 class AzCliLogging(CLILogging):
@@ -57,6 +72,20 @@ class AzCliLogging(CLILogging):
             # azure.core.pipeline.policies._universal, disable azure.core.pipeline.policies.http_logging_policy
             # when debug log is shown.
             logging.getLogger("azure.core.pipeline.policies.http_logging_policy").setLevel(logging.CRITICAL)
+
+    def _init_logfile_handlers(self, root_logger, cli_loggers):
+        # Override knack's CLILogging._init_logfile_handlers() (called by CLILogging.configure())
+        # to use SecureRotatingFileHandler, ensuring log files are created with 0o600 permissions.
+        ensure_dir(self.log_dir)
+        log_file_path = os.path.join(self.log_dir, self.logfile_name)
+        logfile_handler = SecureRotatingFileHandler(log_file_path, maxBytes=10 * 1024 * 1024, backupCount=5,
+                                                    encoding=LOG_FILE_ENCODING)
+        lfmt = logging.Formatter('%(process)d : %(asctime)s : %(levelname)s : %(name)s : %(message)s')
+        logfile_handler.setFormatter(lfmt)
+        logfile_handler.setLevel(logging.DEBUG)
+        root_logger.addHandler(logfile_handler)
+        for cli_logger in cli_loggers:
+            cli_logger.addHandler(logfile_handler)
 
     def get_command_log_dir(self):
         return self.command_log_dir
@@ -112,7 +141,7 @@ class AzCliLogging(CLILogging):
         log_file_path = os.path.join(self.command_log_dir, log_name)
         get_logger(__name__).debug("metadata file logging enabled - writing logs to '%s'.", log_file_path)
 
-        logfile_handler = logging.FileHandler(log_file_path, encoding=LOG_FILE_ENCODING)
+        logfile_handler = SecureFileHandler(log_file_path, encoding=LOG_FILE_ENCODING)
 
         lfmt = logging.Formatter(_CMD_LOG_LINE_PREFIX + ' %(process)d | %(asctime)s | %(levelname)s | %(name)s | %(message)s')  # pylint: disable=line-too-long
         logfile_handler.setFormatter(lfmt)

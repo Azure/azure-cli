@@ -1,0 +1,15 @@
+# Service names with underscores, dots, special characters
+# Tests: _sanitize_container_name() converting to valid sitecontainer names
+version: '3'
+services:
+  my_web_app:
+    image: "myacr.azurecr.io/web:latest"
+    ports:
+      - "80:80"
+  background.worker:
+    image: "myacr.azurecr.io/worker:latest"
+    command: "python worker.py"
+  data-processor:
+    image: "myacr.azurecr.io/processor:latest"
+  UPPERCASE_SVC:
+    image: "redis:alpine"

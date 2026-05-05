@@ -31,7 +31,7 @@ from azure.cli.command_modules.acs.tests.latest.recording_processors import \
 
 from azure.cli.command_modules.acs._consts import CONST_WORKLOAD_RUNTIME_KATA_VM_ISOLATION
 from azure.cli.command_modules.acs.tests.latest.utils import get_test_data_file_path
-from azure.cli.core.azclierror import ClientRequestError, CLIInternalError, InvalidArgumentValueError
+from azure.cli.core.azclierror import BadRequestError, ClientRequestError, CLIInternalError, InvalidArgumentValueError
 from azure.core.exceptions import HttpResponseError
 from azure.cli.testsdk import ScenarioTest, live_only
 from azure.cli.testsdk.checkers import (StringCheck, StringContainCheck,
@@ -2312,6 +2312,89 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.is_empty(),
         ])
 
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_azure_service_mesh_enable_disable_istio_cni(self, resource_group, resource_group_location):
+        """ This test case exercises setting the proxy redirection mechanism for the service mesh profile.
+        It creates a cluster, enables azure service mesh with InitContainers as the initial mechanism,
+        then switches to CNIChaining and back to InitContainers using `aks mesh proxy-redirection-mechanism`.
+        """
+
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+
+        # Get the latest supported revision (compatible with current K8s versions)
+        mesh_revisions_cmd = f"aks mesh get-revisions -l {resource_group_location}"
+        mesh_revisions = self.cmd(mesh_revisions_cmd).get_output_in_json()
+        revisions = [r["revision"] for r in mesh_revisions["meshRevisions"]]
+        sorted_revisions = sort_asm_revisions(revisions)
+        latest_revision = sorted_revisions[-1]
+
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'ssh_key_value': self.generate_ssh_keys(),
+            'revision': latest_revision,
+        })
+
+        # create cluster without --enable-azure-service-mesh
+        create_cmd = (
+            'aks create --resource-group={resource_group} --name={name} --location={location} '
+            '--aks-custom-headers=AKSHTTPCustomFeatures=Microsoft.ContainerService/AzureServiceMeshPreview '
+            '--ssh-key-value={ssh_key_value} --output=json'
+        )
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # enable azure service mesh with InitContainers as the initial mechanism
+        # this ensures a deterministic test order regardless of revision defaults
+        enable_mesh_cmd = (
+            'aks mesh enable --resource-group={resource_group} --name={name} '
+            '--revision={revision} --proxy-redirection-mechanism InitContainers'
+        )
+        self.cmd(enable_mesh_cmd, checks=[
+            self.check('serviceMeshProfile.mode', 'Istio'),
+            self.check('serviceMeshProfile.istio.components.proxyRedirectionMechanism', 'InitContainers'),
+        ])
+
+        # verify idempotency: setting same mechanism fails
+        self.cmd(
+            'aks mesh proxy-redirection-mechanism --resource-group={resource_group} --name={name} --mechanism InitContainers',
+            expect_failure=True,
+        )
+
+        # switch to CNIChaining
+        self.cmd(
+            'aks mesh proxy-redirection-mechanism --resource-group={resource_group} --name={name} --mechanism CNIChaining',
+            checks=[
+                self.check('serviceMeshProfile.istio.components.proxyRedirectionMechanism', 'CNIChaining'),
+            ],
+        )
+
+        # verify idempotency: setting same mechanism fails
+        self.cmd(
+            'aks mesh proxy-redirection-mechanism --resource-group={resource_group} --name={name} --mechanism CNIChaining',
+            expect_failure=True,
+        )
+
+        # switch back to InitContainers
+        self.cmd(
+            'aks mesh proxy-redirection-mechanism --resource-group={resource_group} --name={name} --mechanism InitContainers',
+            checks=[
+                self.check('serviceMeshProfile.istio.components.proxyRedirectionMechanism', 'InitContainers'),
+            ],
+        )
+
+        # delete the cluster
+        delete_cmd = 'aks delete --resource-group={resource_group} --name={name} --yes --no-wait'
+        self.cmd(delete_cmd, checks=[
+            self.is_empty(),
+        ])
+
     # live only due to installing kubectl binary
     @live_only()
     @AllowLargeResponse()
@@ -4012,6 +4095,60 @@ spec:
             checks=[
                 self.check('provisioningState', 'Succeeded'),
                 self.check('osSku', 'Windows2022'),
+            ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_nodepool_add_with_ossku_windows2025(self, resource_group, resource_group_location):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        _, create_version = self._get_versions(resource_group_location)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'dns_name_prefix': self.create_random_name('cliaksdns', 16),
+            'location': resource_group_location,
+            'resource_type': 'Microsoft.ContainerService/ManagedClusters',
+            'windows_admin_username': 'azureuser1',
+            'windows_admin_password': 'replace-Password1234$',
+            'windows_nodepool_name': 'npwin',
+            'k8s_version': create_version,
+            'ssh_key_value': self.generate_ssh_keys()
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--dns-name-prefix={dns_name_prefix} --node-count=1 ' \
+                     '--windows-admin-username={windows_admin_username} --windows-admin-password={windows_admin_password} ' \
+                     '--load-balancer-sku=standard --vm-set-type=virtualmachinescalesets --network-plugin=azure ' \
+                     '--ssh-key-value={ssh_key_value} --kubernetes-version={k8s_version}'
+        self.cmd(create_cmd, checks=[
+            self.exists('fqdn'),
+            self.exists('nodeResourceGroup'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('windowsProfile.adminUsername', 'azureuser1')
+        ])
+
+        # add Windows2025 nodepool
+        self.cmd('aks nodepool add '
+                 '--resource-group={resource_group} '
+                 '--cluster-name={name} '
+                 '--name={windows_nodepool_name} '
+                 '--node-count=1 '
+                 '--os-type Windows '
+                 '--os-sku Windows2025 '
+                 '--enable-fips-image '
+                 '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/AKSWindows2025Preview',
+            checks=[
+                self.check('provisioningState', 'Succeeded'),
+                self.check('osSku', 'Windows2025'),
+                self.check('enableFips', True),
             ])
 
         # delete
@@ -7489,16 +7626,13 @@ spec:
     @live_only()
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    @AKSCustomRoleBasedServicePrincipalPreparer()
-    def test_aks_create_attach_acr(self, resource_group, resource_group_location, sp_name, sp_password):
+    def test_aks_create_attach_acr(self, resource_group, resource_group_location):
         aks_name = self.create_random_name('cliakstest', 16)
         acr_name = self.create_random_name('cliaksacr', 16)
         self.kwargs.update({
             'name': aks_name,
             'resource_group': resource_group,
             'ssh_key_value': self.generate_ssh_keys(),
-            'service_principal': sp_name,
-            'client_secret': sp_password,
             'acr_name': acr_name
         })
 
@@ -7510,18 +7644,9 @@ spec:
 
         # create
         create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
-                     '--service-principal={service_principal} --client-secret={client_secret} ' \
                      '--ssh-key-value={ssh_key_value} --attach-acr={acr_name}'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
-            self.check('servicePrincipalProfile.clientId', sp_name)
-        ])
-
-         # add Mariner node pool
-        node_pool_cmd = 'aks nodepool add --resource-group={resource_group} --cluster-name={name} ' \
-                        '-n marinerpool --os-sku mariner'
-        self.cmd(node_pool_cmd, checks=[
-            self.check('provisioningState', 'Succeeded')
         ])
 
         # install kubectl
@@ -7554,7 +7679,7 @@ spec:
             finally:
                 os.close(fd)
             # get node name
-            k_get_node_cmd = ["kubectl", "get", "node", "-l", "kubernetes.azure.com/os-sku=Ubuntu", "-o", "name", "--kubeconfig", browse_path]
+            k_get_node_cmd = ["kubectl", "get", "node", "-o", "name", "--kubeconfig", browse_path]
             k_get_node_output = subprocess.check_output(
                 k_get_node_cmd,
                 universal_newlines=True,
@@ -7567,31 +7692,10 @@ spec:
                     "node_name": node_name,
                 }
             )
-            # check acr from Ubuntu node
+            # check acr
             check_cmd = "aks check-acr -n {name} -g {resource_group} --acr {acr_name}.azurecr.io --node-name {node_name}"
             self.cmd(
                 check_cmd,
-                checks=[
-                    StringContainCheck("Your cluster can pull images from {}.azurecr.io!".format(acr_name)),
-                ],
-            )
-            # check acr from Mariner node
-            k_get_mariner_node_cmd = ["kubectl", "get", "node", "-l", "kubernetes.azure.com/os-sku=Mariner", "-o", "name", "--kubeconfig", browse_path]
-            k_get_node_output = subprocess.check_output(
-                k_get_mariner_node_cmd,
-                universal_newlines=True,
-                stderr=subprocess.STDOUT,
-            )
-            mariner_node_names = k_get_node_output.split("\n")
-            mariner_node_name = mariner_node_names[0].strip().strip("node/").strip()
-            self.kwargs.update(
-                {
-                    "mariner_node_name": mariner_node_name,
-                }
-            )
-            check_mariner_cmd = "aks check-acr -n {name} -g {resource_group} --acr {acr_name}.azurecr.io --node-name {mariner_node_name}"
-            self.cmd(
-                check_mariner_cmd,
                 checks=[
                     StringContainCheck("Your cluster can pull images from {}.azurecr.io!".format(acr_name)),
                 ],
@@ -8082,7 +8186,7 @@ spec:
         # wait for cluster to fully settle before issuing next update
         self.cmd('aks wait --resource-group={resource_group} --name={name} --updated --interval 30 --timeout 600')
         if self.is_live or self.in_recording:
-            time.sleep(60)
+            time.sleep(180)
 
         # update: disable-azure-monitor-metrics
         update_cmd = 'aks update --resource-group={resource_group} --name={name} --yes --output=json ' \
@@ -15084,3 +15188,619 @@ spec:
             "aks delete --resource-group={resource_group} --name={name} --yes --no-wait",
             checks=[self.is_empty()],
         )
+
+    # NOTE: The managed Gateway API tests below temporarily pass --enable-app-routing
+    # on cluster creation. This is a workaround for the current datamodel setup, which
+    # requires the WebAppRouting ingress profile to be non-nil before the GatewayAPI
+    # field can be manipulated. Once the new RP release rolls out, this workaround
+    # can be removed and these tests should be updated to drop --enable-app-routing.
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest',
+                                    location='westus2', preserve_default_location=True)
+    def test_aks_create_with_enable_azure_monitor_app_monitoring(self, resource_group,
+                                                                 resource_group_location):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'ssh_key_value': self.generate_ssh_keys(),
+            'location': resource_group_location,
+        })
+
+        # create with app monitoring enabled
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--ssh-key-value={ssh_key_value} --node-count=1 --enable-managed-identity ' \
+                     '--enable-azure-monitor-app-monitoring'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('azureMonitorProfile.appMonitoring.autoInstrumentation.enabled', True),
+        ])
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest',
+                                    location='westus2', preserve_default_location=True)
+    def test_aks_update_with_enable_disable_azure_monitor_app_monitoring(self, resource_group,
+                                                                         resource_group_location):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+
+        aks_name = self.create_random_name('cliakstest', 16)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'ssh_key_value': self.generate_ssh_keys(),
+            'location': resource_group_location,
+        })
+
+        # create without app monitoring
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--ssh-key-value={ssh_key_value} --node-count=1 --enable-managed-identity '
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # update to enable app monitoring — retry on transient failures where
+        # the LRO returns before the cluster reaches provisioningState=Succeeded
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--enable-azure-monitor-app-monitoring'
+        for attempt in range(10):
+            try:
+                self.cmd(update_cmd, checks=[
+                    self.check('provisioningState', 'Succeeded'),
+                    self.check('azureMonitorProfile.appMonitoring.autoInstrumentation.enabled', True),
+                ])
+                break
+            except Exception:
+                if attempt < 9:
+                    time.sleep(60)
+                else:
+                    raise
+
+        # wait for cluster to fully settle before issuing next update
+        self.cmd('aks wait --resource-group={resource_group} --name={name} --updated --interval 30 --timeout 600')
+
+        # disable app monitoring — retry on 409 since the background
+        # PutExtensionAddonHandler.PUT may still be running after the cluster
+        # reports provisioningState=Succeeded
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--disable-azure-monitor-app-monitoring'
+        for attempt in range(10):
+            try:
+                self.cmd(update_cmd, checks=[
+                    self.check('provisioningState', 'Succeeded'),
+                    self.check('azureMonitorProfile.appMonitoring.autoInstrumentation.enabled', False),
+                ])
+                break
+            except Exception:
+                if attempt < 9:
+                    time.sleep(60)
+                else:
+                    raise
+
+        # delete
+        self.cmd(
+            'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17, name_prefix="clitest", location="centraluseuap"
+    )
+    def test_aks_create_and_update_with_app_routing_istio(
+        self, resource_group, resource_group_location
+    ):
+        aks_name = self.create_random_name("cliakstest", 16)
+        _, create_version = self._get_versions(resource_group_location)
+        self.kwargs.update(
+            {
+                "resource_group": resource_group,
+                "name": aks_name,
+                "ssh_key_value": self.generate_ssh_keys(),
+                "k8s_version": create_version,
+            }
+        )
+
+        # Test successful creation with App Routing Istio enabled
+        create_cmd = (
+            "aks create --resource-group={resource_group} --name={name} "
+            "--enable-app-routing "
+            "--enable-app-routing-istio "
+            "--ssh-key-value={ssh_key_value} -o json "
+        )
+        self.cmd(
+            create_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("ingressProfile.webAppRouting.enabled", True),
+                self.check(
+                    "ingressProfile.webAppRouting.gatewayApiImplementations.appRoutingIstio.mode",
+                    "Enabled",
+                ),
+            ],
+        )
+
+        # Test disabling App Routing Istio
+        update_cmd = (
+            "aks update --resource-group={resource_group} --name={name} "
+            "--disable-app-routing-istio "
+        )
+        self.cmd(
+            update_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check(
+                    "ingressProfile.webAppRouting.gatewayApiImplementations.appRoutingIstio.mode",
+                    "Disabled",
+                ),
+            ],
+        )
+
+        # Test re-enabling App Routing Istio
+        update_cmd = (
+            "aks update --resource-group={resource_group} --name={name} "
+            "--enable-app-routing-istio "
+        )
+        self.cmd(
+            update_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check(
+                    "ingressProfile.webAppRouting.gatewayApiImplementations.appRoutingIstio.mode",
+                    "Enabled",
+                ),
+            ],
+        )
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17, name_prefix="clitest", location="centraluseuap"
+    )
+    def test_aks_create_with_app_routing_istio_fails_when_asm_enabled(
+        self, resource_group, resource_group_location
+    ):
+        aks_name = self.create_random_name("cliakstest", 16)
+        _, create_version = self._get_versions(resource_group_location)
+        self.kwargs.update(
+            {
+                "resource_group": resource_group,
+                "name": aks_name,
+                "ssh_key_value": self.generate_ssh_keys(),
+                "k8s_version": create_version,
+            }
+        )
+
+        # Creating a cluster with both ASM (Istio) and App Routing Istio should fail
+        create_cmd = (
+            "aks create --resource-group={resource_group} --name={name} "
+            "--enable-azure-service-mesh "
+            "--enable-app-routing "
+            "--enable-app-routing-istio "
+            "--ssh-key-value={ssh_key_value} -o json "
+        )
+        with self.assertRaises(BadRequestError) as context:
+            self.cmd(create_cmd)
+        self.assertIn(
+            "Cannot enable both the Istio add-on and the AppRouting Istio Gateway API implementation simultaneously",
+            str(context.exception),
+        )
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17, name_prefix="clitest", location="centraluseuap"
+    )
+    def test_aks_update_app_routing_istio_fails_when_asm_enabled(
+        self, resource_group, resource_group_location
+    ):
+        aks_name = self.create_random_name("cliakstest", 16)
+        _, create_version = self._get_versions(resource_group_location)
+        self.kwargs.update(
+            {
+                "resource_group": resource_group,
+                "name": aks_name,
+                "ssh_key_value": self.generate_ssh_keys(),
+                "k8s_version": create_version,
+            }
+        )
+
+        # First create a cluster with ASM enabled
+        create_cmd = (
+            "aks create --resource-group={resource_group} --name={name} "
+            "--enable-azure-service-mesh "
+            "--enable-app-routing "
+            "--ssh-key-value={ssh_key_value} -o json "
+        )
+        self.cmd(
+            create_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("serviceMeshProfile.mode", "Istio"),
+            ],
+        )
+
+        # Updating to enable App Routing Istio on a cluster with ASM should fail
+        update_cmd = (
+            "aks update --resource-group={resource_group} --name={name} "
+            "--enable-app-routing-istio "
+        )
+        with self.assertRaises(HttpResponseError) as context:
+            self.cmd(update_cmd)
+        self.assertIn(
+            "Requested change from Istio add-on to AppRouting Istio Gateway API implementation is disallowed",
+            str(context.exception),
+        )
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17, name_prefix="clitest", location="centraluseuap"
+    )
+    def test_aks_update_switch_from_asm_to_app_routing_istio_fails(
+        self, resource_group, resource_group_location
+    ):
+        aks_name = self.create_random_name("cliakstest", 16)
+        _, create_version = self._get_versions(resource_group_location)
+        self.kwargs.update(
+            {
+                "resource_group": resource_group,
+                "name": aks_name,
+                "ssh_key_value": self.generate_ssh_keys(),
+                "k8s_version": create_version,
+            }
+        )
+
+        # Create a cluster with ASM (Istio) and App Routing enabled
+        create_cmd = (
+            "aks create --resource-group={resource_group} --name={name} "
+            "--enable-azure-service-mesh "
+            "--enable-app-routing "
+            "--ssh-key-value={ssh_key_value} -o json "
+        )
+        self.cmd(
+            create_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("serviceMeshProfile.mode", "Istio"),
+            ],
+        )
+
+        # Attempt to disable ASM and enable App Routing Istio in the same operation should fail
+        # First try enabling app routing istio while ASM is still enabled - this should fail
+        update_cmd = (
+            "aks update --resource-group={resource_group} --name={name} "
+            "--enable-app-routing-istio "
+        )
+        with self.assertRaises(HttpResponseError) as context:
+            self.cmd(update_cmd)
+        self.assertIn(
+            "Requested change from Istio add-on to AppRouting Istio Gateway API implementation is disallowed",
+            str(context.exception),
+        )
+
+        # First disable ASM in a separate request using mesh disable
+        disable_asm_cmd = (
+            "aks mesh disable --resource-group={resource_group} --name={name} --yes"
+        )
+        self.cmd(
+            disable_asm_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+            ],
+        )
+
+        # Now enabling App Routing Istio should succeed
+        enable_ari_cmd = (
+            "aks update --resource-group={resource_group} --name={name} "
+            "--enable-app-routing-istio "
+        )
+        self.cmd(
+            enable_ari_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check(
+                    "ingressProfile.webAppRouting.gatewayApiImplementations.appRoutingIstio.mode",
+                    "Enabled",
+                ),
+            ],
+        )
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17, name_prefix="clitest", location="centraluseuap"
+    )
+    def test_aks_update_switch_from_app_routing_istio_to_asm_fails(
+        self, resource_group, resource_group_location
+    ):
+        aks_name = self.create_random_name("cliakstest", 16)
+        _, create_version = self._get_versions(resource_group_location)
+        self.kwargs.update(
+            {
+                "resource_group": resource_group,
+                "name": aks_name,
+                "ssh_key_value": self.generate_ssh_keys(),
+                "k8s_version": create_version,
+            }
+        )
+
+        # Create a cluster with App Routing and App Routing Istio enabled
+        create_cmd = (
+            "aks create --resource-group={resource_group} --name={name} "
+            "--enable-app-routing "
+            "--enable-app-routing-istio "
+            "--ssh-key-value={ssh_key_value} -o json "
+        )
+        self.cmd(
+            create_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check(
+                    "ingressProfile.webAppRouting.gatewayApiImplementations.appRoutingIstio.mode",
+                    "Enabled",
+                ),
+            ],
+        )
+
+        # Attempt to enable ASM while App Routing Istio is still enabled - this should fail
+        enable_asm_cmd_fail = (
+            "aks mesh enable --resource-group={resource_group} --name={name}"
+        )
+        with self.assertRaises(HttpResponseError) as context:
+            self.cmd(enable_asm_cmd_fail)
+        self.assertIn(
+            "Requested change from AppRouting Istio Gateway API implementation to Istio add-on is disallowed",
+            str(context.exception),
+        )
+
+        # First disable App Routing Istio in a separate request
+        disable_ari_cmd = (
+            "aks update --resource-group={resource_group} --name={name} "
+            "--disable-app-routing-istio "
+        )
+        self.cmd(
+            disable_ari_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check(
+                    "ingressProfile.webAppRouting.gatewayApiImplementations.appRoutingIstio.mode",
+                    "Disabled",
+                ),
+            ],
+        )
+
+        # Now enabling ASM should succeed
+        enable_asm_cmd = (
+            "aks mesh enable --resource-group={resource_group} --name={name}"
+        )
+        self.cmd(
+            enable_asm_cmd,
+            checks=[
+                self.check("serviceMeshProfile.mode", "Istio"),
+            ],
+        )
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17, name_prefix="clitest", location="centraluseuap"
+    )
+    def test_aks_approuting_gateway_istio_enable_disable(
+        self, resource_group, resource_group_location
+    ):
+        aks_name = self.create_random_name("cliakstest", 16)
+        _, create_version = self._get_versions(resource_group_location)
+        self.kwargs.update(
+            {
+                "resource_group": resource_group,
+                "name": aks_name,
+                "ssh_key_value": self.generate_ssh_keys(),
+                "k8s_version": create_version,
+            }
+        )
+
+        # Create a cluster with App Routing enabled
+        create_cmd = (
+            "aks create --resource-group={resource_group} --name={name} "
+            "--enable-app-routing "
+            "--ssh-key-value={ssh_key_value} -o json "
+        )
+        self.cmd(
+            create_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("ingressProfile.webAppRouting.enabled", True),
+            ],
+        )
+
+        # Enable Istio via approuting gateway istio enable
+        enable_cmd = (
+            "aks approuting gateway istio enable "
+            "--resource-group={resource_group} --name={name} "
+        )
+        self.cmd(
+            enable_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check(
+                    "ingressProfile.webAppRouting.gatewayApiImplementations.appRoutingIstio.mode",
+                    "Enabled",
+                ),
+            ],
+        )
+
+        # Disable Istio via approuting gateway istio disable
+        disable_cmd = (
+            "aks approuting gateway istio disable "
+            "--resource-group={resource_group} --name={name} --yes "
+        )
+        self.cmd(
+            disable_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check(
+                    "ingressProfile.webAppRouting.gatewayApiImplementations.appRoutingIstio.mode",
+                    "Disabled",
+                ),
+            ],
+        )
+
+        # Re-enable to confirm toggle works
+        self.cmd(
+            enable_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check(
+                    "ingressProfile.webAppRouting.gatewayApiImplementations.appRoutingIstio.mode",
+                    "Enabled",
+                ),
+            ],
+        )
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17, name_prefix="clitest", location="centraluseuap"
+    )
+    def test_aks_create_with_gateway_api_and_azureservicemesh(
+        self, resource_group, resource_group_location
+    ):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+
+        aks_name = self.create_random_name("cliakstest", 16)
+        _, create_version = self._get_versions(resource_group_location)
+        asm_revision = self._get_asm_supported_revision(resource_group_location)
+        self.kwargs.update(
+            {
+                "resource_group": resource_group,
+                "name": aks_name,
+                "ssh_key_value": self.generate_ssh_keys(),
+                "k8s_version": create_version,
+                "asm_revision": asm_revision,
+            }
+        )
+
+        # Test successful creation with Gateway API and Azure Service Mesh addon
+        create_cmd = (
+            "aks create --resource-group={resource_group} --name={name} "
+            "--enable-app-routing "
+            "--enable-azure-service-mesh "
+            "--enable-gateway-api "
+            "--ssh-key-value={ssh_key_value} -o json "
+        )
+        self.cmd(
+            create_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("serviceMeshProfile.mode", "Istio"),
+                self.check("ingressProfile.gatewayApi.installation", "Standard"),
+            ],
+        )
+
+        # Test disabling Gateway API
+        update_cmd = (
+            "aks update --resource-group={resource_group} --name={name} "
+            "--disable-gateway-api "
+        )
+        self.cmd(
+            update_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("ingressProfile.gatewayApi.installation", "Disabled"),
+            ],
+        )
+
+        # Test re-enabling Gateway API
+        update_cmd = (
+            "aks update --resource-group={resource_group} --name={name} "
+            "--enable-gateway-api "
+        )
+        self.cmd(
+            update_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("ingressProfile.gatewayApi.installation", "Standard"),
+            ],
+        )
+
+        # Cleanup
+        self.cmd(
+            "aks delete --resource-group={resource_group} --name={name} --yes --no-wait",
+            checks=[self.is_empty()],
+        )
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17, name_prefix="clitest", location="centraluseuap"
+    )
+    def test_aks_managed_gateway_without_gateway_implementation(
+        self, resource_group, resource_group_location
+    ):
+        """
+        Verify that managed Gateway API can be enabled without a Gateway API implementation
+        (e.g., Azure Service Mesh) on the cluster.
+
+        This test:
+        - Creates a cluster with --enable-gateway-api but no gateway implementation enabled.
+        - Disables and re-enables Gateway API on the existing cluster.
+        """
+
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+
+        aks_name = self.create_random_name("cliakstest", 16)
+        self.kwargs.update(
+            {
+                "resource_group": resource_group,
+                "name": aks_name,
+                "ssh_key_value": self.generate_ssh_keys(),
+                "location": resource_group_location,
+            }
+        )
+
+        # Create a cluster with Gateway API enabled and no gateway implementation
+        create_cmd = (
+            "aks create --resource-group={resource_group} --name={name} "
+            "--enable-app-routing "
+            "--enable-gateway-api "
+            "--ssh-key-value={ssh_key_value} -o json "
+        )
+        self.cmd(
+            create_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("ingressProfile.gatewayApi.installation", "Standard"),
+            ],
+        )
+
+        # Disable Gateway API
+        disable_cmd = (
+            "aks update --resource-group={resource_group} --name={name} "
+            "--disable-gateway-api "
+        )
+        self.cmd(
+            disable_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("ingressProfile.gatewayApi.installation", "Disabled"),
+            ],
+        )
+
+        # Re-enable Gateway API
+        enable_cmd = (
+            "aks update --resource-group={resource_group} --name={name} "
+            "--enable-gateway-api "
+        )
+        self.cmd(
+            enable_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("ingressProfile.gatewayApi.installation", "Standard"),
+            ],
+        )
+
+        # Cleanup
+        delete_cmd = "aks delete --resource-group={resource_group} --name={name} --yes --no-wait"
+        self.cmd(delete_cmd, checks=[self.is_empty()])

@@ -1113,11 +1113,12 @@ class NetworkAppGatewayZoneScenario(ScenarioTest):
 
 
 class NetworkAppGatewayAuthCertScenario(ScenarioTest):
-
+    @unittest.skip('not registered for feature Microsoft.Network/AllowBringYourOwnPublicIpAddress required to carry out the requested operation')
     @ResourceGroupPreparer(name_prefix='cli_test_ag_auth_cert')
     def test_network_ag_auth_cert(self, resource_group):
         self.kwargs.update({
             'gateway': 'ag1',
+            'ip1': 'ip1',
             'cert1': 'cert1',
             'cert1_file': os.path.join(TEST_DIR, 'AuthCert.pfx'),
             'cert2': 'cert2',
@@ -1126,7 +1127,8 @@ class NetworkAppGatewayAuthCertScenario(ScenarioTest):
             'cert3_file': os.path.join(TEST_DIR, 'AuthCert3.pfx'),
             'settings': 'https_settings'
         })
-        self.cmd('network application-gateway create -g {rg} -n {gateway} --priority 1001 --no-wait')
+        self.cmd('network public-ip create -g {rg} -n {ip1} --sku Standard --ip-tags FirstPartyUsage=/NonProd')
+        self.cmd('network application-gateway create -g {rg} -n {gateway} --priority 1001 --public-ip-address {ip1} --sku Standard_v2')
         self.cmd('network application-gateway wait -g {rg} -n {gateway} --exists')
         self.cmd('network application-gateway auth-cert create -g {rg} --gateway-name {gateway} -n {cert1} --cert-file "{cert1_file}" --no-wait')
         self.cmd('network application-gateway auth-cert create -g {rg} --gateway-name {gateway} -n {cert2} --cert-file "{cert2_file}" --no-wait')
@@ -1155,7 +1157,7 @@ class NetworkAppGatewayAuthCertScenario(ScenarioTest):
 
 
 class NetworkAppGatewayTrustedRootCertScenario(ScenarioTest):
-
+    @unittest.skip('not registered for feature Microsoft.Network/AllowBringYourOwnPublicIpAddress required to carry out the requested operation')
     @ResourceGroupPreparer(name_prefix='cli_test_ag_root_cert')
     def test_network_ag_root_cert(self, resource_group):
         self.kwargs.update({
@@ -1897,7 +1899,7 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
             'rg': resource_group
         })
         self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
-        self.cmd('network application-gateway create -g {rg} -n {ag} --public-ip-address {ip} --sku Standard_v2 --priority 1001 --no-wait')
+        self.cmd('network application-gateway create -g {rg} -n {ag} --public-ip-address {ip} --sku Standard_v2 --priority 1001')
         self.cmd('network application-gateway wait -g {rg} -n {ag} --exists')
 
         self.cmd('network application-gateway http-listener create -g {rg} --gateway-name {ag} -n mylistener --no-wait --frontend-port appGatewayFrontendPort --host-name www.test.com')
@@ -1946,7 +1948,7 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
         })
         self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
         self.cmd(
-            'network application-gateway create -g {rg} -n {ag} --public-ip-address {ip} --sku Standard_v2 --priority 1001 --no-wait')
+            'network application-gateway create -g {rg} -n {ag} --public-ip-address {ip} --sku Standard_v2 --priority 1001')
         self.cmd('network application-gateway wait -g {rg} -n {ag} --exists')
 
         self.cmd(
@@ -5269,7 +5271,7 @@ class NetworkRouteTableOperationScenarioTest(ScenarioTest):
         ])
         self.cmd('network route-table route create --address-prefix 10.0.5.0/24 -n {route} -g {rg} --next-hop-type None --route-table-name {table}')
 
-        self.cmd('network route-table list',
+        self.cmd('network route-table list -g {rg}',
                  checks=self.check('type(@)', 'array'))
         self.cmd('network route-table list --resource-group {rg}', checks=[
             self.check('type(@)', 'array'),
@@ -5297,6 +5299,48 @@ class NetworkRouteTableOperationScenarioTest(ScenarioTest):
         self.cmd('network route-table route list --resource-group {rg} --route-table-name {table}', checks=self.is_empty())
         self.cmd('network route-table delete --resource-group {rg} --name {table}')
         self.cmd('network route-table list --resource-group {rg}', checks=self.is_empty())
+
+    @ResourceGroupPreparer(name_prefix='cli_test_route_table_disable_peering', location='centraluseuap')
+    def test_network_route_table_disable_peering_route(self, resource_group):
+        self.kwargs.update({
+            'table': 'cli-test-rt-peering',
+        })
+
+        # create route table without --disable-peering-route (default None)
+        self.cmd('network route-table create -n {table} -g {rg}', checks=[
+            self.check('disablePeeringRoute', None)
+        ])
+
+        self.cmd('network route-table show -g {rg} -n {table}', checks=[
+            self.check('disablePeeringRoute', None)
+        ])
+
+        # update with --disable-peering-route All
+        self.cmd('network route-table update -n {table} -g {rg} --disable-peering-route All', checks=[
+            self.check('disablePeeringRoute', 'All')
+        ])
+
+        self.cmd('network route-table show -g {rg} -n {table}', checks=[
+            self.check('disablePeeringRoute', 'All')
+        ])
+
+        self.cmd('network route-table list -g {rg}', checks=[
+            self.check('[0].disablePeeringRoute', 'All')
+        ])
+
+        # create a new route table with --disable-peering-route All directly
+        self.kwargs['table2'] = 'cli-test-rt-peering2'
+        self.cmd('network route-table create -n {table2} -g {rg} --disable-peering-route All', checks=[
+            self.check('disablePeeringRoute', 'All')
+        ])
+
+        # update to reset --disable-peering-route to None
+        self.cmd('network route-table update -n {table2} -g {rg} --disable-peering-route None', checks=[
+            self.check('disablePeeringRoute', None)
+        ])
+
+        self.cmd('network route-table delete -g {rg} -n {table}')
+        self.cmd('network route-table delete -g {rg} -n {table2}')
 
 
 class NetworkVNetScenarioTest(ScenarioTest):
@@ -9436,6 +9480,124 @@ class NetworkPrivateEndpointScenarioTest(ScenarioTest):
         self.cmd('network private-endpoint list -g {rg}', checks=[
             self.check('length(@)', 3)
         ])
+
+
+class NetworkApplicationGatewayHttpSettingsScenario(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='test_ag', location='eastus')
+    def test_network_application_gateway_http_settings_validate_flags(self, resource_group):
+        self.kwargs.update({
+            'vnet': 'vnet1',
+            'subnet': 'subnet1',
+            'vnet_prefix': '10.0.0.0/16',
+            'subnet_prefix': '10.0.0.0/24',
+            'pip': 'pip1',
+            'ag': 'ag1',
+            'httpsettingname': 'mysettings1',
+            'addresspool': 'myaddresspool1',
+            'listener': 'mylistener1',
+            'rule': 'myrule1',
+        })
+
+        # Create vnet, pip, application-gateway
+        self.cmd('network vnet create -g {rg} -n {vnet} --address-prefix {vnet_prefix} --subnet-name {subnet} --subnet-prefix {subnet_prefix}')
+        self.cmd('network public-ip create -g {rg} -n {pip} --sku Standard --allocation-method Static')
+        self.cmd('network application-gateway create -g {rg} -n {ag} --vnet-name {vnet} --subnet {subnet} --public-ip-address {pip} --priority 1001 --sku Standard_v2')
+
+        # Create http settings
+        self.cmd('network application-gateway http-settings create -g {rg} --gateway-name {ag} -n {httpsettingname} '
+                 '--port 443 --protocol Https --cookie-based-affinity disabled '
+                 '--validate-cert-chain-and-expiry false --validate-sni true', checks=[
+            self.check('name', '{httpsettingname}'),
+            self.check('port', 443),
+            self.check('protocol', 'Https'),
+            self.check('cookieBasedAffinity', 'Disabled'),
+            self.check('validateCertChainAndExpiry', False),
+            self.check('validateSNI', True),
+        ])
+
+        # validate flags under backendHttpSettingsCollection for the created http setting
+        self.cmd('network application-gateway show -g {rg} -n {ag}', checks=[
+            self.check("backendHttpSettingsCollection[?name=='mysettings1'] | [0].validateCertChainAndExpiry", False),
+            self.check("backendHttpSettingsCollection[?name=='mysettings1'] | [0].validateSNI", True),
+        ])
+
+        # Create address-pool and http-listener
+        self.cmd('network application-gateway address-pool create -g {rg} --gateway-name {ag} -n {addresspool}')
+        self.cmd('network application-gateway http-listener create -g {rg} --gateway-name {ag} -n {listener} --no-wait '
+                 '--frontend-port appGatewayFrontendPort --host-name www.test.com')
+
+        # Create rule, then show app-gateway again and check validate flags are still the same
+        self.cmd('network application-gateway rule create -g {rg} --gateway-name {ag} -n {rule} --rule-type Basic '
+                 '--http-listener {listener} --address-pool {addresspool} --http-settings {httpsettingname} --priority 1004')
+
+        self.cmd('network application-gateway show -g {rg} -n {ag}', checks=[
+            self.check("backendHttpSettingsCollection[?name=='mysettings1'] | [0].validateCertChainAndExpiry", False),
+            self.check("backendHttpSettingsCollection[?name=='mysettings1'] | [0].validateSNI", True),
+        ])
+
+
+class ApplicationGatewayValidateFlagsScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_validate_flags', location='eastus')
+    def test_ag_rule_create_preserves_http_settings_validate_flags(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'rg': resource_group,
+            'loc': resource_group_location,
+            'vnet': self.create_random_name('vnet', 15),
+            'subnet': 'subnet1',
+            'pip': self.create_random_name('pip', 15),
+            'ag': self.create_random_name('ag', 15),
+            'settings': 'mysettings1',
+            'pool': 'myaddresspool1',
+            'listener': 'mylistener',
+            'rule': 'repro-rule'
+        })
+
+        self.cmd(
+            'az network vnet create -g {rg} -n {vnet} '
+            '--address-prefix 10.0.0.0/16 '
+            '--subnet-name {subnet} --subnet-prefix 10.0.0.0/24'
+        )
+        self.cmd('az network public-ip create -g {rg} -n {pip} --sku Standard --allocation-method Static')
+
+        self.cmd(
+            'az network application-gateway create -g {rg} -n {ag} '
+            '--vnet-name {vnet} --subnet {subnet} '
+            '--public-ip-address {pip} '
+            '--priority 1001 --sku Standard_v2'
+        )
+
+        self.cmd(
+            'az network application-gateway http-settings create -g {rg} --gateway-name {ag} '
+            '-n {settings} --port 443 --protocol Https '
+            '--cookie-based-affinity disabled '
+            '--validate-cert-chain-and-expiry false --validate-sni false',
+            checks=[
+                self.check('validateCertChainAndExpiry', False),
+                self.check('validateSNI', False)
+            ]
+        )
+
+        self.cmd('az network application-gateway address-pool create -g {rg} --gateway-name {ag} -n {pool}')
+        self.cmd(
+            'az network application-gateway http-listener create -g {rg} --gateway-name {ag} -n {listener} '
+            '--frontend-port appGatewayFrontendPort --host-name www.test.com'
+        )
+
+        self.cmd(
+            'az network application-gateway rule create -g {rg} --gateway-name {ag} -n {rule} '
+            '--rule-type Basic --http-listener {listener} '
+            '--address-pool {pool} --http-settings {settings} '
+            '--priority 1004'
+        )
+
+        self.cmd(
+            'az network application-gateway show -g {rg} -n {ag} '
+            '--query "backendHttpSettingsCollection[?name==\'{settings}\'] | [0]"',
+            checks=[
+                self.check('validateCertChainAndExpiry', False),
+                self.check('validateSNI', False)
+            ]
+        )
 
 
 if __name__ == '__main__':

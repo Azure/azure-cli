@@ -34,20 +34,20 @@ class FlexibleServerRestoreMgmtScenarioTest(ScenarioTest):
         # Wait until snapshot is created
         os.environ.get(ENV_LIVE_TEST, False) and sleep(1800)
 
-        # restore server
+        # Restore server
         target_server_default = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         restore_result = self.cmd('postgres flexible-server restore -g {} --name {} --source-server {} '
                                   .format(resource_group, target_server_default, server_name)).get_output_in_json()
         self.assertEqual(restore_result['name'], target_server_default)
 
-        # Restore to ssdv2
+        # Restore to SSDv2
         target_server_ssdv2 = self.create_random_name(SERVER_NAME_PREFIX + 'ssdv2-', SERVER_NAME_MAX_LENGTH)
         storage_type = 'PremiumV2_LRS'
         restore_migration_result = self.cmd('postgres flexible-server restore -g {} --name {} --source-server {} --storage-type {}'
                                   .format(resource_group, target_server_ssdv2, server_name, storage_type)).get_output_in_json()
         self.assertEqual(restore_migration_result['storage']['type'], storage_type)
 
-        # clean up
+        # Clean up
         self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(
                  resource_group, target_server_default), checks=NoneCheck())
 

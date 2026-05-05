@@ -28,6 +28,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_VIRTUAL_MACHINES,
     CONST_OS_SKU_WINDOWS2019,
     CONST_OS_SKU_WINDOWS2022,
+    CONST_OS_SKU_WINDOWS2025,
     AgentPoolDecoratorMode,
     DecoratorEarlyExitException,
     DecoratorMode,
@@ -712,9 +713,12 @@ class AKSAgentPoolContext(BaseAKSContext):
         ):
             # read the original value passed by the command
             raw_os_sku = self.raw_param.get("os_sku")
-            sku_2019 = CONST_OS_SKU_WINDOWS2019
-            sku_2022 = CONST_OS_SKU_WINDOWS2022
-            if raw_os_sku == sku_2019 or raw_os_sku == sku_2022:
+            windows_skus = (
+                CONST_OS_SKU_WINDOWS2019,
+                CONST_OS_SKU_WINDOWS2022,
+                CONST_OS_SKU_WINDOWS2025,
+            )
+            if raw_os_sku in windows_skus:
                 raise InvalidArgumentValueError(
                     "OS SKU is invalid for Linux OS Type."
                     " Please specify '--os-type Windows' for Windows SKUs"
