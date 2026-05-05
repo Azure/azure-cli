@@ -23,9 +23,6 @@ CLOUD_CONFIG_FILE = os.path.join(GLOBAL_CONFIG_DIR, 'clouds.config')
 # Add names of clouds that don't allow telemetry data collection here such as some air-gapped clouds.
 CLOUDS_FORBIDDING_TELEMETRY = ['USSec', 'USNat']
 
-# Add names of clouds that don't allow Aladdin requests for command recommendations here
-CLOUDS_FORBIDDING_ALADDIN_REQUEST = ['USSec', 'USNat']
-
 
 class CloudNotRegisteredException(Exception):
     def __init__(self, cloud_name):
@@ -501,7 +498,7 @@ AZURE_BLEU_CLOUD = Cloud(
         sql_management='https://management.database.sovcloud-api.fr:8443/',
         batch_resource_id='https://batch.sovcloud-api.fr/',
         gallery='https://gallery.sovcloud-api.fr/',
-        active_directory='https://login.sovcloud-api.fr',
+        active_directory='https://login.sovcloud-identity.fr',
         active_directory_resource_id='https://management.sovcloud-api.fr/',
         active_directory_graph_resource_id='https://graph.svc.sovcloud.fr/',
         microsoft_graph_resource_id='https://graph.svc.sovcloud.fr',

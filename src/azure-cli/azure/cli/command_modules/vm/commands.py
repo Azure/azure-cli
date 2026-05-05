@@ -7,10 +7,10 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm,
                                                           cf_vm_ext, cf_vm_ext_image,
                                                           cf_vm_image_term, cf_usage,
                                                           cf_vmss,
-                                                          cf_galleries, cf_gallery_images, cf_gallery_image_versions,
+                                                          cf_gallery_images, cf_gallery_image_versions,
                                                           cf_proximity_placement_groups,
                                                           cf_log_analytics_data_plane,
-                                                          cf_capacity_reservation_groups, cf_capacity_reservations,
+                                                          cf_capacity_reservations,
                                                           cf_community_gallery)
 from azure.cli.command_modules.vm._format import (
     transform_ip_addresses, transform_vm, transform_vm_create_output, transform_vm_usage_list, transform_vm_list,
@@ -100,11 +100,6 @@ def load_command_table(self, _):
         operation_group='virtual_machine_scale_sets'
     )
 
-    compute_galleries_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#GalleriesOperations.{}',
-        client_factory=cf_galleries,
-    )
-
     compute_gallery_images_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations#GalleryImagesOperations.{}',
         client_factory=cf_gallery_images,
@@ -147,11 +142,6 @@ def load_command_table(self, _):
         client_factory=cf_metric_def,
         operation_group='metric_definitions',
         exception_handler=monitor_exception_handler
-    )
-
-    capacity_reservation_groups_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#CapacityReservationGroupsOperations.{}',
-        client_factory=cf_capacity_reservation_groups
     )
 
     capacity_reservations_sdk = CliCommandType(
@@ -413,11 +403,11 @@ def load_command_table(self, _):
         from .operations.vmss_vms import VMSSGetResiliencyView
         self.command_table['vmss get-resiliency-view'] = VMSSGetResiliencyView(loader=self)
 
-    with self.command_group('vmss diagnostics', compute_vmss_sdk) as g:
+    with self.command_group('vmss diagnostics') as g:
         g.custom_command('set', 'set_vmss_diagnostics_extension')
         g.custom_command('get-default-config', 'show_default_diagnostics_configuration')
 
-    with self.command_group('vmss disk', compute_vmss_sdk, min_api='2017-03-30') as g:
+    with self.command_group('vmss disk') as g:
         g.custom_command('attach', 'attach_managed_data_disk_to_vmss')
         g.custom_command('detach', 'detach_disk_from_vmss')
 
@@ -442,7 +432,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'vmss_run_command_create', supports_no_wait=True)
         g.custom_command('update', 'vmss_run_command_update', supports_no_wait=True)
 
-    with self.command_group('sig', compute_galleries_sdk, operation_group='galleries') as g:
+    with self.command_group('sig', operation_group='galleries') as g:
         from .operations.sig import SigCreate, SigUpdate, SigShow
         self.command_table['sig create'] = SigCreate(loader=self)
         self.command_table['sig update'] = SigUpdate(loader=self)
@@ -450,6 +440,10 @@ def load_command_table(self, _):
 
     with self.command_group('sig', community_gallery_sdk, client_factory=cf_community_gallery, operation_group='shared_galleries', min_api='2022-01-03') as g:
         g.custom_command('list-community', 'sig_community_gallery_list')
+
+    with self.command_group('sig identity') as g:
+        from .operations.sig import SigIdentityRemove
+        self.command_table['sig identity remove'] = SigIdentityRemove(loader=self)
 
     with self.command_group('sig image-definition', compute_gallery_images_sdk, operation_group='gallery_images', min_api='2018-06-01') as g:
         g.custom_command('create', 'create_gallery_image')
@@ -516,8 +510,7 @@ def load_command_table(self, _):
         except APIVersionException:
             pass
 
-    with self.command_group('capacity reservation group', capacity_reservation_groups_sdk, min_api='2021-04-01',
-                            client_factory=cf_capacity_reservation_groups) as g:
+    with self.command_group('capacity reservation group') as g:
         g.custom_command('create', 'create_capacity_reservation_group')
         g.custom_command('update', 'update_capacity_reservation_group')
         g.custom_show_command('show', 'show_capacity_reservation_group')

@@ -822,12 +822,7 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
 def show_vm_identity(cmd, resource_group_name, vm_name):
     vm = get_vm_by_aaz(cmd, resource_group_name, vm_name)
 
-    identity = vm.get("identity", {}) if vm else None
-
-    if identity and not identity.get('userAssignedIdentities'):
-        identity['userAssignedIdentities'] = None
-
-    return identity or None
+    return vm.get("identity") if vm else None
 
 
 def show_vmss_identity(cmd, resource_group_name, vm_name):
@@ -1761,13 +1756,7 @@ def set_vm_by_aaz(cmd, vm, no_wait=False):
                     if has_value(resource.type):
                         resource.type = AAZUndefined
 
-            result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-            if result.get('osProfile', {}).get('secrets', []):
-                for secret in result['osProfile']['secrets']:
-                    for cert in secret.get('vaultCertificates', []):
-                        if not cert.get('certificateStore'):
-                            cert['certificateStore'] = None
-            return result
+            return self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
 
     vm = LongRunningOperation(cmd.cli_ctx)(
         SetVM(cli_ctx=cmd.cli_ctx)(command_args=vm))
@@ -2646,10 +2635,7 @@ def _remove_identities_by_aaz(cmd, resource_group_name, name, identities, getter
 
     result = LongRunningOperation(cmd.cli_ctx)(setter(resource_group_name, name, resource))
 
-    if not result:
-        return None
-
-    return result.get('identity') or None
+    return result.get('identity') if result else None
 
 
 def remove_vm_identity(cmd, resource_group_name, vm_name, identities=None):
@@ -3374,13 +3360,6 @@ def add_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate, cert
 
 def list_vm_secrets(cmd, resource_group_name, vm_name):
     vm = get_vm_by_aaz(cmd, resource_group_name, vm_name)
-
-    if vm.get('osProfile', {}).get('secrets', []):
-        for secret in vm['osProfile']['secrets']:
-            for cert in secret.get('vaultCertificates', []):
-                if not cert.get('certificateStore'):
-                    cert['certificateStore'] = None
-
     return vm.get('osProfile', {}).get('secrets', [])
 
 
@@ -5082,16 +5061,15 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
 
 
 # region VirtualMachineScaleSets Diagnostics
-def set_vmss_diagnostics_extension(
-        cmd, resource_group_name, vmss_name, settings, protected_settings=None, version=None,
-        no_auto_upgrade=False):
-    client = _compute_client_factory(cmd.cli_ctx)
-    vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+def set_vmss_diagnostics_extension(cmd, resource_group_name, vmss_name, settings, protected_settings=None,
+                                   version=None, no_auto_upgrade=False):
+    from ._vm_utils import UpgradeMode
+    vmss = get_vmss_by_aaz(cmd, resource_group_name, vmss_name)
     # pylint: disable=no-member
-    is_linux_os = _is_linux_os(vmss.virtual_machine_profile)
+    is_linux_os = _is_linux_os_aaz(vmss['virtualMachineProfile'])
     vm_extension_name = _LINUX_DIAG_EXT if is_linux_os else _WINDOWS_DIAG_EXT
-    if is_linux_os and vmss.virtual_machine_profile.extension_profile:  # check incompatibles
-        exts = vmss.virtual_machine_profile.extension_profile.extensions or []
+    if is_linux_os and vmss.get('virtualMachineProfile', {}).get('extensionProfile'):  # check incompatibles
+        exts = vmss.get('virtualMachineProfile', {}).get('extensionProfile', {}).get('extensions', [])
         major_ver = extension_mappings[_LINUX_DIAG_EXT]['version'].split('.', maxsplit=1)[0]
         # For VMSS, we don't do auto-removal like VM because there is no reliable API to wait for
         # the removal done before we can install the newer one
@@ -5111,8 +5089,7 @@ def set_vmss_diagnostics_extension(
                                 no_auto_upgrade)
 
     result = LongRunningOperation(cmd.cli_ctx)(poller)
-    UpgradeMode = cmd.get_models('UpgradeMode')
-    if vmss.upgrade_policy.mode == UpgradeMode.manual:
+    if vmss.get('upgradePolicy', {}).get('mode') == UpgradeMode.MANUAL.value:
         poller2 = update_vmss_instances(cmd, resource_group_name, vmss_name, ['*'])
         LongRunningOperation(cmd.cli_ctx)(poller2)
     return result
@@ -5124,68 +5101,109 @@ def attach_managed_data_disk_to_vmss(cmd, resource_group_name, vmss_name, size_g
                                      caching=None, disk=None, sku=None):
 
     def _init_data_disk(storage_profile, lun, existing_disk=None):
-        data_disks = storage_profile.data_disks or []
+        from ._vm_utils import DiskCreateOptionTypes
+        data_disks = storage_profile.get('dataDisks', [])
         if lun is None:
-            lun = _get_disk_lun(data_disks)
+            lun = _get_disk_lun_by_aaz(data_disks)
         if existing_disk is None:
-            data_disk = DataDisk(lun=lun, create_option=DiskCreateOptionTypes.empty, disk_size_gb=size_gb,
-                                 caching=caching, managed_disk=ManagedDiskParameters(storage_account_type=sku))
+            data_disk = {
+                'caching': caching,
+                'createOption': DiskCreateOptionTypes.EMPTY.value,
+                'diskSizeGB': size_gb,
+                'lun': lun,
+                'managedDisk': {
+                    'storageAccountType': sku
+                }
+            }
         else:
-            data_disk = DataDisk(lun=lun, create_option=DiskCreateOptionTypes.attach, caching=caching,
-                                 managed_disk=ManagedDiskParameters(id=existing_disk, storage_account_type=sku))
+            data_disk = {
+                'caching': caching,
+                'createOption': DiskCreateOptionTypes.ATTACH.value,
+                'lun': lun,
+                'managedDisk': {
+                    'id': existing_disk,
+                    'storageAccountType': sku
+                }
+            }
 
         data_disks.append(data_disk)
-        storage_profile.data_disks = data_disks
+        storage_profile['dataDisks'] = data_disks
 
-    DiskCreateOptionTypes, ManagedDiskParameters = cmd.get_models(
-        'DiskCreateOptionTypes', 'ManagedDiskParameters')
-    if disk is None:
-        DataDisk = cmd.get_models('VirtualMachineScaleSetDataDisk')
-    else:
-        DataDisk = cmd.get_models('DataDisk')
-
-    client = _compute_client_factory(cmd.cli_ctx)
     if instance_id is None:
-        vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+        from .operations.vmss import VMSSCreate, convert_show_result_to_snake_case
+        vmss = get_vmss_by_aaz(cmd, resource_group_name, vmss_name)
         # Avoid unnecessary permission error
-        vmss.virtual_machine_profile.storage_profile.image_reference = None
+        if 'virtualMachineProfile' not in vmss:
+            vmss['virtualMachineProfile'] = {}
+        if 'storageProfile' not in vmss['virtualMachineProfile']:
+            vmss['virtualMachineProfile']['storageProfile'] = {}
+        vmss['virtualMachineProfile']['storageProfile']['imageReference'] = None
         # pylint: disable=no-member
-        _init_data_disk(vmss.virtual_machine_profile.storage_profile, lun)
-        return client.virtual_machine_scale_sets.begin_create_or_update(resource_group_name, vmss_name, vmss)
+        _init_data_disk(vmss['virtualMachineProfile']['storageProfile'], lun)
+        vmss = convert_show_result_to_snake_case(vmss)
+        vmss['resource_group'] = resource_group_name
+        vmss['vm_scale_set_name'] = vmss_name
+        return VMSSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss)
 
-    vmss_vm = client.virtual_machine_scale_set_vms.get(resource_group_name, vmss_name, instance_id)
+    from .operations.vmss_vms import VMSSVMSShow, VMSSVMSCreate, convert_show_result_to_snake_case
+    command_args = {
+        'resource_group': resource_group_name,
+        'vm_scale_set_name': vmss_name,
+        'instance_id': instance_id
+    }
+    vmss_vm = VMSSVMSShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
     # Avoid unnecessary permission error
-    vmss_vm.storage_profile.image_reference = None
-    _init_data_disk(vmss_vm.storage_profile, lun, disk)
-    return client.virtual_machine_scale_set_vms.begin_update(resource_group_name, vmss_name, instance_id, vmss_vm)
+    if 'storageProfile' not in vmss_vm:
+        vmss_vm['storageProfile'] = {}
+    vmss_vm['storageProfile']['imageReference'] = None
+    _init_data_disk(vmss_vm['storageProfile'], lun, disk)
+    vmss_vm = convert_show_result_to_snake_case(vmss_vm)
+    vmss_vm['resource_group'] = resource_group_name
+    vmss_vm['vm_scale_set_name'] = vmss_name
+    vmss_vm['instance_id'] = instance_id
+    return VMSSVMSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss_vm)
 
 
 def detach_disk_from_vmss(cmd, resource_group_name, vmss_name, lun, instance_id=None):
-    client = _compute_client_factory(cmd.cli_ctx)
+    from .operations.vmss import VMSSCreate, convert_show_result_to_snake_case as VMSSConvert
+    from .operations.vmss_vms import VMSSVMSShow, VMSSVMSCreate, convert_show_result_to_snake_case as VMSSVMSConvert
     if instance_id is None:
-        vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+        vmss = get_vmss_by_aaz(cmd, resource_group_name, vmss_name)
         # Avoid unnecessary permission error
-        vmss.virtual_machine_profile.storage_profile.image_reference = None
+        vmss['virtualMachineProfile']['storageProfile']['imageReference'] = None
         # pylint: disable=no-member
-        data_disks = vmss.virtual_machine_profile.storage_profile.data_disks
+        data_disks = vmss.get('virtualMachineProfile', {}).get('storageProfile', {}).get('dataDisks', [])
     else:
-        vmss_vm = client.virtual_machine_scale_set_vms.get(resource_group_name, vmss_name, instance_id)
+        command_args = {
+            'resource_group': resource_group_name,
+            'vm_scale_set_name': vmss_name,
+            'instance_id': instance_id
+        }
+        vmss_vm = VMSSVMSShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
         # Avoid unnecessary permission error
-        vmss_vm.storage_profile.image_reference = None
-        data_disks = vmss_vm.storage_profile.data_disks
+        vmss_vm['storageProfile']['imageReference'] = None
+        data_disks = vmss_vm.get('storageProfile', {}).get('dataDisks', [])
 
     if not data_disks:
         raise CLIError("Data disk doesn't exist")
 
-    leftovers = [d for d in data_disks if d.lun != lun]
+    leftovers = [d for d in data_disks if d['lun'] != lun]
     if len(data_disks) == len(leftovers):
         raise CLIError("Could not find the data disk with lun '{}'".format(lun))
 
     if instance_id is None:
-        vmss.virtual_machine_profile.storage_profile.data_disks = leftovers
-        return client.virtual_machine_scale_sets.begin_create_or_update(resource_group_name, vmss_name, vmss)
-    vmss_vm.storage_profile.data_disks = leftovers
-    return client.virtual_machine_scale_set_vms.begin_update(resource_group_name, vmss_name, instance_id, vmss_vm)
+        vmss['virtualMachineProfile']['storageProfile']['dataDisks'] = leftovers
+        vmss = VMSSConvert(vmss)
+        vmss['resource_group'] = resource_group_name
+        vmss['vm_scale_set_name'] = vmss_name
+        return VMSSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss)
+
+    vmss_vm['storageProfile']['dataDisks'] = leftovers
+    vmss_vm = VMSSVMSConvert(vmss_vm)
+    vmss_vm['resource_group'] = resource_group_name
+    vmss_vm['vm_scale_set_name'] = vmss_name
+    vmss_vm['instance_id'] = instance_id
+    return VMSSVMSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss_vm)
 # endregion
 
 
@@ -6272,39 +6290,55 @@ def gallery_application_version_update(client,
                        gallery_application_version=gallery_application_version)
 
 
-def create_capacity_reservation_group(cmd, client, resource_group_name, capacity_reservation_group_name, location=None,
+def create_capacity_reservation_group(cmd, resource_group_name, capacity_reservation_group_name, location=None,
                                       tags=None, zones=None, sharing_profile=None):
-    CapacityReservationGroup = cmd.get_models('CapacityReservationGroup')
+    from .aaz.latest.capacity.reservation.group import Create as CapacityReservationGroupCreate
+    command_args = {
+        'capacity_reservation_group_name': capacity_reservation_group_name,
+        'resource_group': resource_group_name,
+        'location': location,
+        'tags': tags,
+        'zones': zones
+    }
+
     if sharing_profile is not None:
         subscription_ids = [{'id': sub_id} for sub_id in sharing_profile]
-        sharing_profile = {'subscriptionIds': subscription_ids}
-    capacity_reservation_group = CapacityReservationGroup(location=location, tags=tags,
-                                                          zones=zones, sharing_profile=sharing_profile)
-    return client.create_or_update(resource_group_name=resource_group_name,
-                                   capacity_reservation_group_name=capacity_reservation_group_name,
-                                   parameters=capacity_reservation_group)
+        command_args['sharing_profile'] = {'subscription_ids': subscription_ids}
+    else:
+        command_args['sharing_profile'] = sharing_profile
+
+    return CapacityReservationGroupCreate(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
-def update_capacity_reservation_group(cmd, client, resource_group_name, capacity_reservation_group_name, tags=None,
+def update_capacity_reservation_group(cmd, resource_group_name, capacity_reservation_group_name, tags=None,
                                       sharing_profile=None):
-    CapacityReservationGroupUpdate = cmd.get_models('CapacityReservationGroupUpdate')
+    from .aaz.latest.capacity.reservation.group import Update as CapacityReservationGroupUpdate
+    command_args = {
+        'capacity_reservation_group_name': capacity_reservation_group_name,
+        'resource_group': resource_group_name,
+        'tags': tags
+    }
+
     if sharing_profile is not None:
         subscription_ids = [{'id': sub_id} for sub_id in sharing_profile]
-        sharing_profile = {'subscriptionIds': subscription_ids}
-    capacity_reservation_group = CapacityReservationGroupUpdate(tags=tags, sharing_profile=sharing_profile)
-    return client.update(resource_group_name=resource_group_name,
-                         capacity_reservation_group_name=capacity_reservation_group_name,
-                         parameters=capacity_reservation_group)
+        command_args['sharing_profile'] = {'subscription_ids': subscription_ids}
+    else:
+        command_args['sharing_profile'] = sharing_profile
+
+    return CapacityReservationGroupUpdate(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
-def show_capacity_reservation_group(client, resource_group_name, capacity_reservation_group_name,
-                                    instance_view=None):
-    expand = None
+def show_capacity_reservation_group(cmd, resource_group_name, capacity_reservation_group_name, instance_view=None):
+    from .aaz.latest.capacity.reservation.group import Show as CapacityReservationGroupShow
+    command_args = {
+        'capacity_reservation_group_name': capacity_reservation_group_name,
+        'resource_group': resource_group_name
+    }
+
     if instance_view:
-        expand = 'instanceView'
-    return client.get(resource_group_name=resource_group_name,
-                      capacity_reservation_group_name=capacity_reservation_group_name,
-                      expand=expand)
+        command_args['expand'] = 'instanceView'
+
+    return CapacityReservationGroupShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
 def set_vm_applications(cmd, vm_name, resource_group_name, application_version_ids, order_applications=False, application_configuration_overrides=None, treat_deployment_as_failure=None, enable_automatic_upgrade=None, no_wait=False):

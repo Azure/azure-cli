@@ -839,7 +839,7 @@ def generate_sas_blob_uri(cmd, client, permission=None, expiry=None, start=None,
                           protocol=None, cache_control=None, content_disposition=None,
                           content_encoding=None, content_language=None,
                           content_type=None, full_uri=False, as_user=False, snapshot=None, user_delegation_oid=None,
-                          **kwargs):
+                          user_delegation_tid=None, **kwargs):
     from ..url_quote_util import encode_url_path
     from urllib.parse import quote
     t_generate_blob_sas = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB,
@@ -850,7 +850,8 @@ def generate_sas_blob_uri(cmd, client, permission=None, expiry=None, start=None,
     account_key = None
     if as_user:
         user_delegation_key = client.get_user_delegation_key(
-            get_datetime_from_string(start) if start else datetime.utcnow(), get_datetime_from_string(expiry))
+            get_datetime_from_string(start) if start else datetime.utcnow(), get_datetime_from_string(expiry),
+            delegated_user_tid=user_delegation_tid)
     else:
         account_key = client.credential.account_key
 
@@ -889,7 +890,8 @@ def generate_sas_blob_uri(cmd, client, permission=None, expiry=None, start=None,
 def generate_container_shared_access_signature(cmd, client, container_name, permission=None, expiry=None,
                                                start=None, id=None, ip=None, protocol=None, cache_control=None,
                                                content_disposition=None, content_encoding=None, content_language=None,
-                                               content_type=None, user_delegation_oid=None, as_user=False, **kwargs):
+                                               content_type=None, user_delegation_oid=None, user_delegation_tid=None,
+                                               as_user=False, **kwargs):
     t_generate_container_sas = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB,
                                        '_shared_access_signature#generate_container_sas')
 
@@ -898,7 +900,8 @@ def generate_container_shared_access_signature(cmd, client, container_name, perm
     account_key = None
     if as_user:
         user_delegation_key = client.get_user_delegation_key(
-            get_datetime_from_string(start) if start else datetime.utcnow(), get_datetime_from_string(expiry))
+            get_datetime_from_string(start) if start else datetime.utcnow(), get_datetime_from_string(expiry),
+            delegated_user_tid=user_delegation_tid)
     else:
         account_key = client.credential.account_key
 

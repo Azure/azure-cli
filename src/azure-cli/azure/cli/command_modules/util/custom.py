@@ -132,9 +132,24 @@ def upgrade_version(cmd, update_all=None, yes=None, allow_preview=None):  # pyli
                 exit_code = subprocess.call(update_cmd)
         elif installer == 'HOMEBREW_CASK':
             logger.debug("Update homebrew cask")
+            # Determine cask token: 'azure-cli-preview' (custom tap) or 'azure-cli' (homebrew-cask)
+            try:
+                preview_installed = subprocess.call(['brew', 'list', '--cask', 'azure-cli-preview'],
+                                                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) == 0
+                cli_installed = subprocess.call(['brew', 'list', '--cask', 'azure-cli'],
+                                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) == 0
+                if preview_installed:
+                    cask_token = 'azure-cli-preview'
+                elif cli_installed:
+                    cask_token = 'azure-cli'
+                else:
+                    raise CLIError(UPGRADE_MSG)
+            except OSError as ex:
+                logger.debug("Failed to detect Homebrew cask token: %s", ex)
+                cask_token = 'azure-cli'
             exit_code = subprocess.call(['brew', 'update'])
             if exit_code == 0:
-                update_cmd = ['brew', 'upgrade', '--cask', 'azure-cli']
+                update_cmd = ['brew', 'upgrade', '--cask', cask_token]
                 logger.debug("Update azure cli with '%s'", " ".join(update_cmd))
                 exit_code = subprocess.call(update_cmd)
         elif installer == 'PIP':

@@ -57,7 +57,8 @@ def share_exists(cmd, client, **kwargs):
 
 def generate_share_sas(cmd, client, share_name=None, permission=None, expiry=None, start=None, policy_id=None, ip=None,
                        protocol=None, cache_control=None, content_disposition=None, content_encoding=None,
-                       content_language=None, content_type=None, as_user=False, user_delegation_oid=None):
+                       content_language=None, content_type=None, as_user=False, user_delegation_oid=None,
+                       user_delegation_tid=None):
     generate_share_sas_fn = cmd.get_models('_shared_access_signature#generate_share_sas')
 
     sas_kwargs = {'protocol': protocol}
@@ -67,7 +68,8 @@ def generate_share_sas(cmd, client, share_name=None, permission=None, expiry=Non
     if as_user:
         user_delegation_key = client.get_user_delegation_key(
             start=get_datetime_from_string(start) if start else datetime.utcnow(),
-            expiry=get_datetime_from_string(expiry))
+            expiry=get_datetime_from_string(expiry),
+            delegated_user_tid=user_delegation_tid)
     else:
         account_key = client.credential.account_key
 

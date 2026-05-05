@@ -51,7 +51,9 @@ from ._utils import (
     format_location,
     is_docker_running,
     get_pack_exec_path,
-    get_latest_buildpack_run_tag
+    get_latest_buildpack_run_tag,
+    is_acr_url,
+    get_acr_name,
 
 )
 
@@ -414,7 +416,7 @@ class ContainerApp(Resource):  # pylint: disable=too-many-instance-attributes
     def create_acr(self):
         registry_rg = self.resource_group
         url = self.registry_server
-        registry_name = url[: url.rindex(ACR_IMAGE_SUFFIX)]
+        registry_name = get_acr_name(url) or url.split('.')[0]
         location = "eastus"
         if self.env.location and self.env.location.lower() != "northcentralusstage":
             location = self.env.location
@@ -548,7 +550,7 @@ class ContainerApp(Resource):  # pylint: disable=too-many-instance-attributes
         import os
 
         task_name = "cli_build_containerapp"
-        registry_name = (self.registry_server[: self.registry_server.rindex(ACR_IMAGE_SUFFIX)]).lower()
+        registry_name = (get_acr_name(self.registry_server) or self.registry_server.split('.')[0]).lower()
         if not self.target_port:
             self.target_port = DEFAULT_PORT
         task_content = ACR_TASK_TEMPLATE.replace("{{image_name}}", image_name).replace("{{target_port}}",
@@ -919,7 +921,7 @@ def _get_registry_from_app(app, source):
     containerapp_def = app.get()
     existing_registries = safe_get(containerapp_def, "properties", "configuration", "registries", default=[])
     if source:
-        existing_registries = [r for r in existing_registries if ACR_IMAGE_SUFFIX in r["server"]]
+        existing_registries = [r for r in existing_registries if is_acr_url(r["server"])]
     if containerapp_def:
         if len(existing_registries) == 1:
             app.registry_server = existing_registries[0]["server"]
@@ -931,7 +933,7 @@ def _get_registry_from_app(app, source):
 
 
 def _get_acr_rg(app):
-    registry_name = app.registry_server[: app.registry_server.rindex(ACR_IMAGE_SUFFIX)]
+    registry_name = get_acr_name(app.registry_server) or app.registry_server.split('.')[0]
     client = get_mgmt_service_client(
         app.cmd.cli_ctx, ContainerRegistryManagementClient
     ).registries
@@ -967,7 +969,7 @@ def _get_registry_details(cmd, app: "ContainerApp", source):
     registry_rg = None
     registry_name = None
     if app.registry_server:
-        if "azurecr.io" not in app.registry_server and source:
+        if not is_acr_url(app.registry_server) and source:
             raise ValidationError(
                 "Cannot supply non-Azure registry when using --source."
             )

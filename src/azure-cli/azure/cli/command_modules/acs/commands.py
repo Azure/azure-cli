@@ -299,6 +299,11 @@ def load_command_table(self, _):
             'get-upgrades',
             'aks_mesh_get_upgrades',
             table_transformer=aks_mesh_upgrades_table_format)
+        g.custom_command(
+            "proxy-redirection-mechanism",
+            "aks_mesh_proxy_redirection_mechanism",
+            supports_no_wait=True,
+        )
 
     # AKS mesh upgrade commands
     with self.command_group('aks mesh upgrade', managed_clusters_sdk, client_factory=cf_managed_clusters) as g:
@@ -329,6 +334,11 @@ def load_command_table(self, _):
             'delete', 'aks_approuting_zone_delete', confirmation=True)
         g.custom_command('update', 'aks_approuting_zone_update')
         g.custom_command('list', 'aks_approuting_zone_list')
+
+    # AKS approuting gateway istio commands
+    with self.command_group('aks approuting gateway istio', managed_clusters_sdk, client_factory=cf_managed_clusters) as g:
+        g.custom_command('enable', 'aks_approuting_gateway_istio_enable')
+        g.custom_command('disable', 'aks_approuting_gateway_istio_disable', confirmation=True)
 
     with self.command_group('aks safeguards'):
         from .custom import AKSSafeguardsShowCustom as Show

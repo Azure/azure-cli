@@ -693,3 +693,13 @@ def acr_connected_registry_permissions_update(cmd,
     _update_repo_permissions(cmd, resource_group_name, registry_name,
                              target_connected_registry, add_repos_set, remove_repos_set, msg=msg)
 # endregion
+
+
+def acr_connected_registry_resync(cmd,
+                                  client,
+                                  connected_registry_name,
+                                  registry_name,
+                                  resource_group_name=None):
+    _, resource_group_name = validate_managed_registry(
+        cmd, registry_name, resource_group_name)
+    return client.resync(resource_group_name, registry_name, connected_registry_name)

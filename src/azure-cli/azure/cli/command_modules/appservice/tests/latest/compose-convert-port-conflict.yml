@@ -1,0 +1,12 @@
+# Port conflicts: two services mapping different host ports to same container port
+# Tests: CRITICAL port conflict warning, host≠container port warning
+version: '3'
+services:
+  frontend:
+    image: "myacr.azurecr.io/frontend:latest"
+    ports:
+      - "80:8080"
+  backend:
+    image: "myacr.azurecr.io/backend:latest"
+    ports:
+      - "8080:8080"

@@ -37,37 +37,37 @@ class FlexibleServerLtrMgmtScenarioTest(ScenarioTest):
         start_time = (datetime.now(timezone.utc) - timedelta(minutes=60)).strftime(f"%Y-%m-%dT%H:%MZ")
         expiry_time = (datetime.now(timezone.utc) + timedelta(minutes=200)).strftime(f"%Y-%m-%dT%H:%MZ")
 
-        # create storage account
+        # Create storage account
         storage_account = self.cmd('az storage account create -n {} -g {} --encryption-services blob'.format(
                                     storage_account_name, resource_group)).get_output_in_json()
 
-        # create storage container inside storage account
+        # Create storage container inside storage account
         self.cmd('az storage container create -n {} --account-name {}'.format(container_account_name, storage_account_name))
 
-        # generate SAS URL for storage account
+        # Generate SAS URL for storage account
         container_sas_token = self.cmd('az storage container generate-sas -n {} --account-name {} \
                                        --permissions dlrw --expiry {} \
                                        --start {}'.format(container_account_name, storage_account_name,
                                                           expiry_time, start_time)).output
         sas_url = storage_account['primaryEndpoints']['blob'] + container_account_name + "?" + container_sas_token[1:-2]
 
-        # precheck LTR
+        # Precheck LTR
         backup_name = "testbackup"
         precheck_result = self.cmd('postgres flexible-server long-term-retention pre-check -g {} \
                  -n {} -b {}'.format(resource_group, server_name, backup_name)).get_output_in_json()
         self.assertGreaterEqual(precheck_result['numberOfContainers'], 0)
 
-        # start LTR
+        # Start LTR
         self.cmd('postgres flexible-server long-term-retention start -g {} -n {} -u {} -b {}'
                  .format(resource_group, server_name, sas_url, backup_name),
                  checks=[JMESPathCheck('backupName', backup_name)])
 
-        # show LTR
+        # Show LTR
         self.cmd('postgres flexible-server long-term-retention show -g {} -n {} -b {}'
                  .format(resource_group, server_name, backup_name),
                  checks=[JMESPathCheck('backupName', backup_name)])
 
-        # list LTR
+        # List LTR
         list_result = self.cmd('postgres flexible-server long-term-retention list -g {} \
                  -n {}'.format(resource_group, server_name)).get_output_in_json()
         self.assertEqual(len(list_result), 1)

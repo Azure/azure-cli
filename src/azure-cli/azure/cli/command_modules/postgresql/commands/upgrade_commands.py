@@ -24,6 +24,9 @@ def flexible_server_version_upgrade(cmd, client, resource_group_name, server_nam
 
     instance = client.get(resource_group_name, server_name)
 
+    if instance and instance.storage.type == "PremiumV2_LRS" and version and int(version) < 14:
+        raise CLIError('Storage type PremiumV2_LRS is only supported for PostgreSQL version 14 and above.')
+
     current_version = int(instance.version.split('.')[0])
     if current_version >= int(version):
         raise CLIError("The version to upgrade to must be greater than the current version.")

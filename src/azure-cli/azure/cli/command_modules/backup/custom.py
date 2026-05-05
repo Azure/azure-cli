@@ -38,7 +38,7 @@ from azure.core.exceptions import HttpResponseError, ResourceNotFoundError as Co
 from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError, \
     MutuallyExclusiveArgumentError, ArgumentUsageError, ValidationError, ResourceNotFoundError
 from azure.cli.command_modules.backup._client_factory import (
-    vaults_cf, backup_protected_items_cf, protection_policies_cf, virtual_machines_cf, recovery_points_cf,
+    vaults_cf, backup_protected_items_cf, protection_policies_cf, recovery_points_cf,
     protection_containers_cf, backup_protectable_items_cf, backup_protection_containers_cf,
     protected_items_cf, backup_resource_vault_config_cf, recovery_points_crr_cf, aad_properties_cf,
     cross_region_restore_cf, backup_crr_job_details_cf, backup_crr_jobs_cf, backup_protected_items_crr_cf,
@@ -887,6 +887,7 @@ def list_containers(client, resource_group_name, vault_name, container_type="Azu
 
 
 def check_protection_enabled_for_vm(cmd, vm_id=None, vm=None, resource_group_name=None):
+    from ..vm.operations.vm import VMShow
     if vm_id is None:
         if is_valid_resource_id(vm):
             vm_id = vm
@@ -894,17 +895,27 @@ def check_protection_enabled_for_vm(cmd, vm_id=None, vm=None, resource_group_nam
             if vm is None or resource_group_name is None:
                 raise RequiredArgumentMissingError("--vm or --resource-group missing. Please provide the required "
                                                    "arguments.")
-            vm_id = virtual_machines_cf(cmd.cli_ctx).get(resource_group_name, vm).id
+            vm_id = VMShow(cli_ctx=cmd.cli_ctx)(command_args={
+                'resource_group': resource_group_name,
+                'vm_name': vm
+            }).get('id')
     vm_name, vm_rg = cust_help.get_resource_name_and_rg(resource_group_name, vm_id)
-    vm = virtual_machines_cf(cmd.cli_ctx).get(vm_rg, vm_name)
+    vm = VMShow(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': vm_rg,
+        'vm_name': vm_name
+    })
     parameters = BackupStatusRequest(resource_type='VM', resource_id=vm_id)
-    return backup_status_cf(cmd.cli_ctx).get(vm.location, parameters).vault_id
+    return backup_status_cf(cmd.cli_ctx).get(vm.get('location'), parameters).vault_id
 
 
 def enable_protection_for_vm(cmd, client, resource_group_name, vault_name, vm, policy_name, diskslist=None,
                              disk_list_setting=None, exclude_all_data_disks=None):
+    from ..vm.operations.vm import VMShow
     vm_name, vm_rg = cust_help.get_resource_name_and_rg(resource_group_name, vm)
-    vm = virtual_machines_cf(cmd.cli_ctx).get(vm_rg, vm_name)
+    vm = VMShow(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': vm_rg,
+        'vm_name': vm_name
+    })
     vault = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name)
     policy = show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name, policy_name)
 
@@ -915,7 +926,7 @@ def enable_protection_for_vm(cmd, client, resource_group_name, vault_name, vm, p
     if policy.properties.protected_items_count >= 1000:
         raise CLIError("Cannot configure backup for more than 1000 VMs per policy")
 
-    if vm.location.lower() != vault.location.lower():
+    if vm.get('location', '').lower() != vault.location.lower():
         raise CLIError(
             """
             The VM should be in the same location as that of the Recovery Services vault to enable protection.
@@ -945,7 +956,7 @@ def enable_protection_for_vm(cmd, client, resource_group_name, vault_name, vm, p
     # Construct enable protection request object
     container_uri = cust_help.get_protection_container_uri_from_id(protectable_item.id)
     item_uri = cust_help.get_protectable_item_uri_from_id(protectable_item.id)
-    vm_item_properties = _get_vm_item_properties_from_vm_type(vm.type)
+    vm_item_properties = _get_vm_item_properties_from_vm_type(vm['type'])
     vm_item_properties.policy_id = policy.id
     vm_item_properties.source_resource_id = protectable_item.properties.virtual_machine_id
 
