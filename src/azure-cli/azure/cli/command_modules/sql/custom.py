@@ -4672,11 +4672,9 @@ def server_update(
 
     # Handle soft delete retention days
     # 0 = disable soft delete, 1-7 = enable with specified retention days
-    # If not specified, set to None to avoid sending existing value to API
+    # If not specified, preserve the existing value from the GET response
     if soft_delete_retention_days is not None:
         instance.retention_days = soft_delete_retention_days
-    else:
-        instance.retention_days = None
 
     return instance
 

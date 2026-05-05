@@ -32,7 +32,8 @@ from azure.cli.command_modules.sql.custom import (
     ClientAuthenticationType,
     ClientType,
     ComputeModelType,
-    ResourceIdType)
+    ResourceIdType,
+    server_update)
 from datetime import datetime, timedelta
 
 # Constants
@@ -9846,3 +9847,73 @@ class SqlServerDeletedServerScenarioTest(ScenarioTest):
             # Clean up both resource groups
             self.cmd('group delete -n {} --yes --no-wait'.format(rg1_name))
             self.cmd('group delete -n {} --yes --no-wait'.format(rg2_name))
+
+
+class SqlServerUpdateRetentionDaysUnitTest(unittest.TestCase):
+    """
+    Unit tests for server_update to verify that soft delete retention_days is handled correctly.
+
+    These tests verify the fix for the bug where 'az sql server update --assign_identity'
+    failed with an unrelated 'Invalid value given for parameter RetentionDays' error.
+    The root cause was that server_update explicitly set instance.retention_days = None
+    when soft_delete_retention_days was not specified, causing the serializer to exclude the
+    field from the PUT body and the API to reject the request.
+    """
+
+    class MockServerInstance:
+        """A simple mock of the Server model returned by the GET call."""
+        def __init__(self, retention_days=None):
+            self.identity = None
+            self.administrator_login_password = None
+            self.minimal_tls_version = None
+            self.public_network_access = None
+            self.primary_user_assigned_identity_id = None
+            self.key_id = None
+            self.federated_client_id = None
+            self.retention_days = retention_days
+
+    def test_retention_days_preserved_when_not_specified(self):
+        """When --soft-delete-retention-days is not provided, existing retention_days should be preserved."""
+        instance = self.MockServerInstance(retention_days=0)
+        result = server_update(instance)
+        self.assertEqual(result.retention_days, 0,
+                         "retention_days should remain 0 when soft_delete_retention_days is not specified")
+
+    def test_retention_days_preserved_when_enabled(self):
+        """When --soft-delete-retention-days is not provided and soft-delete is enabled, value should be preserved."""
+        instance = self.MockServerInstance(retention_days=7)
+        result = server_update(instance)
+        self.assertEqual(result.retention_days, 7,
+                         "retention_days should remain 7 when soft_delete_retention_days is not specified")
+
+    def test_retention_days_preserved_none_when_not_configured(self):
+        """When --soft-delete-retention-days is not provided and retention_days is None, it should remain None."""
+        instance = self.MockServerInstance(retention_days=None)
+        result = server_update(instance)
+        self.assertIsNone(result.retention_days,
+                          "retention_days should remain None when soft_delete_retention_days is not specified")
+
+    def test_retention_days_updated_when_specified(self):
+        """When --soft-delete-retention-days is provided, retention_days should be updated."""
+        instance = self.MockServerInstance(retention_days=0)
+        result = server_update(instance, soft_delete_retention_days=5)
+        self.assertEqual(result.retention_days, 5,
+                         "retention_days should be set to 5 when soft_delete_retention_days=5 is specified")
+
+    def test_retention_days_disabled_when_specified_zero(self):
+        """When --soft-delete-retention-days 0 is specified, retention_days should be set to 0."""
+        instance = self.MockServerInstance(retention_days=7)
+        result = server_update(instance, soft_delete_retention_days=0)
+        self.assertEqual(result.retention_days, 0,
+                         "retention_days should be set to 0 when soft_delete_retention_days=0 is specified")
+
+    def test_assign_identity_does_not_affect_retention_days(self):
+        """
+        When --assign_identity is used without --soft-delete-retention-days,
+        retention_days should not be changed. This tests the original bug fix.
+        """
+        instance = self.MockServerInstance(retention_days=0)
+        result = server_update(instance, assign_identity=True)
+        self.assertEqual(result.retention_days, 0,
+                         "retention_days should remain 0 when using --assign_identity without "
+                         "--soft-delete-retention-days")
