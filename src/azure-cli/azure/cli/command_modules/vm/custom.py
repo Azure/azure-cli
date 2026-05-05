@@ -1483,6 +1483,14 @@ def list_skus(cmd, location=None, size=None, zone=None, show_all=None, resource_
     return result
 
 
+def list_usage(cmd, location):
+    from .operations.vm import VMListUsage
+    command_args = {
+        'location': location
+    }
+    return VMListUsage(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+
+
 # pylint: disable=redefined-builtin
 def list_vm(cmd, resource_group_name=None, show_details=False, vmss=None):
     from azure.mgmt.core.tools import resource_id, is_valid_resource_id, parse_resource_id
@@ -1720,6 +1728,17 @@ def restart_vm(cmd, resource_group_name, vm_name, no_wait=False, force=False):
         return _VMRedeploy(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
     return _VMRestart(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+
+
+def stop_vm(cmd, resource_group_name, vm_name, no_wait=False, skip_shutdown=False):
+    from .aaz.latest.vm import Stop as VMStop
+    command_args = {
+        'resource_group': resource_group_name,
+        'name': vm_name,
+        'skip_shutdown': skip_shutdown,
+        'no_wait': no_wait
+    }
+    return VMStop(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
 def set_vm(cmd, instance, lro_operation=None, no_wait=False):

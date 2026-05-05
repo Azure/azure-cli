@@ -5,7 +5,7 @@
 
 from azure.cli.command_modules.vm._client_factory import (cf_vm,
                                                           cf_vm_ext, cf_vm_ext_image,
-                                                          cf_vm_image_term, cf_usage,
+                                                          cf_vm_image_term,
                                                           cf_vmss,
                                                           cf_gallery_images, cf_gallery_image_versions,
                                                           cf_proximity_placement_groups,
@@ -13,7 +13,7 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm,
                                                           cf_capacity_reservations,
                                                           cf_community_gallery)
 from azure.cli.command_modules.vm._format import (
-    transform_ip_addresses, transform_vm, transform_vm_create_output, transform_vm_usage_list, transform_vm_list,
+    transform_ip_addresses, transform_vm, transform_vm_create_output, transform_vm_list,
     transform_disk_create_table_output, transform_sku_for_table_output, transform_disk_show_table_output,
     transform_extension_show_table_output, get_vmss_table_output_transformer,
     transform_vm_encryption_show_table_output, transform_log_analytics_query_output,
@@ -79,11 +79,6 @@ def load_command_table(self, _):
     compute_vm_image_term_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.marketplaceordering.operations#MarketplaceAgreementsOperations.{}',
         client_factory=cf_vm_image_term
-    )
-
-    compute_vm_usage_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#UsageOperations.{}',
-        client_factory=cf_usage
     )
 
     compute_vm_run_profile = CliCommandType(
@@ -251,32 +246,27 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'show_vm_identity')
 
     with self.command_group('vm') as g:
+        g.custom_command('application set', 'set_vm_applications', validator=process_set_applications_namespace)
+        g.custom_command('application list', 'list_vm_applications')
+        g.custom_command('auto-shutdown', 'auto_shutdown_vm')
         g.custom_command('create', 'create_vm', transform=transform_vm_create_output, supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_vm_create_namespace, exception_handler=handle_template_based_exception)
-        g.custom_command('list', 'list_vm', table_transformer=transform_vm_list)
-        g.custom_show_command('show', 'show_vm', table_transformer=transform_vm)
-        g.generic_update_command('update', getter_name='get_vm_to_update_by_aaz', setter_name='update_vm', setter_type=compute_custom, command_type=compute_custom, supports_no_wait=True, validator=process_vm_update_namespace)
-        g.custom_command('open-port', 'open_vm_port')
-
-    with self.command_group('vm', compute_vm_sdk) as g:
-        g.custom_command('application set', 'set_vm_applications', validator=process_set_applications_namespace, min_api='2021-07-01')
-        g.custom_command('application list', 'list_vm_applications', min_api='2021-07-01')
-
         g.custom_command('get-instance-view', 'get_instance_view', table_transformer='{Name:name, ResourceGroup:resourceGroup, Location:location, ProvisioningState:provisioningState, PowerState:instanceView.statuses[1].displayStatus}')
+        g.custom_command('install-patches', 'install_vm_patches', supports_no_wait=True)
+        g.custom_command('list', 'list_vm', table_transformer=transform_vm_list)
         g.custom_command('list-ip-addresses', 'list_vm_ip_addresses', table_transformer=transform_ip_addresses)
-        g.custom_command('list-skus', 'list_skus', table_transformer=transform_sku_for_table_output, min_api='2017-03-30')
-        g.command('list-usage', 'list', command_type=compute_vm_usage_sdk, transform=transform_vm_usage_list, table_transformer='[].{Name:localName, CurrentValue:currentValue, Limit:limit}')
+        g.custom_command('list-sizes', 'list_vm_sizes', deprecate_info=g.deprecate(redirect='az vm list-skus'))
+        g.custom_command('list-skus', 'list_skus', table_transformer=transform_sku_for_table_output)
+        g.custom_command('list-usage', 'list_usage', table_transformer='[].{Name:localName, CurrentValue:currentValue, Limit:limit}')
+        g.custom_command('open-port', 'open_vm_port')
         g.custom_command('resize', 'resize_vm', supports_no_wait=True)
         g.custom_command('restart', 'restart_vm', supports_no_wait=True)
-        g.command('stop', 'begin_power_off', supports_no_wait=True, validator=process_vm_vmss_stop)
+        g.custom_show_command('show', 'show_vm', table_transformer=transform_vm)
+        g.custom_command('stop', 'stop_vm', validator=process_vm_vmss_stop, supports_no_wait=True)
+        g.generic_update_command('update', getter_name='get_vm_to_update_by_aaz', setter_name='update_vm', setter_type=compute_custom, command_type=compute_custom, supports_no_wait=True, validator=process_vm_update_namespace)
         g.wait_command('wait', getter_name='get_instance_view', getter_type=compute_custom)
-        g.custom_command('auto-shutdown', 'auto_shutdown_vm')
-        g.custom_command('list-sizes', 'list_vm_sizes', deprecate_info=g.deprecate(redirect='az vm list-skus'))
 
         from .operations.vm import VMCapture
         self.command_table['vm capture'] = VMCapture(loader=self)
-
-    with self.command_group('vm') as g:
-        g.custom_command('install-patches', 'install_vm_patches', supports_no_wait=True, min_api='2020-12-01')
 
     with self.command_group('vm availability-set', compute_availset_profile) as g:
         g.custom_command('create', 'create_av_set', table_transformer=deployment_validate_table_format, supports_no_wait=True, exception_handler=handle_template_based_exception)
