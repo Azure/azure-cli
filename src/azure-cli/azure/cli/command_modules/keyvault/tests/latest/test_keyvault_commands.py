@@ -2786,6 +2786,27 @@ class KeyVaultSecretCopyScenarioTest(ScenarioTest):
     single secret copy, bulk copy, overwrite behavior, and error handling.
     """
 
+    def setUp(self):
+        super().setUp()
+        from unittest import mock
+        from azure.keyvault.secrets import SecretClient
+        from azure.core.exceptions import ResourceNotFoundError
+
+        self.original_get_secret = SecretClient.get_secret
+
+        def mock_get_secret_side_effect(*args, **kwargs):
+            name = args[1] if len(args) > 1 else kwargs.get('name')
+            if name == "azure-cli-validation-dummy":
+                raise ResourceNotFoundError("Mocked dummy secret")
+            return self.original_get_secret(*args, **kwargs)
+
+        self.get_secret_patcher = mock.patch('azure.keyvault.secrets.SecretClient.get_secret', autospec=True, side_effect=mock_get_secret_side_effect)
+        self.get_secret_patcher.start()
+
+    def tearDown(self):
+        self.get_secret_patcher.stop()
+        super().tearDown()
+
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_kv_secret_copy', location='eastus2')
     @KeyVaultPreparer(name_prefix='cli-test-kv-src-', location='eastus2', 
