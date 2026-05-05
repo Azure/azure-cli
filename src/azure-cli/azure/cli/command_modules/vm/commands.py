@@ -10,8 +10,7 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm,
                                                           cf_gallery_images, cf_gallery_image_versions,
                                                           cf_proximity_placement_groups,
                                                           cf_dedicated_hosts,
-                                                          cf_log_analytics_data_plane,
-                                                          cf_capacity_reservation_groups, cf_capacity_reservations,
+                                                          cf_log_analytics_data_plane, cf_capacity_reservations,
                                                           cf_community_gallery)
 from azure.cli.command_modules.vm._format import (
     transform_ip_addresses, transform_vm, transform_vm_create_output, transform_vm_usage_list, transform_vm_list,
@@ -148,11 +147,6 @@ def load_command_table(self, _):
         client_factory=cf_metric_def,
         operation_group='metric_definitions',
         exception_handler=monitor_exception_handler
-    )
-
-    capacity_reservation_groups_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#CapacityReservationGroupsOperations.{}',
-        client_factory=cf_capacity_reservation_groups
     )
 
     capacity_reservations_sdk = CliCommandType(
@@ -522,8 +516,7 @@ def load_command_table(self, _):
         except APIVersionException:
             pass
 
-    with self.command_group('capacity reservation group', capacity_reservation_groups_sdk, min_api='2021-04-01',
-                            client_factory=cf_capacity_reservation_groups) as g:
+    with self.command_group('capacity reservation group') as g:
         g.custom_command('create', 'create_capacity_reservation_group')
         g.custom_command('update', 'update_capacity_reservation_group')
         g.custom_show_command('show', 'show_capacity_reservation_group')
