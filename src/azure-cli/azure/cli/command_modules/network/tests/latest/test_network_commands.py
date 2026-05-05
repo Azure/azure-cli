@@ -9355,6 +9355,65 @@ class NetworkVirtualNetworkApplianceScenario(ScenarioTest):
 
         self.assertTrue(vna_list[0].get('id') == vna2_id)
 
+    @ResourceGroupPreparer(name_prefix='test_vna_ip_version', location='eastus')
+    def test_network_virtual_network_appliance_private_ip_address_version(self, resource_group):
+        self.kwargs.update({
+            'vnet1': 'vnet-ipv4',
+            'vnet2': 'vnet-dualstack',
+            'vnet_address': '10.10.0.0/16',
+            'subnet': 'VirtualNetworkApplianceSubnet',
+            'subnet_address': '10.10.0.0/24',
+            'vna_ipv4': 'vna-ipv4',
+            'vna_dualstack': 'vna-dualstack',
+        })
+
+        # create vnet/subnet for IPv4 vna
+        self.cmd('network vnet create -g {rg} -n {vnet1} --address-prefixes {vnet_address}')
+        self.kwargs['subnet1_id'] = self.cmd(
+            'network vnet subnet create -g {rg} -n {subnet} --vnet-name {vnet1} '
+            '--address-prefix {subnet_address} --default-outbound false --query id'
+        ).get_output_in_json()
+
+        # create vna with --private-ip-address-version IPv4
+        self.cmd(
+            'network virtual-network-appliance create -g {rg} -n {vna_ipv4} '
+            '--bandwidth-in-gbps 50 --subnet \"{{id:{subnet1_id}}}\" '
+            '--private-ip-address-version IPv4'
+        )
+
+        self.cmd('network virtual-network-appliance show -g {rg} -n {vna_ipv4}', checks=[
+            self.check('privateIPAddressVersion', 'IPv4'),
+            self.check('bandwidthInGbps', 50),
+        ])
+
+        # create vnet/subnet for DualStack vna
+        self.cmd('network vnet create -g {rg} -n {vnet2} --address-prefixes {vnet_address}')
+        self.kwargs['subnet2_id'] = self.cmd(
+            'network vnet subnet create -g {rg} -n {subnet} --vnet-name {vnet2} '
+            '--address-prefix {subnet_address} --default-outbound false --query id'
+        ).get_output_in_json()
+
+        # create vna with --private-ip-address-version DualStack
+        self.cmd(
+            'network virtual-network-appliance create -g {rg} -n {vna_dualstack} '
+            '--bandwidth-in-gbps 100 --subnet \"{{id:{subnet2_id}}}\" '
+            '--private-ip-address-version DualStack'
+        )
+
+        self.cmd('network virtual-network-appliance show -g {rg} -n {vna_dualstack}', checks=[
+            self.check('privateIPAddressVersion', 'DualStack'),
+            self.check('bandwidthInGbps', 100),
+        ])
+
+        # verify list output includes both fields
+        vna_list = self.cmd('network virtual-network-appliance list -g {rg}', checks=[
+            self.check('length(@)', 2),
+        ]).get_output_in_json()
+
+        for vna in vna_list:
+            self.assertIn('privateIPAddressVersion', vna)
+            self.assertIn('bandwidthInGbps', vna)
+
 
 class DdosCustomPolicyScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='test_ddos_cuspol', location='eastus')
