@@ -285,7 +285,7 @@ examples:
   - name: Set a key with null value and JSON content type.
     text: az appconfig kv set -n MyAppConfiguration --key foo --value null --content-type application/json
   - name: Set a key-value using your 'az login' credentials.
-    text: az appconfig kv set --endpoint https://co.azconfig.io --key color --value red --auth-mode login
+    text: az appconfig kv set --endpoint https://contoso.azconfig.io --key color --value red --auth-mode login
 """
 
 helps['appconfig kv set-keyvault'] = """
