@@ -47,6 +47,21 @@ def get_resource_name_and_group(cmd, name, resource_group, namespace, type, **ri
     return rid_parsed.get("name"), rid_parsed.get("resource_group"), rid
 
 
+def get_site_server_farm_id(site):
+    """Get server_farm_id from a Site object, supporting both old and new SDK versions.
+
+    In azure-mgmt-web 11.0.0+, models use hybrid dict/model nature with camelCase keys.
+    This helper provides backward compatibility.
+    """
+    # Try new SDK dictionary-style access with camelCase
+    try:
+        return site["serverFarmId"]
+    except (KeyError, TypeError):
+        pass
+    # Fall back to old SDK attribute access
+    return getattr(site, 'server_farm_id', None)
+
+
 def str2bool(v):
     if v == 'true':
         retval = True
@@ -233,8 +248,14 @@ def _list_app(cli_ctx, resource_group_name=None):
 
 def _rename_server_farm_props(webapp):
     # Should be renamed in SDK in a future release
-    setattr(webapp, 'app_service_plan_id', webapp.server_farm_id)
-    del webapp.server_farm_id
+    server_farm_id = get_site_server_farm_id(webapp)
+    setattr(webapp, 'app_service_plan_id', server_farm_id)
+    # Remove server_farm_id if it exists as an attribute (for old SDK compatibility)
+    if hasattr(webapp, 'server_farm_id'):
+        try:
+            del webapp.server_farm_id
+        except (AttributeError, TypeError):
+            pass
     return webapp
 
 
@@ -269,12 +290,39 @@ def _normalize_location(cmd, location):
 
 
 def _remove_list_duplicates(webapp):
-    outbound_ips = webapp.possible_outbound_ip_addresses.split(',')
+    """Remove duplicate outbound IP addresses from a Site object.
+
+    In azure-mgmt-web 11.0.0+, models use hybrid dict/model nature with camelCase keys.
+    This helper provides backward compatibility.
+    """
+    # Try new SDK dictionary-style access with camelCase
+    outbound_ips_value = None
+    try:
+        outbound_ips_value = webapp["possibleOutboundIpAddresses"]
+    except (KeyError, TypeError):
+        pass
+    # Fall back to old SDK attribute access
+    if outbound_ips_value is None:
+        outbound_ips_value = getattr(webapp, 'possible_outbound_ip_addresses', None)
+
+    if outbound_ips_value is None:
+        return
+
+    outbound_ips = outbound_ips_value.split(',')
     outbound_ips_list = list(dict.fromkeys(outbound_ips))
     outbound_ips_list.sort()
     outbound_ips = ','.join(outbound_ips_list)
-    del webapp.possible_outbound_ip_addresses
-    setattr(webapp, 'possible_outbound_ip_addresses', outbound_ips)
+
+    # Try setting with new SDK dict-style
+    try:
+        webapp["possibleOutboundIpAddresses"] = outbound_ips
+    except (TypeError, AttributeError):
+        # Fall back to old SDK attribute style
+        try:
+            del webapp.possible_outbound_ip_addresses
+        except AttributeError:
+            pass
+        setattr(webapp, 'possible_outbound_ip_addresses', outbound_ips)
 
 
 def get_pool_manager(url):
@@ -312,7 +360,7 @@ def get_pool_manager(url):
 
 def get_app_service_plan_from_webapp(cmd, webapp, api_version=None):
     client = web_client_factory(cmd.cli_ctx, api_version=api_version)
-    plan = parse_resource_id(webapp.server_farm_id)
+    plan = parse_resource_id(get_site_server_farm_id(webapp))
     return client.app_service_plans.get(plan['resource_group'], plan['name'])
 
 
@@ -328,10 +376,12 @@ def app_service_plan_exists(cmd, resource_group_name, plan, api_version=None):
 
 
 # Allows putting additional properties on an SDK model instance
+# Note: The new SDK uses a different pattern where properties are set directly on the properties object
 def use_additional_properties(resource):
-    resource.enable_additional_properties_sending()
-    existing_properties = resource.serialize().get("properties")
-    resource.additional_properties["properties"] = {} if existing_properties is None else existing_properties
+    # In the new SDK, enable_additional_properties_sending() is no longer available
+    # Instead, properties should be set directly on the model's properties object
+    # This function is kept for backward compatibility but does nothing in the new SDK
+    pass
 
 
 def repo_url_to_name(repo_url):

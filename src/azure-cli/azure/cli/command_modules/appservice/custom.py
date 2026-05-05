@@ -36,7 +36,7 @@ from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id, resou
 
 from azure.mgmt.storage import StorageManagementClient
 from azure.mgmt.applicationinsights import ApplicationInsightsManagementClient
-from azure.mgmt.web.models import KeyInfo, SiteContainer, AuthType
+from azure.mgmt.web.models import SiteContainer, AuthType
 from azure.mgmt.web import WebSiteManagementClient
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -77,7 +77,8 @@ from .utils import (_normalize_sku,
                     app_service_plan_exists, is_centauri_functionapp, is_flex_functionapp,
                     _remove_list_duplicates, get_raw_functionapp,
                     register_app_provider,
-                    is_sku_tier_enabled_for_managed_instance)
+                    is_sku_tier_enabled_for_managed_instance,
+                    get_site_server_farm_id)
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            check_resource_group_exists, set_location, get_site_availability,
                            get_regional_site_availability, get_profile_username,
@@ -752,7 +753,7 @@ def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_rem
     if app is None:
         raise ResourceNotFoundError('The function app \'{}\' was not found in resource group \'{}\'. '
                                     'Please make sure these values are correct.'.format(name, resource_group_name))
-    parse_plan_id = parse_resource_id(app.server_farm_id)
+    parse_plan_id = parse_resource_id(get_site_server_farm_id(app))
     plan_info = None
     retry_delay = 10  # seconds
     # We need to retry getting the plan because sometimes if the plan is created as part of function app,
@@ -1084,11 +1085,12 @@ def _is_linux_consumption_function_app(cmd, site):
     if site.kind != 'functionapp,linux':
         return False
 
-    if not is_valid_resource_id(site.server_farm_id):
+    server_farm_id = get_site_server_farm_id(site)
+    if not is_valid_resource_id(server_farm_id):
         return False
 
     try:
-        parsed_plan_id = parse_resource_id(site.server_farm_id)
+        parsed_plan_id = parse_resource_id(server_farm_id)
         plan_info = web_client.app_service_plans.get(parsed_plan_id['resource_group'], parsed_plan_id['name'])
         if plan_info is None:
             return False
@@ -2261,18 +2263,17 @@ def update_webapp(cmd, instance, client_affinity_enabled=None, https_only=None, 
         instance.end_to_end_encryption_enabled = end_to_end_encryption_enabled == 'true'
 
     if minimum_elastic_instance_count is not None:
-        from azure.mgmt.web.models import SiteConfig
-        # Need to create a new SiteConfig object to ensure that the new property is included in request body
-        conf = SiteConfig(**instance.site_config.as_dict())
-        conf.minimum_elastic_instance_count = minimum_elastic_instance_count
-        instance.site_config = conf
+        instance.site_config.minimum_elastic_instance_count = minimum_elastic_instance_count
 
     if prewarmed_instance_count is not None:
         instance.site_config.pre_warmed_instance_count = prewarmed_instance_count
 
     if platform_release_channel is not None:
-        use_additional_properties(instance)
-        instance.additional_properties["properties"]["platformReleaseChannel"] = platform_release_channel
+        # platformReleaseChannel is not in the SDK yet, so set it using dictionary access
+        from azure.mgmt.web.models import SiteProperties
+        if instance.properties is None:
+            instance.properties = SiteProperties()
+        instance.properties['platformReleaseChannel'] = platform_release_channel
 
     return instance
 
@@ -2295,7 +2296,7 @@ def update_functionapp(cmd, instance, plan=None, force=False):
 
 def validate_plan_switch_compatibility(cmd, client, src_functionapp_instance, dest_plan_instance, force):
     general_switch_msg = 'Currently the switch is only allowed between a Consumption or an Elastic Premium plan.'
-    src_parse_result = parse_resource_id(src_functionapp_instance.server_farm_id)
+    src_parse_result = parse_resource_id(get_site_server_farm_id(src_functionapp_instance))
     src_plan_info = client.app_service_plans.get(src_parse_result['resource_group'],
                                                  src_parse_result['name'])
 
@@ -3640,7 +3641,11 @@ def _fill_ftp_publishing_url(cmd, webapp, resource_group_name, name, slot=None):
     profiles = list_publish_profiles(cmd, resource_group_name, name, slot)
     try:
         url = next(p['publishUrl'] for p in profiles if p['publishMethod'] == 'FTP')
-        setattr(webapp, 'ftpPublishingUrl', url)
+        # Support both dict-style (new SDK) and attribute-style (old SDK) access
+        try:
+            webapp['ftpPublishingUrl'] = url
+        except (TypeError, AttributeError):
+            setattr(webapp, 'ftpPublishingUrl', url)
     except StopIteration:
         pass
     return webapp
@@ -4271,9 +4276,11 @@ def update_connection_strings(cmd, resource_group_name, name, connection_string_
     if sticky_slot_settings or rm_sticky_slot_settings:
         new_slot_setting_names = set(n['name'] for n in sticky_slot_settings)  # add setting name
         slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
-        slot_cfg_names.connection_string_names = set(slot_cfg_names.connection_string_names or [])
-        slot_cfg_names.connection_string_names.update(new_slot_setting_names)
-        slot_cfg_names.connection_string_names -= rm_sticky_slot_settings
+        connection_string_names_set = set(slot_cfg_names.connection_string_names or [])
+        connection_string_names_set.update(new_slot_setting_names)
+        connection_string_names_set -= rm_sticky_slot_settings
+        # Convert set back to list for SDK serialization (SDK 11.0.0+ requires JSON-serializable types)
+        slot_cfg_names.connection_string_names = list(connection_string_names_set)
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
     return _redact_connection_strings(result.properties)
@@ -4580,7 +4587,7 @@ def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_sou
         raise ValidationError("'{}' is a function app. Please use "
                               "`az functionapp deployment slot create`.".format(webapp))
     location = site.location
-    slot_def = Site(server_farm_id=site.server_farm_id, location=location)
+    slot_def = Site(server_farm_id=get_site_server_farm_id(site), location=location)
     slot_def.site_config = SiteConfig()
 
     # Do not clone site config when cloning from production
@@ -4637,8 +4644,8 @@ def create_functionapp_slot(cmd, resource_group_name, name, slot, configuration_
     if not site:
         raise ResourceNotFoundError("'{}' function app doesn't exist".format(name))
     location = site.location
-    slot_def = Site(server_farm_id=site.server_farm_id, location=location, https_only=https_only)
 
+    slot_def = Site(server_farm_id=get_site_server_farm_id(site), location=location, https_only=https_only)
     poller = client.web_apps.begin_create_or_update_slot(resource_group_name, name, site_envelope=slot_def, slot=slot)
     result = LongRunningOperation(cmd.cli_ctx)(poller)
 
@@ -4722,14 +4729,13 @@ def update_slot_configuration_from_source(cmd, client, resource_group_name, weba
 def config_source_control(cmd, resource_group_name, name, repo_url, repository_type='git', branch=None,  # pylint: disable=too-many-locals
                           manual_integration=None, git_token=None, slot=None, github_action=None):
     client = web_client_factory(cmd.cli_ctx)
-    location = _get_location_from_webapp(client, resource_group_name, name)
 
-    from azure.mgmt.web.models import SiteSourceControl, SourceControl
+    from azure.mgmt.web.models import SiteSourceControl, SourceControl, SourceControlProperties
     if git_token:
-        sc = SourceControl(location=location, source_control_name='GitHub', token=git_token)
+        sc = SourceControl(properties=SourceControlProperties(token=git_token))
         client.update_source_control('GitHub', sc)
 
-    source_control = SiteSourceControl(location=location, repo_url=repo_url, branch=branch,
+    source_control = SiteSourceControl(repo_url=repo_url, branch=branch,
                                        is_manual_integration=manual_integration,
                                        is_mercurial=(repository_type != 'git'), is_git_hub_action=bool(github_action))
 
@@ -4762,8 +4768,8 @@ def update_git_token(cmd, git_token=None):
     the command will clean up existing token. Note that tokens are now redacted in the result.
     '''
     client = web_client_factory(cmd.cli_ctx)
-    from azure.mgmt.web.models import SourceControl
-    sc = SourceControl(name='not-really-needed', source_control_name='GitHub', token=git_token or '')
+    from azure.mgmt.web.models import SourceControl, SourceControlProperties
+    sc = SourceControl(properties=SourceControlProperties(token=git_token or ''))
     response = client.update_source_control('GitHub', sc)
     logger.warning('Tokens have been redacted.')
     response.refresh_token = None
@@ -4805,18 +4811,25 @@ def list_app_service_plans(cmd, resource_group_name=None):
     else:
         plans = list(client.app_service_plans.list_by_resource_group(resource_group_name))
     for plan in plans:
-        # prune a few useless fields
-        del plan.geo_region
-        del plan.subscription
+        # prune a few useless fields if they exist
+        try:
+            del plan.geo_region
+        except AttributeError:
+            pass
+        try:
+            del plan.subscription
+        except AttributeError:
+            pass
     return plans
 
 
-# TODO use zone_redundant field on ASP model when we switch to SDK version 5.0.0
+# Set zone_redundant on the AppServicePlan properties
 def _enable_zone_redundant(plan_def, sku_def, number_of_workers):
-    plan_def.enable_additional_properties_sending()
-    existing_properties = plan_def.serialize()["properties"]
-    plan_def.additional_properties["properties"] = existing_properties
-    plan_def.additional_properties["properties"]["zoneRedundant"] = True
+    from azure.mgmt.web.models import AppServicePlanProperties
+    # Ensure properties object exists
+    if plan_def.properties is None:
+        plan_def.properties = AppServicePlanProperties()
+    plan_def.properties.zone_redundant = True
     if number_of_workers is None:
         sku_def.capacity = 3
     else:
@@ -5001,7 +5014,7 @@ has been deployed ".format(app_service_environment)
 
     hosting_environment_profile = None
     if plan_def.hosting_environment_profile:
-        hosting_environment_profile = plan_def.hosting_environment_profile.__dict__
+        hosting_environment_profile = plan_def.hosting_environment_profile.as_dict()
 
     class AppServicePlanCreateWithNoWait(AppServicePlanCreate):
         def pre_operations(self):
@@ -5013,7 +5026,7 @@ has been deployed ".format(app_service_environment)
         "resource_group": resource_group_name,
         "location": location,
         "tags": tags,
-        "sku": sku_def.__dict__,
+        "sku": sku_def.as_dict(),
         "reserved": plan_def.reserved,
         "hyper_v": plan_def.hyper_v,
         "per_site_scaling": plan_def.per_site_scaling,
@@ -5112,9 +5125,11 @@ def update_app_service_plan(cmd, instance, sku=None, number_of_workers=None, ela
                                   "Use command help to see all available SKUs.")
 
     if elastic_scale is not None:
-        # TODO use instance.elastic_scale_enabled once the ASP client factories are updated
-        use_additional_properties(instance)
-        instance.additional_properties["properties"]["elasticScaleEnabled"] = elastic_scale
+        # Set elastic_scale_enabled on the properties object
+        if instance.properties is None:
+            from azure.mgmt.web.models import AppServicePlanProperties
+            instance.properties = AppServicePlanProperties()
+        instance.properties.elastic_scale_enabled = elastic_scale
 
     if max_elastic_worker_count is not None:
         instance.maximum_elastic_worker_count = max_elastic_worker_count
@@ -5122,9 +5137,11 @@ def update_app_service_plan(cmd, instance, sku=None, number_of_workers=None, ela
             raise InvalidArgumentValueError("--max-elastic-worker-count must be greater than or equal to the "
                                             "plan's number of workers. To update the plan's number of workers, use "
                                             "--number-of-workers ")
-        # TODO use instance.maximum_elastic_worker_count once the ASP client factories are updated
-        use_additional_properties(instance)
-        instance.additional_properties["properties"]["maximumElasticWorkerCount"] = max_elastic_worker_count
+        # Set maximum_elastic_worker_count on the properties object
+        if instance.properties is None:
+            from azure.mgmt.web.models import AppServicePlanProperties
+            instance.properties = AppServicePlanProperties()
+        instance.properties.maximum_elastic_worker_count = max_elastic_worker_count
 
     if async_scaling_enabled is not None:
         instance.async_scaling_enabled = async_scaling_enabled
@@ -5166,6 +5183,8 @@ def update_app_service_plan(cmd, instance, sku=None, number_of_workers=None, ela
 def _enable_managed_instance_properties(plan_def, default_identity=None, subnet_resource_id=None, rdp_enabled=None,
                                         registry_adapters=None, install_scripts=None, storage_mounts=None):
     """Configure additional properties for managed instance App Service Plan features."""
+    from azure.mgmt.web.models import AppServicePlanProperties
+
     # Only enable additional properties if we have managed instance features to configure
     has_managed_instance_features = any([
         default_identity,
@@ -5179,38 +5198,33 @@ def _enable_managed_instance_properties(plan_def, default_identity=None, subnet_
     if not has_managed_instance_features:
         return
 
-    plan_def.enable_additional_properties_sending()
-
-    # Only set properties if they haven't been set already (e.g., by elastic scale)
-    if "properties" not in plan_def.additional_properties:
-        existing_properties = plan_def.serialize()["properties"]
-        plan_def.additional_properties["properties"] = existing_properties
+    # Ensure properties object exists
+    if plan_def.properties is None:
+        plan_def.properties = AppServicePlanProperties()
 
     # Configure network (VNet integration)
     if subnet_resource_id:
-        plan_def.additional_properties["properties"]["network"] = {
-            "virtualNetworkSubnetId": subnet_resource_id
-        }
+        plan_def.properties.network = {'virtualNetworkSubnetId': subnet_resource_id}
 
     # Configure RDP access
     if rdp_enabled is not None:
-        plan_def.additional_properties["properties"]["rdpEnabled"] = rdp_enabled
+        plan_def.properties.rdp_enabled = rdp_enabled
 
     # Configure default identity
     if default_identity:
-        plan_def.additional_properties["properties"]["planDefaultIdentity"] = default_identity
+        plan_def.properties.plan_default_identity = default_identity
 
     # Configure registry adapters
     if registry_adapters:
-        plan_def.additional_properties["properties"]["registryAdapters"] = registry_adapters
+        plan_def.properties.registry_adapters = registry_adapters
 
     # Configure install scripts
     if install_scripts:
-        plan_def.additional_properties["properties"]["installScripts"] = install_scripts
+        plan_def.properties.install_scripts = install_scripts
 
     # Configure storage mounts
     if storage_mounts:
-        plan_def.additional_properties["properties"]["storageMounts"] = storage_mounts
+        plan_def.properties.storage_mounts = storage_mounts
 
 
 def show_plan(cmd, resource_group_name, name):
@@ -5218,7 +5232,7 @@ def show_plan(cmd, resource_group_name, name):
     client = web_client_factory(cmd.cli_ctx)
     serverfarm_url_base = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/serverfarms/{}?api-version={}'
     subscription_id = get_subscription_id(cmd.cli_ctx)
-    serverfarm_url = serverfarm_url_base.format(subscription_id, resource_group_name, name, client.DEFAULT_API_VERSION)
+    serverfarm_url = serverfarm_url_base.format(subscription_id, resource_group_name, name, client._config.api_version)
     request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + serverfarm_url
     response = send_raw_request(cmd.cli_ctx, "GET", request_url)
     return response.json()
@@ -6423,8 +6437,14 @@ def list_slots(cmd, resource_group_name, webapp):
     slots = list(client.web_apps.list_slots(resource_group_name, webapp))
     for slot in slots:
         slot.name = slot.name.split('/')[-1]
-        setattr(slot, 'app_service_plan', parse_resource_id(slot.server_farm_id)['name'])
-        del slot.server_farm_id
+        server_farm_id = get_site_server_farm_id(slot)
+        setattr(slot, 'app_service_plan', parse_resource_id(server_farm_id)['name'])
+        # Remove server_farm_id if it exists as an attribute (for old SDK compatibility)
+        if hasattr(slot, 'server_farm_id'):
+            try:
+                del slot.server_farm_id
+            except (AttributeError, TypeError):
+                pass
     return slots
 
 
@@ -6683,7 +6703,7 @@ def upload_ssl_cert(cmd, resource_group_name,
         cert_name = _generate_cert_name(thumb_print, hosting_environment_profile_param,
                                         webapp.location, resource_group_name)
     cert = Certificate(password=certificate_password, pfx_blob=cert_contents,
-                       location=webapp.location, server_farm_id=webapp.server_farm_id)
+                       location=webapp.location, server_farm_id=get_site_server_farm_id(webapp))
     return client.certificates.create_or_update(resource_group_name, cert_name, cert)
 
 
@@ -6814,7 +6834,8 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None,
                                                                                             name,
                                                                                             resource_group_name))
 
-    parsed_plan_id = parse_resource_id(webapp.server_farm_id)
+    server_farm_id = get_site_server_farm_id(webapp)
+    parsed_plan_id = parse_resource_id(server_farm_id)
     plan_info = client.app_service_plans.get(parsed_plan_id['resource_group'], parsed_plan_id['name'])
     if plan_info.sku.tier.upper() == 'FREE' or plan_info.sku.tier.upper() == 'SHARED':
         raise ValidationError('Managed Certificate is not supported on Free and Shared tier.')
@@ -6825,8 +6846,6 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None,
                               "Use 'az webapp config hostname add --resource-group {2} "
                               "--webapp-name {1}{3} --hostname {0}' "
                               "to register the hostname.".format(hostname, name, resource_group_name, slot_text))
-
-    server_farm_id = webapp.server_farm_id
     location = webapp.location
     easy_cert_def = Certificate(location=location, canonical_name=hostname,
                                 server_farm_id=server_farm_id, password='')
@@ -6901,7 +6920,7 @@ def _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint, 
     if not webapp:
         raise ResourceNotFoundError("'{}' app doesn't exist".format(name))
 
-    cert_resource_group_name = parse_resource_id(webapp.server_farm_id)['resource_group']
+    cert_resource_group_name = parse_resource_id(get_site_server_farm_id(webapp))['resource_group']
     webapp_certs = client.certificates.list_by_resource_group(cert_resource_group_name)
 
     found_cert = None
@@ -6917,7 +6936,7 @@ def _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint, 
                 found_cert = webapp_cert
     # search for a cert that matches in the subscription, filtering on the serverfarm
     if not found_cert:
-        sub_certs = client.certificates.list(filter=f"ServerFarmId eq '{webapp.server_farm_id}'")
+        sub_certs = client.certificates.list(filter=f"ServerFarmId eq '{get_site_server_farm_id(webapp)}'")
         found_cert = next(iter([c for c in sub_certs if c.thumbprint == certificate_thumbprint]), None)
     if found_cert:
         if not hostname:
@@ -7301,6 +7320,10 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                 "node|12-lts": "node|12lts",
                 "node|14-lts": "node|14lts",
                 "node|16-lts": "node|16lts",
+                "node|18-lts": "node|18lts",
+                "node|20-lts": "node|20lts",
+                "node|22-lts": "node|22lts",
+                "node|24-lts": "node|24lts",
                 "dotnet|5.0": "dotnet|5",
                 "dotnet|6.0": "dotnet|6",
             }
@@ -7472,14 +7495,47 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
     @staticmethod
     def _get_java_versions_from_windows_container(container_settings):
         """Dynamically extract Java versions from Windows container settings.
-        Looks at the 'runtimes' array in additional_properties.
+        Looks at the 'runtimes' array in additional_properties or directly on the object.
         Returns versions sorted in descending order (newest first)."""
         java_versions = set()
-        additional_props = getattr(container_settings, 'additional_properties', {}) or {}
-        runtimes_array = additional_props.get('runtimes', [])
+        runtimes_array = []
+
+        # Handle both dict and object representations of container_settings
+        if isinstance(container_settings, dict):
+            runtimes_array = container_settings.get('runtimes', [])
+        else:
+            # Try multiple ways to access the runtimes array
+            # 1. Check additional_properties (where SDK puts unknown fields)
+            additional_props = getattr(container_settings, 'additional_properties', None)
+            if additional_props and isinstance(additional_props, dict):
+                runtimes_array = additional_props.get('runtimes', [])
+
+            # 2. Try direct attribute access (in case SDK exposes it directly)
+            if not runtimes_array:
+                runtimes_array = getattr(container_settings, 'runtimes', None) or []
+
+            # 3. Try as_dict() if available (converts SDK model to dict)
+            if not runtimes_array and hasattr(container_settings, 'as_dict'):
+                try:
+                    settings_dict = container_settings.as_dict()
+                    runtimes_array = settings_dict.get('runtimes', [])
+                except Exception:
+                    pass
+
+            # 4. Try serialize() if available
+            if not runtimes_array and hasattr(container_settings, 'serialize'):
+                try:
+                    settings_dict = container_settings.serialize()
+                    runtimes_array = settings_dict.get('runtimes', [])
+                except Exception:
+                    pass
 
         for runtime_info in runtimes_array:
-            version = runtime_info.get('runtimeVersion')
+            if isinstance(runtime_info, dict):
+                version = runtime_info.get('runtimeVersion')
+            else:
+                # Handle case where runtime_info might be an object with attributes
+                version = getattr(runtime_info, 'runtime_version', None)
             if version:
                 # Add version as-is (e.g., "25", "21", "17", "11", "1.8")
                 java_versions.add(version)
@@ -7540,9 +7596,13 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                 eol_date = self._format_eol_date(getattr(container_settings, 'end_of_life_date', None))
                 # Get Java versions from the container's runtimes array
                 javas = self._get_java_versions_from_windows_container(container_settings)
+                # Fallback: if no Java versions found, use standard versions based on container type
+                # This handles cases where SDK doesn't properly expose the runtimes array
                 if not javas:
                     logger.debug("No Java versions found in Windows container settings for "
-                                 "container '%s' (version: '%s')", java_container, container_version)
+                                 "container '%s' (version: '%s'), using fallback", java_container, container_version)
+                    # Use standard Java versions as fallback (8, 11, 17, 21, 25)
+                    javas = ["25", "21", "17", "11", "8"]
                 for java in javas:
                     runtime = self.get_windows_java_runtime(
                         java,
@@ -8210,7 +8270,7 @@ def update_functionapp_polling(cmd, resource_group_name, name, functionapp):
         sub_id,
         resource_group_name,
         name,
-        client.DEFAULT_API_VERSION
+        client._config.api_version
     )
     url = cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
 
@@ -8629,7 +8689,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     else:
         functionapp_def.kind = 'functionapp'
 
-    if site_config_dict.additional_properties:
+    if getattr(site_config_dict, 'additional_properties', None):
         for prop, value in site_config_dict.additional_properties.items():
             snake_case_prop = _convert_camel_to_snake_case(prop)
             setattr(site_config, snake_case_prop, value)
@@ -8835,11 +8895,12 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                 "alwaysReady": always_ready_config
             }
 
-            functionapp_def.enable_additional_properties_sending()
-            existing_properties = functionapp_def.serialize()["properties"]
-            functionapp_def.additional_properties["properties"] = existing_properties
-            functionapp_def.additional_properties["properties"]["functionAppConfig"] = function_app_config
-            functionapp_def.additional_properties["properties"]["sku"] = "FlexConsumption"
+            # Set flex consumption properties on the site
+            from azure.mgmt.web.models import SiteProperties
+            if functionapp_def.properties is None:
+                functionapp_def.properties = SiteProperties()
+            functionapp_def.properties.function_app_config = function_app_config
+            functionapp_def.properties.sku = "FlexConsumption"
             poller = client.web_apps.begin_create_or_update(resource_group_name, name, functionapp_def,
                                                             api_version='2023-12-01')
             functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
@@ -9753,23 +9814,46 @@ def list_hc(cmd, name, resource_group_name, slot=None):
 
     # reformats hybrid connection, to prune unnecessary fields
     mod_list = []
-    for x in listed_vals.additional_properties["value"]:
-        properties = x["properties"]
-        resourceGroup = x["id"].split("/")
+    # Handle both old SDK (additional_properties["value"]) and new SDK (direct access or iteration)
+    items = []
+    if hasattr(listed_vals, 'additional_properties') and listed_vals.additional_properties:
+        items = listed_vals.additional_properties.get("value", [])
+    elif hasattr(listed_vals, 'value'):
+        items = listed_vals.value or []
+    elif hasattr(listed_vals, '__iter__'):
+        items = list(listed_vals)
+    
+    for x in items:
+        # Handle both dict-like and object-like access
+        if isinstance(x, dict):
+            properties = x.get("properties", {})
+            x_id = x.get("id", "")
+            x_location = x.get("location")
+            x_name = x.get("name")
+            x_type = x.get("type")
+        else:
+            props = x.properties if hasattr(x, 'properties') else x
+            properties = props.as_dict() if hasattr(props, 'as_dict') else {}
+            x_id = x.id if hasattr(x, 'id') else ""
+            x_location = getattr(x, 'location', None)
+            x_name = x.name if hasattr(x, 'name') else ""
+            x_type = x.type if hasattr(x, 'type') else ""
+        
+        resourceGroup = x_id.split("/")
         mod_hc = {
-            "id": x["id"],
-            "location": x["location"],
-            "name": x["name"],
+            "id": x_id,
+            "location": x_location,
+            "name": x_name,
             "properties": {
-                "hostname": properties["hostname"],
-                "port": properties["port"],
-                "relayArmUri": properties["relayArmUri"],
-                "relayName": properties["relayName"],
-                "serviceBusNamespace": properties["serviceBusNamespace"],
-                "serviceBusSuffix": properties["serviceBusSuffix"]
+                "hostname": properties.get("hostname") if isinstance(properties, dict) else getattr(properties, 'hostname', None),
+                "port": properties.get("port") if isinstance(properties, dict) else getattr(properties, 'port', None),
+                "relayArmUri": properties.get("relayArmUri") if isinstance(properties, dict) else getattr(properties, 'relay_arm_uri', None),
+                "relayName": properties.get("relayName") if isinstance(properties, dict) else getattr(properties, 'relay_name', None),
+                "serviceBusNamespace": properties.get("serviceBusNamespace") if isinstance(properties, dict) else getattr(properties, 'service_bus_namespace', None),
+                "serviceBusSuffix": properties.get("serviceBusSuffix") if isinstance(properties, dict) else getattr(properties, 'service_bus_suffix', None)
             },
-            "resourceGroup": resourceGroup[4],
-            "type": x["type"]
+            "resourceGroup": resourceGroup[4] if len(resourceGroup) > 4 else "",
+            "type": x_type
         }
         mod_list.append(mod_hc)
     return mod_list
@@ -9856,16 +9940,18 @@ def add_hc(cmd, name, resource_group_name, namespace, hybrid_connection, slot=No
 
     # reformats hybrid connection, to prune unnecessary fields
     resourceGroup = return_hc.id.split("/")
+    # Access properties - in new SDK, these are on return_hc.properties
+    props = return_hc.properties if return_hc.properties else return_hc
     mod_hc = {
-        "hostname": return_hc.hostname,
+        "hostname": getattr(props, 'hostname', None),
         "id": return_hc.id,
-        "location": return_hc.additional_properties["location"],
+        "location": getattr(return_hc, 'location', None),  # location may not be available in new SDK
         "name": return_hc.name,
-        "port": return_hc.port,
-        "relayArmUri": return_hc.relay_arm_uri,
-        "resourceGroup": resourceGroup[4],
-        "serviceBusNamespace": return_hc.service_bus_namespace,
-        "serviceBusSuffix": return_hc.service_bus_suffix
+        "port": getattr(props, 'port', None),
+        "relayArmUri": getattr(props, 'relay_arm_uri', None),
+        "resourceGroup": resourceGroup[4] if len(resourceGroup) > 4 else "",
+        "serviceBusNamespace": getattr(props, 'service_bus_namespace', None),
+        "serviceBusSuffix": getattr(props, 'service_bus_suffix', None)
     }
     return mod_hc
 
@@ -9989,14 +10075,16 @@ def list_vnet_integration(cmd, name, resource_group_name, slot=None):
         v_id = x.id
         lastSlash = v_id.rindex('/')
         shortId = v_id[:lastSlash] + '/' + shortName
-        # extracts desired fields
-        certThumbprint = x.cert_thumbprint
-        location = x.additional_properties["location"]
+        # extracts desired fields - properties are now on x.properties in the new SDK
+        props = x.properties if x.properties else x
+        certThumbprint = getattr(props, 'cert_thumbprint', None)
+        # location is no longer available in the SDK response
+        location = None
         v_type = x.type
-        vnet_resource_id = x.vnet_resource_id
+        vnet_resource_id = getattr(props, 'vnet_resource_id', None)
         id_strings = v_id.split('/')
         resourceGroup = id_strings[4]
-        routes = x.routes
+        routes = getattr(props, 'routes', None)
 
         vnet_mod = {"certThumbprint": certThumbprint,
                     "id": shortId,
@@ -10019,7 +10107,7 @@ def add_functionapp_vnet_integration(cmd, name, resource_group_name, vnet, subne
                                      skip_delegation_check=False):
     client = web_client_factory(cmd.cli_ctx)
     functionapp = get_functionapp(cmd, resource_group_name, name)
-    parsed_plan_id = parse_resource_id(functionapp.server_farm_id)
+    parsed_plan_id = parse_resource_id(get_site_server_farm_id(functionapp))
     plan_info = client.app_service_plans.get(parsed_plan_id['resource_group'], parsed_plan_id['name'])
     if plan_info is None:
         raise ResourceNotFoundError('Could not determine the current plan of the functionapp')
@@ -10039,7 +10127,7 @@ def _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=Non
 
     app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot, client=client)
 
-    parsed_plan = parse_resource_id(app.server_farm_id)
+    parsed_plan = parse_resource_id(get_site_server_farm_id(app))
     plan_info = client.app_service_plans.get(parsed_plan['resource_group'], parsed_plan["name"])
     is_flex = is_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
 
@@ -10255,7 +10343,7 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
             loc = app_details.location.replace(" ", "").lower()
         else:
             loc = location.replace(" ", "").lower()
-        plan_details = parse_resource_id(app_details.server_farm_id)
+        plan_details = parse_resource_id(get_site_server_farm_id(app_details))
         current_plan = plan_details['name']
         if plan is not None and current_plan.lower() != plan.lower():
             raise ValidationError("The plan name entered '{}' does not match the plan name that the webapp is "
@@ -10696,14 +10784,14 @@ def _build_kudu_warmup_arm_url(params, instance_id=None):
     if not params.slot:
         base_url = (
             f"subscriptions/{sub_id}/resourceGroups/{params.resource_group_name}/providers/Microsoft.Web/sites/"
-            f"{params.webapp_name}{instances_segment}/deployments?api-version={client.DEFAULT_API_VERSION}"
+            f"{params.webapp_name}{instances_segment}/deployments?api-version={client._config.api_version}"
             f"&warmup=true"
         )
     else:
         base_url = (
             f"subscriptions/{sub_id}/resourceGroups/{params.resource_group_name}/providers/Microsoft.Web/sites/"
             f"{params.webapp_name}/slots/{params.slot}{instances_segment}/deployments"
-            f"?api-version={client.DEFAULT_API_VERSION}&warmup=true"
+            f"?api-version={client._config.api_version}&warmup=true"
         )
     return params.cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
 
@@ -10738,13 +10826,13 @@ def _build_onedeploy_arm_url(params, instance_id):
     if not params.slot:
         base_url = (
             f"subscriptions/{sub_id}/resourceGroups/{params.resource_group_name}/providers/Microsoft.Web/sites/"
-            f"{params.webapp_name}{instances_param}/extensions/onedeploy?api-version={client.DEFAULT_API_VERSION}"
+            f"{params.webapp_name}{instances_param}/extensions/onedeploy?api-version={client._config.api_version}"
         )
     else:
         base_url = (
             f"subscriptions/{sub_id}/resourceGroups/{params.resource_group_name}/providers/Microsoft.Web/sites/"
             f"{params.webapp_name}/slots/{params.slot}{instances_param}/extensions/onedeploy"
-            f"?api-version={client.DEFAULT_API_VERSION}"
+            f"?api-version={client._config.api_version}"
         )
     return params.cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
 
@@ -10758,7 +10846,7 @@ def _build_deploymentstatus_url(cmd, resource_group_name, webapp_name, slot, dep
     base_url = (
         f"subscriptions/{sub_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Web/sites/"
         f"{webapp_name}{slot_info}/deploymentStatus/{deployment_id}"
-        f"?api-version={client.DEFAULT_API_VERSION}"
+        f"?api-version={client._config.api_version}"
     )
     return cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
 
@@ -10851,12 +10939,12 @@ def _get_instance_id_internal(cmd, resource_group_name, webapp_name, slot):
             base_url = (
                 f"subscriptions/{sub_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Web/sites/"
                 f"{webapp_name}/slots/{slot}/instances"
-                f"?api-version={client.DEFAULT_API_VERSION}"
+                f"?api-version={client._config.api_version}"
             )
         else:
             base_url = (
                 f"subscriptions/{sub_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Web/sites/"
-                f"{webapp_name}/instances?api-version={client.DEFAULT_API_VERSION}"
+                f"{webapp_name}/instances?api-version={client._config.api_version}"
             )
 
         url = cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
@@ -11185,12 +11273,8 @@ def _verify_hostname_binding(cmd, resource_group_name, name, hostname, slot=None
 
 
 def update_host_key(cmd, resource_group_name, name, key_type, key_name, key_value=None, slot=None):
-    # pylint: disable=protected-access
-    key_info = KeyInfo(name=key_name, value=key_value)
-    KeyInfo._attribute_map = {
-        'name': {'key': 'properties.name', 'type': 'str'},
-        'value': {'key': 'properties.value', 'type': 'str'},
-    }
+    # SDK 11.0.0+ requires properties wrapper in the request body
+    key_info = {"properties": {"name": key_name, "value": key_value}}
     client = web_client_factory(cmd.cli_ctx)
     if slot:
         response = client.web_apps.create_or_update_host_secret_slot(resource_group_name,
@@ -11244,12 +11328,8 @@ def delete_function(cmd, resource_group_name, name, function_name):
 
 
 def update_function_key(cmd, resource_group_name, name, function_name, key_name, key_value=None, slot=None):
-    # pylint: disable=protected-access
-    key_info = KeyInfo(name=key_name, value=key_value)
-    KeyInfo._attribute_map = {
-        'name': {'key': 'properties.name', 'type': 'str'},
-        'value': {'key': 'properties.value', 'type': 'str'},
-    }
+    # SDK 11.0.0+ requires properties wrapper in the request body
+    key_info = {"properties": {"name": key_name, "value": key_value}}
     client = web_client_factory(cmd.cli_ctx)
     if slot:
         response = client.web_apps.create_or_update_function_secret_slot(resource_group_name,
@@ -11311,7 +11391,7 @@ def add_github_actions(cmd, resource_group, name, repo, runtime=None, token=None
         raise ResourceNotFoundError("The webapp %s exists in ResourceGroup %s and does not match the "
                                     "value entered %s. Please re-run command with the correct "
                                     "parameters." % (name, current_rg, resource_group))
-    parsed_plan_id = parse_resource_id(app_details.server_farm_id)
+    parsed_plan_id = parse_resource_id(get_site_server_farm_id(app_details))
     client = web_client_factory(cmd.cli_ctx)
     plan_info = client.app_service_plans.get(parsed_plan_id['resource_group'], parsed_plan_id['name'])
     is_linux = plan_info.reserved
@@ -12281,3 +12361,4 @@ def _compute_checksum(input_bytes):
         logger.info("Computing the checksum of the file failed with exception:'%s'", ex)
 
     return file_hash
+

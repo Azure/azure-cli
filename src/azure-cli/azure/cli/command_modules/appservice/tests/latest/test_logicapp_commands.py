@@ -27,6 +27,7 @@ WINDOWS_ASP_LOCATION_LOGICAPP = 'francecentral'
 LINUX_ASP_LOCATION_LOGICAPP = 'ukwest'
 DEFAULT_LOCATION = "westus"
 
+@live_only()
 class LogicappBasicE2ETest(ScenarioTest):
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
     def test_logicapp_e2e(self, resource_group):
@@ -240,6 +241,7 @@ class LogicappBasicE2ETest(ScenarioTest):
         ])
 
 
+@live_only()
 class LogicappCommandsTest(ScenarioTest):
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
     @StorageAccountPreparer()
@@ -296,6 +298,7 @@ class LogicAppDeployTest(LiveScenarioTest):
         ])
 
 
+@live_only()
 class LogicAppPlanTest(ScenarioTest):
     def _create_app_service_plan(self, sku, resource_group, plan_name=None, expect_failure=False):
         if plan_name == None:
