@@ -2107,22 +2107,11 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
     from .operations.vm import VMCreate
     from .aaz.latest.vm import Start as VMStart
 
-    # Step 2: PUT VM (with updated zone if applicable)
     if zone_change:
-        try:
-            create_poller = VMCreate(cli_ctx=cmd.cli_ctx)(command_args=vm)
-            LongRunningOperation(cmd.cli_ctx)(create_poller)
-            result = create_poller.result()
-        except Exception as put_error:
-            try:
-                start_poller = VMStart(cli_ctx=cmd.cli_ctx)(command_args={
-                    'resource_group': resource_group_name,
-                    'vm_name': vm_name
-                })
-                LongRunningOperation(cmd.cli_ctx)(start_poller)
-            except Exception as start_error:
-                logger.warning('Failed to restart VM after failed update: %s', start_error)
-            raise put_error
+        # Step 2: PUT VM (with updated zone)
+        create_poller = VMCreate(cli_ctx=cmd.cli_ctx)(command_args=vm)
+        LongRunningOperation(cmd.cli_ctx)(create_poller)
+        result = create_poller.result()
 
         # Step 3: Start VM
         start_poller = VMStart(cli_ctx=cmd.cli_ctx)(command_args={
