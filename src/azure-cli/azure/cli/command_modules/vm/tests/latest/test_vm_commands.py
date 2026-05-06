@@ -13964,6 +13964,31 @@ class ArchitectureScenarioTest(ScenarioTest):
             self.check('hyperVGeneration', 'V1'),
         ])
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_gallery_image_update_features_', location='EastUS2EUAP')
+    def test_gallery_image_definition_update_features(self, resource_group):
+        self.kwargs.update({
+            'gallery': self.create_random_name('gallery_', 20),
+            'image': 'image1',
+            'features': '[{"name":"DiskControllerTypes","value":"SCSI","startsAtVersion":"2.0.0"},{"name":"SecurityType","value":"TrustedLaunch","startsAtVersion":"2.0.0"}]',
+        })
+
+        self.cmd('sig create -g {rg} --gallery-name {gallery}')
+        self.cmd('sig image-definition create -g {rg} --gallery-name {gallery} --gallery-image-definition {image} '
+                 '--os-type linux -p publisher1 -f offer1 -s sku1')
+
+        self.cmd('sig image-definition update -g {rg} --gallery-name {gallery} --gallery-image-definition {image} '
+                 '--allow-update-image true '
+                 "--set 'features={features}'",
+                 checks=[
+                     self.check('features[0].name', 'DiskControllerTypes'),
+                     self.check('features[0].value', 'SCSI'),
+                     self.check('features[0].startsAtVersion', '2.0.0'),
+                     self.check('features[1].name', 'SecurityType'),
+                     self.check('features[1].value', 'TrustedLaunch'),
+                     self.check('features[1].startsAtVersion', '2.0.0'),
+                 ])
+
 
 class VMResizeScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_vm_resize')
