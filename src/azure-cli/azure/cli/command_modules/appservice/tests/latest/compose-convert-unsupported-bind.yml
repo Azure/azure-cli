@@ -1,0 +1,17 @@
+# Unsupported bind mounts (not using ${WEBAPP_STORAGE_HOME})
+# Tests: UNSUPPORTED bind mount warning, mixed supported/unsupported volumes
+version: '3'
+services:
+  app:
+    image: "myacr.azurecr.io/app:latest"
+    ports:
+      - "8080:8080"
+    volumes:
+      # Supported: uses ${WEBAPP_STORAGE_HOME}
+      - "${WEBAPP_STORAGE_HOME}/site/wwwroot:/app/public"
+      # Unsupported: absolute host path
+      - "/var/data:/app/data"
+      # Unsupported: relative path
+      - "./config:/app/config"
+      # Supported: another valid bind mount
+      - "${WEBAPP_STORAGE_HOME}/logs:/app/logs"

@@ -1,0 +1,22 @@
+# Volumes: named volumes (top-level volumes section)
+# Tests: named volume → /compose/volumes/<name> mapping (local ephemeral), top-level volumes parsing, warnings
+version: '3'
+services:
+  app:
+    image: "myacr.azurecr.io/nodeapp:latest"
+    ports:
+      - "3000:3000"
+    volumes:
+      - app-data:/app/data
+      - app-logs:/app/logs
+  mongo:
+    image: "mongo:7"
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  app-data:
+  app-logs:
+  mongo-data:
