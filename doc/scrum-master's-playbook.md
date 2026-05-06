@@ -20,6 +20,9 @@ Schedule release meetings in advance and involve the Azure CLI Dev distribution 
 
 Overall, these phases span seven weekdays across two working weeks.
 
+## prerequisite
+1. Ensure `NEXT_BREAKING_CHANGE_RELEASE` and `NEXT_BREAKING_CHANGE_DATE` in [breaking_change.py](https://github.com/Azure/azure-cli/blob/dev/src/azure-cli-core/azure/cli/core/breaking_change.py) are correct before proceeding with the phase1.
+
 ## Phase 1
 1. Triggering [Prepare for Release Build](https://dev.azure.com/azclitools/release/_release?definitionId=12) pipeline.
 2. Reviewing the Release PR to verify release history and its correctness.
