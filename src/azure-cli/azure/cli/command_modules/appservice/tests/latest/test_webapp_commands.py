@@ -154,7 +154,6 @@ class WebappQuickCreateTest(ScenarioTest):
             JMESPathCheck('[0].value', '~22'),
         ])
 
-    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix="clitest", random_name_length=24, location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_win_webapp_quick_create_runtime(self, resource_group):
@@ -173,7 +172,6 @@ class WebappQuickCreateTest(ScenarioTest):
             resource_group, webapp_name_2, plan)).get_output_in_json()
         self.assertTrue(r['ftpPublishingUrl'].startswith('ftps://'))
 
-    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_win_webapp_quick_create_cd(self, resource_group):
@@ -225,7 +223,6 @@ class WebappQuickCreateTest(ScenarioTest):
         r = requests.get('http://{}.azurewebsites.net'.format(webapp_name), timeout=400)
         self.assertTrue('Hello World! I have been' in str(r.content))
 
-    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP)
     def test_linux_webapp_quick_create_cd(self, resource_group):
@@ -481,7 +478,6 @@ class BackupRestoreTest(ScenarioTest):
 
 # Test Framework is not able to handle binary file format, hence, only run live
 class AppServiceLogTest(ScenarioTest):
-    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_download_win_web_log(self, resource_group):
@@ -734,7 +730,6 @@ class WebappElasticScaleTest(ScenarioTest):
         ])
 
 class WebappConfigureTest(ScenarioTest):
-    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_config', location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_config(self, resource_group):
@@ -1264,7 +1259,6 @@ class AppServiceBadErrorPolishTest(ScenarioTest):
 
 # this test doesn't contain the ultimate verification which you need to manually load the frontpage in a browser
 class LinuxWebappScenarioTest(ScenarioTest):
-    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP)
     def test_linux_webapp(self, resource_group):
@@ -1370,7 +1364,6 @@ class LinuxWebappSSHScenarioTest(ScenarioTest):
 
 
 class LinuxWebappRemoteSSHScenarioTest(ScenarioTest):
-    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP)
     def test_linux_webapp_remote_ssh(self, resource_group):
@@ -1432,7 +1425,6 @@ class LinuxWebappMulticontainerSlotScenarioTest(ScenarioTest):
 
 
 class WebappACRScenarioTest(ScenarioTest):
-    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_WEBAPP)
     def test_acr_integration(self, resource_group):
@@ -2598,7 +2590,6 @@ class WebappAcrUseManagedIdentityCredsTests(ScenarioTest):
             JMESPathCheck('acrUserManagedIdentityId', msi_result['clientId'])
         ])
 
-    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='webapp_linux_acr_use_identity',location=LINUX_ASP_LOCATION_WEBAPP)
     def test_webapp_linux_acr_use_identity(self, resource_group):
@@ -3314,7 +3305,6 @@ class TrackRuntimeStatusTest(ScenarioTest):
             JMESPathCheck('type', 'Microsoft.Web/sites/deploymentStatus'),
         ])
 
-    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_deploy_runtimestatus', location='eastus')
     def test_webapp_track_runtimestatus_buildfailed(self, resource_group):
@@ -3328,7 +3318,6 @@ class TrackRuntimeStatusTest(ScenarioTest):
         with self.assertRaisesRegex(CLIError, "Deployment failed because the build process failed"):
             self.cmd('webapp deploy -g {} --n {} --src-path "{}" --type zip --async'.format(resource_group, webapp_name, zip_file))
 
-    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_deploy_runtimestatus', location='eastus')
     def test_webapp_track_runtimestatus_runtimefailed(self, resource_group):
@@ -3377,7 +3366,6 @@ class TrackRuntimeStatusTest(ScenarioTest):
             JMESPathCheck('type', 'Microsoft.Web/sites/deploymentStatus'),
         ])
 
-    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_deployment_source_configzip_runtimestatus', location='eastus')
     def test_webapp_deployment_source_track_runtimestatus_buildfailed(self, resource_group):
@@ -3391,7 +3379,6 @@ class TrackRuntimeStatusTest(ScenarioTest):
         with self.assertRaisesRegex(CLIError, "Deployment failed because the build process failed"):
             self.cmd('webapp deployment source config-zip -g {} --n {} --src "{}"'.format(resource_group, webapp_name, zip_file))
 
-    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_deployment_source_configzip_runtimestatus', location='eastus')
     def test_webapp_deployment_source_track_runtimestatus_runtimefailed(self, resource_group):
