@@ -9524,7 +9524,7 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
 # region dedicated host tests
 class DedicatedHostScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_host_management_', location='eastus')
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_host_management_', location='westus')
     def test_vm_host_management(self, resource_group):
         self.kwargs.update({
             'host-group': 'my-host-group',
@@ -9536,7 +9536,7 @@ class DedicatedHostScenarioTest(ScenarioTest):
             self.check('length(@)', 1),
             self.check('[0].name', '{host-group}')
         ])
-        self.cmd('vm host create -n {host} --host-group {host-group} -d 2 -g {rg} --sku DSv3-Type1')
+        self.cmd('vm host create -n {host} --host-group {host-group} -d 2 -g {rg} --sku DCSv2-Type1')
         self.cmd('vm host list --host-group {host-group} -g {rg}', checks=[
             self.check('length(@)', 1),
             self.check('[0].name', '{host}')

@@ -1008,6 +1008,7 @@ def aks_create(
     ksm_metric_annotations_allow_list=None,
     grafana_resource_id=None,
     enable_windows_recording_rules=False,
+    enable_azure_monitor_app_monitoring=False,
     # azure container storage
     enable_azure_container_storage=None,
     container_storage_version=None,
@@ -1032,9 +1033,17 @@ def aks_create(
     # apiserver vnet integration
     enable_apiserver_vnet_integration=False,
     apiserver_subnet_id=None,
+    # BYO VNet for Managed System Pool (Automatic SKU)
+    system_node_subnet_id=None,
+    node_subnet_id=None,
+    enable_hosted_system=False,
     # node provisioning
     node_provisioning_mode=None,
     node_provisioning_default_pools=None,
+    # app routing istio
+    enable_app_routing_istio=False,
+    # gateway api
+    enable_gateway_api=False,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -1200,6 +1209,8 @@ def aks_update(
     grafana_resource_id=None,
     enable_windows_recording_rules=False,
     disable_azure_monitor_metrics=False,
+    enable_azure_monitor_app_monitoring=False,
+    disable_azure_monitor_app_monitoring=False,
     # azure container storage
     enable_azure_container_storage=None,
     disable_azure_container_storage=None,
@@ -1228,6 +1239,12 @@ def aks_update(
     # node provisioning
     node_provisioning_mode=None,
     node_provisioning_default_pools=None,
+    # app routing istio
+    enable_app_routing_istio=False,
+    disable_app_routing_istio=False,
+    # gateway api
+    enable_gateway_api=False,
+    disable_gateway_api=False,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -1273,7 +1290,7 @@ def aks_upgrade(cmd,
     instance = client.get(resource_group_name, name)
 
     vmas_cluster = False
-    for agent_profile in instance.agent_pool_profiles:
+    for agent_profile in (instance.agent_pool_profiles or []):
         if agent_profile.type.lower() == "availabilityset":
             vmas_cluster = True
             break
@@ -1290,7 +1307,7 @@ def aks_upgrade(cmd,
 
         # This only provide convenience for customer at client side so they can run az aks upgrade to upgrade all
         # nodepools of a cluster. The SDK only support upgrade single nodepool at a time.
-        for agent_pool_profile in instance.agent_pool_profiles:
+        for agent_pool_profile in (instance.agent_pool_profiles or []):
             if vmas_cluster:
                 raise CLIError('This cluster is using AvailabilitySet. Node image upgrade only operation '
                                'can only be applied on VirtualMachineScaleSets or VirtualMachines cluster.')
@@ -1354,7 +1371,7 @@ def aks_upgrade(cmd,
                 return None
 
     if upgrade_all:
-        for agent_profile in instance.agent_pool_profiles:
+        for agent_profile in (instance.agent_pool_profiles or []):
             agent_profile.orchestrator_version = kubernetes_version
             agent_profile.creation_data = None
 
@@ -1438,12 +1455,17 @@ def _upgrade_single_nodepool_image_version(no_wait, client, resource_group_name,
 def aks_scale(cmd, client, resource_group_name, name, node_count, nodepool_name="", no_wait=False):
     instance = client.get(resource_group_name, name)
 
-    if len(instance.agent_pool_profiles) > 1 and nodepool_name == "":
+    agent_pool_profiles = instance.agent_pool_profiles or []
+    if not agent_pool_profiles:
+        raise CLIError('The cluster has no scalable node pools (this may be a Managed System Pool for '
+                       'Automatic cluster). Use az aks nodepool add/scale against a user node pool instead.')
+
+    if len(agent_pool_profiles) > 1 and nodepool_name == "":
         raise CLIError('There are more than one node pool in the cluster. '
                        'Please specify nodepool name or use az aks nodepool command to scale node pool')
 
-    for agent_profile in instance.agent_pool_profiles:
-        if agent_profile.name == nodepool_name or (nodepool_name == "" and len(instance.agent_pool_profiles) == 1):
+    for agent_profile in agent_pool_profiles:
+        if agent_profile.name == nodepool_name or (nodepool_name == "" and len(agent_pool_profiles) == 1):
             if agent_profile.enable_auto_scaling:
                 raise CLIError(
                     "Cannot scale cluster autoscaler enabled node pool.")
@@ -3658,7 +3680,8 @@ def aks_mesh_enable(
         ca_cert_object_name=None,
         ca_key_object_name=None,
         root_cert_object_name=None,
-        cert_chain_object_name=None
+        cert_chain_object_name=None,
+        proxy_redirection_mechanism=None,
 ):
     instance = client.get(resource_group_name, name)
     addon_profiles = instance.addon_profiles
@@ -3677,7 +3700,8 @@ def aks_mesh_enable(
                             root_cert_object_name,
                             cert_chain_object_name,
                             revision=revision,
-                            enable_azure_service_mesh=True)
+                            enable_azure_service_mesh=True,
+                            proxy_redirection_mechanism=proxy_redirection_mechanism)
 
 
 def aks_mesh_disable(
@@ -3856,6 +3880,23 @@ def aks_mesh_upgrade_rollback(
         mesh_upgrade_command=CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_ROLLBACK)
 
 
+def aks_mesh_proxy_redirection_mechanism(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        mechanism,
+):
+    """Set the proxy redirection mechanism for Azure Service Mesh."""
+    return _aks_mesh_update(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        proxy_redirection_mechanism=mechanism,
+    )
+
+
 def _aks_mesh_get_supported_revisions(
         cmd,
         client,
@@ -3889,6 +3930,7 @@ def _aks_mesh_update(
         revision=None,
         yes=False,
         mesh_upgrade_command=None,
+        proxy_redirection_mechanism=None,
 ):
     raw_parameters = locals()
 
@@ -3965,6 +4007,34 @@ def aks_approuting_disable(
         resource_group_name,
         name,
         enable_app_routing=False)
+
+
+def aks_approuting_gateway_istio_enable(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+):
+    return _aks_approuting_update(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        enable_app_routing_istio=True)
+
+
+def aks_approuting_gateway_istio_disable(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+):
+    return _aks_approuting_update(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        disable_app_routing_istio=True)
 
 
 def aks_approuting_update(
@@ -4079,7 +4149,9 @@ def _aks_approuting_update(
         update_dns_zone=None,
         dns_zone_resource_ids=None,
         attach_zones=None,
-        nginx=None
+        nginx=None,
+        enable_app_routing_istio=None,
+        disable_app_routing_istio=None,
 ):
     from azure.cli.command_modules.acs.managed_cluster_decorator import AKSManagedClusterUpdateDecorator
 
@@ -4095,6 +4167,7 @@ def _aks_approuting_update(
     try:
         mc = aks_update_decorator.fetch_mc()
         mc = aks_update_decorator.update_app_routing_profile(mc)
+        mc = aks_update_decorator.update_ingress_profile_app_routing_istio(mc)
     except DecoratorEarlyExitException:
         return None
 
