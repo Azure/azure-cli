@@ -11,20 +11,14 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "vm host show",
-)
 class Show(AAZCommand):
-    """Get the details of a dedicated host.
-
-    :example: Get the details of a dedicated host.
-        az vm host show --host-group MyHostGroup --name MyDedicatedHost --resource-group MyResourceGroup
+    """Get operation that retrieves information about a capacity reservation group.
     """
 
     _aaz_info = {
         "version": "2024-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/hostgroups/{}/hosts/{}", "2024-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/capacityreservationgroups/{}", "2024-11-01"],
         ]
     }
 
@@ -44,31 +38,25 @@ class Show(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.host_group_name = AAZStrArg(
-            options=["--host-group", "--host-group-name"],
-            help="The name of the dedicated host group.",
+        _args_schema.capacity_reservation_group_name = AAZStrArg(
+            options=["-n", "--capacity-reservation-group", "--capacity-reservation-group-name"],
+            help="The name of the capacity reservation group.",
             required=True,
             id_part="name",
-        )
-        _args_schema.host_name = AAZStrArg(
-            options=["-n", "--name", "--host-name"],
-            help="The name of the dedicated host.",
-            required=True,
-            id_part="child_name_1",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
         _args_schema.expand = AAZStrArg(
             options=["--expand"],
-            help="The expand expression to apply on the operation. 'InstanceView' will retrieve the list of instance views of the dedicated host. 'UserData' is not supported for dedicated host.",
-            enum={"instanceView": "instanceView", "resiliencyView": "resiliencyView", "userData": "userData"},
+            help="The expand expression to apply on the operation. 'InstanceView' will retrieve the list of instance views of the capacity reservations under the capacity reservation group which is a snapshot of the runtime properties of a capacity reservation that is managed by the platform and can change outside of control plane operations.",
+            enum={"instanceView": "instanceView"},
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.DedicatedHostsGet(ctx=self.ctx)()
+        self.CapacityReservationGroupsGet(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -83,7 +71,7 @@ class Show(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class DedicatedHostsGet(AAZHttpOperation):
+    class CapacityReservationGroupsGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -97,7 +85,7 @@ class Show(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/hostGroups/{hostGroupName}/hosts/{hostName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/capacityReservationGroups/{capacityReservationGroupName}",
                 **self.url_parameters
             )
 
@@ -113,11 +101,7 @@ class Show(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "hostGroupName", self.ctx.args.host_group_name,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "hostName", self.ctx.args.host_name,
+                    "capacityReservationGroupName", self.ctx.args.capacity_reservation_group_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -183,9 +167,6 @@ class Show(AAZCommand):
             _schema_on_200.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
-            _schema_on_200.sku = AAZObjectType(
-                flags={"required": True},
-            )
             _schema_on_200.system_data = AAZObjectType(
                 serialized_name="systemData",
                 flags={"read_only": True},
@@ -194,70 +175,55 @@ class Show(AAZCommand):
             _schema_on_200.type = AAZStrType(
                 flags={"read_only": True},
             )
+            _schema_on_200.zones = AAZListType()
 
             properties = cls._schema_on_200.properties
-            properties.auto_replace_on_failure = AAZBoolType(
-                serialized_name="autoReplaceOnFailure",
-            )
-            properties.host_id = AAZStrType(
-                serialized_name="hostId",
+            properties.capacity_reservations = AAZListType(
+                serialized_name="capacityReservations",
                 flags={"read_only": True},
             )
             properties.instance_view = AAZObjectType(
                 serialized_name="instanceView",
                 flags={"read_only": True},
             )
-            properties.license_type = AAZStrType(
-                serialized_name="licenseType",
+            properties.sharing_profile = AAZObjectType(
+                serialized_name="sharingProfile",
             )
-            properties.platform_fault_domain = AAZIntType(
-                serialized_name="platformFaultDomain",
-            )
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
+            properties.virtual_machines_associated = AAZListType(
+                serialized_name="virtualMachinesAssociated",
                 flags={"read_only": True},
             )
-            properties.provisioning_time = AAZStrType(
-                serialized_name="provisioningTime",
-                flags={"read_only": True},
-            )
-            properties.time_created = AAZStrType(
-                serialized_name="timeCreated",
-                flags={"read_only": True},
-            )
-            properties.virtual_machines = AAZListType(
-                serialized_name="virtualMachines",
-                flags={"read_only": True},
-            )
+
+            capacity_reservations = cls._schema_on_200.properties.capacity_reservations
+            capacity_reservations.Element = AAZObjectType()
+            _ShowHelper._build_schema_sub_resource_read_only_read(capacity_reservations.Element)
 
             instance_view = cls._schema_on_200.properties.instance_view
-            instance_view.asset_id = AAZStrType(
-                serialized_name="assetId",
+            instance_view.capacity_reservations = AAZListType(
+                serialized_name="capacityReservations",
                 flags={"read_only": True},
             )
-            instance_view.available_capacity = AAZObjectType(
-                serialized_name="availableCapacity",
-            )
-            instance_view.statuses = AAZListType()
-
-            available_capacity = cls._schema_on_200.properties.instance_view.available_capacity
-            available_capacity.allocatable_v_ms = AAZListType(
-                serialized_name="allocatableVMs",
+            instance_view.shared_subscription_ids = AAZListType(
+                serialized_name="sharedSubscriptionIds",
+                flags={"read_only": True},
             )
 
-            allocatable_v_ms = cls._schema_on_200.properties.instance_view.available_capacity.allocatable_v_ms
-            allocatable_v_ms.Element = AAZObjectType()
+            capacity_reservations = cls._schema_on_200.properties.instance_view.capacity_reservations
+            capacity_reservations.Element = AAZObjectType()
 
-            _element = cls._schema_on_200.properties.instance_view.available_capacity.allocatable_v_ms.Element
-            _element.count = AAZFloatType()
-            _element.vm_size = AAZStrType(
-                serialized_name="vmSize",
+            _element = cls._schema_on_200.properties.instance_view.capacity_reservations.Element
+            _element.name = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.statuses = AAZListType()
+            _element.utilization_info = AAZObjectType(
+                serialized_name="utilizationInfo",
             )
 
-            statuses = cls._schema_on_200.properties.instance_view.statuses
+            statuses = cls._schema_on_200.properties.instance_view.capacity_reservations.Element.statuses
             statuses.Element = AAZObjectType()
 
-            _element = cls._schema_on_200.properties.instance_view.statuses.Element
+            _element = cls._schema_on_200.properties.instance_view.capacity_reservations.Element.statuses.Element
             _element.code = AAZStrType()
             _element.display_status = AAZStrType(
                 serialized_name="displayStatus",
@@ -266,18 +232,38 @@ class Show(AAZCommand):
             _element.message = AAZStrType()
             _element.time = AAZStrType()
 
-            virtual_machines = cls._schema_on_200.properties.virtual_machines
-            virtual_machines.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.properties.virtual_machines.Element
-            _element.id = AAZStrType(
+            utilization_info = cls._schema_on_200.properties.instance_view.capacity_reservations.Element.utilization_info
+            utilization_info.current_capacity = AAZIntType(
+                serialized_name="currentCapacity",
+                flags={"read_only": True},
+            )
+            utilization_info.virtual_machines_allocated = AAZListType(
+                serialized_name="virtualMachinesAllocated",
                 flags={"read_only": True},
             )
 
-            sku = cls._schema_on_200.sku
-            sku.capacity = AAZIntType()
-            sku.name = AAZStrType()
-            sku.tier = AAZStrType()
+            virtual_machines_allocated = cls._schema_on_200.properties.instance_view.capacity_reservations.Element.utilization_info.virtual_machines_allocated
+            virtual_machines_allocated.Element = AAZObjectType()
+            _ShowHelper._build_schema_sub_resource_read_only_read(virtual_machines_allocated.Element)
+
+            shared_subscription_ids = cls._schema_on_200.properties.instance_view.shared_subscription_ids
+            shared_subscription_ids.Element = AAZObjectType()
+            _ShowHelper._build_schema_sub_resource_read_only_read(shared_subscription_ids.Element)
+
+            sharing_profile = cls._schema_on_200.properties.sharing_profile
+            sharing_profile.subscription_ids = AAZListType(
+                serialized_name="subscriptionIds",
+            )
+
+            subscription_ids = cls._schema_on_200.properties.sharing_profile.subscription_ids
+            subscription_ids.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.properties.sharing_profile.subscription_ids.Element
+            _element.id = AAZStrType()
+
+            virtual_machines_associated = cls._schema_on_200.properties.virtual_machines_associated
+            virtual_machines_associated.Element = AAZObjectType()
+            _ShowHelper._build_schema_sub_resource_read_only_read(virtual_machines_associated.Element)
 
             system_data = cls._schema_on_200.system_data
             system_data.created_at = AAZStrType(
@@ -302,11 +288,31 @@ class Show(AAZCommand):
             tags = cls._schema_on_200.tags
             tags.Element = AAZStrType()
 
+            zones = cls._schema_on_200.zones
+            zones.Element = AAZStrType()
+
             return cls._schema_on_200
 
 
 class _ShowHelper:
     """Helper class for Show"""
+
+    _schema_sub_resource_read_only_read = None
+
+    @classmethod
+    def _build_schema_sub_resource_read_only_read(cls, _schema):
+        if cls._schema_sub_resource_read_only_read is not None:
+            _schema.id = cls._schema_sub_resource_read_only_read.id
+            return
+
+        cls._schema_sub_resource_read_only_read = _schema_sub_resource_read_only_read = AAZObjectType()
+
+        sub_resource_read_only_read = _schema_sub_resource_read_only_read
+        sub_resource_read_only_read.id = AAZStrType(
+            flags={"read_only": True},
+        )
+
+        _schema.id = cls._schema_sub_resource_read_only_read.id
 
 
 __all__ = ["Show"]

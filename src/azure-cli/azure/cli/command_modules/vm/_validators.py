@@ -1845,7 +1845,7 @@ def process_vmss_create_namespace(cmd, namespace):
             if namespace.vm_sku is None:
                 from azure.cli.core.cloud import AZURE_US_GOV_CLOUD
                 if cmd.cli_ctx.cloud.name != AZURE_US_GOV_CLOUD.name:
-                    namespace.vm_sku = 'Standard_DS1_v2'
+                    namespace.vm_sku = 'Standard_D2s_v5'
                 else:
                     namespace.vm_sku = 'Standard_D1_v2'
 
@@ -1913,7 +1913,7 @@ def process_vmss_create_namespace(cmd, namespace):
     if namespace.vm_sku is None:
         from azure.cli.core.cloud import AZURE_US_GOV_CLOUD
         if cmd.cli_ctx.cloud.name != AZURE_US_GOV_CLOUD.name:
-            namespace.vm_sku = 'Standard_DS1_v2'
+            namespace.vm_sku = 'Standard_D2s_v5'
         else:
             namespace.vm_sku = 'Standard_D1_v2'
     _validate_location(cmd, namespace, namespace.zones, namespace.vm_sku)

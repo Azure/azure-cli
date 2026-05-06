@@ -25,9 +25,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2021-10-01",
+        "version": "2024-03-03",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/galleries/{}/images/{}", "2021-10-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/galleries/{}/images/{}", "2024-03-03"],
         ]
     }
 
@@ -61,6 +61,9 @@ class Update(AAZCommand):
             help="The name of the Shared Image Gallery in which the Image Definition resides.",
             required=True,
             id_part="name",
+            fmt=AAZStrArgFormat(
+                pattern="^[^_\\W][\\w._-]{0,79}(?<![-.])$",
+            ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
@@ -69,13 +72,6 @@ class Update(AAZCommand):
         # define Arg Group "GalleryImage"
 
         _args_schema = cls._args_schema
-        _args_schema.location = AAZResourceLocationArg(
-            arg_group="GalleryImage",
-            help="Resource location",
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group",
-            ),
-        )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
             arg_group="GalleryImage",
@@ -91,6 +87,12 @@ class Update(AAZCommand):
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
+        _args_schema.allow_update_image = AAZBoolArg(
+            options=["--allow-update-image"],
+            arg_group="Properties",
+            help="Optional. Must be set to true if the gallery image features are being updated.",
+            nullable=True,
+        )
         _args_schema.architecture = AAZStrArg(
             options=["--architecture"],
             arg_group="Properties",
@@ -115,6 +117,9 @@ class Update(AAZCommand):
             arg_group="Properties",
             help="The end of life date of the gallery image definition. This property can be used for decommissioning purposes. This property is updatable.",
             nullable=True,
+            fmt=AAZDateTimeFormat(
+                protocol="iso",
+            ),
         )
         _args_schema.eula = AAZStrArg(
             options=["--eula"],
@@ -200,6 +205,11 @@ class Update(AAZCommand):
             help="The name of the gallery image feature.",
             nullable=True,
         )
+        _element.starts_at_version = AAZStrArg(
+            options=["starts-at-version"],
+            help="The minimum gallery image version which supports this feature.",
+            nullable=True,
+        )
         _element.value = AAZStrArg(
             options=["value"],
             help="The value of the gallery image feature.",
@@ -240,6 +250,7 @@ class Update(AAZCommand):
         recommended = cls._args_schema.recommended
         recommended.memory = AAZObjectArg(
             options=["memory"],
+            help="Describes the resource range.",
             nullable=True,
         )
         cls._build_args_resource_range_update(recommended.memory)
@@ -361,7 +372,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2021-10-01",
+                    "api-version", "2024-03-03",
                     required=True,
                 ),
             }
@@ -408,7 +419,7 @@ class Update(AAZCommand):
                     session,
                     self.on_200_201,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
             if session.http_response.status_code in [200, 201]:
@@ -417,7 +428,7 @@ class Update(AAZCommand):
                     session,
                     self.on_200_201,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
 
@@ -464,7 +475,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2021-10-01",
+                    "api-version", "2024-03-03",
                     required=True,
                 ),
             }
@@ -522,12 +533,12 @@ class Update(AAZCommand):
                 value=instance,
                 typ=AAZObjectType
             )
-            _builder.set_prop("location", AAZStrType, ".location", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
             _builder.set_prop("tags", AAZDictType, ".tags")
 
             properties = _builder.get(".properties")
             if properties is not None:
+                properties.set_prop("allowUpdateImage", AAZBoolType, ".allow_update_image")
                 properties.set_prop("architecture", AAZStrType, ".architecture")
                 properties.set_prop("description", AAZStrType, ".description")
                 properties.set_prop("disallowed", AAZObjectType, ".disallowed")
@@ -558,6 +569,7 @@ class Update(AAZCommand):
             _elements = _builder.get(".properties.features[]")
             if _elements is not None:
                 _elements.set_prop("name", AAZStrType, ".name")
+                _elements.set_prop("startsAtVersion", AAZStrType, ".starts_at_version")
                 _elements.set_prop("value", AAZStrType, ".value")
 
             identifier = _builder.get(".properties.identifier")
@@ -611,6 +623,7 @@ class _UpdateHelper:
             _schema.location = cls._schema_gallery_image_read.location
             _schema.name = cls._schema_gallery_image_read.name
             _schema.properties = cls._schema_gallery_image_read.properties
+            _schema.system_data = cls._schema_gallery_image_read.system_data
             _schema.tags = cls._schema_gallery_image_read.tags
             _schema.type = cls._schema_gallery_image_read.type
             return
@@ -630,12 +643,19 @@ class _UpdateHelper:
         gallery_image_read.properties = AAZObjectType(
             flags={"client_flatten": True},
         )
+        gallery_image_read.system_data = AAZObjectType(
+            serialized_name="systemData",
+            flags={"read_only": True},
+        )
         gallery_image_read.tags = AAZDictType()
         gallery_image_read.type = AAZStrType(
             flags={"read_only": True},
         )
 
         properties = _schema_gallery_image_read.properties
+        properties.allow_update_image = AAZBoolType(
+            serialized_name="allowUpdateImage",
+        )
         properties.architecture = AAZStrType()
         properties.description = AAZStrType()
         properties.disallowed = AAZObjectType()
@@ -686,6 +706,9 @@ class _UpdateHelper:
 
         _element = _schema_gallery_image_read.properties.features.Element
         _element.name = AAZStrType()
+        _element.starts_at_version = AAZStrType(
+            serialized_name="startsAtVersion",
+        )
         _element.value = AAZStrType()
 
         identifier = _schema_gallery_image_read.properties.identifier
@@ -712,6 +735,26 @@ class _UpdateHelper:
         )
         cls._build_schema_resource_range_read(recommended.v_cp_us)
 
+        system_data = _schema_gallery_image_read.system_data
+        system_data.created_at = AAZStrType(
+            serialized_name="createdAt",
+        )
+        system_data.created_by = AAZStrType(
+            serialized_name="createdBy",
+        )
+        system_data.created_by_type = AAZStrType(
+            serialized_name="createdByType",
+        )
+        system_data.last_modified_at = AAZStrType(
+            serialized_name="lastModifiedAt",
+        )
+        system_data.last_modified_by = AAZStrType(
+            serialized_name="lastModifiedBy",
+        )
+        system_data.last_modified_by_type = AAZStrType(
+            serialized_name="lastModifiedByType",
+        )
+
         tags = _schema_gallery_image_read.tags
         tags.Element = AAZStrType()
 
@@ -719,6 +762,7 @@ class _UpdateHelper:
         _schema.location = cls._schema_gallery_image_read.location
         _schema.name = cls._schema_gallery_image_read.name
         _schema.properties = cls._schema_gallery_image_read.properties
+        _schema.system_data = cls._schema_gallery_image_read.system_data
         _schema.tags = cls._schema_gallery_image_read.tags
         _schema.type = cls._schema_gallery_image_read.type
 
