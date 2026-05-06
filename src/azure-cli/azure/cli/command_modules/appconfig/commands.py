@@ -56,6 +56,11 @@ def load_command_table(self, _):
         table_transformer=configstore_snapshot_output_format
     )
 
+    configstore_nsp_util = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.appconfig.network_security_perimeter#{}',
+        client_factory=cf_nsp_configurations
+    )
+
     def get_custom_sdk(custom_module, client_factory, table_transformer):
         """Returns a CliCommandType instance with specified operation template based on the given custom module name.
         This is useful when the command is not defined in the default 'custom' module but instead in a module under
@@ -141,11 +146,7 @@ def load_command_table(self, _):
         g.command('archive', 'archive_snapshot')
         g.command('recover', 'recover_snapshot')
 
-    configstore_nsp_util = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.appconfig.network_security_perimeter#{}',
-        client_factory=cf_nsp_configurations
-    )
-
+    # NSP Commands
     with self.command_group('appconfig network-security-perimeter-configuration', configstore_nsp_util) as g:
         g.command('list', 'list_nsp_configurations')
         g.show_command('show', 'show_nsp_configuration')
