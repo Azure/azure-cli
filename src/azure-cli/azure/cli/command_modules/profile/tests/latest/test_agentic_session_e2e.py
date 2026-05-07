@@ -53,7 +53,7 @@ class AgenticSessionScenarioTest(LiveScenarioTest):
 
     def test_agent_agent_reuses_cache(self):
         """Agent followed by agent (same session ID) should reuse the cached token."""
-        os.environ['COPILOT_AGENT_SESSION_ID'] = 'e2e-session-same'
+        os.environ['COPILOT_AGENT_SESSION_ID'] = 'e2e-session-same-reuse-01'
         try:
             _, claims1 = self._get_access_token()
             _, claims2 = self._get_access_token()
@@ -104,10 +104,10 @@ class AgenticSessionScenarioTest(LiveScenarioTest):
     def test_agent_session1_then_agent_session2_does_not_reuse_cache(self):
         """Agent with session1 followed by agent with session2 should NOT reuse cache."""
         try:
-            os.environ['COPILOT_AGENT_SESSION_ID'] = 'e2e-session-AAA'
+            os.environ['COPILOT_AGENT_SESSION_ID'] = 'e2e-session-AAA-isolation'
             _, claims_a = self._get_access_token()
 
-            os.environ['COPILOT_AGENT_SESSION_ID'] = 'e2e-session-BBB'
+            os.environ['COPILOT_AGENT_SESSION_ID'] = 'e2e-session-BBB-isolation'
             _, claims_b = self._get_access_token()
 
             self.assertNotEqual(claims_a.get('uti'), claims_b.get('uti'),

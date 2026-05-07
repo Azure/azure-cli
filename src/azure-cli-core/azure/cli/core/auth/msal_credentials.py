@@ -51,13 +51,17 @@ class UserCredential:  # pylint: disable=too-few-public-methods
                      scopes, claims_challenge, kwargs)
 
         # Apply agentic session parameters for user identity flows
-        from .agentic_session import build_agentic_session_params
-        agentic_session_id, _ = build_agentic_session_params()
+        from .agentic_session import build_agentic_session_params, merge_access_token_claims
+        agentic_session_id, agentic_claims = build_agentic_session_params()
         if agentic_session_id:
+            # Non-broker path: client_session in data flows into ext_cache_key for cache isolation
             kwargs["data"] = kwargs.get("data") or {}
             kwargs["data"]["client_session"] = agentic_session_id
             kwargs["params"] = kwargs.get("params") or {}
             kwargs["params"]["client_session"] = agentic_session_id
+
+            # Broker path: claims_challenge flows to MSALRuntime cache key via set_decoded_claims
+            claims_challenge = merge_access_token_claims(claims_challenge, agentic_claims)
 
             from azure.cli.core.telemetry import set_agentic_session
             set_agentic_session(True)
