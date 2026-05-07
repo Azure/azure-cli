@@ -5147,8 +5147,8 @@ def set_vmss_diagnostics_extension(cmd, resource_group_name, vmss_name, settings
         major_ver = extension_mappings[_LINUX_DIAG_EXT]['version'].split('.', maxsplit=1)[0]
         # For VMSS, we don't do auto-removal like VM because there is no reliable API to wait for
         # the removal done before we can install the newer one
-        if next((e for e in exts if e.name == _LINUX_DIAG_EXT and
-                 not e.type_handler_version.startswith(major_ver + '.')), None):
+        if next((e for e in exts if e.get('name') == _LINUX_DIAG_EXT and
+                 not e.get('typeHandlerVersion').startswith(major_ver + '.')), None):
             delete_cmd = 'az vmss extension delete -g {} --vmss-name {} -n {}'.format(
                 resource_group_name, vmss_name, vm_extension_name)
             raise CLIError("There is an incompatible version of diagnostics extension installed. "
