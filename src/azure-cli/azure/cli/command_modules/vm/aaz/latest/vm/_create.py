@@ -16,9 +16,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-04-01",
+        "version": "2025-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/virtualmachines/{}", "2025-04-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/virtualmachines/{}", "2025-11-01"],
         ]
     }
 
@@ -262,6 +262,11 @@ class Create(AAZCommand):
             help="Specifies information about the proximity placement group that the virtual machine should be assigned to. Minimum api-version: 2018-04-01.",
         )
         cls._build_args_sub_resource_create(_args_schema.proximity_placement_group)
+        _args_schema.resiliency_profile = AAZObjectArg(
+            options=["--resiliency-profile"],
+            arg_group="Properties",
+            help="Resiliency profile for the virtual machine.",
+        )
         _args_schema.scheduled_events_policy = AAZObjectArg(
             options=["--scheduled-events-policy"],
             arg_group="Properties",
@@ -881,6 +886,18 @@ class Create(AAZCommand):
             enum={"Http": "Http", "Https": "Https"},
         )
 
+        resiliency_profile = cls._args_schema.resiliency_profile
+        resiliency_profile.zone_movement = AAZObjectArg(
+            options=["zone-movement"],
+            help="Zone movement configuration.",
+        )
+
+        zone_movement = cls._args_schema.resiliency_profile.zone_movement
+        zone_movement.is_enabled = AAZBoolArg(
+            options=["is-enabled"],
+            help="Indicates if zone movement is enabled. By default isEnabled is set to false i.e VM can't be moved from one zone to another.",
+        )
+
         scheduled_events_policy = cls._args_schema.scheduled_events_policy
         scheduled_events_policy.all_instances_down = AAZObjectArg(
             options=["all-instances-down"],
@@ -979,7 +996,7 @@ class Create(AAZCommand):
         security_profile.security_type = AAZStrArg(
             options=["security-type"],
             help="Specifies the SecurityType of the virtual machine. It has to be set to any specified value to enable UefiSettings. The default behavior is: UefiSettings will not be enabled unless this property is set.",
-            enum={"ConfidentialVM": "ConfidentialVM", "TrustedLaunch": "TrustedLaunch"},
+            enum={"ConfidentialVM": "ConfidentialVM", "Standard": "Standard", "TrustedLaunch": "TrustedLaunch"},
         )
         security_profile.uefi_settings = AAZObjectArg(
             options=["uefi-settings"],
@@ -1114,6 +1131,11 @@ class Create(AAZCommand):
             options=["source-resource"],
             help="The source resource identifier. It can be a snapshot, or disk restore point from which to create a disk.",
         )
+        _element.storage_fault_domain_alignment = AAZStrArg(
+            options=["storage-fault-domain-alignment"],
+            help="Specifies the storage fault domain alignment type for the disk.",
+            enum={"Aligned": "Aligned", "BestEffortAligned": "BestEffortAligned"},
+        )
         _element.to_be_detached = AAZBoolArg(
             options=["to-be-detached"],
             help="Specifies whether the data disk is in process of detachment from the VirtualMachine/VirtualMachineScaleset",
@@ -1212,6 +1234,11 @@ class Create(AAZCommand):
             help="This property allows you to specify the type of the OS that is included in the disk if creating a VM from user-image or a specialized VHD. Possible values are: **Windows,** **Linux.**",
             enum={"Linux": "Linux", "Windows": "Windows"},
         )
+        os_disk.storage_fault_domain_alignment = AAZStrArg(
+            options=["storage-fault-domain-alignment"],
+            help="Specifies the storage fault domain alignment type for the disk.",
+            enum={"Aligned": "Aligned", "BestEffortAligned": "BestEffortAligned"},
+        )
         os_disk.vhd = AAZObjectArg(
             options=["vhd"],
             help="The virtual hard disk.",
@@ -1223,6 +1250,10 @@ class Create(AAZCommand):
         )
 
         diff_disk_settings = cls._args_schema.storage_profile.os_disk.diff_disk_settings
+        diff_disk_settings.enable_full_caching = AAZBoolArg(
+            options=["enable-full-caching"],
+            help="Specifies whether or not to enable full caching for this VM which will cache the OS disk locally on the host and make this VM more resilient to storage outages",
+        )
         diff_disk_settings.option = AAZStrArg(
             options=["option"],
             help="Specifies the ephemeral disk settings for operating system disk.",
@@ -1485,7 +1516,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-04-01",
+                    "api-version", "2025-11-01",
                     required=True,
                 ),
             }
@@ -1579,6 +1610,7 @@ class Create(AAZCommand):
                 properties.set_prop("platformFaultDomain", AAZIntType, ".platform_fault_domain")
                 properties.set_prop("priority", AAZStrType, ".priority")
                 _CreateHelper._build_schema_sub_resource_create(properties.set_prop("proximityPlacementGroup", AAZObjectType, ".proximity_placement_group"))
+                properties.set_prop("resiliencyProfile", AAZObjectType, ".resiliency_profile")
                 properties.set_prop("scheduledEventsPolicy", AAZObjectType, ".scheduled_events_policy")
                 properties.set_prop("scheduledEventsProfile", AAZObjectType, ".scheduled_events_profile")
                 properties.set_prop("securityProfile", AAZObjectType, ".security_profile")
@@ -1871,6 +1903,14 @@ class Create(AAZCommand):
                 _elements.set_prop("certificateUrl", AAZStrType, ".certificate_url")
                 _elements.set_prop("protocol", AAZStrType, ".protocol")
 
+            resiliency_profile = _builder.get(".properties.resiliencyProfile")
+            if resiliency_profile is not None:
+                resiliency_profile.set_prop("zoneMovement", AAZObjectType, ".zone_movement")
+
+            zone_movement = _builder.get(".properties.resiliencyProfile.zoneMovement")
+            if zone_movement is not None:
+                zone_movement.set_prop("isEnabled", AAZBoolType, ".is_enabled")
+
             scheduled_events_policy = _builder.get(".properties.scheduledEventsPolicy")
             if scheduled_events_policy is not None:
                 scheduled_events_policy.set_prop("allInstancesDown", AAZObjectType, ".all_instances_down")
@@ -1966,6 +2006,7 @@ class Create(AAZCommand):
                 _CreateHelper._build_schema_managed_disk_parameters_create(_elements.set_prop("managedDisk", AAZObjectType, ".managed_disk"))
                 _elements.set_prop("name", AAZStrType, ".name")
                 _elements.set_prop("sourceResource", AAZObjectType, ".source_resource")
+                _elements.set_prop("storageFaultDomainAlignment", AAZStrType, ".storage_fault_domain_alignment")
                 _elements.set_prop("toBeDetached", AAZBoolType, ".to_be_detached")
                 _CreateHelper._build_schema_virtual_hard_disk_create(_elements.set_prop("vhd", AAZObjectType, ".vhd"))
                 _elements.set_prop("writeAcceleratorEnabled", AAZBoolType, ".write_accelerator_enabled")
@@ -1996,11 +2037,13 @@ class Create(AAZCommand):
                 _CreateHelper._build_schema_managed_disk_parameters_create(os_disk.set_prop("managedDisk", AAZObjectType, ".managed_disk"))
                 os_disk.set_prop("name", AAZStrType, ".name")
                 os_disk.set_prop("osType", AAZStrType, ".os_type")
+                os_disk.set_prop("storageFaultDomainAlignment", AAZStrType, ".storage_fault_domain_alignment")
                 _CreateHelper._build_schema_virtual_hard_disk_create(os_disk.set_prop("vhd", AAZObjectType, ".vhd"))
                 os_disk.set_prop("writeAcceleratorEnabled", AAZBoolType, ".write_accelerator_enabled")
 
             diff_disk_settings = _builder.get(".properties.storageProfile.osDisk.diffDiskSettings")
             if diff_disk_settings is not None:
+                diff_disk_settings.set_prop("enableFullCaching", AAZBoolType, ".enable_full_caching")
                 diff_disk_settings.set_prop("option", AAZStrType, ".option")
                 diff_disk_settings.set_prop("placement", AAZStrType, ".placement")
 
@@ -2203,6 +2246,9 @@ class Create(AAZCommand):
                 serialized_name="proximityPlacementGroup",
             )
             _CreateHelper._build_schema_sub_resource_read(properties.proximity_placement_group)
+            properties.resiliency_profile = AAZObjectType(
+                serialized_name="resiliencyProfile",
+            )
             properties.scheduled_events_policy = AAZObjectType(
                 serialized_name="scheduledEventsPolicy",
             )
@@ -2378,6 +2424,9 @@ class Create(AAZCommand):
             )
             _element.name = AAZStrType()
             _element.statuses = AAZListType()
+            _element.storage_alignment_status = AAZStrType(
+                serialized_name="storageAlignmentStatus",
+            )
 
             encryption_settings = cls._schema_on_200_201.properties.instance_view.disks.Element.encryption_settings
             encryption_settings.Element = AAZObjectType()
@@ -2904,6 +2953,16 @@ class Create(AAZCommand):
             )
             _element.protocol = AAZStrType()
 
+            resiliency_profile = cls._schema_on_200_201.properties.resiliency_profile
+            resiliency_profile.zone_movement = AAZObjectType(
+                serialized_name="zoneMovement",
+            )
+
+            zone_movement = cls._schema_on_200_201.properties.resiliency_profile.zone_movement
+            zone_movement.is_enabled = AAZBoolType(
+                serialized_name="isEnabled",
+            )
+
             scheduled_events_policy = cls._schema_on_200_201.properties.scheduled_events_policy
             scheduled_events_policy.all_instances_down = AAZObjectType(
                 serialized_name="allInstancesDown",
@@ -3064,6 +3123,9 @@ class Create(AAZCommand):
             _element.source_resource = AAZObjectType(
                 serialized_name="sourceResource",
             )
+            _element.storage_fault_domain_alignment = AAZStrType(
+                serialized_name="storageFaultDomainAlignment",
+            )
             _element.to_be_detached = AAZBoolType(
                 serialized_name="toBeDetached",
             )
@@ -3122,6 +3184,9 @@ class Create(AAZCommand):
             os_disk.os_type = AAZStrType(
                 serialized_name="osType",
             )
+            os_disk.storage_fault_domain_alignment = AAZStrType(
+                serialized_name="storageFaultDomainAlignment",
+            )
             os_disk.vhd = AAZObjectType()
             _CreateHelper._build_schema_virtual_hard_disk_read(os_disk.vhd)
             os_disk.write_accelerator_enabled = AAZBoolType(
@@ -3129,6 +3194,9 @@ class Create(AAZCommand):
             )
 
             diff_disk_settings = cls._schema_on_200_201.properties.storage_profile.os_disk.diff_disk_settings
+            diff_disk_settings.enable_full_caching = AAZBoolType(
+                serialized_name="enableFullCaching",
+            )
             diff_disk_settings.option = AAZStrType()
             diff_disk_settings.placement = AAZStrType()
 
