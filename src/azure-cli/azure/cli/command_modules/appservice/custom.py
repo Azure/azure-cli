@@ -120,6 +120,30 @@ logger = get_logger(__name__)
 # Please maintain compatibility in both interfaces and functionalities"
 
 
+def _is_service_principal_auth(cli_ctx):
+    """Check if current authentication is via Service Principal.
+
+    This helper performs profile/subscription lookups which can fail in cases such as
+    no subscription being selected or token/cache issues. In those situations, we
+    conservatively return False instead of raising, to avoid blocking unrelated
+    command flows (e.g. deployment source configuration) with profile errors.
+    """
+    from azure.cli.core._profile import Profile
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    try:
+        profile = Profile(cli_ctx=cli_ctx)
+        subscription_id = get_subscription_id(cli_ctx)
+        if not subscription_id:
+            logger.debug("Unable to determine authentication type: no active subscription ID.")
+            return False
+        account = profile.get_subscription(subscription=subscription_id)
+    except Exception as ex:  # pylint: disable=broad-exception-caught
+        logger.debug("Failed to determine authentication type from profile: %s", ex)
+        return False
+    # Service principals have user.type == 'servicePrincipal'
+    return account.get('user', {}).get('type') == 'servicePrincipal'
+
+
 def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_file=None,  # pylint: disable=too-many-statements,too-many-branches
                   deployment_container_image_name=None, deployment_source_url=None, deployment_source_branch='master',
                   deployment_local_git=None, sitecontainers_app=None,
@@ -3409,7 +3433,109 @@ def remove_identity(cmd, resource_group_name, name, remove_identities=None, slot
     return webapp.identity
 
 
+def _get_auth_settings_v2(cmd, resource_group_name, name, slot=None):
+    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
+                                   'get_auth_settings_v2', slot)
+
+
+def _is_auth_v2_app(auth_settings_v2):
+    """Check if the app has v2 auth configured by inspecting the v2 settings object."""
+    if auth_settings_v2 is None:
+        return False
+    # If the platform block is present and explicitly configured, this is a v2 app.
+    platform = getattr(auth_settings_v2, 'platform', None)
+    if platform and getattr(platform, 'enabled', None) is not None:
+        return True
+    # Check for any configured identity provider, not just Azure Active Directory.
+    identity_providers = getattr(auth_settings_v2, 'identity_providers', None)
+    if identity_providers:
+        provider_attrs = ('azure_active_directory', 'facebook', 'google', 'twitter', 'microsoft')
+        if any(getattr(identity_providers, attr, None) for attr in provider_attrs):
+            return True
+    # Presence of other v2-specific configuration sections also indicates v2 auth.
+    return any(getattr(auth_settings_v2, attr, None) is not None
+               for attr in ('http_settings', 'login', 'global_validation'))
+
+
+# Mapping from v2 redirect_to_provider values to v1 defaultProvider enum names.
+_V2_PROVIDER_TO_V1_DEFAULT = {
+    'azureactivedirectory': 'AzureActiveDirectory',
+    'facebook': 'Facebook',
+    'google': 'Google',
+    'microsoftaccount': 'MicrosoftAccount',
+    'twitter': 'Twitter',
+}
+
+
+def _add_v1_compat_fields(v2_model, secret_overrides=None):
+    """Add backward-compatible flat v1 fields to a v2 auth settings response.
+
+    Converts the v2 model to a dict and adds top-level aliases for the v1
+    field names so that callers relying on the flat v1 structure (e.g.
+    ``az webapp auth show --query enabled``) continue to work.
+    """
+    from azure.cli.core.util import todict
+
+    result = todict(v2_model)
+    if secret_overrides is None:
+        secret_overrides = {}
+
+    # platform → flat fields
+    platform = result.get('platform') or {}
+    result['enabled'] = platform.get('enabled', False)
+    result['runtimeVersion'] = platform.get('runtimeVersion')
+
+    # globalValidation → flat fields
+    gv = result.get('globalValidation') or {}
+    result['unauthenticatedClientAction'] = gv.get('unauthenticatedClientAction')
+    redirect_provider = gv.get('redirectToProvider')
+    result['defaultProvider'] = (
+        _V2_PROVIDER_TO_V1_DEFAULT.get(redirect_provider, redirect_provider)
+        if redirect_provider else None)
+
+    # login / tokenStore → flat fields
+    login = result.get('login') or {}
+    ts = login.get('tokenStore') or {}
+    result['tokenStoreEnabled'] = ts.get('enabled')
+    result['tokenRefreshExtensionHours'] = ts.get('tokenRefreshExtensionHours')
+    result['allowedExternalRedirectUrls'] = login.get('allowedExternalRedirectUrls')
+
+    # identityProviders → flat fields
+    ip = result.get('identityProviders') or {}
+
+    # Azure Active Directory
+    aad = ip.get('azureActiveDirectory') or {}
+    aad_reg = aad.get('registration') or {}
+    aad_val = aad.get('validation') or {}
+    result['clientId'] = aad_reg.get('clientId')
+    result['clientSecretCertificateThumbprint'] = aad_reg.get('clientSecretCertificateThumbprint')
+    result['issuer'] = aad_reg.get('openIdIssuer')
+    result['allowedAudiences'] = aad_val.get('allowedAudiences')
+    result['clientSecret'] = (
+        secret_overrides.get('clientSecret') or aad_reg.get('clientSecretSettingName'))
+
+    # Facebook
+    fb = ip.get('facebook') or {}
+    fb_reg = fb.get('registration') or {}
+    fb_login = fb.get('login') or {}
+    result['facebookAppId'] = fb_reg.get('appId')
+    result['facebookAppSecret'] = (
+        secret_overrides.get('facebookAppSecret') or fb_reg.get('appSecretSettingName'))
+    result['facebookOauthScopes'] = fb_login.get('scopes')
+
+    return result
+
+
 def get_auth_settings(cmd, resource_group_name, name, slot=None):
+    try:
+        auth_settings_v2 = _get_auth_settings_v2(cmd, resource_group_name, name, slot)
+        if _is_auth_v2_app(auth_settings_v2):
+            return _add_v1_compat_fields(auth_settings_v2)
+    except HttpResponseError as ex:
+        status_code = getattr(ex, 'status_code', None)
+        if status_code not in (404, None):
+            logger.debug("Failed to get auth settings v2 for '%s': %s", name, ex, exc_info=True)
+            raise
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_auth_settings', slot)
 
 
@@ -3433,6 +3559,261 @@ def is_auth_runtime_version_valid(runtime_version=None):
     return True
 
 
+def _configure_auth_v2_platform(auth_settings_v2, enabled, runtime_version):
+    """Configure the platform block of a v2 auth settings object."""
+    from azure.mgmt.web.models import AuthPlatform
+    if auth_settings_v2.platform is None:
+        auth_settings_v2.platform = AuthPlatform()
+    if enabled is not None:
+        auth_settings_v2.platform.enabled = enabled == 'true'
+    if runtime_version is not None:
+        auth_settings_v2.platform.runtime_version = runtime_version
+
+
+def _configure_auth_v2_global_validation(auth_settings_v2, action):
+    """Configure the global_validation block of a v2 auth settings object."""
+    if action is None:
+        return
+    from azure.mgmt.web.models import GlobalValidation
+    if auth_settings_v2.global_validation is None:
+        auth_settings_v2.global_validation = GlobalValidation()
+    if action == 'AllowAnonymous':
+        auth_settings_v2.global_validation.unauthenticated_client_action = 'AllowAnonymous'
+    else:
+        auth_settings_v2.global_validation.unauthenticated_client_action = 'RedirectToLoginPage'
+        provider_map = {
+            'LoginWithAzureActiveDirectory': 'azureactivedirectory',
+            'LoginWithFacebook': 'facebook',
+            'LoginWithGoogle': 'google',
+            'LoginWithMicrosoftAccount': 'microsoftaccount',
+            'LoginWithTwitter': 'twitter',
+        }
+        auth_settings_v2.global_validation.redirect_to_provider = provider_map.get(action, action)
+
+
+def _configure_auth_v2_login(auth_settings_v2, token_store_enabled, token_refresh_extension_hours,
+                             allowed_external_redirect_urls):
+    """Configure the login / token_store block of a v2 auth settings object."""
+    from azure.mgmt.web.models import Login, TokenStore
+    if auth_settings_v2.login is None:
+        auth_settings_v2.login = Login()
+    if token_store_enabled is not None or token_refresh_extension_hours is not None:
+        if auth_settings_v2.login.token_store is None:
+            auth_settings_v2.login.token_store = TokenStore()
+        if token_store_enabled is not None:
+            auth_settings_v2.login.token_store.enabled = token_store_enabled == 'true'
+        if token_refresh_extension_hours is not None:
+            auth_settings_v2.login.token_store.token_refresh_extension_hours = token_refresh_extension_hours
+    if allowed_external_redirect_urls is not None:
+        auth_settings_v2.login.allowed_external_redirect_urls = allowed_external_redirect_urls
+
+
+def _configure_auth_v2_http_settings(auth_settings_v2, require_https):
+    """Configure the http_settings block of a v2 auth settings object."""
+    if require_https is None:
+        return
+    from azure.mgmt.web.models import HttpSettings
+    if auth_settings_v2.http_settings is None:
+        auth_settings_v2.http_settings = HttpSettings()
+    auth_settings_v2.http_settings.require_https = require_https == 'true'
+
+
+def _configure_auth_v2_aad(ip, client_id, client_secret, client_secret_certificate_thumbprint,
+                           allowed_audiences, issuer):
+    """Configure Azure Active Directory identity provider and return any secrets to store."""
+    secrets = {}
+    if not any(v is not None for v in [client_id, client_secret, client_secret_certificate_thumbprint,
+                                       allowed_audiences, issuer]):
+        return secrets
+    from azure.mgmt.web.models import (AzureActiveDirectory, AzureActiveDirectoryRegistration,
+                                       AzureActiveDirectoryValidation)
+    if ip.azure_active_directory is None:
+        ip.azure_active_directory = AzureActiveDirectory(enabled=True)
+    else:
+        ip.azure_active_directory.enabled = True
+    aad = ip.azure_active_directory
+    if aad.registration is None:
+        aad.registration = AzureActiveDirectoryRegistration()
+    if client_id is not None:
+        aad.registration.client_id = client_id
+    if client_secret is not None:
+        setting_name = 'MICROSOFT_PROVIDER_AUTHENTICATION_SECRET'
+        secrets[setting_name] = client_secret
+        aad.registration.client_secret_setting_name = setting_name
+    if client_secret_certificate_thumbprint is not None:
+        aad.registration.client_secret_certificate_thumbprint = client_secret_certificate_thumbprint
+    if issuer is not None:
+        aad.registration.open_id_issuer = issuer
+    if allowed_audiences is not None:
+        if aad.validation is None:
+            aad.validation = AzureActiveDirectoryValidation()
+        aad.validation.allowed_audiences = allowed_audiences
+    return secrets
+
+
+def _configure_auth_v2_facebook(ip, facebook_app_id, facebook_app_secret, facebook_oauth_scopes):
+    """Configure Facebook identity provider and return any secrets to store."""
+    secrets = {}
+    if not any(v is not None for v in [facebook_app_id, facebook_app_secret, facebook_oauth_scopes]):
+        return secrets
+    from azure.mgmt.web.models import Facebook, AppRegistration, LoginScopes
+    if ip.facebook is None:
+        ip.facebook = Facebook(enabled=True)
+    else:
+        ip.facebook.enabled = True
+    if facebook_app_id is not None or facebook_app_secret is not None:
+        if ip.facebook.registration is None:
+            ip.facebook.registration = AppRegistration()
+        if facebook_app_id is not None:
+            ip.facebook.registration.app_id = facebook_app_id
+        if facebook_app_secret is not None:
+            setting_name = 'FACEBOOK_PROVIDER_AUTHENTICATION_SECRET'
+            secrets[setting_name] = facebook_app_secret
+            ip.facebook.registration.app_secret_setting_name = setting_name
+    if facebook_oauth_scopes is not None:
+        if ip.facebook.login is None:
+            ip.facebook.login = LoginScopes()
+        ip.facebook.login.scopes = facebook_oauth_scopes
+    return secrets
+
+
+def _configure_auth_v2_google(ip, google_client_id, google_client_secret, google_oauth_scopes):
+    """Configure Google identity provider and return any secrets to store."""
+    secrets = {}
+    if not any(v is not None for v in [google_client_id, google_client_secret, google_oauth_scopes]):
+        return secrets
+    from azure.mgmt.web.models import Google, ClientRegistration, LoginScopes
+    if ip.google is None:
+        ip.google = Google(enabled=True)
+    else:
+        ip.google.enabled = True
+    if google_client_id is not None or google_client_secret is not None:
+        if ip.google.registration is None:
+            ip.google.registration = ClientRegistration()
+        if google_client_id is not None:
+            ip.google.registration.client_id = google_client_id
+        if google_client_secret is not None:
+            setting_name = 'GOOGLE_PROVIDER_AUTHENTICATION_SECRET'
+            secrets[setting_name] = google_client_secret
+            ip.google.registration.client_secret_setting_name = setting_name
+    if google_oauth_scopes is not None:
+        if ip.google.login is None:
+            ip.google.login = LoginScopes()
+        ip.google.login.scopes = google_oauth_scopes
+    return secrets
+
+
+def _configure_auth_v2_twitter(ip, twitter_consumer_key, twitter_consumer_secret):
+    """Configure Twitter identity provider and return any secrets to store."""
+    secrets = {}
+    if not any(v is not None for v in [twitter_consumer_key, twitter_consumer_secret]):
+        return secrets
+    from azure.mgmt.web.models import Twitter, TwitterRegistration
+    if ip.twitter is None:
+        ip.twitter = Twitter(enabled=True)
+    else:
+        ip.twitter.enabled = True
+    if ip.twitter.registration is None:
+        ip.twitter.registration = TwitterRegistration()
+    if twitter_consumer_key is not None:
+        ip.twitter.registration.consumer_key = twitter_consumer_key
+    if twitter_consumer_secret is not None:
+        setting_name = 'TWITTER_PROVIDER_AUTHENTICATION_SECRET'
+        secrets[setting_name] = twitter_consumer_secret
+        ip.twitter.registration.consumer_secret_setting_name = setting_name
+    return secrets
+
+
+def _configure_auth_v2_microsoft_account(ip, microsoft_account_client_id, microsoft_account_client_secret,
+                                         microsoft_account_oauth_scopes):
+    """Configure Microsoft Account (legacy) identity provider and return any secrets to store."""
+    secrets = {}
+    if not any(v is not None for v in [microsoft_account_client_id, microsoft_account_client_secret,
+                                       microsoft_account_oauth_scopes]):
+        return secrets
+    from azure.mgmt.web.models import ClientRegistration, LoginScopes
+    if ip.legacy_microsoft_account is None:
+        from azure.mgmt.web.models import LegacyMicrosoftAccount
+        ip.legacy_microsoft_account = LegacyMicrosoftAccount(enabled=True)
+    else:
+        ip.legacy_microsoft_account.enabled = True
+    if microsoft_account_client_id is not None or microsoft_account_client_secret is not None:
+        if ip.legacy_microsoft_account.registration is None:
+            ip.legacy_microsoft_account.registration = ClientRegistration()
+        if microsoft_account_client_id is not None:
+            ip.legacy_microsoft_account.registration.client_id = microsoft_account_client_id
+        if microsoft_account_client_secret is not None:
+            setting_name = 'MICROSOFTACCOUNT_PROVIDER_AUTHENTICATION_SECRET'
+            secrets[setting_name] = microsoft_account_client_secret
+            ip.legacy_microsoft_account.registration.client_secret_setting_name = setting_name
+    if microsoft_account_oauth_scopes is not None:
+        if ip.legacy_microsoft_account.login is None:
+            ip.legacy_microsoft_account.login = LoginScopes()
+        ip.legacy_microsoft_account.login.scopes = microsoft_account_oauth_scopes
+    return secrets
+
+
+def _update_auth_settings_v2(cmd, resource_group_name, name, auth_settings_v2,
+                             enabled=None, action=None, client_id=None,
+                             token_store_enabled=None, runtime_version=None,
+                             token_refresh_extension_hours=None,
+                             allowed_external_redirect_urls=None, client_secret=None,
+                             client_secret_certificate_thumbprint=None,
+                             allowed_audiences=None, issuer=None,
+                             facebook_app_id=None, facebook_app_secret=None,
+                             facebook_oauth_scopes=None,
+                             twitter_consumer_key=None, twitter_consumer_secret=None,
+                             google_client_id=None, google_client_secret=None,
+                             google_oauth_scopes=None,
+                             microsoft_account_client_id=None,
+                             microsoft_account_client_secret=None,
+                             microsoft_account_oauth_scopes=None,
+                             require_https=None, slot=None):
+    """Apply parameter updates to a SiteAuthSettingsV2 object and persist it."""
+    from azure.mgmt.web.models import IdentityProviders
+
+    _configure_auth_v2_platform(auth_settings_v2, enabled, runtime_version)
+    _configure_auth_v2_global_validation(auth_settings_v2, action)
+    _configure_auth_v2_login(auth_settings_v2, token_store_enabled,
+                             token_refresh_extension_hours,
+                             allowed_external_redirect_urls)
+    _configure_auth_v2_http_settings(auth_settings_v2, require_https)
+
+    # -- identity_providers --
+    if auth_settings_v2.identity_providers is None:
+        auth_settings_v2.identity_providers = IdentityProviders()
+    ip = auth_settings_v2.identity_providers
+
+    # Collect secrets that need to be stored as app settings.
+    # The v2 auth model *_secret_setting_name fields expect the name of an app setting,
+    # not the secret value itself.
+    secrets_to_store = {}
+    secrets_to_store.update(_configure_auth_v2_aad(
+        ip, client_id, client_secret, client_secret_certificate_thumbprint,
+        allowed_audiences, issuer))
+    secrets_to_store.update(_configure_auth_v2_facebook(
+        ip, facebook_app_id, facebook_app_secret, facebook_oauth_scopes))
+    secrets_to_store.update(_configure_auth_v2_google(
+        ip, google_client_id, google_client_secret, google_oauth_scopes))
+    secrets_to_store.update(_configure_auth_v2_twitter(
+        ip, twitter_consumer_key, twitter_consumer_secret))
+    secrets_to_store.update(_configure_auth_v2_microsoft_account(
+        ip, microsoft_account_client_id, microsoft_account_client_secret,
+        microsoft_account_oauth_scopes))
+
+    # Store all collected secrets into app settings in a single API call.
+    if secrets_to_store:
+        app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
+                                               'list_application_settings', slot)
+        for setting_key, secret_value in secrets_to_store.items():
+            app_settings.properties[setting_key] = secret_value
+        _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
+                                'update_application_settings', slot, app_settings)
+
+    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
+                                   'update_auth_settings_v2', slot, auth_settings_v2)
+
+
 def update_auth_settings(cmd, resource_group_name, name, enabled=None, action=None,  # pylint: disable=unused-argument
                          client_id=None, token_store_enabled=None, runtime_version=None,  # pylint: disable=unused-argument
                          token_refresh_extension_hours=None,  # pylint: disable=unused-argument
@@ -3444,17 +3825,69 @@ def update_auth_settings(cmd, resource_group_name, name, enabled=None, action=No
                          google_client_id=None, google_client_secret=None,  # pylint: disable=unused-argument
                          google_oauth_scopes=None, microsoft_account_client_id=None,  # pylint: disable=unused-argument
                          microsoft_account_client_secret=None,  # pylint: disable=unused-argument
-                         microsoft_account_oauth_scopes=None, slot=None):  # pylint: disable=unused-argument
-    auth_settings = get_auth_settings(cmd, resource_group_name, name, slot)
+                         microsoft_account_oauth_scopes=None,  # pylint: disable=unused-argument
+                         require_https=None, slot=None):  # pylint: disable=unused-argument
+    # validate runtime version
+    if not is_auth_runtime_version_valid(runtime_version):
+        raise InvalidArgumentValueError('Usage Error: --runtime-version set to invalid value')
+
+    # Determine whether to use v2 or v1 auth API
+    use_v2 = False
+    auth_settings_v2 = None
+    try:
+        auth_settings_v2 = _get_auth_settings_v2(cmd, resource_group_name, name, slot)
+        if _is_auth_v2_app(auth_settings_v2):
+            use_v2 = True
+    except HttpResponseError as ex:
+        # Only treat 404 as "v2 not available"; propagate other HTTP errors
+        status_code = getattr(getattr(ex, 'response', None), 'status_code', None)
+        if status_code != 404:
+            raise
+
+    # v2-only params force v2 path for new auth setups
+    if require_https is not None:
+        use_v2 = True
+
+    if use_v2:
+        if auth_settings_v2 is None:
+            from azure.mgmt.web.models import SiteAuthSettingsV2
+            auth_settings_v2 = SiteAuthSettingsV2()
+        v2_result = _update_auth_settings_v2(
+            cmd, resource_group_name, name, auth_settings_v2,
+            enabled=enabled, action=action, client_id=client_id,
+            token_store_enabled=token_store_enabled, runtime_version=runtime_version,
+            token_refresh_extension_hours=token_refresh_extension_hours,
+            allowed_external_redirect_urls=allowed_external_redirect_urls,
+            client_secret=client_secret,
+            client_secret_certificate_thumbprint=client_secret_certificate_thumbprint,
+            allowed_audiences=allowed_audiences, issuer=issuer,
+            facebook_app_id=facebook_app_id, facebook_app_secret=facebook_app_secret,
+            facebook_oauth_scopes=facebook_oauth_scopes,
+            twitter_consumer_key=twitter_consumer_key,
+            twitter_consumer_secret=twitter_consumer_secret,
+            google_client_id=google_client_id, google_client_secret=google_client_secret,
+            google_oauth_scopes=google_oauth_scopes,
+            microsoft_account_client_id=microsoft_account_client_id,
+            microsoft_account_client_secret=microsoft_account_client_secret,
+            microsoft_account_oauth_scopes=microsoft_account_oauth_scopes,
+            require_https=require_https, slot=slot)
+        # Pass through original secret values for backward-compatible fields,
+        # since v2 stores setting names rather than raw secret values.
+        secret_overrides = {}
+        if client_secret is not None:
+            secret_overrides['clientSecret'] = client_secret
+        if facebook_app_secret is not None:
+            secret_overrides['facebookAppSecret'] = facebook_app_secret
+        return _add_v1_compat_fields(v2_result, secret_overrides=secret_overrides)
+
+    # v1 path
+    auth_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_auth_settings', slot)
     UnauthenticatedClientAction = cmd.get_models('UnauthenticatedClientAction')
     if action == 'AllowAnonymous':
         auth_settings.unauthenticated_client_action = UnauthenticatedClientAction.allow_anonymous
     elif action:
         auth_settings.unauthenticated_client_action = UnauthenticatedClientAction.redirect_to_login_page
         auth_settings.default_provider = AUTH_TYPES[action]
-    # validate runtime version
-    if not is_auth_runtime_version_valid(runtime_version):
-        raise InvalidArgumentValueError('Usage Error: --runtime-version set to invalid value')
 
     import inspect
     frame = inspect.currentframe()
@@ -3463,7 +3896,12 @@ def update_auth_settings(cmd, resource_group_name, name, enabled=None, action=No
     # and no simple functional replacement for this deprecating method for 3.5
     args, _, _, values = inspect.getargvalues(frame)  # pylint: disable=deprecated-method
 
-    for arg in args[2:]:
+    # Skip v2-only params and non-settable args when applying to v1 model
+    v2_only_args = {'require_https'}
+    skip_args = {'cmd', 'resource_group_name', 'name', 'action', 'slot'} | v2_only_args
+    for arg in args:
+        if arg in skip_args:
+            continue
         if values.get(arg, None):
             setattr(auth_settings, arg, values[arg] if arg not in bool_flags else values[arg] == 'true')
 
@@ -4730,6 +5168,13 @@ def config_source_control(cmd, resource_group_name, name, repo_url, repository_t
                           manual_integration=None, git_token=None, slot=None, github_action=None):
     client = web_client_factory(cmd.cli_ctx)
     location = _get_location_from_webapp(client, resource_group_name, name)
+
+    # Check for Service Principal + GitHub Actions incompatibility
+    if github_action and _is_service_principal_auth(cmd.cli_ctx):
+        raise ValidationError(
+            "GitHub Actions deployment cannot be configured with Service Principal authentication. "
+            "Use 'az webapp deployment github-actions add' instead, which supports Service Principal workflows."
+        )
 
     from azure.mgmt.web.models import SiteSourceControl, SourceControl
     if git_token:
