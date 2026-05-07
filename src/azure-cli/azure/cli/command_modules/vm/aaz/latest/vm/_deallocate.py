@@ -34,9 +34,9 @@ class Deallocate(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-11-01",
+        "version": "2025-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/virtualmachines/{}/deallocate", "2022-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/virtualmachines/{}/deallocate", "2025-11-01"],
         ]
     }
 
@@ -67,9 +67,13 @@ class Deallocate(AAZCommand):
             id_part="name",
             configured_default="vm",
         )
+        _args_schema.force_deallocate = AAZBoolArg(
+            options=["--force-deallocate"],
+            help="Optional parameter to force deallocate a virtual machine. Default is false.",
+        )
         _args_schema.hibernate = AAZBoolArg(
             options=["--hibernate"],
-            help="Optional parameter to hibernate a virtual machine. (Feature in Preview)",
+            help="Optional parameter to hibernate a virtual machine.",
         )
         return cls._args_schema
 
@@ -98,7 +102,7 @@ class Deallocate(AAZCommand):
                     session,
                     self.on_200,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
             if session.http_response.status_code in [200]:
@@ -107,7 +111,7 @@ class Deallocate(AAZCommand):
                     session,
                     self.on_200,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
 
@@ -150,10 +154,13 @@ class Deallocate(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
+                    "forceDeallocate", self.ctx.args.force_deallocate,
+                ),
+                **self.serialize_query_param(
                     "hibernate", self.ctx.args.hibernate,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2022-11-01",
+                    "api-version", "2025-11-01",
                     required=True,
                 ),
             }

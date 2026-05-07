@@ -1,0 +1,27 @@
+# Volumes: long syntax (mapping with type/source/target)
+# Tests: long syntax bind mount parsing, long syntax volume parsing
+version: '3.2'
+services:
+  web:
+    image: "nginx:1.25-alpine"
+    ports:
+      - "80:80"
+    volumes:
+      - type: bind
+        source: "${WEBAPP_STORAGE_HOME}/site/wwwroot"
+        target: /usr/share/nginx/html
+      - type: bind
+        source: "${WEBAPP_STORAGE_HOME}/nginx/conf.d"
+        target: /etc/nginx/conf.d
+        read_only: true
+  api:
+    image: "myacr.azurecr.io/api:v3"
+    ports:
+      - "8080:8080"
+    volumes:
+      - type: volume
+        source: api-cache
+        target: /tmp/cache
+
+volumes:
+  api-cache:

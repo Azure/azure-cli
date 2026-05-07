@@ -7,7 +7,6 @@
 # pylint: disable=line-too-long
 def load_arguments(self, _):
     from azure.cli.core.commands.parameters import get_enum_type, get_three_state_flag
-    from azure.cli.core.style import Theme
 
     with self.argument_context('rest') as c:
         c.argument('method', options_list=['--method', '-m'],
@@ -40,14 +39,3 @@ def load_arguments(self, _):
         c.argument('yes', options_list=['--yes', '-y'], action='store_true', help='Do not prompt for checking release notes.')
         c.argument('allow_preview', options_list=['--allow-preview-extensions', '--allow-preview'],
                    arg_type=get_three_state_flag(), help="Include preview packages for extension installation, if exists")
-
-    with self.argument_context('demo style') as c:
-        c.argument('theme', arg_type=get_enum_type(Theme),
-                   help='The theme to format styled text. If unspecified, the default theme is used.')
-
-    with self.argument_context('demo secret-store save') as c:
-        c.positional('key_value', nargs='+', help="Space-separated data: `<key>=<value> [<key>=<value> ...]`")
-
-    with self.argument_context('demo byo-access-token') as c:
-        c.argument('access_token', help="Your own access token")
-        c.argument('subscription_id', help="Subscription ID under which to list resource groups")

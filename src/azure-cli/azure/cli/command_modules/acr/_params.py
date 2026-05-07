@@ -456,7 +456,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('acr network-rule') as c:
         c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.', deprecate_info=c.deprecate(hide=True))
         c.argument('vnet_name', help='Name of a virtual network.', deprecate_info=c.deprecate(hide=True))
-        c.argument('ip_address', help='IPv4 address or CIDR range.')
+        c.argument('ip_address', help='IPv4/IPv6 address or CIDR range.')
 
     with self.argument_context('acr check-health') as c:
         c.argument('ignore_errors', options_list=['--ignore-errors'], help='Provide all health checks, even if errors are found', action='store_true', required=False)
