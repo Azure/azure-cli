@@ -34,3 +34,19 @@ class TestAccountScenarios(ScenarioTest):
             self.check('[0].tags.tag', 'test'),
             self.check('[0].tags.tag2', 'test2')
         ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_monitor_account_np')
+    def test_monitor_account_new_params(self, resource_group):
+        self.kwargs.update({
+            'account': self.create_random_name('ac', 10)
+        })
+        self.cmd('monitor account create -n {account} -g {rg} '
+                 '--enable-access-using-resource-permissions true --public-network-access Disabled', checks=[
+            self.check('name', '{account}'),
+            self.check('publicNetworkAccess', 'Disabled'),
+            self.check('metrics.enableAccessUsingResourcePermissions', True)
+        ])
+        self.cmd('monitor account update -n {account} -g {rg} '
+                 '--enable-access-using-resource-permissions false', checks=[
+            self.check('metrics.enableAccessUsingResourcePermissions', False)
+        ])
