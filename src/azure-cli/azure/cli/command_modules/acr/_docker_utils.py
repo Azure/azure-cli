@@ -126,6 +126,28 @@ def _handle_challenge_phase(login_server,
     return token_params
 
 
+def _resolve_acr_scope(cli_ctx):
+    """Determine the AAD resource (audience) to request a token for, for the ACR /oauth2/exchange endpoint.
+
+    Resolution order:
+      1. ``az config set acr.audience_resource=<value>`` — operator override. If the value
+         starts with ``https://`` it is used verbatim, otherwise it is treated as a short
+         name and expanded to ``https://<value>.azure.net``.
+      2. The default public ACR audience ``https://containerregistry.azure.net``.
+
+    This lets disconnected environments (e.g. Azure Local Disconnected Operations) pin
+    the audience their local IDP knows about, instead of relying on runtime fallback.
+    """
+    configured = None
+    try:
+        configured = cli_ctx.config.get('acr', 'audience_resource', fallback=None)
+    except Exception:  # pylint: disable=broad-except
+        configured = None
+    if configured:
+        return configured if configured.startswith('https://') else "https://{}.azure.net".format(configured)
+    return "https://{}.azure.net".format(ACR_AUDIENCE_RESOURCE_NAME)
+
+
 def _get_aad_token_after_challenge(cli_ctx,
                                    token_params,
                                    login_server,
@@ -141,7 +163,7 @@ def _get_aad_token_after_challenge(cli_ctx,
     from azure.cli.core._profile import Profile
     profile = Profile(cli_ctx=cli_ctx)
 
-    scope = "https://{}.azure.net".format(ACR_AUDIENCE_RESOURCE_NAME)
+    scope = _resolve_acr_scope(cli_ctx)
 
     # this might be a cross tenant scenario, so pass subscription to get_raw_token
     creds, _, tenant = profile.get_raw_token(subscription=get_subscription_id(cli_ctx),
