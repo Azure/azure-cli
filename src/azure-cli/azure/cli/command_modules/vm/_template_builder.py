@@ -312,7 +312,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
         zone_placement_policy=None, include_zones=None, exclude_zones=None, align_regional_disks_to_vm_zone=None,
         wire_server_mode=None, imds_mode=None, wire_server_access_control_profile_reference_id=None,
         imds_access_control_profile_reference_id=None, key_incarnation_id=None, add_proxy_agent_extension=None,
-        disk_iops_read_write=None, disk_mbps_read_write=None):
+        disk_iops_read_write=None, disk_mbps_read_write=None, zone_movement=None):
 
     os_caching = disk_info['os'].get('caching')
 
@@ -587,6 +587,16 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
 
     vm_properties = {'hardwareProfile': {'vmSize': size}, 'networkProfile': {'networkInterfaces': nics},
                      'storageProfile': _build_storage_profile()}
+
+    resiliency_profile = {}
+    if zone_movement is not None:
+        resiliency_profile.update({
+            'zoneMovement': {
+                'isEnabled': zone_movement
+            }
+        })
+    if resiliency_profile:
+        vm_properties['resiliencyProfile'] = resiliency_profile
 
     scheduled_events_policy = {}
     if additional_scheduled_events is not None:

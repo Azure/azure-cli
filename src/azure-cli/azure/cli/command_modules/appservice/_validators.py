@@ -109,6 +109,15 @@ def _validate_asp_sku(sku, app_service_environment, zone_redundant):
 
 def validate_asp_create(namespace):
     validate_tags(namespace)
+    if namespace.sku is None:
+        if namespace.is_linux:
+            namespace.sku = 'P0V3'
+            logger.warning("No --sku specified. Using default: P0V3 (Premium V3 Extra Small). "
+                           "See all options: az appservice plan create --help. "
+                           "For current pricing, visit: "
+                           "https://azure.microsoft.com/pricing/details/app-service/")
+        else:
+            namespace.sku = 'B1'
     sku = _normalize_sku(namespace.sku)
     _validate_asp_sku(sku, namespace.app_service_environment, namespace.zone_redundant)
     if namespace.is_linux and namespace.hyper_v:

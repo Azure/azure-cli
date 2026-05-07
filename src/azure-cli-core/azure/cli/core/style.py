@@ -13,8 +13,6 @@ https://devdivdesignguide.azurewebsites.net/command-line-interface/color-guideli
 
 Console Virtual Terminal Sequences:
 https://learn.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences#text-formatting
-
-For a complete demo, see `src/azure-cli/azure/cli/command_modules/util/custom.py` and run `az demo style`.
 """
 
 import sys

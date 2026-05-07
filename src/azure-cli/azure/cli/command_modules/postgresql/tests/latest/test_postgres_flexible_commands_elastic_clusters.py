@@ -8,6 +8,7 @@ from time import sleep
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk.scenario_tests.const import ENV_LIVE_TEST
 from azure.cli.testsdk import (
+    JMESPathCheck,
     ResourceGroupPreparer,
     ScenarioTest)
 from .constants import SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH, DEFAULT_LOCATION
@@ -50,8 +51,21 @@ class ElasticClustersMgmtScenarioTest(ScenarioTest):
         # Test failures
         self.cmd('postgres flexible-server update -g {} -n {} --storage-auto-grow Enabled'
                  .format(resource_group, cluster_name), expect_failure=True)
+        # Backend silently ignores if the cluster size is smaller than current size, and does not return error.
+        # Also, the cluster size remains unchanged. Hence the check is added to verify that cluster size is not updated.
+        # When control plane adds support for scaling down cluster size, this test should be updated accordingly.
         self.cmd('postgres flexible-server update -g {} -n {} --node-count {}'
-                 .format(resource_group, cluster_name, cluster_size - 1), expect_failure=True)
+                 .format(resource_group, cluster_name, cluster_size - 1),
+                 checks=[
+                     JMESPathCheck('cluster.clusterSize', cluster_size)])
+        # Same behavior with cluster size being set to 0, it doesn't return error, neither it changes the cluster size.
+        self.cmd('postgres flexible-server update -g {} -n {} --node-count {}'
+                 .format(resource_group, cluster_name, 0),
+                 checks=[
+                     JMESPathCheck('cluster.clusterSize', cluster_size)])
+        # If the cluster size is larger than current supported maximum (20), it will return error.
+        self.cmd('postgres flexible-server update -g {} -n {} --node-count {}'
+                 .format(resource_group, cluster_name, 21), expect_failure=True)
         self.cmd('postgres flexible-server replica list -g {} -n {}'
                  .format(resource_group, cluster_name), expect_failure=True)
         self.cmd('postgres flexible-server db create -g {} -s {} -d dbclusterfail'
