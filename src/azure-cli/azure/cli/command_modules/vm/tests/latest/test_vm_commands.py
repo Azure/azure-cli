@@ -6035,7 +6035,7 @@ class VMSSCustomDataScenarioTest(ScenarioTest):
         })
 
         self.cmd('vmss create -n {vmss} -g {rg} --image Debian:debian-10:10:latest --admin-username deploy --ssh-key-value "{ssh_key}" '
-                 '--user-data "{user_data}" --orchestration-mode Uniform --lb-sku Standard --vm-sku Standard_B2ms')
+                 '--user-data "{user_data}" --orchestration-mode Uniform --lb-sku Standard --vm-sku Standard_D2s_v3')
 
         self.cmd('vmss show -n {vmss} -g {rg} --include-user-data', checks=[
             self.check('provisioningState', 'Succeeded'),
