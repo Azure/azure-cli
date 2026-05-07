@@ -39,7 +39,7 @@ def build_agentic_session_params():
 
     claims_challenge = json.dumps({
         "access_token": {
-            "xms_agent_session": {"essential": True, "value": session_id}
+            "xms_cli_sid": {"values": [session_id]}
         }
     })
     return session_id, claims_challenge
