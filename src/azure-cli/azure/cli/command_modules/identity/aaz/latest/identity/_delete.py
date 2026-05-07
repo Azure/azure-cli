@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "identity delete",
-    confirmation="Are you sure you want to perform this operation?",
 )
 class Delete(AAZCommand):
     """Delete the identity.

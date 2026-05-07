@@ -32,7 +32,7 @@ class TestIdentity(ScenarioTest):
         self.cmd('identity list-resources -g {rg} -n {identity}')
 
         self.cmd('identity list -g {rg}', checks=self.check('length(@)', 1))
-        self.cmd('identity delete -n {identity} -g {rg} --yes')
+        self.cmd('identity delete -n {identity} -g {rg}')
 
         self.cmd('identity create -n {identity} -g {rg} --isolation-scope Regional', checks=[
             self.check('name', '{identity}'),
@@ -46,7 +46,7 @@ class TestIdentity(ScenarioTest):
             self.check('isolationScope', 'None')
         ])
 
-        self.cmd('identity delete -n {identity} -g {rg} --yes')
+        self.cmd('identity delete -n {identity} -g {rg}')
 
         self.cmd('identity create -n {identity} -g {rg} --resource-restriction {resource_restriction_compute}', checks=[
             self.check('name', '{identity}'),
