@@ -953,11 +953,11 @@ class WebappConfigureTest(ScenarioTest):
             JMESPathCheck("[?name=='WEBSITE_NODE_DEFAULT_VERSION']|[0].value", "~22"),
         ])
         #linux
-        self.cmd('webapp config set -g {} -n {} --runtime TOMCAT:11.0-java21'.format(resource_group, linux_webapp)).assert_with_checks([
-            JMESPathCheck("linuxFxVersion", "TOMCAT|11.0-java21"), 
+        self.cmd('webapp config set -g {} -n {} --runtime TOMCAT:10.1-java11'.format(resource_group, linux_webapp)).assert_with_checks([
+            JMESPathCheck("linuxFxVersion", "TOMCAT|10.1-java11"), 
         ])
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, linux_webapp)).assert_with_checks([
-            JMESPathCheck("linuxFxVersion", "TOMCAT|11.0-java21"),      
+            JMESPathCheck("linuxFxVersion", "TOMCAT|10.1-java11"),      
         ])
         self.cmd('webapp config set -g {} -n {} --runtime PYTHON:3.12'.format(resource_group, linux_webapp)).assert_with_checks([
             JMESPathCheck("linuxFxVersion", "PYTHON|3.12"),
@@ -3134,7 +3134,7 @@ class WebappOneDeployScenarioTest(ScenarioTest):
         self.cmd(
             'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
         self.cmd(
-            'webapp create -g {} -n {} --plan {} -r "TOMCAT|11.0-java17"'.format(resource_group, webapp_name, plan_name))
+            'webapp create -g {} -n {} --plan {} -r "TOMCAT|10.1-java11"'.format(resource_group, webapp_name, plan_name))
         self.cmd('webapp deploy -g {} --n {} --src-path "{}" --type war --async true'.format(resource_group, webapp_name, war_file)).assert_with_checks([
             JMESPathCheck('resourceGroup', resource_group),
             JMESPathCheck('properties.errors', None),
@@ -3323,7 +3323,7 @@ class TrackRuntimeStatusTest(ScenarioTest):
         self.cmd(
             'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
         self.cmd(
-            'webapp create -g {} -n {} --plan {} -r "TOMCAT|11.0-java17"'.format(resource_group, webapp_name, plan_name))
+            'webapp create -g {} -n {} --plan {} -r "TOMCAT|10.1-java11"'.format(resource_group, webapp_name, plan_name))
         self.cmd('webapp deploy -g {} --n {} --src-path "{}" --type war --async'.format(resource_group, webapp_name, war_file)).assert_with_checks([
             JMESPathCheck('resourceGroup', resource_group),
             JMESPathCheck('properties.errors', None),
@@ -3369,7 +3369,7 @@ class TrackRuntimeStatusTest(ScenarioTest):
         self.cmd(
             'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
         self.cmd(
-            'webapp create -g {} -n {} --plan {} -r "TOMCAT|11.0-java17"'.format(resource_group, webapp_name, plan_name))
+            'webapp create -g {} -n {} --plan {} -r "TOMCAT|10.1-java11"'.format(resource_group, webapp_name, plan_name))
         self.cmd('webapp deployment source config-zip -g {} --n {} --src "{}" --track-status false'.format(resource_group, webapp_name, war_file)).assert_with_checks([
             JMESPathCheck('status', 4),
             JMESPathCheck('complete', True)
@@ -3384,7 +3384,7 @@ class TrackRuntimeStatusTest(ScenarioTest):
         self.cmd(
             'appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
         self.cmd(
-            'webapp create -g {} -n {} --plan {} -r "TOMCAT|11.0-java17"'.format(resource_group, webapp_name, plan_name))
+            'webapp create -g {} -n {} --plan {} -r "TOMCAT|10.1-java11"'.format(resource_group, webapp_name, plan_name))
         self.cmd('webapp deployment source config-zip -g {} --n {} --src "{}"'.format(resource_group, webapp_name, war_file)).assert_with_checks([
             JMESPathCheck('resourceGroup', resource_group),
             JMESPathCheck('properties.errors', None),
