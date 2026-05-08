@@ -3,12 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.command_modules.vm._client_factory import (cf_vm,
-                                                          cf_vm_image_term,
-                                                          cf_vmss,
-                                                          cf_dedicated_hosts,
-                                                          cf_log_analytics_data_plane,
-                                                          cf_community_gallery)
+from azure.cli.command_modules.vm._client_factory import (cf_vm_image_term, cf_vmss, cf_log_analytics_data_plane)
 from azure.cli.command_modules.vm._format import (
     transform_ip_addresses, transform_vm, transform_vm_create_output, transform_vm_list,
     transform_disk_create_table_output, transform_sku_for_table_output, transform_disk_show_table_output,
@@ -53,30 +48,15 @@ def load_command_table(self, _):
         client_factory=image_builder_client_factory
     )
 
-    compute_vm_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#VirtualMachinesOperations.{}',
-        client_factory=cf_vm
-    )
-
     compute_vm_image_term_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.marketplaceordering.operations#MarketplaceAgreementsOperations.{}',
         client_factory=cf_vm_image_term
-    )
-
-    compute_vm_usage_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#UsageOperations.{}',
-        client_factory=cf_usage
     )
 
     compute_vmss_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations#VirtualMachineScaleSetsOperations.{}',
         client_factory=cf_vmss,
         operation_group='virtual_machine_scale_sets'
-    )
-
-    compute_dedicated_host_sdk = CliCommandType(
-        operations_tmpl="azure.mgmt.compute.operations#DedicatedHostsOperations.{}",
-        client_factory=cf_dedicated_hosts,
     )
 
     image_builder_image_templates_sdk = CliCommandType(
@@ -95,11 +75,6 @@ def load_command_table(self, _):
         client_factory=cf_metric_def,
         operation_group='metric_definitions',
         exception_handler=monitor_exception_handler
-    )
-
-    capacity_reservation_groups_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#CapacityReservationGroupsOperations.{}',
-        client_factory=cf_capacity_reservation_groups
     )
 
     with self.command_group("ppg"):
@@ -230,7 +205,7 @@ def load_command_table(self, _):
         g.custom_command('set', 'set_diagnostics_extension')
         g.custom_command('get-default-config', 'show_default_diagnostics_configuration')
 
-    with self.command_group('vm disk', compute_vm_sdk, min_api='2017-03-30') as g:
+    with self.command_group('vm disk', min_api='2017-03-30') as g:
         g.custom_command('attach', 'attach_managed_data_disk', validator=process_vm_disk_attach_namespace)
         g.custom_command('detach', 'detach_managed_data_disk', validator=process_vm_disk_detach_namespace)
 

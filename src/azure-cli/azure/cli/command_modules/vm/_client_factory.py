@@ -12,14 +12,6 @@ def _compute_client_factory(cli_ctx, **kwargs):
                                    aux_subscriptions=kwargs.get('aux_subscriptions'))
 
 
-def cf_vm(cli_ctx, _):
-    return _compute_client_factory(cli_ctx).virtual_machines
-
-
-def cf_vm_image(cli_ctx, _):
-    return _compute_client_factory(cli_ctx).virtual_machine_images
-
-
 def cf_vm_image_term(cli_ctx, _):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.marketplaceordering import MarketplaceOrderingAgreements
@@ -29,10 +21,6 @@ def cf_vm_image_term(cli_ctx, _):
 
 def cf_vmss(cli_ctx, _):
     return _compute_client_factory(cli_ctx).virtual_machine_scale_sets
-
-
-def cf_dedicated_hosts(cli_ctx, _):
-    return _compute_client_factory(cli_ctx).dedicated_hosts
 
 
 def _log_analytics_client_factory(cli_ctx, subscription_id, *_):
@@ -67,15 +55,5 @@ def cf_vm_cl(cli_ctx, *_):
                                    ComputeManagementClient)
 
 
-def cf_shared_gallery_image(cli_ctx, *_):
-    return cf_vm_cl(cli_ctx).shared_gallery_images
-
-
 def cf_community_gallery(cli_ctx, *_):
     return cf_vm_cl(cli_ctx).community_galleries
-
-
-def cf_community_gallery_image(cli_ctx, *_):
-    return cf_vm_cl(cli_ctx).community_gallery_images
-
-
