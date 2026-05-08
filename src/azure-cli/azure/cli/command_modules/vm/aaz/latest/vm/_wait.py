@@ -20,7 +20,7 @@ class Wait(AAZWaitCommand):
 
     _aaz_info = {
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/virtualmachines/{}", "2025-04-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/virtualmachines/{}", "2025-11-01"],
         ]
     }
 
@@ -124,7 +124,7 @@ class Wait(AAZWaitCommand):
                     "$expand", self.ctx.args.expand,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2025-04-01",
+                    "api-version", "2025-11-01",
                     required=True,
                 ),
             }
@@ -312,6 +312,9 @@ class Wait(AAZWaitCommand):
                 serialized_name="proximityPlacementGroup",
             )
             _WaitHelper._build_schema_sub_resource_read(properties.proximity_placement_group)
+            properties.resiliency_profile = AAZObjectType(
+                serialized_name="resiliencyProfile",
+            )
             properties.scheduled_events_policy = AAZObjectType(
                 serialized_name="scheduledEventsPolicy",
             )
@@ -487,6 +490,9 @@ class Wait(AAZWaitCommand):
             )
             _element.name = AAZStrType()
             _element.statuses = AAZListType()
+            _element.storage_alignment_status = AAZStrType(
+                serialized_name="storageAlignmentStatus",
+            )
 
             encryption_settings = cls._schema_on_200.properties.instance_view.disks.Element.encryption_settings
             encryption_settings.Element = AAZObjectType()
@@ -1013,6 +1019,16 @@ class Wait(AAZWaitCommand):
             )
             _element.protocol = AAZStrType()
 
+            resiliency_profile = cls._schema_on_200.properties.resiliency_profile
+            resiliency_profile.zone_movement = AAZObjectType(
+                serialized_name="zoneMovement",
+            )
+
+            zone_movement = cls._schema_on_200.properties.resiliency_profile.zone_movement
+            zone_movement.is_enabled = AAZBoolType(
+                serialized_name="isEnabled",
+            )
+
             scheduled_events_policy = cls._schema_on_200.properties.scheduled_events_policy
             scheduled_events_policy.all_instances_down = AAZObjectType(
                 serialized_name="allInstancesDown",
@@ -1173,6 +1189,9 @@ class Wait(AAZWaitCommand):
             _element.source_resource = AAZObjectType(
                 serialized_name="sourceResource",
             )
+            _element.storage_fault_domain_alignment = AAZStrType(
+                serialized_name="storageFaultDomainAlignment",
+            )
             _element.to_be_detached = AAZBoolType(
                 serialized_name="toBeDetached",
             )
@@ -1231,6 +1250,9 @@ class Wait(AAZWaitCommand):
             os_disk.os_type = AAZStrType(
                 serialized_name="osType",
             )
+            os_disk.storage_fault_domain_alignment = AAZStrType(
+                serialized_name="storageFaultDomainAlignment",
+            )
             os_disk.vhd = AAZObjectType()
             _WaitHelper._build_schema_virtual_hard_disk_read(os_disk.vhd)
             os_disk.write_accelerator_enabled = AAZBoolType(
@@ -1238,6 +1260,9 @@ class Wait(AAZWaitCommand):
             )
 
             diff_disk_settings = cls._schema_on_200.properties.storage_profile.os_disk.diff_disk_settings
+            diff_disk_settings.enable_full_caching = AAZBoolType(
+                serialized_name="enableFullCaching",
+            )
             diff_disk_settings.option = AAZStrType()
             diff_disk_settings.placement = AAZStrType()
 

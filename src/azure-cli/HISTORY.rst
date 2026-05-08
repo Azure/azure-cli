@@ -25,6 +25,8 @@ Release History
 * `az aks mesh enable/proxy-redirection-mechanism`: Add mesh Istio CNI commands (#32992)
 * `az aks nodepool add`: Add `Windows2025` as a supported value for `--os-sku` (#33246)
 * `az aks update`: Fix `--enable-azure-monitor-metrics` failing with RoleAssignmentExists when Grafana role assignment already exists (#33229)
+* `az aks create/update`: Add `--enable-gateway-api` and `--disable-gateway-api` parameters to manage Managed Gateway API installation (#33286)
+* `az aks create/update`: Add `--enable-app-routing-istio` and `--disable-app-routing-istio` to manage App Routing Istio gateway implementation (#33287)
 
 **App Service**
 

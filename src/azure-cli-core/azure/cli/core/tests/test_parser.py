@@ -204,7 +204,8 @@ class TestParser(unittest.TestCase):
 
         cli.loader.load_command_table(None)
 
-        parser = cli.parser_cls(cli)
+        global_parser = cli.parser_cls.create_global_parser(cli_ctx=cli)
+        parser = cli.parser_cls(cli, prog=cli.name, parents=[global_parser])
         parser.load_command_table(cli.loader)
 
         logger_msgs = []

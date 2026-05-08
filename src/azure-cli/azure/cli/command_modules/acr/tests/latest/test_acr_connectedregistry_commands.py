@@ -65,6 +65,11 @@ class AcrConnectedRegistryCommandsTests(ScenarioTest):
                          self.check('resourceGroup', '{rg}'),
                          self.check('garbageCollection.enabled', False)])
 
+        # Resync should fail because it requires a deployed, on-prem agent that has
+        # completed the initial sync. The test environment lacks this, so we assert
+        # that the CLI surfaces the error properly.
+        self.cmd('acr connected-registry resync -n {cr_name} -r {registry_name}',
+                expect_failure=True)
         # Create a custom connected-registry with a previously created token.
         self.cmd('acr token create -r {registry_name} -n {syncToken} --repository {repo_1} content/read metadata/read --gateway {root_name} config/read config/write message/read message/write --no-passwords')
         self.cmd('acr token create -r {registry_name} -n {clientToken} --repository {repo_1} content/read --no-passwords')

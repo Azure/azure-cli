@@ -57,15 +57,6 @@ def transform_vm_create_output(result):
         return None if isinstance(result, ClientRawResponse) else result
 
 
-def transform_vm_usage_list(result):
-    result = list(result)
-    for item in result:
-        item.current_value = str(item.current_value)
-        item.limit = str(item.limit)
-        item.local_name = item.name.localized_value
-    return result
-
-
 def transform_vm_list(vm_list):
     return [transform_vm(v) for v in vm_list]
 
