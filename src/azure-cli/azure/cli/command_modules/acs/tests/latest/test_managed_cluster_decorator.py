@@ -2020,6 +2020,24 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         ctx_1.attach_mc(mc)
         self.assertEqual(ctx_1.get_outbound_type(), "test_outbound_type")
 
+        ctx_1_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "outbound_type": CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
+                }
+            ),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        ctx_1_1.agentpool_context = mock.MagicMock()
+        ctx_1_1.agentpool_context.get_vnet_subnet_id.return_value = None
+        with self.assertRaisesRegex(
+            InvalidArgumentValueError,
+            "only supported for clusters created with --vnet-subnet-id",
+        ):
+            ctx_1_1.get_outbound_type()
+
         # invalid parameter
         ctx_2 = AKSManagedClusterContext(
             self.cmd,

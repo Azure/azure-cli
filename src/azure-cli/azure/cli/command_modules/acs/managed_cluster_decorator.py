@@ -2366,12 +2366,22 @@ class AKSManagedClusterContext(BaseAKSContext):
                 skuName = CONST_MANAGED_CLUSTER_SKU_NAME_BASE
         return skuName
 
-    @staticmethod
-    def _raise_missing_vnet_subnet_for_outbound_type(outbound_type: str, sku_name: str) -> None:
+    def _raise_missing_vnet_subnet_for_outbound_type(self, outbound_type: str, sku_name: str) -> None:
         if outbound_type == CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING:
             subnet_requirement = "a route table with egress rules"
         else:
             subnet_requirement = "a NAT gateway with outbound ips"
+
+        if self.decorator_mode == DecoratorMode.UPDATE:
+            raise InvalidArgumentValueError(
+                "Updating outbound type to {outbound_type} is only supported for clusters created with "
+                "--vnet-subnet-id. Clusters using an AKS-managed VNet can't be updated to this outbound type. "
+                "Please refer to "
+                "https://learn.microsoft.com/en-us/azure/aks/egress-outboundtype#updating-outboundtype-after-cluster-creation "  # pylint:disable=line-too-long
+                "for more details.".format(
+                    outbound_type=outbound_type,
+                )
+            )
 
         if sku_name == CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC:
             raise RequiredArgumentMissingError(
