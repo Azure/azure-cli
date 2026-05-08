@@ -46,6 +46,10 @@ Release History
 
 * Fix #33183: `az cloud set`: Typo correction on AZURE_BLEU_CLOUD active directory endpoint
 
+**CDN**
+
+* Remove built-in `az cdn` and `az afd` commands. Install the `cdn` extension to use these commands.
+
 **Compute**
 
 * `az sig create`: Add new argument group "Managed Service Identity" to configure the service identity of a Shared Image Gallery (SIG) (#33137)

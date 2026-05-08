@@ -97,7 +97,6 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_BATCHAI = ('azure.mgmt.batchai', None)
     MGMT_BILLING = ('azure.mgmt.billing', None)
     MGMT_BOTSERVICE = ('azure.mgmt.botservice', None)
-    MGMT_CDN = ('azure.mgmt.cdn', None)
     MGMT_COGNITIVESERVICES = ('azure.mgmt.cognitiveservices', None)
     MGMT_CONTAINERINSTANCE = ('azure.mgmt.containerinstance', None)
     MGMT_COSMOSDB = ('azure.mgmt.cosmosdb', None)
