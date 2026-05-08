@@ -340,7 +340,7 @@ subscription than the app service environment, please use the resource ID for --
                    help='Enable or disable end-to-end encryption between the Front End and the Workers.',
                    arg_type=get_three_state_flag(return_label=True))
         c.argument('site_scoped_certs',
-                   options_list=['--site-scoped-certificates-enabled'],
+                   options_list=['--site-scoped-certs'],
                    help='Enable or disable site-scoped certificates.',
                    arg_type=get_three_state_flag(return_label=True))
         c.argument('min_tls_version',
@@ -476,7 +476,7 @@ subscription than the app service environment, please use the resource ID for --
                    help='Set the platform release channel for the web app. Possible values: Latest, Standard, Extended.',
                    arg_type=get_enum_type(PLATFORM_RELEASE_CHANNEL_TYPES))
         c.argument('site_scoped_certs',
-                   options_list=['--site-scoped-certificates-enabled'],
+                   options_list=['--site-scoped-certs'],
                    help='Enable or disable site-scoped certificates.',
                    arg_type=get_three_state_flag(return_label=True))
 
