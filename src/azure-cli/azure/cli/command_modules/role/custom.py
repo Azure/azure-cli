@@ -637,47 +637,10 @@ def create_deny_assignment(cmd, scope=None, deny_assignment_name=None,
             and len(exclude_principal_types) != len(exclude_principal_ids):
         raise CLIError('--exclude-principal-types must have the same number of entries as --exclude-principal-ids.')
 
-    # Resolve SDK model classes via get_sdk so the role module stays consistent with the rest of the codebase.
-    DenyAssignment = get_sdk(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION, 'DenyAssignment',
-                             mod='models', operation_group='deny_assignments')
-    DenyAssignmentProperties = get_sdk(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION, 'DenyAssignmentProperties',
-                                       mod='models', operation_group='deny_assignments')
-    DenyAssignmentPermission = get_sdk(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION, 'DenyAssignmentPermission',
-                                       mod='models', operation_group='deny_assignments')
-    DenyAssignmentPrincipal = get_sdk(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION, 'DenyAssignmentPrincipal',
-                                      mod='models', operation_group='deny_assignments')
-
-    # Build principals (target of the deny)
-    if principal_id:
-        principals = [DenyAssignmentPrincipal(id=principal_id, type=principal_type)]
-    else:
-        # Everyone mode is represented by a single SystemDefined principal with the all-zero GUID.
-        principals = [DenyAssignmentPrincipal(id='00000000-0000-0000-0000-000000000000', type='SystemDefined')]
-
-    # Build exclude principals
-    exclude_principals = []
-    if exclude_principal_ids:
-        for i, pid in enumerate(exclude_principal_ids):
-            exclude_type = exclude_principal_types[i] if exclude_principal_types else 'ServicePrincipal'
-            exclude_principals.append(DenyAssignmentPrincipal(id=pid, type=exclude_type))
-
-    permission = DenyAssignmentPermission(
-        actions=actions or [],
-        not_actions=not_actions or [],
-        data_actions=[],
-        not_data_actions=[],
-    )
-
-    properties = DenyAssignmentProperties(
-        deny_assignment_name=deny_assignment_name,
-        description=description or '',
-        permissions=[permission],
-        principals=principals,
-        exclude_principals=exclude_principals,
-        is_system_protected=False,
-    )
-
-    parameters = DenyAssignment(properties=properties)
+    parameters = _build_deny_assignment_model(
+        cmd.cli_ctx, deny_assignment_name, description,
+        actions, not_actions, principal_id, principal_type,
+        exclude_principal_ids, exclude_principal_types)
 
     if not assignment_name:
         assignment_name = str(uuid.uuid4())
@@ -687,6 +650,46 @@ def create_deny_assignment(cmd, scope=None, deny_assignment_name=None,
 
     return deny_client.create_or_update(scope=scope, deny_assignment_id=assignment_name,
                                         parameters=parameters)
+
+
+def _build_deny_assignment_model(cli_ctx, deny_assignment_name, description,
+                                 actions, not_actions, principal_id, principal_type,
+                                 exclude_principal_ids, exclude_principal_types):
+    """Construct the DenyAssignment SDK model from CLI inputs."""
+    DenyAssignment = get_sdk(cli_ctx, ResourceType.MGMT_AUTHORIZATION, 'DenyAssignment',
+                             mod='models', operation_group='deny_assignments')
+    DenyAssignmentProperties = get_sdk(cli_ctx, ResourceType.MGMT_AUTHORIZATION, 'DenyAssignmentProperties',
+                                       mod='models', operation_group='deny_assignments')
+    DenyAssignmentPermission = get_sdk(cli_ctx, ResourceType.MGMT_AUTHORIZATION, 'DenyAssignmentPermission',
+                                       mod='models', operation_group='deny_assignments')
+    DenyAssignmentPrincipal = get_sdk(cli_ctx, ResourceType.MGMT_AUTHORIZATION, 'DenyAssignmentPrincipal',
+                                      mod='models', operation_group='deny_assignments')
+
+    if principal_id:
+        principals = [DenyAssignmentPrincipal(id=principal_id, type=principal_type)]
+    else:
+        # Everyone mode is represented by a single SystemDefined principal with the all-zero GUID.
+        principals = [DenyAssignmentPrincipal(id='00000000-0000-0000-0000-000000000000', type='SystemDefined')]
+
+    exclude_principals = []
+    if exclude_principal_ids:
+        for i, pid in enumerate(exclude_principal_ids):
+            exclude_type = exclude_principal_types[i] if exclude_principal_types else 'ServicePrincipal'
+            exclude_principals.append(DenyAssignmentPrincipal(id=pid, type=exclude_type))
+
+    return DenyAssignment(properties=DenyAssignmentProperties(
+        deny_assignment_name=deny_assignment_name,
+        description=description or '',
+        permissions=[DenyAssignmentPermission(
+            actions=actions or [],
+            not_actions=not_actions or [],
+            data_actions=[],
+            not_data_actions=[],
+        )],
+        principals=principals,
+        exclude_principals=exclude_principals,
+        is_system_protected=False,
+    ))
 
 
 def delete_deny_assignment(cmd, scope=None, deny_assignment_id=None, deny_assignment_name=None):
