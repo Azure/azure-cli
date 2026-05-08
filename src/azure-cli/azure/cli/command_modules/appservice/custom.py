@@ -3474,24 +3474,18 @@ def list_instances(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_instance_identifiers', slot)
 
 
-def list_runtimes(cmd, os_type=None, linux=False, show_runtime_details=False):
-    if os_type is not None and linux:
-        raise MutuallyExclusiveArgumentError("Cannot use both --os-type and --linux")
-
-    if linux:
-        linux = True
+def list_runtimes(cmd, os_type=None, runtime=None, support=None):
+    # show both linux and windows stacks by default
+    linux = True
+    windows = True
+    if os_type == WINDOWS_OS_NAME:
+        linux = False
+    if os_type == LINUX_OS_NAME:
         windows = False
-    else:
-        # show both linux and windows stacks by default
-        linux = True
-        windows = True
-        if os_type == WINDOWS_OS_NAME:
-            linux = False
-        if os_type == LINUX_OS_NAME:
-            windows = False
 
-    runtime_helper = _StackRuntimeHelper(cmd=cmd, linux=linux, windows=windows)
-    return runtime_helper.get_stack_names_only(delimiter=":", show_runtime_details=show_runtime_details)
+    include_eol = support in ('eol', 'all') if support else False
+    runtime_helper = _StackRuntimeHelper(cmd=cmd, linux=linux, windows=windows, include_eol=include_eol)
+    return runtime_helper.get_stacks_as_table(runtime_filter=runtime, support_filter=support)
 
 
 def list_function_app_runtimes(cmd, os_type=None):
@@ -7005,21 +6999,30 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
     DEFAULT_DELIMETER = "|"  # character that separates runtime name from version
     ALLOWED_DELIMETERS = "|:"  # delimiters allowed: '|', ':'
 
-    # pylint: disable=too-few-public-methods
+    # pylint: disable=too-few-public-methods,too-many-instance-attributes
     class Runtime:
         def __init__(self,
                      display_name=None,
                      configs=None,
                      github_actions_properties=None,
                      linux=False,
-                     is_auto_update=None):
+                     is_auto_update=None,
+                     os=None,
+                     runtime_family=None,
+                     version_label=None,
+                     eol_date=None):
             self.display_name = display_name
             self.configs = configs if configs is not None else {}
             self.github_actions_properties = github_actions_properties
             self.linux = linux
             self.is_auto_update = is_auto_update
+            self.os = os or ("Linux" if linux else "Windows")
+            self.runtime_family = runtime_family
+            self.version_label = version_label
+            self.eol_date = eol_date
 
-    def __init__(self, cmd, linux=False, windows=False):
+    def __init__(self, cmd, linux=False, windows=False, include_eol=False):
+        self._include_eol = include_eol
         # TODO try and get API support for this so it isn't hardcoded
         self.windows_config_mappings = {
             'node': 'WEBSITE_NODE_DEFAULT_VERSION',
@@ -7065,6 +7068,168 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
             return windows_stacks
         return {LINUX_OS_NAME: linux_stacks, WINDOWS_OS_NAME: windows_stacks}
 
+    def get_stacks_as_table(self, runtime_filter=None, support_filter=None):
+        """Return stacks as list of dicts for structured output."""
+        if not support_filter:
+            support_filter = 'supported'
+
+        runtime_family_map = {
+            'dotnet': ['.NET'],
+            'node': ['Node'],
+            'php': ['PHP'],
+            'python': ['Python'],
+            'java': ['Java', 'Tomcat', 'JBoss EAP'],
+        }
+
+        results = []
+        for stack in self.stacks:
+            # For Java-related runtimes, only show auto-update (friendly name) entries,
+            # not individual patch versions like JAVA|21.0.8
+            if 'java' in stack.display_name.casefold() and not stack.is_auto_update:
+                continue
+
+            if runtime_filter and runtime_filter != 'all':
+                allowed_families = runtime_family_map.get(runtime_filter, [])
+                if stack.runtime_family not in allowed_families:
+                    continue
+
+            support_status = self._compute_support_status(stack.eol_date)
+
+            if support_filter != 'all':
+                if support_filter == 'supported':
+                    if support_status == 'EOL':
+                        continue
+                elif support_filter == 'active':
+                    if support_status not in ('Active', 'n/a'):
+                        continue
+                elif support_filter == 'near':
+                    if support_status != 'Near':
+                        continue
+                elif support_filter == 'eol':
+                    if support_status != 'EOL':
+                        continue
+
+            results.append({
+                'os': stack.os,
+                'runtime': stack.runtime_family,
+                'version': stack.version_label or '',
+                'config': stack.display_name,
+                'support': support_status,
+                'end_of_life': stack.eol_date or '-',
+            })
+
+        return results
+
+    @staticmethod
+    def _compute_support_status(eol_date_str):
+        if not eol_date_str:
+            return 'n/a'
+        try:
+            eol_date = datetime.datetime.strptime(eol_date_str, "%Y-%m-%d").replace(
+                tzinfo=datetime.timezone.utc)
+            now = datetime.datetime.now(datetime.timezone.utc)
+            near_threshold = now + datetime.timedelta(days=365)
+            if eol_date <= now:
+                return 'EOL'
+            if eol_date <= near_threshold:
+                return 'Near'
+            return 'Active'
+        except (ValueError, TypeError):
+            return 'n/a'
+
+    @staticmethod
+    def _format_eol_date(eol_date):
+        """Format EOL date to YYYY-MM-DD string."""
+        if not eol_date:
+            return None
+        if isinstance(eol_date, str):
+            for fmt in ("%Y-%m-%dT%H:%M:%S.%fZ", "%Y-%m-%dT%H:%M:%SZ"):
+                try:
+                    return datetime.datetime.strptime(eol_date, fmt).strftime("%Y-%m-%d")
+                except ValueError:
+                    continue
+            return eol_date
+        if isinstance(eol_date, datetime.datetime):
+            return eol_date.strftime("%Y-%m-%d")
+        return None
+
+    @staticmethod
+    def _get_version_label(display_text):
+        """Extract human-readable version label from minor version display text.
+        Examples: '.NET 10 (LTS)' -> '10.0 (LTS)', 'Node 24 LTS' -> '24.0 LTS',
+                  'Python 3.14' -> '3.14', 'PHP 8.4' -> '8.4'
+        """
+        match = re.match(r'.*?(\d+(?:\.\d+)*)(?:\s*\((LTS|STS)\)|\s+(LTS|STS))?\s*$', display_text)
+        if match:
+            ver = match.group(1)
+            paren_label = match.group(2)
+            space_label = match.group(3)
+            if '.' not in ver:
+                ver = ver + '.0'
+            if paren_label:
+                return "{} ({})".format(ver, paren_label)
+            if space_label:
+                return "{} {}".format(ver, space_label)
+            return ver
+        return display_text
+
+    @staticmethod
+    def _get_java_version_label(display_name):
+        """Extract version label for Java runtimes from display_name.
+        'JAVA|21-java21' -> '21', 'TOMCAT|10.1-java21' -> '10.1 (Java 21)'
+        """
+        parts = display_name.split("|")
+        if len(parts) != 2:
+            return display_name
+        prefix = parts[0].upper()
+        version_part = parts[1]
+        if prefix == "JAVA":
+            m = re.match(r'(\d+)', version_part)
+            if m:
+                return "8" if version_part.startswith("1.8") else m.group(1)
+            return version_part
+        m = re.match(r'([\d.]+)-java(\d+)', version_part)
+        if m:
+            return "{} (Java {})".format(m.group(1), m.group(2))
+        return version_part
+
+    @staticmethod
+    def _get_java_runtime_family(display_name):
+        """Extract runtime family from Java display_name.
+        'JAVA|21' -> 'Java', 'TOMCAT|10.1-java21' -> 'Tomcat', 'JBOSSEAP|7.4' -> 'JBoss EAP'
+        """
+        prefix = display_name.split("|")[0].upper()
+        family_map = {
+            "JAVA": "Java",
+            "TOMCAT": "Tomcat",
+            "JBOSSEAP": "JBoss EAP",
+        }
+        return family_map.get(prefix, prefix)
+
+    @staticmethod
+    def _extract_java_version_from_runtime(runtime_name):
+        """Extract the Java major version from a runtime display name.
+        'JAVA|25-java25' -> '25', 'TOMCAT|10.1-java21' -> '21', 'JBOSSEAP|8-java17' -> '17',
+        'JAVA|8-jre8' -> '8', 'JAVA|21' -> '21'
+        """
+        parts = runtime_name.split("|")
+        if len(parts) != 2:
+            return None
+        version_part = parts[1]
+        # Pattern: ...-java21, ...-java8
+        m = re.search(r'-java(\d+)', version_part)
+        if m:
+            return m.group(1)
+        # Pattern: ...-jre8
+        m = re.search(r'-jre(\d+)', version_part)
+        if m:
+            return m.group(1)
+        # Plain version like "JAVA|21", "JAVA|8"
+        m = re.match(r'^(\d+)', version_part)
+        if m:
+            return m.group(1)
+        return None
+
     def _get_raw_stacks_from_api(self):
         return list(self._client.provider.get_web_app_stacks(stack_os_type=None))
 
@@ -7072,15 +7237,55 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         # Track seen runtime display names to avoid duplicates in Linux parsing.
         # Linux Java containers (e.g., JBOSSEAP) can produce duplicate entries across major versions.
         # Windows parsing doesn't have this issue due to its different structure.
+
+        java_eol_map = self._build_java_eol_map(stacks)
+
         seen_runtimes = set()
         for lang in stacks:
             for major_version in lang.major_versions:
                 if self._linux:
                     if lang.display_text.lower() == "java":
                         continue
-                    self._parse_major_version_linux(major_version, self._stacks, seen_runtimes)
+                    self._parse_major_version_linux(
+                        major_version, self._stacks, seen_runtimes,
+                        runtime_family=lang.display_text,
+                        java_eol_map=java_eol_map)
                 if self._windows:
-                    self._parse_major_version_windows(major_version, self._stacks, self.windows_config_mappings)
+                    self._parse_major_version_windows(
+                        major_version, self._stacks,
+                        self.windows_config_mappings,
+                        runtime_family=lang.display_text,
+                        java_eol_map=java_eol_map)
+
+    def _build_java_eol_map(self, stacks):
+        """Build Java version -> EOL date map from the 'Java' stack.
+
+        The EOL dates for Java versions live on the 'Java' stack's runtime settings,
+        not on the 'Java Containers' stack. We need this lookup so Tomcat/JBoss/Java SE
+        entries can display the correct EOL for their Java version.
+        """
+        java_eol_map = {}
+        for lang in stacks:
+            if lang.display_text.lower() != "java":
+                continue
+            for major_version in lang.major_versions:
+                for minor_version in major_version.minor_versions:
+                    self._extract_java_eol_from_settings(minor_version, java_eol_map)
+            break
+        return java_eol_map
+
+    def _extract_java_eol_from_settings(self, minor_version, java_eol_map):
+        settings = minor_version.stack_settings
+        for rt_settings in (getattr(settings, 'linux_runtime_settings', None),
+                            getattr(settings, 'windows_runtime_settings', None)):
+            if not rt_settings or not getattr(rt_settings, 'is_auto_update', False):
+                continue
+            eol = self._format_eol_date(getattr(rt_settings, 'end_of_life_date', None))
+            rv = getattr(rt_settings, 'runtime_version', '') or ''
+            if eol and rv:
+                ver = "8" if rv.startswith("1.8") else rv.split('.')[0]
+                if ver not in java_eol_map:
+                    java_eol_map[ver] = eol
 
     @classmethod
     def remove_delimiters(cls, runtime):
@@ -7176,12 +7381,14 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         return t.replace(" ", "|", 1).replace(" ", "")
 
     @classmethod
-    def _is_valid_runtime_setting(cls, runtime_setting):
+    def _is_valid_runtime_setting(cls, runtime_setting, include_eol=False):
         # Using datetime module imported at the top level
         if runtime_setting is None or getattr(runtime_setting, 'is_hidden', False):
             return False
         if getattr(runtime_setting, 'is_deprecated', False):
             return False
+        if include_eol:
+            return True
         end_of_life = getattr(runtime_setting, 'end_of_life_date', None)
         if end_of_life:
             try:
@@ -7218,9 +7425,10 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         return minor_version.stack_settings.linux_container_settings
 
     @classmethod
-    def _get_valid_minor_versions(cls, major_version, linux, java=False):
+    def _get_valid_minor_versions(cls, major_version, linux, java=False, include_eol=False):
         def _filter(minor_version):
-            return cls._is_valid_runtime_setting(cls._get_runtime_setting(minor_version, linux, java))
+            return cls._is_valid_runtime_setting(cls._get_runtime_setting(minor_version, linux, java),
+                                                 include_eol=include_eol)
         return [m for m in major_version.minor_versions if _filter(m)]
 
     @staticmethod
@@ -7321,13 +7529,16 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         runtimes.sort(key=lambda x: _StackRuntimeHelper._java_version_sort_key(x[1]))
         return runtimes
 
-    def _parse_major_version_windows(self, major_version, parsed_results, config_mappings):
-        java_container_minor_versions = self._get_valid_minor_versions(major_version, linux=False, java=True)
+    def _parse_major_version_windows(self, major_version, parsed_results, config_mappings,
+                                     runtime_family=None, java_eol_map=None):
+        java_container_minor_versions = self._get_valid_minor_versions(
+            major_version, linux=False, java=True, include_eol=self._include_eol)
         if java_container_minor_versions:
             for container in java_container_minor_versions:
                 container_settings = container.stack_settings.windows_container_settings
                 java_container = container_settings.java_container
                 container_version = container_settings.java_container_version
+                eol_date = self._format_eol_date(getattr(container_settings, 'end_of_life_date', None))
                 # Get Java versions from the container's runtimes array
                 javas = self._get_java_versions_from_windows_container(container_settings)
                 if not javas:
@@ -7339,15 +7550,26 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                         java_container,
                         container_version,
                         container_settings.is_auto_update)
+                    # Look up EOL from the Java stack if the container doesn't have one
+                    java_ver = self._extract_java_version_from_runtime(runtime.display_name) or \
+                        ("8" if java.startswith("1.8") else java.split('.')[0])
+                    runtime.eol_date = eol_date or (java_eol_map or {}).get(java_ver)
+                    runtime.runtime_family = self._get_java_runtime_family(runtime.display_name)
+                    runtime.version_label = self._get_java_version_label(runtime.display_name)
                     parsed_results.append(runtime)
         else:
-            minor_versions = self._get_valid_minor_versions(major_version, linux=False, java=False)
+            minor_versions = self._get_valid_minor_versions(
+                major_version, linux=False, java=False, include_eol=self._include_eol)
             for minor_version in minor_versions:
                 settings = minor_version.stack_settings.windows_runtime_settings
+                eol_date = self._format_eol_date(getattr(settings, 'end_of_life_date', None))
                 if "Java" not in minor_version.display_text:
                     runtime_name = self._format_windows_display_text(minor_version.display_text)
 
-                    runtime = self.Runtime(display_name=runtime_name, linux=False)
+                    runtime = self.Runtime(display_name=runtime_name, linux=False,
+                                           os="Windows", runtime_family=runtime_family,
+                                           version_label=self._get_version_label(minor_version.display_text),
+                                           eol_date=eol_date)
                     lang_name = runtime_name.split("|")[0].lower()
                     config_key = config_mappings.get(lang_name)
 
@@ -7358,6 +7580,9 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                         runtime.github_actions_properties = {"github_actions_version": gh_properties.supported_version}
                 else:
                     runtime = self.get_windows_java_runtime(settings.runtime_version, "JAVA", "SE", False)
+                    runtime.eol_date = eol_date
+                    runtime.runtime_family = self._get_java_runtime_family(runtime.display_name)
+                    runtime.version_label = self._get_java_version_label(runtime.display_name)
 
                 parsed_results.append(runtime)
 
@@ -7396,8 +7621,10 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                             linux=False,
                             is_auto_update=is_auto_update)
 
-    def _parse_major_version_linux(self, major_version, parsed_results, seen_runtimes):
-        minor_java_container_versions = self._get_valid_minor_versions(major_version, linux=True, java=True)
+    def _parse_major_version_linux(self, major_version, parsed_results, seen_runtimes,
+                                   runtime_family=None, java_eol_map=None):
+        minor_java_container_versions = self._get_valid_minor_versions(
+            major_version, linux=True, java=True, include_eol=self._include_eol)
         if "SE" in major_version.display_text:
             # Dynamically get Java versions from the available minor versions
             java_versions = self._get_java_versions_from_minor_versions(minor_java_container_versions)
@@ -7409,6 +7636,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         if minor_java_container_versions:
             for minor in minor_java_container_versions:
                 linux_container_settings = minor.stack_settings.linux_container_settings
+                eol_date = self._format_eol_date(getattr(linux_container_settings, 'end_of_life_date', None))
                 # Dynamically get all Java runtimes from container settings
                 runtimes = self._get_java_runtimes_from_container_settings(linux_container_settings)
                 # Remove the 'JBoss _byol' entries from the output
@@ -7418,21 +7646,35 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                     if runtime_name in seen_runtimes:
                         continue
                     seen_runtimes.add(runtime_name)
+                    # Use container EOL if available, otherwise look up from the Java stack
+                    runtime_eol = eol_date
+                    if not runtime_eol and java_eol_map:
+                        java_ver = self._extract_java_version_from_runtime(runtime_name)
+                        runtime_eol = java_eol_map.get(java_ver)
                     runtime = self.Runtime(display_name=runtime_name,
                                            configs={"linux_fx_version": runtime_name},
                                            github_actions_properties={"github_actions_version": version},
                                            linux=True,
-                                           is_auto_update=auto_update)
+                                           is_auto_update=auto_update,
+                                           os="Linux",
+                                           runtime_family=self._get_java_runtime_family(runtime_name),
+                                           version_label=self._get_java_version_label(runtime_name),
+                                           eol_date=runtime_eol)
                     parsed_results.append(runtime)
         else:
-            minor_versions = self._get_valid_minor_versions(major_version, linux=True, java=False)
+            minor_versions = self._get_valid_minor_versions(
+                major_version, linux=True, java=False, include_eol=self._include_eol)
             for minor_version in minor_versions:
                 settings = minor_version.stack_settings.linux_runtime_settings
                 runtime_name = settings.runtime_version
                 runtime = self.Runtime(display_name=runtime_name,
                                        configs={"linux_fx_version": runtime_name},
                                        linux=True,
-                                       )
+                                       os="Linux",
+                                       runtime_family=runtime_family,
+                                       version_label=self._get_version_label(minor_version.display_text),
+                                       eol_date=self._format_eol_date(
+                                           getattr(settings, 'end_of_life_date', None)))
                 gh_properties = settings.git_hub_action_settings
                 if gh_properties.is_supported:
                     runtime.github_actions_properties = {"github_actions_version": gh_properties.supported_version}
