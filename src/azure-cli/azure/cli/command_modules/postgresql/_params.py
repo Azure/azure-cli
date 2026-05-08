@@ -549,12 +549,13 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                        help='Source of the configuration.')
 
         # firewall-rule
-        for scope in ['create', 'delete', 'list', 'show', 'update']:
+        firewall_rule_name_scopes = ['create', 'delete', 'show', 'update']
+        for scope in firewall_rule_name_scopes + ['list']:
             argument_context_string = '{} flexible-server firewall-rule {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
                 c.argument('server_name', arg_type=server_name_resource_arg_type)
 
-        for scope in ['create', 'delete', 'show', 'update']:
+        for scope in firewall_rule_name_scopes:
             argument_context_string = '{} flexible-server firewall-rule {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
                 c.argument('firewall_rule_name', id_part='child_name_1', options_list=['--name', '-n'], validator=postgres_firewall_rule_name_validator,
