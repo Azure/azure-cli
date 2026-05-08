@@ -248,7 +248,11 @@ def convert_show_result_to_snake_case(result):
         external_health_policy.pop("gracePeriod")
 
     lifecycle_hooks_profile = new_result.get("lifecycle_hooks_profile", {}) or {}
-    lifecycle_hooks = lifecycle_hooks_profile.get("lifecycleHooks", [])
+    if "lifecycleHooks" in lifecycle_hooks_profile:
+        lifecycle_hooks_profile["lifecycle_hooks"] = lifecycle_hooks_profile["lifecycleHooks"]
+        lifecycle_hooks_profile.pop("lifecycleHooks")
+
+    lifecycle_hooks = lifecycle_hooks_profile.get("lifecycle_hooks", [])
     for lifecycle_hook in lifecycle_hooks:
         if "defaultAction" in lifecycle_hook:
             lifecycle_hook["default_action"] = lifecycle_hook["defaultAction"]
