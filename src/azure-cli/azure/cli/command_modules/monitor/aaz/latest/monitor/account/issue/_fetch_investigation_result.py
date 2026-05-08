@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class FetchInvestigationResult(AAZCommand):
     """Fetch investigation result
+
+    :example: Fetch the investigation result for an issue
+        az monitor account issue fetch-investigation-result --azure-monitor-workspace-name myWorkspace -g myRG --issue-name myIssue --investigation-id 00000000-0000-0000-0000-000000000000
     """
 
     _aaz_info = {

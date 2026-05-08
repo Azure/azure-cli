@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class AddOrUpdateResource(AAZCommand):
     """Add or update resources in the issue
+
+    :example: Add a resource to an issue
+        az monitor account issue add-or-update-resource --azure-monitor-workspace-name myWorkspace -g myRG --issue-name myIssue --value "[{\"id\": \"/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Compute/virtualMachines/vm1\"}]"
     """
 
     _aaz_info = {

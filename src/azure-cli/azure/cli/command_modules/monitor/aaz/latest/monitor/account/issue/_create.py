@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Create(AAZCommand):
     """Create a new issue or updates an existing one
+
+    :example: Create a new issue in an Azure Monitor workspace
+        az monitor account issue create --azure-monitor-workspace-name myWorkspace -g myRG -n myIssue --title "My Issue" --severity High --status New
     """
 
     _aaz_info = {

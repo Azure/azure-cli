@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class SetBackgroundVisualization(AAZCommand):
     """Set the background visualization for the issue
+
+    :example: Set the background visualization for an issue
+        az monitor account issue set-background-visualization --azure-monitor-workspace-name myWorkspace -g myRG --issue-name myIssue --visualization "{\"type\":\"AdaptiveCard\"}"
     """
 
     _aaz_info = {

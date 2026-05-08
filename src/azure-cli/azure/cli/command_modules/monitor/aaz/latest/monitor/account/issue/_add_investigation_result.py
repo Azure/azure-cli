@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class AddInvestigationResult(AAZCommand):
     """Adds investigation result
+
+    :example: Add an investigation result to an issue
+        az monitor account issue add-investigation-result --azure-monitor-workspace-name myWorkspace -g myRG --issue-name myIssue --text "Investigation findings" --id 00000000-0000-0000-0000-000000000000
     """
 
     _aaz_info = {

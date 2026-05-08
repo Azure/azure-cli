@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class AddOrUpdateAlert(AAZCommand):
     """Add or update alerts in the issue
+
+    :example: Add an alert to an issue
+        az monitor account issue add-or-update-alert --azure-monitor-workspace-name myWorkspace -g myRG --issue-name myIssue --value "[{\"id\": \"/subscriptions/sub/resourceGroups/rg/providers/Microsoft.AlertsManagement/alerts/alert1\"}]"
     """
 
     _aaz_info = {

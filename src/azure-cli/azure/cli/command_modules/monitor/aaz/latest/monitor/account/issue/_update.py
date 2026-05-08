@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update a new issue or updates an existing one
+
+    :example: Update the status and severity of an issue
+        az monitor account issue update --azure-monitor-workspace-name myWorkspace -g myRG -n myIssue --status InProgress --severity High
     """
 
     _aaz_info = {

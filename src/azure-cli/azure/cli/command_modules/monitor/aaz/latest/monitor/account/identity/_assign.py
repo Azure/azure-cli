@@ -16,6 +16,12 @@ from azure.cli.core.aaz import *
 )
 class Assign(AAZCommand):
     """Assign the user or system managed identities.
+
+    :example: Assign a system-assigned managed identity to an Azure Monitor workspace
+        az monitor account identity assign -n myWorkspace -g myRG --system-assigned
+
+    :example: Assign a user-assigned managed identity to an Azure Monitor workspace
+        az monitor account identity assign -n myWorkspace -g myRG --user-assigned /subscriptions/sub/resourceGroups/rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myIdentity
     """
 
     _aaz_info = {

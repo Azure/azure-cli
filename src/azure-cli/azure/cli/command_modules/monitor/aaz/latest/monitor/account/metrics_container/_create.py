@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Create(AAZCommand):
     """Create metrics container settings for a monitoring account.
+
+    :example: Create the default metrics container for an Azure Monitor workspace
+        az monitor account metrics-container create -w myWorkspace -g myRG -n default
     """
 
     _aaz_info = {
@@ -42,7 +45,7 @@ class Create(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.azure_monitor_workspace_name = AAZStrArg(
-            options=["--azure-monitor-workspace-name"],
+            options=["-w", "--azure-monitor-workspace-name"],
             help="The name of the Azure Monitor Workspace. The name is case insensitive",
             required=True,
             fmt=AAZStrArgFormat(

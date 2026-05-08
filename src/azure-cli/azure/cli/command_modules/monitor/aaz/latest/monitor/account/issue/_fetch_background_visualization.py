@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class FetchBackgroundVisualization(AAZCommand):
     """Fetch the background visualization of the issue
+
+    :example: Fetch the background visualization for an issue
+        az monitor account issue fetch-background-visualization --azure-monitor-workspace-name myWorkspace -g myRG --issue-name myIssue
     """
 
     _aaz_info = {
