@@ -30,8 +30,7 @@ from azure.mgmt.cognitiveservices.models import Account as CognitiveServicesAcco
     ManagedNetworkSettingsEx, \
     OutboundRuleBasicResource, FqdnOutboundRule, \
     PrivateEndpointOutboundRule, PrivateEndpointOutboundRuleDestination, \
-    ServiceTagOutboundRule, ServiceTagOutboundRuleDestination, \
-    ManagedComputeDeployment, ManagedComputeDeploymentProperties
+    ServiceTagOutboundRule, ServiceTagOutboundRuleDestination
 from azure.cli.command_modules.cognitiveservices._client_factory import cf_accounts, cf_resource_skus
 from azure.cli.core.azclierror import (
     BadRequestError,
@@ -403,6 +402,7 @@ def managed_compute_deployment_create(
     """
     Create a managed compute deployment for Azure Cognitive Services account.
     """
+    from azure.mgmt.cognitiveservices.models import ManagedComputeDeployment, ManagedComputeDeploymentProperties
     properties = ManagedComputeDeploymentProperties(
         model=model,
         deployment_template=deployment_template,
