@@ -26,6 +26,7 @@ from azure.cli.command_modules.acs.custom import (
     _get_command_context,
     _update_addons,
     aks_enable_addons,
+    aks_agentpool_upgrade,
     aks_stop,
     is_monitoring_addon_enabled,
     k8s_install_kubectl,
@@ -943,6 +944,36 @@ class TestAKSCommand(unittest.TestCase):
         self.cmd = MockCmd(self.cli_ctx)
         self.models = AKSManagedClusterModels(self.cmd, ResourceType.MGMT_CONTAINERSERVICE)
         self.client = MockClient()
+
+    def test_aks_agentpool_upgrade_sets_max_unavailable(self):
+        agent_pool = mock.MagicMock()
+        agent_pool.orchestrator_version = "1.28.0"
+        agent_pool.provisioning_state = "Succeeded"
+        agent_pool.upgrade_settings = None
+        self.client.get = mock.Mock(return_value=agent_pool)
+        self.client.begin_create_or_update = mock.Mock(return_value=agent_pool)
+        self.cmd.get_models = mock.Mock(return_value=mock.Mock)
+
+        result = aks_agentpool_upgrade(
+            self.cmd,
+            self.client,
+            "rg",
+            "cluster",
+            "nodepool",
+            kubernetes_version="1.29.0",
+            max_unavailable="1",
+            yes=True,
+        )
+
+        self.assertEqual(result, agent_pool)
+        self.assertEqual(agent_pool.upgrade_settings.max_unavailable, "1")
+        self.client.begin_create_or_update.assert_called_once_with(
+            "rg",
+            "cluster",
+            "nodepool",
+            agent_pool,
+            headers={},
+        )
 
     def test_aks_stop(self):
         # public cluster: call begin_stop
