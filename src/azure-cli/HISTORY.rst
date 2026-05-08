@@ -268,6 +268,7 @@ Release History
 * `az cognitiveservices agent logs show`: Add console log streaming for hosted agents (#32701)
 * `az cognitiveservices agent create`: Add `--show-logs` flag for deployment troubleshooting (#32701)
 * `az cognitiveservices agent start`: Add `--show-logs` and `--timeout` flags (#32701)
+* [PREVIEW] `az cognitiveservices account managed-compute-deployment`: Add new command group for managing GPU-backed managed compute deployments with create, show, list, update, and delete operations
 
 **Container app**
 
