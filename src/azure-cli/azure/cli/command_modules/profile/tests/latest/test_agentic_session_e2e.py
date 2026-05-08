@@ -29,7 +29,10 @@ class AgenticSessionScenarioTest(LiveScenarioTest):
     def setUp(self):
         super().setUp()
         self._clean_state()
-        self.cmd('az login')
+        # Login to the agent test tenant where xms_cli_ses eSTS feature is enabled
+        self._tenant_id = os.environ.get('AZURE_AGENTIC_TEST_TENANT',
+                                         'c6f398fc-b904-4326-98b0-d8ce4b0db27a')
+        self.cmd('az login --tenant {}'.format(self._tenant_id))
 
     def tearDown(self):
         self._clean_state()
@@ -154,7 +157,7 @@ class AgenticSessionScenarioTest(LiveScenarioTest):
 
         app = msal.PublicClientApplication(
             "04b07795-8ddb-461a-bbee-02f9e1bf7b46",
-            authority="https://login.microsoftonline.com/organizations",
+            authority="https://login.microsoftonline.com/{}".format(self._tenant_id),
             token_cache=cache,
         )
         accounts = app.get_accounts()
