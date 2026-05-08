@@ -430,15 +430,15 @@ examples:
   - name: >
       Create a firewall rule allowing connections from a specific IP address.
     text: >
-      az postgres flexible-server firewall-rule create --resource-group testGroup --name testserver --rule-name allowip --start-ip-address 107.46.14.221
+      az postgres flexible-server firewall-rule create --resource-group testGroup --server-name testserver --name allowip --start-ip-address 107.46.14.221
   - name: >
       Create a firewall rule allowing connections from an IP address range.
     text: >
-        az postgres flexible-server firewall-rule create --resource-group testGroup --name testserver --rule-name allowiprange --start-ip-address 107.46.14.0 --end-ip-address 107.46.14.221
+        az postgres flexible-server firewall-rule create --resource-group testGroup --server-name testserver --name allowiprange --start-ip-address 107.46.14.0 --end-ip-address 107.46.14.221
   - name: >
       Create a firewall rule allowing connections to all Azure services
     text: >
-      az postgres flexible-server firewall-rule create --resource-group testGroup --name testserver --rule-name allowazureservices --start-ip-address 0.0.0.0
+      az postgres flexible-server firewall-rule create --resource-group testGroup --server-name testserver --name allowazureservices --start-ip-address 0.0.0.0
 """
 
 helps['postgres flexible-server firewall-rule list'] = """
@@ -446,9 +446,9 @@ type: command
 short-summary: List all firewall rules for a flexible server.
 example:
   - name: List all firewall rules for a server.
-    text: az postgres flexible-server firewall-rule list --resource-group testGroup --name testserver
+    text: az postgres flexible-server firewall-rule list --resource-group testGroup --server-name testserver
   - name: List all firewall rules for a server in table format.
-    text: az postgres flexible-server firewall-rule list --resource-group testGroup --name testserver --output table
+    text: az postgres flexible-server firewall-rule list --resource-group testGroup --server-name testserver --output table
 """
 
 helps['postgres flexible-server firewall-rule show'] = """
@@ -456,7 +456,7 @@ type: command
 short-summary: Get the details of a firewall rule.
 examples:
   - name: Get the details of a firewall rule.
-    text: az postgres flexible-server firewall-rule show --rule-name testRule --resource-group testGroup --name testserver
+    text: az postgres flexible-server firewall-rule show --name testRule --resource-group testGroup --server-name testserver
 """
 
 helps['postgres flexible-server firewall-rule update'] = """
@@ -464,9 +464,9 @@ type: command
 short-summary: Update a firewall rule.
 examples:
   - name: Update a firewall rule's start IP address.
-    text: az postgres flexible-server firewall-rule update --resource-group testGroup --name testserver --rule-name allowiprange --start-ip-address 107.46.14.1
+    text: az postgres flexible-server firewall-rule update --resource-group testGroup --server-name testserver --name allowiprange --start-ip-address 107.46.14.1
   - name: Update a firewall rule's start and end IP address.
-    text: az postgres flexible-server firewall-rule update --resource-group testGroup --name testserver --rule-name allowiprange --start-ip-address 107.46.14.2 --end-ip-address 107.46.14.218
+    text: az postgres flexible-server firewall-rule update --resource-group testGroup --server-name testserver --name allowiprange --start-ip-address 107.46.14.2 --end-ip-address 107.46.14.218
 """
 
 helps['postgres flexible-server firewall-rule delete'] = """
@@ -474,7 +474,7 @@ type: command
 short-summary: Delete a firewall rule.
 examples:
   - name: Delete a firewall rule.
-    text: az postgres flexible-server firewall-rule delete --rule-name testRule --resource-group testGroup --name testserver
+    text: az postgres flexible-server firewall-rule delete --name testRule --resource-group testGroup --server-name testserver
 """
 
 helps['postgres flexible-server virtual-endpoint'] = """
