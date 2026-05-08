@@ -8,11 +8,17 @@
 
 import unittest
 
-from azure.cli.testsdk import ScenarioTest, LiveScenarioTest
+from knack.util import CLIError
+
+from azure.cli.testsdk import LiveScenarioTest
 
 
-class DenyAssignmentListTest(ScenarioTest):
-    """Tests for az role deny-assignment list — works on any subscription."""
+class DenyAssignmentListTest(LiveScenarioTest):
+    """Tests for az role deny-assignment list — works on any subscription.
+
+    These hit the live Authorization API (no recorded cassettes) so they run only in --live mode
+    and are skipped in the standard playback CI pipeline.
+    """
 
     def test_deny_assignment_list(self):
         """List deny assignments at the subscription scope."""
@@ -33,13 +39,18 @@ class DenyAssignmentListTest(ScenarioTest):
         self.assertIsInstance(result, list)
 
 
-class DenyAssignmentShowTest(ScenarioTest):
-    """Tests for az role deny-assignment show."""
+class DenyAssignmentShowValidationTest(unittest.TestCase):
+    """Pure-validation tests for show_deny_assignment that don't require Azure auth.
+
+    Calls show_deny_assignment() directly so the missing-args validation runs before
+    any auth client is instantiated.
+    """
 
     def test_deny_assignment_show_missing_args(self):
-        """Should fail if neither --id nor --name+--scope are provided."""
-        with self.assertRaises(SystemExit):
-            self.cmd('role deny-assignment show')
+        """Should raise CLIError if neither --id nor --name+--scope are provided."""
+        from azure.cli.command_modules.role.custom import show_deny_assignment
+        with self.assertRaisesRegex(CLIError, 'Please provide --id, or both --name and --scope'):
+            show_deny_assignment(cmd=None)
 
 
 class DenyAssignmentCrudTest(LiveScenarioTest):

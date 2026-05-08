@@ -296,7 +296,9 @@ def update_role_assignment(cmd, role_assignment):
 
     RoleAssignment = get_sdk(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION, 'RoleAssignment', mod='models',
                              operation_group='role_assignments')
-    assignment = RoleAssignment.from_dict(role_assignment)
+    # In azure-mgmt-authorization 5.x (TypeSpec-generated), the new Model base class
+    # accepts a JSON mapping directly via __init__ and no longer exposes from_dict.
+    assignment = RoleAssignment(role_assignment)
     scope = assignment.scope
     name = assignment.name
 
@@ -565,14 +567,16 @@ def list_deny_assignments(cmd, scope=None, filter_str=None):
 
 def show_deny_assignment(cmd, deny_assignment_id=None, deny_assignment_name=None, scope=None):
     """Get a deny assignment by ID or name."""
+    # Validate args BEFORE creating the auth client so the missing-args path doesn't require login.
+    if not deny_assignment_id and not (deny_assignment_name and scope):
+        raise CLIError('Please provide --id, or both --name and --scope.')
+
     authorization_client = _auth_client_factory(cmd.cli_ctx, scope)
     deny_client = authorization_client.deny_assignments
 
     if deny_assignment_id:
         return deny_client.get_by_id(deny_assignment_id)
-    if deny_assignment_name and scope:
-        return deny_client.get(scope=scope, deny_assignment_id=deny_assignment_name)
-    raise CLIError('Please provide --id, or both --name and --scope.')
+    return deny_client.get(scope=scope, deny_assignment_id=deny_assignment_name)
 
 
 def create_deny_assignment(cmd, scope=None, deny_assignment_name=None,
@@ -595,14 +599,12 @@ def create_deny_assignment(cmd, scope=None, deny_assignment_name=None,
     - Read actions (*/read) are not permitted
     - Group type principals are not permitted
     """
+    # Validate args BEFORE creating the auth client so validation errors don't require login.
     if not scope:
         raise CLIError('--scope is required for creating a deny assignment.')
 
     if not deny_assignment_name:
         raise CLIError('--name is required for creating a deny assignment.')
-
-    authorization_client = _auth_client_factory(cmd.cli_ctx, scope)
-    deny_client = authorization_client.deny_assignments
 
     if not actions:
         raise CLIError('At least one action is required via --actions.')
@@ -613,7 +615,7 @@ def create_deny_assignment(cmd, scope=None, deny_assignment_name=None,
             raise CLIError(f"Read actions are not permitted for user-assigned deny assignments: '{action}'. "
                            "Only write, delete, and action operations can be denied.")
 
-    # Build principals list
+    # Validate principal arguments and build principals list
     if principal_type and not principal_id:
         raise CLIError('--principal-id is required when --principal-type is specified. '
                        'Provide both --principal-id and --principal-type together, '
@@ -625,60 +627,98 @@ def create_deny_assignment(cmd, scope=None, deny_assignment_name=None,
         if principal_type == 'Group':
             raise CLIError('Group type principals are not permitted for user-assigned deny assignments. '
                            'Use User or ServicePrincipal instead.')
-        principals = [{'id': principal_id, 'type': principal_type}]
+    elif not exclude_principal_ids:
+        # Everyone mode requires at least one exclusion
+        raise CLIError('At least one excluded principal is required via --exclude-principal-ids '
+                       'when using Everyone mode (no --principal-id specified). '
+                       'User-assigned deny assignments that deny Everyone require at least one exclusion.')
+
+    if exclude_principal_ids and exclude_principal_types \
+            and len(exclude_principal_types) != len(exclude_principal_ids):
+        raise CLIError('--exclude-principal-types must have the same number of entries as --exclude-principal-ids.')
+
+    # Resolve SDK model classes via get_sdk so the role module stays consistent with the rest of the codebase.
+    DenyAssignment = get_sdk(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION, 'DenyAssignment',
+                             mod='models', operation_group='deny_assignments')
+    DenyAssignmentProperties = get_sdk(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION, 'DenyAssignmentProperties',
+                                       mod='models', operation_group='deny_assignments')
+    DenyAssignmentPermission = get_sdk(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION, 'DenyAssignmentPermission',
+                                       mod='models', operation_group='deny_assignments')
+    DenyAssignmentPrincipal = get_sdk(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION, 'DenyAssignmentPrincipal',
+                                      mod='models', operation_group='deny_assignments')
+
+    # Build principals (target of the deny)
+    if principal_id:
+        principals = [DenyAssignmentPrincipal(id=principal_id, type=principal_type)]
     else:
-        # Everyone mode — deny applies to all principals at the scope
-        if not exclude_principal_ids:
-            raise CLIError('At least one excluded principal is required via --exclude-principal-ids '
-                           'when using Everyone mode (no --principal-id specified). '
-                           'User-assigned deny assignments that deny Everyone require at least one exclusion.')
-        principals = [{'id': '00000000-0000-0000-0000-000000000000', 'type': 'SystemDefined'}]
+        # Everyone mode is represented by a single SystemDefined principal with the all-zero GUID.
+        principals = [DenyAssignmentPrincipal(id='00000000-0000-0000-0000-000000000000', type='SystemDefined')]
+
+    # Build exclude principals
+    exclude_principals = []
+    if exclude_principal_ids:
+        for i, pid in enumerate(exclude_principal_ids):
+            exclude_type = exclude_principal_types[i] if exclude_principal_types else 'ServicePrincipal'
+            exclude_principals.append(DenyAssignmentPrincipal(id=pid, type=exclude_type))
+
+    permission = DenyAssignmentPermission(
+        actions=actions or [],
+        not_actions=not_actions or [],
+        data_actions=[],
+        not_data_actions=[],
+    )
+
+    properties = DenyAssignmentProperties(
+        deny_assignment_name=deny_assignment_name,
+        description=description or '',
+        permissions=[permission],
+        principals=principals,
+        exclude_principals=exclude_principals,
+        is_system_protected=False,
+    )
+
+    parameters = DenyAssignment(properties=properties)
 
     if not assignment_name:
         assignment_name = str(uuid.uuid4())
 
-    # Build exclude principals list
-    exclude_principals = []
-    if exclude_principal_ids:
-        if exclude_principal_types and len(exclude_principal_types) != len(exclude_principal_ids):
-            raise CLIError('--exclude-principal-types must have the same number of entries as --exclude-principal-ids.')
+    authorization_client = _auth_client_factory(cmd.cli_ctx, scope)
+    deny_client = authorization_client.deny_assignments
 
-        for i, pid in enumerate(exclude_principal_ids):
-            principal = {
-                'id': pid,
-                'type': exclude_principal_types[i] if exclude_principal_types else 'ServicePrincipal'
-            }
-            exclude_principals.append(principal)
-
-    deny_assignment_params = {
-        'deny_assignment_name': deny_assignment_name,
-        'description': description or '',
-        'permissions': [{
-            'actions': actions or [],
-            'not_actions': not_actions or [],
-            'data_actions': [],
-            'not_data_actions': []
-        }],
-        'scope': scope,
-        'principals': principals,
-        'exclude_principals': exclude_principals,
-        'is_system_protected': False
-    }
-
-    return deny_client.create(scope=scope, deny_assignment_id=assignment_name,
-                              parameters=deny_assignment_params)
+    return deny_client.create_or_update(scope=scope, deny_assignment_id=assignment_name,
+                                        parameters=parameters)
 
 
 def delete_deny_assignment(cmd, scope=None, deny_assignment_id=None, deny_assignment_name=None):
     """Delete a user-assigned deny assignment."""
-    authorization_client = _auth_client_factory(cmd.cli_ctx, scope)
-    deny_client = authorization_client.deny_assignments
+    # Validate args BEFORE creating the auth client so missing-args paths don't require login.
+    if not deny_assignment_id and not (deny_assignment_name and scope):
+        raise CLIError('Please provide --id, or both --name and --scope.')
 
     if deny_assignment_id:
-        return deny_client.delete_by_id(deny_assignment_id)
-    if deny_assignment_name and scope:
-        return deny_client.delete(scope=scope, deny_assignment_id=deny_assignment_name)
-    raise CLIError('Please provide --id, or both --name and --scope.')
+        # The new SDK does not expose delete_by_id for deny assignments. Parse the canonical
+        # resource ID into (scope, name) and call delete(). Match case-insensitively because
+        # the provider segment may appear in any casing.
+        parsed_scope, parsed_name = _parse_deny_assignment_id(deny_assignment_id)
+        authorization_client = _auth_client_factory(cmd.cli_ctx, parsed_scope)
+        return authorization_client.deny_assignments.delete(
+            scope=parsed_scope, deny_assignment_id=parsed_name)
+
+    authorization_client = _auth_client_factory(cmd.cli_ctx, scope)
+    return authorization_client.deny_assignments.delete(
+        scope=scope, deny_assignment_id=deny_assignment_name)
+
+
+def _parse_deny_assignment_id(deny_assignment_id):
+    """Split a fully-qualified deny assignment resource ID into (scope, name)."""
+    match = re.match(
+        r'^(?P<scope>.+)/providers/Microsoft\.Authorization/denyAssignments/(?P<name>[^/]+)$',
+        deny_assignment_id, re.IGNORECASE)
+    if not match:
+        raise CLIError(
+            "Invalid deny assignment ID '{}'. Expected format: "
+            "<scope>/providers/Microsoft.Authorization/denyAssignments/<name>".format(deny_assignment_id))
+    return match.group('scope'), match.group('name')
 
 
 def _build_role_scope(resource_group_name, scope, subscription_id):
@@ -707,7 +747,7 @@ def _resolve_role_id(role, scope, definitions_client):
             role_id = '/subscriptions/{}/providers/Microsoft.Authorization/roleDefinitions/{}'.format(
                 definitions_client._config.subscription_id, role)
         if not role_id:  # retrieve role id
-            role_defs = list(definitions_client.list(scope, "roleName eq '{}'".format(role)))
+            role_defs = list(definitions_client.list(scope, filter="roleName eq '{}'".format(role)))
             if not role_defs:
                 raise CLIError("Role '{}' doesn't exist.".format(role))
             if len(role_defs) > 1:
