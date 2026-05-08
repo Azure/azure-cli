@@ -550,7 +550,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
         # firewall-rule
         firewall_rule_name_scopes = ['create', 'delete', 'show', 'update']
-        for scope in firewall_rule_name_scopes + ['list']:
+        firewall_rule_server_name_scopes = firewall_rule_name_scopes + ['list']
+        for scope in firewall_rule_server_name_scopes:
             argument_context_string = '{} flexible-server firewall-rule {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
                 c.argument('server_name', arg_type=server_name_resource_arg_type)
