@@ -246,6 +246,10 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'show_deployment_log')
         g.custom_command('list', 'list_deployment_logs')
 
+    with self.command_group('webapp log startup', is_preview=True) as g:
+        g.custom_command('list', 'list_startup_logs')
+        g.custom_show_command('show', 'show_startup_log')
+
     with self.command_group('functionapp log deployment') as g:
         g.custom_show_command('show', 'show_deployment_log')
         g.custom_command('list', 'list_deployment_logs')

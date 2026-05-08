@@ -786,6 +786,19 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('resource_group', arg_type=resource_group_name_type)
         c.argument('slot', options_list=['--slot', '-s'], help="the name of the slot. Default to the productions slot if not specified")
 
+    with self.argument_context('webapp log startup') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+        c.argument('resource_group', arg_type=resource_group_name_type)
+        c.argument('slot', options_list=['--slot', '-s'], help="the name of the slot. Default to the production slot if not specified")
+        c.argument('instance', options_list=['--instance'], help='Filter by worker instance name.')
+
+    with self.argument_context('webapp log startup list') as c:
+        c.argument('outcome', options_list=['--outcome'], help='Filter by startup outcome.',
+                   arg_type=get_enum_type(['success', 'failure']))
+
+    with self.argument_context('webapp log startup show') as c:
+        c.argument('filename', options_list=['--filename', '-f'], help='Name of a specific startup log file to display. If not specified, shows the latest log (preferring failures).')
+
     with self.argument_context('functionapp log deployment show') as c:
         c.argument('name', arg_type=functionapp_name_arg_type, id_part=None)
         c.argument('resource_group', arg_type=resource_group_name_type)
