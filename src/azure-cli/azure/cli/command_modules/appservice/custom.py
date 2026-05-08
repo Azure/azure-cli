@@ -8260,6 +8260,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         is_linux = bool(plan_info.reserved)
         functionapp_def.server_farm_id = plan
         functionapp_def.location = location
+        if plan_info.sku and plan_info.sku.tier and plan_info.sku.tier.lower() == 'flexconsumption':
+            register_app_provider(cmd)
 
     elif flexconsumption_location:
         locations = list_flexconsumption_locations(cmd)
@@ -8267,6 +8269,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         if location is None:
             raise ValidationError("Location is invalid. Use: az functionapp list-flexconsumption-locations")
         is_linux = True
+        register_app_provider(cmd)
 
     if environment is not None:
         if consumption_plan_location is not None:

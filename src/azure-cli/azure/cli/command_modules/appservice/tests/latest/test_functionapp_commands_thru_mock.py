@@ -16,7 +16,8 @@ from azure.cli.command_modules.appservice.custom import (
     remove_remote_build_app_settings,
     config_source_control,
     validate_app_settings_in_scm,
-    update_container_settings_functionapp)
+    update_container_settings_functionapp,
+    create_functionapp)
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.azclierror import (AzureInternalError, UnclassifiedUserFault)
 
@@ -681,3 +682,182 @@ class TestFunctionappMocked(unittest.TestCase):
 
         # assert
         self.assertEqual(response.git_hub_action_configuration.container_configuration.password, None)
+
+
+class TestCreateFunctionAppFlexProviderRegistration(unittest.TestCase):
+    def _setup_flex_runtime_mock(self, flex_runtime_helper_mock):
+        flex_sku = {
+            'functionAppConfigProperties': {
+                'runtime': {'name': 'python', 'version': '3.11'}
+            },
+            'instanceMemoryMB': [{'size': 2048, 'isDefault': True}],
+            'maximumInstanceCount': {'defaultValue': 100}
+        }
+        matched_runtime = mock.MagicMock()
+        matched_runtime.sku = flex_sku
+        matched_runtime.app_insights = False
+        flex_runtime_helper_mock.return_value.resolve.return_value = matched_runtime
+
+    def _setup_deployment_storage_mock(self, validate_deployment_storage_mock, get_deployment_container_mock):
+        deployment_storage = mock.MagicMock()
+        deployment_storage.primary_endpoints.blob = 'https://storage.blob.core.windows.net/'
+        validate_deployment_storage_mock.return_value = deployment_storage
+        container = mock.MagicMock()
+        container.name = 'container'
+        get_deployment_container_mock.return_value = container
+
+    def _setup_client_mock(self, web_client_factory_mock):
+        client = mock.MagicMock()
+        functionapp_result = mock.MagicMock()
+        functionapp_result.resource_group = 'rg'
+        functionapp_result.name = 'name'
+        web_client_factory_mock.return_value = client
+        return client, functionapp_result
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_raw_functionapp')
+    @mock.patch('azure.cli.command_modules.appservice.custom._set_remote_or_local_git')
+    @mock.patch('azure.cli.command_modules.appservice.custom.LongRunningOperation')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_storage_connection_string', return_value='conn_str')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_or_create_deployment_storage_container')
+    @mock.patch('azure.cli.command_modules.appservice.custom._validate_and_get_deployment_storage')
+    @mock.patch('azure.cli.command_modules.appservice.custom.create_flex_app_service_plan')
+    @mock.patch('azure.cli.command_modules.appservice.custom.register_app_provider')
+    @mock.patch('azure.cli.command_modules.appservice.custom._validate_and_get_connection_string', return_value='conn_str')
+    @mock.patch('azure.cli.command_modules.appservice.custom.is_storage_account_network_restricted', return_value=False)
+    @mock.patch('azure.cli.command_modules.appservice.custom._FlexFunctionAppStackRuntimeHelper')
+    @mock.patch('azure.cli.command_modules.appservice.custom.list_flexconsumption_locations',
+                return_value=[{'name': 'northeurope'}])
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    def test_create_functionapp_flex_registers_app_provider(
+            self, web_client_factory_mock, list_flex_locations_mock, flex_runtime_helper_mock,
+            is_storage_restricted_mock, validate_conn_string_mock, register_app_provider_mock,
+            create_flex_plan_mock, validate_deployment_storage_mock, get_deployment_container_mock,
+            get_storage_conn_string_mock, long_running_op_mock, set_remote_git_mock, get_raw_functionapp_mock):
+        cmd_mock = _get_test_cmd()
+        client, functionapp_result = self._setup_client_mock(web_client_factory_mock)
+        self._setup_flex_runtime_mock(flex_runtime_helper_mock)
+        self._setup_deployment_storage_mock(validate_deployment_storage_mock, get_deployment_container_mock)
+        create_flex_plan_mock.return_value = mock.MagicMock(id='/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan')
+        long_running_op_mock.return_value = mock.MagicMock(return_value=functionapp_result)
+
+        # action
+        create_functionapp(cmd_mock, 'rg', 'name', 'storage',
+                           flexconsumption_location='northeurope', runtime='python')
+
+        # assert register_app_provider is called when flexconsumption_location is used
+        register_app_provider_mock.assert_called_once_with(cmd_mock)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_raw_functionapp')
+    @mock.patch('azure.cli.command_modules.appservice.custom._set_remote_or_local_git')
+    @mock.patch('azure.cli.command_modules.appservice.custom.LongRunningOperation')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_storage_connection_string', return_value='conn_str')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_or_create_deployment_storage_container')
+    @mock.patch('azure.cli.command_modules.appservice.custom._validate_and_get_deployment_storage')
+    @mock.patch('azure.cli.command_modules.appservice.custom.create_flex_app_service_plan')
+    @mock.patch('azure.cli.command_modules.appservice.custom.register_app_provider')
+    @mock.patch('azure.cli.command_modules.appservice.custom._validate_and_get_connection_string', return_value='conn_str')
+    @mock.patch('azure.cli.command_modules.appservice.custom.is_storage_account_network_restricted', return_value=False)
+    @mock.patch('azure.cli.command_modules.appservice.custom._FlexFunctionAppStackRuntimeHelper')
+    @mock.patch('azure.cli.command_modules.appservice.custom.list_flexconsumption_locations',
+                return_value=[{'name': 'northeurope'}])
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    def test_create_functionapp_flex_registers_app_provider_with_vnet(
+            self, web_client_factory_mock, list_flex_locations_mock, flex_runtime_helper_mock,
+            is_storage_restricted_mock, validate_conn_string_mock, register_app_provider_mock,
+            create_flex_plan_mock, validate_deployment_storage_mock, get_deployment_container_mock,
+            get_storage_conn_string_mock, long_running_op_mock, set_remote_git_mock, get_raw_functionapp_mock):
+        cmd_mock = _get_test_cmd()
+        client, functionapp_result = self._setup_client_mock(web_client_factory_mock)
+        self._setup_flex_runtime_mock(flex_runtime_helper_mock)
+        self._setup_deployment_storage_mock(validate_deployment_storage_mock, get_deployment_container_mock)
+        create_flex_plan_mock.return_value = mock.MagicMock(id='/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Web/serverfarms/plan')
+        long_running_op_mock.return_value = mock.MagicMock(return_value=functionapp_result)
+
+        with mock.patch('azure.cli.command_modules.appservice.custom._get_subnet_info') as get_subnet_info_mock, \
+             mock.patch('azure.cli.command_modules.appservice.custom._validate_vnet_integration_location'), \
+             mock.patch('azure.cli.command_modules.appservice.custom._vnet_delegation_check'):
+            get_subnet_info_mock.return_value = {
+                'resource_group_name': 'rg',
+                'vnet_name': 'vnet',
+                'subnet_name': 'subnet',
+                'subnet_subscription_id': 'sub',
+                'subnet_resource_id': '/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/vnet/subnets/subnet'
+            }
+            # action
+            create_functionapp(cmd_mock, 'rg', 'name', 'storage',
+                               flexconsumption_location='northeurope', runtime='python',
+                               vnet='vnet', subnet='subnet')
+
+        # assert register_app_provider is called when flexconsumption_location is used with vnet
+        register_app_provider_mock.assert_called_with(cmd_mock)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._set_remote_or_local_git')
+    @mock.patch('azure.cli.command_modules.appservice.custom.LongRunningOperation')
+    @mock.patch('azure.cli.command_modules.appservice.custom.register_app_provider')
+    @mock.patch('azure.cli.command_modules.appservice.custom._validate_and_get_connection_string', return_value='conn_str')
+    @mock.patch('azure.cli.command_modules.appservice.custom.is_storage_account_network_restricted', return_value=False)
+    @mock.patch('azure.cli.command_modules.appservice.custom._FunctionAppStackRuntimeHelper')
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    def test_create_functionapp_flex_plan_registers_app_provider(
+            self, web_client_factory_mock, func_runtime_helper_mock, is_storage_restricted_mock,
+            validate_conn_string_mock, register_app_provider_mock, long_running_op_mock, set_remote_git_mock):
+        cmd_mock = _get_test_cmd()
+        client, functionapp_result = self._setup_client_mock(web_client_factory_mock)
+
+        flex_plan = mock.MagicMock()
+        flex_plan.location = 'northeurope'
+        flex_plan.reserved = True
+        flex_plan.sku.tier = 'FlexConsumption'
+        client.app_service_plans.get.return_value = flex_plan
+
+        matched_runtime = mock.MagicMock()
+        matched_runtime.app_insights = False
+        matched_runtime.site_config_dict.as_dict.return_value = {}
+        matched_runtime.site_config_dict.additional_properties = {}
+        matched_runtime.app_settings_dict = {}
+        func_runtime_helper_mock.return_value.resolve.return_value = matched_runtime
+
+        long_running_op_mock.return_value = mock.MagicMock(return_value=functionapp_result)
+
+        # action
+        create_functionapp(cmd_mock, 'rg', 'name', 'storage',
+                           plan='myplan', functions_version='4', runtime='python')
+
+        # assert register_app_provider is called when plan has FlexConsumption tier
+        register_app_provider_mock.assert_called_once_with(cmd_mock)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._set_remote_or_local_git')
+    @mock.patch('azure.cli.command_modules.appservice.custom.LongRunningOperation')
+    @mock.patch('azure.cli.command_modules.appservice.custom.register_app_provider')
+    @mock.patch('azure.cli.command_modules.appservice.custom._validate_and_get_connection_string', return_value='conn_str')
+    @mock.patch('azure.cli.command_modules.appservice.custom.is_storage_account_network_restricted', return_value=False)
+    @mock.patch('azure.cli.command_modules.appservice.custom._FunctionAppStackRuntimeHelper')
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    def test_create_functionapp_non_flex_plan_does_not_register_app_provider(
+            self, web_client_factory_mock, func_runtime_helper_mock, is_storage_restricted_mock,
+            validate_conn_string_mock, register_app_provider_mock, long_running_op_mock, set_remote_git_mock):
+        cmd_mock = _get_test_cmd()
+        client, functionapp_result = self._setup_client_mock(web_client_factory_mock)
+
+        standard_plan = mock.MagicMock()
+        standard_plan.location = 'northeurope'
+        standard_plan.reserved = True
+        standard_plan.sku.tier = 'Standard'
+        client.app_service_plans.get.return_value = standard_plan
+
+        matched_runtime = mock.MagicMock()
+        matched_runtime.app_insights = False
+        matched_runtime.site_config_dict.as_dict.return_value = {}
+        matched_runtime.site_config_dict.additional_properties = {}
+        matched_runtime.app_settings_dict = {}
+        func_runtime_helper_mock.return_value.resolve.return_value = matched_runtime
+
+        long_running_op_mock.return_value = mock.MagicMock(return_value=functionapp_result)
+
+        # action
+        create_functionapp(cmd_mock, 'rg', 'name', 'storage',
+                           plan='myplan', functions_version='4', runtime='python')
+
+        # assert register_app_provider is NOT called for non-FlexConsumption plans
+        register_app_provider_mock.assert_not_called()
+
