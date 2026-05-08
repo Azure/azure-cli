@@ -6268,27 +6268,40 @@ class MSIScenarioTest(ScenarioTest):
         })
 
         with self.assertRaisesRegex(ArgumentUsageError, "please specify both --role and --scope"):
-            self.cmd('vmss create -g {rg} -n {vmss1} --image Debian:debian-10:10:latest --instance-count 1 --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope {scope} --orchestration-mode Uniform --vm-sku Standard_B1ls')
+            self.cmd('vmss create -g {rg} -n {vmss1} --image Debian:debian-10:10:latest --instance-count 1 '
+                     '--assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope {scope} '
+                     '--orchestration-mode Uniform --vm-sku Standard_D2s_v3')
 
         with self.assertRaisesRegex(ArgumentUsageError, "please specify both --role and --scope"):
-            self.cmd('vmss create -g {rg} -n {vmss1} --image Debian:debian-10:10:latest --instance-count 1 --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --role Contributor --orchestration-mode Uniform --vm-sku Standard_B1ls')
+            self.cmd('vmss create -g {rg} -n {vmss1} --image Debian:debian-10:10:latest --instance-count 1 '
+                     '--assign-identity --admin-username admin123 --admin-password PasswordPassword1! '
+                     '--role Contributor --orchestration-mode Uniform --vm-sku Standard_D2s_v3')
 
         with mock.patch('azure.cli.core.commands.arm._gen_guid', side_effect=self.create_guid):
             # create linux vm with default configuration
-            self.cmd('vmss create -g {rg} -n {vmss1} --image Debian:debian-10:10:latest --instance-count 1 --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope {scope} --role Contributor --orchestration-mode Uniform --lb-sku Standard --vm-sku Standard_B1ls', checks=[
+            self.cmd('vmss create -g {rg} -n {vmss1} --image Debian:debian-10:10:latest --instance-count 1 '
+                     '--assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope {scope} '
+                     '--role Contributor --orchestration-mode Uniform --lb-sku Standard '
+                     '--vm-sku Standard_D2s_v3', checks=[
                 self.check('vmss.identity.role', 'Contributor'),
                 self.check('vmss.identity.scope', '/subscriptions/{sub}/resourceGroups/{rg}'),
             ])
 
             # create a windows vm with reader role on the linux vm
-            result = self.cmd('vmss create -g {rg} -n {vmss2} --image Win2022Datacenter --instance-count 1 --assign-identity --scope {vmss1_id} --role reader --admin-username admin123 --admin-password PasswordPassword1! --orchestration-mode Uniform --lb-sku Standard --vm-sku Standard_B1ls', checks=[
+            result = self.cmd('vmss create -g {rg} -n {vmss2} --image Win2022Datacenter --instance-count 1 '
+                              '--assign-identity --scope {vmss1_id} --role reader --admin-username admin123 '
+                              '--admin-password PasswordPassword1! --orchestration-mode Uniform --lb-sku Standard '
+                              '--vm-sku Standard_D2s_v3', checks=[
                 self.check('vmss.identity.role', 'reader'),
                 self.check('vmss.identity.scope', '{vmss1_id}'),
             ]).get_output_in_json()
             uuid.UUID(result['vmss']['identity']['systemAssignedIdentity'])
 
             # create a linux vm w/o identity and later enable it
-            result = self.cmd('vmss create -g {rg} -n {vmss3} --image Debian:debian-10:10:latest --instance-count 1 --admin-username admin123 --admin-password PasswordPassword1! --orchestration-mode Uniform --lb-sku Standard --vm-sku Standard_B1ls').get_output_in_json()['vmss']
+            result = self.cmd('vmss create -g {rg} -n {vmss3} --image Debian:debian-10:10:latest --instance-count 1 '
+                              '--admin-username admin123 --admin-password PasswordPassword1! '
+                              '--orchestration-mode Uniform --lb-sku Standard '
+                              '--vm-sku Standard_D2s_v3').get_output_in_json()['vmss']
             self.assertIsNone(result.get('identity'))
 
             with self.assertRaisesRegex(ArgumentUsageError, "please specify both --role and --scope when assigning a role to the managed identity"):
@@ -12720,7 +12733,9 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             'profile2': self.create_random_name('profile', 15)
         })
         self.cmd('network nsg create -g {rg} -n {nsg1}')
-        self.cmd('vm create -g {rg} -n {vm1} --image Win2022Datacenter --enable-proxy-agent --wire-server-mode Audit --imds-mode Audit --key-incarnation-id 1 --size Standard_B2ms --subnet {subnet} --vnet-name {vnet} --admin-password Password001! --nsg-rule NONE')
+        self.cmd('vm create -g {rg} -n {vm1} --image Win2022Datacenter --enable-proxy-agent --wire-server-mode Audit '
+                 '--imds-mode Audit --key-incarnation-id 1 --size Standard_D2s_v3 --subnet {subnet} --vnet-name {vnet} '
+                 '--admin-password Password001! --nsg-rule NONE')
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
@@ -12748,7 +12763,9 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('securityProfile.proxyAgentSettings.imds.inVMAccessControlProfileReferenceId', '{imds_profileid}')
         ])
 
-        self.cmd('vmss create -g {rg} -n {vmss1} --image Win2022Datacenter --nsg {nsg1} --enable-proxy-agent --wire-server-mode Audit --imds-mode Audit --vm-sku Standard_B1ls --orchestration-mode Flexible --admin-password Password001!', checks=[
+        self.cmd('vmss create -g {rg} -n {vmss1} --image Win2022Datacenter --nsg {nsg1} --enable-proxy-agent '
+                 '--wire-server-mode Audit --imds-mode Audit --vm-sku Standard_D2s_v3 --orchestration-mode Flexible '
+                 '--admin-password Password001!', checks=[
             self.check('vmss.virtualMachineProfile.securityProfile.proxyAgentSettings.enabled', True),
             self.check('vmss.virtualMachineProfile.securityProfile.proxyAgentSettings.wireServer.mode', 'Audit'),
             self.check('vmss.virtualMachineProfile.securityProfile.proxyAgentSettings.imds.mode', 'Audit'),
