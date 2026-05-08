@@ -2374,13 +2374,11 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         if self.decorator_mode == DecoratorMode.UPDATE:
             raise InvalidArgumentValueError(
-                "Updating outbound type to {outbound_type} is only supported for clusters created with "
+                f"Updating outbound type to {outbound_type} is only supported for clusters created with "
                 "--vnet-subnet-id. Clusters using an AKS-managed VNet can't be updated to this outbound type. "
                 "Please refer to "
                 "https://learn.microsoft.com/en-us/azure/aks/egress-outboundtype#updating-outboundtype-after-cluster-creation "  # pylint:disable=line-too-long
-                "for more details.".format(
-                    outbound_type=outbound_type,
-                )
+                "for more details."
             )
 
         if sku_name == CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC:
