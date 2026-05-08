@@ -177,7 +177,9 @@ class WebappQuickCreateTest(ScenarioTest):
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
         r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git'.format(
             resource_group, webapp_name, plan)).get_output_in_json()
-        self.assertTrue(r.get('ftpPublishingUrl', '').startswith('ftps://') if r.get('ftpPublishingUrl') else True)
+        # ftpPublishingUrl may not be present in all API responses; validate format when present
+        if 'ftpPublishingUrl' in r and r['ftpPublishingUrl']:
+            self.assertTrue(r['ftpPublishingUrl'].startswith('ftps://'))
         self.cmd('webapp config appsettings list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('[0].name', 'WEBSITE_NODE_DEFAULT_VERSION'),
             JMESPathCheck('[0].value', '~22'),
@@ -192,14 +194,18 @@ class WebappQuickCreateTest(ScenarioTest):
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
         r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "node|22LTS"'.format(
             resource_group, webapp_name, plan)).get_output_in_json()
-        self.assertTrue(r.get('ftpPublishingUrl', '').startswith('ftps://') if r.get('ftpPublishingUrl') else True)
+        # ftpPublishingUrl may not be present in all API responses; validate format when present
+        if 'ftpPublishingUrl' in r and r['ftpPublishingUrl']:
+            self.assertTrue(r['ftpPublishingUrl'].startswith('ftps://'))
         self.cmd('webapp config appsettings list -g {} -n {}'.format(resource_group, webapp_name), checks=[
             JMESPathCheck('[0].name', 'WEBSITE_NODE_DEFAULT_VERSION'),
             JMESPathCheck('[0].value', '~22'),
         ])
         r = self.cmd('webapp create -g {} -n {} --plan {} --deployment-local-git -r "dotnet:8"'.format(
             resource_group, webapp_name_2, plan)).get_output_in_json()
-        self.assertTrue(r.get('ftpPublishingUrl', '').startswith('ftps://') if r.get('ftpPublishingUrl') else True)
+        # ftpPublishingUrl may not be present in all API responses; validate format when present
+        if 'ftpPublishingUrl' in r and r['ftpPublishingUrl']:
+            self.assertTrue(r['ftpPublishingUrl'].startswith('ftps://'))
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
@@ -2658,7 +2664,6 @@ class WebappAcrUseManagedIdentityCredsTests(ScenarioTest):
         ])            
 
 class WebappNetworkConnectionTests(ScenarioTest):
-    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_hybridconnectionE2E(self, resource_group):

@@ -151,7 +151,7 @@ def create_domain(cmd, resource_group_name, hostname, contact_info, privacy=True
 
 
 def show_domain_purchase_terms(cmd, hostname):
-    from azure.mgmt.web.models import TopLevelDomainAgreementOption
+    TopLevelDomainAgreementOption = cmd.get_models('TopLevelDomainAgreementOption')
     domain_identifier = NameIdentifier(name=hostname)
     web_client = web_client_factory(cmd.cli_ctx)
     hostname_availability = web_client.domains.check_availability(domain_identifier)

@@ -380,8 +380,11 @@ def app_service_plan_exists(cmd, resource_group_name, plan, api_version=None):
 def use_additional_properties(resource):
     # In the new SDK, enable_additional_properties_sending() is no longer available
     # Instead, properties should be set directly on the model's properties object
-    # This function is kept for backward compatibility but does nothing in the new SDK
-    pass
+    # For backward compatibility with older SDK versions, call the method if it exists
+    if hasattr(resource, 'enable_additional_properties_sending'):
+        resource.enable_additional_properties_sending()
+        existing_properties = resource.serialize().get("properties")
+        resource.additional_properties["properties"] = {} if existing_properties is None else existing_properties
 
 
 def repo_url_to_name(repo_url):

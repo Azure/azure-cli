@@ -69,10 +69,9 @@ from .utils import (_normalize_sku,
                     is_functionapp,
                     is_linux_webapp,
                     _rename_server_farm_props,
-                    _get_location_from_webapp,
                     _normalize_flex_location,
                     _normalize_location,
-                    get_pool_manager, use_additional_properties, get_app_service_plan_from_webapp,
+                    get_pool_manager, get_app_service_plan_from_webapp,
                     get_resource_if_exists, repo_url_to_name, get_token,
                     app_service_plan_exists, is_centauri_functionapp, is_flex_functionapp,
                     _remove_list_duplicates, get_raw_functionapp,
@@ -4638,7 +4637,7 @@ def create_functionapp_slot(cmd, resource_group_name, name, slot, configuration_
 
     docker_registry_server_url = parse_docker_image_name(image)
 
-    Site = cmd.get_models('Site')
+    Site, SitePatchResource = cmd.get_models('Site', 'SitePatchResource')
     client = web_client_factory(cmd.cli_ctx)
     site = client.web_apps.get(resource_group_name, name)
     if not site:
@@ -4648,6 +4647,12 @@ def create_functionapp_slot(cmd, resource_group_name, name, slot, configuration_
     slot_def = Site(server_farm_id=get_site_server_farm_id(site), location=location, https_only=https_only)
     poller = client.web_apps.begin_create_or_update_slot(resource_group_name, name, site_envelope=slot_def, slot=slot)
     result = LongRunningOperation(cmd.cli_ctx)(poller)
+
+    # Azure service may default https_only to True during slot creation.
+    # Use PATCH to explicitly update the slot if https_only is False.
+    if not https_only:
+        patch_resource = SitePatchResource(https_only=False)
+        result = client.web_apps.update_slot(resource_group_name, name, slot, patch_resource)
 
     if configuration_source:
         update_slot_configuration_from_source(cmd, client, resource_group_name, name, slot, configuration_source,
@@ -5232,6 +5237,7 @@ def show_plan(cmd, resource_group_name, name):
     client = web_client_factory(cmd.cli_ctx)
     serverfarm_url_base = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/serverfarms/{}?api-version={}'
     subscription_id = get_subscription_id(cmd.cli_ctx)
+    # pylint: disable-next=protected-access
     serverfarm_url = serverfarm_url_base.format(subscription_id, resource_group_name, name, client._config.api_version)
     request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + serverfarm_url
     response = send_raw_request(cmd.cli_ctx, "GET", request_url)
@@ -7519,7 +7525,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                 try:
                     settings_dict = container_settings.as_dict()
                     runtimes_array = settings_dict.get('runtimes', [])
-                except Exception:
+                except (AttributeError, TypeError, KeyError):
                     pass
 
             # 4. Try serialize() if available
@@ -7527,7 +7533,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                 try:
                     settings_dict = container_settings.serialize()
                     runtimes_array = settings_dict.get('runtimes', [])
-                except Exception:
+                except (AttributeError, TypeError, KeyError):
                     pass
 
         for runtime_info in runtimes_array:
@@ -7611,7 +7617,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                         container_settings.is_auto_update)
                     # Look up EOL from the Java stack if the container doesn't have one
                     java_ver = self._extract_java_version_from_runtime(runtime.display_name) or \
-                        ("8" if java.startswith("1.8") else java.split('.')[0])
+                        ("8" if java.startswith("1.8") else java.split('.', maxsplit=1)[0])
                     runtime.eol_date = eol_date or (java_eol_map or {}).get(java_ver)
                     runtime.runtime_family = self._get_java_runtime_family(runtime.display_name)
                     runtime.version_label = self._get_java_version_label(runtime.display_name)
@@ -8266,11 +8272,13 @@ def update_functionapp_polling(cmd, resource_group_name, name, functionapp):
     from azure.cli.core.commands.client_factory import get_subscription_id
     client = web_client_factory(cmd.cli_ctx)
     sub_id = get_subscription_id(cmd.cli_ctx)
+    # pylint: disable-next=protected-access
+    api_version = client._config.api_version
     base_url = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}?api-version={}'.format(
         sub_id,
         resource_group_name,
         name,
-        client._config.api_version
+        api_version
     )
     url = cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
 
@@ -9814,43 +9822,64 @@ def list_hc(cmd, name, resource_group_name, slot=None):
 
     # reformats hybrid connection, to prune unnecessary fields
     mod_list = []
-    # Handle both old SDK (additional_properties["value"]) and new SDK (direct access or iteration)
+    # Handle both old SDK (additional_properties["value"]) and new SDK (dict-like access)
     items = []
     if hasattr(listed_vals, 'additional_properties') and listed_vals.additional_properties:
         items = listed_vals.additional_properties.get("value", [])
-    elif hasattr(listed_vals, 'value'):
-        items = listed_vals.value or []
-    elif hasattr(listed_vals, '__iter__'):
-        items = list(listed_vals)
-    
+    else:
+        # Try dictionary-style access first (new SDK with hybrid dict/model nature)
+        try:
+            items = listed_vals["value"] or []
+        except (KeyError, TypeError):
+            # Fall back to attribute access (old SDK)
+            if hasattr(listed_vals, 'value'):
+                items = listed_vals.value or []
+            elif hasattr(listed_vals, '__iter__'):
+                items = list(listed_vals)
+
+    # Helper to get property value from either dict or object
+    def get_prop(props, prop_dict_key, prop_attr_name):
+        # Try dictionary-style access first (new SDK with hybrid dict/model)
+        try:
+            return props[prop_dict_key]
+        except (KeyError, TypeError):
+            pass
+        # Fall back to attribute access (old SDK)
+        return getattr(props, prop_attr_name, None)
+
     for x in items:
-        # Handle both dict-like and object-like access
-        if isinstance(x, dict):
-            properties = x.get("properties", {})
-            x_id = x.get("id", "")
-            x_location = x.get("location")
-            x_name = x.get("name")
-            x_type = x.get("type")
-        else:
+        # Try dictionary-style access first (new SDK with hybrid dict/model nature)
+        try:
+            properties = x["properties"] or {}
+            x_id = x["id"] or ""
+            x_name = x["name"] or ""
+            x_type = x["type"] or ""
+            # location may not always be present
+            try:
+                x_location = x["location"]
+            except (KeyError, TypeError):
+                x_location = None
+        except (KeyError, TypeError):
+            # Fall back to attribute access (old SDK)
             props = x.properties if hasattr(x, 'properties') else x
             properties = props.as_dict() if hasattr(props, 'as_dict') else {}
             x_id = x.id if hasattr(x, 'id') else ""
             x_location = getattr(x, 'location', None)
             x_name = x.name if hasattr(x, 'name') else ""
             x_type = x.type if hasattr(x, 'type') else ""
-        
         resourceGroup = x_id.split("/")
+
         mod_hc = {
             "id": x_id,
             "location": x_location,
             "name": x_name,
             "properties": {
-                "hostname": properties.get("hostname") if isinstance(properties, dict) else getattr(properties, 'hostname', None),
-                "port": properties.get("port") if isinstance(properties, dict) else getattr(properties, 'port', None),
-                "relayArmUri": properties.get("relayArmUri") if isinstance(properties, dict) else getattr(properties, 'relay_arm_uri', None),
-                "relayName": properties.get("relayName") if isinstance(properties, dict) else getattr(properties, 'relay_name', None),
-                "serviceBusNamespace": properties.get("serviceBusNamespace") if isinstance(properties, dict) else getattr(properties, 'service_bus_namespace', None),
-                "serviceBusSuffix": properties.get("serviceBusSuffix") if isinstance(properties, dict) else getattr(properties, 'service_bus_suffix', None)
+                "hostname": get_prop(properties, "hostname", "hostname"),
+                "port": get_prop(properties, "port", "port"),
+                "relayArmUri": get_prop(properties, "relayArmUri", "relay_arm_uri"),
+                "relayName": get_prop(properties, "relayName", "relay_name"),
+                "serviceBusNamespace": get_prop(properties, "serviceBusNamespace", "service_bus_namespace"),
+                "serviceBusSuffix": get_prop(properties, "serviceBusSuffix", "service_bus_suffix")
             },
             "resourceGroup": resourceGroup[4] if len(resourceGroup) > 4 else "",
             "type": x_type
@@ -10781,6 +10810,7 @@ def _build_kudu_warmup_arm_url(params, instance_id=None):
     client = web_client_factory(params.cmd.cli_ctx)
     sub_id = get_subscription_id(params.cmd.cli_ctx)
     instances_segment = f"/instances/{instance_id}" if instance_id is not None else ""
+    # pylint: disable=protected-access
     if not params.slot:
         base_url = (
             f"subscriptions/{sub_id}/resourceGroups/{params.resource_group_name}/providers/Microsoft.Web/sites/"
@@ -10793,6 +10823,7 @@ def _build_kudu_warmup_arm_url(params, instance_id=None):
             f"{params.webapp_name}/slots/{params.slot}{instances_segment}/deployments"
             f"?api-version={client._config.api_version}&warmup=true"
         )
+    # pylint: enable=protected-access
     return params.cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
 
 
@@ -10823,6 +10854,7 @@ def _build_onedeploy_arm_url(params, instance_id):
     client = web_client_factory(params.cmd.cli_ctx)
     sub_id = get_subscription_id(params.cmd.cli_ctx)
     instances_param = f"/instances/{instance_id}" if instance_id is not None else ""
+    # pylint: disable=protected-access
     if not params.slot:
         base_url = (
             f"subscriptions/{sub_id}/resourceGroups/{params.resource_group_name}/providers/Microsoft.Web/sites/"
@@ -10834,6 +10866,7 @@ def _build_onedeploy_arm_url(params, instance_id):
             f"{params.webapp_name}/slots/{params.slot}{instances_param}/extensions/onedeploy"
             f"?api-version={client._config.api_version}"
         )
+    # pylint: enable=protected-access
     return params.cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
 
 
@@ -10843,10 +10876,12 @@ def _build_deploymentstatus_url(cmd, resource_group_name, webapp_name, slot, dep
     sub_id = get_subscription_id(cmd.cli_ctx)
 
     slot_info = "/slots/" + slot if slot else ""
+    # pylint: disable-next=protected-access
+    api_version = client._config.api_version
     base_url = (
         f"subscriptions/{sub_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Web/sites/"
         f"{webapp_name}{slot_info}/deploymentStatus/{deployment_id}"
-        f"?api-version={client._config.api_version}"
+        f"?api-version={api_version}"
     )
     return cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
 
@@ -10935,6 +10970,7 @@ def _get_instance_id_internal(cmd, resource_group_name, webapp_name, slot):
     try:
         client = web_client_factory(cmd.cli_ctx)
         sub_id = get_subscription_id(cmd.cli_ctx)
+        # pylint: disable=protected-access
         if slot:
             base_url = (
                 f"subscriptions/{sub_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Web/sites/"
@@ -10946,6 +10982,7 @@ def _get_instance_id_internal(cmd, resource_group_name, webapp_name, slot):
                 f"subscriptions/{sub_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Web/sites/"
                 f"{webapp_name}/instances?api-version={client._config.api_version}"
             )
+        # pylint: enable=protected-access
 
         url = cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
         response = send_raw_request(cmd.cli_ctx, "GET", url)
@@ -12361,4 +12398,3 @@ def _compute_checksum(input_bytes):
         logger.info("Computing the checksum of the file failed with exception:'%s'", ex)
 
     return file_hash
-

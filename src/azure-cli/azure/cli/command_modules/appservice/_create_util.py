@@ -341,7 +341,8 @@ def get_site_availability(cmd, name):
     return availability
 
 
-def get_regional_site_availability(cmd, location, name, resource_group_name, auto_generated_domain_name_label_scope):
+def get_regional_site_availability(cmd, location, name, resource_group_name=None,  # pylint: disable=unused-argument
+                                   auto_generated_domain_name_label_scope=None):  # pylint: disable=unused-argument
     """ This is used by az webapp up to verify if a site needs to be created or should just be deployed
       (regional check)"""
     from azure.mgmt.web.models import ResourceNameAvailabilityRequest

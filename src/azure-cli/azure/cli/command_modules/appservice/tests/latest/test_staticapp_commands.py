@@ -4,11 +4,10 @@
 # --------------------------------------------------------------------------------------------
 import os
 
-from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, JMESPathCheck, live_only)
+from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, JMESPathCheck)
 
-DEFAULT_LOCATION = "westus"
+DEFAULT_LOCATION = "eastus"
 
-@live_only()
 class StaticAppBasicE2ETest(ScenarioTest):
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
     @StorageAccountPreparer()

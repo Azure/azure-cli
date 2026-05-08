@@ -8,15 +8,14 @@ import os
 
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck, 
-                               JMESPathCheckExists, JMESPathCheckNotExists, live_only)
+                               JMESPathCheckExists, JMESPathCheckNotExists)
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 # Test location for managed instance plans
-MANAGED_INSTANCE_LOCATION = 'eastus2euap'
+MANAGED_INSTANCE_LOCATION = 'eastasia'
 
 
-@live_only()
 class AppServicePlanManagedInstanceTest(ScenarioTest):
     
     @AllowLargeResponse()

@@ -25,7 +25,7 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 # you can use to rebuild the repository
 TEST_REPO_URL = 'https://github.com/yugangw-msft/azure-site-test.git'
 WINDOWS_ASP_LOCATION_WEBAPP = 'japanwest'
-WINDOWS_ASP_LOCATION_FUNCTIONAPP = 'francecentral'
+WINDOWS_ASP_LOCATION_FUNCTIONAPP = 'eastus'
 LINUX_ASP_LOCATION_WEBAPP = 'eastus2'
 LINUX_ASP_LOCATION_FUNCTIONAPP = 'ukwest'
 FLEX_ASP_LOCATION_FUNCTIONAPP = 'eastasia'
@@ -3386,7 +3386,6 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
         with self.assertRaises(ValidationError):
             self.cmd('functionapp create -g {} -n {} -s {} -p {} --functions-version 4 --vnet {} --subnet {} --configure-networking-later'.format(resource_group, functionapp_name, storage_account, ep_plan_name, vnet_name, subnet_name))
 
-    @live_only()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     def test_functionapp_create_elastic_premium_zone_redundant_plan(self, resource_group):
         ep_plan_name = self.create_random_name('epplan', 24)
@@ -3395,7 +3394,6 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
             JMESPathCheck('zoneRedundant', True)
         ])
 
-    @live_only()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     def test_functionapp_create_elastic_premium_ep2_zone_redundant_plan(self, resource_group):
         ep_plan_name = self.create_random_name('epplan', 24)
@@ -3404,7 +3402,6 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
             JMESPathCheck('zoneRedundant', True)
         ])
 
-    @live_only()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     def test_functionapp_create_elastic_premium_ep3_zone_redundant_plan(self, resource_group):
         ep_plan_name = self.create_random_name('epplan', 24)
