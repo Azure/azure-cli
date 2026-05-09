@@ -230,9 +230,9 @@ examples:
       az postgres flexible-server create -g testgroup -n testserver --location testlocation --storage-auto-grow Enabled
 
   - name: >
-      Create elastic cluster with node count of 5. Default node count is 2 when --cluster-option is "ElasticCluster".
+      Create elastic cluster with node count of 5.
     text: >
-      az postgres flexible-server create -g testgroup -n testcluster --location testlocation --cluster-option ElasticCluster --node-count 5
+      az postgres flexible-server create -g testGroup -n testCluster --location testLocation --node-count 5
 """
 
 helps['postgres flexible-server show'] = """
@@ -290,9 +290,9 @@ examples:
   - name: Update a flexible server's storage to set IOPS (operations/sec). Server must be using Premium SSD v2 Disks.
     text: az postgres flexible-server update --resource-group testgroup --name testserver --iops 3000
   - name: Update a flexible server's storage to set Throughput (MB/sec). Server must be using Premium SSD v2 Disks.
-    text: az postgres flexible-server update --resource-group testgroup --name testserver --throughput 125
-  - name: Update a flexible server's cluster size by scaling up node count. Must be an Elastic Cluster.
-    text: az postgres flexible-server update --resource-group testgroup --name testcluster --node-count 6
+    text: az postgres flexible-server update --resource-group testGroup --name testserver --throughput 125
+  - name: Update a flexible server's cluster size by scaling up node count. Must be an elastic cluster.
+    text: az postgres flexible-server update --resource-group testGroup --name testcluster --node-count 6
 """
 
 helps['postgres flexible-server restore'] = """

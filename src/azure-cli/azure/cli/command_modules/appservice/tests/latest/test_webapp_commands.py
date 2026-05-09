@@ -134,9 +134,38 @@ class WebappBasicE2ETest(ScenarioTest):
 
     @AllowLargeResponse()
     def test_webapp_runtimes(self):
-        self.cmd('webapp list-runtimes')
-        self.cmd('webapp list-runtimes --os windows')
-        self.cmd('webapp list-runtimes --os linux')
+        # Validate default output structure
+        self.cmd('webapp list-runtimes', checks=[
+            JMESPathCheck('type(@)', 'array'),
+            JMESPathCheck('length(@) > `0`', True),
+            JMESPathCheck('[0].os != `null`', True),
+            JMESPathCheck('[0].runtime != `null`', True),
+            JMESPathCheck('[0].config != `null`', True),
+            JMESPathCheck('[0].support != `null`', True),
+        ])
+        # Validate OS filter
+        self.cmd('webapp list-runtimes --os windows', checks=[
+            JMESPathCheck("length([?os != 'Windows'])", 0),
+        ])
+        self.cmd('webapp list-runtimes --os linux', checks=[
+            JMESPathCheck("length([?os != 'Linux'])", 0),
+        ])
+        # Validate runtime filter
+        self.cmd('webapp list-runtimes --runtime python', checks=[
+            JMESPathCheck("length([?runtime != 'Python'])", 0),
+        ])
+        self.cmd('webapp list-runtimes --runtime java')
+        # Validate support filter
+        self.cmd('webapp list-runtimes --support active', checks=[
+            JMESPathCheck("length([?support == 'EOL' || support == 'Near'])", 0),
+        ])
+        self.cmd('webapp list-runtimes --support near', checks=[
+            JMESPathCheck("length([?support != 'Near'])", 0),
+        ])
+        # Validate combined filters
+        self.cmd('webapp list-runtimes --os linux --runtime dotnet --support near', checks=[
+            JMESPathCheck("length([?os != 'Linux'])", 0),
+        ])
 
 
 class WebappQuickCreateTest(ScenarioTest):
