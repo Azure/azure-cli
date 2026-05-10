@@ -19,10 +19,9 @@ class FlexibleServerLtrMgmtScenarioTest(ScenarioTest):
 
     postgres_location = DEFAULT_LOCATION
 
-    @AllowLargeResponse()
+    @AllowLargeResponse(2048)
     @ResourceGroupPreparer(location=postgres_location)
     @ServerPreparer(location=postgres_location)
-    @live_only()
     def test_postgres_flexible_server_ltr(self, resource_group, server):
         self._test_flexible_server_ltr(resource_group, server)
 
