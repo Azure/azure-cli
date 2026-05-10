@@ -56,6 +56,3 @@ register_command_group_deprecate(command_group='postgres flexible-server long-te
 register_other_breaking_change('postgres flexible-server backup create',
                                message='The argument for backup name will no longer be required '
                                'in the next breaking change release (2.86.0) scheduled for May 2026.')
-
-# Replica command argument changes
-register_argument_deprecate('postgres flexible-server replica create', '--replica-name', redirect='--name')
