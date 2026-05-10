@@ -580,7 +580,7 @@ def apim_api_export(client, resource_group_name, service_name, api_id, export_fo
     try:
         exportedResults = requests.get(link, timeout=30)
         if not exportedResults.ok:
-            logger.warning("Got bad status from APIManagement during API Export:%s, {exportedResults.status_code}")
+            logger.warning("Got bad status from APIManagement during API Export: %s", exportedResults.status_code)
     except requests.exceptions.ReadTimeout:
         logger.warning("Timed out while exporting api from APIManagement.")
 
