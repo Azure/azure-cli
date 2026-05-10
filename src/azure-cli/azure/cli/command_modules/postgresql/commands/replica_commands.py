@@ -38,7 +38,7 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
     validate_resource_group(resource_group_name)
 
     if replica_name is None and name is None:
-        raise RequiredArgumentMissingError('the following arguments are required: --name')
+        raise RequiredArgumentMissingError('One of the following arguments is required: --name, --replica-name')
     if replica_name is not None and name is not None:
         raise MutuallyExclusiveArgumentError('usage error: --name and --replica-name cannot be used together. Please use --name.')
     replica_name = replica_name.lower() if name is None else name.lower()

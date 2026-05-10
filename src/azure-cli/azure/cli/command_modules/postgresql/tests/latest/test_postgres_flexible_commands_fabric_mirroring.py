@@ -24,7 +24,7 @@ class FlexibleServerFabricMirroringMgmtScenarioTest(ScenarioTest):
     def _test_fabric_mirroring_mgmt(self, resource_group, server):
         # Create a database
         database2_name = 'flexibleserverdb'
-        self.cmd('postgres flexible-server db create -g {} -s {} -d {}'.format(resource_group, server, database2_name),
+        self.cmd('postgres flexible-server db create -g {} -s {} -n {}'.format(resource_group, server, database2_name),
                  checks=[JMESPathCheck('name', database2_name)])
 
         # Enable system assigned managed identity
