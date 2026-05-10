@@ -68,11 +68,6 @@ def cf_postgres_flexible_server_capabilities(cli_ctx, _):
 def cf_postgres_flexible_backups(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).backups_automatic_and_on_demand
 
-
-def cf_postgres_flexible_ltr_backups(cli_ctx, _):
-    return get_postgresql_flexible_management_client(cli_ctx).backups_long_term_retention
-
-
 def cf_postgres_flexible_operations(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).operations
 

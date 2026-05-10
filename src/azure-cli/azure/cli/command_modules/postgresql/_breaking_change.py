@@ -47,23 +47,9 @@ register_command_group_deprecate(command_group='postgres flexible-server index-t
                                  'other automatically generated recommendations which are covered by the '
                                  'new command.')
 
-# Long term retention command group deprecated with no redirect as the functionality will be removed in the future
-register_command_group_deprecate(command_group='postgres flexible-server long-term-retention',
-                                 message='Long term retention command group will be removed. '
-                                 'For more information, open a support incident.')
-
 # Name of new backup no longer required in backup create command
 register_other_breaking_change('postgres flexible-server backup create',
                                message='The argument for backup name will no longer be required '
-                               'in next breaking change release(2.86.0) scheduled for May 2026.')
-
-# LTR command argument changes
-register_other_breaking_change('postgres flexible-server long-term-retention',
-                               message='The --backup-name/-b argument has been deprecated and will be removed '
-                               'in next breaking change release(2.86.0) scheduled for May 2026.')
-register_other_breaking_change('postgres flexible-server long-term-retention',
-                               message='The --name/-n argument will be repurposed to specify the backup name. '
-                               'The --server-name/-s argument will be introduced to specify the server name '
                                'in next breaking change release(2.86.0) scheduled for May 2026.')
 
 # Backup command argument changes

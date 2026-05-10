@@ -585,15 +585,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         with self.argument_context('{} flexible-server virtual-endpoint delete'.format(command_group)) as c:
             c.argument('yes', arg_type=yes_arg_type)
 
-        # long-term-retention
-        for scope in ['show', 'start', 'pre-check']:
-            argument_context_string = '{} flexible-server long-term-retention {}'.format(command_group, scope)
-            with self.argument_context(argument_context_string) as c:
-                c.argument('backup_name', options_list=['--backup-name', '-b'], help='Long-term retention backup name.')
-
-        with self.argument_context('{} flexible-server long-term-retention start'.format(command_group)) as c:
-            c.argument('sas_url', options_list=['--sas-url', '-u'], help='Container SAS URL.')
-
         for scope in ['create', 'update']:
             argument_context_string = '{} flexible-server virtual-endpoint {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
