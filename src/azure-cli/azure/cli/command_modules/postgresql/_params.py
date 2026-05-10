@@ -623,9 +623,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         # replica
         with self.argument_context('{} flexible-server replica create'.format(command_group)) as c:
             c.argument('source_server', arg_type=source_server_arg_type)
-            c.argument('replica_name', options_list=['--replica-name'],
-                       help='The name of the read replica.')
-            c.argument('name', options_list=['--name', '-n'],
+            c.argument('name', options_list=['--name', '-n'], required=True,
                        help='The name of the read replica.')
             c.argument('zone', arg_type=zone_arg_type)
             c.argument('location', arg_type=get_location_type(self.cli_ctx))
