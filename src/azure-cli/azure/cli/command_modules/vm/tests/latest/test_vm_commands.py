@@ -3330,7 +3330,9 @@ class VMSSExtensionInstallTest(ScenarioTest):
             'config_file': config_file
         })
 
-        self.cmd('vmss create -n {vmss} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password --admin-username admin123 --admin-password testPassword0 --instance-count 1 --orchestration-mode Uniform --lb-sku Standard --no-wait')
+        self.cmd('vmss create -n {vmss} -g {rg} --image Canonical:UbuntuServer:16.04-LTS:latest '
+                 '--authentication-type password --admin-username admin123 --admin-password testPassword0 '
+                 '--instance-count 1 --orchestration-mode Uniform --lb-sku Standard --no-wait --vm-sku Standard_D2s_v3')
         self.cmd('vmss wait --created -n {vmss} -g {rg}')
 
         self.cmd('vmss extension set -n {net-ext} --publisher {net-pub} --version 1.4  --vmss-name {vmss} --resource-group {rg} --protected-settings "{config_file}" --force-update --enable-auto-upgrade false')
@@ -3395,7 +3397,9 @@ class VMSSExtensionInstallTest(ScenarioTest):
             'config_file': config_file
         })
 
-        self.cmd('vmss create -n {vmss} -g {rg} --image Debian:debian-10:10:latest --authentication-type password --admin-username admin123 --admin-password testPassword0 --instance-count 1 --no-wait --orchestration-mode Uniform --lb-sku Standard')
+        self.cmd('vmss create -n {vmss} -g {rg} --image Debian:debian-10:10:latest --authentication-type password '
+                 '--admin-username admin123 --admin-password testPassword0 --instance-count 1 --no-wait '
+                 '--orchestration-mode Uniform --lb-sku Standard --vm-sku Standard_D2s_v3')
         self.cmd('vmss wait --created -n {vmss} -g {rg}')
 
         self.cmd('vmss extension set -n {net-ext} --publisher {net-pub} --version 1.4  --vmss-name {vmss} --resource-group {rg} --protected-settings "{config_file}" --force-update --enable-auto-upgrade false')
@@ -3452,12 +3456,14 @@ class VMSSExtensionInstallTest(ScenarioTest):
             'ext_name': 'MyNetworkWatcher'
         })
 
-        self.cmd('vmss create -n {vmss} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password --admin-username admin123 --admin-password testPassword0 --instance-count 1 --orchestration-mode Flexible')
+        self.cmd('vmss create -n {vmss} -g {rg} --image Canonical:UbuntuServer:16.04-LTS:latest '
+                 '--authentication-type password --admin-username admin123 --admin-password testPassword0 '
+                 '--instance-count 1 --orchestration-mode Flexible --vm-sku Standard_D2s_v3')
         self.cmd('vmss extension set -n {ext_type} --publisher {pub} --version 1.4  --vmss-name {vmss} --resource-group {rg} '
                  '--protected-settings "{config_file}" --extension-instance-name {ext_name}')
         self.cmd('vmss extension show --resource-group {rg} --vmss-name {vmss} --name {ext_name}', checks=[
             self.check('name', '{ext_name}'),
-            self.check('typePropertiesType', '{ext_type}')
+            self.check('type', '{ext_type}')
         ])
         self.cmd('vmss extension delete --resource-group {rg} --vmss-name {vmss} --name {ext_name}')
 
@@ -11212,7 +11218,8 @@ class VMSSAutomaticRepairsScenarioTest(ScenarioTest):
         })
 
         # Prepare vmss
-        self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username azureuser --orchestration-mode Uniform --lb-sku Standard')
+        self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:16.04-LTS:latest '
+                 '--admin-username azureuser --orchestration-mode Uniform --lb-sku Standard --vm-sku Standard_D2s_v3')
 
         # Prepare health extension
         _, settings_file = tempfile.mkstemp()
@@ -11943,7 +11950,7 @@ class VMSSPatchModeScenarioTest(ScenarioTest):
             self.check('osProfile.windowsConfiguration.patchSettings.patchMode', 'Manual')
         ])
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vmss_linux_patch_mode_')
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_linux_patch_mode_', location='eastus')
     def test_vmss_linux_patch_mode(self, resource_group):
         self.kwargs.update({
             'vmss': self.create_random_name('clitestvmss', 20),
@@ -11952,7 +11959,7 @@ class VMSSPatchModeScenarioTest(ScenarioTest):
 
         self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:16.04-LTS:latest --enable-agent '
                  '--patch-mode ImageDefault --generate-ssh-keys --instance-count 0 --admin-username vmtest '
-                 '--vm-sku Standard_B1ls')
+                 '--vm-sku Standard_D2s_v3')
 
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         health_extension_file = os.path.join(curr_dir, 'health_extension.json').replace('\\', '\\\\')
