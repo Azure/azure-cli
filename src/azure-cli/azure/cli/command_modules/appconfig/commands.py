@@ -16,7 +16,8 @@ from ._format import (configstore_credential_format,
                       featurefilter_entry_format,
                       deleted_configstore_output_format,
                       configstore_replica_output_format,
-                      configstore_snapshot_output_format)
+                      configstore_snapshot_output_format,
+                      configstore_nsp_output_format)
 
 
 def load_command_table(self, _):
@@ -58,6 +59,7 @@ def load_command_table(self, _):
 
     configstore_nsp_util = CliCommandType(
         operations_tmpl='azure.cli.command_modules.appconfig.network_security_perimeter#{}',
+        table_transformer=configstore_nsp_output_format,
         client_factory=cf_nsp_configurations
     )
 
