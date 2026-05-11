@@ -1567,6 +1567,41 @@ class FunctionAppFlex(LiveScenarioTest):
         result = self.cmd('provider show -n Microsoft.App').get_output_in_json()
         self.assertTrue(result['registrationState'] == 'Registered')
 
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_flex_update_strategy_config(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionapp', 40)
+
+        # Create a flex consumption function app
+        self.cmd('functionapp create -g {} -n {} -f {} -s {} --runtime python --runtime-version 3.11'
+                 .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account))
+
+        # Test setting update strategy to Recreate
+        update_strategy_config = self.cmd('functionapp update-strategy config set -g {} -n {} --type Recreate'
+                                          .format(resource_group, functionapp_name)).get_output_in_json()
+        self.assertEqual(update_strategy_config['type'], 'Recreate')
+
+        # Test showing update strategy config
+        update_strategy_config = self.cmd('functionapp update-strategy config show -g {} -n {}'
+                                          .format(resource_group, functionapp_name)).get_output_in_json()
+        self.assertEqual(update_strategy_config['type'], 'Recreate')
+
+        # Test setting update strategy to RollingUpdate
+        update_strategy_config = self.cmd('functionapp update-strategy config set -g {} -n {} --type RollingUpdate'
+                                          .format(resource_group, functionapp_name)).get_output_in_json()
+        self.assertEqual(update_strategy_config['type'], 'RollingUpdate')
+
+        # Test case insensitivity - lowercase should work
+        update_strategy_config = self.cmd('functionapp update-strategy config set -g {} -n {} --type recreate'
+                                          .format(resource_group, functionapp_name)).get_output_in_json()
+        self.assertEqual(update_strategy_config['type'], 'Recreate')
+
+        # Test case insensitivity - mixed case should work
+        update_strategy_config = self.cmd('functionapp update-strategy config set -g {} -n {} --type rollingupdate'
+                                          .format(resource_group, functionapp_name)).get_output_in_json()
+        self.assertEqual(update_strategy_config['type'], 'RollingUpdate')
+
 
 class FunctionAppManagedEnvironment(ScenarioTest):
     @AllowLargeResponse()
