@@ -5,7 +5,7 @@
 import unittest
 import os
 
-from azure.cli.command_modules.containerapp._utils import clean_null_values, load_cert_file
+from azure.cli.command_modules.containerapp._utils import clean_null_values, load_cert_file, _convert_object_from_snake_to_camel_case
 from azure.cli.core.azclierror import CLIInternalError
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
@@ -210,6 +210,29 @@ class UtilsTest(unittest.TestCase):
         }
         self.assertEqual(expect_result_for_new, result_new)
         self.assertEqual(expect_result_for_old, result_old)
+
+    def test_convert_object_from_snake_to_camel_case_preserves_arm_resource_id_keys(self):
+        # ARM resource IDs used as dictionary keys (e.g. in userAssignedIdentities)
+        # must not be modified by camelCase conversion. Underscores in resource group
+        # names would otherwise be incorrectly collapsed into camelCase segments.
+        arm_resource_id = (
+            "/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+            "/resourcegroups/NAME-PARTS-DIVIDED-BY-DASHES-RG_NAME_PARTS_DIVIDED_BY_UNDERSCORES"
+            "/providers/Microsoft.ManagedIdentity/userAssignedIdentities/SOME-Managed-Identity"
+        )
+        input_obj = {
+            "identity": {
+                "user_assigned_identities": {
+                    arm_resource_id: {}
+                },
+                "type": "UserAssigned"
+            }
+        }
+        result = _convert_object_from_snake_to_camel_case(input_obj)
+        self.assertIn("identity", result)
+        self.assertIn("userAssignedIdentities", result["identity"])
+        self.assertIn(arm_resource_id, result["identity"]["userAssignedIdentities"],
+                      "ARM resource ID key must not be camelCased")
 
     def test_load_cert_file(self):
         pfx_file = os.path.join(TEST_DIR, 'data', 'cert.pfx')

@@ -942,7 +942,7 @@ def _convert_object_from_snake_to_camel_case(o):
     if isinstance(o, list):
         return [_convert_object_from_snake_to_camel_case(i) if isinstance(i, (dict, list)) else i for i in o]
     return {
-        _to_camel_case(a): _convert_object_from_snake_to_camel_case(b) if isinstance(b, (dict, list)) else b for a, b in o.items()
+        (_to_camel_case(a) if not a.startswith('/') else a): _convert_object_from_snake_to_camel_case(b) if isinstance(b, (dict, list)) else b for a, b in o.items()
     }
 
 
