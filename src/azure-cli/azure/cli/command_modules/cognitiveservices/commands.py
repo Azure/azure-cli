@@ -208,7 +208,7 @@ def load_command_table(self, _):
             'cognitiveservices account managed-compute-deployment', managed_compute_deployments_type,
             client_factory=cf_managed_compute_deployments, is_preview=True) as g:
         g.custom_command('create', 'managed_compute_deployment_create')
-        g.custom_command('show', 'managed_compute_deployment_show')
+        g.custom_show_command('show', 'managed_compute_deployment_show')
         g.custom_command('list', 'managed_compute_deployment_list')
         g.custom_command('update', 'managed_compute_deployment_update')
         g.custom_command('delete', 'managed_compute_deployment_delete')
