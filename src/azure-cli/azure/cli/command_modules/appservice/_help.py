@@ -2371,6 +2371,39 @@ examples:
     text: az webapp log deployment list --name MyWebApp --resource-group MyResourceGroup
 """
 
+helps['webapp log startup'] = """
+type: group
+short-summary: View web app container startup logs.
+long-summary: >
+    View startup logs written during container initialization for Linux web apps.
+    Use when a container fails to start, crashes on cold start, times out waiting
+    for a port, or returns HTTP 502/503 errors after deployment. These logs contain
+    platform lifecycle events and container stdout/stderr output.
+"""
+
+helps['webapp log startup list'] = """
+type: command
+short-summary: List all container startup log files for a web app.
+examples:
+  - name: List all startup log files
+    text: az webapp log startup list --name MyWebApp --resource-group MyResourceGroup
+  - name: List only failure logs
+    text: az webapp log startup list --name MyWebApp --resource-group MyResourceGroup --outcome failure
+"""
+
+helps['webapp log startup show'] = """
+type: command
+short-summary: Show the content of a container startup log.
+long-summary: By default, shows the most recent startup log (preferring a failure log when one exists for the latest date). Use --filename to view a specific log file, or --instance to scope the latest-log lookup to a specific worker. --filename and --instance are mutually exclusive.
+examples:
+  - name: Show the latest startup log (prefers failures)
+    text: az webapp log startup show --name MyWebApp --resource-group MyResourceGroup
+  - name: Show a specific startup log file
+    text: az webapp log startup show --name MyWebApp --resource-group MyResourceGroup --filename 2026_04_13_lw0sdlwk000002_failure.log
+  - name: Show the latest startup log for a specific worker instance
+    text: az webapp log startup show --name MyWebApp --resource-group MyResourceGroup --instance lw0sdlwk000002
+"""
+
 helps['functionapp log'] = """
 type: group
 short-summary: Manage function app logs.
