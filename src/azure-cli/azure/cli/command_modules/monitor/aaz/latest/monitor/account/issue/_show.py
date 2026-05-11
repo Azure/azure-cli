@@ -42,7 +42,7 @@ class Show(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.azure_monitor_workspace_name = AAZStrArg(
-            options=["--azure-monitor-workspace-name"],
+            options=["-w", "--azure-monitor-workspace-name"],
             help="The name of the Azure Monitor Workspace. The name is case insensitive",
             required=True,
             id_part="name",
