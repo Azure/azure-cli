@@ -271,8 +271,10 @@ def download_app(cmd, client, resource_group_name, resource_name, file_save_path
     if (os.path.exists(os.path.join(folder_path, 'PostDeployScripts', 'deploy.cmd.template')) and
             os.path.exists(os.path.join(folder_path, 'deploy.cmd'))):
 
-        logger.info('Post deployment scripts and deploy.cmd found in source under folder %s. Copying deploy.cmd.',
-                folder_path)
+        logger.info(
+            'Post deployment scripts and deploy.cmd found in source under folder %s. Copying deploy.cmd.',
+            folder_path
+        )
 
         shutil.copyfile(os.path.join(folder_path, 'deploy.cmd'),
                         os.path.join(folder_path, 'PostDeployScripts', 'deploy.cmd.template'))
