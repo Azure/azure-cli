@@ -2556,7 +2556,7 @@ class FunctionAppServicePlan(ScenarioTest):
             JMESPathCheck('sku.name', 'EP1'),
             JMESPathCheck('sku.capacity', 1)
         ])
-        self.cmd('functionapp delete -g {} -n {}'.format(resource_group, plan))
+        self.cmd('functionapp plan delete -g {} -n {} -y'.format(resource_group, plan))
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
