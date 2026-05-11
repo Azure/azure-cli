@@ -66,10 +66,6 @@ Release History
 
 * Fix #31108, #32073: `az eventhubs`: Regex updated for commands with `--namespace-name` arguments (#32472)
 
-**Key Vault**
-
-* `az keyvault create`: Fix `RequestDisallowedByPolicy` error by explicitly setting `enableSoftDelete` in the request body to satisfy Azure Policy checks (#33265)
-
 **NetAppFiles**
 
 * `az netapfiles volume create/update`: Add paramter `--desired-ransomware-protection-state` to support advanced ransomware reports (#32828)
