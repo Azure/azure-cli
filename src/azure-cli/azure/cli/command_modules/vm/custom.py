@@ -5331,8 +5331,7 @@ def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publ
                        settings=None, protected_settings=None, no_auto_upgrade=False, force_update=False,
                        no_wait=False, extension_instance_name=None, provision_after_extensions=None,
                        enable_auto_upgrade=None):
-    from .aaz.latest.vmss import Update as VMSSUpdate
-    from .operations.vmss import convert_show_result_to_snake_case
+    from .operations.vmss import VMSSCreate, convert_show_result_to_snake_case
 
     if not extension_instance_name:
         extension_instance_name = extension_name
@@ -5385,7 +5384,7 @@ def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publ
     vmss['vm_scale_set_name'] = vmss_name
     vmss['no_wait'] = no_wait
 
-    return VMSSUpdate(cli_ctx=cmd.cli_ctx)(command_args=vmss)
+    return VMSSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss)
 
 
 def set_orchestration_service_state(cmd, resource_group_name, vm_scale_set_name, service_name, action, no_wait=False):
