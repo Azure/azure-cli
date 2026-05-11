@@ -524,7 +524,8 @@ def update_cluster_durability(cmd, client, resource_group_name, cluster_name, no
     if fabric_ext_ref is None:
         raise CLIError("Failed to find service fabric extension.")
 
-    curr_vmss_durability_level = fabric_ext_ref.get('settings', {}).get('durabilityLevel', '')
+    setting = fabric_ext_ref.get('settings', {})
+    curr_vmss_durability_level = setting.get('durability_level', setting.get('durabilityLevel', ''))
 
     # check upgrade
     if curr_node_type_durability.lower() != curr_vmss_durability_level.lower():
@@ -543,8 +544,8 @@ def update_cluster_durability(cmd, client, resource_group_name, cluster_name, no
     # update vmss sf extension durability
     if curr_vmss_durability_level.lower() != durability_level.lower() and fabric_ext_ref.get('settings'):
         from ..vm.operations.vmss import VMSSCreate
-        fabric_ext_ref['settings']['durabilityLevel'] = durability_level
-        fabric_ext_ref['settings']['enableParallelJobs'] = True
+        fabric_ext_ref['settings']['durability_level'] = durability_level
+        fabric_ext_ref['settings']['enable_parallel_jobs'] = True
         vmss['resource_group'] = resource_group_name
         vmss['vm_scale_set_name'] = vmss['name']
         vmss_poll = VMSSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss)
@@ -970,14 +971,16 @@ def _create_vmss(cmd, resource_group_name, cluster_name, cluster, node_type_name
         if e.get('type', '').lower() == 'IaaSDiagnostics'.lower()]
     if any(diagnostics_exts):
         diagnostics_ext = diagnostics_exts[0]
-        diagnostics_account = diagnostics_ext.get('settings', {}).get('StorageAccount')
+
+        setting = diagnostics_ext.get('settings', {})
+        diagnostics_account = setting.get('StorageAccount', setting.get('Storage_account'))
         storage_client = storage_client_factory(cli_ctx)
         list_results = storage_client.storage_accounts.list_keys(
             resource_group_name, diagnostics_account)
         diagnostics_ext['protected_settings'] = {
-            'storageAccountName': diagnostics_account,
-            'storageAccountKey': list_results.keys[0].value,
-            'storageAccountEndPoint': 'https://core.windows.net/'
+            'storage_account_name': diagnostics_account,
+            'storage_account_key': list_results.keys[0].value,
+            'storage_account_end_point': 'https://core.windows.net/'
         }
 
     fabric_exts = [
@@ -993,19 +996,17 @@ def _create_vmss(cmd, resource_group_name, cluster_name, cluster, node_type_name
     if not fabric_ext.get('settings'):
         fabric_ext['settings'] = {}
 
-    fabric_ext['settings']['nodeTypeRef'] = node_type_name
-    fabric_ext['settings']['durabilityLevel'] = durability_level
-    if 'nicPrefixOverride' not in fabric_ext['settings']:
-        fabric_ext['settings']['nicPrefixOverride'] = address_prefix
+    fabric_ext['settings']['node_type_ref'] = node_type_name
+    fabric_ext['settings']['durability_level'] = durability_level
+    if 'nicPrefixOverride' not in fabric_ext['settings'] or 'nic_prefix_override' not in fabric_ext['settings']:
+        fabric_ext['settings']['nic_prefix_override'] = address_prefix
     storage_client = storage_client_factory(cli_ctx)
     list_results = storage_client.storage_accounts.list_keys(
         resource_group_name, diagnostics_storage_name)
-    import json
-    json_data = json.loads(
-        '{"StorageAccountKey1": "", "StorageAccountKey2": ""}')
-    fabric_ext['protected_settings'] = json_data
-    fabric_ext['protected_settings']['StorageAccountKey1'] = list_results.keys[0].value
-    fabric_ext['protected_settings']['StorageAccountKey2'] = list_results.keys[1].value
+    fabric_ext['protected_settings'] = {
+        'storage_account_key_1': list_results.keys[0].value,
+        'storage_account_key_2': list_results.keys[1].value
+    }
 
     extensions = [fabric_ext]
     if diagnostics_ext:
@@ -1052,8 +1053,9 @@ def _get_cluster_vmss_by_node_type(cmd, resource_group_name, cluster_id, node_ty
         fabric_ext = _get_sf_vm_extension(vmss)
         if fabric_ext is not None:
             curr_cluster_id = _get_cluster_id_in_sf_extension(fabric_ext)
+            setting = fabric_ext.get('settings', {})
             if (curr_cluster_id.lower() == cluster_id.lower() and
-                    fabric_ext.get('settings', {}).get('nodeTypeRef', '').lower() == node_type_name.lower()):
+                    setting.get('nodeTypeRef', setting.get('node_type_ref', '')).lower() == node_type_name.lower()):
                 return vmss
     raise CLIError("Failed to find vmss in resource group {} for cluster id {} and node type {}".format(
         resource_group_name, cluster_id, node_type_name))
@@ -1253,7 +1255,8 @@ def _get_sf_vm_extension(vmss):
 
 
 def _get_cluster_id_in_sf_extension(fabric_ext):
-    cluster_endpoint = fabric_ext.get('settings', {}).get('clusterEndpoint')
+    setting = fabric_ext.get('settings', {})
+    cluster_endpoint = setting.get('clusterEndpoint', setting.get('cluster_endpoint'))
     endpoint_list = cluster_endpoint.split('/')
     cluster_id = endpoint_list[len(endpoint_list) - 1]
     return cluster_id
@@ -1280,7 +1283,7 @@ def _add_cert_to_all_vmss(cli_ctx, resource_group_name, cluster_id, vault_id, se
 
                     if not fabric_ext.get('settings'):
                         fabric_ext['settings'] = {}
-                    fabric_ext["settings"]["certificateSecondary"] = secondary_setting
+                    fabric_ext["settings"]["certificate_secondary"] = secondary_setting
 
                 t = threading.Thread(target=_add_cert_to_vmss, args=[cli_ctx, vmss, resource_group_name, vault_id, secret_url])
                 t.start()
