@@ -78,7 +78,7 @@ def flexible_server_create(cmd, client,
                            zone=None, standby_availability_zone=None,
                            geo_redundant_backup=None, byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
                            auto_grow=None, performance_tier=None,
-                           storage_type=None, iops=None, throughput=None, create_cluster=None, cluster_size=None, database_name=None, yes=False):
+                           storage_type=None, iops=None, throughput=None, cluster_size=None, database_name=None, yes=False):
 
     if not check_resource_group(resource_group_name):
         resource_group_name = None
@@ -141,13 +141,11 @@ def flexible_server_create(cmd, client,
                            backup_byok_identity=backup_byok_identity,
                            backup_byok_key=backup_byok_key,
                            performance_tier=performance_tier,
-                           create_cluster=create_cluster,
                            password_auth=password_auth, microsoft_entra_auth=microsoft_entra_auth,
-                           admin_name=admin_name, admin_id=admin_id, admin_type=admin_type,)
+                           admin_name=admin_name, admin_id=admin_id, admin_type=admin_type, database_name=database_name)
 
     cluster = None
-    if create_cluster == 'ElasticCluster':
-        cluster_size = cluster_size if cluster_size else 2
+    if cluster_size is not None:
         cluster = postgresql_flexibleservers.models.Cluster(cluster_size=cluster_size, default_database_name=database_name if database_name else POSTGRES_DB_NAME)
 
     server_result = firewall_id = None

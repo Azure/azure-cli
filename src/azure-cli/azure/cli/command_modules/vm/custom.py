@@ -920,7 +920,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_D2s_
               plan_promotion_code=None, license_type=None, assign_identity=None, identity_scope=None,
               identity_role=None, identity_role_id=None, encryption_identity=None,
               application_security_groups=None, zone=None, boot_diagnostics_storage=None, ultra_ssd_enabled=None,
-              ephemeral_os_disk=None, ephemeral_os_disk_placement=None,
+              ephemeral_os_disk=None, ephemeral_os_disk_placement=None, ephemeral_os_disk_enable_full_caching=None,
               proximity_placement_group=None, dedicated_host=None, dedicated_host_group=None, aux_subscriptions=None,
               priority=None, max_price=None, eviction_policy=None, enable_agent=None, workspace=None, vmss=None,
               os_disk_encryption_set=None, data_disk_encryption_sets=None, specialized=None,
@@ -3741,7 +3741,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 assign_identity=None, identity_scope=None, identity_role=None, encryption_identity=None,
                 identity_role_id=None, zones=None, priority=None, eviction_policy=None,
                 application_security_groups=None, ultra_ssd_enabled=None,
-                ephemeral_os_disk=None, ephemeral_os_disk_placement=None,
+                ephemeral_os_disk=None, ephemeral_os_disk_placement=None, ephemeral_os_disk_enable_full_caching=None,
                 proximity_placement_group=None, aux_subscriptions=None, terminate_notification_time=None,
                 max_price=None, computer_name_prefix=None, orchestration_mode=None, scale_in_policy=None,
                 os_disk_encryption_set=None, data_disk_encryption_sets=None, data_disk_iops=None, data_disk_mbps=None,
@@ -5147,8 +5147,8 @@ def set_vmss_diagnostics_extension(cmd, resource_group_name, vmss_name, settings
         major_ver = extension_mappings[_LINUX_DIAG_EXT]['version'].split('.', maxsplit=1)[0]
         # For VMSS, we don't do auto-removal like VM because there is no reliable API to wait for
         # the removal done before we can install the newer one
-        if next((e for e in exts if e.name == _LINUX_DIAG_EXT and
-                 not e.type_handler_version.startswith(major_ver + '.')), None):
+        if next((e for e in exts if e.get('name') == _LINUX_DIAG_EXT and
+                 not e.get('typeHandlerVersion').startswith(major_ver + '.')), None):
             delete_cmd = 'az vmss extension delete -g {} --vmss-name {} -n {}'.format(
                 resource_group_name, vmss_name, vm_extension_name)
             raise CLIError("There is an incompatible version of diagnostics extension installed. "

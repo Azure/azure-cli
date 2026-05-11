@@ -1201,6 +1201,9 @@ def load_arguments(self, _):
                        help='Allows you to create an OS disk directly on the host node, providing local disk performance and faster VM/VMSS reimage time.')
             c.argument('ephemeral_os_disk_placement', arg_type=ephemeral_placement_type,
                        help='Only applicable when used with `--ephemeral-os-disk`. Allows you to choose the Ephemeral OS disk provisioning location.')
+            c.argument('ephemeral_os_disk_enable_full_caching', arg_type=get_three_state_flag(),
+                       options_list=['--ephemeral-os-disk-enable-full-caching', '--ephemeral-full-caching'],
+                       help='Specify whether or not to enable full caching for this VM/VMSS which will cache the OS disk locally on the host and make this VM/VMSS more resilient to storage outages')
             c.argument('os_disk_encryption_set', min_api='2019-07-01', help='Name or ID of disk encryption set for OS disk.')
             c.argument('data_disk_encryption_sets', nargs='+', min_api='2019-07-01',
                        help='Names or IDs (space delimited) of disk encryption sets for data disks.')
