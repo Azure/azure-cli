@@ -555,11 +555,13 @@ def apim_api_export(client, resource_group_name, service_name, api_id, export_fo
 
     # Obtain link from the response
     response_dict = api_export_result_to_dict(response)
+    link = None
     try:
         # Extract the link from the response where results are stored
         link = response_dict['additional_properties']['properties']['value']['link']
     except KeyError:
         logger.warning("Error exporting api from APIManagement. The expected link is not present in the response.")
+        return
 
     # Determine the file extension based on the mappedFormat
     if mappedFormat in ['swagger-link', 'openapi+json-link']:
@@ -577,12 +579,15 @@ def apim_api_export(client, resource_group_name, service_name, api_id, export_fo
     full_path = os.path.join(file_path, file_name)
 
     # Get the results from the link where the API Export Results are stored
+    exportedResults = None
     try:
         exportedResults = requests.get(link, timeout=30)
         if not exportedResults.ok:
             logger.warning("Got bad status from APIManagement during API Export: %s", exportedResults.status_code)
+            return
     except requests.exceptions.ReadTimeout:
         logger.warning("Timed out while exporting api from APIManagement.")
+        return
 
     try:
         # Try to parse as JSON
