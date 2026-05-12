@@ -17,7 +17,7 @@ from azure.cli.core.util import \
     (get_file_json, truncate_text, shell_safe_json_parse, b64_to_hex, hash_string, random_string,
      open_page_in_browser, can_launch_browser, handle_exception, ConfiguredDefaultSetter, send_raw_request,
      should_disable_connection_verify, parse_proxy_resource_id, get_az_user_agent, get_az_rest_user_agent,
-    _get_parent_proc_name, is_wsl, run_cmd, run_az_cmd, roughly_parse_command)
+     _get_parent_proc_name, is_wsl, run_cmd, run_az_cmd, roughly_parse_command, sdk_no_wait)
 from azure.cli.core.mock import DummyCli
 
 
@@ -234,6 +234,21 @@ class TestUtils(unittest.TestCase):
         with ConfiguredDefaultSetter(config, False):
             self.assertEqual(config.use_local_config, False)
         self.assertTrue(config.use_local_config)
+
+    def test_sdk_no_wait_sets_polling_false(self):
+        func = mock.MagicMock(return_value='ok')
+        result = sdk_no_wait(True, func, 1, test='value')
+        self.assertEqual(result, 'ok')
+        func.assert_called_once_with(1, test='value', polling=False)
+
+    def test_sdk_no_wait_retries_without_forced_polling_on_json_decode_error(self):
+        def _func(*_args, **kwargs):
+            if kwargs.get('polling') is False:
+                raise json.decoder.JSONDecodeError("bad json", "gAS", 3)
+            return 'ok'
+
+        result = sdk_no_wait(True, _func)
+        self.assertEqual(result, 'ok')
 
     @mock.patch('azure.cli.core.__version__', '7.8.9')
     def test_get_az_user_agent(self):

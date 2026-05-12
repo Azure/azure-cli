@@ -790,7 +790,16 @@ def augment_no_wait_handler_args(no_wait_enabled, handler, handler_args):
 
 def sdk_no_wait(no_wait, func, *args, **kwargs):
     if no_wait:
+        original_polling = kwargs.get('polling', None)
+        has_polling = 'polling' in kwargs
         kwargs.update({'polling': False})
+        try:
+            return func(*args, **kwargs)
+        except json.decoder.JSONDecodeError:
+            if has_polling:
+                kwargs['polling'] = original_polling
+            else:
+                kwargs.pop('polling', None)
     return func(*args, **kwargs)
 
 
