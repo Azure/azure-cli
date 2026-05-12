@@ -1437,15 +1437,15 @@ class NetworkAppGatewaySslCertManagedHsmScenarioTest(ScenarioTest):
                  '--sd-wrapping-keys {sd_cert0} {sd_cert1} {sd_cert2} '
                  '--sd-quorum 2 --security-domain-file {security_domain}')
 
-        # grant signed-in user access to create keys in HSM
-        self.cmd('keyvault role assignment create --hsm-name {hsm_name} '
-                 '--role "Managed HSM Crypto User" '
-                 '--assignee {init_admin} --scope /keys')
-
-        # grant identity access to HSM keys
-        self.cmd('keyvault role assignment create --hsm-name {hsm_name} '
-                 '--role "Managed HSM Crypto User" '
-                 '--assignee {identity_principal} --scope /keys')
+        # grant signed-in user and identity access to create keys in HSM
+        from unittest import mock
+        with mock.patch('azure.cli.command_modules.keyvault.custom._gen_guid', side_effect=self.create_guid):
+            self.cmd('keyvault role assignment create --hsm-name {hsm_name} '
+                     '--role "Managed HSM Crypto User" '
+                     '--assignee {init_admin} --scope /keys')
+            self.cmd('keyvault role assignment create --hsm-name {hsm_name} '
+                     '--role "Managed HSM Crypto User" '
+                     '--assignee {identity_principal} --scope /keys')
 
         # create keys in Managed HSM
         kid = self.cmd('keyvault key create --hsm-name {hsm_name} -n mykey1'
