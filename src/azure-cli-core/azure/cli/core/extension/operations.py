@@ -407,6 +407,9 @@ def update_extension(cmd=None, extension_name=None, index_url=None, pip_extra_in
             raise CLIError(
                 f"Cannot update system extension {extension_name}, please wait until Cloud Shell updates it in the next release.")
         cur_version = ext.get_version()
+        if cur_version is None:
+            logger.warning("The '%s' extension has missing or invalid metadata. It may have been partially installed. "
+                           "Proceeding with update to attempt to repair it.", extension_name)
         try:
             if not download_url:
                 download_url, ext_sha256 = resolve_from_index(extension_name, cur_version=cur_version, index_url=index_url, target_version=version, cli_ctx=cmd_cli_ctx, allow_preview=allow_preview)
@@ -435,7 +438,7 @@ def update_extension(cmd=None, extension_name=None, index_url=None, pip_extra_in
             logger.error(err)
             logger.debug('Copying %s to %s', backup_dir, extension_path)
             shutil.copytree(backup_dir, extension_path)
-            raise CLIError('Failed to update. Rolled {} back to {}.'.format(extension_name, cur_version))
+            raise CLIError('Failed to update. Rolled {} back to {}.'.format(extension_name, cur_version or 'unknown'))
         CommandIndex().invalidate()
     except ExtensionNotInstalledException as e:
         raise CLIError(e)

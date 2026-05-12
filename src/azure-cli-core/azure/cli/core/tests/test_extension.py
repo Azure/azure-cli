@@ -455,6 +455,32 @@ class TestExtensions(TestExtensionsBase):
             self.assertEqual(ext['name'], extension_name)
             self.assertEqual(ext['version'], '1.4.1a1')
 
+    def test_update_extension_with_corrupted_metadata(self):
+        """Test that update_extension works when extension has missing/corrupted metadata (partial install)."""
+        extension_name = "extension-test-pkg"
+        extension2 = 'extension_test_pkg-1.2.3-py3-none-any.whl'
+
+        mocked_index_data = {
+            extension_name: [
+                mock_ext(extension2, version='1.2.3', download_url=_get_test_data_file(extension2)),
+            ]
+        }
+        with mock.patch('azure.cli.core.extension._resolve.get_index_extensions',
+                        return_value=mocked_index_data):
+            add_extension(self.cmd, extension_name=extension_name)
+            ext = show_extension(extension_name)
+            self.assertEqual(ext['name'], extension_name)
+            self.assertEqual(ext['version'], '1.2.3')
+
+            # Simulate corrupted/partial install by patching get_version to return None
+            with mock.patch('azure.cli.core.extension.operations.logger') as mock_logger:
+                with mock.patch.object(WheelExtension, 'get_version', return_value=None):
+                    update_extension(self.cmd, extension_name)
+
+                # Verify the warning about missing metadata was emitted
+                warning_messages = [str(call) for call in mock_logger.warning.call_args_list]
+                self.assertTrue(any(extension_name in msg for msg in warning_messages))
+
     @mock.patch('sys.stdin.isatty', return_value=True)
     def test_ext_dynamic_install_config_tty(self, _):
         from azure.cli.core.extension.dynamic_install import _get_extension_use_dynamic_install_config
@@ -496,6 +522,12 @@ class TestWheelExtension(TestExtensionsBase):
         self.assertTrue(ext.metadata)
         # We check that we can retrieve any one of the az extension metadata values
         self.assertTrue(ext.metadata.get(EXT_METADATA_MINCLICOREVERSION))
+
+    def test_wheel_get_version_with_none_metadata(self):
+        """Test that get_version() returns None when metadata is None (e.g. corrupted/partial installation)."""
+        ext = WheelExtension(EXT_NAME)
+        with mock.patch.object(type(ext), 'metadata', new_callable=lambda: property(lambda self: None)):
+            self.assertIsNone(ext.get_version())
 
 
 class TestWheelSystemExtension(TestExtensionsBase):
