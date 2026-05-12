@@ -12,6 +12,7 @@ from azure.cli.command_modules.appservice.custom import (
     enable_zip_deploy_functionapp,
     enable_zip_deploy,
     enable_zip_deploy_flex,
+    _check_zip_deployment_status_flex,
     add_remote_build_app_settings,
     remove_remote_build_app_settings,
     config_source_control,
@@ -681,3 +682,99 @@ class TestFunctionappMocked(unittest.TestCase):
 
         # assert
         self.assertEqual(response.git_hub_action_configuration.container_configuration.password, None)
+
+
+class TestCheckZipDeploymentStatusFlex(unittest.TestCase):
+    """Tests for _check_zip_deployment_status_flex handling of Kudu restart (status 6) scenario."""
+
+    def _make_response(self, status_code, json_body=None):
+        """Create a mock HTTP response."""
+        resp = mock.MagicMock()
+        resp.status_code = status_code
+        if json_body is not None:
+            resp.json.return_value = json_body
+        else:
+            resp.json.side_effect = Exception("No JSON body")
+        return resp
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers_flex', return_value={})
+    @mock.patch('azure.cli.core.util.should_disable_connection_verify', return_value=False)
+    @mock.patch('time.sleep', return_value=None)
+    @mock.patch('requests.get')
+    def test_status_6_then_status_4_succeeds(self, requests_get_mock, sleep_mock,
+                                              should_disable_mock, get_headers_mock):
+        """Status 6 (Kudu restart) followed by status 4 (success) should not raise an error."""
+        cmd_mock = _get_test_cmd()
+
+        # Simulate: first poll returns status 6 (partial success / Kudu restarting),
+        # second poll returns status 4 (success)
+        requests_get_mock.side_effect = [
+            self._make_response(200, {'status': 6, 'progress': ''}),
+            self._make_response(200, {'status': 4, 'complete': True}),
+        ]
+
+        result = _check_zip_deployment_status_flex(cmd_mock, 'rg', 'name',
+                                                   'https://mock-scm/api/deployments/latest',
+                                                   timeout=None)
+        self.assertEqual(result.get('status'), 4)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers_flex', return_value={})
+    @mock.patch('azure.cli.core.util.should_disable_connection_verify', return_value=False)
+    @mock.patch('time.sleep', return_value=None)
+    @mock.patch('requests.get')
+    def test_status_6_then_404_then_status_4_succeeds(self, requests_get_mock, sleep_mock,
+                                                       should_disable_mock, get_headers_mock):
+        """Status 6 followed by 404 (Kudu restarting) followed by status 4 should succeed."""
+        cmd_mock = _get_test_cmd()
+
+        requests_get_mock.side_effect = [
+            self._make_response(200, {'status': 6, 'progress': ''}),
+            self._make_response(404),
+            self._make_response(200, {'status': 4, 'complete': True}),
+        ]
+
+        result = _check_zip_deployment_status_flex(cmd_mock, 'rg', 'name',
+                                                   'https://mock-scm/api/deployments/latest',
+                                                   timeout=None)
+        self.assertEqual(result.get('status'), 4)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers_flex', return_value={})
+    @mock.patch('azure.cli.core.util.should_disable_connection_verify', return_value=False)
+    @mock.patch('time.sleep', return_value=None)
+    @mock.patch('requests.get')
+    def test_status_6_multiple_404_then_status_4_succeeds(self, requests_get_mock, sleep_mock,
+                                                           should_disable_mock, get_headers_mock):
+        """Multiple 404 responses during Kudu restart should continue polling until success."""
+        cmd_mock = _get_test_cmd()
+
+        requests_get_mock.side_effect = [
+            self._make_response(200, {'status': 6, 'progress': ''}),
+            self._make_response(404),
+            self._make_response(404),
+            self._make_response(200, {'status': 4, 'complete': True}),
+        ]
+
+        result = _check_zip_deployment_status_flex(cmd_mock, 'rg', 'name',
+                                                   'https://mock-scm/api/deployments/latest',
+                                                   timeout=None)
+        self.assertEqual(result.get('status'), 4)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers_flex', return_value={})
+    @mock.patch('azure.cli.core.util.should_disable_connection_verify', return_value=False)
+    @mock.patch('time.sleep', return_value=None)
+    @mock.patch('requests.get')
+    def test_status_3_still_raises_error(self, requests_get_mock, sleep_mock,
+                                          should_disable_mock, get_headers_mock):
+        """Status 3 (deployment failed) should still raise an error."""
+        cmd_mock = _get_test_cmd()
+
+        with mock.patch('azure.cli.command_modules.appservice.custom.show_deployment_log', return_value=[]):
+            requests_get_mock.side_effect = [
+                self._make_response(200, {'status': 3}),
+            ]
+
+            with self.assertRaises(CLIError) as cm:
+                _check_zip_deployment_status_flex(cmd_mock, 'rg', 'name',
+                                                  'https://mock-scm/api/deployments/latest',
+                                                  timeout=None)
+            self.assertIn("Zip deployment failed", str(cm.exception))

@@ -9652,6 +9652,9 @@ def _check_zip_deployment_status_flex(cmd, rg_name, name, deployment_status_url,
     # Indicates whether the status has been non empty in previous calls
     has_response = False
     has_partial_success = False
+    # Indicates Kudu is restarting after package deployment (transient state for flex consumption apps)
+    kudu_restart_in_progress = False
+    res_dict = {}
     while num_trials < total_trials:
         time.sleep(1)
         response = requests.get(deployment_status_url, headers=headers,
@@ -9659,14 +9662,19 @@ def _check_zip_deployment_status_flex(cmd, rg_name, name, deployment_status_url,
         try:
             if response.status_code == 202 and not has_partial_success:
                 has_partial_success = True
-            if response.status_code == 404 and has_partial_success:
+            if response.status_code == 404 and has_partial_success and not kudu_restart_in_progress:
                 break
-            if (response.status_code == 404 or response.json().get('status') is None) and has_response:
+            if response.status_code == 404 and kudu_restart_in_progress:
+                # Kudu is restarting after package deployment — continue polling until it comes back
+                logger.warning("Deployment status endpoint returned 404. "
+                               "Kudu may be restarting after package deployment. Retrying...")
+                res_dict = {}
+            elif (response.status_code == 404 or response.json().get('status') is None) and has_response:
                 raise CLIError("Failed to retrieve deployment status. Please try again in a few minutes.")
-            if (response.status_code != 404 and response.json().get('status') is not None) and not has_response:
-                has_response = True
-
-            res_dict = response.json()
+            else:
+                if (response.status_code != 404 and response.json().get('status') is not None) and not has_response:
+                    has_response = True
+                res_dict = response.json()
         except json.decoder.JSONDecodeError:
             logger.warning("Deployment status endpoint %s returns malformed data. Retrying...", deployment_status_url)
             res_dict = {}
@@ -9685,12 +9693,14 @@ def _check_zip_deployment_status_flex(cmd, rg_name, name, deployment_status_url,
         if status == 5:
             raise CLIError("Deployment was cancelled and another deployment is in progress.")
         if status == 6:
-            raise CLIError("Deployment was partially successful. These are the deployment logs:\n{}".format(
-                           json.dumps(show_deployment_log(cmd, rg_name, name))))
+            if not kudu_restart_in_progress:
+                kudu_restart_in_progress = True
+                logger.warning("Deployment is partially complete. Kudu may be restarting after package "
+                               "deployment. Continuing to poll for completion...")
         if 'progress' in res_dict:
             logger.info(res_dict['progress'])  # show only in debug mode, customers seem to find this confusing
     # if the deployment is taking longer than expected
-    if res_dict.get('status', 0) != 4 and not has_partial_success:
+    if res_dict.get('status', 0) != 4 and not has_partial_success and not kudu_restart_in_progress:
         raise CLIError("""Timeout reached by the command, however, the deployment operation
                        is still on-going. Navigate to your scm site to check the deployment status""")
     return res_dict
