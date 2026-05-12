@@ -626,7 +626,7 @@ class TestHandleException(unittest.TestCase):
                 mock_response.url = 'https://graph.microsoft.com/v1.0/policies/authenticationStrengthPolicies/'
                 mock_response.text = json.dumps({"error": {"code": error_code, "message": "Request Authorization failed"}})
                 mock_response.json.return_value = json.loads(mock_response.text)
-                http_error = azclierror.HTTPError('Forbidden({"error":{"code":"accessDenied"}})', mock_response)
+                http_error = azclierror.HTTPError(f'Forbidden({{"error":{{"code":"{error_code}"}}}})', mock_response)
 
                 with mock.patch('sys.stderr', new=io.StringIO()) as stderr:
                     ex_result = handle_exception(http_error)
