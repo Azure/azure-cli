@@ -634,6 +634,31 @@ class TestHandleException(unittest.TestCase):
         self.assertEqual(ex_result, 1)
         self.assertIn(GRAPH_ACCESS_DENIED_RECOMMENDATION, stderr.getvalue())
 
+    @mock.patch('azure.cli.core.azclierror.logger.error', autospec=True)
+    def test_handle_exception_http_error_without_graph_access_denied_no_recommendation(self, _):
+        test_cases = [
+            (403, 'https://management.azure.com/subscriptions?api-version=2020-01-01',
+             {"error": {"code": "accessDenied", "message": "Request Authorization failed"}}),
+            (404, 'https://graph.microsoft.com/v1.0/policies/authenticationStrengthPolicies/',
+             {"error": {"code": "accessDenied", "message": "Request Authorization failed"}})
+        ]
+
+        for status_code, url, payload in test_cases:
+            with self.subTest(status_code=status_code, url=url):
+                mock_response = mock.MagicMock()
+                mock_response.status_code = status_code
+                mock_response.headers = {}
+                mock_response.url = url
+                mock_response.text = json.dumps(payload)
+                mock_response.json.return_value = payload
+                http_error = azclierror.HTTPError('Request failed', mock_response)
+
+                with mock.patch('sys.stderr', new=io.StringIO()) as stderr:
+                    ex_result = handle_exception(http_error)
+
+                self.assertEqual(ex_result, 1)
+                self.assertNotIn(GRAPH_ACCESS_DENIED_RECOMMENDATION, stderr.getvalue())
+
     @staticmethod
     def _get_mock_HttpOperationError(response_text):
         from msrest.exceptions import HttpOperationError
