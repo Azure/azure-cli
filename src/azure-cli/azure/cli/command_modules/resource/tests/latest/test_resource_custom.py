@@ -259,6 +259,7 @@ class TestCustom(unittest.TestCase):
     def test_feature_registration_warning_mentions_subscription_scope(self, logger_warning):
         for method_name, operation in [('register', register_feature), ('unregister', unregister_feature)]:
             with self.subTest(method_name=method_name):
+                logger_warning.reset_mock()
                 client = mock.Mock()
                 expected = object()
                 getattr(client, method_name).return_value = expected
@@ -268,12 +269,11 @@ class TestCustom(unittest.TestCase):
                 self.assertIs(result, expected)
                 getattr(client, method_name).assert_called_once_with(
                     'Microsoft.CognitiveServices', 'OpenAI.BlockedTools.web_search')
-
-        self.assertEqual(logger_warning.call_count, 2)
-        warning_message = logger_warning.call_args_list[0].args[0]
-        self.assertIn('current default subscription', warning_message)
-        self.assertIn('--subscription', warning_message)
-        self.assertIn('az account set', warning_message)
+                logger_warning.assert_called_once()
+                warning_message = logger_warning.call_args.args[0]
+                self.assertIn('current default subscription', warning_message)
+                self.assertIn('--subscription', warning_message)
+                self.assertIn('az account set', warning_message)
 
     def test_provider_register_help_mentions_subscription_scope(self):
         help_text = helps['provider register']
