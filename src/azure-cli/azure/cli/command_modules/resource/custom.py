@@ -3460,16 +3460,16 @@ def list_features(client, resource_provider_namespace=None):
 
 def register_feature(client, resource_provider_namespace, feature_name):
     logger.warning("Once the feature '%s' is registered, invoke 'az provider register -n %s' in the current "
-                   "default subscription to get the change propagated. Use '--subscription' or run "
-                   "'az account set' first if you need to target a different subscription.",
+                   "default subscription to get the change propagated. Use '--subscription' or "
+                   "'az account set' to change the default subscription if you need to target another one.",
                    feature_name, resource_provider_namespace)
     return client.register(resource_provider_namespace, feature_name)
 
 
 def unregister_feature(client, resource_provider_namespace, feature_name):
     logger.warning("Once the feature '%s' is unregistered, invoke 'az provider register -n %s' in the current "
-                   "default subscription to get the change propagated. Use '--subscription' or run "
-                   "'az account set' first if you need to target a different subscription.",
+                   "default subscription to get the change propagated. Use '--subscription' or "
+                   "'az account set' to change the default subscription if you need to target another one.",
                    feature_name, resource_provider_namespace)
     return client.unregister(resource_provider_namespace, feature_name)
 

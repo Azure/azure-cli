@@ -276,6 +276,7 @@ class TestCustom(unittest.TestCase):
                 self.assertIn('az account set', warning_message)
 
     def test_provider_register_help_mentions_subscription_scope(self):
+        self.assertIn('provider register', helps)
         help_text = helps['provider register']
         self.assertIn('current default subscription', help_text)
         self.assertIn('`--subscription`', help_text)
