@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from dateutil import parser
 import re
+import ipaddress
 from knack.util import CLIError
 from knack.log import get_logger
 from azure.mgmt.core.tools import parse_resource_id, resource_id, is_valid_resource_id, is_valid_resource_name
@@ -379,14 +380,8 @@ def public_access_validator(ns):
 
 
 def _validate_start_and_end_ip_address_order(start_ip, end_ip):
-    start_ip_elements = start_ip.split('.')
-    end_ip_elements = end_ip.split('.')
-
-    for idx in range(4):
-        if start_ip_elements[idx] < end_ip_elements[idx]:
-            break
-        if start_ip_elements[idx] > end_ip_elements[idx]:
-            raise ArgumentUsageError("The end IP address is smaller than the start IP address.")
+    if ipaddress.ip_address(start_ip) > ipaddress.ip_address(end_ip):
+        raise ArgumentUsageError("The end IP address is smaller than the start IP address.")
 
 
 def _validate_ip(ips):

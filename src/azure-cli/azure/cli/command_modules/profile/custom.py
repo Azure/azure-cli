@@ -120,6 +120,18 @@ def account_clear(cmd):
     profile.logout_all()
 
 
+def _select_and_set_active(profile, subscriptions):
+    """Launch interactive subscription selector and set the chosen subscription as active."""
+    from ._subscription_selector import SubscriptionSelector
+    from azure.cli.core._profile import _SUBSCRIPTION_ID
+
+    selected = SubscriptionSelector(subscriptions)()
+    profile.set_active_subscription(selected[_SUBSCRIPTION_ID])
+
+    print(LOGIN_ANNOUNCEMENT)
+    logger.warning(LOGIN_OUTPUT_WARNING)
+
+
 # pylint: disable=too-many-branches, too-many-locals
 def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_subscriptions=False,
           claims_challenge=None,
@@ -128,7 +140,9 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
           # Service principal
           service_principal=None, certificate=None, use_cert_sn_issuer=None, client_assertion=None,
           # Managed identity
-          identity=False, client_id=None, object_id=None, resource_id=None):
+          identity=False, client_id=None, object_id=None, resource_id=None,
+          # Subscription discovery and default subscription selection control
+          skip_subscription_discovery=False, subscription=None):
     """Log in to access Azure subscriptions"""
 
     # quick argument usage check
@@ -143,6 +157,13 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
         raise CLIError("usage error: '--use-sn-issuer' is only applicable with a service principal")
     if service_principal and not username:
         raise CLIError('usage error: --service-principal --username NAME --password SECRET --tenant TENANT')
+    if skip_subscription_discovery and not tenant:
+        raise CLIError("usage error: '--skip-subscription-discovery' requires '--tenant'")
+    if skip_subscription_discovery and subscription:
+        from azure.cli.core.util import is_guid
+        if not is_guid(subscription):
+            raise CLIError("usage error: '--subscription' must be a subscription ID (GUID), not a name, "
+                           "when combined with '--skip-subscription-discovery'.")
     if username and not service_principal and not identity:
         if cmd.cli_ctx.cloud.endpoints.active_directory.startswith('https://login.microsoftonline.com'):
             logger.warning(USERNAME_PASSWORD_DEPRECATION_WARNING_AZURE_CLOUD)
@@ -187,7 +208,9 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
     from azure.cli.core.telemetry import set_login_experience_v2
     set_login_experience_v2(login_experience_v2)
 
-    select_subscription = interactive and sys.stdin.isatty() and sys.stdout.isatty() and login_experience_v2
+    can_show_selector = (interactive and sys.stdin.isatty() and sys.stdout.isatty() and
+                         login_experience_v2)
+    is_subscription_filter = bool(subscription or skip_subscription_discovery)
 
     subscriptions = profile.login(
         interactive,
@@ -199,20 +222,20 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
         use_device_code=use_device_code,
         allow_no_subscriptions=allow_no_subscriptions,
         use_cert_sn_issuer=use_cert_sn_issuer,
-        show_progress=select_subscription,
-        claims_challenge=claims_challenge
+        show_progress=can_show_selector and not skip_subscription_discovery,
+        claims_challenge=claims_challenge,
+        skip_subscription_discovery=skip_subscription_discovery,
+        subscription=subscription
     )
 
-    # Launch interactive account selection. No JSON output.
-    if select_subscription:
-        from ._subscription_selector import SubscriptionSelector
-        from azure.cli.core._profile import _SUBSCRIPTION_ID
+    # Filtered path (--subscription or --skip): show selector only when multiple matches
+    if can_show_selector and is_subscription_filter and len(subscriptions) > 1:
+        _select_and_set_active(profile, subscriptions)
+        return
 
-        selected = SubscriptionSelector(subscriptions)()
-        profile.set_active_subscription(selected[_SUBSCRIPTION_ID])
-
-        print(LOGIN_ANNOUNCEMENT)
-        logger.warning(LOGIN_OUTPUT_WARNING)
+    # Original no-filter path: always show selector (even 1 item) for backward compatibility
+    if can_show_selector and not is_subscription_filter:
+        _select_and_set_active(profile, subscriptions)
         return
 
     all_subscriptions = list(subscriptions)

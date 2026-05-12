@@ -16,9 +16,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-04-01",
+        "version": "2025-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/virtualmachinescalesets/{}", "2025-04-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/virtualmachinescalesets/{}", "2025-11-01"],
         ]
     }
 
@@ -225,6 +225,11 @@ class Create(AAZCommand):
             arg_group="Properties",
             help="When Overprovision is enabled, extensions are launched only on the requested number of VMs which are finally kept. This property will hence ensure that the extensions do not run on the extra overprovisioned VMs.",
         )
+        _args_schema.external_health_policy = AAZObjectArg(
+            options=["--external-health-policy"],
+            arg_group="Properties",
+            help="Specifies the external health policy for the virtual machine scale set.",
+        )
         _args_schema.high_speed_interconnect_placement = AAZStrArg(
             options=["--high-speed-interconnect-placement"],
             arg_group="Properties",
@@ -237,6 +242,11 @@ class Create(AAZCommand):
             help="Specifies information about the dedicated host group that the virtual machine scale set resides in. Minimum api-version: 2020-06-01.",
         )
         cls._build_args_sub_resource_create(_args_schema.host_group)
+        _args_schema.lifecycle_hooks_profile = AAZObjectArg(
+            options=["--lifecycle-hooks-profile"],
+            arg_group="Properties",
+            help="Specifies the lifecycle hooks profile for the virtual machine scale set.",
+        )
         _args_schema.orchestration_mode = AAZStrArg(
             options=["--orchestration-mode"],
             arg_group="Properties",
@@ -308,7 +318,7 @@ class Create(AAZCommand):
             options=["--zonal-platform-fault-domain-align-mode"],
             arg_group="Properties",
             help="Specifies the align mode between Virtual Machine Scale Set compute and storage Fault Domain count.",
-            enum={"Aligned": "Aligned", "Unaligned": "Unaligned"},
+            enum={"Aligned": "Aligned", "BestEffortAligned": "BestEffortAligned", "Unaligned": "Unaligned"},
         )
         _args_schema.zone_balance = AAZBoolArg(
             options=["--zone-balance"],
@@ -345,6 +355,45 @@ class Create(AAZCommand):
             enum={"Reimage": "Reimage", "Replace": "Replace", "Restart": "Restart"},
         )
 
+        external_health_policy = cls._args_schema.external_health_policy
+        external_health_policy.enabled = AAZBoolArg(
+            options=["enabled"],
+            help="If true, external health is enabled for this scale set. Cannot be set to true on instances where another health monitoring source is active (ApplicationHealth extension or SLB). Defaults to false.",
+        )
+        external_health_policy.expiry_duration = AAZDurationArg(
+            options=["expiry-duration"],
+            help="Defines how long the health status set by External Health API will last on the VM. If a signal is not received/updated within this time, the VM Health will be marked as \"unknown\". Uses the ISO 8601 format. Minimum: 5 minutes (PT5M), Maximum: 3 hours (PT3H).",
+        )
+        external_health_policy.grace_period = AAZDurationArg(
+            options=["grace-period"],
+            help="Grace period for newly created VMs or when the External Health policy is first applied on VMSS. Uses the ISO 8601 format. Minimum: 5 minutes (PT5M), Maximum: 4 hours (PT4H).",
+        )
+
+        lifecycle_hooks_profile = cls._args_schema.lifecycle_hooks_profile
+        lifecycle_hooks_profile.lifecycle_hooks = AAZListArg(
+            options=["lifecycle-hooks"],
+            help="Specifies the lifecycle hooks configured for the virtual machine scale set.",
+        )
+
+        lifecycle_hooks = cls._args_schema.lifecycle_hooks_profile.lifecycle_hooks
+        lifecycle_hooks.Element = AAZObjectArg()
+
+        _element = cls._args_schema.lifecycle_hooks_profile.lifecycle_hooks.Element
+        _element.default_action = AAZStrArg(
+            options=["default-action"],
+            help="Specifies the action that will be applied to a target resource in the virtual machine scale set lifecycle hook event if the platform does not receive a response from the customer for the target resource before waitUntil.",
+            enum={"Approve": "Approve", "Reject": "Reject"},
+        )
+        _element.type = AAZStrArg(
+            options=["type"],
+            help="Specifies the type of the lifecycle hook.",
+            enum={"UpgradeAutoOSRollingBatchStarting": "UpgradeAutoOSRollingBatchStarting", "UpgradeAutoOSScheduling": "UpgradeAutoOSScheduling"},
+        )
+        _element.wait_duration = AAZDurationArg(
+            options=["wait-duration"],
+            help="Specifies the time duration a virtual machine scale set lifecycle hook event sent to the customer waits for a response from the customer. It should be in ISO 8601 format.",
+        )
+
         priority_mix_policy = cls._args_schema.priority_mix_policy
         priority_mix_policy.base_regular_priority_count = AAZIntArg(
             options=["base-regular-priority-count"],
@@ -362,6 +411,10 @@ class Create(AAZCommand):
         resiliency_policy.automatic_zone_rebalancing_policy = AAZObjectArg(
             options=["automatic-zone-rebalancing-policy"],
             help="The configuration parameters used while performing automatic AZ balancing.",
+        )
+        resiliency_policy.operation_recovery_settings = AAZObjectArg(
+            options=["operation-recovery-settings"],
+            help="The configuration parameters used for operation recovery settings.",
         )
         resiliency_policy.resilient_vm_creation_policy = AAZObjectArg(
             options=["resilient-vm-creation-policy"],
@@ -390,6 +443,38 @@ class Create(AAZCommand):
             options=["rebalance-strategy"],
             help="Type of rebalance strategy that will be used for rebalancing virtual machines in the scale set across availability zones. Default and only supported value for now is Recreate.",
             enum={"Recreate": "Recreate"},
+        )
+
+        operation_recovery_settings = cls._args_schema.resiliency_policy.operation_recovery_settings
+        operation_recovery_settings.reimage_recovery_policy = AAZObjectArg(
+            options=["reimage-recovery-policy"],
+            help="The configuration parameters used for reimage recovery policy.",
+        )
+        operation_recovery_settings.restart_recovery_policy = AAZObjectArg(
+            options=["restart-recovery-policy"],
+            help="The configuration parameters used for restart recovery policy.",
+        )
+        operation_recovery_settings.start_recovery_policy = AAZObjectArg(
+            options=["start-recovery-policy"],
+            help="The configuration parameters used for start recovery policy.",
+        )
+
+        reimage_recovery_policy = cls._args_schema.resiliency_policy.operation_recovery_settings.reimage_recovery_policy
+        reimage_recovery_policy.enabled = AAZBoolArg(
+            options=["enabled"],
+            help="Specifies whether reimage recovery should be enabled. The default value is false.",
+        )
+
+        restart_recovery_policy = cls._args_schema.resiliency_policy.operation_recovery_settings.restart_recovery_policy
+        restart_recovery_policy.enabled = AAZBoolArg(
+            options=["enabled"],
+            help="Specifies whether restart recovery should be enabled. The default value is false.",
+        )
+
+        start_recovery_policy = cls._args_schema.resiliency_policy.operation_recovery_settings.start_recovery_policy
+        start_recovery_policy.enabled = AAZBoolArg(
+            options=["enabled"],
+            help="Specifies whether start recovery should be enabled. The default value is false.",
         )
 
         resilient_vm_creation_policy = cls._args_schema.resiliency_policy.resilient_vm_creation_policy
@@ -1377,7 +1462,7 @@ class Create(AAZCommand):
         security_profile.security_type = AAZStrArg(
             options=["security-type"],
             help="Specifies the SecurityType of the virtual machine. It has to be set to any specified value to enable UefiSettings. The default behavior is: UefiSettings will not be enabled unless this property is set.",
-            enum={"ConfidentialVM": "ConfidentialVM", "TrustedLaunch": "TrustedLaunch"},
+            enum={"ConfidentialVM": "ConfidentialVM", "Standard": "Standard", "TrustedLaunch": "TrustedLaunch"},
         )
         security_profile.uefi_settings = AAZObjectArg(
             options=["uefi-settings"],
@@ -1500,6 +1585,11 @@ class Create(AAZCommand):
             options=["name"],
             help="The disk name.",
         )
+        _element.storage_fault_domain_alignment = AAZStrArg(
+            options=["storage-fault-domain-alignment"],
+            help="Specifies the storage fault domain alignment type for the disk.",
+            enum={"Aligned": "Aligned", "BestEffortAligned": "BestEffortAligned"},
+        )
         _element.write_accelerator_enabled = AAZBoolArg(
             options=["write-accelerator-enabled"],
             help="Specifies whether writeAccelerator should be enabled or disabled on the disk.",
@@ -1578,6 +1668,11 @@ class Create(AAZCommand):
             help="This property allows you to specify the type of the OS that is included in the disk if creating a VM from user-image or a specialized VHD. Possible values are: **Windows,** **Linux.**",
             enum={"Linux": "Linux", "Windows": "Windows"},
         )
+        os_disk.storage_fault_domain_alignment = AAZStrArg(
+            options=["storage-fault-domain-alignment"],
+            help="Specifies the storage fault domain alignment type for the disk.",
+            enum={"Aligned": "Aligned", "BestEffortAligned": "BestEffortAligned"},
+        )
         os_disk.vhd_containers = AAZListArg(
             options=["vhd-containers"],
             help="Specifies the container urls that are used to store operating system disks for the scale set.",
@@ -1588,6 +1683,10 @@ class Create(AAZCommand):
         )
 
         diff_disk_settings = cls._args_schema.virtual_machine_profile.storage_profile.os_disk.diff_disk_settings
+        diff_disk_settings.enable_full_caching = AAZBoolArg(
+            options=["enable-full-caching"],
+            help="Specifies whether or not to enable full caching for this VM which will cache the OS disk locally on the host and make this VM more resilient to storage outages",
+        )
         diff_disk_settings.option = AAZStrArg(
             options=["option"],
             help="Specifies the ephemeral disk settings for operating system disk.",
@@ -1813,7 +1912,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-04-01",
+                    "api-version", "2025-11-01",
                     required=True,
                 ),
             }
@@ -1901,8 +2000,10 @@ class Create(AAZCommand):
                 properties.set_prop("automaticRepairsPolicy", AAZObjectType, ".automatic_repairs_policy")
                 properties.set_prop("constrainedMaximumCapacity", AAZBoolType, ".constrained_maximum_capacity")
                 properties.set_prop("doNotRunExtensionsOnOverprovisionedVMs", AAZBoolType, ".do_not_run_extensions_on_overprovisioned_v_ms")
+                properties.set_prop("externalHealthPolicy", AAZObjectType, ".external_health_policy")
                 properties.set_prop("highSpeedInterconnectPlacement", AAZStrType, ".high_speed_interconnect_placement")
                 _CreateHelper._build_schema_sub_resource_create(properties.set_prop("hostGroup", AAZObjectType, ".host_group"))
+                properties.set_prop("lifecycleHooksProfile", AAZObjectType, ".lifecycle_hooks_profile")
                 properties.set_prop("orchestrationMode", AAZStrType, ".orchestration_mode")
                 properties.set_prop("overprovision", AAZBoolType, ".overprovision")
                 properties.set_prop("platformFaultDomainCount", AAZIntType, ".platform_fault_domain_count")
@@ -1931,6 +2032,26 @@ class Create(AAZCommand):
                 automatic_repairs_policy.set_prop("gracePeriod", AAZStrType, ".grace_period")
                 automatic_repairs_policy.set_prop("repairAction", AAZStrType, ".repair_action")
 
+            external_health_policy = _builder.get(".properties.externalHealthPolicy")
+            if external_health_policy is not None:
+                external_health_policy.set_prop("enabled", AAZBoolType, ".enabled")
+                external_health_policy.set_prop("expiryDuration", AAZStrType, ".expiry_duration")
+                external_health_policy.set_prop("gracePeriod", AAZStrType, ".grace_period")
+
+            lifecycle_hooks_profile = _builder.get(".properties.lifecycleHooksProfile")
+            if lifecycle_hooks_profile is not None:
+                lifecycle_hooks_profile.set_prop("lifecycleHooks", AAZListType, ".lifecycle_hooks")
+
+            lifecycle_hooks = _builder.get(".properties.lifecycleHooksProfile.lifecycleHooks")
+            if lifecycle_hooks is not None:
+                lifecycle_hooks.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.lifecycleHooksProfile.lifecycleHooks[]")
+            if _elements is not None:
+                _elements.set_prop("defaultAction", AAZStrType, ".default_action")
+                _elements.set_prop("type", AAZStrType, ".type")
+                _elements.set_prop("waitDuration", AAZStrType, ".wait_duration")
+
             priority_mix_policy = _builder.get(".properties.priorityMixPolicy")
             if priority_mix_policy is not None:
                 priority_mix_policy.set_prop("baseRegularPriorityCount", AAZIntType, ".base_regular_priority_count")
@@ -1939,6 +2060,7 @@ class Create(AAZCommand):
             resiliency_policy = _builder.get(".properties.resiliencyPolicy")
             if resiliency_policy is not None:
                 resiliency_policy.set_prop("automaticZoneRebalancingPolicy", AAZObjectType, ".automatic_zone_rebalancing_policy")
+                resiliency_policy.set_prop("operationRecoverySettings", AAZObjectType, ".operation_recovery_settings")
                 resiliency_policy.set_prop("resilientVMCreationPolicy", AAZObjectType, ".resilient_vm_creation_policy")
                 resiliency_policy.set_prop("resilientVMDeletionPolicy", AAZObjectType, ".resilient_vm_deletion_policy")
                 resiliency_policy.set_prop("zoneAllocationPolicy", AAZObjectType, ".zone_allocation_policy")
@@ -1948,6 +2070,24 @@ class Create(AAZCommand):
                 automatic_zone_rebalancing_policy.set_prop("enabled", AAZBoolType, ".enabled")
                 automatic_zone_rebalancing_policy.set_prop("rebalanceBehavior", AAZStrType, ".rebalance_behavior")
                 automatic_zone_rebalancing_policy.set_prop("rebalanceStrategy", AAZStrType, ".rebalance_strategy")
+
+            operation_recovery_settings = _builder.get(".properties.resiliencyPolicy.operationRecoverySettings")
+            if operation_recovery_settings is not None:
+                operation_recovery_settings.set_prop("reimageRecoveryPolicy", AAZObjectType, ".reimage_recovery_policy")
+                operation_recovery_settings.set_prop("restartRecoveryPolicy", AAZObjectType, ".restart_recovery_policy")
+                operation_recovery_settings.set_prop("startRecoveryPolicy", AAZObjectType, ".start_recovery_policy")
+
+            reimage_recovery_policy = _builder.get(".properties.resiliencyPolicy.operationRecoverySettings.reimageRecoveryPolicy")
+            if reimage_recovery_policy is not None:
+                reimage_recovery_policy.set_prop("enabled", AAZBoolType, ".enabled")
+
+            restart_recovery_policy = _builder.get(".properties.resiliencyPolicy.operationRecoverySettings.restartRecoveryPolicy")
+            if restart_recovery_policy is not None:
+                restart_recovery_policy.set_prop("enabled", AAZBoolType, ".enabled")
+
+            start_recovery_policy = _builder.get(".properties.resiliencyPolicy.operationRecoverySettings.startRecoveryPolicy")
+            if start_recovery_policy is not None:
+                start_recovery_policy.set_prop("enabled", AAZBoolType, ".enabled")
 
             resilient_vm_creation_policy = _builder.get(".properties.resiliencyPolicy.resilientVMCreationPolicy")
             if resilient_vm_creation_policy is not None:
@@ -2449,6 +2589,7 @@ class Create(AAZCommand):
                 _elements.set_prop("lun", AAZIntType, ".lun", typ_kwargs={"flags": {"required": True}})
                 _CreateHelper._build_schema_virtual_machine_scale_set_managed_disk_parameters_create(_elements.set_prop("managedDisk", AAZObjectType, ".managed_disk"))
                 _elements.set_prop("name", AAZStrType, ".name")
+                _elements.set_prop("storageFaultDomainAlignment", AAZStrType, ".storage_fault_domain_alignment")
                 _elements.set_prop("writeAcceleratorEnabled", AAZBoolType, ".write_accelerator_enabled")
 
             image_reference = _builder.get(".properties.virtualMachineProfile.storageProfile.imageReference")
@@ -2472,11 +2613,13 @@ class Create(AAZCommand):
                 _CreateHelper._build_schema_virtual_machine_scale_set_managed_disk_parameters_create(os_disk.set_prop("managedDisk", AAZObjectType, ".managed_disk"))
                 os_disk.set_prop("name", AAZStrType, ".name")
                 os_disk.set_prop("osType", AAZStrType, ".os_type")
+                os_disk.set_prop("storageFaultDomainAlignment", AAZStrType, ".storage_fault_domain_alignment")
                 os_disk.set_prop("vhdContainers", AAZListType, ".vhd_containers")
                 os_disk.set_prop("writeAcceleratorEnabled", AAZBoolType, ".write_accelerator_enabled")
 
             diff_disk_settings = _builder.get(".properties.virtualMachineProfile.storageProfile.osDisk.diffDiskSettings")
             if diff_disk_settings is not None:
+                diff_disk_settings.set_prop("enableFullCaching", AAZBoolType, ".enable_full_caching")
                 diff_disk_settings.set_prop("option", AAZStrType, ".option")
                 diff_disk_settings.set_prop("placement", AAZStrType, ".placement")
 
@@ -2623,6 +2766,9 @@ class Create(AAZCommand):
             properties.do_not_run_extensions_on_overprovisioned_v_ms = AAZBoolType(
                 serialized_name="doNotRunExtensionsOnOverprovisionedVMs",
             )
+            properties.external_health_policy = AAZObjectType(
+                serialized_name="externalHealthPolicy",
+            )
             properties.high_speed_interconnect_placement = AAZStrType(
                 serialized_name="highSpeedInterconnectPlacement",
             )
@@ -2630,6 +2776,9 @@ class Create(AAZCommand):
                 serialized_name="hostGroup",
             )
             _CreateHelper._build_schema_sub_resource_read(properties.host_group)
+            properties.lifecycle_hooks_profile = AAZObjectType(
+                serialized_name="lifecycleHooksProfile",
+            )
             properties.orchestration_mode = AAZStrType(
                 serialized_name="orchestrationMode",
             )
@@ -2707,6 +2856,32 @@ class Create(AAZCommand):
                 serialized_name="repairAction",
             )
 
+            external_health_policy = cls._schema_on_200_201.properties.external_health_policy
+            external_health_policy.enabled = AAZBoolType()
+            external_health_policy.expiry_duration = AAZStrType(
+                serialized_name="expiryDuration",
+            )
+            external_health_policy.grace_period = AAZStrType(
+                serialized_name="gracePeriod",
+            )
+
+            lifecycle_hooks_profile = cls._schema_on_200_201.properties.lifecycle_hooks_profile
+            lifecycle_hooks_profile.lifecycle_hooks = AAZListType(
+                serialized_name="lifecycleHooks",
+            )
+
+            lifecycle_hooks = cls._schema_on_200_201.properties.lifecycle_hooks_profile.lifecycle_hooks
+            lifecycle_hooks.Element = AAZObjectType()
+
+            _element = cls._schema_on_200_201.properties.lifecycle_hooks_profile.lifecycle_hooks.Element
+            _element.default_action = AAZStrType(
+                serialized_name="defaultAction",
+            )
+            _element.type = AAZStrType()
+            _element.wait_duration = AAZStrType(
+                serialized_name="waitDuration",
+            )
+
             priority_mix_policy = cls._schema_on_200_201.properties.priority_mix_policy
             priority_mix_policy.base_regular_priority_count = AAZIntType(
                 serialized_name="baseRegularPriorityCount",
@@ -2718,6 +2893,9 @@ class Create(AAZCommand):
             resiliency_policy = cls._schema_on_200_201.properties.resiliency_policy
             resiliency_policy.automatic_zone_rebalancing_policy = AAZObjectType(
                 serialized_name="automaticZoneRebalancingPolicy",
+            )
+            resiliency_policy.operation_recovery_settings = AAZObjectType(
+                serialized_name="operationRecoverySettings",
             )
             resiliency_policy.resilient_vm_creation_policy = AAZObjectType(
                 serialized_name="resilientVMCreationPolicy",
@@ -2737,6 +2915,26 @@ class Create(AAZCommand):
             automatic_zone_rebalancing_policy.rebalance_strategy = AAZStrType(
                 serialized_name="rebalanceStrategy",
             )
+
+            operation_recovery_settings = cls._schema_on_200_201.properties.resiliency_policy.operation_recovery_settings
+            operation_recovery_settings.reimage_recovery_policy = AAZObjectType(
+                serialized_name="reimageRecoveryPolicy",
+            )
+            operation_recovery_settings.restart_recovery_policy = AAZObjectType(
+                serialized_name="restartRecoveryPolicy",
+            )
+            operation_recovery_settings.start_recovery_policy = AAZObjectType(
+                serialized_name="startRecoveryPolicy",
+            )
+
+            reimage_recovery_policy = cls._schema_on_200_201.properties.resiliency_policy.operation_recovery_settings.reimage_recovery_policy
+            reimage_recovery_policy.enabled = AAZBoolType()
+
+            restart_recovery_policy = cls._schema_on_200_201.properties.resiliency_policy.operation_recovery_settings.restart_recovery_policy
+            restart_recovery_policy.enabled = AAZBoolType()
+
+            start_recovery_policy = cls._schema_on_200_201.properties.resiliency_policy.operation_recovery_settings.start_recovery_policy
+            start_recovery_policy.enabled = AAZBoolType()
 
             resilient_vm_creation_policy = cls._schema_on_200_201.properties.resiliency_policy.resilient_vm_creation_policy
             resilient_vm_creation_policy.enabled = AAZBoolType()
@@ -3535,6 +3733,9 @@ class Create(AAZCommand):
             )
             _CreateHelper._build_schema_virtual_machine_scale_set_managed_disk_parameters_read(_element.managed_disk)
             _element.name = AAZStrType()
+            _element.storage_fault_domain_alignment = AAZStrType(
+                serialized_name="storageFaultDomainAlignment",
+            )
             _element.write_accelerator_enabled = AAZBoolType(
                 serialized_name="writeAcceleratorEnabled",
             )
@@ -3580,6 +3781,9 @@ class Create(AAZCommand):
             os_disk.os_type = AAZStrType(
                 serialized_name="osType",
             )
+            os_disk.storage_fault_domain_alignment = AAZStrType(
+                serialized_name="storageFaultDomainAlignment",
+            )
             os_disk.vhd_containers = AAZListType(
                 serialized_name="vhdContainers",
             )
@@ -3588,6 +3792,9 @@ class Create(AAZCommand):
             )
 
             diff_disk_settings = cls._schema_on_200_201.properties.virtual_machine_profile.storage_profile.os_disk.diff_disk_settings
+            diff_disk_settings.enable_full_caching = AAZBoolType(
+                serialized_name="enableFullCaching",
+            )
             diff_disk_settings.option = AAZStrType()
             diff_disk_settings.placement = AAZStrType()
 

@@ -17,7 +17,7 @@ from azure.cli.command_modules.postgresql.utils._flexible_server_util import get
 from azure.cli.command_modules.postgresql.utils._util import get_autonomous_tuning_settings_map
 from azure.cli.command_modules.postgresql.utils.validators import public_access_validator, maintenance_window_validator, ip_address_validator, \
     retention_validator, validate_identity, validate_byok_identity, validate_identities, \
-    virtual_endpoint_name_validator, node_count_validator, postgres_firewall_rule_name_validator, \
+    virtual_endpoint_name_validator, postgres_firewall_rule_name_validator, \
     db_renaming_cluster_validator
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction
 from .randomname.generate import generate_username
@@ -97,7 +97,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         database_name_arg_type_cluster = CLIArgumentType(
             metavar='NAME',
             options_list=['--database-name', '-d'],
-            help='The default database name for an elastic cluster. Only applicable when --cluster-option is set to ElasticCluster.',
+            help='The default database name for an elastic cluster. Only applicable when --node-count is present.',
             local_context_attribute=LocalContextAttribute(
                 name='database_name',
                 actions=[LocalContextAction.GET, LocalContextAction.SET],
@@ -146,25 +146,16 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                  'This value can only be updated if flexible server is using Premium SSD v2 Disks.'
         )
 
-        cluster_option_arg_type = CLIArgumentType(
-            arg_type=get_enum_type(['Server', 'ElasticCluster']),
-            options_list=['--cluster-option'],
-            help='Cluster option for the server. Servers are for workloads that can fit on one node. '
-                 'Elastic clusters provides schema- and row-based sharding on a database. Default value is Server.'
-        )
-
         create_node_count_arg_type = CLIArgumentType(
             type=int,
             options_list=['--node-count'],
-            help='The number of nodes for elastic cluster. Range of 1 to 10. Default is 2 nodes.',
-            validator=node_count_validator
+            help='The number of nodes for elastic cluster.'
         )
 
         update_node_count_arg_type = CLIArgumentType(
             type=int,
             options_list=['--node-count'],
-            help='The number of nodes for elastic cluster. Range of 1 to 10.',
-            validator=node_count_validator
+            help='The number of nodes for elastic cluster.'
         )
 
         auto_grow_arg_type = CLIArgumentType(
@@ -278,7 +269,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         )
 
         pg_version_upgrade_arg_type = CLIArgumentType(
-            arg_type=get_enum_type(['13', '14', '15', '16', '17', '18']),
             options_list=['--version', '-v'],
             help='Server major version.'
         )
@@ -410,7 +400,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('iops', default=None, arg_type=iops_v2_arg_type)
             c.argument('throughput', default=None, arg_type=throughput_arg_type)
             c.argument('performance_tier', default=None, arg_type=performance_tier_arg_type)
-            c.argument('create_cluster', default='Server', arg_type=cluster_option_arg_type)
             c.argument('cluster_size', default=None, arg_type=create_node_count_arg_type)
             c.argument('zonal_resiliency', arg_type=zonal_resiliency_arg_type, default="Disabled")
             c.argument('allow_same_zone', arg_type=allow_same_zone_arg_type, default=False)

@@ -5271,7 +5271,7 @@ class NetworkRouteTableOperationScenarioTest(ScenarioTest):
         ])
         self.cmd('network route-table route create --address-prefix 10.0.5.0/24 -n {route} -g {rg} --next-hop-type None --route-table-name {table}')
 
-        self.cmd('network route-table list',
+        self.cmd('network route-table list -g {rg}',
                  checks=self.check('type(@)', 'array'))
         self.cmd('network route-table list --resource-group {rg}', checks=[
             self.check('type(@)', 'array'),
@@ -5300,6 +5300,48 @@ class NetworkRouteTableOperationScenarioTest(ScenarioTest):
         self.cmd('network route-table delete --resource-group {rg} --name {table}')
         self.cmd('network route-table list --resource-group {rg}', checks=self.is_empty())
 
+    @ResourceGroupPreparer(name_prefix='cli_test_route_table_disable_peering', location='centraluseuap')
+    def test_network_route_table_disable_peering_route(self, resource_group):
+        self.kwargs.update({
+            'table': 'cli-test-rt-peering',
+        })
+
+        # create route table without --disable-peering-route (default None)
+        self.cmd('network route-table create -n {table} -g {rg}', checks=[
+            self.check('disablePeeringRoute', None)
+        ])
+
+        self.cmd('network route-table show -g {rg} -n {table}', checks=[
+            self.check('disablePeeringRoute', None)
+        ])
+
+        # update with --disable-peering-route All
+        self.cmd('network route-table update -n {table} -g {rg} --disable-peering-route All', checks=[
+            self.check('disablePeeringRoute', 'All')
+        ])
+
+        self.cmd('network route-table show -g {rg} -n {table}', checks=[
+            self.check('disablePeeringRoute', 'All')
+        ])
+
+        self.cmd('network route-table list -g {rg}', checks=[
+            self.check('[0].disablePeeringRoute', 'All')
+        ])
+
+        # create a new route table with --disable-peering-route All directly
+        self.kwargs['table2'] = 'cli-test-rt-peering2'
+        self.cmd('network route-table create -n {table2} -g {rg} --disable-peering-route All', checks=[
+            self.check('disablePeeringRoute', 'All')
+        ])
+
+        # update to reset --disable-peering-route to None
+        self.cmd('network route-table update -n {table2} -g {rg} --disable-peering-route None', checks=[
+            self.check('disablePeeringRoute', None)
+        ])
+
+        self.cmd('network route-table delete -g {rg} -n {table}')
+        self.cmd('network route-table delete -g {rg} -n {table2}')
+
 
 class NetworkVNetScenarioTest(ScenarioTest):
 
@@ -5324,7 +5366,7 @@ class NetworkVNetScenarioTest(ScenarioTest):
         self.cmd('network vnet check-ip-address -g {rg} -n {vnet} --ip-address 10.0.0.0',
                  checks=self.check('available', False))
 
-        self.cmd('network vnet list', checks=[
+        self.cmd('network vnet list -g {rg}', checks=[
             self.check('type(@)', 'array'),
             self.check("length([?type == '{rt}']) == length(@)", True)
         ])
@@ -5332,7 +5374,7 @@ class NetworkVNetScenarioTest(ScenarioTest):
             self.check('type(@)', 'array'),
             self.check("length([?type == '{rt}']) == length(@)", True),
         ])
-        self.cmd("network vnet list -o table")
+        self.cmd("network vnet list -o table -g {rg}")
         self.cmd('network vnet show --resource-group {rg} --name {vnet}', checks=[
             self.check('type(@)', 'object'),
             self.check('name', '{vnet}'),
@@ -5398,6 +5440,82 @@ class NetworkVNetScenarioTest(ScenarioTest):
             self.check('ipamPoolPrefixAllocations[0].numberOfIpAddresses', 5),
             self.check('ipamPoolPrefixAllocations[0].resourceGroup', '{rg}')
         ])
+
+    @live_only()
+    @ResourceGroupPreparer(name_prefix='cli_vnet_summarized_gw_ipam', location='centraluseuap')
+    @AllowLargeResponse(size_kb=99999)
+    def test_network_vnet_with_summarized_gateway_prefixes_ipam(self, resource_group, resource_group_location):
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'location': resource_group_location,
+            'manager': 'manager1',
+            'pool': 'pool1',
+            'vnet': 'vnet1',
+        })
+        self.cmd('extension add -n virtual-network-manager')
+        self.kwargs['sub_id'] = self.get_subscription_id()
+        self.cmd('network manager create -g {rg} -n {manager} -l {location} --scope-accesses "SecurityAdmin" "Connectivity" --network-manager-scopes subscriptions="/subscriptions/{sub_id}"')
+        self.kwargs['pool_id'] = self.cmd('network manager ipam-pool create --manager-name {manager} -g {rg} --name {pool} --address-prefix 10.1.0.0/16').get_output_in_json()['id']
+
+        self.cmd(
+            'network vnet create -g {rg} -n {vnet} --address-prefixes 10.0.0.0/16 '
+            '--summarized-gateway-prefixes ipam-pool-prefix-allocations="[{{id:{pool_id},number-of-ip-addresses:10}}]"',
+            checks=[
+                self.check('newVNet.provisioningState', 'Succeeded'),
+                self.check('newVNet.summarizedGatewayPrefixes.ipamPoolPrefixAllocations[0].id', '{pool_id}'),
+                self.check('newVNet.summarizedGatewayPrefixes.ipamPoolPrefixAllocations[0].numberOfIpAddresses', 10),
+            ]
+        )
+
+        self.cmd('network vnet show -g {rg} -n {vnet}', checks=[
+            self.check('summarizedGatewayPrefixes.ipamPoolPrefixAllocations[0].id', '{pool_id}'),
+            self.check('summarizedGatewayPrefixes.ipamPoolPrefixAllocations[0].numberOfIpAddresses', 10),
+        ])
+
+        self.cmd(
+            'network vnet update -g {rg} -n {vnet} --summarized-gateway-prefixes null',
+            checks=[
+                self.check('summarizedGatewayPrefixes', None),
+            ]
+        )
+
+    @ResourceGroupPreparer(name_prefix='cli_vnet_with_summarized_gw_prefixes', location='centraluseuap')
+    def test_network_vnet_with_summarized_gateway_prefixes(self, resource_group):
+
+        self.kwargs.update({
+            'vnet': 'vnet1',
+        })
+
+        self.cmd(
+            'network vnet create -g {rg} -n {vnet} --address-prefixes 10.0.0.0/16 '
+            '--summarized-gateway-prefixes address-prefixes="[10.0.0.0/16]"',
+            checks=[
+                self.check('newVNet.provisioningState', 'Succeeded'),
+                self.check('newVNet.summarizedGatewayPrefixes.addressPrefixes[0]', '10.0.0.0/16'),
+            ]
+        )
+
+        self.cmd('network vnet show -g {rg} -n {vnet}', checks=[
+            self.check('summarizedGatewayPrefixes.addressPrefixes[0]', '10.0.0.0/16'),
+        ])
+
+        self.cmd(
+            'network vnet update -g {rg} -n {vnet} '
+            '--summarized-gateway-prefixes address-prefixes="[10.0.0.0/16,10.1.0.0/16]"',
+            checks=[
+                self.check('summarizedGatewayPrefixes.addressPrefixes[0]', '10.0.0.0/16'),
+                self.check('summarizedGatewayPrefixes.addressPrefixes[1]', '10.1.0.0/16'),
+                self.check('length(summarizedGatewayPrefixes.addressPrefixes)', 2),
+            ]
+        )
+
+        self.cmd(
+            'network vnet update -g {rg} -n {vnet} --summarized-gateway-prefixes null',
+            checks=[
+                self.check('summarizedGatewayPrefixes', None),
+            ]
+        )
 
     @ResourceGroupPreparer(name_prefix='cli_vnet_with_subnet_nsg_test')
     def test_network_vnet_with_subnet_nsg(self, resource_group):

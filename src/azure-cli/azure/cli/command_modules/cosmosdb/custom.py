@@ -273,10 +273,21 @@ def _create_database_account(client,
         locations = []
         locations.append(Location(location_name=arm_location, failover_priority=0, is_zone_redundant=False))
 
-    for loc in locations:
-        if loc.failover_priority == 0:
-            arm_location = loc.location_name
-            break
+    # For cross-region restore (CRR), the caller intentionally passes
+    # arm_location set to the SOURCE region while locations[priority=0] is
+    # the TARGET region. The Cosmos ARM contract for restore requires the
+    # top-level `location` on DatabaseAccountCreateUpdateParameters to match
+    # the `restoreSource` URI region (the source). Overwriting arm_location
+    # with the priority-0 target here causes the backend to reject the
+    # request with "Location provided in 'restoreSource' does not match the
+    # location of the request" (BadRequest). Skip this normalization for
+    # restore requests; for regular create the loop preserves existing
+    # behavior of aligning arm_location with the priority-0 location.
+    if not is_restore_request:
+        for loc in locations:
+            if loc.failover_priority == 0:
+                arm_location = loc.location_name
+                break
 
     managed_service_identity = None
     SYSTEM_ID = '[system]'

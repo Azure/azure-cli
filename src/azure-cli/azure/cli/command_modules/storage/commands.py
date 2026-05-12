@@ -943,3 +943,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
     with self.command_group('storage account'):
         from .operations.account import FileServiceUsage
         self.command_table['storage account file-service-usage'] = FileServiceUsage(loader=self)
+
+    with self.command_group('storage advanced-platform-metric'):
+        from .operations.advanced_platform_metric import AdvancedPlatformMetricUpdate
+        self.command_table['storage advanced-platform-metric update'] = AdvancedPlatformMetricUpdate(loader=self)
