@@ -9680,9 +9680,10 @@ def _check_zip_deployment_status_flex(cmd, rg_name, name, deployment_status_url,
                     raise CLIError("Failed to retrieve deployment status. Please try again in a few minutes.")
             else:
                 res_json = response.json()
-                if res_json.get('status') is None and has_response:
+                res_status = res_json.get('status')
+                if res_status is None and has_response:
                     raise CLIError("Failed to retrieve deployment status. Please try again in a few minutes.")
-                if res_json.get('status') is not None and not has_response:
+                if res_status is not None and not has_response:
                     has_response = True
                 res_dict = res_json
         except json.decoder.JSONDecodeError:
