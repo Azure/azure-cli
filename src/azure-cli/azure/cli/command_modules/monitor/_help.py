@@ -625,3 +625,144 @@ examples:
     text: |
         az monitor clone --source-resource /subscriptions/{subscriptionID}/resourceGroups/Space1999/providers/Microsoft.Compute/virtualMachines/vm1 --target-resource /subscriptions/{subscriptionID}/resourceGroups/Space1999/providers/Microsoft.Compute/virtualMachines/vm2
 """
+
+helps['monitor diagnostic-settings subscription list'] = """
+type: command
+short-summary: List the active subscription diagnostic settings for a specified subscription.
+"""
+
+helps['monitor log-analytics workspace list-link-target'] = """
+type: command
+short-summary: List workspaces which the current user administers and are not linked to an Azure Subscription.
+parameters:
+  - name: --change-reference
+    short-summary: The related change reference ID for this resource operation.
+  - name: --acquire-policy-token
+    short-summary: Acquiring an Azure Policy token automatically for this resource operation.
+examples:
+  - name: List link targets with specific change reference ID
+    text: |
+        az monitor log-analytics workspace list-link-target --change-reference CHG12345
+  - name: List link targets and acquire Azure Policy token
+    text: |
+        az monitor log-analytics workspace list-link-target --acquire-policy-token
+"""
+
+helps['monitor activity-log list-categories'] = """
+type: command
+short-summary: List the available event categories in the Activity Logs Service.
+parameters:
+  - name: --change-reference
+    short-summary: The related change reference ID for this resource operation.
+  - name: --acquire-policy-token
+    short-summary: Acquiring an Azure Policy token automatically for this resource operation.
+examples:
+  - name: List event categories with a specific change reference
+    text: |
+        az monitor activity-log list-categories --change-reference MyChangeRefID
+  - name: List event categories while acquiring a policy token
+    text: |
+        az monitor activity-log list-categories --acquire-policy-token
+"""
+
+helps['monitor log-analytics workspace list-available-service-tier'] = """
+type: command
+short-summary: List the available service tiers for the workspace.
+parameters:
+  - name: --resource-group -g
+    short-summary: Name of resource group. You can configure the default group using `az configure --defaults group=<name>`
+  - name: --workspace-name -n
+    short-summary: The name of the workspace.
+examples:
+  - name: List available service tiers for a specific workspace
+    text: |
+        az monitor log-analytics workspace list-available-service-tier --resource-group MyResourceGroup --workspace-name MyWorkspace
+"""
+
+helps['monitor log-analytics workspace data-export list'] = """
+type: command
+short-summary: List all data export rules for a given workspace.
+parameters:
+  - name: --resource-group -g
+    short-summary: Name of resource group. You can configure the default group using `az configure --defaults group=<name>`
+  - name: --workspace-name
+    short-summary: The name of the workspace.
+examples:
+  - name: List all data export rules for a workspace
+    text: |
+      az monitor log-analytics workspace data-export list --resource-group MyResourceGroup --workspace-name MyWorkspace
+"""
+
+helps['monitor log-profiles list'] = """
+type: command
+short-summary: List the log profiles.
+examples:
+  - name: List all log profiles
+    text: |
+        az monitor log-profiles list
+"""
+
+helps['monitor action-group list'] = """
+type: command
+short-summary: List action groups under a resource group or the current subscription.
+parameters:
+  - name: --resource-group -g
+    short-summary: Name of resource group. You can configure the default group using `az configure --defaults group=<name>`
+examples:
+  - name: List all action groups in a specific resource group
+    text: |
+        az monitor action-group list --resource-group MyResourceGroup
+  - name: List all action groups in the current subscription
+    text: |
+        az monitor action-group list
+"""
+
+helps['monitor action-group delete'] = """
+type: command
+short-summary: Delete an action group.
+parameters:
+  - name: --change-reference
+    short-summary: The related change reference ID for this resource operation.
+  - name: --acquire-policy-token
+    short-summary: Acquiring an Azure Policy token automatically for this resource operation.
+  - name: --action-group-name --name -n
+    short-summary: The name of the action group.
+  - name: --resource-group -g
+    short-summary: Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.
+examples:
+  - name: Delete an action group in a specific resource group
+    text: |
+        az monitor action-group delete --action-group-name MyActionGroup --resource-group MyResourceGroup
+  - name: Delete an action group with change reference
+    text: |
+        az monitor action-group delete --action-group-name MyActionGroup --resource-group MyResourceGroup --change-reference 12345
+"""
+
+helps['monitor metrics alert show'] = """
+type: command
+short-summary: Show a metrics-based alert rule.
+parameters:
+  - name: --resource-group -g
+    short-summary: Name of resource group. You can configure the default group using `az configure --defaults group=<name>`
+  - name: --name -n
+    short-summary: Name of the alert rule.
+examples:
+  - name: Show a metrics-based alert rule.
+    text: |
+        az monitor metrics alert show --name MyAlertRule --resource-group MyResourceGroup
+"""
+
+helps['monitor log-analytics workspace list'] = """
+type: command
+short-summary: List workspaces under a resource group or a subscription.
+parameters:
+  - name: --resource-group -g
+    short-summary: Name of resource group. You can configure the default group using `az configure --defaults group=<name>`.
+examples:
+  - name: List all workspaces in a specific resource group
+    text: |
+        az monitor log-analytics workspace list --resource-group MyResourceGroup
+  - name: List all workspaces in the current subscription
+    text: |
+        az monitor log-analytics workspace list
+"""
