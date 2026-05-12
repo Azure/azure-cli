@@ -481,6 +481,11 @@ class TestExtensions(TestExtensionsBase):
                 warning_messages = [str(call) for call in mock_logger.warning.call_args_list]
                 self.assertTrue(any(extension_name in msg for msg in warning_messages))
 
+            # Verify the extension was successfully repaired/updated
+            ext = show_extension(extension_name)
+            self.assertEqual(ext['name'], extension_name)
+            self.assertEqual(ext['version'], '1.2.3')
+
     @mock.patch('sys.stdin.isatty', return_value=True)
     def test_ext_dynamic_install_config_tty(self, _):
         from azure.cli.core.extension.dynamic_install import _get_extension_use_dynamic_install_config
@@ -526,7 +531,7 @@ class TestWheelExtension(TestExtensionsBase):
     def test_wheel_get_version_with_none_metadata(self):
         """Test that get_version() returns None when metadata is None (e.g. corrupted/partial installation)."""
         ext = WheelExtension(EXT_NAME)
-        with mock.patch.object(type(ext), 'metadata', new_callable=lambda: property(lambda self: None)):
+        with mock.patch.object(type(ext), 'metadata', new_callable=mock.PropertyMock, return_value=None):
             self.assertIsNone(ext.get_version())
 
 
