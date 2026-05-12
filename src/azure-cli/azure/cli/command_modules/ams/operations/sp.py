@@ -214,7 +214,7 @@ def _resolve_role_id(cli_ctx, role, scope, definitions_client):
             role_id = '/subscriptions/{}/providers/Microsoft.Authorization/roleDefinitions/{}'.format(
                 subscription_id, role)
         if not role_id:  # retrieve role id
-            role_defs = list(definitions_client.list(scope, "roleName eq '{}'".format(role)))
+            role_defs = list(definitions_client.list(scope, filter="roleName eq '{}'".format(role)))
 
             if not role_defs:
                 raise CLIError("Role '{}' doesn't exist.".format(role))

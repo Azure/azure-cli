@@ -18,11 +18,12 @@ import json
 import os
 import re
 import uuid
+from enum import Enum as _Enum
 
 import dateutil.parser
 from dateutil.relativedelta import relativedelta
 from knack.log import get_logger
-from knack.util import CLIError, todict
+from knack.util import CLIError
 from azure.core.exceptions import HttpResponseError
 
 from azure.cli.core.profiles import ResourceType, get_sdk
@@ -31,6 +32,128 @@ from azure.cli.core.azclierror import ArgumentUsageError
 
 from ._client_factory import _auth_client_factory, _graph_client_factory
 from ._msgrpah import GraphError, set_object_properties
+
+# ----------------------------------------------------------------------------
+# SDK shape adapters
+# ----------------------------------------------------------------------------
+# In azure-mgmt-authorization 5.x (TypeSpec-generated), RoleAssignment and DenyAssignment
+# wrap their domain attributes in a nested ``properties`` envelope. The Track 1 SDK shape
+# previously exposed everything at the top level, and downstream code (this module, table
+# transformers, scenario tests) assumes that flat shape. ``knack.util.todict`` does not
+# walk these new MutableMapping models (it inspects ``__dict__``), so we need explicit
+# adapters to project them back to the legacy flat camelCase shape.
+
+def _coerce(value):
+    """Best-effort coerce an SDK attribute value to a JSON-safe scalar/list."""
+    if value is None:
+        return None
+    if isinstance(value, _Enum):
+        return value.value
+    if isinstance(value, list):
+        return [_coerce(v) for v in value]
+    if isinstance(value, datetime.datetime):
+        return value.isoformat()
+    return value
+
+
+_RA_FLAT_KEYS = (
+    ('scope', 'scope'),
+    ('role_definition_id', 'roleDefinitionId'),
+    ('principal_id', 'principalId'),
+    ('principal_type', 'principalType'),
+    ('description', 'description'),
+    ('condition', 'condition'),
+    ('condition_version', 'conditionVersion'),
+    ('created_on', 'createdOn'),
+    ('updated_on', 'updatedOn'),
+    ('created_by', 'createdBy'),
+    ('updated_by', 'updatedBy'),
+    ('delegated_managed_identity_resource_id', 'delegatedManagedIdentityResourceId'),
+)
+
+
+def _role_assignment_to_dict(ra):
+    """Project a TypeSpec-generated RoleAssignment model to the legacy flat camelCase dict."""
+    if ra is None:
+        return None
+    result = {}
+    for attr in ('id', 'name', 'type'):
+        value = getattr(ra, attr, None)
+        if value is not None:
+            result[attr] = _coerce(value)
+    for snake_attr, camel_key in _RA_FLAT_KEYS:
+        value = getattr(ra, snake_attr, None)
+        if value is not None:
+            result[camel_key] = _coerce(value)
+    return result
+
+
+_DA_FLAT_KEYS = (
+    ('deny_assignment_name', 'denyAssignmentName'),
+    ('description', 'description'),
+    ('scope', 'scope'),
+    ('do_not_apply_to_child_scopes', 'doNotApplyToChildScopes'),
+    ('is_system_protected', 'isSystemProtected'),
+    ('deny_assignment_effect', 'denyAssignmentEffect'),
+    ('condition', 'condition'),
+    ('condition_version', 'conditionVersion'),
+    ('created_on', 'createdOn'),
+    ('updated_on', 'updatedOn'),
+    ('created_by', 'createdBy'),
+    ('updated_by', 'updatedBy'),
+)
+
+
+def _deny_assignment_principal_to_dict(p):
+    if p is None:
+        return None
+    out = {}
+    for attr, key in (('id', 'id'), ('type', 'type'), ('display_name', 'displayName'),
+                      ('email', 'email'), ('principal_type', 'principalType'),
+                      ('object_type', 'objectType')):
+        value = getattr(p, attr, None)
+        if value is not None:
+            out[key] = _coerce(value)
+    return out
+
+
+def _deny_assignment_permission_to_dict(perm):
+    if perm is None:
+        return None
+    out = {}
+    for attr, key in (('actions', 'actions'), ('not_actions', 'notActions'),
+                      ('data_actions', 'dataActions'), ('not_data_actions', 'notDataActions'),
+                      ('condition', 'condition'), ('condition_version', 'conditionVersion')):
+        value = getattr(perm, attr, None)
+        if value is not None:
+            out[key] = _coerce(value)
+    return out
+
+
+def _deny_assignment_to_dict(da):
+    """Project a TypeSpec-generated DenyAssignment model to the legacy flat camelCase dict."""
+    if da is None:
+        return None
+    result = {}
+    for attr in ('id', 'name', 'type'):
+        value = getattr(da, attr, None)
+        if value is not None:
+            result[attr] = _coerce(value)
+    for snake_attr, camel_key in _DA_FLAT_KEYS:
+        value = getattr(da, snake_attr, None)
+        if value is not None:
+            result[camel_key] = _coerce(value)
+    permissions = getattr(da, 'permissions', None)
+    if permissions is not None:
+        result['permissions'] = [_deny_assignment_permission_to_dict(p) for p in permissions]
+    principals = getattr(da, 'principals', None)
+    if principals is not None:
+        result['principals'] = [_deny_assignment_principal_to_dict(p) for p in principals]
+    excludes = getattr(da, 'exclude_principals', None)
+    if excludes is not None:
+        result['excludePrincipals'] = [_deny_assignment_principal_to_dict(p) for p in excludes]
+    return result
+
 
 # ARM RBAC's principalType
 USER = 'User'
@@ -253,7 +376,10 @@ def list_role_assignments(cmd,  # pylint: disable=too-many-locals, too-many-bran
                                            scope, assignee_object_id, role,
                                            include_inherited, include_groups)
 
-    results = todict(assignments) if assignments else []
+    # In azure-mgmt-authorization 5.x the SDK models nest properties under a ``properties``
+    # field and ``knack.util.todict`` does not walk MutableMapping models, so use the
+    # explicit adapter to keep the legacy flat camelCase shape downstream code expects.
+    results = [_role_assignment_to_dict(ra) for ra in assignments] if assignments else []
 
     if not results:
         return []
@@ -294,13 +420,26 @@ def update_role_assignment(cmd, role_assignment):
     else:
         role_assignment = shell_safe_json_parse(role_assignment)
 
-    RoleAssignment = get_sdk(cmd.cli_ctx, ResourceType.MGMT_AUTHORIZATION, 'RoleAssignment', mod='models',
-                             operation_group='role_assignments')
-    # In azure-mgmt-authorization 5.x (TypeSpec-generated), the new Model base class
-    # accepts a JSON mapping directly via __init__ and no longer exposes from_dict.
-    assignment = RoleAssignment(role_assignment)
-    scope = assignment.scope
-    name = assignment.name
+    if not isinstance(role_assignment, dict):
+        raise CLIError("--role-assignment must be a JSON object.")
+
+    # The user supplies the legacy flat camelCase shape (typically the output of
+    # ``az role assignment create`` or ``... show``). Read the resource address from
+    # there directly. The new TypeSpec-generated SDK does not reliably surface these
+    # fields when the model is constructed from a flat dict, so don't round-trip
+    # through ``RoleAssignment(...)`` to extract them.
+    scope = role_assignment.get('scope')
+    name = role_assignment.get('name')
+    if not scope or not name:
+        raise CLIError("'scope' and 'name' are required in the role assignment JSON.")
+
+    new_principal_type = role_assignment.get('principalType')
+    new_condition = role_assignment.get('condition')
+    new_condition_version = role_assignment.get('conditionVersion')
+    new_description = role_assignment.get('description')
+    new_role_definition_id = role_assignment.get('roleDefinitionId')
+    new_principal_id = role_assignment.get('principalId')
+    new_delegated_id = role_assignment.get('delegatedManagedIdentityResourceId')
 
     auth_client = _auth_client_factory(cmd.cli_ctx, scope)
     assignments_client = auth_client.role_assignments
@@ -310,14 +449,36 @@ def update_role_assignment(cmd, role_assignment):
 
     # Forbid condition version downgrading.
     # This should be implemented on the service-side in the future.
-    if (assignment.condition_version and original_assignment.condition_version and
-            original_assignment.condition_version.startswith('2.') and assignment.condition_version.startswith('1.')):
+    if (new_condition_version and original_assignment.condition_version and
+            original_assignment.condition_version.startswith('2.') and
+            new_condition_version.startswith('1.')):
         raise CLIError("Condition version cannot be downgraded to '1.X'.")
 
-    if not assignment.principal_type:
-        assignment.principal_type = original_assignment.principal_type
+    # PUT semantics: build a complete properties body, defaulting any field the user
+    # did not include to the existing value.
+    properties_body = {
+        'roleDefinitionId': new_role_definition_id or original_assignment.role_definition_id,
+        'principalId': new_principal_id or original_assignment.principal_id,
+        'principalType': new_principal_type or original_assignment.principal_type,
+        'description': new_description if new_description is not None
+        else original_assignment.description,
+        'condition': new_condition if new_condition is not None
+        else original_assignment.condition,
+        'conditionVersion': new_condition_version if new_condition_version is not None
+        else original_assignment.condition_version,
+    }
+    if new_delegated_id is not None or original_assignment.delegated_managed_identity_resource_id:
+        properties_body['delegatedManagedIdentityResourceId'] = (
+            new_delegated_id or original_assignment.delegated_managed_identity_resource_id)
 
-    return assignments_client.create(scope, name, parameters=assignment)
+    # Strip None values so we don't clobber server defaults with explicit nulls.
+    properties_body = {k: v for k, v in properties_body.items() if v is not None}
+
+    # The .create() overload accepts a JSON dict directly via the {"properties": {...}}
+    # envelope - simpler than wrapping in RoleAssignmentCreateParameters and avoids the
+    # flatten/unflatten gymnastics of the new TypeSpec models.
+    return _role_assignment_to_dict(
+        assignments_client.create(scope, name, parameters={'properties': properties_body}))
 
 
 def _get_assignment_events(cli_ctx, start_time=None, end_time=None):
@@ -562,7 +723,7 @@ def list_deny_assignments(cmd, scope=None, filter_str=None):
     else:
         assignments = list(deny_client.list(filter=filter_str))
 
-    return todict(assignments) if assignments else []
+    return [_deny_assignment_to_dict(da) for da in assignments] if assignments else []
 
 
 def show_deny_assignment(cmd, deny_assignment_id=None, deny_assignment_name=None, scope=None):
@@ -575,8 +736,9 @@ def show_deny_assignment(cmd, deny_assignment_id=None, deny_assignment_name=None
     deny_client = authorization_client.deny_assignments
 
     if deny_assignment_id:
-        return deny_client.get_by_id(deny_assignment_id)
-    return deny_client.get(scope=scope, deny_assignment_id=deny_assignment_name)
+        return _deny_assignment_to_dict(deny_client.get_by_id(deny_assignment_id))
+    return _deny_assignment_to_dict(
+        deny_client.get(scope=scope, deny_assignment_id=deny_assignment_name))
 
 
 def create_deny_assignment(cmd, scope=None, deny_assignment_name=None,

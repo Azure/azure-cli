@@ -39,7 +39,7 @@ def resolve_role_id(role, scope, definitions_client):
         pass
     if not role_id:  # retrieve role id
         role_defs = list(definitions_client.list(
-            scope, "roleName eq '{}'".format(role)))
+            scope, filter="roleName eq '{}'".format(role)))
         if len(role_defs) == 0:
             raise AzCLIError("Role '{}' doesn't exist.".format(role))
         if len(role_defs) > 1:
