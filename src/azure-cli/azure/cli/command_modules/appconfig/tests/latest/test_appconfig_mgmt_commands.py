@@ -577,7 +577,7 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
         })
 
         # Create Azure Front Door profile first
-        front_door_profile = self.cmd('afd profile create -g {rg} --profile-name {front_door_profile_name} --sku Standard_AzureFrontDoor').get_output_in_json()
+        front_door_profile = self.cmd('resource create -g {rg} -n {front_door_profile_name} --resource-type Microsoft.Cdn/profiles --api-version 2025-06-01 --is-full-object --properties \'{{"location": "global", "sku": {{"name": "Standard_AzureFrontDoor"}}}}\'').get_output_in_json()
         front_door_profile_id = front_door_profile['id']
 
         self.kwargs.update({
