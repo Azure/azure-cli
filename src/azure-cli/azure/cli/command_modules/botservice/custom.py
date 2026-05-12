@@ -322,7 +322,7 @@ def download_app(cmd, client, resource_group_name, resource_name, file_save_path
             if not os.path.exists(app_settings_path):
 
                 logger.info('App settings not found at %s, defaulting app settings to empty object.', app_settings_path)
-                existing = '{}'
+                existing = {}
             else:
                 with open(app_settings_path, 'r') as f:
                     existing = json.load(f)
