@@ -257,6 +257,7 @@ class TestCustom(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.resource.custom.logger.warning')
     def test_feature_registration_warning_mentions_subscription_scope(self, logger_warning):
+        feature_name = 'TestFeature'
         for method_name, operation in [('register', register_feature), ('unregister', unregister_feature)]:
             with self.subTest(method_name=method_name):
                 logger_warning.reset_mock()
@@ -264,11 +265,11 @@ class TestCustom(unittest.TestCase):
                 expected = object()
                 getattr(client, method_name).return_value = expected
 
-                result = operation(client, 'Microsoft.CognitiveServices', 'OpenAI.BlockedTools.web_search')
+                result = operation(client, 'Microsoft.CognitiveServices', feature_name)
 
                 self.assertIs(result, expected)
                 getattr(client, method_name).assert_called_once_with(
-                    'Microsoft.CognitiveServices', 'OpenAI.BlockedTools.web_search')
+                    'Microsoft.CognitiveServices', feature_name)
                 logger_warning.assert_called_once()
                 warning_message = logger_warning.call_args.args[0]
                 self.assertIn('current default subscription', warning_message)

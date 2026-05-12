@@ -1757,7 +1757,7 @@ examples:
     crafted: true
   - name: Register a provider for a specific subscription.
     text: |
-        az provider register --namespace Microsoft.CognitiveServices --subscription 00000000-0000-0000-0000-000000000000
+        az provider register --namespace Microsoft.CognitiveServices --subscription 12345678-1234-1234-1234-123456789012
   - name: Register a provider from RPaaS.
     text: |
         az provider register -n 'Microsoft.Confluent' --accept-terms
