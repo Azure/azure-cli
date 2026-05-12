@@ -618,21 +618,23 @@ class TestHandleException(unittest.TestCase):
 
     @mock.patch('azure.cli.core.azclierror.logger.error', autospec=True)
     def test_handle_exception_http_error_graph_access_denied_adds_recommendation(self, mock_logger_error):
-        mock_response = mock.MagicMock()
-        mock_response.status_code = 403
-        mock_response.headers = {}
-        mock_response.url = 'https://graph.microsoft.com/v1.0/policies/authenticationStrengthPolicies/'
-        mock_response.text = json.dumps({"error": {"code": "accessDenied", "message": "Request Authorization failed"}})
-        mock_response.json.return_value = json.loads(mock_response.text)
-        http_error = azclierror.HTTPError('Forbidden({"error":{"code":"accessDenied"}})', mock_response)
+        for error_code in ['accessDenied', 'ACCESSDENIED']:
+            with self.subTest(error_code=error_code):
+                mock_response = mock.MagicMock()
+                mock_response.status_code = 403
+                mock_response.headers = {}
+                mock_response.url = 'https://graph.microsoft.com/v1.0/policies/authenticationStrengthPolicies/'
+                mock_response.text = json.dumps({"error": {"code": error_code, "message": "Request Authorization failed"}})
+                mock_response.json.return_value = json.loads(mock_response.text)
+                http_error = azclierror.HTTPError('Forbidden({"error":{"code":"accessDenied"}})', mock_response)
 
-        with mock.patch('sys.stderr', new=io.StringIO()) as stderr:
-            ex_result = handle_exception(http_error)
+                with mock.patch('sys.stderr', new=io.StringIO()) as stderr:
+                    ex_result = handle_exception(http_error)
 
-        self.assertTrue(mock_logger_error.called)
-        self.assertIn('Forbidden', str(mock_logger_error.call_args[0][0]))
-        self.assertEqual(ex_result, 1)
-        self.assertIn(GRAPH_ACCESS_DENIED_RECOMMENDATION, stderr.getvalue())
+                self.assertTrue(mock_logger_error.called)
+                self.assertIn('Forbidden', str(mock_logger_error.call_args[0][0]))
+                self.assertEqual(ex_result, 1)
+                self.assertIn(GRAPH_ACCESS_DENIED_RECOMMENDATION, stderr.getvalue())
 
     @mock.patch('azure.cli.core.azclierror.logger.error', autospec=True)
     def test_handle_exception_http_error_without_graph_access_denied_no_recommendation(self, _):
