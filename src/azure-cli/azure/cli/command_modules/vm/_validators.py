@@ -2881,7 +2881,7 @@ def _validate_community_gallery_legal_agreement_acceptance(cmd, namespace):
             'public_gallery_name': community_gallery_name
         }
         community_gallery_info = SigShowCommunity(cli_ctx=cmd.cli_ctx)(command_args=command_args)
-        eula = community_gallery_info['community_metadata']['eula']
+        eula = community_gallery_info['communityMetadata']['eula']
     except Exception as err:
         raise CLIInternalError('Get the eula from community gallery failed: {0}'.format(err))
 
