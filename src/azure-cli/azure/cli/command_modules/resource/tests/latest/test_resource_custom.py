@@ -31,7 +31,10 @@ from azure.cli.command_modules.resource.custom import (
     publish_bicep_file,
     _process_template_file,
     _prepare_deployment_properties_unmodified,
+    register_feature,
+    unregister_feature,
 )
+from azure.cli.command_modules.resource._help import helps
 
 from azure.cli.command_modules.resource._bicep import (run_bicep_command)
 
@@ -251,6 +254,32 @@ class TestCustom(unittest.TestCase):
             raise NoTTYException
         with self.assertRaisesRegex(CLIError, "Missing input parameters: missing"):
             _get_missing_parameters(parameters, template, prompt_function)
+
+    @mock.patch('azure.cli.command_modules.resource.custom.logger.warning')
+    def test_feature_registration_warning_mentions_subscription_scope(self, logger_warning):
+        for method_name, operation in [('register', register_feature), ('unregister', unregister_feature)]:
+            with self.subTest(method_name=method_name):
+                client = mock.Mock()
+                expected = object()
+                getattr(client, method_name).return_value = expected
+
+                result = operation(client, 'Microsoft.CognitiveServices', 'OpenAI.BlockedTools.web_search')
+
+                self.assertIs(result, expected)
+                getattr(client, method_name).assert_called_once_with(
+                    'Microsoft.CognitiveServices', 'OpenAI.BlockedTools.web_search')
+
+        self.assertEqual(logger_warning.call_count, 2)
+        warning_message = logger_warning.call_args_list[0].args[0]
+        self.assertIn('current default subscription', warning_message)
+        self.assertIn('--subscription', warning_message)
+        self.assertIn('az account set', warning_message)
+
+    def test_provider_register_help_mentions_subscription_scope(self):
+        help_text = helps['provider register']
+        self.assertIn('current default subscription', help_text)
+        self.assertIn('`--subscription`', help_text)
+        self.assertIn('Microsoft.CognitiveServices --subscription', help_text)
 
     def test_deployment_parameters(self):
 
