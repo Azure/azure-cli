@@ -7,7 +7,8 @@ from azure.cli.core.util import sdk_no_wait, CLIError
 from azure.mgmt.synapse.models import Workspace, WorkspacePatchInfo, ManagedIdentity, \
     DataLakeStorageAccountDetails, WorkspaceKeyDetails, CustomerManagedKeyDetails, EncryptionDetails, ManagedVirtualNetworkSettings, \
     ManagedIdentitySqlControlSettingsModelPropertiesGrantSqlControlToManagedIdentity, IpFirewallRuleInfo, Key, ManagedIdentitySqlControlSettingsModel, WorkspaceRepositoryConfiguration, \
-    KekIdentityProperties, UserAssignedManagedIdentity, CheckNameAvailabilityRequest
+    KekIdentityProperties, UserAssignedManagedIdentity
+from azure.mgmt.cdn.models import CheckNameAvailabilityInput
 
 
 # Synapse workspace
@@ -205,7 +206,7 @@ def get_resource_group_by_workspace_name(cmd, client, workspace_name):
 
 
 def custom_check_name_availability(cmd, client, name):
-    check_name_availability_input = CheckNameAvailabilityRequest(name=name, type="Microsoft.Synapse/workspaces")
+    check_name_availability_input = CheckNameAvailabilityInput(name=name, type="Microsoft.Synapse/workspaces")
     return client.check_name_availability(check_name_availability_input)
 
 
