@@ -8,7 +8,7 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.core.util import empty_on_404
 
 from ._client_factory import cf_web_client, cf_plans, cf_webapps
-from ._validators import (validate_onedeploy_params, validate_staticsite_link_function, validate_staticsite_sku,
+from ._validators import (validate_onedeploy_params, validate_onedeploy_functionapp_params, validate_staticsite_link_function, validate_staticsite_sku,
                           validate_vnet_integration, validate_asp_create, validate_functionapp_asp_create,
                           validate_webapp_up, validate_app_exists, validate_add_vnet, validate_app_is_functionapp,
                           validate_app_is_webapp, validate_functionapp_on_containerapp_vnet,
@@ -382,7 +382,7 @@ def load_command_table(self, _):
         g.custom_command('identity assign', 'assign_identity')
         g.custom_show_command('identity show', 'show_identity')
         g.custom_command('identity remove', 'remove_identity')
-        g.custom_command('deploy', 'perform_onedeploy_functionapp', validator=validate_onedeploy_params, is_preview=True)
+        g.custom_command('deploy', 'perform_onedeploy_functionapp', validator=validate_onedeploy_functionapp_params, is_preview=True)
         g.generic_update_command('update', getter_name="get_functionapp", setter_name='set_functionapp', exception_handler=update_function_ex_handler_factory(),
                                  custom_func_name='update_functionapp', getter_type=appservice_custom, setter_type=appservice_custom, command_type=webapp_sdk,
                                  validator=validate_functionapp_on_containerapp_update)

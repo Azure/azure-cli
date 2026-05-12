@@ -296,6 +296,14 @@ def validate_onedeploy_params(namespace):
         raise RequiredArgumentMissingError('Deployment type is mandatory when deploying from URLs. Use --type')
 
 
+def validate_onedeploy_functionapp_params(cmd, namespace):
+    validate_onedeploy_params(namespace)
+    from azure.cli.core.cloud import AZURE_PUBLIC_CLOUD
+    if cmd.cli_ctx.cloud.name != AZURE_PUBLIC_CLOUD.name:
+        raise ValidationError("The 'az functionapp deploy' command is currently available only in AzureCloud. "
+                              "Use 'az functionapp deployment source config-zip' in this cloud.")
+
+
 def _validate_ip_address_format(namespace):
     if namespace.ip_address is not None:
         input_value = namespace.ip_address

@@ -6,13 +6,14 @@
 import unittest
 from unittest import mock
 
-from azure.cli.core.azclierror import ArgumentUsageError
+from azure.cli.core.azclierror import ArgumentUsageError, ValidationError
 
 from azure.cli.command_modules.appservice._validators import (
     _normalize_http_headers,
     _normalize_ip_address_list,
     _validate_ip_address_existence,
     _validate_service_tag_existence,
+    validate_onedeploy_functionapp_params,
 )
 
 
@@ -247,6 +248,31 @@ class ValidateIpAddressExistenceTest(unittest.TestCase):
                 _validate_ip_address_existence(cmd, ns)
             except ArgumentUsageError:
                 self.fail('Missing http_headers attribute should be treated as no headers')
+
+
+class ValidateFunctionappOneDeployParamsTest(unittest.TestCase):
+    def _make_namespace(self):
+        ns = mock.MagicMock()
+        ns.src_path = 'artifact.zip'
+        ns.src_url = None
+        ns.artifact_type = None
+        return ns
+
+    def test_allowed_in_public_cloud(self):
+        cmd = mock.MagicMock()
+        cmd.cli_ctx.cloud.name = 'AzureCloud'
+
+        validate_onedeploy_functionapp_params(cmd, self._make_namespace())
+
+    def test_blocked_in_non_public_cloud(self):
+        cmd = mock.MagicMock()
+        cmd.cli_ctx.cloud.name = 'AzureUSGovernment'
+
+        with self.assertRaises(ValidationError) as ctx:
+            validate_onedeploy_functionapp_params(cmd, self._make_namespace())
+
+        self.assertIn('available only in AzureCloud', str(ctx.exception))
+        self.assertIn('deployment source config-zip', str(ctx.exception))
 
 
 class ValidateServiceTagExistenceTest(unittest.TestCase):
