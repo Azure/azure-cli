@@ -242,13 +242,34 @@ class TestUtils(unittest.TestCase):
         func.assert_called_once_with(1, test='value', polling=False)
 
     def test_sdk_no_wait_retries_without_forced_polling_on_json_decode_error(self):
+        calls = []
+
         def _func(*_args, **kwargs):
-            if kwargs.get('polling') is False:
+            calls.append(kwargs.copy())
+            if len(calls) == 1:
                 raise json.decoder.JSONDecodeError("bad json", "gAS", 3)
             return 'ok'
 
         result = sdk_no_wait(True, _func)
         self.assertEqual(result, 'ok')
+        self.assertEqual(len(calls), 2)
+        self.assertFalse(calls[0]['polling'])
+        self.assertNotIn('polling', calls[1])
+
+    def test_sdk_no_wait_restores_original_polling_on_json_decode_error(self):
+        calls = []
+
+        def _func(*_args, **kwargs):
+            calls.append(kwargs.copy())
+            if len(calls) == 1:
+                raise json.decoder.JSONDecodeError("bad json", "gAS", 3)
+            return 'ok'
+
+        result = sdk_no_wait(True, _func, polling=True)
+        self.assertEqual(result, 'ok')
+        self.assertEqual(len(calls), 2)
+        self.assertFalse(calls[0]['polling'])
+        self.assertTrue(calls[1]['polling'])
 
     @mock.patch('azure.cli.core.__version__', '7.8.9')
     def test_get_az_user_agent(self):
