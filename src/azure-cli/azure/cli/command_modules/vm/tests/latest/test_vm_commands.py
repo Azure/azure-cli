@@ -2798,6 +2798,44 @@ class VMUpdateTests(ScenarioTest):
             self.check('tags.tagName', 'tagValue'),
         ])
 
+    @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_vmss_ephemeral_os_disk_full_caching', location='centralus')
+    def test_vm_vmss_ephemeral_os_disk_full_caching(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'vm': 'vm1',
+            'vmss': 'vmss1',
+            'image': 'Canonical:UbuntuServer:16.04-LTS:latest',
+            'ssh_key': TEST_SSH_KEY_PUB,
+            'loc': resource_group_location,
+            'user': 'user_1',
+            'subnet': 'subnet1',
+            'vnet': 'vnet1'
+        })
+
+        # VM create with ephemeral OS disk full caching
+        self.cmd('vm create -n {vm} -g {rg} --image {image} --size Standard_D8ds_v4 --location {loc} '
+                 '--ssh-key-value \'{ssh_key}\' --ephemeral-os-disk --ephemeral-os-disk-placement CacheDisk '
+                 '--os-disk-caching ReadOnly --ephemeral-os-disk-enable-full-caching true '
+                 '--storage-sku Premium_LRS '
+                 '--admin-username {user} --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('storageProfile.osDisk.diffDiskSettings.option', 'Local'),
+            self.check('storageProfile.osDisk.diffDiskSettings.enableFullCaching', True),
+        ])
+
+        # VMSS create with ephemeral OS disk full caching (instance-count 0 to stay within quota)
+        self.cmd('vmss create -n {vmss} -g {rg} --image {image} --vm-sku Standard_D8ds_v4 '
+                 '--ephemeral-os-disk --ephemeral-os-disk-placement CacheDisk '
+                 '--os-disk-caching ReadOnly --ephemeral-os-disk-enable-full-caching true '
+                 '--storage-sku Premium_LRS --instance-count 0 '
+                 '--admin-username {user} --admin-password testPassword09! --orchestration-mode Flexible')
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.option', 'Local'),
+            self.check('virtualMachineProfile.storageProfile.osDisk.diffDiskSettings.enableFullCaching', True),
+        ])
+
 
 class VMMultiNicScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
     # Add live_only:
@@ -4622,8 +4660,11 @@ class VMSSCreateOptions(ScenarioTest):
 
         self.cmd('network public-ip create --name {ip} -g {rg}')
 
-        self.cmd('vmss create --image Debian:debian-10:10:latest --admin-password testPassword0 -l westus -g {rg} -n {vmss} --disable-overprovision --instance-count {count} '
-                 '--os-disk-caching {caching} --upgrade-policy-mode {update} --authentication-type password --admin-username myadmin --public-ip-address {ip} --os-disk-size-gb 40 --data-disk-sizes-gb 1 --vm-sku Standard_D2_v2 --computer-name-prefix vmss1 --orchestration-mode Uniform --lb-sku Standard')
+        self.cmd('vmss create --image Debian:debian-10:10:latest --admin-password testPassword0 -l westus -g {rg} '
+                 '-n {vmss} --disable-overprovision --instance-count {count} --os-disk-caching {caching} '
+                 '--upgrade-policy-mode {update} --authentication-type password --admin-username myadmin '
+                 '--public-ip-address {ip} --os-disk-size-gb 40 --data-disk-sizes-gb 1 --vm-sku Standard_D2s_v3 '
+                 '--computer-name-prefix vmss1 --orchestration-mode Uniform --lb-sku Standard')
         self.cmd('network lb show -g {rg} -n {vmss}lb ',
                  checks=self.check('frontendIPConfigurations[0].publicIPAddress.id.ends_with(@, \'{ip}\')', True))
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
@@ -4642,9 +4683,9 @@ class VMSSCreateOptions(ScenarioTest):
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('length(virtualMachineProfile.storageProfile.dataDisks)', 2),
             self.check('virtualMachineProfile.storageProfile.dataDisks[0].diskSizeGB', 1),
-            self.check('virtualMachineProfile.storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Standard_LRS'),
+            self.check('virtualMachineProfile.storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Premium_LRS'),
             self.check('virtualMachineProfile.storageProfile.dataDisks[1].diskSizeGB', 3),
-            self.check('virtualMachineProfile.storageProfile.dataDisks[1].managedDisk.storageAccountType', 'Standard_LRS'),
+            self.check('virtualMachineProfile.storageProfile.dataDisks[1].managedDisk.storageAccountType', 'Premium_LRS'),
         ])
         self.cmd('vmss disk detach -g {rg} --vmss-name {vmss} --lun 1')
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
@@ -5997,7 +6038,7 @@ class VMSSCustomDataScenarioTest(ScenarioTest):
         })
 
         self.cmd('vmss create -n {vmss} -g {rg} --image Debian:debian-10:10:latest --admin-username deploy --ssh-key-value "{ssh_key}" '
-                 '--user-data "{user_data}" --orchestration-mode Uniform --lb-sku Standard --vm-sku Standard_B2ms')
+                 '--user-data "{user_data}" --orchestration-mode Uniform --lb-sku Standard --vm-sku Standard_D2s_v3')
 
         self.cmd('vmss show -n {vmss} -g {rg} --include-user-data', checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -6227,27 +6268,40 @@ class MSIScenarioTest(ScenarioTest):
         })
 
         with self.assertRaisesRegex(ArgumentUsageError, "please specify both --role and --scope"):
-            self.cmd('vmss create -g {rg} -n {vmss1} --image Debian:debian-10:10:latest --instance-count 1 --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope {scope} --orchestration-mode Uniform --vm-sku Standard_B1ls')
+            self.cmd('vmss create -g {rg} -n {vmss1} --image Debian:debian-10:10:latest --instance-count 1 '
+                     '--assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope {scope} '
+                     '--orchestration-mode Uniform --vm-sku Standard_D2s_v3')
 
         with self.assertRaisesRegex(ArgumentUsageError, "please specify both --role and --scope"):
-            self.cmd('vmss create -g {rg} -n {vmss1} --image Debian:debian-10:10:latest --instance-count 1 --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --role Contributor --orchestration-mode Uniform --vm-sku Standard_B1ls')
+            self.cmd('vmss create -g {rg} -n {vmss1} --image Debian:debian-10:10:latest --instance-count 1 '
+                     '--assign-identity --admin-username admin123 --admin-password PasswordPassword1! '
+                     '--role Contributor --orchestration-mode Uniform --vm-sku Standard_D2s_v3')
 
         with mock.patch('azure.cli.core.commands.arm._gen_guid', side_effect=self.create_guid):
             # create linux vm with default configuration
-            self.cmd('vmss create -g {rg} -n {vmss1} --image Debian:debian-10:10:latest --instance-count 1 --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope {scope} --role Contributor --orchestration-mode Uniform --lb-sku Standard --vm-sku Standard_B1ls', checks=[
+            self.cmd('vmss create -g {rg} -n {vmss1} --image Debian:debian-10:10:latest --instance-count 1 '
+                     '--assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope {scope} '
+                     '--role Contributor --orchestration-mode Uniform --lb-sku Standard '
+                     '--vm-sku Standard_D2s_v3', checks=[
                 self.check('vmss.identity.role', 'Contributor'),
                 self.check('vmss.identity.scope', '/subscriptions/{sub}/resourceGroups/{rg}'),
             ])
 
             # create a windows vm with reader role on the linux vm
-            result = self.cmd('vmss create -g {rg} -n {vmss2} --image Win2022Datacenter --instance-count 1 --assign-identity --scope {vmss1_id} --role reader --admin-username admin123 --admin-password PasswordPassword1! --orchestration-mode Uniform --lb-sku Standard --vm-sku Standard_B1ls', checks=[
+            result = self.cmd('vmss create -g {rg} -n {vmss2} --image Win2022Datacenter --instance-count 1 '
+                              '--assign-identity --scope {vmss1_id} --role reader --admin-username admin123 '
+                              '--admin-password PasswordPassword1! --orchestration-mode Uniform --lb-sku Standard '
+                              '--vm-sku Standard_D2s_v3', checks=[
                 self.check('vmss.identity.role', 'reader'),
                 self.check('vmss.identity.scope', '{vmss1_id}'),
             ]).get_output_in_json()
             uuid.UUID(result['vmss']['identity']['systemAssignedIdentity'])
 
             # create a linux vm w/o identity and later enable it
-            result = self.cmd('vmss create -g {rg} -n {vmss3} --image Debian:debian-10:10:latest --instance-count 1 --admin-username admin123 --admin-password PasswordPassword1! --orchestration-mode Uniform --lb-sku Standard --vm-sku Standard_B1ls').get_output_in_json()['vmss']
+            result = self.cmd('vmss create -g {rg} -n {vmss3} --image Debian:debian-10:10:latest --instance-count 1 '
+                              '--admin-username admin123 --admin-password PasswordPassword1! '
+                              '--orchestration-mode Uniform --lb-sku Standard '
+                              '--vm-sku Standard_D2s_v3').get_output_in_json()['vmss']
             self.assertIsNone(result.get('identity'))
 
             with self.assertRaisesRegex(ArgumentUsageError, "please specify both --role and --scope when assigning a role to the managed identity"):
@@ -6398,7 +6452,7 @@ class MSIScenarioTest(ScenarioTest):
         result = self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:16.04-LTS:latest '
                           '--assign-identity {emsi} [system] --role reader --scope {scope} --instance-count 1 '
                           '--generate-ssh-keys --admin-username ubuntuadmin --orchestration-mode Uniform '
-                          '--lb-sku Standard --vm-sku Standard_B1ls').get_output_in_json()
+                          '--lb-sku Standard --vm-sku Standard_D2s_v3').get_output_in_json()
         emsis = [x.lower() for x in result['vmss']['identity']['userAssignedIdentities'].keys()]
         self.assertEqual(emsis, [emsi_result['id'].lower()])
 
@@ -12532,8 +12586,10 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             'subnet': 'subnet1',
             'vnet': 'vnet1'
         })
-        self.cmd('vm create --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --subnet {subnet} --vnet-name {vnet} '
-                 '-g {rg} -n {vm1} --enable-secure-boot --enable-vtpm --enable-integrity-monitoring --admin-username azureuser --admin-password testPassword0 --generate-ssh-keys --nsg-rule NONE')
+        self.cmd('vm create --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest '
+                 '--security-type TrustedLaunch --subnet {subnet} --vnet-name {vnet} -g {rg} -n {vm1} '
+                 '--enable-secure-boot --enable-vtpm --enable-integrity-monitoring --admin-username azureuser '
+                 '--admin-password testPassword0 --generate-ssh-keys --nsg-rule NONE --size Standard_D2s_v3')
 
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
@@ -12546,8 +12602,11 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('securityProfile.uefiSettings.secureBootEnabled', True),
             self.check('securityProfile.uefiSettings.vTpmEnabled', True)
         ])
-        self.cmd('vm create --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --subnet {subnet} --vnet-name {vnet} '
-                 '-g {rg} -n {vm2} --enable-secure-boot --enable-vtpm --enable-integrity-monitoring --disable-integrity-monitoring-autoupgrade --admin-username azureuser --admin-password testPassword0 --generate-ssh-keys --nsg-rule NONE')
+        self.cmd('vm create --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest '
+                 '--security-type TrustedLaunch --subnet {subnet} --vnet-name {vnet} -g {rg} -n {vm2} '
+                 '--enable-secure-boot --enable-vtpm --enable-integrity-monitoring '
+                 '--disable-integrity-monitoring-autoupgrade --admin-username azureuser '
+                 '--admin-password testPassword0 --generate-ssh-keys --nsg-rule NONE --size Standard_D2s_v3')
         self.cmd('vm show -g {rg} -n {vm2}', checks=[
             self.check('resources[0].name', 'GuestAttestation'),
             self.check('resources[0].publisher', 'Microsoft.Azure.Security.LinuxAttestation'),
@@ -12556,8 +12615,12 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('securityProfile.uefiSettings.secureBootEnabled', True),
             self.check('securityProfile.uefiSettings.vTpmEnabled', True)
         ])
-        self.cmd('vmss create -g {rg} -n {vmss1} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --orchestration-mode Flexible '
-                 '--admin-username azureuser --security-type TrustedLaunch --enable-secure-boot --enable-vtpm --enable-integrity-monitoring --generate-ssh-keys')
+        self.cmd('vm delete -g {rg} -n {vm1} -y')
+        self.cmd('vm delete -g {rg} -n {vm2} -y')
+        self.cmd('vmss create -g {rg} -n {vmss1} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest '
+                 '--orchestration-mode Flexible --admin-username azureuser --security-type TrustedLaunch '
+                 '--enable-secure-boot --enable-vtpm --enable-integrity-monitoring --generate-ssh-keys '
+                 '--vm-sku Standard_D2s_v3')
         self.cmd('vmss show -g {rg} -n {vmss1}', checks=[
             self.check('virtualMachineProfile.extensionProfile.extensions[0].name', 'GuestAttestation'),
             self.check('virtualMachineProfile.extensionProfile.extensions[0].publisher',
@@ -12567,8 +12630,10 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('virtualMachineProfile.securityProfile.uefiSettings.secureBootEnabled', True),
             self.check('virtualMachineProfile.securityProfile.uefiSettings.vTpmEnabled', True)
         ])
-        self.cmd('vmss create -g {rg} -n {vmss2} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --admin-username azureuser --security-type TrustedLaunch '
-                 '--enable-secure-boot --enable-vtpm --enable-integrity-monitoring --disable-integrity-monitoring-autoupgrade --generate-ssh-keys --orchestration-mode Flexible')
+        self.cmd('vmss create -g {rg} -n {vmss2} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest '
+                 '--admin-username azureuser --security-type TrustedLaunch --enable-secure-boot --enable-vtpm '
+                 '--enable-integrity-monitoring --disable-integrity-monitoring-autoupgrade --generate-ssh-keys '
+                 '--orchestration-mode Flexible --vm-sku Standard_D2s_v3')
         self.cmd('vmss show -g {rg} -n {vmss2}', checks=[
             self.check('virtualMachineProfile.extensionProfile.extensions[0].name', 'GuestAttestation'),
             self.check('virtualMachineProfile.extensionProfile.extensions[0].publisher',
@@ -12668,7 +12733,9 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             'profile2': self.create_random_name('profile', 15)
         })
         self.cmd('network nsg create -g {rg} -n {nsg1}')
-        self.cmd('vm create -g {rg} -n {vm1} --image Win2022Datacenter --enable-proxy-agent --wire-server-mode Audit --imds-mode Audit --key-incarnation-id 1 --size Standard_B2ms --subnet {subnet} --vnet-name {vnet} --admin-password Password001! --nsg-rule NONE')
+        self.cmd('vm create -g {rg} -n {vm1} --image Win2022Datacenter --enable-proxy-agent --wire-server-mode Audit '
+                 '--imds-mode Audit --key-incarnation-id 1 --size Standard_D2s_v3 --subnet {subnet} --vnet-name {vnet} '
+                 '--admin-password Password001! --nsg-rule NONE')
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
@@ -12696,7 +12763,9 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('securityProfile.proxyAgentSettings.imds.inVMAccessControlProfileReferenceId', '{imds_profileid}')
         ])
 
-        self.cmd('vmss create -g {rg} -n {vmss1} --image Win2022Datacenter --nsg {nsg1} --enable-proxy-agent --wire-server-mode Audit --imds-mode Audit --vm-sku Standard_B1ls --orchestration-mode Flexible --admin-password Password001!', checks=[
+        self.cmd('vmss create -g {rg} -n {vmss1} --image Win2022Datacenter --nsg {nsg1} --enable-proxy-agent '
+                 '--wire-server-mode Audit --imds-mode Audit --vm-sku Standard_D2s_v3 --orchestration-mode Flexible '
+                 '--admin-password Password001!', checks=[
             self.check('vmss.virtualMachineProfile.securityProfile.proxyAgentSettings.enabled', True),
             self.check('vmss.virtualMachineProfile.securityProfile.proxyAgentSettings.wireServer.mode', 'Audit'),
             self.check('vmss.virtualMachineProfile.securityProfile.proxyAgentSettings.imds.mode', 'Audit'),
