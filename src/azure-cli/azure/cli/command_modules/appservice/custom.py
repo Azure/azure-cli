@@ -9665,18 +9665,19 @@ def _check_zip_deployment_status_flex(cmd, rg_name, name, deployment_status_url,
             if response.status_code == 404:
                 if has_partial_success and not kudu_restart_in_progress:
                     break
-                if kudu_restart_in_progress:
+                elif kudu_restart_in_progress:
                     # Kudu is restarting after package deployment — continue polling until it comes back
                     logger.warning("Deployment status endpoint returned 404. "
                                    "Kudu may be restarting after package deployment. Retrying...")
                 elif has_response:
                     raise CLIError("Failed to retrieve deployment status. Please try again in a few minutes.")
             else:
-                if response.json().get('status') is None and has_response:
+                res_json = response.json()
+                if res_json.get('status') is None and has_response:
                     raise CLIError("Failed to retrieve deployment status. Please try again in a few minutes.")
-                if response.json().get('status') is not None and not has_response:
+                if res_json.get('status') is not None and not has_response:
                     has_response = True
-                res_dict = response.json()
+                res_dict = res_json
         except json.decoder.JSONDecodeError:
             logger.warning("Deployment status endpoint %s returns malformed data. Retrying...", deployment_status_url)
             res_dict = {}
