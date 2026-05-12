@@ -9662,17 +9662,19 @@ def _check_zip_deployment_status_flex(cmd, rg_name, name, deployment_status_url,
         try:
             if response.status_code == 202 and not has_partial_success:
                 has_partial_success = True
-            if response.status_code == 404 and has_partial_success and not kudu_restart_in_progress:
-                break
-            if response.status_code == 404 and kudu_restart_in_progress:
-                # Kudu is restarting after package deployment — continue polling until it comes back
-                logger.warning("Deployment status endpoint returned 404. "
-                               "Kudu may be restarting after package deployment. Retrying...")
-                res_dict = {}
-            elif (response.status_code == 404 or response.json().get('status') is None) and has_response:
-                raise CLIError("Failed to retrieve deployment status. Please try again in a few minutes.")
+            if response.status_code == 404:
+                if has_partial_success and not kudu_restart_in_progress:
+                    break
+                if kudu_restart_in_progress:
+                    # Kudu is restarting after package deployment — continue polling until it comes back
+                    logger.warning("Deployment status endpoint returned 404. "
+                                   "Kudu may be restarting after package deployment. Retrying...")
+                elif has_response:
+                    raise CLIError("Failed to retrieve deployment status. Please try again in a few minutes.")
             else:
-                if (response.status_code != 404 and response.json().get('status') is not None) and not has_response:
+                if response.json().get('status') is None and has_response:
+                    raise CLIError("Failed to retrieve deployment status. Please try again in a few minutes.")
+                if response.json().get('status') is not None and not has_response:
                     has_response = True
                 res_dict = response.json()
         except json.decoder.JSONDecodeError:
