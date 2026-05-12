@@ -796,6 +796,8 @@ def sdk_no_wait(no_wait, func, *args, **kwargs):
         try:
             return func(*args, **kwargs)
         except json.decoder.JSONDecodeError:
+            logger.debug("Retrying no-wait operation without forcing polling=False after JSON decode failure.",
+                         exc_info=True)
             if has_polling:
                 kwargs['polling'] = original_polling
             else:
