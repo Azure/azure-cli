@@ -800,6 +800,7 @@ def sdk_no_wait(no_wait, func, *args, **kwargs):
                 kwargs['polling'] = original_polling
             else:
                 kwargs.pop('polling', None)
+            return func(*args, **kwargs)
     return func(*args, **kwargs)
 
 
