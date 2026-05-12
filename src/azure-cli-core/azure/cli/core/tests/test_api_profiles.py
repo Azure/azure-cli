@@ -5,6 +5,7 @@
 
 import unittest
 from unittest import mock
+from importlib import import_module
 
 from azure.cli.core.profiles import (ResourceType, PROFILE_TYPE, CustomResourceType,
                                      get_api_version, supported_api_version, register_resource_type)
@@ -262,6 +263,15 @@ class TestAPIProfiles(unittest.TestCase):
                 get_versioned_sdk_path('latest', ResourceType.MGMT_STORAGE),
                 "azure.mgmt.storage.v2020_10_10"
             )
+
+    def test_get_versioned_sdk_path_compute_gallery_image_versions(self):
+        sdk_path = get_versioned_sdk_path(
+            'latest',
+            ResourceType.MGMT_COMPUTE,
+            operation_group='gallery_image_versions'
+        )
+        self.assertEqual(sdk_path, "azure.mgmt.compute.v2024_03_02")
+        import_module(sdk_path)
 
 
 if __name__ == '__main__':
