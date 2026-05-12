@@ -5,6 +5,7 @@
 
 # pylint: disable=line-too-long
 from collections import namedtuple
+import io
 import os
 import sys
 import unittest
@@ -17,7 +18,9 @@ from azure.cli.core.util import \
     (get_file_json, truncate_text, shell_safe_json_parse, b64_to_hex, hash_string, random_string,
      open_page_in_browser, can_launch_browser, handle_exception, ConfiguredDefaultSetter, send_raw_request,
      should_disable_connection_verify, parse_proxy_resource_id, get_az_user_agent, get_az_rest_user_agent,
-    _get_parent_proc_name, is_wsl, run_cmd, run_az_cmd, roughly_parse_command)
+     _get_parent_proc_name, is_wsl, run_cmd, run_az_cmd, roughly_parse_command,
+     GRAPH_ACCESS_DENIED_RECOMMENDATION)
+from azure.cli.core import azclierror
 from azure.cli.core.mock import DummyCli
 
 
@@ -612,6 +615,24 @@ class TestHandleException(unittest.TestCase):
         self.assertTrue(mock_logger_error.called)
         self.assertIn(str(mock_http_error), mock_logger_error.call_args[0][0])
         self.assertEqual(ex_result, 1)
+
+    @mock.patch('azure.cli.core.azclierror.logger.error', autospec=True)
+    def test_handle_exception_http_error_graph_access_denied_adds_recommendation(self, mock_logger_error):
+        mock_response = mock.MagicMock()
+        mock_response.status_code = 403
+        mock_response.headers = {}
+        mock_response.url = 'https://graph.microsoft.com/v1.0/policies/authenticationStrengthPolicies/'
+        mock_response.text = json.dumps({"error": {"code": "accessDenied", "message": "Request Authorization failed"}})
+        mock_response.json.return_value = json.loads(mock_response.text)
+        http_error = azclierror.HTTPError('Forbidden({"error":{"code":"accessDenied"}})', mock_response)
+
+        with mock.patch('sys.stderr', new=io.StringIO()) as stderr:
+            ex_result = handle_exception(http_error)
+
+        self.assertTrue(mock_logger_error.called)
+        self.assertIn('Forbidden', str(mock_logger_error.call_args[0][0]))
+        self.assertEqual(ex_result, 1)
+        self.assertIn(GRAPH_ACCESS_DENIED_RECOMMENDATION, stderr.getvalue())
 
     @staticmethod
     def _get_mock_HttpOperationError(response_text):

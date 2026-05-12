@@ -27,6 +27,13 @@ SSLERROR_TEMPLATE = ('Certificate verification failed. This typically happens wh
 QUERY_REFERENCE = ("To learn more about --query, please visit: "
                    "'https://learn.microsoft.com/cli/azure/query-azure-cli'")
 
+GRAPH_ACCESS_DENIED_RECOMMENDATION = (
+    "If this Microsoft Graph API call requires privileged permissions (for example "
+    "Policy.ReadWrite.ConditionalAccess), Azure CLI's first-party app may not be pre-authorized "
+    "for that scope (AADSTS65002). Use 'az login --service-principal' with an app registration "
+    "that has the required Microsoft Graph permissions granted."
+)
+
 
 _PROXYID_RE = re.compile(
     '(?i)/subscriptions/(?P<subscription>[^/]*)(/resourceGroups/(?P<resource_group>[^/]*))?'
@@ -99,6 +106,9 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
             az_error.set_recommendation("Interactive authentication is needed. Please run:\naz logout\naz login")
         else:
             az_error = azclierror.UnclassifiedUserFault(ex)
+            recommendation = _get_graph_access_denied_recommendation(ex.response)
+            if recommendation:
+                az_error.set_recommendation(recommendation)
 
     elif isinstance(ex, CLIError):
         # TODO: Fine-grained analysis here
@@ -182,6 +192,33 @@ def extract_common_error_message(ex):
     except Exception:  # pylint: disable=broad-except
         pass
     return error_msg
+
+
+def _get_graph_access_denied_recommendation(response):
+    if getattr(response, 'status_code', None) != 403:
+        return None
+
+    response_url = getattr(response, 'url', '')
+    if not isinstance(response_url, str) or not response_url.lower().startswith('https://graph.microsoft.com/'):
+        return None
+
+    try:
+        response_json = response.json()
+    except Exception:  # pylint: disable=broad-except
+        try:
+            response_json = json.loads(getattr(response, 'text', ''))
+        except Exception:  # pylint: disable=broad-except
+            return None
+
+    error = response_json.get('error') if isinstance(response_json, dict) else None
+    if not isinstance(error, dict):
+        return None
+
+    error_code = error.get('code')
+    if isinstance(error_code, str) and error_code.lower() == 'accessdenied':
+        return GRAPH_ACCESS_DENIED_RECOMMENDATION
+
+    return None
 
 
 def extract_http_operation_error(ex):
