@@ -33,6 +33,7 @@ GRAPH_ACCESS_DENIED_RECOMMENDATION = (
     "for that scope (AADSTS65002). Use 'az login --service-principal' with an app registration "
     "that has the required Microsoft Graph permissions granted."
 )
+GRAPH_ACCESS_DENIED_ERROR_CODE = 'accessdenied'
 
 
 _PROXYID_RE = re.compile(
@@ -215,7 +216,7 @@ def _get_graph_access_denied_recommendation(response):
         return None
 
     error_code = error.get('code')
-    if isinstance(error_code, str) and error_code.lower() == 'accessdenied':
+    if isinstance(error_code, str) and error_code.lower() == GRAPH_ACCESS_DENIED_ERROR_CODE:
         return GRAPH_ACCESS_DENIED_RECOMMENDATION
 
     return None
