@@ -43,6 +43,7 @@ from ._msgrpah import GraphError, set_object_properties
 # walk these new MutableMapping models (it inspects ``__dict__``), so we need explicit
 # adapters to project them back to the legacy flat camelCase shape.
 
+
 def _coerce(value):
     """Best-effort coerce an SDK attribute value to a JSON-safe scalar/list."""
     if value is None:
