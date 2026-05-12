@@ -9654,6 +9654,9 @@ def _check_zip_deployment_status_flex(cmd, rg_name, name, deployment_status_url,
     has_partial_success = False
     # Indicates Kudu is restarting after package deployment (transient state for flex consumption apps)
     kudu_restart_in_progress = False
+    # Tracks whether the Kudu-restart 404 warning has already been emitted once
+    kudu_restart_404_warned = False
+    # Default return value; overwritten on each successful JSON response
     res_dict = {}
     while num_trials < total_trials:
         time.sleep(1)
@@ -9667,8 +9670,12 @@ def _check_zip_deployment_status_flex(cmd, rg_name, name, deployment_status_url,
                     break
                 elif kudu_restart_in_progress:
                     # Kudu is restarting after package deployment — continue polling until it comes back
-                    logger.warning("Deployment status endpoint returned 404. "
-                                   "Kudu may be restarting after package deployment. Retrying...")
+                    if not kudu_restart_404_warned:
+                        kudu_restart_404_warned = True
+                        logger.warning("Deployment status endpoint returned 404. "
+                                       "Kudu may be restarting after package deployment. Retrying...")
+                    else:
+                        logger.info("Deployment status endpoint still returning 404 during Kudu restart. Retrying...")
                 elif has_response:
                     raise CLIError("Failed to retrieve deployment status. Please try again in a few minutes.")
             else:
