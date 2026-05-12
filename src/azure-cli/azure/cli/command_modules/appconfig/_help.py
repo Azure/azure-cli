@@ -242,7 +242,7 @@ examples:
     text: az appconfig kv list -n MyAppConfiguration --tags tag1=
   - name: List all key-values with tag name "tag1" with null value
     text: az appconfig kv list -n MyAppConfiguration --tags tag1=\\0
-  - name: Resolve a snapshot reference and list all key-values from the referenced snapshot.
+  - name: List all key-values within a snapshot referenced by the key "MySnapshotRef".
     text: az appconfig kv list -n MyAppConfiguration --key MySnapshotRef --resolve-snapshot-references
 """
 
@@ -285,7 +285,7 @@ examples:
   - name: Set a key with null value and JSON content type.
     text: az appconfig kv set -n MyAppConfiguration --key foo --value null --content-type application/json
   - name: Set a key-value using your 'az login' credentials.
-    text: az appconfig kv set --endpoint https://co.azconfig.io --key color --value red --auth-mode login
+    text: az appconfig kv set --endpoint https://contoso.azconfig.io --key color --value red --auth-mode login
 """
 
 helps['appconfig kv set-keyvault'] = """
