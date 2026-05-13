@@ -126,16 +126,7 @@ class ConsumptionReservationSummaryList(_ConsumptionReservationSummaryList):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.end_date = AAZStrArg(
-            options=["--end-date", "-e"],
-            help="End date (YYYY-MM-DD in UTC). Only needed for daily grain and if specified, also requires --start-date.",
-        )
-        args_schema.start_date = AAZStrArg(
-            options=["--start-date", "-s"],
-            help="Start date (YYYY-MM-DD in UTC). Only needed for daily grain and if specified, also requires --end-date.",
-        )
         args_schema.filter._registered = False
         return args_schema
 
@@ -172,18 +163,7 @@ class ConsumptionReservationDetailList(_ConsumptionReservationDetailList):
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.end_date = AAZStrArg(
-            options=["--end-date", "-e"],
-            help="End date (YYYY-MM-DD in UTC). Only needed for daily grain and if specified, also requires --start-date.",
-            required=True,
-        )
-        args_schema.start_date = AAZStrArg(
-            options=["--start-date", "-s"],
-            help="Start date (YYYY-MM-DD in UTC). Only needed for daily grain and if specified, also requires --end-date.",
-            required=True,
-        )
         args_schema.filter._required = False
         args_schema.filter._registered = False
         return args_schema
