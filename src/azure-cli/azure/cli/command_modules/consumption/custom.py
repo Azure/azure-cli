@@ -279,48 +279,21 @@ def marketplace_list_output(result):
     return result
 
 
+def budget_output(result):
+    result['amount'] = str(result['amount'])
+    if 'currentSpend' in result:
+        result['currentSpend']['amount'] = str(result['currentSpend'].get('amount', None))
+    if 'notifications' in result:
+        for key in result['notifications']:
+            value = result['notifications'][key]
+            value['threshold'] = str(value.get('threshold', None))
+    return result
+
+
 class ConsumptionBudgetsList(_ConsumptionBudgetsList):
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
-        from ._transformers import budget_output
         result = [budget_output(item) for item in result]
         next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
         return result, next_link
-
-
-def cli_consumption_show_budget(cmd, budget_name, resource_group_name=None):
-    args = {"budget_name": budget_name}
-    if resource_group_name:
-        from .aaz.latest.consumption.budget import ShowWithRg
-        args['resource_group'] = resource_group_name
-        return ShowWithRg(cli_ctx=cmd.cli_ctx)(command_args=args)
-    from .aaz.latest.consumption.budget import Show
-    return Show(cli_ctx=cmd.cli_ctx)(command_args=args)
-
-
-def cli_consumption_create_budget(cmd, budget_name, category, amount, time_grain, start_date, end_date, resource_groups=None, resources=None, meters=None, resource_group_name=None):
-    args = {
-        "budget_name": budget_name,
-        "category": category,
-        "amount": float(amount),
-        "time_grain": time_grain,
-        "time_period": {"start_date": str(start_date), "end_date": str(end_date)},
-        "filters": {"resource_groups": resource_groups, "meters": meters, "resources": resources},
-    }
-    if resource_group_name:
-        from .aaz.latest.consumption.budget import CreateWithRg
-        args['resource_group'] = resource_group_name
-        return CreateWithRg(cli_ctx=cmd.cli_ctx)(command_args=args)
-    from .aaz.latest.consumption.budget import Create
-    return Create(cli_ctx=cmd.cli_ctx)(command_args=args)
-
-
-def cli_consumption_delete_budget(cmd, budget_name, resource_group_name=None):
-    args = {"budget_name": budget_name}
-    if resource_group_name:
-        args['resource_group'] = resource_group_name
-        from .aaz.latest.consumption.budget import DeleteWithRg
-        return DeleteWithRg(cli_ctx=cmd.cli_ctx)(command_args=args)
-    from .aaz.latest.consumption.budget import Delete
-    return Delete(cli_ctx=cmd.cli_ctx)(command_args=args)
