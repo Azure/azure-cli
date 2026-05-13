@@ -99,9 +99,9 @@ def retention_validator(ns):
 
 
 def db_renaming_cluster_validator(ns):
-    if ns.database_name is not None and ns.create_cluster.lower() != 'elasticcluster':
+    if ns.database_name is not None and ns.cluster_size is None:
         raise ArgumentUsageError('The --database-name argument can only be used '
-                                 'when --cluster-option is set to "ElasticCluster".')
+                                 'when --node-count is present, as it only applies to elastic clusters.')
 
 
 # Validates if a subnet id or name have been given by the user. If subnet id is given, vnet-name should not be provided.
@@ -150,7 +150,7 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
                            public_access=None, version=None, instance=None, geo_redundant_backup=None,
                            byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
                            auto_grow=None, performance_tier=None,
-                           storage_type=None, iops=None, throughput=None, create_cluster=None, cluster_size=None,
+                           storage_type=None, iops=None, throughput=None, cluster_size=None,
                            password_auth=None, microsoft_entra_auth=None,
                            admin_name=None, admin_id=None, admin_type=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
@@ -169,7 +169,7 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     sku_info = {k.lower(): v for k, v in sku_info.items()}
     single_az = list_location_capability_info['single_az']
     geo_backup_supported = list_location_capability_info['geo_backup_supported']
-    _cluster_validator(create_cluster, cluster_size, auto_grow, version, instance)
+    _cluster_validator(cluster_size, instance)
     _network_arg_validator(subnet, public_access)
     _pg_tier_validator(tier, sku_info)  # need to be validated first
     if tier is None and instance is not None:
@@ -198,16 +198,8 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
                                  admin_name, admin_id, admin_type, instance)
 
 
-def _cluster_validator(create_cluster, cluster_size, auto_grow, version, instance):
-    if (create_cluster and create_cluster.lower() == 'elasticcluster') or \
-       (instance and instance.cluster and instance.cluster.cluster_size > 0):
-        if instance is None and version != '17':
-            raise ValidationError('Elastic cluster is only supported for PostgreSQL version 17.')
-
-        if auto_grow and auto_grow.lower() != 'disabled':
-            raise ValidationError('Storage auto-grow is not supported for elastic cluster.')
-
-    if cluster_size and instance and not instance.cluster:
+def _cluster_validator(cluster_size, instance):
+    if cluster_size is not None and instance and not instance.cluster:
         raise ValidationError('Node count can only be specified for an elastic cluster.')
 
 
