@@ -9386,11 +9386,12 @@ class NetworkVirtualNetworkApplianceScenario(ScenarioTest):
             self.check('bandwidthInGbps', 50),
         ])
 
-        # create vnet/subnet for DualStack vna
-        self.cmd('network vnet create -g {rg} -n {vnet2} --address-prefixes {vnet_address}')
+        # create vnet/subnet for DualStack vna (need both IPv4 and IPv6 address spaces)
+        self.cmd('network vnet create -g {rg} -n {vnet2} --address-prefixes {vnet_address} fd00:db8::/48')
         self.kwargs['subnet2_id'] = self.cmd(
             'network vnet subnet create -g {rg} -n {subnet} --vnet-name {vnet2} '
-            '--address-prefix {subnet_address} --default-outbound false --query id'
+            '--address-prefixes {subnet_address} fd00:db8::/64 '
+            '--default-outbound false --query id'
         ).get_output_in_json()
 
         # create vna with --private-ip-address-version DualStack
