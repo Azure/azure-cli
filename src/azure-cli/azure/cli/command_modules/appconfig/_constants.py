@@ -63,6 +63,13 @@ class KeyVaultConstants:
     KEYVAULT_CONTENT_TYPE = "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
 
 
+class SnapshotReferenceConstants:
+    SNAPSHOT_REFERENCE_CONTENT_TYPE = (
+        'application/json; profile="https://azconfig.io/mime-profiles/snapshot-ref"; charset=utf-8'
+    )
+    SNAPSHOT_NAME_KEY = "snapshot_name"
+
+
 class AIConfigConstants:
     AI_CHAT_COMPLETION_CONTENT_TYPE = "application/vnd.microsoft.appconfig.aichatcompletion+json;charset=utf-8"
 

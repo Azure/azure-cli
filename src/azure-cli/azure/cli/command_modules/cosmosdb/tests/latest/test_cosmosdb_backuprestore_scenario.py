@@ -683,3 +683,80 @@ class CosmosDBRestoreUnitTests(unittest.TestCase):
         client.get.assert_not_called()
         # 4. Result matches
         self.assertEqual(result, mock_created_account)
+
+    def test_restore_preserves_source_arm_location_for_cross_region(self):
+        # Regression test for cross-region restore: ensure the
+        # `failover_priority == 0` loop does NOT overwrite arm_location
+        # (source region) with the priority-0 location (target region)
+        # when is_restore_request=True. Backend rejects the request as
+        # BadRequest if top-level `location` does not match the
+        # `restoreSource` URI region.
+        from azure.cli.command_modules.cosmosdb.custom import _create_database_account
+
+        client = mock.MagicMock()
+        poller = mock.MagicMock()
+        mock_account = mock.MagicMock()
+        mock_account.provisioning_state = "Succeeded"
+        poller.result.return_value = mock_account
+        client.begin_create_or_update.return_value = poller
+
+        # Mock a Location object with a real failover_priority value (not a
+        # MagicMock) so the gate's truthiness check behaves predictably.
+        target_location = mock.MagicMock()
+        target_location.location_name = "westus2"
+        target_location.failover_priority = 0
+
+        with mock.patch(
+            'azure.cli.command_modules.cosmosdb.custom.DatabaseAccountCreateUpdateParameters'
+        ) as mock_params:
+            _create_database_account(
+                client=client,
+                resource_group_name="rg",
+                account_name="myaccount",
+                locations=[target_location],
+                is_restore_request=True,
+                arm_location="eastus2",
+                restore_source="/subscriptions/sub/providers/Microsoft.DocumentDB/locations/eastus2/restorableDatabaseAccounts/source-id",
+                restore_timestamp="2026-01-01T00:00:00+00:00"
+            )
+
+            mock_params.assert_called_once()
+            kwargs = mock_params.call_args.kwargs
+            # Source region (eastus2) must be preserved; loop must NOT
+            # overwrite it with the priority-0 target (westus2).
+            self.assertEqual(kwargs.get('location'), "eastus2")
+            self.assertEqual(kwargs.get('locations'), [target_location])
+
+    def test_normal_create_aligns_arm_location_with_priority_zero(self):
+        # Control test: for non-restore creates, the loop preserves
+        # existing behavior of aligning arm_location with the
+        # priority-0 location.
+        from azure.cli.command_modules.cosmosdb.custom import _create_database_account
+
+        client = mock.MagicMock()
+        poller = mock.MagicMock()
+        mock_account = mock.MagicMock()
+        mock_account.provisioning_state = "Succeeded"
+        poller.result.return_value = mock_account
+        client.begin_create_or_update.return_value = poller
+
+        primary_location = mock.MagicMock()
+        primary_location.location_name = "westus2"
+        primary_location.failover_priority = 0
+
+        with mock.patch(
+            'azure.cli.command_modules.cosmosdb.custom.DatabaseAccountCreateUpdateParameters'
+        ) as mock_params:
+            _create_database_account(
+                client=client,
+                resource_group_name="rg",
+                account_name="myaccount",
+                locations=[primary_location],
+                is_restore_request=False,
+                arm_location="eastus2"
+            )
+
+            mock_params.assert_called_once()
+            kwargs = mock_params.call_args.kwargs
+            # Non-restore path: priority-0 location overrides arm_location.
+            self.assertEqual(kwargs.get('location'), "westus2")

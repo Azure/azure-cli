@@ -165,6 +165,7 @@ def normalize_disk_info(image_data_disks=None,
                         data_disk_sizes_gb=None, attach_data_disks=None, storage_sku=None,
                         os_disk_caching=None, data_disk_cachings=None, size='',
                         ephemeral_os_disk=False, ephemeral_os_disk_placement=None,
+                        ephemeral_os_disk_enable_full_caching=None,
                         data_disk_delete_option=None, source_snapshots_or_disks=None,
                         source_snapshots_or_disks_size_gb=None, source_disk_restore_point=None,
                         source_disk_restore_point_size_gb=None):
@@ -204,6 +205,8 @@ def normalize_disk_info(image_data_disks=None,
             os_disk_caching = 'ReadOnly'
         if ephemeral_os_disk_placement:
             info['os']['diffDiskSettings']['placement'] = ephemeral_os_disk_placement
+        if ephemeral_os_disk_enable_full_caching is not None:
+            info['os']['diffDiskSettings']['enableFullCaching'] = ephemeral_os_disk_enable_full_caching
 
     # add managed image data disks
     for data_disk in image_data_disks:
