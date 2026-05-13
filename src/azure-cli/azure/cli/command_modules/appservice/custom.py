@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import ast
+import base64
 import threading
 import time
 import re
@@ -6742,7 +6743,7 @@ def _get_log(url, headers, log_file=None):
 def upload_ssl_cert(cmd, resource_group_name,
                     name, certificate_password,
                     certificate_file, slot=None,
-                    certificate_name=None):
+                    certificate_name=None, load_to_code=None):
     Certificate = cmd.get_models('Certificate')
     client = web_client_factory(cmd.cli_ctx)
     webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
@@ -6763,6 +6764,32 @@ def upload_ssl_cert(cmd, resource_group_name,
                                         webapp.location, resource_group_name)
     cert = Certificate(password=certificate_password, pfx_blob=cert_contents,
                        location=webapp.location, server_farm_id=get_site_server_farm_id(webapp))
+
+    # Check if this is a Flex Consumption function app
+    is_flex = is_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
+
+    # For Flex Consumption apps, use the site-scoped certificates endpoint (slots not supported)
+    if is_flex:
+        # Build certificate envelope as dict to include loadCertificateToWebsitesSettings
+        # (not in SDK model yet)
+        cert_envelope = {
+            "location": webapp.location,
+            "properties": {
+                "password": certificate_password,
+                "pfxBlob": base64.b64encode(cert_contents).decode('utf-8'),
+                "serverFarmId": get_site_server_farm_id(webapp)
+            }
+        }
+        if load_to_code is not None:
+            cert_envelope["properties"]["loadCertificateToWebsitesSettings"] = {
+                "loadToWebsite": load_to_code
+            }
+        return client.site_certificates.create_or_update(
+            resource_group_name=resource_group_name,
+            name=name,
+            certificate_name=cert_name,
+            certificate_envelope=cert_envelope
+        )
     return client.certificates.create_or_update(resource_group_name, cert_name, cert)
 
 
@@ -6780,18 +6807,43 @@ def _get_cert(certificate_password, certificate_file):
     return thumbprint
 
 
-def list_ssl_certs(cmd, resource_group_name):
+def list_ssl_certs(cmd, resource_group_name, name=None):
     client = web_client_factory(cmd.cli_ctx)
+
+    # Check if this is a Flex Consumption function app
+    if name and is_flex_functionapp(cmd.cli_ctx, resource_group_name, name):
+        return client.site_certificates.list(resource_group_name=resource_group_name, name=name)
     return client.certificates.list_by_resource_group(resource_group_name)
 
 
-def show_ssl_cert(cmd, resource_group_name, certificate_name):
+def show_ssl_cert(cmd, resource_group_name, certificate_name, name=None):
     client = web_client_factory(cmd.cli_ctx)
+
+    # Check if this is a Flex Consumption function app
+    if name and is_flex_functionapp(cmd.cli_ctx, resource_group_name, name):
+        return client.site_certificates.get(
+            resource_group_name=resource_group_name,
+            name=name,
+            certificate_name=certificate_name
+        )
     return client.certificates.get(resource_group_name, certificate_name)
 
 
-def delete_ssl_cert(cmd, resource_group_name, certificate_thumbprint):
+def delete_ssl_cert(cmd, resource_group_name, certificate_thumbprint, name=None):
     client = web_client_factory(cmd.cli_ctx)
+
+    # Check if this is a Flex Consumption function app
+    if name and is_flex_functionapp(cmd.cli_ctx, resource_group_name, name):
+        site_certs = client.site_certificates.list(resource_group_name=resource_group_name, name=name)
+        for site_cert in site_certs:
+            if site_cert.thumbprint == certificate_thumbprint:
+                return client.site_certificates.delete(
+                    resource_group_name=resource_group_name,
+                    name=name,
+                    certificate_name=site_cert.name
+                )
+        raise ResourceNotFoundError("Certificate for thumbprint '{}' not found".format(certificate_thumbprint))
+
     webapp_certs = client.certificates.list_by_resource_group(resource_group_name)
     for webapp_cert in webapp_certs:
         if webapp_cert.thumbprint == certificate_thumbprint:
@@ -6799,7 +6851,8 @@ def delete_ssl_cert(cmd, resource_group_name, certificate_thumbprint):
     raise ResourceNotFoundError("Certificate for thumbprint '{}' not found".format(certificate_thumbprint))
 
 
-def import_ssl_cert(cmd, resource_group_name, key_vault, key_vault_certificate_name, name=None, certificate_name=None):
+def import_ssl_cert(cmd, resource_group_name, key_vault, key_vault_certificate_name, name=None, certificate_name=None,
+                    load_to_code=None, enable_using_msi=None):
     Certificate = cmd.get_models('Certificate')
     client = web_client_factory(cmd.cli_ctx)
 
@@ -6847,17 +6900,20 @@ def import_ssl_cert(cmd, resource_group_name, key_vault, key_vault_certificate_n
     from azure.cli.core.commands.client_factory import get_subscription_id
     subscription_id = get_subscription_id(cmd.cli_ctx)
     if cloud_type.lower() == PUBLIC_CLOUD.lower():
+        # Check if app_service_certificate_orders operation group is available in the SDK
         if kv_subscription.lower() != subscription_id.lower():
             diff_subscription_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_APPSERVICE,
                                                                subscription_id=kv_subscription)
-            ascs = diff_subscription_client.app_service_certificate_orders.list(api_version=VERSION_2022_09_01)
+            cert_orders_client = diff_subscription_client
         else:
-            ascs = client.app_service_certificate_orders.list(api_version=VERSION_2022_09_01)
+            cert_orders_client = client
 
-        kv_secret_name = None
-        for asc in ascs:
-            if asc.name == key_vault_certificate_name:
-                kv_secret_name = asc.certificates[key_vault_certificate_name].key_vault_secret_name
+        if hasattr(cert_orders_client, 'app_service_certificate_orders'):
+            ascs = cert_orders_client.app_service_certificate_orders.list(api_version=VERSION_2022_09_01)
+            for asc in ascs:
+                if asc.name == key_vault_certificate_name:
+                    kv_secret_name = asc.certificates[key_vault_certificate_name].key_vault_secret_name
+                    break
 
     # if kv_secret_name is not populated, it is not an appservice certificate, proceed for KV certificates
     if not kv_secret_name:
@@ -6877,6 +6933,31 @@ def import_ssl_cert(cmd, resource_group_name, key_vault, key_vault_certificate_n
 
     kv_cert_def = Certificate(location=location, key_vault_id=kv_id, password='',
                               key_vault_secret_name=kv_secret_name)
+
+    # Check if this is a Flex Consumption function app
+    if name and is_flex_functionapp(cmd.cli_ctx, resource_group_name, name):
+        # Build certificate envelope as dict to include loadCertificateToWebsitesSettings
+        # (not in SDK model yet)
+        cert_envelope = {
+            "location": location,
+            "properties": {
+                "keyVaultId": kv_id,
+                "password": "",
+                "keyVaultSecretName": kv_secret_name
+            }
+        }
+        if load_to_code is not None:
+            cert_envelope["properties"]["loadCertificateToWebsitesSettings"] = {
+                "loadToWebsite": load_to_code
+            }
+        if enable_using_msi is not None:
+            cert_envelope["properties"]["enableKeyVaultAccessUsingMSI"] = enable_using_msi
+        return client.site_certificates.create_or_update(
+            resource_group_name=resource_group_name,
+            name=name,
+            certificate_name=cert_name,
+            certificate_envelope=cert_envelope
+        )
 
     return client.certificates.create_or_update(name=cert_name, resource_group_name=resource_group_name,
                                                 certificate_envelope=kv_cert_def)
@@ -6909,9 +6990,23 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None,
     easy_cert_def = Certificate(location=location, canonical_name=hostname,
                                 server_farm_id=server_farm_id, password='')
 
+    # Check if this is a Flex Consumption function app
+    is_flex = is_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
+
+    # Default certificate_name to hostname if not provided
+    if not certificate_name:
+        certificate_name = hostname
+
     # TODO: Update manual polling to use LongRunningOperation once backend API & new SDK supports polling
     try:
-        certificate_name = hostname if not certificate_name else certificate_name
+        # For Flex Consumption apps, use the site-scoped certificates endpoint (slots not supported)
+        if is_flex:
+            return client.site_certificates.create_or_update(
+                resource_group_name=resource_group_name,
+                name=name,
+                certificate_name=certificate_name,
+                certificate_envelope=easy_cert_def
+            )
         return client.certificates.create_or_update(name=certificate_name, resource_group_name=resource_group_name,
                                                     certificate_envelope=easy_cert_def)
     except Exception as ex:
@@ -6979,24 +7074,37 @@ def _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint, 
     if not webapp:
         raise ResourceNotFoundError("'{}' app doesn't exist".format(name))
 
-    cert_resource_group_name = parse_resource_id(get_site_server_farm_id(webapp))['resource_group']
-    webapp_certs = client.certificates.list_by_resource_group(cert_resource_group_name)
+    # Check if this is a Flex Consumption function app
+    is_flex = is_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
 
     found_cert = None
-    # search for a cert that matches in the app service plan's RG
-    for webapp_cert in webapp_certs:
-        if webapp_cert.thumbprint == certificate_thumbprint:
-            found_cert = webapp_cert
-    # search for a cert that matches in the webapp's RG
-    if not found_cert:
-        webapp_certs = client.certificates.list_by_resource_group(resource_group_name)
+
+    # For Flex Consumption apps, search in site-scoped certificates
+    if is_flex:
+        site_certs = client.site_certificates.list(resource_group_name=resource_group_name, name=name)
+        for site_cert in site_certs:
+            if site_cert.thumbprint == certificate_thumbprint:
+                found_cert = site_cert
+                break
+    # If not a Flex app, search in regular certificates
+    else:
+        cert_resource_group_name = parse_resource_id(get_site_server_farm_id(webapp))['resource_group']
+        webapp_certs = client.certificates.list_by_resource_group(cert_resource_group_name)
+        # search for a cert that matches in the app service plan's RG
         for webapp_cert in webapp_certs:
             if webapp_cert.thumbprint == certificate_thumbprint:
                 found_cert = webapp_cert
-    # search for a cert that matches in the subscription, filtering on the serverfarm
-    if not found_cert:
-        sub_certs = client.certificates.list(filter=f"ServerFarmId eq '{get_site_server_farm_id(webapp)}'")
-        found_cert = next(iter([c for c in sub_certs if c.thumbprint == certificate_thumbprint]), None)
+        # search for a cert that matches in the webapp's RG
+        if not found_cert:
+            webapp_certs = client.certificates.list_by_resource_group(resource_group_name)
+            for webapp_cert in webapp_certs:
+                if webapp_cert.thumbprint == certificate_thumbprint:
+                    found_cert = webapp_cert
+        # search for a cert that matches in the subscription, filtering on the serverfarm
+        if not found_cert:
+            sub_certs = client.certificates.list(filter=f"ServerFarmId eq '{get_site_server_farm_id(webapp)}'")
+            found_cert = next(iter([c for c in sub_certs if c.thumbprint == certificate_thumbprint]), None)
+
     if found_cert:
         if not hostname:
             if len(found_cert.host_names) == 1 and not found_cert.host_names[0].startswith('*'):

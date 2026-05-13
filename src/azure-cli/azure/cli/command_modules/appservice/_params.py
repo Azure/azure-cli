@@ -708,6 +708,24 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('strategy_type', options_list=['--type'], arg_type=get_enum_type(UPDATE_STRATEGY_TYPES),
                    help="The update strategy type. Allowed values: Recreate, RollingUpdate.")
 
+    # Add optional 'name' parameter for functionapp SSL commands to support Flex Consumption apps
+    with self.argument_context('functionapp config ssl list') as c:
+        c.argument('name', options_list=['--name', '-n'], help='Name of the function app. Required for Flex Consumption apps to list site-scoped certificates.')
+
+    with self.argument_context('functionapp config ssl show') as c:
+        c.argument('name', options_list=['--name', '-n'], help='Name of the function app. Required for Flex Consumption apps to show site-scoped certificates.')
+
+    with self.argument_context('functionapp config ssl delete') as c:
+        c.argument('name', options_list=['--name', '-n'], help='Name of the function app. Required for Flex Consumption apps to delete site-scoped certificates.')
+
+    # Add load_to_code parameter for functionapp SSL commands that create/update certificates (Flex Consumption only)
+    with self.argument_context('functionapp config ssl upload') as c:
+        c.argument('load_to_code', arg_type=get_three_state_flag(), help='For Flex Consumption apps only. Make the certificate accessible to app code. When set to true, the certificate can be loaded via the WEBSITE_LOAD_CERTIFICATES app setting.')
+
+    with self.argument_context('functionapp config ssl import') as c:
+        c.argument('load_to_code', arg_type=get_three_state_flag(), help='For Flex Consumption apps only. Make the certificate accessible to app code. When set to true, the certificate can be loaded via the WEBSITE_LOAD_CERTIFICATES app setting.')
+        c.argument('enable_using_msi', arg_type=get_three_state_flag(), help='For Flex Consumption apps only. Enable Key Vault access using Managed Service Identity. When set to true, the app will use its managed identity to access Key Vault instead of service principal.')
+
     with self.argument_context('webapp config connection-string list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
 

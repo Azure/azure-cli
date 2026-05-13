@@ -469,10 +469,11 @@ class TestWebappMocked(unittest.TestCase):
         self.assertIn('--runtime', str(context.exception))
         self.assertIn('--os-type linux', str(context.exception))
 
+    @mock.patch('azure.cli.command_modules.appservice.custom.is_flex_functionapp', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom._verify_hostname_binding', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
-    def test_create_managed_ssl_cert(self, generic_site_op_mock, client_factory_mock, verify_binding_mock):
+    def test_create_managed_ssl_cert(self, generic_site_op_mock, client_factory_mock, verify_binding_mock, is_flex_mock):
         webapp_name = 'someWebAppName'
         rg_name = 'someRgName'
         farm_id = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg1/providers/Microsoft.Web/serverfarms/farm1'
@@ -488,6 +489,7 @@ class TestWebappMocked(unittest.TestCase):
         site = Site(name=webapp_name, location='westeurope')
         site.server_farm_id = farm_id
         generic_site_op_mock.return_value = site
+        is_flex_mock.return_value = False
 
         verify_binding_mock.return_value = False
         with self.assertRaises(CLIError):
