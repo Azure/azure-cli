@@ -42,7 +42,7 @@ from ._vm_diagnostics_templates import get_default_diag_config
 
 from ._actions import (load_images_from_aliases_doc, load_extension_images_thru_services,
                        load_images_thru_services, _get_latest_image_version_by_aaz)
-from ._client_factory import (_compute_client_factory, cf_vm_image_term)
+from ._client_factory import _compute_client_factory, cf_vm_image_term
 
 from .aaz.latest.vm.disk import AttachDetachDataDisk
 from .aaz.latest.vm import Update as UpdateVM
@@ -890,19 +890,6 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, 
 
 
 # region VirtualMachines
-def capture_vm(cmd, resource_group_name, vm_name, vhd_name_prefix,
-               storage_container='vhds', overwrite=True):
-    VirtualMachineCaptureParameters = cmd.get_models('VirtualMachineCaptureParameters')
-    client = _compute_client_factory(cmd.cli_ctx)
-    parameter = VirtualMachineCaptureParameters(vhd_prefix=vhd_name_prefix,
-                                                destination_container_name=storage_container,
-                                                overwrite_vhds=overwrite)
-    poller = client.virtual_machines.begin_capture(resource_group_name, vm_name, parameter)
-    result = LongRunningOperation(cmd.cli_ctx)(poller)
-    output = getattr(result, 'output', None) or result.resources[0]
-    print(json.dumps(output, indent=2))  # pylint: disable=no-member
-
-
 # pylint: disable=too-many-locals, unused-argument, too-many-statements, too-many-branches, broad-except
 def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_D2s_v5', location=None, tags=None,
               no_wait=False, authentication_type=None, admin_password=None, computer_name=None,
@@ -1392,19 +1379,6 @@ def get_vm_by_aaz(cmd, resource_group_name, vm_name, expand=None):
     return VMShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
-def get_vm(cmd, resource_group_name, vm_name, expand=None):
-    client = _compute_client_factory(cmd.cli_ctx)
-    return client.virtual_machines.get(resource_group_name, vm_name, expand=expand)
-
-
-def get_vm_to_update(cmd, resource_group_name, vm_name):
-    client = _compute_client_factory(cmd.cli_ctx)
-    vm = client.virtual_machines.get(resource_group_name, vm_name)
-    # To avoid unnecessary permission check of image
-    vm.storage_profile.image_reference = None
-    return vm
-
-
 def get_vm_to_update_by_aaz(cmd, resource_group_name, vm_name):
     from .operations.vm import VMShow
 
@@ -1742,20 +1716,6 @@ def stop_vm(cmd, resource_group_name, vm_name, no_wait=False, skip_shutdown=Fals
     return VMStop(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
-def set_vm(cmd, instance, lro_operation=None, no_wait=False):
-    instance.resources = None  # Issue: https://github.com/Azure/autorest/issues/934
-    client = _compute_client_factory(cmd.cli_ctx)
-    parsed_id = _parse_rg_name(instance.id)
-    poller = sdk_no_wait(no_wait, client.virtual_machines.begin_create_or_update,
-                         resource_group_name=parsed_id[0],
-                         vm_name=parsed_id[1],
-                         parameters=instance)
-    if lro_operation:
-        return lro_operation(poller)
-
-    return LongRunningOperation(cmd.cli_ctx)(poller)
-
-
 # Notes: vm format is in snake_case
 def set_vm_by_aaz(cmd, vm, no_wait=False):
     from .aaz.latest.vm import Create as _VMCreate
@@ -1782,19 +1742,6 @@ def set_vm_by_aaz(cmd, vm, no_wait=False):
         SetVM(cli_ctx=cmd.cli_ctx)(command_args=vm))
 
     return vm
-
-
-def patch_vm(cmd, resource_group_name, vm_name, vm):
-    client = _compute_client_factory(cmd.cli_ctx)
-    poller = client.virtual_machines.begin_update(resource_group_name, vm_name, vm)
-    return LongRunningOperation(cmd.cli_ctx)(poller)
-
-
-def patch_disk_encryption_set(cmd, resource_group_name, disk_encryption_set_name, disk_encryption_set_update):
-    client = _compute_client_factory(cmd.cli_ctx)
-    poller = client.disk_encryption_sets.begin_update(resource_group_name, disk_encryption_set_name,
-                                                      disk_encryption_set_update)
-    return LongRunningOperation(cmd.cli_ctx)(poller)
 
 
 def show_vm(cmd, resource_group_name, vm_name, show_details=False, include_user_data=False):
@@ -4280,26 +4227,6 @@ def deallocate_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=No
     return VmssDeallocate(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
-def get_vmss(cmd, resource_group_name, name, instance_id=None, include_user_data=False):
-    client = _compute_client_factory(cmd.cli_ctx)
-
-    expand = None
-    if include_user_data:
-        expand = 'userData'
-
-    if instance_id is not None:
-        if cmd.supported_api_version(min_api='2020-12-01', operation_group='virtual_machine_scale_sets'):
-            return client.virtual_machine_scale_set_vms.get(resource_group_name=resource_group_name,
-                                                            vm_scale_set_name=name, instance_id=instance_id,
-                                                            expand=expand)
-        return client.virtual_machine_scale_set_vms.get(resource_group_name=resource_group_name,
-                                                        vm_scale_set_name=name, instance_id=instance_id)
-
-    if cmd.supported_api_version(min_api='2021-03-01', operation_group='virtual_machine_scale_sets'):
-        return client.virtual_machine_scale_sets.get(resource_group_name, name, expand=expand)
-    return client.virtual_machine_scale_sets.get(resource_group_name, name)
-
-
 def get_vmss_by_aaz(cmd, resource_group_name, name, instance_id=None, include_user_data=False):
     from .operations.vmss import VMSSShow
     from .operations.vmss_vms import VMSSVMSShow
@@ -5917,7 +5844,7 @@ def undelete_image_version(cmd, resource_group_name, gallery_name, gallery_image
 
 
 def fix_gallery_image_date_info(date_info):
-    # here we add needed time, if only date is provided, so the setting can be accepted by servie end
+    # here we add needed time, if only date is provided, so the setting can be accepted by service end
     if date_info and 't' not in date_info.lower():
         date_info += 'T12:59:59Z'
     return date_info

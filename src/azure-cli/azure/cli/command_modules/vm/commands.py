@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.command_modules.vm._client_factory import (cf_vm_image_term, cf_vmss, cf_log_analytics_data_plane)
+from azure.cli.command_modules.vm._client_factory import cf_vm_image_term, cf_vmss, cf_log_analytics_data_plane
 from azure.cli.command_modules.vm._format import (
     transform_ip_addresses, transform_vm, transform_vm_create_output, transform_vm_list,
     transform_disk_create_table_output, transform_sku_for_table_output, transform_disk_show_table_output,
@@ -432,7 +432,6 @@ def load_command_table(self, _):
     with self.command_group('restore-point') as g:
         g.custom_show_command('show', 'restore_point_show')
         g.custom_command('create', 'restore_point_create', supports_no_wait=True)
-        g.wait_command('wait')
 
     with self.command_group('restore-point collection') as g:
         g.custom_show_command('show', 'restore_point_collection_show')
