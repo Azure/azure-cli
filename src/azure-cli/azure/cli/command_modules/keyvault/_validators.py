@@ -426,7 +426,7 @@ def validate_deleted_vault_or_hsm_name(cmd, ns):
     hsm_name = getattr(ns, 'hsm_name', None)
 
     if not vault_name and not hsm_name:
-        raise CLIError('Please specify --vault-name or --hsm-name.')
+        raise CLIError('Please specify --name or --hsm-name.')
 
     if vault_name:
         resource_name = vault_name
