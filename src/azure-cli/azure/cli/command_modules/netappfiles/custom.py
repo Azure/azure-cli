@@ -192,7 +192,7 @@ _POOL_HALF_TIB_FEATURE = "Microsoft.NetApp/ANFHalfTiBPoolSize"
 _POOL_HALF_TIB_HINT = (
     "Provisioning a 512 GiB (0.5 TiB) pool requires the AFEC feature "
     "'{feature}' to be registered on your subscription. Register it with: "
-    "az feature registration create --provider-namespace Microsoft.NetApp "
+    "az feature registration create --namespace Microsoft.NetApp "
     "--name ANFHalfTiBPoolSize"
 ).format(feature=_POOL_HALF_TIB_FEATURE)
 
@@ -313,6 +313,18 @@ def _customize_pool_size_args(args_schema, *, on_update):
     )
 
 
+def _resolved_pool_bytes(cmd):
+    """Return the resolved aaz `size` value (bytes) from a Pool command instance,
+    or None if ctx/args have not been initialized yet or `size` is unset."""
+    ctx = getattr(cmd, "ctx", None)
+    if ctx is None or getattr(ctx, "args", None) is None:
+        return None
+    size_arg = getattr(ctx.args, "size", None)
+    if size_arg is None or not has_value(size_arg):
+        return None
+    return size_arg.to_serialized_data()
+
+
 class PoolCreate(_PoolCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
@@ -330,14 +342,16 @@ class PoolCreate(_PoolCreate):
         args.size = bytes_val
 
     def _handler(self, command_args):
-        poller = super()._handler(command_args)
+        # super()._handler initializes self.ctx and (in --no-wait path) runs the
+        # first LRO step synchronously, so service rejections (e.g. AFEC-gated
+        # 0.5 TiB) can be raised here before we get a poller to wrap.
+        try:
+            poller = super()._handler(command_args)
+        except Exception as ex:  # pylint: disable=broad-except
+            raise _augment_pool_size_error(ex, _resolved_pool_bytes(self))
         if poller is None:
-            return poller  # --no-wait path
-        requested_bytes = (
-            self.ctx.args.size.to_serialized_data()
-            if has_value(self.ctx.args.size) else None
-        )
-        return _wrap_pool_poller(poller, requested_bytes)
+            return poller  # --no-wait path (no exception)
+        return _wrap_pool_poller(poller, _resolved_pool_bytes(self))
 
 
 class PoolUpdate(_PoolUpdate):
@@ -358,14 +372,14 @@ class PoolUpdate(_PoolUpdate):
             args.size = bytes_val
 
     def _handler(self, command_args):
-        poller = super()._handler(command_args)
+        # See PoolCreate._handler for why we wrap super() too.
+        try:
+            poller = super()._handler(command_args)
+        except Exception as ex:  # pylint: disable=broad-except
+            raise _augment_pool_size_error(ex, _resolved_pool_bytes(self))
         if poller is None:
-            return poller  # --no-wait path
-        requested_bytes = (
-            self.ctx.args.size.to_serialized_data()
-            if has_value(self.ctx.args.size) else None
-        )
-        return _wrap_pool_poller(poller, requested_bytes)
+            return poller
+        return _wrap_pool_poller(poller, _resolved_pool_bytes(self))
 
 # endregion
 

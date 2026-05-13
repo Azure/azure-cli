@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
-from knack.util import CLIError
 from azure.core.exceptions import HttpResponseError
 from azure.cli.core.azclierror import InvalidArgumentValueError, ValidationError, MutuallyExclusiveArgumentError
 
