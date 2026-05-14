@@ -185,7 +185,7 @@ def load_arguments(self, _):
                    deprecate_info=c.deprecate(redirect='--public-network-access', hide=False))
         c.argument('public_network_access', options_list=['--public-network-access'],
                    arg_type=get_enum_type(['Disabled', 'Enabled', 'SecuredByPerimeter']),
-                   help='Control permission for data plane traffic coming from public networks while private endpoint is enabled. Possible values include: Disabled, Enabled, SecuredByPerimeter.',
+                   help='Control permission for data plane traffic coming from public networks. Possible values include: Disabled, Enabled, SecuredByPerimeter. NOTE: The SecuredByPerimeter mode is currently in preview.',
                    validator=validate_public_network_args)
         c.argument('disable_local_auth', arg_type=get_three_state_flag(), help='Disable all authentication methods other than AAD authentication.')
         c.argument('retention_days', arg_type=retention_days_arg_type)
@@ -207,7 +207,7 @@ def load_arguments(self, _):
                    deprecate_info=c.deprecate(redirect='--public-network-access', hide=False))
         c.argument('public_network_access', options_list=['--public-network-access'],
                    arg_type=get_enum_type(['Disabled', 'Enabled', 'SecuredByPerimeter']),
-                   help='Control permission for data plane traffic coming from public networks while private endpoint is enabled. Possible values include: Disabled, Enabled, SecuredByPerimeter.',
+                   help='Control permission for data plane traffic coming from public networks. Possible values include: Disabled, Enabled, SecuredByPerimeter. NOTE: The SecuredByPerimeter mode is currently in preview.',
                    validator=validate_public_network_args)
         c.argument('disable_local_auth', arg_type=get_three_state_flag(), help='Disable all authentication methods other than AAD authentication.')
         c.argument('enable_purge_protection', options_list=['--enable-purge-protection', '-p'], arg_type=get_three_state_flag(), help='Property specifying whether protection against purge is enabled for this App Configuration store. Setting this property to true activates protection against purge for this App Configuration store and its contents. Enabling this functionality is irreversible.')

@@ -10,7 +10,7 @@ from azure.cli.command_modules.appconfig._client_factory import cf_configstore, 
 from azure.cli.core.commands.progress import IndeterminateStandardOut
 from azure.cli.core.util import user_confirmation
 from azure.core.exceptions import ResourceNotFoundError
-from azure.cli.core.azclierror import RequiredArgumentMissingError
+from azure.cli.core.azclierror import MutuallyExclusiveArgumentError, RequiredArgumentMissingError
 from azure.mgmt.appconfiguration.models import (ConfigurationStoreUpdateParameters,
                                                 ConfigurationStore,
                                                 Sku,
@@ -63,9 +63,12 @@ def create_configstore(cmd,  # pylint: disable=too-many-locals
     if assign_identity is not None and not assign_identity:
         assign_identity = [SYSTEM_ASSIGNED_IDENTITY]
 
-    resolved_public_network_access = public_network_access
-    if resolved_public_network_access is None and enable_public_network is not None:
-        resolved_public_network_access = PublicNetworkAccess.ENABLED if enable_public_network else PublicNetworkAccess.DISABLED
+    if public_network_access is not None and enable_public_network is not None:
+        raise MutuallyExclusiveArgumentError("Cannot specify both '--enable-public-network' and '--public-network-access'. "
+                                             "Please use '--public-network-access' as '--enable-public-network' has been deprecated.")
+
+    if enable_public_network is not None:
+        public_network_access = PublicNetworkAccess.ENABLED if enable_public_network else PublicNetworkAccess.DISABLED
 
     arm_private_link_delegation = None
     if enable_arm_private_network_access is not None:
@@ -87,7 +90,7 @@ def create_configstore(cmd,  # pylint: disable=too-many-locals
                                             identity=__get_resource_identity(assign_identity) if assign_identity else None,
                                             sku=Sku(name=sku),
                                             tags=tags,
-                                            public_network_access=resolved_public_network_access,
+                                            public_network_access=public_network_access,
                                             disable_local_auth=disable_local_auth,
                                             soft_delete_retention_in_days=retention_days,
                                             enable_purge_protection=enable_purge_protection,
@@ -206,9 +209,12 @@ def update_configstore(cmd,  # pylint: disable=too-many-locals
     if resource_group_name is None:
         resource_group_name, _ = resolve_store_metadata(cmd, name)
 
-    resolved_public_network_access = public_network_access
-    if resolved_public_network_access is None and enable_public_network is not None:
-        resolved_public_network_access = PublicNetworkAccess.ENABLED if enable_public_network else PublicNetworkAccess.DISABLED
+    if public_network_access is not None and enable_public_network is not None:
+        raise MutuallyExclusiveArgumentError("Cannot specify both '--enable-public-network' and '--public-network-access'. "
+                                             "Please use '--public-network-access' as '--enable-public-network' has been deprecated.")
+
+    if enable_public_network is not None:
+        public_network_access = PublicNetworkAccess.ENABLED if enable_public_network else PublicNetworkAccess.DISABLED
 
     arm_private_link_delegation = None
     if enable_arm_private_network_access is not None:
@@ -228,7 +234,7 @@ def update_configstore(cmd,  # pylint: disable=too-many-locals
 
     update_params = ConfigurationStoreUpdateParameters(tags=tags,
                                                        sku=Sku(name=sku) if sku else None,
-                                                       public_network_access=resolved_public_network_access,
+                                                       public_network_access=public_network_access,
                                                        disable_local_auth=disable_local_auth,
                                                        enable_purge_protection=enable_purge_protection,
                                                        default_key_value_revision_retention_period_in_seconds=kv_revision_retention_period,

@@ -170,14 +170,9 @@ def _featurefilter_entry_format_group(item):
 
 def _configstore_nsp_format_group(item):
     return OrderedDict([
-        ('NAME', _get_value(item, 'name')),
-        ('PROVISIONING STATE', _get_value(item, 'properties', 'provisioningState')),
-        ('PERIMETER GUID', _get_value(item, 'properties', 'networkSecurityPerimeter', 'perimeterGuid')),
-        ('PERIMETER LOCATION', _get_value(item, 'properties', 'networkSecurityPerimeter', 'location')),
         ('PERIMETER ID', _get_value(item, 'properties', 'networkSecurityPerimeter', 'id')),
-        ('RESOURCE ASSOCIATION NAME', _get_value(item, 'properties', 'resourceAssociation', 'name')),
-        ('ACCESS MODE', _get_value(item, 'properties', 'resourceAssociation', 'accessMode')),
         ('PROFILE NAME', _get_value(item, 'properties', 'profile', 'name')),
+        ('ACCESS MODE', _get_value(item, 'properties', 'resourceAssociation', 'accessMode')),
         ('ACCESS RULES VERSION', _get_value(item, 'properties', 'profile', 'accessRulesVersion')),
         ('DIAGNOSTIC SETTINGS VERSION', _get_value(item, 'properties', 'profile', 'diagnosticSettingsVersion'))
     ])

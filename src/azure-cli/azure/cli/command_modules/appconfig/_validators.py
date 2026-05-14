@@ -447,6 +447,8 @@ def validate_public_network_args(namespace):
     if namespace.enable_public_network is not None and namespace.public_network_access is not None:
         raise MutuallyExclusiveArgumentError("Cannot specify both '--enable-public-network' and '--public-network-access'. "
                                              "Please use '--public-network-access' as '--enable-public-network' has been deprecated.")
+    if namespace.public_network_access is not None and namespace.public_network_access.lower() == 'securedbyperimeter':
+        logger.warning("The 'SecuredByPerimeter' value is currently in preview.")
 
 
 def validate_sku(namespace):
