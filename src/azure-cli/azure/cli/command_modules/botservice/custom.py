@@ -59,7 +59,7 @@ def __prepare_configuration_file(cmd, resource_group_name, kudu_client, folder_p
                                if setting['name'] not in ignorable_settings}
         existing = None
         if not os.path.exists(app_settings_path):
-            logger.info('App settings not found at %s, defaulting app settings to empty object.', app_settings_path)
+            logger.info('App settings not found at %s, defaulting app settings to empty.', app_settings_path)
             existing = {}
         else:
             with open(app_settings_path, 'r') as f:
@@ -321,7 +321,7 @@ def download_app(cmd, client, resource_group_name, resource_name, file_save_path
             existing = None
             if not os.path.exists(app_settings_path):
 
-                logger.info('App settings not found at %s, defaulting app settings to empty object.', app_settings_path)
+                logger.info('App settings not found at %s, defaulting app settings to empty.', app_settings_path)
                 existing = '{}'
             else:
                 with open(app_settings_path, 'r') as f:
