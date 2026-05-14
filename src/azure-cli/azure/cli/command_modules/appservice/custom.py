@@ -58,6 +58,9 @@ from ._client_factory import (web_client_factory, ex_handler_factory, providers_
                               appcontainers_client_factory)
 from ._appservice_utils import _generic_site_operation, _generic_settings_operation
 from ._appservice_utils import MSI_LOCAL_ID
+from ._deployment_context_engine import (
+    raise_enriched_deployment_error, EnrichedDeploymentError
+)
 from .utils import (_normalize_sku,
                     get_sku_tier,
                     retryable_method,
@@ -266,17 +269,25 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         if not validate_container_app_create_options(runtime, container_image_name,
                                                      multicontainer_config_type, multicontainer_config_file,
                                                      sitecontainers_app):
+            if not any([runtime, container_image_name, multicontainer_config_type,
+                        multicontainer_config_file, deployment_container_image_name, sitecontainers_app]):
+                raise ArgumentUsageError('Creating a Linux webapp requires one of the following: '
+                                         '--runtime, --container-image-name, '
+                                         'or --sitecontainers-app. '
+                                         "Run 'az webapp list-runtimes --os-type linux' for supported runtimes. "
+                                         "For custom containers, see 'az webapp sitecontainers create --help': "
+                                         "https://learn.microsoft.com/cli/azure/webapp/sitecontainers")
             if deployment_container_image_name:
                 raise ArgumentUsageError('Please specify both --multicontainer-config-type TYPE '
                                          'and --multicontainer-config-file FILE, '
                                          'and only specify one out of --runtime, '
                                          '--deployment-container-image-name, --multicontainer-config-type '
-                                         'or --sitecontainers_app')
+                                         'or --sitecontainers-app')
             raise ArgumentUsageError('Please specify both --multicontainer-config-type TYPE '
                                      'and --multicontainer-config-file FILE, '
                                      'and only specify one out of --runtime, '
                                      '--container-image-name, --multicontainer-config-type '
-                                     'or --sitecontainers_app')
+                                     'or --sitecontainers-app')
         if startup_file:
             site_config.app_command_line = startup_file
         if sitecontainers_app:
@@ -868,7 +879,7 @@ def enable_zip_deploy_flex(cmd, resource_group_name, name, src, timeout=None, sl
 
 # This funtion performs deployment using /zipdeploy for both function app and web app
 def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=None,
-                      track_status=False, enable_kudu_warmup=True):
+                      track_status=False, enable_kudu_warmup=True, enriched_errors=False):
     logger.warning("Getting scm site credentials for zip deployment")
 
     try:
@@ -892,6 +903,8 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     # check if the app is a linux web app
     app_is_linux_webapp = is_linux_webapp(app)
     app_is_function_app = is_functionapp(app)
+
+    _should_enrich_errors = enriched_errors and not app_is_function_app and app_is_linux_webapp
 
     # Read file content
     with open(os.path.realpath(os.path.expanduser(src)), 'rb') as fs:
@@ -926,16 +939,30 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
     if res.status_code == 202:
         response_body = None
         if track_status:
-            response_body = _check_runtimestatus_with_deploymentstatusapi(cmd, resource_group_name, name, slot,
-                                                                          deployment_status_url, is_async=True,
-                                                                          timeout=timeout)
+            response_body = _check_runtimestatus_with_deploymentstatusapi(
+                cmd, resource_group_name, name, slot,
+                deployment_status_url, is_async=True,
+                timeout=timeout)
         else:
-            response_body = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
-                                                         slot, timeout)
+            response_body = _check_zip_deployment_status(
+                cmd, resource_group_name, name, deployment_status_url,
+                slot, timeout)
         return response_body
 
     # check if there's an ongoing process
     if res.status_code == 409:
+        if _should_enrich_errors:
+            raise_enriched_deployment_error(
+                cmd=cmd,
+                resource_group_name=resource_group_name,
+                webapp_name=name,
+                slot=slot,
+                artifact_type="zip",
+                status_code=409,
+                error_message=res.text if res.text else "Deployment conflict (HTTP 409)",
+                last_known_step="Zip deployment HTTP request",
+                kudu_status="409"
+            )
         raise UnclassifiedUserFault("There may be an ongoing deployment or your app setting has "
                                     "WEBSITE_RUN_FROM_PACKAGE. Please track your deployment in {} and ensure the "
                                     "WEBSITE_RUN_FROM_PACKAGE app setting is removed. Use 'az webapp config "
@@ -946,6 +973,18 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=No
 
     # check if an error occured during deployment
     if res.status_code:
+        if _should_enrich_errors and res.status_code >= 400:
+            raise_enriched_deployment_error(
+                cmd=cmd,
+                resource_group_name=resource_group_name,
+                webapp_name=name,
+                slot=slot,
+                artifact_type="zip",
+                status_code=res.status_code,
+                error_message=res.text if res.text else None,
+                last_known_step="Zip deployment HTTP request",
+                kudu_status=str(res.status_code)
+            )
         raise AzureInternalError("An error occured during deployment. Status Code: {}, Details: {}"
                                  .format(res.status_code, res.text))
 
@@ -2125,20 +2164,48 @@ def get_webapp_sitecontainer_log(cmd, name, resource_group, container_name, slot
         raise AzureInternalError("Failed to fetch sitecontainer logs. Error: {}".format(str(ex)))
 
 
-def convert_webapp_sitecontainers(cmd, name, resource_group, mode, slot=None):
+def convert_webapp_sitecontainers(cmd, name, resource_group, mode, slot=None, main_container_name=None, yes=False):
     """
-    Convert a webapp between classic (docker) and sitecontainers mode.
+    Convert a webapp between classic (docker/compose) and sitecontainers mode.
 
     :param cmd: CLI command context
     :param name: Name of the webapp
     :param resource_group: Resource group of the webapp
     :param mode: Target mode, either 'docker' or 'sitecontainers'
     :param slot: Optional deployment slot
+    :param main_container_name: For compose conversion, the name of the service to be the main container
+    :param yes: Do not prompt for confirmation.
     """
+    if not slot and mode == 'sitecontainers' and not yes:
+        logger.warning("")
+        logger.warning("WARNING: You are about to convert the production site directly. "
+                       "It is recommended to perform the conversion on a deployment slot first, "
+                       "verify the result, and then swap the slot into production.")
+        logger.warning("")
+        logger.warning("If you proceed on production and need to roll back:")
+        logger.warning("  1. Save your current config first:")
+        logger.warning("       az webapp config show -g %s -n %s --query linuxFxVersion -o tsv",
+                       resource_group, name)
+        logger.warning("  2. Delete all sitecontainers created by the conversion:")
+        logger.warning("       az webapp sitecontainers list -g %s -n %s "
+                       "--query \"[].name\" -o tsv", resource_group, name)
+        logger.warning("       az webapp sitecontainers delete -g %s -n %s "
+                       "--container-name <name>", resource_group, name)
+        logger.warning("       (Repeat for each sitecontainer)")
+        logger.warning("  3. Review and delete any app settings prefixed with COMPOSE_")
+        logger.warning("     that were added during conversion.")
+        logger.warning("  4. Restore the saved linuxFxVersion:")
+        logger.warning("       az webapp config set -g %s -n %s "
+                       "--linux-fx-version \"<saved-value>\"", resource_group, name)
+        logger.warning("")
+        if not prompt_y_n("Do you want to continue with the conversion on the production site?"):
+            logger.warning("Conversion aborted. Use '--slot <slot-name>' to convert a deployment slot instead.")
+            return None
+
     if mode == 'sitecontainers':
-        _convert_webapp_to_sitecontainers(cmd, name, resource_group, slot)
+        _convert_webapp_to_sitecontainers(cmd, name, resource_group, slot, main_container_name, yes=yes)
     elif mode == 'docker':
-        _convert_webapp_to_docker(cmd, name, resource_group, slot)
+        _convert_webapp_to_docker(cmd, name, resource_group, slot, yes=yes)
     else:
         raise InvalidArgumentValueError(
             "Invalid mode '{}'. Allowed values: docker, sitecontainers.".format(mode)
@@ -2174,7 +2241,7 @@ def update_webapp(cmd, instance, client_affinity_enabled=None, https_only=None, 
         args = ["--minimum-elastic-instance-count", "--prewarmed-instance-count"]
         plan = get_app_service_plan_from_webapp(cmd, instance)
         sku = _normalize_sku(plan.sku.name)
-        if get_sku_tier(sku) not in ["PREMIUMV2", "PREMIUMV3"]:
+        if get_sku_tier(sku) not in ["PREMIUMV2", "PREMIUM0V3", "PREMIUMV3"]:
             raise ValidationError("{} are only supported for elastic premium V2/V3 SKUs".format(str(args)))
         if not plan.elastic_scale_enabled:
             raise ValidationError("Elastic scale is not enabled on the App Service Plan. Please update the plan ")
@@ -2441,14 +2508,27 @@ def _build_plan_default_identity_sdk(default_identity):
     }
 
 
-def _convert_webapp_to_sitecontainers(cmd, name, resource_group, slot):
+def _convert_webapp_to_sitecontainers(cmd, name, resource_group, slot, main_container_name=None, yes=False):
     site_config = get_site_configs(cmd, resource_group, name, slot)
     linux_fx_version = getattr(site_config, "linux_fx_version", None)
 
-    if linux_fx_version and not linux_fx_version.startswith('DOCKER|'):
-        raise ValidationError("Cannot convert to sitecontainers mode as site is not a "
-                              "classic custom container (docker) app.")
+    is_compose = linux_fx_version and linux_fx_version.startswith('COMPOSE|')
+    is_docker = linux_fx_version and linux_fx_version.startswith('DOCKER|')
 
+    if not is_compose and not is_docker:
+        raise ValidationError("Cannot convert to sitecontainers mode. The site must be a "
+                              "classic custom container (DOCKER|) or multi-container (COMPOSE|) app. "
+                              "Current linuxFxVersion: '{}'".format(linux_fx_version or '(empty)'))
+
+    if is_compose:
+        _convert_compose_to_sitecontainers(cmd, name, resource_group, slot, site_config,
+                                           linux_fx_version, main_container_name, yes=yes)
+    else:
+        _convert_docker_to_sitecontainers(cmd, name, resource_group, slot, site_config, linux_fx_version)
+
+
+def _convert_docker_to_sitecontainers(cmd, name, resource_group, slot, site_config, linux_fx_version):
+    """Convert a single-container DOCKER| app to sitecontainers mode."""
     acr_use_managed_identity_creds = getattr(site_config, "acr_use_managed_identity_creds", None)
     acr_user_managed_identity_id = getattr(site_config, "acr_user_managed_identity_id", None)
     acr_user_name = None
@@ -2521,7 +2601,637 @@ def _convert_webapp_to_sitecontainers(cmd, name, resource_group, slot):
     logger.warning("Webapp '%s' converted to sitecontainers mode.", name)
 
 
-def _convert_webapp_to_docker(cmd, name, resource_group, slot):
+# ---------------------------------------------------------------------------
+# Compose → Sitecontainers conversion
+# ---------------------------------------------------------------------------
+# The following constants and functions parse a Docker Compose YAML (as stored
+# in linuxFxVersion as COMPOSE|<base64>) and produce SiteContainer ARM objects.
+# The parsing mirrors what the LWAS v1 ComposeFileParser.cs actually accepted,
+# and the volume-mapping logic matches AppSpecConverter.cs in LWASv2.
+# ---------------------------------------------------------------------------
+
+_COMPOSE_WEBAPP_STORAGE_HOME = "${WEBAPP_STORAGE_HOME}"
+_COMPOSE_SIDECAR_HOME_MOUNT = "/home"
+
+# Compose fields that are recognized by the LWAS v1 orchestrator.  Everything
+# else is silently ignored there, but we warn the user so they know what will
+# not carry over.
+_COMPOSE_SUPPORTED_SERVICE_KEYS = frozenset([
+    "image", "restart", "entrypoint", "command", "environment", "ports", "volumes",
+])
+
+# Top-level compose keys the old orchestrator recognized (even if it ignored
+# some, like "networks").
+_COMPOSE_SUPPORTED_TOP_KEYS = frozenset([
+    "version", "services", "networks", "volumes",
+])
+
+# Service-level keys that are NOT supported in Sidecars and merit a warning
+_COMPOSE_UNSUPPORTED_KEYS = frozenset([
+    "build", "depends_on", "links", "networks", "secrets", "deploy",
+    "healthcheck", "logging", "dns", "dns_search", "extra_hosts",
+    "cap_add", "cap_drop", "privileged", "read_only", "tmpfs",
+    "security_opt", "sysctls", "ulimits", "devices", "labels",
+    "stop_signal", "stop_grace_period", "working_dir", "domainname",
+    "hostname", "ipc", "pid", "shm_size", "stdin_open", "tty", "user",
+])
+
+
+def _parse_compose_entrypoint_or_command(value):
+    """Parse a Compose entrypoint or command value (string or list) into a list of tokens.
+
+    Mirrors ComposeFileParser.ParseEntryPoint / ParseCommand:
+    - Scalar string → split on whitespace
+    - Sequence → use items as-is
+    """
+    if value is None:
+        return []
+    if isinstance(value, list):
+        return [str(v) for v in value]
+    # Scalar string – split on whitespace (matching ComposeFileParser.TokenizeString)
+    return str(value).split()
+
+
+def _merge_entrypoint_command(entrypoint_tokens, command_tokens):
+    """Merge entrypoint and command into a single startUpCommand string.
+
+    In Docker/Compose semantics, ENTRYPOINT and CMD are separate concepts, but
+    the Sidecar model has a single ``startUpCommand`` field.  We concatenate
+    them (entrypoint first, then command arguments) which is the effective
+    behaviour of ``docker run``.
+
+    Returns None if both are empty so that the platform default is used.
+    """
+    merged = entrypoint_tokens + command_tokens
+    if not merged:
+        return None
+    return " ".join(merged)
+
+
+def _parse_compose_environment(env_node):
+    """Parse Compose environment into a dict of {NAME: VALUE}.
+
+    Supports both formats that ComposeFileParser handles:
+    - Mapping:  ``environment: { KEY: VALUE, ... }``
+    - Sequence: ``environment: [ "KEY=VALUE", ... ]``
+    """
+    if env_node is None:
+        return {}
+    if isinstance(env_node, dict):
+        return {str(k): str(v) if v is not None else "" for k, v in env_node.items()}
+    if isinstance(env_node, list):
+        result = {}
+        for item in env_node:
+            item_str = str(item)
+            idx = item_str.find('=')
+            if idx > 0:
+                result[item_str[:idx]] = item_str[idx + 1:]
+            elif idx == 0:
+                logger.warning("  [env] Skipping environment entry with empty name: '%s'", item_str)
+            else:
+                # No '=' means the value comes from an existing app setting (name-only reference)
+                result[item_str] = ""
+        return result
+    logger.warning("  [env] Unexpected environment format (not dict or list). Skipping.")
+    return {}
+
+
+def _parse_compose_ports(ports_node):
+    """Parse Compose ports into a list of (host_port, container_port) tuples.
+
+    Only the ``host:container`` short syntax is parsed (matching
+    ComposeFileParser.ParsePorts).  Returns a list of tuples.
+    """
+    if ports_node is None:
+        return []
+    ports = []
+    for item in ports_node:
+        mapping = str(item)
+        parts = mapping.split(':')
+        if len(parts) >= 2:
+            try:
+                host_port = int(parts[0])
+                container_port = int(parts[1])
+                ports.append((host_port, container_port))
+            except ValueError:
+                logger.warning("  [ports] Skipping invalid port mapping: '%s'", mapping)
+        else:
+            # single port (no host mapping) – treat as container port
+            try:
+                container_port = int(parts[0])
+                ports.append((None, container_port))
+            except ValueError:
+                logger.warning("  [ports] Skipping invalid port value: '%s'", mapping)
+    return ports
+
+
+def _parse_compose_volumes(volumes_node, top_level_volumes):
+    """Parse Compose service volumes into sidecar VolumeMount dicts.
+
+    Handles both short syntax (``source:target``) and long syntax (mapping with
+    type/source/target) – mirroring ComposeFileParser.ParseContainerVolumes.
+
+    For the Sidecar model, ``volumeSubPath`` must be an absolute path under
+    ``/home`` (which maps to ``${WEBAPP_STORAGE_HOME}`` from Compose).  Named
+    volumes without a ``/home`` path are mapped to a local share path.
+
+    Returns:
+        A list of dicts with keys: volume_sub_path, container_mount_path,
+        read_only.  Also returns a list of warning strings for unsupported
+        volumes.
+    """
+    mounts = []
+    warnings = []
+    if volumes_node is None:
+        return mounts, warnings
+
+    for item in volumes_node:
+        if isinstance(item, dict):
+            # Long syntax: { type: bind|volume, source: ..., target: ... }
+            vol_type = item.get("type", "volume")
+            source = item.get("source", "")
+            target = item.get("target", "")
+            read_only = item.get("read_only", False)
+
+            if not source:
+                warnings.append(f"  [volumes] Skipping volume with empty source (target='{target}').")
+                continue
+            if not target:
+                warnings.append(f"  [volumes] Skipping volume with empty target (source='{source}').")
+                continue
+
+            if vol_type == "bind":
+                mount = _make_bind_mount(source, target, read_only, warnings)
+                if mount:
+                    mounts.append(mount)
+            else:
+                # Named volume – resolve against top-level volumes
+                mount = _make_named_volume_mount(source, target, read_only, top_level_volumes, warnings)
+                mounts.append(mount)
+        else:
+            # Short syntax: "source:target" or "source:target:ro"
+            parts = str(item).split(':')
+            if len(parts) >= 2:
+                source = parts[0]
+                target = parts[1]
+                read_only = len(parts) >= 3 and parts[2].strip().lower() == 'ro'
+            else:
+                warnings.append(f"  [volumes] Skipping unrecognised volume entry: '{item}'")
+                continue
+
+            if source.startswith(_COMPOSE_WEBAPP_STORAGE_HOME):
+                mount = _make_bind_mount(source, target, read_only, warnings)
+                if mount:
+                    mounts.append(mount)
+            elif any(c in source for c in ('/', '\\', '$')):
+                warnings.append(
+                    f"  [volumes] UNSUPPORTED bind mount '{source}:{target}'. "
+                    f"Only bind mounts starting with {_COMPOSE_WEBAPP_STORAGE_HOME} are supported."
+                )
+            else:
+                # Named volume
+                mount = _make_named_volume_mount(source, target, read_only, top_level_volumes, warnings)
+                mounts.append(mount)
+
+    return mounts, warnings
+
+
+def _make_bind_mount(source, target, read_only, warnings):
+    """Convert a ${WEBAPP_STORAGE_HOME}/... bind mount to a sidecar VolumeMount.
+
+    In Compose, ``${WEBAPP_STORAGE_HOME}`` is the /home mount point.  In the
+    Sidecar model, ``volumeSubPath`` is an absolute path under /home.
+    Example: ``${WEBAPP_STORAGE_HOME}/site/wwwroot`` → ``/home/site/wwwroot``.
+    """
+    if not source.startswith(_COMPOSE_WEBAPP_STORAGE_HOME):
+        warnings.append(
+            f"  [volumes] UNSUPPORTED bind mount source '{source}'. "
+            f"Bind mounts must start with {_COMPOSE_WEBAPP_STORAGE_HOME}."
+        )
+        return None
+
+    # Strip the ${WEBAPP_STORAGE_HOME} prefix and map to /home/...
+    sub_path = source[len(_COMPOSE_WEBAPP_STORAGE_HOME):]
+    if not sub_path:
+        sub_path = "/"
+    elif not sub_path.startswith('/'):
+        sub_path = '/' + sub_path
+
+    volume_sub_path = _COMPOSE_SIDECAR_HOME_MOUNT + sub_path if sub_path != '/' else _COMPOSE_SIDECAR_HOME_MOUNT
+
+    return {
+        "volume_sub_path": volume_sub_path,
+        "container_mount_path": target,
+        "read_only": read_only,
+    }
+
+
+def _make_named_volume_mount(vol_name, target, read_only, top_level_volumes, warnings):  # pylint: disable=unused-argument
+    """Convert a named volume to a sidecar VolumeMount.
+
+    Named volumes in Compose are typically Docker-managed volumes that are
+    local to the instance.  In the Sidecar model these map to the local
+    ephemeral share (``CustomLocalShare`` in LWASv2) via a volumeSubPath
+    that does NOT start with ``/home``.  We use ``/compose/volumes/<name>``
+    so the data stays on local (non-persistent) storage, which matches
+    Docker named volume semantics.  If persistence is needed, users should
+    switch to a ``${WEBAPP_STORAGE_HOME}`` bind mount instead.
+    """
+    warnings.append(
+        f"  [volumes] Named volume '{vol_name}' mapped to '/compose/volumes/{vol_name}' → '{target}'. "
+        f"This uses LOCAL (ephemeral) storage, matching Docker named volume behaviour. "
+        f"Data will NOT survive a restart. If you need persistence, use a "
+        f"{_COMPOSE_WEBAPP_STORAGE_HOME} bind mount instead."
+    )
+    return {
+        "volume_sub_path": f"/compose/volumes/{vol_name}",
+        "container_mount_path": target,
+        "read_only": read_only,
+    }
+
+
+def _sanitize_container_name(service_name):
+    """Sanitize a Compose service name for use as a sitecontainer name.
+
+    Sitecontainer names must be alphanumeric with hyphens, no underscores.
+    """
+    # Replace underscores/dots/spaces with hyphens, then strip non-alphanum-hyphen chars
+    sanitized = re.sub(r'[^a-zA-Z0-9-]', '-', service_name)
+    # Collapse consecutive hyphens
+    sanitized = re.sub(r'-+', '-', sanitized).strip('-')
+    return sanitized.lower() or "container"
+
+
+def _convert_compose_to_sitecontainers(cmd, name, resource_group, slot,  # pylint: disable=too-many-branches
+                                       site_config, linux_fx_version, main_container_name=None, yes=False):
+    """Convert a COMPOSE| multi-container app to sitecontainers mode.
+
+    Steps:
+    1. Decode & parse the compose YAML from linuxFxVersion
+    2. Extract services with image, entrypoint, command, environment, ports, volumes
+    3. Determine authentication (shared ACR config for all services)
+    4. Create app settings for inline environment variables
+    5. Map volumes (${WEBAPP_STORAGE_HOME} → /home VolumeSubPath)
+    6. Create sitecontainer resources via ARM
+    7. Set linuxFxVersion to SITECONTAINERS
+    """
+    import yaml
+    from base64 import b64decode
+    from azure.mgmt.web.models import VolumeMount, EnvironmentVariable
+
+    # -----------------------------------------------------------------------
+    # Step 1: Decode and parse compose YAML
+    # -----------------------------------------------------------------------
+    compose_b64 = linux_fx_version.split('|', 1)[1]
+    try:
+        compose_yaml_str = b64decode(compose_b64.encode('utf-8')).decode('utf-8')
+    except Exception as ex:
+        raise ValidationError(f"Failed to base64-decode the COMPOSE configuration: {ex}")
+
+    try:
+        compose = yaml.safe_load(compose_yaml_str)
+    except Exception as ex:
+        raise ValidationError(f"Failed to parse COMPOSE YAML: {ex}")
+
+    if not isinstance(compose, dict) or 'services' not in compose:
+        raise ValidationError("Invalid Docker Compose file: missing 'services' section.")
+
+    services = compose.get('services', {})
+    if not services:
+        raise ValidationError("Docker Compose file has no services defined.")
+
+    top_level_volumes = compose.get('volumes', {}) or {}
+
+    # Warn about unrecognised top-level keys
+    for key in compose:
+        if key not in _COMPOSE_SUPPORTED_TOP_KEYS:
+            logger.warning("WARNING: Top-level Compose key '%s' is not supported and will be ignored.", key)
+
+    # -----------------------------------------------------------------------
+    # Step 2: Get shared ACR auth configuration
+    # -----------------------------------------------------------------------
+    acr_use_managed_identity_creds = getattr(site_config, "acr_use_managed_identity_creds", None)
+    acr_user_managed_identity_id = getattr(site_config, "acr_user_managed_identity_id", None)
+
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    slot_segment = f"/slots/{slot}" if slot else ""
+    url = (
+        f"/subscriptions/{subscription_id}/resourceGroups/{resource_group}/"
+        f"providers/Microsoft.Web/sites/{name}{slot_segment}/config/appsettings/list?api-version=2024-11-01"
+    )
+    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + url
+    response = send_raw_request(cmd.cli_ctx, "POST", request_url)
+    app_settings_raw = response.json()
+    existing_app_settings = app_settings_raw.get("properties", {})
+
+    acr_user_password = existing_app_settings.get("DOCKER_REGISTRY_SERVER_PASSWORD", None)
+    acr_user_name = existing_app_settings.get("DOCKER_REGISTRY_SERVER_USERNAME", None)
+
+    # -----------------------------------------------------------------------
+    # Step 3: Parse each service
+    # -----------------------------------------------------------------------
+    all_warnings = []
+    new_app_settings = {}  # Will be created as app settings for env var references
+    sitecontainer_specs = []
+    service_names = list(services.keys())
+    seen_ports = {}  # port → service_name for conflict detection
+    seen_names = {}  # sanitized container name → service_name for collision detection
+    services_with_ports = []
+
+    for svc_name in service_names:
+        svc = services[svc_name]
+        if not isinstance(svc, dict):
+            all_warnings.append(f"WARNING: Service '{svc_name}' is not a valid mapping. Skipping.")
+            continue
+
+        container_name = _sanitize_container_name(svc_name)
+        if container_name in seen_names:
+            raise ValidationError(
+                f"Container name collision: services '{seen_names[container_name]}' and '{svc_name}' "
+                f"both sanitize to container name '{container_name}'. Rename one of the services to avoid this."
+            )
+        seen_names[container_name] = svc_name
+        logger.warning("Processing service '%s' (container name: '%s')...", svc_name, container_name)
+
+        # Warn about unsupported keys
+        for key in svc:
+            if key in _COMPOSE_UNSUPPORTED_KEYS:
+                all_warnings.append(
+                    f"  [{svc_name}] WARNING: Key '{key}' is not supported in Sidecars and will be ignored."
+                )
+            elif key not in _COMPOSE_SUPPORTED_SERVICE_KEYS:
+                all_warnings.append(
+                    f"  [{svc_name}] INFO: Unrecognised key '{key}' will be ignored."
+                )
+
+        # --- Image ---
+        image = svc.get('image')
+        if not image:
+            raise ValidationError(
+                f"Service '{svc_name}' does not have an 'image' specified. "
+                f"Sidecars require a pre-built image; 'build' is not supported."
+            )
+
+        # --- Entrypoint + Command → startUpCommand ---
+        entrypoint_tokens = _parse_compose_entrypoint_or_command(svc.get('entrypoint'))
+        command_tokens = _parse_compose_entrypoint_or_command(svc.get('command'))
+        startup_command = _merge_entrypoint_command(entrypoint_tokens, command_tokens)
+        if entrypoint_tokens and command_tokens:
+            all_warnings.append(
+                f"  [{svc_name}] INFO: Both 'entrypoint' and 'command' were specified. "
+                f"They have been merged into a single startUpCommand: '{startup_command}'. "
+                f"Verify this behaves as expected."
+            )
+
+        # --- Ports ---
+        ports = _parse_compose_ports(svc.get('ports'))
+        target_port = None
+        if ports:
+            services_with_ports.append(svc_name)
+            # Use the container port of the first port mapping
+            _, container_port = ports[0]
+            target_port = str(container_port)
+
+            if len(ports) > 1:
+                all_warnings.append(
+                    f"  [{svc_name}] WARNING: Multiple port mappings found ({[f'{h}:{c}' for h, c in ports]}). "
+                    f"Only the first container port ({container_port}) will be used as targetPort. "
+                    f"In Sidecars, all containers share the same network namespace (localhost), "
+                    f"so each container must listen on a unique port."
+                )
+
+            # Detect port conflicts
+            if target_port in seen_ports:
+                all_warnings.append(
+                    f"  [{svc_name}] CRITICAL: Port {target_port} conflicts with service "
+                    f"'{seen_ports[target_port]}'. In Sidecars, all containers share the same "
+                    f"network namespace. Each container MUST use a unique port."
+                )
+            else:
+                seen_ports[target_port] = svc_name
+
+            # Warn about host:container port differences
+            for host_port, cont_port in ports:
+                if host_port is not None and host_port != cont_port:
+                    all_warnings.append(
+                        f"  [{svc_name}] WARNING: Host port ({host_port}) differs from container port "
+                        f"({cont_port}). In Sidecars, all containers share a single network namespace, "
+                        f"so the host:container port mapping is ignored. Only the container port is used."
+                    )
+
+        # --- Environment Variables ---
+        env_dict = _parse_compose_environment(svc.get('environment'))
+        env_variables = []
+        if env_dict:
+            all_warnings.append(
+                f"  [{svc_name}] INFO: {len(env_dict)} environment variable(s) found. In the Sidecar model, "
+                f"environment variable 'value' is a REFERENCE to an App Setting name (not the literal value). "
+                f"App settings will be created/updated for each variable."
+            )
+            for env_name, env_value in env_dict.items():
+                # Create an app setting with a namespaced key to avoid collisions
+                # Convention: COMPOSE_<SERVICE>_<VARNAME> as the app setting name
+                app_setting_key = f"COMPOSE_{_sanitize_container_name(svc_name).upper().replace('-', '_')}_{env_name}"
+                if env_value:
+                    new_app_settings[app_setting_key] = env_value
+                else:
+                    # Value-less env var: check if there is an existing app setting with same name
+                    if env_name in existing_app_settings:
+                        app_setting_key = env_name  # Reference the existing app setting directly
+                    else:
+                        new_app_settings[app_setting_key] = ""
+                        all_warnings.append(
+                            f"  [{svc_name}] WARNING: Environment variable '{env_name}' has no value and "
+                            f"no matching app setting exists. An empty app setting '{app_setting_key}' "
+                            f"will be created."
+                        )
+                env_variables.append(EnvironmentVariable(name=env_name, value=app_setting_key))
+
+        # --- Volumes ---
+        volume_mounts_raw, vol_warnings = _parse_compose_volumes(svc.get('volumes'), top_level_volumes)
+        all_warnings.extend(vol_warnings)
+        volume_mounts = []
+        for vm in volume_mounts_raw:
+            volume_mounts.append(VolumeMount(
+                volume_sub_path=vm["volume_sub_path"],
+                container_mount_path=vm["container_mount_path"],
+                read_only=vm.get("read_only", False),
+            ))
+
+        sitecontainer_specs.append({
+            "service_name": svc_name,
+            "container_name": container_name,
+            "image": image,
+            "target_port": target_port,
+            "startup_command": startup_command,
+            "env_variables": env_variables or None,
+            "volume_mounts": volume_mounts or None,
+        })
+
+    if not sitecontainer_specs:
+        raise ValidationError("No valid services found in the Docker Compose file.")
+
+    # -----------------------------------------------------------------------
+    # Step 4: Determine main container
+    # -----------------------------------------------------------------------
+    main_svc_name = None
+    if main_container_name:
+        # User explicitly specified which service is main
+        match = next((s for s in sitecontainer_specs
+                      if s["service_name"] == main_container_name or
+                      s["container_name"] == main_container_name), None)
+        if not match:
+            available = [s["service_name"] for s in sitecontainer_specs]
+            raise ValidationError(
+                f"Specified main container '{main_container_name}' not found in compose services. "
+                f"Available services: {available}"
+            )
+        main_svc_name = match["service_name"]
+    elif len(services_with_ports) == 1:
+        # Auto-detect: single service with ports → main
+        main_svc_name = services_with_ports[0]
+        logger.warning("Auto-detected main container: '%s' (only service with port mapping)", main_svc_name)
+    elif len(services_with_ports) > 1:
+        # Multiple services with ports – use the first one but warn
+        main_svc_name = services_with_ports[0]
+        all_warnings.append(
+            f"WARNING: Multiple services have port mappings: {services_with_ports}. "
+            f"Using '{main_svc_name}' as the main container. "
+            f"Use --main-container-name to specify a different one."
+        )
+    else:
+        # No services have ports – use the first service
+        main_svc_name = sitecontainer_specs[0]["service_name"]
+        all_warnings.append(
+            f"WARNING: No services have port mappings. Using '{main_svc_name}' as the main container. "
+            f"Use --main-container-name to specify a different one. "
+            f"The main container typically needs a targetPort."
+        )
+
+    # -----------------------------------------------------------------------
+    # Step 5: Print all collected warnings
+    # -----------------------------------------------------------------------
+    if all_warnings:
+        logger.warning("")
+        logger.warning("=" * 70)
+        logger.warning("CONVERSION WARNINGS AND NOTICES")
+        logger.warning("=" * 70)
+        for w in all_warnings:
+            logger.warning(w)
+        logger.warning("=" * 70)
+        logger.warning("")
+
+    # Print networking change notice
+    logger.warning("IMPORTANT: In Sidecars, all containers share the same network namespace "
+                   "(localhost). If your containers previously communicated using Docker Compose "
+                   "service names (e.g., 'http://redis:6379'), you must update them to use "
+                   "'localhost' and ensure each container listens on a unique port.")
+
+    if all_warnings and not yes:
+        logger.warning("")
+        if not prompt_y_n("Do you want to proceed with the conversion?"):
+            logger.warning("Conversion aborted.")
+            return
+
+    # -----------------------------------------------------------------------
+    # Step 6: Create/update app settings for environment variables
+    # -----------------------------------------------------------------------
+    if new_app_settings:
+        logger.warning("Creating %d app setting(s) for environment variable references...", len(new_app_settings))
+        settings_list = [f"{k}={v}" for k, v in new_app_settings.items()]
+        update_app_settings(cmd, resource_group, name, settings_list, slot)
+
+    # -----------------------------------------------------------------------
+    # Step 7: Determine auth type (shared across all containers from site config)
+    # -----------------------------------------------------------------------
+    auth_kwargs = {}
+    if acr_use_managed_identity_creds:
+        if acr_user_managed_identity_id:
+            logger.warning("Using User-Assigned Managed Identity for ACR authentication.")
+            auth_kwargs["user_assigned_identity"] = acr_user_managed_identity_id
+        else:
+            logger.warning("Using System-Assigned Managed Identity for ACR authentication.")
+            auth_kwargs["system_assigned_identity"] = True
+    elif acr_user_name and acr_user_password:
+        logger.warning("Using User Credentials for ACR authentication.")
+        auth_kwargs["registry_username"] = acr_user_name
+        auth_kwargs["registry_password"] = acr_user_password
+    else:
+        logger.warning("Using anonymous access for image pull authentication.")
+
+    # -----------------------------------------------------------------------
+    # Step 8: Create sitecontainer resources
+    # -----------------------------------------------------------------------
+    created_containers = []
+    for spec in sitecontainer_specs:
+        is_main = spec["service_name"] == main_svc_name
+
+        # Create the SiteContainer directly (not via create_webapp_sitecontainers)
+        # because environment_variables and volume_mounts are not exposed as
+        # individual kwargs on the higher-level create function.
+        auth_type = AuthType.ANONYMOUS
+        if auth_kwargs.get("system_assigned_identity"):
+            auth_type = AuthType.SYSTEM_IDENTITY
+        elif auth_kwargs.get("user_assigned_identity"):
+            auth_type = AuthType.USER_ASSIGNED
+        elif auth_kwargs.get("registry_username") and auth_kwargs.get("registry_password"):
+            auth_type = AuthType.USER_CREDENTIALS
+
+        sitecontainer = SiteContainer(
+            image=spec["image"],
+            target_port=spec["target_port"],
+            start_up_command=spec["startup_command"],
+            is_main=is_main,
+            auth_type=auth_type,
+            user_name=auth_kwargs.get("registry_username"),
+            password_secret=auth_kwargs.get("registry_password"),
+            user_managed_identity_client_id=auth_kwargs.get("user_assigned_identity"),
+            volume_mounts=spec["volume_mounts"],
+            environment_variables=spec["env_variables"],
+            # Non-main (sidecar) containers should NOT inherit the webapp's
+            # app settings and connection strings by default.  They receive
+            # only the env vars explicitly declared in the compose file.
+            inherit_app_settings_and_connection_strings=None if is_main else False,
+        )
+
+        try:
+            _create_or_update_webapp_sitecontainer_internal(
+                cmd, name, resource_group, spec["container_name"], sitecontainer, slot
+            )
+            created_containers.append(spec["container_name"])
+            logger.warning("  Created sitecontainer '%s'%s", spec["container_name"],
+                           " (main)" if is_main else "")
+        except Exception as ex:  # pylint: disable=broad-exception-caught
+            # Rollback: delete containers we already created
+            logger.error("Failed to create sitecontainer '%s': %s", spec["container_name"], str(ex))
+            logger.warning("Rolling back: deleting %d already-created container(s)...", len(created_containers))
+            for c_name in created_containers:
+                try:
+                    delete_webapp_sitecontainer(cmd, name, resource_group, c_name, slot)
+                except Exception:  # pylint: disable=broad-exception-caught
+                    pass
+            raise AzureInternalError(
+                f"Failed to create sitecontainer '{spec['container_name']}' during compose conversion. "
+                f"All created containers have been rolled back. Error: {ex}"
+            )
+
+    # -----------------------------------------------------------------------
+    # Step 9: Set linuxFxVersion to SITECONTAINERS
+    # -----------------------------------------------------------------------
+    logger.warning("Setting linuxFxVersion to SITECONTAINERS")
+    update_site_configs(cmd, resource_group, name, slot=slot, linux_fx_version="SITECONTAINERS")
+
+    logger.warning("")
+    logger.warning("Webapp '%s' successfully converted from COMPOSE to sitecontainers mode.", name)
+    logger.warning("  %d sitecontainer(s) created: %s", len(created_containers), ", ".join(created_containers))
+    logger.warning("  Main container: '%s'",
+                   next(s["container_name"] for s in sitecontainer_specs if s["service_name"] == main_svc_name))
+    if new_app_settings:
+        logger.warning("  %d app setting(s) created for environment variable references.", len(new_app_settings))
+
+
+def _convert_webapp_to_docker(cmd, name, resource_group, slot, yes=False):
     site_config = get_site_configs(cmd, resource_group, name, slot)
     linux_fx_version = getattr(site_config, "linux_fx_version", None)
     if linux_fx_version and not linux_fx_version.lower().startswith('sitecontainers'):
@@ -2532,7 +3242,7 @@ def _convert_webapp_to_docker(cmd, name, resource_group, slot):
     main_container = next((c for c in sitecontainers if getattr(c, "is_main", False)), None)
     if not main_container:
         raise ResourceNotFoundError("No main sitecontainer found. Cannot convert to classic mode (docker).")
-    if len(sitecontainers) > 1:
+    if len(sitecontainers) > 1 and not yes:
         option = prompt_y_n('More than one sitecontainer exists. Do you want to continue with the conversion?')
         if not option:
             raise ValidationError("Skipped converting to classic (docker) mode as more than one sitecontainer exists."
@@ -2764,24 +3474,18 @@ def list_instances(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_instance_identifiers', slot)
 
 
-def list_runtimes(cmd, os_type=None, linux=False, show_runtime_details=False):
-    if os_type is not None and linux:
-        raise MutuallyExclusiveArgumentError("Cannot use both --os-type and --linux")
-
-    if linux:
-        linux = True
+def list_runtimes(cmd, os_type=None, runtime=None, support=None):
+    # show both linux and windows stacks by default
+    linux = True
+    windows = True
+    if os_type == WINDOWS_OS_NAME:
+        linux = False
+    if os_type == LINUX_OS_NAME:
         windows = False
-    else:
-        # show both linux and windows stacks by default
-        linux = True
-        windows = True
-        if os_type == WINDOWS_OS_NAME:
-            linux = False
-        if os_type == LINUX_OS_NAME:
-            windows = False
 
-    runtime_helper = _StackRuntimeHelper(cmd=cmd, linux=linux, windows=windows)
-    return runtime_helper.get_stack_names_only(delimiter=":", show_runtime_details=show_runtime_details)
+    include_eol = support in ('eol', 'all') if support else False
+    runtime_helper = _StackRuntimeHelper(cmd=cmd, linux=linux, windows=windows, include_eol=include_eol)
+    return runtime_helper.get_stacks_as_table(runtime_filter=runtime, support_filter=support)
 
 
 def list_function_app_runtimes(cmd, os_type=None):
@@ -4212,11 +4916,14 @@ def is_async_response(poller, timeout_seconds=30):
 
 
 def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, per_site_scaling=False,
-                            app_service_environment=None, sku='B1', number_of_workers=None, location=None,
+                            app_service_environment=None, sku=None, number_of_workers=None, location=None,
                             tags=None, no_wait=False, zone_redundant=False, async_scaling_enabled=None,
                             is_managed_instance=None, mi_system_assigned=None, mi_user_assigned=None,
                             default_identity=None, rdp_enabled=None, vnet=None, subnet=None,
                             registry_adapters=None, install_scripts=None, storage_mounts=None):
+    if sku is None:
+        sku = 'P0V3' if is_linux else 'B1'
+
     HostingEnvironmentProfile, SkuDescription, AppServicePlan = cmd.get_models(
         'HostingEnvironmentProfile', 'SkuDescription', 'AppServicePlan')
 
@@ -4260,10 +4967,13 @@ has been deployed ".format(app_service_environment)
 
     if sku.upper() in ['WS1', 'WS2', 'WS3']:
         existing_plan = get_resource_if_exists(client.app_service_plans,
-                                               resource_group_name=resource_group_name, name=name)
+                                               resource_group_name=resource_group_name,
+                                               name=name)
         if existing_plan and existing_plan.sku.tier != "WorkflowStandard":
-            raise ValidationError("Plan {} in resource group {} already exists and "
-                                  "cannot be updated to a logic app SKU (WS1, WS2, or WS3)")
+            raise ValidationError(
+                "Plan '{}' in resource group '{}' already exists and "
+                "cannot be updated to a logic app SKU (WS1, WS2, or WS3)"
+                .format(name, resource_group_name))
         plan_def.type = "elastic"
 
     if zone_redundant:
@@ -4397,7 +5107,7 @@ def update_app_service_plan(cmd, instance, sku=None, number_of_workers=None, ela
     if elastic_scale is not None or max_elastic_worker_count is not None:
         if sku is None:
             sku = instance.sku.name
-        if get_sku_tier(sku) not in ["PREMIUMV2", "PREMIUMV3", "WorkflowStandard"]:
+        if get_sku_tier(sku) not in ["PREMIUMV2", "PREMIUM0V3", "PREMIUMV3", "WorkflowStandard"]:
             raise ValidationError("--number-of-workers and --elastic-scale can only "
                                   "be used on premium V2/V3 or workflow SKUs. "
                                   "Use command help to see all available SKUs.")
@@ -5597,6 +6307,111 @@ def list_deployment_logs(cmd, resource_group, name, slot=None):
     return response.json() or []
 
 
+def _ensure_linux_webapp_for_startup_logs(cmd, resource_group, name, slot=None):
+    client = web_client_factory(cmd.cli_ctx)
+    if slot:
+        app = client.web_apps.get_slot(resource_group, name, slot)
+    else:
+        app = client.web_apps.get(resource_group, name)
+    if app is None or not is_linux_webapp(app):
+        raise ArgumentUsageError(
+            "'az webapp log startup' is only supported for Linux web apps.")
+
+
+def list_startup_logs(cmd, resource_group, name, slot=None, outcome=None, instance=None):
+    import requests
+
+    _ensure_linux_webapp_for_startup_logs(cmd, resource_group, name, slot)
+
+    scm_url = _get_scm_url(cmd, resource_group, name, slot)
+    headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group, slot)
+
+    params = {}
+    if outcome:
+        params['type'] = outcome
+    if instance:
+        params['instance'] = instance
+
+    url = '{}/api/startuplogs'.format(scm_url)
+    response = requests.get(url, headers=headers, params=params)
+
+    if response.status_code == 404:
+        if instance:
+            logger.warning(
+                "No startup logs found for instance '%s'. "
+                "Run 'az webapp log startup list' to see available instances.", instance)
+        else:
+            # TODO: remove rollout-aware wording after KuduLite/LWASv2 GA (see Phase 4 in feature memory).
+            logger.warning(
+                'Startup logs are not available for this app. '
+                'This feature requires a platform version that may not have rolled out to your app\'s region yet.')
+        return []
+    if response.status_code != 200:
+        raise CLIError("Failed to retrieve startup logs from '{}' with status code '{}' and reason '{}'".format(
+            url, response.status_code, response.reason))
+
+    result = response.json()
+    return result.get('files', result) if isinstance(result, dict) else result
+
+
+def show_startup_log(cmd, resource_group, name, slot=None, filename=None, instance=None):
+    import requests
+
+    if filename and instance:
+        raise MutuallyExclusiveArgumentError(
+            '--filename and --instance cannot be used together. '
+            '--filename selects a specific log file; --instance scopes the latest-log lookup to a worker.')
+
+    _ensure_linux_webapp_for_startup_logs(cmd, resource_group, name, slot)
+
+    scm_url = _get_scm_url(cmd, resource_group, name, slot)
+    headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group, slot)
+
+    if filename:
+        url = '{}/api/startuplogs/{}'.format(scm_url, quote(filename, safe=''))
+    else:
+        # Server-side selection: most recent date, prefers a failure log if one exists
+        # for that date, otherwise returns the success log for that date.
+        url = '{}/api/startuplogs?latest=true'.format(scm_url)
+        if instance:
+            url += '&instance={}'.format(quote(instance, safe=''))
+
+    response = requests.get(url, headers=headers)
+
+    if response.status_code == 404:
+        if filename:
+            logger.warning('Startup log file \'%s\' was not found.', filename)
+        elif instance:
+            logger.warning(
+                "No startup logs found for instance '%s'. "
+                "Run 'az webapp log startup list' to see available instances.", instance)
+        else:
+            # TODO: remove rollout-aware wording after KuduLite/LWASv2 GA (see Phase 4 in feature memory).
+            logger.warning(
+                'Startup logs are not available for this app. '
+                'This feature requires a platform version that may not have rolled out to your app\'s region yet.')
+        return None
+    if response.status_code != 200:
+        raise CLIError("Failed to retrieve startup log from '{}' with status code '{}' and reason '{}'".format(
+            url, response.status_code, response.reason))
+
+    content_type = response.headers.get('Content-Type', '')
+    if 'text/plain' in content_type:
+        # Raw log content — return metadata from headers along with content
+        log_content = response.text
+        metadata = {}
+        for header_name in ['X-StartupLog-Filename', 'X-StartupLog-Date', 'X-StartupLog-Instance',
+                            'X-StartupLog-Outcome']:
+            value = response.headers.get(header_name)
+            if value:
+                key = header_name.replace('X-StartupLog-', '').lower()
+                metadata[key] = value
+        metadata['content'] = log_content
+        return metadata
+
+    return response.json()
+
+
 def config_slot_auto_swap(cmd, resource_group_name, webapp, slot, auto_swap_slot=None, disable=None):
     client = web_client_factory(cmd.cli_ctx)
     site_config = client.web_apps.get_configuration_slot(resource_group_name, webapp, slot)
@@ -6184,21 +6999,30 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
     DEFAULT_DELIMETER = "|"  # character that separates runtime name from version
     ALLOWED_DELIMETERS = "|:"  # delimiters allowed: '|', ':'
 
-    # pylint: disable=too-few-public-methods
+    # pylint: disable=too-few-public-methods,too-many-instance-attributes
     class Runtime:
         def __init__(self,
                      display_name=None,
                      configs=None,
                      github_actions_properties=None,
                      linux=False,
-                     is_auto_update=None):
+                     is_auto_update=None,
+                     os=None,
+                     runtime_family=None,
+                     version_label=None,
+                     eol_date=None):
             self.display_name = display_name
             self.configs = configs if configs is not None else {}
             self.github_actions_properties = github_actions_properties
             self.linux = linux
             self.is_auto_update = is_auto_update
+            self.os = os or ("Linux" if linux else "Windows")
+            self.runtime_family = runtime_family
+            self.version_label = version_label
+            self.eol_date = eol_date
 
-    def __init__(self, cmd, linux=False, windows=False):
+    def __init__(self, cmd, linux=False, windows=False, include_eol=False):
+        self._include_eol = include_eol
         # TODO try and get API support for this so it isn't hardcoded
         self.windows_config_mappings = {
             'node': 'WEBSITE_NODE_DEFAULT_VERSION',
@@ -6244,6 +7068,168 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
             return windows_stacks
         return {LINUX_OS_NAME: linux_stacks, WINDOWS_OS_NAME: windows_stacks}
 
+    def get_stacks_as_table(self, runtime_filter=None, support_filter=None):
+        """Return stacks as list of dicts for structured output."""
+        if not support_filter:
+            support_filter = 'supported'
+
+        runtime_family_map = {
+            'dotnet': ['.NET'],
+            'node': ['Node'],
+            'php': ['PHP'],
+            'python': ['Python'],
+            'java': ['Java', 'Tomcat', 'JBoss EAP'],
+        }
+
+        results = []
+        for stack in self.stacks:
+            # For Java-related runtimes, only show auto-update (friendly name) entries,
+            # not individual patch versions like JAVA|21.0.8
+            if 'java' in stack.display_name.casefold() and not stack.is_auto_update:
+                continue
+
+            if runtime_filter and runtime_filter != 'all':
+                allowed_families = runtime_family_map.get(runtime_filter, [])
+                if stack.runtime_family not in allowed_families:
+                    continue
+
+            support_status = self._compute_support_status(stack.eol_date)
+
+            if support_filter != 'all':
+                if support_filter == 'supported':
+                    if support_status == 'EOL':
+                        continue
+                elif support_filter == 'active':
+                    if support_status not in ('Active', 'n/a'):
+                        continue
+                elif support_filter == 'near':
+                    if support_status != 'Near':
+                        continue
+                elif support_filter == 'eol':
+                    if support_status != 'EOL':
+                        continue
+
+            results.append({
+                'os': stack.os,
+                'runtime': stack.runtime_family,
+                'version': stack.version_label or '',
+                'config': stack.display_name,
+                'support': support_status,
+                'end_of_life': stack.eol_date or '-',
+            })
+
+        return results
+
+    @staticmethod
+    def _compute_support_status(eol_date_str):
+        if not eol_date_str:
+            return 'n/a'
+        try:
+            eol_date = datetime.datetime.strptime(eol_date_str, "%Y-%m-%d").replace(
+                tzinfo=datetime.timezone.utc)
+            now = datetime.datetime.now(datetime.timezone.utc)
+            near_threshold = now + datetime.timedelta(days=365)
+            if eol_date <= now:
+                return 'EOL'
+            if eol_date <= near_threshold:
+                return 'Near'
+            return 'Active'
+        except (ValueError, TypeError):
+            return 'n/a'
+
+    @staticmethod
+    def _format_eol_date(eol_date):
+        """Format EOL date to YYYY-MM-DD string."""
+        if not eol_date:
+            return None
+        if isinstance(eol_date, str):
+            for fmt in ("%Y-%m-%dT%H:%M:%S.%fZ", "%Y-%m-%dT%H:%M:%SZ"):
+                try:
+                    return datetime.datetime.strptime(eol_date, fmt).strftime("%Y-%m-%d")
+                except ValueError:
+                    continue
+            return eol_date
+        if isinstance(eol_date, datetime.datetime):
+            return eol_date.strftime("%Y-%m-%d")
+        return None
+
+    @staticmethod
+    def _get_version_label(display_text):
+        """Extract human-readable version label from minor version display text.
+        Examples: '.NET 10 (LTS)' -> '10.0 (LTS)', 'Node 24 LTS' -> '24.0 LTS',
+                  'Python 3.14' -> '3.14', 'PHP 8.4' -> '8.4'
+        """
+        match = re.match(r'.*?(\d+(?:\.\d+)*)(?:\s*\((LTS|STS)\)|\s+(LTS|STS))?\s*$', display_text)
+        if match:
+            ver = match.group(1)
+            paren_label = match.group(2)
+            space_label = match.group(3)
+            if '.' not in ver:
+                ver = ver + '.0'
+            if paren_label:
+                return "{} ({})".format(ver, paren_label)
+            if space_label:
+                return "{} {}".format(ver, space_label)
+            return ver
+        return display_text
+
+    @staticmethod
+    def _get_java_version_label(display_name):
+        """Extract version label for Java runtimes from display_name.
+        'JAVA|21-java21' -> '21', 'TOMCAT|10.1-java21' -> '10.1 (Java 21)'
+        """
+        parts = display_name.split("|")
+        if len(parts) != 2:
+            return display_name
+        prefix = parts[0].upper()
+        version_part = parts[1]
+        if prefix == "JAVA":
+            m = re.match(r'(\d+)', version_part)
+            if m:
+                return "8" if version_part.startswith("1.8") else m.group(1)
+            return version_part
+        m = re.match(r'([\d.]+)-java(\d+)', version_part)
+        if m:
+            return "{} (Java {})".format(m.group(1), m.group(2))
+        return version_part
+
+    @staticmethod
+    def _get_java_runtime_family(display_name):
+        """Extract runtime family from Java display_name.
+        'JAVA|21' -> 'Java', 'TOMCAT|10.1-java21' -> 'Tomcat', 'JBOSSEAP|7.4' -> 'JBoss EAP'
+        """
+        prefix = display_name.split("|")[0].upper()
+        family_map = {
+            "JAVA": "Java",
+            "TOMCAT": "Tomcat",
+            "JBOSSEAP": "JBoss EAP",
+        }
+        return family_map.get(prefix, prefix)
+
+    @staticmethod
+    def _extract_java_version_from_runtime(runtime_name):
+        """Extract the Java major version from a runtime display name.
+        'JAVA|25-java25' -> '25', 'TOMCAT|10.1-java21' -> '21', 'JBOSSEAP|8-java17' -> '17',
+        'JAVA|8-jre8' -> '8', 'JAVA|21' -> '21'
+        """
+        parts = runtime_name.split("|")
+        if len(parts) != 2:
+            return None
+        version_part = parts[1]
+        # Pattern: ...-java21, ...-java8
+        m = re.search(r'-java(\d+)', version_part)
+        if m:
+            return m.group(1)
+        # Pattern: ...-jre8
+        m = re.search(r'-jre(\d+)', version_part)
+        if m:
+            return m.group(1)
+        # Plain version like "JAVA|21", "JAVA|8"
+        m = re.match(r'^(\d+)', version_part)
+        if m:
+            return m.group(1)
+        return None
+
     def _get_raw_stacks_from_api(self):
         return list(self._client.provider.get_web_app_stacks(stack_os_type=None))
 
@@ -6251,15 +7237,55 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         # Track seen runtime display names to avoid duplicates in Linux parsing.
         # Linux Java containers (e.g., JBOSSEAP) can produce duplicate entries across major versions.
         # Windows parsing doesn't have this issue due to its different structure.
+
+        java_eol_map = self._build_java_eol_map(stacks)
+
         seen_runtimes = set()
         for lang in stacks:
             for major_version in lang.major_versions:
                 if self._linux:
                     if lang.display_text.lower() == "java":
                         continue
-                    self._parse_major_version_linux(major_version, self._stacks, seen_runtimes)
+                    self._parse_major_version_linux(
+                        major_version, self._stacks, seen_runtimes,
+                        runtime_family=lang.display_text,
+                        java_eol_map=java_eol_map)
                 if self._windows:
-                    self._parse_major_version_windows(major_version, self._stacks, self.windows_config_mappings)
+                    self._parse_major_version_windows(
+                        major_version, self._stacks,
+                        self.windows_config_mappings,
+                        runtime_family=lang.display_text,
+                        java_eol_map=java_eol_map)
+
+    def _build_java_eol_map(self, stacks):
+        """Build Java version -> EOL date map from the 'Java' stack.
+
+        The EOL dates for Java versions live on the 'Java' stack's runtime settings,
+        not on the 'Java Containers' stack. We need this lookup so Tomcat/JBoss/Java SE
+        entries can display the correct EOL for their Java version.
+        """
+        java_eol_map = {}
+        for lang in stacks:
+            if lang.display_text.lower() != "java":
+                continue
+            for major_version in lang.major_versions:
+                for minor_version in major_version.minor_versions:
+                    self._extract_java_eol_from_settings(minor_version, java_eol_map)
+            break
+        return java_eol_map
+
+    def _extract_java_eol_from_settings(self, minor_version, java_eol_map):
+        settings = minor_version.stack_settings
+        for rt_settings in (getattr(settings, 'linux_runtime_settings', None),
+                            getattr(settings, 'windows_runtime_settings', None)):
+            if not rt_settings or not getattr(rt_settings, 'is_auto_update', False):
+                continue
+            eol = self._format_eol_date(getattr(rt_settings, 'end_of_life_date', None))
+            rv = getattr(rt_settings, 'runtime_version', '') or ''
+            if eol and rv:
+                ver = "8" if rv.startswith("1.8") else rv.split('.')[0]
+                if ver not in java_eol_map:
+                    java_eol_map[ver] = eol
 
     @classmethod
     def remove_delimiters(cls, runtime):
@@ -6355,12 +7381,14 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         return t.replace(" ", "|", 1).replace(" ", "")
 
     @classmethod
-    def _is_valid_runtime_setting(cls, runtime_setting):
+    def _is_valid_runtime_setting(cls, runtime_setting, include_eol=False):
         # Using datetime module imported at the top level
         if runtime_setting is None or getattr(runtime_setting, 'is_hidden', False):
             return False
         if getattr(runtime_setting, 'is_deprecated', False):
             return False
+        if include_eol:
+            return True
         end_of_life = getattr(runtime_setting, 'end_of_life_date', None)
         if end_of_life:
             try:
@@ -6397,9 +7425,10 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         return minor_version.stack_settings.linux_container_settings
 
     @classmethod
-    def _get_valid_minor_versions(cls, major_version, linux, java=False):
+    def _get_valid_minor_versions(cls, major_version, linux, java=False, include_eol=False):
         def _filter(minor_version):
-            return cls._is_valid_runtime_setting(cls._get_runtime_setting(minor_version, linux, java))
+            return cls._is_valid_runtime_setting(cls._get_runtime_setting(minor_version, linux, java),
+                                                 include_eol=include_eol)
         return [m for m in major_version.minor_versions if _filter(m)]
 
     @staticmethod
@@ -6500,13 +7529,16 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         runtimes.sort(key=lambda x: _StackRuntimeHelper._java_version_sort_key(x[1]))
         return runtimes
 
-    def _parse_major_version_windows(self, major_version, parsed_results, config_mappings):
-        java_container_minor_versions = self._get_valid_minor_versions(major_version, linux=False, java=True)
+    def _parse_major_version_windows(self, major_version, parsed_results, config_mappings,
+                                     runtime_family=None, java_eol_map=None):
+        java_container_minor_versions = self._get_valid_minor_versions(
+            major_version, linux=False, java=True, include_eol=self._include_eol)
         if java_container_minor_versions:
             for container in java_container_minor_versions:
                 container_settings = container.stack_settings.windows_container_settings
                 java_container = container_settings.java_container
                 container_version = container_settings.java_container_version
+                eol_date = self._format_eol_date(getattr(container_settings, 'end_of_life_date', None))
                 # Get Java versions from the container's runtimes array
                 javas = self._get_java_versions_from_windows_container(container_settings)
                 if not javas:
@@ -6518,15 +7550,26 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                         java_container,
                         container_version,
                         container_settings.is_auto_update)
+                    # Look up EOL from the Java stack if the container doesn't have one
+                    java_ver = self._extract_java_version_from_runtime(runtime.display_name) or \
+                        ("8" if java.startswith("1.8") else java.split('.')[0])
+                    runtime.eol_date = eol_date or (java_eol_map or {}).get(java_ver)
+                    runtime.runtime_family = self._get_java_runtime_family(runtime.display_name)
+                    runtime.version_label = self._get_java_version_label(runtime.display_name)
                     parsed_results.append(runtime)
         else:
-            minor_versions = self._get_valid_minor_versions(major_version, linux=False, java=False)
+            minor_versions = self._get_valid_minor_versions(
+                major_version, linux=False, java=False, include_eol=self._include_eol)
             for minor_version in minor_versions:
                 settings = minor_version.stack_settings.windows_runtime_settings
+                eol_date = self._format_eol_date(getattr(settings, 'end_of_life_date', None))
                 if "Java" not in minor_version.display_text:
                     runtime_name = self._format_windows_display_text(minor_version.display_text)
 
-                    runtime = self.Runtime(display_name=runtime_name, linux=False)
+                    runtime = self.Runtime(display_name=runtime_name, linux=False,
+                                           os="Windows", runtime_family=runtime_family,
+                                           version_label=self._get_version_label(minor_version.display_text),
+                                           eol_date=eol_date)
                     lang_name = runtime_name.split("|")[0].lower()
                     config_key = config_mappings.get(lang_name)
 
@@ -6537,6 +7580,9 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                         runtime.github_actions_properties = {"github_actions_version": gh_properties.supported_version}
                 else:
                     runtime = self.get_windows_java_runtime(settings.runtime_version, "JAVA", "SE", False)
+                    runtime.eol_date = eol_date
+                    runtime.runtime_family = self._get_java_runtime_family(runtime.display_name)
+                    runtime.version_label = self._get_java_version_label(runtime.display_name)
 
                 parsed_results.append(runtime)
 
@@ -6575,8 +7621,10 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                             linux=False,
                             is_auto_update=is_auto_update)
 
-    def _parse_major_version_linux(self, major_version, parsed_results, seen_runtimes):
-        minor_java_container_versions = self._get_valid_minor_versions(major_version, linux=True, java=True)
+    def _parse_major_version_linux(self, major_version, parsed_results, seen_runtimes,
+                                   runtime_family=None, java_eol_map=None):
+        minor_java_container_versions = self._get_valid_minor_versions(
+            major_version, linux=True, java=True, include_eol=self._include_eol)
         if "SE" in major_version.display_text:
             # Dynamically get Java versions from the available minor versions
             java_versions = self._get_java_versions_from_minor_versions(minor_java_container_versions)
@@ -6588,6 +7636,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         if minor_java_container_versions:
             for minor in minor_java_container_versions:
                 linux_container_settings = minor.stack_settings.linux_container_settings
+                eol_date = self._format_eol_date(getattr(linux_container_settings, 'end_of_life_date', None))
                 # Dynamically get all Java runtimes from container settings
                 runtimes = self._get_java_runtimes_from_container_settings(linux_container_settings)
                 # Remove the 'JBoss _byol' entries from the output
@@ -6597,21 +7646,35 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                     if runtime_name in seen_runtimes:
                         continue
                     seen_runtimes.add(runtime_name)
+                    # Use container EOL if available, otherwise look up from the Java stack
+                    runtime_eol = eol_date
+                    if not runtime_eol and java_eol_map:
+                        java_ver = self._extract_java_version_from_runtime(runtime_name)
+                        runtime_eol = java_eol_map.get(java_ver)
                     runtime = self.Runtime(display_name=runtime_name,
                                            configs={"linux_fx_version": runtime_name},
                                            github_actions_properties={"github_actions_version": version},
                                            linux=True,
-                                           is_auto_update=auto_update)
+                                           is_auto_update=auto_update,
+                                           os="Linux",
+                                           runtime_family=self._get_java_runtime_family(runtime_name),
+                                           version_label=self._get_java_version_label(runtime_name),
+                                           eol_date=runtime_eol)
                     parsed_results.append(runtime)
         else:
-            minor_versions = self._get_valid_minor_versions(major_version, linux=True, java=False)
+            minor_versions = self._get_valid_minor_versions(
+                major_version, linux=True, java=False, include_eol=self._include_eol)
             for minor_version in minor_versions:
                 settings = minor_version.stack_settings.linux_runtime_settings
                 runtime_name = settings.runtime_version
                 runtime = self.Runtime(display_name=runtime_name,
                                        configs={"linux_fx_version": runtime_name},
                                        linux=True,
-                                       )
+                                       os="Linux",
+                                       runtime_family=runtime_family,
+                                       version_label=self._get_version_label(minor_version.display_text),
+                                       eol_date=self._format_eol_date(
+                                           getattr(settings, 'end_of_life_date', None)))
                 gh_properties = settings.git_hub_action_settings
                 if gh_properties.is_supported:
                     runtime.github_actions_properties = {"github_actions_version": gh_properties.supported_version}
@@ -8521,6 +9584,11 @@ def _poll_deployment_runtime_status(cmd, resource_group_name, webapp_name, slot,
             if failure_logs is not None and len(failure_logs) > 0:
                 failure_logs = failure_logs[0]
             error_text += "Please check the runtime logs for more info: {}\n".format(failure_logs)
+            tip_cmd = "az webapp log startup show -n {} -g {}".format(webapp_name, resource_group_name)
+            if slot:
+                tip_cmd += " --slot {}".format(slot)
+            error_text += ("TIP: Run '{}' "
+                           "to view container startup logs.\n").format(tip_cmd)
             if site_started_partially:
                 logger.warning(error_text)
                 break
@@ -8565,6 +9633,11 @@ def _poll_deployment_runtime_status(cmd, resource_group_name, webapp_name, slot,
                           deployment_properties.get('numberOfInstancesInProgress'),
                           deployment_properties.get('numberOfInstancesSuccessful'),
                           deployment_properties.get('numberOfInstancesFailed'))
+        tip_cmd = "az webapp log startup show -n {} -g {}".format(webapp_name, resource_group_name)
+        if slot:
+            tip_cmd += " --slot {}".format(slot)
+        error_text += ("\nTIP: Run '{}' "
+                       "to view container startup logs.").format(tip_cmd)
         raise CLIError(error_text)
     return response_body
 
@@ -9112,7 +10185,7 @@ def get_history_triggered_webjob(cmd, resource_group_name, name, webjob_name, sl
 def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None, sku=None,  # pylint: disable=too-many-statements,too-many-branches
               os_type=None, runtime=None, dryrun=False, logs=False, launch_browser=False, html=False,
               app_service_environment=None, track_status=True, enable_kudu_warmup=True, basic_auth="",
-              auto_generated_domain_name_label_scope=None):
+              auto_generated_domain_name_label_scope=None, enriched_errors=False):
     if not name:
         name = generate_default_app_name(cmd)
 
@@ -9303,7 +10376,7 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
     # zip contents & deploy
     zip_file_path = zip_contents_from_dir(src_dir, language)
     enable_zip_deploy(cmd, rg_name, name, zip_file_path, track_status=track_status,
-                      enable_kudu_warmup=enable_kudu_warmup)
+                      enable_kudu_warmup=enable_kudu_warmup, enriched_errors=enriched_errors)
 
     if launch_browser:
         logger.warning("Launching app using default browser")
@@ -9543,7 +10616,8 @@ def perform_onedeploy_webapp(cmd,
                              timeout=None,
                              slot=None,
                              track_status=True,
-                             enable_kudu_warmup=True):
+                             enable_kudu_warmup=True,
+                             enriched_errors=False):
     params = OneDeployParams()
 
     params.cmd = cmd
@@ -9561,6 +10635,7 @@ def perform_onedeploy_webapp(cmd,
     params.slot = slot
     params.track_status = track_status
     params.enable_kudu_warmup = enable_kudu_warmup
+    params.enriched_errors = enriched_errors
 
     client = web_client_factory(cmd.cli_ctx)
     app = client.web_apps.get(resource_group_name, name)
@@ -9599,6 +10674,7 @@ class OneDeployParams:
         self.enable_kudu_warmup = None
         self.is_linux_webapp = None
         self.is_functionapp = None
+        self.enriched_errors = False
 # pylint: enable=too-many-instance-attributes,too-few-public-methods
 
 
@@ -9896,14 +10972,17 @@ def _make_onedeploy_request(params):
         response_body = None
         if poll_async_deployment_for_debugging:
             if params.track_status is not None and params.track_status:
-                response_body = _check_runtimestatus_with_deploymentstatusapi(params.cmd, params.resource_group_name,
-                                                                              params.webapp_name, params.slot,
-                                                                              deployment_status_url,
-                                                                              params.is_async_deployment,
-                                                                              params.timeout)
+                response_body = _check_runtimestatus_with_deploymentstatusapi(
+                    params.cmd, params.resource_group_name,
+                    params.webapp_name, params.slot,
+                    deployment_status_url,
+                    params.is_async_deployment,
+                    params.timeout)
             else:
-                response_body = _check_zip_deployment_status(params.cmd, params.resource_group_name, params.webapp_name,
-                                                             deployment_status_url, params.slot, params.timeout)
+                response_body = _check_zip_deployment_status(
+                    params.cmd, params.resource_group_name,
+                    params.webapp_name,
+                    deployment_status_url, params.slot, params.timeout)
             logger.info('Server response: %s', response_body)
         else:
             if 'application/json' in response.headers.get('content-type', ""):
@@ -9920,20 +10999,48 @@ def _make_onedeploy_request(params):
     if response.status_code == 404:
         raise ResourceNotFoundError("This API isn't available in this environment yet!")
 
+    _should_enrich_errors = params.enriched_errors and params.is_linux_webapp and not params.is_functionapp
     # check if there's an ongoing process
     if response.status_code == 409:
+        if _should_enrich_errors:
+            raise_enriched_deployment_error(
+                params=params,
+                status_code=409,
+                error_message=response.text if response.text else "Deployment conflict (HTTP 409)",
+                last_known_step="OneDeploy HTTP request",
+                kudu_status="409"
+            )
         raise ValidationError("Another deployment is in progress. Please wait until that process is complete before "
                               "starting a new deployment. You can track the ongoing deployment at {}"
                               .format(deployment_status_url))
 
-    # check if an error occured during deployment
+    # check if an error occurred during deployment
     if response.status_code:
         scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
         latest_deploymentinfo_url = scm_url + "/api/deployments/latest"
+        if _should_enrich_errors and response.status_code >= 400:
+            logger.error("Deployment failed. Visit %s to get more information about your deployment.",
+                         latest_deploymentinfo_url)
+            raise_enriched_deployment_error(
+                params=params,
+                status_code=response.status_code,
+                error_message=response.text if response.text else None,
+                last_known_step="HTTP request sent to deployment API",
+                kudu_status=str(response.status_code)
+            )
         raise CLIError("An error occurred during deployment. Status Code: {}, {} Please visit {}"
                        " to get more information about your deployment"
                        .format(response.status_code, f"Details: {response.text}," if response.text else "",
                                latest_deploymentinfo_url))
+
+
+def _try_enrich_and_raise(params, **kwargs):
+    try:
+        raise_enriched_deployment_error(params=params, **kwargs)
+    except EnrichedDeploymentError:
+        raise
+    except Exception:  # pylint: disable=broad-except
+        logger.debug("Failed to enrich deployment error, re-raising original.")
 
 
 # OneDeploy
@@ -9941,11 +11048,19 @@ def _perform_onedeploy_internal(params):
 
     # Update artifact type, if required
     _update_artifact_type(params)
+    _should_enrich_errors = params.enriched_errors and params.is_linux_webapp and not params.is_functionapp
 
     # Now make the OneDeploy API call
     logger.warning("Initiating deployment")
-    response = _make_onedeploy_request(params)
-    return response
+    try:
+        response = _make_onedeploy_request(params)
+        return response
+    except (ValidationError, ResourceNotFoundError, EnrichedDeploymentError):
+        raise
+    except Exception as ex:  # pylint: disable=broad-except
+        if _should_enrich_errors:
+            _try_enrich_and_raise(params, error_message=str(ex), last_known_step="Deployment request")
+        raise
 
 
 def _wait_for_webapp(tunnel_server):

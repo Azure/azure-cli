@@ -43,12 +43,18 @@ helps['appservice plan create'] = """
 type: command
 short-summary: Create an app service plan.
 examples:
-  - name: Create a basic app service plan.
+  - name: Create a Linux app service plan.
+    text: >
+        az appservice plan create -g MyResourceGroup -n MyPlan --is-linux
+  - name: Create a Windows app service plan.
     text: >
         az appservice plan create -g MyResourceGroup -n MyPlan
-  - name: Create a standard app service plan with four Linux workers.
+  - name: Create a Windows app service plan with a specific SKU.
     text: >
-        az appservice plan create -g MyResourceGroup -n MyPlan --is-linux --number-of-workers 4 --sku S1
+        az appservice plan create -g MyResourceGroup -n MyPlan --sku B1
+  - name: Create a Linux app service plan with four Linux workers.
+    text: >
+        az appservice plan create -g MyResourceGroup -n MyPlan --is-linux --number-of-workers 4 --sku P0V3
   - name: Create a Windows container app service plan.
     text: >
         az appservice plan create -g MyResourceGroup -n MyPlan --hyper-v --sku P1V3
@@ -2365,6 +2371,39 @@ examples:
     text: az webapp log deployment list --name MyWebApp --resource-group MyResourceGroup
 """
 
+helps['webapp log startup'] = """
+type: group
+short-summary: View web app container startup logs.
+long-summary: >
+    View startup logs written during container initialization for Linux web apps.
+    Use when a container fails to start, crashes on cold start, times out waiting
+    for a port, or returns HTTP 502/503 errors after deployment. These logs contain
+    platform lifecycle events and container stdout/stderr output.
+"""
+
+helps['webapp log startup list'] = """
+type: command
+short-summary: List all container startup log files for a web app.
+examples:
+  - name: List all startup log files
+    text: az webapp log startup list --name MyWebApp --resource-group MyResourceGroup
+  - name: List only failure logs
+    text: az webapp log startup list --name MyWebApp --resource-group MyResourceGroup --outcome failure
+"""
+
+helps['webapp log startup show'] = """
+type: command
+short-summary: Show the content of a container startup log.
+long-summary: By default, shows the most recent startup log (preferring a failure log when one exists for the latest date). Use --filename to view a specific log file, or --instance to scope the latest-log lookup to a specific worker. --filename and --instance are mutually exclusive.
+examples:
+  - name: Show the latest startup log (prefers failures)
+    text: az webapp log startup show --name MyWebApp --resource-group MyResourceGroup
+  - name: Show a specific startup log file
+    text: az webapp log startup show --name MyWebApp --resource-group MyResourceGroup --filename 2026_04_13_lw0sdlwk000002_failure.log
+  - name: Show the latest startup log for a specific worker instance
+    text: az webapp log startup show --name MyWebApp --resource-group MyResourceGroup --instance lw0sdlwk000002
+"""
+
 helps['functionapp log'] = """
 type: group
 short-summary: Manage function app logs.
@@ -2597,12 +2636,16 @@ examples:
 
 helps['webapp sitecontainers convert'] = """
 type: command
-short-summary: Convert a webapp from sitecontainers to a classic custom container and vice versa.
+short-summary: Convert a webapp from sitecontainers to a classic custom container and vice versa. Supports both single-container (DOCKER|) and multi-container (COMPOSE|) apps.
 examples:
   - name: Convert a webapp to classic custom container (docker) from sitecontainers
     text: az webapp sitecontainers convert --mode docker --name MyWebApp --resource-group MyResourceGroup
-  - name: Convert a webapp to sitecontainers from classic custom container (docker)
+  - name: Convert a single-container webapp (DOCKER|) to sitecontainers
     text: az webapp sitecontainers convert --mode sitecontainers --name MyWebApp --resource-group MyResourceGroup
+  - name: Convert a multi-container webapp (COMPOSE|) to sitecontainers
+    text: az webapp sitecontainers convert --mode sitecontainers --name MyWebApp --resource-group MyResourceGroup
+  - name: Convert a COMPOSE app to sitecontainers specifying which service is the main container
+    text: az webapp sitecontainers convert --mode sitecontainers --name MyWebApp --resource-group MyResourceGroup --main-container-name web
 """
 
 
@@ -2652,6 +2695,9 @@ examples:
   - name: Create a web app with a specified domain name scope for unique hostname generation
     text: >
         az webapp up -n MyUniqueAppName --domain-name-scope TenantReuse
+  - name: Deploy with enriched error diagnostics on failure.
+    text: >
+        az webapp up --enriched-errors true
 """
 
 helps['webapp update'] = """
@@ -3344,4 +3390,6 @@ helps['webapp deploy'] = """
       text: az webapp deploy --resource-group ResourceGroup --name AppName --src-path SourcePath --type war --async true
     - name: Deploy a static text file to wwwroot/staticfiles/test.txt
       text: az webapp deploy --resource-group ResourceGroup --name AppName --src-path SourcePath --type static --target-path staticfiles/test.txt
+    - name: Deploy a zip file with enriched error diagnostics on failure.
+      text: az webapp deploy -g ResourceGroup -n AppName --src-path app.zip --enriched-errors true
 """

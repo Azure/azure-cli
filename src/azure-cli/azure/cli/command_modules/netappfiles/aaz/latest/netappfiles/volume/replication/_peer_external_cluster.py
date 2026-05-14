@@ -22,9 +22,9 @@ class PeerExternalCluster(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-12-01",
+        "version": "2026-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/peerexternalcluster", "2025-12-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/peerexternalcluster", "2026-01-01"],
         ]
     }
 
@@ -126,7 +126,7 @@ class PeerExternalCluster(AAZCommand):
                     session,
                     self.on_200,
                     self.on_error,
-                    lro_options={"final-state-via": "location"},
+                    lro_options={"final-state-via": "azure-async-operation"},
                     path_format_arguments=self.url_parameters,
                 )
             if session.http_response.status_code in [200]:
@@ -135,7 +135,7 @@ class PeerExternalCluster(AAZCommand):
                     session,
                     self.on_200,
                     self.on_error,
-                    lro_options={"final-state-via": "location"},
+                    lro_options={"final-state-via": "azure-async-operation"},
                     path_format_arguments=self.url_parameters,
                 )
 
@@ -186,7 +186,7 @@ class PeerExternalCluster(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-12-01",
+                    "api-version", "2026-01-01",
                     required=True,
                 ),
             }
@@ -237,9 +237,13 @@ class PeerExternalCluster(AAZCommand):
             cls._schema_on_200 = AAZObjectType()
 
             _schema_on_200 = cls._schema_on_200
-            _schema_on_200.peer_accept_command = AAZStrType(
-                serialized_name="peerAcceptCommand",
+            _schema_on_200.properties = AAZObjectType()
+
+            properties = cls._schema_on_200.properties
+            properties.cluster_peering_command = AAZStrType(
+                serialized_name="clusterPeeringCommand",
             )
+            properties.passphrase = AAZStrType()
 
             return cls._schema_on_200
 

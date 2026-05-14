@@ -3,15 +3,17 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.breaking_change import (register_argument_deprecate, register_command_group_deprecate,
-                                            register_other_breaking_change)
+from azure.cli.core.breaking_change import (
+    register_argument_deprecate,
+    register_command_group_deprecate,
+    register_other_breaking_change
+)
 
 NETWORK_RESOURCE_BREAKING_CHANGE_MESSAGE = (
     'This command will stop creating new network resources or altering existing ones which are required '
     'for the server to function, such as virtual networks, subnets, IP ranges, etc. It will instead '
     'require users to provide the necessary network resources created beforehand using the corresponding '
-    'commands from the `az network` module. This change will take effect in next breaking change '
-    'release scheduled for May 2026.'
+    'commands from the `az network` module.'
 )
 
 
@@ -49,12 +51,6 @@ register_command_group_deprecate(command_group='postgres flexible-server index-t
 register_command_group_deprecate(command_group='postgres flexible-server long-term-retention',
                                  message='Long term retention command group will be removed. '
                                  'For more information, open a support incident.')
-
-# Upgrade command argument changes
-register_other_breaking_change('postgres flexible-server upgrade',
-                               message='The allowed values will be changed from set list to '
-                               'supported versions for upgrade based on capabilities.',
-                               arg='--version')
 
 # Name of new backup no longer required in backup create command
 register_other_breaking_change('postgres flexible-server backup create',
