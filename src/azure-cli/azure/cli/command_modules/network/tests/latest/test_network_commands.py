@@ -1398,6 +1398,135 @@ class NetworkAppGatewayPrivateIpScenarioTest20170601(ScenarioTest):
 
         self.cmd('network application-gateway delete --name {appgw} --resource-group {rg}')
 
+class NetworkAppGatewaySslCertManagedHsmScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_ssl_cert_hsm', location='uksouth')
+    def test_network_app_gateway_ssl_cert_managed_hsm(self, resource_group):
+        logged_in_user = self.cmd('ad signed-in-user show').get_output_in_json()
+        init_admin = logged_in_user['id'] if logged_in_user is not None else ''
+
+        self.kwargs.update({
+            'ag': 'ag-hsm-test',
+            'ip': 'pip-hsm-test',
+            'identity': 'id-hsm-test',
+            'hsm_name': self.create_random_name('clihsm', 24),
+            'init_admin': init_admin,
+            'cert_name': 'hsmSslCert',
+            'cert_name2': 'hsmSslCert2',
+        })
+
+        # create managed identity
+        identity_result = self.cmd('identity create -g {rg} -n {identity}').get_output_in_json()
+        self.kwargs['identity_id'] = identity_result['id']
+        self.kwargs['identity_principal'] = identity_result['principalId']
+
+        # create Managed HSM
+        self.cmd('keyvault create --hsm-name {hsm_name} -g {rg} -l uksouth '
+                 '--administrators {init_admin} --retention-days 7')
+
+        # activate HSM by downloading security domain
+        cert_dir = os.path.join(TEST_DIR, 'certs')
+        tmp_dir = tempfile.mkdtemp()
+        self.kwargs.update({
+            'sd_cert0': os.path.join(cert_dir, 'cert_0.cer').replace('\\', '\\\\'),
+            'sd_cert1': os.path.join(cert_dir, 'cert_1.cer').replace('\\', '\\\\'),
+            'sd_cert2': os.path.join(cert_dir, 'cert_2.cer').replace('\\', '\\\\'),
+            'security_domain': os.path.join(tmp_dir, 'sd.json').replace('\\', '\\\\'),
+        })
+        self.cmd('keyvault security-domain download --hsm-name {hsm_name} '
+                 '--sd-wrapping-keys {sd_cert0} {sd_cert1} {sd_cert2} '
+                 '--sd-quorum 2 --security-domain-file {security_domain}')
+
+        # grant signed-in user and identity access to create keys in HSM
+        from unittest import mock
+        with mock.patch('azure.cli.command_modules.keyvault.custom._gen_guid', side_effect=self.create_guid):
+            self.cmd('keyvault role assignment create --hsm-name {hsm_name} '
+                     '--role "Managed HSM Crypto User" '
+                     '--assignee {init_admin} --scope /keys')
+            self.cmd('keyvault role assignment create --hsm-name {hsm_name} '
+                     '--role "Managed HSM Crypto User" '
+                     '--assignee {identity_principal} --scope /keys')
+
+        # create keys in Managed HSM
+        kid = self.cmd('keyvault key create --hsm-name {hsm_name} -n mykey1'
+                       ).get_output_in_json()['key']['kid']
+        kid2 = self.cmd('keyvault key create --hsm-name {hsm_name} -n mykey2'
+                        ).get_output_in_json()['key']['kid']
+        self.kwargs.update({
+            'hsm_key_id': kid,
+            'hsm_key_id2': kid2,
+        })
+
+        # read public cert data from existing test cert file
+        cert_file = os.path.join(TEST_DIR, 'certs', 'cert_0.cer')
+        with open(cert_file, 'r') as f:
+            lines = f.read().strip().split('\n')
+        pub_cert_data = ''.join(l.strip() for l in lines if not l.startswith('-----'))
+        self.kwargs['pub_cert_data'] = pub_cert_data
+
+        # create public IP and application gateway with identity
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard')
+        self.cmd('network application-gateway create -g {rg} -n {ag} '
+                 '--sku Standard_v2 --public-ip-address {ip} '
+                 '--identity {identity_id} --priority 1001 --no-wait')
+        self.cmd('network application-gateway wait -g {rg} -n {ag} --exists')
+
+        # test validation: --hsm key-id without public-cert-data should fail
+        self.cmd('network application-gateway ssl-cert create -g {rg} --gateway-name {ag} '
+                 '-n badCert --hsm key-id={hsm_key_id}',
+                 expect_failure=True)
+
+        # test ssl-cert create with --hsm key-id and public-cert-data
+        self.cmd('network application-gateway ssl-cert create -g {rg} --gateway-name {ag} '
+                 '-n {cert_name} --hsm key-id={hsm_key_id} public-cert-data={pub_cert_data}',
+                 checks=[
+                     self.check('name', '{cert_name}'),
+                     self.check('hsm.keyId', '{hsm_key_id}'),
+                 ])
+
+        # test ssl-cert show returns hsm block
+        self.cmd('network application-gateway ssl-cert show -g {rg} --gateway-name {ag} '
+                 '-n {cert_name}',
+                 checks=[
+                     self.check('name', '{cert_name}'),
+                     self.check('hsm.keyId', '{hsm_key_id}'),
+                     self.exists('hsm'),
+                 ])
+
+        # test ssl-cert update to change hsm key-id
+        self.cmd('network application-gateway ssl-cert update -g {rg} --gateway-name {ag} '
+                 '-n {cert_name} --hsm key-id={hsm_key_id2} public-cert-data={pub_cert_data}',
+                 checks=[
+                     self.check('name', '{cert_name}'),
+                     self.check('hsm.keyId', '{hsm_key_id2}'),
+                 ])
+
+        # test ssl-cert list includes the hsm cert
+        self.cmd('network application-gateway ssl-cert list -g {rg} --gateway-name {ag}',
+                 checks=[
+                     self.check('length(@)', 1),
+                     self.check('[0].name', '{cert_name}'),
+                     self.check('[0].hsm.keyId', '{hsm_key_id2}'),
+                 ])
+
+        # test ssl-cert create a second hsm cert
+        self.cmd('network application-gateway ssl-cert create -g {rg} --gateway-name {ag} '
+                 '-n {cert_name2} --hsm key-id={hsm_key_id} public-cert-data={pub_cert_data}',
+                 checks=[
+                     self.check('name', '{cert_name2}'),
+                     self.check('hsm.keyId', '{hsm_key_id}'),
+                 ])
+        self.cmd('network application-gateway ssl-cert list -g {rg} --gateway-name {ag}',
+                 checks=[self.check('length(@)', 2)])
+
+        # test ssl-cert delete
+        self.cmd('network application-gateway ssl-cert delete -g {rg} --gateway-name {ag} '
+                 '-n {cert_name2} --no-wait')
+        self.cmd('network application-gateway wait -g {rg} -n {ag} --updated')
+        self.cmd('network application-gateway ssl-cert list -g {rg} --gateway-name {ag}',
+                 checks=[self.check('length(@)', 1)])
+
+
 class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
 
     def _create_ag(self):

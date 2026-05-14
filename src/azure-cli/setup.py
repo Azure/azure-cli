@@ -114,7 +114,7 @@ DEPENDENCIES = [
     'azure-mgmt-resource-deploymentscripts==1.0.0b1',
     'azure-mgmt-resource-deploymentstacks==1.0.0',
     'azure-mgmt-resource-templatespecs==1.0.0b1',
-    'azure-mgmt-search~=9.0',
+    'azure-mgmt-search~=9.2',
     'azure-mgmt-security==6.0.0',
     'azure-mgmt-servicebus~=10.0.0b1',
     'azure-mgmt-servicefabricmanagedclusters==2.1.0b1',
