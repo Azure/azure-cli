@@ -17,9 +17,10 @@ from azure.cli.command_modules.appservice.custom import (
     remove_remote_build_app_settings,
     config_source_control,
     validate_app_settings_in_scm,
-    update_container_settings_functionapp)
+    update_container_settings_functionapp,
+    _FunctionAppStackRuntimeHelper)
 from azure.cli.core.profiles import ResourceType
-from azure.cli.core.azclierror import (AzureInternalError, UnclassifiedUserFault)
+from azure.cli.core.azclierror import (AzureInternalError, UnclassifiedUserFault, ValidationError)
 from azure.cli.core.azclierror import ResourceNotFoundError
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
@@ -849,3 +850,154 @@ class TestFunctionappMocked(unittest.TestCase):
 
         # assert
         self.assertEqual(matched.name, 'dotnet-isolated')
+
+
+def _make_runtime(name, version, linux=True, supported_func_versions=None):
+    """Build a minimal _FunctionAppStackRuntimeHelper.Runtime for resolve() tests."""
+    return _FunctionAppStackRuntimeHelper.Runtime(
+        name=name,
+        version=version,
+        linux=linux,
+        supported_func_versions=supported_func_versions or ["~4"],
+    )
+
+
+class TestFunctionAppStackRuntimeHelperResolve(unittest.TestCase):
+    """Tests for _FunctionAppStackRuntimeHelper.resolve() version normalization.
+
+    The Functions Stacks API and the value persisted on a site can disagree on the
+    decimal-suffix convention (e.g. API returns "21.0" while linux_fx_version stores
+    "Java|21"; .NET-isolated returns "8" while Bicep/portal stored "8.0"). resolve()
+    normalizes between these forms instead of using a hand-maintained mapping that
+    needs a code change for every new major version.
+    """
+
+    def _build_helper(self, stacks):
+        with mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory'):
+            helper = _FunctionAppStackRuntimeHelper(_get_test_cmd(), linux=True, windows=False)
+        # Pre-populate stacks so _load_stacks() short-circuits and no API call is made.
+        helper._stacks = stacks
+        return helper
+
+    # -- bare integer ("21") matches API decimal form ("21.0") ---------------
+
+    def test_resolve_java_bare_int_matches_decimal_form(self):
+        """Repro: az functionapp config appsettings set on a Linux Java 21 app
+        emitted a misleading 'Invalid version: 21' warning because linux_fx_version
+        stores 'Java|21' but the API returns version '21.0'."""
+        stacks = [
+            _make_runtime("java", "25.0"),
+            _make_runtime("java", "21.0"),
+            _make_runtime("java", "17.0"),
+            _make_runtime("java", "11.0"),
+            _make_runtime("java", "8.0"),
+        ]
+        helper = self._build_helper(stacks)
+
+        result = helper.resolve("java", "21", functions_version="~4", is_linux=True)
+
+        self.assertIsNotNone(result)
+        self.assertEqual(result.version, "21.0")
+
+    def test_resolve_java_25_bare_int_matches_decimal_form(self):
+        """Future-proofing: the fix must handle Java majors that did not exist
+        when this code was written, without a code change."""
+        stacks = [
+            _make_runtime("java", "25.0"),
+            _make_runtime("java", "21.0"),
+        ]
+        helper = self._build_helper(stacks)
+
+        result = helper.resolve("java", "25", functions_version="~4", is_linux=True)
+
+        self.assertIsNotNone(result)
+        self.assertEqual(result.version, "25.0")
+
+    # -- decimal form ("8.0") matches API bare integer ("8") -----------------
+
+    def test_resolve_dotnet_isolated_decimal_matches_bare_int(self):
+        """.NET-isolated runtime versions appear in the Stacks API as bare
+        integers ('8'), but Bicep/portal-provisioned apps sometimes store '8.0'.
+        Normalization must work in both directions."""
+        stacks = [
+            _make_runtime("dotnet-isolated", "8"),
+            _make_runtime("dotnet-isolated", "9"),
+        ]
+        helper = self._build_helper(stacks)
+
+        result = helper.resolve("dotnet-isolated", "8.0", functions_version="~4", is_linux=True)
+
+        self.assertIsNotNone(result)
+        self.assertEqual(result.version, "8")
+
+    # -- legacy Java naming --------------------------------------------------
+
+    def test_resolve_java_1_8_matches_8_0(self):
+        """Legacy Java naming '1.8' should still resolve to the API's '8.0'."""
+        stacks = [
+            _make_runtime("java", "8.0"),
+            _make_runtime("java", "11.0"),
+        ]
+        helper = self._build_helper(stacks)
+
+        result = helper.resolve("java", "1.8", functions_version="~4", is_linux=True)
+
+        self.assertIsNotNone(result)
+        self.assertEqual(result.version, "8.0")
+
+    # -- direct match (already-canonical input) ------------------------------
+
+    def test_resolve_exact_version_match_unchanged(self):
+        """If the input already matches the API value verbatim, normalization
+        must not run and the Runtime should be returned as-is."""
+        stacks = [
+            _make_runtime("java", "21.0"),
+        ]
+        helper = self._build_helper(stacks)
+
+        result = helper.resolve("java", "21.0", functions_version="~4", is_linux=True)
+
+        self.assertIsNotNone(result)
+        self.assertEqual(result.version, "21.0")
+
+    # -- genuinely invalid versions still error ------------------------------
+
+    def test_resolve_unknown_major_version_still_raises(self):
+        """An unknown bare-integer major must NOT be silently accepted just
+        because rule 1 generates a candidate. The candidate is only used if it
+        actually exists in the API-returned runtime list."""
+        stacks = [
+            _make_runtime("java", "21.0"),
+            _make_runtime("java", "17.0"),
+        ]
+        helper = self._build_helper(stacks)
+
+        with self.assertRaises(ValidationError) as ctx:
+            helper.resolve("java", "99", functions_version="~4", is_linux=True)
+        self.assertIn("Invalid version: 99", str(ctx.exception))
+
+    def test_resolve_unknown_minor_version_still_raises(self):
+        """Versions that don't fit any normalization rule (e.g. '21.5') must
+        fall through to the existing 'Invalid version' error."""
+        stacks = [
+            _make_runtime("java", "21.0"),
+        ]
+        helper = self._build_helper(stacks)
+
+        with self.assertRaises(ValidationError) as ctx:
+            helper.resolve("java", "21.5", functions_version="~4", is_linux=True)
+        self.assertIn("Invalid version: 21.5", str(ctx.exception))
+
+    def test_resolve_disable_version_error_returns_none(self):
+        """disable_version_error=True must continue to suppress the ValidationError
+        for unknown versions (existing behavior preserved)."""
+        stacks = [
+            _make_runtime("java", "21.0"),
+        ]
+        helper = self._build_helper(stacks)
+
+        result = helper.resolve(
+            "java", "99", functions_version="~4",
+            is_linux=True, disable_version_error=True)
+
+        self.assertIsNone(result)

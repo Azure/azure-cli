@@ -8061,20 +8061,29 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
             return matched_runtime_version
         matched_runtime_version = next((r for r in runtimes if r.version == version), None)
         if not matched_runtime_version:
-            # help convert previously acceptable versions into correct ones if match not found
-            old_to_new_version = {
-                "11": "11.0",
-                "8": "8.0",
-                "8.0": "8",
-                "7": "7.0",
-                "6.0": "6",
-                "1.8": "8.0",
-                "17": "17.0"
-            }
-            new_version = old_to_new_version.get(version)
-            matched_runtime_version = next((r for r in runtimes if r.version == new_version), None)
-            if matched_runtime_version is not None:
-                version = new_version
+            # The runtime stacks API and the value persisted on a site can disagree on the
+            # decimal-suffix convention (e.g. API returns "21.0" while linux_fx_version stores
+            # "Java|21"; .NET-isolated returns "8" while a Bicep template stored "8.0"). To
+            # avoid emitting a misleading "Invalid version" warning, derive a small set of
+            # candidate alternatives and accept any that actually exists in the API-returned
+            # runtimes list. This stays self-healing as new major versions ship.
+            candidate_versions = []
+            if version == "1.8":
+                # Legacy Java naming retained for backwards compatibility.
+                candidate_versions.append("8.0")
+            elif version.isdigit():
+                # Bare integer ("21") -> decimal form ("21.0").
+                candidate_versions.append("{}.0".format(version))
+            elif re.fullmatch(r"\d+\.0", version):
+                # Decimal form ("8.0") -> bare integer ("8").
+                candidate_versions.append(version[:-2])
+
+            for candidate in candidate_versions:
+                alt_match = next((r for r in runtimes if r.version == candidate), None)
+                if alt_match is not None:
+                    matched_runtime_version = alt_match
+                    version = candidate
+                    break
 
         self.validate_end_of_life_date(
             runtime,
