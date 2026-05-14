@@ -72,7 +72,7 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 SRC_DIR = PROJECT_ROOT / "src"
 AZURE_CLI_CORE_DIR = SRC_DIR / "azure-cli-core"
-REQUIREMENTS_FILE = SRC_DIR / "azure-cli" / "requirements.py3.Darwin.txt"
+REQUIREMENTS_FILE = SRC_DIR / "azure-cli" / "requirements.py3.MacOS.txt"
 
 # Package configuration
 APP_NAME = "azure-cli"
@@ -187,7 +187,7 @@ def install_azure_cli(venv_python: Path) -> None:
 
     Mirrors the run.sh approach:
       1. Install all src packages with --no-deps (local source code takes precedence)
-      2. Install pinned dependencies from requirements.py3.Darwin.txt
+      2. Install pinned dependencies from requirements.py3.MacOS.txt
     """
     # Step 1: install every package found under SRC_DIR from source, without pulling
     # transitive deps from PyPI (--no-deps). This ensures the locally-built wheels

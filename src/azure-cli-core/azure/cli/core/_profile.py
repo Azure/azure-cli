@@ -970,8 +970,10 @@ def _create_identity_instance(cli_ctx, authority, tenant_id=None, client_id=None
 
     # On Windows, use core.enable_broker_on_windows=false to disable broker (WAM) for authentication.
     enable_broker_on_windows = cli_ctx.config.getboolean('core', 'enable_broker_on_windows', fallback=True)
+    # On macOS, broker authentication is opt-in. Use core.enable_broker_on_mac=true to enable it.
+    enable_broker_on_mac = cli_ctx.config.getboolean('core', 'enable_broker_on_mac', fallback=False)
     from .telemetry import set_broker_info
-    set_broker_info(enable_broker_on_windows)
+    set_broker_info(enable_broker_on_windows, enable_broker_on_mac)
 
     # PREVIEW: In Azure Stack environment, use core.instance_discovery=false to disable MSAL's instance discovery.
     instance_discovery = cli_ctx.config.getboolean('core', 'instance_discovery', True)
@@ -980,4 +982,5 @@ def _create_identity_instance(cli_ctx, authority, tenant_id=None, client_id=None
                     encrypt=encrypt,
                     use_msal_http_cache=use_msal_http_cache,
                     enable_broker_on_windows=enable_broker_on_windows,
+                    enable_broker_on_mac=enable_broker_on_mac,
                     instance_discovery=instance_discovery)
