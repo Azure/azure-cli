@@ -106,6 +106,54 @@ class DateTimeParseTest(unittest.TestCase):
         self.assertEqual(_asn1_to_iso8601("20170424163720Z"), expected)
 
 
+class CreateVaultSoftDeleteTest(unittest.TestCase):
+    """Verify that create_vault explicitly sets enable_soft_delete=True in the request body
+    so that Azure Policy checks requiring the property to be present are satisfied."""
+
+    @mock.patch('azure.cli.command_modules.keyvault.custom._create_network_rule_set', return_value=None)
+    @mock.patch('azure.cli.core._profile.Profile')
+    @mock.patch('azure.cli.core.util.sdk_no_wait')
+    def test_create_vault_sets_enable_soft_delete_true(self, mock_sdk_no_wait, mock_profile, _mock_network):
+        from azure.cli.command_modules.keyvault.custom import create_vault
+
+        mock_profile.return_value.get_subscription.return_value = {
+            'tenantId': '00000000-0000-0000-0000-000000000000'
+        }
+
+        # Build a minimal cmd mock that returns simple model classes
+        cmd = mock.MagicMock()
+        cmd.cli_ctx.data = {}
+
+        # get_models returns a simple class that records its kwargs
+        def fake_get_models(name, **kwargs):
+            return type(name, (), {'__init__': lambda self, **kw: self.__dict__.update(kw)})
+
+        cmd.get_models.side_effect = fake_get_models
+
+        # Client whose get() raises so vault-already-exists check is skipped
+        client = mock.MagicMock()
+        client.get.side_effect = HttpResponseError()
+
+        create_vault(
+            cmd, client,
+            resource_group_name='rg',
+            vault_name='testvault',
+            location='eastus',
+            retention_days='90',
+            no_self_perms=True,
+        )
+
+        # sdk_no_wait is called with the VaultCreateOrUpdateParameters as 'parameters'
+        mock_sdk_no_wait.assert_called_once()
+        call_kwargs = mock_sdk_no_wait.call_args
+        parameters = call_kwargs.kwargs.get('parameters') or call_kwargs[1].get('parameters')
+        vault_properties = parameters.properties
+
+        self.assertIs(vault_properties.enable_soft_delete, True,
+                      "create_vault must explicitly set enable_soft_delete=True in the request body "
+                      "to satisfy Azure Policy checks")
+
+
 class KeyVaultPrivateLinkResourceScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_plr')
     @KeyVaultPreparer(name_prefix='cli-test-kv-plr-', location='eastus2')

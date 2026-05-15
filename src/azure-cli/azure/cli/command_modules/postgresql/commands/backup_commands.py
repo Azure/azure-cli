@@ -4,16 +4,39 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
+from datetime import datetime
 from azure.cli.core.util import user_confirmation
 from knack.log import get_logger
 from ..utils.validators import validate_resource_group, validate_backup_name
 
 logger = get_logger(__name__)
 
+_BACKUP_NAME_PREFIX = "ondemandbackup"
 
-def backup_create_func(client, resource_group_name, server_name, backup_name):
+
+def _generate_backup_name(client, resource_group_name, server_name):
+    existing_backups = client.list_by_server(resource_group_name, server_name)
+    existing_names = {backup.name for backup in existing_backups}
+
+    on_demand_count = sum(1 for name in existing_names if name.startswith(_BACKUP_NAME_PREFIX))
+
+    date_str = datetime.utcnow().strftime("%m%d%Y")
+    backup_name = f"{_BACKUP_NAME_PREFIX}-{date_str}-{on_demand_count + 1}"
+
+    if backup_name in existing_names:
+        backup_name = f"{_BACKUP_NAME_PREFIX}-{date_str}-{on_demand_count + 2}"
+
+    return backup_name
+
+
+def backup_create_func(client, resource_group_name, server_name, backup_name=None):
     validate_resource_group(resource_group_name)
-    validate_backup_name(backup_name)
+
+    if not backup_name:
+        backup_name = _generate_backup_name(client, resource_group_name, server_name)
+        logger.warning("No backup name provided. Using generated name: %s", backup_name)
+    else:
+        validate_backup_name(backup_name)
 
     return client.begin_create(
         resource_group_name,

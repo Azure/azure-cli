@@ -895,23 +895,6 @@ def _remove_env_vars(existing_env_vars, remove_env_vars):
             logger.warning("Environment variable {} does not exist.".format(old_env_var))  # pylint: disable=logging-format-interpolation
 
 
-def _remove_env_vars(existing_env_vars, remove_env_vars):
-    for old_env_var in remove_env_vars:
-
-        # Check if updating existing env var
-        is_existing = False
-        for index, value in enumerate(existing_env_vars):
-            existing_env_var = value
-            if existing_env_var["name"].lower() == old_env_var.lower():
-                is_existing = True
-                existing_env_vars.pop(index)
-                break
-
-        # If not updating existing env var, add it as a new env var
-        if not is_existing:
-            logger.warning("Environment variable {} does not exist.".format(old_env_var))  # pylint: disable=logging-format-interpolation
-
-
 def _add_or_update_tags(containerapp_def, tags):
     if 'tags' not in containerapp_def:
         if tags:
