@@ -44,8 +44,8 @@ class Create(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.name = AAZStrArg(
-            options=["-n", "--name"],
+        _args_schema.budget_name = AAZStrArg(
+            options=["-n", "--name", "--budget-name"],
             help="Budget Name.",
             required=True,
         )
@@ -288,7 +288,7 @@ class Create(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "budgetName", self.ctx.args.name,
+                    "budgetName", self.ctx.args.budget_name,
                     required=True,
                 ),
                 **self.serialize_url_param(
