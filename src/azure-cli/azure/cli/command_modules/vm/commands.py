@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.command_modules.vm._client_factory import cf_vm_image_term, cf_vmss, cf_log_analytics_data_plane
+from azure.cli.command_modules.vm._client_factory import cf_vm_image_term, cf_log_analytics_data_plane
 from azure.cli.command_modules.vm._format import (
     transform_ip_addresses, transform_vm, transform_vm_create_output, transform_vm_list,
     transform_disk_create_table_output, transform_sku_for_table_output, transform_disk_show_table_output,
@@ -51,12 +51,6 @@ def load_command_table(self, _):
     compute_vm_image_term_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.marketplaceordering.operations#MarketplaceAgreementsOperations.{}',
         client_factory=cf_vm_image_term
-    )
-
-    compute_vmss_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#VirtualMachineScaleSetsOperations.{}',
-        client_factory=cf_vmss,
-        operation_group='virtual_machine_scale_sets'
     )
 
     image_builder_image_templates_sdk = CliCommandType(
@@ -309,7 +303,7 @@ def load_command_table(self, _):
         from .operations.vmss_vms import VMSSGetResiliencyView
         self.command_table['vmss get-resiliency-view'] = VMSSGetResiliencyView(loader=self)
 
-    with self.command_group('vmss application', operation_group='virtual_machine_scale_sets') as g:
+    with self.command_group('vmss application') as g:
         g.custom_command('set', 'set_vmss_applications', validator=process_set_applications_namespace)
         g.custom_command('list', 'list_vmss_applications')
 
@@ -326,7 +320,7 @@ def load_command_table(self, _):
         g.custom_command('disable', 'decrypt_vmss')
         g.custom_show_command('show', 'show_vmss_encryption_status')
 
-    with self.command_group('vmss extension', compute_vmss_sdk) as g:
+    with self.command_group('vmss extension') as g:
         g.custom_command('delete', 'delete_vmss_extension', supports_no_wait=True)
         g.custom_show_command('show', 'get_vmss_extension')
         g.custom_command('set', 'set_vmss_extension', supports_no_wait=True)

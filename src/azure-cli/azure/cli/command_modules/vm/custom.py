@@ -33,7 +33,7 @@ from azure.cli.command_modules.vm._validators import _get_resource_group_from_va
 from azure.cli.core.commands.validators import validate_file_or_dict
 
 from azure.cli.core.commands import LongRunningOperation, DeploymentOutputLongRunningOperation
-from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import sdk_no_wait
 
@@ -42,7 +42,7 @@ from ._vm_diagnostics_templates import get_default_diag_config
 
 from ._actions import (load_images_from_aliases_doc, load_extension_images_thru_services,
                        load_images_thru_services, _get_latest_image_version_by_aaz)
-from ._client_factory import _compute_client_factory, cf_vm_image_term
+from ._client_factory import _compute_client_factory, cf_log_analytics, cf_log_analytics_data_sources, cf_vm_image_term
 
 from .aaz.latest.vm.disk import AttachDetachDataDisk
 from .aaz.latest.vm import Update as UpdateVM
@@ -434,7 +434,6 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                         supported_security_option=None):
 
     from azure.mgmt.core.tools import resource_id, is_valid_resource_id
-    from azure.cli.core.commands.client_factory import get_subscription_id
 
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     if security_data_uri:
@@ -6008,7 +6007,6 @@ def update_dedicated_host(cmd, host_group_name, host_name, resource_group_name, 
 
 # region VMMonitor
 def _get_log_analytics_client(cmd):
-    from ._client_factory import cf_log_analytics
     from azure.cli.core.commands.client_factory import get_subscription_id
     subscription_id = get_subscription_id(cmd.cli_ctx)
     return cf_log_analytics(cmd.cli_ctx, subscription_id)
@@ -6045,7 +6043,6 @@ def _prepare_workspace(cmd, resource_group_name, workspace):
 
 
 def _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_name):
-    from ._client_factory import cf_log_analytics_data_sources
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.mgmt.loganalytics.models import DataSource
     from azure.core.exceptions import HttpResponseError

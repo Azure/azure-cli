@@ -19,10 +19,6 @@ def cf_vm_image_term(cli_ctx, _):
     return market_place_client.marketplace_agreements
 
 
-def cf_vmss(cli_ctx, _):
-    return _compute_client_factory(cli_ctx).virtual_machine_scale_sets
-
-
 def _log_analytics_client_factory(cli_ctx, subscription_id, *_):
     from azure.mgmt.loganalytics import LogAnalyticsManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
