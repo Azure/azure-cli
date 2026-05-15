@@ -75,7 +75,7 @@ class AzureNetAppFilesPoolServiceScenarioTest(ScenarioTest):
         assert pool['size'] == 4398046511104
 
 
-    @unittest.skip('Skip 0.5 TiB pool size tests until the preview (AFEC) feature is more widely available, then we can remove the skip and enable the `--size` arg in the CLI')
+    @unittest.skip('Skip 0.5 TiB pool size tests until the preview (AFEC) feature is more widely available, then we can remove the skip')
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_pool_', additional_tags={'owner': 'cli_test'})
     def test_create_pool_minimum_size(self):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)

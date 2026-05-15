@@ -239,13 +239,15 @@ def _wrap_pool_poller(poller, requested_bytes):
         try:
             return original_result(timeout=timeout)
         except Exception as ex:  # pylint: disable=broad-except
-            raise _augment_pool_size_error(ex, requested_bytes)
+            _augment_pool_size_error(ex, requested_bytes)
+            raise
 
     def wait(timeout=None):
         try:
             return original_wait(timeout=timeout)
         except Exception as ex:  # pylint: disable=broad-except
-            raise _augment_pool_size_error(ex, requested_bytes)
+            _augment_pool_size_error(ex, requested_bytes)
+            raise
 
     poller.result = result
     poller.wait = wait

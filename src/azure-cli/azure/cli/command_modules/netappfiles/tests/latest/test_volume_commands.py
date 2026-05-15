@@ -845,7 +845,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
             "az keyvault private-endpoint-connection wait -g {rg} --vault-name {kv_name} -n {pe_name} --created"
         )
 
-        # 5. Grant the UAMI wrap/unwrap on the key
+        # 5. Grant the UAMI permissions on the key
         self.cmd(
             "az keyvault set-policy -g {rg} -n {kv_name} --object-id {uami_principal_id} "
             "--key-permissions get decrypt encrypt"
