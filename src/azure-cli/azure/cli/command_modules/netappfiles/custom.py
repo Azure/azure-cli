@@ -288,12 +288,12 @@ def _customize_pool_size_args(args_schema, *, on_update):
     `--size-in-bytes` (int). The aaz int `size` field is preserved for body serialization
     and gets populated by pre_operations.
     """
-    from azure.cli.core.aaz import AAZFloatArg, AAZFloatArgFormat, AAZIntArg
 
     # TODO: 0.5 sized pools are currently preview only and gated by AFEC, so we are not advertising the float `--size` arg until
     # the feature is more widely available. For now, users can use `--size-in-bytes 549755813888` to get a 512 GiB pool.
     # When we do enable the `--size` arg, we should set its default to 4 (TiB) to preserve existing behavior where omitting size defaults to 4 TiB.
 
+    # from azure.cli.core.aaz import AAZFloatArg, AAZFloatArgFormat, AAZIntArg
     # # Keep aaz `size` AAZIntArg for body serialization but hide it from the CLI surface.
     # args_schema.size._registered = False
     # args_schema.size._required = False
