@@ -6,6 +6,7 @@
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from azure.core.exceptions import HttpResponseError
 from azure.cli.core.azclierror import InvalidArgumentValueError, ValidationError, MutuallyExclusiveArgumentError
+import unittest
 
 POOL_DEFAULT = "--service-level Premium --size 4"
 POOL_DEFAULT_STRING_SIZE = "--service-level 'Premium' --size a"
@@ -58,6 +59,7 @@ class AzureNetAppFilesPoolServiceScenarioTest(ScenarioTest):
         with self.assertRaises(InvalidArgumentValueError):
             self.cmd("az netappfiles pool create --resource-group {rg} --account-name %s --pool-name %s -l %s %s " % (account_name, pool_name, LOCATION, POOL_DEFAULT_STRING_SIZE)).get_output_in_json()
 
+    @unittest.skip('Skip 0.5 TiB pool size tests until the preview (AFEC) feature is more widely available, then we can remove the skip and enable the `--size` arg in the CLI')
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_pool_', additional_tags={'owner': 'cli_test'})
     def test_create_pool_minimum_size(self):
         account_name = self.create_random_name(prefix='cli-acc-', length=24)

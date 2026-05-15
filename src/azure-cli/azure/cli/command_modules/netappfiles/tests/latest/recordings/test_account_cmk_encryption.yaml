@@ -1,42 +1,35 @@
 interactions:
 - request:
-    body: '{"identity": {"type": "UserAssigned"}, "location": "eastus2", "properties":
-      {"encryption": {"identity": {"userAssignedIdentity": "myIdentity"}, "keySource":
-      "Microsoft.KeyVault", "keyVaultProperties": {"keyName": "myKeyName", "keyVaultResourceId":
-      "myKeyVaultResourceId", "keyVaultUri": "myUri"}}}}'
+    body: null
     headers:
       Accept:
       - application/json
       Accept-Encoding:
       - gzip, deflate
       CommandName:
-      - netappfiles account create
+      - keyvault create
       Connection:
       - keep-alive
-      Content-Length:
-      - '298'
-      Content-Type:
-      - application/json
       ParameterSetName:
-      - -g -a -l --key-source --identity-type --user-assigned-identity --key-vault-uri
-        --key-name --keyvault-resource-id --user-assigned-identity
+      - -g -n -l --enable-purge-protection --retention-days --enable-rbac-authorization
       User-Agent:
-      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.13.13 (Windows-11-10.0.26200-SP0)
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002?api-version=2026-01-01
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.13.13 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.KeyVault/vaults/clikv000004?api-version=2025-05-01
   response:
     body:
-      string: '{"error":{"code":"MissingIdentityIds","message":"The identity ids must
-        not be null or empty for ''UserAssigned'' identity type."}}'
+      string: '{"error":{"code":"ResourceNotFound","message":"The Resource ''Microsoft.KeyVault/vaults/clikv000004''
+        under resource group ''cli_netappfiles_test_account_000001'' was not found.
+        For more details please go to https://aka.ms/ARMResourceNotFoundFix"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '128'
+      - '244'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 15 Apr 2026 13:06:54 GMT
+      - Fri, 15 May 2026 10:18:50 GMT
       expires:
       - '-1'
       pragma:
@@ -50,10 +43,833 @@ interactions:
       x-ms-failure-cause:
       - gateway
       x-msedge-ref:
-      - 'Ref A: DF5B5B1E832E4F86855E4D0A0CA73759 Ref B: BL2AA2010205045 Ref C: 2026-04-15T13:06:54Z'
+      - 'Ref A: 4753D78892AF471B821A649C981A77AA Ref B: MNZ221060610037 Ref C: 2026-05-15T10:18:50Z'
     status:
-      code: 400
-      message: Bad Request
+      code: 404
+      message: Not Found
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - keyvault create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l --enable-purge-protection --retention-days --enable-rbac-authorization
+      User-Agent:
+      - python/3.13.13 (Windows-11-10.0.26200-SP0) AZURECLI/2.86.0
+    method: GET
+    uri: https://graph.microsoft.com/v1.0/me
+  response:
+    body:
+      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#users/$entity","businessPhones":[],"displayName":"Audunn
+        Baldvinsson (Business Guest)","givenName":"Audunn","jobTitle":null,"mail":"test@example.com","mobilePhone":null,"officeLocation":"No
+        WorkSpace","preferredLanguage":null,"surname":"Baldvinsson","userPrincipalName":"test@example.com","id":"29ee0da0-a37f-4d77-8704-0c32607c900f"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '395'
+      content-type:
+      - application/json; odata.metadata=minimal; odata.streaming=true; IEEE754Compatible=false;
+        charset=utf-8
+      date:
+      - Fri, 15 May 2026 10:18:53 GMT
+      odata-version:
+      - '4.0'
+      request-id:
+      - e63f016c-9754-4f30-be90-c126a8754d88
+      strict-transport-security:
+      - max-age=31536000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-ms-ags-diagnostic:
+      - '{"ServerInfo":{"DataCenter":"East US","Slice":"E","Ring":"5","ScaleUnit":"011","RoleInstance":"BL02EPF000401D1"}}'
+      x-ms-gateway-esc:
+      - '200'
+      x-ms-resource-unit:
+      - '1'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "eastus2", "properties": {"tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47",
+      "sku": {"name": "standard", "family": "A"}, "accessPolicies": [{"tenantId":
+      "72f988bf-86f1-41af-91ab-2d7cd011db47", "objectId": "29ee0da0-a37f-4d77-8704-0c32607c900f",
+      "permissions": {"keys": ["all"], "secrets": ["all"], "certificates": ["all"],
+      "storage": ["all"]}}], "enableRbacAuthorization": false, "enableSoftDelete":
+      true, "enablePurgeProtection": true, "softDeleteRetentionInDays": 7, "networkAcls":
+      {"bypass": "AzureServices", "defaultAction": "Allow"}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - keyvault create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '553'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n -l --enable-purge-protection --retention-days --enable-rbac-authorization
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.13.13 (Windows-11-10.0.26200-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.KeyVault/vaults/clikv000004?api-version=2025-05-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.KeyVault/vaults/clikv000004","name":"clikv000004","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{"CreatedOnDate":"2026-05-15T10:18:54.8501068Z"},"systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-05-15T10:18:55.02Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-05-15T10:18:55.02Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","accessPolicies":[{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"29ee0da0-a37f-4d77-8704-0c32607c900f","permissions":{"keys":["all"],"secrets":["all"],"certificates":["all"],"storage":["all"]}}],"enabledForDeployment":false,"enabledForDiskEncryption":false,"enabledForTemplateDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"enableRbacAuthorization":false,"enablePurgeProtection":true,"vaultUri":"https://clikv000004.vault.azure.net","provisioningState":"RegisteringDns","publicNetworkAccess":"Enabled"}}'
+    headers:
+      azure-deprecating:
+      - Due to an RBAC security default, Key Vault's Resource Manager API versions
+        older than 2026-02-01 will retire on 2027-04-01 (https://learn.microsoft.com/en-us/azure/key-vault/general/access-control-default?tabs=azure-cli)
+      cache-control:
+      - no-cache
+      content-length:
+      - '1153'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 15 May 2026 10:18:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-service-version:
+      - 2.2.841.0
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=29ee0da0-a37f-4d77-8704-0c32607c900f/westus/cab6f8d5-3d31-499e-8c90-dfdd15ac1dd0
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 219B4315128D4895ABB49A96272357AB Ref B: MNZ221060619051 Ref C: 2026-05-15T10:18:54Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - keyvault create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l --enable-purge-protection --retention-days --enable-rbac-authorization
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.13.13 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.KeyVault/vaults/clikv000004?api-version=2025-05-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.KeyVault/vaults/clikv000004","name":"clikv000004","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{"CreatedOnDate":"2026-05-15T10:18:54.8501068Z"},"systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-05-15T10:18:55.02Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-05-15T10:18:55.02Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","accessPolicies":[{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"29ee0da0-a37f-4d77-8704-0c32607c900f","permissions":{"keys":["all"],"secrets":["all"],"certificates":["all"],"storage":["all"]}}],"enabledForDeployment":false,"enabledForDiskEncryption":false,"enabledForTemplateDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"enableRbacAuthorization":false,"enablePurgeProtection":true,"vaultUri":"https://clikv000004.vault.azure.net/","provisioningState":"RegisteringDns","publicNetworkAccess":"Enabled"}}'
+    headers:
+      azure-deprecating:
+      - Due to an RBAC security default, Key Vault's Resource Manager API versions
+        older than 2026-02-01 will retire on 2027-04-01 (https://learn.microsoft.com/en-us/azure/key-vault/general/access-control-default?tabs=azure-cli)
+      cache-control:
+      - no-cache
+      content-length:
+      - '1154'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 15 May 2026 10:18:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-service-version:
+      - 2.2.841.0
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: E0DB18BE995F473E8D07CAA2EC302610 Ref B: MNZ221060610035 Ref C: 2026-05-15T10:18:59Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - keyvault create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n -l --enable-purge-protection --retention-days --enable-rbac-authorization
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.13.13 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.KeyVault/vaults/clikv000004?api-version=2025-05-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.KeyVault/vaults/clikv000004","name":"clikv000004","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{"CreatedOnDate":"2026-05-15T10:18:54.8501068Z"},"systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-05-15T10:18:55.02Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-05-15T10:18:55.02Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","accessPolicies":[{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"29ee0da0-a37f-4d77-8704-0c32607c900f","permissions":{"keys":["all"],"secrets":["all"],"certificates":["all"],"storage":["all"]}}],"enabledForDeployment":false,"enabledForDiskEncryption":false,"enabledForTemplateDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"enableRbacAuthorization":false,"enablePurgeProtection":true,"vaultUri":"https://clikv000004.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
+    headers:
+      azure-deprecating:
+      - Due to an RBAC security default, Key Vault's Resource Manager API versions
+        older than 2026-02-01 will retire on 2027-04-01 (https://learn.microsoft.com/en-us/azure/key-vault/general/access-control-default?tabs=azure-cli)
+      cache-control:
+      - no-cache
+      content-length:
+      - '1149'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 15 May 2026 10:19:30 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-service-version:
+      - 2.2.841.0
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 3F7788518F23440AA5A2E0070B372DBA Ref B: MNZ221060610021 Ref C: 2026-05-15T10:19:30Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - keyvault key create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --vault-name -n --kty --protection
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.13.13 (Windows-11-10.0.26200-SP0)
+    method: POST
+    uri: https://clikv000004.vault.azure.net/keys/clikey000005/create?api-version=7.6-preview.2
+  response:
+    body:
+      string: '{"error":{"code":"Unauthorized","message":"AKV10000: Request is missing
+        a Bearer, PoP, or MTLS_POP token."}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '108'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 15 May 2026 10:19:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000;includeSubDomains
+      www-authenticate:
+      - Bearer authorization="https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47",
+        resource="https://vault.azure.net"
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=40.117.66.23;act_addr_fam=InterNetwork;
+      x-ms-keyvault-region:
+      - eastus2
+      x-ms-keyvault-service-version:
+      - 1.9.3347.1
+    status:
+      code: 401
+      message: Unauthorized
+- request:
+    body: '{"kty": "RSA", "attributes": {"enabled": true}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - keyvault key create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '47'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --vault-name -n --kty --protection
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.13.13 (Windows-11-10.0.26200-SP0)
+    method: POST
+    uri: https://clikv000004.vault.azure.net/keys/clikey000005/create?api-version=7.6-preview.2
+  response:
+    body:
+      string: '{"key":{"kid":"https://clikv000004.vault.azure.net/keys/clikey000005/e103dcdffce54de8b7d201f8144fb34e","kty":"RSA","key_ops":["encrypt","decrypt","sign","verify","wrapKey","unwrapKey"],"n":"z8Oz_vzom0YCLXZA1V5-keMBZoZu4eXfgnDz6zeozQaQwJAv8vEIfdFzS_GAPhx2i_v-aWacZLDhAVWSLSb2dYvKr2LXD_W8HqzL47xbnTEZgCvpkZH6VfTjrggENZph2UhhrPdPSlu7b0pWxAy8uQbS5tnJPIECgjzJPmuH3nPJnlVflWilXpdM32YAa6MMmfH8EwDLr2htU-C9C5Nn71nDNYPH-O-T-G7QtUVAODozas-uLnpfn2AyYsqRirpc2dFrP_jfjp_5UnZQsDGHjO-I-Lwf-MAxlNTEQtHZM8DtX7Ri_R_U_8y7Z9X1ogrsXbCEFNhcfvA2G2oLJHgpJQ","e":"AQAB"},"attributes":{"enabled":true,"key_size":2048,"created":1778840373,"updated":1778840373,"recoveryLevel":"CustomizedRecoverable","recoverableDays":7,"exportable":false,"hsmPlatform":"0"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '731'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 15 May 2026 10:19:33 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000;includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-network-info:
+      - conn_type=Ipv4;addr=40.117.66.16;act_addr_fam=InterNetwork;
+      x-ms-keyvault-region:
+      - eastus2
+      x-ms-keyvault-service-version:
+      - 1.9.3347.1
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - identity create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.13.13 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_netappfiles_test_account_000001?api-version=2024-11-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001","name":"cli_netappfiles_test_account_000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"owner":"cli_test","CreatedOnDate":"2026-05-15T10:18:47.4752336Z","SkipNRMSNSG":"true"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '363'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 15 May 2026 10:19:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 3EFC251A8EA942968A547A577E570866 Ref B: MNZ221060609045 Ref C: 2026-05-15T10:19:34Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - identity create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '22'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.13.13 (Windows-11-10.0.26200-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/cli-id-000006?api-version=2024-11-30
+  response:
+    body:
+      string: '{"error":{"code":"429","message":"Request is temporarily throttled
+        because tenant 72f988bf-86f1-41af-91ab-2d7cd011db47 has issued too many requests.
+        Retry after 1 seconds."}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '174'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 15 May 2026 10:19:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - service
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=29ee0da0-a37f-4d77-8704-0c32607c900f/westus/3c20b6cb-0c89-4839-8e36-0ded700b74b4
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: BFDBEA48C02348A6882038C90B5A46F3 Ref B: MNZ221060619039 Ref C: 2026-05-15T10:19:35Z'
+    status:
+      code: 429
+      message: Too Many Requests
+- request:
+    body: '{"location": "westus"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - identity create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '22'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.13.13 (Windows-11-10.0.26200-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/cli-id-000006?api-version=2024-11-30
+  response:
+    body:
+      string: '{"location":"westus","tags":{"CreatedOnDate":"2026-05-15T10:19:37.5075734Z"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_netappfiles_test_account_000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/cli-id-000006","name":"cli-id-000006","type":"Microsoft.ManagedIdentity/userAssignedIdentities","properties":{"isolationScope":"None","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"01bcf93d-5984-47d4-9d8e-57cbdd1d54cc","clientId":"eff6ff25-ad85-4212-8ddd-31993822fa1e"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '533'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 15 May 2026 10:19:38 GMT
+      expires:
+      - '-1'
+      location:
+      - /subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_netappfiles_test_account_000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/cli-id-000006
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=29ee0da0-a37f-4d77-8704-0c32607c900f/westus/e394363b-e78e-49af-87da-4b88fd05c1de
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 9A95A62B70D64ABD9DA7CB04357D1C20 Ref B: MNZ221060619009 Ref C: 2026-05-15T10:19:37Z'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - keyvault set-policy
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --object-id --key-permissions
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.13.13 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.KeyVault/vaults/clikv000004?api-version=2025-05-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.KeyVault/vaults/clikv000004","name":"clikv000004","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{"CreatedOnDate":"2026-05-15T10:18:54.8501068Z"},"systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-05-15T10:18:55.02Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-05-15T10:18:55.02Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","accessPolicies":[{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"29ee0da0-a37f-4d77-8704-0c32607c900f","permissions":{"keys":["all"],"secrets":["all"],"certificates":["all"],"storage":["all"]}}],"enabledForDeployment":false,"enabledForDiskEncryption":false,"enabledForTemplateDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"enableRbacAuthorization":false,"enablePurgeProtection":true,"vaultUri":"https://clikv000004.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
+    headers:
+      azure-deprecating:
+      - Due to an RBAC security default, Key Vault's Resource Manager API versions
+        older than 2026-02-01 will retire on 2027-04-01 (https://learn.microsoft.com/en-us/azure/key-vault/general/access-control-default?tabs=azure-cli)
+      cache-control:
+      - no-cache
+      content-length:
+      - '1149'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 15 May 2026 10:19:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-service-version:
+      - 2.2.841.0
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 98E7EEC185F14B87870586E788988537 Ref B: MNZ221060618023 Ref C: 2026-05-15T10:19:40Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "eastus2", "tags": {"CreatedOnDate": "2026-05-15T10:18:54.8501068Z"},
+      "properties": {"sku": {"family": "A", "name": "standard"}, "tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47",
+      "accessPolicies": [{"tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47", "objectId":
+      "29ee0da0-a37f-4d77-8704-0c32607c900f", "permissions": {"keys": ["all"], "secrets":
+      ["all"], "certificates": ["all"], "storage": ["all"]}}, {"tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47",
+      "objectId": "01bcf93d-5984-47d4-9d8e-57cbdd1d54cc", "permissions": {"keys":
+      ["decrypt", "get", "encrypt"]}}], "enabledForDeployment": false, "enabledForDiskEncryption":
+      false, "enabledForTemplateDeployment": false, "enableSoftDelete": true, "softDeleteRetentionInDays":
+      7, "enableRbacAuthorization": false, "enablePurgeProtection": true, "vaultUri":
+      "https://clikv000004.vault.azure.net/", "provisioningState": "Succeeded", "publicNetworkAccess":
+      "Enabled"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - keyvault set-policy
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '929'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --object-id --key-permissions
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.13.13 (Windows-11-10.0.26200-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.KeyVault/vaults/clikv000004?api-version=2025-05-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.KeyVault/vaults/clikv000004","name":"clikv000004","type":"Microsoft.KeyVault/vaults","location":"eastus2","tags":{"CreatedOnDate":"2026-05-15T10:18:54.8501068Z"},"systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-05-15T10:18:55.02Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-05-15T10:19:40.977Z"},"properties":{"sku":{"family":"A","name":"standard"},"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","accessPolicies":[{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"29ee0da0-a37f-4d77-8704-0c32607c900f","permissions":{"keys":["all"],"secrets":["all"],"certificates":["all"],"storage":["all"]}},{"tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","objectId":"01bcf93d-5984-47d4-9d8e-57cbdd1d54cc","permissions":{"keys":["decrypt","get","encrypt"]}}],"enabledForDeployment":false,"enabledForDiskEncryption":false,"enabledForTemplateDeployment":false,"enableSoftDelete":true,"softDeleteRetentionInDays":7,"enableRbacAuthorization":false,"enablePurgeProtection":true,"vaultUri":"https://clikv000004.vault.azure.net/","provisioningState":"Succeeded","publicNetworkAccess":"Enabled"}}'
+    headers:
+      azure-deprecating:
+      - Due to an RBAC security default, Key Vault's Resource Manager API versions
+        older than 2026-02-01 will retire on 2027-04-01 (https://learn.microsoft.com/en-us/azure/key-vault/general/access-control-default?tabs=azure-cli)
+      cache-control:
+      - no-cache
+      content-length:
+      - '1303'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 15 May 2026 10:19:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-keyvault-service-version:
+      - 2.2.841.0
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=29ee0da0-a37f-4d77-8704-0c32607c900f/westus/20cdaf94-143d-46c3-bd09-4573bb03fe72
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 7B743CDD906942BF805F33D853D930D5 Ref B: MNZ221060609051 Ref C: 2026-05-15T10:19:40Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"identity": {"type": "UserAssigned", "userAssignedIdentities": {"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_netappfiles_test_account_000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/cli-id-000006":
+      {}}}, "location": "eastus2", "properties": {"encryption": {"identity": {"userAssignedIdentity":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_netappfiles_test_account_000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/cli-id-000006"},
+      "keySource": "Microsoft.KeyVault", "keyVaultProperties": {"keyName": "clikey000005",
+      "keyVaultResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.KeyVault/vaults/clikv000004",
+      "keyVaultUri": "https://clikv000004.vault.azure.net/"}}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - netappfiles account create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '838'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -a -l --key-source --identity-type --user-assigned-identities --user-assigned-identity
+        --key-vault-uri --key-name --keyvault-resource-id
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.13.13 (Windows-11-10.0.26200-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002?api-version=2026-01-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002","name":"cli-acc-000002","type":"Microsoft.NetApp/netAppAccounts","etag":"W/\"datetime''2026-05-15T10%3A19%3A43.8690116Z''\"","location":"eastus2","tags":{"CreatedOnDate":"2026-05-15T10:19:42.7228346Z"},"properties":{"provisioningState":"Creating","activeDirectories":[{"activeDirectoryId":"7f1ea496-b09a-e031-6635-44ef39dd38f2","username":"ad_user","domain":"northeurope","dns":"1.2.3.4","status":"Created","smbServerName":"SMBSERVER","organizationalUnit":"CN=Computers","kdcIP":"172.16.254.1","adName":"ad_name","aesEncryption":false,"ldapSigning":true,"ldapOverTLS":false,"allowLocalNfsUsersWithLdap":true,"encryptDCConnections":false,"ldapSearchScope":{}}],"encryption":{"keySource":"Microsoft.KeyVault","keyVaultProperties":{"keyVaultUri":"https://clikv000004.vault.azure.net/","keyName":"clikey000005","keyVaultResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.KeyVault/vaults/clikv000004"},"identity":{"userAssignedIdentity":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_netappfiles_test_account_000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/cli-id-000006"}},"multiADStatus":"Disabled"},"identity":{"type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_netappfiles_test_account_000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/cli-id-000006":{}}},"systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-05-15T10:19:42.9439332Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-05-15T10:19:42.9439332Z"}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/eastus2/operationResults/95fd7aa2-975c-4623-85b3-70274386b82b?api-version=2026-01-01&t=639144371841158349&c=MIIHlDCCBnygAwIBAgIQezb8rseFMm1IRs195n9vVzANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXVVMyIENBIDAxMB4XDTI2MDQwNzIzNDE1NFoXDTI2MTAwMzA1NDE1NFowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCyN0RC1toIy0MUjNqRPJLB51RUbtwBvAu6pgWK5gw2lmci7lE7U6jMxMh_8ljqwlXFY90FwPHzKHdcfHD4M0Ma3DRUVgE-v0S1aUDhKodisph39p7biWkApcSmxbkzmQMB2D0u2Zm0IhszNnwquCfvJuftV7em4_XCA_NbUt5EYUpfjv1sYzkLLAA8_2geRJLmDRfZGZvSHhgN-bsErNiX7v-BdmAyt_5jYpEcuAWuKp_6DUtXPY_mbwCm-qkLcoXGR39z9dHcyaldZUrJJ6JYcAEG5QNboi3gR2R7bY7pVtxUqbJ9Gx2tDy1qzosxOu0hXflZnevb68ylv7B68Wu9AgMBAAGjggSSMIIEjjCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBQNw-Elcx5N6tZ9jh67WrWJYZxlnzAfBgNVHSMEGDAWgBSs43L6A7Jznj2VyO-HW67dG6HtaDCCAbIGA1UdHwSCAakwggGlMGmgZ6BlhmNodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvMzQvY3VycmVudC5jcmwwa6BpoGeGZWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3R1czIvY3Jscy9jY21ld2VzdHVzMnBraS9jY21ld2VzdHVzMmljYTAxLzM0L2N1cnJlbnQuY3JsMFqgWKBWhlRodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvMzQvY3VycmVudC5jcmwwb6BtoGuGaWh0dHA6Ly9jY21ld2VzdHVzMnBraS53ZXN0dXMyLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZXdlc3R1czJpY2EwMS8zNC9jdXJyZW50LmNybDCCAbcGCCsGAQUFBwEBBIIBqTCCAaUwbAYIKwYBBQUHMAKGYGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBuBggrBgEFBQcwAoZiaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jYWNlcnRzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvY2VydC5jZXIwXQYIKwYBBQUHMAKGUWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBmBggrBgEFBQcwAoZaaHR0cDovL2NjbWV3ZXN0dXMycGtpLndlc3R1czIucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdHVzMmljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQBOslPK0kujtTlyxe5WOtpNbQRYZ8iSxYHILxKtavGf63w2nf7l5nX07MzYQqUYkw1ZLV81KZUWrAqmYoK0fTLgq7S_ePVqJ0Bi0EefpAOxc4Q7FtrTXk-2n80mtrwbcDH_jHtUGHd5gGv7MEFSu5Wa2iI3mNDsNSZrscWUqrBhKiZ2zF0slf8YMpHWflHomPT5wBh2LQC9ub-GLJKfkVDFxokxP2roGR1np3ATyRygILitspiTUM4Bcia0TOmYoYUqpLZTBiVNI-ehKyCyQXxR9eeBX0xmiPRji8kPKfC97Q_8KsB0icYO2jpcYUsIggTmm6Rz61nAEqF34O6kWVt8&s=agZMMovBDjnOyaDQJC4AhMLw7jioaEgRF7hKnURN6fYXS2-js4SXmeDkz91J7rZ9QQW4Iypl1nruTB3JbUBd6IwTButFnEvZUr0fFJcDIWvDV93ZNOXnpWUYgZKwxwgb_9IeFaqdIYwvidVpNMLLdQa6bu1SVRhRSo2IeHm_0BliglJ2She0QgMzeEXX1SZkIC7tjO7GAN86qSU5sFUw3iiXGh_Mux81MKF3xUdRfUhYR-eO1ujqw4xl-M4IOdjmMLXti2bwpOJ4hkv63h4Tz_FpI2t7aoYjoudYLnuXnhRV148eUfwMakXLL84ayBJDNOQ_Ke0wEl3Xb0ZrdapjDg&h=febOihxOwSbbKaz7dHfx3b20JM1ESytE62hbhbtZDpQ
+      cache-control:
+      - no-cache
+      content-length:
+      - '1858'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 15 May 2026 10:19:43 GMT
+      etag:
+      - W/"datetime'2026-05-15T10%3A19%3A43.8690116Z'"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=29ee0da0-a37f-4d77-8704-0c32607c900f/westus/167eeb6f-84e9-41dd-86ff-838e6c90a6f6
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: AC2C80B39A96443CB709F113EB9833E8 Ref B: MNZ221060619011 Ref C: 2026-05-15T10:19:42Z'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - netappfiles account create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -a -l --key-source --identity-type --user-assigned-identities --user-assigned-identity
+        --key-vault-uri --key-name --keyvault-resource-id
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.13.13 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/eastus2/operationResults/95fd7aa2-975c-4623-85b3-70274386b82b?api-version=2026-01-01&t=639144371841158349&c=MIIHlDCCBnygAwIBAgIQezb8rseFMm1IRs195n9vVzANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXVVMyIENBIDAxMB4XDTI2MDQwNzIzNDE1NFoXDTI2MTAwMzA1NDE1NFowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCyN0RC1toIy0MUjNqRPJLB51RUbtwBvAu6pgWK5gw2lmci7lE7U6jMxMh_8ljqwlXFY90FwPHzKHdcfHD4M0Ma3DRUVgE-v0S1aUDhKodisph39p7biWkApcSmxbkzmQMB2D0u2Zm0IhszNnwquCfvJuftV7em4_XCA_NbUt5EYUpfjv1sYzkLLAA8_2geRJLmDRfZGZvSHhgN-bsErNiX7v-BdmAyt_5jYpEcuAWuKp_6DUtXPY_mbwCm-qkLcoXGR39z9dHcyaldZUrJJ6JYcAEG5QNboi3gR2R7bY7pVtxUqbJ9Gx2tDy1qzosxOu0hXflZnevb68ylv7B68Wu9AgMBAAGjggSSMIIEjjCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBQNw-Elcx5N6tZ9jh67WrWJYZxlnzAfBgNVHSMEGDAWgBSs43L6A7Jznj2VyO-HW67dG6HtaDCCAbIGA1UdHwSCAakwggGlMGmgZ6BlhmNodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvMzQvY3VycmVudC5jcmwwa6BpoGeGZWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3R1czIvY3Jscy9jY21ld2VzdHVzMnBraS9jY21ld2VzdHVzMmljYTAxLzM0L2N1cnJlbnQuY3JsMFqgWKBWhlRodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvMzQvY3VycmVudC5jcmwwb6BtoGuGaWh0dHA6Ly9jY21ld2VzdHVzMnBraS53ZXN0dXMyLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZXdlc3R1czJpY2EwMS8zNC9jdXJyZW50LmNybDCCAbcGCCsGAQUFBwEBBIIBqTCCAaUwbAYIKwYBBQUHMAKGYGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBuBggrBgEFBQcwAoZiaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jYWNlcnRzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvY2VydC5jZXIwXQYIKwYBBQUHMAKGUWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBmBggrBgEFBQcwAoZaaHR0cDovL2NjbWV3ZXN0dXMycGtpLndlc3R1czIucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdHVzMmljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQBOslPK0kujtTlyxe5WOtpNbQRYZ8iSxYHILxKtavGf63w2nf7l5nX07MzYQqUYkw1ZLV81KZUWrAqmYoK0fTLgq7S_ePVqJ0Bi0EefpAOxc4Q7FtrTXk-2n80mtrwbcDH_jHtUGHd5gGv7MEFSu5Wa2iI3mNDsNSZrscWUqrBhKiZ2zF0slf8YMpHWflHomPT5wBh2LQC9ub-GLJKfkVDFxokxP2roGR1np3ATyRygILitspiTUM4Bcia0TOmYoYUqpLZTBiVNI-ehKyCyQXxR9eeBX0xmiPRji8kPKfC97Q_8KsB0icYO2jpcYUsIggTmm6Rz61nAEqF34O6kWVt8&s=agZMMovBDjnOyaDQJC4AhMLw7jioaEgRF7hKnURN6fYXS2-js4SXmeDkz91J7rZ9QQW4Iypl1nruTB3JbUBd6IwTButFnEvZUr0fFJcDIWvDV93ZNOXnpWUYgZKwxwgb_9IeFaqdIYwvidVpNMLLdQa6bu1SVRhRSo2IeHm_0BliglJ2She0QgMzeEXX1SZkIC7tjO7GAN86qSU5sFUw3iiXGh_Mux81MKF3xUdRfUhYR-eO1ujqw4xl-M4IOdjmMLXti2bwpOJ4hkv63h4Tz_FpI2t7aoYjoudYLnuXnhRV148eUfwMakXLL84ayBJDNOQ_Ke0wEl3Xb0ZrdapjDg&h=febOihxOwSbbKaz7dHfx3b20JM1ESytE62hbhbtZDpQ
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/eastus2/operationResults/95fd7aa2-975c-4623-85b3-70274386b82b","name":"95fd7aa2-975c-4623-85b3-70274386b82b","status":"Creating","startTime":"2026-05-15T10:19:43.8790525Z","endTime":"0001-01-01T00:00:00Z","percentComplete":0.0,"properties":{"resourceName":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002","action":"CREATE"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '533'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 15 May 2026 10:19:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=29ee0da0-a37f-4d77-8704-0c32607c900f/eastus/42931947-997c-4261-b771-c1dbbcf2babf
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 108FED6A3ED449C798F4610900630EE8 Ref B: MNZ221060610045 Ref C: 2026-05-15T10:19:44Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - netappfiles account create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -a -l --key-source --identity-type --user-assigned-identities --user-assigned-identity
+        --key-vault-uri --key-name --keyvault-resource-id
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.13.13 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/eastus2/operationResults/95fd7aa2-975c-4623-85b3-70274386b82b?api-version=2026-01-01&t=639144371841158349&c=MIIHlDCCBnygAwIBAgIQezb8rseFMm1IRs195n9vVzANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXVVMyIENBIDAxMB4XDTI2MDQwNzIzNDE1NFoXDTI2MTAwMzA1NDE1NFowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCyN0RC1toIy0MUjNqRPJLB51RUbtwBvAu6pgWK5gw2lmci7lE7U6jMxMh_8ljqwlXFY90FwPHzKHdcfHD4M0Ma3DRUVgE-v0S1aUDhKodisph39p7biWkApcSmxbkzmQMB2D0u2Zm0IhszNnwquCfvJuftV7em4_XCA_NbUt5EYUpfjv1sYzkLLAA8_2geRJLmDRfZGZvSHhgN-bsErNiX7v-BdmAyt_5jYpEcuAWuKp_6DUtXPY_mbwCm-qkLcoXGR39z9dHcyaldZUrJJ6JYcAEG5QNboi3gR2R7bY7pVtxUqbJ9Gx2tDy1qzosxOu0hXflZnevb68ylv7B68Wu9AgMBAAGjggSSMIIEjjCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBQNw-Elcx5N6tZ9jh67WrWJYZxlnzAfBgNVHSMEGDAWgBSs43L6A7Jznj2VyO-HW67dG6HtaDCCAbIGA1UdHwSCAakwggGlMGmgZ6BlhmNodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvMzQvY3VycmVudC5jcmwwa6BpoGeGZWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3R1czIvY3Jscy9jY21ld2VzdHVzMnBraS9jY21ld2VzdHVzMmljYTAxLzM0L2N1cnJlbnQuY3JsMFqgWKBWhlRodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvMzQvY3VycmVudC5jcmwwb6BtoGuGaWh0dHA6Ly9jY21ld2VzdHVzMnBraS53ZXN0dXMyLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZXdlc3R1czJpY2EwMS8zNC9jdXJyZW50LmNybDCCAbcGCCsGAQUFBwEBBIIBqTCCAaUwbAYIKwYBBQUHMAKGYGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBuBggrBgEFBQcwAoZiaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jYWNlcnRzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvY2VydC5jZXIwXQYIKwYBBQUHMAKGUWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBmBggrBgEFBQcwAoZaaHR0cDovL2NjbWV3ZXN0dXMycGtpLndlc3R1czIucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdHVzMmljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQBOslPK0kujtTlyxe5WOtpNbQRYZ8iSxYHILxKtavGf63w2nf7l5nX07MzYQqUYkw1ZLV81KZUWrAqmYoK0fTLgq7S_ePVqJ0Bi0EefpAOxc4Q7FtrTXk-2n80mtrwbcDH_jHtUGHd5gGv7MEFSu5Wa2iI3mNDsNSZrscWUqrBhKiZ2zF0slf8YMpHWflHomPT5wBh2LQC9ub-GLJKfkVDFxokxP2roGR1np3ATyRygILitspiTUM4Bcia0TOmYoYUqpLZTBiVNI-ehKyCyQXxR9eeBX0xmiPRji8kPKfC97Q_8KsB0icYO2jpcYUsIggTmm6Rz61nAEqF34O6kWVt8&s=agZMMovBDjnOyaDQJC4AhMLw7jioaEgRF7hKnURN6fYXS2-js4SXmeDkz91J7rZ9QQW4Iypl1nruTB3JbUBd6IwTButFnEvZUr0fFJcDIWvDV93ZNOXnpWUYgZKwxwgb_9IeFaqdIYwvidVpNMLLdQa6bu1SVRhRSo2IeHm_0BliglJ2She0QgMzeEXX1SZkIC7tjO7GAN86qSU5sFUw3iiXGh_Mux81MKF3xUdRfUhYR-eO1ujqw4xl-M4IOdjmMLXti2bwpOJ4hkv63h4Tz_FpI2t7aoYjoudYLnuXnhRV148eUfwMakXLL84ayBJDNOQ_Ke0wEl3Xb0ZrdapjDg&h=febOihxOwSbbKaz7dHfx3b20JM1ESytE62hbhbtZDpQ
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/eastus2/operationResults/95fd7aa2-975c-4623-85b3-70274386b82b","name":"95fd7aa2-975c-4623-85b3-70274386b82b","status":"Succeeded","startTime":"2026-05-15T10:19:43.8790525Z","endTime":"2026-05-15T10:19:45.1529475Z","percentComplete":100.0,"properties":{"resourceName":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002","action":"CREATE"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '544'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 15 May 2026 10:20:15 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=29ee0da0-a37f-4d77-8704-0c32607c900f/eastus/b42777bf-b130-4f10-be1d-6bdc256132fb
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 878A4FD6097749988C0E298BDC35778D Ref B: BL2AA2030101009 Ref C: 2026-05-15T10:20:15Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - netappfiles account create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -a -l --key-source --identity-type --user-assigned-identities --user-assigned-identity
+        --key-vault-uri --key-name --keyvault-resource-id
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.13.13 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002?api-version=2026-01-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000002","name":"cli-acc-000002","type":"Microsoft.NetApp/netAppAccounts","etag":"W/\"datetime''2026-05-15T10%3A19%3A45.1021221Z''\"","location":"eastus2","tags":{"CreatedOnDate":"2026-05-15T10:19:42.7228346Z"},"properties":{"provisioningState":"Succeeded","encryption":{"keySource":"Microsoft.KeyVault","keyVaultProperties":{"keyVaultId":"95fba301-5921-57fc-7bfa-54227ac292ed","keyVaultUri":"https://clikv000004.vault.azure.net/","keyName":"clikey000005","keyVaultResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.KeyVault/vaults/clikv000004","status":"Created"},"identity":{"userAssignedIdentity":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_netappfiles_test_account_000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/cli-id-000006","principalId":"01bcf93d-5984-47d4-9d8e-57cbdd1d54cc"}},"multiADStatus":"Enabled"},"identity":{"type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_netappfiles_test_account_000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/cli-id-000006":{"principalId":"01bcf93d-5984-47d4-9d8e-57cbdd1d54cc","clientId":"eff6ff25-ad85-4212-8ddd-31993822fa1e","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"}}},"systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-05-15T10:19:42.9439332Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-05-15T10:19:42.9439332Z"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1721'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 15 May 2026 10:20:16 GMT
+      etag:
+      - W/"datetime'2026-05-15T10%3A19%3A45.1021221Z'"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: E22C9A660BBF41C298DD3FCB014B45CC Ref B: BL2AA2010205005 Ref C: 2026-05-15T10:20:16Z'
+    status:
+      code: 200
+      message: OK
 - request:
     body: '{"location": "eastus2", "properties": {"encryption": {"keySource": "Microsoft.NetApp"}}}'
     headers:
@@ -72,15 +888,15 @@ interactions:
       ParameterSetName:
       - -g -a -l
       User-Agent:
-      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.13.13 (Windows-11-10.0.26200-SP0)
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.13.13 (Windows-11-10.0.26200-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000003?api-version=2026-01-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000003","name":"cli-acc-000003","type":"Microsoft.NetApp/netAppAccounts","etag":"W/\"datetime''2026-04-15T13%3A06%3A57.2318045Z''\"","location":"eastus2","tags":{"CreatedOnDate":"2026-04-15T13:06:56.7492192Z"},"properties":{"provisioningState":"Creating","activeDirectories":[{"activeDirectoryId":"7f1ea496-b09a-e031-6635-44ef39dd38f2","username":"ad_user","domain":"northeurope","dns":"1.2.3.4","status":"Created","smbServerName":"SMBSERVER","organizationalUnit":"CN=Computers","kdcIP":"172.16.254.1","adName":"ad_name","aesEncryption":false,"ldapSigning":true,"ldapOverTLS":false,"allowLocalNfsUsersWithLdap":true,"encryptDCConnections":false,"ldapSearchScope":{}}],"encryption":{"keySource":"Microsoft.NetApp"},"multiADStatus":"Disabled"},"systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-04-15T13:06:56.9255656Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-04-15T13:06:56.9255656Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000003","name":"cli-acc-000003","type":"Microsoft.NetApp/netAppAccounts","etag":"W/\"datetime''2026-05-15T10%3A20%3A18.3095166Z''\"","location":"eastus2","tags":{"CreatedOnDate":"2026-05-15T10:20:17.7982210Z"},"properties":{"provisioningState":"Creating","activeDirectories":[{"activeDirectoryId":"7f1ea496-b09a-e031-6635-44ef39dd38f2","username":"ad_user","domain":"northeurope","dns":"1.2.3.4","status":"Created","smbServerName":"SMBSERVER","organizationalUnit":"CN=Computers","kdcIP":"172.16.254.1","adName":"ad_name","aesEncryption":false,"ldapSigning":true,"ldapOverTLS":false,"allowLocalNfsUsersWithLdap":true,"encryptDCConnections":false,"ldapSearchScope":{}}],"encryption":{"keySource":"Microsoft.NetApp"},"multiADStatus":"Disabled"},"systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-05-15T10:20:18.0425409Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-05-15T10:20:18.0425409Z"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/eastus2/operationResults/d39a2627-face-4e99-ae79-c9ef7034d4e5?api-version=2026-01-01&t=639118552174568515&c=MIIHlDCCBnygAwIBAgIQezb8rseFMm1IRs195n9vVzANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXVVMyIENBIDAxMB4XDTI2MDQwNzIzNDE1NFoXDTI2MTAwMzA1NDE1NFowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCyN0RC1toIy0MUjNqRPJLB51RUbtwBvAu6pgWK5gw2lmci7lE7U6jMxMh_8ljqwlXFY90FwPHzKHdcfHD4M0Ma3DRUVgE-v0S1aUDhKodisph39p7biWkApcSmxbkzmQMB2D0u2Zm0IhszNnwquCfvJuftV7em4_XCA_NbUt5EYUpfjv1sYzkLLAA8_2geRJLmDRfZGZvSHhgN-bsErNiX7v-BdmAyt_5jYpEcuAWuKp_6DUtXPY_mbwCm-qkLcoXGR39z9dHcyaldZUrJJ6JYcAEG5QNboi3gR2R7bY7pVtxUqbJ9Gx2tDy1qzosxOu0hXflZnevb68ylv7B68Wu9AgMBAAGjggSSMIIEjjCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBQNw-Elcx5N6tZ9jh67WrWJYZxlnzAfBgNVHSMEGDAWgBSs43L6A7Jznj2VyO-HW67dG6HtaDCCAbIGA1UdHwSCAakwggGlMGmgZ6BlhmNodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvMzQvY3VycmVudC5jcmwwa6BpoGeGZWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3R1czIvY3Jscy9jY21ld2VzdHVzMnBraS9jY21ld2VzdHVzMmljYTAxLzM0L2N1cnJlbnQuY3JsMFqgWKBWhlRodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvMzQvY3VycmVudC5jcmwwb6BtoGuGaWh0dHA6Ly9jY21ld2VzdHVzMnBraS53ZXN0dXMyLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZXdlc3R1czJpY2EwMS8zNC9jdXJyZW50LmNybDCCAbcGCCsGAQUFBwEBBIIBqTCCAaUwbAYIKwYBBQUHMAKGYGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBuBggrBgEFBQcwAoZiaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jYWNlcnRzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvY2VydC5jZXIwXQYIKwYBBQUHMAKGUWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBmBggrBgEFBQcwAoZaaHR0cDovL2NjbWV3ZXN0dXMycGtpLndlc3R1czIucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdHVzMmljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQBOslPK0kujtTlyxe5WOtpNbQRYZ8iSxYHILxKtavGf63w2nf7l5nX07MzYQqUYkw1ZLV81KZUWrAqmYoK0fTLgq7S_ePVqJ0Bi0EefpAOxc4Q7FtrTXk-2n80mtrwbcDH_jHtUGHd5gGv7MEFSu5Wa2iI3mNDsNSZrscWUqrBhKiZ2zF0slf8YMpHWflHomPT5wBh2LQC9ub-GLJKfkVDFxokxP2roGR1np3ATyRygILitspiTUM4Bcia0TOmYoYUqpLZTBiVNI-ehKyCyQXxR9eeBX0xmiPRji8kPKfC97Q_8KsB0icYO2jpcYUsIggTmm6Rz61nAEqF34O6kWVt8&s=n-82rN08GzIusuGrI4byMuwufuLLaEey_0rWf0nsryK6sBNWrc-2tFtDp5bPSeXkvDv8o6dNMF5xDcJ5f9tv7YrkMyXiCUQxz1SwgSC6FidpU1cOWWXZp92oqgY23IwpeMpRNKM1OLS27pSMXx4jf8dvN-uKYXMcf7Bky6A0ulTVfo1isFWxSJC-Zouo2EvExHnzvA-Rr5MIHy_dElI09e5VD3rgWH3N8zhfvzlkNP_nq2Tbi9wseOJ_qSbLPqy_nYhZbNW3QBd5bItgugw5jlFfgAxpnbPV1dQdvjWSQU8hS2PoJKq2NeFng8KBTjzNXtQ-0Pl_8disK-sYyfMBnA&h=mmn89jV0TtpMhqpy72oC9PuEJlJXk7_YIC2Ls9wot4U
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/eastus2/operationResults/729c4afa-305b-43a9-8837-fd998c432e88?api-version=2026-01-01&t=639144372185581241&c=MIIHlDCCBnygAwIBAgIQezb8rseFMm1IRs195n9vVzANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXVVMyIENBIDAxMB4XDTI2MDQwNzIzNDE1NFoXDTI2MTAwMzA1NDE1NFowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCyN0RC1toIy0MUjNqRPJLB51RUbtwBvAu6pgWK5gw2lmci7lE7U6jMxMh_8ljqwlXFY90FwPHzKHdcfHD4M0Ma3DRUVgE-v0S1aUDhKodisph39p7biWkApcSmxbkzmQMB2D0u2Zm0IhszNnwquCfvJuftV7em4_XCA_NbUt5EYUpfjv1sYzkLLAA8_2geRJLmDRfZGZvSHhgN-bsErNiX7v-BdmAyt_5jYpEcuAWuKp_6DUtXPY_mbwCm-qkLcoXGR39z9dHcyaldZUrJJ6JYcAEG5QNboi3gR2R7bY7pVtxUqbJ9Gx2tDy1qzosxOu0hXflZnevb68ylv7B68Wu9AgMBAAGjggSSMIIEjjCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBQNw-Elcx5N6tZ9jh67WrWJYZxlnzAfBgNVHSMEGDAWgBSs43L6A7Jznj2VyO-HW67dG6HtaDCCAbIGA1UdHwSCAakwggGlMGmgZ6BlhmNodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvMzQvY3VycmVudC5jcmwwa6BpoGeGZWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3R1czIvY3Jscy9jY21ld2VzdHVzMnBraS9jY21ld2VzdHVzMmljYTAxLzM0L2N1cnJlbnQuY3JsMFqgWKBWhlRodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvMzQvY3VycmVudC5jcmwwb6BtoGuGaWh0dHA6Ly9jY21ld2VzdHVzMnBraS53ZXN0dXMyLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZXdlc3R1czJpY2EwMS8zNC9jdXJyZW50LmNybDCCAbcGCCsGAQUFBwEBBIIBqTCCAaUwbAYIKwYBBQUHMAKGYGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBuBggrBgEFBQcwAoZiaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jYWNlcnRzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvY2VydC5jZXIwXQYIKwYBBQUHMAKGUWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBmBggrBgEFBQcwAoZaaHR0cDovL2NjbWV3ZXN0dXMycGtpLndlc3R1czIucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdHVzMmljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQBOslPK0kujtTlyxe5WOtpNbQRYZ8iSxYHILxKtavGf63w2nf7l5nX07MzYQqUYkw1ZLV81KZUWrAqmYoK0fTLgq7S_ePVqJ0Bi0EefpAOxc4Q7FtrTXk-2n80mtrwbcDH_jHtUGHd5gGv7MEFSu5Wa2iI3mNDsNSZrscWUqrBhKiZ2zF0slf8YMpHWflHomPT5wBh2LQC9ub-GLJKfkVDFxokxP2roGR1np3ATyRygILitspiTUM4Bcia0TOmYoYUqpLZTBiVNI-ehKyCyQXxR9eeBX0xmiPRji8kPKfC97Q_8KsB0icYO2jpcYUsIggTmm6Rz61nAEqF34O6kWVt8&s=GQKbSFUj7fYplgqNa1SVFmvXvsLaqe9DNJyrBpFyrJDon9q0Uftk3McK3Ui-wRdmszwn6a0zMfJoAGYnUR8himnZgftZf8JG3Z270JM8QY2E6yeMOjDNaLm8hl-oEPieq8OfFwm5hbddhOSjvv4iQIVzkYKk06cq5DchOl-H1e1ZiYnqLe3v51HAsKJ0OQZQZMa7yLig-VAayJ8Z0ANI92s-DZaQhRGJAFDfF3gd0ZuDNp2-4zh0uJimfs0eXNEhIP3dIr3vKuViSz-tZG2vFHOZ_5W5ObQElDswv1J6gWLWzak0_Y7VD8oZYto42R9Swj2lqdpPY3yUbsAt0gfVZA&h=m-l0hZ8QMl-HCEAPmpda1OASYqDs9nxR3aJTpEwwfJI
       cache-control:
       - no-cache
       content-length:
@@ -88,9 +904,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 15 Apr 2026 13:06:56 GMT
+      - Fri, 15 May 2026 10:20:18 GMT
       etag:
-      - W/"datetime'2026-04-15T13%3A06%3A57.2318045Z'"
+      - W/"datetime'2026-05-15T10%3A20%3A18.3095166Z'"
       expires:
       - '-1'
       pragma:
@@ -102,13 +918,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=29ee0da0-a37f-4d77-8704-0c32607c900f/westus/bb531e92-7144-433b-b35c-320c9030327c
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=29ee0da0-a37f-4d77-8704-0c32607c900f/westus/c4817b2f-8d49-4fe7-bd6a-f7a618be3328
       x-ms-ratelimit-remaining-subscription-global-writes:
       - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
       - '799'
       x-msedge-ref:
-      - 'Ref A: 3B1110F847454C608AB6C5C6D4B86CEA Ref B: BL2AA2030101053 Ref C: 2026-04-15T13:06:56Z'
+      - 'Ref A: 8B2C951F4E2949D3B1636A7457246C11 Ref B: MNZ221060618009 Ref C: 2026-05-15T10:20:17Z'
     status:
       code: 201
       message: Created
@@ -126,12 +942,12 @@ interactions:
       ParameterSetName:
       - -g -a -l
       User-Agent:
-      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.13.13 (Windows-11-10.0.26200-SP0)
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.13.13 (Windows-11-10.0.26200-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/eastus2/operationResults/d39a2627-face-4e99-ae79-c9ef7034d4e5?api-version=2026-01-01&t=639118552174568515&c=MIIHlDCCBnygAwIBAgIQezb8rseFMm1IRs195n9vVzANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXVVMyIENBIDAxMB4XDTI2MDQwNzIzNDE1NFoXDTI2MTAwMzA1NDE1NFowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCyN0RC1toIy0MUjNqRPJLB51RUbtwBvAu6pgWK5gw2lmci7lE7U6jMxMh_8ljqwlXFY90FwPHzKHdcfHD4M0Ma3DRUVgE-v0S1aUDhKodisph39p7biWkApcSmxbkzmQMB2D0u2Zm0IhszNnwquCfvJuftV7em4_XCA_NbUt5EYUpfjv1sYzkLLAA8_2geRJLmDRfZGZvSHhgN-bsErNiX7v-BdmAyt_5jYpEcuAWuKp_6DUtXPY_mbwCm-qkLcoXGR39z9dHcyaldZUrJJ6JYcAEG5QNboi3gR2R7bY7pVtxUqbJ9Gx2tDy1qzosxOu0hXflZnevb68ylv7B68Wu9AgMBAAGjggSSMIIEjjCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBQNw-Elcx5N6tZ9jh67WrWJYZxlnzAfBgNVHSMEGDAWgBSs43L6A7Jznj2VyO-HW67dG6HtaDCCAbIGA1UdHwSCAakwggGlMGmgZ6BlhmNodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvMzQvY3VycmVudC5jcmwwa6BpoGeGZWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3R1czIvY3Jscy9jY21ld2VzdHVzMnBraS9jY21ld2VzdHVzMmljYTAxLzM0L2N1cnJlbnQuY3JsMFqgWKBWhlRodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvMzQvY3VycmVudC5jcmwwb6BtoGuGaWh0dHA6Ly9jY21ld2VzdHVzMnBraS53ZXN0dXMyLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZXdlc3R1czJpY2EwMS8zNC9jdXJyZW50LmNybDCCAbcGCCsGAQUFBwEBBIIBqTCCAaUwbAYIKwYBBQUHMAKGYGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBuBggrBgEFBQcwAoZiaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jYWNlcnRzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvY2VydC5jZXIwXQYIKwYBBQUHMAKGUWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBmBggrBgEFBQcwAoZaaHR0cDovL2NjbWV3ZXN0dXMycGtpLndlc3R1czIucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdHVzMmljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQBOslPK0kujtTlyxe5WOtpNbQRYZ8iSxYHILxKtavGf63w2nf7l5nX07MzYQqUYkw1ZLV81KZUWrAqmYoK0fTLgq7S_ePVqJ0Bi0EefpAOxc4Q7FtrTXk-2n80mtrwbcDH_jHtUGHd5gGv7MEFSu5Wa2iI3mNDsNSZrscWUqrBhKiZ2zF0slf8YMpHWflHomPT5wBh2LQC9ub-GLJKfkVDFxokxP2roGR1np3ATyRygILitspiTUM4Bcia0TOmYoYUqpLZTBiVNI-ehKyCyQXxR9eeBX0xmiPRji8kPKfC97Q_8KsB0icYO2jpcYUsIggTmm6Rz61nAEqF34O6kWVt8&s=n-82rN08GzIusuGrI4byMuwufuLLaEey_0rWf0nsryK6sBNWrc-2tFtDp5bPSeXkvDv8o6dNMF5xDcJ5f9tv7YrkMyXiCUQxz1SwgSC6FidpU1cOWWXZp92oqgY23IwpeMpRNKM1OLS27pSMXx4jf8dvN-uKYXMcf7Bky6A0ulTVfo1isFWxSJC-Zouo2EvExHnzvA-Rr5MIHy_dElI09e5VD3rgWH3N8zhfvzlkNP_nq2Tbi9wseOJ_qSbLPqy_nYhZbNW3QBd5bItgugw5jlFfgAxpnbPV1dQdvjWSQU8hS2PoJKq2NeFng8KBTjzNXtQ-0Pl_8disK-sYyfMBnA&h=mmn89jV0TtpMhqpy72oC9PuEJlJXk7_YIC2Ls9wot4U
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/eastus2/operationResults/729c4afa-305b-43a9-8837-fd998c432e88?api-version=2026-01-01&t=639144372185581241&c=MIIHlDCCBnygAwIBAgIQezb8rseFMm1IRs195n9vVzANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXVVMyIENBIDAxMB4XDTI2MDQwNzIzNDE1NFoXDTI2MTAwMzA1NDE1NFowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCyN0RC1toIy0MUjNqRPJLB51RUbtwBvAu6pgWK5gw2lmci7lE7U6jMxMh_8ljqwlXFY90FwPHzKHdcfHD4M0Ma3DRUVgE-v0S1aUDhKodisph39p7biWkApcSmxbkzmQMB2D0u2Zm0IhszNnwquCfvJuftV7em4_XCA_NbUt5EYUpfjv1sYzkLLAA8_2geRJLmDRfZGZvSHhgN-bsErNiX7v-BdmAyt_5jYpEcuAWuKp_6DUtXPY_mbwCm-qkLcoXGR39z9dHcyaldZUrJJ6JYcAEG5QNboi3gR2R7bY7pVtxUqbJ9Gx2tDy1qzosxOu0hXflZnevb68ylv7B68Wu9AgMBAAGjggSSMIIEjjCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBQNw-Elcx5N6tZ9jh67WrWJYZxlnzAfBgNVHSMEGDAWgBSs43L6A7Jznj2VyO-HW67dG6HtaDCCAbIGA1UdHwSCAakwggGlMGmgZ6BlhmNodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvMzQvY3VycmVudC5jcmwwa6BpoGeGZWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3R1czIvY3Jscy9jY21ld2VzdHVzMnBraS9jY21ld2VzdHVzMmljYTAxLzM0L2N1cnJlbnQuY3JsMFqgWKBWhlRodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvMzQvY3VycmVudC5jcmwwb6BtoGuGaWh0dHA6Ly9jY21ld2VzdHVzMnBraS53ZXN0dXMyLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZXdlc3R1czJpY2EwMS8zNC9jdXJyZW50LmNybDCCAbcGCCsGAQUFBwEBBIIBqTCCAaUwbAYIKwYBBQUHMAKGYGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBuBggrBgEFBQcwAoZiaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jYWNlcnRzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvY2VydC5jZXIwXQYIKwYBBQUHMAKGUWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBmBggrBgEFBQcwAoZaaHR0cDovL2NjbWV3ZXN0dXMycGtpLndlc3R1czIucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdHVzMmljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQBOslPK0kujtTlyxe5WOtpNbQRYZ8iSxYHILxKtavGf63w2nf7l5nX07MzYQqUYkw1ZLV81KZUWrAqmYoK0fTLgq7S_ePVqJ0Bi0EefpAOxc4Q7FtrTXk-2n80mtrwbcDH_jHtUGHd5gGv7MEFSu5Wa2iI3mNDsNSZrscWUqrBhKiZ2zF0slf8YMpHWflHomPT5wBh2LQC9ub-GLJKfkVDFxokxP2roGR1np3ATyRygILitspiTUM4Bcia0TOmYoYUqpLZTBiVNI-ehKyCyQXxR9eeBX0xmiPRji8kPKfC97Q_8KsB0icYO2jpcYUsIggTmm6Rz61nAEqF34O6kWVt8&s=GQKbSFUj7fYplgqNa1SVFmvXvsLaqe9DNJyrBpFyrJDon9q0Uftk3McK3Ui-wRdmszwn6a0zMfJoAGYnUR8himnZgftZf8JG3Z270JM8QY2E6yeMOjDNaLm8hl-oEPieq8OfFwm5hbddhOSjvv4iQIVzkYKk06cq5DchOl-H1e1ZiYnqLe3v51HAsKJ0OQZQZMa7yLig-VAayJ8Z0ANI92s-DZaQhRGJAFDfF3gd0ZuDNp2-4zh0uJimfs0eXNEhIP3dIr3vKuViSz-tZG2vFHOZ_5W5ObQElDswv1J6gWLWzak0_Y7VD8oZYto42R9Swj2lqdpPY3yUbsAt0gfVZA&h=m-l0hZ8QMl-HCEAPmpda1OASYqDs9nxR3aJTpEwwfJI
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/eastus2/operationResults/d39a2627-face-4e99-ae79-c9ef7034d4e5","name":"d39a2627-face-4e99-ae79-c9ef7034d4e5","status":"Succeeded","startTime":"2026-04-15T13:06:57.2422436Z","endTime":"2026-04-15T13:06:57.4066496Z","percentComplete":100.0,"properties":{"resourceName":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000003","action":"CREATE"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/eastus2/operationResults/729c4afa-305b-43a9-8837-fd998c432e88","name":"729c4afa-305b-43a9-8837-fd998c432e88","status":"Succeeded","startTime":"2026-05-15T10:20:18.3184768Z","endTime":"2026-05-15T10:20:18.4111944Z","percentComplete":100.0,"properties":{"resourceName":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000003","action":"CREATE"}}'
     headers:
       cache-control:
       - no-cache
@@ -140,7 +956,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 15 Apr 2026 13:06:58 GMT
+      - Fri, 15 May 2026 10:20:19 GMT
       expires:
       - '-1'
       pragma:
@@ -152,11 +968,11 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=29ee0da0-a37f-4d77-8704-0c32607c900f/eastus/f023606c-779e-4d8c-8af4-698915d42978
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=29ee0da0-a37f-4d77-8704-0c32607c900f/eastus/b1c65740-afdb-4aa5-a9b4-568d793df505
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 711FF80924964958AE1F91873361BF61 Ref B: BL2AA2010204039 Ref C: 2026-04-15T13:06:58Z'
+      - 'Ref A: D0503E3012274A22ADD7BE72443AA748 Ref B: MNZ221060608007 Ref C: 2026-05-15T10:20:19Z'
     status:
       code: 200
       message: OK
@@ -174,12 +990,12 @@ interactions:
       ParameterSetName:
       - -g -a -l
       User-Agent:
-      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.13.13 (Windows-11-10.0.26200-SP0)
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.13.13 (Windows-11-10.0.26200-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000003?api-version=2026-01-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000003","name":"cli-acc-000003","type":"Microsoft.NetApp/netAppAccounts","etag":"W/\"datetime''2026-04-15T13%3A06%3A57.3979366Z''\"","location":"eastus2","tags":{"CreatedOnDate":"2026-04-15T13:06:56.7492192Z"},"properties":{"provisioningState":"Succeeded","encryption":{"keySource":"Microsoft.NetApp"},"multiADStatus":"Enabled"},"systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-04-15T13:06:56.9255656Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-04-15T13:06:56.9255656Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000003","name":"cli-acc-000003","type":"Microsoft.NetApp/netAppAccounts","etag":"W/\"datetime''2026-05-15T10%3A20%3A18.4030666Z''\"","location":"eastus2","tags":{"CreatedOnDate":"2026-05-15T10:20:17.7982210Z"},"properties":{"provisioningState":"Succeeded","encryption":{"keySource":"Microsoft.NetApp"},"multiADStatus":"Enabled"},"systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-05-15T10:20:18.0425409Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-05-15T10:20:18.0425409Z"}}'
     headers:
       cache-control:
       - no-cache
@@ -188,9 +1004,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 15 Apr 2026 13:06:59 GMT
+      - Fri, 15 May 2026 10:20:20 GMT
       etag:
-      - W/"datetime'2026-04-15T13%3A06%3A57.3979366Z'"
+      - W/"datetime'2026-05-15T10%3A20%3A18.4030666Z'"
       expires:
       - '-1'
       pragma:
@@ -204,7 +1020,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 15D5A5192A8841CFB605A5B47CC02623 Ref B: MNZ221060619049 Ref C: 2026-04-15T13:07:00Z'
+      - 'Ref A: 28E949E0D15E488BAC9230EDE519AEA2 Ref B: MNZ221060609009 Ref C: 2026-05-15T10:20:19Z'
     status:
       code: 200
       message: OK
@@ -220,14 +1036,15 @@ interactions:
       Connection:
       - keep-alive
       ParameterSetName:
-      - -g -a --key-source --identity-type --user-assigned-identity
+      - -g -a --key-source --identity-type --user-assigned-identities --user-assigned-identity
+        --key-vault-uri --key-name --keyvault-resource-id
       User-Agent:
-      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.13.13 (Windows-11-10.0.26200-SP0)
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.13.13 (Windows-11-10.0.26200-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000003?api-version=2026-01-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000003","name":"cli-acc-000003","type":"Microsoft.NetApp/netAppAccounts","etag":"W/\"datetime''2026-04-15T13%3A06%3A57.3979366Z''\"","location":"eastus2","tags":{"CreatedOnDate":"2026-04-15T13:06:56.7492192Z"},"properties":{"provisioningState":"Succeeded","encryption":{"keySource":"Microsoft.NetApp"},"multiADStatus":"Enabled"},"systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-04-15T13:06:56.9255656Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-04-15T13:06:56.9255656Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000003","name":"cli-acc-000003","type":"Microsoft.NetApp/netAppAccounts","etag":"W/\"datetime''2026-05-15T10%3A20%3A18.4030666Z''\"","location":"eastus2","tags":{"CreatedOnDate":"2026-05-15T10:20:17.7982210Z"},"properties":{"provisioningState":"Succeeded","encryption":{"keySource":"Microsoft.NetApp"},"multiADStatus":"Enabled"},"systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-05-15T10:20:18.0425409Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-05-15T10:20:18.0425409Z"}}'
     headers:
       cache-control:
       - no-cache
@@ -236,9 +1053,9 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 15 Apr 2026 13:07:01 GMT
+      - Fri, 15 May 2026 10:20:21 GMT
       etag:
-      - W/"datetime'2026-04-15T13%3A06%3A57.3979366Z'"
+      - W/"datetime'2026-05-15T10%3A20%3A18.4030666Z'"
       expires:
       - '-1'
       pragma:
@@ -252,14 +1069,18 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 079C5A7B97974A658F70E29C1BBB8EB6 Ref B: MNZ221060610017 Ref C: 2026-04-15T13:07:01Z'
+      - 'Ref A: 1F22FBE0B6D54E0C888F2C8A12004B10 Ref B: BL2AA2010205039 Ref C: 2026-05-15T10:20:21Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"identity": {"type": "UserAssigned"}, "location": "eastus2", "properties":
-      {"encryption": {"identity": {"userAssignedIdentity": "myIdentity"}, "keySource":
-      "Microsoft.KeyVault"}}, "tags": {"CreatedOnDate": "2026-04-15T13:06:56.7492192Z"}}'
+    body: '{"identity": {"type": "UserAssigned", "userAssignedIdentities": {"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_netappfiles_test_account_000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/cli-id-000006":
+      {}}}, "location": "eastus2", "properties": {"encryption": {"identity": {"userAssignedIdentity":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_netappfiles_test_account_000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/cli-id-000006"},
+      "keySource": "Microsoft.KeyVault", "keyVaultProperties": {"keyName": "clikey000005",
+      "keyVaultResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.KeyVault/vaults/clikv000004",
+      "keyVaultUri": "https://clikv000004.vault.azure.net/"}}}, "tags": {"CreatedOnDate":
+      "2026-05-15T10:20:17.7982210Z"}}'
     headers:
       Accept:
       - application/json
@@ -270,28 +1091,32 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '239'
+      - '897'
       Content-Type:
       - application/json
       ParameterSetName:
-      - -g -a --key-source --identity-type --user-assigned-identity
+      - -g -a --key-source --identity-type --user-assigned-identities --user-assigned-identity
+        --key-vault-uri --key-name --keyvault-resource-id
       User-Agent:
-      - AZURECLI/2.85.0 azsdk-python-core/1.39.0 Python/3.13.13 (Windows-11-10.0.26200-SP0)
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.13.13 (Windows-11-10.0.26200-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000003?api-version=2026-01-01
   response:
     body:
-      string: '{"error":{"code":"MissingIdentityIds","message":"The identity ids must
-        not be null or empty for ''UserAssigned'' identity type."}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000003","name":"cli-acc-000003","type":"Microsoft.NetApp/netAppAccounts","etag":"W/\"datetime''2026-05-15T10%3A20%3A23.3029369Z''\"","location":"eastus2","tags":{"CreatedOnDate":"2026-05-15T10:20:17.7982210Z"},"properties":{"provisioningState":"Updating","encryption":{"keySource":"Microsoft.NetApp"},"multiADStatus":"Enabled"},"systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-05-15T10:20:18.0425409Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-05-15T10:20:18.0425409Z"}}'
     headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/eastus2/operationResults/0d06ab9f-0ee1-47e9-b1dd-3dbeb420fe87?api-version=2026-01-01&t=639144372234991712&c=MIIHlDCCBnygAwIBAgIQezb8rseFMm1IRs195n9vVzANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXVVMyIENBIDAxMB4XDTI2MDQwNzIzNDE1NFoXDTI2MTAwMzA1NDE1NFowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCyN0RC1toIy0MUjNqRPJLB51RUbtwBvAu6pgWK5gw2lmci7lE7U6jMxMh_8ljqwlXFY90FwPHzKHdcfHD4M0Ma3DRUVgE-v0S1aUDhKodisph39p7biWkApcSmxbkzmQMB2D0u2Zm0IhszNnwquCfvJuftV7em4_XCA_NbUt5EYUpfjv1sYzkLLAA8_2geRJLmDRfZGZvSHhgN-bsErNiX7v-BdmAyt_5jYpEcuAWuKp_6DUtXPY_mbwCm-qkLcoXGR39z9dHcyaldZUrJJ6JYcAEG5QNboi3gR2R7bY7pVtxUqbJ9Gx2tDy1qzosxOu0hXflZnevb68ylv7B68Wu9AgMBAAGjggSSMIIEjjCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBQNw-Elcx5N6tZ9jh67WrWJYZxlnzAfBgNVHSMEGDAWgBSs43L6A7Jznj2VyO-HW67dG6HtaDCCAbIGA1UdHwSCAakwggGlMGmgZ6BlhmNodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvMzQvY3VycmVudC5jcmwwa6BpoGeGZWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3R1czIvY3Jscy9jY21ld2VzdHVzMnBraS9jY21ld2VzdHVzMmljYTAxLzM0L2N1cnJlbnQuY3JsMFqgWKBWhlRodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvMzQvY3VycmVudC5jcmwwb6BtoGuGaWh0dHA6Ly9jY21ld2VzdHVzMnBraS53ZXN0dXMyLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZXdlc3R1czJpY2EwMS8zNC9jdXJyZW50LmNybDCCAbcGCCsGAQUFBwEBBIIBqTCCAaUwbAYIKwYBBQUHMAKGYGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBuBggrBgEFBQcwAoZiaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jYWNlcnRzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvY2VydC5jZXIwXQYIKwYBBQUHMAKGUWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBmBggrBgEFBQcwAoZaaHR0cDovL2NjbWV3ZXN0dXMycGtpLndlc3R1czIucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdHVzMmljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQBOslPK0kujtTlyxe5WOtpNbQRYZ8iSxYHILxKtavGf63w2nf7l5nX07MzYQqUYkw1ZLV81KZUWrAqmYoK0fTLgq7S_ePVqJ0Bi0EefpAOxc4Q7FtrTXk-2n80mtrwbcDH_jHtUGHd5gGv7MEFSu5Wa2iI3mNDsNSZrscWUqrBhKiZ2zF0slf8YMpHWflHomPT5wBh2LQC9ub-GLJKfkVDFxokxP2roGR1np3ATyRygILitspiTUM4Bcia0TOmYoYUqpLZTBiVNI-ehKyCyQXxR9eeBX0xmiPRji8kPKfC97Q_8KsB0icYO2jpcYUsIggTmm6Rz61nAEqF34O6kWVt8&s=ka2ysggjgrA9AJp6yrqhkrCcFNgc3471QUenMF-YDA9CidrTB7yyanD1zPe_ncyctpXdftgOYyNe-k55RHfeuw5cU8eNPgGwr7lGV4JYV5CTuoSjEQ_zvhc6UPDFWDklBbH487E17KucR1JN-iF5TypIbmpeSVDJnLulexLvR9DFLilvUv9LcE_44PGTrUFMHnUI-ZLs5Bvur43G2x_uEcpGgE4-gUAGpJCMxOssqNj4imH8zXcduYUMq_gZhsMWEWN0dZclPypQtudU9Wz2REpDm8mAAq-cwO71gnbRWxLzF6-SQJ4AL_dwcvO4l1h1eYeRX7ocGzWIcprECvzP0g&h=eAtwSu__zqgg8TIEvT_loglQ7TQkHuMXVm-upE3-nrM
       cache-control:
       - no-cache
       content-length:
-      - '128'
+      - '710'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Wed, 15 Apr 2026 13:07:02 GMT
+      - Fri, 15 May 2026 10:20:23 GMT
+      etag:
+      - W/"datetime'2026-05-15T10%3A20%3A23.3029369Z'"
       expires:
       - '-1'
       pragma:
@@ -302,11 +1127,162 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
-      x-ms-failure-cause:
-      - gateway
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=29ee0da0-a37f-4d77-8704-0c32607c900f/westus/2a9aed03-ba6d-4dcc-b558-fa5ff7f14fef
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
       x-msedge-ref:
-      - 'Ref A: 9DD164B7AE564BCEB535F0911B9E79D8 Ref B: BL2AA2010204037 Ref C: 2026-04-15T13:07:02Z'
+      - 'Ref A: E7C514528B744FE5BC612CE945E517E3 Ref B: MNZ221060608035 Ref C: 2026-05-15T10:20:22Z'
     status:
-      code: 400
-      message: Bad Request
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - netappfiles account update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -a --key-source --identity-type --user-assigned-identities --user-assigned-identity
+        --key-vault-uri --key-name --keyvault-resource-id
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.13.13 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/eastus2/operationResults/0d06ab9f-0ee1-47e9-b1dd-3dbeb420fe87?api-version=2026-01-01&t=639144372234991712&c=MIIHlDCCBnygAwIBAgIQezb8rseFMm1IRs195n9vVzANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXVVMyIENBIDAxMB4XDTI2MDQwNzIzNDE1NFoXDTI2MTAwMzA1NDE1NFowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCyN0RC1toIy0MUjNqRPJLB51RUbtwBvAu6pgWK5gw2lmci7lE7U6jMxMh_8ljqwlXFY90FwPHzKHdcfHD4M0Ma3DRUVgE-v0S1aUDhKodisph39p7biWkApcSmxbkzmQMB2D0u2Zm0IhszNnwquCfvJuftV7em4_XCA_NbUt5EYUpfjv1sYzkLLAA8_2geRJLmDRfZGZvSHhgN-bsErNiX7v-BdmAyt_5jYpEcuAWuKp_6DUtXPY_mbwCm-qkLcoXGR39z9dHcyaldZUrJJ6JYcAEG5QNboi3gR2R7bY7pVtxUqbJ9Gx2tDy1qzosxOu0hXflZnevb68ylv7B68Wu9AgMBAAGjggSSMIIEjjCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBQNw-Elcx5N6tZ9jh67WrWJYZxlnzAfBgNVHSMEGDAWgBSs43L6A7Jznj2VyO-HW67dG6HtaDCCAbIGA1UdHwSCAakwggGlMGmgZ6BlhmNodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvMzQvY3VycmVudC5jcmwwa6BpoGeGZWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3R1czIvY3Jscy9jY21ld2VzdHVzMnBraS9jY21ld2VzdHVzMmljYTAxLzM0L2N1cnJlbnQuY3JsMFqgWKBWhlRodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvMzQvY3VycmVudC5jcmwwb6BtoGuGaWh0dHA6Ly9jY21ld2VzdHVzMnBraS53ZXN0dXMyLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZXdlc3R1czJpY2EwMS8zNC9jdXJyZW50LmNybDCCAbcGCCsGAQUFBwEBBIIBqTCCAaUwbAYIKwYBBQUHMAKGYGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBuBggrBgEFBQcwAoZiaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jYWNlcnRzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvY2VydC5jZXIwXQYIKwYBBQUHMAKGUWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBmBggrBgEFBQcwAoZaaHR0cDovL2NjbWV3ZXN0dXMycGtpLndlc3R1czIucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdHVzMmljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQBOslPK0kujtTlyxe5WOtpNbQRYZ8iSxYHILxKtavGf63w2nf7l5nX07MzYQqUYkw1ZLV81KZUWrAqmYoK0fTLgq7S_ePVqJ0Bi0EefpAOxc4Q7FtrTXk-2n80mtrwbcDH_jHtUGHd5gGv7MEFSu5Wa2iI3mNDsNSZrscWUqrBhKiZ2zF0slf8YMpHWflHomPT5wBh2LQC9ub-GLJKfkVDFxokxP2roGR1np3ATyRygILitspiTUM4Bcia0TOmYoYUqpLZTBiVNI-ehKyCyQXxR9eeBX0xmiPRji8kPKfC97Q_8KsB0icYO2jpcYUsIggTmm6Rz61nAEqF34O6kWVt8&s=ka2ysggjgrA9AJp6yrqhkrCcFNgc3471QUenMF-YDA9CidrTB7yyanD1zPe_ncyctpXdftgOYyNe-k55RHfeuw5cU8eNPgGwr7lGV4JYV5CTuoSjEQ_zvhc6UPDFWDklBbH487E17KucR1JN-iF5TypIbmpeSVDJnLulexLvR9DFLilvUv9LcE_44PGTrUFMHnUI-ZLs5Bvur43G2x_uEcpGgE4-gUAGpJCMxOssqNj4imH8zXcduYUMq_gZhsMWEWN0dZclPypQtudU9Wz2REpDm8mAAq-cwO71gnbRWxLzF6-SQJ4AL_dwcvO4l1h1eYeRX7ocGzWIcprECvzP0g&h=eAtwSu__zqgg8TIEvT_loglQ7TQkHuMXVm-upE3-nrM
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/eastus2/operationResults/0d06ab9f-0ee1-47e9-b1dd-3dbeb420fe87","name":"0d06ab9f-0ee1-47e9-b1dd-3dbeb420fe87","status":"Updating","startTime":"2026-05-15T10:20:23.3102074Z","endTime":"0001-01-01T00:00:00Z","percentComplete":0.0,"properties":{"resourceName":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000003","action":"UPDATE"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '533'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 15 May 2026 10:20:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=29ee0da0-a37f-4d77-8704-0c32607c900f/eastus/4794fb0e-2664-4a5c-bef8-bf520fb61239
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 639AA3D2084640D9A1DB975477E8F6A9 Ref B: MNZ221060618033 Ref C: 2026-05-15T10:20:24Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - netappfiles account update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -a --key-source --identity-type --user-assigned-identities --user-assigned-identity
+        --key-vault-uri --key-name --keyvault-resource-id
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.13.13 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/eastus2/operationResults/0d06ab9f-0ee1-47e9-b1dd-3dbeb420fe87?api-version=2026-01-01&t=639144372234991712&c=MIIHlDCCBnygAwIBAgIQezb8rseFMm1IRs195n9vVzANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBXVVMyIENBIDAxMB4XDTI2MDQwNzIzNDE1NFoXDTI2MTAwMzA1NDE1NFowQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCyN0RC1toIy0MUjNqRPJLB51RUbtwBvAu6pgWK5gw2lmci7lE7U6jMxMh_8ljqwlXFY90FwPHzKHdcfHD4M0Ma3DRUVgE-v0S1aUDhKodisph39p7biWkApcSmxbkzmQMB2D0u2Zm0IhszNnwquCfvJuftV7em4_XCA_NbUt5EYUpfjv1sYzkLLAA8_2geRJLmDRfZGZvSHhgN-bsErNiX7v-BdmAyt_5jYpEcuAWuKp_6DUtXPY_mbwCm-qkLcoXGR39z9dHcyaldZUrJJ6JYcAEG5QNboi3gR2R7bY7pVtxUqbJ9Gx2tDy1qzosxOu0hXflZnevb68ylv7B68Wu9AgMBAAGjggSSMIIEjjCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBQNw-Elcx5N6tZ9jh67WrWJYZxlnzAfBgNVHSMEGDAWgBSs43L6A7Jznj2VyO-HW67dG6HtaDCCAbIGA1UdHwSCAakwggGlMGmgZ6BlhmNodHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvMzQvY3VycmVudC5jcmwwa6BpoGeGZWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L3dlc3R1czIvY3Jscy9jY21ld2VzdHVzMnBraS9jY21ld2VzdHVzMmljYTAxLzM0L2N1cnJlbnQuY3JsMFqgWKBWhlRodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vd2VzdHVzMi9jcmxzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvMzQvY3VycmVudC5jcmwwb6BtoGuGaWh0dHA6Ly9jY21ld2VzdHVzMnBraS53ZXN0dXMyLnBraS5jb3JlLndpbmRvd3MubmV0L2NlcnRpZmljYXRlQXV0aG9yaXRpZXMvY2NtZXdlc3R1czJpY2EwMS8zNC9jdXJyZW50LmNybDCCAbcGCCsGAQUFBwEBBIIBqTCCAaUwbAYIKwYBBQUHMAKGYGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBuBggrBgEFBQcwAoZiaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvd2VzdHVzMi9jYWNlcnRzL2NjbWV3ZXN0dXMycGtpL2NjbWV3ZXN0dXMyaWNhMDEvY2VydC5jZXIwXQYIKwYBBQUHMAKGUWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS93ZXN0dXMyL2NhY2VydHMvY2NtZXdlc3R1czJwa2kvY2NtZXdlc3R1czJpY2EwMS9jZXJ0LmNlcjBmBggrBgEFBQcwAoZaaHR0cDovL2NjbWV3ZXN0dXMycGtpLndlc3R1czIucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21ld2VzdHVzMmljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQBOslPK0kujtTlyxe5WOtpNbQRYZ8iSxYHILxKtavGf63w2nf7l5nX07MzYQqUYkw1ZLV81KZUWrAqmYoK0fTLgq7S_ePVqJ0Bi0EefpAOxc4Q7FtrTXk-2n80mtrwbcDH_jHtUGHd5gGv7MEFSu5Wa2iI3mNDsNSZrscWUqrBhKiZ2zF0slf8YMpHWflHomPT5wBh2LQC9ub-GLJKfkVDFxokxP2roGR1np3ATyRygILitspiTUM4Bcia0TOmYoYUqpLZTBiVNI-ehKyCyQXxR9eeBX0xmiPRji8kPKfC97Q_8KsB0icYO2jpcYUsIggTmm6Rz61nAEqF34O6kWVt8&s=ka2ysggjgrA9AJp6yrqhkrCcFNgc3471QUenMF-YDA9CidrTB7yyanD1zPe_ncyctpXdftgOYyNe-k55RHfeuw5cU8eNPgGwr7lGV4JYV5CTuoSjEQ_zvhc6UPDFWDklBbH487E17KucR1JN-iF5TypIbmpeSVDJnLulexLvR9DFLilvUv9LcE_44PGTrUFMHnUI-ZLs5Bvur43G2x_uEcpGgE4-gUAGpJCMxOssqNj4imH8zXcduYUMq_gZhsMWEWN0dZclPypQtudU9Wz2REpDm8mAAq-cwO71gnbRWxLzF6-SQJ4AL_dwcvO4l1h1eYeRX7ocGzWIcprECvzP0g&h=eAtwSu__zqgg8TIEvT_loglQ7TQkHuMXVm-upE3-nrM
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.NetApp/locations/eastus2/operationResults/0d06ab9f-0ee1-47e9-b1dd-3dbeb420fe87","name":"0d06ab9f-0ee1-47e9-b1dd-3dbeb420fe87","status":"Succeeded","startTime":"2026-05-15T10:20:23.3102074Z","endTime":"2026-05-15T10:20:24.4153457Z","percentComplete":100.0,"properties":{"resourceName":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000003","action":"UPDATE"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '544'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 15 May 2026 10:20:54 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=29ee0da0-a37f-4d77-8704-0c32607c900f/eastus/1f2e98a3-a6bc-4e67-a1a8-b395055e43ce
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: D8B84FBA2BFF4E1CB399D97086A45EE1 Ref B: MNZ221060618053 Ref C: 2026-05-15T10:20:55Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - netappfiles account update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -a --key-source --identity-type --user-assigned-identities --user-assigned-identity
+        --key-vault-uri --key-name --keyvault-resource-id
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.13.13 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000003?api-version=2026-01-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.NetApp/netAppAccounts/cli-acc-000003","name":"cli-acc-000003","type":"Microsoft.NetApp/netAppAccounts","etag":"W/\"datetime''2026-05-15T10%3A20%3A24.4060899Z''\"","location":"eastus2","tags":{"CreatedOnDate":"2026-05-15T10:20:17.7982210Z"},"properties":{"provisioningState":"Succeeded","encryption":{"keySource":"Microsoft.KeyVault","keyVaultProperties":{"keyVaultId":"f7333b27-2048-3951-524e-edd6e7f0daf1","keyVaultUri":"https://clikv000004.vault.azure.net/","keyName":"clikey000005","keyVaultResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_netappfiles_test_account_000001/providers/Microsoft.KeyVault/vaults/clikv000004","status":"Created"},"identity":{"userAssignedIdentity":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_netappfiles_test_account_000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/cli-id-000006","principalId":"01bcf93d-5984-47d4-9d8e-57cbdd1d54cc"}},"multiADStatus":"Enabled"},"identity":{"type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_netappfiles_test_account_000001/providers/Microsoft.ManagedIdentity/userAssignedIdentities/cli-id-000006":{"principalId":"01bcf93d-5984-47d4-9d8e-57cbdd1d54cc","clientId":"eff6ff25-ad85-4212-8ddd-31993822fa1e","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47"}}},"systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-05-15T10:20:18.0425409Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-05-15T10:20:22.764787Z"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1720'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 15 May 2026 10:20:56 GMT
+      etag:
+      - W/"datetime'2026-05-15T10%3A20%3A24.4060899Z'"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: E7F8D6844E0049788F1583263721E8AB Ref B: MNZ221060619023 Ref C: 2026-05-15T10:20:55Z'
+    status:
+      code: 200
+      message: OK
 version: 1

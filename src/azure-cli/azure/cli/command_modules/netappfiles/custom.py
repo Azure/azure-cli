@@ -289,29 +289,42 @@ def _customize_pool_size_args(args_schema, *, on_update):
     and gets populated by pre_operations.
     """
     from azure.cli.core.aaz import AAZFloatArg, AAZFloatArgFormat, AAZIntArg
-    # Keep aaz `size` AAZIntArg for body serialization but hide it from the CLI surface.
-    args_schema.size._registered = False
-    args_schema.size._required = False
-    # Drop the alias so we can reuse --size for our float arg.
-    args_schema._fields_alias_map.pop("--size", None)
 
-    args_schema.size_tib = AAZFloatArg(
-        options=["--size"],
-        arg_group="Properties",
-        help="Provisioned size of the pool in tebibytes (TiB). Use 0.5 for the 512 GiB minimum; "
-             "otherwise an integer multiple of 1 TiB. Use either --size or --size-in-bytes, not both.",
-        nullable=on_update,
-        fmt=AAZFloatArgFormat(minimum=0.5),
-    )
+    # TODO: 0.5 sized pools are currently preview only and gated by AFEC, so we are not advertising the float `--size` arg until
+    # the feature is more widely available. For now, users can use `--size-in-bytes 549755813888` to get a 512 GiB pool.
+    # When we do enable the `--size` arg, we should set its default to 4 (TiB) to preserve existing behavior where omitting size defaults to 4 TiB.
+
+    # # Keep aaz `size` AAZIntArg for body serialization but hide it from the CLI surface.
+    # args_schema.size._registered = False
+    # args_schema.size._required = False
+    # # Drop the alias so we can reuse --size for our float arg.
+    # args_schema._fields_alias_map.pop("--size", None)
+
+    # args_schema.size_tib = AAZFloatArg(
+    #     options=["--size"],
+    #     arg_group="Properties",
+    #     help="Provisioned size of the pool in tebibytes (TiB). Use 0.5 for the 512 GiB minimum; "
+    #          "otherwise an integer multiple of 1 TiB. Use either --size or --size-in-bytes, not both.",
+    #     nullable=on_update,
+    #     fmt=AAZFloatArgFormat(minimum=0.5),
+    # )
+    # args_schema.size_in_bytes = AAZIntArg(
+    #     options=["--size-in-bytes"],
+    #     arg_group="Properties",
+    #     help="Provisioned size of the pool in bytes. Allowed values: 549755813888 (512 GiB) "
+    #          "or any positive multiple of 1099511627776 (1 TiB). "
+    #          "Use either --size or --size-in-bytes, not both.",
+    #     nullable=on_update,
+    # )
+
     args_schema.size_in_bytes = AAZIntArg(
         options=["--size-in-bytes"],
         arg_group="Properties",
-        help="Provisioned size of the pool in bytes. Allowed values: 549755813888 (512 GiB) "
-             "or any positive multiple of 1099511627776 (1 TiB). "
+        help="Provisioned size of the pool (in bytes). Allowed values are 512GiB (549755813888 bytes) "
+             "or in 1TiB chunks (value must be multiple of 1099511627776). "
              "Use either --size or --size-in-bytes, not both.",
         nullable=on_update,
     )
-
 
 def _resolved_pool_bytes(cmd):
     """Return the resolved aaz `size` value (bytes) from a Pool command instance,
