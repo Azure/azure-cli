@@ -39,14 +39,6 @@ for network_command in (
 register_argument_deprecate('postgres flexible-server create', '--high-availability', redirect='--zonal-resiliency')
 register_argument_deprecate('postgres flexible-server update', '--high-availability', redirect='--zonal-resiliency')
 
-# Index Tuning command group renamed to Autonomous Tuning as the feature has expanded to
-# include more types of recommendations beyond just index tuning
-register_command_group_deprecate(command_group='postgres flexible-server index-tuning',
-                                 redirect='postgres flexible-server autonomous-tuning',
-                                 message='Index tuning feature has now expanded its capabilities to support '
-                                 'other automatically generated recommendations which are covered by the '
-                                 'new command.')
-
 # Long term retention command group deprecated with no redirect as the functionality will be removed in the future
 register_command_group_deprecate(command_group='postgres flexible-server long-term-retention',
                                  message='Long term retention command group will be removed. '
