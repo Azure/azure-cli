@@ -192,7 +192,7 @@ _POOL_HALF_TIB_FEATURE = "Microsoft.NetApp/ANFHalfTiBPoolSize"
 _POOL_HALF_TIB_HINT = (
     "Provisioning a 512 GiB (0.5 TiB) pool requires the AFEC feature "
     "'{feature}' to be registered on your subscription. Register it with: "
-    "az feature registration create --namespace Microsoft.NetApp "
+    "az feature register --namespace Microsoft.NetApp "
     "--name ANFHalfTiBPoolSize"
 ).format(feature=_POOL_HALF_TIB_FEATURE)
 
