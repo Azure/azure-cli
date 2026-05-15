@@ -150,7 +150,7 @@ def load_command_table(self, _):
         g.command('recover', 'recover_snapshot')
 
     # NSP Commands
-    with self.command_group('appconfig network-security-perimeter-configuration', configstore_nsp_util) as g:
+    with self.command_group('appconfig network-security-perimeter-configuration', configstore_nsp_util, is_preview=True) as g:
         g.command('list', 'list_nsp_configurations')
         g.show_command('show', 'show_nsp_configuration')
         g.command('reconcile', 'reconcile_nsp_configuration')
