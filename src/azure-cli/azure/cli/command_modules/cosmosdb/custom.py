@@ -2784,13 +2784,6 @@ def cli_cosmosdb_managed_cassandra_datacenter_update(client,
     return client.begin_create_update(resource_group_name, cluster_name, data_center_name, data_center_resource)
 
 
-def _handle_exists_exception(http_response_error):
-
-    if http_response_error.status_code == 404:
-        return False
-    raise http_response_error
-
-
 def process_restorable_databases(restorable_databases, database_name):
 
     latest_database_delete_time = datetime.datetime.utcfromtimestamp(0)

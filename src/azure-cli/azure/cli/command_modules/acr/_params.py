@@ -134,6 +134,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('acr update', arg_group='Network Rule') as c:
         c.argument('data_endpoint_enabled', get_three_state_flag(), help="Enable dedicated data endpoint for client firewall configuration")
+        c.argument('endpoint_protocol', arg_type=get_enum_type(['IPv4', 'IPv4AndIPv6']), options_list=['--endpoint-protocol'], is_preview=True, help="The endpoint protocol for the registry. Allowed values: IPv4, IPv4AndIPv6.")
 
     with self.argument_context('acr update') as c:
         c.argument('anonymous_pull_enabled', get_three_state_flag(), help="Enable registry-wide pull from unauthenticated clients")

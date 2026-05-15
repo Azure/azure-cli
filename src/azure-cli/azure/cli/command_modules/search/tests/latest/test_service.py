@@ -61,6 +61,13 @@ class AzureSearchServicesTests(ScenarioTest):
                     self.check('partitionCount', '{partition_count}'),
                     self.check('hostingMode', '{hosting_mode}')])
 
+    def test_service_create_supports_serverless_sku_argument(self):
+        from azure.cli.command_modules.search.aaz.latest.search.service._create import Create
+        from azure.cli.command_modules.search.aaz.latest.search.service._update import Update
+
+        self.assertIn('serverless', Create._build_arguments_schema().sku.enum.items)
+        self.assertIn('serverless', Update._build_arguments_schema().sku.enum.items)
+
     @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
     def test_service_create_multi_partition(self, resource_group):
         self.kwargs.update({
@@ -291,6 +298,50 @@ class AzureSearchServicesTests(ScenarioTest):
             checks=[self.check('name', '{name}'),
                     self.check('identity.type', '{identity_type}')])
 
+    @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='westus')
+    def test_service_update_service_level_encryption_key(self, resource_group):
+        self.kwargs.update({
+            'sku_name': 'basic',
+            'name': self.create_random_name(prefix='test', length=24),
+            'key_vault_name': self.create_random_name(prefix='clisearchkv', length=24),
+            'key_name': self.create_random_name(prefix='key', length=24),
+            'identity_type': 'SystemAssigned'
+        })
+
+        search_service = self.cmd(
+            'az search service create -n {name} -g {rg} --sku {sku_name} --identity-type {identity_type}',
+            checks=[self.check('name', '{name}'),
+                    self.check('sku.name', '{sku_name}'),
+                    self.check('identity.type', '{identity_type}')]).get_output_in_json()
+        self.kwargs['principal_id'] = search_service['identity']['principalId']
+
+        self.cmd(
+            'az keyvault create -g {rg} -n {key_vault_name} -l westus'
+            ' --enable-purge-protection true --enable-rbac-authorization false')
+        self.cmd(
+            'az keyvault set-policy -n {key_vault_name} --object-id {principal_id}'
+            ' --key-permissions get wrapKey unwrapKey')
+        key = self.cmd(
+            'az keyvault key create --vault-name {key_vault_name} -n {key_name} --protection software'
+        ).get_output_in_json()
+        key_id = key['key']['kid']
+        self.kwargs.update({
+            'key_vault_uri': 'https://{}.vault.azure.net/'.format(self.kwargs['key_vault_name']),
+            'key_vault_key_version': key_id.rstrip('/').split('/')[-1]
+        })
+
+        self.cmd(
+            'az search service update -n {name} -g {rg}'
+            ' --encryption-with-cmk "{{enforcement:Enabled,service-level-encryption-key:'
+            '{{key-vault-key-name:{key_name},key-vault-key-version:{key_vault_key_version},'
+            "key-vault-uri:'{key_vault_uri}'}}}}\"",
+            checks=[self.check('name', '{name}'),
+                    self.check('encryptionWithCmk.enforcement', 'Enabled'),
+                    self.check('encryptionWithCmk.serviceLevelEncryptionKey.keyVaultKeyName', '{key_name}'),
+                    self.check('encryptionWithCmk.serviceLevelEncryptionKey.keyVaultKeyVersion',
+                               '{key_vault_key_version}'),
+                    self.check('encryptionWithCmk.serviceLevelEncryptionKey.keyVaultUri', '{key_vault_uri}')])
+
     @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
     def test_service_create_delete_show(self, resource_group):
         self.kwargs.update({
@@ -499,6 +550,50 @@ class AzureSearchServicesTests(ScenarioTest):
                     self.check('partitionCount', '{partition_count}')]).get_output_in_json()
         self.assertTrue(len(_search_service['dataExfiltrationProtections']) == 1)
         self.assertTrue(_search_service['dataExfiltrationProtections'][0] == 'BlockAll')
+
+    @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
+    def test_service_knowledge_retrieval(self, resource_group):
+        self.kwargs.update({
+            'sku_name': 'standard',
+            'name': self.create_random_name(prefix='test', length=24),
+            'standard_name': self.create_random_name(prefix='test', length=24),
+            'replica_count': 1,
+            'partition_count': 1,
+            'knowledge_retrieval': 'free'
+        })
+
+        self.cmd(
+            'az search service create -n {name} -g {rg} --sku {sku_name}'
+            ' --replica-count {replica_count} --partition-count {partition_count}'
+            ' --knowledge-retrieval {knowledge_retrieval}',
+            checks=[self.check('name', '{name}'),
+                    self.check('sku.name', '{sku_name}'),
+                    self.check('replicaCount', '{replica_count}'),
+                    self.check('partitionCount', '{partition_count}'),
+                    self.check('knowledgeRetrieval', '{knowledge_retrieval}')])
+
+        self.cmd('az search service show -n {name} -g {rg}',
+                 checks=[self.check('name', '{name}'),
+                         self.check('knowledgeRetrieval', '{knowledge_retrieval}')])
+
+        self.cmd('az search service list -g {rg}',
+                 checks=[self.check('[0].name', '{name}')])
+
+        self.kwargs.update({
+            'knowledge_retrieval': 'standard'
+        })
+
+        self.cmd('az search service update -n {name} -g {rg} --knowledge-retrieval {knowledge_retrieval}',
+                 checks=[self.check('name', '{name}')])
+
+        self.cmd('az search service show -n {name} -g {rg}',
+                 checks=[self.check('name', '{name}')])
+
+        self.cmd(
+            'az search service create -n {standard_name} -g {rg} --sku {sku_name}'
+            ' --replica-count {replica_count} --partition-count {partition_count}'
+            ' --knowledge-retrieval {knowledge_retrieval}',
+            checks=[self.check('name', '{standard_name}')])
 
 if __name__ == '__main__':
     unittest.main()

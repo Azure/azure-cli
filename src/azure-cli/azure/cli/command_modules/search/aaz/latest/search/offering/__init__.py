@@ -8,16 +8,6 @@
 # pylint: skip-file
 # flake8: noqa
 
-from azure.cli.core.aaz import *
+from .__cmd_group import *
+from ._list import *
 
-
-@register_command_group(
-    "search",
-)
-class __CMDGroup(AAZCommandGroup):
-    """Manage Azure AI Search
-    """
-    pass
-
-
-__all__ = ["__CMDGroup"]

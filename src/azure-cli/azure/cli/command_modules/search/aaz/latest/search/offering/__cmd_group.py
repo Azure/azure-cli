@@ -12,12 +12,13 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "search",
+    "search offering",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Manage Azure AI Search
+    """Manage Azure AI Search offerings
     """
     pass
 
 
 __all__ = ["__CMDGroup"]
+
