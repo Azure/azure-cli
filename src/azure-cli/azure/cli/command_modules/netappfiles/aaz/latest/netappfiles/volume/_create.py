@@ -348,7 +348,7 @@ class Create(AAZCommand):
             options=["--network-features"],
             arg_group="Properties",
             help="Basic network, or Standard features available to the volume.",
-            default="Basic",
+            default="Standard",
             enum={"Basic": "Basic", "Basic_Standard": "Basic_Standard", "Standard": "Standard", "Standard_Basic": "Standard_Basic"},
         )
         _args_schema.placement_rules = AAZListArg(
