@@ -11,7 +11,7 @@ import unittest
 from copy import deepcopy
 from unittest import mock
 
-from azure.cli.core._profile import (Profile, SubscriptionFinder, _attach_token_tenant,
+from azure.cli.core._profile import (Profile, SubscriptionFinder, _attach_token_tenant, _create_identity_instance,
                                      _transform_subscription_for_multiapi,
                                      _TENANT_LEVEL_ACCOUNT_NAME)
 from azure.cli.core.auth.util import AccessToken
@@ -1395,6 +1395,28 @@ class TestProfile(unittest.TestCase):
         # Make sure logout is attempted on both account types
         logout_all_users_mock.assert_called_once()
         logout_all_service_principal_mock.assert_called_once()
+
+    @mock.patch('azure.cli.core.auth.identity.Identity', autospec=True)
+    def test_create_identity_instance_broker_on_mac_default_opt_in(self, identity_mock):
+        # Verify that broker on macOS is opt-in: default is False unless user sets
+        # core.enable_broker_on_mac=true. See CLIPS#55.
+        cli = DummyCli()
+        _create_identity_instance(cli, authority='https://login.microsoftonline.com')
+        _, kwargs = identity_mock.call_args
+        self.assertEqual(kwargs['enable_broker_on_mac'], False)
+        # Windows broker remains opt-out (default True).
+        self.assertEqual(kwargs['enable_broker_on_windows'], True)
+
+    @mock.patch('azure.cli.core.auth.identity.Identity', autospec=True)
+    def test_create_identity_instance_broker_on_mac_opt_in_enabled(self, identity_mock):
+        cli = DummyCli()
+        cli.config.set_value('core', 'enable_broker_on_mac', 'true')
+        try:
+            _create_identity_instance(cli, authority='https://login.microsoftonline.com')
+        finally:
+            cli.config.remove_option('core', 'enable_broker_on_mac')
+        _, kwargs = identity_mock.call_args
+        self.assertEqual(kwargs['enable_broker_on_mac'], True)
 
     @mock.patch('azure.cli.core._profile.SubscriptionFinder._create_subscription_client', autospec=True)
     @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential', autospec=True)
