@@ -400,13 +400,15 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage blob service-properties delete-policy show',
                          storage_account_info).assert_with_checks(JMESPathCheck('enabled', True),
                                                                   JMESPathCheck('days', 2))
-        time.sleep(10)
+        if self.is_live:
+            time.sleep(10)
         # soft-delete and check
         self.storage_cmd('storage blob delete -c {} -n {}', storage_account_info, container, blob_name)
         self.assertEqual(len(self.storage_cmd('storage blob list -c {}',
                                               storage_account_info, container).get_output_in_json()), 0)
 
-        time.sleep(30)
+        if self.is_live:
+            time.sleep(30)
         self.assertEqual(len(self.storage_cmd('storage blob list -c {} --include d',
                                               storage_account_info, container).get_output_in_json()), 1)
 
@@ -977,7 +979,8 @@ class StorageBlobCommonTests(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('length(@)', 1),
                                 JMESPathCheck('[0].name', 'dir'))
 
-        time.sleep(5)
+        if self.is_live:
+            time.sleep(5)
         # Test secondary location
         account_name = account_info[0] + '-secondary'
         account_key = account_info[1]
@@ -1028,7 +1031,8 @@ class StorageBlobPITRTests(StorageScenarioMixin, ScenarioTest):
                 container, storage_account, account_key)) \
                 .assert_with_checks(JMESPathCheck('deleted', True))
 
-        time.sleep(60)
+        if self.is_live:
+            time.sleep(60)
 
         # Restore blobs, with specific ranges
         self.cmd('storage account blob-service-properties show -n {sa}') \
@@ -1050,7 +1054,8 @@ class StorageBlobPITRTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('storage blob restore -t {} -r {} {} --account-name {} -g {} --no-wait'.format(
             time_to_restore, start_range, end_range, storage_account, resource_group))
 
-        time.sleep(300)
+        if self.is_live:
+            time.sleep(300)
 
         time_to_restore = (datetime.utcnow() + timedelta(seconds=-5)).strftime('%Y-%m-%dT%H:%MZ')
         # c1/b2 -> c2/b3
@@ -1062,7 +1067,8 @@ class StorageBlobPITRTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('parameters.blobRanges[0].startRange', start_range),
             JMESPathCheck('parameters.blobRanges[0].endRange', end_range)])
 
-        time.sleep(120)
+        if self.is_live:
+            time.sleep(120)
         self.cmd('storage blob restore -t {} --account-name {} -g {} --no-wait'.format(
             time_to_restore, storage_account, resource_group))
 
@@ -1205,7 +1211,8 @@ class StorageContainerScenarioTest(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].deleted', True))
 
-        time.sleep(30)
+        if self.is_live:
+            time.sleep(30)
         version = self.storage_cmd('storage container list --include-deleted --query [0].version -o tsv', account_info)\
             .output.strip('\n')
         self.storage_cmd('storage container restore -n {} --deleted-version {}', account_info, container, version)\

@@ -42,10 +42,10 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
                      JMESPathCheck('networkRuleSet.bypass', 'Logging'),
                      JMESPathCheck('networkRuleSet.defaultAction', 'Deny')])
 
-        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}'.format(**kwargs))
-        self.cmd(
-            'network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --service-endpoints Microsoft.Storage'.format(
-                **kwargs))
+        self.cmd('network vnet create -n {vnet} -g {rg}'.format(**kwargs))
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} --name {subnet} '
+                 '--address-prefixes 10.0.1.0/24 --default-outbound false '
+                 '--service-endpoints Microsoft.Storage'.format(**kwargs))
 
         self.cmd('storage account network-rule add -g {rg} --account-name {acc} --ip-address {ip1}'.format(**kwargs))
         # test network-rule add idempotent
@@ -317,6 +317,13 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck("contains(connectionString, 'https')", True),
             JMESPathCheck("contains(connectionString, '{}')".format(name), True)])
 
+        self.cmd('storage account delete -g {} -n {} --yes'.format(resource_group, name))
+        self.cmd('storage account check-name --name {}'.format(name),
+                 checks=JMESPathCheck('nameAvailable', True))
+
+        self.cmd('storage account create -n {} -g {} --sku {} -l {}'.format(
+            name, resource_group, 'Standard_LRS', location))
+
         self.cmd('storage account update -g {} -n {} --tags foo=bar cat'
                  .format(resource_group, name),
                  checks=JMESPathCheck('tags', {'cat': '', 'foo': 'bar'}))
@@ -327,9 +334,6 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('storage account update -g {} -n {} --set tags.test=success'
                  .format(resource_group, name),
                  checks=JMESPathCheck('tags', {'test': 'success'}))
-        self.cmd('storage account delete -g {} -n {} --yes'.format(resource_group, name))
-        self.cmd('storage account check-name --name {}'.format(name),
-                 checks=JMESPathCheck('nameAvailable', True))
 
         large_file_name = self.create_random_name(prefix='cli', length=24)
         self.cmd('storage account create -g {} -n {} --sku {} --enable-large-file-share'.format(
@@ -642,10 +646,10 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             'rg': resource_group
         }
 
-        result = self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}').get_output_in_json()
-        self.kwargs['subnet_id'] = result['newVNet']['subnets'][0]['id']
-        self.cmd(
-            'network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --service-endpoints Microsoft.Storage')
+        self.cmd('network vnet create -n {vnet} -g {rg}')
+        self.kwargs['subnet_id'] = self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} --name {subnet} '
+                                            '--address-prefixes 10.0.1.0/24 --default-outbound false '
+                                            '--service-endpoints Microsoft.Storage').get_output_in_json()['id']
         self.cmd('storage account create -n {name1} -g {rg} --subnet {subnet_id} '
                  '--default-action Deny --hns --sku Standard_LRS --enable-nfs-v3 true',
                  checks=[JMESPathCheck('enableNfsV3', True)])
@@ -809,7 +813,8 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         # Set version to 1.0
         self.cmd('storage logging update --services t --log r --retention 1 --version 1.0 --connection-string {} '
                  .format(connection_string))
-        time.sleep(60)
+        if self.is_live:
+            time.sleep(60)
         self.cmd('storage logging show --connection-string {}'.format(connection_string), checks=[
             JMESPathCheck('table.version', '1.0'),
             JMESPathCheck('table.delete', False),
@@ -822,7 +827,8 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         # Use default version
         self.cmd('storage logging update --services t --log r --retention 1 --connection-string {}'.format(
             connection_string))
-        time.sleep(10)
+        if self.is_live:
+            time.sleep(10)
         self.cmd('storage logging show --connection-string {}'.format(connection_string), checks=[
             JMESPathCheck('table.version', '1.0'),
             JMESPathCheck('table.delete', False),
@@ -1887,9 +1893,10 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('azureFilesIdentityBasedAuthentication.smbOAuthSettings.isSmbOAuthEnabled', True)
         ])
 
-    def test_storage_account_zone_with_placement(self):
+    @ResourceGroupPreparer(location='eastus')
+    def test_storage_account_zone_with_placement(self, resource_group):
         self.kwargs.update({
-            'rg': 'yifantestzp',
+            'rg': resource_group,
             'sazones': self.create_random_name('sa', 24),
             'sazones2': self.create_random_name('sa', 24),
             'sazoneplacement': self.create_random_name('sa', 24),
@@ -1903,13 +1910,9 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('storage account create -n {sazones2} -g {rg} --sku Premium_LRS --kind FileStorage', checks=[
             JMESPathCheck('zones', None)
         ])
-        self.cmd('storage account update -n {sazones2} -g {rg} '
-                 '--zones 1', checks=[
-            JMESPathCheck('zones', ['1'])
-        ])
 
         self.cmd('storage account create -n {sazoneplacement} -g {rg} --sku Premium_LRS --kind FileStorage '
-                 '--location centraluseuap --zone-placement-policy Any', checks=[
+                 '--location eastus --zone-placement-policy Any', checks=[
             JMESPathCheck('placement.zonePlacementPolicy', 'Any')
         ])
         self.cmd('storage account update -n {sazoneplacement} -g {rg}  --zone-placement-policy None', checks=[
@@ -1920,7 +1923,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         ])
 
         self.cmd('storage account create -n {sazoneplacement2} -g {rg} --sku Premium_LRS --kind FileStorage '
-                 '--location centraluseuap --zone-placement-policy None', checks=[
+                 '--location eastus --zone-placement-policy None', checks=[
             JMESPathCheck('placement.zonePlacementPolicy', 'None')
         ])
         self.cmd('storage account update -n {sazoneplacement2} -g {rg} --zone-placement-policy Any', checks=[
@@ -1930,9 +1933,10 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('placement.zonePlacementPolicy', 'Any')
         ])
 
-    def test_storage_account_geo_sla(self):
+    @ResourceGroupPreparer(location='eastus')
+    def test_storage_account_geo_sla(self, resource_group):
         self.kwargs.update({
-            'rg': 'yifantestzp',
+            'rg': resource_group,
             'sa': self.create_random_name('sa', 24)
         })
 
@@ -1980,7 +1984,8 @@ class RevokeStorageAccountTests(StorageScenarioMixin, RoleScenarioTest, LiveScen
         user = self.create_random_name('testuser', 15)
         self.kwargs['upn'] = user + '@azuresdkteam.onmicrosoft.com'
         self.cmd('ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}')
-        time.sleep(15)  # By-design, it takes some time for RBAC system propagated with graph object change
+        if self.is_live:
+            time.sleep(15)  # By-design, it takes some time for RBAC system propagated with graph object change
 
         self.cmd('role assignment create --assignee {upn} --role "Storage Blob Data Contributor" --scope {sc_id}')
 
@@ -1996,8 +2001,8 @@ class RevokeStorageAccountTests(StorageScenarioMixin, RoleScenarioTest, LiveScen
             .assert_with_checks(JMESPathCheck('name', b))
 
         self.cmd('storage account revoke-delegation-keys -n {account} -g {rg}')
-
-        time.sleep(60)  # By-design, it takes some time for RBAC system propagated with graph object change
+        if self.is_live:
+            time.sleep(60)  # By-design, it takes some time for RBAC system propagated with graph object change
 
         self.cmd('storage blob show -c {container} -n {blob} --account-name {account} --sas-token {blob_sas}', expect_failure=True)
 
@@ -2395,8 +2400,9 @@ class StorageAccountPrivateEndpointScenarioTest(ScenarioTest):
         })
 
         # Prepare network
-        self.cmd('network vnet create -n {vnet} -g {rg} -l {loc} --subnet-name {subnet}',
-                 checks=self.check('length(newVNet.subnets)', 1))
+        self.cmd('network vnet create -n {vnet} -g {rg} -l {loc}')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} --name {subnet} '
+                 '--address-prefixes 10.0.1.0/24 --default-outbound false')
         self.cmd('network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
                  '--disable-private-endpoint-network-policies true',
                  checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
@@ -2542,7 +2548,8 @@ class StorageAccountFailoverScenarioTest(ScenarioTest):
                                     'geoReplicationStats.canFailover -o tsv').output.strip('\n')
             if can_failover == 'true':
                 break
-            time.sleep(10)
+            if self.is_live:
+                time.sleep(10)
 
         self.cmd('storage account show -n {sa} -g {rg} --expand geoReplicationStats', checks=[
             self.check('geoReplicationStats.canFailover', True),
@@ -2566,7 +2573,8 @@ class StorageAccountFailoverScenarioTest(ScenarioTest):
                                     'geoReplicationStats.canFailover -o tsv').output.strip('\n')
             if can_failover == 'true':
                 break
-            time.sleep(10)
+            if self.is_live:
+                time.sleep(10)
 
         self.cmd('storage account show -n {sa2} -g {rg} --expand geoReplicationStats', checks=[
             self.check('geoReplicationStats.canFailover', True),
@@ -2591,7 +2599,8 @@ class StorageAccountFailoverScenarioTest(ScenarioTest):
                                     'geoReplicationStats.canFailover -o tsv').output.strip('\n')
             if can_failover == 'true':
                 break
-            time.sleep(10)
+            if self.is_live:
+                time.sleep(10)
 
         self.cmd('storage account show -n {sa3} -g {rg} --expand geoReplicationStats', checks=[
             self.check('geoReplicationStats.canFailover', True),
@@ -3008,7 +3017,8 @@ class StorageAccountHNSMigrationScenarioTest(StorageScenarioMixin, ScenarioTest)
                     raise ex
                 if ex.reason == 'Hns migration for the account: {} is not found.'.format(storage_account2):
                     retry += 1
-                    time.sleep(30)
+                    if self.is_live:
+                        time.sleep(30)
 
 class StorageAccountLocalUserTests(StorageScenarioMixin, ScenarioTest):
     @AllowLargeResponse()

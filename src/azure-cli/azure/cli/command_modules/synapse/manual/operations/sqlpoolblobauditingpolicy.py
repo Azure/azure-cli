@@ -415,7 +415,7 @@ def _get_storage_key(
 
     # Choose storage key
     index = 1 if use_secondary_key else 0
-    return keys.keys[index].value  # pylint: disable=no-member
+    return keys.keys_property[index].value  # pylint: disable=no-member
 
 
 def _check_audit_policy_state(

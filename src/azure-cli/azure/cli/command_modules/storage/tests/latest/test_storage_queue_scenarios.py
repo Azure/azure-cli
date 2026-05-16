@@ -213,7 +213,8 @@ class StorageQueueScenarioTests(StorageScenarioMixin, ScenarioTest):
 
         # get message, test `num_messages`
         import time
-        time.sleep(35)
+        if self.is_live:
+            time.sleep(35)
         result = self.storage_cmd('storage message get -q {} --num-messages 2', account_info,
                                   queue).get_output_in_json()
         self.assertEqual(len(result), 2)
@@ -240,7 +241,8 @@ class StorageQueueScenarioTests(StorageScenarioMixin, ScenarioTest):
         # delete message
         self.storage_cmd('storage message delete -q {} --id {} --pop-receipt {}',
                          account_info, queue, update_result.get('id'), update_result.get('popReceipt'))
-        time.sleep(10)
+        if self.is_live:
+            time.sleep(10)
         self.storage_cmd('storage message peek -q {} --num-messages 2', account_info, queue) \
             .assert_with_checks(JMESPathCheck('length(@)', 1))
 

@@ -356,7 +356,7 @@ def show_storage_account_connection_string(cmd, resource_group_name, account_nam
         scf = cf_sa_for_keys(cmd.cli_ctx, None)
         obj = scf.list_keys(resource_group_name, account_name, logging_enable=False)  # pylint: disable=no-member
         try:
-            keys = [obj.keys[0].value, obj.keys[1].value]  # pylint: disable=no-member
+            keys = [obj.keys_property[0].value, obj.keys_property[1].value]  # pylint: disable=no-member
         except AttributeError:
             # Older API versions have a slightly different structure
             keys = [obj.key1, obj.key2]  # pylint: disable=no-member
@@ -759,8 +759,8 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
 def list_network_rules(client, resource_group_name, account_name):
     sa = client.get_properties(resource_group_name, account_name)
     rules = sa.network_rule_set
-    delattr(rules, 'bypass')
-    delattr(rules, 'default_action')
+    del rules['bypass']
+    del rules['defaultAction']
     return rules
 
 

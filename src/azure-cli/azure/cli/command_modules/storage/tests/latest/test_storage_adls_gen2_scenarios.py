@@ -289,19 +289,22 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage fs service-properties show',
                          account_info).assert_with_checks(JMESPathCheck('delete_retention_policy.enabled', True),
                                                           JMESPathCheck('delete_retention_policy.days', 2))
-        time.sleep(10)
+        if self.is_live:
+            time.sleep(10)
         # soft-delete and check
         self.storage_cmd('storage fs file delete -f {} -p {} -y', account_info, container, file_name)
         self.storage_cmd('storage fs directory delete -f {} -n {} -y', account_info, container, dir_name)
         self.assertEqual(len(self.storage_cmd('storage fs file list -f {}',
                                               account_info, container).get_output_in_json()), 0)
 
-        time.sleep(60)
+        if self.is_live:
+            time.sleep(60)
         result = self.storage_cmd('storage fs list-deleted-path -f {} --path-prefix {} ',
                                   account_info, container, dir_name).get_output_in_json()
         self.assertEqual(len(result), 1)
 
-        time.sleep(60)
+        if self.is_live:
+            time.sleep(60)
         result = self.storage_cmd('storage fs list-deleted-path -f {}', account_info, container) \
             .get_output_in_json()
         self.assertEqual(len(result), 2)
@@ -512,7 +515,8 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
                          account_info, expiry, file, filesystem)
         self.storage_cmd("storage fs file exists -p {} -f {}", account_info, file, filesystem)\
             .assert_with_checks(JMESPathCheck('exists', True))
-        time.sleep(7)
+        if self.is_live:
+            time.sleep(7)
         self.storage_cmd("storage fs file exists -p {} -f {}", account_info, file, filesystem)\
             .assert_with_checks(JMESPathCheck('exists', False))
 
@@ -523,7 +527,8 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
                          account_info, expiry, file, filesystem)
         self.storage_cmd("storage fs file exists -p {} -f {}", account_info, file, filesystem) \
             .assert_with_checks(JMESPathCheck('exists', True))
-        time.sleep(7)
+        if self.is_live:
+            time.sleep(7)
         self.storage_cmd("storage fs file exists -p {} -f {}", account_info, file, filesystem) \
             .assert_with_checks(JMESPathCheck('exists', False))
 
