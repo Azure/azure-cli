@@ -940,7 +940,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_D2s_
               exclude_zones=None, align_regional_disks_to_vm_zone=None, wire_server_mode=None, imds_mode=None,
               wire_server_access_control_profile_reference_id=None, imds_access_control_profile_reference_id=None,
               key_incarnation_id=None, add_proxy_agent_extension=None, disk_iops_read_write=None,
-              disk_mbps_read_write=None, zone_movement=None):
+              disk_mbps_read_write=None, zone_movement=None,
+              os_disk_storage_fault_domain_alignment=None, data_disk_storage_fault_domain_alignment=None):
 
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
@@ -1172,7 +1173,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_D2s_
         imds_access_control_profile_reference_id=imds_access_control_profile_reference_id,
         key_incarnation_id=key_incarnation_id, add_proxy_agent_extension=add_proxy_agent_extension,
         disk_iops_read_write=disk_iops_read_write, disk_mbps_read_write=disk_mbps_read_write,
-        zone_movement=zone_movement)
+        zone_movement=zone_movement, os_disk_storage_fault_domain_alignment=os_disk_storage_fault_domain_alignment,
+        data_disk_storage_fault_domain_alignment=data_disk_storage_fault_domain_alignment)
 
     vm_resource['dependsOn'] = vm_dependencies
 
@@ -3770,7 +3772,9 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 imds_access_control_profile_reference_id=None, enable_automatic_zone_balancing=None,
                 automatic_zone_balancing_strategy=None, automatic_zone_balancing_behavior=None,
                 enable_automatic_repairs=None, zone_placement_policy=None, include_zones=None,
-                exclude_zones=None, max_zone_count=None, instance_percent_policy=None, max_instance_percent=None):
+                exclude_zones=None, max_zone_count=None, instance_percent_policy=None, max_instance_percent=None,
+                data_disk_storage_fault_domain_alignment=None, os_disk_storage_fault_domain_alignment=None,
+                zonal_platform_fault_domain_align_mode=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -4096,7 +4100,10 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             automatic_zone_balancing_behavior=automatic_zone_balancing_behavior,
             enable_automatic_repairs=enable_automatic_repairs, zone_placement_policy=zone_placement_policy,
             include_zones=include_zones, exclude_zones=exclude_zones, max_zone_count=max_zone_count,
-            instance_percent_policy=instance_percent_policy, max_instance_percent=max_instance_percent)
+            instance_percent_policy=instance_percent_policy, max_instance_percent=max_instance_percent,
+            data_disk_storage_fault_domain_alignment=data_disk_storage_fault_domain_alignment,
+            os_disk_storage_fault_domain_alignment=os_disk_storage_fault_domain_alignment,
+            zonal_platform_fault_domain_align_mode=zonal_platform_fault_domain_align_mode)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
