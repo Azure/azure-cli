@@ -823,8 +823,7 @@ def check_flex_app_after_deployment(cmd, resource_group_name, name):
         if 200 <= response.status_code <= 299:
             break
         if response.status_code == 403 and response.reason == 'Ip Forbidden':
-            logger.warning("Failed to check health due to IP restriction")
-            break
+            return "Deployment was successful but health check failed due to IP restriction."
         num_trials = num_trials + 1
 
     if response.status_code != 200:

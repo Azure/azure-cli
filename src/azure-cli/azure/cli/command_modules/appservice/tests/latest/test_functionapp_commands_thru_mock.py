@@ -12,6 +12,7 @@ from azure.cli.command_modules.appservice.custom import (
     enable_zip_deploy_functionapp,
     enable_zip_deploy,
     enable_zip_deploy_flex,
+    check_flex_app_after_deployment,
     add_remote_build_app_settings,
     remove_remote_build_app_settings,
     config_source_control,
@@ -19,6 +20,7 @@ from azure.cli.command_modules.appservice.custom import (
     update_container_settings_functionapp)
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.azclierror import (AzureInternalError, UnclassifiedUserFault)
+from azure.cli.core.azclierror import ResourceNotFoundError
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -252,6 +254,113 @@ class TestFunctionappMocked(unittest.TestCase):
         # TODO improve authorization matcher
         check_zip_deployment_status_mock.assert_called_with(cmd_mock, 'rg', 'name',
                                                             'https://mock-scm/api/deployments/latest', None)
+
+    @mock.patch('time.sleep')
+    @mock.patch('requests.get', autospec=True)
+    @mock.patch('azure.cli.core.util.should_disable_connection_verify', return_value=False)
+    @mock.patch('azure.cli.command_modules.appservice.custom.list_host_keys')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_host_url',
+                return_value='https://mock-func.azurewebsites.net')
+    def test_check_flex_app_after_deployment_success(self,
+                                                     get_host_url_mock,
+                                                     list_host_keys_mock,
+                                                     should_disable_verify_mock,
+                                                     requests_get_mock,
+                                                     sleep_mock):
+        # prepare
+        cmd_mock = _get_test_cmd()
+        list_host_keys_mock.return_value = mock.Mock(master_key='master-key')
+        response = mock.Mock(status_code=200, reason='OK')
+        requests_get_mock.return_value = response
+
+        # action
+        result = check_flex_app_after_deployment(cmd_mock, 'rg', 'name')
+
+        # assert
+        self.assertEqual(result, "Deployment was successful.")
+        requests_get_mock.assert_called_with('https://mock-func.azurewebsites.net/admin/host/status',
+                                             headers={"x-functions-key": 'master-key'},
+                                             verify=True)
+
+    @mock.patch('time.sleep')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_host_url', side_effect=ValueError())
+    def test_check_flex_app_after_deployment_host_url_fetch_failure(self,
+                                                                    get_host_url_mock,
+                                                                    sleep_mock):
+        # prepare
+        cmd_mock = _get_test_cmd()
+
+        # action
+        with self.assertRaises(ResourceNotFoundError):
+            check_flex_app_after_deployment(cmd_mock, 'rg', 'name')
+
+        # assert
+        get_host_url_mock.assert_called_once_with(cmd_mock, 'rg', 'name')
+
+    @mock.patch('time.sleep')
+    @mock.patch('azure.cli.command_modules.appservice.custom.list_host_keys', side_effect=Exception())
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_host_url',
+                return_value='https://mock-func.azurewebsites.net')
+    def test_check_flex_app_after_deployment_host_key_fetch_failure(self,
+                                                                    get_host_url_mock,
+                                                                    list_host_keys_mock,
+                                                                    sleep_mock):
+        # prepare
+        cmd_mock = _get_test_cmd()
+
+        # action
+        with self.assertRaises(ResourceNotFoundError):
+            check_flex_app_after_deployment(cmd_mock, 'rg', 'name')
+
+        # assert
+        list_host_keys_mock.assert_called_once_with(cmd_mock, 'rg', 'name')
+
+    @mock.patch('time.sleep')
+    @mock.patch('requests.get', autospec=True)
+    @mock.patch('azure.cli.core.util.should_disable_connection_verify', return_value=False)
+    @mock.patch('azure.cli.command_modules.appservice.custom.list_host_keys')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_host_url',
+                return_value='https://mock-func.azurewebsites.net')
+    def test_check_flex_app_after_deployment_ip_restriction(self,
+                                                            get_host_url_mock,
+                                                            list_host_keys_mock,
+                                                            should_disable_verify_mock,
+                                                            requests_get_mock,
+                                                            sleep_mock):
+        # prepare
+        cmd_mock = _get_test_cmd()
+        list_host_keys_mock.return_value = mock.Mock(master_key='master-key')
+        requests_get_mock.return_value = mock.Mock(status_code=403, reason='Ip Forbidden')
+
+        # action
+        result = check_flex_app_after_deployment(cmd_mock, 'rg', 'name')
+
+        # assert
+        self.assertEqual(result, "Deployment was successful but health check failed due to IP restriction.")
+
+    @mock.patch('time.sleep')
+    @mock.patch('requests.get', autospec=True)
+    @mock.patch('azure.cli.core.util.should_disable_connection_verify', return_value=False)
+    @mock.patch('azure.cli.command_modules.appservice.custom.list_host_keys')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_host_url',
+                return_value='https://mock-func.azurewebsites.net')
+    def test_check_flex_app_after_deployment_unhealthy(self,
+                                                       get_host_url_mock,
+                                                       list_host_keys_mock,
+                                                       should_disable_verify_mock,
+                                                       requests_get_mock,
+                                                       sleep_mock):
+        # prepare
+        cmd_mock = _get_test_cmd()
+        list_host_keys_mock.return_value = mock.Mock(master_key='master-key')
+        requests_get_mock.return_value = mock.Mock(status_code=500, reason='Internal Server Error')
+
+        # action
+        with self.assertRaises(CLIError):
+            check_flex_app_after_deployment(cmd_mock, 'rg', 'name')
+
+        # assert
+        self.assertEqual(requests_get_mock.call_count, 15)
 
 
     @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers')
@@ -494,7 +603,7 @@ class TestFunctionappMocked(unittest.TestCase):
         Site, DaprConfig, ResourceConfig = cmd_mock.get_models('Site', 'DaprConfig', 'ResourceConfig')
         site = Site(dapr_config=None, location='westus', name='name', resource_config=ResourceConfig())
         site_op_mock.return_value = site
-        
+
         is_centauri_functionapp_mock.return_value = True
 
         check_language_runtime_mock.return_value = True
