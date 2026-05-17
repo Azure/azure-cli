@@ -569,6 +569,8 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         local_file = self.create_temp_file(128)
         logged_in_user = self.cmd('ad signed-in-user show').get_output_in_json()
         logged_in_user = logged_in_user["id"] if logged_in_user is not None else "2146abed-b993-4a81-a6af-eda7b4524c5e"
+        current_tenant = self.cmd('account show --query tenantId').get_output_in_json()
+        current_tenant = current_tenant if current_tenant is not None else '544a7a2e-697f-487c-b2b0-a13df7f346b6'
 
         expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
 
@@ -576,8 +578,8 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
 
         blob_sas = self.cmd('storage blob generate-sas --account-name {} -n {} -c {} --expiry {} --permissions '
                             'wr --as-user --auth-mode login --user-delegation-oid '
-                            '{} --user-delegation-tid ed94de55-1f87-4278-9651-525e7ba467d6'.format(
-            storage_account, b, c, expiry, logged_in_user)).output
+                            '{} --user-delegation-tid {}'.format(
+            storage_account, b, c, expiry, logged_in_user, current_tenant)).output
         self.assertIn('&sig=', blob_sas)
         self.assertIn('skoid=', blob_sas)
         self.assertIn('sktid=', blob_sas)
@@ -594,8 +596,8 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
 
         container_sas = self.cmd('storage container generate-sas --account-name {} -n {} --expiry {} --permissions '
                                  'wr --https-only --as-user --auth-mode login --user-delegation-oid '
-                                 '{} --user-delegation-tid ed94de55-1f87-4278-9651-525e7ba467d6'.format(
-            storage_account, c, expiry, logged_in_user)).output
+                                 '{} --user-delegation-tid {}'.format(
+            storage_account, c, expiry, logged_in_user, current_tenant)).output
         self.assertIn('&sig=', container_sas)
         self.assertIn('skoid=', container_sas)
         self.assertIn('sktid=', container_sas)
