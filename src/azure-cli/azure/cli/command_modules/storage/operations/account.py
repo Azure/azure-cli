@@ -969,18 +969,19 @@ def update_file_service_properties(cmd, instance, enable_delete_retention=None,
                                    channel_encryption=None, require_smb_encryption_in_transit=None,
                                    require_nfs_encryption_in_transit=None):
     from azure.cli.core.azclierror import ValidationError
-    params = {}
+    properties = instance.file_service_properties
+
     # set delete retention policy according input
     if enable_delete_retention is not None:
         if enable_delete_retention is False:
             delete_retention_days = None
-        instance.share_delete_retention_policy = cmd.get_models('DeleteRetentionPolicy')(
+        properties.share_delete_retention_policy = cmd.get_models('DeleteRetentionPolicy')(
             enabled=enable_delete_retention, days=delete_retention_days)
 
     # If already enabled, only update days
     if enable_delete_retention is None and delete_retention_days is not None:
-        if instance.share_delete_retention_policy is not None and instance.share_delete_retention_policy.enabled:
-            instance.share_delete_retention_policy.days = delete_retention_days
+        if properties.share_delete_retention_policy is not None and properties.share_delete_retention_policy.enabled:
+            properties.share_delete_retention_policy.days = delete_retention_days
         else:
             raise ValidationError(
                 "Delete Retention Policy hasn't been enabled, and you cannot set delete retention days. "
@@ -988,43 +989,40 @@ def update_file_service_properties(cmd, instance, enable_delete_retention=None,
 
     # Fix the issue in server when delete_retention_policy.enabled=False, the returned days is 0
     # TODO: remove it when server side return null not 0 for days
-    if instance.share_delete_retention_policy is not None and instance.share_delete_retention_policy.enabled is False:
-        instance.share_delete_retention_policy.days = None
-    if instance.share_delete_retention_policy:
-        params['share_delete_retention_policy'] = instance.share_delete_retention_policy
+    if properties.share_delete_retention_policy is not None and properties.share_delete_retention_policy.enabled is False:
+        properties.share_delete_retention_policy.days = None
 
     # set protocol settings
     smbSetting = cmd.get_models('SmbSetting')
     nfsSetting = cmd.get_models('NfsSetting')
-    if not instance.protocol_settings:
-        instance.protocol_settings = cmd.get_models('ProtocolSettings')(smb=smbSetting(), nfs=nfsSetting())
+    if not properties.protocol_settings:
+        properties.protocol_settings = cmd.get_models('ProtocolSettings')(smb=smbSetting(), nfs=nfsSetting())
     else:
-        if not instance.protocol_settings.smb:
-            instance.protocol_settings.smb = smbSetting()
-        if not instance.protocol_settings.nfs:
-            instance.protocol_settings.nfs = nfsSetting()
+        if not properties.protocol_settings.smb:
+            properties.protocol_settings.smb = smbSetting()
+        if not properties.protocol_settings.nfs:
+            properties.protocol_settings.nfs = nfsSetting()
 
     if enable_smb_multichannel is not None:
-        instance.protocol_settings.smb.multichannel = cmd.get_models('Multichannel')(enabled=enable_smb_multichannel)
+        properties.protocol_settings.smb.multichannel = cmd.get_models('Multichannel')(enabled=enable_smb_multichannel)
     if versions is not None:
-        instance.protocol_settings.smb.versions = versions
+        properties.protocol_settings.smb.versions = versions
     if authentication_methods is not None:
-        instance.protocol_settings.smb.authentication_methods = authentication_methods
+        properties.protocol_settings.smb.authentication_methods = authentication_methods
     if kerberos_ticket_encryption is not None:
-        instance.protocol_settings.smb.kerberos_ticket_encryption = kerberos_ticket_encryption
+        properties.protocol_settings.smb.kerberos_ticket_encryption = kerberos_ticket_encryption
     if channel_encryption is not None:
-        instance.protocol_settings.smb.channel_encryption = channel_encryption
+        properties.protocol_settings.smb.channel_encryption = channel_encryption
     if require_smb_encryption_in_transit is not None:
-        instance.protocol_settings.smb.encryption_in_transit = (
+        properties.protocol_settings.smb.encryption_in_transit = (
             cmd.get_models('EncryptionInTransit')(required=require_smb_encryption_in_transit))
     if require_nfs_encryption_in_transit is not None:
-        instance.protocol_settings.nfs.encryption_in_transit = (
+        properties.protocol_settings.nfs.encryption_in_transit = (
             cmd.get_models('EncryptionInTransit')(required=require_nfs_encryption_in_transit))
 
-    if any(instance.protocol_settings.smb.__dict__.values()) or any(instance.protocol_settings.nfs.__dict__.values()):
-        params['protocol_settings'] = instance.protocol_settings
+    FileServiceProperties = cmd.get_models('FileServiceProperties')
 
-    return params
+    return FileServiceProperties(file_service_properties=properties)
 
 
 def create_encryption_scope(cmd, client, resource_group_name, account_name, encryption_scope_name,
@@ -1077,21 +1075,20 @@ def list_encryption_scope(client, resource_group_name, account_name,
     return result
 
 
-# pylint: disable=no-member
+# pylint: disable=no-member, line-too-long
 def create_or_policy(cmd, client, account_name, resource_group_name=None, properties=None, source_account=None,
                      destination_account=None, policy_id="default", rule_id=None, source_container=None,
                      destination_container=None, min_creation_time=None, prefix_match=None, enable_metrics=None,
                      priority_replication=None):
     from azure.core.exceptions import HttpResponseError
-    ObjectReplicationPolicy = cmd.get_models('ObjectReplicationPolicy')
+    (ObjectReplicationPolicy, ObjectReplicationPolicyRule, ObjectReplicationPolicyFilter,
+     ObjectReplicationPolicyPropertiesMetrics, ObjectReplicationPolicyPropertiesPriorityReplication) = \
+        cmd.get_models('ObjectReplicationPolicy', 'ObjectReplicationPolicyRule', 'ObjectReplicationPolicyFilter',
+                       'ObjectReplicationPolicyPropertiesMetrics',
+                       'ObjectReplicationPolicyPropertiesPriorityReplication')
 
     if properties is None:
         rules = []
-        (ObjectReplicationPolicyRule, ObjectReplicationPolicyFilter, ObjectReplicationPolicyPropertiesMetrics,
-         ObjectReplicationPolicyPropertiesPriorityReplication) = \
-            cmd.get_models('ObjectReplicationPolicyRule', 'ObjectReplicationPolicyFilter',
-                           'ObjectReplicationPolicyPropertiesMetrics',
-                           'ObjectReplicationPolicyPropertiesPriorityReplication')
         if source_container and destination_container:
             rule = ObjectReplicationPolicyRule(
                 rule_id=rule_id,
@@ -1107,7 +1104,21 @@ def create_or_policy(cmd, client, account_name, resource_group_name=None, proper
                                             priority_replication=ObjectReplicationPolicyPropertiesPriorityReplication(
                                                 enabled=priority_replication))
     else:
-        or_policy = properties
+        rules = []
+        if properties.get('rules'):
+            rules = [ObjectReplicationPolicyRule(
+                    rule_id=rule.get('ruleId'),
+                    source_container=rule.get('sourceContainer'),
+                    destination_container=rule.get('destinationContainer'),
+                    filters=ObjectReplicationPolicyFilter(prefix_match=rule.get('filters').get('prefixMatch'),
+                                                          min_creation_time=rule.get('filters').get('minCreationTime')) if rule.get('filters') else None
+                ) for rule in properties['rules']]
+        or_policy = ObjectReplicationPolicy(source_account=properties.get('sourceAccount'),
+                                            destination_account=properties.get('destinationAccount'),
+                                            rules=rules,
+                                            metrics=ObjectReplicationPolicyPropertiesMetrics(enabled=properties.get('metrics').get('enabled')),
+                                            priority_replication=ObjectReplicationPolicyPropertiesPriorityReplication(
+                                                enabled=properties.get('priorityReplication').get('enabled')))
     try:
         return client.create_or_update(resource_group_name=resource_group_name, account_name=account_name,
                                        object_replication_policy_id=policy_id, properties=or_policy)
@@ -1124,6 +1135,11 @@ def create_or_policy(cmd, client, account_name, resource_group_name=None, proper
 def update_or_policy(cmd, client, parameters, resource_group_name, account_name, object_replication_policy_id=None,
                      properties=None, source_account=None, destination_account=None, enable_metrics=None,
                      priority_replication=None):
+    (ObjectReplicationPolicy, ObjectReplicationPolicyRule, ObjectReplicationPolicyFilter,
+     ObjectReplicationPolicyPropertiesMetrics, ObjectReplicationPolicyPropertiesPriorityReplication) = \
+        cmd.get_models('ObjectReplicationPolicy', 'ObjectReplicationPolicyRule', 'ObjectReplicationPolicyFilter',
+                       'ObjectReplicationPolicyPropertiesMetrics',
+                       'ObjectReplicationPolicyPropertiesPriorityReplication')
 
     if source_account is not None:
         parameters.source_account = source_account
@@ -1131,17 +1147,30 @@ def update_or_policy(cmd, client, parameters, resource_group_name, account_name,
         parameters.destination_account = destination_account
 
     if properties is not None:
-        parameters = properties
+        rules = []
+        if properties.get('rules'):
+            rules = [ObjectReplicationPolicyRule(
+                rule_id=rule.get('ruleId'),
+                source_container=rule.get('sourceContainer'),
+                destination_container=rule.get('destinationContainer'),
+                filters=ObjectReplicationPolicyFilter(prefix_match=rule.get('filters').get('prefixMatch'),
+                                                      min_creation_time=rule.get('filters').get(
+                                                          'minCreationTime')) if rule.get('filters') else None
+            ) for rule in properties['rules']]
+        parameters = ObjectReplicationPolicy(source_account=properties.get('sourceAccount'),
+                                            destination_account=properties.get('destinationAccount'),
+                                            rules=rules,
+                                            metrics=ObjectReplicationPolicyPropertiesMetrics(
+                                                enabled=properties.get('metrics').get('enabled')),
+                                            priority_replication=ObjectReplicationPolicyPropertiesPriorityReplication(
+                                                enabled=properties.get('priorityReplication').get('enabled')))
         if "policyId" in properties.keys() and properties["policyId"]:
             object_replication_policy_id = properties["policyId"]
 
     if enable_metrics is not None:
-        ObjectReplicationPolicyPropertiesMetrics = cmd.get_models('ObjectReplicationPolicyPropertiesMetrics')
         parameters.metrics = ObjectReplicationPolicyPropertiesMetrics(enabled=enable_metrics)
 
     if priority_replication is not None:
-        ObjectReplicationPolicyPropertiesPriorityReplication = (
-            cmd.get_models('ObjectReplicationPolicyPropertiesPriorityReplication'))
         parameters.priority_replication = ObjectReplicationPolicyPropertiesPriorityReplication(enabled=priority_replication)
 
     return client.create_or_update(resource_group_name=resource_group_name, account_name=account_name,

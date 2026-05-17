@@ -13,6 +13,7 @@ from azure.cli.core.azclierror import AzureResponseError, FileOperationError
 from azure.cli.command_modules.storage.util import (filter_none, collect_blobs, collect_blob_objects,
                                                     collect_files_track2, mkdir_p, guess_content_type,
                                                     normalize_blob_file_path, check_precondition_success)
+from azure.core import MatchConditions
 from azure.core.exceptions import ResourceExistsError, ResourceModifiedError, HttpResponseError
 
 from knack.log import get_logger
@@ -46,7 +47,8 @@ def create_or_update_immutability_policy(cmd, client, container_name, account_na
                                              allow_protected_append_writes=allow_protected_append_writes,
                                              allow_protected_append_writes_all=allow_protected_append_writes_all)
     return client.create_or_update_immutability_policy(resource_group_name, account_name, container_name,
-                                                       if_match, immutability_policy)
+                                                       immutability_policy, etag=if_match,
+                                                       match_condition=MatchConditions.IfNotModified)
 
 
 def extend_immutability_policy(cmd, client, container_name, account_name, if_match,
@@ -58,7 +60,21 @@ def extend_immutability_policy(cmd, client, container_name, account_name, if_mat
                                              allow_protected_append_writes=allow_protected_append_writes,
                                              allow_protected_append_writes_all=allow_protected_append_writes_all)
     return client.extend_immutability_policy(resource_group_name, account_name, container_name,
-                                             if_match, immutability_policy)
+                                             immutability_policy, etag=if_match,
+                                             match_condition=MatchConditions.IfNotModified)
+
+
+def delete_immutability_policy(cmd, client, container_name, account_name, if_match,
+                               resource_group_name=None):
+    return client.delete_immutability_policy(resource_group_name, account_name, container_name, etag=if_match,
+                                             match_condition=MatchConditions.IfNotModified)
+
+
+def lock_immutability_policy(cmd, client, container_name, account_name, if_match,
+                             resource_group_name=None):
+    from azure.core import MatchConditions
+    return client.lock_immutability_policy(resource_group_name, account_name, container_name, etag=if_match,
+                                           match_condition=MatchConditions.IfNotModified)
 
 
 def create_container_rm(cmd, client, container_name, resource_group_name, account_name,

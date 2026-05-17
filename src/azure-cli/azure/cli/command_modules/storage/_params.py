@@ -1607,6 +1607,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                              'creation, in days.')
             c.ignore('parameters')
 
+    for item in ['delete', 'lock']:
+        with self.argument_context('storage container immutability-policy {}'.format(item)) as c:
+            c.argument('account_name',
+                       help='Storage account name. Related environment variable: AZURE_STORAGE_ACCOUNT.')
+            c.argument('if_match', help="An ETag value, or the wildcard character (*). Specify this header to perform "
+                                        "the operation only if the resource's ETag matches the value specified.")
+
     with self.argument_context('storage container list') as c:
         c.argument('num_results', arg_type=num_results_type)
 
