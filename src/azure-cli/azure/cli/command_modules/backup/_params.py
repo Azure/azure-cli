@@ -228,6 +228,8 @@ def load_arguments(self, _):
         c.argument('backup_management_type', extended_backup_management_type)
         c.argument('workload_type', workload_type)
         c.argument('use_secondary_region', action='store_true', help='Use this flag to list items in secondary region.')
+        c.argument('is_deleted', action='store_true', help='Use this flag to list only soft-deleted backup items in the vault. '
+                                                          'These items can be rehydrated using "az backup protection undelete" while still in the soft-delete retention window.')
 
     # Policy
     with self.argument_context('backup policy') as c:

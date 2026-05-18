@@ -107,9 +107,9 @@ def show_item(cmd, client, resource_group_name, vault_name, container_name, name
 
 
 def list_items(cmd, client, resource_group_name, vault_name, workload_type=None, container_name=None,
-               backup_management_type=None, use_secondary_region=None):
+               backup_management_type=None, use_secondary_region=None, is_deleted=None):
     return common.list_items(cmd, client, resource_group_name, vault_name, workload_type,
-                             container_name, backup_management_type, use_secondary_region)
+                             container_name, backup_management_type, use_secondary_region, is_deleted)
 
 
 def show_recovery_point(cmd, client, resource_group_name, vault_name, container_name, item_name, name,
