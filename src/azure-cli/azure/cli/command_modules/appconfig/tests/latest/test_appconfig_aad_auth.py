@@ -318,8 +318,8 @@ class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
                 if "Operation returned an invalid status 'Forbidden'" not in str(e):
                     raise e
 
-            # Assert that the ClientCredential was instantiated with no custom scope
-            cred_mock.assert_called_with(mock.ANY, None)
+            # Assert that the ClientCredential was instantiated with the endpoint as the token audience
+            cred_mock.assert_called_with(mock.ANY, endpoint)
 
             # Mock the get_active_cloud function to return a custom cloud with a custom token audience
             with mock.patch('azure.cli.core.cloud.get_active_cloud', new=mock_get_active_cloud):
