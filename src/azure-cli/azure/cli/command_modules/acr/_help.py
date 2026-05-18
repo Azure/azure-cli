@@ -1526,6 +1526,9 @@ examples:
   - name: Enable regional endpoints on an existing registry.
     text: >
         az acr update -n myregistry --regional-endpoints enabled
+  - name: Update the endpoint protocol for an Azure Container Registry.
+    text: >
+        az acr update -n myregistry --endpoint-protocol IPv4AndIPv6
 """
 
 helps['acr webhook'] = """
@@ -1789,6 +1792,16 @@ examples:
   - name: Remove permissions to synchronize 'repo1' images and adds permissions for 'repo2' images.
     text: >
         az acr connected-registry repo -r mycloudregistry -n myconnectedregistry --remove repo1 --add repo2
+"""
+
+helps['acr connected-registry resync'] = """
+type: command
+short-summary: Trigger a manual resync between the connected registry and its parent.
+long-summary: The connected registry agent must be online for the sync to execute. The returned syncState is typically 'Pending'; use 'az acr connected-registry show' to track progress.
+examples:
+  - name: Resync a connected registry 'myconnectedregistry'.
+    text: >
+        az acr connected-registry resync -r mycloudregistry -n myconnectedregistry
 """
 # endregion
 

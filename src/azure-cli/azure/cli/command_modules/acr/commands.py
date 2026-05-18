@@ -434,6 +434,7 @@ def load_command_table(self, _):
                   table_transformer=token_output_format)
         g.command('repo', 'acr_connected_registry_permissions_update',
                   deprecate_info=self.deprecate(redirect='permissions update', hide=True))
+        g.command('resync', 'acr_connected_registry_resync', is_preview=True)
 
     with self.command_group('acr connected-registry install', acr_connected_registry_util,
                             deprecate_info=self.deprecate(redirect='acr connected-registry get-settings',

@@ -52,7 +52,7 @@ DEPENDENCIES = [
     'distro; sys_platform == "linux"',
     'humanfriendly~=10.0',
     'jmespath',
-    'knack~=0.11.0',
+    'knack~=0.14.0',
     'microsoft-security-utilities-secret-masker~=1.0.0b4',
     'msal-extensions==1.3.1',
     'msal[broker]==1.35.1; sys_platform == "win32"',

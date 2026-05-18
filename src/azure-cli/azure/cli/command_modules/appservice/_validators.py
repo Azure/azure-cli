@@ -319,10 +319,75 @@ def _validate_ip_address_existence(cmd, namespace):
     scm_site = namespace.scm_site
     configs = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_configuration', slot)
     access_rules = configs.scm_ip_security_restrictions if scm_site else configs.ip_security_restrictions
-    ip_exists = [x.ip_address == namespace.ip_address for x in access_rules]
-    if True in ip_exists:
-        raise ArgumentUsageError('IP address: ' + namespace.ip_address + ' already exists. '
-                                 'Cannot add duplicate IP address values.')
+    new_headers = _normalize_http_headers(getattr(namespace, 'http_headers', None))
+    new_ip_set = _normalize_ip_address_list(namespace.ip_address)
+    for rule in access_rules or []:
+        if _normalize_ip_address_list(rule.ip_address) != new_ip_set:
+            continue
+        if _normalize_http_headers(rule.headers) == new_headers:
+            if not new_headers:
+                raise ArgumentUsageError(
+                    "An access-restriction rule with IP address '{}' already exists. Cannot add a "
+                    "duplicate rule. Use a different IP address, or add a --http-header filter to "
+                    "create an additional rule.".format(namespace.ip_address))
+            raise ArgumentUsageError(
+                "An access-restriction rule with IP address '{}' and the same HTTP header filter "
+                "already exists. Cannot add a duplicate rule. Use a different IP address or vary "
+                "the --http-header values to create an additional rule.".format(namespace.ip_address))
+
+
+def _normalize_ip_address_list(ip_address):
+    """Return a frozenset of canonical CIDR strings parsed from a comma-separated input.
+
+    The CLI accepts up to 8 comma-separated CIDRs in a single rule's ``--ip-address``. ARM stores
+    them in the same comma-separated form on the rule's ``ip_address`` attribute. Two rules
+    represent the same source set regardless of the order in which the CIDRs appear, so duplicate
+    detection should compare unordered sets. Returns ``frozenset()`` for missing/empty input.
+    """
+    if not ip_address:
+        return frozenset()
+    return frozenset(part.strip() for part in ip_address.split(',') if part.strip())
+
+
+def _normalize_http_headers(headers):
+    """Normalize an http-header collection for duplicate-rule comparison.
+
+    Accepts either the CLI input form (list of "name=value" strings, as supplied via --http-header)
+    or the SDK/ARM form (dict mapping header name to a list of values). Returns a dict whose keys
+    are lowercased header names and whose values are frozensets of value strings, so that order of
+    values within a single header (which ARM treats as a set) does not affect equality. None and
+    an empty collection are both normalized to an empty dict so that a rule with no headers
+    compares equal to itself regardless of representation.
+    """
+    if not headers:
+        return {}
+    result = {}
+    if isinstance(headers, dict):
+        for header_name, values in headers.items():
+            if header_name is None:
+                continue
+            normalized_name = header_name.strip().lower()
+            if values is None:
+                continue
+            if isinstance(values, str):
+                values = [values]
+            value_set = frozenset(v for v in values if v)
+            if value_set:
+                result[normalized_name] = value_set
+        return result
+    # CLI input form: list of "name=value" strings.
+    for header_str in headers:
+        if header_str is None or '=' not in header_str:
+            continue
+        header_name, _, header_value = header_str.partition('=')
+        normalized_name = header_name.strip().lower()
+        normalized_value = header_value.strip()
+        if not normalized_name or not normalized_value:
+            continue
+        existing = set(result.get(normalized_name, frozenset()))
+        existing.add(normalized_value)
+        result[normalized_name] = frozenset(existing)
+    return result
 
 
 def validate_service_tag(cmd, namespace):
@@ -369,10 +434,21 @@ def _validate_service_tag_existence(cmd, namespace):
     input_tag_value = namespace.service_tag.replace(' ', '')
     configs = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_configuration', slot)
     access_rules = configs.scm_ip_security_restrictions if scm_site else configs.ip_security_restrictions
-    for rule in access_rules:
-        if rule.ip_address and rule.ip_address.lower() == input_tag_value.lower():
-            raise ArgumentUsageError('Service Tag: ' + namespace.service_tag + ' already exists. '
-                                     'Cannot add duplicate Service Tag values.')
+    new_headers = _normalize_http_headers(getattr(namespace, 'http_headers', None))
+    for rule in access_rules or []:
+        if not rule.ip_address or rule.ip_address.lower() != input_tag_value.lower():
+            continue
+        if _normalize_http_headers(rule.headers) == new_headers:
+            if not new_headers:
+                raise ArgumentUsageError(
+                    "A service-tag access-restriction rule with value '{}' already exists. Cannot "
+                    "add a duplicate rule. Use a different service tag, or add a --http-header "
+                    "filter to create an additional rule.".format(namespace.service_tag))
+            raise ArgumentUsageError(
+                "A service-tag access-restriction rule with value '{}' and the same HTTP header "
+                "filter already exists. Cannot add a duplicate rule. Use a different service tag "
+                "or vary the --http-header values to create an additional rule.".format(
+                    namespace.service_tag))
 
 
 def validate_public_cloud(cmd):

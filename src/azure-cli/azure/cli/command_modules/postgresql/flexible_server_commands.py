@@ -334,16 +334,6 @@ def load_flexibleserver_command_table(self, _):
 
     autonomous_tuning_commands = CliCommandType(
         operations_tmpl='azure.cli.command_modules.postgresql.commands.autonomous_tuning_commands#{}')
-    with self.command_group('postgres flexible-server index-tuning', postgres_flexible_config_sdk,
-                            custom_command_type=autonomous_tuning_commands,
-                            client_factory=cf_postgres_flexible_config) as g:
-        g.custom_command('update', 'index_tuning_update')
-        g.custom_show_command('show', 'index_tuning_show')
-        g.custom_command('list-settings', 'index_tuning_settings_list')
-        g.custom_command('show-settings', 'index_tuning_settings_get')
-        g.custom_command('set-settings', 'index_tuning_settings_set')
-        g.custom_command('list-recommendations', 'index_tuning_recommendations_list')
-
     with self.command_group('postgres flexible-server autonomous-tuning', postgres_flexible_config_sdk,
                             custom_command_type=autonomous_tuning_commands,
                             client_factory=cf_postgres_flexible_config) as g:

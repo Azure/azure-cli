@@ -18,6 +18,27 @@ alias_json = """
       "type": "object",
       "value": {
         "Linux": {
+          "AzureLinux4": {
+            "publisher": "microsoftazurelinux",
+            "offer": "azurelinux-4",
+            "sku": "4",
+            "version": "latest",
+            "architecture": "x64"
+          },
+          "AzureLinux4Arm64": {
+            "publisher": "microsoftazurelinux",
+            "offer": "azurelinux-4",
+            "sku": "4-arm64",
+            "version": "latest",
+            "architecture": "Arm64"
+          },
+          "AzureLinux4Gen1": {
+            "publisher": "microsoftazurelinux",
+            "offer": "azurelinux-4",
+            "sku": "4-gen1",
+            "version": "latest",
+            "architecture": "x64"
+          },
           "CentOS85Gen2":  {
             "publisher":  "OpenLogic",
             "offer":  "CentOS",

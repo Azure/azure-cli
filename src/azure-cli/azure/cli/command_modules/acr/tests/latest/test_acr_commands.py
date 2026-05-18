@@ -797,6 +797,19 @@ class AcrCommandsTests(ScenarioTest):
 
     @ResourceGroupPreparer()
     @live_only()
+    def test_acr_with_dual_stack_endpoints(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'registry_name': self.create_random_name('testreg', 20)
+        })
+        self.cmd('acr create --name {registry_name} --resource-group {rg} --sku premium -l eastus',
+                 checks=[self.check('endpointProtocol', 'IPv4')])
+        self.cmd('acr update --name {registry_name} --resource-group {rg} --endpoint-protocol IPv4AndIPv6',
+                 checks=[self.check('endpointProtocol', 'IPv4AndIPv6')])
+        self.cmd('acr update --name {registry_name} --resource-group {rg} --endpoint-protocol IPv4',
+                 checks=[self.check('endpointProtocol', 'IPv4')])
+
+    @ResourceGroupPreparer()
+    @live_only()
     def test_acr_create_invalid_name(self, resource_group):
         from azure.cli.core.azclierror import InvalidArgumentValueError
 

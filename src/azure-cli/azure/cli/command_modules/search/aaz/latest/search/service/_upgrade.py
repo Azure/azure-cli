@@ -19,9 +19,9 @@ class Upgrade(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-05-01",
+        "version": "2026-03-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.search/searchservices/{}/upgrade", "2025-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.search/searchservices/{}/upgrade", "2026-03-01-preview"],
         ]
     }
 
@@ -137,7 +137,7 @@ class Upgrade(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-05-01",
+                    "api-version", "2026-03-01-preview",
                     required=True,
                 ),
             }
@@ -313,6 +313,46 @@ class Upgrade(AAZCommand):
                 flags={"read_only": True},
             )
             encryption_with_cmk.enforcement = AAZStrType()
+            encryption_with_cmk.service_level_encryption_key = AAZObjectType(
+                serialized_name="serviceLevelEncryptionKey",
+            )
+
+            service_level_encryption_key = cls._schema_on_200.properties.encryption_with_cmk.service_level_encryption_key
+            service_level_encryption_key.access_credentials = AAZObjectType(
+                serialized_name="accessCredentials",
+            )
+            service_level_encryption_key.identity = AAZObjectType(
+                nullable=True,
+            )
+            service_level_encryption_key.key_vault_key_name = AAZStrType(
+                serialized_name="keyVaultKeyName",
+            )
+            service_level_encryption_key.key_vault_key_version = AAZStrType(
+                serialized_name="keyVaultKeyVersion",
+            )
+            service_level_encryption_key.key_vault_uri = AAZStrType(
+                serialized_name="keyVaultUri",
+            )
+
+            access_credentials = cls._schema_on_200.properties.encryption_with_cmk.service_level_encryption_key.access_credentials
+            access_credentials.application_id = AAZStrType(
+                serialized_name="applicationId",
+            )
+            access_credentials.application_secret = AAZStrType(
+                serialized_name="applicationSecret",
+            )
+
+            identity = cls._schema_on_200.properties.encryption_with_cmk.service_level_encryption_key.identity
+            identity.odata_type = AAZStrType(
+                serialized_name="@odata.type",
+                flags={"required": True},
+            )
+            identity.federated_identity_client_id = AAZStrType(
+                serialized_name="federatedIdentityClientId",
+            )
+            identity.user_assigned_identity = AAZStrType(
+                serialized_name="userAssignedIdentity",
+            )
 
             network_rule_set = cls._schema_on_200.properties.network_rule_set
             network_rule_set.bypass = AAZStrType()

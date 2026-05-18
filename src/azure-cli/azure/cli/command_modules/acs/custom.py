@@ -1040,6 +1040,10 @@ def aks_create(
     # node provisioning
     node_provisioning_mode=None,
     node_provisioning_default_pools=None,
+    # app routing istio
+    enable_app_routing_istio=False,
+    # gateway api
+    enable_gateway_api=False,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -1235,6 +1239,12 @@ def aks_update(
     # node provisioning
     node_provisioning_mode=None,
     node_provisioning_default_pools=None,
+    # app routing istio
+    enable_app_routing_istio=False,
+    disable_app_routing_istio=False,
+    # gateway api
+    enable_gateway_api=False,
+    disable_gateway_api=False,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -3999,6 +4009,34 @@ def aks_approuting_disable(
         enable_app_routing=False)
 
 
+def aks_approuting_gateway_istio_enable(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+):
+    return _aks_approuting_update(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        enable_app_routing_istio=True)
+
+
+def aks_approuting_gateway_istio_disable(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+):
+    return _aks_approuting_update(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        disable_app_routing_istio=True)
+
+
 def aks_approuting_update(
         cmd,
         client,
@@ -4111,7 +4149,9 @@ def _aks_approuting_update(
         update_dns_zone=None,
         dns_zone_resource_ids=None,
         attach_zones=None,
-        nginx=None
+        nginx=None,
+        enable_app_routing_istio=None,
+        disable_app_routing_istio=None,
 ):
     from azure.cli.command_modules.acs.managed_cluster_decorator import AKSManagedClusterUpdateDecorator
 
@@ -4127,6 +4167,7 @@ def _aks_approuting_update(
     try:
         mc = aks_update_decorator.fetch_mc()
         mc = aks_update_decorator.update_app_routing_profile(mc)
+        mc = aks_update_decorator.update_ingress_profile_app_routing_istio(mc)
     except DecoratorEarlyExitException:
         return None
 
