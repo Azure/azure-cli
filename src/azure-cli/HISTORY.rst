@@ -46,6 +46,11 @@ Release History
 
 * Fix #33183: `az cloud set`: Typo correction on AZURE_BLEU_CLOUD active directory endpoint
 
+**Backup**
+
+* `az backup protection undelete`: Add support for rehydrating soft-deleted Azure File Share backup items (`--backup-management-type AzureStorage --workload-type AzureFileShare`)
+* `az backup item list`: Add `--is-deleted` flag to return only soft-deleted backup items in the vault
+
 **Compute**
 
 * `az sig create`: Add new argument group "Managed Service Identity" to configure the service identity of a Shared Image Gallery (SIG) (#33137)
