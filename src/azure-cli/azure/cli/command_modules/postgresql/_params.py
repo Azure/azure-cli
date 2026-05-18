@@ -97,7 +97,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         database_name_arg_type_cluster = CLIArgumentType(
             metavar='NAME',
             options_list=['--database-name', '-d'],
-            help='The default database name for an elastic cluster. Only applicable when --cluster-option is set to ElasticCluster.',
+            help='The default database name for an elastic cluster. Only applicable when --node-count is present.',
             local_context_attribute=LocalContextAttribute(
                 name='database_name',
                 actions=[LocalContextAction.GET, LocalContextAction.SET],
@@ -146,17 +146,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                  'This value can only be updated if flexible server is using Premium SSD v2 Disks.'
         )
 
-        cluster_option_arg_type = CLIArgumentType(
-            arg_type=get_enum_type(['Server', 'ElasticCluster']),
-            options_list=['--cluster-option'],
-            help='Cluster option for the server. Servers are for workloads that can fit on one node. '
-                 'Elastic clusters provides schema- and row-based sharding on a database. Default value is Server.'
-        )
-
         create_node_count_arg_type = CLIArgumentType(
             type=int,
             options_list=['--node-count'],
-            help='The number of nodes for elastic cluster. Default is 2 nodes.'
+            help='The number of nodes for elastic cluster.'
         )
 
         update_node_count_arg_type = CLIArgumentType(
@@ -407,7 +400,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('iops', default=None, arg_type=iops_v2_arg_type)
             c.argument('throughput', default=None, arg_type=throughput_arg_type)
             c.argument('performance_tier', default=None, arg_type=performance_tier_arg_type)
-            c.argument('create_cluster', default='Server', arg_type=cluster_option_arg_type)
             c.argument('cluster_size', default=None, arg_type=create_node_count_arg_type)
             c.argument('zonal_resiliency', arg_type=zonal_resiliency_arg_type, default="Disabled")
             c.argument('allow_same_zone', arg_type=allow_same_zone_arg_type, default=False)
@@ -750,36 +742,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         for scope in ['list', 'show']:
             with self.argument_context('{} flexible-server private-link-resource {}'.format(command_group, scope)) as c:
                 c.argument('server_name', arg_type=server_name_resource_arg_type)
-
-        # index tuning
-        for scope in ['update', 'show', 'list-settings', 'show-settings', 'set-settings', 'list-recommendations']:
-            argument_context_string = '{} flexible-server index-tuning {}'.format(command_group, scope)
-            with self.argument_context(argument_context_string) as c:
-                c.argument('server_name', arg_type=server_name_resource_arg_type)
-
-        with self.argument_context('{} flexible-server index-tuning update'.format(command_group)) as c:
-            c.argument('index_tuning_enabled',
-                       options_list=['--enabled'],
-                       required=True,
-                       help='Enable or disable index tuning feature.',
-                       arg_type=get_enum_type(['True', 'False']))
-
-        with self.argument_context('{} flexible-server index-tuning list-recommendations'.format(command_group)) as c:
-            c.argument('recommendation_type',
-                       options_list=['--recommendation-type', '-r'],
-                       help='Retrieve recommendations based on type.',
-                       arg_type=get_enum_type(['CreateIndex', 'DropIndex', 'ReIndex']))
-
-            for scope in ['show-settings', 'set-settings']:
-                argument_context_string = '{} flexible-server index-tuning {}'.format(command_group, scope)
-                with self.argument_context(argument_context_string) as c:
-                    c.argument('setting_name', options_list=['--name', '-n'], required=True,
-                               arg_type=get_enum_type(get_autonomous_tuning_settings_map().keys()),
-                               help='The name of the tuning setting.')
-
-            with self.argument_context('{} flexible-server index-tuning set-settings'.format(command_group)) as c:
-                c.argument('value', options_list=['--value', '-v'],
-                           help='Value of the tuning setting.')
 
         # autonomous tuning
         for scope in ['update', 'show', 'list-settings', 'show-settings', 'set-settings', 'list-table-recommendations', 'list-index-recommendations']:

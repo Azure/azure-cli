@@ -861,41 +861,6 @@ def _audit_policy_validate_arguments(
         raise CLIError('event-hub-authorization-rule-id must be specified if event-hub-target-state is enabled')
 
 
-def _get_diagnostic_settings_url(
-        cmd,
-        resource_group_name,
-        workspace_name,
-        sql_pool_name=None):
-
-    from azure.cli.core.commands.client_factory import get_subscription_id
-
-    diag_settings = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Synapse/workspaces/{}'.format(
-        get_subscription_id(cmd.cli_ctx),
-        resource_group_name, workspace_name)
-
-    if sql_pool_name is not None:
-        diag_settings = diag_settings + '/sqlpools/{}'.format(sql_pool_name)
-
-    return diag_settings
-
-
-def _get_diagnostic_settings(
-        cmd,
-        resource_group_name,
-        workspace_name,
-        sql_pool_name=None):
-    '''
-    Common code to get server or database diagnostic settings
-    '''
-
-    diagnostic_settings_url = _get_diagnostic_settings_url(
-        cmd=cmd, resource_group_name=resource_group_name,
-        workspace_name=workspace_name, sql_pool_name=sql_pool_name)
-    azure_monitor_client = cf_monitor(cmd.cli_ctx)
-
-    return list(azure_monitor_client.diagnostic_settings.list(diagnostic_settings_url))
-
-
 def workspace_audit_policy_show(
         cmd,
         client,

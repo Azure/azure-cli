@@ -181,10 +181,14 @@ def convert_show_result_to_snake_case(result):
         new_result["constrained_maximum_capacity"] = result["constrainedMaximumCapacity"]
     if "doNotRunExtensionsOnOverprovisionedVMs" in result:
         new_result["do_not_run_extensions_on_overprovisioned_v_ms"] = result["doNotRunExtensionsOnOverprovisionedVMs"]
+    if "externalHealthPolicy" in result:
+        new_result["external_health_policy"] = result["externalHealthPolicy"]
     if "highSpeedInterconnectPlacement" in result:
         new_result["high_speed_interconnect_placement"] = result["highSpeedInterconnectPlacement"]
     if "hostGroup" in result:
         new_result["host_group"] = result["hostGroup"]
+    if "lifecycleHooksProfile" in result:
+        new_result["lifecycle_hooks_profile"] = result["lifecycleHooksProfile"]
     if "orchestrationMode" in result:
         new_result["orchestration_mode"] = result["orchestrationMode"]
     if "overprovision" in result:
@@ -235,6 +239,28 @@ def convert_show_result_to_snake_case(result):
         automatic_repairs_policy["repair_action"] = automatic_repairs_policy["repairAction"]
         automatic_repairs_policy.pop("repairAction")
 
+    external_health_policy = new_result.get("external_health_policy", {}) or {}
+    if "expiryDuration" in external_health_policy:
+        external_health_policy["expiry_duration"] = external_health_policy["expiryDuration"]
+        external_health_policy.pop("expiryDuration")
+    if "gracePeriod" in external_health_policy:
+        external_health_policy["grace_period"] = external_health_policy["gracePeriod"]
+        external_health_policy.pop("gracePeriod")
+
+    lifecycle_hooks_profile = new_result.get("lifecycle_hooks_profile", {}) or {}
+    if "lifecycleHooks" in lifecycle_hooks_profile:
+        lifecycle_hooks_profile["lifecycle_hooks"] = lifecycle_hooks_profile["lifecycleHooks"]
+        lifecycle_hooks_profile.pop("lifecycleHooks")
+
+    lifecycle_hooks = lifecycle_hooks_profile.get("lifecycle_hooks", [])
+    for lifecycle_hook in lifecycle_hooks:
+        if "defaultAction" in lifecycle_hook:
+            lifecycle_hook["default_action"] = lifecycle_hook["defaultAction"]
+            lifecycle_hook.pop("defaultAction")
+        if "waitDuration" in lifecycle_hook:
+            lifecycle_hook["wait_duration"] = lifecycle_hook["waitDuration"]
+            lifecycle_hook.pop("waitDuration")
+
     priority_mix_policy = new_result.get("priority_mix_policy", {}) or {}
     if "baseRegularPriorityCount" in priority_mix_policy:
         priority_mix_policy["base_regular_priority_count"] = priority_mix_policy["baseRegularPriorityCount"]
@@ -247,6 +273,9 @@ def convert_show_result_to_snake_case(result):
     if "automaticZoneRebalancingPolicy" in resiliency_policy:
         resiliency_policy["automatic_zone_rebalancing_policy"] = resiliency_policy["automaticZoneRebalancingPolicy"]
         resiliency_policy.pop("automaticZoneRebalancingPolicy")
+    if "operationRecoverySettings" in resiliency_policy:
+        resiliency_policy["operation_recovery_settings"] = resiliency_policy["operationRecoverySettings"]
+        resiliency_policy.pop("operationRecoverySettings")
     if "resilientVMCreationPolicy" in resiliency_policy:
         resiliency_policy["resilient_vm_creation_policy"] = resiliency_policy["resilientVMCreationPolicy"]
         resiliency_policy.pop("resilientVMCreationPolicy")
@@ -264,6 +293,17 @@ def convert_show_result_to_snake_case(result):
     if "rebalanceStrategy" in automatic_zone_rebalancing_policy:
         automatic_zone_rebalancing_policy["rebalance_strategy"] = automatic_zone_rebalancing_policy["rebalanceStrategy"]
         automatic_zone_rebalancing_policy.pop("rebalanceStrategy")
+
+    operation_recovery_settings = resiliency_policy.get("operation_recovery_settings", {}) or {}
+    if "reimageRecoveryPolicy" in operation_recovery_settings:
+        operation_recovery_settings["reimage_recovery_policy"] = operation_recovery_settings["reimageRecoveryPolicy"]
+        operation_recovery_settings.pop("reimageRecoveryPolicy")
+    if "restartRecoveryPolicy" in operation_recovery_settings:
+        operation_recovery_settings["restart_recovery_policy"] = operation_recovery_settings["restartRecoveryPolicy"]
+        operation_recovery_settings.pop("restartRecoveryPolicy")
+    if "startRecoveryPolicy" in operation_recovery_settings:
+        operation_recovery_settings["start_recovery_policy"] = operation_recovery_settings["startRecoveryPolicy"]
+        operation_recovery_settings.pop("startRecoveryPolicy")
 
     zone_allocation_policy = resiliency_policy.get("zone_allocation_policy", {}) or {}
     if "maxInstancePercentPerZonePolicy" in zone_allocation_policy:
@@ -892,6 +932,9 @@ def convert_show_result_to_snake_case(result):
         if "managedDisk" in data_disk:
             data_disk["managed_disk"] = data_disk["managedDisk"]
             data_disk.pop("managedDisk")
+        if "storageFaultDomainAlignment" in data_disk:
+            data_disk["storage_fault_domain_alignment"] = data_disk["storageFaultDomainAlignment"]
+            data_disk.pop("storageFaultDomainAlignment")
         if "writeAcceleratorEnabled" in data_disk:
             data_disk["write_accelerator_enabled"] = data_disk["writeAcceleratorEnabled"]
             data_disk.pop("writeAcceleratorEnabled")
@@ -945,6 +988,9 @@ def convert_show_result_to_snake_case(result):
     if "vhdContainers" in os_disk:
         os_disk["vhd_containers"] = os_disk["vhdContainers"]
         os_disk.pop("vhdContainers")
+    if "storageFaultDomainAlignment" in os_disk:
+        os_disk["storage_fault_domain_alignment"] = os_disk["storageFaultDomainAlignment"]
+        os_disk.pop("storageFaultDomainAlignment")
     if "writeAcceleratorEnabled" in os_disk:
         os_disk["write_accelerator_enabled"] = os_disk["writeAcceleratorEnabled"]
         os_disk.pop("writeAcceleratorEnabled")

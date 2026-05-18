@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.breaking_change import (
-    NextBreakingChangeWindow,
     register_argument_deprecate,
     register_command_group_deprecate,
     register_other_breaking_change
@@ -40,23 +39,10 @@ for network_command in (
 register_argument_deprecate('postgres flexible-server create', '--high-availability', redirect='--zonal-resiliency')
 register_argument_deprecate('postgres flexible-server update', '--high-availability', redirect='--zonal-resiliency')
 
-# Index Tuning command group renamed to Autonomous Tuning as the feature has expanded to
-# include more types of recommendations beyond just index tuning
-register_command_group_deprecate(command_group='postgres flexible-server index-tuning',
-                                 redirect='postgres flexible-server autonomous-tuning',
-                                 message='Index tuning feature has now expanded its capabilities to support '
-                                 'other automatically generated recommendations which are covered by the '
-                                 'new command.')
-
 # Long term retention command group deprecated with no redirect as the functionality will be removed in the future
 register_command_group_deprecate(command_group='postgres flexible-server long-term-retention',
                                  message='Long term retention command group will be removed. '
                                  'For more information, open a support incident.')
-
-# Name of new backup no longer required in backup create command
-register_other_breaking_change('postgres flexible-server backup create',
-                               message='The argument for backup name will no longer be required '
-                               'in next breaking change release(2.86.0) scheduled for May 2026.')
 
 # LTR command argument changes
 register_other_breaking_change('postgres flexible-server long-term-retention',
@@ -105,12 +91,3 @@ register_other_breaking_change('postgres flexible-server migration',
 
 # Replica command argument changes
 register_argument_deprecate('postgres flexible-server replica create', '--replica-name', redirect='--name')
-
-# Elastic cluster command argument deprecated and will be removed in the future. Today,
-# users must specify both --cluster-option ElasticCluster and --node-count to create an
-# elastic cluster. In the future, providing --node-count alone will imply an elastic cluster.
-register_argument_deprecate(command='postgres flexible-server create', argument='--cluster-option',
-                            message='Currently, to create an elastic cluster you must specify '
-                            '--cluster-option ElasticCluster together with --node-count. In the '
-                            'future, providing --node-count alone will imply an elastic cluster.',
-                            target_version=NextBreakingChangeWindow())
