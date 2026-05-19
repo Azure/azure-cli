@@ -28,4 +28,3 @@ register_command_group_deprecate(command_group='acr helm', redirect='Helm v3 com
                                  target_version='Sept 30th, 2025')
 
 register_command_group_deprecate(command_group='acr config content-trust', message=content_trust_bc_msg)
-
