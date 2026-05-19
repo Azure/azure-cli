@@ -5288,8 +5288,11 @@ def delete_vmss_extension(cmd, resource_group_name, vmss_name, extension_name):
 
     vmss = get_vmss_by_aaz(cmd, resource_group_name, vmss_name)
     # Avoid unnecessary permission error
-    if vmss.get('virtualMachineProfile', {}).get('storageProfile', {}):
-        vmss['virtualMachineProfile']['storageProfile']['imageReference'] = None
+    if not vmss.get('virtualMachineProfile', {}):
+        vmss['virtualMachineProfile'] = {}
+    if not vmss.get('virtualMachineProfile', {}).get('storageProfile', {}):
+        vmss['virtualMachineProfile']['storageProfile'] = {}
+    vmss['virtualMachineProfile']['storageProfile']['imageReference'] = None
     # pylint: disable=no-member
     if not vmss.get('virtualMachineProfile', {}).get('extensionProfile'):
         raise CLIError('Scale set has no extensions to delete')
