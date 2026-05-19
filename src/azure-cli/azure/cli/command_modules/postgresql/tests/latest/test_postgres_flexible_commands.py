@@ -137,11 +137,11 @@ class PostgreSQLFlexibleServerMgmtScenarioTest(ScenarioTest):
         # Negative tests
         replica_1_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
 
-        self.cmd('postgres flexible-server replica create -g "" --replica-name {} --source-server {}'.format(
+        self.cmd('postgres flexible-server replica create -g "" --name {} --source-server {}'.format(
                         replica_1_name,
                         server_name
             ), expect_failure=True)
-        self.cmd('postgres flexible-server replica create -g \'\' --replica-name {} --source-server {}'.format(
+        self.cmd('postgres flexible-server replica create -g \'\' --name {} --source-server {}'.format(
                         replica_1_name,
                         server_name
             ), expect_failure=True)

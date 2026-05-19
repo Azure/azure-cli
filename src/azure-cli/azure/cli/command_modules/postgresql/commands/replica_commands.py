@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
-from azure.cli.core.azclierror import MutuallyExclusiveArgumentError, RequiredArgumentMissingError, ValidationError
+from azure.cli.core.azclierror import RequiredArgumentMissingError, ValidationError
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.core.exceptions import ResourceNotFoundError
@@ -37,11 +37,9 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
                             storage_gb=None, performance_tier=None, yes=False, tags=None):
     validate_resource_group(resource_group_name)
 
-    if replica_name is None and name is None:
+    if name is None:
         raise RequiredArgumentMissingError('the following arguments are required: --name')
-    if replica_name is not None and name is not None:
-        raise MutuallyExclusiveArgumentError('usage error: --name and --replica-name cannot be used together. Please use --name.')
-    replica_name = replica_name.lower() if name is None else name.lower()
+    replica_name = name.lower()
 
     if not is_valid_resource_id(source_server):
         if _is_resource_name(source_server):

@@ -46,26 +46,26 @@ class MigrationScenarioTest(ScenarioTest):
         print(target_subscription_id)
 
         # Test check migration name availability -success
-        result = self.cmd('postgres flexible-server migration check-name-availability --subscription {} --resource-group {} --name {} --migration-name {} '
+        result = self.cmd('postgres flexible-server migration check-name-availability --subscription {} --resource-group {} --server-name {} --name {} '
                           .format(target_subscription_id, target_resource_group_name, target_server_name, migration_name),
                           checks=[JMESPathCheck('nameAvailable', True)]).get_output_in_json()
 
         # Test create migration - success
-        result = self.cmd('postgres flexible-server migration create --subscription {} --resource-group {} --name {} --migration-name {} --properties {} '
+        result = self.cmd('postgres flexible-server migration create --subscription {} --resource-group {} --server-name {} --name {} --properties {} '
                           .format(target_subscription_id, target_resource_group_name, target_server_name, migration_name, properties_filepath),
                           checks=[JMESPathCheck('migrationMode', "Offline")]).get_output_in_json()
         migration_name = result['name']
 
         # Test list migrations - success, with filter
-        result = self.cmd('postgres flexible-server migration list --subscription {} --resource-group {} --name {} --filter Active'
+        result = self.cmd('postgres flexible-server migration list --subscription {} --resource-group {} --server-name {} --filter Active'
                           .format(target_subscription_id, target_resource_group_name, target_server_name)).get_output_in_json()
 
         # Test list migrations - success, without filter
-        result = self.cmd('postgres flexible-server migration list --subscription {} --resource-group {} --name {}'
+        result = self.cmd('postgres flexible-server migration list --subscription {} --resource-group {} --server-name {}'
                           .format(target_subscription_id, target_resource_group_name, target_server_name)).get_output_in_json()
 
         # Test show migration - success
-        result = self.cmd('postgres flexible-server migration show --subscription {} --resource-group {} --name {} --migration-name {}'
+        result = self.cmd('postgres flexible-server migration show --subscription {} --resource-group {} --server-name {} --name {}'
                           .format(target_subscription_id, target_resource_group_name, target_server_name, migration_name)).get_output_in_json()
 
         self.assertEqual(result['name'], migration_name)
@@ -74,7 +74,7 @@ class MigrationScenarioTest(ScenarioTest):
         self.assertEqual(result['sslMode'], "VerifyFull")
 
         # Test update migration - error - no param
-        result = self.cmd('postgres flexible-server migration update --subscription {} --resource-group {} --name {} --migration-name {}'
+        result = self.cmd('postgres flexible-server migration update --subscription {} --resource-group {} --server-name {} --name {}'
                           .format(target_subscription_id, target_resource_group_name, target_server_name, migration_name), expect_failure=True)
 
     def _test_server_migration_onpremise(self, validateOnly=False, migration_name=None):
@@ -102,12 +102,12 @@ class MigrationScenarioTest(ScenarioTest):
         print(target_subscription_id)
 
         # Test check migration name availability -success
-        self.cmd('postgres flexible-server migration check-name-availability --subscription {} --resource-group {} --name {} --migration-name {} '
+        self.cmd('postgres flexible-server migration check-name-availability --subscription {} --resource-group {} --server-name {} --name {} '
                  .format(target_subscription_id, target_resource_group_name, target_server_name, migration_name),
                  checks=[JMESPathCheck('nameAvailable', True)]).get_output_in_json()
 
         # Test create migration - success
-        result = self.cmd('postgres flexible-server migration create --subscription {} --resource-group {} --name {} --migration-name {} --properties {} --migration-option {}'
+        result = self.cmd('postgres flexible-server migration create --subscription {} --resource-group {} --server-name {} --name {} --properties {} --migration-option {}'
                           .format(target_subscription_id, target_resource_group_name, target_server_name, migration_name, properties_filepath, migration_option),
                           checks=[JMESPathCheck('migrationMode', "Offline"),
                                   JMESPathCheck('migrationOption', migration_option),
@@ -116,7 +116,7 @@ class MigrationScenarioTest(ScenarioTest):
         migration_name = result['name']
 
         # Test show migration - success
-        result = self.cmd('postgres flexible-server migration show --subscription {} --resource-group {} --name {} --migration-name {}'
+        result = self.cmd('postgres flexible-server migration show --subscription {} --resource-group {} --server-name {} --name {}'
                           .format(target_subscription_id, target_resource_group_name, target_server_name, migration_name)).get_output_in_json()
 
         self.assertEqual(result['name'], migration_name)
