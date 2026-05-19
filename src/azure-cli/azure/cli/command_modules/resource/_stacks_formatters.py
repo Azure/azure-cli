@@ -497,9 +497,9 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
 
         if before_type == after_type:
             return before_type
-        if after_type is not type(None):
+        if after_type is not type(None):  # pylint: disable=unidiomatic-typecheck
             return after_type
-        if before_type is not type(None):
+        if before_type is not type(None):  # pylint: disable=unidiomatic-typecheck
             return before_type
 
         return None
