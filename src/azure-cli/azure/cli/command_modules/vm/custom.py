@@ -5283,8 +5283,7 @@ def detach_disk_from_vmss(cmd, resource_group_name, vmss_name, lun, instance_id=
 
 # region VirtualMachineScaleSets Extensions
 def delete_vmss_extension(cmd, resource_group_name, vmss_name, extension_name):
-    from .aaz.latest.vmss import Update as VMSSUpdate
-    from .operations.vmss import convert_show_result_to_snake_case
+    from .operations.vmss import convert_show_result_to_snake_case, VMSSCreate
 
     vmss = get_vmss_by_aaz(cmd, resource_group_name, vmss_name)
     # Avoid unnecessary permission error
@@ -5313,7 +5312,7 @@ def delete_vmss_extension(cmd, resource_group_name, vmss_name, extension_name):
     vmss['resource_group'] = resource_group_name
     vmss['vm_scale_set_name'] = vmss_name
 
-    return VMSSUpdate(cli_ctx=cmd.cli_ctx)(command_args=vmss)
+    return VMSSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss)
 
 
 # pylint: disable=inconsistent-return-statements
