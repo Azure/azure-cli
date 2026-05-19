@@ -1612,8 +1612,9 @@ def _add_single_access_restriction(cmd, resource_group, name, restriction, scm_s
     action = restriction.get('action', 'Allow')
     description = restriction.get('description')
     tag = restriction.get('tag', 'Default')
-    ip_address = restriction.get('ip_address')
-    subnet_id = restriction.get('vnet_subnet_resource_id')
+    # as_dict() returns camelCase keys matching the REST API
+    ip_address = restriction.get('ipAddress') or restriction.get('ip_address')
+    subnet_id = restriction.get('vnetSubnetResourceId') or restriction.get('vnet_subnet_resource_id')
     headers = restriction.get('headers')
 
     if not ip_address and not subnet_id:
@@ -8913,8 +8914,9 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                 functionapp_def.properties = SiteProperties()
             functionapp_def.properties.function_app_config = function_app_config
             functionapp_def.properties.sku = "FlexConsumption"
-            poller = client.web_apps.begin_create_or_update(resource_group_name, name, functionapp_def,
-                                                            api_version='2023-12-01')
+            # Use a client with specific API version for flex consumption
+            flex_client = web_client_factory(cmd.cli_ctx, api_version='2025-05-01')
+            poller = flex_client.web_apps.begin_create_or_update(resource_group_name, name, functionapp_def)
             functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
         except Exception as ex:  # pylint: disable=broad-except
             client.app_service_plans.delete(resource_group_name, plan_name)

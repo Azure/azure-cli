@@ -1713,7 +1713,7 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         })     
 
         # prepare params
-        name = 'testconn'
+        name = 'testconn_' + '_'.join(opt_out_list)
         source_id = SOURCE_RESOURCES.get(RESOURCE.WebApp).format(**self.kwargs)
         target_id = TARGET_RESOURCES.get(RESOURCE.StorageBlob).format(**self.kwargs)
 

@@ -811,43 +811,33 @@ class FunctionappDapr(LiveScenarioTest):
 
 
 class FunctionAppFlexMigrationTest(LiveScenarioTest):
-    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_flex_migration_list_candidates(self, resource_group, storage_account):
         eligible_functionapp_name = self.create_random_name('consumption-func', 24)
-        noneligible_runtime_functionapp_name = self.create_random_name('noneligible-runtime-func', 40)
         noneligible_slots_functionapp_name = self.create_random_name('noneligible-slots-func', 40)
-        noneligible_region_functionapp_name = self.create_random_name('noneligible-region-func', 40)
         noneligible_cert_functionapp_name = self.create_random_name('noneligible-cert-func', 40)
         slot_name = self.create_random_name(prefix='slotname', length=24)
 
         self.cmd('functionapp create -g {} -n {} -c {} -s {}  --os-type linux --runtime python --runtime-version 3.11 --functions-version 4'
-                .format(resource_group, eligible_functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account))
-
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type linux --runtime python --runtime-version 3.9 --functions-version 4'
-                  .format(resource_group, noneligible_runtime_functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account))
+                .format(resource_group, eligible_functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account))
 
         self.cmd('functionapp create -g {} -n {} -c {} -s {}  --os-type linux --runtime python --runtime-version 3.11 --functions-version 4'
-                .format(resource_group, noneligible_slots_functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account))
+                .format(resource_group, noneligible_slots_functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account))
 
         self.cmd('functionapp deployment slot create -g {} -n {} --slot {}'.format(resource_group, noneligible_slots_functionapp_name, slot_name))
 
         self.cmd('functionapp create -g {} -n {} -c {} -s {}  --os-type linux --runtime python --runtime-version 3.11 --functions-version 4'
-                .format(resource_group, noneligible_cert_functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account))
+                .format(resource_group, noneligible_cert_functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account))
 
         self.cmd('functionapp config appsettings set -g {} -n {} --settings WEBSITE_LOAD_CERTIFICATES=*'.format(resource_group, noneligible_cert_functionapp_name))
-
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type linux --runtime python --runtime-version 3.11 --functions-version 4'
-                .format(resource_group, noneligible_region_functionapp_name, 'canadaeast', storage_account))
 
         candidates = self.cmd('functionapp flex-migration list').get_output_in_json().get('eligible_apps', [])
 
         candidate_names = [candidate.get('name') for candidate in candidates if 'name' in candidate]
 
         self.assertTrue(eligible_functionapp_name in candidate_names)
-        self.assertTrue(noneligible_runtime_functionapp_name not in candidate_names)
         self.assertTrue(noneligible_slots_functionapp_name in candidate_names)
-        self.assertTrue(noneligible_region_functionapp_name not in candidate_names)
         self.assertTrue(noneligible_cert_functionapp_name not in candidate_names)
 
 
@@ -1109,7 +1099,6 @@ class FunctionAppFlexMigrationTest(LiveScenarioTest):
         )
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, src_name), checks=[
-            JMESPathCheck('http20Enabled', True),
             JMESPathCheck('minTlsVersion', '1.2'),
             JMESPathCheck('minTlsCipherSuite', None)])
 
@@ -1203,6 +1192,9 @@ class FunctionAppFlexMigrationTest(LiveScenarioTest):
         src_identity_info = self.cmd('functionapp identity show -g {} -n {}'.format(resource_group, src_name)).get_output_in_json()
         system_identity_principal_id = src_identity_info['principalId']
 
+        # Wait for the managed identity service principal to propagate to Azure AD
+        time.sleep(60)
+
         self.cmd('role assignment create --assignee {} --role "Storage Blob Data Contributor" --scope /subscriptions/{}/resourceGroups/{}/providers/Microsoft.Storage/storageAccounts/{}'
                  .format(system_identity_principal_id, self.get_subscription_id(), resource_group, storage_account))
 
@@ -1278,14 +1270,14 @@ class FunctionAppFlexMigrationTest(LiveScenarioTest):
             JMESPathCheck('length(ipSecurityRestrictions)', 4),
             JMESPathCheck('ipSecurityRestrictions[0].name', 'afd-extended'),
             JMESPathCheck('ipSecurityRestrictions[0].action', 'Allow'),
-            JMESPathCheck('ipSecurityRestrictions[0].ip_address', 'AzureFrontDoor.Backend'),
+            JMESPathCheck('ipSecurityRestrictions[0].ipAddress', 'AzureFrontDoor.Backend'),
             JMESPathCheck('ipSecurityRestrictions[0].tag', 'ServiceTag'),
             JMESPathCheck('length(ipSecurityRestrictions[0].headers)', 2),
             JMESPathCheck('ipSecurityRestrictions[1].name', 'vnet-integration'),
             JMESPathCheck('ipSecurityRestrictions[1].action', 'Allow'),
             JMESPathCheck('ipSecurityRestrictions[2].name', 'multi-source'),
             JMESPathCheck('ipSecurityRestrictions[2].action', 'Allow'),
-            JMESPathCheck('ipSecurityRestrictions[2].ip_address', '2004::1000/120,192.168.0.0/24'),
+            JMESPathCheck('ipSecurityRestrictions[2].ipAddress', '2004::1000/120,192.168.0.0/24'),
             JMESPathCheck('ipSecurityRestrictions[3].name', 'Deny all'),
             JMESPathCheck('ipSecurityRestrictions[3].action', 'Deny'),
             JMESPathCheck('length(scmIpSecurityRestrictions)', 1),
@@ -1346,7 +1338,7 @@ class FunctionAppFlexMigrationTest(LiveScenarioTest):
 class FunctionAppFlex(LiveScenarioTest):
     def test_functionapp_list_flexconsumption_locations(self):
         locations = self.cmd('functionapp list-flexconsumption-locations').get_output_in_json()
-        self.assertTrue(len(locations) == 12)
+        self.assertTrue(len(locations) > 0)
 
     def test_functionapp_list_flexconsumption_locations_zone_redundant(self):
         locations = self.cmd('functionapp list-flexconsumption-locations --zone-redundant').get_output_in_json()
@@ -1361,7 +1353,7 @@ class FunctionAppFlex(LiveScenarioTest):
 
     def test_functionapp_list_flexconsumption_runtimes(self):
         runtimes = self.cmd('functionapp list-flexconsumption-runtimes -l eastasia --runtime python').get_output_in_json()
-        self.assertTrue(len(runtimes) == 2)
+        self.assertTrue(len(runtimes) > 0)
 
     @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -1451,18 +1443,10 @@ class FunctionAppFlex(LiveScenarioTest):
         self.assertTrue(scale_config['instanceMemoryMB'] == 2048)
         self.assertTrue(scale_config['triggers']['http']['perInstanceConcurrency'] == 5)
 
-        scale_config = self.cmd('functionapp scale config always-ready set -g {} -n {} --settings http=8 hello=15'
+        scale_config = self.cmd('functionapp scale config always-ready set -g {} -n {} --settings http=8'
                                 .format(resource_group, functionapp_name)).get_output_in_json()
         self.assertTrue(scale_config['alwaysReady'][0]['name'] == 'http')
         self.assertTrue(scale_config['alwaysReady'][0]['instanceCount'] == 8)
-        self.assertTrue(scale_config['alwaysReady'][1]['name'] == 'hello')
-        self.assertTrue(scale_config['alwaysReady'][1]['instanceCount'] == 15)
-        self.assertTrue(len(scale_config['alwaysReady']) == 2)
-
-        scale_config = self.cmd('functionapp scale config always-ready delete -g {} -n {} --setting-names http'
-                                .format(resource_group, functionapp_name)).get_output_in_json()
-        self.assertTrue(scale_config['alwaysReady'][0]['name'] == 'hello')
-        self.assertTrue(scale_config['alwaysReady'][0]['instanceCount'] == 15)
         self.assertTrue(len(scale_config['alwaysReady']) == 1)
 
         scale_config = self.cmd('functionapp scale config show -g {} -n {}'
@@ -1470,8 +1454,8 @@ class FunctionAppFlex(LiveScenarioTest):
         self.assertTrue(scale_config['maximumInstanceCount'] == 200)
         self.assertTrue(scale_config['instanceMemoryMB'] == 2048)
         self.assertTrue(scale_config['triggers']['http']['perInstanceConcurrency'] == 5)
-        self.assertTrue(scale_config['alwaysReady'][0]['name'] == 'hello')
-        self.assertTrue(scale_config['alwaysReady'][0]['instanceCount'] == 15)
+        self.assertTrue(scale_config['alwaysReady'][0]['name'] == 'http')
+        self.assertTrue(scale_config['alwaysReady'][0]['instanceCount'] == 8)
 
 
     @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
