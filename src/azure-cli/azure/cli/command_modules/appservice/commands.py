@@ -40,6 +40,14 @@ def transform_web_list_output(webs):
     return [transform_web_output(w) for w in webs]
 
 
+def transform_runtime_list_output(result):
+    from collections import OrderedDict
+    return [OrderedDict([
+        ('OS', r['os']), ('Runtime', r['runtime']), ('Version', r['version']),
+        ('Config', r['config']), ('Support', r['support']), ('End of Life', r['end_of_life'])
+    ]) for r in result]
+
+
 def ex_handler_factory(creating_plan=False):
     def _ex_handler(ex):
         ex = _polish_bad_errors(ex, creating_plan)
@@ -133,7 +141,7 @@ def load_command_table(self, _):
         g.custom_command('restart', 'restart_webapp')
         g.custom_command('browse', 'view_in_browser')
         g.custom_command('list-instances', 'list_instances')
-        g.custom_command('list-runtimes', 'list_runtimes')
+        g.custom_command('list-runtimes', 'list_runtimes', table_transformer=transform_runtime_list_output)
         g.custom_command('identity assign', 'assign_identity')
         g.custom_show_command('identity show', 'show_identity')
         g.custom_command('identity remove', 'remove_identity')
@@ -245,6 +253,10 @@ def load_command_table(self, _):
     with self.command_group('webapp log deployment') as g:
         g.custom_show_command('show', 'show_deployment_log')
         g.custom_command('list', 'list_deployment_logs')
+
+    with self.command_group('webapp log startup', is_preview=True) as g:
+        g.custom_command('list', 'list_startup_logs')
+        g.custom_show_command('show', 'show_startup_log')
 
     with self.command_group('functionapp log deployment') as g:
         g.custom_show_command('show', 'show_deployment_log')

@@ -1159,6 +1159,24 @@ jobs:
   #     azdev perf benchmark "version" "network vnet -h" "rest -h" "storage account"
   #   displayName: "Execution Performance"
 
+- job: CheckExternalUrls
+  displayName: "Check External Source URLs"
+  condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
+  pool:
+    name: ${{ variables.ubuntu_pool }}
+  steps:
+    - task: UsePythonVersion@0
+      displayName: 'Use Python 3.13'
+      inputs:
+        versionSpec: 3.13
+    - bash: |
+        #!/usr/bin/env bash
+        set -ev
+        # External URL exclusions are maintained in scripts/ci/external_url_exclusions.json.
+        git fetch origin --depth=1 $(System.PullRequest.TargetBranch)
+        python scripts/ci/validate_external_source_urls.py --src=HEAD --tgt=origin/$(System.PullRequest.TargetBranch)
+      displayName: 'Validate External Source URLs'
+
 - job: CheckLinter
   displayName: "Check CLI Linter"
 

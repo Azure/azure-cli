@@ -31,62 +31,96 @@ class ElasticClustersMgmtScenarioTest(ScenarioTest):
         location = self.postgres_location
         sku_name = 'Standard_D2ds_v4'
         tier = 'GeneralPurpose'
-        cluster_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        cluster_size = 2
+        non_cluster = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        cluster = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        cluster_restore = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        node_count = 2
+        database = 'dbcluster'
+
+        # Try to create regular flexible server passing elastic cluster specific parameters to verify that they are not accepted for regular servers.
+        self.cmd('postgres flexible-server create -g {} -n {} --sku-name {} \
+                   --version {} --database-name {}'
+                  .format(resource_group, cluster, sku_name, version, database),
+                  expect_failure=True)
+        
+        # Create regular flexible server to verify that elastic cluster specific parameters are not accepted for update command as well.
+        self.cmd('postgres flexible-server create -g {} -n {} --sku-name {} \
+                   --version {} --public-access Enabled'
+                  .format(resource_group, non_cluster, sku_name, version))
+        
+        # Try to update regular flexible server with elastic cluster specific parameters to verify that they are not accepted for regular servers.
+        self.cmd('postgres flexible-server update -g {} -n {} --node-count {}'
+                 .format(resource_group, non_cluster, node_count),
+                    expect_failure=True)
 
         # Create elastic cluster
         self.cmd('postgres flexible-server create -g {} -n {} --sku-name {} \
-                   --version {} --cluster-option ElasticCluster --public-access Enabled'
-                  .format(resource_group, cluster_name, sku_name, version))
+                   --version {} --node-count {} --public-access Enabled'
+                  .format(resource_group, cluster, sku_name, version, node_count))
         
-        basic_info = self.cmd('postgres flexible-server show -g {} -n {}'.format(resource_group, cluster_name)).get_output_in_json()
-        self.assertEqual(basic_info['name'], cluster_name)
-        self.assertEqual(str(basic_info['location']).replace(' ', '').lower(), location)
-        self.assertEqual(basic_info['resourceGroup'], resource_group)
-        self.assertEqual(basic_info['sku']['name'], sku_name)
-        self.assertEqual(basic_info['sku']['tier'], tier)
-        self.assertEqual(basic_info['version'], version)
-        self.assertEqual(basic_info['cluster']['clusterSize'], cluster_size)
+        basic_info = self.cmd('postgres flexible-server show -g {} -n {}'.
+                              format(resource_group, cluster),
+                              checks=[
+                                  JMESPathCheck('name', cluster),
+                                  JMESPathCheck('resourceGroup', resource_group),
+                                  JMESPathCheck('sku.name', sku_name),
+                                  JMESPathCheck('sku.tier', tier),
+                                  JMESPathCheck('version', version),
+                                  JMESPathCheck('cluster.clusterSize', node_count)
+                              ]).get_output_in_json()
+        self.assertEqual(basic_info['location'].replace(' ', '').lower(), location)
 
         # Test failures
         self.cmd('postgres flexible-server update -g {} -n {} --storage-auto-grow Enabled'
-                 .format(resource_group, cluster_name), expect_failure=True)
+                 .format(resource_group, cluster),
+                 expect_failure=True)
+
         # Backend silently ignores if the cluster size is smaller than current size, and does not return error.
         # Also, the cluster size remains unchanged. Hence the check is added to verify that cluster size is not updated.
         # When control plane adds support for scaling down cluster size, this test should be updated accordingly.
         self.cmd('postgres flexible-server update -g {} -n {} --node-count {}'
-                 .format(resource_group, cluster_name, cluster_size - 1),
+                 .format(resource_group, cluster, node_count - 1),
                  checks=[
-                     JMESPathCheck('cluster.clusterSize', cluster_size)])
+                     JMESPathCheck('cluster.clusterSize', node_count)])
+
         # Same behavior with cluster size being set to 0, it doesn't return error, neither it changes the cluster size.
         self.cmd('postgres flexible-server update -g {} -n {} --node-count {}'
-                 .format(resource_group, cluster_name, 0),
+                 .format(resource_group, cluster, 0),
                  checks=[
-                     JMESPathCheck('cluster.clusterSize', cluster_size)])
+                     JMESPathCheck('cluster.clusterSize', node_count)])
+
         # If the cluster size is larger than current supported maximum (20), it will return error.
         self.cmd('postgres flexible-server update -g {} -n {} --node-count {}'
-                 .format(resource_group, cluster_name, 21), expect_failure=True)
-        self.cmd('postgres flexible-server replica list -g {} -n {}'
-                 .format(resource_group, cluster_name), expect_failure=True)
-        self.cmd('postgres flexible-server db create -g {} -s {} -d dbclusterfail'
-                 .format(resource_group, cluster_name), expect_failure=True)
+                 .format(resource_group, cluster, 21),
+                 expect_failure=True)
 
-        # Update cluster
-        update_cluster_size = 4
-        update_info = self.cmd('postgres flexible-server update -g {} -n {} --node-count {}'
-                               .format(resource_group, cluster_name, update_cluster_size)).get_output_in_json()
-        self.assertEqual(update_info['cluster']['clusterSize'], update_cluster_size)
+        self.cmd('postgres flexible-server replica list -g {} -n {}'
+                 .format(resource_group, cluster),
+                 expect_failure=True)
+
+        self.cmd('postgres flexible-server db create -g {} -s {} -d dbclusterfail'
+                 .format(resource_group, cluster),
+                 expect_failure=True)
+
+        # Grow cluster size and validate growth.
+        update_node_count = 4
+        self.cmd('postgres flexible-server update -g {} -n {} --node-count {}'
+                               .format(resource_group, cluster, update_node_count),
+                               checks=[
+                                   JMESPathCheck('cluster.clusterSize', update_node_count)
+                               ])
 
         # Wait until snapshot is created
         os.environ.get(ENV_LIVE_TEST, False) and sleep(1800)
 
-        # Restore
-        cluster_restore_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        restore_result = self.cmd('postgres flexible-server restore -g {} --name {} --source-server {}'
-                                  .format(resource_group, cluster_restore_name, basic_info['id'])).get_output_in_json()
-        self.assertEqual(restore_result['name'], cluster_restore_name)
-        self.assertEqual(restore_result['cluster']['clusterSize'], update_cluster_size)
+        # Restore cluster and validate the restored cluster has the same cluster size as source cluster
+        self.cmd('postgres flexible-server restore -g {} --name {} --source-server {}'
+                                  .format(resource_group, cluster_restore, basic_info['id']),
+                                  checks=[
+                                      JMESPathCheck('name', cluster_restore),
+                                      JMESPathCheck('cluster.clusterSize', update_node_count)
+                                  ])
 
         # Clean up
-        self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, cluster_name))
-        self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, cluster_restore_name))
+        self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, cluster))
+        self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, cluster_restore))

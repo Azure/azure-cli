@@ -679,6 +679,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                                               data_disk_cachings=namespace.data_caching,
                                               ephemeral_os_disk=getattr(namespace, 'ephemeral_os_disk', None),
                                               ephemeral_os_disk_placement=getattr(namespace, 'ephemeral_os_disk_placement', None),
+                                              ephemeral_os_disk_enable_full_caching=getattr(namespace, 'ephemeral_os_disk_enable_full_caching', None),
                                               data_disk_delete_option=getattr(
                                                   namespace, 'data_disk_delete_option', None),
                                               source_snapshots_or_disks=getattr(namespace, 'source_snapshots_or_disks', None),
@@ -1845,7 +1846,7 @@ def process_vmss_create_namespace(cmd, namespace):
             if namespace.vm_sku is None:
                 from azure.cli.core.cloud import AZURE_US_GOV_CLOUD
                 if cmd.cli_ctx.cloud.name != AZURE_US_GOV_CLOUD.name:
-                    namespace.vm_sku = 'Standard_DS1_v2'
+                    namespace.vm_sku = 'Standard_D2s_v5'
                 else:
                     namespace.vm_sku = 'Standard_D1_v2'
 
@@ -1913,7 +1914,7 @@ def process_vmss_create_namespace(cmd, namespace):
     if namespace.vm_sku is None:
         from azure.cli.core.cloud import AZURE_US_GOV_CLOUD
         if cmd.cli_ctx.cloud.name != AZURE_US_GOV_CLOUD.name:
-            namespace.vm_sku = 'Standard_DS1_v2'
+            namespace.vm_sku = 'Standard_D2s_v5'
         else:
             namespace.vm_sku = 'Standard_D1_v2'
     _validate_location(cmd, namespace, namespace.zones, namespace.vm_sku)
@@ -2870,14 +2871,18 @@ def _validate_vm_vmss_update_ephemeral_placement(cmd, namespace):  # pylint: dis
 
 def _validate_community_gallery_legal_agreement_acceptance(cmd, namespace):
     from ._vm_utils import is_community_gallery_image_id, parse_community_gallery_image_id
+    from .aaz.latest.sig import ShowCommunity as SigShowCommunity
     if not is_community_gallery_image_id(namespace.image) or namespace.accept_term:
         return
 
     community_gallery_name, _ = parse_community_gallery_image_id(namespace.image)
-    from ._client_factory import cf_community_gallery
     try:
-        community_gallery_info = cf_community_gallery(cmd.cli_ctx).get(namespace.location, community_gallery_name)
-        eula = community_gallery_info.additional_properties['communityMetadata']['eula']
+        command_args = {
+            'location': namespace.location,
+            'public_gallery_name': community_gallery_name
+        }
+        community_gallery_info = SigShowCommunity(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+        eula = community_gallery_info['communityMetadata']['eula']
     except Exception as err:
         raise CLIInternalError('Get the eula from community gallery failed: {0}'.format(err))
 

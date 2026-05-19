@@ -904,7 +904,7 @@ def capture_vm(cmd, resource_group_name, vm_name, vhd_name_prefix,
 
 
 # pylint: disable=too-many-locals, unused-argument, too-many-statements, too-many-branches, broad-except
-def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_v2', location=None, tags=None,
+def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_D2s_v5', location=None, tags=None,
               no_wait=False, authentication_type=None, admin_password=None, computer_name=None,
               admin_username=None, ssh_dest_key_path=None, ssh_key_value=None, generate_ssh_keys=False,
               availability_set=None, nics=None, nsg=None, nsg_rule=None, accelerated_networking=None,
@@ -920,7 +920,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               plan_promotion_code=None, license_type=None, assign_identity=None, identity_scope=None,
               identity_role=None, identity_role_id=None, encryption_identity=None,
               application_security_groups=None, zone=None, boot_diagnostics_storage=None, ultra_ssd_enabled=None,
-              ephemeral_os_disk=None, ephemeral_os_disk_placement=None,
+              ephemeral_os_disk=None, ephemeral_os_disk_placement=None, ephemeral_os_disk_enable_full_caching=None,
               proximity_placement_group=None, dedicated_host=None, dedicated_host_group=None, aux_subscriptions=None,
               priority=None, max_price=None, eviction_policy=None, enable_agent=None, workspace=None, vmss=None,
               os_disk_encryption_set=None, data_disk_encryption_sets=None, specialized=None,
@@ -940,7 +940,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               exclude_zones=None, align_regional_disks_to_vm_zone=None, wire_server_mode=None, imds_mode=None,
               wire_server_access_control_profile_reference_id=None, imds_access_control_profile_reference_id=None,
               key_incarnation_id=None, add_proxy_agent_extension=None, disk_iops_read_write=None,
-              disk_mbps_read_write=None):
+              disk_mbps_read_write=None, zone_movement=None):
 
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
@@ -1171,7 +1171,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         wire_server_access_control_profile_reference_id=wire_server_access_control_profile_reference_id,
         imds_access_control_profile_reference_id=imds_access_control_profile_reference_id,
         key_incarnation_id=key_incarnation_id, add_proxy_agent_extension=add_proxy_agent_extension,
-        disk_iops_read_write=disk_iops_read_write, disk_mbps_read_write=disk_mbps_read_write)
+        disk_iops_read_write=disk_iops_read_write, disk_mbps_read_write=disk_mbps_read_write,
+        zone_movement=zone_movement)
 
     vm_resource['dependsOn'] = vm_dependencies
 
@@ -1817,7 +1818,7 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
               align_regional_disks_to_vm_zone=None, wire_server_mode=None, imds_mode=None,
               add_proxy_agent_extension=None,
               wire_server_access_control_profile_reference_id=None, imds_access_control_profile_reference_id=None,
-              key_incarnation_id=None, **kwargs):
+              key_incarnation_id=None, zone_movement=None, zone=None, **kwargs):
     from azure.mgmt.core.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching_by_aaz
     from .operations.vm import convert_show_result_to_snake_case as vm_convert_show_result_to_snake_case
@@ -2086,6 +2087,33 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
                 vm["scheduled_events_policy"]["user_initiated_reboot"] = {
                     "automatically_approve": enable_user_reboot_scheduled_events
                 }
+
+    if vm.get("resiliency_profile") is None:
+        vm["resiliency_profile"] = {}
+    if vm["resiliency_profile"].get("zone_movement") is None:
+        vm["resiliency_profile"]["zone_movement"] = {}
+    vm["resiliency_profile"]["zone_movement"]["is_enabled"] = zone_movement
+
+    # Zone move orchestration: force deallocate → PUT with new zone → start
+    zone_change = False
+    if zone is not None:
+        target_zones = [str(z) for z in zone] if isinstance(zone, list) else [str(zone)]
+        current_zones = vm.get('zones', [])
+        if current_zones != target_zones:
+            zone_change = True
+
+            vm['zones'] = target_zones
+
+            # Step 1: Force deallocate the VM
+            from .aaz.latest.vm import Deallocate as VMDeallocate
+            command_args = {
+                'resource_group': resource_group_name,
+                'vm_name': vm_name,
+                'force_deallocate': True
+            }
+            deallocate_poller = VMDeallocate(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+            LongRunningOperation(cmd.cli_ctx)(deallocate_poller)
+
     if wire_server_access_control_profile_reference_id is not None or \
             imds_access_control_profile_reference_id is not None or \
             add_proxy_agent_extension is not None:
@@ -2096,6 +2124,33 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
     vm["no_wait"] = no_wait
 
     from .operations.vm import VMCreate
+    from .aaz.latest.vm import Start as VMStart
+
+    # Step 2: PUT VM (with updated zone if applicable)
+    if zone_change:
+        try:
+            create_poller = VMCreate(cli_ctx=cmd.cli_ctx)(command_args=vm)
+            LongRunningOperation(cmd.cli_ctx)(create_poller)
+            result = create_poller.result()
+        except Exception as put_error:
+            try:
+                start_poller = VMStart(cli_ctx=cmd.cli_ctx)(command_args={
+                    'resource_group': resource_group_name,
+                    'vm_name': vm_name
+                })
+                LongRunningOperation(cmd.cli_ctx)(start_poller)
+            except Exception as start_error:
+                logger.warning('Failed to restart VM after failed update: %s', start_error)
+            raise put_error
+
+        # Step 3: Start VM
+        start_poller = VMStart(cli_ctx=cmd.cli_ctx)(command_args={
+            'resource_group': resource_group_name,
+            'vm_name': vm_name
+        })
+        LongRunningOperation(cmd.cli_ctx)(start_poller)
+        return result
+
     return VMCreate(cli_ctx=cmd.cli_ctx)(command_args=vm)
 # endregion
 
@@ -3686,7 +3741,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 assign_identity=None, identity_scope=None, identity_role=None, encryption_identity=None,
                 identity_role_id=None, zones=None, priority=None, eviction_policy=None,
                 application_security_groups=None, ultra_ssd_enabled=None,
-                ephemeral_os_disk=None, ephemeral_os_disk_placement=None,
+                ephemeral_os_disk=None, ephemeral_os_disk_placement=None, ephemeral_os_disk_enable_full_caching=None,
                 proximity_placement_group=None, aux_subscriptions=None, terminate_notification_time=None,
                 max_price=None, computer_name_prefix=None, orchestration_mode=None, scale_in_policy=None,
                 os_disk_encryption_set=None, data_disk_encryption_sets=None, data_disk_iops=None, data_disk_mbps=None,
@@ -5092,8 +5147,8 @@ def set_vmss_diagnostics_extension(cmd, resource_group_name, vmss_name, settings
         major_ver = extension_mappings[_LINUX_DIAG_EXT]['version'].split('.', maxsplit=1)[0]
         # For VMSS, we don't do auto-removal like VM because there is no reliable API to wait for
         # the removal done before we can install the newer one
-        if next((e for e in exts if e.name == _LINUX_DIAG_EXT and
-                 not e.type_handler_version.startswith(major_ver + '.')), None):
+        if next((e for e in exts if e.get('name') == _LINUX_DIAG_EXT and
+                 not e.get('typeHandlerVersion').startswith(major_ver + '.')), None):
             delete_cmd = 'az vmss extension delete -g {} --vmss-name {} -n {}'.format(
                 resource_group_name, vmss_name, vm_extension_name)
             raise CLIError("There is an incompatible version of diagnostics extension installed. "
