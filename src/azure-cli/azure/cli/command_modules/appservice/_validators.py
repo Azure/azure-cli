@@ -109,6 +109,9 @@ def _validate_asp_sku(sku, app_service_environment, zone_redundant):
 
 def validate_asp_create(namespace):
     validate_tags(namespace)
+    # When --hyper-v is set, override is_linux to False (Windows container plan)
+    if namespace.hyper_v:
+        namespace.is_linux = False
     if namespace.sku is None:
         if namespace.is_linux:
             namespace.sku = 'P0V3'
