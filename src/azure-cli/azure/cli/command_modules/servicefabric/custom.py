@@ -525,7 +525,8 @@ def update_cluster_durability(cmd, client, resource_group_name, cluster_name, no
         raise CLIError("Failed to find service fabric extension.")
 
     setting = fabric_ext_ref.get('settings', {})
-    curr_vmss_durability_level = setting.get('durability_level', setting.get('durabilityLevel', ''))
+    # Settings is a freeform dict; Service Fabric stores keys in their original casing, so read using the original key name.
+    curr_vmss_durability_level = setting.get('durabilityLevel')
 
     # check upgrade
     if curr_node_type_durability.lower() != curr_vmss_durability_level.lower():
@@ -544,6 +545,7 @@ def update_cluster_durability(cmd, client, resource_group_name, cluster_name, no
     # update vmss sf extension durability
     if curr_vmss_durability_level.lower() != durability_level.lower() and fabric_ext_ref.get('settings'):
         from ..vm.operations.vmss import VMSSCreate
+        # Use snake_case since the backend accepts it; keeps naming consistent across the migrated module.
         fabric_ext_ref['settings']['durability_level'] = durability_level
         fabric_ext_ref['settings']['enable_parallel_jobs'] = True
         vmss['resource_group'] = resource_group_name
@@ -973,10 +975,11 @@ def _create_vmss(cmd, resource_group_name, cluster_name, cluster, node_type_name
         diagnostics_ext = diagnostics_exts[0]
 
         setting = diagnostics_ext.get('settings', {})
-        diagnostics_account = setting.get('StorageAccount', setting.get('Storage_account'))
+        # Settings is a freeform dict; IaaSDiagnostics stores keys in their original casing, so read using the original key name.
+        diagnostics_account = setting.get('StorageAccount')
         storage_client = storage_client_factory(cli_ctx)
-        list_results = storage_client.storage_accounts.list_keys(
-            resource_group_name, diagnostics_account)
+        list_results = storage_client.storage_accounts.list_keys(resource_group_name, diagnostics_account)
+        # Use snake_case since the backend accepts it; keeps naming consistent across the migrated module.
         diagnostics_ext['protected_settings'] = {
             'storage_account_name': diagnostics_account,
             'storage_account_key': list_results.keys[0].value,
@@ -996,10 +999,14 @@ def _create_vmss(cmd, resource_group_name, cluster_name, cluster, node_type_name
     if not fabric_ext.get('settings'):
         fabric_ext['settings'] = {}
 
+    # Use snake_case since the backend accepts it; keeps naming consistent across the migrated module.
     fabric_ext['settings']['node_type_ref'] = node_type_name
     fabric_ext['settings']['durability_level'] = durability_level
-    if 'nicPrefixOverride' not in fabric_ext['settings'] or 'nic_prefix_override' not in fabric_ext['settings']:
+    # Migrate legacy camelCase key to snake_case since the backend accepts it; keeps naming consistent across the migrated module.
+    if 'nicPrefixOverride' not in fabric_ext['settings']:
         fabric_ext['settings']['nic_prefix_override'] = address_prefix
+    else:
+        fabric_ext['settings']['nic_prefix_override'] = fabric_ext['settings'].pop('nicPrefixOverride')
     storage_client = storage_client_factory(cli_ctx)
     list_results = storage_client.storage_accounts.list_keys(
         resource_group_name, diagnostics_storage_name)
@@ -1054,8 +1061,9 @@ def _get_cluster_vmss_by_node_type(cmd, resource_group_name, cluster_id, node_ty
         if fabric_ext is not None:
             curr_cluster_id = _get_cluster_id_in_sf_extension(fabric_ext)
             setting = fabric_ext.get('settings', {})
+            # Settings is a freeform dict; Service Fabric stores keys in their original casing, so read using the original key name.
             if (curr_cluster_id.lower() == cluster_id.lower() and
-                    setting.get('nodeTypeRef', setting.get('node_type_ref', '')).lower() == node_type_name.lower()):
+                    setting.get('nodeTypeRef', '').lower() == node_type_name.lower()):
                 return vmss
     raise CLIError("Failed to find vmss in resource group {} for cluster id {} and node type {}".format(
         resource_group_name, cluster_id, node_type_name))
@@ -1256,7 +1264,8 @@ def _get_sf_vm_extension(vmss):
 
 def _get_cluster_id_in_sf_extension(fabric_ext):
     setting = fabric_ext.get('settings', {})
-    cluster_endpoint = setting.get('clusterEndpoint', setting.get('cluster_endpoint'))
+    # Settings is a freeform dict; Service Fabric stores keys in their original casing, so read using the original key name.
+    cluster_endpoint = setting.get('clusterEndpoint')
     endpoint_list = cluster_endpoint.split('/')
     cluster_id = endpoint_list[len(endpoint_list) - 1]
     return cluster_id
@@ -1283,6 +1292,7 @@ def _add_cert_to_all_vmss(cli_ctx, resource_group_name, cluster_id, vault_id, se
 
                     if not fabric_ext.get('settings'):
                         fabric_ext['settings'] = {}
+                    # Use snake_case since the backend accepts it; keeps naming consistent across the migrated module.
                     fabric_ext["settings"]["certificate_secondary"] = secondary_setting
 
                 t = threading.Thread(target=_add_cert_to_vmss, args=[cli_ctx, vmss, resource_group_name, vault_id, secret_url])
