@@ -204,9 +204,9 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         if params.azure_files_identity_based_authentication is None:
             params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
                 directory_service_options='None')
-        params.azure_files_identity_based_authentication.smb_o_auth_settings = {
-            "is_smb_o_auth_enabled": enable_smb_oauth
-        }
+        SmbOAuthSettings = cmd.get_models('SmbOAuthSettings')
+        params.azure_files_identity_based_authentication.smb_o_auth_settings = SmbOAuthSettings(
+            is_smb_o_auth_enabled=enable_smb_oauth)
 
     if enable_large_file_share:
         LargeFileSharesState = cmd.get_models('LargeFileSharesState')
@@ -646,9 +646,9 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
             params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
                 directory_service_options='None') if instance.azure_files_identity_based_authentication is None \
                 else instance.azure_files_identity_based_authentication
-        params.azure_files_identity_based_authentication.smb_o_auth_settings = {
-            "is_smb_o_auth_enabled": enable_smb_oauth
-        }
+        SmbOAuthSettings = cmd.get_models('SmbOAuthSettings')
+        params.azure_files_identity_based_authentication.smb_o_auth_settings = SmbOAuthSettings(
+            is_smb_o_auth_enabled=enable_smb_oauth)
 
     if assign_identity:
         params.identity = Identity(type='SystemAssigned')

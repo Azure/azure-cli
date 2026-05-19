@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import time
 from knack.util import CLIError
 from azure.cli.command_modules.storage.tests.storage_test_util import StorageScenarioMixin
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,)
@@ -136,6 +137,9 @@ class StorageQueueScenarioTests(StorageScenarioMixin, ScenarioTest):
         acl = self.cmd('storage queue policy list -q {} --connection-string {}'.format(queue, connection_string)) \
             .get_output_in_json().keys()
         self.assertSetEqual(set(acl), {'test1', 'test2', 'test3'})
+        # service slow
+        if self.is_live:
+            time.sleep(10)
         # policy show
         self.storage_cmd('storage queue policy show -n test1 -q {}', account_info, queue) \
             .assert_with_checks(JMESPathCheck('permission', 'raup'))

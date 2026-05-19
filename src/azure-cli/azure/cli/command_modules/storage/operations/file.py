@@ -30,9 +30,13 @@ logger = get_logger(__name__)
 
 def snapshot_share_rm(cmd, client, resource_group_name, account_name, share_name, metadata=None, share_quota=None,
                       enabled_protocols=None, root_squash=None, access_tier=None):
-    return _create_share_rm(cmd, client, resource_group_name, account_name, share_name, metadata=metadata,
-                            share_quota=share_quota, enabled_protocols=enabled_protocols, root_squash=root_squash,
-                            access_tier=access_tier, snapshot=True)
+    ShareRmSnapshot = _ShareRmCreate(cmd.loader)
+    args = {
+        'resource_group': resource_group_name, 'storage_account':account_name, 'share_name': share_name,
+        'metadata': metadata, 'quota': share_quota, 'enabled_protocols': enabled_protocols,
+        'root_squash': root_squash, 'access_tier': access_tier, 'expand': 'snapshots'
+    }
+    return ShareRmSnapshot(args)
 
 
 def _create_share_rm(cmd, client, resource_group_name, account_name, share_name, metadata=None, share_quota=None,
@@ -595,6 +599,7 @@ class ShareRmCreate(_ShareRmCreate):
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         _format_storage_account_id(args_schema)
+        args_schema.expand._registered = False
         return args_schema
 
     def pre_operations(self):
