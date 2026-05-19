@@ -2763,6 +2763,39 @@ examples:
     text: az bicep lint --file {bicep_file} --diagnostics-format {diagnostics_format}
 """
 
+helps['bicep snapshot'] = """
+type: command
+short-summary: Capture or validate a snapshot of the resources predicted to be deployed by a .bicepparam file.
+long-summary: |
+    Compiles a .bicepparam file together with its referenced Bicep template and writes a deployment
+    snapshot (a `*.snapshot.json` file) next to the .bicepparam file. When run with `--mode Validate`,
+    the existing snapshot is compared against the current template and the command fails if they
+    differ. This command requires Bicep CLI v0.41.2 or later.
+examples:
+  - name: Capture a snapshot for a .bicepparam file.
+    text: az bicep snapshot --file main.bicepparam
+  - name: Validate that the existing snapshot still matches the current template.
+    text: az bicep snapshot --file main.bicepparam --mode Validate
+  - name: Capture a snapshot with explicit Azure context.
+    text: az bicep snapshot --file main.bicepparam --subscription-id 00000000-0000-0000-0000-000000000000 --resource-group myRg --location westus
+"""
+
+helps['bicep run'] = """
+type: command
+short-summary: Forward a raw command to the installed Bicep CLI.
+long-summary: |
+    Runs the Bicep CLI with the arguments supplied via `--command`, allowing use of Bicep CLI
+    features that do not yet have a dedicated `az bicep` wrapper. The string passed to
+    `--command` is split using shell-style quoting and forwarded to the Bicep CLI verbatim.
+    When the forwarded command itself starts with `--` (for example `--version`), use the
+    `--command=<value>` form so the CLI parser does not mistake the value for another option.
+examples:
+  - name: Forward a build command to the Bicep CLI.
+    text: az bicep run --command "build main.bicep"
+  - name: Show the Bicep CLI help (use the --command=<value> form for option-like values).
+    text: az bicep run --command=--help
+"""
+
 helps['resourcemanagement'] = """
 type: group
 short-summary: resourcemanagement CLI command group.

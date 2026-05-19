@@ -5669,6 +5669,68 @@ class BicepLintTest(LiveScenarioTest):
 
         self.cmd('az bicep lint -f {tf} --diagnostics-format sarif')
 
+
+class BicepSnapshotTest(LiveScenarioTest):
+    def setup(self):
+        super().setup()
+        self.cmd('az bicep uninstall')
+
+    def tearDown(self):
+        super().tearDown()
+        self.cmd('az bicep uninstall')
+
+    def test_bicep_snapshot(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        params_file = os.path.join(curr_dir, 'sample_params.bicepparam').replace('\\', '\\\\')
+        snapshot_path = os.path.join(curr_dir, 'sample_params.snapshot.json')
+        self.kwargs.update({
+            'pf': params_file,
+        })
+
+        try:
+            # Capture (default mode).
+            self.cmd('az bicep snapshot --file {pf}')
+            self.assertTrue(os.path.exists(snapshot_path))
+
+            # Validate against the just-captured snapshot.
+            self.cmd('az bicep snapshot --file {pf} --mode Validate')
+        finally:
+            if os.path.exists(snapshot_path):
+                os.remove(snapshot_path)
+
+
+class BicepRunTest(LiveScenarioTest):
+    def setup(self):
+        super().setup()
+        self.cmd('az bicep uninstall')
+
+    def tearDown(self):
+        super().tearDown()
+        self.cmd('az bicep uninstall')
+
+    def test_bicep_run_version(self):
+        # Ensure Bicep CLI is installed so the passthrough has something to call.
+        self.cmd('az bicep install')
+        # Use the --option=value form because the value itself starts with --,
+        # which argparse otherwise treats as another option flag.
+        self.cmd('az bicep run --command=--version')
+
+    def test_bicep_run_build(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        bf = os.path.join(curr_dir, 'sample_params.bicep').replace('\\', '\\\\')
+        self.kwargs.update({
+            'bf': bf,
+        })
+
+        self.cmd('az bicep install')
+        self.cmd('az bicep run --command "build {bf} --stdout"')
+
+    def test_bicep_run_empty_command_fails(self):
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('az bicep run --command "   "')
+
+
 class BicepInstallationTest(LiveScenarioTest):
     def setup(self):
         super().setup()
