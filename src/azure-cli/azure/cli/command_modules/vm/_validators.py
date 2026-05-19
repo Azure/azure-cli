@@ -1937,7 +1937,7 @@ def process_vmss_create_namespace(cmd, namespace):
                 namespace.authentication_type, namespace.os_type]):
             _validate_vm_vmss_create_auth(namespace, cmd)
         if namespace.assign_identity == '[system]':
-            raise InvalidArgumentValueError('usage error: only user assigned indetity is suppoprted for Flex mode.')
+            raise InvalidArgumentValueError('usage error: only user assigned identity is supported for Flex mode.')
         if namespace.assign_identity is not None:
             _validate_vm_vmss_msi(cmd, namespace)  # -- UserAssignedOnly
         _validate_proximity_placement_group(cmd, namespace)
