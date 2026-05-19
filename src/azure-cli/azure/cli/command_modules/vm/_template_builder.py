@@ -752,7 +752,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
         }
 
     vm = {
-        'apiVersion': '2025-04-01',
+        'apiVersion': '2025-11-01',
         'type': 'Microsoft.Compute/virtualMachines',
         'name': name,
         'location': location,
@@ -1733,7 +1733,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
         'name': name,
         'location': location,
         'tags': tags,
-        'apiVersion': '2025-04-01',
+        'apiVersion': '2025-11-01',
         'dependsOn': [],
         'properties': vmss_properties
     }
