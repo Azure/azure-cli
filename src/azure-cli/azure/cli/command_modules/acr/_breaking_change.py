@@ -3,9 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.breaking_change import (
-    register_command_group_deprecate
-)
+from azure.cli.core.breaking_change import (register_command_group_deprecate)
 
 helm_bc_msg = 'In November 2020, Helm 2 reached end of life. ' \
               'Starting on March 30th, 2025 Azure Container Registry will no longer support Helm 2. ' \
@@ -30,5 +28,4 @@ register_command_group_deprecate(command_group='acr helm', redirect='Helm v3 com
                                  target_version='Sept 30th, 2025')
 
 register_command_group_deprecate(command_group='acr config content-trust', message=content_trust_bc_msg)
-
 
