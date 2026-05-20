@@ -42,6 +42,65 @@ MODULE_LOAD_TIMEOUT_SECONDS = 60
 # Maximum number of worker threads for parallel module loading.
 MAX_WORKER_THREAD_COUNT = 4
 
+# Shared Azure SDK trunks that many command modules import independently. Pre-warming
+# these on the main thread before parallel module loading prevents
+# importlib._DeadlockError on Python 3.14+ (which raises on concurrent imports of
+# the same module instead of blocking, as 3.13 and earlier did). Order matters:
+# import base packages before their subpackages so each lock is taken once.
+#
+# _REQUIRED_PREWARM_MODULES are hard dependencies of azure-cli-core
+# (see setup.py: azure-core, azure-mgmt-core). A ModuleNotFoundError on these
+# indicates a broken install and is propagated.
+#
+# _OPTIONAL_PREWARM_MODULES are transitive SDK packages that may or may not be
+# installed depending on which command modules / extensions are present. A
+# ModuleNotFoundError matching the optional name itself (or one of its parent
+# packages) is suppressed; unrelated ModuleNotFoundError raised from inside an
+# installed module still propagates.
+_REQUIRED_PREWARM_MODULES = (
+    'azure.core',
+    'azure.core.exceptions',
+    'azure.core.pipeline',
+    'azure.core.pipeline.policies',
+    'azure.mgmt.core',
+)
+_OPTIONAL_PREWARM_MODULES = (
+    'msrest',
+    'msrest.serialization',
+    'msrest.http_logger',
+    'msrestazure',
+    'msrestazure.azure_exceptions',
+)
+_prewarm_done = False
+
+
+def _prewarm_shared_imports():
+    """Import shared Azure SDK trunks once on the main thread.
+
+    See `_REQUIRED_PREWARM_MODULES` and `_OPTIONAL_PREWARM_MODULES` for rationale.
+    Safe to call repeatedly; a flag guards against repeated work. A
+    `ModuleNotFoundError` for an optional module (or one of its parent packages)
+    is ignored so this helper never blocks startup if an optional SDK package is
+    uninstalled. Missing required modules propagate so a broken install fails
+    loudly rather than deferring to a harder-to-debug location.
+    """
+    global _prewarm_done  # pylint: disable=global-statement
+    if _prewarm_done:
+        return
+    from importlib import import_module
+    for name in _REQUIRED_PREWARM_MODULES:
+        import_module(name)
+    for name in _OPTIONAL_PREWARM_MODULES:
+        try:
+            import_module(name)
+        except ModuleNotFoundError as ex:
+            missing_name = getattr(ex, 'name', None)
+            if missing_name == name or (missing_name and name.startswith(missing_name + '.')):
+                # Optional/transitive SDK module not present in this install.
+                continue
+            raise
+    _prewarm_done = True
+
 
 def _get_top_level_command(args):
     """Return normalized top-level command token or None when unavailable."""
@@ -668,6 +727,16 @@ class MainCommandsLoader(CLICommandsLoader):
         import concurrent.futures
         from concurrent.futures import ThreadPoolExecutor
         from azure.cli.core.commands import BLOCKED_MODS
+
+        # Pre-warm shared Azure SDK trunks on the main thread before fanning out to
+        # worker threads. On Python 3.14+, importlib raises _DeadlockError instead
+        # of blocking when two threads concurrently import the same module
+        # (https://docs.python.org/3.14/whatsnew/3.14.html). Many command modules
+        # independently `import azure.core` / `import msrest` etc., which races
+        # under the thread pool. By importing these once on the main thread first,
+        # worker threads see fully-initialized entries in sys.modules and never
+        # contend on the module lock.
+        _prewarm_shared_imports()
 
         results = []
         with ThreadPoolExecutor(max_workers=MAX_WORKER_THREAD_COUNT) as executor:
