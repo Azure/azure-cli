@@ -126,8 +126,9 @@ def load_arguments(self, _):
 subscription than the app service environment, please use the resource ID for --app-service-environment parameter. ",
                    local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.GET]))
         c.argument('sku', arg_type=sku_arg_type)
-        c.argument('is_linux', arg_type=get_three_state_flag(), default=True, required=False,
-                   help='Host web app on Linux worker. Defaults to true. Use "--is-linux false" to create a Windows plan.')
+        c.argument('is_linux', arg_type=get_three_state_flag(), default=None, required=False,
+                   help='Host web app on Linux worker. Defaults to true unless --hyper-v is specified. '
+                        'Use "--is-linux false" to create a Windows plan.')
         c.argument('hyper_v', action='store_true', required=False, help='Host Windows Container Web App on Hyper-V worker.')
         c.argument('per_site_scaling', action='store_true', required=False, help='Enable per-app scaling at the '
                                                                                  'App Service plan level to allow for '
