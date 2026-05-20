@@ -576,11 +576,10 @@ def get_file_yaml(file_path, throw_on_empty=True):
 
 
 def read_file_content(file_path, allow_binary=False):
-    from codecs import open as codecs_open
     # Note, always put 'utf-8-sig' first, so that BOM in WinOS won't cause trouble.
     for encoding in ['utf-8-sig', 'utf-8', 'utf-16', 'utf-16le', 'utf-16be']:
         try:
-            with codecs_open(file_path, encoding=encoding) as f:
+            with open(file_path, mode='r', encoding=encoding) as f:
                 logger.debug("attempting to read file %s as %s", file_path, encoding)
                 return f.read()
         except (UnicodeError, UnicodeDecodeError):
