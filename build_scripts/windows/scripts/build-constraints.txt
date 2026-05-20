@@ -1,0 +1,13 @@
+# Build-time constraints used via PIP_CONSTRAINT during the Windows MSI build.
+#
+# setuptools 82 eagerly imports jaraco.text -> jaraco.context -> urllib.request
+# -> http.client -> socket at module load. On the win32 embeddable Python
+# distribution used to build the MSI, importing the _socket extension fails
+# under pip's isolated PEP 517 BuildEnvironment, causing
+# BackendUnavailable: Cannot import '...' for any sdist whose backend imports
+# setuptools (e.g. pyyaml's in-tree _pyyaml_pep517 backend).
+#
+# Pinning setuptools<82 here ensures both this env's setuptools and the one
+# pip resolves into isolated BuildEnvironments stay on a version that does
+# not require _socket at import time.
+setuptools<82

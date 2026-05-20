@@ -51,6 +51,18 @@ set BUILDING_DIR=%ARTIFACTS_DIR%\cli
 set WIX_DIR=%ARTIFACTS_DIR%\wix
 set PYTHON_DIR=%ARTIFACTS_DIR%\Python
 
+REM win32-only: apply setuptools<82 constraint to ALL pip operations in
+REM this build, including the isolated PEP 517 BuildEnvironment that pip
+REM creates for building sdists (e.g. pyyaml's in-tree _pyyaml_pep517
+REM backend imports setuptools.build_meta; setuptools 82 fails to import
+REM on the win32 embed Python because jaraco.text -> urllib.request ->
+REM socket -> _socket is missing). PIP_CONSTRAINT is honored by pip's
+REM BuildEnvironment. The x64 (amd64) embed Python does not have this
+REM problem, so we leave pip on its defaults there.
+if "%ARCH%"=="x86" (
+    set PIP_CONSTRAINT=%~dp0build-constraints.txt
+)
+
 REM Get the absolute directory since we pushd into different levels of subdirectories.
 PUSHD %~dp0..\..\..
 SET REPO_ROOT=%CD%
@@ -125,8 +137,21 @@ if not exist %PYTHON_DIR% (
     REM See https://github.com/Azure/azure-cli/pull/27196
     REM Install wheel to force pip install azure-cli in legacy mode
     REM see https://github.com/Azure/azure-cli/pull/29887
+    REM win32-only: pin setuptools<82. setuptools 82 eagerly imports
+    REM jaraco.text -> jaraco.context -> urllib.request -> http.client ->
+    REM socket at module load. On the win32 embeddable Python distribution
+    REM this fails with ModuleNotFoundError: _socket. The three azure-cli
+    REM local installs below use --no-build-isolation (x86 only) to reuse
+    REM this pinned setuptools. PIP_CONSTRAINT (set above for x86 only)
+    REM propagates the same pin to any pip install that does use PEP 517
+    REM isolation (e.g. building pyyaml from sdist). On x64 (amd64) the
+    REM embed Python works normally, so install the latest setuptools.
     echo Installing setuptools wheel
-    %PYTHON_DIR%\python.exe -Im pip install setuptools wheel
+    if "%ARCH%"=="x86" (
+        %PYTHON_DIR%\python.exe -Im pip install "setuptools<82" wheel
+    ) else (
+        %PYTHON_DIR%\python.exe -Im pip install setuptools wheel
+    )
 
     popd
 )
@@ -135,12 +160,40 @@ set PYTHON_EXE=%PYTHON_DIR%\python.exe
 
 robocopy %PYTHON_DIR% %BUILDING_DIR% /s /NFL /NDL
 
+REM win32-only: pip 26+ defaults to PEP 517 builds even without a
+REM pyproject.toml (uses setuptools.build_meta:__legacy__), and pip's
+REM isolated BuildEnvironment subprocess cannot import setuptools.build_meta
+REM on the win32 embeddable Python (the embed dir is not on sys.path under
+REM -I, so _socket.pyd / stdlib extensions are unreachable). Using
+REM --no-build-isolation reuses this env's already-working setuptools<82
+REM and bypasses that subprocess entirely. On x64 (amd64) the isolated
+REM subprocess works fine, so we leave pip on its defaults.
+set NOBUILDISO_FLAG=
+if "%ARCH%"=="x86" set NOBUILDISO_FLAG=--no-build-isolation
+
 set CLI_SRC=%REPO_ROOT%\src
 for %%a in (%CLI_SRC%\azure-cli %CLI_SRC%\azure-cli-core %CLI_SRC%\azure-cli-telemetry) do (
    pushd %%a
-   %BUILDING_DIR%\python.exe -Im pip install --no-warn-script-location --no-cache-dir --no-deps .
+   %BUILDING_DIR%\python.exe -Im pip install --no-warn-script-location --no-cache-dir %NOBUILDISO_FLAG% --no-deps .
    if %errorlevel% neq 0 goto ERROR
    popd
+)
+
+REM win32-only: pre-build pyyaml from sdist with --no-build-isolation.
+REM PyPI has no cp314 win32 wheel for pyyaml, so pip would otherwise spin
+REM up a PEP 517 BuildEnvironment subprocess that fails to import pyyaml's
+REM in-tree _pyyaml_pep517 backend on the win32 embeddable Python (same
+REM root cause as the local installs above). Installing pyyaml into the
+REM main env now (which already has setuptools<82 + wheel) makes the
+REM requirements install below find it already satisfied. Cython is
+REM pyyaml's only extra build requirement and ships a cp314 win32 wheel.
+REM On x64 (amd64) PyPI ships a cp314 wheel, so this whole block is
+REM unnecessary.
+if "%ARCH%"=="x86" (
+    %BUILDING_DIR%\python.exe -Im pip install --no-warn-script-location --no-cache-dir Cython
+    if !errorlevel! neq 0 goto ERROR
+    %BUILDING_DIR%\python.exe -Im pip install --no-warn-script-location --no-cache-dir --no-build-isolation pyyaml
+    if !errorlevel! neq 0 goto ERROR
 )
 
 %BUILDING_DIR%\python.exe -Im pip install --no-warn-script-location --requirement %CLI_SRC%\azure-cli\requirements.py3.windows.txt
