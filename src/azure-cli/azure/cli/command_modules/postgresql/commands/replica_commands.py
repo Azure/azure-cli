@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
-from azure.cli.core.azclierror import MutuallyExclusiveArgumentError, RequiredArgumentMissingError, ValidationError
+from azure.cli.core.azclierror import ValidationError
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.core.exceptions import ResourceNotFoundError
@@ -29,19 +29,13 @@ from .._db_context import DbContext
 
 
 # pylint: disable=too-many-locals
-def flexible_replica_create(cmd, client, resource_group_name, source_server, replica_name=None, name=None, zone=None,
+def flexible_replica_create(cmd, client, resource_group_name, source_server, name=None, zone=None,
                             location=None, vnet=None, subnet=None,
                             private_dns_zone_arguments=None, no_wait=False,
                             byok_identity=None, byok_key=None,
                             sku_name=None, tier=None, storage_type=None,
                             storage_gb=None, performance_tier=None, yes=False, tags=None):
     validate_resource_group(resource_group_name)
-
-    if replica_name is None and name is None:
-        raise RequiredArgumentMissingError('the following arguments are required: --name')
-    if replica_name is not None and name is not None:
-        raise MutuallyExclusiveArgumentError('usage error: --name and --replica-name cannot be used together. Please use --name.')
-    replica_name = replica_name.lower() if name is None else name.lower()
 
     if not is_valid_resource_id(source_server):
         if _is_resource_name(source_server):
@@ -86,7 +80,7 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
         cf_db=cf_postgres_flexible_db, cf_availability=cf_postgres_check_resource_availability,
         cf_private_dns_zone_suffix=cf_postgres_flexible_private_dns_zone_suffix_operations,
         logging_name='PostgreSQL', command_group='postgres', server_client=client, location=location)
-    validate_server_name(db_context, replica_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
+    validate_server_name(db_context, name, 'Microsoft.DBforPostgreSQL/flexibleServers')
 
     pg_byok_validator(byok_identity, byok_key)
 
@@ -101,7 +95,7 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
         parameters.network, _, _ = build_network_configuration(
             cmd=cmd,
             resource_group_name=resource_group_name,
-            server_name=replica_name,
+            server_name=name,
             location=location,
             db_context=db_context,
             private_dns_zone_arguments=private_dns_zone_arguments,
@@ -120,7 +114,7 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
 
     parameters.storage = postgresql_flexibleservers.models.Storage(storage_size_gb=storage_gb, auto_grow=source_server_object.storage.auto_grow, tier=performance_tier, type=storage_type)
 
-    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, replica_name, parameters)
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, parameters)
 
 
 def _get_pg_replica_zone(availabilityZones, sourceServerZone, replicaZone):
@@ -155,9 +149,9 @@ def _get_pg_replica_zone(availabilityZones, sourceServerZone, replicaZone):
     return pg_replica_zone
 
 
-def flexible_replica_promote(cmd, client, resource_group_name, replica_name, promote_mode='standalone', promote_option='planned'):
+def flexible_replica_promote(cmd, client, resource_group_name, name, promote_mode='standalone', promote_option='planned'):
     validate_resource_group(resource_group_name)
-    if is_citus_cluster(cmd, resource_group_name, replica_name):
+    if is_citus_cluster(cmd, resource_group_name, name):
         # some settings validation
         if promote_mode.lower() == 'standalone':
             raise ValidationError("Standalone replica promotion on elastic cluster isn't currently supported. Please use 'switchover' instead.")
@@ -165,12 +159,12 @@ def flexible_replica_promote(cmd, client, resource_group_name, replica_name, pro
             raise ValidationError("Planned replica promotion on elastic cluster isn't currently supported. Please use 'forced' instead.")
 
     try:
-        server_object = client.get(resource_group_name, replica_name)
+        server_object = client.get(resource_group_name, name)
     except Exception as e:
         raise ResourceNotFoundError(e)
 
     if server_object.replica.role is not None and "replica" not in server_object.replica.role.lower():
-        raise CLIError('Server {} is not a replica server.'.format(replica_name))
+        raise CLIError('Server {} is not a replica server.'.format(name))
 
     if promote_mode == "standalone":
         params = postgresql_flexibleservers.models.ServerForPatch(
@@ -189,7 +183,7 @@ def flexible_replica_promote(cmd, client, resource_group_name, replica_name, pro
             )
         )
 
-    return client.begin_update(resource_group_name, replica_name, params)
+    return client.begin_update(resource_group_name, name, params)
 
 
 def flexible_replica_list_by_server(cmd, client, resource_group_name, server_name):

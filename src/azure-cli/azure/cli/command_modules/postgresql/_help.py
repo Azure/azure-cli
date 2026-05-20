@@ -384,9 +384,9 @@ type: command
 short-summary: Create a PostgreSQL database on a flexible server.
 examples:
   - name: Create database 'testDatabase' in the flexible server 'testserver' with the default parameters.
-    text: az postgres flexible-server db create --resource-group testgroup --server-name testserver --database-name testDatabase
+    text: az postgres flexible-server db create --resource-group testGroup --server-name testserver --name testDatabase
   - name: Create database 'testDatabase' in the flexible server 'testserver' with a given character set and collation rules.
-    text: az postgres flexible-server db create --resource-group testgroup --server-name testserver --database-name testDatabase \\
+    text: az postgres flexible-server db create --resource-group testGroup --server-name testserver --name testDatabase \\
             --charset validCharset --collation validCollation
 """
 
@@ -395,7 +395,7 @@ type: command
 short-summary: Delete a database on a flexible server.
 examples:
   - name: Delete database 'testDatabase' in the flexible server 'testserver'.
-    text: az postgres flexible-server db delete --resource-group testgroup --server-name testserver --database-name testDatabase
+    text: az postgres flexible-server db delete --resource-group testGroup --server-name testserver --name testDatabase
 """
 
 helps['postgres flexible-server db list'] = """
@@ -412,8 +412,8 @@ helps['postgres flexible-server db show'] = """
 type: command
 short-summary: Show the details of a database.
 examples:
-  - name: Show database 'testdatabase' in the server 'testserver'.
-    text: az postgres flexible-server db show --resource-group testgroup --server-name testserver --database-name testdatabase
+  - name: Show database 'testDatabase' in the server 'testserver'.
+    text: az postgres flexible-server db show --resource-group testGroup --server-name testserver --name testDatabase
 """
 
 helps['postgres flexible-server firewall-rule'] = """
@@ -428,15 +428,15 @@ examples:
   - name: >
       Create a firewall rule allowing connections from a specific IP address.
     text: >
-      az postgres flexible-server firewall-rule create --resource-group testgroup --name testserver --rule-name allowip --start-ip-address 107.46.14.221
+      az postgres flexible-server firewall-rule create --resource-group testGroup --server-name testserver --name allowip --start-ip-address 107.46.14.221
   - name: >
       Create a firewall rule allowing connections from an IP address range.
     text: >
-        az postgres flexible-server firewall-rule create --resource-group testgroup --name testserver --rule-name allowiprange --start-ip-address 107.46.14.0 --end-ip-address 107.46.14.221
+        az postgres flexible-server firewall-rule create --resource-group testGroup --server-name testserver --name allowiprange --start-ip-address 107.46.14.0 --end-ip-address 107.46.14.221
   - name: >
       Create a firewall rule allowing connections to all Azure services
     text: >
-      az postgres flexible-server firewall-rule create --resource-group testgroup --name testserver --rule-name allowazureservices --start-ip-address 0.0.0.0
+      az postgres flexible-server firewall-rule create --resource-group testGroup --server-name testserver --name allowazureservices --start-ip-address 0.0.0.0
 """
 
 helps['postgres flexible-server firewall-rule list'] = """
@@ -444,9 +444,9 @@ type: command
 short-summary: List all firewall rules for a flexible server.
 example:
   - name: List all firewall rules for a server.
-    text: az postgres flexible-server firewall-rule list --resource-group testgroup --name testserver
+    text: az postgres flexible-server firewall-rule list --resource-group testGroup --server-name testserver
   - name: List all firewall rules for a server in table format.
-    text: az postgres flexible-server firewall-rule list --resource-group testgroup --name testserver --output table
+    text: az postgres flexible-server firewall-rule list --resource-group testGroup --server-name testserver --output table
 """
 
 helps['postgres flexible-server firewall-rule show'] = """
@@ -454,7 +454,7 @@ type: command
 short-summary: Get the details of a firewall rule.
 examples:
   - name: Get the details of a firewall rule.
-    text: az postgres flexible-server firewall-rule show --rule-name testRule --resource-group testgroup --name testserver
+    text: az postgres flexible-server firewall-rule show --name testRule --resource-group testGroup --server-name testserver
 """
 
 helps['postgres flexible-server firewall-rule update'] = """
@@ -462,9 +462,9 @@ type: command
 short-summary: Update a firewall rule.
 examples:
   - name: Update a firewall rule's start IP address.
-    text: az postgres flexible-server firewall-rule update --resource-group testgroup --name testserver --rule-name allowiprange --start-ip-address 107.46.14.1
+    text: az postgres flexible-server firewall-rule update --resource-group testGroup --server-name testserver --name allowiprange --start-ip-address 107.46.14.1
   - name: Update a firewall rule's start and end IP address.
-    text: az postgres flexible-server firewall-rule update --resource-group testgroup --name testserver --rule-name allowiprange --start-ip-address 107.46.14.2 --end-ip-address 107.46.14.218
+    text: az postgres flexible-server firewall-rule update --resource-group testGroup --server-name testserver --name allowiprange --start-ip-address 107.46.14.2 --end-ip-address 107.46.14.218
 """
 
 helps['postgres flexible-server firewall-rule delete'] = """
@@ -472,7 +472,7 @@ type: command
 short-summary: Delete a firewall rule.
 examples:
   - name: Delete a firewall rule.
-    text: az postgres flexible-server firewall-rule delete --rule-name testRule --resource-group testgroup --name testserver
+    text: az postgres flexible-server firewall-rule delete --name testRule --resource-group testGroup --server-name testserver
 """
 
 helps['postgres flexible-server virtual-endpoint'] = """
@@ -557,26 +557,26 @@ examples:
         }
       }
     text: >
-      az postgres flexible-server migration create --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testgroup --name testserver \
-      --migration-name testmigration --properties "migrationConfig.json"
+      az postgres flexible-server migration create --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup \
+      --server-name testserver --name testmigration --properties "migrationConfig.json"
   - name: >
       Start a migration workflow on the target server identified by the parameters. The configurations of the migration should be specified in the migrationConfig.json file. \
       Use --migration-mode offline for Offline migration.
     text: >
-      az postgres flexible-server migration create --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testgroup --name testserver \
-      --migration-name testmigration --properties "migrationConfig.json" --migration-mode offline
+      az postgres flexible-server migration create --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup \
+      --server-name testserver --name testmigration --properties "migrationConfig.json" --migration-mode offline
   - name: >
       Start a migration workflow on the target server identified by the parameters. The configurations of the migration should be specified in the migrationConfig.json file. \
       Use --migration-mode online for Online(with CDC) migration. Use migration-option Validate for validate only request.
     text: >
-      az postgres flexible-server migration create --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testgroup --name testserver \
-      --migration-name testmigration --properties "migrationConfig.json" --migration-mode online --migration-option Validate
+      az postgres flexible-server migration create --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup \
+      --server-name testserver --name testmigration --properties "migrationConfig.json" --migration-mode online --migration-option Validate
   - name: >
       Start a migration workflow on the target server identified by the parameters. The configurations of the migration should be specified in the migrationConfig.json file. \
       Use --migration-option Migrate for Migrate Only request.
     text: >
-      az postgres flexible-server migration create --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testgroup --name testserver \
-      --migration-name testmigration --properties "migrationConfig.json" --migration-option Migrate
+      az postgres flexible-server migration create --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup \
+      --server-name testserver --name testmigration --properties "migrationConfig.json" --migration-option Migrate
   - name: >
       To start a migration for other than PostgreSQLSingleServer, soureType and sslMode must be specified in properties file. These properties are defined as: \n
       sourceType: Values can be - OnPremises, AWS_AURORA, AWS_RDS, AzureVM, PostgreSQLSingleServer \n
@@ -602,8 +602,8 @@ examples:
         }
       }
     text: >
-      az postgres flexible-server migration create --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testgroup --name testserver \
-        --migration-name testmigration --properties "migrationConfig.json"
+      az postgres flexible-server migration create --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup \
+        --server-name testserver --name testmigration --properties "migrationConfig.json"
   - name: >
       Start a private endpoint enabled migration workflow on the target server by specifying migrationRuntimeResourceId in properties file. This property is defined as: \n
       migrationRuntimeResourceId: The resource identifier of the migration runtime server that is responsible for migrating data between source and target server. \n
@@ -627,7 +627,7 @@ examples:
         }
       }
     text: >
-      az postgres flexible-server migration create --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testgroup --name testserver --migration-name testmigration
+      az postgres flexible-server migration create --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --server-name testserver --name testmigration
       --properties "migrationConfig.json"
 """
 
@@ -636,9 +636,9 @@ type: command
 short-summary: List the migrations of a flexible server.
 examples:
   - name: List the currently active migrations of a target flexible server.
-    text: az postgres flexible-server migration list --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testgroup --name testserver --filter Active
+    text: az postgres flexible-server migration list --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --server-name testserver --filter Active
   - name: List all (Active/Completed) migrations of a target flexible server.
-    text: az postgres flexible-server migration list --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testgroup --name testserver --filter All
+    text: az postgres flexible-server migration list --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --server-name testserver --filter All
 """
 
 helps['postgres flexible-server migration show'] = """
@@ -646,7 +646,7 @@ type: command
 short-summary: Get the details of a specific migration.
 examples:
   - name: Get the details of a specific migration of a target flexible server.
-    text: az postgres flexible-server migration show --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testgroup --name testserver --migration-name testmigration
+    text: az postgres flexible-server migration show --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --server-name testserver --name testmigration
 """
 
 helps['postgres flexible-server migration update'] = """
@@ -654,11 +654,11 @@ type: command
 short-summary: Update a specific migration.
 examples:
   - name: Allow the migration workflow to setup logical replication on the source. Note that this command will restart the source server.
-    text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testgroup --name testserver --migration-name testmigration --setup-replication
+    text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --server-name testserver --name testmigration --setup-replication
   - name: Cut-over the data migration for all the databases involved in the migration. After this is complete, subsequent updates to all databases in the migration will not be migrated to the target. Cutover migration can only be triggered for migration_mode=Online.
-    text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testgroup --name testserver --migration-name testmigration --cutover
+    text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --server-name testserver --name testmigration --cutover
   - name: Cancels the data migration for all the databases involved in the migration. Only 'InProgress' migration can be cancelled
-    text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testgroup --name testserver --migration-name testmigration --cancel
+    text: az postgres flexible-server migration update --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --server-name testserver --name testmigration --cancel
 """
 
 helps['postgres flexible-server migration check-name-availability'] = """
@@ -666,7 +666,7 @@ type: command
 short-summary: Checks if the provided migration-name can be used.
 examples:
   - name: Check if the migration-name provided is available for your migration workflow.
-    text: az postgres flexible-server migration check-name-availability --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testgroup --name testserver --migration-name xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+    text: az postgres flexible-server migration check-name-availability --subscription xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx --resource-group testGroup --server-name testserver --name xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 """
 
 helps['postgres flexible-server parameter'] = """
@@ -755,23 +755,23 @@ examples:
   - name: >
       Create a backup.
     text: >
-      az postgres flexible-server backup create -g testgroup -n testserver --backup-name testbackup
+      az postgres flexible-server backup create -g testgroup -s testsvr -n testbackup
 """
 
 helps['postgres flexible-server backup list'] = """
 type: command
 short-summary: List all the backups for a given server.
 examples:
-  - name: List all backups for 'testserver'.
-    text: az postgres flexible-server backup list -g testgroup -n testserver
+  - name: List all backups for 'testsvr'.
+    text: az postgres flexible-server backup list -g testgroup -s testsvr
 """
 
 helps['postgres flexible-server backup show'] = """
 type: command
 short-summary: Show the details of a specific backup for a given server.
 examples:
-  - name: Show the details of backup 'testbackup' for 'testserver'.
-    text: az postgres flexible-server backup show -g testgroup -n testserver --backup-name testbackup
+  - name: Show the details of backup 'testbackup' for 'testsvr'.
+    text: az postgres flexible-server backup show -g testgroup -s testsvr -n testbackup
 """
 
 helps['postgres flexible-server backup delete'] = """
@@ -779,7 +779,7 @@ type: command
 short-summary: Delete a specific backup.
 examples:
   - name: Delete a backup.
-    text: az postgres flexible-server backup delete -g testgroup -n testserver --backup-name testbackup
+    text: az postgres flexible-server backup delete -g testgroup -s testsvr -n testbackup
 """
 
 helps['postgres flexible-server long-term-retention'] = """
@@ -792,7 +792,7 @@ type: command
 short-summary: Performs all the checks that are needed for the subsequent long-term-retention backup operation to succeed.
 examples:
   - name: Precheck if we can perform long-term-retention command on server 'server-name' on resource group 'resource-group-name' with backup name 'backup-name'.
-    text: az postgres flexible-server long-term-retention pre-check -g resource-group-name -b backup-name -n server-name
+    text: az postgres flexible-server long-term-retention pre-check -g resource-group-name -s server-name -n backup-name
 """
 
 helps['postgres flexible-server long-term-retention start'] = """
@@ -800,23 +800,23 @@ type: command
 short-summary: Start long-term-retention backup for a flexible server. SAS URL parameter refers to the container SAS URL, inside the storage account, where the backups will be uploaded.
 examples:
   - name: Create a backup with name 'backup-name' of server 'server-name' in resource group 'resource-group-name', using container with SAS URL '<sas-url>'.
-    text: az postgres flexible-server long-term-retention start -g resource-group-name -b backup-name -n server-name -u <sas-url>
+    text: az postgres flexible-server long-term-retention start -g resource-group-name -s server-name -n backup-name -u <sas-url>
 """
 
 helps['postgres flexible-server long-term-retention show'] = """
 type: command
 short-summary: Show the details of a specific long-term-retention backup for a given server.
 examples:
-  - name: Show the details of long-term-retention backup 'testbackup' for 'testserver'.
-    text: az postgres flexible-server long-term-retention show -g resource-group-name -n server-name -b backup-name
+  - name: Show the details of long-term-retention backup 'testbackup' for 'testsvr'.
+    text: az postgres flexible-server long-term-retention show -g resource-group-name -s server-name -n backup-name
 """
 
 helps['postgres flexible-server long-term-retention list'] = """
 type: command
 short-summary: List all the long-term-retention backups for a given server.
 examples:
-  - name: List all long-term-retention backups for 'testserver'.
-    text: az postgres flexible-server long-term-retention list -g resource-group-name -n server-name
+  - name: List all long-term-retention backups for 'testsvr'.
+    text: az postgres flexible-server long-term-retention list -g resource-group-name -s server-name
 """
 
 helps['postgres flexible-server replica'] = """
