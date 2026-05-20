@@ -45,3 +45,55 @@ class TestRegionalEndpointUriConversion(unittest.TestCase):
         for uri in test_cases:
             result = acr_import._regional_endpoint_uri_to_login_server(uri, login_server_suffix)
             self.assertEqual(result, uri)
+
+    @staticmethod
+    def _match_regional_endpoint(login_server, endpoint, regional_endpoint_host_names):
+        """Replicate the matching logic from acr_login for unit testing."""
+        login_server_name = login_server.split('.')[0]
+        regional_endpoint_prefix = f"{login_server_name}.{endpoint}.geo.".lower()
+        return next(
+            (url for url in regional_endpoint_host_names
+             if url.lower().strip().startswith(regional_endpoint_prefix)), None)
+
+    def test_match_standard_registry(self):
+        """Registry without DNL — login_server starts with registry name."""
+        login_server = 'myregistry.azurecr.io'
+        hosts = [
+            'myregistry.eastus.geo.azurecr.io',
+            'myregistry.westus.geo.azurecr.io',
+        ]
+        self.assertEqual(
+            self._match_regional_endpoint(login_server, 'eastus', hosts),
+            'myregistry.eastus.geo.azurecr.io')
+        self.assertEqual(
+            self._match_regional_endpoint(login_server, 'westus', hosts),
+            'myregistry.westus.geo.azurecr.io')
+
+    def test_match_dnl_registry(self):
+        """Registry with DNL suffix — login_server has a hash appended."""
+        login_server = 'myregistry-d7ezgzevdwfvc8ht.azurecr.io'
+        hosts = [
+            'myregistry-d7ezgzevdwfvc8ht.eastus.geo.azurecr.io',
+            'myregistry-d7ezgzevdwfvc8ht.westus.geo.azurecr.io',
+        ]
+        self.assertEqual(
+            self._match_regional_endpoint(login_server, 'eastus', hosts),
+            'myregistry-d7ezgzevdwfvc8ht.eastus.geo.azurecr.io')
+        self.assertEqual(
+            self._match_regional_endpoint(login_server, 'westus', hosts),
+            'myregistry-d7ezgzevdwfvc8ht.westus.geo.azurecr.io')
+
+    def test_no_match_returns_none(self):
+        """Endpoint region not in the host list returns None."""
+        login_server = 'myregistry.azurecr.io'
+        hosts = ['myregistry.eastus.geo.azurecr.io']
+        self.assertIsNone(
+            self._match_regional_endpoint(login_server, 'westus', hosts))
+
+    def test_match_case_insensitive(self):
+        """Matching is case-insensitive for both endpoint arg and host names."""
+        login_server = 'MyRegistry.azurecr.io'
+        hosts = ['MyRegistry.EastUS.geo.azurecr.io']
+        self.assertEqual(
+            self._match_regional_endpoint(login_server, 'eastus', hosts),
+            'MyRegistry.EastUS.geo.azurecr.io')

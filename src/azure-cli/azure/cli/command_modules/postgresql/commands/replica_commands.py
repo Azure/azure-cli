@@ -13,6 +13,7 @@ from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id, resou
 from ..utils._flexible_server_location_capabilities_util import get_postgres_location_capability_info
 from ..utils._flexible_server_util import _is_resource_name, build_identity_and_data_encryption
 from ..utils.validators import (
+    build_network_configuration,
     is_citus_cluster,
     pg_byok_validator,
     validate_citus_cluster,
@@ -25,13 +26,12 @@ from .._client_factory import (
     cf_postgres_check_resource_availability,
     cf_postgres_flexible_private_dns_zone_suffix_operations)
 from .._db_context import DbContext
-from .network_commands import flexible_server_provision_network_resource
 
 
 # pylint: disable=too-many-locals
 def flexible_replica_create(cmd, client, resource_group_name, source_server, replica_name=None, name=None, zone=None,
-                            location=None, vnet=None, vnet_address_prefix=None, subnet=None,
-                            subnet_address_prefix=None, private_dns_zone_arguments=None, no_wait=False,
+                            location=None, vnet=None, subnet=None,
+                            private_dns_zone_arguments=None, no_wait=False,
                             byok_identity=None, byok_key=None,
                             sku_name=None, tier=None, storage_type=None,
                             storage_gb=None, performance_tier=None, yes=False, tags=None):
@@ -98,18 +98,17 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
         create_mode="Replica")
 
     if source_server_object.network.public_network_access == 'Disabled' and any((vnet, subnet)):
-        parameters.network, _, _ = flexible_server_provision_network_resource(cmd=cmd,
-                                                                              resource_group_name=resource_group_name,
-                                                                              server_name=replica_name,
-                                                                              location=location,
-                                                                              db_context=db_context,
-                                                                              private_dns_zone_arguments=private_dns_zone_arguments,
-                                                                              public_access='Disabled',
-                                                                              vnet=vnet,
-                                                                              subnet=subnet,
-                                                                              vnet_address_prefix=vnet_address_prefix,
-                                                                              subnet_address_prefix=subnet_address_prefix,
-                                                                              yes=yes)
+        parameters.network, _, _ = build_network_configuration(
+            cmd=cmd,
+            resource_group_name=resource_group_name,
+            server_name=replica_name,
+            location=location,
+            db_context=db_context,
+            private_dns_zone_arguments=private_dns_zone_arguments,
+            public_access='Disabled',
+            vnet=vnet,
+            subnet=subnet,
+            yes=yes)
     else:
         parameters.network = source_server_object.network
 
