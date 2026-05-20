@@ -54,6 +54,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             options_list=['--name', '-n'],
             id_part='name',
             help="Name of the read replica.",
+            required=True,
             local_context_attribute=LocalContextAttribute(
                 name='server_name',
                 actions=[LocalContextAction.SET, LocalContextAction.GET],
@@ -99,6 +100,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             options_list=['--name', '-n'],
             id_part='child_name_1',
             help='The name of the database',
+            required=True,
             local_context_attribute=LocalContextAttribute(
                 name='database_name',
                 actions=[LocalContextAction.GET, LocalContextAction.SET],
@@ -590,8 +592,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         # replica
         with self.argument_context('{} flexible-server replica create'.format(command_group)) as c:
             c.argument('source_server', arg_type=source_server_arg_type)
-            c.argument('name', options_list=['--name', '-n'], required=True,
-                       help='The name of the read replica.')
+            c.argument('name', arg_type=replica_name_arg_type)
             c.argument('zone', arg_type=zone_arg_type)
             c.argument('location', arg_type=get_location_type(self.cli_ctx))
             c.argument('vnet', arg_type=vnet_arg_type)
@@ -608,7 +609,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('storage_type', default=None, arg_type=storage_type_replica_arg_type)
 
         with self.argument_context('{} flexible-server replica promote'.format(command_group)) as c:
-            c.argument('replica_name', arg_type=replica_name_arg_type)
+            c.argument('name', arg_type=replica_name_arg_type)
             c.argument('promote_mode', options_list=['--promote-mode'], required=False, arg_type=promote_mode_arg_type)
             c.argument('promote_option', options_list=['--promote-option'], required=False, arg_type=promote_option_arg_type)
             c.argument('yes', arg_type=yes_arg_type)

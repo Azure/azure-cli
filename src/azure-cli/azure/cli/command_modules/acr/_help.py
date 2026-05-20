@@ -71,6 +71,7 @@ type: group
 short-summary: Configure policies for Azure Container Registries.
 """
 
+# To be deprecated
 helps['acr config content-trust'] = """
 type: group
 short-summary: Manage content-trust policy for Azure Container Registries.
@@ -102,6 +103,7 @@ examples:
         az acr config authentication-as-arm update -r myregistry --status Enabled
 """
 
+# To be deprecated
 helps['acr config content-trust show'] = """
 type: command
 short-summary: Show the configured content-trust policy for an Azure Container Registry.
@@ -111,6 +113,7 @@ examples:
         az acr config content-trust show -r myregistry
 """
 
+# To be deprecated
 helps['acr config content-trust update'] = """
 type: command
 short-summary: Update content-trust policy for an Azure Container Registry.
