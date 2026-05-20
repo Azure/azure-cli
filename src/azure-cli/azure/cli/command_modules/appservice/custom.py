@@ -66,7 +66,6 @@ from .utils import (_normalize_sku,
                     retryable_method,
                     raise_missing_token_suggestion,
                     _get_location_from_resource_group,
-                    _list_app,
                     is_functionapp,
                     is_linux_webapp,
                     _rename_server_farm_props,
@@ -4921,6 +4920,11 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, p
                             is_managed_instance=None, mi_system_assigned=None, mi_user_assigned=None,
                             default_identity=None, rdp_enabled=None, vnet=None, subnet=None,
                             registry_adapters=None, install_scripts=None, storage_mounts=None):
+    if is_linux and hyper_v:
+        raise MutuallyExclusiveArgumentError('--hyper-v creates a Windows container plan and cannot be combined '
+                                             'with --is-linux. Use "--is-linux false --hyper-v" to create a '
+                                             'Windows container plan.')
+
     if sku is None:
         sku = 'P0V3' if is_linux else 'B1'
 
