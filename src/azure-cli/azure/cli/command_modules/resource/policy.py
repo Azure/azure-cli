@@ -298,6 +298,36 @@ class Common:
             else:
                 Common.SetUndefinedNone(value.data)
 
+    # Allow legacy 'key=value [key=value ...]' partial shorthand for an
+    # AAZAnyTypeArg, in addition to its native JSON / full-shorthand / @file inputs.
+    @staticmethod
+    def AllowKeyValueShorthand(any_type_arg):
+        # pylint: disable=protected-access
+        from azure.cli.core.aaz._arg_action import AAZAnyTypeArgAction
+        original_build = type(any_type_arg)._build_cmd_action
+
+        def build():
+            parent_action = original_build(any_type_arg)
+            if not issubclass(parent_action, AAZAnyTypeArgAction):
+                return parent_action
+
+            class Action(parent_action):
+                @classmethod
+                def decode_str(cls, value):
+                    if isinstance(value, str):
+                        stripped = value.strip()
+                        # Skip JSON / list / @file / quoted -- let AAZ handle.
+                        if stripped and stripped[0] not in ('{', '[', '@', '"', "'"):
+                            parts = stripped.split()
+                            if parts and all(
+                                    '=' in p and p.split('=', 1)[0] for p in parts):
+                                return dict(p.split('=', 1) for p in parts)
+                    return super().decode_str(value)
+
+            return Action
+
+        any_type_arg._build_cmd_action = build
+
 # Completers for policy command arguments
 class Completers:
 
@@ -1734,7 +1764,7 @@ class PolicySetDefinitionUpdate(SetDefinitionUpdate):
 
     def pre_operations(self):
         pass
-    
+
     def _execute_operations(self):
         self.pre_operations()
 
