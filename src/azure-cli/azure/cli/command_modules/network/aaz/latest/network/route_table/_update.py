@@ -81,7 +81,6 @@ class Update(AAZCommand):
             options=["--disable-peering-route"],
             arg_group="Properties",
             help="Whether to disable the routes learned by peering on the route table. 'None' means peering routes are enabled, 'All' means all peering routes are disabled.",
-            is_preview=True,
             nullable=True,
             enum={"All": "All", "None": "None"},
         )

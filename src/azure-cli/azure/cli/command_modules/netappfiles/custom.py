@@ -410,12 +410,6 @@ class VolumeUpdate(_VolumeUpdate):
             help="Name or Resource ID of the vnet. If you want to use a vnet in other resource group or subscription, please provide the Resource ID instead of the name of the vnet.",
             required=False,
         )
-        args_schema.remote_volume_resource_id = AAZStrArg(
-            options=["--remote-volume-id", "--remote-volume-resource-id"],
-            arg_group="Replication",
-            help="The resource ID of the remote volume.",
-            nullable=True,
-        )
         args_schema.usage_threshold._fmt = AAZIntArgFormat(
             maximum=2457600,
             minimum=50

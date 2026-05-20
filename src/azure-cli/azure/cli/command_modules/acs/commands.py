@@ -335,6 +335,11 @@ def load_command_table(self, _):
         g.custom_command('update', 'aks_approuting_zone_update')
         g.custom_command('list', 'aks_approuting_zone_list')
 
+    # AKS approuting gateway istio commands
+    with self.command_group('aks approuting gateway istio', managed_clusters_sdk, client_factory=cf_managed_clusters) as g:
+        g.custom_command('enable', 'aks_approuting_gateway_istio_enable')
+        g.custom_command('disable', 'aks_approuting_gateway_istio_disable', confirmation=True)
+
     with self.command_group('aks safeguards'):
         from .custom import AKSSafeguardsShowCustom as Show
         from .custom import AKSSafeguardsCreateCustom as Create

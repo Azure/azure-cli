@@ -24,11 +24,12 @@ from ._validators import (validate_appservice_name_or_id, validate_aks_cluster_n
                           validate_feature_query_fields, validate_filter_parameters,
                           validate_separator, validate_secret_identifier,
                           validate_key, validate_feature, validate_feature_key,
-                          validate_identity, validate_auth_mode,
+                          validate_identity, validate_auth_mode, validate_snapshot_reference,
                           validate_resolve_keyvault, validate_export_profile, validate_import_profile,
                           validate_strict_import, validate_export_as_reference, validate_snapshot_filters,
                           validate_snapshot_export, validate_snapshot_import, validate_tag_filters,
-                          validate_import_tag_filters, validate_dry_run, validate_kv_revision_retention_period)
+                          validate_import_tag_filters, validate_dry_run, validate_kv_revision_retention_period,
+                          validate_public_network_args)
 
 
 def load_arguments(self, _):
@@ -180,7 +181,12 @@ def load_arguments(self, _):
         c.argument('assign_identity', arg_type=identities_arg_type,
                    help='Space-separated list of managed identities to be assigned. Use "[system]" to refer to system-assigned managed identity or a resource ID to refer to user-assigned managed identity. If this argument is provided without any value, system-assigned managed identity will be assigned by default. If this argument is not provided, no managed identities will be assigned to this App Configuration store.')
         c.argument('enable_public_network', options_list=['--enable-public-network', '-e'], arg_type=get_three_state_flag(),
-                   help='When true, requests coming from public networks have permission to access this store while private endpoint is enabled. When false, only requests made through Private Links can reach this store.')
+                   help='When true, requests coming from public networks have permission to access this store while private endpoint is enabled. When false, only requests made through Private Links can reach this store.',
+                   deprecate_info=c.deprecate(redirect='--public-network-access', hide=False))
+        c.argument('public_network_access', options_list=['--public-network-access'],
+                   arg_type=get_enum_type(['Disabled', 'Enabled', 'SecuredByPerimeter']),
+                   help='Control permission for data plane traffic coming from public networks. Possible values include: Disabled, Enabled, SecuredByPerimeter. NOTE: The SecuredByPerimeter mode is currently in preview.',
+                   validator=validate_public_network_args)
         c.argument('disable_local_auth', arg_type=get_three_state_flag(), help='Disable all authentication methods other than AAD authentication.')
         c.argument('retention_days', arg_type=retention_days_arg_type)
         c.argument('enable_purge_protection', options_list=['--enable-purge-protection', '-p'], arg_type=get_three_state_flag(), help='Property specifying whether protection against purge is enabled for this App Configuration store. Setting this property to true activates protection against purge for this App Configuration store and its contents. Enabling this functionality is irreversible.')
@@ -197,7 +203,12 @@ def load_arguments(self, _):
         c.argument('sku', help='The sku of the App Configuration store', arg_type=get_enum_type(['Free', 'Developer', 'Premium', 'Standard']))
         c.argument('tags', arg_type=tags_type)
         c.argument('enable_public_network', options_list=['--enable-public-network', '-e'], arg_type=get_three_state_flag(),
-                   help='When true, requests coming from public networks have permission to access this store while private endpoint is enabled. When false, only requests made through Private Links can reach this store.')
+                   help='When true, requests coming from public networks have permission to access this store while private endpoint is enabled. When false, only requests made through Private Links can reach this store.',
+                   deprecate_info=c.deprecate(redirect='--public-network-access', hide=False))
+        c.argument('public_network_access', options_list=['--public-network-access'],
+                   arg_type=get_enum_type(['Disabled', 'Enabled', 'SecuredByPerimeter']),
+                   help='Control permission for data plane traffic coming from public networks. Possible values include: Disabled, Enabled, SecuredByPerimeter. NOTE: The SecuredByPerimeter mode is currently in preview.',
+                   validator=validate_public_network_args)
         c.argument('disable_local_auth', arg_type=get_three_state_flag(), help='Disable all authentication methods other than AAD authentication.')
         c.argument('enable_purge_protection', options_list=['--enable-purge-protection', '-p'], arg_type=get_three_state_flag(), help='Property specifying whether protection against purge is enabled for this App Configuration store. Setting this property to true activates protection against purge for this App Configuration store and its contents. Enabling this functionality is irreversible.')
         c.argument('arm_auth_mode', arg_type=arm_auth_mode_arg_type)
@@ -326,6 +337,12 @@ def load_arguments(self, _):
         c.argument('tags', arg_type=tags_type)
         c.argument('secret_identifier', validator=validate_secret_identifier, help="ID of the Key Vault object. Can be found using 'az keyvault {collection} show' command, where collection is key, secret or certificate. To set reference to the latest version of your secret, remove version information from secret identifier.")
 
+    with self.argument_context('appconfig kv set-snapshot-reference') as c:
+        c.argument('key', validator=validate_key, help="Key to be set. Key cannot be a '.' or '..', or contain the '%' character.")
+        c.argument('label', help="If no label specified, set the key with null label by default")
+        c.argument('tags', arg_type=tags_type)
+        c.argument('snapshot_name', validator=validate_snapshot_reference, help='Name of the snapshot to reference. This is required.')
+
     with self.argument_context('appconfig kv delete') as c:
         c.argument('key', validator=validate_key, help='Support star sign as filters, for instance * means all key and abc* means keys with abc as prefix.')
         c.argument('label', help="If no label specified, delete entry with null label. Support star sign as filters, for instance * means all label and abc* means labels with abc as prefix.")
@@ -341,6 +358,7 @@ def load_arguments(self, _):
         c.argument('tags', arg_type=tags_arg_type, help="If no tags are specified, return all key-values with any tags. Support space-separated tags: key[=value] [key[=value] ...].")
         c.argument('snapshot', help="List all keys in a given snapshot of the App Configuration store. If no snapshot is specified, the keys currently in the store are listed.")
         c.argument('resolve_keyvault', arg_type=get_three_state_flag(), help="Resolve the content of key vault reference. This argument should NOT be specified along with --fields. Instead use --query for customized query.")
+        c.argument('resolve_snapshot_references', arg_type=get_three_state_flag(), help="Resolve snapshot references and return the referenced snapshots' key-values.")
 
     with self.argument_context('appconfig kv restore') as c:
         c.argument('key', help='If no key specified, restore all keys by default. Support star sign as filters, for instance abc* means keys with abc as prefix.')
@@ -466,3 +484,12 @@ def load_arguments(self, _):
         c.argument('snapshot_name', options_list=['--snapshot-name', '-s'], help='If no name specified, return all snapshots by default. Support star sign as filters, for instance abc* means snapshots with abc as prefix to the name.')
         c.argument('status', arg_type=snapshot_status_arg_type)
         c.argument('fields', arg_type=snapshot_fields_arg_type)
+
+    with self.argument_context('appconfig network-security-perimeter-configuration') as c:
+        c.argument('store_name', arg_type=store_name_arg_type)
+
+    with self.argument_context('appconfig network-security-perimeter-configuration show') as c:
+        c.argument('name', options_list=['--name', '-n'], help='Name of the network security perimeter configuration to show.', required=True)
+
+    with self.argument_context('appconfig network-security-perimeter-configuration reconcile') as c:
+        c.argument('name', options_list=['--name', '-n'], help='Name of the network security perimeter configuration to reconcile.', required=True)

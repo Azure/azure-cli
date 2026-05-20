@@ -242,6 +242,8 @@ examples:
     text: az appconfig kv list -n MyAppConfiguration --tags tag1=
   - name: List all key-values with tag name "tag1" with null value
     text: az appconfig kv list -n MyAppConfiguration --tags tag1=\\0
+  - name: List all key-values within a snapshot referenced by the key "MySnapshotRef".
+    text: az appconfig kv list -n MyAppConfiguration --key MySnapshotRef --resolve-snapshot-references
 """
 
 helps['appconfig kv lock'] = """
@@ -283,7 +285,7 @@ examples:
   - name: Set a key with null value and JSON content type.
     text: az appconfig kv set -n MyAppConfiguration --key foo --value null --content-type application/json
   - name: Set a key-value using your 'az login' credentials.
-    text: az appconfig kv set --endpoint https://myappconfiguration.azconfig.io --key color --value red --auth-mode login
+    text: az appconfig kv set --endpoint https://contoso.azconfig.io --key color --value red --auth-mode login
 """
 
 helps['appconfig kv set-keyvault'] = """
@@ -294,6 +296,18 @@ examples:
     text: az appconfig kv set-keyvault -n MyAppConfiguration --key HostSecret --label MyLabel --secret-identifier https://contoso.vault.azure.net/Secrets/DummySecret/Dummyversion
   - name: Set a keyvault reference with null label and multiple tags using connection string.
     text: az appconfig kv set-keyvault --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --key HostSecret --secret-identifier https://contoso.vault.azure.net/Secrets/DummySecret --tags tag1=value1 tag2=value2
+"""
+
+helps['appconfig kv set-snapshot-reference'] = """
+type: command
+short-summary: Set a snapshot reference.
+examples:
+  - name: Set a snapshot reference with label MyLabel.
+    text: az appconfig kv set-snapshot-reference -n MyAppConfiguration --key MySnapshotRef --label MyLabel --snapshot-name MySnapshot
+  - name: Set a snapshot reference using login-based authentication.
+    text: az appconfig kv set-snapshot-reference --endpoint https://contoso.azconfig.io --key MySnapshotRef --snapshot-name MySnapshot --auth-mode login
+  - name: Set a snapshot reference with tags using connection string.
+    text: az appconfig kv set-snapshot-reference --connection-string Endpoint=https://contoso.azconfig.io;Id=xxx;Secret=xxx --key MySnapshotRef --snapshot-name MySnapshot --tags tag1=value1 tag2=value2
 """
 
 helps['appconfig kv show'] = """
@@ -682,6 +696,38 @@ helps['appconfig feature filter list'] = """
 helps['appconfig snapshot'] = """
     type: group
     short-summary: Manage snapshots associated with an app configuration store.
+    """
+
+helps['appconfig network-security-perimeter-configuration'] = """
+    type: group
+    short-summary: Manage network security perimeter configurations for an App Configuration store.
+    """
+
+helps['appconfig network-security-perimeter-configuration list'] = """
+    type: command
+    short-summary: List all network security perimeter configurations for an App Configuration store.
+    examples:
+        - name: List all network security perimeter configurations for an App Configuration store.
+          text:
+            az appconfig network-security-perimeter-configuration list --store-name MyAppConfiguration -g MyResourceGroup
+    """
+
+helps['appconfig network-security-perimeter-configuration show'] = """
+    type: command
+    short-summary: Show a specific network security perimeter configuration for an App Configuration store.
+    examples:
+        - name: Show a network security perimeter configuration by name.
+          text:
+            az appconfig network-security-perimeter-configuration show --store-name MyAppConfiguration -g MyResourceGroup --name MyNspConfigurationName
+    """
+
+helps['appconfig network-security-perimeter-configuration reconcile'] = """
+    type: command
+    short-summary: Force a refresh of the specified network security perimeter configuration for an App Configuration store.
+    examples:
+        - name: Reconcile a network security perimeter configuration.
+          text:
+            az appconfig network-security-perimeter-configuration reconcile --store-name MyAppConfiguration -g MyResourceGroup --name MyNspConfigurationName
     """
 
 helps['appconfig snapshot create'] = """
