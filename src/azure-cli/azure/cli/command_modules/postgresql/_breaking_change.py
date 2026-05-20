@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.breaking_change import (
-    register_argument_deprecate,
     register_command_group_deprecate,
     register_other_breaking_change
 )
