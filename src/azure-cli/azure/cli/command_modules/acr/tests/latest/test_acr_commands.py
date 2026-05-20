@@ -45,12 +45,15 @@ class AcrCommandsTests(ScenarioTest):
                  checks=[self.check('status', "enabled"),
                          self.check('days', 30)])
 
-        # test content-trust
-        self.cmd('acr config content-trust update -n {} --status enabled'.format(registry_name),
-                 checks=[self.check('status', "enabled")])
+        # test content-trust - 'enabled' is no longer a valid value for --status due to DCT deprecation
+        with self.assertRaises(SystemExit):
+            self.cmd('acr config content-trust update -n {} --status enabled'.format(registry_name))
+
+        self.cmd('acr config content-trust update -n {} --status disabled --yes'.format(registry_name),
+                 checks=[self.check('status', "disabled")])
 
         self.cmd('acr config content-trust show -n {}'.format(registry_name),
-                 checks=[self.check('status', "enabled")])
+                 checks=[self.check('status', "disabled")])
 
         # test soft-delete
         self.cmd('acr config soft-delete update -r {} --status enabled --days 30 --yes'.format(registry_name),
@@ -367,7 +370,7 @@ class AcrCommandsTests(ScenarioTest):
                          ])
 
         # update replication
-        self.cmd('acr replication update -n {replication_name} -r {registry_name} --tags {tags} --region-endpoint-enabled false',
+        self.cmd('acr replication update -n {replication_name} -r {registry_name} --tags {tags} --global-endpoint-routing false',
                  checks=[self.check('name', '{replication_name}'),
                          self.check('provisioningState', 'Succeeded'),
                          self.check('regionEndpointEnabled', False),
@@ -377,7 +380,7 @@ class AcrCommandsTests(ScenarioTest):
         self.cmd('acr replication delete -n {replication_name} -r {registry_name}')
 
         # test create replication disable on home region
-        self.cmd('acr replication create -n {replication_name} -r {registry_name} -l {replication_loc} --region-endpoint-enabled false',
+        self.cmd('acr replication create -n {replication_name} -r {registry_name} -l {replication_loc} --global-endpoint-routing false',
                  checks=[self.check('name', '{replication_name}'),
                          self.check('location', '{replication_loc}'),
                          self.check('provisioningState', 'Succeeded'),

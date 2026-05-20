@@ -19,10 +19,9 @@ class FlexibleServerLtrMgmtScenarioTest(ScenarioTest):
 
     postgres_location = DEFAULT_LOCATION
 
-    @AllowLargeResponse()
+    @AllowLargeResponse(2048)
     @ResourceGroupPreparer(location=postgres_location)
     @ServerPreparer(location=postgres_location)
-    @live_only()
     def test_postgres_flexible_server_ltr(self, resource_group, server):
         self._test_flexible_server_ltr(resource_group, server)
 
@@ -54,21 +53,21 @@ class FlexibleServerLtrMgmtScenarioTest(ScenarioTest):
         # Precheck LTR
         backup_name = "testbackup"
         precheck_result = self.cmd('postgres flexible-server long-term-retention pre-check -g {} \
-                 -n {} -b {}'.format(resource_group, server_name, backup_name)).get_output_in_json()
+                 -s {} -n {}'.format(resource_group, server_name, backup_name)).get_output_in_json()
         self.assertGreaterEqual(precheck_result['numberOfContainers'], 0)
 
         # Start LTR
-        self.cmd('postgres flexible-server long-term-retention start -g {} -n {} -u {} -b {}'
+        self.cmd('postgres flexible-server long-term-retention start -g {} -s {} -u {} -n {}'
                  .format(resource_group, server_name, sas_url, backup_name),
                  checks=[JMESPathCheck('backupName', backup_name)])
 
         # Show LTR
-        self.cmd('postgres flexible-server long-term-retention show -g {} -n {} -b {}'
+        self.cmd('postgres flexible-server long-term-retention show -g {} -s {} -n {}'
                  .format(resource_group, server_name, backup_name),
                  checks=[JMESPathCheck('backupName', backup_name)])
 
         # List LTR
         list_result = self.cmd('postgres flexible-server long-term-retention list -g {} \
-                 -n {}'.format(resource_group, server_name)).get_output_in_json()
+                 -s {}'.format(resource_group, server_name)).get_output_in_json()
         self.assertEqual(len(list_result), 1)
         self.assertEqual(list_result[0]['backupName'], backup_name)

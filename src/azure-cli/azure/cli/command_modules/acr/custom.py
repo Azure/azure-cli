@@ -402,7 +402,9 @@ def acr_login(cmd,
         RegionalEndpoints = cmd.get_models('RegionalEndpoints')
         if registry.regional_endpoints == RegionalEndpoints.ENABLED and registry.regional_endpoint_host_names:
             # Build the expected regional endpoint prefix: registryname.region.geo.
-            regional_endpoint_prefix = f"{registry_name}.{endpoint}.geo.".lower()
+            # Use login_server hostname (before the first dot) to account for the DNL suffix if set.
+            login_server_name = registry.login_server.split('.')[0]
+            regional_endpoint_prefix = f"{login_server_name}.{endpoint}.geo.".lower()
             matching_endpoint = next(
                 (url for url in registry.regional_endpoint_host_names
                  if url.lower().strip().startswith(regional_endpoint_prefix)), None)
