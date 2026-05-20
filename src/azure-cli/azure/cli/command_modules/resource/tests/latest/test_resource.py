@@ -4589,7 +4589,7 @@ class PolicyScenarioTest(ScenarioTest):
         self.cmd('policy definition delete -n {pn}')
 
     @AllowLargeResponse(8192)
-    def test_show_built_in_policy(self):
+    def test_resource_show_built_in_policy(self):
         # get the list of builtins, then retrieve each via show and validate the results match
         results = self.cmd('policy definition list --query "[?policyType==\'BuiltIn\']"').get_output_in_json()
         if results:
@@ -4856,7 +4856,7 @@ class PolicyScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_policyexemption_subscription')
     @AllowLargeResponse(16384)
-    def test_resource_policyexemption_subscription(self, resource_group):
+    def test_resource_policyexemption_subscription_id(self, resource_group):
         # under playback, we mock it so the subscription id will be '00000000...' and it will match
         # the same sanitized value in the recording
         if not self.in_recording:
