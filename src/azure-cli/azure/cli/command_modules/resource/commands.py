@@ -197,6 +197,22 @@ def load_command_table(self, _):
         self.command_table['policy definition list'] = PolicyDefinitionList(loader=self)
         self.command_table['policy definition show'] = PolicyDefinitionShow(loader=self)
         self.command_table['policy definition update'] = PolicyDefinitionUpdate(loader=self)
+        
+    with self.command_group('policy definition version'):
+        from .policy import PolicyDefinitionVersionCreate, PolicyDefinitionVersionDelete, PolicyDefinitionVersionList, PolicyDefinitionVersionShow, PolicyDefinitionVersionUpdate
+        self.command_table['policy definition version create'] = PolicyDefinitionVersionCreate(loader=self)
+        self.command_table['policy definition version delete'] = PolicyDefinitionVersionDelete(loader=self)
+        self.command_table['policy definition version list'] = PolicyDefinitionVersionList(loader=self)
+        self.command_table['policy definition version show'] = PolicyDefinitionVersionShow(loader=self)
+        self.command_table['policy definition version update'] = PolicyDefinitionVersionUpdate(loader=self)
+        
+    with self.command_group('policy enrollment'):
+        from .policy import PolicyEnrollmentCreate, PolicyEnrollmentDelete, PolicyEnrollmentList, PolicyEnrollmentShow, PolicyEnrollmentUpdate
+        self.command_table['policy enrollment create'] = PolicyEnrollmentCreate(loader=self)
+        self.command_table['policy enrollment delete'] = PolicyEnrollmentDelete(loader=self)
+        self.command_table['policy enrollment list'] = PolicyEnrollmentList(loader=self)
+        self.command_table['policy enrollment show'] = PolicyEnrollmentShow(loader=self)
+        self.command_table['policy enrollment update'] = PolicyEnrollmentUpdate(loader=self)
 
     with self.command_group('policy exemption'):
         from .policy import PolicyExemptionCreate, PolicyExemptionDelete, PolicyExemptionList, PolicyExemptionShow, PolicyExemptionUpdate
@@ -205,7 +221,7 @@ def load_command_table(self, _):
         self.command_table['policy exemption list'] = PolicyExemptionList(loader=self)
         self.command_table['policy exemption show'] = PolicyExemptionShow(loader=self)
         self.command_table['policy exemption update'] = PolicyExemptionUpdate(loader=self)
-
+        
     with self.command_group('policy set-definition'):
         from .policy import PolicySetDefinitionCreate, PolicySetDefinitionDelete, PolicySetDefinitionList, PolicySetDefinitionShow, PolicySetDefinitionUpdate
         self.command_table['policy set-definition create'] = PolicySetDefinitionCreate(loader=self)
@@ -213,6 +229,14 @@ def load_command_table(self, _):
         self.command_table['policy set-definition list'] = PolicySetDefinitionList(loader=self)
         self.command_table['policy set-definition show'] = PolicySetDefinitionShow(loader=self)
         self.command_table['policy set-definition update'] = PolicySetDefinitionUpdate(loader=self)
+        
+    with self.command_group('policy set-definition version'):
+        from .policy import PolicySetDefinitionVersionCreate, PolicySetDefinitionVersionDelete, PolicySetDefinitionVersionList, PolicySetDefinitionVersionShow, PolicySetDefinitionVersionUpdate
+        self.command_table['policy set-definition version create'] = PolicySetDefinitionVersionCreate(loader=self)
+        self.command_table['policy set-definition version delete'] = PolicySetDefinitionVersionDelete(loader=self)
+        self.command_table['policy set-definition version list'] = PolicySetDefinitionVersionList(loader=self)
+        self.command_table['policy set-definition version show'] = PolicySetDefinitionVersionShow(loader=self)
+        self.command_table['policy set-definition version update'] = PolicySetDefinitionVersionUpdate(loader=self)
 
     resource_lock_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.resource.locks.operations#ManagementLocksOperations.{}',
