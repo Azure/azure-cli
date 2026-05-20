@@ -12323,8 +12323,10 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             'subnet': 'subnet1',
             'vnet': 'vnet1'
         })
-        self.cmd('vm create -g {rg} -n {vm1} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --security-type TrustedLaunch --size Standard_B2ms '
-                 '--enable-secure-boot true --enable-vtpm true --admin-username azureuser --admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} --nsg-rule None')
+        self.cmd('vm create -g {rg} -n {vm1} --image Canonical:ubuntu-24_04-lts:server:latest '
+                 '--security-type TrustedLaunch --size Standard_D2s_v3 --enable-secure-boot true --enable-vtpm true '
+                 '--admin-username azureuser --admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} '
+                 '--nsg-rule None')
 
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
@@ -12335,18 +12337,20 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('securityProfile.uefiSettings.vTpmEnabled', True)
         ])
         # create with image whose hyperVGeneration is v2 and under features does not contains TrustedLaunch
-        self.cmd('vm create -g {rg} -n {vm2} --image OpenLogic:CentOS:7_6-gen2:latest --admin-username azureuser --admin-password testPassword0 '
-                 '--subnet {subnet} --vnet-name {vnet} --size Standard_B2ms --nsg-rule None')
+        self.cmd('vm create -g {rg} -n {vm2} --image Canonical:UbuntuServer:16.04-LTS:latest '
+                 '--admin-username azureuser --admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} '
+                 '--size Standard_D2s_v3 --nsg-rule None')
         self.cmd('vm show -g {rg} -n {vm2}', checks=[
-            self.check('securityProfile', 'None')
+            self.check('securityProfile.securityType', 'Standard')
         ])
 
         # create VM with specifying security type Standard
         # and image whose hyperVGeneration is v2 and under features contains TrustedLaunch
-        self.cmd('vm create -g {rg} -n {vm3} --image canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest --size Standard_B2ms '
-                 '--admin-username clitest1 --generate-ssh-key --security-type Standard --subnet {subnet} --vnet-name {vnet} --nsg-rule None')
+        self.cmd('vm create -g {rg} -n {vm3} --image Canonical:UbuntuServer:16.04-LTS:latest --size Standard_D2s_v3 '
+                 '--admin-username clitest1 --generate-ssh-key --security-type Standard --subnet {subnet} '
+                 '--vnet-name {vnet} --nsg-rule None')
         self.cmd('vm show -g {rg} -n {vm3}', checks=[
-            self.check('securityProfile', 'None')
+            self.check('securityProfile.securityType', 'Standard')
         ])
 
     @AllowLargeResponse(size_kb=99999)
