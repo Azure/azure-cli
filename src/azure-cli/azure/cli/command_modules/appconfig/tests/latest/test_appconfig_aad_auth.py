@@ -9,6 +9,7 @@ import json
 import os
 import time
 import unittest
+from types import SimpleNamespace
 
 from azure.cli.command_modules.appconfig._credential import AppConfigurationCliCredential
 from azure.cli.command_modules.appconfig._utils import get_appconfig_data_client
@@ -59,6 +60,40 @@ def mock_get_active_cloud(cli_ctx=None):
     cloud = get_active_cloud(cli_ctx)
     cloud.endpoints.appconfig_auth_token_audience = APPCONFIG_AUTH_TOKEN_AUDIENCE
     return cloud
+
+
+class AppConfigAadAuthUnitTest(unittest.TestCase):
+
+    @mock.patch('azure.cli.command_modules.appconfig._utils.AzureAppConfigurationClient')
+    @mock.patch('azure.cli.command_modules.appconfig._credential.AppConfigurationCliCredential')
+    @mock.patch('azure.cli.core.cloud.get_active_cloud')
+    @mock.patch('azure.cli.core._profile.Profile')
+    def test_get_appconfig_data_client_falls_back_to_endpoint_when_cloud_has_no_audience(
+            self,
+            profile_cls_mock,
+            get_active_cloud_mock,
+            appconfig_credential_cls_mock,
+            appconfig_client_cls_mock):
+        endpoint = 'https://contoso.azconfig.io'
+        command = mock.MagicMock()
+        command.cli_ctx = DummyCli()
+
+        token_credential = object()
+        profile_cls_mock.return_value.get_login_credentials.return_value = (token_credential, None, None)
+        get_active_cloud_mock.return_value = SimpleNamespace(endpoints=SimpleNamespace())
+
+        get_appconfig_data_client(
+            command,
+            name=None,
+            connection_string=None,
+            auth_mode='login',
+            endpoint=endpoint)
+
+        appconfig_credential_cls_mock.assert_called_once_with(token_credential, endpoint)
+        appconfig_client_cls_mock.assert_called_once_with(
+            credential=appconfig_credential_cls_mock.return_value,
+            base_url=endpoint,
+            user_agent=mock.ANY)
 
 class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
 
@@ -318,7 +353,7 @@ class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
                 if "Operation returned an invalid status 'Forbidden'" not in str(e):
                     raise e
 
-            # Assert that the ClientCredential was instantiated with the endpoint as the token audience
+            # Assert that AppConfigurationCliCredential was instantiated with endpoint as the token audience
             cred_mock.assert_called_with(mock.ANY, endpoint)
 
             # Mock the get_active_cloud function to return a custom cloud with a custom token audience
@@ -332,5 +367,5 @@ class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
                     if "Operation returned an invalid status 'Forbidden'" not in str(e):
                         raise e
 
-                # Assert that the ClientCredential was instantiated with the correct scope
+                # Assert that AppConfigurationCliCredential was instantiated with the configured audience
                 cred_mock.assert_called_with(mock.ANY, APPCONFIG_AUTH_TOKEN_AUDIENCE)
