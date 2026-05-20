@@ -1124,18 +1124,25 @@ def list_flex_migration_candidates(cmd):
             continue
 
         try:
-            if validate_flex_migration_eligibility_for_linux_consumption_app(cmd, site, flex_regions):
+            is_eligible, warnings = validate_flex_migration_eligibility_for_linux_consumption_app(cmd, site, flex_regions)
+            if is_eligible:
                 site_entry = {
                     'name': site.name,
                     'resource_group': site.resource_group,
                 }
 
+                notes = []
                 has_slots = len(list_slots(cmd, site.resource_group, site.name)) > 0
 
                 if has_slots:
-                    slots_warning = (f"The site '{site.name}' has slots configured. This will not block migration, "
-                                     f"but please note that slots are not supported in Flex Consumption.")
-                    site_entry['note'] = slots_warning
+                    notes.append(f"The site '{site.name}' has slots configured. This will not block migration, "
+                                 f"but please note that slots are not supported in Flex Consumption.")
+
+                # Add certificate-related warnings as notes
+                notes.extend(warnings)
+
+                if notes:
+                    site_entry['note'] = ' '.join(notes)
 
                 eligible_sites.append(site_entry)
 
@@ -1153,6 +1160,8 @@ def list_flex_migration_candidates(cmd):
 
 
 def validate_flex_migration_eligibility_for_linux_consumption_app(cmd, site, flex_regions):
+    warnings = []
+
     # Validating that the site is in a Flex Consumption-supported region
     normalized_site_location = _normalize_location(cmd, site.location)
     if normalized_site_location not in flex_regions:
@@ -1170,18 +1179,26 @@ def validate_flex_migration_eligibility_for_linux_consumption_app(cmd, site, fle
     runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, normalized_site_location, runtime)
     runtime_helper.resolve(runtime, runtime_version)
 
-    # Validating that the site does not have SSL bindings configured
+    # Check for SSL bindings - warn but allow migration
     for ssl_state in site.host_name_ssl_states or []:
         if ssl_state.ssl_state != 'Disabled':
-            raise ValidationError("The site '{}' is using TSL/SSL certificates. "
-                                  "TSL/SSL certificates are not supported in Flex Consumption.".format(site.name))
+            warnings.append("The site '{}' is using TSL/SSL certificates. "
+                            "Site-scoped TSL/SSL certificates are supported in Flex Consumption in preview. "
+                            "Re-configure certificates after migration using the new site-scoped model. "
+                            "Help Link: https://aka.ms/flex-site-scoped-certs-docs."
+                            .format(site.name))
+            break
 
-    # Validating that the site does not have WEBSITE_LOAD_CERTIFICATES app setting configured
+    # Check for WEBSITE_LOAD_CERTIFICATES app setting - warn but allow migration
     app_settings = get_app_settings(cmd, site.resource_group, site.name)
     for setting in app_settings:
         if setting['name'] == 'WEBSITE_LOAD_CERTIFICATES':
-            raise ValidationError("The site '{}' has the WEBSITE_LOAD_CERTIFICATES app setting configured. "
-                                  "Certificate loading is not supported in Flex Consumption.".format(site.name))
+            warnings.append("The site '{}' has the WEBSITE_LOAD_CERTIFICATES app setting configured. "
+                            "Site-scoped certificate loading is supported in Flex Consumption in preview. "
+                            "Re-configure certificates after migration using the new site-scoped model. "
+                            "Help Link: https://aka.ms/flex-site-scoped-certs-docs."
+                            .format(site.name))
+            break
 
     # Validating that the site has triggers supported in Flex Consumption
     functions = list_functions(cmd, site.resource_group, site.name)
@@ -1200,7 +1217,7 @@ def validate_flex_migration_eligibility_for_linux_consumption_app(cmd, site, fle
                               "Please convert these triggers to use Event Grid or replace them with Event Grid "
                               "triggers before migration.".format(site.name, function_list))
 
-    return True
+    return True, warnings
 
 
 def get_storage_account_from_functionapp(cmd, resource_group_name, name):
@@ -1260,11 +1277,16 @@ def migrate_consumption_to_flex(cmd, source_resource_group, source_name, resourc
                               "migration is only supported for Function Apps on Linux Consumption plans."
                               .format(source.name))
 
-    if validate_flex_migration_eligibility_for_linux_consumption_app(cmd, source, flex_regions):
+    is_eligible, warnings = validate_flex_migration_eligibility_for_linux_consumption_app(cmd, source, flex_regions)
+    if is_eligible:
         slots = list_slots(cmd, source_resource_group, source_name)
         if len(slots) > 0:
             print(f"The site '{source_name}' has slots configured. This will not block migration, "
                   f"but please note that slots are not supported in Flex Consumption.")
+
+        # Print certificate-related warnings
+        for warning in warnings:
+            logger.warning(warning)
         print(f"Source app '{source_name}' is eligible for Flex Consumption migration.")
 
     source_site_configs = get_site_configs(cmd, source_resource_group, source_name)

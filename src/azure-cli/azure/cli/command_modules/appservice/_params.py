@@ -720,10 +720,10 @@ subscription than the app service environment, please use the resource ID for --
 
     # Add load_to_code parameter for functionapp SSL commands that create/update certificates (Flex Consumption only)
     with self.argument_context('functionapp config ssl upload') as c:
-        c.argument('load_to_code', arg_type=get_three_state_flag(), help='For Flex Consumption apps only. Make the certificate accessible to app code. When set to true, the certificate can be loaded via the WEBSITE_LOAD_CERTIFICATES app setting.')
+        c.argument('load_to_code', arg_type=get_three_state_flag(), help='For Flex Consumption apps only. When set to true, the certificate is accessible to app code.')
 
     with self.argument_context('functionapp config ssl import') as c:
-        c.argument('load_to_code', arg_type=get_three_state_flag(), help='For Flex Consumption apps only. Make the certificate accessible to app code. When set to true, the certificate can be loaded via the WEBSITE_LOAD_CERTIFICATES app setting.')
+        c.argument('load_to_code', arg_type=get_three_state_flag(), help='For Flex Consumption apps only. When set to true, the certificate is accessible to app code')
         c.argument('enable_using_msi', arg_type=get_three_state_flag(), help='For Flex Consumption apps only. Enable Key Vault access using Managed Service Identity. When set to true, the app will use its managed identity to access Key Vault instead of service principal.')
 
     with self.argument_context('webapp config connection-string list') as c:

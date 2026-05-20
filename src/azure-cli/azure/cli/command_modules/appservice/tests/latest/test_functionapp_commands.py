@@ -816,7 +816,8 @@ class FunctionAppFlexMigrationTest(LiveScenarioTest):
     def test_functionapp_flex_migration_list_candidates(self, resource_group, storage_account):
         eligible_functionapp_name = self.create_random_name('consumption-func', 24)
         noneligible_slots_functionapp_name = self.create_random_name('noneligible-slots-func', 40)
-        noneligible_cert_functionapp_name = self.create_random_name('noneligible-cert-func', 40)
+        eligible_cert_functionapp_name = self.create_random_name('eligible-cert-func', 40)
+
         slot_name = self.create_random_name(prefix='slotname', length=24)
 
         self.cmd('functionapp create -g {} -n {} -c {} -s {}  --os-type linux --runtime python --runtime-version 3.11 --functions-version 4'
@@ -828,9 +829,9 @@ class FunctionAppFlexMigrationTest(LiveScenarioTest):
         self.cmd('functionapp deployment slot create -g {} -n {} --slot {}'.format(resource_group, noneligible_slots_functionapp_name, slot_name))
 
         self.cmd('functionapp create -g {} -n {} -c {} -s {}  --os-type linux --runtime python --runtime-version 3.11 --functions-version 4'
-                .format(resource_group, noneligible_cert_functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account))
+                .format(resource_group, eligible_cert_functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account))
 
-        self.cmd('functionapp config appsettings set -g {} -n {} --settings WEBSITE_LOAD_CERTIFICATES=*'.format(resource_group, noneligible_cert_functionapp_name))
+        self.cmd('functionapp config appsettings set -g {} -n {} --settings WEBSITE_LOAD_CERTIFICATES=*'.format(resource_group, eligible_cert_functionapp_name))
 
         candidates = self.cmd('functionapp flex-migration list').get_output_in_json().get('eligible_apps', [])
 
@@ -838,21 +839,25 @@ class FunctionAppFlexMigrationTest(LiveScenarioTest):
 
         self.assertTrue(eligible_functionapp_name in candidate_names)
         self.assertTrue(noneligible_slots_functionapp_name in candidate_names)
-        self.assertTrue(noneligible_cert_functionapp_name not in candidate_names)
+        # Apps with WEBSITE_LOAD_CERTIFICATES are now eligible with a warning note
+        self.assertTrue(eligible_cert_functionapp_name in candidate_names)
+        cert_candidate = next((c for c in candidates if c.get('name') == eligible_cert_functionapp_name), None)
+        self.assertIsNotNone(cert_candidate)
+        self.assertIn('WEBSITE_LOAD_CERTIFICATES', cert_candidate.get('note', ''))
 
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_flex_migration_private_cert_list_candidates(self, resource_group, storage_account):
-        noneligible_privatekey_functionapp_name = self.create_random_name('noneligible-privatekey-func', 40)
+        eligible_ssl_functionapp_name = self.create_random_name('eligible-ssl-func', 40)
         pfx_file = os.path.join(TEST_DIR, 'server.pfx')
         cert_password = 'test'
         cert_thumbprint = '9E9735C45C792B03B3FFCCA614852B32EE71AD6B'
 
         self.cmd('functionapp create -g {} -n {} -c {} -s {}  --os-type linux --runtime python --runtime-version 3.11 --functions-version 4'
-                .format(resource_group, noneligible_privatekey_functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account))
+                .format(resource_group, eligible_ssl_functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account))
 
-        self.cmd('webapp config ssl upload -g {} -n {} --certificate-file "{}" --certificate-password {} --certificate-name {}'.format(resource_group, noneligible_privatekey_functionapp_name, pfx_file, cert_password, "test123"), checks=[
+        self.cmd('webapp config ssl upload -g {} -n {} --certificate-file "{}" --certificate-password {} --certificate-name {}'.format(resource_group, eligible_ssl_functionapp_name, pfx_file, cert_password, "test123"), checks=[
             JMESPathCheck('thumbprint', cert_thumbprint),
             JMESPathCheck('name', 'test123')
         ])
@@ -861,20 +866,24 @@ class FunctionAppFlexMigrationTest(LiveScenarioTest):
 
         candidate_names = [candidate.get('name') for candidate in candidates if 'name' in candidate]
 
-        self.assertTrue(noneligible_privatekey_functionapp_name in candidate_names)
+        self.assertTrue(eligible_ssl_functionapp_name in candidate_names)
 
-        self.cmd('webapp config ssl bind -g {} -n {} --certificate-thumbprint {} --ssl-type {}'.format(resource_group, noneligible_privatekey_functionapp_name, cert_thumbprint, 'SNI'), checks=[
+        self.cmd('webapp config ssl bind -g {} -n {} --certificate-thumbprint {} --ssl-type {}'.format(resource_group, eligible_ssl_functionapp_name, cert_thumbprint, 'SNI'), checks=[
             JMESPathCheck("hostNameSslStates|[?name=='{}.azurewebsites.net']|[0].sslState".format(
-                noneligible_privatekey_functionapp_name), 'SniEnabled'),
+                eligible_ssl_functionapp_name), 'SniEnabled'),
             JMESPathCheck("hostNameSslStates|[?name=='{}.azurewebsites.net']|[0].thumbprint".format(
-                noneligible_privatekey_functionapp_name), cert_thumbprint)
+                eligible_ssl_functionapp_name), cert_thumbprint)
         ])
 
         candidates = self.cmd('functionapp flex-migration list').get_output_in_json().get('eligible_apps', [])
 
         candidate_names = [candidate.get('name') for candidate in candidates if 'name' in candidate]
 
-        self.assertTrue(noneligible_privatekey_functionapp_name not in candidate_names)
+        # Apps with SSL bindings are now eligible with a warning note
+        self.assertTrue(eligible_ssl_functionapp_name in candidate_names)
+        ssl_candidate = next((c for c in candidates if c.get('name') == eligible_ssl_functionapp_name), None)
+        self.assertIsNotNone(ssl_candidate)
+        self.assertIn('TSL/SSL certificates', ssl_candidate.get('note', ''))
 
 
     @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
