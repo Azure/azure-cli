@@ -2871,14 +2871,18 @@ def _validate_vm_vmss_update_ephemeral_placement(cmd, namespace):  # pylint: dis
 
 def _validate_community_gallery_legal_agreement_acceptance(cmd, namespace):
     from ._vm_utils import is_community_gallery_image_id, parse_community_gallery_image_id
+    from .aaz.latest.sig import ShowCommunity as SigShowCommunity
     if not is_community_gallery_image_id(namespace.image) or namespace.accept_term:
         return
 
     community_gallery_name, _ = parse_community_gallery_image_id(namespace.image)
-    from ._client_factory import cf_community_gallery
     try:
-        community_gallery_info = cf_community_gallery(cmd.cli_ctx).get(namespace.location, community_gallery_name)
-        eula = community_gallery_info.additional_properties['communityMetadata']['eula']
+        command_args = {
+            'location': namespace.location,
+            'public_gallery_name': community_gallery_name
+        }
+        community_gallery_info = SigShowCommunity(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+        eula = community_gallery_info['communityMetadata']['eula']
     except Exception as err:
         raise CLIInternalError('Get the eula from community gallery failed: {0}'.format(err))
 

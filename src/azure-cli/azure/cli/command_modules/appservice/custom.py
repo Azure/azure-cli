@@ -66,7 +66,6 @@ from .utils import (_normalize_sku,
                     retryable_method,
                     raise_missing_token_suggestion,
                     _get_location_from_resource_group,
-                    _list_app,
                     is_functionapp,
                     is_linux_webapp,
                     _rename_server_farm_props,
@@ -130,7 +129,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                   role='Contributor', scope=None, vnet=None, subnet=None, https_only=False,
                   public_network_access=None, acr_use_identity=False, acr_identity=None, basic_auth="",
                   auto_generated_domain_name_label_scope=None, end_to_end_encryption_enabled=None,
-                  min_tls_version=None, min_tls_cipher_suite=None):
+                  min_tls_version=None, min_tls_cipher_suite=None, site_scoped_certs=None):
     from azure.mgmt.web.models import Site, OutboundVnetRouting
     from azure.core.exceptions import ResourceNotFoundError as _ResourceNotFoundError
     SiteConfig, SkuDescription, NameValuePair = cmd.get_models(
@@ -260,7 +259,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                       https_only=https_only, virtual_network_subnet_id=subnet_resource_id,
                       public_network_access=public_network_access, outbound_vnet_routing=outbound_vnet_routing,
                       auto_generated_domain_name_label_scope=auto_generated_domain_name_label_scope,
-                      end_to_end_encryption_enabled=end_to_end_encryption_enabled)
+                      end_to_end_encryption_enabled=end_to_end_encryption_enabled,
+                      site_scoped_certs=site_scoped_certs)
     if runtime:
         runtime = _StackRuntimeHelper.remove_delimiters(runtime)
 
@@ -2234,7 +2234,7 @@ def set_webapp(cmd, resource_group_name, name, slot=None, skip_dns_registration=
 
 def update_webapp(cmd, instance, client_affinity_enabled=None, https_only=None, minimum_elastic_instance_count=None,
                   prewarmed_instance_count=None, end_to_end_encryption_enabled=None,
-                  platform_release_channel=None):
+                  platform_release_channel=None, site_scoped_certs=None):
     if 'function' in instance.kind:
         raise ValidationError("please use 'az functionapp update' to update this function app")
     if minimum_elastic_instance_count or prewarmed_instance_count:
@@ -2260,6 +2260,9 @@ def update_webapp(cmd, instance, client_affinity_enabled=None, https_only=None, 
         instance.https_only = https_only == 'true'
     if end_to_end_encryption_enabled is not None:
         instance.end_to_end_encryption_enabled = end_to_end_encryption_enabled == 'true'
+
+    if site_scoped_certs is not None:
+        instance.site_scoped_certs = site_scoped_certs == 'true'
 
     if minimum_elastic_instance_count is not None:
         from azure.mgmt.web.models import SiteConfig

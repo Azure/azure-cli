@@ -38,11 +38,13 @@ from ..utils._flexible_server_util import (
     parse_maintenance_window,
     resolve_poller)
 from ..utils.validators import (
+    build_network_configuration,
     check_resource_group,
     compare_sku_names,
     pg_arguments_validator,
     pg_byok_validator,
     pg_restore_validator,
+    resolve_private_dns_zone_id,
     validate_and_format_restore_point_in_time,
     validate_citus_cluster,
     validate_georestore_network,
@@ -50,9 +52,6 @@ from ..utils.validators import (
     validate_server_name)
 from .firewall_rule_commands import create_firewall_rule
 from .microsoft_entra_commands import _create_admin
-from .network_commands import (
-    flexible_server_provision_network_resource,
-    prepare_private_dns_zone)
 
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
@@ -72,7 +71,7 @@ def flexible_server_create(cmd, client,
                            storage_gb=None, version=None, microsoft_entra_auth=None,
                            admin_name=None, admin_id=None, admin_type=None,
                            password_auth=None, administrator_login=None, administrator_login_password=None,
-                           tags=None, subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
+                           tags=None, subnet=None, vnet=None,
                            private_dns_zone_arguments=None, public_access=None,
                            high_availability=None, zonal_resiliency=None, allow_same_zone=False,
                            zone=None, standby_availability_zone=None,
@@ -150,18 +149,17 @@ def flexible_server_create(cmd, client,
 
     server_result = firewall_id = None
 
-    network, start_ip, end_ip = flexible_server_provision_network_resource(cmd=cmd,
-                                                                           resource_group_name=resource_group_name,
-                                                                           server_name=server_name,
-                                                                           location=location,
-                                                                           db_context=db_context,
-                                                                           private_dns_zone_arguments=private_dns_zone_arguments,
-                                                                           public_access=public_access,
-                                                                           vnet=vnet,
-                                                                           subnet=subnet,
-                                                                           vnet_address_prefix=vnet_address_prefix,
-                                                                           subnet_address_prefix=subnet_address_prefix,
-                                                                           yes=yes)
+    network, start_ip, end_ip = build_network_configuration(
+        cmd=cmd,
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        location=location,
+        db_context=db_context,
+        private_dns_zone_arguments=private_dns_zone_arguments,
+        public_access=public_access,
+        vnet=vnet,
+        subnet=subnet,
+        yes=yes)
 
     storage = postgresql_flexibleservers.models.Storage(storage_size_gb=storage_gb, auto_grow=auto_grow, tier=performance_tier, type=storage_type, iops=iops, throughput=throughput)
 
@@ -327,7 +325,7 @@ def _form_response(username, sku, location, server_id, host, version, password, 
 def flexible_server_restore(cmd, client,
                             resource_group_name, server_name,
                             source_server, restore_point_in_time=None, zone=None, no_wait=False,
-                            subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
+                            subnet=None, vnet=None,
                             private_dns_zone_arguments=None, geo_redundant_backup=None,
                             byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None, storage_type=None, yes=False):
 
@@ -380,18 +378,17 @@ def flexible_server_restore(cmd, client,
         )
 
         if source_server_object.network.public_network_access == 'Disabled' and any((vnet, subnet)):
-            parameters.network, _, _ = flexible_server_provision_network_resource(cmd=cmd,
-                                                                                  resource_group_name=resource_group_name,
-                                                                                  server_name=server_name,
-                                                                                  location=location,
-                                                                                  db_context=db_context,
-                                                                                  private_dns_zone_arguments=private_dns_zone_arguments,
-                                                                                  public_access='Disabled',
-                                                                                  vnet=vnet,
-                                                                                  subnet=subnet,
-                                                                                  vnet_address_prefix=vnet_address_prefix,
-                                                                                  subnet_address_prefix=subnet_address_prefix,
-                                                                                  yes=yes)
+            parameters.network, _, _ = build_network_configuration(
+                cmd=cmd,
+                resource_group_name=resource_group_name,
+                server_name=server_name,
+                location=location,
+                db_context=db_context,
+                private_dns_zone_arguments=private_dns_zone_arguments,
+                public_access='Disabled',
+                vnet=vnet,
+                subnet=subnet,
+                yes=yes)
         else:
             parameters.network = source_server_object.network
 
@@ -471,13 +468,13 @@ def flexible_server_update_custom_func(cmd, client, instance,
         instance.network.public_network_access = public_access
 
     if private_dns_zone_arguments:
-        private_dns_zone_id = prepare_private_dns_zone(db_context,
-                                                       resource_group_name,
-                                                       server_name,
-                                                       private_dns_zone=private_dns_zone_arguments,
-                                                       subnet_id=instance.network.delegated_subnet_resource_id,
-                                                       location=location,
-                                                       yes=yes)
+        private_dns_zone_id = resolve_private_dns_zone_id(
+            db_context,
+            resource_group_name,
+            server_name,
+            private_dns_zone=private_dns_zone_arguments,
+            subnet_id=instance.network.delegated_subnet_resource_id,
+            location=location)
         instance.network.private_dns_zone_arm_resource_id = private_dns_zone_id
 
     _confirm_restart_server(instance, sku_name, storage_gb, yes)
@@ -681,7 +678,7 @@ def flexible_list_skus(cmd, client, location):
 
 
 def flexible_server_georestore(cmd, client, resource_group_name, server_name, source_server, location, zone=None,
-                               vnet=None, vnet_address_prefix=None, subnet=None, subnet_address_prefix=None,
+                               vnet=None, subnet=None,
                                private_dns_zone_arguments=None, geo_redundant_backup=None, no_wait=False, yes=False,
                                byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None, restore_point_in_time=None):
     validate_resource_group(resource_group_name)
@@ -735,18 +732,17 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
     )
 
     if source_server_object.network.public_network_access == 'Disabled':
-        parameters.network, _, _ = flexible_server_provision_network_resource(cmd=cmd,
-                                                                              resource_group_name=resource_group_name,
-                                                                              server_name=server_name,
-                                                                              location=location,
-                                                                              db_context=db_context,
-                                                                              private_dns_zone_arguments=private_dns_zone_arguments,
-                                                                              public_access='Disabled',
-                                                                              vnet=vnet,
-                                                                              subnet=subnet,
-                                                                              vnet_address_prefix=vnet_address_prefix,
-                                                                              subnet_address_prefix=subnet_address_prefix,
-                                                                              yes=yes)
+        parameters.network, _, _ = build_network_configuration(
+            cmd=cmd,
+            resource_group_name=resource_group_name,
+            server_name=server_name,
+            location=location,
+            db_context=db_context,
+            private_dns_zone_arguments=private_dns_zone_arguments,
+            public_access='Disabled',
+            vnet=vnet,
+            subnet=subnet,
+            yes=yes)
 
     parameters.backup = postgresql_flexibleservers.models.Backup(geo_redundant_backup=geo_redundant_backup)
 
@@ -760,7 +756,7 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
 
 
 def flexible_server_revivedropped(cmd, client, resource_group_name, server_name, source_server, location, zone=None,
-                                  vnet=None, vnet_address_prefix=None, subnet=None, subnet_address_prefix=None,
+                                  vnet=None, subnet=None,
                                   private_dns_zone_arguments=None, geo_redundant_backup=None, no_wait=False, yes=False,
                                   byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None):
     validate_resource_group(resource_group_name)
@@ -800,20 +796,18 @@ def flexible_server_revivedropped(cmd, client, resource_group_name, server_name,
         storage=storage
     )
 
-    if vnet is not None or vnet_address_prefix is not None or subnet is not None or \
-       subnet_address_prefix is not None or private_dns_zone_arguments is not None:
-        parameters.network, _, _ = flexible_server_provision_network_resource(cmd=cmd,
-                                                                              resource_group_name=resource_group_name,
-                                                                              server_name=server_name,
-                                                                              location=location,
-                                                                              db_context=db_context,
-                                                                              private_dns_zone_arguments=private_dns_zone_arguments,
-                                                                              public_access='Disabled',
-                                                                              vnet=vnet,
-                                                                              subnet=subnet,
-                                                                              vnet_address_prefix=vnet_address_prefix,
-                                                                              subnet_address_prefix=subnet_address_prefix,
-                                                                              yes=yes)
+    if vnet is not None or subnet is not None or private_dns_zone_arguments is not None:
+        parameters.network, _, _ = build_network_configuration(
+            cmd=cmd,
+            resource_group_name=resource_group_name,
+            server_name=server_name,
+            location=location,
+            db_context=db_context,
+            private_dns_zone_arguments=private_dns_zone_arguments,
+            public_access='Disabled',
+            vnet=vnet,
+            subnet=subnet,
+            yes=yes)
 
     parameters.backup = postgresql_flexibleservers.models.Backup(geo_redundant_backup=geo_redundant_backup)
 
