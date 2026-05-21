@@ -2375,9 +2375,10 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         if sku_name == CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC:
             raise RequiredArgumentMissingError(
-                "--vnet-subnet-id must be specified for {outbound_type}. For an Automatic cluster "
-                "using Managed System Pool BYO VNet, specify --system-node-subnet-id, --node-subnet-id "
-                "and --apiserver-subnet-id instead. The subnet must be pre-configured with {requirement}".format(
+                "For an Automatic cluster using Managed System Pool BYO VNet, --system-node-subnet-id, "
+                "--node-subnet-id and --apiserver-subnet-id must be specified for {outbound_type}. "
+                "For other BYO VNet clusters, specify --vnet-subnet-id. The subnet must be "
+                "pre-configured with {requirement}".format(
                     outbound_type=outbound_type,
                     requirement=subnet_requirement,
                 )
@@ -2436,17 +2437,27 @@ class AKSManagedClusterContext(BaseAKSContext):
         skuName = self.get_sku_name()
         isVnetSubnetIdEmpty = self.get_vnet_subnet_id() in ["", None]
         # For BYO VNet Managed System Pool (Automatic SKU with system-node/node subnet trio),
-        # the user's subnet IDs replace --vnet-subnet-id; don't force ManagedNATGateway in that case.
+        # those subnet IDs replace --vnet-subnet-id; don't force ManagedNATGateway in that case.
         byo_subnets_set = bool(
             self.raw_param.get("system_node_subnet_id") or
             self.raw_param.get("node_subnet_id")
         )
+        hosted_system_profile = getattr(self.mc, "hosted_system_profile", None) if self.mc else None
+        existing_byo_subnets_set = bool(
+            self.decorator_mode == DecoratorMode.UPDATE and
+            hosted_system_profile and
+            (
+                getattr(hosted_system_profile, "system_node_subnet_id", None) or
+                getattr(hosted_system_profile, "node_subnet_id", None)
+            )
+        )
+        byo_subnets_configured = byo_subnets_set or existing_byo_subnets_set
         use_automatic_managed_nat_gateway = (
             skuName is not None and
             skuName == CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC and
             isVnetSubnetIdEmpty and
             not read_from_mc and
-            not byo_subnets_set
+            not byo_subnets_configured
         )
         if use_automatic_managed_nat_gateway and outbound_type == CONST_OUTBOUND_TYPE_LOAD_BALANCER:
             # outbound_type of Automatic SKU should be ManagedNATGateway if no subnet id provided.
@@ -2479,7 +2490,7 @@ class AKSManagedClusterContext(BaseAKSContext):
                 CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
                 CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
             ]:
-                if self.get_vnet_subnet_id() in ["", None] and not byo_subnets_set:
+                if not read_from_mc and self.get_vnet_subnet_id() in ["", None] and not byo_subnets_configured:
                     self._raise_missing_vnet_subnet_for_outbound_type(outbound_type, skuName)
             if outbound_type == CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY:
                 if self.get_vnet_subnet_id() not in ["", None] or byo_subnets_set:

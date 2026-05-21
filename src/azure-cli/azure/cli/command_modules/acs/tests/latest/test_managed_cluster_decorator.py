@@ -2273,6 +2273,53 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         ctx_14.attach_mc(mc_14)
         self.assertEqual(ctx_14.get_outbound_type(), CONST_OUTBOUND_TYPE_LOAD_BALANCER)
 
+        network_profile_14_0 = self.models.ContainerServiceNetworkProfile(
+            outbound_type=CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY
+        )
+        mc_14_0 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=network_profile_14_0,
+            sku=self.models.ManagedClusterSKU(name="Base"),
+        )
+        ctx_14_0 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"sku": "base"}),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        ctx_14_0.agentpool_context = mock.MagicMock()
+        ctx_14_0.agentpool_context.get_vnet_subnet_id.return_value = None
+        ctx_14_0.attach_mc(mc_14_0)
+        self.assertEqual(ctx_14_0.get_outbound_type(), CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY)
+
+        hosted_system_profile_existing_byo = self.models.ManagedClusterHostedSystemProfile()
+        hosted_system_profile_existing_byo.system_node_subnet_id = (
+            "/subscriptions/s/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/v/subnets/sys"
+        )
+        hosted_system_profile_existing_byo.node_subnet_id = (
+            "/subscriptions/s/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/v/subnets/node"
+        )
+        mc_existing_byo = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=network_profile_14,
+            sku=self.models.ManagedClusterSKU(name="Automatic"),
+            hosted_system_profile=hosted_system_profile_existing_byo,
+        )
+        for outbound_type in [
+            CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING,
+            CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
+        ]:
+            ctx_existing_byo = AKSManagedClusterContext(
+                self.cmd,
+                AKSManagedClusterParamDict({"outbound_type": outbound_type}),
+                self.models,
+                DecoratorMode.UPDATE,
+            )
+            ctx_existing_byo.agentpool_context = mock.MagicMock()
+            ctx_existing_byo.agentpool_context.get_vnet_subnet_id.return_value = None
+            ctx_existing_byo.attach_mc(mc_existing_byo)
+            self.assertEqual(ctx_existing_byo.get_outbound_type(), outbound_type)
+
         ctx_14_1 = AKSManagedClusterContext(
             self.cmd,
             AKSManagedClusterParamDict({
@@ -2286,7 +2333,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         ctx_14_1.agentpool_context.get_vnet_subnet_id.return_value = None
         with self.assertRaisesRegex(
             RequiredArgumentMissingError,
-            "--system-node-subnet-id, --node-subnet-id and --apiserver-subnet-id",
+            "Automatic cluster using Managed System Pool BYO VNet",
         ):
             ctx_14_1.get_outbound_type()
 
@@ -2303,7 +2350,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         ctx_14_2.agentpool_context.get_vnet_subnet_id.return_value = None
         with self.assertRaisesRegex(
             RequiredArgumentMissingError,
-            "--system-node-subnet-id, --node-subnet-id and --apiserver-subnet-id",
+            "Automatic cluster using Managed System Pool BYO VNet",
         ):
             ctx_14_2.get_outbound_type()
 
