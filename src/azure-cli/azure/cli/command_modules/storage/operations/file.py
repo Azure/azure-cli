@@ -28,7 +28,7 @@ from ..util import get_datetime_from_string
 logger = get_logger(__name__)
 
 
-def snapshot_share_rm(cmd, client, resource_group_name, account_name, share_name, metadata=None, share_quota=None,
+def snapshot_share_rm(cmd, resource_group_name, account_name, share_name, metadata=None, share_quota=None,
                       enabled_protocols=None, root_squash=None, access_tier=None):
     ShareRmSnapshot = _ShareRmCreate(cmd.loader)
     args = {

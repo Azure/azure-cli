@@ -64,15 +64,14 @@ def extend_immutability_policy(cmd, client, container_name, account_name, if_mat
                                              match_condition=MatchConditions.IfNotModified)
 
 
-def delete_immutability_policy(cmd, client, container_name, account_name, if_match,
+def delete_immutability_policy(client, container_name, account_name, if_match,
                                resource_group_name=None):
     return client.delete_immutability_policy(resource_group_name, account_name, container_name, etag=if_match,
                                              match_condition=MatchConditions.IfNotModified)
 
 
-def lock_immutability_policy(cmd, client, container_name, account_name, if_match,
+def lock_immutability_policy(client, container_name, account_name, if_match,
                              resource_group_name=None):
-    from azure.core import MatchConditions
     return client.lock_immutability_policy(resource_group_name, account_name, container_name, etag=if_match,
                                            match_condition=MatchConditions.IfNotModified)
 

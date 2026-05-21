@@ -1543,13 +1543,13 @@ short-summary: Extend the immutabilityPeriodSinceCreationInDays of a locked immu
 
 helps['storage container immutability-policy delete'] = """
 type: command
-short-summary: Aborts an unlocked immutability policy. 
+short-summary: Aborts an unlocked immutability policy.
 long-summary: The response of delete has immutabilityPeriodSinceCreationInDays set to 0. ETag in If-Match is required for this operation. Deleting a locked immutability policy is not allowed, the only way is to delete the container after deleting all expired blobs inside the policy locked container.
 """
 
 helps['storage container immutability-policy lock'] = """
 type: command
-short-summary: Sets the ImmutabilityPolicy to Locked state. 
+short-summary: Sets the ImmutabilityPolicy to Locked state.
 long-summary: The only action allowed on a Locked policy is ExtendImmutabilityPolicy action. ETag in If-Match is required for this operation.
 """
 
