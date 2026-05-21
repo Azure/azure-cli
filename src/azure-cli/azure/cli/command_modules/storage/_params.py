@@ -324,10 +324,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('account_name', acct_name_type, options_list=['--name', '-n'], local_context_attribute=None)
 
     with self.argument_context('storage account create', resource_type=ResourceType.MGMT_STORAGE) as c:
-        t_account_type, t_sku_name, t_kind, t_tls_version, t_dns_endpoint_type, t_zone_placement_policy = \
-            self.get_models('AccountType', 'SkuName', 'Kind', 'MinimumTlsVersion', 'DnsEndpointType',
-                            'ZonePlacementPolicy',
-                            resource_type=ResourceType.MGMT_STORAGE)
+        (t_account_type, t_sku_name, t_kind, t_tls_version, t_dns_endpoint_type, t_zone_placement_policy,
+         t_allowed_copy_scope) = self.get_models('AccountType', 'SkuName', 'Kind', 'MinimumTlsVersion',
+                                                 'DnsEndpointType', 'ZonePlacementPolicy', 'AllowedCopyScope',
+                                                 resource_type=ResourceType.MGMT_STORAGE)
         t_identity_type = self.get_models('IdentityType', resource_type=ResourceType.MGMT_STORAGE)
         c.register_common_storage_account_options()
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
@@ -448,6 +448,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('publish_ipv6_endpoint', arg_type=get_three_state_flag(),
                    arg_group='IPv6 Endpoint', is_preview=True,
                    help='A boolean flag which indicates whether IPv6 storage endpoints are to be published.')
+        c.argument('allowed_copy_scope', arg_type=get_enum_type(t_allowed_copy_scope),
+                   help='Restrict copy to and from Storage Accounts within an AAD tenant or with Private Links to the '
+                        'same VNet.')
 
     with self.argument_context('storage account private-endpoint-connection',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
@@ -551,6 +554,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('publish_ipv6_endpoint', arg_type=get_three_state_flag(),
                    arg_group='IPv6 Endpoint', is_preview=True,
                    help='A boolean flag which indicates whether IPv6 storage endpoints are to be published.')
+        c.argument('allowed_copy_scope', arg_type=get_enum_type(t_allowed_copy_scope),
+                   help='Restrict copy to and from Storage Accounts within an AAD tenant or with Private Links to the '
+                        'same VNet.')
 
     for scope in ['storage account create', 'storage account update']:
         with self.argument_context(scope, arg_group='Customer managed key',

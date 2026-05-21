@@ -79,7 +79,8 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                            immutability_period_since_creation_in_days=None, immutability_policy_state=None,
                            allow_protected_append_writes=None, public_network_access=None, dns_endpoint_type=None,
                            enable_smb_oauth=None, zones=None, zone_placement_policy=None,
-                           enable_blob_geo_priority_replication=None, publish_ipv6_endpoint=None):
+                           enable_blob_geo_priority_replication=None, publish_ipv6_endpoint=None,
+                           allowed_copy_scope=None):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
@@ -334,6 +335,9 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
             publish_ipv6_endpoint=publish_ipv6_endpoint
         )
 
+    if allowed_copy_scope is not None:
+        params.allowed_copy_scope = allowed_copy_scope
+
     return scf.storage_accounts.begin_create(resource_group_name, account_name, params)
 
 
@@ -429,7 +433,8 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                            immutability_period_since_creation_in_days=None, immutability_policy_state=None,
                            allow_protected_append_writes=None, public_network_access=None, upgrade_to_storagev2=None,
                            yes=None, enable_smb_oauth=None, zones=None, zone_placement_policy=None,
-                           enable_blob_geo_priority_replication=None, publish_ipv6_endpoint=None):
+                           enable_blob_geo_priority_replication=None, publish_ipv6_endpoint=None,
+                           allowed_copy_scope=None):
     StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet, Kind = \
         cmd.get_models('StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier', 'Identity', 'Encryption',
                        'NetworkRuleSet', 'Kind')
@@ -752,6 +757,9 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
         params.dual_stack_endpoint_preference = DualStackEndpointPreference(
             publish_ipv6_endpoint=publish_ipv6_endpoint
         )
+
+    if allowed_copy_scope is not None:
+        params.allowed_copy_scope = allowed_copy_scope
 
     return params
 
