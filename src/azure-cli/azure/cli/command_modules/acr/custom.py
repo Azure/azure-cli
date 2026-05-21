@@ -489,16 +489,24 @@ def _validate_command_path(docker_command, is_diagnostics_context=False):
     resolved_path = shutil.which(docker_command)
     if resolved_path:
         try:
-            # Use the pre-symlink path for the security decision to prevent symlink bypass
-            resolved_dir = os.path.dirname(os.path.abspath(resolved_path))
             cwd = os.path.abspath(os.getcwd())
-            # samefile catches Windows 8.3 short names, junctions, and subst drives
-            try:
-                dirs_match = os.path.samefile(resolved_dir, cwd)
-            except (OSError, ValueError):
-                dirs_match = (os.path.normcase(os.path.normpath(resolved_dir)) ==
-                              os.path.normcase(os.path.normpath(cwd)))
-            if dirs_match:
+
+            # Check pre-symlink path (where PATH found the entry)
+            resolved_dir = os.path.dirname(os.path.abspath(resolved_path))
+            # Check post-symlink path (where it ultimately points)
+            real_dir = os.path.dirname(os.path.realpath(resolved_path))
+
+            def _is_same_dir(dir1, dir2):
+                """Use samefile to compare directories by filesystem identity, not string path.
+                This handles cases where the same directory has different path representations
+                (e.g., short names like PROGRA~1, junctions, or mapped drives)."""
+                try:
+                    return os.path.samefile(dir1, dir2)
+                except (OSError, ValueError):
+                    return (os.path.normcase(os.path.normpath(dir1)) ==
+                            os.path.normcase(os.path.normpath(dir2)))
+
+            if _is_same_dir(resolved_dir, cwd) or _is_same_dir(real_dir, cwd):
                 resolved_real = os.path.realpath(resolved_path)
                 msg = (
                     "Refusing to use '{}' resolved at '{}' because it is located in the current "

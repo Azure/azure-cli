@@ -136,3 +136,18 @@ class TestValidateCommandPath(unittest.TestCase):
 
         with self.assertRaises(CLIError):
             _validate_command_path('docker', is_diagnostics_context=False)
+
+    @mock.patch('azure.cli.command_modules.acr.custom.os.path.realpath')
+    @mock.patch('azure.cli.command_modules.acr.custom.os.path.abspath')
+    @mock.patch('azure.cli.command_modules.acr.custom.shutil.which')
+    @mock.patch('azure.cli.command_modules.acr.custom.os.getcwd')
+    def test_system_binary_symlink_resolving_to_cwd_is_blocked(self, mock_getcwd, mock_which, mock_abspath,
+                                                               mock_realpath):
+        """A binary outside CWD whose realpath resolves into the CWD should be blocked."""
+        mock_getcwd.return_value = '/home/user/repo'
+        mock_which.return_value = '/usr/local/bin/docker'
+        mock_abspath.side_effect = lambda p: p if p != '.' else '/home/user/repo'
+        mock_realpath.return_value = '/home/user/repo/docker'
+
+        with self.assertRaises(CLIError):
+            _validate_command_path('docker', is_diagnostics_context=False)
