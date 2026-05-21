@@ -728,6 +728,20 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('enable_last_access_tracking', arg_type=get_three_state_flag(),
                    options_list=['--enable-last-access-tracking', '-t'],
                    help='When set to true last access time based tracking policy is enabled.')
+        c.argument('enable_static_website', arg_type=get_three_state_flag(), arg_group='Static Website',
+                   help='Indicates whether static website support is enabled for the specified account.')
+        c.argument('index_document', arg_group='Static Website',
+                   help='The webpage that Azure Storage serves for requests to the root of a website or any subfolder '
+                        '(for example, index.html).')
+        c.argument('default_index_document_path', arg_group='Static Website',
+                   options_list=['--default-index-document-path', '--default-index'],
+                   help='The absolute path where the default index file is present. This absolute path is mutually '
+                        'exclusive to "indexDocument" and it is case-sensitive.')
+        c.argument('error_document_404_path', arg_group='Static Website',
+                   options_list=['--error-document-404-path', '--404-document'],
+                   help="The absolute path to a webpage that Azure Storage serves for requests that don't correspond "
+                        "to an existing file. The contents of the page are returned with HTTP 404 Not Found. "
+                        "Only a single custom 404 page is supported in each static website.")
 
     with self.argument_context('storage account blob-service-properties cors-rule',
                                resource_type=ResourceType.MGMT_STORAGE) as c:

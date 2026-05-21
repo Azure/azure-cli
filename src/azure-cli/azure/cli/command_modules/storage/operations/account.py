@@ -927,12 +927,14 @@ def update_management_policies(cmd, client, resource_group_name, account_name, p
 
 
 # TODO: support updating other properties besides 'enable_change_feed,delete_retention_policy'
+# pylint: line-too-long
 def update_blob_service_properties(cmd, instance, enable_change_feed=None, change_feed_retention_days=None,
                                    enable_delete_retention=None, delete_retention_days=None,
                                    enable_restore_policy=None, restore_days=None,
                                    enable_versioning=None, enable_container_delete_retention=None,
                                    container_delete_retention_days=None, default_service_version=None,
-                                   enable_last_access_tracking=None):
+                                   enable_last_access_tracking=None, enable_static_website=None,
+                                   index_document=None, default_index_document_path=None, error_document_404_path=None):
     if enable_change_feed is not None:
         if enable_change_feed is False:
             change_feed_retention_days = None
@@ -967,6 +969,13 @@ def update_blob_service_properties(cmd, instance, enable_change_feed=None, chang
     if enable_last_access_tracking is not None:
         LastAccessTimeTrackingPolicy = cmd.get_models('LastAccessTimeTrackingPolicy')
         instance.last_access_time_tracking_policy = LastAccessTimeTrackingPolicy(enable=enable_last_access_tracking)
+
+    if enable_static_website is not None or index_document or default_index_document_path or error_document_404_path:
+        StaticWebsite = cmd.get_models('StaticWebsite')
+        instance.static_website = StaticWebsite(enabled=enable_static_website,
+                                                index_document=index_document,
+                                                default_index_document_path=default_index_document_path,
+                                                error_document404_path=error_document_404_path)
 
     return instance
 
