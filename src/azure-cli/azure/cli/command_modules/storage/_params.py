@@ -587,6 +587,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
             c.argument('vnet_name', help='Name of a virtual network.', validator=validate_subnet)
             c.argument('action', action_type)
 
+    with self.argument_context('storage account show') as c:
+        t_storage_account_expand = self.get_models('StorageAccountExpand', resource_type=ResourceType.MGMT_STORAGE)
+        c.argument('expand', arg_type=get_enum_type(t_storage_account_expand),
+                   help="May be used to expand the properties within account's properties. Default value is None.")
+
     with self.argument_context('storage account show-connection-string') as c:
         from ._validators import validate_key_name
         c.argument('protocol', help='The default endpoint protocol.', arg_type=get_enum_type(['http', 'https']))
@@ -890,6 +895,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                        help='Indicates whether ssh key exists. Set it to false to remove existing SSH key.')
             c.argument('has_ssh_password', arg_type=get_three_state_flag(),
                        help='Indicates whether ssh password exists. Set it to false to remove existing SSH password.')
+
+    with self.argument_context('storage account local-user list') as c:
+        t_list_local_user_include_param = self.get_models('ListLocalUserIncludeParam',
+                                                          resource_type=ResourceType.MGMT_STORAGE)
+        c.argument('filter', help='When specified, only local user names starting with the filter will be listed. '
+                                  'Default value is None.')
+        c.argument('include', arg_type=get_enum_type(t_list_local_user_include_param),
+                   help='When specified, will list local users enabled for the specific protocol. '
+                        'Lists all users by default. Default value is None.')
 
     for item in ['show', 'off']:
         with self.argument_context('storage logging {}'.format(item)) as c:
@@ -1613,6 +1627,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                        help='Storage account name. Related environment variable: AZURE_STORAGE_ACCOUNT.')
             c.argument('if_match', help="An ETag value, or the wildcard character (*). Specify this header to perform "
                                         "the operation only if the resource's ETag matches the value specified.")
+
+    with self.argument_context('storage container immutability-policy show') as c:
+        c.ignore('etag')
+        c.ignore('match_condition')
 
     with self.argument_context('storage container list') as c:
         c.argument('num_results', arg_type=num_results_type)

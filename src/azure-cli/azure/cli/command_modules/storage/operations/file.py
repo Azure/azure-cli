@@ -32,7 +32,7 @@ def snapshot_share_rm(cmd, client, resource_group_name, account_name, share_name
                       enabled_protocols=None, root_squash=None, access_tier=None):
     ShareRmSnapshot = _ShareRmCreate(cmd.loader)
     args = {
-        'resource_group': resource_group_name, 'storage_account':account_name, 'share_name': share_name,
+        'resource_group': resource_group_name, 'storage_account': account_name, 'share_name': share_name,
         'metadata': metadata, 'quota': share_quota, 'enabled_protocols': enabled_protocols,
         'root_squash': root_squash, 'access_tier': access_tier, 'expand': 'snapshots'
     }

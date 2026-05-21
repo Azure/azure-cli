@@ -1106,13 +1106,14 @@ def create_or_policy(cmd, client, account_name, resource_group_name=None, proper
     else:
         rules = []
         if properties.get('rules'):
-            rules = [ObjectReplicationPolicyRule(
-                    rule_id=rule.get('ruleId'),
-                    source_container=rule.get('sourceContainer'),
-                    destination_container=rule.get('destinationContainer'),
-                    filters=ObjectReplicationPolicyFilter(prefix_match=rule.get('filters').get('prefixMatch'),
-                                                          min_creation_time=rule.get('filters').get('minCreationTime')) if rule.get('filters') else None
-                ) for rule in properties['rules']]
+            rules = [ObjectReplicationPolicyRule(rule_id=rule.get('ruleId'),
+                                                 source_container=rule.get('sourceContainer'),
+                                                 destination_container=rule.get('destinationContainer'),
+                                                 filters=ObjectReplicationPolicyFilter(
+                                                     prefix_match=rule.get('filters').get('prefixMatch'),
+                                                     min_creation_time=rule.get('filters').get(
+                                                         'minCreationTime')) if rule.get('filters') else None
+                                                 ) for rule in properties['rules']]
         or_policy = ObjectReplicationPolicy(source_account=properties.get('sourceAccount'),
                                             destination_account=properties.get('destinationAccount'),
                                             rules=rules,
@@ -1158,12 +1159,12 @@ def update_or_policy(cmd, client, parameters, resource_group_name, account_name,
                                                           'minCreationTime')) if rule.get('filters') else None
             ) for rule in properties['rules']]
         parameters = ObjectReplicationPolicy(source_account=properties.get('sourceAccount'),
-                                            destination_account=properties.get('destinationAccount'),
-                                            rules=rules,
-                                            metrics=ObjectReplicationPolicyPropertiesMetrics(
-                                                enabled=properties.get('metrics').get('enabled')),
-                                            priority_replication=ObjectReplicationPolicyPropertiesPriorityReplication(
-                                                enabled=properties.get('priorityReplication').get('enabled')))
+                                             destination_account=properties.get('destinationAccount'),
+                                             rules=rules,
+                                             metrics=ObjectReplicationPolicyPropertiesMetrics(
+                                                 enabled=properties.get('metrics').get('enabled')),
+                                             priority_replication=ObjectReplicationPolicyPropertiesPriorityReplication(
+                                                 enabled=properties.get('priorityReplication').get('enabled')))
         if "policyId" in properties.keys() and properties["policyId"]:
             object_replication_policy_id = properties["policyId"]
 
