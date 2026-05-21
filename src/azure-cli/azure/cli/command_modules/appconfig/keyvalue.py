@@ -50,7 +50,8 @@ from ._constants import (FeatureFlagConstants, KeyVaultConstants,
                          SearchFilterOptions, StatusCodes,
                          ImportExportProfiles, CompareFieldsMap,
                          JsonDiff, ImportMode,
-                         AIConfigConstants, HttpHeaders)
+                         AIConfigConstants, HttpHeaders,
+                         SnapshotReferenceConstants)
 from ._featuremodels import map_keyvalue_to_featureflag
 from ._json import parse_json_with_comments
 from ._models import (convert_configurationsetting_to_keyvalue, convert_keyvalue_to_configurationsetting)
@@ -648,6 +649,85 @@ def set_keyvault(cmd,
     raise CLIError("Failed to set the keyvault reference '{}' due to a conflicting operation.".format(key))
 
 
+def set_snapshot_reference(cmd,
+                           key,
+                           snapshot_name,
+                           name=None,
+                           label=None,
+                           tags=None,
+                           yes=False,
+                           connection_string=None,
+                           auth_mode="key",
+                           endpoint=None):
+    azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
+
+    snapshot_ref_value = json.dumps({SnapshotReferenceConstants.SNAPSHOT_NAME_KEY: snapshot_name}, ensure_ascii=False)
+    retry_times = 3
+    retry_interval = 1
+
+    label = label if label and label != SearchFilterOptions.EMPTY_LABEL else None
+
+    # generate correlation request id for operations in the same activity
+    correlation_request_id = str(uuid.uuid4())
+
+    for i in range(0, retry_times):
+        retrieved_kv = None
+        set_kv = None
+        new_kv = None
+
+        try:
+            retrieved_kv = azconfig_client.get_configuration_setting(key=key, label=label, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
+        except ResourceNotFoundError:
+            logger.debug("Key '%s' with label '%s' not found. A new snapshot reference will be created.", key, label)
+        except HttpResponseError as exception:
+            raise CLIErrors.AzureResponseError("Failed to retrieve key-values from config store. " + str(exception))
+
+        if retrieved_kv is None:
+            set_kv = ConfigurationSetting(key=key,
+                                          label=label,
+                                          value=snapshot_ref_value,
+                                          content_type=SnapshotReferenceConstants.SNAPSHOT_REFERENCE_CONTENT_TYPE,
+                                          tags=tags)
+        else:
+            set_kv = ConfigurationSetting(key=key,
+                                          label=label,
+                                          value=snapshot_ref_value,
+                                          content_type=SnapshotReferenceConstants.SNAPSHOT_REFERENCE_CONTENT_TYPE,
+                                          tags=retrieved_kv.tags if tags is None else tags,
+                                          read_only=retrieved_kv.read_only,
+                                          etag=retrieved_kv.etag)
+
+        verification_kv = {
+            "key": set_kv.key,
+            "label": set_kv.label,
+            "content_type": set_kv.content_type,
+            "value": set_kv.value,
+            "tags": set_kv.tags
+        }
+        entry = json.dumps(verification_kv, indent=2, sort_keys=True, ensure_ascii=False)
+        confirmation_message = "Are you sure you want to set the snapshot reference: \n" + entry + "\n"
+        user_confirmation(confirmation_message, yes)
+
+        try:
+            if set_kv.etag is None:
+                new_kv = azconfig_client.add_configuration_setting(set_kv, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
+            else:
+                new_kv = azconfig_client.set_configuration_setting(set_kv, match_condition=MatchConditions.IfNotModified, headers={HttpHeaders.CORRELATION_REQUEST_ID: correlation_request_id})
+            return convert_configurationsetting_to_keyvalue(new_kv)
+
+        except ResourceReadOnlyError:
+            raise CLIError("Failed to update read only snapshot reference. Unlock the key-value before updating it.")
+        except HttpResponseError as exception:
+            if exception.status_code == StatusCodes.PRECONDITION_FAILED:
+                logger.debug('Retrying setting %s times with exception: concurrent setting operations', i + 1)
+                time.sleep(retry_interval)
+            else:
+                raise CLIErrors.AzureResponseError("Failed to set the snapshot reference due to an exception: " + str(exception))
+        except Exception as exception:
+            raise CLIError("Failed to set the snapshot reference due to an exception: " + str(exception))
+    raise CLIError("Failed to set the snapshot reference '{}' due to a conflicting operation.".format(key))
+
+
 def delete_key(cmd,
                key,
                name=None,
@@ -821,6 +901,7 @@ def list_key(cmd,
              top=None,
              all_=False,
              resolve_keyvault=False,
+             resolve_snapshot_references=False,
              auth_mode="key",
              endpoint=None):
     if fields and resolve_keyvault:
@@ -841,7 +922,45 @@ def list_key(cmd,
                                             top=top,
                                             all_=all_,
                                             cli_ctx=cmd.cli_ctx if resolve_keyvault else None)
+
+    if resolve_snapshot_references:
+        keyvalues = __resolve_snapshot_references(azconfig_client, keyvalues, cli_ctx=cmd.cli_ctx if resolve_keyvault else None)
+
     return keyvalues
+
+
+def __resolve_snapshot_references(azconfig_client, keyvalues, cli_ctx=None):
+    """Return key-values in the referenced snapshot. The result may contain duplicate keys,
+    which the caller is responsible for handling.
+    """
+    resolved_keyvalues = []
+    for keyvalue in keyvalues:
+        content_type = getattr(keyvalue, 'content_type', None)
+        if not (isinstance(content_type, str) and
+                content_type.lower() == SnapshotReferenceConstants.SNAPSHOT_REFERENCE_CONTENT_TYPE.lower()):
+            resolved_keyvalues.append(keyvalue)
+            continue
+
+        reference_value = getattr(keyvalue, 'value', None) or '{}'
+        try:
+            snapshot_name = json.loads(reference_value).get(SnapshotReferenceConstants.SNAPSHOT_NAME_KEY)
+        except (json.JSONDecodeError, TypeError):
+            logger.warning("Skipping snapshot reference with key '%s': invalid value format.", getattr(keyvalue, 'key', None))
+            continue
+
+        if not snapshot_name:
+            logger.warning("Skipping snapshot reference with key '%s': missing snapshot name.", getattr(keyvalue, 'key', None))
+            continue
+
+        try:
+            snapshot_keyvalues = __read_kv_from_config_store(azconfig_client, snapshot=snapshot_name, cli_ctx=cli_ctx)
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.warning("Skipping snapshot reference '%s': %s", snapshot_name, str(ex))
+            continue
+
+        resolved_keyvalues.extend(snapshot_keyvalues)
+
+    return resolved_keyvalues
 
 
 def restore_key(cmd,

@@ -54,6 +54,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             options_list=['--name', '-n'],
             id_part='name',
             help="Name of the read replica.",
+            required=True,
             local_context_attribute=LocalContextAttribute(
                 name='server_name',
                 actions=[LocalContextAction.SET, LocalContextAction.GET],
@@ -61,7 +62,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
         migration_id_arg_type = CLIArgumentType(
             metavar='NAME',
-            help="ID of the migration.",
+            help="Identifier of the migration.",
             local_context_attribute=LocalContextAttribute(
                 name='migration_id',
                 actions=[LocalContextAction.SET, LocalContextAction.GET],
@@ -94,10 +95,21 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 actions=[LocalContextAction.GET, LocalContextAction.SET],
                 scopes=['{} flexible-server'.format(command_group)]))
 
+        database_object_name_arg_type = CLIArgumentType(
+            metavar='NAME',
+            options_list=['--name', '-n'],
+            id_part='child_name_1',
+            help='The name of the database',
+            required=True,
+            local_context_attribute=LocalContextAttribute(
+                name='database_name',
+                actions=[LocalContextAction.GET, LocalContextAction.SET],
+                scopes=['{} flexible-server'.format(command_group)]))
+
         database_name_arg_type_cluster = CLIArgumentType(
             metavar='NAME',
             options_list=['--database-name', '-d'],
-            help='The default database name for an elastic cluster. Only applicable when --cluster-option is set to ElasticCluster.',
+            help='The default database name for an elastic cluster. Only applicable when --node-count is present.',
             local_context_attribute=LocalContextAttribute(
                 name='database_name',
                 actions=[LocalContextAction.GET, LocalContextAction.SET],
@@ -146,17 +158,10 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                  'This value can only be updated if flexible server is using Premium SSD v2 Disks.'
         )
 
-        cluster_option_arg_type = CLIArgumentType(
-            arg_type=get_enum_type(['Server', 'ElasticCluster']),
-            options_list=['--cluster-option'],
-            help='Cluster option for the server. Servers are for workloads that can fit on one node. '
-                 'Elastic clusters provides schema- and row-based sharding on a database. Default value is Server.'
-        )
-
         create_node_count_arg_type = CLIArgumentType(
             type=int,
             options_list=['--node-count'],
-            help='The number of nodes for elastic cluster. Default is 2 nodes.'
+            help='The number of nodes for elastic cluster.'
         )
 
         update_node_count_arg_type = CLIArgumentType(
@@ -174,20 +179,22 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         storage_type_arg_type = CLIArgumentType(
             arg_type=get_enum_type(['PremiumV2_LRS', 'Premium_LRS']),
             options_list=['--storage-type'],
-            help='Storage type for the server. Allowed values are Premium_LRS and PremiumV2_LRS. Default value is Premium_LRS.'
-                 'Must set iops and throughput if using PremiumV2_LRS.'
+            help='Storage type for the server. Allowed values are Premium_LRS and PremiumV2_LRS. '
+            'Default value is Premium_LRS. Must set --iops and --throughput if using PremiumV2_LRS.'
         )
 
         storage_type_replica_arg_type = CLIArgumentType(
             arg_type=get_enum_type(['PremiumV2_LRS']),
             options_list=['--storage-type'],
-            help='Storage type for the read replica. Allowed value is PremiumV2_LRS. Default is for the read replica to match storage type of the primary server.'
+            help='Storage type for the read replica. Allowed value is PremiumV2_LRS. '
+            'Default is for the read replica to match storage type of the primary server.'
         )
 
         storage_type_restore_arg_type = CLIArgumentType(
             arg_type=get_enum_type(['PremiumV2_LRS']),
             options_list=['--storage-type'],
-            help='Storage type for the new server. Allowed value is PremiumV2_LRS. Default is for the new server to match storage type of the source server.'
+            help='Storage type for the new server. Allowed value is PremiumV2_LRS. '
+            'Default is for the new server to match storage type of the source server.'
         )
 
         performance_tier_arg_type = CLIArgumentType(
@@ -203,30 +210,17 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
         vnet_arg_type = CLIArgumentType(
             options_list=['--vnet'],
-            help='Name or ID of a new or existing virtual network. '
-                 'If you want to use a vnet from different resource group or subscription, '
-                 'please provide a resource ID. The name must be between 2 to 64 characters. '
+            help='Name or identifier of an existing virtual network. '
+                 'If you want to use a vnet from a different resource group or subscription, '
+                 'please provide a resource identifier. The name must be between 2 to 64 characters. '
                  'The name must begin with a letter or number, end with a letter, number or underscore, '
                  'and may contain only letters, numbers, underscores, periods, or hyphens.'
         )
 
-        vnet_address_prefix_arg_type = CLIArgumentType(
-            options_list=['--address-prefixes'],
-            help='The IP address prefix to use when creating a new virtual network in CIDR format. '
-                 'Default value is 10.0.0.0/16.'
-        )
-
         subnet_arg_type = CLIArgumentType(
             options_list=['--subnet'],
-            help='Name or resource ID of a new or existing subnet. '
-                 'If you want to use a subnet from different resource group or subscription, please provide resource ID instead of name. '
-                 'Please note that the subnet will be delegated to flexibleServers. '
-                 'After delegation, this subnet cannot be used for any other type of Azure resources.'
-        )
-
-        subnet_address_prefix_arg_type = CLIArgumentType(
-            options_list=['--subnet-prefixes'],
-            help='The subnet IP address prefix to use when creating a new subnet in CIDR format. Default value is 10.0.0.0/24.'
+            help='Name or identifier of an existing subnet. '
+                 'If you want to use a subnet from a different resource group or subscription, please provide its resource identifier instead of name.'
         )
 
         zone_arg_type = CLIArgumentType(
@@ -276,30 +270,28 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         )
 
         pg_version_upgrade_arg_type = CLIArgumentType(
-            arg_type=get_enum_type(['13', '14', '15', '16', '17', '18']),
             options_list=['--version', '-v'],
             help='Server major version.'
         )
 
         private_dns_zone_arguments_arg_type = CLIArgumentType(
             options_list=['--private-dns-zone'],
-            help='This parameter only applies for a server with private access. '
-                 'The name or id of new or existing private dns zone. '
-                 'You can use the private dns zone from same resource group, different resource group, or different subscription. '
-                 'If you want to use a zone from different resource group or subscription, please provide resource Id. '
-                 'CLI creates a new private dns zone within the same resource group as virtual network if not provided by users.'
+            help='This parameter only applies for a server with private access and is required when using --vnet or --subnet. '
+                 'The name or resource identifier of an existing private DNS zone. '
+                 'You can use a private DNS zone from the same resource group, a different resource group, or a different subscription. '
+                 'If you want to use a zone from a different resource group or subscription, please provide its resource identifier.'
         )
 
         restore_point_in_time_arg_type = CLIArgumentType(
             options_list=['--restore-time'],
             default=get_current_time(),
-            help='The point in time in UTC to restore from (ISO8601 format), e.g., 2017-04-26T02:10:00+00:00'
+            help='The point in time in UTC to restore from (ISO8601 format), e.g., 2026-03-22T18:20:22+00:00 '
                  'The default value is set to current time.'
         )
 
         source_server_arg_type = CLIArgumentType(
             options_list=['--source-server'],
-            help='The name or resource ID of the source server to restore from.'
+            help='The name or resource identifier of the source server to restore from.'
         )
 
         geo_redundant_backup_arg_type = CLIArgumentType(
@@ -310,30 +302,30 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
         identity_arg_type = CLIArgumentType(
             options_list=['--identity'],
-            help='The name or resource ID of the user assigned identity for data encryption.',
+            help='The name or resource identifier of the user assigned identity for data encryption.',
             validator=validate_byok_identity
         )
 
         backup_identity_arg_type = CLIArgumentType(
             options_list=['--backup-identity'],
-            help='The name or resource ID of the geo backup user identity for data encryption. The identity needs to be in the same region as the backup region.',
+            help='The name or resource identifier of the geo backup user identity for data encryption. The identity needs to be in the same region as the backup region.',
             validator=validate_byok_identity
         )
 
         key_arg_type = CLIArgumentType(
             options_list=['--key'],
-            help='The resource ID of the primary keyvault key for data encryption.'
+            help='The resource identifier of the primary keyvault key for data encryption.'
         )
 
         backup_key_arg_type = CLIArgumentType(
             options_list=['--backup-key'],
-            help='The resource ID of the geo backup keyvault key for data encryption. The key needs to be in the same region as the backup region.'
+            help='The resource identifier of the geo backup keyvault key for data encryption. The key needs to be in the same region as the backup region.'
         )
 
         identities_arg_type = CLIArgumentType(
             options_list=['--identity', '-n'],
             nargs='+',
-            help='Space-separated names or ID\'s of identities.',
+            help='Space-separated names or identifiers of identities.',
             validator=validate_identities
         )
 
@@ -398,7 +390,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('version', arg_type=version_arg_type)
             c.argument('backup_retention', default=7, arg_type=pg_backup_retention_arg_type)
             c.argument('microsoft_entra_auth', default='Disabled', arg_type=microsoft_entra_auth_arg_type)
-            c.argument('admin_id', options_list=['--admin-object-id', '-i'], help='The unique ID of the Microsoft Entra administrator.')
+            c.argument('admin_id', options_list=['--admin-object-id', '-i'], help='The unique identifier of the Microsoft Entra administrator.')
             c.argument('admin_name', options_list=['--admin-display-name', '-m'], help='Display name of the Microsoft Entra administrator user or group.')
             c.argument('admin_type', options_list=['--admin-type', '-t'],
                        arg_type=get_enum_type(['User', 'Group', 'ServicePrincipal', 'Unknown']), help='Type of the Microsoft Entra administrator.')
@@ -408,7 +400,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('iops', default=None, arg_type=iops_v2_arg_type)
             c.argument('throughput', default=None, arg_type=throughput_arg_type)
             c.argument('performance_tier', default=None, arg_type=performance_tier_arg_type)
-            c.argument('create_cluster', default='Server', arg_type=cluster_option_arg_type)
             c.argument('cluster_size', default=None, arg_type=create_node_count_arg_type)
             c.argument('zonal_resiliency', arg_type=zonal_resiliency_arg_type, default="Disabled")
             c.argument('allow_same_zone', arg_type=allow_same_zone_arg_type, default=False)
@@ -424,9 +415,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('high_availability', arg_type=high_availability_arg_type, default="Disabled")
             c.argument('public_access', arg_type=public_access_create_arg_type)
             c.argument('vnet', arg_type=vnet_arg_type)
-            c.argument('vnet_address_prefix', arg_type=vnet_address_prefix_arg_type)
             c.argument('subnet', arg_type=subnet_arg_type)
-            c.argument('subnet_address_prefix', arg_type=subnet_address_prefix_arg_type)
             c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
             c.argument('zone', zone_arg_type)
             c.argument('tags', tags_type)
@@ -444,9 +433,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('restore_point_in_time', arg_type=restore_point_in_time_arg_type)
             c.argument('source_server', arg_type=source_server_arg_type)
             c.argument('vnet', arg_type=vnet_arg_type)
-            c.argument('vnet_address_prefix', arg_type=vnet_address_prefix_arg_type)
             c.argument('subnet', arg_type=subnet_arg_type)
-            c.argument('subnet_address_prefix', arg_type=subnet_address_prefix_arg_type)
             c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
             c.argument('zone', arg_type=zone_arg_type)
             c.argument('yes', arg_type=yes_arg_type)
@@ -462,9 +449,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('sku_name', arg_type=sku_name_arg_type)
             c.argument('source_server', arg_type=source_server_arg_type)
             c.argument('vnet', arg_type=vnet_arg_type)
-            c.argument('vnet_address_prefix', arg_type=vnet_address_prefix_arg_type)
             c.argument('subnet', arg_type=subnet_arg_type)
-            c.argument('subnet_address_prefix', arg_type=subnet_address_prefix_arg_type)
             c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
             c.argument('zone', arg_type=zone_arg_type)
             c.argument('yes', arg_type=yes_arg_type)
@@ -480,9 +465,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('sku_name', arg_type=sku_name_arg_type)
             c.argument('source_server', arg_type=source_server_arg_type)
             c.argument('vnet', arg_type=vnet_arg_type)
-            c.argument('vnet_address_prefix', arg_type=vnet_address_prefix_arg_type)
             c.argument('subnet', arg_type=subnet_arg_type)
-            c.argument('subnet_address_prefix', arg_type=subnet_address_prefix_arg_type)
             c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
             c.argument('zone', arg_type=zone_arg_type)
             c.argument('yes', arg_type=yes_arg_type)
@@ -553,12 +536,16 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         for scope in ['create', 'delete', 'show', 'update']:
             argument_context_string = '{} flexible-server firewall-rule {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
-                c.argument('firewall_rule_name', id_part='child_name_1', options_list=['--rule-name', '-r'], validator=postgres_firewall_rule_name_validator,
-                           help='The name of the firewall rule. If name is omitted, default name will be chosen for firewall name. The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. Additionally, the name of the firewall rule must be at least 3 characters and no more than 128 characters in length. ')
+                c.argument('server_name', arg_type=server_name_resource_arg_type)
+                c.argument('firewall_rule_name', id_part='child_name_1', options_list=['--name', '-n'], validator=postgres_firewall_rule_name_validator,
+                           help='The name of the firewall rule. If name is omitted, default name will be chosen for firewall rule name. The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. Additionally, the name of the firewall rule must be at least 3 characters and no more than 128 characters in length. ')
                 c.argument('end_ip_address', options_list=['--end-ip-address'], validator=ip_address_validator,
                            help='The end IP address of the firewall rule. Must be IPv4 format. Use value \'0.0.0.0\' to represent all Azure-internal IP addresses. ')
                 c.argument('start_ip_address', options_list=['--start-ip-address'], validator=ip_address_validator,
                            help='The start IP address of the firewall rule. Must be IPv4 format. Use value \'0.0.0.0\' to represent all Azure-internal IP addresses. ')
+
+        with self.argument_context('{} flexible-server firewall-rule list'.format(command_group)) as c:
+            c.argument('server_name', arg_type=server_name_resource_arg_type)
 
         with self.argument_context('{} flexible-server firewall-rule delete'.format(command_group)) as c:
             c.argument('yes', arg_type=yes_arg_type)
@@ -568,7 +555,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             argument_context_string = '{} flexible-server db {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
                 c.argument('server_name', arg_type=server_name_resource_arg_type)
-                c.argument('database_name', arg_type=database_name_arg_type)
+                c.argument('database_name', arg_type=database_object_name_arg_type)
 
         with self.argument_context('{} flexible-server db create'.format(command_group)) as c:
             c.argument('charset', help='The charset of the database. The default value is UTF8')
@@ -598,7 +585,11 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         for scope in ['show', 'start', 'pre-check']:
             argument_context_string = '{} flexible-server long-term-retention {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
-                c.argument('backup_name', options_list=['--backup-name', '-b'], help='Long-term retention backup name.')
+                c.argument('server_name', arg_type=server_name_resource_arg_type)
+                c.argument('backup_name', options_list=['--name', '-n'], help='Long-term retention backup name.')
+
+        with self.argument_context('{} flexible-server long-term-retention list'.format(command_group)) as c:
+            c.argument('server_name', arg_type=server_name_resource_arg_type)
 
         with self.argument_context('{} flexible-server long-term-retention start'.format(command_group)) as c:
             c.argument('sas_url', options_list=['--sas-url', '-u'], help='Container SAS URL.')
@@ -614,17 +605,12 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         # replica
         with self.argument_context('{} flexible-server replica create'.format(command_group)) as c:
             c.argument('source_server', arg_type=source_server_arg_type)
-            c.argument('replica_name', options_list=['--replica-name'],
-                       help='The name of the read replica.')
-            c.argument('name', options_list=['--name', '-n'],
-                       help='The name of the read replica.')
+            c.argument('name', arg_type=replica_name_arg_type)
             c.argument('zone', arg_type=zone_arg_type)
             c.argument('location', arg_type=get_location_type(self.cli_ctx))
             c.argument('vnet', arg_type=vnet_arg_type)
             c.argument('subnet', arg_type=subnet_arg_type)
             c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
-            c.argument('vnet_address_prefix', arg_type=vnet_address_prefix_arg_type)
-            c.argument('subnet_address_prefix', arg_type=subnet_address_prefix_arg_type)
             c.argument('byok_key', arg_type=key_arg_type)
             c.argument('byok_identity', arg_type=identity_arg_type)
             c.argument('tier', arg_type=tier_arg_type)
@@ -636,7 +622,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('storage_type', default=None, arg_type=storage_type_replica_arg_type)
 
         with self.argument_context('{} flexible-server replica promote'.format(command_group)) as c:
-            c.argument('replica_name', arg_type=replica_name_arg_type)
+            c.argument('name', arg_type=replica_name_arg_type)
             c.argument('promote_mode', options_list=['--promote-mode'], required=False, arg_type=promote_mode_arg_type)
             c.argument('promote_option', options_list=['--promote-option'], required=False, arg_type=promote_option_arg_type)
             c.argument('yes', arg_type=yes_arg_type)
@@ -660,7 +646,11 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         for scope in ['show', 'create', 'delete']:
             argument_context_string = '{} flexible-server backup {}'.format(command_group, scope)
             with self.argument_context(argument_context_string) as c:
-                c.argument('backup_name', id_part='child_name_1', options_list=['--backup-name', '-b'], help='The name of the backup.')
+                c.argument('server_name', arg_type=server_name_resource_arg_type)
+                c.argument('backup_name', id_part='child_name_1', options_list=['--name', '-n'], help='The name of the backup.')
+
+        with self.argument_context('{} flexible-server backup list'.format(command_group)) as c:
+            c.argument('server_name', arg_type=server_name_resource_arg_type)
 
         with self.argument_context('{} flexible-server backup delete'.format(command_group)) as c:
             c.argument('yes', arg_type=yes_arg_type)
@@ -674,7 +664,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('identities', arg_type=identities_arg_type)
 
         with self.argument_context('{} flexible-server identity show'.format(command_group)) as c:
-            c.argument('identity', options_list=['--identity', '-n'], help='Name or ID of identity to show.', validator=validate_identity)
+            c.argument('identity', options_list=['--identity', '-n'], help='Name or identifier of identity to show.', validator=validate_identity)
 
         with self.argument_context('{} flexible-server identity update'.format(command_group)) as c:
             c.argument('system_assigned', options_list=['--system-assigned'], arg_type=get_enum_type(['Enabled', 'Disabled']),
@@ -697,12 +687,12 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
         for scope in ['create', 'show', 'delete', 'wait']:
             with self.argument_context('{} flexible-server microsoft-entra-admin {}'.format(command_group, scope)) as c:
-                c.argument('sid', options_list=['--object-id', '-i'], help='The unique ID of the Microsoft Entra administrator.')
+                c.argument('sid', options_list=['--object-id', '-i'], help='The unique identifier of the Microsoft Entra administrator.')
 
         with self.argument_context('{} flexible-server microsoft-entra-admin create'.format(command_group)) as c:
             c.argument('login', options_list=['--display-name', '-u'], help='Display name of the Microsoft Entra administrator user or group.')
             c.argument('principal_type', options_list=['--type', '-t'], default='User', arg_type=get_enum_type(['User', 'Group', 'ServicePrincipal', 'Unknown']), help='Type of the Microsoft Entra administrator.')
-            c.argument('identity', help='Name or ID of identity used for Microsoft Entra Authentication.', validator=validate_identity)
+            c.argument('identity', help='Name or identifier of identity used for Microsoft Entra Authentication.', validator=validate_identity)
 
         # server advanced threat protection settings
         for scope in ['update', 'show']:
@@ -739,7 +729,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                            help='The name of the private endpoint connection associated with the Server. '
                            'Required if --id is not specified')
                 c.extra('connection_id', options_list=['--id'], required=False,
-                        help='The ID of the private endpoint connection associated with the Server. '
+                        help='The identifier of the private endpoint connection associated with the Server. '
                         'If specified --server-name/-s and --name/-n, this should be omitted.')
                 if scope == "approve" or scope == "reject":
                     c.argument('description', help='Comments for {} operation.'.format(scope), required=True)
@@ -751,36 +741,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         for scope in ['list', 'show']:
             with self.argument_context('{} flexible-server private-link-resource {}'.format(command_group, scope)) as c:
                 c.argument('server_name', arg_type=server_name_resource_arg_type)
-
-        # index tuning
-        for scope in ['update', 'show', 'list-settings', 'show-settings', 'set-settings', 'list-recommendations']:
-            argument_context_string = '{} flexible-server index-tuning {}'.format(command_group, scope)
-            with self.argument_context(argument_context_string) as c:
-                c.argument('server_name', arg_type=server_name_resource_arg_type)
-
-        with self.argument_context('{} flexible-server index-tuning update'.format(command_group)) as c:
-            c.argument('index_tuning_enabled',
-                       options_list=['--enabled'],
-                       required=True,
-                       help='Enable or disable index tuning feature.',
-                       arg_type=get_enum_type(['True', 'False']))
-
-        with self.argument_context('{} flexible-server index-tuning list-recommendations'.format(command_group)) as c:
-            c.argument('recommendation_type',
-                       options_list=['--recommendation-type', '-r'],
-                       help='Retrieve recommendations based on type.',
-                       arg_type=get_enum_type(['CreateIndex', 'DropIndex', 'ReIndex']))
-
-            for scope in ['show-settings', 'set-settings']:
-                argument_context_string = '{} flexible-server index-tuning {}'.format(command_group, scope)
-                with self.argument_context(argument_context_string) as c:
-                    c.argument('setting_name', options_list=['--name', '-n'], required=True,
-                               arg_type=get_enum_type(get_autonomous_tuning_settings_map().keys()),
-                               help='The name of the tuning setting.')
-
-            with self.argument_context('{} flexible-server index-tuning set-settings'.format(command_group)) as c:
-                c.argument('value', options_list=['--value', '-v'],
-                           help='Value of the tuning setting.')
 
         # autonomous tuning
         for scope in ['update', 'show', 'list-settings', 'show-settings', 'set-settings', 'list-table-recommendations', 'list-index-recommendations']:
@@ -819,7 +779,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                            help='Value of the tuning setting.')
 
         # migration
-        handle_migration_parameters(command_group, server_name_arg_type, migration_id_arg_type)
+        handle_migration_parameters(command_group, server_name_resource_arg_type, migration_id_arg_type)
 
     def handle_migration_parameters(command_group, server_name_arg_type, migration_id_arg_type):
         for scope in ['create', 'show', 'list', 'update', 'check-name-availability']:
@@ -828,7 +788,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('server_name', arg_type=server_name_arg_type, help='Migration target server name.')
 
                 if scope == "create" or scope == "update" or scope == "show" or scope == "check-name-availability":
-                    c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--migration-name'],
+                    c.argument('migration_name', arg_type=migration_id_arg_type, options_list=['--name', '-n'],
                                help='Name of the migration.')
 
                 if scope == "create":
