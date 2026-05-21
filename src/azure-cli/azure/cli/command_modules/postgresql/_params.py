@@ -791,4 +791,3 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                                help='Cancel the data migration for all the databases.')
 
     _flexible_server_params('postgres')
-    
