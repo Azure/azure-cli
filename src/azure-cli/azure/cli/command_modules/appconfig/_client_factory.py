@@ -25,6 +25,10 @@ def cf_replicas(cli_ctx, *_):
     return get_appconfig_service_client(cli_ctx).replicas
 
 
+def cf_nsp_configurations(cli_ctx, *_):
+    return get_appconfig_service_client(cli_ctx).network_security_perimeter_configurations
+
+
 def cf_configstore_operations(cli_ctx, *_):
     try:
         return get_appconfig_service_client(cli_ctx).operations

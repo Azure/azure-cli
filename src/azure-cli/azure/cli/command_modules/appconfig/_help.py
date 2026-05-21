@@ -698,6 +698,38 @@ helps['appconfig snapshot'] = """
     short-summary: Manage snapshots associated with an app configuration store.
     """
 
+helps['appconfig network-security-perimeter-configuration'] = """
+    type: group
+    short-summary: Manage network security perimeter configurations for an App Configuration store.
+    """
+
+helps['appconfig network-security-perimeter-configuration list'] = """
+    type: command
+    short-summary: List all network security perimeter configurations for an App Configuration store.
+    examples:
+        - name: List all network security perimeter configurations for an App Configuration store.
+          text:
+            az appconfig network-security-perimeter-configuration list --store-name MyAppConfiguration -g MyResourceGroup
+    """
+
+helps['appconfig network-security-perimeter-configuration show'] = """
+    type: command
+    short-summary: Show a specific network security perimeter configuration for an App Configuration store.
+    examples:
+        - name: Show a network security perimeter configuration by name.
+          text:
+            az appconfig network-security-perimeter-configuration show --store-name MyAppConfiguration -g MyResourceGroup --name MyNspConfigurationName
+    """
+
+helps['appconfig network-security-perimeter-configuration reconcile'] = """
+    type: command
+    short-summary: Force a refresh of the specified network security perimeter configuration for an App Configuration store.
+    examples:
+        - name: Reconcile a network security perimeter configuration.
+          text:
+            az appconfig network-security-perimeter-configuration reconcile --store-name MyAppConfiguration -g MyResourceGroup --name MyNspConfigurationName
+    """
+
 helps['appconfig snapshot create'] = """
     type: command
     short-summary: Create an app configuration snapshot.

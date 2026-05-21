@@ -76,7 +76,7 @@ class Create(AAZCommand):
         )
         _args_schema.ddos_protection_plan = AAZStrArg(
             options=["--ddos-protection-plan"],
-            help="Name or ID of a DDoS protection plan to associate with the VNet.",
+            help="Name or identifier of a DDoS protection plan to associate with the VNet.",
         )
         _args_schema.dns_servers = AAZListArg(
             options=["--dns-servers"],
@@ -209,7 +209,7 @@ class Create(AAZCommand):
         _element = cls._args_schema.subnets.Element.delegations.Element
         _element.id = AAZStrArg(
             options=["id"],
-            help="Resource ID.",
+            help="Resource identifier.",
         )
         _element.name = AAZStrArg(
             options=["name"],
@@ -227,7 +227,7 @@ class Create(AAZCommand):
         network_security_group = cls._args_schema.subnets.Element.network_security_group
         network_security_group.id = AAZResourceIdArg(
             options=["id"],
-            help="Resource ID.",
+            help="Resource identifier.",
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/networkSecurityGroups/{}",
             ),
@@ -258,7 +258,7 @@ class Create(AAZCommand):
         _element = cls._args_schema.subnets.Element.network_security_group.security_rules.Element
         _element.id = AAZResourceIdArg(
             options=["id"],
-            help="Resource ID.",
+            help="Resource identifier.",
         )
         _element.name = AAZStrArg(
             options=["name"],
@@ -358,7 +358,7 @@ class Create(AAZCommand):
         route_table = cls._args_schema.subnets.Element.route_table
         route_table.id = AAZResourceIdArg(
             options=["id"],
-            help="Resource ID.",
+            help="Resource identifier.",
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/routeTables/{}",
             ),
@@ -389,7 +389,7 @@ class Create(AAZCommand):
         _element = cls._args_schema.subnets.Element.route_table.routes.Element
         _element.id = AAZResourceIdArg(
             options=["id"],
-            help="Resource ID.",
+            help="Resource identifier.",
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/routeTables/{}/routes/{}",
             ),
@@ -429,7 +429,7 @@ class Create(AAZCommand):
         _element = cls._args_schema.subnets.Element.service_endpoint_policy.Element
         _element.id = AAZResourceIdArg(
             options=["id"],
-            help="Resource ID.",
+            help="Resource identifier.",
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/serviceEndpointPolicies/{}",
             ),
@@ -467,7 +467,7 @@ class Create(AAZCommand):
         _element = cls._args_schema.subnets.Element.service_endpoint_policy.Element.service_endpoint_policy_definitions.Element
         _element.id = AAZResourceIdArg(
             options=["id"],
-            help="Resource ID.",
+            help="Resource identifier.",
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/serviceEndpointPolicies/{}/serviceEndpointPolicyDefinitions/{}",
             ),
@@ -580,7 +580,7 @@ class Create(AAZCommand):
         sub_resource_create = cls._args_sub_resource_create
         sub_resource_create.id = AAZStrArg(
             options=["id"],
-            help="Resource ID.",
+            help="Resource identifier.",
         )
 
         _schema.id = cls._args_sub_resource_create.id
