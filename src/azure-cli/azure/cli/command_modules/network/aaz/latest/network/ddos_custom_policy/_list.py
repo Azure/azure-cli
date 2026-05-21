@@ -12,26 +12,24 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network ddos-custom-policy show",
+    "network ddos-custom-policy list",
 )
-class Show(AAZCommand):
-    """Get information about the specified DDoS custom policy.
-
-    :example: Get DDoS custom policy
-        az network ddos-custom-policy show --resource-group rg1 --ddos-custom-policy-name test-ddos-custom-policy
+class List(AAZCommand):
+    """List all the DDoS custom policies in a resource group.
     """
 
     _aaz_info = {
         "version": "2025-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/ddoscustompolicies/{}", "2025-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/ddoscustompolicies", "2025-07-01"],
         ]
     }
 
+    AZ_SUPPORT_PAGINATION = True
+
     def _handler(self, command_args):
         super()._handler(command_args)
-        self._execute_operations()
-        return self._output()
+        return self.build_paging(self._execute_operations, self._output)
 
     _args_schema = None
 
@@ -44,12 +42,6 @@ class Show(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.ddos_custom_policy_name = AAZStrArg(
-            options=["-n", "--name", "--ddos-custom-policy-name"],
-            help="The name of the DDoS custom policy.",
-            required=True,
-            id_part="name",
-        )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
@@ -57,7 +49,7 @@ class Show(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        self.DdosCustomPoliciesGet(ctx=self.ctx)()
+        self.DdosCustomPoliciesList(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -69,10 +61,11 @@ class Show(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
+        result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
+        next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
+        return result, next_link
 
-    class DdosCustomPoliciesGet(AAZHttpOperation):
+    class DdosCustomPoliciesList(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -86,7 +79,7 @@ class Show(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/ddosCustomPolicies/{ddosCustomPolicyName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/ddosCustomPolicies",
                 **self.url_parameters
             )
 
@@ -101,10 +94,6 @@ class Show(AAZCommand):
         @property
         def url_parameters(self):
             parameters = {
-                **self.serialize_url_param(
-                    "ddosCustomPolicyName", self.ctx.args.ddos_custom_policy_name,
-                    required=True,
-                ),
                 **self.serialize_url_param(
                     "resourceGroupName", self.ctx.args.resource_group,
                     required=True,
@@ -153,23 +142,34 @@ class Show(AAZCommand):
             cls._schema_on_200 = AAZObjectType()
 
             _schema_on_200 = cls._schema_on_200
-            _schema_on_200.etag = AAZStrType(
+            _schema_on_200.next_link = AAZStrType(
+                serialized_name="nextLink",
+            )
+            _schema_on_200.value = AAZListType(
+                flags={"required": True},
+            )
+
+            value = cls._schema_on_200.value
+            value.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element
+            _element.etag = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200.id = AAZStrType()
-            _schema_on_200.location = AAZStrType()
-            _schema_on_200.name = AAZStrType(
+            _element.id = AAZStrType()
+            _element.location = AAZStrType()
+            _element.name = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200.properties = AAZObjectType(
+            _element.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
-            _schema_on_200.tags = AAZDictType()
-            _schema_on_200.type = AAZStrType(
+            _element.tags = AAZDictType()
+            _element.type = AAZStrType(
                 flags={"read_only": True},
             )
 
-            properties = cls._schema_on_200.properties
+            properties = cls._schema_on_200.value.Element.properties
             properties.detection_rules = AAZListType(
                 serialized_name="detectionRules",
             )
@@ -189,10 +189,10 @@ class Show(AAZCommand):
                 flags={"read_only": True},
             )
 
-            detection_rules = cls._schema_on_200.properties.detection_rules
+            detection_rules = cls._schema_on_200.value.Element.properties.detection_rules
             detection_rules.Element = AAZObjectType()
 
-            _element = cls._schema_on_200.properties.detection_rules.Element
+            _element = cls._schema_on_200.value.Element.properties.detection_rules.Element
             _element.etag = AAZStrType(
                 flags={"read_only": True},
             )
@@ -207,7 +207,7 @@ class Show(AAZCommand):
                 flags={"read_only": True},
             )
 
-            properties = cls._schema_on_200.properties.detection_rules.Element.properties
+            properties = cls._schema_on_200.value.Element.properties.detection_rules.Element.properties
             properties.detection_mode = AAZStrType(
                 serialized_name="detectionMode",
             )
@@ -219,7 +219,7 @@ class Show(AAZCommand):
                 serialized_name="trafficDetectionRule",
             )
 
-            traffic_detection_rule = cls._schema_on_200.properties.detection_rules.Element.properties.traffic_detection_rule
+            traffic_detection_rule = cls._schema_on_200.value.Element.properties.detection_rules.Element.properties.traffic_detection_rule
             traffic_detection_rule.packets_per_second = AAZIntType(
                 serialized_name="packetsPerSecond",
             )
@@ -227,22 +227,22 @@ class Show(AAZCommand):
                 serialized_name="trafficType",
             )
 
-            front_end_ip_configuration = cls._schema_on_200.properties.front_end_ip_configuration
+            front_end_ip_configuration = cls._schema_on_200.value.Element.properties.front_end_ip_configuration
             front_end_ip_configuration.Element = AAZObjectType()
-            _ShowHelper._build_schema_common_sub_resource_read(front_end_ip_configuration.Element)
+            _ListHelper._build_schema_common_sub_resource_read(front_end_ip_configuration.Element)
 
-            public_ip_addresses = cls._schema_on_200.properties.public_ip_addresses
+            public_ip_addresses = cls._schema_on_200.value.Element.properties.public_ip_addresses
             public_ip_addresses.Element = AAZObjectType()
-            _ShowHelper._build_schema_common_sub_resource_read(public_ip_addresses.Element)
+            _ListHelper._build_schema_common_sub_resource_read(public_ip_addresses.Element)
 
-            tags = cls._schema_on_200.tags
+            tags = cls._schema_on_200.value.Element.tags
             tags.Element = AAZStrType()
 
             return cls._schema_on_200
 
 
-class _ShowHelper:
-    """Helper class for Show"""
+class _ListHelper:
+    """Helper class for List"""
 
     _schema_common_sub_resource_read = None
 
@@ -260,4 +260,4 @@ class _ShowHelper:
         _schema.id = cls._schema_common_sub_resource_read.id
 
 
-__all__ = ["Show"]
+__all__ = ["List"]

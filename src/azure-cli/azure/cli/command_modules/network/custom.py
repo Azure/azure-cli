@@ -6723,7 +6723,7 @@ class CustomIpPrefixUpdate(_CustomIpPrefixUpdate):
 
 def create_ddos_custom_policy(cmd, ddos_custom_policy_name, resource_group_name, location=None, tags=None,
                               detection_rule_name=None, detection_mode=None, traffic_type=None,
-                              packets_per_second=None, no_wait=None):
+                              packets_per_second=None, front_end_ip_configuration=None, no_wait=None):
     from .aaz.latest.network.ddos_custom_policy import Create as DdosCustomPolicyCreate, Show as DdosCustomPolicyShow
     from .operations.ddos_custom_policy import convert_ddos_custom_policy_to_snake_case, combine_old_and_new_custom_policy
     from ._template_builder import build_ddos_custom_policy
@@ -6747,7 +6747,7 @@ def create_ddos_custom_policy(cmd, ddos_custom_policy_name, resource_group_name,
                        ddos_custom_policy_name, resource_group_name, err)
 
     policy = build_ddos_custom_policy(cmd, ddos_custom_policy_name, location, tags, detection_rule_name, detection_mode,
-                                      packets_per_second, traffic_type)
+                                      packets_per_second, traffic_type, front_end_ip_configuration)
 
     if existing_policy:
         policy = combine_old_and_new_custom_policy(existing_policy, policy)

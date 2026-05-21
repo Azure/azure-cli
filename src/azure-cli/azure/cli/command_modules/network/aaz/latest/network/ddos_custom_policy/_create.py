@@ -22,9 +22,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-03-01",
+        "version": "2025-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/ddoscustompolicies/{}", "2025-03-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/ddoscustompolicies/{}", "2025-07-01"],
         ]
     }
 
@@ -81,6 +81,11 @@ class Create(AAZCommand):
             arg_group="Properties",
             help="The list of DDoS detection rules associated with the custom policy.",
         )
+        _args_schema.front_end_ip_configuration = AAZListArg(
+            options=["--fip-config", "--front-end-ip-configuration"],
+            arg_group="Properties",
+            help="The list of frontend IP configurations associated with the custom policy.",
+        )
 
         detection_rules = cls._args_schema.detection_rules
         detection_rules.Element = AAZObjectArg()
@@ -109,6 +114,15 @@ class Create(AAZCommand):
             options=["traffic-type"],
             help="The traffic type (one of Tcp, Udp, TcpSyn) that the detection rule will be applied upon.",
             enum={"Tcp": "Tcp", "TcpSyn": "TcpSyn", "Udp": "Udp"},
+        )
+
+        front_end_ip_configuration = cls._args_schema.front_end_ip_configuration
+        front_end_ip_configuration.Element = AAZObjectArg()
+
+        _element = cls._args_schema.front_end_ip_configuration.Element
+        _element.id = AAZStrArg(
+            options=["id"],
+            help="Resource ID.",
         )
         return cls._args_schema
 
@@ -193,7 +207,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-03-01",
+                    "api-version", "2025-07-01",
                     required=True,
                 ),
             }
@@ -225,6 +239,7 @@ class Create(AAZCommand):
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("detectionRules", AAZListType, ".detection_rules")
+                properties.set_prop("frontEndIpConfiguration", AAZListType, ".front_end_ip_configuration")
 
             detection_rules = _builder.get(".properties.detectionRules")
             if detection_rules is not None:
@@ -244,6 +259,14 @@ class Create(AAZCommand):
             if traffic_detection_rule is not None:
                 traffic_detection_rule.set_prop("packetsPerSecond", AAZIntType, ".packets_per_second")
                 traffic_detection_rule.set_prop("trafficType", AAZStrType, ".traffic_type")
+
+            front_end_ip_configuration = _builder.get(".properties.frontEndIpConfiguration")
+            if front_end_ip_configuration is not None:
+                front_end_ip_configuration.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.frontEndIpConfiguration[]")
+            if _elements is not None:
+                _elements.set_prop("id", AAZStrType, ".id")
 
             tags = _builder.get(".tags")
             if tags is not None:
@@ -296,6 +319,10 @@ class Create(AAZCommand):
                 serialized_name="provisioningState",
                 flags={"read_only": True},
             )
+            properties.public_ip_addresses = AAZListType(
+                serialized_name="publicIPAddresses",
+                flags={"read_only": True},
+            )
             properties.resource_guid = AAZStrType(
                 serialized_name="resourceGuid",
                 flags={"read_only": True},
@@ -341,9 +368,11 @@ class Create(AAZCommand):
 
             front_end_ip_configuration = cls._schema_on_200_201.properties.front_end_ip_configuration
             front_end_ip_configuration.Element = AAZObjectType()
+            _CreateHelper._build_schema_common_sub_resource_read(front_end_ip_configuration.Element)
 
-            _element = cls._schema_on_200_201.properties.front_end_ip_configuration.Element
-            _element.id = AAZStrType()
+            public_ip_addresses = cls._schema_on_200_201.properties.public_ip_addresses
+            public_ip_addresses.Element = AAZObjectType()
+            _CreateHelper._build_schema_common_sub_resource_read(public_ip_addresses.Element)
 
             tags = cls._schema_on_200_201.tags
             tags.Element = AAZStrType()
@@ -353,6 +382,21 @@ class Create(AAZCommand):
 
 class _CreateHelper:
     """Helper class for Create"""
+
+    _schema_common_sub_resource_read = None
+
+    @classmethod
+    def _build_schema_common_sub_resource_read(cls, _schema):
+        if cls._schema_common_sub_resource_read is not None:
+            _schema.id = cls._schema_common_sub_resource_read.id
+            return
+
+        cls._schema_common_sub_resource_read = _schema_common_sub_resource_read = AAZObjectType()
+
+        common_sub_resource_read = _schema_common_sub_resource_read
+        common_sub_resource_read.id = AAZStrType()
+
+        _schema.id = cls._schema_common_sub_resource_read.id
 
 
 __all__ = ["Create"]
