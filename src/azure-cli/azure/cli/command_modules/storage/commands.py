@@ -515,8 +515,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                                                resource_type=ResourceType.MGMT_STORAGE)) as g:
         from azure.cli.command_modules.storage._transformers import transform_immutability_policy
 
-        g.show_command('show', 'get_immutability_policy',
-                       transform=transform_immutability_policy)
+        g.custom_show_command('show', 'get_immutability_policy', transform=transform_immutability_policy)
         g.custom_command('create', 'create_or_update_immutability_policy')
         g.custom_command('delete', 'delete_immutability_policy', transform=lambda x: None)
         g.custom_command('lock', 'lock_immutability_policy')

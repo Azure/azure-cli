@@ -904,6 +904,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('include', arg_type=get_enum_type(t_list_local_user_include_param),
                    help='When specified, will list local users enabled for the specific protocol. '
                         'Lists all users by default. Default value is None.')
+        c.extra('maxpagesize', help='Optional, specifies the maximum number of local users that will be included in '
+                                    'the list response. Default value is None.')
 
     for item in ['show', 'off']:
         with self.argument_context('storage logging {}'.format(item)) as c:
@@ -1629,6 +1631,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                         "the operation only if the resource's ETag matches the value specified.")
 
     with self.argument_context('storage container immutability-policy show') as c:
+        c.argument('if_match', help='The entity state (ETag) version of the immutability policy to update must be '
+                                    'returned to the server for all update operations. '
+                                    'The ETag value must include the leading and trailing double quotes as returned '
+                                    'by the service. Default value is None.')
         c.ignore('etag')
         c.ignore('match_condition')
 
