@@ -79,7 +79,7 @@ class Assign(AAZCommand):
         _args_schema.mi_user_assigned = AAZListArg(
             options=["--user-assigned", "--mi-user-assigned"],
             arg_group="Parameters.identity",
-            help="Set the user managed identity.",
+            help="Set the user managed identities.",
             blank=[],
         )
 
