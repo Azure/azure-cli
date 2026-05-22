@@ -68,7 +68,8 @@ from azure.cli.command_modules.resource.aaz.latest.policy.set_definition.version
 from azure.cli.command_modules.resource.aaz.latest.policy.set_definition.version._update import Update as SetDefinitionVersionUpdate
 
 from azure.cli.command_modules.resource._client_factory import _resource_policy_client_factory
-from azure.cli.core.aaz import AAZAnyTypeArg, has_value, AAZResourceGroupNameArg, AAZStrArg, AAZBoolArg, AAZDictArg
+from azure.cli.core.aaz import has_value, AAZResourceGroupNameArg, AAZStrArg, AAZBoolArg
+from azure.cli.core.aaz._arg_action import AAZAnyTypeArgAction
 from azure.cli.core.azclierror import InvalidArgumentValueError, ArgumentUsageError
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.decorators import Completer
@@ -303,30 +304,30 @@ class Common:
     @staticmethod
     def AllowKeyValueShorthand(any_type_arg):
         # pylint: disable=protected-access
-        from azure.cli.core.aaz._arg_action import AAZAnyTypeArgAction
-        original_build = type(any_type_arg)._build_cmd_action
+        class Action(AAZAnyTypeArgAction):
+            _schema = any_type_arg
 
-        def build():
-            parent_action = original_build(any_type_arg)
-            if not issubclass(parent_action, AAZAnyTypeArgAction):
-                return parent_action
+            @classmethod
+            def decode_str(cls, value):
+                stripped = value.strip()
+                # Skip JSON / list / @file / quoted -- let AAZ handle those natively.
+                if stripped and stripped[0] not in '{[@\'"':
+                    parts = stripped.split()
+                    if all('=' in p and p.split('=', 1)[0] for p in parts):
+                        return dict(p.split('=', 1) for p in parts)
+                return super().decode_str(value)
 
-            class Action(parent_action):
-                @classmethod
-                def decode_str(cls, value):
-                    if isinstance(value, str):
-                        stripped = value.strip()
-                        # Skip JSON / list / @file / quoted -- let AAZ handle.
-                        if stripped and stripped[0] not in ('{', '[', '@', '"', "'"):
-                            parts = stripped.split()
-                            if parts and all(
-                                    '=' in p and p.split('=', 1)[0] for p in parts):
-                                return dict(p.split('=', 1) for p in parts)
-                    return super().decode_str(value)
+        any_type_arg._build_cmd_action = lambda: Action
 
-            return Action
-
-        any_type_arg._build_cmd_action = build
+    # The policy (set-)definition version PUT API validates that the version
+    # specified in the URI matches `properties.version` in the request body.
+    # Inject it here using the value from the --version argument.
+    @staticmethod
+    def InjectBodyVersion(data, version_arg):
+        if isinstance(data, dict) and has_value(version_arg):
+            properties = data.setdefault('properties', {})
+            if isinstance(properties, dict):
+                properties['version'] = version_arg.to_serialized_data()
 
 # Completers for policy command arguments
 class Completers:
@@ -383,7 +384,6 @@ class Completers:
             result = policy_client.policy_set_definition_versions.list(namespace.policy_set_definition_name)
             return [i.name for i in result]
         return []
-
 
 class PolicyAssignmentCreate(AssignmentCreate):
 
@@ -1022,6 +1022,7 @@ class PolicyDefinitionVersionCreate(DefinitionVersionCreate):
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         Common.SetSchemaNullable(args_schema)
+        Common.AllowKeyValueShorthand(args_schema.metadata)
         return args_schema
 
     class PolicyDefinitionVersionsCreateOrUpdateAtManagementGroup(
@@ -1032,6 +1033,12 @@ class PolicyDefinitionVersionCreate(DefinitionVersionCreate):
             _schema = super()._build_schema_on_201()
             Common.SetSchemaNullable(_schema)
             return _schema
+
+        @property
+        def content(self):
+            data = super().content
+            Common.InjectBodyVersion(data, self.ctx.args.version)
+            return data
 
         @staticmethod
         def serialize_content(value, required=False):
@@ -1048,6 +1055,12 @@ class PolicyDefinitionVersionCreate(DefinitionVersionCreate):
             Common.SetSchemaNullable(_schema)
             return _schema
 
+        @property
+        def content(self):
+            data = super().content
+            Common.InjectBodyVersion(data, self.ctx.args.version)
+            return data
+
         @staticmethod
         def serialize_content(value, required=False):
             Common.SetUndefinedNone(value._data)
@@ -1055,14 +1068,12 @@ class PolicyDefinitionVersionCreate(DefinitionVersionCreate):
             return content
 
     def pre_operations(self):
-        # Set properties.version to match the version argument
-        if has_value(self.ctx.args.version):
-            self.ctx.args.properties.version = self.ctx.args.version
+        pass
 
     def _execute_operations(self):
         self.pre_operations()
 
-        if has_value(self.ctx.args.policy_definition_name) and has_value(self.ctx.args.management_group):
+        if has_value(self.ctx.args.name) and has_value(self.ctx.args.management_group):
             self.PolicyDefinitionVersionsCreateOrUpdateAtManagementGroup(ctx=self.ctx)()
         else:
             self.PolicyDefinitionVersionsCreateOrUpdate(ctx=self.ctx)()
@@ -1081,6 +1092,22 @@ class PolicyDefinitionVersionDelete(DefinitionVersionDelete):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.version._completer = Completers.get_policy_definition_version_completion_list
         return args_schema
+
+    def pre_operations(self):
+        pass
+
+    def _execute_operations(self):
+        self.pre_operations()
+
+        if has_value(self.ctx.args.management_group):
+            self.PolicyDefinitionVersionsDeleteAtManagementGroup(ctx=self.ctx)()
+        else:
+            self.PolicyDefinitionVersionsDelete(ctx=self.ctx)()
+
+        self.post_operations()
+
+    def post_operations(self):
+        pass
 
 
 class PolicyDefinitionVersionList(DefinitionVersionList):
@@ -1151,7 +1178,7 @@ class PolicyDefinitionVersionShow(DefinitionVersionShow):
     def _execute_operations(self):
         self.pre_operations()
 
-        if has_value(self.ctx.args.policy_definition_name) and has_value(self.ctx.args.management_group):
+        if has_value(self.ctx.args.name) and has_value(self.ctx.args.management_group):
             self.PolicyDefinitionVersionsGetAtManagementGroup(ctx=self.ctx)()
         else:
             self.PolicyDefinitionVersionsGet(ctx=self.ctx)()
@@ -1164,87 +1191,11 @@ class PolicyDefinitionVersionShow(DefinitionVersionShow):
 
 class PolicyDefinitionVersionUpdate(DefinitionVersionUpdate):
 
-    # pylint: disable=protected-access
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.version._completer = Completers.get_policy_definition_version_completion_list
-        return args_schema
-
-    class PolicyDefinitionVersionsCreateOrUpdateAtManagementGroup(
-            DefinitionVersionUpdate.PolicyDefinitionVersionsCreateOrUpdateAtManagementGroup):
-
-        @classmethod
-        def _build_schema_on_200(cls):
-            _schema = super()._build_schema_on_200()
-            Common.SetSchemaNullable(_schema)
-            return _schema
-
-        @staticmethod
-        def serialize_content(value, required=False):
-            Common.SetUndefinedNone(value._data)
-            content = DefinitionVersionUpdate.PolicyDefinitionVersionsCreateOrUpdateAtManagementGroup.serialize_content(
-                value, required)
-            return content
-
-    class PolicyDefinitionVersionsCreateOrUpdate(DefinitionVersionUpdate.PolicyDefinitionVersionsCreateOrUpdate):
-
-        @classmethod
-        def _build_schema_on_200(cls):
-            _schema = super()._build_schema_on_200()
-            Common.SetSchemaNullable(_schema)
-            return _schema
-
-        @staticmethod
-        def serialize_content(value, required=False):
-            Common.SetUndefinedNone(value._data)
-            content = DefinitionVersionUpdate.PolicyDefinitionVersionsCreateOrUpdate.serialize_content(value, required)
-            return content
-
-    class PolicyDefinitionVersionsGetAtManagementGroup(
-            DefinitionVersionUpdate.PolicyDefinitionVersionsGetAtManagementGroup):
-
-        @classmethod
-        def _build_schema_on_200(cls):
-            _schema = super()._build_schema_on_200()
-            Common.SetSchemaNullable(_schema)
-            return _schema
-
-    class PolicyDefinitionVersionsGet(DefinitionVersionUpdate.PolicyDefinitionVersionsGet):
-
-        @classmethod
-        def _build_schema_on_200(cls):
-            _schema = super()._build_schema_on_200()
-            Common.SetSchemaNullable(_schema)
-            return _schema
-
-    class InstanceUpdateByJson(DefinitionVersionUpdate.InstanceUpdateByJson):
-        pass
-
-    class InstanceUpdateByGeneric(DefinitionVersionUpdate.InstanceUpdateByGeneric):
-        pass
-
-    def pre_operations(self):
-        pass
-
     def _execute_operations(self):
-        self.pre_operations()
-
-        if has_value(self.ctx.args.policy_definition_name) and has_value(self.ctx.args.management_group):
-            self.PolicyDefinitionVersionsGetAtManagementGroup(ctx=self.ctx)()
-            self.InstanceUpdateByJson(ctx=self.ctx)()
-            self.InstanceUpdateByGeneric(ctx=self.ctx)()
-            self.PolicyDefinitionVersionsCreateOrUpdateAtManagementGroup(ctx=self.ctx)()
-        else:
-            self.PolicyDefinitionVersionsGet(ctx=self.ctx)()
-            self.InstanceUpdateByJson(ctx=self.ctx)()
-            self.InstanceUpdateByGeneric(ctx=self.ctx)()
-            self.PolicyDefinitionVersionsCreateOrUpdate(ctx=self.ctx)()
-
-        self.post_operations()
-
-    def post_operations(self):
-        pass
+        raise ArgumentUsageError(
+            "'az policy definition version update' is not supported. "
+            "Policy definition versions are immutable. "
+            "Use 'az policy definition version create' to publish a new version.")
 
 
 class PolicyEnrollmentCreate(EnrollmentCreate):
@@ -1255,6 +1206,7 @@ class PolicyEnrollmentCreate(EnrollmentCreate):
         args_schema.name._required = False            # pylint: disable=protected-access
         args_schema.scope._required = False               # pylint: disable=protected-access
         args_schema.resource_group = AAZResourceGroupNameArg()
+        Common.AllowKeyValueShorthand(args_schema.metadata)
         return args_schema
 
     def pre_operations(self):
@@ -1373,6 +1325,7 @@ class PolicyEnrollmentUpdate(EnrollmentUpdate):
         args_schema.name._completer = Completers.get_policy_enrollment_completion_list
         args_schema.scope._required = False               # pylint: disable=protected-access
         args_schema.resource_group = AAZResourceGroupNameArg()
+        Common.AllowKeyValueShorthand(args_schema.metadata)
         return args_schema
 
     def pre_operations(self):
@@ -1791,6 +1744,7 @@ class PolicySetDefinitionVersionCreate(SetDefinitionVersionCreate):
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         Common.SetSchemaNullable(args_schema)
+        Common.AllowKeyValueShorthand(args_schema.metadata)
         return args_schema
 
     class PolicySetDefinitionVersionsCreateOrUpdateAtManagementGroup(
@@ -1801,6 +1755,12 @@ class PolicySetDefinitionVersionCreate(SetDefinitionVersionCreate):
             _schema = super()._build_schema_on_201()
             Common.SetSchemaNullable(_schema)
             return _schema
+
+        @property
+        def content(self):
+            data = super().content
+            Common.InjectBodyVersion(data, self.ctx.args.version)
+            return data
 
         @staticmethod
         def serialize_content(value, required=False):
@@ -1817,6 +1777,12 @@ class PolicySetDefinitionVersionCreate(SetDefinitionVersionCreate):
             Common.SetSchemaNullable(_schema)
             return _schema
 
+        @property
+        def content(self):
+            data = super().content
+            Common.InjectBodyVersion(data, self.ctx.args.version)
+            return data
+
         @staticmethod
         def serialize_content(value, required=False):
             Common.SetUndefinedNone(value._data)
@@ -1824,14 +1790,12 @@ class PolicySetDefinitionVersionCreate(SetDefinitionVersionCreate):
             return content
 
     def pre_operations(self):
-        # Set properties.version to match the version argument
-        if has_value(self.ctx.args.version):
-            self.ctx.args.properties.version = self.ctx.args.version
+        pass
 
     def _execute_operations(self):
         self.pre_operations()
 
-        if has_value(self.ctx.args.policy_set_definition_name) and has_value(self.ctx.args.management_group):
+        if has_value(self.ctx.args.name) and has_value(self.ctx.args.management_group):
             self.PolicySetDefinitionVersionsCreateOrUpdateAtManagementGroup(ctx=self.ctx)()
         else:
             self.PolicySetDefinitionVersionsCreateOrUpdate(ctx=self.ctx)()
@@ -1850,6 +1814,22 @@ class PolicySetDefinitionVersionDelete(SetDefinitionVersionDelete):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.version._completer = Completers.get_policy_set_definition_version_completion_list
         return args_schema
+
+    def pre_operations(self):
+        pass
+
+    def _execute_operations(self):
+        self.pre_operations()
+
+        if has_value(self.ctx.args.management_group):
+            self.PolicySetDefinitionVersionsDeleteAtManagementGroup(ctx=self.ctx)()
+        else:
+            self.PolicySetDefinitionVersionsDelete(ctx=self.ctx)()
+
+        self.post_operations()
+
+    def post_operations(self):
+        pass
 
 
 class PolicySetDefinitionVersionList(SetDefinitionVersionList):
@@ -1920,7 +1900,7 @@ class PolicySetDefinitionVersionShow(SetDefinitionVersionShow):
     def _execute_operations(self):
         self.pre_operations()
 
-        if has_value(self.ctx.args.policy_set_definition_name) and has_value(self.ctx.args.management_group):
+        if has_value(self.ctx.args.name) and has_value(self.ctx.args.management_group):
             self.PolicySetDefinitionVersionsGetAtManagementGroup(ctx=self.ctx)()
         else:
             self.PolicySetDefinitionVersionsGet(ctx=self.ctx)()
@@ -1933,85 +1913,9 @@ class PolicySetDefinitionVersionShow(SetDefinitionVersionShow):
 
 class PolicySetDefinitionVersionUpdate(SetDefinitionVersionUpdate):
 
-    # pylint: disable=protected-access
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.version._completer = Completers.get_policy_set_definition_version_completion_list
-        return args_schema
-
-    class PolicySetDefinitionVersionsCreateOrUpdateAtManagementGroup(
-            SetDefinitionVersionUpdate.PolicySetDefinitionVersionsCreateOrUpdateAtManagementGroup):
-
-        @classmethod
-        def _build_schema_on_200(cls):
-            _schema = super()._build_schema_on_200()
-            Common.SetSchemaNullable(_schema)
-            return _schema
-
-        @staticmethod
-        def serialize_content(value, required=False):
-            Common.SetUndefinedNone(value._data)
-            content = SetDefinitionVersionUpdate.PolicySetDefinitionVersionsCreateOrUpdateAtManagementGroup.serialize_content(
-                value, required)
-            return content
-
-    class PolicySetDefinitionVersionsCreateOrUpdate(SetDefinitionVersionUpdate.PolicySetDefinitionVersionsCreateOrUpdate):
-
-        @classmethod
-        def _build_schema_on_200(cls):
-            _schema = super()._build_schema_on_200()
-            Common.SetSchemaNullable(_schema)
-            return _schema
-
-        @staticmethod
-        def serialize_content(value, required=False):
-            Common.SetUndefinedNone(value._data)
-            content = SetDefinitionVersionUpdate.PolicySetDefinitionVersionsCreateOrUpdate.serialize_content(value, required)
-            return content
-
-    class PolicySetDefinitionVersionsGetAtManagementGroup(
-            SetDefinitionVersionUpdate.PolicySetDefinitionVersionsGetAtManagementGroup):
-
-        @classmethod
-        def _build_schema_on_200(cls):
-            _schema = super()._build_schema_on_200()
-            Common.SetSchemaNullable(_schema)
-            return _schema
-
-    class PolicySetDefinitionVersionsGet(SetDefinitionVersionUpdate.PolicySetDefinitionVersionsGet):
-
-        @classmethod
-        def _build_schema_on_200(cls):
-            _schema = super()._build_schema_on_200()
-            Common.SetSchemaNullable(_schema)
-            return _schema
-
-    class InstanceUpdateByJson(SetDefinitionVersionUpdate.InstanceUpdateByJson):
-        pass
-
-    class InstanceUpdateByGeneric(SetDefinitionVersionUpdate.InstanceUpdateByGeneric):
-        pass
-
-    def pre_operations(self):
-        pass
-    
     def _execute_operations(self):
-        self.pre_operations()
-
-        if has_value(self.ctx.args.policy_set_definition_name) and has_value(self.ctx.args.management_group):
-            self.PolicySetDefinitionVersionsGetAtManagementGroup(ctx=self.ctx)()
-            self.InstanceUpdateByJson(ctx=self.ctx)()
-            self.InstanceUpdateByGeneric(ctx=self.ctx)()
-            self.PolicySetDefinitionVersionsCreateOrUpdateAtManagementGroup(ctx=self.ctx)()
-        else:
-            self.PolicySetDefinitionVersionsGet(ctx=self.ctx)()
-            self.InstanceUpdateByJson(ctx=self.ctx)()
-            self.InstanceUpdateByGeneric(ctx=self.ctx)()
-            self.PolicySetDefinitionVersionsCreateOrUpdate(ctx=self.ctx)()
-
-        self.post_operations()
-
-    def post_operations(self):
-        pass
+        raise ArgumentUsageError(
+            "'az policy set-definition version update' is not supported. "
+            "Policy set-definition versions are immutable. "
+            "Use 'az policy set-definition version create' to publish a new version.")
 
