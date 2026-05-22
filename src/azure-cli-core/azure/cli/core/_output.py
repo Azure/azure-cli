@@ -14,11 +14,11 @@ class AzOutputProducer(knack.output.OutputProducer):
         return format_type in self._FORMAT_DICT
 
     def out(self, obj, formatter=None, out_file=None):
+        file = out_file or sys.stdout
         if get_output_format(self.cli_ctx) == "tsv":
-            file = out_file or sys.stdout
             if hasattr(file, "reconfigure"):
                 file.reconfigure(newline="\n")
-        super().out(obj, formatter=formatter, out_file=out_file)
+        return super().out(obj, formatter=formatter, out_file=file)
 
 
 def get_output_format(cli_ctx):
