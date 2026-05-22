@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import sys
+
 import knack.output
 
 
@@ -10,6 +12,13 @@ class AzOutputProducer(knack.output.OutputProducer):
 
     def check_valid_format_type(self, format_type):
         return format_type in self._FORMAT_DICT
+
+    def out(self, obj, formatter=None, out_file=None):
+        if get_output_format(self.cli_ctx) == "tsv":
+            file = out_file or sys.stdout
+            if hasattr(file, "reconfigure"):
+                file.reconfigure(newline="\n")
+        super().out(obj, formatter=formatter, out_file=out_file)
 
 
 def get_output_format(cli_ctx):
