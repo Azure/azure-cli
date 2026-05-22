@@ -152,7 +152,7 @@ def validate_private_endpoint_connection_id(cmd, namespace):
 
 # pylint: disable=too-many-locals
 def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, server_name=None, database_name=None,
-                           zone=None, standby_availability_zone=None, high_availability=None,
+                           zone=None, standby_availability_zone=None,
                            zonal_resiliency=None, allow_same_zone=False, subnet=None,
                            public_access=None, version=None, instance=None, geo_redundant_backup=None,
                            byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
@@ -196,8 +196,8 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     _pg_georedundant_backup_validator(geo_redundant_backup, geo_backup_supported)
     _pg_storage_validator(storage_gb, sku_info, tier, storage_type, iops, throughput, instance)
     _pg_sku_name_validator(sku_name, sku_info, tier, instance)
-    _pg_high_availability_validator(high_availability, zonal_resiliency, allow_same_zone,
-                                    standby_availability_zone, zone, tier, single_az, instance)
+    _pg_zonal_resiliency_validator(zonal_resiliency, allow_same_zone,
+                                   standby_availability_zone, zone, tier, single_az, instance)
     pg_version_validator(version, list_location_capability_info['server_versions'])
     pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup, instance)
     is_microsoft_entra_auth = bool(microsoft_entra_auth is not None and microsoft_entra_auth.lower() == 'enabled')
@@ -344,26 +344,13 @@ def pg_version_validator(version, versions):
                            'maintain security, performance, and supportability.')
 
 
-def _pg_high_availability_validator(high_availability, zonal_resiliency, allow_same_zone,
-                                    standby_availability_zone, zone, tier, single_az, instance):
-    high_availability_enabled = (high_availability is not None and high_availability.lower() != 'disabled')
+def _pg_zonal_resiliency_validator(zonal_resiliency, allow_same_zone,
+                                   standby_availability_zone, zone, tier, single_az, instance):
     zonal_resiliency_enabled = (zonal_resiliency is not None and zonal_resiliency.lower() != 'disabled')
-    high_availability_zone_redundant = (high_availability_enabled and high_availability.lower() == 'zoneredundant')
-
-    if high_availability_enabled and zonal_resiliency_enabled:
-        raise ArgumentUsageError('Setting both --high-availability and --zonal-resiliency is not allowed. '
-                                 'To proceed, set only --zonal-resiliency.')
 
     if instance:
         tier = instance.sku.tier if tier is None else tier
         zone = instance.availability_zone if zone is None else zone
-
-    if high_availability_enabled:
-        if tier.lower() == 'burstable':
-            raise ArgumentUsageError('High availability is not supported for the Burstable tier.')
-        if single_az and high_availability_zone_redundant:
-            raise ArgumentUsageError('This location has a single availability zone. '
-                                     'Zone-redundant high availability is not supported for this location.')
 
     if zonal_resiliency_enabled:
         if tier.lower() == 'burstable':
@@ -373,8 +360,8 @@ def _pg_high_availability_validator(high_availability, zonal_resiliency, allow_s
                                      'To proceed, set --allow-same-zone.')
 
     if standby_availability_zone:
-        if not high_availability_zone_redundant and not zonal_resiliency_enabled:
-            raise ArgumentUsageError('To set --standby-availability-zone, enable --zonal-resiliency.')
+        if not zonal_resiliency_enabled:
+            raise ArgumentUsageError('To set --standby-zone, enable --zonal-resiliency.')
         if zone == standby_availability_zone:
             raise ArgumentUsageError('Your server is in availability zone {}. '
                                      'The standby availability zone must be different from the server zone.'
