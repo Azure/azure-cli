@@ -417,6 +417,10 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_always_ready_settings', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)
         g.custom_command('set', 'update_always_ready_settings', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)
 
+    with self.command_group('functionapp update-strategy config') as g:
+        g.custom_show_command('show', 'get_update_strategy_config', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)
+        g.custom_command('set', 'set_update_strategy_config', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)
+
     with self.command_group('functionapp config hostname') as g:
         g.custom_command('add', 'add_hostname', exception_handler=ex_handler_factory())
         g.custom_command('list', 'list_hostnames')

@@ -143,4 +143,6 @@ FLEX_SUBNET_DELEGATION = "Microsoft.App/environments"
 
 DEPLOYMENT_STORAGE_AUTH_TYPES = ['SystemAssignedIdentity', 'UserAssignedIdentity', 'StorageAccountConnectionString']
 
+UPDATE_STRATEGY_TYPES = ['Recreate', 'RollingUpdate']
+
 STORAGE_BLOB_DATA_CONTRIBUTOR_ROLE_ID = 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'

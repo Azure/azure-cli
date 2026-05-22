@@ -4138,6 +4138,44 @@ def update_scale_config(cmd, resource_group_name, name, maximum_instance_count=N
         "scaleAndConcurrency", {})
 
 
+def get_update_strategy_config(cmd, resource_group_name, name):
+    functionapp = get_raw_functionapp(cmd.cli_ctx, resource_group_name, name)
+
+    return functionapp.get("properties", {}).get("functionAppConfig", {}).get(
+        "siteUpdateStrategy", {})
+
+
+def set_update_strategy_config(cmd, resource_group_name, name, strategy_type):
+    from ._constants import UPDATE_STRATEGY_TYPES
+
+    # Case-insensitive validation - find the correctly cased value
+    strategy_type_lower = strategy_type.lower()
+    matched_type = None
+    for valid_type in UPDATE_STRATEGY_TYPES:
+        if valid_type.lower() == strategy_type_lower:
+            matched_type = valid_type
+            break
+
+    if not matched_type:
+        raise ValidationError(
+            f"Invalid update strategy type '{strategy_type}'. "
+            f"Allowed values are: {', '.join(UPDATE_STRATEGY_TYPES)}."
+        )
+
+    functionapp = get_raw_functionapp(cmd.cli_ctx, resource_group_name, name)
+
+    # Initialize siteUpdateStrategy if it doesn't exist
+    if "siteUpdateStrategy" not in functionapp["properties"]["functionAppConfig"]:
+        functionapp["properties"]["functionAppConfig"]["siteUpdateStrategy"] = {}
+
+    functionapp["properties"]["functionAppConfig"]["siteUpdateStrategy"]["type"] = matched_type
+
+    result = update_flex_functionapp(cmd, resource_group_name, name, functionapp)
+
+    return result.get("properties", {}).get("functionAppConfig", {}).get(
+        "siteUpdateStrategy", {})
+
+
 def delete_app_settings(cmd, resource_group_name, name, setting_names, slot=None):
     app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings', slot)
     client = web_client_factory(cmd.cli_ctx)
