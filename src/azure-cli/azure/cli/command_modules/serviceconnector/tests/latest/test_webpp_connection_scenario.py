@@ -1650,15 +1650,12 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         # delete connection
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
 
-    @record_only()
     def test_webapp_storageblob_secret_opt_out_public_network_and_config(self):
         self._test_webapp_storageblob_secret_opt_out(['publicnetwork', 'configinfo'])
     
-    @record_only()
     def test_webapp_storageblob_secret_opt_out_public_network(self):
         self._test_webapp_storageblob_secret_opt_out(['publicnetwork'])
     
-    @record_only()
     def test_webapp_storageblob_secret_opt_out_config(self):
         self._test_webapp_storageblob_secret_opt_out(['configinfo'])
 
@@ -1725,16 +1722,16 @@ class WebAppConnectionScenarioTest(ScenarioTest):
                  '--secret --client-type dotnet --opt-out {}'.format(name, source_id, 
                                                                      target_id, ' '.join(opt_out_list)))
 
-        # list connection
-        connections = self.cmd(
-            'webapp connection list --source-id {}'.format(source_id),
+        connection_id = source_id + "/providers/Microsoft.ServiceLinker/linkers/" + name
+
+        # show connection to verify it was created correctly
+        self.cmd(
+            'webapp connection show --id {}'.format(connection_id),
             checks = [
-                self.check('length(@)', 1),
-                self.check('[0].authInfo.authType', 'secret'),
-                self.check('[0].clientType', 'dotnet')
+                self.check('authInfo.authType', 'secret'),
+                self.check('clientType', 'dotnet')
             ]
-        ).get_output_in_json()
-        connection_id = connections[0].get('id')
+        )
 
         validate_connection(connection_id)
         self.cmd('webapp connection validate --id {}'.format(connection_id))

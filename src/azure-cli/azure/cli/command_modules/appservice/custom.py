@@ -259,8 +259,9 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                       https_only=https_only, virtual_network_subnet_id=subnet_resource_id,
                       public_network_access=public_network_access, outbound_vnet_routing=outbound_vnet_routing,
                       auto_generated_domain_name_label_scope=auto_generated_domain_name_label_scope,
-                      end_to_end_encryption_enabled=end_to_end_encryption_enabled,
-                      site_scoped_certs=site_scoped_certs)
+                      end_to_end_encryption_enabled=end_to_end_encryption_enabled)
+    if site_scoped_certs is not None:
+        webapp_def.site_scoped_certs = site_scoped_certs
     if runtime:
         runtime = _StackRuntimeHelper.remove_delimiters(runtime)
 
