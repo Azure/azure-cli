@@ -5150,7 +5150,7 @@ class PolicyScenarioTest(ScenarioTest):
                  '--not-scopes "{ns1}" "{ns2}" '
                  '--resource-selectors "{rsel}" '
                  '--overrides "{ovr}" '
-                 '--self-serve "{sse}"', checks=[
+                 '--self-serve-exemption "{sse}"', checks=[
                      self.check('enforcementMode', 'Default'),
                      self.check('length(notScopes)', 2),
                      self.check('resourceSelectors[0].name', 'byLocation'),
