@@ -1650,12 +1650,15 @@ class WebAppConnectionScenarioTest(ScenarioTest):
         # delete connection
         self.cmd('webapp connection delete --id {} --yes'.format(connection_id))
 
+    @record_only()
     def test_webapp_storageblob_secret_opt_out_public_network_and_config(self):
         self._test_webapp_storageblob_secret_opt_out(['publicnetwork', 'configinfo'])
     
+    @record_only()
     def test_webapp_storageblob_secret_opt_out_public_network(self):
         self._test_webapp_storageblob_secret_opt_out(['publicnetwork'])
     
+    @record_only()
     def test_webapp_storageblob_secret_opt_out_config(self):
         self._test_webapp_storageblob_secret_opt_out(['configinfo'])
 
