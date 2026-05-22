@@ -1963,6 +1963,34 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('geoPriorityReplicationStatus.isBlobEnabled', False)
         ])
 
+    @ResourceGroupPreparer(location='eastus')
+    def test_storage_account_allowed_copy_scope(self, resource_group):
+        self.kwargs.update({
+            'rg': resource_group,
+            'sa1': self.create_random_name('sa', 24),
+            'sa2': self.create_random_name('sa', 24),
+            'sa3': self.create_random_name('sa', 24)
+        })
+
+        self.cmd('storage account create -n {sa1} -g {rg} --allowed-copy-scope PrivateLink', checks=[
+            JMESPathCheck('allowedCopyScope', 'PrivateLink')
+        ])
+        self.cmd('storage account update -n {sa1} -g {rg} --allowed-copy-scope AAD', checks=[
+            JMESPathCheck('allowedCopyScope', 'AAD')
+        ])
+        self.cmd('storage account create -n {sa2} -g {rg} --allowed-copy-scope AAD', checks=[
+            JMESPathCheck('allowedCopyScope', 'AAD')
+        ])
+        self.cmd('storage account update -n {sa2} -g {rg} --allowed-copy-scope All', checks=[
+            JMESPathCheck('allowedCopyScope', 'All')
+        ])
+        self.cmd('storage account create -n {sa3} -g {rg} --allowed-copy-scope All', checks=[
+            JMESPathCheck('allowedCopyScope', 'All')
+        ])
+        self.cmd('storage account update -n {sa3} -g {rg} --allowed-copy-scope PrivateLink', checks=[
+            JMESPathCheck('allowedCopyScope', 'PrivateLink')
+        ])
+
 
 class RoleScenarioTest(LiveScenarioTest):
     def run_under_service_principal(self):
