@@ -7772,7 +7772,7 @@ class _FlexFunctionAppStackRuntimeHelper:
                         continue
 
                     runtime_settings = minor_version['stackSettings']['linuxRuntimeSettings']
-                    runtime_name = (runtime_settings['appSettingsDictionary']['FUNCTIONS_WORKER_RUNTIME'] or
+                    runtime_name = (runtime_settings.get('appSettingsDictionary', {}).get('FUNCTIONS_WORKER_RUNTIME') or
                                     runtime['name'])
 
                     skus = runtime_settings['Sku']
