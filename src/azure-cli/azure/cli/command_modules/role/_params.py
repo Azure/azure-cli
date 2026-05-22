@@ -185,7 +185,7 @@ def load_arguments(self, _):
 
     with self.argument_context('ad sp create-for-rbac') as c:
         c.argument('display_name', options_list=['--display-name', '--name', '-n'],
-                   help='Display name of the service principal. If not present, default to azure-cli-%%Y-%%m-%%d-%%H-%%M-%%S '
+                   help='Display name of the service principal. If not present, defaults to azure-cli-%%Y-%%m-%%d-%%H-%%M-%%S '
                         'where the suffix is the time of creation.')
         c.argument('create_password', arg_type=get_three_state_flag(), arg_group='Credential',
                    help='Create a password credential (secret) on the the application. This is the default behavior. '
@@ -359,7 +359,7 @@ def load_arguments(self, _):
         c.argument('include_groups', action='store_true',
                    help='Include extra assignments to the groups of which the user is a member (transitively).')
 
-    time_help = 'The {} of the query in the format of %%Y-%%m-%%dT%%H:%%M:%%SZ, e.g. 2000-12-31T12:59:59Z. Defaults to {}'
+    time_help = 'The {} for the query in the format of %%Y-%%m-%%dT%%H:%%M:%%SZ, e.g. 2000-12-31T12:59:59Z. Defaults to {}'
     with self.argument_context('role assignment list-changelogs') as c:
         c.argument('start_time', help=time_help.format('start time', '1 Hour prior to the current time'))
         c.argument('end_time', help=time_help.format('end time', 'the current time'))
