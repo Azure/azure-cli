@@ -197,7 +197,7 @@ def load_command_table(self, _):
         self.command_table['policy definition list'] = PolicyDefinitionList(loader=self)
         self.command_table['policy definition show'] = PolicyDefinitionShow(loader=self)
         self.command_table['policy definition update'] = PolicyDefinitionUpdate(loader=self)
-        
+
     with self.command_group('policy definition version'):
         from .policy import PolicyDefinitionVersionCreate, PolicyDefinitionVersionDelete, PolicyDefinitionVersionList, PolicyDefinitionVersionShow, PolicyDefinitionVersionUpdate
         self.command_table['policy definition version create'] = PolicyDefinitionVersionCreate(loader=self)
@@ -205,7 +205,7 @@ def load_command_table(self, _):
         self.command_table['policy definition version list'] = PolicyDefinitionVersionList(loader=self)
         self.command_table['policy definition version show'] = PolicyDefinitionVersionShow(loader=self)
         self.command_table['policy definition version update'] = PolicyDefinitionVersionUpdate(loader=self)
-        
+
     with self.command_group('policy enrollment'):
         from .policy import PolicyEnrollmentCreate, PolicyEnrollmentDelete, PolicyEnrollmentList, PolicyEnrollmentShow, PolicyEnrollmentUpdate
         self.command_table['policy enrollment create'] = PolicyEnrollmentCreate(loader=self)
@@ -229,7 +229,7 @@ def load_command_table(self, _):
         self.command_table['policy set-definition list'] = PolicySetDefinitionList(loader=self)
         self.command_table['policy set-definition show'] = PolicySetDefinitionShow(loader=self)
         self.command_table['policy set-definition update'] = PolicySetDefinitionUpdate(loader=self)
-        
+
     with self.command_group('policy set-definition version'):
         from .policy import PolicySetDefinitionVersionCreate, PolicySetDefinitionVersionDelete, PolicySetDefinitionVersionList, PolicySetDefinitionVersionShow, PolicySetDefinitionVersionUpdate
         self.command_table['policy set-definition version create'] = PolicySetDefinitionVersionCreate(loader=self)

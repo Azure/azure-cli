@@ -12,37 +12,22 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "policy definition create",
+    "policy definition version create",
 )
 class Create(AAZCommand):
-    """Create a policy definition.
+    """Create a policy definition version.
 
-    Create a policy definition in the given subscription or management group with the given name and other properties.
+    Create a policy definition version in the given subscription or management group with the given name and other properties.
 
-    :example: Create a read-only storage policy
-        az policy definition create --name readOnlyStorage --rules "{ 'if': { 'field': 'type', 'equals': 'Microsoft.Storage/storageAccounts/write' }, 'then': { 'effect': 'deny' } }"
-
-    :example: Create a policy definition with parameters
-        az policy definition create --name allowedLocations --rules "{ 'if': { 'allOf': [{ 'field': 'location','notIn': '[parameters(\\'listOfAllowedLocations\\')]' }, { 'field': 'location', 'notEquals': 'global' }, { 'field': 'type', 'notEquals': 'Microsoft.AzureActiveDirectory/b2cDirectories'}] }, 'then': { 'effect': 'deny' } }" --params "{ 'allowedLocations': {'type': 'array', 'metadata': { 'description': 'The list of locations that can be specified when deploying resources', 'strongType': 'location', 'displayName': 'Allowed locations' } } }"
-
-    :example: Create a read-only storage policy that can be applied within a management group
-        az policy definition create -n readOnlyStorage --management-group "MyManagementGroup" --rules "{ 'if': { 'field': 'type', 'equals': 'Microsoft.Storage/storageAccounts/write' }, 'then': { 'effect': 'deny' } }"
-
-    :example: Create a policy definition with mode
-        az policy definition create --name TagsPolicyDefinition --subscription "MySubscription" --mode Indexed --rules "{ 'if': { 'field': 'tags', 'exists': 'false' }, 'then': { 'effect': 'deny' } }"
-
-    :example: Create a read-only storage policy with newer version
-        az policy definition create --name readOnlyStorage --rules "{ 'if': { 'field': 'type', 'equals': 'Microsoft.Storage/storageAccounts/write' }, 'then': { 'effect': 'deny' } }" --version 2.0.0
-
-    :example: Create a policy definition with external evaluation enforcement settings
-        az policy definition create --name externalPolicy --rules "{ 'if': { 'value': '[claims().isValid]', 'equals': 'true' }, 'then': { 'effect': 'deny' } }" --external-settings "{ 'roleDefinitionIds': [ '/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c' ], 'endpointSettings': { 'kind': 'CoinFlip' } }"
+    :example: Create a policy definition with older version
+        az policy definition version create --name readOnlyStorage --rules "{ 'if': { 'field': 'type', 'equals': 'Microsoft.Storage/storageAccounts/write' }, 'then': { 'effect': 'deny' } }" --version 1.1.0
     """
 
     _aaz_info = {
         "version": "2025-11-01",
         "resources": [
-            ["mgmt-plane", "/providers/microsoft.management/managementgroups/{}/providers/microsoft.authorization/policydefinitions/{}", "2025-11-01"],
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.authorization/policydefinitions/{}", "2025-11-01"],
+            ["mgmt-plane", "/providers/microsoft.management/managementgroups/{}/providers/microsoft.authorization/policydefinitions/{}/versions/{}", "2025-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.authorization/policydefinitions/{}/versions/{}", "2025-11-01"],
         ]
     }
 
@@ -64,7 +49,11 @@ class Create(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.management_group = AAZStrArg(
             options=["--management-group"],
-            help={"short-summary": "The management group.", "long-summary": "The management group with the given name is where the policy definition will reside. It can be assigned only at scopes at or below this management group."},
+            help="The management group.",
+            fmt=AAZStrArgFormat(
+                max_length=90,
+                min_length=1,
+            ),
         )
         _args_schema.name = AAZStrArg(
             options=["-n", "--name"],
@@ -74,6 +63,14 @@ class Create(AAZCommand):
                 pattern="^[^<>%&:\\?/]*[^<>%&:\\?/ ]+$",
             ),
         )
+        _args_schema.version = AAZStrArg(
+            options=["--version"],
+            help={"short-summary": "The policy definition version.", "long-summary": "The policy definition version in #.#.# format."},
+            required=True,
+            fmt=AAZStrArgFormat(
+                pattern="^\\d+\\.\\d+\\.\\d+$",
+            ),
+        )
 
         # define Arg Group "Properties"
 
@@ -81,12 +78,12 @@ class Create(AAZCommand):
         _args_schema.description = AAZStrArg(
             options=["--description"],
             arg_group="Properties",
-            help={"short-summary": "Policy definition description.", "long-summary": "Full description of the policy definition."},
+            help="The policy definition description.",
         )
         _args_schema.display_name = AAZStrArg(
             options=["--display-name"],
             arg_group="Properties",
-            help={"short-summary": "The display name of the policy definition.", "long-summary": "The display name of the policy definition is not part of its ID, allowing for longer and more flexible naming."},
+            help="The display name of the policy definition.",
         )
         _args_schema.external_evaluation_enforcement_settings = AAZObjectArg(
             options=["--external-settings", "--external-evaluation-enforcement-settings"],
@@ -113,11 +110,6 @@ class Create(AAZCommand):
             options=["--rule", "--rules"],
             arg_group="Properties",
             help="The policy rule.",
-        )
-        _args_schema.version = AAZStrArg(
-            options=["--version"],
-            arg_group="Properties",
-            help={"short-summary": "The policy definition version.", "long-summary": "The policy definition version in #.#.# format."},
         )
 
         external_evaluation_enforcement_settings = cls._args_schema.external_evaluation_enforcement_settings
@@ -183,12 +175,12 @@ class Create(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        condition_0 = has_value(self.ctx.args.management_group) and has_value(self.ctx.args.name)
-        condition_1 = has_value(self.ctx.args.name) and has_value(self.ctx.subscription_id)
+        condition_0 = has_value(self.ctx.args.management_group) and has_value(self.ctx.args.name) and has_value(self.ctx.args.version)
+        condition_1 = has_value(self.ctx.args.name) and has_value(self.ctx.args.version) and has_value(self.ctx.subscription_id)
         if condition_0:
-            self.PolicyDefinitionsCreateOrUpdateAtManagementGroup(ctx=self.ctx)()
+            self.PolicyDefinitionVersionsCreateOrUpdateAtManagementGroup(ctx=self.ctx)()
         if condition_1:
-            self.PolicyDefinitionsCreateOrUpdate(ctx=self.ctx)()
+            self.PolicyDefinitionVersionsCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -203,21 +195,21 @@ class Create(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class PolicyDefinitionsCreateOrUpdateAtManagementGroup(AAZHttpOperation):
+    class PolicyDefinitionVersionsCreateOrUpdateAtManagementGroup(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
             request = self.make_request()
             session = self.client.send_request(request=request, stream=False, **kwargs)
-            if session.http_response.status_code in [201]:
-                return self.on_201(session)
+            if session.http_response.status_code in [200, 201]:
+                return self.on_200_201(session)
 
             return self.on_error(session.http_response)
 
         @property
         def url(self):
             return self.client.format_url(
-                "/providers/Microsoft.Management/managementGroups/{managementGroupId}/providers/Microsoft.Authorization/policyDefinitions/{policyDefinitionName}",
+                "/providers/Microsoft.Management/managementGroups/{managementGroupName}/providers/Microsoft.Authorization/policyDefinitions/{policyDefinitionName}/versions/{policyDefinitionVersion}",
                 **self.url_parameters
             )
 
@@ -233,11 +225,15 @@ class Create(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "managementGroupId", self.ctx.args.management_group,
+                    "managementGroupName", self.ctx.args.management_group,
                     required=True,
                 ),
                 **self.serialize_url_param(
                     "policyDefinitionName", self.ctx.args.name,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "policyDefinitionVersion", self.ctx.args.version,
                     required=True,
                 ),
             }
@@ -283,7 +279,6 @@ class Create(AAZCommand):
                 properties.set_prop("mode", AAZStrType, ".mode")
                 properties.set_prop("parameters", AAZDictType, ".params")
                 properties.set_prop("policyRule", AAZAnyType, ".rules")
-                properties.set_prop("version", AAZStrType, ".version")
 
             external_evaluation_enforcement_settings = _builder.get(".properties.externalEvaluationEnforcementSettings")
             if external_evaluation_enforcement_settings is not None:
@@ -323,42 +318,42 @@ class Create(AAZCommand):
 
             return self.serialize_content(_content_value)
 
-        def on_201(self, session):
+        def on_200_201(self, session):
             data = self.deserialize_http_content(session)
             self.ctx.set_var(
                 "instance",
                 data,
-                schema_builder=self._build_schema_on_201
+                schema_builder=self._build_schema_on_200_201
             )
 
-        _schema_on_201 = None
+        _schema_on_200_201 = None
 
         @classmethod
-        def _build_schema_on_201(cls):
-            if cls._schema_on_201 is not None:
-                return cls._schema_on_201
+        def _build_schema_on_200_201(cls):
+            if cls._schema_on_200_201 is not None:
+                return cls._schema_on_200_201
 
-            cls._schema_on_201 = AAZObjectType()
+            cls._schema_on_200_201 = AAZObjectType()
 
-            _schema_on_201 = cls._schema_on_201
-            _schema_on_201.id = AAZStrType(
+            _schema_on_200_201 = cls._schema_on_200_201
+            _schema_on_200_201.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_201.name = AAZStrType(
+            _schema_on_200_201.name = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_201.properties = AAZObjectType(
+            _schema_on_200_201.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
-            _schema_on_201.system_data = AAZObjectType(
+            _schema_on_200_201.system_data = AAZObjectType(
                 serialized_name="systemData",
                 flags={"read_only": True},
             )
-            _schema_on_201.type = AAZStrType(
+            _schema_on_200_201.type = AAZStrType(
                 flags={"read_only": True},
             )
 
-            properties = cls._schema_on_201.properties
+            properties = cls._schema_on_200_201.properties
             properties.description = AAZStrType()
             properties.display_name = AAZStrType(
                 serialized_name="displayName",
@@ -376,9 +371,8 @@ class Create(AAZCommand):
                 serialized_name="policyType",
             )
             properties.version = AAZStrType()
-            properties.versions = AAZListType()
 
-            external_evaluation_enforcement_settings = cls._schema_on_201.properties.external_evaluation_enforcement_settings
+            external_evaluation_enforcement_settings = cls._schema_on_200_201.properties.external_evaluation_enforcement_settings
             external_evaluation_enforcement_settings.endpoint_settings = AAZObjectType(
                 serialized_name="endpointSettings",
             )
@@ -392,17 +386,17 @@ class Create(AAZCommand):
                 serialized_name="roleDefinitionIds",
             )
 
-            endpoint_settings = cls._schema_on_201.properties.external_evaluation_enforcement_settings.endpoint_settings
+            endpoint_settings = cls._schema_on_200_201.properties.external_evaluation_enforcement_settings.endpoint_settings
             endpoint_settings.details = AAZAnyType()
             endpoint_settings.kind = AAZStrType()
 
-            role_definition_ids = cls._schema_on_201.properties.external_evaluation_enforcement_settings.role_definition_ids
+            role_definition_ids = cls._schema_on_200_201.properties.external_evaluation_enforcement_settings.role_definition_ids
             role_definition_ids.Element = AAZStrType()
 
-            parameters = cls._schema_on_201.properties.parameters
+            parameters = cls._schema_on_200_201.properties.parameters
             parameters.Element = AAZObjectType()
 
-            _element = cls._schema_on_201.properties.parameters.Element
+            _element = cls._schema_on_200_201.properties.parameters.Element
             _element.allowed_values = AAZListType(
                 serialized_name="allowedValues",
             )
@@ -413,13 +407,10 @@ class Create(AAZCommand):
             _element.schema = AAZAnyType()
             _element.type = AAZStrType()
 
-            allowed_values = cls._schema_on_201.properties.parameters.Element.allowed_values
+            allowed_values = cls._schema_on_200_201.properties.parameters.Element.allowed_values
             allowed_values.Element = AAZAnyType()
 
-            versions = cls._schema_on_201.properties.versions
-            versions.Element = AAZStrType()
-
-            system_data = cls._schema_on_201.system_data
+            system_data = cls._schema_on_200_201.system_data
             system_data.created_at = AAZStrType(
                 serialized_name="createdAt",
             )
@@ -439,23 +430,23 @@ class Create(AAZCommand):
                 serialized_name="lastModifiedByType",
             )
 
-            return cls._schema_on_201
+            return cls._schema_on_200_201
 
-    class PolicyDefinitionsCreateOrUpdate(AAZHttpOperation):
+    class PolicyDefinitionVersionsCreateOrUpdate(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
             request = self.make_request()
             session = self.client.send_request(request=request, stream=False, **kwargs)
-            if session.http_response.status_code in [201]:
-                return self.on_201(session)
+            if session.http_response.status_code in [200, 201]:
+                return self.on_200_201(session)
 
             return self.on_error(session.http_response)
 
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policyDefinitions/{policyDefinitionName}",
+                "/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policyDefinitions/{policyDefinitionName}/versions/{policyDefinitionVersion}",
                 **self.url_parameters
             )
 
@@ -472,6 +463,10 @@ class Create(AAZCommand):
             parameters = {
                 **self.serialize_url_param(
                     "policyDefinitionName", self.ctx.args.name,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "policyDefinitionVersion", self.ctx.args.version,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -521,7 +516,6 @@ class Create(AAZCommand):
                 properties.set_prop("mode", AAZStrType, ".mode")
                 properties.set_prop("parameters", AAZDictType, ".params")
                 properties.set_prop("policyRule", AAZAnyType, ".rules")
-                properties.set_prop("version", AAZStrType, ".version")
 
             external_evaluation_enforcement_settings = _builder.get(".properties.externalEvaluationEnforcementSettings")
             if external_evaluation_enforcement_settings is not None:
@@ -561,42 +555,42 @@ class Create(AAZCommand):
 
             return self.serialize_content(_content_value)
 
-        def on_201(self, session):
+        def on_200_201(self, session):
             data = self.deserialize_http_content(session)
             self.ctx.set_var(
                 "instance",
                 data,
-                schema_builder=self._build_schema_on_201
+                schema_builder=self._build_schema_on_200_201
             )
 
-        _schema_on_201 = None
+        _schema_on_200_201 = None
 
         @classmethod
-        def _build_schema_on_201(cls):
-            if cls._schema_on_201 is not None:
-                return cls._schema_on_201
+        def _build_schema_on_200_201(cls):
+            if cls._schema_on_200_201 is not None:
+                return cls._schema_on_200_201
 
-            cls._schema_on_201 = AAZObjectType()
+            cls._schema_on_200_201 = AAZObjectType()
 
-            _schema_on_201 = cls._schema_on_201
-            _schema_on_201.id = AAZStrType(
+            _schema_on_200_201 = cls._schema_on_200_201
+            _schema_on_200_201.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_201.name = AAZStrType(
+            _schema_on_200_201.name = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_201.properties = AAZObjectType(
+            _schema_on_200_201.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
-            _schema_on_201.system_data = AAZObjectType(
+            _schema_on_200_201.system_data = AAZObjectType(
                 serialized_name="systemData",
                 flags={"read_only": True},
             )
-            _schema_on_201.type = AAZStrType(
+            _schema_on_200_201.type = AAZStrType(
                 flags={"read_only": True},
             )
 
-            properties = cls._schema_on_201.properties
+            properties = cls._schema_on_200_201.properties
             properties.description = AAZStrType()
             properties.display_name = AAZStrType(
                 serialized_name="displayName",
@@ -614,9 +608,8 @@ class Create(AAZCommand):
                 serialized_name="policyType",
             )
             properties.version = AAZStrType()
-            properties.versions = AAZListType()
 
-            external_evaluation_enforcement_settings = cls._schema_on_201.properties.external_evaluation_enforcement_settings
+            external_evaluation_enforcement_settings = cls._schema_on_200_201.properties.external_evaluation_enforcement_settings
             external_evaluation_enforcement_settings.endpoint_settings = AAZObjectType(
                 serialized_name="endpointSettings",
             )
@@ -630,17 +623,17 @@ class Create(AAZCommand):
                 serialized_name="roleDefinitionIds",
             )
 
-            endpoint_settings = cls._schema_on_201.properties.external_evaluation_enforcement_settings.endpoint_settings
+            endpoint_settings = cls._schema_on_200_201.properties.external_evaluation_enforcement_settings.endpoint_settings
             endpoint_settings.details = AAZAnyType()
             endpoint_settings.kind = AAZStrType()
 
-            role_definition_ids = cls._schema_on_201.properties.external_evaluation_enforcement_settings.role_definition_ids
+            role_definition_ids = cls._schema_on_200_201.properties.external_evaluation_enforcement_settings.role_definition_ids
             role_definition_ids.Element = AAZStrType()
 
-            parameters = cls._schema_on_201.properties.parameters
+            parameters = cls._schema_on_200_201.properties.parameters
             parameters.Element = AAZObjectType()
 
-            _element = cls._schema_on_201.properties.parameters.Element
+            _element = cls._schema_on_200_201.properties.parameters.Element
             _element.allowed_values = AAZListType(
                 serialized_name="allowedValues",
             )
@@ -651,13 +644,10 @@ class Create(AAZCommand):
             _element.schema = AAZAnyType()
             _element.type = AAZStrType()
 
-            allowed_values = cls._schema_on_201.properties.parameters.Element.allowed_values
+            allowed_values = cls._schema_on_200_201.properties.parameters.Element.allowed_values
             allowed_values.Element = AAZAnyType()
 
-            versions = cls._schema_on_201.properties.versions
-            versions.Element = AAZStrType()
-
-            system_data = cls._schema_on_201.system_data
+            system_data = cls._schema_on_200_201.system_data
             system_data.created_at = AAZStrType(
                 serialized_name="createdAt",
             )
@@ -677,7 +667,7 @@ class Create(AAZCommand):
                 serialized_name="lastModifiedByType",
             )
 
-            return cls._schema_on_201
+            return cls._schema_on_200_201
 
 
 class _CreateHelper:

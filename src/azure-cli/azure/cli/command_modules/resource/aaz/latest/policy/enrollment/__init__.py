@@ -8,18 +8,9 @@
 # pylint: skip-file
 # flake8: noqa
 
-from azure.cli.core.aaz import *
-
-
-@register_command_group(
-    "policy assignment non-compliance-message",
-)
-class __CMDGroup(AAZCommandGroup):
-    """Manage non-compliance message used by the policy assignment.
-
-    Customized message used by the enclosing policy assignment to report non-compliance.
-    """
-    pass
-
-
-__all__ = ["__CMDGroup"]
+from .__cmd_group import *
+from ._create import *
+from ._delete import *
+from ._list import *
+from ._show import *
+from ._update import *

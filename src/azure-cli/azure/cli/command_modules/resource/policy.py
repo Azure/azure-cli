@@ -329,6 +329,7 @@ class Common:
             if isinstance(properties, dict):
                 properties['version'] = version_arg.to_serialized_data()
 
+
 # Completers for policy command arguments
 class Completers:
 
@@ -384,6 +385,7 @@ class Completers:
             result = policy_client.policy_set_definition_versions.list(namespace.policy_set_definition_name)
             return [i.name for i in result]
         return []
+
 
 class PolicyAssignmentCreate(AssignmentCreate):
 
@@ -1918,4 +1920,3 @@ class PolicySetDefinitionVersionUpdate(SetDefinitionVersionUpdate):
             "'az policy set-definition version update' is not supported. "
             "Policy set-definition versions are immutable. "
             "Use 'az policy set-definition version create' to publish a new version.")
-

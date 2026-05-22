@@ -12,21 +12,22 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "policy exemption delete",
+    "policy enrollment delete",
+    confirmation="Are you sure you want to perform this operation?",
 )
 class Delete(AAZCommand):
-    """Delete a policy exemption.
+    """Delete a policy enrollment.
 
-    Delete the policy exemption with the given name and scope.
+    Delete the policy enrollment with the given name and scope.
 
-    :example: Delete a policy exemption
-        az policy exemption delete --name MyPolicyExemption --resource-group "myResourceGroup"
+    :example: Delete a policy enrollment
+        az policy enrollment delete --name MyPolicyEnrollment --resource-group "myResourceGroup"
     """
 
     _aaz_info = {
         "version": "2026-01-01-preview",
         "resources": [
-            ["mgmt-plane", "/{scope}/providers/microsoft.authorization/policyexemptions/{}", "2026-01-01-preview"],
+            ["mgmt-plane", "/{scope}/providers/microsoft.authorization/policyenrollments/{}", "2026-01-01-preview"],
         ]
     }
 
@@ -48,7 +49,7 @@ class Delete(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.name = AAZStrArg(
             options=["-n", "--name"],
-            help="The name of the policy exemption.",
+            help="The name of the policy enrollment.",
             required=True,
             fmt=AAZStrArgFormat(
                 pattern="^[^<>%&:\\?/]*[^<>%&:\\?/ ]+$",
@@ -56,14 +57,14 @@ class Delete(AAZCommand):
         )
         _args_schema.scope = AAZStrArg(
             options=["--scope"],
-            help={"short-summary": "The scope of the policy assignment.", "long-summary": "Valid scopes are: management group (format: '/providers/Microsoft.Management/managementGroups/{managementGroup}'), subscription (format: '/subscriptions/{subscriptionId}'), resource group (format: '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}', or resource (format: '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/[{parentResourcePath}/]{resourceType}/{resourceName}'. The scope of an assignment is always the part of its ID preceding '/providers/Microsoft.Authorization/policyAssignments/{policyAssignmentName}'. If scope is not provided, the scope will be the implied or specified subscription."},
+            help="The fully qualified Azure Resource manager identifier of the resource.",
             required=True,
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.PolicyExemptionsDelete(ctx=self.ctx)()
+        self.PolicyEnrollmentsDelete(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -74,7 +75,7 @@ class Delete(AAZCommand):
     def post_operations(self):
         pass
 
-    class PolicyExemptionsDelete(AAZHttpOperation):
+    class PolicyEnrollmentsDelete(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -90,7 +91,7 @@ class Delete(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/{scope}/providers/Microsoft.Authorization/policyExemptions/{policyExemptionName}",
+                "/{scope}/providers/Microsoft.Authorization/policyEnrollments/{policyEnrollmentName}",
                 **self.url_parameters
             )
 
@@ -106,7 +107,7 @@ class Delete(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "policyExemptionName", self.ctx.args.name,
+                    "policyEnrollmentName", self.ctx.args.name,
                     required=True,
                 ),
                 **self.serialize_url_param(

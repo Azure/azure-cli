@@ -12,27 +12,27 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "policy exemption create",
+    "policy enrollment create",
 )
 class Create(AAZCommand):
-    """Create a policy exemption.
+    """Create a policy enrollment.
 
-    Create a policy exemption with the given name and scope. Policy exemptions apply to all resources contained within their scope. For example, when you create a policy exemption at resource group scope for a policy assignment at the same or higher scope level, the exemption exempts all applicable resources in the resource group from applying to that policy assignment.
+    Create a policy enrollment with the given name and scope. Policy enrollments apply a policy assignment to resources within their scope. For example, when you create a policy enrollment at resource group scope for a policy assignment at the same or higher scope level, the enrollment applies to all applicable resources in the resource group, optionally filtering which policy definitions or resources are included.
 
-    :example: Create a policy exemption in default subscription
-        az policy exemption create -n exemptTestVM --policy-assignment "/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policyAssignments/limitVMSku" --exemption-category "Waiver"
+    :example: Create a policy enrollment in default subscription
+        az policy enrollment create -n enrollTestVm --policy-assignment "/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policyAssignments/limitVMSku"
 
-    :example: Create a policy exemption in the resource group
-        az policy exemption create -n exemptTestVM --policy-assignment "/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policyAssignments/limitVMSku" --exemption-category "Waiver" --resource-group "myResourceGroup"
+    :example: Create a policy enrollment in the resource group
+        az policy enrollment create -n enrollTestVm --policy-assignment "/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policyAssignments/limitVMSku" --resource-group MyResourceGroup
 
-    :example: Create a policy exemption in a management group
-        az policy exemption create -n exemptTestVM --policy-assignment "/providers/Microsoft.Management/managementGroups/{managementGroupName}/providers/Microsoft.Authorization/policyAssignments/limitVMSku" --exemption-category "Waiver" --scope "/providers/Microsoft.Management/managementGroups/{managementGroupName}"
+    :example: Create a policy enrollment in the management group
+        az az policy enrollment create -n enrollTestVm --policy-assignment "/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policyAssignments/limitVMSku" --scope "/providers/Microsoft.Management/managementGroups/{managementGroupName}"
     """
 
     _aaz_info = {
         "version": "2026-01-01-preview",
         "resources": [
-            ["mgmt-plane", "/{scope}/providers/microsoft.authorization/policyexemptions/{}", "2026-01-01-preview"],
+            ["mgmt-plane", "/{scope}/providers/microsoft.authorization/policyenrollments/{}", "2026-01-01-preview"],
         ]
     }
 
@@ -54,7 +54,7 @@ class Create(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.name = AAZStrArg(
             options=["-n", "--name"],
-            help="The name of the policy exemption.",
+            help="The name of the policy enrollment.",
             required=True,
             fmt=AAZStrArgFormat(
                 pattern="^[^<>%&:\\?/]*[^<>%&:\\?/ ]+$",
@@ -62,9 +62,11 @@ class Create(AAZCommand):
         )
         _args_schema.scope = AAZStrArg(
             options=["--scope"],
-            help={"short-summary": "The scope of the policy assignment.", "long-summary": "Valid scopes are: management group (format: '/providers/Microsoft.Management/managementGroups/{managementGroup}'), subscription (format: '/subscriptions/{subscriptionId}'), resource group (format: '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}', or resource (format: '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/[{parentResourcePath}/]{resourceType}/{resourceName}'. The scope of an assignment is always the part of its ID preceding '/providers/Microsoft.Authorization/policyAssignments/{policyAssignmentName}'. If scope is not provided, the scope will be the implied or specified subscription."},
+            help="The fully qualified Azure Resource manager identifier of the resource.",
             required=True,
         )
+
+        # define Arg Group "Parameters"
 
         # define Arg Group "Properties"
 
@@ -72,53 +74,38 @@ class Create(AAZCommand):
         _args_schema.assignment_scope_validation = AAZStrArg(
             options=["-v", "--assignment-scope-validation"],
             arg_group="Properties",
-            help={"short-summary": "The assignment scope validation", "long-summary": "Indicates the type of validation to perform on the assignment scope. Valid values are Default, DoNotValidate."},
-            default="Default",
+            help="The option whether to validate the enrollment is at or under the assignment scope.",
             enum={"Default": "Default", "DoNotValidate": "DoNotValidate"},
         )
         _args_schema.description = AAZStrArg(
             options=["--description"],
             arg_group="Properties",
-            help={"short-summary": "Policy exemption description.", "long-summary": "Full description of the policy exemption."},
+            help="The description of the policy enrollment.",
         )
         _args_schema.display_name = AAZStrArg(
             options=["--display-name"],
             arg_group="Properties",
-            help={"short-summary": "The display name of the policy exemption.", "long-summary": "The display name of the policy exemption is not part of its ID, allowing for longer and more flexible naming."},
-        )
-        _args_schema.exemption_category = AAZStrArg(
-            options=["-e", "--exemption-category"],
-            arg_group="Properties",
-            help={"short-summary": "The policy exemption category.", "long-summary": "The policy exemption category. Possible values are Mitigated and Waiver."},
-            enum={"Mitigated": "Mitigated", "Waiver": "Waiver"},
-        )
-        _args_schema.expires_on = AAZDateTimeArg(
-            options=["--expires-on"],
-            arg_group="Properties",
-            help={"short-summary": "The expiration date and time.", "long-summary": "The expiration date and time of the policy exemption in UTC ISO 8601 format, e.g. yyyy-MM-ddTHH:mm:ssZ."},
-            fmt=AAZDateTimeFormat(
-                protocol="iso",
-            ),
+            help="The display name of the policy enrollment.",
         )
         _args_schema.metadata = AAZAnyTypeArg(
             options=["--metadata"],
             arg_group="Properties",
-            help={"short-summary": "The policy exemption metadata.", "long-summary": "The policy exemption metadata. Metadata is an open-ended object and is typically a collection of key value pairs."},
+            help="The policy enrollment metadata. Metadata is an open ended object and is typically a collection of key value pairs.",
         )
-        _args_schema.policy_assignment = AAZStrArg(
+        _args_schema.policy_assignment = AAZResourceIdArg(
             options=["-a", "--policy-assignment"],
             arg_group="Properties",
-            help={"short-summary": "The policy assignment to exempt.", "long-summary": "The resource ID of the policy assignment to exempt."},
+            help={"short-summary": "The policy assignment to enroll.", "long-summary": "The resource ID of the policy assignment to enroll."},
         )
         _args_schema.policy_definition_reference_ids = AAZListArg(
             options=["-r", "--policy-definition-reference-ids"],
             arg_group="Properties",
-            help={"short-summary": "The policy definition reference IDs.", "long-summary": "The collection of policy definition reference IDs to exempt when the policy assignment is an assignment of a policy set definition."},
+            help={"short-summary": "The policy definition reference IDs.", "long-summary": "The collection of policy definition reference IDs to enroll when the policy assignment is an assignment of a policy set definition."},
         )
         _args_schema.resource_selectors = AAZListArg(
             options=["--resource-selectors"],
             arg_group="Properties",
-            help={"short-summary": "The resource selectors list to filter policies by resource properties.", "long-summary": "The collection of resource selector expressions used to filter policy exemption applicability by certain resource property values."},
+            help="The resource selector list to filter policies by resource properties.",
         )
 
         policy_definition_reference_ids = cls._args_schema.policy_definition_reference_ids
@@ -164,7 +151,7 @@ class Create(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        self.PolicyExemptionsCreateOrUpdate(ctx=self.ctx)()
+        self.PolicyEnrollmentsCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -179,7 +166,7 @@ class Create(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class PolicyExemptionsCreateOrUpdate(AAZHttpOperation):
+    class PolicyEnrollmentsCreateOrUpdate(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -193,7 +180,7 @@ class Create(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/{scope}/providers/Microsoft.Authorization/policyExemptions/{policyExemptionName}",
+                "/{scope}/providers/Microsoft.Authorization/policyEnrollments/{policyEnrollmentName}",
                 **self.url_parameters
             )
 
@@ -209,7 +196,7 @@ class Create(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "policyExemptionName", self.ctx.args.name,
+                    "policyEnrollmentName", self.ctx.args.name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -256,8 +243,6 @@ class Create(AAZCommand):
                 properties.set_prop("assignmentScopeValidation", AAZStrType, ".assignment_scope_validation")
                 properties.set_prop("description", AAZStrType, ".description")
                 properties.set_prop("displayName", AAZStrType, ".display_name")
-                properties.set_prop("exemptionCategory", AAZStrType, ".exemption_category", typ_kwargs={"flags": {"required": True}})
-                properties.set_prop("expiresOn", AAZStrType, ".expires_on")
                 properties.set_prop("metadata", AAZAnyType, ".metadata")
                 properties.set_prop("policyAssignmentId", AAZStrType, ".policy_assignment", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("policyDefinitionReferenceIds", AAZListType, ".policy_definition_reference_ids")
@@ -314,6 +299,9 @@ class Create(AAZCommand):
             cls._schema_on_200_201 = AAZObjectType()
 
             _schema_on_200_201 = cls._schema_on_200_201
+            _schema_on_200_201.e_tag = AAZStrType(
+                serialized_name="eTag",
+            )
             _schema_on_200_201.id = AAZStrType(
                 flags={"read_only": True},
             )
@@ -339,17 +327,14 @@ class Create(AAZCommand):
             properties.display_name = AAZStrType(
                 serialized_name="displayName",
             )
-            properties.exemption_category = AAZStrType(
-                serialized_name="exemptionCategory",
-                flags={"required": True},
-            )
-            properties.expires_on = AAZStrType(
-                serialized_name="expiresOn",
-            )
             properties.metadata = AAZAnyType()
             properties.policy_assignment_id = AAZStrType(
                 serialized_name="policyAssignmentId",
                 flags={"required": True},
+            )
+            properties.policy_assignment_instance_id = AAZStrType(
+                serialized_name="policyAssignmentInstanceId",
+                flags={"read_only": True},
             )
             properties.policy_definition_reference_ids = AAZListType(
                 serialized_name="policyDefinitionReferenceIds",

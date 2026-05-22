@@ -12,34 +12,20 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "policy set-definition create",
+    "policy set-definition version create",
 )
 class Create(AAZCommand):
-    """Create a policy set definition.
+    """Create operation creates or updates a policy set definition version in the given management group with the given name and version.
 
-    Create a policy set definition in the given subscription or management group with the given name and other properties.
-
-    :example: Create a policy set definition
-        az policy set-definition create -n readOnlyStorage --definitions '[ { 'policyDefinitionId': '/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policyDefinitions/{policyDefinitionName}' } ]'
-
-    :example: Create a policy set definition with parameters
-        az policy set-definition create -n readOnlyStorage --definitions "[ { 'policyDefinitionId': '/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policyDefinitions/{policyDefinitionName}', 'parameters': { 'storageSku': { 'value': '[parameters(\\'requiredSku\\')]' } } }]" --params "{ 'requiredSku': { 'type': 'String' } }"
-
-    :example: Create a policy set definition in a subscription
-        az policy set-definition create -n readOnlyStorage --subscription {subscriptionName} --definitions "[ { 'policyDefinitionId': '/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policyDefinitions/{policyDefinitionName}' } ]"
-
-    :example: Create a policy set definition with policy definition groups
-        az policy set-definition create -n computeRequirements --definitions "[ { 'policyDefinitionId ': '/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policyDefinitions/storagePolicy', 'groupNames': [ 'CostSaving', 'Organizational' ] }, { 'policyDefinitionId': '/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policyDefinitions/tagPolicy', 'groupNames': [ 'Organizational' ] } ]" --definition-groups "[{ 'name': 'CostSaving' }, { 'name': 'Organizational' } ]"
-
-    :example: Create a policy set definition with newer version
-        az policy set-definition create -n readOnlyStorage --definitions "[ { 'policyDefinitionId': '/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policyDefinitions/{policyDefinitionName}' } ]" --version 2.0.0
+    :example: Create a policy set definition with older version
+        az policy set-definition version create -n readOnlyStorage --definitions "[ { 'policyDefinitionId': '/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policyDefinitions/{policyDefinitionName}' } ]" --version 1.1.0
     """
 
     _aaz_info = {
         "version": "2025-11-01",
         "resources": [
-            ["mgmt-plane", "/providers/microsoft.management/managementgroups/{}/providers/microsoft.authorization/policysetdefinitions/{}", "2025-11-01"],
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.authorization/policysetdefinitions/{}", "2025-11-01"],
+            ["mgmt-plane", "/providers/microsoft.management/managementgroups/{}/providers/microsoft.authorization/policysetdefinitions/{}/versions/{}", "2025-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.authorization/policysetdefinitions/{}/versions/{}", "2025-11-01"],
         ]
     }
 
@@ -61,7 +47,19 @@ class Create(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.management_group = AAZStrArg(
             options=["--management-group"],
-            help={"short-summary": "The management group.", "long-summary": "The management group with the given name is where the policy definition will reside. It can be assigned only at scopes at or below this management group."},
+            help="The management group.",
+            fmt=AAZStrArgFormat(
+                max_length=90,
+                min_length=1,
+            ),
+        )
+        _args_schema.version = AAZStrArg(
+            options=["--version"],
+            help={"short-summary": "The policy set definition version.", "long-summary": "The policy set definition version in #.#.# format."},
+            required=True,
+            fmt=AAZStrArgFormat(
+                pattern="^\\d+\\.\\d+\\.\\d+$",
+            ),
         )
         _args_schema.name = AAZStrArg(
             options=["-n", "--name"],
@@ -78,12 +76,12 @@ class Create(AAZCommand):
         _args_schema.description = AAZStrArg(
             options=["--description"],
             arg_group="Properties",
-            help={"short-summary": "Policy set definition description.", "long-summary": "Full description of the policy set definition."},
+            help="The policy set definition description.",
         )
         _args_schema.display_name = AAZStrArg(
             options=["--display-name"],
             arg_group="Properties",
-            help={"short-summary": "The display name of the policy set definition.", "long-summary": "The display name of the policy set definition is not part of its ID, allowing for longer and more flexible naming."},
+            help="The display name of the policy set definition.",
         )
         _args_schema.metadata = AAZAnyTypeArg(
             options=["--metadata"],
@@ -104,11 +102,6 @@ class Create(AAZCommand):
             options=["--definitions"],
             arg_group="Properties",
             help="An array of policy definition references.",
-        )
-        _args_schema.version = AAZStrArg(
-            options=["--version"],
-            arg_group="Properties",
-            help={"short-summary": "The policy set definition version.", "long-summary": "The policy set definition version in #.#.# format."},
         )
 
         params = cls._args_schema.params
@@ -207,12 +200,12 @@ class Create(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        condition_0 = has_value(self.ctx.args.management_group) and has_value(self.ctx.args.name)
-        condition_1 = has_value(self.ctx.args.name) and has_value(self.ctx.subscription_id)
+        condition_0 = has_value(self.ctx.args.management_group) and has_value(self.ctx.args.version) and has_value(self.ctx.args.name)
+        condition_1 = has_value(self.ctx.args.version) and has_value(self.ctx.args.name) and has_value(self.ctx.subscription_id)
         if condition_0:
-            self.PolicySetDefinitionsCreateOrUpdateAtManagementGroup(ctx=self.ctx)()
+            self.PolicySetDefinitionVersionsCreateOrUpdateAtManagementGroup(ctx=self.ctx)()
         if condition_1:
-            self.PolicySetDefinitionsCreateOrUpdate(ctx=self.ctx)()
+            self.PolicySetDefinitionVersionsCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -227,7 +220,7 @@ class Create(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class PolicySetDefinitionsCreateOrUpdateAtManagementGroup(AAZHttpOperation):
+    class PolicySetDefinitionVersionsCreateOrUpdateAtManagementGroup(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -241,7 +234,7 @@ class Create(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/providers/Microsoft.Management/managementGroups/{managementGroupId}/providers/Microsoft.Authorization/policySetDefinitions/{policySetDefinitionName}",
+                "/providers/Microsoft.Management/managementGroups/{managementGroupName}/providers/Microsoft.Authorization/policySetDefinitions/{policySetDefinitionName}/versions/{policyDefinitionVersion}",
                 **self.url_parameters
             )
 
@@ -257,7 +250,11 @@ class Create(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "managementGroupId", self.ctx.args.management_group,
+                    "managementGroupName", self.ctx.args.management_group,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "policyDefinitionVersion", self.ctx.args.version,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -306,7 +303,6 @@ class Create(AAZCommand):
                 properties.set_prop("parameters", AAZDictType, ".params")
                 properties.set_prop("policyDefinitionGroups", AAZListType, ".definition_groups")
                 properties.set_prop("policyDefinitions", AAZListType, ".definitions", typ_kwargs={"flags": {"required": True}})
-                properties.set_prop("version", AAZStrType, ".version")
 
             parameters = _builder.get(".properties.parameters")
             if parameters is not None:
@@ -419,7 +415,6 @@ class Create(AAZCommand):
                 serialized_name="policyType",
             )
             properties.version = AAZStrType()
-            properties.versions = AAZListType()
 
             parameters = cls._schema_on_200_201.properties.parameters
             parameters.Element = AAZObjectType()
@@ -490,9 +485,6 @@ class Create(AAZCommand):
             _element = cls._schema_on_200_201.properties.policy_definitions.Element.parameters.Element
             _element.value = AAZAnyType()
 
-            versions = cls._schema_on_200_201.properties.versions
-            versions.Element = AAZStrType()
-
             system_data = cls._schema_on_200_201.system_data
             system_data.created_at = AAZStrType(
                 serialized_name="createdAt",
@@ -515,7 +507,7 @@ class Create(AAZCommand):
 
             return cls._schema_on_200_201
 
-    class PolicySetDefinitionsCreateOrUpdate(AAZHttpOperation):
+    class PolicySetDefinitionVersionsCreateOrUpdate(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -529,7 +521,7 @@ class Create(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policySetDefinitions/{policySetDefinitionName}",
+                "/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policySetDefinitions/{policySetDefinitionName}/versions/{policyDefinitionVersion}",
                 **self.url_parameters
             )
 
@@ -544,6 +536,10 @@ class Create(AAZCommand):
         @property
         def url_parameters(self):
             parameters = {
+                **self.serialize_url_param(
+                    "policyDefinitionVersion", self.ctx.args.version,
+                    required=True,
+                ),
                 **self.serialize_url_param(
                     "policySetDefinitionName", self.ctx.args.name,
                     required=True,
@@ -594,7 +590,6 @@ class Create(AAZCommand):
                 properties.set_prop("parameters", AAZDictType, ".params")
                 properties.set_prop("policyDefinitionGroups", AAZListType, ".definition_groups")
                 properties.set_prop("policyDefinitions", AAZListType, ".definitions", typ_kwargs={"flags": {"required": True}})
-                properties.set_prop("version", AAZStrType, ".version")
 
             parameters = _builder.get(".properties.parameters")
             if parameters is not None:
@@ -707,7 +702,6 @@ class Create(AAZCommand):
                 serialized_name="policyType",
             )
             properties.version = AAZStrType()
-            properties.versions = AAZListType()
 
             parameters = cls._schema_on_200_201.properties.parameters
             parameters.Element = AAZObjectType()
@@ -777,9 +771,6 @@ class Create(AAZCommand):
 
             _element = cls._schema_on_200_201.properties.policy_definitions.Element.parameters.Element
             _element.value = AAZAnyType()
-
-            versions = cls._schema_on_200_201.properties.versions
-            versions.Element = AAZStrType()
 
             system_data = cls._schema_on_200_201.system_data
             system_data.created_at = AAZStrType(

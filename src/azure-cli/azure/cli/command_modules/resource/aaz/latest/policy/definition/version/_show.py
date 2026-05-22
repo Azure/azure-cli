@@ -12,25 +12,22 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "policy set-definition show",
+    "policy definition version show",
 )
 class Show(AAZCommand):
-    """Retrieve a policy set definition.
+    """Retrieves a policy definition version.
 
-    Retrieve and show the details of the policy set definition in the given subscription or management group with the given name.
+    Retrieve and show the details of the policy definition version in the given subscription or management group with the given name and version.
 
-    :example: Retrieve a policy set definition at management group level
-        az policy set-definition show --management-group MyManagementGroup --name CostManagement
-
-    :example: Retrieve a policy set definition
-        az policy set-definition show --name CostManagement
+    :example: Retrieve a policy definition version
+        az policy definition version show --name ResourceNaming --version 1.2.1
     """
 
     _aaz_info = {
         "version": "2025-11-01",
         "resources": [
-            ["mgmt-plane", "/providers/microsoft.management/managementgroups/{}/providers/microsoft.authorization/policysetdefinitions/{}", "2025-11-01"],
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.authorization/policysetdefinitions/{}", "2025-11-01"],
+            ["mgmt-plane", "/providers/microsoft.management/managementgroups/{}/providers/microsoft.authorization/policydefinitions/{}/versions/{}", "2025-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.authorization/policydefinitions/{}/versions/{}", "2025-11-01"],
         ]
     }
 
@@ -52,30 +49,38 @@ class Show(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.management_group = AAZStrArg(
             options=["--management-group"],
-            help={"short-summary": "The management group.", "long-summary": "The management group with the given name where the policy set definition resides."},
+            help="The management group.",
+            fmt=AAZStrArgFormat(
+                max_length=90,
+                min_length=1,
+            ),
         )
         _args_schema.name = AAZStrArg(
             options=["-n", "--name"],
-            help="The name of the policy set definition.",
+            help="The name of the policy definition.",
             required=True,
             fmt=AAZStrArgFormat(
                 pattern="^[^<>%&:\\?/]*[^<>%&:\\?/ ]+$",
             ),
         )
-        _args_schema.expand = AAZStrArg(
-            options=["--expand"],
-            help={"short-summary": "Additional properties to include in output", "long-summary": "Comma-separated list of additional properties to include in the command output. Supported values are 'LatestDefinitionVersion, EffectiveDefinitionVersion'."},
+        _args_schema.version = AAZStrArg(
+            options=["--version"],
+            help={"short-summary": "The policy definition version.", "long-summary": "The policy definition version in #.#.# format."},
+            required=True,
+            fmt=AAZStrArgFormat(
+                pattern="^\\d+\\.\\d+\\.\\d+$",
+            ),
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        condition_0 = has_value(self.ctx.args.management_group) and has_value(self.ctx.args.name)
-        condition_1 = has_value(self.ctx.args.name) and has_value(self.ctx.subscription_id)
+        condition_0 = has_value(self.ctx.args.management_group) and has_value(self.ctx.args.name) and has_value(self.ctx.args.version)
+        condition_1 = has_value(self.ctx.args.name) and has_value(self.ctx.args.version) and has_value(self.ctx.subscription_id)
         if condition_0:
-            self.PolicySetDefinitionsGetAtManagementGroup(ctx=self.ctx)()
+            self.PolicyDefinitionVersionsGetAtManagementGroup(ctx=self.ctx)()
         if condition_1:
-            self.PolicySetDefinitionsGet(ctx=self.ctx)()
+            self.PolicyDefinitionVersionsGet(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -90,7 +95,7 @@ class Show(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class PolicySetDefinitionsGetAtManagementGroup(AAZHttpOperation):
+    class PolicyDefinitionVersionsGetAtManagementGroup(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -104,7 +109,7 @@ class Show(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/providers/Microsoft.Management/managementGroups/{managementGroupId}/providers/Microsoft.Authorization/policySetDefinitions/{policySetDefinitionName}",
+                "/providers/Microsoft.Management/managementGroups/{managementGroupName}/providers/Microsoft.Authorization/policyDefinitions/{policyDefinitionName}/versions/{policyDefinitionVersion}",
                 **self.url_parameters
             )
 
@@ -120,11 +125,15 @@ class Show(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "managementGroupId", self.ctx.args.management_group,
+                    "managementGroupName", self.ctx.args.management_group,
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "policySetDefinitionName", self.ctx.args.name,
+                    "policyDefinitionName", self.ctx.args.name,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "policyDefinitionVersion", self.ctx.args.version,
                     required=True,
                 ),
             }
@@ -133,9 +142,6 @@ class Show(AAZCommand):
         @property
         def query_parameters(self):
             parameters = {
-                **self.serialize_query_param(
-                    "$expand", self.ctx.args.expand,
-                ),
                 **self.serialize_query_param(
                     "api-version", "2025-11-01",
                     required=True,
@@ -192,20 +198,40 @@ class Show(AAZCommand):
             properties.display_name = AAZStrType(
                 serialized_name="displayName",
             )
-            properties.metadata = AAZAnyType()
-            properties.parameters = AAZDictType()
-            properties.policy_definition_groups = AAZListType(
-                serialized_name="policyDefinitionGroups",
+            properties.external_evaluation_enforcement_settings = AAZObjectType(
+                serialized_name="externalEvaluationEnforcementSettings",
             )
-            properties.policy_definitions = AAZListType(
-                serialized_name="policyDefinitions",
-                flags={"required": True},
+            properties.metadata = AAZAnyType()
+            properties.mode = AAZStrType()
+            properties.parameters = AAZDictType()
+            properties.policy_rule = AAZAnyType(
+                serialized_name="policyRule",
             )
             properties.policy_type = AAZStrType(
                 serialized_name="policyType",
             )
             properties.version = AAZStrType()
-            properties.versions = AAZListType()
+
+            external_evaluation_enforcement_settings = cls._schema_on_200.properties.external_evaluation_enforcement_settings
+            external_evaluation_enforcement_settings.endpoint_settings = AAZObjectType(
+                serialized_name="endpointSettings",
+            )
+            external_evaluation_enforcement_settings.missing_token_action = AAZStrType(
+                serialized_name="missingTokenAction",
+            )
+            external_evaluation_enforcement_settings.result_lifespan = AAZStrType(
+                serialized_name="resultLifespan",
+            )
+            external_evaluation_enforcement_settings.role_definition_ids = AAZListType(
+                serialized_name="roleDefinitionIds",
+            )
+
+            endpoint_settings = cls._schema_on_200.properties.external_evaluation_enforcement_settings.endpoint_settings
+            endpoint_settings.details = AAZAnyType()
+            endpoint_settings.kind = AAZStrType()
+
+            role_definition_ids = cls._schema_on_200.properties.external_evaluation_enforcement_settings.role_definition_ids
+            role_definition_ids.Element = AAZStrType()
 
             parameters = cls._schema_on_200.properties.parameters
             parameters.Element = AAZObjectType()
@@ -223,61 +249,6 @@ class Show(AAZCommand):
 
             allowed_values = cls._schema_on_200.properties.parameters.Element.allowed_values
             allowed_values.Element = AAZAnyType()
-
-            policy_definition_groups = cls._schema_on_200.properties.policy_definition_groups
-            policy_definition_groups.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.properties.policy_definition_groups.Element
-            _element.additional_metadata_id = AAZStrType(
-                serialized_name="additionalMetadataId",
-            )
-            _element.category = AAZStrType()
-            _element.description = AAZStrType()
-            _element.display_name = AAZStrType(
-                serialized_name="displayName",
-            )
-            _element.name = AAZStrType(
-                flags={"required": True},
-            )
-
-            policy_definitions = cls._schema_on_200.properties.policy_definitions
-            policy_definitions.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.properties.policy_definitions.Element
-            _element.definition_version = AAZStrType(
-                serialized_name="definitionVersion",
-            )
-            _element.effective_definition_version = AAZStrType(
-                serialized_name="effectiveDefinitionVersion",
-                flags={"read_only": True},
-            )
-            _element.group_names = AAZListType(
-                serialized_name="groupNames",
-            )
-            _element.latest_definition_version = AAZStrType(
-                serialized_name="latestDefinitionVersion",
-                flags={"read_only": True},
-            )
-            _element.parameters = AAZDictType()
-            _element.policy_definition_id = AAZStrType(
-                serialized_name="policyDefinitionId",
-                flags={"required": True},
-            )
-            _element.policy_definition_reference_id = AAZStrType(
-                serialized_name="policyDefinitionReferenceId",
-            )
-
-            group_names = cls._schema_on_200.properties.policy_definitions.Element.group_names
-            group_names.Element = AAZStrType()
-
-            parameters = cls._schema_on_200.properties.policy_definitions.Element.parameters
-            parameters.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.properties.policy_definitions.Element.parameters.Element
-            _element.value = AAZAnyType()
-
-            versions = cls._schema_on_200.properties.versions
-            versions.Element = AAZStrType()
 
             system_data = cls._schema_on_200.system_data
             system_data.created_at = AAZStrType(
@@ -301,7 +272,7 @@ class Show(AAZCommand):
 
             return cls._schema_on_200
 
-    class PolicySetDefinitionsGet(AAZHttpOperation):
+    class PolicyDefinitionVersionsGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -315,7 +286,7 @@ class Show(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policySetDefinitions/{policySetDefinitionName}",
+                "/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policyDefinitions/{policyDefinitionName}/versions/{policyDefinitionVersion}",
                 **self.url_parameters
             )
 
@@ -331,7 +302,11 @@ class Show(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "policySetDefinitionName", self.ctx.args.name,
+                    "policyDefinitionName", self.ctx.args.name,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "policyDefinitionVersion", self.ctx.args.version,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -344,9 +319,6 @@ class Show(AAZCommand):
         @property
         def query_parameters(self):
             parameters = {
-                **self.serialize_query_param(
-                    "$expand", self.ctx.args.expand,
-                ),
                 **self.serialize_query_param(
                     "api-version", "2025-11-01",
                     required=True,
@@ -403,20 +375,40 @@ class Show(AAZCommand):
             properties.display_name = AAZStrType(
                 serialized_name="displayName",
             )
-            properties.metadata = AAZAnyType()
-            properties.parameters = AAZDictType()
-            properties.policy_definition_groups = AAZListType(
-                serialized_name="policyDefinitionGroups",
+            properties.external_evaluation_enforcement_settings = AAZObjectType(
+                serialized_name="externalEvaluationEnforcementSettings",
             )
-            properties.policy_definitions = AAZListType(
-                serialized_name="policyDefinitions",
-                flags={"required": True},
+            properties.metadata = AAZAnyType()
+            properties.mode = AAZStrType()
+            properties.parameters = AAZDictType()
+            properties.policy_rule = AAZAnyType(
+                serialized_name="policyRule",
             )
             properties.policy_type = AAZStrType(
                 serialized_name="policyType",
             )
             properties.version = AAZStrType()
-            properties.versions = AAZListType()
+
+            external_evaluation_enforcement_settings = cls._schema_on_200.properties.external_evaluation_enforcement_settings
+            external_evaluation_enforcement_settings.endpoint_settings = AAZObjectType(
+                serialized_name="endpointSettings",
+            )
+            external_evaluation_enforcement_settings.missing_token_action = AAZStrType(
+                serialized_name="missingTokenAction",
+            )
+            external_evaluation_enforcement_settings.result_lifespan = AAZStrType(
+                serialized_name="resultLifespan",
+            )
+            external_evaluation_enforcement_settings.role_definition_ids = AAZListType(
+                serialized_name="roleDefinitionIds",
+            )
+
+            endpoint_settings = cls._schema_on_200.properties.external_evaluation_enforcement_settings.endpoint_settings
+            endpoint_settings.details = AAZAnyType()
+            endpoint_settings.kind = AAZStrType()
+
+            role_definition_ids = cls._schema_on_200.properties.external_evaluation_enforcement_settings.role_definition_ids
+            role_definition_ids.Element = AAZStrType()
 
             parameters = cls._schema_on_200.properties.parameters
             parameters.Element = AAZObjectType()
@@ -434,61 +426,6 @@ class Show(AAZCommand):
 
             allowed_values = cls._schema_on_200.properties.parameters.Element.allowed_values
             allowed_values.Element = AAZAnyType()
-
-            policy_definition_groups = cls._schema_on_200.properties.policy_definition_groups
-            policy_definition_groups.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.properties.policy_definition_groups.Element
-            _element.additional_metadata_id = AAZStrType(
-                serialized_name="additionalMetadataId",
-            )
-            _element.category = AAZStrType()
-            _element.description = AAZStrType()
-            _element.display_name = AAZStrType(
-                serialized_name="displayName",
-            )
-            _element.name = AAZStrType(
-                flags={"required": True},
-            )
-
-            policy_definitions = cls._schema_on_200.properties.policy_definitions
-            policy_definitions.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.properties.policy_definitions.Element
-            _element.definition_version = AAZStrType(
-                serialized_name="definitionVersion",
-            )
-            _element.effective_definition_version = AAZStrType(
-                serialized_name="effectiveDefinitionVersion",
-                flags={"read_only": True},
-            )
-            _element.group_names = AAZListType(
-                serialized_name="groupNames",
-            )
-            _element.latest_definition_version = AAZStrType(
-                serialized_name="latestDefinitionVersion",
-                flags={"read_only": True},
-            )
-            _element.parameters = AAZDictType()
-            _element.policy_definition_id = AAZStrType(
-                serialized_name="policyDefinitionId",
-                flags={"required": True},
-            )
-            _element.policy_definition_reference_id = AAZStrType(
-                serialized_name="policyDefinitionReferenceId",
-            )
-
-            group_names = cls._schema_on_200.properties.policy_definitions.Element.group_names
-            group_names.Element = AAZStrType()
-
-            parameters = cls._schema_on_200.properties.policy_definitions.Element.parameters
-            parameters.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.properties.policy_definitions.Element.parameters.Element
-            _element.value = AAZAnyType()
-
-            versions = cls._schema_on_200.properties.versions
-            versions.Element = AAZStrType()
 
             system_data = cls._schema_on_200.system_data
             system_data.created_at = AAZStrType(

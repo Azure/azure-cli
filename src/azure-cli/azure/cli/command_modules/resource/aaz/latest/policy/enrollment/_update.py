@@ -12,27 +12,24 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "policy exemption update",
+    "policy enrollment update",
 )
 class Update(AAZCommand):
-    """Update a policy exemption.
+    """Update a policy enrollment.
 
-    Update the policy exemption with the given name and scope by applying the given property values.
+    Update the policy enrollment with the given name and scope by applying the given property values.
 
-    :example: Update a policy exemption category
-        az policy exemption update -n exemptTestVM --exemption-category "Mitigated"
+    :example: Update a policy enrollment in a resource group
+        az policy enrollment update -n enrollTestVM --display-name "Updated display name" --resource-group myResourceGroup
 
-    :example: Update a policy exemption in a resource group
-        az policy exemption update -n exemptTestVM --display-name "Updated display name" --resource-group myResourceGroup
-
-    :example: Update a policy exemption at scope
-        az policy exemption update -n exemptTestVM --description "This exemption is very cool." --scope "/providers/Microsoft.Management/managementGroups/{managementGroupName}"
+    :example: Update a policy enrollment at scope
+        az policy enrollment update -n enrollTestVM --description "This enrollment is very cool." --scope "/providers/Microsoft.Management/managementGroups/{managementGroupName}"
     """
 
     _aaz_info = {
         "version": "2026-01-01-preview",
         "resources": [
-            ["mgmt-plane", "/{scope}/providers/microsoft.authorization/policyexemptions/{}", "2026-01-01-preview"],
+            ["mgmt-plane", "/{scope}/providers/microsoft.authorization/policyenrollments/{}", "2026-01-01-preview"],
         ]
     }
 
@@ -56,7 +53,7 @@ class Update(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.name = AAZStrArg(
             options=["-n", "--name"],
-            help="The name of the policy exemption.",
+            help="The name of the policy enrollment.",
             required=True,
             fmt=AAZStrArgFormat(
                 pattern="^[^<>%&:\\?/]*[^<>%&:\\?/ ]+$",
@@ -64,9 +61,11 @@ class Update(AAZCommand):
         )
         _args_schema.scope = AAZStrArg(
             options=["--scope"],
-            help={"short-summary": "The scope of the policy assignment.", "long-summary": "Valid scopes are: management group (format: '/providers/Microsoft.Management/managementGroups/{managementGroup}'), subscription (format: '/subscriptions/{subscriptionId}'), resource group (format: '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}', or resource (format: '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/{resourceProviderNamespace}/[{parentResourcePath}/]{resourceType}/{resourceName}'. The scope of an assignment is always the part of its ID preceding '/providers/Microsoft.Authorization/policyAssignments/{policyAssignmentName}'. If scope is not provided, the scope will be the implied or specified subscription."},
+            help="The fully qualified Azure Resource manager identifier of the resource.",
             required=True,
         )
+
+        # define Arg Group "Parameters"
 
         # define Arg Group "Properties"
 
@@ -74,58 +73,43 @@ class Update(AAZCommand):
         _args_schema.assignment_scope_validation = AAZStrArg(
             options=["-v", "--assignment-scope-validation"],
             arg_group="Properties",
-            help={"short-summary": "The assignment scope validation", "long-summary": "Indicates the type of validation to perform on the assignment scope. Valid values are Default, DoNotValidate."},
+            help="The option whether to validate the enrollment is at or under the assignment scope.",
             nullable=True,
             enum={"Default": "Default", "DoNotValidate": "DoNotValidate"},
         )
         _args_schema.description = AAZStrArg(
             options=["--description"],
             arg_group="Properties",
-            help={"short-summary": "Policy exemption description.", "long-summary": "Full description of the policy exemption."},
+            help="The description of the policy enrollment.",
             nullable=True,
         )
         _args_schema.display_name = AAZStrArg(
             options=["--display-name"],
             arg_group="Properties",
-            help={"short-summary": "The display name of the policy exemption.", "long-summary": "The display name of the policy exemption is not part of its ID, allowing for longer and more flexible naming."},
+            help="The display name of the policy enrollment.",
             nullable=True,
-        )
-        _args_schema.exemption_category = AAZStrArg(
-            options=["-e", "--exemption-category"],
-            arg_group="Properties",
-            help={"short-summary": "The policy exemption category.", "long-summary": "The policy exemption category. Possible values are Mitigated and Waiver."},
-            enum={"Mitigated": "Mitigated", "Waiver": "Waiver"},
-        )
-        _args_schema.expires_on = AAZDateTimeArg(
-            options=["--expires-on"],
-            arg_group="Properties",
-            help={"short-summary": "The expiration date and time.", "long-summary": "The expiration date and time of the policy exemption in UTC ISO 8601 format, e.g. yyyy-MM-ddTHH:mm:ssZ."},
-            nullable=True,
-            fmt=AAZDateTimeFormat(
-                protocol="iso",
-            ),
         )
         _args_schema.metadata = AAZAnyTypeArg(
             options=["--metadata"],
             arg_group="Properties",
-            help={"short-summary": "The policy exemption metadata.", "long-summary": "The policy exemption metadata. Metadata is an open-ended object and is typically a collection of key value pairs."},
+            help="The policy enrollment metadata. Metadata is an open ended object and is typically a collection of key value pairs.",
             nullable=True,
         )
-        _args_schema.policy_assignment = AAZStrArg(
+        _args_schema.policy_assignment = AAZResourceIdArg(
             options=["-a", "--policy-assignment"],
             arg_group="Properties",
-            help={"short-summary": "The policy assignment to exempt.", "long-summary": "The resource ID of the policy assignment to exempt."},
+            help={"short-summary": "The policy assignment to enroll.", "long-summary": "The resource ID of the policy assignment to enroll."},
         )
         _args_schema.policy_definition_reference_ids = AAZListArg(
             options=["-r", "--policy-definition-reference-ids"],
             arg_group="Properties",
-            help={"short-summary": "The policy definition reference IDs.", "long-summary": "The collection of policy definition reference IDs to exempt when the policy assignment is an assignment of a policy set definition."},
+            help={"short-summary": "The policy definition reference IDs.", "long-summary": "The collection of policy definition reference IDs to enroll when the policy assignment is an assignment of a policy set definition."},
             nullable=True,
         )
         _args_schema.resource_selectors = AAZListArg(
             options=["--resource-selectors"],
             arg_group="Properties",
-            help={"short-summary": "The resource selectors list to filter policies by resource properties.", "long-summary": "The collection of resource selector expressions used to filter policy exemption applicability by certain resource property values."},
+            help="The resource selector list to filter policies by resource properties.",
             nullable=True,
         )
 
@@ -187,12 +171,12 @@ class Update(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        self.PolicyExemptionsGet(ctx=self.ctx)()
+        self.PolicyEnrollmentsGet(ctx=self.ctx)()
         self.pre_instance_update(self.ctx.vars.instance)
         self.InstanceUpdateByJson(ctx=self.ctx)()
         self.InstanceUpdateByGeneric(ctx=self.ctx)()
         self.post_instance_update(self.ctx.vars.instance)
-        self.PolicyExemptionsCreateOrUpdate(ctx=self.ctx)()
+        self.PolicyEnrollmentsCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -215,7 +199,7 @@ class Update(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class PolicyExemptionsGet(AAZHttpOperation):
+    class PolicyEnrollmentsGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -229,7 +213,7 @@ class Update(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/{scope}/providers/Microsoft.Authorization/policyExemptions/{policyExemptionName}",
+                "/{scope}/providers/Microsoft.Authorization/policyEnrollments/{policyEnrollmentName}",
                 **self.url_parameters
             )
 
@@ -245,7 +229,7 @@ class Update(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "policyExemptionName", self.ctx.args.name,
+                    "policyEnrollmentName", self.ctx.args.name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -291,11 +275,11 @@ class Update(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _UpdateHelper._build_schema_policy_exemption_read(cls._schema_on_200)
+            _UpdateHelper._build_schema_policy_enrollment_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
-    class PolicyExemptionsCreateOrUpdate(AAZHttpOperation):
+    class PolicyEnrollmentsCreateOrUpdate(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -309,7 +293,7 @@ class Update(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/{scope}/providers/Microsoft.Authorization/policyExemptions/{policyExemptionName}",
+                "/{scope}/providers/Microsoft.Authorization/policyEnrollments/{policyEnrollmentName}",
                 **self.url_parameters
             )
 
@@ -325,7 +309,7 @@ class Update(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "policyExemptionName", self.ctx.args.name,
+                    "policyEnrollmentName", self.ctx.args.name,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -383,7 +367,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200_201
 
             cls._schema_on_200_201 = AAZObjectType()
-            _UpdateHelper._build_schema_policy_exemption_read(cls._schema_on_200_201)
+            _UpdateHelper._build_schema_policy_enrollment_read(cls._schema_on_200_201)
 
             return cls._schema_on_200_201
 
@@ -405,8 +389,6 @@ class Update(AAZCommand):
                 properties.set_prop("assignmentScopeValidation", AAZStrType, ".assignment_scope_validation")
                 properties.set_prop("description", AAZStrType, ".description")
                 properties.set_prop("displayName", AAZStrType, ".display_name")
-                properties.set_prop("exemptionCategory", AAZStrType, ".exemption_category", typ_kwargs={"flags": {"required": True}})
-                properties.set_prop("expiresOn", AAZStrType, ".expires_on")
                 properties.set_prop("metadata", AAZAnyType, ".metadata")
                 properties.set_prop("policyAssignmentId", AAZStrType, ".policy_assignment", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("policyDefinitionReferenceIds", AAZListType, ".policy_definition_reference_ids")
@@ -457,39 +439,43 @@ class Update(AAZCommand):
 class _UpdateHelper:
     """Helper class for Update"""
 
-    _schema_policy_exemption_read = None
+    _schema_policy_enrollment_read = None
 
     @classmethod
-    def _build_schema_policy_exemption_read(cls, _schema):
-        if cls._schema_policy_exemption_read is not None:
-            _schema.id = cls._schema_policy_exemption_read.id
-            _schema.name = cls._schema_policy_exemption_read.name
-            _schema.properties = cls._schema_policy_exemption_read.properties
-            _schema.system_data = cls._schema_policy_exemption_read.system_data
-            _schema.type = cls._schema_policy_exemption_read.type
+    def _build_schema_policy_enrollment_read(cls, _schema):
+        if cls._schema_policy_enrollment_read is not None:
+            _schema.e_tag = cls._schema_policy_enrollment_read.e_tag
+            _schema.id = cls._schema_policy_enrollment_read.id
+            _schema.name = cls._schema_policy_enrollment_read.name
+            _schema.properties = cls._schema_policy_enrollment_read.properties
+            _schema.system_data = cls._schema_policy_enrollment_read.system_data
+            _schema.type = cls._schema_policy_enrollment_read.type
             return
 
-        cls._schema_policy_exemption_read = _schema_policy_exemption_read = AAZObjectType()
+        cls._schema_policy_enrollment_read = _schema_policy_enrollment_read = AAZObjectType()
 
-        policy_exemption_read = _schema_policy_exemption_read
-        policy_exemption_read.id = AAZStrType(
+        policy_enrollment_read = _schema_policy_enrollment_read
+        policy_enrollment_read.e_tag = AAZStrType(
+            serialized_name="eTag",
+        )
+        policy_enrollment_read.id = AAZStrType(
             flags={"read_only": True},
         )
-        policy_exemption_read.name = AAZStrType(
+        policy_enrollment_read.name = AAZStrType(
             flags={"read_only": True},
         )
-        policy_exemption_read.properties = AAZObjectType(
+        policy_enrollment_read.properties = AAZObjectType(
             flags={"client_flatten": True},
         )
-        policy_exemption_read.system_data = AAZObjectType(
+        policy_enrollment_read.system_data = AAZObjectType(
             serialized_name="systemData",
             flags={"read_only": True},
         )
-        policy_exemption_read.type = AAZStrType(
+        policy_enrollment_read.type = AAZStrType(
             flags={"read_only": True},
         )
 
-        properties = _schema_policy_exemption_read.properties
+        properties = _schema_policy_enrollment_read.properties
         properties.assignment_scope_validation = AAZStrType(
             serialized_name="assignmentScopeValidation",
         )
@@ -497,17 +483,14 @@ class _UpdateHelper:
         properties.display_name = AAZStrType(
             serialized_name="displayName",
         )
-        properties.exemption_category = AAZStrType(
-            serialized_name="exemptionCategory",
-            flags={"required": True},
-        )
-        properties.expires_on = AAZStrType(
-            serialized_name="expiresOn",
-        )
         properties.metadata = AAZAnyType()
         properties.policy_assignment_id = AAZStrType(
             serialized_name="policyAssignmentId",
             flags={"required": True},
+        )
+        properties.policy_assignment_instance_id = AAZStrType(
+            serialized_name="policyAssignmentInstanceId",
+            flags={"read_only": True},
         )
         properties.policy_definition_reference_ids = AAZListType(
             serialized_name="policyDefinitionReferenceIds",
@@ -516,33 +499,33 @@ class _UpdateHelper:
             serialized_name="resourceSelectors",
         )
 
-        policy_definition_reference_ids = _schema_policy_exemption_read.properties.policy_definition_reference_ids
+        policy_definition_reference_ids = _schema_policy_enrollment_read.properties.policy_definition_reference_ids
         policy_definition_reference_ids.Element = AAZStrType()
 
-        resource_selectors = _schema_policy_exemption_read.properties.resource_selectors
+        resource_selectors = _schema_policy_enrollment_read.properties.resource_selectors
         resource_selectors.Element = AAZObjectType()
 
-        _element = _schema_policy_exemption_read.properties.resource_selectors.Element
+        _element = _schema_policy_enrollment_read.properties.resource_selectors.Element
         _element.name = AAZStrType()
         _element.selectors = AAZListType()
 
-        selectors = _schema_policy_exemption_read.properties.resource_selectors.Element.selectors
+        selectors = _schema_policy_enrollment_read.properties.resource_selectors.Element.selectors
         selectors.Element = AAZObjectType()
 
-        _element = _schema_policy_exemption_read.properties.resource_selectors.Element.selectors.Element
+        _element = _schema_policy_enrollment_read.properties.resource_selectors.Element.selectors.Element
         _element["in"] = AAZListType()
         _element.kind = AAZStrType()
         _element.not_in = AAZListType(
             serialized_name="notIn",
         )
 
-        in_ = _schema_policy_exemption_read.properties.resource_selectors.Element.selectors.Element["in"]
+        in_ = _schema_policy_enrollment_read.properties.resource_selectors.Element.selectors.Element["in"]
         in_.Element = AAZStrType()
 
-        not_in = _schema_policy_exemption_read.properties.resource_selectors.Element.selectors.Element.not_in
+        not_in = _schema_policy_enrollment_read.properties.resource_selectors.Element.selectors.Element.not_in
         not_in.Element = AAZStrType()
 
-        system_data = _schema_policy_exemption_read.system_data
+        system_data = _schema_policy_enrollment_read.system_data
         system_data.created_at = AAZStrType(
             serialized_name="createdAt",
         )
@@ -562,11 +545,12 @@ class _UpdateHelper:
             serialized_name="lastModifiedByType",
         )
 
-        _schema.id = cls._schema_policy_exemption_read.id
-        _schema.name = cls._schema_policy_exemption_read.name
-        _schema.properties = cls._schema_policy_exemption_read.properties
-        _schema.system_data = cls._schema_policy_exemption_read.system_data
-        _schema.type = cls._schema_policy_exemption_read.type
+        _schema.e_tag = cls._schema_policy_enrollment_read.e_tag
+        _schema.id = cls._schema_policy_enrollment_read.id
+        _schema.name = cls._schema_policy_enrollment_read.name
+        _schema.properties = cls._schema_policy_enrollment_read.properties
+        _schema.system_data = cls._schema_policy_enrollment_read.system_data
+        _schema.type = cls._schema_policy_enrollment_read.type
 
 
 __all__ = ["Update"]

@@ -12,12 +12,10 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "policy assignment non-compliance-message",
+    "policy set-definition version",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Manage non-compliance message used by the policy assignment.
-
-    Customized message used by the enclosing policy assignment to report non-compliance.
+    """Manage Version
     """
     pass
 

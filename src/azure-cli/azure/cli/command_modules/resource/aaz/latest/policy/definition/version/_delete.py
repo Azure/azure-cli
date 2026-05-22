@@ -12,22 +12,23 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "policy set-definition delete",
+    "policy definition version delete",
+    confirmation="Are you sure you want to perform this operation?",
 )
 class Delete(AAZCommand):
-    """Delete a policy set definition.
+    """Delete a policy definition version.
 
-    Delete the policy set definition in the given subscription or management group with the given name.
+    Delete the policy definition version in the given subscription or management group with the given name and other properties.
 
-    :example: Delete a policy set definition
-        az policy set-definition delete --management-group myMg --name MyPolicySetDefinition
+    :example: Delete a policy definition version
+        az policy definition version delete --name ResourceNaming --version 1.2.1
     """
 
     _aaz_info = {
         "version": "2025-11-01",
         "resources": [
-            ["mgmt-plane", "/providers/microsoft.management/managementgroups/{}/providers/microsoft.authorization/policysetdefinitions/{}", "2025-11-01"],
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.authorization/policysetdefinitions/{}", "2025-11-01"],
+            ["mgmt-plane", "/providers/microsoft.management/managementgroups/{}/providers/microsoft.authorization/policydefinitions/{}/versions/{}", "2025-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.authorization/policydefinitions/{}/versions/{}", "2025-11-01"],
         ]
     }
 
@@ -49,26 +50,38 @@ class Delete(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.management_group = AAZStrArg(
             options=["--management-group"],
-            help={"short-summary": "The management group.", "long-summary": "The management group with the given name where the policy set definition resides."},
+            help="The management group.",
+            fmt=AAZStrArgFormat(
+                max_length=90,
+                min_length=1,
+            ),
         )
         _args_schema.name = AAZStrArg(
             options=["-n", "--name"],
-            help="The name of the policy set definition.",
+            help="The name of the policy definition.",
             required=True,
             fmt=AAZStrArgFormat(
                 pattern="^[^<>%&:\\?/]*[^<>%&:\\?/ ]+$",
+            ),
+        )
+        _args_schema.version = AAZStrArg(
+            options=["--version"],
+            help={"short-summary": "The policy definition version.", "long-summary": "The policy definition version in #.#.# format."},
+            required=True,
+            fmt=AAZStrArgFormat(
+                pattern="^\\d+\\.\\d+\\.\\d+$",
             ),
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        condition_0 = has_value(self.ctx.args.management_group) and has_value(self.ctx.args.name)
-        condition_1 = has_value(self.ctx.args.name) and has_value(self.ctx.subscription_id)
+        condition_0 = has_value(self.ctx.args.management_group) and has_value(self.ctx.args.name) and has_value(self.ctx.args.version)
+        condition_1 = has_value(self.ctx.args.name) and has_value(self.ctx.args.version) and has_value(self.ctx.subscription_id)
         if condition_0:
-            self.PolicySetDefinitionsDeleteAtManagementGroup(ctx=self.ctx)()
+            self.PolicyDefinitionVersionsDeleteAtManagementGroup(ctx=self.ctx)()
         if condition_1:
-            self.PolicySetDefinitionsDelete(ctx=self.ctx)()
+            self.PolicyDefinitionVersionsDelete(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -79,7 +92,7 @@ class Delete(AAZCommand):
     def post_operations(self):
         pass
 
-    class PolicySetDefinitionsDeleteAtManagementGroup(AAZHttpOperation):
+    class PolicyDefinitionVersionsDeleteAtManagementGroup(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -95,7 +108,7 @@ class Delete(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/providers/Microsoft.Management/managementGroups/{managementGroupId}/providers/Microsoft.Authorization/policySetDefinitions/{policySetDefinitionName}",
+                "/providers/Microsoft.Management/managementGroups/{managementGroupName}/providers/Microsoft.Authorization/policyDefinitions/{policyDefinitionName}/versions/{policyDefinitionVersion}",
                 **self.url_parameters
             )
 
@@ -111,11 +124,15 @@ class Delete(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "managementGroupId", self.ctx.args.management_group,
+                    "managementGroupName", self.ctx.args.management_group,
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "policySetDefinitionName", self.ctx.args.name,
+                    "policyDefinitionName", self.ctx.args.name,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "policyDefinitionVersion", self.ctx.args.version,
                     required=True,
                 ),
             }
@@ -137,7 +154,7 @@ class Delete(AAZCommand):
         def on_204(self, session):
             pass
 
-    class PolicySetDefinitionsDelete(AAZHttpOperation):
+    class PolicyDefinitionVersionsDelete(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -153,7 +170,7 @@ class Delete(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policySetDefinitions/{policySetDefinitionName}",
+                "/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policyDefinitions/{policyDefinitionName}/versions/{policyDefinitionVersion}",
                 **self.url_parameters
             )
 
@@ -169,7 +186,11 @@ class Delete(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "policySetDefinitionName", self.ctx.args.name,
+                    "policyDefinitionName", self.ctx.args.name,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "policyDefinitionVersion", self.ctx.args.version,
                     required=True,
                 ),
                 **self.serialize_url_param(

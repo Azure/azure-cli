@@ -5065,6 +5065,152 @@ class PolicyScenarioTest(ScenarioTest):
         # cleanup
         self.cmd('policy definition delete -n {pn}')
 
+    @ResourceGroupPreparer(name_prefix='cli_test_policy_name')
+    @AllowLargeResponse(8192)
+    def test_resource_policy_name(self, resource_group):
+        # Validate that policy assignment names containing characters allowed
+        # by the API regex, e.g. '.', '-', '+' are accepted by create/show/delete.
+        self.kwargs.update({
+            'bip': '06a78e20-9358-41c9-923c-fb736d382a4d',  # built-in policy
+            'padn': self.create_random_name('test_policy_name', 30),
+        })
+
+        for name in ['policy-name-v1.0.0', 'policy+name']:
+            self.kwargs['pan'] = name
+            self.cmd('policy assignment create --policy {bip} -n "{pan}" '
+                     '--display-name {padn} -g {rg}', checks=[
+                         self.check('name', '{pan}'),
+                         self.check('displayName', '{padn}'),
+                     ])
+            self.cmd('policy assignment show -n "{pan}" -g {rg}', checks=[
+                self.check('name', '{pan}'),
+            ])
+            self.cmd('policy assignment delete -n "{pan}" -g {rg}')
+
+    @ResourceGroupPreparer(name_prefix='cli_test_policy_assignment_props')
+    @AllowLargeResponse(8192)
+    def test_resource_policy_assignment(self, resource_group):
+        sub = self.get_subscription_id()
+        self.kwargs.update({
+            'sub_scope': '/subscriptions/{}'.format(sub),
+            'bisp': '095e4ed9-c835-4ab6-9439-b5644362a06c',   # built-in initiative
+            'pan': self.create_random_name('cli-test-props', 24),
+            'pan_sub': self.create_random_name('cli-test-enroll', 24),
+            'pan_json': self.create_random_name('cli-test-jsonrsel', 24),
+            'padn': self.create_random_name('test_assignment_properties', 40),
+            'drid': 'AINE_MaximumPasswordAge',
+            'rsel': '[{name:byLocation,selectors:[{kind:resourceLocation,'
+                    'in:[eastus,westus]}]}]',
+            'rsel_json': '[{"name":"byType","selectors":'
+                         '[{"kind":"resourceType","in":'
+                         '["Microsoft.Storage/storageAccounts"]}]}]',
+            'sse': '{enabled:true,policy-definition-reference-ids:'
+                   '[AINE_MaximumPasswordAge]}',
+            'ovr': '[{kind:policyEffect,value:disabled,selectors:'
+                   '[{kind:policyDefinitionReferenceId,'
+                   'in:[AINE_MaximumPasswordAge]}]}]',
+            'ncm': "[{message:'Resource is non-compliant',"
+                   "policy-definition-reference-id:AINE_MaximumPasswordAge}]",
+            'ns1': '/subscriptions/{}/resourceGroups/{}/providers/'
+                   'Microsoft.Storage/storageAccounts/excluded1'.format(sub, resource_group),
+            'ns2': '/subscriptions/{}/resourceGroups/{}/providers/'
+                   'Microsoft.Storage/storageAccounts/excluded2'.format(sub, resource_group),
+        })
+
+        # validate policy assignment create with a bunch of properties
+        self.cmd('policy assignment create -d {bisp} -n {pan} -g {rg} '
+                 '--display-name {padn} '
+                 '--enforcement-mode DoNotEnforce '
+                 '--not-scopes "{ns1}" '
+                 '--non-compliance-messages "{ncm}"', checks=[
+                     self.check('name', '{pan}'),
+                     self.check('enforcementMode', 'DoNotEnforce'),
+                     self.check('length(notScopes)', 1),
+                     self.check('nonComplianceMessages[0].message', 'Resource is non-compliant'),
+                     self.check('nonComplianceMessages[0].policyDefinitionReferenceId', '{drid}'),
+                     self.not_exists('resourceSelectors'),
+                     self.not_exists('selfServeExemptionSettings'),
+                     self.not_exists('overrides'),
+                 ])
+
+        self.cmd('policy assignment show -n {pan} -g {rg}', checks=[
+            self.check('name', '{pan}'),
+            self.check('enforcementMode', 'DoNotEnforce'),
+            self.check('length(notScopes)', 1),
+            self.check('length(nonComplianceMessages)', 1),
+            self.check('nonComplianceMessages[0].policyDefinitionReferenceId', '{drid}'),
+            self.not_exists('resourceSelectors'),
+            self.not_exists('selfServeExemptionSettings'),
+            self.not_exists('overrides'),
+        ])
+
+        # validate policy assignment update with a bunch of properties
+        self.cmd('policy assignment update -n {pan} -g {rg} '
+                 '--enforcement-mode Default '
+                 '--not-scopes "{ns1}" "{ns2}" '
+                 '--resource-selectors "{rsel}" '
+                 '--overrides "{ovr}" '
+                 '--self-serve "{sse}"', checks=[
+                     self.check('enforcementMode', 'Default'),
+                     self.check('length(notScopes)', 2),
+                     self.check('resourceSelectors[0].name', 'byLocation'),
+                     self.check('resourceSelectors[0].selectors[0].kind', 'resourceLocation'),
+                     self.check('resourceSelectors[0].selectors[0].in[0]', 'eastus'),
+                     self.check('overrides[0].kind', 'policyEffect'),
+                     self.check('overrides[0].value', 'disabled'),
+                     self.check('overrides[0].selectors[0].kind', 'policyDefinitionReferenceId'),
+                     self.check('overrides[0].selectors[0].in[0]', '{drid}'),
+                     self.check('selfServeExemptionSettings.enabled', True),
+                     self.check('selfServeExemptionSettings.policyDefinitionReferenceIds[0]', '{drid}'),
+                 ])
+
+        self.cmd('policy assignment show -n {pan} -g {rg}', checks=[
+            self.check('enforcementMode', 'Default'),
+            self.check('length(notScopes)', 2),
+            self.check('length(nonComplianceMessages)', 1),
+            self.check("length(resourceSelectors[0].selectors[0].in)", 2),
+            self.check('overrides[0].value', 'disabled'),
+            self.check('selfServeExemptionSettings.enabled', True),
+        ])
+
+        self.cmd('policy assignment delete -n {pan} -g {rg}')
+
+        # validate policy assignment create with JSON resource selectors
+        self.cmd('policy assignment create -d {bisp} -n {pan_json} -g {rg} '
+                 '--display-name {padn} '
+                 '--resource-selectors \'{rsel_json}\'', checks=[
+                     self.check('name', '{pan_json}'),
+                     self.check('resourceSelectors[0].name', 'byType'),
+                     self.check('resourceSelectors[0].selectors[0].kind', 'resourceType'),
+                     self.check('resourceSelectors[0].selectors[0].in[0]', 'Microsoft.Storage/storageAccounts'),
+                 ])
+        self.cmd('policy assignment delete -n {pan_json} -g {rg}')
+
+        # validate enroll enforcement mode
+        self.cmd('policy assignment create -d {bisp} -n {pan_sub} '
+                 '--scope "{sub_scope}" --display-name {padn} '
+                 '--enforcement-mode Enroll', checks=[
+                     self.check('name', '{pan_sub}'),
+                     self.check('enforcementMode', 'Enroll'),
+                 ])
+        self.cmd('policy assignment show -n {pan_sub} --scope "{sub_scope}"', checks=[
+            self.check('enforcementMode', 'Enroll'),
+        ])
+        self.cmd('policy assignment delete -n {pan_sub} --scope "{sub_scope}"')
+
+        # invalid enforcement-mode value is rejected
+        self.kwargs['bad_em'] = 'NotAMode'
+        with self.assertRaisesRegex(SystemExit, '2'):
+            self.cmd('policy assignment create -d {bisp} -n {pan} -g {rg} '
+                     '--enforcement-mode {bad_em}')
+
+        # invalid resource-selector kind is rejected
+        self.kwargs['bad_rsel'] = ('[{name:bad,selectors:'
+                                   '[{kind:notAValidKind,in:[eastus]}]}]')
+        with self.assertRaisesRegex(Exception, 'notAValidKind'):
+            self.cmd('policy assignment create -d {bisp} -n {pan} -g {rg} '
+                     '--resource-selectors "{bad_rsel}"')
+
     @ResourceGroupPreparer(name_prefix='cli_test_policy_external_evaluation')
     @AllowLargeResponse(8192)
     def test_resource_policy_external_evaluation(self, resource_group):

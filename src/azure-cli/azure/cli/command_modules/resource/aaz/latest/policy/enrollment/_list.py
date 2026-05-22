@@ -12,29 +12,29 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "policy definition list",
+    "policy enrollment list",
 )
 class List(AAZCommand):
-    """Retrieves policy definition.
+    """Retrieve all applicable policy enrollments.
 
-    Retrieve the list of all policy definitions in the given subscription or management group.
+    Retrieve the list of all policy enrollments applicable to the given resource group, subscription or management group.
 
-    :example: List built-in policy definitions
-        az policy definition list --filter atScopeAndBelow()
+    :example: List policy enrollments for management group
+        az policy enrollment list --management-group DevOrg --filter atScopeAndBelow()
 
-    :example: List policy definitions by management group
-        az policy definition list --management-group MyManagementGroup
+    :example: List policy enrollments for resource group
+        az policy enrollment list --resource-group TestResourceGroup
 
-    :example: List policy definitions by subscription
-        az policy definition list
+    :example: List policy enrollments for subscription
+        az policy enrollment list
     """
 
     _aaz_info = {
-        "version": "2025-11-01",
+        "version": "2026-01-01-preview",
         "resources": [
-            ["mgmt-plane", "/providers/microsoft.authorization/policydefinitions", "2025-11-01"],
-            ["mgmt-plane", "/providers/microsoft.management/managementgroups/{}/providers/microsoft.authorization/policydefinitions", "2025-11-01"],
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.authorization/policydefinitions", "2025-11-01"],
+            ["mgmt-plane", "/providers/microsoft.management/managementgroups/{}/providers/microsoft.authorization/policyenrollments", "2026-01-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.authorization/policyenrollments", "2026-01-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.authorization/policyenrollments", "2026-01-01-preview"],
         ]
     }
 
@@ -57,25 +57,29 @@ class List(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.management_group = AAZStrArg(
             options=["--management-group"],
-            help={"short-summary": "The management group.", "long-summary": "The management group with the given name whose policy definitions are to be listed."},
+            help={"short-summary": "The management group.", "long-summary": "Indicates that policy enrollments whose scope covers the management group with the given name should be listed."},
+            fmt=AAZStrArgFormat(
+                min_length=1,
+            ),
         )
+        _args_schema.resource_group = AAZResourceGroupNameArg()
         _args_schema.filter = AAZStrArg(
             options=["--filter"],
-            help={"short-summary": "Filter list results.", "long-summary": "The filter to limit list results. Valid values are: 'atScope()', 'atExactScope()', 'atScopeAndBelow()' or 'policyDefinitionId eq '{value}''. If filter is not provided, no filtering is performed. If filter atScope() is provided, the returned list includes all policy assignments that apply to the given scope, which is everything in the unfiltered list except those applied to sub scopes contained within the given scope. If filter atExactScope() is provided, the returned list includes all policy assignments at the given scope.  If filter atScopeAndBelow() is provided, the returned list includes all policy assignments at the given scope and those in sub scopes contained within the given scope. If filter policyDefinitionId eq '{value}' is provided, the returned list includes all policy assignments of the policy definition whose id is {value}."},
+            help={"short-summary": "Filter list results.", "long-summary": "The filter to limit list results. Valid values for $filter are: 'atScope()' or 'atExactScope()'. If $filter is not provided, no filtering is performed. If $filter is not provided, the unfiltered list includes all policy enrollments associated with the scope, including those that apply directly or from containing scopes. If $filter=atScope() is provided, the returned list includes all policy enrollments that apply to the scope, which is everything in the unfiltered list except those applied to sub-scopes contained within the given scope. If $filter=atExactScope() is provided, the returned list only includes all policy enrollments that apply at the given scope."},
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        condition_0 = has_value(self.ctx.args.management_group) is not True and has_value(self.ctx.subscription_id) is not True
-        condition_1 = has_value(self.ctx.args.management_group)
-        condition_2 = has_value(self.ctx.subscription_id)
+        condition_0 = has_value(self.ctx.args.management_group)
+        condition_1 = has_value(self.ctx.subscription_id) and has_value(self.ctx.args.resource_group) is not True
+        condition_2 = has_value(self.ctx.args.resource_group) and has_value(self.ctx.subscription_id)
         if condition_0:
-            self.PolicyDefinitionsListBuiltIn(ctx=self.ctx)()
+            self.PolicyEnrollmentsListForManagementGroup(ctx=self.ctx)()
         if condition_1:
-            self.PolicyDefinitionsListByManagementGroup(ctx=self.ctx)()
+            self.PolicyEnrollmentsList(ctx=self.ctx)()
         if condition_2:
-            self.PolicyDefinitionsList(ctx=self.ctx)()
+            self.PolicyEnrollmentsListForResourceGroup(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -91,7 +95,7 @@ class List(AAZCommand):
         next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
         return result, next_link
 
-    class PolicyDefinitionsListBuiltIn(AAZHttpOperation):
+    class PolicyEnrollmentsListForManagementGroup(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -105,184 +109,7 @@ class List(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/providers/Microsoft.Authorization/policyDefinitions",
-                **self.url_parameters
-            )
-
-        @property
-        def method(self):
-            return "GET"
-
-        @property
-        def error_format(self):
-            return "MgmtErrorFormat"
-
-        @property
-        def query_parameters(self):
-            parameters = {
-                **self.serialize_query_param(
-                    "$filter", self.ctx.args.filter,
-                ),
-                **self.serialize_query_param(
-                    "api-version", "2025-11-01",
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def header_parameters(self):
-            parameters = {
-                **self.serialize_header_param(
-                    "Accept", "application/json",
-                ),
-            }
-            return parameters
-
-        def on_200(self, session):
-            data = self.deserialize_http_content(session)
-            self.ctx.set_var(
-                "instance",
-                data,
-                schema_builder=self._build_schema_on_200
-            )
-
-        _schema_on_200 = None
-
-        @classmethod
-        def _build_schema_on_200(cls):
-            if cls._schema_on_200 is not None:
-                return cls._schema_on_200
-
-            cls._schema_on_200 = AAZObjectType()
-
-            _schema_on_200 = cls._schema_on_200
-            _schema_on_200.next_link = AAZStrType(
-                serialized_name="nextLink",
-            )
-            _schema_on_200.value = AAZListType(
-                flags={"required": True},
-            )
-
-            value = cls._schema_on_200.value
-            value.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element
-            _element.id = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.name = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-            _element.system_data = AAZObjectType(
-                serialized_name="systemData",
-                flags={"read_only": True},
-            )
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200.value.Element.properties
-            properties.description = AAZStrType()
-            properties.display_name = AAZStrType(
-                serialized_name="displayName",
-            )
-            properties.external_evaluation_enforcement_settings = AAZObjectType(
-                serialized_name="externalEvaluationEnforcementSettings",
-            )
-            properties.metadata = AAZAnyType()
-            properties.mode = AAZStrType()
-            properties.parameters = AAZDictType()
-            properties.policy_rule = AAZAnyType(
-                serialized_name="policyRule",
-            )
-            properties.policy_type = AAZStrType(
-                serialized_name="policyType",
-            )
-            properties.version = AAZStrType()
-            properties.versions = AAZListType()
-
-            external_evaluation_enforcement_settings = cls._schema_on_200.value.Element.properties.external_evaluation_enforcement_settings
-            external_evaluation_enforcement_settings.endpoint_settings = AAZObjectType(
-                serialized_name="endpointSettings",
-            )
-            external_evaluation_enforcement_settings.missing_token_action = AAZStrType(
-                serialized_name="missingTokenAction",
-            )
-            external_evaluation_enforcement_settings.result_lifespan = AAZStrType(
-                serialized_name="resultLifespan",
-            )
-            external_evaluation_enforcement_settings.role_definition_ids = AAZListType(
-                serialized_name="roleDefinitionIds",
-            )
-
-            endpoint_settings = cls._schema_on_200.value.Element.properties.external_evaluation_enforcement_settings.endpoint_settings
-            endpoint_settings.details = AAZAnyType()
-            endpoint_settings.kind = AAZStrType()
-
-            role_definition_ids = cls._schema_on_200.value.Element.properties.external_evaluation_enforcement_settings.role_definition_ids
-            role_definition_ids.Element = AAZStrType()
-
-            parameters = cls._schema_on_200.value.Element.properties.parameters
-            parameters.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.parameters.Element
-            _element.allowed_values = AAZListType(
-                serialized_name="allowedValues",
-            )
-            _element.default_value = AAZAnyType(
-                serialized_name="defaultValue",
-            )
-            _element.metadata = AAZFreeFormDictType()
-            _element.schema = AAZAnyType()
-            _element.type = AAZStrType()
-
-            allowed_values = cls._schema_on_200.value.Element.properties.parameters.Element.allowed_values
-            allowed_values.Element = AAZAnyType()
-
-            versions = cls._schema_on_200.value.Element.properties.versions
-            versions.Element = AAZStrType()
-
-            system_data = cls._schema_on_200.value.Element.system_data
-            system_data.created_at = AAZStrType(
-                serialized_name="createdAt",
-            )
-            system_data.created_by = AAZStrType(
-                serialized_name="createdBy",
-            )
-            system_data.created_by_type = AAZStrType(
-                serialized_name="createdByType",
-            )
-            system_data.last_modified_at = AAZStrType(
-                serialized_name="lastModifiedAt",
-            )
-            system_data.last_modified_by = AAZStrType(
-                serialized_name="lastModifiedBy",
-            )
-            system_data.last_modified_by_type = AAZStrType(
-                serialized_name="lastModifiedByType",
-            )
-
-            return cls._schema_on_200
-
-    class PolicyDefinitionsListByManagementGroup(AAZHttpOperation):
-        CLIENT_TYPE = "MgmtClient"
-
-        def __call__(self, *args, **kwargs):
-            request = self.make_request()
-            session = self.client.send_request(request=request, stream=False, **kwargs)
-            if session.http_response.status_code in [200]:
-                return self.on_200(session)
-
-            return self.on_error(session.http_response)
-
-        @property
-        def url(self):
-            return self.client.format_url(
-                "/providers/Microsoft.Management/managementGroups/{managementGroupId}/providers/Microsoft.Authorization/policyDefinitions",
+                "/providers/Microsoft.Management/managementGroups/{managementGroupId}/providers/Microsoft.Authorization/policyEnrollments",
                 **self.url_parameters
             )
 
@@ -311,7 +138,7 @@ class List(AAZCommand):
                     "$filter", self.ctx.args.filter,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2025-11-01",
+                    "api-version", "2026-01-01-preview",
                     required=True,
                 ),
             }
@@ -355,6 +182,9 @@ class List(AAZCommand):
             value.Element = AAZObjectType()
 
             _element = cls._schema_on_200.value.Element
+            _element.e_tag = AAZStrType(
+                serialized_name="eTag",
+            )
             _element.id = AAZStrType(
                 flags={"read_only": True},
             )
@@ -373,65 +203,54 @@ class List(AAZCommand):
             )
 
             properties = cls._schema_on_200.value.Element.properties
+            properties.assignment_scope_validation = AAZStrType(
+                serialized_name="assignmentScopeValidation",
+            )
             properties.description = AAZStrType()
             properties.display_name = AAZStrType(
                 serialized_name="displayName",
             )
-            properties.external_evaluation_enforcement_settings = AAZObjectType(
-                serialized_name="externalEvaluationEnforcementSettings",
-            )
             properties.metadata = AAZAnyType()
-            properties.mode = AAZStrType()
-            properties.parameters = AAZDictType()
-            properties.policy_rule = AAZAnyType(
-                serialized_name="policyRule",
+            properties.policy_assignment_id = AAZStrType(
+                serialized_name="policyAssignmentId",
+                flags={"required": True},
             )
-            properties.policy_type = AAZStrType(
-                serialized_name="policyType",
+            properties.policy_assignment_instance_id = AAZStrType(
+                serialized_name="policyAssignmentInstanceId",
+                flags={"read_only": True},
             )
-            properties.version = AAZStrType()
-            properties.versions = AAZListType()
-
-            external_evaluation_enforcement_settings = cls._schema_on_200.value.Element.properties.external_evaluation_enforcement_settings
-            external_evaluation_enforcement_settings.endpoint_settings = AAZObjectType(
-                serialized_name="endpointSettings",
+            properties.policy_definition_reference_ids = AAZListType(
+                serialized_name="policyDefinitionReferenceIds",
             )
-            external_evaluation_enforcement_settings.missing_token_action = AAZStrType(
-                serialized_name="missingTokenAction",
-            )
-            external_evaluation_enforcement_settings.result_lifespan = AAZStrType(
-                serialized_name="resultLifespan",
-            )
-            external_evaluation_enforcement_settings.role_definition_ids = AAZListType(
-                serialized_name="roleDefinitionIds",
+            properties.resource_selectors = AAZListType(
+                serialized_name="resourceSelectors",
             )
 
-            endpoint_settings = cls._schema_on_200.value.Element.properties.external_evaluation_enforcement_settings.endpoint_settings
-            endpoint_settings.details = AAZAnyType()
-            endpoint_settings.kind = AAZStrType()
+            policy_definition_reference_ids = cls._schema_on_200.value.Element.properties.policy_definition_reference_ids
+            policy_definition_reference_ids.Element = AAZStrType()
 
-            role_definition_ids = cls._schema_on_200.value.Element.properties.external_evaluation_enforcement_settings.role_definition_ids
-            role_definition_ids.Element = AAZStrType()
+            resource_selectors = cls._schema_on_200.value.Element.properties.resource_selectors
+            resource_selectors.Element = AAZObjectType()
 
-            parameters = cls._schema_on_200.value.Element.properties.parameters
-            parameters.Element = AAZObjectType()
+            _element = cls._schema_on_200.value.Element.properties.resource_selectors.Element
+            _element.name = AAZStrType()
+            _element.selectors = AAZListType()
 
-            _element = cls._schema_on_200.value.Element.properties.parameters.Element
-            _element.allowed_values = AAZListType(
-                serialized_name="allowedValues",
+            selectors = cls._schema_on_200.value.Element.properties.resource_selectors.Element.selectors
+            selectors.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.resource_selectors.Element.selectors.Element
+            _element["in"] = AAZListType()
+            _element.kind = AAZStrType()
+            _element.not_in = AAZListType(
+                serialized_name="notIn",
             )
-            _element.default_value = AAZAnyType(
-                serialized_name="defaultValue",
-            )
-            _element.metadata = AAZFreeFormDictType()
-            _element.schema = AAZAnyType()
-            _element.type = AAZStrType()
 
-            allowed_values = cls._schema_on_200.value.Element.properties.parameters.Element.allowed_values
-            allowed_values.Element = AAZAnyType()
+            in_ = cls._schema_on_200.value.Element.properties.resource_selectors.Element.selectors.Element["in"]
+            in_.Element = AAZStrType()
 
-            versions = cls._schema_on_200.value.Element.properties.versions
-            versions.Element = AAZStrType()
+            not_in = cls._schema_on_200.value.Element.properties.resource_selectors.Element.selectors.Element.not_in
+            not_in.Element = AAZStrType()
 
             system_data = cls._schema_on_200.value.Element.system_data
             system_data.created_at = AAZStrType(
@@ -455,7 +274,7 @@ class List(AAZCommand):
 
             return cls._schema_on_200
 
-    class PolicyDefinitionsList(AAZHttpOperation):
+    class PolicyEnrollmentsList(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -469,7 +288,7 @@ class List(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policyDefinitions",
+                "/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policyEnrollments",
                 **self.url_parameters
             )
 
@@ -498,7 +317,7 @@ class List(AAZCommand):
                     "$filter", self.ctx.args.filter,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2025-11-01",
+                    "api-version", "2026-01-01-preview",
                     required=True,
                 ),
             }
@@ -542,6 +361,9 @@ class List(AAZCommand):
             value.Element = AAZObjectType()
 
             _element = cls._schema_on_200.value.Element
+            _element.e_tag = AAZStrType(
+                serialized_name="eTag",
+            )
             _element.id = AAZStrType(
                 flags={"read_only": True},
             )
@@ -560,65 +382,237 @@ class List(AAZCommand):
             )
 
             properties = cls._schema_on_200.value.Element.properties
+            properties.assignment_scope_validation = AAZStrType(
+                serialized_name="assignmentScopeValidation",
+            )
             properties.description = AAZStrType()
             properties.display_name = AAZStrType(
                 serialized_name="displayName",
             )
-            properties.external_evaluation_enforcement_settings = AAZObjectType(
-                serialized_name="externalEvaluationEnforcementSettings",
+            properties.metadata = AAZAnyType()
+            properties.policy_assignment_id = AAZStrType(
+                serialized_name="policyAssignmentId",
+                flags={"required": True},
+            )
+            properties.policy_assignment_instance_id = AAZStrType(
+                serialized_name="policyAssignmentInstanceId",
+                flags={"read_only": True},
+            )
+            properties.policy_definition_reference_ids = AAZListType(
+                serialized_name="policyDefinitionReferenceIds",
+            )
+            properties.resource_selectors = AAZListType(
+                serialized_name="resourceSelectors",
+            )
+
+            policy_definition_reference_ids = cls._schema_on_200.value.Element.properties.policy_definition_reference_ids
+            policy_definition_reference_ids.Element = AAZStrType()
+
+            resource_selectors = cls._schema_on_200.value.Element.properties.resource_selectors
+            resource_selectors.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.resource_selectors.Element
+            _element.name = AAZStrType()
+            _element.selectors = AAZListType()
+
+            selectors = cls._schema_on_200.value.Element.properties.resource_selectors.Element.selectors
+            selectors.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.resource_selectors.Element.selectors.Element
+            _element["in"] = AAZListType()
+            _element.kind = AAZStrType()
+            _element.not_in = AAZListType(
+                serialized_name="notIn",
+            )
+
+            in_ = cls._schema_on_200.value.Element.properties.resource_selectors.Element.selectors.Element["in"]
+            in_.Element = AAZStrType()
+
+            not_in = cls._schema_on_200.value.Element.properties.resource_selectors.Element.selectors.Element.not_in
+            not_in.Element = AAZStrType()
+
+            system_data = cls._schema_on_200.value.Element.system_data
+            system_data.created_at = AAZStrType(
+                serialized_name="createdAt",
+            )
+            system_data.created_by = AAZStrType(
+                serialized_name="createdBy",
+            )
+            system_data.created_by_type = AAZStrType(
+                serialized_name="createdByType",
+            )
+            system_data.last_modified_at = AAZStrType(
+                serialized_name="lastModifiedAt",
+            )
+            system_data.last_modified_by = AAZStrType(
+                serialized_name="lastModifiedBy",
+            )
+            system_data.last_modified_by_type = AAZStrType(
+                serialized_name="lastModifiedByType",
+            )
+
+            return cls._schema_on_200
+
+    class PolicyEnrollmentsListForResourceGroup(AAZHttpOperation):
+        CLIENT_TYPE = "MgmtClient"
+
+        def __call__(self, *args, **kwargs):
+            request = self.make_request()
+            session = self.client.send_request(request=request, stream=False, **kwargs)
+            if session.http_response.status_code in [200]:
+                return self.on_200(session)
+
+            return self.on_error(session.http_response)
+
+        @property
+        def url(self):
+            return self.client.format_url(
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Authorization/policyEnrollments",
+                **self.url_parameters
+            )
+
+        @property
+        def method(self):
+            return "GET"
+
+        @property
+        def error_format(self):
+            return "MgmtErrorFormat"
+
+        @property
+        def url_parameters(self):
+            parameters = {
+                **self.serialize_url_param(
+                    "resourceGroupName", self.ctx.args.resource_group,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "subscriptionId", self.ctx.subscription_id,
+                    required=True,
+                ),
+            }
+            return parameters
+
+        @property
+        def query_parameters(self):
+            parameters = {
+                **self.serialize_query_param(
+                    "$filter", self.ctx.args.filter,
+                ),
+                **self.serialize_query_param(
+                    "api-version", "2026-01-01-preview",
+                    required=True,
+                ),
+            }
+            return parameters
+
+        @property
+        def header_parameters(self):
+            parameters = {
+                **self.serialize_header_param(
+                    "Accept", "application/json",
+                ),
+            }
+            return parameters
+
+        def on_200(self, session):
+            data = self.deserialize_http_content(session)
+            self.ctx.set_var(
+                "instance",
+                data,
+                schema_builder=self._build_schema_on_200
+            )
+
+        _schema_on_200 = None
+
+        @classmethod
+        def _build_schema_on_200(cls):
+            if cls._schema_on_200 is not None:
+                return cls._schema_on_200
+
+            cls._schema_on_200 = AAZObjectType()
+
+            _schema_on_200 = cls._schema_on_200
+            _schema_on_200.next_link = AAZStrType(
+                serialized_name="nextLink",
+            )
+            _schema_on_200.value = AAZListType(
+                flags={"required": True},
+            )
+
+            value = cls._schema_on_200.value
+            value.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element
+            _element.e_tag = AAZStrType(
+                serialized_name="eTag",
+            )
+            _element.id = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.name = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
+            _element.system_data = AAZObjectType(
+                serialized_name="systemData",
+                flags={"read_only": True},
+            )
+            _element.type = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            properties = cls._schema_on_200.value.Element.properties
+            properties.assignment_scope_validation = AAZStrType(
+                serialized_name="assignmentScopeValidation",
+            )
+            properties.description = AAZStrType()
+            properties.display_name = AAZStrType(
+                serialized_name="displayName",
             )
             properties.metadata = AAZAnyType()
-            properties.mode = AAZStrType()
-            properties.parameters = AAZDictType()
-            properties.policy_rule = AAZAnyType(
-                serialized_name="policyRule",
+            properties.policy_assignment_id = AAZStrType(
+                serialized_name="policyAssignmentId",
+                flags={"required": True},
             )
-            properties.policy_type = AAZStrType(
-                serialized_name="policyType",
+            properties.policy_assignment_instance_id = AAZStrType(
+                serialized_name="policyAssignmentInstanceId",
+                flags={"read_only": True},
             )
-            properties.version = AAZStrType()
-            properties.versions = AAZListType()
-
-            external_evaluation_enforcement_settings = cls._schema_on_200.value.Element.properties.external_evaluation_enforcement_settings
-            external_evaluation_enforcement_settings.endpoint_settings = AAZObjectType(
-                serialized_name="endpointSettings",
+            properties.policy_definition_reference_ids = AAZListType(
+                serialized_name="policyDefinitionReferenceIds",
             )
-            external_evaluation_enforcement_settings.missing_token_action = AAZStrType(
-                serialized_name="missingTokenAction",
-            )
-            external_evaluation_enforcement_settings.result_lifespan = AAZStrType(
-                serialized_name="resultLifespan",
-            )
-            external_evaluation_enforcement_settings.role_definition_ids = AAZListType(
-                serialized_name="roleDefinitionIds",
+            properties.resource_selectors = AAZListType(
+                serialized_name="resourceSelectors",
             )
 
-            endpoint_settings = cls._schema_on_200.value.Element.properties.external_evaluation_enforcement_settings.endpoint_settings
-            endpoint_settings.details = AAZAnyType()
-            endpoint_settings.kind = AAZStrType()
+            policy_definition_reference_ids = cls._schema_on_200.value.Element.properties.policy_definition_reference_ids
+            policy_definition_reference_ids.Element = AAZStrType()
 
-            role_definition_ids = cls._schema_on_200.value.Element.properties.external_evaluation_enforcement_settings.role_definition_ids
-            role_definition_ids.Element = AAZStrType()
+            resource_selectors = cls._schema_on_200.value.Element.properties.resource_selectors
+            resource_selectors.Element = AAZObjectType()
 
-            parameters = cls._schema_on_200.value.Element.properties.parameters
-            parameters.Element = AAZObjectType()
+            _element = cls._schema_on_200.value.Element.properties.resource_selectors.Element
+            _element.name = AAZStrType()
+            _element.selectors = AAZListType()
 
-            _element = cls._schema_on_200.value.Element.properties.parameters.Element
-            _element.allowed_values = AAZListType(
-                serialized_name="allowedValues",
+            selectors = cls._schema_on_200.value.Element.properties.resource_selectors.Element.selectors
+            selectors.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.resource_selectors.Element.selectors.Element
+            _element["in"] = AAZListType()
+            _element.kind = AAZStrType()
+            _element.not_in = AAZListType(
+                serialized_name="notIn",
             )
-            _element.default_value = AAZAnyType(
-                serialized_name="defaultValue",
-            )
-            _element.metadata = AAZFreeFormDictType()
-            _element.schema = AAZAnyType()
-            _element.type = AAZStrType()
 
-            allowed_values = cls._schema_on_200.value.Element.properties.parameters.Element.allowed_values
-            allowed_values.Element = AAZAnyType()
+            in_ = cls._schema_on_200.value.Element.properties.resource_selectors.Element.selectors.Element["in"]
+            in_.Element = AAZStrType()
 
-            versions = cls._schema_on_200.value.Element.properties.versions
-            versions.Element = AAZStrType()
+            not_in = cls._schema_on_200.value.Element.properties.resource_selectors.Element.selectors.Element.not_in
+            not_in.Element = AAZStrType()
 
             system_data = cls._schema_on_200.value.Element.system_data
             system_data.created_at = AAZStrType(

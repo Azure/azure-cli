@@ -12,12 +12,12 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "policy assignment non-compliance-message",
+    "policy enrollment",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Manage non-compliance message used by the policy assignment.
+    """Manage policy enrollments.
 
-    Customized message used by the enclosing policy assignment to report non-compliance.
+    Policy exemptions specify resources that a policy assignment on 'Enroll' mode applies to.
     """
     pass
 

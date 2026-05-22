@@ -12,25 +12,20 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "policy set-definition show",
+    "policy set-definition version show",
 )
 class Show(AAZCommand):
-    """Retrieve a policy set definition.
+    """Get operation retrieves the policy set definition version in the given management group with the given name and version.
 
-    Retrieve and show the details of the policy set definition in the given subscription or management group with the given name.
-
-    :example: Retrieve a policy set definition at management group level
-        az policy set-definition show --management-group MyManagementGroup --name CostManagement
-
-    :example: Retrieve a policy set definition
-        az policy set-definition show --name CostManagement
+    :example: Retrieve a policy set definition version
+        az policy set-definition version show --name CostManagement --version 1.2.1
     """
 
     _aaz_info = {
         "version": "2025-11-01",
         "resources": [
-            ["mgmt-plane", "/providers/microsoft.management/managementgroups/{}/providers/microsoft.authorization/policysetdefinitions/{}", "2025-11-01"],
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.authorization/policysetdefinitions/{}", "2025-11-01"],
+            ["mgmt-plane", "/providers/microsoft.management/managementgroups/{}/providers/microsoft.authorization/policysetdefinitions/{}/versions/{}", "2025-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.authorization/policysetdefinitions/{}/versions/{}", "2025-11-01"],
         ]
     }
 
@@ -52,7 +47,19 @@ class Show(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.management_group = AAZStrArg(
             options=["--management-group"],
-            help={"short-summary": "The management group.", "long-summary": "The management group with the given name where the policy set definition resides."},
+            help="The management group.",
+            fmt=AAZStrArgFormat(
+                max_length=90,
+                min_length=1,
+            ),
+        )
+        _args_schema.version = AAZStrArg(
+            options=["--version"],
+            help={"short-summary": "The policy set definition version.", "long-summary": "The policy set definition version in #.#.# format."},
+            required=True,
+            fmt=AAZStrArgFormat(
+                pattern="^\\d+\\.\\d+\\.\\d+$",
+            ),
         )
         _args_schema.name = AAZStrArg(
             options=["-n", "--name"],
@@ -64,18 +71,18 @@ class Show(AAZCommand):
         )
         _args_schema.expand = AAZStrArg(
             options=["--expand"],
-            help={"short-summary": "Additional properties to include in output", "long-summary": "Comma-separated list of additional properties to include in the command output. Supported values are 'LatestDefinitionVersion, EffectiveDefinitionVersion'."},
+            help="Comma-separated list of additional properties to be included in the response. Supported values are 'LatestDefinitionVersion, EffectiveDefinitionVersion'.",
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        condition_0 = has_value(self.ctx.args.management_group) and has_value(self.ctx.args.name)
-        condition_1 = has_value(self.ctx.args.name) and has_value(self.ctx.subscription_id)
+        condition_0 = has_value(self.ctx.args.management_group) and has_value(self.ctx.args.version) and has_value(self.ctx.args.name)
+        condition_1 = has_value(self.ctx.args.version) and has_value(self.ctx.args.name) and has_value(self.ctx.subscription_id)
         if condition_0:
-            self.PolicySetDefinitionsGetAtManagementGroup(ctx=self.ctx)()
+            self.PolicySetDefinitionVersionsGetAtManagementGroup(ctx=self.ctx)()
         if condition_1:
-            self.PolicySetDefinitionsGet(ctx=self.ctx)()
+            self.PolicySetDefinitionVersionsGet(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -90,7 +97,7 @@ class Show(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class PolicySetDefinitionsGetAtManagementGroup(AAZHttpOperation):
+    class PolicySetDefinitionVersionsGetAtManagementGroup(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -104,7 +111,7 @@ class Show(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/providers/Microsoft.Management/managementGroups/{managementGroupId}/providers/Microsoft.Authorization/policySetDefinitions/{policySetDefinitionName}",
+                "/providers/Microsoft.Management/managementGroups/{managementGroupName}/providers/Microsoft.Authorization/policySetDefinitions/{policySetDefinitionName}/versions/{policyDefinitionVersion}",
                 **self.url_parameters
             )
 
@@ -120,7 +127,11 @@ class Show(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "managementGroupId", self.ctx.args.management_group,
+                    "managementGroupName", self.ctx.args.management_group,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "policyDefinitionVersion", self.ctx.args.version,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -205,7 +216,6 @@ class Show(AAZCommand):
                 serialized_name="policyType",
             )
             properties.version = AAZStrType()
-            properties.versions = AAZListType()
 
             parameters = cls._schema_on_200.properties.parameters
             parameters.Element = AAZObjectType()
@@ -276,9 +286,6 @@ class Show(AAZCommand):
             _element = cls._schema_on_200.properties.policy_definitions.Element.parameters.Element
             _element.value = AAZAnyType()
 
-            versions = cls._schema_on_200.properties.versions
-            versions.Element = AAZStrType()
-
             system_data = cls._schema_on_200.system_data
             system_data.created_at = AAZStrType(
                 serialized_name="createdAt",
@@ -301,7 +308,7 @@ class Show(AAZCommand):
 
             return cls._schema_on_200
 
-    class PolicySetDefinitionsGet(AAZHttpOperation):
+    class PolicySetDefinitionVersionsGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -315,7 +322,7 @@ class Show(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policySetDefinitions/{policySetDefinitionName}",
+                "/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policySetDefinitions/{policySetDefinitionName}/versions/{policyDefinitionVersion}",
                 **self.url_parameters
             )
 
@@ -330,6 +337,10 @@ class Show(AAZCommand):
         @property
         def url_parameters(self):
             parameters = {
+                **self.serialize_url_param(
+                    "policyDefinitionVersion", self.ctx.args.version,
+                    required=True,
+                ),
                 **self.serialize_url_param(
                     "policySetDefinitionName", self.ctx.args.name,
                     required=True,
@@ -416,7 +427,6 @@ class Show(AAZCommand):
                 serialized_name="policyType",
             )
             properties.version = AAZStrType()
-            properties.versions = AAZListType()
 
             parameters = cls._schema_on_200.properties.parameters
             parameters.Element = AAZObjectType()
@@ -486,9 +496,6 @@ class Show(AAZCommand):
 
             _element = cls._schema_on_200.properties.policy_definitions.Element.parameters.Element
             _element.value = AAZAnyType()
-
-            versions = cls._schema_on_200.properties.versions
-            versions.Element = AAZStrType()
 
             system_data = cls._schema_on_200.system_data
             system_data.created_at = AAZStrType(

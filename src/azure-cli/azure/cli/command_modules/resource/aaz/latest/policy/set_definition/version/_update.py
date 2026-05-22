@@ -12,25 +12,20 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "policy set-definition update",
+    "policy set-definition version update",
 )
 class Update(AAZCommand):
-    """Update a policy set definition.
+    """Update operation creates or updates a policy set definition version in the given management group with the given name and version.
 
-    Update the policy set definition in the given subscription or management group with the given name by applying the given properties.
-
-    :example: Update a policy set definition
-        az policy set-definition update --definitions '[ { 'policyDefinitionId': '/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policyDefinitions/storagePolicy' } ]' --name MyPolicySetDefinition
-
-    :example: Update the groups and definitions within a policy set definition
-        az policy set-definition update -n computeRequirements --definitions "[ { 'policyDefinitionId': '/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policyDefinitions/storagePolicy', 'groupNames': [ 'CostSaving', 'Organizational' ] }, { 'policyDefinitionId': '/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policyDefinitions/tagPolicy', 'groupNames': [ 'Organizational' ] } ]" --definition-groups "[{ 'name': 'CostSaving' }, { 'name': 'Organizational' } ]"
+    :example: Update a policy set definition version
+        az az policy set-definition version update -n readOnlyStorage --display-name "Updated display name goes here"
     """
 
     _aaz_info = {
         "version": "2025-11-01",
         "resources": [
-            ["mgmt-plane", "/providers/microsoft.management/managementgroups/{}/providers/microsoft.authorization/policysetdefinitions/{}", "2025-11-01"],
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.authorization/policysetdefinitions/{}", "2025-11-01"],
+            ["mgmt-plane", "/providers/microsoft.management/managementgroups/{}/providers/microsoft.authorization/policysetdefinitions/{}/versions/{}", "2025-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.authorization/policysetdefinitions/{}/versions/{}", "2025-11-01"],
         ]
     }
 
@@ -54,7 +49,19 @@ class Update(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.management_group = AAZStrArg(
             options=["--management-group"],
-            help={"short-summary": "The management group.", "long-summary": "The management group with the given name where the policy set definition resides."},
+            help="The management group.",
+            fmt=AAZStrArgFormat(
+                max_length=90,
+                min_length=1,
+            ),
+        )
+        _args_schema.version = AAZStrArg(
+            options=["--version"],
+            help={"short-summary": "The policy set definition version.", "long-summary": "The policy set definition version in #.#.# format."},
+            required=True,
+            fmt=AAZStrArgFormat(
+                pattern="^\\d+\\.\\d+\\.\\d+$",
+            ),
         )
         _args_schema.name = AAZStrArg(
             options=["-n", "--name"],
@@ -71,13 +78,13 @@ class Update(AAZCommand):
         _args_schema.description = AAZStrArg(
             options=["--description"],
             arg_group="Properties",
-            help={"short-summary": "Policy set definition description.", "long-summary": "Full description of the policy set definition."},
+            help="The policy set definition description.",
             nullable=True,
         )
         _args_schema.display_name = AAZStrArg(
             options=["--display-name"],
             arg_group="Properties",
-            help={"short-summary": "The display name of the policy set definition.", "long-summary": "The display name of the policy set definition is not part of its ID, allowing for longer and more flexible naming."},
+            help="The display name of the policy set definition.",
             nullable=True,
         )
         _args_schema.metadata = AAZAnyTypeArg(
@@ -102,12 +109,6 @@ class Update(AAZCommand):
             options=["--definitions"],
             arg_group="Properties",
             help="An array of policy definition references.",
-        )
-        _args_schema.version = AAZStrArg(
-            options=["--version"],
-            arg_group="Properties",
-            help={"short-summary": "The policy set definition version.", "long-summary": "The policy set definition version in #.#.# format."},
-            nullable=True,
         )
 
         params = cls._args_schema.params
@@ -230,22 +231,22 @@ class Update(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        condition_0 = has_value(self.ctx.args.management_group) and has_value(self.ctx.args.name)
-        condition_1 = has_value(self.ctx.args.name) and has_value(self.ctx.subscription_id)
-        condition_2 = has_value(self.ctx.args.management_group) and has_value(self.ctx.args.name)
-        condition_3 = has_value(self.ctx.args.name) and has_value(self.ctx.subscription_id)
+        condition_0 = has_value(self.ctx.args.management_group) and has_value(self.ctx.args.version) and has_value(self.ctx.args.name)
+        condition_1 = has_value(self.ctx.args.version) and has_value(self.ctx.args.name) and has_value(self.ctx.subscription_id)
+        condition_2 = has_value(self.ctx.args.management_group) and has_value(self.ctx.args.version) and has_value(self.ctx.args.name)
+        condition_3 = has_value(self.ctx.args.version) and has_value(self.ctx.args.name) and has_value(self.ctx.subscription_id)
         if condition_0:
-            self.PolicySetDefinitionsGetAtManagementGroup(ctx=self.ctx)()
+            self.PolicySetDefinitionVersionsGetAtManagementGroup(ctx=self.ctx)()
         if condition_1:
-            self.PolicySetDefinitionsGet(ctx=self.ctx)()
+            self.PolicySetDefinitionVersionsGet(ctx=self.ctx)()
         self.pre_instance_update(self.ctx.vars.instance)
         self.InstanceUpdateByJson(ctx=self.ctx)()
         self.InstanceUpdateByGeneric(ctx=self.ctx)()
         self.post_instance_update(self.ctx.vars.instance)
         if condition_2:
-            self.PolicySetDefinitionsCreateOrUpdateAtManagementGroup(ctx=self.ctx)()
+            self.PolicySetDefinitionVersionsCreateOrUpdateAtManagementGroup(ctx=self.ctx)()
         if condition_3:
-            self.PolicySetDefinitionsCreateOrUpdate(ctx=self.ctx)()
+            self.PolicySetDefinitionVersionsCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -268,7 +269,7 @@ class Update(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class PolicySetDefinitionsGetAtManagementGroup(AAZHttpOperation):
+    class PolicySetDefinitionVersionsGetAtManagementGroup(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -282,7 +283,7 @@ class Update(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/providers/Microsoft.Management/managementGroups/{managementGroupId}/providers/Microsoft.Authorization/policySetDefinitions/{policySetDefinitionName}",
+                "/providers/Microsoft.Management/managementGroups/{managementGroupName}/providers/Microsoft.Authorization/policySetDefinitions/{policySetDefinitionName}/versions/{policyDefinitionVersion}",
                 **self.url_parameters
             )
 
@@ -298,7 +299,11 @@ class Update(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "managementGroupId", self.ctx.args.management_group,
+                    "managementGroupName", self.ctx.args.management_group,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "policyDefinitionVersion", self.ctx.args.version,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -343,11 +348,11 @@ class Update(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _UpdateHelper._build_schema_policy_set_definition_read(cls._schema_on_200)
+            _UpdateHelper._build_schema_policy_set_definition_version_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
-    class PolicySetDefinitionsGet(AAZHttpOperation):
+    class PolicySetDefinitionVersionsGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -361,7 +366,7 @@ class Update(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policySetDefinitions/{policySetDefinitionName}",
+                "/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policySetDefinitions/{policySetDefinitionName}/versions/{policyDefinitionVersion}",
                 **self.url_parameters
             )
 
@@ -376,6 +381,10 @@ class Update(AAZCommand):
         @property
         def url_parameters(self):
             parameters = {
+                **self.serialize_url_param(
+                    "policyDefinitionVersion", self.ctx.args.version,
+                    required=True,
+                ),
                 **self.serialize_url_param(
                     "policySetDefinitionName", self.ctx.args.name,
                     required=True,
@@ -422,11 +431,11 @@ class Update(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _UpdateHelper._build_schema_policy_set_definition_read(cls._schema_on_200)
+            _UpdateHelper._build_schema_policy_set_definition_version_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
-    class PolicySetDefinitionsCreateOrUpdateAtManagementGroup(AAZHttpOperation):
+    class PolicySetDefinitionVersionsCreateOrUpdateAtManagementGroup(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -440,7 +449,7 @@ class Update(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/providers/Microsoft.Management/managementGroups/{managementGroupId}/providers/Microsoft.Authorization/policySetDefinitions/{policySetDefinitionName}",
+                "/providers/Microsoft.Management/managementGroups/{managementGroupName}/providers/Microsoft.Authorization/policySetDefinitions/{policySetDefinitionName}/versions/{policyDefinitionVersion}",
                 **self.url_parameters
             )
 
@@ -456,7 +465,11 @@ class Update(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "managementGroupId", self.ctx.args.management_group,
+                    "managementGroupName", self.ctx.args.management_group,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "policyDefinitionVersion", self.ctx.args.version,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -513,11 +526,11 @@ class Update(AAZCommand):
                 return cls._schema_on_200_201
 
             cls._schema_on_200_201 = AAZObjectType()
-            _UpdateHelper._build_schema_policy_set_definition_read(cls._schema_on_200_201)
+            _UpdateHelper._build_schema_policy_set_definition_version_read(cls._schema_on_200_201)
 
             return cls._schema_on_200_201
 
-    class PolicySetDefinitionsCreateOrUpdate(AAZHttpOperation):
+    class PolicySetDefinitionVersionsCreateOrUpdate(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -531,7 +544,7 @@ class Update(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policySetDefinitions/{policySetDefinitionName}",
+                "/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policySetDefinitions/{policySetDefinitionName}/versions/{policyDefinitionVersion}",
                 **self.url_parameters
             )
 
@@ -546,6 +559,10 @@ class Update(AAZCommand):
         @property
         def url_parameters(self):
             parameters = {
+                **self.serialize_url_param(
+                    "policyDefinitionVersion", self.ctx.args.version,
+                    required=True,
+                ),
                 **self.serialize_url_param(
                     "policySetDefinitionName", self.ctx.args.name,
                     required=True,
@@ -604,7 +621,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200_201
 
             cls._schema_on_200_201 = AAZObjectType()
-            _UpdateHelper._build_schema_policy_set_definition_read(cls._schema_on_200_201)
+            _UpdateHelper._build_schema_policy_set_definition_version_read(cls._schema_on_200_201)
 
             return cls._schema_on_200_201
 
@@ -629,7 +646,6 @@ class Update(AAZCommand):
                 properties.set_prop("parameters", AAZDictType, ".params")
                 properties.set_prop("policyDefinitionGroups", AAZListType, ".definition_groups")
                 properties.set_prop("policyDefinitions", AAZListType, ".definitions", typ_kwargs={"flags": {"required": True}})
-                properties.set_prop("version", AAZStrType, ".version")
 
             parameters = _builder.get(".properties.parameters")
             if parameters is not None:
@@ -701,39 +717,39 @@ class Update(AAZCommand):
 class _UpdateHelper:
     """Helper class for Update"""
 
-    _schema_policy_set_definition_read = None
+    _schema_policy_set_definition_version_read = None
 
     @classmethod
-    def _build_schema_policy_set_definition_read(cls, _schema):
-        if cls._schema_policy_set_definition_read is not None:
-            _schema.id = cls._schema_policy_set_definition_read.id
-            _schema.name = cls._schema_policy_set_definition_read.name
-            _schema.properties = cls._schema_policy_set_definition_read.properties
-            _schema.system_data = cls._schema_policy_set_definition_read.system_data
-            _schema.type = cls._schema_policy_set_definition_read.type
+    def _build_schema_policy_set_definition_version_read(cls, _schema):
+        if cls._schema_policy_set_definition_version_read is not None:
+            _schema.id = cls._schema_policy_set_definition_version_read.id
+            _schema.name = cls._schema_policy_set_definition_version_read.name
+            _schema.properties = cls._schema_policy_set_definition_version_read.properties
+            _schema.system_data = cls._schema_policy_set_definition_version_read.system_data
+            _schema.type = cls._schema_policy_set_definition_version_read.type
             return
 
-        cls._schema_policy_set_definition_read = _schema_policy_set_definition_read = AAZObjectType()
+        cls._schema_policy_set_definition_version_read = _schema_policy_set_definition_version_read = AAZObjectType()
 
-        policy_set_definition_read = _schema_policy_set_definition_read
-        policy_set_definition_read.id = AAZStrType(
+        policy_set_definition_version_read = _schema_policy_set_definition_version_read
+        policy_set_definition_version_read.id = AAZStrType(
             flags={"read_only": True},
         )
-        policy_set_definition_read.name = AAZStrType(
+        policy_set_definition_version_read.name = AAZStrType(
             flags={"read_only": True},
         )
-        policy_set_definition_read.properties = AAZObjectType(
+        policy_set_definition_version_read.properties = AAZObjectType(
             flags={"client_flatten": True},
         )
-        policy_set_definition_read.system_data = AAZObjectType(
+        policy_set_definition_version_read.system_data = AAZObjectType(
             serialized_name="systemData",
             flags={"read_only": True},
         )
-        policy_set_definition_read.type = AAZStrType(
+        policy_set_definition_version_read.type = AAZStrType(
             flags={"read_only": True},
         )
 
-        properties = _schema_policy_set_definition_read.properties
+        properties = _schema_policy_set_definition_version_read.properties
         properties.description = AAZStrType()
         properties.display_name = AAZStrType(
             serialized_name="displayName",
@@ -751,12 +767,11 @@ class _UpdateHelper:
             serialized_name="policyType",
         )
         properties.version = AAZStrType()
-        properties.versions = AAZListType()
 
-        parameters = _schema_policy_set_definition_read.properties.parameters
+        parameters = _schema_policy_set_definition_version_read.properties.parameters
         parameters.Element = AAZObjectType()
 
-        _element = _schema_policy_set_definition_read.properties.parameters.Element
+        _element = _schema_policy_set_definition_version_read.properties.parameters.Element
         _element.allowed_values = AAZListType(
             serialized_name="allowedValues",
         )
@@ -767,13 +782,13 @@ class _UpdateHelper:
         _element.schema = AAZAnyType()
         _element.type = AAZStrType()
 
-        allowed_values = _schema_policy_set_definition_read.properties.parameters.Element.allowed_values
+        allowed_values = _schema_policy_set_definition_version_read.properties.parameters.Element.allowed_values
         allowed_values.Element = AAZAnyType()
 
-        policy_definition_groups = _schema_policy_set_definition_read.properties.policy_definition_groups
+        policy_definition_groups = _schema_policy_set_definition_version_read.properties.policy_definition_groups
         policy_definition_groups.Element = AAZObjectType()
 
-        _element = _schema_policy_set_definition_read.properties.policy_definition_groups.Element
+        _element = _schema_policy_set_definition_version_read.properties.policy_definition_groups.Element
         _element.additional_metadata_id = AAZStrType(
             serialized_name="additionalMetadataId",
         )
@@ -786,10 +801,10 @@ class _UpdateHelper:
             flags={"required": True},
         )
 
-        policy_definitions = _schema_policy_set_definition_read.properties.policy_definitions
+        policy_definitions = _schema_policy_set_definition_version_read.properties.policy_definitions
         policy_definitions.Element = AAZObjectType()
 
-        _element = _schema_policy_set_definition_read.properties.policy_definitions.Element
+        _element = _schema_policy_set_definition_version_read.properties.policy_definitions.Element
         _element.definition_version = AAZStrType(
             serialized_name="definitionVersion",
         )
@@ -813,19 +828,16 @@ class _UpdateHelper:
             serialized_name="policyDefinitionReferenceId",
         )
 
-        group_names = _schema_policy_set_definition_read.properties.policy_definitions.Element.group_names
+        group_names = _schema_policy_set_definition_version_read.properties.policy_definitions.Element.group_names
         group_names.Element = AAZStrType()
 
-        parameters = _schema_policy_set_definition_read.properties.policy_definitions.Element.parameters
+        parameters = _schema_policy_set_definition_version_read.properties.policy_definitions.Element.parameters
         parameters.Element = AAZObjectType()
 
-        _element = _schema_policy_set_definition_read.properties.policy_definitions.Element.parameters.Element
+        _element = _schema_policy_set_definition_version_read.properties.policy_definitions.Element.parameters.Element
         _element.value = AAZAnyType()
 
-        versions = _schema_policy_set_definition_read.properties.versions
-        versions.Element = AAZStrType()
-
-        system_data = _schema_policy_set_definition_read.system_data
+        system_data = _schema_policy_set_definition_version_read.system_data
         system_data.created_at = AAZStrType(
             serialized_name="createdAt",
         )
@@ -845,11 +857,11 @@ class _UpdateHelper:
             serialized_name="lastModifiedByType",
         )
 
-        _schema.id = cls._schema_policy_set_definition_read.id
-        _schema.name = cls._schema_policy_set_definition_read.name
-        _schema.properties = cls._schema_policy_set_definition_read.properties
-        _schema.system_data = cls._schema_policy_set_definition_read.system_data
-        _schema.type = cls._schema_policy_set_definition_read.type
+        _schema.id = cls._schema_policy_set_definition_version_read.id
+        _schema.name = cls._schema_policy_set_definition_version_read.name
+        _schema.properties = cls._schema_policy_set_definition_version_read.properties
+        _schema.system_data = cls._schema_policy_set_definition_version_read.system_data
+        _schema.type = cls._schema_policy_set_definition_version_read.type
 
 
 __all__ = ["Update"]
