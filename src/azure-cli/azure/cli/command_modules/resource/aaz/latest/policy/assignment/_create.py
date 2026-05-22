@@ -158,7 +158,7 @@ class Create(AAZCommand):
             help={"short-summary": "The resource selectors list to filter policies by resource properties.", "long-summary": "The collection of resource selector expressions used to filter policy assignment applicability by certain resource property values."},
         )
         _args_schema.self_serve_exemption_settings = AAZObjectArg(
-            options=["--self-serve", "--self-serve-exemption-settings"],
+            options=["--self-serve-exemption", "--self-serve-exemption-settings"],
             arg_group="Properties",
             help="The self-serve exemption settings for the policy assignment.",
         )

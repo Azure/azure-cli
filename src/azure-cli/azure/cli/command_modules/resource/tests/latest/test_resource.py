@@ -4739,6 +4739,20 @@ class PolicyScenarioTest(ScenarioTest):
         with self.assertRaisesRegex(ArgumentUsageError, expected_msg):
             self.cmd(cmd)
 
+        # omitting -n/--name is rejected
+        cmd = self.cmdstring('policy definition version create --version 9.9.9 '
+                             '--rules "{rf}" --display-name {pdn}',
+                             management_group, subscription)
+        with self.assertRaisesRegex(SystemExit, '2'):
+            self.cmd(cmd)
+
+        # omitting --rules is rejected
+        cmd = self.cmdstring('policy definition version create -n {pn} '
+                             '--version 9.9.9 --display-name {pdn}',
+                             management_group, subscription)
+        with self.assertRaisesRegex(Exception, 'rule|policyRule|required'):
+            self.cmd(cmd)
+
         # assign the policy at the older custom version
         self.kwargs.update({
             'pan': self.create_random_name('cli-test-polassg', 24),
@@ -4885,6 +4899,20 @@ class PolicyScenarioTest(ScenarioTest):
             cmd = self.cmdstring('policy set-definition version update -n {psn} --version {ver_old} '
                                 '--description "should fail"', management_group, subscription)
             with self.assertRaisesRegex(ArgumentUsageError, expected_msg):
+                self.cmd(cmd)
+
+            # omitting -n/--name is rejected
+            cmd = self.cmdstring('policy set-definition version create --version 9.9.9 '
+                                 '--definitions @"{psf}" --display-name {psdn}',
+                                 management_group, subscription)
+            with self.assertRaisesRegex(SystemExit, '2'):
+                self.cmd(cmd)
+
+            # omitting --definitions is rejected
+            cmd = self.cmdstring('policy set-definition version create -n {psn} '
+                                 '--version 9.9.9 --display-name {psdn}',
+                                 management_group, subscription)
+            with self.assertRaisesRegex(Exception, 'definition|policyDefinitions|required'):
                 self.cmd(cmd)
 
             # assign the set-definition at the older custom version
@@ -5150,7 +5178,7 @@ class PolicyScenarioTest(ScenarioTest):
                  '--not-scopes "{ns1}" "{ns2}" '
                  '--resource-selectors "{rsel}" '
                  '--overrides "{ovr}" '
-                 '--self-serve "{sse}"', checks=[
+                 '--self-serve-exemption "{sse}"', checks=[
                      self.check('enforcementMode', 'Default'),
                      self.check('length(notScopes)', 2),
                      self.check('resourceSelectors[0].name', 'byLocation'),

@@ -138,7 +138,7 @@ class Update(AAZCommand):
             nullable=True,
         )
         _args_schema.self_serve_exemption_settings = AAZObjectArg(
-            options=["--self-serve", "--self-serve-exemption-settings"],
+            options=["--self-serve-exemption", "--self-serve-exemption-settings"],
             arg_group="Properties",
             help="The self-serve exemption settings for the policy assignment.",
             nullable=True,
