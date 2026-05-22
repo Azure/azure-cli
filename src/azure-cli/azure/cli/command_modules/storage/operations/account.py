@@ -1190,7 +1190,7 @@ def update_or_policy(cmd, client, parameters, resource_group_name, account_name,
                                              priority_replication=ObjectReplicationPolicyPropertiesPriorityReplication(
                                                  enabled=properties.get('priorityReplication').get('enabled')),
                                              tags_replication=ObjectReplicationPolicyPropertiesTagsReplication(
-                                                enabled=properties.get('tagsReplication').get('enabled')))
+                                                 enabled=properties.get('tagsReplication').get('enabled')))
         if "policyId" in properties.keys() and properties["policyId"]:
             object_replication_policy_id = properties["policyId"]
 
