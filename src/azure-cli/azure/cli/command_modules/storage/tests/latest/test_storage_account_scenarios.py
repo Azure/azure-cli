@@ -2230,6 +2230,33 @@ class BlobServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
         result = self.cmd('storage account blob-service-properties show -n {sa} -g {rg}').get_output_in_json()
         self.assertEqual(result['lastAccessTimeTrackingPolicy']['enable'], True)
 
+    @ResourceGroupPreparer(name_prefix="cli_test_sa_static_website")
+    @StorageAccountPreparer(location="eastus2", kind="StorageV2")
+    def test_storage_account_static_website(self, resource_group, storage_account):
+        self.kwargs.update({
+            'sa': storage_account,
+            'rg': resource_group
+        })
+
+        self.cmd('storage account blob-service-properties update -n {sa} -g {rg} '
+                 '--enable-static-website --index-document index1.html') \
+            .assert_with_checks(
+            JMESPathCheck('staticWebsite.enabled', True),
+            JMESPathCheck('staticWebsite.indexDocument', 'index1.html'))
+
+        self.cmd('storage account blob-service-properties update -n {sa} -g {rg} '
+                 '--enable-static-website false') \
+            .assert_with_checks(
+            JMESPathCheck('staticWebsite.enabled', False))
+
+        self.cmd('storage account blob-service-properties update -n {sa} -g {rg} '
+                 '--enable-static-website --default-index-document-path default1.html '
+                 '--error-document-404-path error1.html') \
+            .assert_with_checks(
+            JMESPathCheck('staticWebsite.enabled', True),
+            JMESPathCheck('staticWebsite.defaultIndexDocumentPath', 'default1.html'),
+            JMESPathCheck('staticWebsite.errorDocument404Path', 'error1.html'))
+
     @ResourceGroupPreparer(name_prefix="cli_test_sa_blob_cors")
     @StorageAccountPreparer(location="eastus2", kind="StorageV2")
     def test_storage_account_blob_cors_rule(self, resource_group, storage_account):
