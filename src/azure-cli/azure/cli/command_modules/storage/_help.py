@@ -1553,6 +1553,11 @@ short-summary: Sets the ImmutabilityPolicy to Locked state.
 long-summary: The only action allowed on a Locked policy is ExtendImmutabilityPolicy action. ETag in If-Match is required for this operation.
 """
 
+helps['storage container immutability-policy show'] = """
+type: command
+short-summary: Gets the existing immutability policy along with the corresponding ETag in response headers and body.
+"""
+
 helps['storage container lease'] = """
 type: group
 short-summary: Manage blob storage container leases.

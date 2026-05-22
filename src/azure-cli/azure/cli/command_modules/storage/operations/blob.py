@@ -75,9 +75,10 @@ def lock_immutability_policy(client, container_name, account_name, if_match,
     return client.lock_immutability_policy(resource_group_name, account_name, container_name, etag=if_match,
                                            match_condition=MatchConditions.IfNotModified)
 
+
 def get_immutability_policy(client, container_name, account_name, if_match=None, resource_group_name=None):
     return client.get_immutability_policy(resource_group_name, account_name, container_name, etag=if_match,
-                                           match_condition=MatchConditions.IfNotModified)
+                                          match_condition=MatchConditions.IfNotModified)
 
 
 def create_container_rm(cmd, client, container_name, resource_group_name, account_name,

@@ -252,8 +252,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         help='The immutability period for the blobs in the container since the policy creation, in days.'
     )
 
-    account_immutability_policy_state_enum = self.get_sdk(
-        'models._storage_management_client_enums#AccountImmutabilityPolicyState',
+    account_immutability_policy_state_enum = self.get_models(
+        'AccountImmutabilityPolicyState',
         resource_type=ResourceType.MGMT_STORAGE)
     immutability_policy_state_type = CLIArgumentType(
         arg_type=get_enum_type(account_immutability_policy_state_enum),
@@ -266,8 +266,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         'two states. Only a policy in an Unlocked state can transition to a Locked state which cannot '
         'be reverted.')
 
-    public_network_access_enum = self.get_sdk('models._storage_management_client_enums#PublicNetworkAccess',
-                                              resource_type=ResourceType.MGMT_STORAGE)
+    public_network_access_enum = self.get_models('PublicNetworkAccess', resource_type=ResourceType.MGMT_STORAGE)
 
     version_id_type = CLIArgumentType(
         help='An optional blob version ID. This parameter is only for versioning enabled account. ',
@@ -1623,7 +1622,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                              'creation, in days.')
             c.ignore('parameters')
 
-    for item in ['delete', 'lock']:
+    for item in ['delete', 'lock', 'show']:
         with self.argument_context('storage container immutability-policy {}'.format(item)) as c:
             c.argument('account_name',
                        help='Storage account name. Related environment variable: AZURE_STORAGE_ACCOUNT.')
@@ -1631,10 +1630,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                         "the operation only if the resource's ETag matches the value specified.")
 
     with self.argument_context('storage container immutability-policy show') as c:
-        c.argument('if_match', help='The entity state (ETag) version of the immutability policy to update must be '
-                                    'returned to the server for all update operations. '
-                                    'The ETag value must include the leading and trailing double quotes as returned '
-                                    'by the service. Default value is None.')
         c.ignore('etag')
         c.ignore('match_condition')
 
