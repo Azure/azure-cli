@@ -59,10 +59,26 @@ def constructDefaultMaintenanceConfiguration(cmd, raw_parameters):
     start_hour = raw_parameters.get("start_hour")
     schedule_type = raw_parameters.get("schedule_type")
 
-    if weekday is None or start_hour is None:
-        raise RequiredArgumentMissingError('Please specify --weekday and --start-hour for default maintenance configuration, or use --config-file instead.')
+    # If schedule_type is provided, use maintenanceWindow format for the default config
     if schedule_type is not None:
-        raise MutuallyExclusiveArgumentError('--schedule-type is not supported for default maintenance configuration.')
+        if weekday is not None or start_hour is not None:
+            raise MutuallyExclusiveArgumentError('--weekday and --start-hour cannot be used together with --schedule-type for default maintenance configuration.')
+        if schedule_type != CONST_WEEKLY_MAINTENANCE_SCHEDULE:
+            raise InvalidArgumentValueError('--schedule-type for default maintenance configuration must be Weekly.')
+        interval_weeks = raw_parameters.get("interval_weeks")
+        if interval_weeks is not None and interval_weeks != 1:
+            raise InvalidArgumentValueError('--interval-weeks for default maintenance configuration must be 1.')
+        maintenance_configuration_models = AKSManagedClusterModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).maintenance_configuration_models
+        Result = (
+            maintenance_configuration_models.MaintenanceConfiguration
+        )
+        result = Result()
+        result.maintenance_window = constructMaintenanceWindow(cmd, raw_parameters)
+        return result
+
+    # Legacy timeInWeek format
+    if weekday is None or start_hour is None:
+        raise RequiredArgumentMissingError('Please specify --weekday and --start-hour, or --schedule-type Weekly with --day-of-week, --start-time, and --duration for default maintenance configuration, or use --config-file instead.')
 
     maintenance_configuration_models = AKSManagedClusterModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).maintenance_configuration_models
     TimeInWeek = (

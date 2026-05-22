@@ -34,7 +34,7 @@ class TestAddMaintenanceConfiguration(unittest.TestCase):
             aks_maintenanceconfiguration_update_internal(cmd, None, raw_parameters)
         self.assertEqual(str(cm.exception), err)
 
-    def test_add_default_maintenance_configuration_with_schedule_type(self):
+    def test_add_default_maintenance_configuration_with_schedule_type_and_weekday(self):
         cmd = SimpleNamespace()
         raw_parameters = {
             "resource_group_name": "test_rg",
@@ -45,8 +45,52 @@ class TestAddMaintenanceConfiguration(unittest.TestCase):
             "schedule_type": "Weekly",
         }
 
-        err = ("--schedule-type is not supported for default maintenance configuration.")
+        err = ("--weekday and --start-hour cannot be used together with --schedule-type for default maintenance configuration.")
         with self.assertRaises(MutuallyExclusiveArgumentError) as cm:
+            aks_maintenanceconfiguration_update_internal(cmd, None, raw_parameters)
+        self.assertEqual(str(cm.exception), err)
+
+    def test_add_default_maintenance_configuration_with_invalid_schedule_type(self):
+        cmd = MockCmd(self.cli_ctx)
+        raw_parameters = {
+            "resource_group_name": "test_rg",
+            "cluster_name": "test_cluster",
+            "config_name": "default",
+            "weekday": None,
+            "start_hour": None,
+            "schedule_type": "Daily",
+            "interval_days": 3,
+            "interval_weeks": None,
+            "interval_months": None,
+            "day_of_week": None,
+            "day_of_month": None,
+            "week_index": None,
+        }
+
+        err = ("--schedule-type for default maintenance configuration must be Weekly.")
+        with self.assertRaises(InvalidArgumentValueError) as cm:
+            aks_maintenanceconfiguration_update_internal(cmd, None, raw_parameters)
+        self.assertEqual(str(cm.exception), err)
+
+    def test_add_default_maintenance_configuration_with_invalid_interval_weeks(self):
+        cmd = MockCmd(self.cli_ctx)
+        raw_parameters = {
+            "resource_group_name": "test_rg",
+            "cluster_name": "test_cluster",
+            "config_name": "default",
+            "weekday": None,
+            "start_hour": None,
+            "schedule_type": "Weekly",
+            "interval_days": None,
+            "interval_weeks": 3,
+            "interval_months": None,
+            "day_of_week": "Monday",
+            "day_of_month": None,
+            "week_index": None,
+        }
+
+        err = ("--interval-weeks for default maintenance configuration must be 1.")
+        with self.assertRaises(InvalidArgumentValueError) as cm:
             aks_maintenanceconfiguration_update_internal(cmd, None, raw_parameters)
         self.assertEqual(str(cm.exception), err)
     

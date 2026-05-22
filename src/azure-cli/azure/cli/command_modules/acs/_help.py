@@ -1569,6 +1569,10 @@ helps["aks maintenanceconfiguration add"] = """
                         }
                       ]
               }
+        - name: Add default maintenance configuration with weekly maintenanceWindow schedule.
+          text: |
+            az aks maintenanceconfiguration add -g MyResourceGroup --cluster-name test1 -n default --schedule-type Weekly --day-of-week Monday --interval-weeks 1 --duration 4 --start-time 09:00
+              The maintenance is allowed on Monday from 09:00 to 13:00 in UTC every week using the maintenanceWindow format.
         - name: Add aksManagedNodeOSUpgradeSchedule maintenance configuration with daily schedule.
           text: |
             az aks maintenanceconfiguration add -g MyResourceGroup --cluster-name test1 -n aksManagedNodeOSUpgradeSchedule --schedule-type Daily --interval-days 2 --duration 12 --utc-offset=-08:00 --start-date 2023-01-16 --start-time 00:00
@@ -1627,7 +1631,7 @@ helps["aks maintenanceconfiguration update"] = """
           short-summary: The start time of 1 hour window which maintenance is allowd. E.g. 1 means it's allowd between 1:00 am and 2:00 am. Applicable to default maintenance configuration only.
         - name: --schedule-type
           type: string
-          short-summary: Choose either 'Daily', 'Weekly', 'AbsoluteMonthly' or 'RelativeMonthly' for your maintenance schedule. Only applicable to 'aksManagedAutoUpgradeSchedule' and 'aksManagedNodeOSUpgradeSchedule' maintenance configuration.
+          short-summary: Choose either 'Daily', 'Weekly', 'AbsoluteMonthly' or 'RelativeMonthly' for your maintenance schedule. For default maintenance configuration, only 'Weekly' is supported.
         - name: --start-date
           type: string
           short-summary: The date the maintenance configuration activates. If not specified, the maintenance window will be active right away."
@@ -1703,6 +1707,10 @@ helps["aks maintenanceconfiguration update"] = """
                         }
                       ]
               }
+        - name: Update default maintenance configuration with weekly maintenanceWindow schedule.
+          text: |
+            az aks maintenanceconfiguration update -g MyResourceGroup --cluster-name test1 -n default --schedule-type Weekly --day-of-week Monday --interval-weeks 1 --duration 4 --start-time 09:00
+              The maintenance is allowed on Monday from 09:00 to 13:00 in UTC every week using the maintenanceWindow format.
         - name: Update aksManagedNodeOSUpgradeSchedule maintenance configuration with daily schedule.
           text: |
             az aks maintenanceconfiguration update -g MyResourceGroup --cluster-name test1 -n aksManagedNodeOSUpgradeSchedule --schedule-type Daily --interval-days 2 --duration 12 --utc-offset=-08:00 --start-date 2023-01-16 --start-time 00:00
