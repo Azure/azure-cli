@@ -148,6 +148,7 @@ class Profile:
               is_service_principal,
               tenant,
               scopes=None,
+              use_broker_sso=False,
               use_device_code=False,
               allow_no_subscriptions=False,
               use_cert_sn_issuer=None,
@@ -176,7 +177,10 @@ class Profile:
             if use_device_code:
                 user_identity = identity.login_with_device_code(scopes=scopes, claims_challenge=claims_challenge)
             else:
-                user_identity = identity.login_with_auth_code(scopes=scopes, claims_challenge=claims_challenge)
+                user_identity = identity.login_with_auth_code(
+                    scopes=scopes,
+                    claims_challenge=claims_challenge,
+                    use_broker_sso=use_broker_sso)
         else:
             if not is_service_principal:
                 user_identity = identity.login_with_username_password(username, password, scopes=scopes)

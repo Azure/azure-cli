@@ -58,6 +58,8 @@ class ProfileCommandsLoader(AzCommandsLoader):
             c.argument('claims_challenge',
                        help="Base64-encoded claims challenge requested by a resource API in the "
                             "WWW-Authenticate header.")
+            c.argument('use_broker_sso', action='store_true',
+                       help="(TBD) Enable broker SSO for login.")
             c.ignore('_subscription')  # hide the global subscription parameter
 
             # Skip subscription discovery
