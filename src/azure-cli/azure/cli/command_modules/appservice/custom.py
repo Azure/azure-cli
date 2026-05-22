@@ -129,7 +129,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                   role='Contributor', scope=None, vnet=None, subnet=None, https_only=False,
                   public_network_access=None, acr_use_identity=False, acr_identity=None, basic_auth="",
                   auto_generated_domain_name_label_scope=None, end_to_end_encryption_enabled=None,
-                  min_tls_version=None, min_tls_cipher_suite=None):
+                  min_tls_version=None, min_tls_cipher_suite=None, site_scoped_certs=None):
     from azure.mgmt.web.models import Site, OutboundVnetRouting
     from azure.core.exceptions import ResourceNotFoundError as _ResourceNotFoundError
     SiteConfig, SkuDescription, NameValuePair = cmd.get_models(
@@ -259,7 +259,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                       https_only=https_only, virtual_network_subnet_id=subnet_resource_id,
                       public_network_access=public_network_access, outbound_vnet_routing=outbound_vnet_routing,
                       auto_generated_domain_name_label_scope=auto_generated_domain_name_label_scope,
-                      end_to_end_encryption_enabled=end_to_end_encryption_enabled)
+                      end_to_end_encryption_enabled=end_to_end_encryption_enabled,
+                      site_scoped_certs=site_scoped_certs)
     if runtime:
         runtime = _StackRuntimeHelper.remove_delimiters(runtime)
 
@@ -2233,7 +2234,7 @@ def set_webapp(cmd, resource_group_name, name, slot=None, skip_dns_registration=
 
 def update_webapp(cmd, instance, client_affinity_enabled=None, https_only=None, minimum_elastic_instance_count=None,
                   prewarmed_instance_count=None, end_to_end_encryption_enabled=None,
-                  platform_release_channel=None):
+                  platform_release_channel=None, site_scoped_certs=None):
     if 'function' in instance.kind:
         raise ValidationError("please use 'az functionapp update' to update this function app")
     if minimum_elastic_instance_count or prewarmed_instance_count:
@@ -2259,6 +2260,9 @@ def update_webapp(cmd, instance, client_affinity_enabled=None, https_only=None, 
         instance.https_only = https_only == 'true'
     if end_to_end_encryption_enabled is not None:
         instance.end_to_end_encryption_enabled = end_to_end_encryption_enabled == 'true'
+
+    if site_scoped_certs is not None:
+        instance.site_scoped_certs = site_scoped_certs == 'true'
 
     if minimum_elastic_instance_count is not None:
         from azure.mgmt.web.models import SiteConfig
@@ -4666,7 +4670,7 @@ def _set_site_config_storage_keys(cmd, site_config):
         if acct.access_key is None:
             scf = cf_sa_for_keys(cmd.cli_ctx, None)
             acct_rg = _resolve_storage_account_resource_group(cmd, acct.account_name)
-            keys = scf.list_keys(acct_rg, acct.account_name, logging_enable=False).keys
+            keys = scf.list_keys(acct_rg, acct.account_name, logging_enable=False).keys_property
             if keys:
                 key = keys[0]
                 logger.info("Retreived key %s", key.key_name)
@@ -7768,7 +7772,7 @@ class _FlexFunctionAppStackRuntimeHelper:
                         continue
 
                     runtime_settings = minor_version['stackSettings']['linuxRuntimeSettings']
-                    runtime_name = (runtime_settings['appSettingsDictionary']['FUNCTIONS_WORKER_RUNTIME'] or
+                    runtime_name = (runtime_settings.get('appSettingsDictionary', {}).get('FUNCTIONS_WORKER_RUNTIME') or
                                     runtime['name'])
 
                     skus = runtime_settings['Sku']
@@ -9207,7 +9211,7 @@ def _get_storage_connection_string(cli_ctx, deployment_storage_account):
     storage_client = get_mgmt_service_client(cli_ctx, StorageManagementClient)
     access_keys = storage_client.storage_accounts.list_keys(resource_group_name, deployment_storage_name)
     try:
-        key = access_keys.keys[0].value
+        key = access_keys.keys_property[0].value
     except AttributeError:
         # Older API versions have a slightly different structure
         key = access_keys.key1
@@ -9296,7 +9300,7 @@ def _validate_and_get_connection_string(cli_ctx, resource_group_name, storage_ac
 
     obj = storage_client.storage_accounts.list_keys(sa_resource_group, storage_account)  # pylint: disable=no-member
     try:
-        keys = [obj.keys[0].value, obj.keys[1].value]  # pylint: disable=no-member
+        keys = [obj.keys_property[0].value, obj.keys_property[1].value]  # pylint: disable=no-member
     except AttributeError:
         # Older API versions have a slightly different structure
         keys = [obj.key1, obj.key2]  # pylint: disable=no-member

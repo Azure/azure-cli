@@ -134,10 +134,10 @@ class StorageContainerRmScenarios(ScenarioTest):
             'vnet': self.create_random_name(prefix='vnet', length=10),
             'subnet': self.create_random_name(prefix='subnet', length=10)
         })
-        result = self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}').get_output_in_json()
-        self.kwargs['subnet_id'] = result['newVNet']['subnets'][0]['id']
-        self.cmd(
-            'network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --service-endpoints Microsoft.Storage')
+        self.cmd('network vnet create -n {vnet} -g {rg}')
+        self.kwargs['subnet_id'] = self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} --name {subnet} '
+                                            '--address-prefixes 10.0.1.0/24 --default-outbound false '
+                                            '--service-endpoints Microsoft.Storage').get_output_in_json()['id']
         self.cmd('storage account create -n {sa} -g {rg} --subnet {subnet_id} '
                  '--default-action Deny --hns --sku Standard_LRS --enable-nfs-v3 true',
                  checks=[JMESPathCheck('enableNfsV3', True)])

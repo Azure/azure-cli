@@ -40,7 +40,7 @@ def _query_account_key(cli_ctx, account_name):
     if t_storage_account_keys:
         return scf.storage_accounts.list_keys(rg, account_name, logging_enable=False).key1
     # of type: models.storage_account_list_keys_result#StorageAccountListKeysResult
-    return scf.storage_accounts.list_keys(rg, account_name, logging_enable=False).keys[0].value  # pylint: disable=no-member
+    return scf.storage_accounts.list_keys(rg, account_name, logging_enable=False).keys_property[0].value  # pylint: disable=no-member
 
 
 def _query_account_rg(cli_ctx, account_name):

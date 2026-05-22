@@ -12,7 +12,7 @@ from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest)
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
 from azure.cli.command_modules.appconfig.tests.latest._test_utils import CredentialResponseSanitizer, get_resource_name_prefix
-from azure.cli.core.azclierror import InvalidArgumentValueError
+from azure.cli.core.azclierror import InvalidArgumentValueError, MutuallyExclusiveArgumentError
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -447,6 +447,8 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_public_network_access(self, resource_group, location):
+        """Test public network access via the deprecated --enable-public-network flag and the
+        new --public-network-access parameter (Enabled, Disabled, SecuredByPerimeter)."""
         pub_network_prefix = get_resource_name_prefix('PubNetworkTrue')
         config_store_name = self.create_random_name(prefix=pub_network_prefix, length=24)
 
@@ -493,6 +495,49 @@ class AppConfigMgmtScenarioTest(ScenarioTest):
                          self.check('provisioningState', 'Succeeded'),
                          self.check('sku.name', sku),
                          self.check('publicNetworkAccess', 'Enabled')])
+
+        # Test the new --public-network-access parameter with Enabled, Disabled and SecuredByPerimeter values.
+        new_param_prefix = get_resource_name_prefix('PubNetAccess')
+
+        # Test create with --public-network-access Enabled
+        enabled_store = self.create_random_name(prefix=new_param_prefix, length=24)
+        self.kwargs.update({
+            'config_store_name': enabled_store
+        })
+
+        self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --public-network-access Enabled --retention-days {retention_days}',
+                 checks=[self.check('name', '{config_store_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('resourceGroup', resource_group),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('publicNetworkAccess', 'Enabled')])
+
+        # Test update with --public-network-access Disabled
+        self.cmd('appconfig update -n {config_store_name} -g {rg} --public-network-access Disabled',
+                 checks=[self.check('name', '{config_store_name}'),
+                         self.check('publicNetworkAccess', 'Disabled')])
+
+        # Test create with --public-network-access Disabled
+        disabled_store = self.create_random_name(prefix=new_param_prefix, length=24)
+        self.kwargs.update({
+            'config_store_name': disabled_store
+        })
+
+        self.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --public-network-access Disabled --retention-days {retention_days}',
+                 checks=[self.check('name', '{config_store_name}'),
+                         self.check('location', '{rg_loc}'),
+                         self.check('resourceGroup', resource_group),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('publicNetworkAccess', 'Disabled')])
+
+        # Test update with --public-network-access SecuredByPerimeter
+        self.cmd('appconfig update -n {config_store_name} -g {rg} --public-network-access SecuredByPerimeter',
+                 checks=[self.check('name', '{config_store_name}'),
+                         self.check('publicNetworkAccess', 'SecuredByPerimeter')])
+
+        # Test that --enable-public-network and --public-network-access cannot be used together
+        with self.assertRaisesRegex(MutuallyExclusiveArgumentError, "Cannot specify both '--enable-public-network' and '--public-network-access'"):
+            self.cmd('appconfig update -n {config_store_name} -g {rg} --enable-public-network true --public-network-access Disabled')
 
 
     @ResourceGroupPreparer(parameter_name_for_location='location')

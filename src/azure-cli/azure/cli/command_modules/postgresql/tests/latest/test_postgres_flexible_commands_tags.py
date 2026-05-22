@@ -117,7 +117,7 @@ class PostgreSQLFlexibleServerTagsMgmtScenarioTest(ScenarioTest):
                  checks=[_unique_tag_subset_check("")])
         
         # Confirm that primary server has at least one backup before testing restore with tags, as restore operation requires a backup to be present.
-        self.cmd('postgres flexible-server backup list -g {} -n {}'.format(resource_group, primary_server),
+        self.cmd('postgres flexible-server backup list -g {} -s {}'.format(resource_group, primary_server),
                  checks=[JMESPathCheck("length(@) >= `1`", True)])
 
         restore_time_utc = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')

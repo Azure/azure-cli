@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.testsdk import ScenarioTest, StorageAccountPreparer, ResourceGroupPreparer, record_only, live_only
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, live_only
 
 class AcrAgentPoolCommandsTests(ScenarioTest):
 

@@ -969,7 +969,7 @@ def _create_vmss(cmd, resource_group_name, cluster_name, cluster, node_type_name
         json_data = json.loads(
             '{"storageAccountName": "", "storageAccountKey": "", "storageAccountEndPoint": ""}')
         json_data['storageAccountName'] = diagnostics_account
-        json_data['storageAccountKey'] = list_results.keys[0].value
+        json_data['storageAccountKey'] = list_results.keys_property[0].value
         json_data['storageAccountEndPoint'] = "https://core.windows.net/"
         diagnostics_ext.protected_settings = json_data
 
@@ -992,8 +992,8 @@ def _create_vmss(cmd, resource_group_name, cluster_name, cluster, node_type_name
     json_data = json.loads(
         '{"StorageAccountKey1": "", "StorageAccountKey2": ""}')
     fabric_ext.protected_settings = json_data
-    fabric_ext.protected_settings['StorageAccountKey1'] = list_results.keys[0].value
-    fabric_ext.protected_settings['StorageAccountKey2'] = list_results.keys[1].value
+    fabric_ext.protected_settings['StorageAccountKey1'] = list_results.keys_property[0].value
+    fabric_ext.protected_settings['StorageAccountKey2'] = list_results.keys_property[1].value
 
     extensions = [fabric_ext]
     if diagnostics_ext:
