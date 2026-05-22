@@ -1859,6 +1859,20 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
                  checks=[JMESPathCheck('accessTier', 'Cold')])
 
     @ResourceGroupPreparer(location='eastus')
+    def test_storage_account_smart_tier(self, resource_group):
+        self.kwargs.update({
+            'sastoragesmart': self.create_random_name('sa', 24)
+        })
+        # Smart tier
+        self.cmd('az storage account create -n {sastoragesmart} -g {rg} --sku Standard_ZRS '
+                 '--access-tier Smart',
+                 checks=[JMESPathCheck('accessTier', 'Smart')])
+        self.cmd('az storage account update --access-tier Cool -n {sastoragesmart} -g {rg} -y',
+                 checks=[JMESPathCheck('accessTier', 'Cool')])
+        self.cmd('az storage account update --access-tier Smart -n {sastoragesmart} -g {rg} -y',
+                 checks=[JMESPathCheck('accessTier', 'Smart')])
+
+    @ResourceGroupPreparer(location='eastus')
     def test_storage_account_smb_oauth(self, resource_group):
         self.kwargs.update({
             'sasmboauth': self.create_random_name('sa', 24),
