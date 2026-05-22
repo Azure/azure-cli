@@ -2789,6 +2789,9 @@ long-summary: |
     `--command` is split using shell-style quoting and forwarded to the Bicep CLI verbatim.
     When the forwarded command itself starts with `--` (for example `--version`), use the
     `--command=<value>` form so the CLI parser does not mistake the value for another option.
+
+    Because the value is forwarded to the Bicep CLI without validation, do not pass strings
+    derived from untrusted input.
 examples:
   - name: Forward a build command to the Bicep CLI.
     text: az bicep run --command "build main.bicep"

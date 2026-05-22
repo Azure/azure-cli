@@ -5671,8 +5671,8 @@ class BicepLintTest(LiveScenarioTest):
 
 
 class BicepSnapshotTest(LiveScenarioTest):
-    def setup(self):
-        super().setup()
+    def setUp(self):
+        super().setUp()
         self.cmd('az bicep uninstall')
 
     def tearDown(self):
@@ -5700,8 +5700,8 @@ class BicepSnapshotTest(LiveScenarioTest):
 
 
 class BicepRunTest(LiveScenarioTest):
-    def setup(self):
-        super().setup()
+    def setUp(self):
+        super().setUp()
         self.cmd('az bicep uninstall')
 
     def tearDown(self):

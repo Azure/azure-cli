@@ -23,7 +23,7 @@ from azure.mgmt.resource.resources.models import GenericResource
 from azure.mgmt.resource.deployments.models import DeploymentMode
 import azure.mgmt.resource.deploymentstacks.models as StackModels
 
-from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueError, ResourceNotFoundError
+from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueError, ResourceNotFoundError, ValidationError
 from azure.cli.core.parser import IncorrectUsageError
 from azure.cli.core.util import get_file_json, read_file_content, shell_safe_json_parse, sdk_no_wait
 from azure.cli.core.commands import LongRunningOperation
@@ -4608,11 +4608,16 @@ def snapshot_bicep_file(cmd, file, mode=None, tenant_id=None, subscription_id=No
         if output:
             print(output)
     else:
-        logger.error("az bicep snapshot could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version)
+        raise ValidationError(
+            f"az bicep snapshot could not be executed with the current version of Bicep CLI. "
+            f"Please upgrade Bicep CLI to v{minimum_supported_version} or later."
+        )
 
 
 def run_bicep_cli_passthrough(cmd, command_string):
     import shlex
+
+    ensure_bicep_installation(cmd.cli_ctx, stdout=False)
 
     # Use non-POSIX mode so that backslashes in Windows paths are preserved.
     # In non-POSIX mode, shlex retains the surrounding quotes on quoted tokens,

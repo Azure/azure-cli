@@ -366,21 +366,20 @@ class TestBicepSnapshot(unittest.TestCase):
             ],
         )
 
-    @mock.patch("azure.cli.command_modules.resource.custom.logger.error")
     @mock.patch("azure.cli.command_modules.resource.custom.run_bicep_command")
     @mock.patch("azure.cli.command_modules.resource.custom.bicep_version_greater_than_or_equal_to")
     @mock.patch("azure.cli.command_modules.resource.custom.ensure_bicep_installation")
     def test_snapshot_bicep_file_errors_when_bicep_too_old(
-        self, ensure_bicep_installation_mock, bicep_version_check_mock, run_bicep_command_mock, logger_error_mock
+        self, ensure_bicep_installation_mock, bicep_version_check_mock, run_bicep_command_mock
     ):
+        from azure.cli.core.azclierror import ValidationError
+
         bicep_version_check_mock.return_value = False
 
-        snapshot_bicep_file(self.cmd, "main.bicepparam")
+        with self.assertRaisesRegex(ValidationError, "az bicep snapshot.*0\\.41\\.2"):
+            snapshot_bicep_file(self.cmd, "main.bicepparam")
 
         run_bicep_command_mock.assert_not_called()
-        logger_error_mock.assert_called_once()
-        self.assertIn("az bicep snapshot", logger_error_mock.call_args.args[0])
-        self.assertEqual(logger_error_mock.call_args.args[1], "0.41.2")
 
 
 class TestBicepRun(unittest.TestCase):
@@ -390,17 +389,20 @@ class TestBicepRun(unittest.TestCase):
         self.cmd.cli_ctx = self.cli_ctx
 
     @mock.patch("azure.cli.command_modules.resource.custom.run_bicep_command")
-    def test_run_bicep_cli_passthrough_forwards_split_args(self, run_bicep_command_mock):
+    @mock.patch("azure.cli.command_modules.resource.custom.ensure_bicep_installation")
+    def test_run_bicep_cli_passthrough_forwards_split_args(self, ensure_bicep_installation_mock, run_bicep_command_mock):
         run_bicep_command_mock.return_value = ""
 
         run_bicep_cli_passthrough(self.cmd, "build main.bicep --stdout")
 
+        ensure_bicep_installation_mock.assert_called_once_with(self.cli_ctx, stdout=False)
         run_bicep_command_mock.assert_called_once_with(
             self.cli_ctx, ["build", "main.bicep", "--stdout"]
         )
 
     @mock.patch("azure.cli.command_modules.resource.custom.run_bicep_command")
-    def test_run_bicep_cli_passthrough_preserves_quoted_args(self, run_bicep_command_mock):
+    @mock.patch("azure.cli.command_modules.resource.custom.ensure_bicep_installation")
+    def test_run_bicep_cli_passthrough_preserves_quoted_args(self, ensure_bicep_installation_mock, run_bicep_command_mock):
         run_bicep_command_mock.return_value = ""
 
         run_bicep_cli_passthrough(self.cmd, 'build "path with spaces/main.bicep"')
@@ -410,7 +412,8 @@ class TestBicepRun(unittest.TestCase):
         )
 
     @mock.patch("azure.cli.command_modules.resource.custom.run_bicep_command")
-    def test_run_bicep_cli_passthrough_preserves_windows_path_backslashes(self, run_bicep_command_mock):
+    @mock.patch("azure.cli.command_modules.resource.custom.ensure_bicep_installation")
+    def test_run_bicep_cli_passthrough_preserves_windows_path_backslashes(self, ensure_bicep_installation_mock, run_bicep_command_mock):
         run_bicep_command_mock.return_value = ""
 
         # Windows paths use backslashes which collide with POSIX shell escape semantics.
@@ -422,7 +425,8 @@ class TestBicepRun(unittest.TestCase):
         )
 
     @mock.patch("azure.cli.command_modules.resource.custom.run_bicep_command")
-    def test_run_bicep_cli_passthrough_raises_when_command_empty(self, run_bicep_command_mock):
+    @mock.patch("azure.cli.command_modules.resource.custom.ensure_bicep_installation")
+    def test_run_bicep_cli_passthrough_raises_when_command_empty(self, ensure_bicep_installation_mock, run_bicep_command_mock):
         with self.assertRaisesRegex(InvalidArgumentValueError, "--command must not be empty."):
             run_bicep_cli_passthrough(self.cmd, "   ")
 
