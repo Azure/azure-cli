@@ -4644,34 +4644,30 @@ class PolicyScenarioTest(ScenarioTest):
         cmd = self.cmdstring('policy definition list', management_group, subscription)
         self.cmd(cmd, checks=self.check("length([?name=='{pn}'])", 0))
 
-    def _versioned_assignment_at_scope(self, policy_id, version, scope=None, resource_group=None):
-        from azure.cli.core.azclierror import ArgumentUsageError  # noqa: F401  # imported for symmetry
-
-        curr_dir = os.path.dirname(os.path.realpath(__file__))
-        self.kwargs.update({
-            'pol': policy_id,
-            'ver_assign': version,
-            'pan': self.create_random_name('cli-test-polassg', 24),
-            'padn': self.create_random_name('test_assignment', 20),
-            'pa_params': os.path.join(curr_dir, 'sample_policy_param.json').replace('\\', '\\\\'),
-        })
-
-        if scope is not None:
-            self.kwargs['scope'] = scope
-            self.cmd('policy assignment create --policy {pol} --definition-version {ver_assign} '
-                     '-n {pan} --display-name {padn} --params "{pa_params}" --scope {scope}', checks=[
-                         self.check('name', '{pan}'),
-                         self.check('definitionVersion', '{ver_assign}'),
-                     ])
-            self.cmd('policy assignment delete -n {pan} --scope {scope}')
+    def _validate_assignment_expand_at_scope(self, scoped, resource_group=None):
+        if scoped:
+            target = '-n {pan} --scope {scope}'
         else:
-            self.kwargs['rg_for_assign'] = resource_group
-            self.cmd('policy assignment create --policy {pol} --definition-version {ver_assign} '
-                     '-n {pan} --display-name {padn} --params "{pa_params}" -g {rg_for_assign}', checks=[
-                         self.check('name', '{pan}'),
-                         self.check('definitionVersion', '{ver_assign}'),
-                     ])
-            self.cmd('policy assignment delete -n {pan} -g {rg_for_assign}')
+            self.kwargs['rg_for_show'] = resource_group
+            target = '-n {pan} -g {rg_for_show}'
+
+        self.cmd('policy assignment show ' + target, checks=[
+            self.not_exists('effectiveDefinitionVersion'),
+            self.not_exists('latestDefinitionVersion'),
+        ])
+        self.cmd('policy assignment show ' + target + ' --expand effectiveDefinitionVersion', checks=[
+            self.check('effectiveDefinitionVersion', '{ver_old}'),
+            self.not_exists('latestDefinitionVersion'),
+        ])
+        self.cmd('policy assignment show ' + target + ' --expand latestDefinitionVersion', checks=[
+            self.not_exists('effectiveDefinitionVersion'),
+            self.check('latestDefinitionVersion', '{ver_new}'),
+        ])
+        self.cmd('policy assignment show ' + target +
+                 ' --expand effectiveDefinitionVersion,latestDefinitionVersion', checks=[
+            self.check('effectiveDefinitionVersion', '{ver_old}'),
+            self.check('latestDefinitionVersion', '{ver_new}'),
+        ])
 
     def resource_policy_definition_version_operations(self, resource_group, management_group=None, subscription=None):
         from azure.cli.core.azclierror import ArgumentUsageError
@@ -4744,20 +4740,44 @@ class PolicyScenarioTest(ScenarioTest):
             self.cmd(cmd)
 
         # assign the policy at the older custom version
-        ver_assign = self.kwargs['ver_assign']
+        self.kwargs.update({
+            'pan': self.create_random_name('cli-test-polassg', 24),
+            'padn': self.create_random_name('test_assignment', 20),
+            'pa_params': os.path.join(curr_dir, 'sample_policy_param.json').replace('\\', '\\\\'),
+        })
+
         if management_group:
             scope = '/providers/Microsoft.Management/managementGroups/{mg}'.format(mg=management_group)
             policy_id = '{scope}/providers/Microsoft.Authorization/policyDefinitions/{pn}'.format(
                 scope=scope, pn=self.kwargs['pn'])
-            self._versioned_assignment_at_scope(policy_id, ver_assign, scope=scope)
+            self.kwargs.update({'scope': scope, 'policy_id': policy_id})
+            self.cmd('policy assignment create --policy {policy_id} --definition-version {ver_assign} '
+                     '-n {pan} --display-name {padn} --params "{pa_params}" --scope {scope}', checks=[
+                         self.check('name', '{pan}'),
+                         self.check('definitionVersion', '{ver_assign}'),
+                     ])
+            self._validate_assignment_expand_at_scope(scoped=True)
+            self.cmd('policy assignment delete -n {pan} --scope {scope}')
         elif subscription:
             scope = '/subscriptions/{sub}'.format(sub=subscription)
             policy_id = '{scope}/providers/Microsoft.Authorization/policyDefinitions/{pn}'.format(
                 scope=scope, pn=self.kwargs['pn'])
-            self._versioned_assignment_at_scope(policy_id, ver_assign, scope=scope)
+            self.kwargs.update({'scope': scope, 'policy_id': policy_id})
+            self.cmd('policy assignment create --policy {policy_id} --definition-version {ver_assign} '
+                     '-n {pan} --display-name {padn} --params "{pa_params}" --scope {scope}', checks=[
+                         self.check('name', '{pan}'),
+                         self.check('definitionVersion', '{ver_assign}'),
+                     ])
+            self._validate_assignment_expand_at_scope(scoped=True)
+            self.cmd('policy assignment delete -n {pan} --scope {scope}')
         else:
-            self._versioned_assignment_at_scope(self.kwargs['pn'], ver_assign,
-                                                resource_group=resource_group)
+            self.cmd('policy assignment create --policy {pn} --definition-version {ver_assign} '
+                     '-n {pan} --display-name {padn} --params "{pa_params}" -g {rg}', checks=[
+                         self.check('name', '{pan}'),
+                         self.check('definitionVersion', '{ver_assign}'),
+                     ])
+            self._validate_assignment_expand_at_scope(scoped=False, resource_group=resource_group)
+            self.cmd('policy assignment delete -n {pan} -g {rg}')
 
         # delete the older version
         cmd = self.cmdstring('policy definition version delete -n {pn} --version {ver_old} --yes',
@@ -4885,6 +4905,7 @@ class PolicyScenarioTest(ScenarioTest):
                          '-n {pan} --display-name {padn} --scope {scope}', checks=[
                              self.check('definitionVersion', '{ver_assign}'),
                          ])
+                self._validate_assignment_expand_at_scope(scoped=True)
                 self.cmd('policy assignment delete -n {pan} --scope {scope}')
             elif subscription:
                 scope = '/subscriptions/{sub}'.format(sub=subscription)
@@ -4898,12 +4919,14 @@ class PolicyScenarioTest(ScenarioTest):
                          '-n {pan} --display-name {padn} --scope {scope}', checks=[
                              self.check('definitionVersion', '{ver_assign}'),
                          ])
+                self._validate_assignment_expand_at_scope(scoped=True)
                 self.cmd('policy assignment delete -n {pan} --scope {scope}')
             else:
                 self.cmd('policy assignment create -d {psn} --definition-version {ver_assign} '
                          '-n {pan} --display-name {padn} -g {rg}', checks=[
                              self.check('definitionVersion', '{ver_assign}'),
                          ])
+                self._validate_assignment_expand_at_scope(scoped=False, resource_group=resource_group)
                 self.cmd('policy assignment delete -n {pan} -g {rg}')
 
             # delete the older version
@@ -4981,6 +5004,66 @@ class PolicyScenarioTest(ScenarioTest):
                              'This test requires a subscription other than that of the current context')
 
         self.resource_policy_set_definition_version_operations(resource_group, None, other_sub_id)
+
+    @ResourceGroupPreparer(name_prefix='cli_test_policy_metadata')
+    @AllowLargeResponse(8192)
+    def test_resource_policy_metadata(self, resource_group):
+        # Validate the different supported forms of the --metadata argument on
+        # policy definition create/update: legacy single key=value shorthand,
+        # legacy multi key=value shorthand (space-separated), AAZ full
+        # shorthand ('{k:v,...}'), JSON string, and @file.json reference.
+        import json
+        import tempfile
+
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'pn': self.create_random_name('cli-test-meta', 30),
+            'pdn': self.create_random_name('test_policy_metadata', 30),
+            'rf': os.path.join(curr_dir, 'sample_policy_rule.json').replace('\\', '\\\\'),
+            'pdf': os.path.join(curr_dir, 'sample_policy_param_def.json').replace('\\', '\\\\'),
+        })
+
+        # legacy single key=value shorthand
+        self.cmd('policy definition create -n {pn} --rules "{rf}" --params "{pdf}" '
+                 '--display-name {pdn} --metadata category=form1', checks=[
+                     self.check('name', '{pn}'),
+                     self.check('metadata.category', 'form1'),
+                 ])
+
+        # legacy multi key=value shorthand (space-separated, quoted)
+        self.cmd('policy definition update -n {pn} --metadata "category=form2 owner=cli"', checks=[
+            self.check('metadata.category', 'form2'),
+            self.check('metadata.owner', 'cli'),
+        ])
+
+        # legacy full shorthand
+        self.cmd('policy definition update -n {pn} --metadata "{{category:form3,owner:aaz}}"', checks=[
+            self.check('metadata.category', 'form3'),
+            self.check('metadata.owner', 'aaz'),
+        ])
+
+        # JSON string
+        self.cmd('policy definition update -n {pn} '
+                 '--metadata \'{{"category":"form4","owner":"json"}}\'', checks=[
+                     self.check('metadata.category', 'form4'),
+                     self.check('metadata.owner', 'json'),
+                 ])
+
+        # @file.json reference
+        meta_file = tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False)
+        try:
+            json.dump({'category': 'form5', 'owner': 'file'}, meta_file)
+            meta_file.close()
+            self.kwargs['meta_file'] = meta_file.name.replace('\\', '\\\\')
+            self.cmd('policy definition update -n {pn} --metadata "@{meta_file}"', checks=[
+                self.check('metadata.category', 'form5'),
+                self.check('metadata.owner', 'file'),
+            ])
+        finally:
+            os.unlink(meta_file.name)
+
+        # cleanup
+        self.cmd('policy definition delete -n {pn}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_policy_external_evaluation')
     @AllowLargeResponse(8192)
