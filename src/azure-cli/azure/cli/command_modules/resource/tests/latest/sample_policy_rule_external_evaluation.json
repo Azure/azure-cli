@@ -1,0 +1,17 @@
+{
+	"if": {
+		"allOf": [
+			{
+				"field": "location",
+		        "notIn": "[parameters('allowedLocations')]"
+			},
+			{
+				"value": "[claims().isValid]",
+				"equals": false
+			}
+		]
+	},
+	"then": {
+		"effect": "deny"
+	}
+}

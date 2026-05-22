@@ -221,7 +221,7 @@ def load_command_table(self, _):
         self.command_table['policy exemption list'] = PolicyExemptionList(loader=self)
         self.command_table['policy exemption show'] = PolicyExemptionShow(loader=self)
         self.command_table['policy exemption update'] = PolicyExemptionUpdate(loader=self)
-        
+
     with self.command_group('policy set-definition'):
         from .policy import PolicySetDefinitionCreate, PolicySetDefinitionDelete, PolicySetDefinitionList, PolicySetDefinitionShow, PolicySetDefinitionUpdate
         self.command_table['policy set-definition create'] = PolicySetDefinitionCreate(loader=self)

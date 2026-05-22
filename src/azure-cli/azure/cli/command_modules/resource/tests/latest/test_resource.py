@@ -4644,6 +4644,437 @@ class PolicyScenarioTest(ScenarioTest):
         cmd = self.cmdstring('policy definition list', management_group, subscription)
         self.cmd(cmd, checks=self.check("length([?name=='{pn}'])", 0))
 
+    def _versioned_assignment_at_scope(self, policy_id, version, scope=None, resource_group=None):
+        from azure.cli.core.azclierror import ArgumentUsageError  # noqa: F401  # imported for symmetry
+
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'pol': policy_id,
+            'ver_assign': version,
+            'pan': self.create_random_name('cli-test-polassg', 24),
+            'padn': self.create_random_name('test_assignment', 20),
+            'pa_params': os.path.join(curr_dir, 'sample_policy_param.json').replace('\\', '\\\\'),
+        })
+
+        if scope is not None:
+            self.kwargs['scope'] = scope
+            self.cmd('policy assignment create --policy {pol} --definition-version {ver_assign} '
+                     '-n {pan} --display-name {padn} --params "{pa_params}" --scope {scope}', checks=[
+                         self.check('name', '{pan}'),
+                         self.check('definitionVersion', '{ver_assign}'),
+                     ])
+            self.cmd('policy assignment delete -n {pan} --scope {scope}')
+        else:
+            self.kwargs['rg_for_assign'] = resource_group
+            self.cmd('policy assignment create --policy {pol} --definition-version {ver_assign} '
+                     '-n {pan} --display-name {padn} --params "{pa_params}" -g {rg_for_assign}', checks=[
+                         self.check('name', '{pan}'),
+                         self.check('definitionVersion', '{ver_assign}'),
+                     ])
+            self.cmd('policy assignment delete -n {pan} -g {rg_for_assign}')
+
+    def resource_policy_definition_version_operations(self, resource_group, management_group=None, subscription=None):
+        from azure.cli.core.azclierror import ArgumentUsageError
+
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'pn': self.create_random_name('cli-test-pdv', 30),
+            'pdn': self.create_random_name('test_policy', 20),
+            'rf': os.path.join(curr_dir, 'sample_policy_rule.json').replace('\\', '\\\\'),
+            'pdf': os.path.join(curr_dir, 'sample_policy_param_def.json').replace('\\', '\\\\'),
+            'ver_base': '1.0.0',
+            'ver_new': '2.0.0',
+            'ver_old': '1.1.0',
+            'ver_assign': '1.*',
+        })
+        if management_group:
+            self.kwargs.update({'mg': management_group})
+        if subscription:
+            self.kwargs.update({'sub': subscription})
+
+        # create base policy definition at version 1.0.0
+        cmd = self.cmdstring('policy definition create -n {pn} --rules "{rf}" --params "{pdf}" '
+                             '--display-name {pdn} --version {ver_base}',
+                             management_group, subscription)
+        self.cmd(cmd, checks=[
+            self.check('name', '{pn}'),
+            self.check('version', '{ver_base}'),
+            self.check("length(versions[?@=='{ver_base}'])", 1),
+        ])
+
+        # create a newer version (2.0.0) via 'policy definition create'
+        cmd = self.cmdstring('policy definition create -n {pn} --rules "{rf}" --params "{pdf}" '
+                             '--display-name {pdn} --version {ver_new}',
+                             management_group, subscription)
+        self.cmd(cmd, checks=[
+            self.check('version', '{ver_new}'),
+            self.check("length(versions[?@=='{ver_base}'])", 1),
+            self.check("length(versions[?@=='{ver_new}'])", 1),
+        ])
+
+        # create an older version (1.1.0) via 'policy definition version create'
+        cmd = self.cmdstring('policy definition version create -n {pn} --version {ver_old} '
+                             '--rules "{rf}" --params "{pdf}" --display-name {pdn} '
+                             '--description "v1.1.0 description" --metadata category=test',
+                             management_group, subscription)
+        self.cmd(cmd, checks=[
+            self.check('name', '{ver_old}'),
+            self.check('description', 'v1.1.0 description'),
+            self.check('metadata.category', 'test'),
+        ])
+
+        cmd = self.cmdstring('policy definition version show -n {pn} --version {ver_old}',
+                             management_group, subscription)
+        self.cmd(cmd, checks=self.check('name', '{ver_old}'))
+
+        cmd = self.cmdstring('policy definition version list -n {pn}', management_group, subscription)
+        self.cmd(cmd, checks=[
+            self.check("length([?name=='{ver_base}'])", 1),
+            self.check("length([?name=='{ver_new}'])", 1),
+            self.check("length([?name=='{ver_old}'])", 1),
+        ])
+
+        # 'policy definition version update' is intentionally disabled in policy.py
+        expected_msg = (r"'az policy definition version update' is not supported\. "
+                        r"Policy definition versions are immutable\. "
+                        r"Use 'az policy definition version create' to publish a new version\.")
+        cmd = self.cmdstring('policy definition version update -n {pn} --version {ver_old} '
+                             '--description "should fail"', management_group, subscription)
+        with self.assertRaisesRegex(ArgumentUsageError, expected_msg):
+            self.cmd(cmd)
+
+        # assign the policy at the older custom version
+        ver_assign = self.kwargs['ver_assign']
+        if management_group:
+            scope = '/providers/Microsoft.Management/managementGroups/{mg}'.format(mg=management_group)
+            policy_id = '{scope}/providers/Microsoft.Authorization/policyDefinitions/{pn}'.format(
+                scope=scope, pn=self.kwargs['pn'])
+            self._versioned_assignment_at_scope(policy_id, ver_assign, scope=scope)
+        elif subscription:
+            scope = '/subscriptions/{sub}'.format(sub=subscription)
+            policy_id = '{scope}/providers/Microsoft.Authorization/policyDefinitions/{pn}'.format(
+                scope=scope, pn=self.kwargs['pn'])
+            self._versioned_assignment_at_scope(policy_id, ver_assign, scope=scope)
+        else:
+            self._versioned_assignment_at_scope(self.kwargs['pn'], ver_assign,
+                                                resource_group=resource_group)
+
+        # delete the older version
+        cmd = self.cmdstring('policy definition version delete -n {pn} --version {ver_old} --yes',
+                             management_group, subscription)
+        self.cmd(cmd)
+        if not self.in_recording:
+            time.sleep(10)
+        cmd = self.cmdstring('policy definition version list -n {pn}', management_group, subscription)
+        self.cmd(cmd, checks=[
+            self.check("length([?name=='{ver_old}'])", 0),
+            self.check("length([?name=='{ver_base}'])", 1),
+            self.check("length([?name=='{ver_new}'])", 1),
+        ])
+
+        # delete the base definition
+        cmd = self.cmdstring('policy definition delete -n {pn}', management_group, subscription)
+        self.cmd(cmd)
+        if not self.in_recording:
+            time.sleep(10)
+
+    def resource_policy_set_definition_version_operations(self, resource_group, management_group=None, subscription=None):
+        import tempfile
+        from azure.cli.core.azclierror import ArgumentUsageError
+
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'pn': self.create_random_name('cli-test-policy', 30),
+            'pdn': self.create_random_name('test_policy', 20),
+            'psn': self.create_random_name('cli-test-policyset', 30),
+            'psdn': self.create_random_name('test_policyset', 20),
+            'rf': os.path.join(curr_dir, 'sample_policy_rule.json').replace('\\', '\\\\'),
+            'pdf': os.path.join(curr_dir, 'sample_policy_param_def.json').replace('\\', '\\\\'),
+            'ver_base': '1.0.0',
+            'ver_new': '2.0.0',
+            'ver_old': '1.1.0',
+            'ver_assign': '1.*',
+        })
+        if management_group:
+            self.kwargs.update({'mg': management_group})
+        if subscription:
+            self.kwargs.update({'sub': subscription})
+
+        # create base policy definition (needed by the set-definition)
+        cmd = self.cmdstring('policy definition create -n {pn} --rules "{rf}" --params "{pdf}" '
+                             '--display-name {pdn} --version {ver_new}', management_group, subscription)
+        policy = self.cmd(cmd).get_output_in_json()
+
+        defs_file = tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False)
+        json.dump([{
+            "policyDefinitionId": policy['id'],
+            "definitionVersion": "2.*.*",
+            "parameters": {"allowedLocations": {"value": ["eastus"]}},
+        }], defs_file)
+        defs_file.close()
+        self.kwargs['psf'] = defs_file.name.replace('\\', '\\\\')
+
+        try:
+            # create base policy set-definition at version 1.0.0
+            cmd = self.cmdstring('policy set-definition create -n {psn} --definitions @"{psf}" '
+                                 '--display-name {psdn} --version {ver_base}',
+                                 management_group, subscription)
+            self.cmd(cmd, checks=[
+                self.check('name', '{psn}'),
+                self.check('version', '{ver_base}'),
+                self.check("length(versions[?@=='{ver_base}'])", 1),
+            ])
+
+            # create a newer version (2.0.0) via 'policy set-definition create'
+            cmd = self.cmdstring('policy set-definition create -n {psn} --definitions @"{psf}" '
+                                 '--display-name {psdn} --version {ver_new}',
+                                 management_group, subscription)
+            self.cmd(cmd, checks=[
+                self.check('version', '{ver_new}'),
+                self.check("length(versions[?@=='{ver_base}'])", 1),
+                self.check("length(versions[?@=='{ver_new}'])", 1),
+            ])
+
+            # create an older version (1.1.0) via 'policy set-definition version create'
+            cmd = self.cmdstring('policy set-definition version create -n {psn} --version {ver_old} '
+                                 '--definitions @"{psf}" --display-name {psdn} '
+                                 '--description "v1.1.0 description" --metadata category=test',
+                                 management_group, subscription)
+            self.cmd(cmd, checks=[
+                self.check('name', '{ver_old}'),
+                self.check('description', 'v1.1.0 description'),
+                self.check('metadata.category', 'test'),
+            ])
+
+            cmd = self.cmdstring('policy set-definition version show -n {psn} --version {ver_old}',
+                                 management_group, subscription)
+            self.cmd(cmd, checks=self.check('name', '{ver_old}'))
+
+            cmd = self.cmdstring('policy set-definition version list -n {psn}',
+                                 management_group, subscription)
+            self.cmd(cmd, checks=[
+                self.check("length([?name=='{ver_base}'])", 1),
+                self.check("length([?name=='{ver_new}'])", 1),
+                self.check("length([?name=='{ver_old}'])", 1),
+            ])
+
+            # 'policy set-definition version update' is intentionally disabled in policy.py
+            expected_msg = (r"'az policy set-definition version update' is not supported\. "
+                            r"Policy set-definition versions are immutable\. "
+                            r"Use 'az policy set-definition version create' to publish a new version\.")
+            cmd = self.cmdstring('policy set-definition version update -n {psn} --version {ver_old} '
+                                '--description "should fail"', management_group, subscription)
+            with self.assertRaisesRegex(ArgumentUsageError, expected_msg):
+                self.cmd(cmd)
+
+            # assign the set-definition at the older custom version
+            self.kwargs.update({
+                    'pan': self.create_random_name('cli-test-polassg', 24),
+                    'padn': self.create_random_name('test_assignment', 20),
+                })
+
+            if management_group:
+                scope = '/providers/Microsoft.Management/managementGroups/{mg}'.format(mg=management_group)
+                set_def_id = '{scope}/providers/Microsoft.Authorization/policySetDefinitions/{psn}'.format(
+                    scope=scope, psn=self.kwargs['psn'])
+                self.kwargs.update({
+                    'scope': scope,
+                    'set_def_id': set_def_id,
+                })
+                self.cmd('policy assignment create -d {set_def_id} --definition-version {ver_assign} '
+                         '-n {pan} --display-name {padn} --scope {scope}', checks=[
+                             self.check('definitionVersion', '{ver_assign}'),
+                         ])
+                self.cmd('policy assignment delete -n {pan} --scope {scope}')
+            elif subscription:
+                scope = '/subscriptions/{sub}'.format(sub=subscription)
+                set_def_id = '{scope}/providers/Microsoft.Authorization/policySetDefinitions/{psn}'.format(
+                    scope=scope, psn=self.kwargs['psn'])
+                self.kwargs.update({
+                    'scope': scope,
+                    'set_def_id': set_def_id,
+                })
+                self.cmd('policy assignment create -d {set_def_id} --definition-version {ver_assign} '
+                         '-n {pan} --display-name {padn} --scope {scope}', checks=[
+                             self.check('definitionVersion', '{ver_assign}'),
+                         ])
+                self.cmd('policy assignment delete -n {pan} --scope {scope}')
+            else:
+                self.cmd('policy assignment create -d {psn} --definition-version {ver_assign} '
+                         '-n {pan} --display-name {padn} -g {rg}', checks=[
+                             self.check('definitionVersion', '{ver_assign}'),
+                         ])
+                self.cmd('policy assignment delete -n {pan} -g {rg}')
+
+            # delete the older version
+            cmd = self.cmdstring('policy set-definition version delete -n {psn} --version {ver_old} --yes',
+                                 management_group, subscription)
+            self.cmd(cmd)
+            if not self.in_recording:
+                time.sleep(10)
+            cmd = self.cmdstring('policy set-definition version list -n {psn}',
+                                 management_group, subscription)
+            self.cmd(cmd, checks=[
+                self.check("length([?name=='{ver_old}'])", 0),
+                self.check("length([?name=='{ver_base}'])", 1),
+                self.check("length([?name=='{ver_new}'])", 1),
+            ])
+
+            # delete the base version
+            cmd = self.cmdstring('policy set-definition delete -n {psn}',
+                                 management_group, subscription)
+            self.cmd(cmd)
+            if not self.in_recording:
+                time.sleep(10)
+            cmd = self.cmdstring('policy definition delete -n {pn}',
+                                 management_group, subscription)
+            self.cmd(cmd)
+            if not self.in_recording:
+                time.sleep(10)
+        finally:
+            os.remove(defs_file.name)
+
+    @ResourceGroupPreparer(name_prefix='cli_test_policy_definition_version')
+    @AllowLargeResponse(8192)
+    def test_resource_policy_version_default(self, resource_group):
+        self.resource_policy_definition_version_operations(resource_group)
+
+    @ResourceGroupPreparer(name_prefix='cli_test_policy_definition_version_mg')
+    @AllowLargeResponse(8192)
+    def test_resource_policy_version_management_group(self, resource_group):
+        management_group_name = 'PowershellTesting'
+        self.resource_policy_definition_version_operations(resource_group, management_group_name)
+
+    @ResourceGroupPreparer(name_prefix='cli_test_policy_definition_version_sub')
+    @AllowLargeResponse(8192)
+    def test_resource_policy_version_subscription_id(self, resource_group):
+        if not self.in_recording:
+            other_sub_id = '00000000-0000-0000-0000-000000000000'
+        else:
+            other_sub_id = 'e5a130f3-57fd-46b6-9c55-03d21a853935'
+            sub_id = get_subscription_id(self.cli_ctx)
+            self.assertFalse(sub_id == other_sub_id,
+                             'This test requires a subscription other than that of the current context')
+
+        self.resource_policy_definition_version_operations(resource_group, None, other_sub_id)
+
+    @ResourceGroupPreparer(name_prefix='cli_test_policy_set_definition_version')
+    @AllowLargeResponse(16384)
+    def test_resource_policyset_version_default(self, resource_group):
+        self.resource_policy_set_definition_version_operations(resource_group)
+
+    @ResourceGroupPreparer(name_prefix='cli_test_policy_set_definition_version_mg')
+    @AllowLargeResponse(16384)
+    def test_resource_policyset_version_management_group(self, resource_group):
+        management_group_name = 'PowershellTesting'
+        self.resource_policy_set_definition_version_operations(resource_group, management_group_name)
+
+    @ResourceGroupPreparer(name_prefix='cli_test_policy_set_definition_version_sub')
+    @AllowLargeResponse(16384)
+    def test_resource_policyset_version_subscription_id(self, resource_group):
+        if not self.in_recording:
+            other_sub_id = '00000000-0000-0000-0000-000000000000'
+        else:
+            other_sub_id = 'e5a130f3-57fd-46b6-9c55-03d21a853935'
+            sub_id = get_subscription_id(self.cli_ctx)
+            self.assertFalse(sub_id == other_sub_id,
+                             'This test requires a subscription other than that of the current context')
+
+        self.resource_policy_set_definition_version_operations(resource_group, None, other_sub_id)
+
+    @ResourceGroupPreparer(name_prefix='cli_test_policy_external_evaluation')
+    @AllowLargeResponse(8192)
+    def test_resource_policy_external_evaluation(self, resource_group):
+        import tempfile
+
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update({
+            'pn': self.create_random_name('cli-test-extpol', 30),
+            'pdn': self.create_random_name('test_external_policy', 30),
+            'rf': os.path.join(curr_dir, 'sample_policy_rule_external_evaluation.json').replace('\\', '\\\\'),
+            'pdf': os.path.join(curr_dir, 'sample_policy_param_def.json').replace('\\', '\\\\'),
+            'role_id': '/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c',
+        })
+
+        ees_create = {
+            "missingTokenAction": "Deny",
+            "resultLifespan": "PT1H",
+            "roleDefinitionIds": [self.kwargs['role_id']],
+            "endpointSettings": {"kind": "CoinFlip"}
+        }
+        ees_file = tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False)
+        json.dump(ees_create, ees_file)
+        ees_file.close()
+        self.kwargs['ees'] = ees_file.name.replace('\\', '\\\\')
+
+        ees_update = {
+            "missingTokenAction": "Audit",
+            "resultLifespan": "PT30M",
+            "roleDefinitionIds": [self.kwargs['role_id']],
+            "endpointSettings": {"kind": "CoinFlip"}
+        }
+        ees_update_file = tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False)
+        json.dump(ees_update, ees_update_file)
+        ees_update_file.close()
+        self.kwargs['ees_update'] = ees_update_file.name.replace('\\', '\\\\')
+
+        self.kwargs.update({
+            'ver_new': '2.0.0',
+            'ver_old': '1.1.0',
+        })
+
+        try:
+            # create policy definition with external evaluation enforcement settings at version 2.0.0
+            self.cmd('policy definition create -n {pn} --rules "{rf}" --params "{pdf}" '
+                     '--display-name {pdn} --version {ver_new} '
+                     '--external-evaluation-enforcement-settings @"{ees}"', checks=[
+                         self.check('name', '{pn}'),
+                         self.check('version', '{ver_new}'),
+                         self.check('externalEvaluationEnforcementSettings.missingTokenAction', 'Deny'),
+                         self.check('externalEvaluationEnforcementSettings.resultLifespan', 'PT1H'),
+                         self.check('externalEvaluationEnforcementSettings.endpointSettings.kind', 'CoinFlip'),
+                         self.check('externalEvaluationEnforcementSettings.roleDefinitionIds[0]', '{role_id}')
+                     ])
+
+            # publish an older version (1.1.0) via 'policy definition version create'
+            self.cmd('policy definition version create -n {pn} --version {ver_old} '
+                     '--rules "{rf}" --params "{pdf}" --display-name {pdn} '
+                     '--external-evaluation-enforcement-settings @"{ees}"', checks=[
+                         self.check('name', '{ver_old}'),
+                         self.check('externalEvaluationEnforcementSettings.missingTokenAction', 'Deny'),
+                     ])
+
+            # show it and re-verify the current version is still 2.0.0
+            self.cmd('policy definition show -n {pn}', checks=[
+                self.check('version', '{ver_new}'),
+                self.check('externalEvaluationEnforcementSettings.missingTokenAction', 'Deny'),
+                self.check('externalEvaluationEnforcementSettings.endpointSettings.kind', 'CoinFlip'),
+            ])
+
+            # update the external evaluation settings; verify the 2.0.0 (current) version is updated
+            self.cmd('policy definition update -n {pn} '
+                     '--external-evaluation-enforcement-settings @"{ees_update}"', checks=[
+                         self.check('version', '{ver_new}'),
+                         self.check('externalEvaluationEnforcementSettings.missingTokenAction', 'Audit'),
+                         self.check('externalEvaluationEnforcementSettings.resultLifespan', 'PT30M'),
+                         self.check('externalEvaluationEnforcementSettings.endpointSettings.kind', 'CoinFlip'),
+                         self.check('externalEvaluationEnforcementSettings.roleDefinitionIds[0]', '{role_id}')
+                     ])
+
+            # confirm the older 1.1.0 version still has the original 'Deny' setting
+            self.cmd('policy definition version show -n {pn} --version {ver_old}', checks=[
+                self.check('name', '{ver_old}'),
+                self.check('externalEvaluationEnforcementSettings.missingTokenAction', 'Deny'),
+            ])
+
+            # cleanup
+            self.cmd('policy definition delete -n {pn}')
+            if not self.in_recording:
+                time.sleep(10)
+        finally:
+            os.remove(ees_file.name)
+            os.remove(ees_update_file.name)
+
     def resource_policyexemption_operations(self, resource_group, management_group=None, subscription=None):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
 

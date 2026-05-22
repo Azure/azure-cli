@@ -1,0 +1,450 @@
+interactions:
+- request:
+    body: '{"properties": {"displayName": "test_external_policy000003", "externalEvaluationEnforcementSettings":
+      {"endpointSettings": {"kind": "CoinFlip"}, "missingTokenAction": "Deny", "resultLifespan":
+      "PT1H", "roleDefinitionIds": ["/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"]},
+      "mode": "Indexed", "parameters": {"allowedLocations": {"allowedValues": [null,
+      [], ["australiaeast", "eastus", "japaneast", "westus"], ["eastus"]], "metadata":
+      {"description": "The list of locations that can be specified when deploying
+      resources", "strongType": "location", "displayName": "Allowed locations"}, "type":
+      "Array"}}, "policyRule": {"if": {"allOf": [{"field": "location", "notIn": "[parameters(''allowedLocations'')]"},
+      {"value": "[claims().isValid]", "equals": false}]}, "then": {"effect": "deny"}},
+      "version": "2.0.0"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy definition create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '847'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n --rules --params --display-name --version --external-evaluation-enforcement-settings
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.13.13 (Windows-11-10.0.26200-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/cli-test-extpol000002?api-version=2025-11-01
+  response:
+    body:
+      string: '{"properties":{"displayName":"test_external_policy000003","policyType":"Custom","mode":"Indexed","metadata":{"createdBy":"638d92d9-ae3b-4f1d-be91-382dcc631f82","createdOn":"2026-05-21T21:49:37.3200973Z","updatedBy":null,"updatedOn":null},"version":"2.0.0","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        list of locations that can be specified when deploying resources","strongType":"location","displayName":"Allowed
+        locations"},"allowedValues":[null,[],["australiaeast","eastus","japaneast","westus"],["eastus"]]}},"policyRule":{"if":{"allOf":[{"field":"location","notIn":"[parameters(''allowedLocations'')]"},{"value":"[claims().isValid]","equals":false}]},"then":{"effect":"deny"}},"versions":["2.0.0"],"externalEvaluationEnforcementSettings":{"endpointSettings":{"kind":"CoinFlip"},"missingTokenAction":"Deny","resultLifespan":"PT1H","roleDefinitionIds":["/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"]}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/cli-test-extpol000002","type":"Microsoft.Authorization/policyDefinitions","name":"cli-test-extpol000002","systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-05-21T21:49:37.2765886Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-05-21T21:49:37.2765886Z"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1421'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 May 2026 21:49:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=638d92d9-ae3b-4f1d-be91-382dcc631f82/westus/71908410-fe76-4d23-b1bd-68825c0b60c1
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 772C1342309042D8AC3FA6B72B2A88C7 Ref B: MWH011020809023 Ref C: 2026-05-21T21:49:37Z'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: '{"properties": {"displayName": "test_external_policy000003", "externalEvaluationEnforcementSettings":
+      {"endpointSettings": {"kind": "CoinFlip"}, "missingTokenAction": "Deny", "resultLifespan":
+      "PT1H", "roleDefinitionIds": ["/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"]},
+      "mode": "Indexed", "parameters": {"allowedLocations": {"allowedValues": [null,
+      [], ["australiaeast", "eastus", "japaneast", "westus"], ["eastus"]], "metadata":
+      {"description": "The list of locations that can be specified when deploying
+      resources", "strongType": "location", "displayName": "Allowed locations"}, "type":
+      "Array"}}, "policyRule": {"if": {"allOf": [{"field": "location", "notIn": "[parameters(''allowedLocations'')]"},
+      {"value": "[claims().isValid]", "equals": false}]}, "then": {"effect": "deny"}},
+      "version": "1.1.0"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy definition version create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '847'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n --version --rules --params --display-name --external-evaluation-enforcement-settings
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.13.13 (Windows-11-10.0.26200-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/cli-test-extpol000002/versions/1.1.0?api-version=2025-11-01
+  response:
+    body:
+      string: '{"properties":{"displayName":"test_external_policy000003","policyType":"Custom","mode":"Indexed","metadata":{"createdBy":"638d92d9-ae3b-4f1d-be91-382dcc631f82","createdOn":"2026-05-21T21:49:38.5395402Z","updatedBy":null,"updatedOn":null},"version":"1.1.0","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        list of locations that can be specified when deploying resources","strongType":"location","displayName":"Allowed
+        locations"},"allowedValues":[null,[],["australiaeast","eastus","japaneast","westus"],["eastus"]]}},"policyRule":{"if":{"allOf":[{"field":"location","notIn":"[parameters(''allowedLocations'')]"},{"value":"[claims().isValid]","equals":false}]},"then":{"effect":"deny"}},"externalEvaluationEnforcementSettings":{"endpointSettings":{"kind":"CoinFlip"},"missingTokenAction":"Deny","resultLifespan":"PT1H","roleDefinitionIds":["/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"]}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/cli-test-extpol000002/versions/1.1.0","type":"Microsoft.Authorization/policyDefinitions/versions","name":"1.1.0","systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-05-21T21:49:38.5042264Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-05-21T21:49:38.5042264Z"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1408'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 May 2026 21:49:37 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=638d92d9-ae3b-4f1d-be91-382dcc631f82/westus2/c0d5c676-c497-41a0-aa71-7de27b6d0784
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 3D1831E1698A4E098AE819AA474F945E Ref B: MWH011020806023 Ref C: 2026-05-21T21:49:38Z'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy definition show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.13.13 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Authorization/policyDefinitions/cli-test-extpol000002?api-version=2025-11-01
+  response:
+    body:
+      string: '{"error":{"code":"PolicyDefinitionNotFound","message":"The policy definition
+        ''cli-test-extpol000002'' could not be found."}}'
+    headers:
+      cache-control:
+      - no-store, no-cache
+      content-length:
+      - '123'
+      content-type:
+      - application/json
+      date:
+      - Thu, 21 May 2026 21:49:38 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - ''
+      x-msedge-ref:
+      - 'Ref A: D8C1186F15C34864BD3C3D5851A76D74 Ref B: CO6AA3150217037 Ref C: 2026-05-21T21:49:39Z'
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy definition show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.13.13 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/cli-test-extpol000002?api-version=2025-11-01
+  response:
+    body:
+      string: '{"properties":{"displayName":"test_external_policy000003","policyType":"Custom","mode":"Indexed","metadata":{"createdBy":"638d92d9-ae3b-4f1d-be91-382dcc631f82","createdOn":"2026-05-21T21:49:37.3200973Z","updatedBy":null,"updatedOn":null},"version":"2.0.0","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        list of locations that can be specified when deploying resources","strongType":"location","displayName":"Allowed
+        locations"},"allowedValues":[null,[],["australiaeast","eastus","japaneast","westus"],["eastus"]]}},"policyRule":{"if":{"allOf":[{"field":"location","notIn":"[parameters(''allowedLocations'')]"},{"value":"[claims().isValid]","equals":false}]},"then":{"effect":"deny"}},"versions":["2.0.0","1.1.0"],"externalEvaluationEnforcementSettings":{"endpointSettings":{"kind":"CoinFlip"},"missingTokenAction":"Deny","resultLifespan":"PT1H","roleDefinitionIds":["/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"]}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/cli-test-extpol000002","type":"Microsoft.Authorization/policyDefinitions","name":"cli-test-extpol000002","systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-05-21T21:49:37.2765886Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-05-21T21:49:37.2765886Z"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1429'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 May 2026 21:49:39 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=638d92d9-ae3b-4f1d-be91-382dcc631f82/westus2/4c148de8-1f18-4f04-bf5f-a80b7f793173
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: AB6B0D9254B0449E8C5E6A1C6E3563E8 Ref B: MWH011020809060 Ref C: 2026-05-21T21:49:40Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy definition update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --external-evaluation-enforcement-settings
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.13.13 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/cli-test-extpol000002?api-version=2025-11-01
+  response:
+    body:
+      string: '{"properties":{"displayName":"test_external_policy000003","policyType":"Custom","mode":"Indexed","metadata":{"createdBy":"638d92d9-ae3b-4f1d-be91-382dcc631f82","createdOn":"2026-05-21T21:49:37.3200973Z","updatedBy":null,"updatedOn":null},"version":"2.0.0","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        list of locations that can be specified when deploying resources","strongType":"location","displayName":"Allowed
+        locations"},"allowedValues":[null,[],["australiaeast","eastus","japaneast","westus"],["eastus"]]}},"policyRule":{"if":{"allOf":[{"field":"location","notIn":"[parameters(''allowedLocations'')]"},{"value":"[claims().isValid]","equals":false}]},"then":{"effect":"deny"}},"versions":["2.0.0","1.1.0"],"externalEvaluationEnforcementSettings":{"endpointSettings":{"kind":"CoinFlip"},"missingTokenAction":"Deny","resultLifespan":"PT1H","roleDefinitionIds":["/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"]}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/cli-test-extpol000002","type":"Microsoft.Authorization/policyDefinitions","name":"cli-test-extpol000002","systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-05-21T21:49:37.2765886Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-05-21T21:49:37.2765886Z"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1429'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 May 2026 21:49:40 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=638d92d9-ae3b-4f1d-be91-382dcc631f82/westcentralus/ea839d0d-da69-4194-9c67-3415ad647ad1
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: FC61DA0773A945CB95BC610F9382EA12 Ref B: CO6AA3150219025 Ref C: 2026-05-21T21:49:40Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"displayName": "test_external_policy000003", "externalEvaluationEnforcementSettings":
+      {"endpointSettings": {"kind": "CoinFlip"}, "missingTokenAction": "Audit", "resultLifespan":
+      "PT30M", "roleDefinitionIds": ["/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"]},
+      "metadata": {"createdBy": "638d92d9-ae3b-4f1d-be91-382dcc631f82", "createdOn":
+      "2026-05-21T21:49:37.3200973Z", "updatedBy": null, "updatedOn": null}, "mode":
+      "Indexed", "parameters": {"allowedLocations": {"allowedValues": [null, [], ["australiaeast",
+      "eastus", "japaneast", "westus"], ["eastus"]], "metadata": {"description": "The
+      list of locations that can be specified when deploying resources", "strongType":
+      "location", "displayName": "Allowed locations"}, "type": "Array"}}, "policyRule":
+      {"if": {"allOf": [{"field": "location", "notIn": "[parameters(''allowedLocations'')]"},
+      {"value": "[claims().isValid]", "equals": false}]}, "then": {"effect": "deny"}},
+      "policyType": "Custom", "version": "2.0.0", "versions": ["2.0.0", "1.1.0"]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy definition update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1055'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n --external-evaluation-enforcement-settings
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.13.13 (Windows-11-10.0.26200-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/cli-test-extpol000002?api-version=2025-11-01
+  response:
+    body:
+      string: '{"properties":{"displayName":"test_external_policy000003","policyType":"Custom","mode":"Indexed","metadata":{"createdBy":"638d92d9-ae3b-4f1d-be91-382dcc631f82","createdOn":"2026-05-21T21:49:37.3200973Z","updatedBy":"638d92d9-ae3b-4f1d-be91-382dcc631f82","updatedOn":"2026-05-21T21:49:42.0176537Z"},"version":"2.0.0","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        list of locations that can be specified when deploying resources","strongType":"location","displayName":"Allowed
+        locations"},"allowedValues":[null,[],["australiaeast","eastus","japaneast","westus"],["eastus"]]}},"policyRule":{"if":{"allOf":[{"field":"location","notIn":"[parameters(''allowedLocations'')]"},{"value":"[claims().isValid]","equals":false}]},"then":{"effect":"deny"}},"versions":["2.0.0","1.1.0"],"externalEvaluationEnforcementSettings":{"endpointSettings":{"kind":"CoinFlip"},"missingTokenAction":"Audit","resultLifespan":"PT30M","roleDefinitionIds":["/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"]}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/cli-test-extpol000002","type":"Microsoft.Authorization/policyDefinitions","name":"cli-test-extpol000002","systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-05-21T21:49:37.2765886Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-05-21T21:49:41.9915742Z"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1491'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 May 2026 21:49:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=638d92d9-ae3b-4f1d-be91-382dcc631f82/westus2/055ce9e3-594f-445e-8dde-3cff50548f65
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: D2F148FEF4724C8D8D5931F25187E9A6 Ref B: CO6AA3150218045 Ref C: 2026-05-21T21:49:41Z'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy definition version show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --version
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.13.13 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/cli-test-extpol000002/versions/1.1.0?api-version=2025-11-01
+  response:
+    body:
+      string: '{"properties":{"displayName":"test_external_policy000003","policyType":"Custom","mode":"Indexed","metadata":{"createdBy":"638d92d9-ae3b-4f1d-be91-382dcc631f82","createdOn":"2026-05-21T21:49:38.5395402Z","updatedBy":null,"updatedOn":null},"version":"1.1.0","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        list of locations that can be specified when deploying resources","strongType":"location","displayName":"Allowed
+        locations"},"allowedValues":[null,[],["australiaeast","eastus","japaneast","westus"],["eastus"]]}},"policyRule":{"if":{"allOf":[{"field":"location","notIn":"[parameters(''allowedLocations'')]"},{"value":"[claims().isValid]","equals":false}]},"then":{"effect":"deny"}},"externalEvaluationEnforcementSettings":{"endpointSettings":{"kind":"CoinFlip"},"missingTokenAction":"Deny","resultLifespan":"PT1H","roleDefinitionIds":["/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"]}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/cli-test-extpol000002/versions/1.1.0","type":"Microsoft.Authorization/policyDefinitions/versions","name":"1.1.0","systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-05-21T21:49:38.5042264Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-05-21T21:49:38.5042264Z"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1408'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 May 2026 21:49:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=638d92d9-ae3b-4f1d-be91-382dcc631f82/centralus/9fa1d609-cb1a-4da1-9226-aa233692031d
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 4EE1F7BAD298416BB1CA45C4848CF3D0 Ref B: MWH011020808034 Ref C: 2026-05-21T21:49:42Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy definition delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.13.13 (Windows-11-10.0.26200-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/cli-test-extpol000002?api-version=2025-11-01
+  response:
+    body:
+      string: '{"properties":{"displayName":"test_external_policy000003","policyType":"Custom","mode":"Indexed","metadata":{"createdBy":"638d92d9-ae3b-4f1d-be91-382dcc631f82","createdOn":"2026-05-21T21:49:37.3200973Z","updatedBy":"638d92d9-ae3b-4f1d-be91-382dcc631f82","updatedOn":"2026-05-21T21:49:42.0176537Z"},"version":"2.0.0","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        list of locations that can be specified when deploying resources","strongType":"location","displayName":"Allowed
+        locations"},"allowedValues":[null,[],["australiaeast","eastus","japaneast","westus"],["eastus"]]}},"policyRule":{"if":{"allOf":[{"field":"location","notIn":"[parameters(''allowedLocations'')]"},{"value":"[claims().isValid]","equals":false}]},"then":{"effect":"deny"}},"versions":["2.0.0","1.1.0"],"externalEvaluationEnforcementSettings":{"endpointSettings":{"kind":"CoinFlip"},"missingTokenAction":"Audit","resultLifespan":"PT30M","roleDefinitionIds":["/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"]}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/cli-test-extpol000002","type":"Microsoft.Authorization/policyDefinitions","name":"cli-test-extpol000002","systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-05-21T21:49:37.2765886Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-05-21T21:49:41.9915742Z"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1491'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 21 May 2026 21:49:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=638d92d9-ae3b-4f1d-be91-382dcc631f82/westus2/4e4ea1cc-a9e7-472f-bcac-2a5ca438bfc8
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '799'
+      x-ms-ratelimit-remaining-subscription-global-deletes:
+      - '11999'
+      x-msedge-ref:
+      - 'Ref A: FECDCF686E1B4252BE584D685D706E38 Ref B: CO6AA3150219017 Ref C: 2026-05-21T21:49:43Z'
+    status:
+      code: 200
+      message: OK
+version: 1
