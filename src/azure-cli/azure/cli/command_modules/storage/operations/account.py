@@ -1095,13 +1095,15 @@ def list_encryption_scope(client, resource_group_name, account_name,
 def create_or_policy(cmd, client, account_name, resource_group_name=None, properties=None, source_account=None,
                      destination_account=None, policy_id="default", rule_id=None, source_container=None,
                      destination_container=None, min_creation_time=None, prefix_match=None, enable_metrics=None,
-                     priority_replication=None):
+                     priority_replication=None, tags_replication=None):
     from azure.core.exceptions import HttpResponseError
     (ObjectReplicationPolicy, ObjectReplicationPolicyRule, ObjectReplicationPolicyFilter,
-     ObjectReplicationPolicyPropertiesMetrics, ObjectReplicationPolicyPropertiesPriorityReplication) = \
+     ObjectReplicationPolicyPropertiesMetrics, ObjectReplicationPolicyPropertiesPriorityReplication,
+     ObjectReplicationPolicyPropertiesTagsReplication) = \
         cmd.get_models('ObjectReplicationPolicy', 'ObjectReplicationPolicyRule', 'ObjectReplicationPolicyFilter',
                        'ObjectReplicationPolicyPropertiesMetrics',
-                       'ObjectReplicationPolicyPropertiesPriorityReplication')
+                       'ObjectReplicationPolicyPropertiesPriorityReplication',
+                       'ObjectReplicationPolicyPropertiesTagsReplication')
 
     if properties is None:
         rules = []
@@ -1118,7 +1120,9 @@ def create_or_policy(cmd, client, account_name, resource_group_name=None, proper
                                             rules=rules,
                                             metrics=ObjectReplicationPolicyPropertiesMetrics(enabled=enable_metrics),
                                             priority_replication=ObjectReplicationPolicyPropertiesPriorityReplication(
-                                                enabled=priority_replication))
+                                                enabled=priority_replication),
+                                            tags_replication=ObjectReplicationPolicyPropertiesTagsReplication(
+                                                enabled=tags_replication))
     else:
         rules = []
         if properties.get('rules'):
@@ -1135,7 +1139,9 @@ def create_or_policy(cmd, client, account_name, resource_group_name=None, proper
                                             rules=rules,
                                             metrics=ObjectReplicationPolicyPropertiesMetrics(enabled=properties.get('metrics').get('enabled')),
                                             priority_replication=ObjectReplicationPolicyPropertiesPriorityReplication(
-                                                enabled=properties.get('priorityReplication').get('enabled')))
+                                                enabled=properties.get('priorityReplication').get('enabled')),
+                                            tags_replication=ObjectReplicationPolicyPropertiesTagsReplication(
+                                                enabled=properties.get('tagsReplication').get('enabled')))
     try:
         return client.create_or_update(resource_group_name=resource_group_name, account_name=account_name,
                                        object_replication_policy_id=policy_id, properties=or_policy)
@@ -1151,12 +1157,14 @@ def create_or_policy(cmd, client, account_name, resource_group_name=None, proper
 # pylint: disable=line-too-long
 def update_or_policy(cmd, client, parameters, resource_group_name, account_name, object_replication_policy_id=None,
                      properties=None, source_account=None, destination_account=None, enable_metrics=None,
-                     priority_replication=None):
+                     priority_replication=None, tags_replication=None):
     (ObjectReplicationPolicy, ObjectReplicationPolicyRule, ObjectReplicationPolicyFilter,
-     ObjectReplicationPolicyPropertiesMetrics, ObjectReplicationPolicyPropertiesPriorityReplication) = \
+     ObjectReplicationPolicyPropertiesMetrics, ObjectReplicationPolicyPropertiesPriorityReplication,
+     ObjectReplicationPolicyPropertiesTagsReplication) = \
         cmd.get_models('ObjectReplicationPolicy', 'ObjectReplicationPolicyRule', 'ObjectReplicationPolicyFilter',
                        'ObjectReplicationPolicyPropertiesMetrics',
-                       'ObjectReplicationPolicyPropertiesPriorityReplication')
+                       'ObjectReplicationPolicyPropertiesPriorityReplication',
+                       'ObjectReplicationPolicyPropertiesTagsReplication')
 
     if source_account is not None:
         parameters.source_account = source_account
@@ -1180,7 +1188,9 @@ def update_or_policy(cmd, client, parameters, resource_group_name, account_name,
                                              metrics=ObjectReplicationPolicyPropertiesMetrics(
                                                  enabled=properties.get('metrics').get('enabled')),
                                              priority_replication=ObjectReplicationPolicyPropertiesPriorityReplication(
-                                                 enabled=properties.get('priorityReplication').get('enabled')))
+                                                 enabled=properties.get('priorityReplication').get('enabled')),
+                                             tags_replication=ObjectReplicationPolicyPropertiesTagsReplication(
+                                                enabled=properties.get('tagsReplication').get('enabled')))
         if "policyId" in properties.keys() and properties["policyId"]:
             object_replication_policy_id = properties["policyId"]
 
@@ -1189,6 +1199,9 @@ def update_or_policy(cmd, client, parameters, resource_group_name, account_name,
 
     if priority_replication is not None:
         parameters.priority_replication = ObjectReplicationPolicyPropertiesPriorityReplication(enabled=priority_replication)
+
+    if tags_replication is not None:
+        parameters.tags_replication = ObjectReplicationPolicyPropertiesTagsReplication(enabled=tags_replication)
 
     return client.create_or_update(resource_group_name=resource_group_name, account_name=account_name,
                                    object_replication_policy_id=object_replication_policy_id, properties=parameters)

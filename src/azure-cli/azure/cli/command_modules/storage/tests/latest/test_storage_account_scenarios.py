@@ -2702,10 +2702,10 @@ class StorageAccountLocalContextScenarioTest(LocalContextScenarioTest):
 
 class StorageAccountORScenarioTest(StorageScenarioMixin, ScenarioTest):
     @AllowLargeResponse()
-    @ResourceGroupPreparer(name_prefix='cli_test_storage_account_ors', location='centraluseuap')
-    @StorageAccountPreparer(parameter_name='source_account', location='centraluseuap', kind='StorageV2')
-    @StorageAccountPreparer(parameter_name='destination_account', location='centraluseuap', kind='StorageV2')
-    @StorageAccountPreparer(parameter_name='new_account', location='centraluseuap', kind='StorageV2')
+    @ResourceGroupPreparer(name_prefix='cli_test_storage_account_ors', location='eastus')
+    @StorageAccountPreparer(parameter_name='source_account', location='eastus', kind='StorageV2')
+    @StorageAccountPreparer(parameter_name='destination_account', location='eastus', kind='StorageV2')
+    @StorageAccountPreparer(parameter_name='new_account', location='eastus', kind='StorageV2')
     def test_storage_account_or_policy(self, resource_group, source_account, destination_account,
                                        new_account):
         src_account_info = self.get_account_info(resource_group, source_account)
@@ -2738,12 +2738,13 @@ class StorageAccountORScenarioTest(StorageScenarioMixin, ScenarioTest):
         # Create ORS policy on destination account
         result = self.cmd('storage account or-policy create -n {dest_sc} -s {src_sc} --dcont {dcont} '
                           '--scont {scont} -t "2020-02-19T16:05:00Z" --enable-metrics True '
-                          '--priority-replication true').get_output_in_json()
+                          '--priority-replication true --tags-replication true').get_output_in_json()
         self.assertIn('policyId', result)
         self.assertIn('ruleId', result['rules'][0])
         self.assertEqual(result["rules"][0]["filters"]["minCreationTime"], "2020-02-19T16:05:00Z")
         self.assertEqual(result["metrics"]["enabled"], True)
         self.assertEqual(result["priorityReplication"]["enabled"], True)
+        self.assertEqual(result["tagsReplication"]["enabled"], True)
 
         self.kwargs.update({
             'policy_id': result["policyId"],
@@ -2751,9 +2752,10 @@ class StorageAccountORScenarioTest(StorageScenarioMixin, ScenarioTest):
         })
 
         self.cmd('storage account or-policy update -g {rg} -n {dest_sc} -s {src_sc} --policy-id {policy_id} '
-                 '--enable-metrics False --priority-replication false',
+                 '--enable-metrics False --priority-replication false --tags-replication false',
                  checks=[JMESPathCheck('metrics.enabled', False),
-                         JMESPathCheck('priorityReplication.enabled', False)])
+                         JMESPathCheck('priorityReplication.enabled', False),
+                         JMESPathCheck('tagsReplication.enabled', False)])
 
         # Get policy properties from destination account
         self.cmd('storage account or-policy show -g {rg} -n {dest_sc} --policy-id {policy_id}') \

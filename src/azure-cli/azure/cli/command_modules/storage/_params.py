@@ -858,6 +858,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Indicates whether object replication metrics feature is enabled for the policy.')
         c.argument('priority_replication', arg_type=get_three_state_flag(),
                    help='Indicates whether object replication priority replication feature is enabled for the policy.')
+        c.argument('tags_replication', arg_type=get_three_state_flag(),
+                   help='Indicates whether object replication tags replication feature is enabled for the policy.')
 
     for item in ['create', 'update']:
         with self.argument_context('storage account or-policy {}'.format(item),
