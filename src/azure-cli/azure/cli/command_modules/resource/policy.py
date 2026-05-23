@@ -37,11 +37,16 @@ from azure.cli.command_modules.resource.aaz.latest.policy.definition._list impor
 from azure.cli.command_modules.resource.aaz.latest.policy.definition._show import Show as DefinitionShow
 from azure.cli.command_modules.resource.aaz.latest.policy.definition._update import Update as DefinitionUpdate
 
-from azure.cli.command_modules.resource.aaz.latest.policy.definition.version._create import Create as DefinitionVersionCreate
-from azure.cli.command_modules.resource.aaz.latest.policy.definition.version._delete import Delete as DefinitionVersionDelete
-from azure.cli.command_modules.resource.aaz.latest.policy.definition.version._list import List as DefinitionVersionList
-from azure.cli.command_modules.resource.aaz.latest.policy.definition.version._show import Show as DefinitionVersionShow
-from azure.cli.command_modules.resource.aaz.latest.policy.definition.version._update import Update as DefinitionVersionUpdate
+from azure.cli.command_modules.resource.aaz.latest.policy.definition.version._create \
+    import Create as DefinitionVersionCreate
+from azure.cli.command_modules.resource.aaz.latest.policy.definition.version._delete \
+    import Delete as DefinitionVersionDelete
+from azure.cli.command_modules.resource.aaz.latest.policy.definition.version._list \
+    import List as DefinitionVersionList
+from azure.cli.command_modules.resource.aaz.latest.policy.definition.version._show \
+    import Show as DefinitionVersionShow
+from azure.cli.command_modules.resource.aaz.latest.policy.definition.version._update \
+    import Update as DefinitionVersionUpdate
 
 from azure.cli.command_modules.resource.aaz.latest.policy.enrollment._create import Create as EnrollmentCreate
 from azure.cli.command_modules.resource.aaz.latest.policy.enrollment._delete import Delete as EnrollmentDelete
@@ -61,11 +66,16 @@ from azure.cli.command_modules.resource.aaz.latest.policy.set_definition._list i
 from azure.cli.command_modules.resource.aaz.latest.policy.set_definition._show import Show as SetDefinitionShow
 from azure.cli.command_modules.resource.aaz.latest.policy.set_definition._update import Update as SetDefinitionUpdate
 
-from azure.cli.command_modules.resource.aaz.latest.policy.set_definition.version._create import Create as SetDefinitionVersionCreate
-from azure.cli.command_modules.resource.aaz.latest.policy.set_definition.version._delete import Delete as SetDefinitionVersionDelete
-from azure.cli.command_modules.resource.aaz.latest.policy.set_definition.version._list import List as SetDefinitionVersionList
-from azure.cli.command_modules.resource.aaz.latest.policy.set_definition.version._show import Show as SetDefinitionVersionShow
-from azure.cli.command_modules.resource.aaz.latest.policy.set_definition.version._update import Update as SetDefinitionVersionUpdate
+from azure.cli.command_modules.resource.aaz.latest.policy.set_definition.version._create \
+    import Create as SetDefinitionVersionCreate
+from azure.cli.command_modules.resource.aaz.latest.policy.set_definition.version._delete \
+    import Delete as SetDefinitionVersionDelete
+from azure.cli.command_modules.resource.aaz.latest.policy.set_definition.version._list \
+    import List as SetDefinitionVersionList
+from azure.cli.command_modules.resource.aaz.latest.policy.set_definition.version._show \
+    import Show as SetDefinitionVersionShow
+from azure.cli.command_modules.resource.aaz.latest.policy.set_definition.version._update \
+    import Update as SetDefinitionVersionUpdate
 
 from azure.cli.command_modules.resource._client_factory import _resource_policy_client_factory
 from azure.cli.core.aaz import has_value, AAZResourceGroupNameArg, AAZStrArg, AAZBoolArg
@@ -1044,6 +1054,7 @@ class PolicyDefinitionVersionCreate(DefinitionVersionCreate):
 
         @staticmethod
         def serialize_content(value, required=False):
+            # pylint: disable=protected-access
             Common.SetUndefinedNone(value._data)
             content = DefinitionVersionCreate.PolicyDefinitionVersionsCreateOrUpdateAtManagementGroup.serialize_content(
                 value, required)
@@ -1065,6 +1076,7 @@ class PolicyDefinitionVersionCreate(DefinitionVersionCreate):
 
         @staticmethod
         def serialize_content(value, required=False):
+            # pylint: disable=protected-access
             Common.SetUndefinedNone(value._data)
             content = DefinitionVersionCreate.PolicyDefinitionVersionsCreateOrUpdate.serialize_content(value, required)
             return content
@@ -1766,12 +1778,14 @@ class PolicySetDefinitionVersionCreate(SetDefinitionVersionCreate):
 
         @staticmethod
         def serialize_content(value, required=False):
+            # pylint: disable=protected-access
             Common.SetUndefinedNone(value._data)
-            content = SetDefinitionVersionCreate.PolicySetDefinitionVersionsCreateOrUpdateAtManagementGroup.serialize_content(
-                value, required)
+            cls = SetDefinitionVersionCreate.PolicySetDefinitionVersionsCreateOrUpdateAtManagementGroup
+            content = cls.serialize_content(value, required)
             return content
 
-    class PolicySetDefinitionVersionsCreateOrUpdate(SetDefinitionVersionCreate.PolicySetDefinitionVersionsCreateOrUpdate):
+    class PolicySetDefinitionVersionsCreateOrUpdate(
+            SetDefinitionVersionCreate.PolicySetDefinitionVersionsCreateOrUpdate):
 
         @classmethod
         def _build_schema_on_201(cls):
@@ -1787,8 +1801,10 @@ class PolicySetDefinitionVersionCreate(SetDefinitionVersionCreate):
 
         @staticmethod
         def serialize_content(value, required=False):
+            # pylint: disable=protected-access
             Common.SetUndefinedNone(value._data)
-            content = SetDefinitionVersionCreate.PolicySetDefinitionVersionsCreateOrUpdate.serialize_content(value, required)
+            cls = SetDefinitionVersionCreate.PolicySetDefinitionVersionsCreateOrUpdate
+            content = cls.serialize_content(value, required)
             return content
 
     def pre_operations(self):
