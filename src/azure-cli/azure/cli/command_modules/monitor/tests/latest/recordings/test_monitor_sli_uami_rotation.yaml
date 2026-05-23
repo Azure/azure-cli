@@ -1,0 +1,400 @@
+interactions:
+- request:
+    body: '{"identity": {"userAssignedIdentities": {"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/mfrei/providers/Microsoft.ManagedIdentity/userAssignedIdentities/mfrei-test-user-managed-identity":
+      {}}, "type": "UserAssigned"}, "properties": {"baselineProperties": {"baseline":
+      {"evaluationCalculationType": "CalendarDays", "evaluationPeriodDays": 30, "value":
+      50.0}}, "category": "Latency", "description": "CLI SLI rotation test", "destinationAmwAccounts":
+      [{"identity": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/mfrei/providers/Microsoft.ManagedIdentity/userAssignedIdentities/mfrei-test-user-managed-identity",
+      "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mfrei/providers/microsoft.monitor/accounts/streaming-3p-slo-am2cbn-eastus2euap-1"}],
+      "enableAlert": false, "evaluationType": "RequestBased", "sliProperties": {"goodSignals":
+      {"signalFormula": "A", "signalSources": [{"filters": [{"dimensionName": "dimName1",
+      "operator": "eq", "samplingType": "Count", "value": "GetContosoUsers"}], "metricName":
+      "mfreiTestMetric1", "metricNamespace": "mfreiTestNamespace", "signalSourceId":
+      "A", "sourceAmwAccountManagedIdentity": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/mfrei/providers/Microsoft.ManagedIdentity/userAssignedIdentities/mfrei-test-user-managed-identity",
+      "sourceAmwAccountResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mfrei/providers/microsoft.monitor/accounts/streaming-3p-slo-am2cbn-eastus2euap-1",
+      "spatialAggregation": {"dimensions": ["dimName1"], "type": "Count"}, "temporalAggregation":
+      {"type": "Max"}}]}, "totalSignals": {"signalFormula": "A", "signalSources":
+      [{"filters": [{"dimensionName": "dimName1", "operator": "eq", "samplingType":
+      "Count", "value": "GetContosoUsers"}], "metricName": "mfreiTestMetric1", "metricNamespace":
+      "mfreiTestNamespace", "signalSourceId": "A", "sourceAmwAccountManagedIdentity":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/mfrei/providers/Microsoft.ManagedIdentity/userAssignedIdentities/mfrei-test-user-managed-identity",
+      "sourceAmwAccountResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mfrei/providers/microsoft.monitor/accounts/streaming-3p-slo-am2cbn-eastus2euap-1",
+      "spatialAggregation": {"dimensions": ["dimName1"], "type": "Count"}, "temporalAggregation":
+      {"type": "Max"}}]}}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor sli create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2426'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --service-group-name --sli-name --category --evaluation-type --description
+        --enable-alert --user-assigned --destination-amw-accounts --baseline-properties
+        --sli-properties
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.11.9 (Windows-10-10.0.26200-SP0)
+    method: PUT
+    uri: https://management.azure.com/providers/Microsoft.Management/serviceGroups/arm-sdk-tests-sg/providers/Microsoft.Monitor/slis/clislirot000001?api-version=2025-03-01-preview
+  response:
+    body:
+      string: '{"id":"/providers/Microsoft.Management/serviceGroups/arm-sdk-tests-sg/providers/Microsoft.Monitor/slis/clislirot000001","name":"clislirot000001","type":"microsoft.monitor/slis","systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-05-23T18:47:13.8307726Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-05-23T18:47:13.8307726Z"},"identity":{"type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/mfrei/providers/Microsoft.ManagedIdentity/userAssignedIdentities/mfrei-test-user-managed-identity":{"clientId":"c355a8a2-2d6b-491e-86f6-42b11846b324","principalId":"f9ac6c44-5c1c-4bd5-9f89-90e804c3fa6f"}}},"properties":{"description":"CLI
+        SLI rotation test","category":"Latency","evaluationType":"RequestBased","provisioningState":"Succeeded","executionState":{"message":null,"state":"Pending"},"destinationAmwAccounts":[{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mfrei/providers/microsoft.monitor/accounts/streaming-3p-slo-am2cbn-eastus2euap-1","identity":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/mfrei/providers/Microsoft.ManagedIdentity/userAssignedIdentities/mfrei-test-user-managed-identity"}],"destinationMetrics":[{"metricName":"clislirot000001:Good","metricNamespace":"arm-sdk-tests-sg"},{"metricName":"clislirot000001:Total","metricNamespace":"arm-sdk-tests-sg"},{"metricName":"clislirot000001:Value","metricNamespace":"arm-sdk-tests-sg"}],"baselineProperties":{"baseline":{"value":50.0,"evaluationCalculationType":"CalendarDays","evaluationPeriodDays":30}},"streamingRuleId":"72f988bf-86f1-41af-91ab-2d7cd011db47_global_75867cb7-909e-4698-b932-68c7cee42428","streamingRuleLastUpdatedTimestamp":"2026-05-23T18:47:17.1774363Z","enableAlert":false,"sliProperties":{"goodSignals":{"signalFormula":"A","signalSources":[{"signalSourceId":"A","sourceAmwAccountManagedIdentity":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/mfrei/providers/Microsoft.ManagedIdentity/userAssignedIdentities/mfrei-test-user-managed-identity","sourceAmwAccountResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mfrei/providers/microsoft.monitor/accounts/streaming-3p-slo-am2cbn-eastus2euap-1","metricNamespace":"mfreiTestNamespace","metricName":"mfreiTestMetric1","filters":[{"dimensionName":"dimName1","operator":"eq","value":"GetContosoUsers"}],"spatialAggregation":{"type":"Count","dimensions":["dimName1"]},"temporalAggregation":{"type":"Max"}}]},"totalSignals":{"signalFormula":"A","signalSources":[{"signalSourceId":"A","sourceAmwAccountManagedIdentity":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/mfrei/providers/Microsoft.ManagedIdentity/userAssignedIdentities/mfrei-test-user-managed-identity","sourceAmwAccountResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mfrei/providers/microsoft.monitor/accounts/streaming-3p-slo-am2cbn-eastus2euap-1","metricNamespace":"mfreiTestNamespace","metricName":"mfreiTestMetric1","filters":[{"dimensionName":"dimName1","operator":"eq","value":"GetContosoUsers"}],"spatialAggregation":{"type":"Count","dimensions":["dimName1"]},"temporalAggregation":{"type":"Max"}}]}}}}'
+    headers:
+      accept-ranges:
+      - bytes
+      cache-control:
+      - no-cache
+      content-length:
+      - '3294'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 23 May 2026 18:47:16 GMT
+      etag:
+      - '"cd02fc5d-0000-0a00-0000-6a11f6350000"'
+      expires:
+      - '-1'
+      mise-correlation-id:
+      - 8e9865f0-489b-4707-9e4e-aa0c1a0257d9
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-azure-ref:
+      - 20260523T184714Z-1646496db66vt7kbhC1CO1ce000000000760000000002vnq
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - ''
+      x-ms-providerhub-traffic:
+      - 'True'
+      x-ms-ratelimit-remaining-tenant-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: BCFA52B4677746A58D71C944B8B0F6B0 Ref B: CO6AA3150220045 Ref C: 2026-05-23T18:47:13Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor sli update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --service-group-name --sli-name --set --set --set --set
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.11.9 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Management/serviceGroups/arm-sdk-tests-sg/providers/Microsoft.Monitor/slis/clislirot000001?api-version=2025-03-01-preview
+  response:
+    body:
+      string: '{"id":"/providers/Microsoft.Management/serviceGroups/arm-sdk-tests-sg/providers/Microsoft.Monitor/slis/clislirot000001","name":"clislirot000001","type":"microsoft.monitor/slis","systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-05-23T18:47:13.8307726Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-05-23T18:47:13.8307726Z"},"identity":{"type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/mfrei/providers/Microsoft.ManagedIdentity/userAssignedIdentities/mfrei-test-user-managed-identity":{"clientId":"c355a8a2-2d6b-491e-86f6-42b11846b324","principalId":"f9ac6c44-5c1c-4bd5-9f89-90e804c3fa6f"}}},"properties":{"description":"CLI
+        SLI rotation test","category":"Latency","evaluationType":"RequestBased","provisioningState":"Succeeded","executionState":{"message":null,"state":"Pending"},"destinationAmwAccounts":[{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mfrei/providers/microsoft.monitor/accounts/streaming-3p-slo-am2cbn-eastus2euap-1","identity":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/mfrei/providers/Microsoft.ManagedIdentity/userAssignedIdentities/mfrei-test-user-managed-identity"}],"destinationMetrics":[{"metricName":"clislirot000001:Good","metricNamespace":"arm-sdk-tests-sg"},{"metricName":"clislirot000001:Total","metricNamespace":"arm-sdk-tests-sg"},{"metricName":"clislirot000001:Value","metricNamespace":"arm-sdk-tests-sg"}],"baselineProperties":{"baseline":{"value":50,"evaluationCalculationType":"CalendarDays","evaluationPeriodDays":30}},"streamingRuleId":"72f988bf-86f1-41af-91ab-2d7cd011db47_global_75867cb7-909e-4698-b932-68c7cee42428","streamingRuleLastUpdatedTimestamp":"2026-05-23T18:47:17.1774363Z","enableAlert":false,"sliProperties":{"goodSignals":{"signalFormula":"A","signalSources":[{"signalSourceId":"A","sourceAmwAccountManagedIdentity":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/mfrei/providers/Microsoft.ManagedIdentity/userAssignedIdentities/mfrei-test-user-managed-identity","sourceAmwAccountResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mfrei/providers/microsoft.monitor/accounts/streaming-3p-slo-am2cbn-eastus2euap-1","metricNamespace":"mfreiTestNamespace","metricName":"mfreiTestMetric1","filters":[{"dimensionName":"dimName1","operator":"eq","value":"GetContosoUsers"}],"spatialAggregation":{"type":"Count","dimensions":["dimName1"]},"temporalAggregation":{"type":"Max"}}]},"totalSignals":{"signalFormula":"A","signalSources":[{"signalSourceId":"A","sourceAmwAccountManagedIdentity":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/mfrei/providers/Microsoft.ManagedIdentity/userAssignedIdentities/mfrei-test-user-managed-identity","sourceAmwAccountResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mfrei/providers/microsoft.monitor/accounts/streaming-3p-slo-am2cbn-eastus2euap-1","metricNamespace":"mfreiTestNamespace","metricName":"mfreiTestMetric1","filters":[{"dimensionName":"dimName1","operator":"eq","value":"GetContosoUsers"}],"spatialAggregation":{"type":"Count","dimensions":["dimName1"]},"temporalAggregation":{"type":"Max"}}]}}}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '3292'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 23 May 2026 18:47:17 GMT
+      etag:
+      - '"cd02fc5d-0000-0a00-0000-6a11f6350000"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - ''
+      x-ms-providerhub-traffic:
+      - 'True'
+      x-msedge-ref:
+      - 'Ref A: 69E30B764C6240EC95DDD15F143EC879 Ref B: MWH011020808052 Ref C: 2026-05-23T18:47:18Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"identity": {"type": "UserAssigned", "userAssignedIdentities": {"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/mfrei/providers/Microsoft.ManagedIdentity/userAssignedIdentities/mfrei-test-user-managed-identity-2":
+      {}}}, "properties": {"baselineProperties": {"baseline": {"evaluationCalculationType":
+      "CalendarDays", "evaluationPeriodDays": 30, "value": 50.0}}, "category": "Latency",
+      "description": "CLI SLI rotation test", "destinationAmwAccounts": [{"identity":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/mfrei/providers/Microsoft.ManagedIdentity/userAssignedIdentities/mfrei-test-user-managed-identity-2",
+      "resourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mfrei/providers/microsoft.monitor/accounts/streaming-3p-slo-am2cbn-eastus2euap-1"}],
+      "enableAlert": false, "evaluationType": "RequestBased", "sliProperties": {"goodSignals":
+      {"signalFormula": "A", "signalSources": [{"filters": [{"dimensionName": "dimName1",
+      "operator": "eq", "value": "GetContosoUsers"}], "metricName": "mfreiTestMetric1",
+      "metricNamespace": "mfreiTestNamespace", "signalSourceId": "A", "sourceAmwAccountManagedIdentity":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/mfrei/providers/Microsoft.ManagedIdentity/userAssignedIdentities/mfrei-test-user-managed-identity-2",
+      "sourceAmwAccountResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mfrei/providers/microsoft.monitor/accounts/streaming-3p-slo-am2cbn-eastus2euap-1",
+      "spatialAggregation": {"dimensions": ["dimName1"], "type": "Count"}, "temporalAggregation":
+      {"type": "Max"}}]}, "totalSignals": {"signalFormula": "A", "signalSources":
+      [{"filters": [{"dimensionName": "dimName1", "operator": "eq", "value": "GetContosoUsers"}],
+      "metricName": "mfreiTestMetric1", "metricNamespace": "mfreiTestNamespace", "signalSourceId":
+      "A", "sourceAmwAccountManagedIdentity": "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/mfrei/providers/Microsoft.ManagedIdentity/userAssignedIdentities/mfrei-test-user-managed-identity-2",
+      "sourceAmwAccountResourceId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mfrei/providers/microsoft.monitor/accounts/streaming-3p-slo-am2cbn-eastus2euap-1",
+      "spatialAggregation": {"dimensions": ["dimName1"], "type": "Count"}, "temporalAggregation":
+      {"type": "Max"}}]}}}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor sli update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '2384'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --service-group-name --sli-name --set --set --set --set
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.11.9 (Windows-10-10.0.26200-SP0)
+    method: PUT
+    uri: https://management.azure.com/providers/Microsoft.Management/serviceGroups/arm-sdk-tests-sg/providers/Microsoft.Monitor/slis/clislirot000001?api-version=2025-03-01-preview
+  response:
+    body:
+      string: '{"id":"/providers/Microsoft.Management/serviceGroups/arm-sdk-tests-sg/providers/Microsoft.Monitor/slis/clislirot000001","name":"clislirot000001","type":"microsoft.monitor/slis","systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2026-05-23T18:47:13.8307726Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2026-05-23T18:47:18.9729399Z"},"identity":{"type":"UserAssigned","userAssignedIdentities":{"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/mfrei/providers/Microsoft.ManagedIdentity/userAssignedIdentities/mfrei-test-user-managed-identity-2":{"clientId":"a7c6f044-28b2-4005-8823-b420bd51af51","principalId":"249cb22e-c9b6-4190-9419-29b2bd914d5a"}}},"properties":{"description":"CLI
+        SLI rotation test","category":"Latency","evaluationType":"RequestBased","provisioningState":"Succeeded","executionState":{"message":null,"state":"Pending"},"destinationAmwAccounts":[{"resourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mfrei/providers/microsoft.monitor/accounts/streaming-3p-slo-am2cbn-eastus2euap-1","identity":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/mfrei/providers/Microsoft.ManagedIdentity/userAssignedIdentities/mfrei-test-user-managed-identity-2"}],"destinationMetrics":[{"metricName":"clislirot000001:Good","metricNamespace":"arm-sdk-tests-sg"},{"metricName":"clislirot000001:Total","metricNamespace":"arm-sdk-tests-sg"},{"metricName":"clislirot000001:Value","metricNamespace":"arm-sdk-tests-sg"}],"baselineProperties":{"baseline":{"value":50.0,"evaluationCalculationType":"CalendarDays","evaluationPeriodDays":30}},"streamingRuleId":"72f988bf-86f1-41af-91ab-2d7cd011db47_global_75867cb7-909e-4698-b932-68c7cee42428","streamingRuleLastUpdatedTimestamp":"2026-05-23T18:47:22.5592904Z","enableAlert":false,"sliProperties":{"goodSignals":{"signalFormula":"A","signalSources":[{"signalSourceId":"A","sourceAmwAccountManagedIdentity":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/mfrei/providers/Microsoft.ManagedIdentity/userAssignedIdentities/mfrei-test-user-managed-identity-2","sourceAmwAccountResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mfrei/providers/microsoft.monitor/accounts/streaming-3p-slo-am2cbn-eastus2euap-1","metricNamespace":"mfreiTestNamespace","metricName":"mfreiTestMetric1","filters":[{"dimensionName":"dimName1","operator":"eq","value":"GetContosoUsers"}],"spatialAggregation":{"type":"Count","dimensions":["dimName1"]},"temporalAggregation":{"type":"Max"}}]},"totalSignals":{"signalFormula":"A","signalSources":[{"signalSourceId":"A","sourceAmwAccountManagedIdentity":"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/mfrei/providers/Microsoft.ManagedIdentity/userAssignedIdentities/mfrei-test-user-managed-identity-2","sourceAmwAccountResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/mfrei/providers/microsoft.monitor/accounts/streaming-3p-slo-am2cbn-eastus2euap-1","metricNamespace":"mfreiTestNamespace","metricName":"mfreiTestMetric1","filters":[{"dimensionName":"dimName1","operator":"eq","value":"GetContosoUsers"}],"spatialAggregation":{"type":"Count","dimensions":["dimName1"]},"temporalAggregation":{"type":"Max"}}]}}}}'
+    headers:
+      accept-ranges:
+      - bytes
+      cache-control:
+      - no-cache
+      content-length:
+      - '3302'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Sat, 23 May 2026 18:47:22 GMT
+      etag:
+      - '"cd02a96d-0000-0a00-0000-6a11f63a0000"'
+      expires:
+      - '-1'
+      mise-correlation-id:
+      - 11cd9dc7-1718-457c-b8fa-26ba068c3809
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-azure-ref:
+      - 20260523T184719Z-1646496db66s6dzthC1CO1wzr400000007s000000000dd4e
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - ''
+      x-ms-providerhub-traffic:
+      - 'True'
+      x-ms-ratelimit-remaining-tenant-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 324CC3E673E84623ABD261E1A1D343CD Ref B: MWH011020807029 Ref C: 2026-05-23T18:47:18Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor sli delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --service-group-name --sli-name --yes
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.11.9 (Windows-10-10.0.26200-SP0)
+    method: DELETE
+    uri: https://management.azure.com/providers/Microsoft.Management/serviceGroups/arm-sdk-tests-sg/providers/Microsoft.Monitor/slis/clislirot000001?api-version=2025-03-01-preview
+  response:
+    body:
+      string: '{"error":{"code":"UnspecifiedError","message":"An unspecified error
+        occurred.  (RequestId: d64a71c4-56d7-11f1-b34e-f4289dce1732, CorrelationId:
+        c3de3578-00bb-42b2-83fa-51baea0f2698)"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '184'
+      content-type:
+      - application/json
+      date:
+      - Sat, 23 May 2026 18:47:31 GMT
+      etag:
+      - '"cd027a83-0000-0a00-0000-6a11f6430000"'
+      expires:
+      - '-1'
+      mise-correlation-id:
+      - 6b993aa9-5699-49b0-aecb-3432a999820d
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-azure-ref:
+      - 20260523T184724Z-165db84777644vrfhC1YVRhhm400000004e000000000we77
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - service
+      x-ms-operation-identifier:
+      - ''
+      x-ms-providerhub-traffic:
+      - 'True'
+      x-ms-ratelimit-remaining-tenant-deletes:
+      - '800'
+      x-msedge-ref:
+      - 'Ref A: BFABF293348048748A810DF9BBE75730 Ref B: MWH011020807025 Ref C: 2026-05-23T18:47:23Z'
+    status:
+      code: 500
+      message: Internal Server Error
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor sli delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --service-group-name --sli-name --yes
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.11.9 (Windows-10-10.0.26200-SP0)
+    method: DELETE
+    uri: https://management.azure.com/providers/Microsoft.Management/serviceGroups/arm-sdk-tests-sg/providers/Microsoft.Monitor/slis/clislirot000001?api-version=2025-03-01-preview
+  response:
+    body:
+      string: '{"error":{"code":"UnspecifiedError","message":"An unspecified error
+        occurred.  (RequestId: d64a71c4-56d7-11f1-b34e-f4289dce1732, CorrelationId:
+        806f8fbc-4e09-4b1b-9d64-2a92c335569b)"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '184'
+      content-type:
+      - application/json
+      date:
+      - Sat, 23 May 2026 18:47:38 GMT
+      etag:
+      - '"cd023997-0000-0a00-0000-6a11f64b0000"'
+      expires:
+      - '-1'
+      mise-correlation-id:
+      - 3c547059-1db9-48ab-af70-95da62bf38b1
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-azure-ref:
+      - 20260523T184732Z-177cf685948fznw7hC1CO1mp9n000000068g000000006xpg
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - service
+      x-ms-operation-identifier:
+      - ''
+      x-ms-providerhub-traffic:
+      - 'True'
+      x-ms-ratelimit-remaining-tenant-deletes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 663C7284788A40719F93D97C5CCDD405 Ref B: MWH011020808042 Ref C: 2026-05-23T18:47:32Z'
+    status:
+      code: 500
+      message: Internal Server Error
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor sli delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - --service-group-name --sli-name --yes
+      User-Agent:
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.11.9 (Windows-10-10.0.26200-SP0)
+    method: DELETE
+    uri: https://management.azure.com/providers/Microsoft.Management/serviceGroups/arm-sdk-tests-sg/providers/Microsoft.Monitor/slis/clislirot000001?api-version=2025-03-01-preview
+  response:
+    body:
+      string: ''
+    headers:
+      accept-ranges:
+      - bytes
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Sat, 23 May 2026 18:47:49 GMT
+      expires:
+      - '-1'
+      mise-correlation-id:
+      - 935a9aaa-6e6b-49df-a5a5-6ad32a331589
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-azure-ref:
+      - 20260523T184741Z-1646496db66skvvkhC1CO16z8400000003mg0000000084tz
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - ''
+      x-ms-providerhub-traffic:
+      - 'True'
+      x-ms-ratelimit-remaining-tenant-deletes:
+      - '800'
+      x-msedge-ref:
+      - 'Ref A: B5E870D832784BDABD521C2ADD8965D8 Ref B: MWH011020809060 Ref C: 2026-05-23T18:47:41Z'
+    status:
+      code: 200
+      message: OK
+version: 1
