@@ -4914,7 +4914,7 @@ def is_async_response(poller, timeout_seconds=30):
     return status_code == 202
 
 
-def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, per_site_scaling=False,
+def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, per_site_scaling=False,  # pylint: disable=too-many-branches
                             app_service_environment=None, sku=None, number_of_workers=None, location=None,
                             tags=None, no_wait=False, zone_redundant=False, async_scaling_enabled=None,
                             is_managed_instance=None, mi_system_assigned=None, mi_user_assigned=None,
