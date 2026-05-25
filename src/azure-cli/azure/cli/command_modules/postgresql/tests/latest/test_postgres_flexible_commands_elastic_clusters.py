@@ -98,7 +98,7 @@ class ElasticClustersMgmtScenarioTest(ScenarioTest):
                  .format(resource_group, cluster),
                  expect_failure=True)
 
-        self.cmd('postgres flexible-server db create -g {} -s {} -d dbclusterfail'
+        self.cmd('postgres flexible-server db create -g {} -s {} -n dbclusterfail'
                  .format(resource_group, cluster),
                  expect_failure=True)
 

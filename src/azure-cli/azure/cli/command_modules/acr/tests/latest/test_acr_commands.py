@@ -45,12 +45,15 @@ class AcrCommandsTests(ScenarioTest):
                  checks=[self.check('status', "enabled"),
                          self.check('days', 30)])
 
-        # test content-trust
-        self.cmd('acr config content-trust update -n {} --status enabled'.format(registry_name),
-                 checks=[self.check('status', "enabled")])
+        # test content-trust - 'enabled' is no longer a valid value for --status due to DCT deprecation
+        with self.assertRaises(SystemExit):
+            self.cmd('acr config content-trust update -n {} --status enabled'.format(registry_name))
+
+        self.cmd('acr config content-trust update -n {} --status disabled --yes'.format(registry_name),
+                 checks=[self.check('status', "disabled")])
 
         self.cmd('acr config content-trust show -n {}'.format(registry_name),
-                 checks=[self.check('status', "enabled")])
+                 checks=[self.check('status', "disabled")])
 
         # test soft-delete
         self.cmd('acr config soft-delete update -r {} --status enabled --days 30 --yes'.format(registry_name),
@@ -95,7 +98,7 @@ class AcrCommandsTests(ScenarioTest):
             self.check_pattern('availableLoginServerName',r'{name}-[a-zA-Z0-9]+\.*')
         ])
     
-    @live_only()
+    @live_only()  # acr login issues direct requests to azurecr.io; WWW-Authenticate headers contain unsanitized registry hostnames not currently replaced by VCR processors
     @ResourceGroupPreparer()
     def test_acr_login_expose_token(self, resource_group):
         registry_name = self.create_random_name('clireg', 20)
@@ -119,7 +122,6 @@ class AcrCommandsTests(ScenarioTest):
         self.assertEqual(tokens['accessToken'], tokens['refreshToken'])
 
     @ResourceGroupPreparer()
-    @live_only()
     def test_acr_create_with_managed_registry(self, resource_group, resource_group_location):
         registry_name = self.create_random_name('clireg', 20)
 
@@ -367,7 +369,7 @@ class AcrCommandsTests(ScenarioTest):
                          ])
 
         # update replication
-        self.cmd('acr replication update -n {replication_name} -r {registry_name} --tags {tags} --region-endpoint-enabled false',
+        self.cmd('acr replication update -n {replication_name} -r {registry_name} --tags {tags} --global-endpoint-routing false',
                  checks=[self.check('name', '{replication_name}'),
                          self.check('provisioningState', 'Succeeded'),
                          self.check('regionEndpointEnabled', False),
@@ -377,7 +379,7 @@ class AcrCommandsTests(ScenarioTest):
         self.cmd('acr replication delete -n {replication_name} -r {registry_name}')
 
         # test create replication disable on home region
-        self.cmd('acr replication create -n {replication_name} -r {registry_name} -l {replication_loc} --region-endpoint-enabled false',
+        self.cmd('acr replication create -n {replication_name} -r {registry_name} -l {replication_loc} --global-endpoint-routing false',
                  checks=[self.check('name', '{replication_name}'),
                          self.check('location', '{replication_loc}'),
                          self.check('provisioningState', 'Succeeded'),
@@ -584,7 +586,7 @@ class AcrCommandsTests(ScenarioTest):
         ])
 
     @ResourceGroupPreparer()
-    @live_only()
+    @live_only()  # role assignment create generates random UUIDs via _gen_guid(); may require mock.patch for playback
     @KeyVaultPreparer(additional_params='--enable-purge-protection')
     def test_acr_encryption_with_cmk(self, key_vault, resource_group):
         user = self.cmd('ad signed-in-user show').get_output_in_json()
@@ -605,7 +607,8 @@ class AcrCommandsTests(ScenarioTest):
                  checks=[self.check('scope', '{scope}')])
         
         # Wait for the role assignment to propagate
-        time.sleep(15)
+        if self.is_live:
+            time.sleep(15)
 
         # create a new key
         result = self.cmd('keyvault key create --name {key_name} --vault-name {key_vault}')
@@ -618,9 +621,14 @@ class AcrCommandsTests(ScenarioTest):
         self.kwargs['identity_id'] = result.get_output_in_json()['id']
         self.kwargs['client_id'] = result.get_output_in_json()['clientId']
         
-        time.sleep(15) # wait for ARM cache to populate 
+        if self.is_live:
+            time.sleep(15) # wait for ARM cache to populate 
+        
         self.cmd('role assignment create --role "Key Vault Crypto Service Encryption User" --assignee {principal_id} --scope /subscriptions/{subscription_id}/resourceGroups/{rg}/providers/Microsoft.KeyVault/vaults/{key_vault}')
-     
+
+        if self.is_live:
+            time.sleep(15) # wait for Key Vault role assignment to propagate before ACR accesses the key
+
         # create the registry with CMK encryption enabled using the user-assigned identity
         result = self.cmd('acr create --name {registry_name} --resource-group {rg} --sku premium --identity {identity_id} --key-encryption-key {key_id}', checks=[
             self.check('identity.type', 'userAssigned'),
@@ -670,18 +678,20 @@ class AcrCommandsTests(ScenarioTest):
         self.assertEqual(list(result['userAssignedIdentities'].keys())[0].lower(), self.kwargs['identity_id'].lower())
 
         # remove identities
-        import time
-        time.sleep(10)
+        if self.is_live:
+            time.sleep(10)
         self.cmd('acr identity remove --name {registry_name} --identities "{system_identity}" "{identity_id}"', self.check('identity', None))
 
         # try different combinations of adds and deletes
         # system
         self.cmd('acr identity assign --name {registry_name} --identities {system_identity}', self.check('identity.type', 'systemAssigned'))
-        time.sleep(10)
+        if self.is_live:
+            time.sleep(10)
         self.cmd('acr identity remove --name {registry_name} --identities {system_identity}', self.check('identity', None))
         # user
         self.cmd('acr identity assign --name {registry_name} --identities {identity_id}', self.check('identity.type', 'userAssigned'))
-        time.sleep(10)
+        if self.is_live:
+            time.sleep(10)
         self.cmd('acr identity remove --name {registry_name} --identities {identity_id}', self.check('identity', None))
 
         # add multiple identities
@@ -689,13 +699,15 @@ class AcrCommandsTests(ScenarioTest):
                           self.check('identity.type', 'systemAssigned, userAssigned')).get_output_in_json()
         self.assertUserIdentitiesExpected([self.kwargs['identity_id'].lower()], result['identity'])
         # add another user identity to existing
-        time.sleep(10)
+        if self.is_live:
+            time.sleep(10)
         result = self.cmd('acr identity assign --name {registry_name} --identities {second_identity_id}',
                           self.check('identity.type', 'systemAssigned, userAssigned')).get_output_in_json()
         self.assertUserIdentitiesExpected([self.kwargs['identity_id'].lower(), self.kwargs['second_identity_id'].lower()], result['identity'])
 
         # remove identities and validate result
-        time.sleep(10)
+        if self.is_live:
+            time.sleep(10)
         self.cmd('acr identity remove --name {registry_name} --identities {second_identity_id}', self.check('identity.type', 'systemAssigned, userAssigned'))
 
         self.cmd('acr identity remove --name {registry_name} --identities {identity_id}', self.check('identity.type', 'systemAssigned'))
@@ -797,6 +809,19 @@ class AcrCommandsTests(ScenarioTest):
 
     @ResourceGroupPreparer()
     @live_only()
+    def test_acr_with_dual_stack_endpoints(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'registry_name': self.create_random_name('testreg', 20)
+        })
+        self.cmd('acr create --name {registry_name} --resource-group {rg} --sku premium -l eastus',
+                 checks=[self.check('endpointProtocol', 'IPv4')])
+        self.cmd('acr update --name {registry_name} --resource-group {rg} --endpoint-protocol IPv4AndIPv6',
+                 checks=[self.check('endpointProtocol', 'IPv4AndIPv6')])
+        self.cmd('acr update --name {registry_name} --resource-group {rg} --endpoint-protocol IPv4',
+                 checks=[self.check('endpointProtocol', 'IPv4')])
+
+    @ResourceGroupPreparer()
+    @live_only()
     def test_acr_create_invalid_name(self, resource_group):
         from azure.cli.core.azclierror import InvalidArgumentValueError
 
@@ -890,9 +915,6 @@ class AcrCommandsTests(ScenarioTest):
 
         self.kwargs["home_location"] = result["location"]
 
-        self.cmd('acr replication show --name {home_location} --registry {registry_2} --resource-group {rg}',
-                 checks=[self.check('zoneRedundancy', 'Enabled')])
-
         self.cmd('acr replication create --registry {registry_1}  -g {rg} --location {location_2} --zone-redundancy Enabled',
                  checks=[self.check('zoneRedundancy', 'Enabled')])
 
@@ -901,6 +923,9 @@ class AcrCommandsTests(ScenarioTest):
 
         self.cmd('acr replication create --registry {registry_2}  -g {rg} --location {location_3} --zone-redundancy Disabled',
                  checks=[self.check('zoneRedundancy', 'Disabled')])
+
+        self.cmd('acr replication show --name {home_location} --registry {registry_2} --resource-group {rg}',
+                 checks=[self.check('zoneRedundancy', 'Enabled')])
 
     def assertUserIdentitiesExpected(self, query_identities, result):
         result_identities = [identity.lower() for identity in result['userAssignedIdentities'].keys()]

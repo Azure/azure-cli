@@ -13,7 +13,7 @@ from azure.cli.command_modules.sql.tests.latest.test_sql_commands import SqlServ
 class MonitorTests(ScenarioTest):
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_v2')
+    @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_v2', location='eastus')
     @StorageAccountPreparer()
     def test_metric_alert_v2_scenario(self, resource_group, storage_account):
 

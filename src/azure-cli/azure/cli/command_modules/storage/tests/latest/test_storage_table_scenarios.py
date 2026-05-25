@@ -42,7 +42,8 @@ class StorageTableScenarioTests(StorageScenarioMixin, ScenarioTest):
 
         # status may not be available immediately after the storage account is created in live testing. so retry a few
         # times
-        time.sleep(300)
+        if self.is_live:
+            time.sleep(300)
         table_status = self.storage_cmd('storage table stats', account_info).get_output_in_json()
         self.assertIn(table_status['geoReplication']['status'], ('live', 'unavailable'))
 

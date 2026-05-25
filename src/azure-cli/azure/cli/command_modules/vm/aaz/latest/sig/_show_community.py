@@ -19,9 +19,9 @@ class ShowCommunity(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-01-03",
+        "version": "2025-03-03",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/locations/{}/communitygalleries/{}", "2022-01-03"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/locations/{}/communitygalleries/{}", "2025-03-03"],
         ]
     }
 
@@ -118,7 +118,7 @@ class ShowCommunity(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-01-03",
+                    "api-version", "2025-03-03",
                     required=True,
                 ),
             }
@@ -160,6 +160,9 @@ class ShowCommunity(AAZCommand):
             _schema_on_200.name = AAZStrType(
                 flags={"read_only": True},
             )
+            _schema_on_200.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
             _schema_on_200.type = AAZStrType(
                 flags={"read_only": True},
             )
@@ -168,6 +171,38 @@ class ShowCommunity(AAZCommand):
             identifier.unique_id = AAZStrType(
                 serialized_name="uniqueId",
             )
+
+            properties = cls._schema_on_200.properties
+            properties.artifact_tags = AAZDictType(
+                serialized_name="artifactTags",
+            )
+            properties.community_metadata = AAZObjectType(
+                serialized_name="communityMetadata",
+            )
+            properties.disclaimer = AAZStrType()
+
+            artifact_tags = cls._schema_on_200.properties.artifact_tags
+            artifact_tags.Element = AAZStrType()
+
+            community_metadata = cls._schema_on_200.properties.community_metadata
+            community_metadata.eula = AAZStrType()
+            community_metadata.privacy_statement_uri = AAZStrType(
+                serialized_name="privacyStatementUri",
+            )
+            community_metadata.public_names = AAZListType(
+                serialized_name="publicNames",
+                flags={"required": True},
+            )
+            community_metadata.publisher_contact = AAZStrType(
+                serialized_name="publisherContact",
+                flags={"required": True},
+            )
+            community_metadata.publisher_uri = AAZStrType(
+                serialized_name="publisherUri",
+            )
+
+            public_names = cls._schema_on_200.properties.community_metadata.public_names
+            public_names.Element = AAZStrType()
 
             return cls._schema_on_200
 

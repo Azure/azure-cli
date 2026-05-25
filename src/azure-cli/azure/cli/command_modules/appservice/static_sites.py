@@ -216,7 +216,7 @@ def assign_identity(cmd, resource_group_name, name, assign_identities=None, role
 
 def remove_identity(cmd, resource_group_name, name, remove_identities=None):
     IdentityType = cmd.get_models('ManagedServiceIdentityType')
-    UserAssignedIdentitiesValue = cmd.get_models('Components1Jq1T4ISchemasManagedserviceidentityPropertiesUserassignedidentitiesAdditionalproperties')  # pylint: disable=line-too-long
+    UserAssignedIdentitiesValue = cmd.get_models('UserAssignedIdentity')  # pylint: disable=line-too-long
     _, _, external_identities, remove_local_identity = _build_identities_info(remove_identities)
 
     def getter():
