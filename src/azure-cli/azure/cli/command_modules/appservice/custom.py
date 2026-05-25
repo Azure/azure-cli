@@ -4924,8 +4924,7 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, p
         is_linux = not hyper_v
     elif is_linux and hyper_v:
         raise MutuallyExclusiveArgumentError('--hyper-v creates a Windows container plan and cannot be combined '
-                                             'with --is-linux. Use "--is-linux false --hyper-v" to create a '
-                                             'Windows container plan.')
+                                             'with --is-linux true. Omit --is-linux or use "--is-linux false".')
 
     if sku is None:
         sku = 'P0V3' if is_linux else 'B1'
@@ -5015,6 +5014,9 @@ has been deployed ".format(app_service_environment)
             args = self.ctx.args
             args.no_wait = no_wait
 
+    os_type = 'Linux' if is_linux else ('Hyper-V' if hyper_v else 'Windows')
+    logger.warning("Creating App Service Plan '%s' (%s, SKU: %s).", name, os_type, sku)
+
     poller = AppServicePlanCreateWithNoWait(cli_ctx=cmd.cli_ctx)(command_args={
         "name": name,
         "resource_group": resource_group_name,
@@ -5039,9 +5041,6 @@ has been deployed ".format(app_service_environment)
         "install_scripts": install_scripts,
         "storage_mounts": storage_mounts,
     })
-
-    os_type = 'Linux' if is_linux else ('Hyper-V' if hyper_v else 'Windows')
-    logger.warning("Creating App Service Plan '%s' (%s).", name, os_type)
 
     if no_wait:
         return poller.result()
