@@ -971,10 +971,24 @@ def update_blob_service_properties(cmd, instance, enable_change_feed=None, chang
 
     if enable_static_website is not None or index_document or default_index_document_path or error_document_404_path:
         StaticWebsite = cmd.get_models('StaticWebsite')
-        instance.static_website = StaticWebsite(enabled=enable_static_website,
-                                                index_document=index_document,
-                                                default_index_document_path=default_index_document_path,
-                                                error_document404_path=error_document_404_path)
+        if enable_static_website is not None and not enable_static_website:
+            instance.static_website = StaticWebsite(enabled=enable_static_website)
+        else:
+            if instance.static_website is None:
+                instance.static_website = StaticWebsite(enabled=enable_static_website,
+                                                        index_document=index_document,
+                                                        default_index_document_path=default_index_document_path,
+                                                        error_document404_path=error_document_404_path)
+            else:
+                static_website = instance.static_website
+                instance.static_website = StaticWebsite(
+                    enabled=(enable_static_website if enable_static_website is not None else static_website.enabled),
+                    index_document=(index_document if index_document else static_website.index_document),
+                    default_index_document_path=(
+                        default_index_document_path if default_index_document_path else
+                        static_website.default_index_document_path),
+                    error_document404_path=(
+                        error_document_404_path if error_document_404_path else static_website.error_document404_path))
 
     return instance
 
@@ -1134,14 +1148,19 @@ def create_or_policy(cmd, client, account_name, resource_group_name=None, proper
                                                      min_creation_time=rule.get('filters').get(
                                                          'minCreationTime')) if rule.get('filters') else None
                                                  ) for rule in properties['rules']]
+
         or_policy = ObjectReplicationPolicy(source_account=properties.get('sourceAccount'),
                                             destination_account=properties.get('destinationAccount'),
                                             rules=rules,
-                                            metrics=ObjectReplicationPolicyPropertiesMetrics(enabled=properties.get('metrics').get('enabled')),
+                                            metrics=ObjectReplicationPolicyPropertiesMetrics(
+                                                enabled=properties.get('metrics').get('enabled')) if properties.get(
+                                                'metrics') else None,
                                             priority_replication=ObjectReplicationPolicyPropertiesPriorityReplication(
-                                                enabled=properties.get('priorityReplication').get('enabled')),
+                                                enabled=properties.get('priorityReplication').get(
+                                                    'enabled')) if properties.get('priorityReplication') else None,
                                             tags_replication=ObjectReplicationPolicyPropertiesTagsReplication(
-                                                enabled=properties.get('tagsReplication').get('enabled')))
+                                                enabled=properties.get('tagsReplication').get(
+                                                    'enabled')) if properties.get('tagsReplication') else None)
     try:
         return client.create_or_update(resource_group_name=resource_group_name, account_name=account_name,
                                        object_replication_policy_id=policy_id, properties=or_policy)
@@ -1186,11 +1205,14 @@ def update_or_policy(cmd, client, parameters, resource_group_name, account_name,
                                              destination_account=properties.get('destinationAccount'),
                                              rules=rules,
                                              metrics=ObjectReplicationPolicyPropertiesMetrics(
-                                                 enabled=properties.get('metrics').get('enabled')),
+                                                 enabled=properties.get('metrics').get('enabled')) if properties.get(
+                                                 'metrics') else None,
                                              priority_replication=ObjectReplicationPolicyPropertiesPriorityReplication(
-                                                 enabled=properties.get('priorityReplication').get('enabled')),
+                                                 enabled=properties.get('priorityReplication').get(
+                                                     'enabled')) if properties.get('priorityReplication') else None,
                                              tags_replication=ObjectReplicationPolicyPropertiesTagsReplication(
-                                                 enabled=properties.get('tagsReplication').get('enabled')))
+                                                 enabled=properties.get('tagsReplication').get(
+                                                     'enabled')) if properties.get('tagsReplication') else None)
         if "policyId" in properties.keys() and properties["policyId"]:
             object_replication_policy_id = properties["policyId"]
 
@@ -1198,7 +1220,8 @@ def update_or_policy(cmd, client, parameters, resource_group_name, account_name,
         parameters.metrics = ObjectReplicationPolicyPropertiesMetrics(enabled=enable_metrics)
 
     if priority_replication is not None:
-        parameters.priority_replication = ObjectReplicationPolicyPropertiesPriorityReplication(enabled=priority_replication)
+        parameters.priority_replication = ObjectReplicationPolicyPropertiesPriorityReplication(
+            enabled=priority_replication)
 
     if tags_replication is not None:
         parameters.tags_replication = ObjectReplicationPolicyPropertiesTagsReplication(enabled=tags_replication)
