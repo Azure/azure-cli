@@ -122,7 +122,7 @@ def _run_diff(src: str, tgt: str, cached: bool = False) -> str:
     if cached:
         cmd.append("--cached")
     else:
-        cmd.append(f"{tgt}...{src}")
+        cmd.append(f"{tgt}..{src}")
 
     proc = subprocess.run(
         cmd,

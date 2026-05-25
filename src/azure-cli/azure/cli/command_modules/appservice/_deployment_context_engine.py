@@ -64,12 +64,14 @@ def _get_app_region_and_plan_sku(cmd, resource_group_name, webapp_name):
     try:
         from ._client_factory import web_client_factory
         from azure.mgmt.core.tools import parse_resource_id
+        from .utils import get_site_server_farm_id
         client = web_client_factory(cmd.cli_ctx)
         app = client.web_apps.get(resource_group_name, webapp_name)
         region = app.location if app else "Unknown"
         sku = "Unknown"
-        if app and app.server_farm_id:
-            plan_parts = parse_resource_id(app.server_farm_id)
+        server_farm_id = get_site_server_farm_id(app) if app else None
+        if app and server_farm_id:
+            plan_parts = parse_resource_id(server_farm_id)
             plan = client.app_service_plans.get(plan_parts['resource_group'], plan_parts['name'])
             if plan and plan.sku:
                 sku = plan.sku.name
