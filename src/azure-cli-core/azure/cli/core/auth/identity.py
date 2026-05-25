@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import cmd
 import json
 import os
 import re
@@ -164,9 +163,8 @@ class Identity:  # pylint: disable=too-many-instance-attributes
 
         from .agentic_session import is_agentic_session
         is_agentic_session_value = is_agentic_session()
-        enable_broker_on_windows = cmd.cli_ctx.config.getboolean('core', 'enable_broker_on_windows', fallback=True)
         # Broker is available only on Windows for now
-        broker_sso_available = sys.platform.startswith('win') and enable_broker_on_windows
+        broker_sso_available = sys.platform.startswith('win') and self._enable_broker_on_windows
         logger.debug("use_broker_sso: %s, is_agentic_session: %s, broker_sso_available: %s",
                      use_broker_sso, is_agentic_session_value, broker_sso_available)
         use_broker_sso = (use_broker_sso or is_agentic_session_value) and broker_sso_available
