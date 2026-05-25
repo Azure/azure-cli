@@ -489,13 +489,13 @@ def load_arguments(self, _):
         c.argument('source_disk_restore_point_size_gb', options_list=['--source-disk-restore-point-size-gb', '--source-rp-size'], nargs='+', type=int, min_api='2024-03-01', help='The size of the source disk restore point in GB')
         c.argument(
             'data_disk_storage_fault_domain_alignment',
-            options_list=['--data-disk-storage-fault-domain-alignment', '--data-disk-storage-fda'],
+            options_list=['--data-disk-storage-fd-alignment', '--data-disk-fda'],
             arg_type=get_enum_type(DiskStorageAlignment),
             help='Specifies the storage fault domain alignment type for the disk.'
         )
         c.argument(
             'os_disk_storage_fault_domain_alignment',
-            options_list=['--os-disk-storage-fault-domain-alignment', '--os-disk-storage-fda'],
+            options_list=['--os-disk-storage-fd-alignment', '--os-disk-fda'],
             arg_type=get_enum_type(DiskStorageAlignment),
             help='Specifies the storage fault domain alignment type for the disk.'
         )
@@ -833,19 +833,19 @@ def load_arguments(self, _):
         )
         c.argument(
             'data_disk_storage_fault_domain_alignment',
-            options_list=['--data-disk-storage-fault-domain-alignment', '--data-disk-storage-fda'],
+            options_list=['--data-disk-storage-fd-alignment', '--data-disk-fda'],
             arg_type=get_enum_type(DiskStorageAlignment),
             help='Specifies the storage fault domain alignment type for the disk.'
         )
         c.argument(
             'os_disk_storage_fault_domain_alignment',
-            options_list=['--os-disk-storage-fault-domain-alignment', '--os-disk-storage-fda'],
+            options_list=['--os-disk-storage-fd-alignment', '--os-disk-fda'],
             arg_type=get_enum_type(DiskStorageAlignment),
             help='Specifies the storage fault domain alignment type for the disk.'
         )
         c.argument(
             'zonal_platform_fault_domain_align_mode',
-            options_list=['--zonal-platform-fault-domain-align-mode', '--zonal-fda'],
+            options_list=['--zonal-fault-domain-align-mode', '--zonal-fda'],
             arg_type=get_enum_type(FaultDomainAlignment),
             help='Specifies the align mode between Virtual Machine Scale Set compute and storage Fault Domain count.'
         )
