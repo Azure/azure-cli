@@ -8,11 +8,11 @@ from azure.cli.core.commands import DeploymentOutputLongRunningOperation
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import sdk_no_wait, random_string
-from azure.mgmt.web.models import NameIdentifier
+from azure.mgmt.domainregistration.models import NameIdentifier, TopLevelDomainAgreementOption
 from knack.util import CLIError
 from knack.log import get_logger
 
-from ._client_factory import web_client_factory
+from ._client_factory import domain_registration_client_factory
 
 logger = get_logger(__name__)
 
@@ -48,17 +48,16 @@ def create_domain(cmd, resource_group_name, hostname, contact_info, privacy=True
     except:
         raise CLIError("Unable to get IP address")
 
-    web_client = web_client_factory(cmd.cli_ctx)
-    hostname_availability = web_client.domains.check_availability(NameIdentifier(name=hostname))
+    domain_client = domain_registration_client_factory(cmd.cli_ctx)
+    hostname_availability = domain_client.domains.check_availability(NameIdentifier(name=hostname))
 
     if not hostname_availability.available:
         raise ValidationError("Custom domain name '{}' is not available. Please try again "
                               "with a new hostname.".format(hostname))
 
     tld = '.'.join(hostname.split('.')[1:])
-    TopLevelDomainAgreementOption = cmd.get_models('TopLevelDomainAgreementOption')
     domain_agreement_option = TopLevelDomainAgreementOption(include_privacy=bool(privacy), for_transfer=False)
-    agreements = web_client.top_level_domains.list_agreements(name=tld, agreement_option=domain_agreement_option)
+    agreements = domain_client.top_level_domains.list_agreements(name=tld, agreement_option=domain_agreement_option)
     agreement_keys = [agreement.agreement_key for agreement in agreements]
 
     if dryrun:
@@ -151,16 +150,15 @@ def create_domain(cmd, resource_group_name, hostname, contact_info, privacy=True
 
 
 def show_domain_purchase_terms(cmd, hostname):
-    from azure.mgmt.web.models import TopLevelDomainAgreementOption
     domain_identifier = NameIdentifier(name=hostname)
-    web_client = web_client_factory(cmd.cli_ctx)
-    hostname_availability = web_client.domains.check_availability(domain_identifier)
+    domain_client = domain_registration_client_factory(cmd.cli_ctx)
+    hostname_availability = domain_client.domains.check_availability(domain_identifier)
     if not hostname_availability.available:  # api returns false
         raise CLIError(" hostname: '{}' in not available. Please enter a valid hostname.".format(hostname))
 
     tld = '.'.join(hostname.split('.')[1:])
     domain_agreement_option = TopLevelDomainAgreementOption(include_privacy=True, for_transfer=True)
-    agreements = web_client.top_level_domains.list_agreements(name=tld, agreement_option=domain_agreement_option)
+    agreements = domain_client.top_level_domains.list_agreements(name=tld, agreement_option=domain_agreement_option)
 
     terms = {
         "hostname": hostname,

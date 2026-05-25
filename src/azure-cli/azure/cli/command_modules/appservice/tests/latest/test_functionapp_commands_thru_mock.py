@@ -651,7 +651,7 @@ class TestFunctionappMocked(unittest.TestCase):
 
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
-    @mock.patch('azure.cli.command_modules.appservice.custom._get_location_from_webapp')
+    @mock.patch('azure.cli.command_modules.appservice.utils._get_location_from_webapp')
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom.LongRunningOperation.__call__', autospec=True)
     def test_config_source_control(self,
@@ -681,3 +681,62 @@ class TestFunctionappMocked(unittest.TestCase):
 
         # assert
         self.assertEqual(response.git_hub_action_configuration.container_configuration.password, None)
+
+    def test_flex_parse_raw_stacks_handles_empty_app_settings_dictionary(self):
+        from azure.cli.command_modules.appservice.custom import _FlexFunctionAppStackRuntimeHelper
+
+        # prepare
+        cmd_mock = _get_test_cmd()
+        go_stack = {
+            'name': 'go',
+            'properties': {'majorVersions': [{'minorVersions': [{
+                'value': '1.0',
+                'stackSettings': {'linuxRuntimeSettings': {
+                    'appSettingsDictionary': {},
+                    'Sku': [{'skuCode': 'FC1'}],
+                    'gitHubActionSettings': {'isSupported': True},
+                    'appInsightsSettings': {'isSupported': True},
+                    'isDefault': True,
+                }},
+            }]}]},
+        }
+
+        # action
+        with mock.patch.object(_FlexFunctionAppStackRuntimeHelper,
+                               'get_flex_raw_function_app_stacks',
+                               return_value=[go_stack]):
+            matched = _FlexFunctionAppStackRuntimeHelper(cmd_mock, 'westcentralus', 'go').resolve('go', '1.0')
+
+        # assert
+        self.assertEqual(matched.name, 'go')
+        self.assertEqual(matched.version, '1.0')
+
+    def test_flex_parse_raw_stacks_prefers_functions_worker_runtime_when_present(self):
+        # FUNCTIONS_WORKER_RUNTIME overrides runtime['name'] when set (e.g., dotnet-isolated under the dotnet stack).
+        from azure.cli.command_modules.appservice.custom import _FlexFunctionAppStackRuntimeHelper
+
+        # prepare
+        cmd_mock = _get_test_cmd()
+        dotnet_isolated_stack = {
+            'name': 'dotnet',
+            'properties': {'majorVersions': [{'minorVersions': [{
+                'value': '8.0',
+                'stackSettings': {'linuxRuntimeSettings': {
+                    'appSettingsDictionary': {'FUNCTIONS_WORKER_RUNTIME': 'dotnet-isolated'},
+                    'Sku': [{'skuCode': 'FC1'}],
+                    'gitHubActionSettings': {'isSupported': True},
+                    'appInsightsSettings': {'isSupported': True},
+                    'isDefault': True,
+                }},
+            }]}]},
+        }
+
+        # action
+        with mock.patch.object(_FlexFunctionAppStackRuntimeHelper,
+                               'get_flex_raw_function_app_stacks',
+                               return_value=[dotnet_isolated_stack]):
+            matched = _FlexFunctionAppStackRuntimeHelper(
+                cmd_mock, 'westcentralus', 'dotnet-isolated').resolve('dotnet-isolated', '8.0')
+
+        # assert
+        self.assertEqual(matched.name, 'dotnet-isolated')

@@ -50,6 +50,27 @@ class UserCredential:  # pylint: disable=too-few-public-methods
         logger.debug("UserCredential.acquire_token: scopes=%r, claims_challenge=%r, kwargs=%r",
                      scopes, claims_challenge, kwargs)
 
+        # Apply agentic session parameters for user identity flows
+        from .agentic_session import build_agentic_session_params, merge_access_token_claims
+        agentic_session_id, agentic_claims = build_agentic_session_params()
+        if agentic_session_id:
+            # Both paths: client_session in data and params so eSTS can identify the agentic session
+            kwargs["data"] = kwargs.get("data") or {}
+            kwargs["data"]["client_session"] = agentic_session_id
+            kwargs["params"] = kwargs.get("params") or {}
+            kwargs["params"]["client_session"] = agentic_session_id
+
+            if getattr(self._msal_app, '_enable_broker', False):
+                # Broker path: claims_challenge flows to MSALRuntime cache key via set_decoded_claims.
+                # This causes MSAL to skip its local AT cache and forward claims to the broker,
+                # where requestedClaims becomes part of the C++ cache key.
+                claims_challenge = merge_access_token_claims(claims_challenge, agentic_claims)
+            # Non-broker path: client_session in data flows into ext_cache_key (SHA256 hash),
+            # which partitions the MSAL Python token cache. No claims_challenge needed.
+
+            from azure.cli.core.telemetry import set_agentic_session
+            set_agentic_session(True)
+
         if claims_challenge:
             logger.info('Acquiring new access token silently with claims challenge: %s', claims_challenge)
         result = self._msal_app.acquire_token_silent_with_error(

@@ -1090,7 +1090,7 @@ class NetworkPrivateLinkCosmosDBScenarioTest(ScenarioTest):
 
 class NetworkPrivateLinkWebappScenarioTest(ScenarioTest):
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location='westus')
+    @ResourceGroupPreparer(location='eastus')
     def test_private_link_resource_webapp(self, resource_group):
         self.kwargs.update({
             'plan_name': self.create_random_name('webapp-privatelink-asp', 40),
@@ -1106,7 +1106,7 @@ class NetworkPrivateLinkWebappScenarioTest(ScenarioTest):
         ])
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location='westus')
+    @ResourceGroupPreparer(location='eastus')
     def test_private_endpoint_connection_webapp(self, resource_group):
         self.kwargs.update({
             'resource_group': resource_group,

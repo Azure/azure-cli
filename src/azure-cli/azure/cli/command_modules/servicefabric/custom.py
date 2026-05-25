@@ -982,7 +982,7 @@ def _create_vmss(cmd, resource_group_name, cluster_name, cluster, node_type_name
         # Use snake_case since the backend accepts it; keeps naming consistent across the migrated module.
         diagnostics_ext['protected_settings'] = {
             'storage_account_name': diagnostics_account,
-            'storage_account_key': list_results.keys[0].value,
+            'storage_account_key': list_results.keys_property[0].value,
             'storage_account_end_point': 'https://core.windows.net/'
         }
 
@@ -1011,8 +1011,8 @@ def _create_vmss(cmd, resource_group_name, cluster_name, cluster, node_type_name
     list_results = storage_client.storage_accounts.list_keys(
         resource_group_name, diagnostics_storage_name)
     fabric_ext['protected_settings'] = {
-        'storage_account_key_1': list_results.keys[0].value,
-        'storage_account_key_2': list_results.keys[1].value
+        'storage_account_key_1': list_results.keys_property[0].value,
+        'storage_account_key_2': list_results.keys_property[1].value
     }
 
     extensions = [fabric_ext]
