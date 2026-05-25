@@ -65,16 +65,20 @@ def constructDefaultMaintenanceConfiguration(cmd, raw_parameters):
             raise MutuallyExclusiveArgumentError('--weekday and --start-hour cannot be used together with --schedule-type for default maintenance configuration.')
         if schedule_type != CONST_WEEKLY_MAINTENANCE_SCHEDULE:
             raise InvalidArgumentValueError('--schedule-type for default maintenance configuration must be Weekly.')
-        interval_weeks = raw_parameters.get("interval_weeks")
-        if interval_weeks is not None and interval_weeks != 1:
-            raise InvalidArgumentValueError('--interval-weeks for default maintenance configuration must be 1.')
+        if raw_parameters.get("interval_weeks") is not None:
+            raise InvalidArgumentValueError('--interval-weeks cannot be specified for default maintenance configuration; the interval is always 1 week.')
+        if any(raw_parameters.get(p) is not None for p in ("interval_days", "interval_months", "day_of_month", "week_index")):
+            raise MutuallyExclusiveArgumentError('--interval-days, --interval-months, --day-of-month and --week-index cannot be used for default maintenance configuration.')
+        raw_parameters["interval_weeks"] = 1
         maintenance_configuration_models = AKSManagedClusterModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).maintenance_configuration_models
-        Result = (
+        MaintenanceConfiguration = (
             maintenance_configuration_models.MaintenanceConfiguration
         )
-        result = Result()
-        result.maintenance_window = constructMaintenanceWindow(cmd, raw_parameters)
-        return result
+        maintenanceConfiguration = MaintenanceConfiguration()
+        # utc_offset and start_date are intentionally not validated here: the RP accepts the full
+        # MaintenanceWindow schema (including these optional fields) for all maintenance config types.
+        maintenanceConfiguration.maintenance_window = constructMaintenanceWindow(cmd, raw_parameters)
+        return maintenanceConfiguration
 
     # Legacy timeInWeek format
     if weekday is None or start_hour is None:
@@ -89,13 +93,13 @@ def constructDefaultMaintenanceConfiguration(cmd, raw_parameters):
     timeInWeek_dict["day"] = weekday
     timeInWeek_dict["hour_slots"] = [start_hour]
     timeInWeek = TimeInWeek(**timeInWeek_dict)
-    Result = (
+    MaintenanceConfiguration = (
         maintenance_configuration_models.MaintenanceConfiguration
     )
-    result = Result()
-    result.time_in_week = [timeInWeek]
-    result.not_allowed_time = []
-    return result
+    maintenanceConfiguration = MaintenanceConfiguration()
+    maintenanceConfiguration.time_in_week = [timeInWeek]
+    maintenanceConfiguration.not_allowed_time = []
+    return maintenanceConfiguration
 
 
 def constructDedicatedMaintenanceConfiguration(cmd, raw_parameters):
@@ -105,12 +109,12 @@ def constructDedicatedMaintenanceConfiguration(cmd, raw_parameters):
         raise MutuallyExclusiveArgumentError('--weekday and --start-hour are only applicable to default maintenance configuration.')
 
     maintenance_configuration_models = AKSManagedClusterModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).maintenance_configuration_models
-    Result = (
+    MaintenanceConfiguration = (
         maintenance_configuration_models.MaintenanceConfiguration
     )
-    result = Result()
-    result.maintenance_window = constructMaintenanceWindow(cmd, raw_parameters)
-    return result
+    maintenanceConfiguration = MaintenanceConfiguration()
+    maintenanceConfiguration.maintenance_window = constructMaintenanceWindow(cmd, raw_parameters)
+    return maintenanceConfiguration
 
 
 def constructMaintenanceWindow(cmd, raw_parameters):
