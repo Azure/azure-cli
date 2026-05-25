@@ -145,7 +145,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
             Identity._service_principal_store_instance = ServicePrincipalStore(store)
         return Identity._service_principal_store_instance
 
-    def login_with_auth_code(self, scopes, claims_challenge=None):
+    def login_with_auth_code(self, scopes, claims_challenge=None, use_broker_sso=False):
         # Emit a warning to inform that a browser is opened.
         # Only show the path part of the URL and hide the query string.
 
@@ -161,15 +161,24 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         from .util import read_response_templates
         success_template, error_template = read_response_templates()
 
+        from .agentic_session import is_agentic_session
+        prompt = 'none' if use_broker_sso or is_agentic_session() else 'select_account'
+
         # For AAD, use port 0 to let the system choose arbitrary unused ephemeral port to avoid port collision
         # on port 8400 from the old design. However, ADFS only allows port 8400.
         result = self._msal_app.acquire_token_interactive(
-            scopes, prompt='select_account', port=8400 if self._is_adfs else None,
+            scopes,
+            prompt=prompt,
+            port=8400 if self._is_adfs else None,
             success_template=success_template, error_template=error_template,
             parent_window_handle=self._msal_app.CONSOLE_WINDOW_HANDLE, on_before_launching_ui=_prompt_launching_ui,
             enable_msa_passthrough=True,
             claims_challenge=claims_challenge)
-        return check_result(result)
+        parsed = check_result(result)
+        if use_broker_sso:
+            # log parsed result in debug level
+            logger.debug("Result from broker SSO login: %s", json.dumps(parsed, indent=4))
+        return parsed
 
     def login_with_device_code(self, scopes, claims_challenge=None):
         flow = self._msal_app.initiate_device_flow(scopes, claims_challenge=claims_challenge)
@@ -243,6 +252,14 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         entry = self._service_principal_store.load_entry(client_id, self.tenant_id)
         client_credential = ServicePrincipalAuth(entry).get_msal_client_credential()
         return ServicePrincipalCredential(client_id, client_credential, **self._msal_app_kwargs)
+
+    # checks are now done in custom.py
+    # def _is_broker_sso(self):
+    #     """Detect if SSO with broker is possible.
+    #     It is only possible if broker is available (Windows for now) and enabled via config,
+    #     AND user has opted in with the flag.
+    #     """
+    #     return self._enable_broker_on_windows and sys.platform.startswith('win') and self._broker_sso
 
 
 class ServicePrincipalAuth:  # pylint: disable=too-many-instance-attributes
