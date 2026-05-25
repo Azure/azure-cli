@@ -154,6 +154,7 @@ cat >>$testsrc_dir/setup.py <<EOL
                        '*.txt',
                        '*.xml',
                        '*.yml',
+                       '*.yaml',
                        '*.zip',
                        '**/*.bat',
                        '**/*.byok',
@@ -171,6 +172,8 @@ cat >>$testsrc_dir/setup.py <<EOL
                        '**/*.txt',
                        '**/*.txt',
                        '**/*.xml',
+                       '**/*.yml',
+                       '**/*.yaml',
                        'data/*',
                        'recordings/*.yaml']},
     install_requires=DEPENDENCIES
