@@ -651,7 +651,7 @@ class TestFunctionappMocked(unittest.TestCase):
 
 
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
-    @mock.patch('azure.cli.command_modules.appservice.custom._get_location_from_webapp')
+    @mock.patch('azure.cli.command_modules.appservice.utils._get_location_from_webapp')
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom.LongRunningOperation.__call__', autospec=True)
     def test_config_source_control(self,

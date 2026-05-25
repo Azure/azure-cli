@@ -18,7 +18,7 @@ from ._appservice_utils import _generic_site_operation
 from ._client_factory import web_client_factory
 from .utils import (_normalize_sku, get_sku_tier, get_resource_name_and_group,
                     get_resource_if_exists, is_functionapp, is_logicapp, is_webapp, is_centauri_functionapp,
-                    _normalize_location)
+                    _normalize_location, get_site_server_farm_id)
 
 from .aaz.latest.network import ListServiceTags
 from .aaz.latest.network.vnet import List as VNetList, Show as VNetShow
@@ -82,10 +82,12 @@ def validate_site_create(cmd, namespace):
 
 def validate_ase_create(cmd, namespace):
     # Validate the ASE Name availability
+    from azure.mgmt.web.models import ResourceNameAvailabilityRequest
     client = web_client_factory(cmd.cli_ctx)
     resource_type = 'Microsoft.Web/hostingEnvironments'
     if isinstance(namespace.name, str):
-        name_validation = client.check_name_availability(namespace.name, resource_type)
+        request = ResourceNameAvailabilityRequest(name=namespace.name, type=resource_type)
+        name_validation = client.check_name_availability(request)
         if not name_validation.name_available:
             raise ValidationError(name_validation.message)
 
@@ -175,9 +177,10 @@ def validate_functionapp_on_flex_plan(cmd, namespace):
     resource_group_name = namespace.resource_group_name
     name = _get_app_name(namespace)
     functionapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
-    if functionapp.server_farm_id is None:
+    server_farm_id = get_site_server_farm_id(functionapp)
+    if server_farm_id is None:
         return
-    parsed_plan_id = parse_resource_id(functionapp.server_farm_id)
+    parsed_plan_id = parse_resource_id(server_farm_id)
     client = web_client_factory(cmd.cli_ctx)
     plan_info = client.app_service_plans.get(parsed_plan_id['resource_group'], parsed_plan_id['name'])
     if plan_info is None:
@@ -191,9 +194,10 @@ def validate_is_flex_functionapp(cmd, namespace):
     resource_group_name = namespace.resource_group_name
     name = namespace.name
     functionapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
-    if functionapp.server_farm_id is None:
+    server_farm_id = get_site_server_farm_id(functionapp)
+    if server_farm_id is None:
         raise ValidationError('This command is only valid for Azure Functions on the FlexConsumption plan.')
-    parsed_plan_id = parse_resource_id(functionapp.server_farm_id)
+    parsed_plan_id = parse_resource_id(server_farm_id)
     client = web_client_factory(cmd.cli_ctx)
     plan_info = client.app_service_plans.get(parsed_plan_id['resource_group'], parsed_plan_id['name'])
     if plan_info is None:
