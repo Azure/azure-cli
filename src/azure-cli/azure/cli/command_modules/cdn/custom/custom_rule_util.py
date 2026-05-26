@@ -244,13 +244,23 @@ def create_condition(match_variable,
     return condition
 
 
+def _resolve_origin_group(origin_group):
+    if has_value(origin_group):
+        try:
+            return origin_group.to_serialized_data()
+        except AttributeError:
+            return origin_group
+    return None
+
+
 def create_action(action_name, cache_behavior=None, cache_duration=None, header_action=None,
                   header_name=None, header_value=None, query_string_behavior=None, query_parameters=None,
                   redirect_type=None, redirect_protocol=None, custom_hostname=None, custom_path=None,
                   custom_querystring=None, custom_fragment=None, source_pattern=None, destination=None,
                   preserve_unmatched_path=None, sub_id=None, resource_group=None, profile_name=None,
                   endpoint_name=None, origin_group=None, query_string_caching_behavior=None,
-                  enable_compression=None, enable_caching=None, forwarding_protocol=None):
+                  enable_compression=None, enable_caching=None, forwarding_protocol=None,
+                  edge_action_id=None, invocation_point=None):
     action = None
     if action_name == "CacheExpiration":
         action = {
@@ -327,14 +337,7 @@ def create_action(action_name, cache_behavior=None, cache_duration=None, header_
         }
         return action
     if action_name == "OriginGroupOverride":
-        formatetd_origin_group = None
-        if has_value(origin_group):
-            try:
-                formatetd_origin_group = origin_group.to_serialized_data()
-            except AttributeError:
-                formatetd_origin_group = origin_group
-        else:
-            formatetd_origin_group = None
+        formatetd_origin_group = _resolve_origin_group(origin_group)
 
         if not is_valid_resource_id(formatetd_origin_group):
             # Ideally we should use resource_id but Auzre FrontDoor portal extension has some case-sensitive issues
@@ -355,14 +358,7 @@ def create_action(action_name, cache_behavior=None, cache_duration=None, header_
         return action
     if action_name == "RouteConfigurationOverride":
         origin_group_override = None
-        formatetd_origin_group = None
-        if has_value(origin_group):
-            try:
-                formatetd_origin_group = origin_group.to_serialized_data()
-            except AttributeError:
-                formatetd_origin_group = origin_group
-        else:
-            formatetd_origin_group = None
+        formatetd_origin_group = _resolve_origin_group(origin_group)
         if formatetd_origin_group is not None:
             if is_valid_resource_id(formatetd_origin_group):
                 origin_group_override = {
@@ -395,6 +391,20 @@ def create_action(action_name, cache_behavior=None, cache_duration=None, header_
                         else RuleIsCompressionEnabled.DISABLED.value
                     } if enable_caching else None
                 },
+            }
+        }
+        return action
+    if action_name == "EdgeAction":
+        formatted_edge_action_id = _resolve_origin_group(edge_action_id)
+        action = {
+            "edge_action": {
+                "parameters": {
+                    "type_name": "DeliveryRuleEdgeActionParameters",
+                    "edge_action_reference": {
+                        "id": formatted_edge_action_id
+                    },
+                    "invocation_point": invocation_point
+                }
             }
         }
         return action
@@ -489,6 +499,15 @@ def create_actions_from_existing(existing_actions):
                                                 RuleIsCompressionEnabled.ENABLED.value
                                                 else False,
                                                 enable_caching=enable_caching))
+        if name == 'EdgeAction':
+            parsed_actions.append(create_action(name,
+                                                edge_action_id=para['edgeActionReference']['id']
+                                                if 'edgeActionReference' in para and
+                                                'id' in para['edgeActionReference']
+                                                else None,
+                                                invocation_point=para['invocationPoint']
+                                                if 'invocationPoint' in para
+                                                else None))
     if len(parsed_actions) == 0:
         return []
     return parsed_actions

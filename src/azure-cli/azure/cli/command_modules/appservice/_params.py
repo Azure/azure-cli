@@ -19,7 +19,7 @@ from azure.mgmt.web.models import (DatabaseType, ConnectionStringType, BuiltInAu
 
 from ._completers import get_hostname_completion_list
 from ._constants import (FUNCTIONS_VERSIONS, LOGICAPPS_NODE_RUNTIME_VERSIONS, WINDOWS_OS_NAME, LINUX_OS_NAME,
-                         DEPLOYMENT_STORAGE_AUTH_TYPES)
+                         DEPLOYMENT_STORAGE_AUTH_TYPES, UPDATE_STRATEGY_TYPES)
 
 from ._validators import (validate_timeout_value, validate_site_create, validate_asp_create,
                           validate_ase_create, validate_ip_address,
@@ -339,6 +339,10 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('end_to_end_encryption_enabled', options_list=['--end-to-end-encryption-enabled', '-e'],
                    help='Enable or disable end-to-end encryption between the Front End and the Workers.',
                    arg_type=get_three_state_flag(return_label=True))
+        c.argument('site_scoped_certs',
+                   options_list=['--site-scoped-certs'],
+                   help='Enable or disable site-scoped certificates.',
+                   arg_type=get_three_state_flag(return_label=True))
         c.argument('min_tls_version',
                    help="The minimum version of TLS required for SSL requests, e.g., '1.0', '1.1', '1.2'")
         c.argument('min_tls_cipher_suite', options_list=['--min-tls-cipher-suite'],
@@ -383,6 +387,12 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context("webapp sitecontainers convert") as c:
         c.argument('mode', options_list=['--mode'], help='Mode for conversion.',
                    arg_type=get_enum_type(['docker', 'sitecontainers']))
+        c.argument('main_container_name', options_list=['--main-container-name'],
+                   help='For COMPOSE to sitecontainers conversion, specifies which '
+                        'compose service should be the main container. If not provided, '
+                        'the service with a port mapping is auto-detected.')
+        c.argument('yes', options_list=['--yes', '-y'], action='store_true',
+                   help='Do not prompt for confirmation.')
 
     with self.argument_context('webapp show') as c:
         c.argument('name', arg_type=webapp_name_arg_type)
@@ -395,9 +405,9 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('slot', options_list=['--slot', '-s'], help='Name of the web app slot. Default to the productions slot if not specified.')
 
     with self.argument_context('webapp list-runtimes') as c:
-        c.argument('linux', action='store_true', help='list runtime stacks for linux based web apps', deprecate_info=c.deprecate(redirect="--os-type"))
         c.argument('os_type', options_list=["--os", "--os-type"], help="limit the output to just windows or linux runtimes", arg_type=get_enum_type([LINUX_OS_NAME, WINDOWS_OS_NAME]))
-        c.argument('show_runtime_details', action='store_true', help="show detailed versions of runtime stacks")
+        c.argument('runtime', options_list=["--runtime"], help="limit the output to a specific runtime family", arg_type=get_enum_type(['dotnet', 'node', 'php', 'python', 'java']))
+        c.argument('support', options_list=["--support"], help="filter by support lifecycle status. Default: supported", arg_type=get_enum_type(['supported', 'active', 'near', 'eol', 'all']))
 
     with self.argument_context('functionapp list-runtimes') as c:
         c.argument('os_type', options_list=["--os", "--os-type"], help="limit the output to just windows or linux runtimes", arg_type=get_enum_type([LINUX_OS_NAME, WINDOWS_OS_NAME]))
@@ -465,6 +475,10 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('platform_release_channel', options_list=['--platform-release-channel'],
                    help='Set the platform release channel for the web app. Possible values: Latest, Standard, Extended.',
                    arg_type=get_enum_type(PLATFORM_RELEASE_CHANNEL_TYPES))
+        c.argument('site_scoped_certs',
+                   options_list=['--site-scoped-certs'],
+                   help='Enable or disable site-scoped certificates.',
+                   arg_type=get_three_state_flag(return_label=True))
 
     with self.argument_context('webapp browse') as c:
         c.argument('logs', options_list=['--logs', '-l'], action='store_true',
@@ -688,6 +702,10 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('setting_names', nargs='+', help="space-separated always-ready setting names")
         c.argument('settings', nargs='+', help="space-separated configuration for the number of pre-allocated instances in the format `<name>=<value>`")
 
+    with self.argument_context('functionapp update-strategy config') as c:
+        c.argument('strategy_type', options_list=['--type'], arg_type=get_enum_type(UPDATE_STRATEGY_TYPES),
+                   help="The update strategy type. Allowed values: Recreate, RollingUpdate.")
+
     with self.argument_context('webapp config connection-string list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
 
@@ -779,6 +797,19 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
         c.argument('resource_group', arg_type=resource_group_name_type)
         c.argument('slot', options_list=['--slot', '-s'], help="the name of the slot. Default to the productions slot if not specified")
+
+    with self.argument_context('webapp log startup') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+        c.argument('resource_group', arg_type=resource_group_name_type)
+        c.argument('slot', options_list=['--slot', '-s'], help="the name of the slot. Default to the production slot if not specified")
+        c.argument('instance', options_list=['--instance'], help='Filter by worker instance name.')
+
+    with self.argument_context('webapp log startup list') as c:
+        c.argument('outcome', options_list=['--outcome'], help='Filter by startup outcome.',
+                   arg_type=get_enum_type(['success', 'failure']))
+
+    with self.argument_context('webapp log startup show') as c:
+        c.argument('filename', options_list=['--filename', '-f'], help='Name of a specific startup log file to display. If not specified, shows the latest log (preferring failures).')
 
     with self.argument_context('functionapp log deployment show') as c:
         c.argument('name', arg_type=functionapp_name_arg_type, id_part=None)
@@ -984,6 +1015,9 @@ subscription than the app service environment, please use the resource ID for --
                    arg_type=get_three_state_flag())
         c.argument('enable_kudu_warmup', help="If true, kudu will be warmed up before performing deployment for a linux webapp.",
                    arg_type=get_three_state_flag())
+        c.argument('enriched_errors', options_list=['--enriched-errors'],
+                   help='If true, deployment failures will show context-enriched diagnostics with error codes, suggested fixes, and Copilot prompts.',
+                   arg_type=get_three_state_flag())
         c.argument('auto_generated_domain_name_label_scope', options_list=['--domain-name-scope'], help="Specify the scope of uniqueness for the default hostname during resource creation.", arg_type=get_enum_type(AutoGeneratedDomainNameLabelScope))
 
     with self.argument_context('webapp ssh') as c:
@@ -1024,6 +1058,9 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('track_status', help="If true, web app startup status during deployment will be tracked for linux web apps.",
                    arg_type=get_three_state_flag())
         c.argument('enable_kudu_warmup', help="If true, kudu will be warmed up before performing deployment for a linux webapp.",
+                   arg_type=get_three_state_flag())
+        c.argument('enriched_errors', options_list=['--enriched-errors'],
+                   help='If true, deployment failures will show context-enriched diagnostics with error codes, suggested fixes, and Copilot prompts.',
                    arg_type=get_three_state_flag())
 
     with self.argument_context('functionapp deploy') as c:
@@ -1196,7 +1233,7 @@ subscription than the app service environment, please use the resource ID for --
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                    configured_default='appserviceplan', id_part='name',
                    local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
-        c.argument('is_linux', arg_type=get_three_state_flag(return_label=True), required=False,
+        c.argument('is_linux', arg_type=get_three_state_flag(), required=False,
                    help='host function app on Linux worker')
         c.argument('number_of_workers', options_list=['--number-of-workers', '--min-instances'],
                    help='The number of workers for the app service plan.')

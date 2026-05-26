@@ -945,6 +945,15 @@ class AFDRuleCreate(_AFDRuleCreate):
             help='Transform to apply before matching.',
         )
         args_schema.transforms.Element = AAZStrArg()
+        args_schema.edge_action_id = AAZStrArg(
+            options=['--edge-action-id'],
+            help='Resource ID of the edge action to invoke.',
+        )
+        args_schema.invocation_point = AAZStrArg(
+            options=['--invocation-point'],
+            help='Defines at which point in the request processing pipeline the edge action will be invoked.',
+            enum={'ClientRequest': 'ClientRequest', 'OriginRequest': 'OriginRequest'},
+        )
         args_schema.actions._registered = False
         args_schema.conditions._registered = False
         return args_schema
@@ -976,6 +985,8 @@ class AFDRuleCreate(_AFDRuleCreate):
             enable_compression=args.enable_compression,
             query_string_caching_behavior=args.query_string_caching_behavior,
             forwarding_protocol=args.forwarding_protocol,
+            edge_action_id=args.edge_action_id,
+            invocation_point=args.invocation_point,
         )
         if action is not None:
             actions.append(action)
@@ -1184,6 +1195,15 @@ class AFDRuleActionCreate(_AFDRuleUpdate):
             options=['--source-pattern'],
             help='A request URI pattern that identifies the type of requests that may be rewritten.',
         )
+        args_schema.edge_action_id = AAZStrArg(
+            options=['--edge-action-id'],
+            help='Resource ID of the edge action to invoke.',
+        )
+        args_schema.invocation_point = AAZStrArg(
+            options=['--invocation-point'],
+            help='Defines at which point in the request processing pipeline the edge action will be invoked.',
+            enum={'ClientRequest': 'ClientRequest', 'OriginRequest': 'OriginRequest'},
+        )
         args_schema.actions._registered = False
         args_schema.conditions._registered = False
         return args_schema
@@ -1212,6 +1232,8 @@ class AFDRuleActionCreate(_AFDRuleUpdate):
             enable_compression=args.enable_compression,
             query_string_caching_behavior=args.query_string_caching_behavior,
             forwarding_protocol=args.forwarding_protocol,
+            edge_action_id=args.edge_action_id,
+            invocation_point=args.invocation_point,
         )
         if action is not None:
             actions.append(action)

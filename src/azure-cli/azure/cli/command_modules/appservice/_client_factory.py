@@ -68,3 +68,9 @@ def cf_providers(cli_ctx, _):
 
 def cf_web_client(cli_ctx, _):
     return web_client_factory(cli_ctx)
+
+
+def domain_registration_client_factory(cli_ctx, **_):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.mgmt.domainregistration import DomainRegistrationMgmtClient
+    return get_mgmt_service_client(cli_ctx, DomainRegistrationMgmtClient)

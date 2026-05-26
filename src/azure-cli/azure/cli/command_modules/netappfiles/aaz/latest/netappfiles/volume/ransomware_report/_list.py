@@ -25,9 +25,9 @@ ARP creates snapshots named Anti_ransomware_backup when it detects a potential r
     """
 
     _aaz_info = {
-        "version": "2025-12-01",
+        "version": "2026-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/ransomwarereports", "2025-12-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/ransomwarereports", "2026-01-01"],
         ]
     }
 
@@ -155,7 +155,7 @@ ARP creates snapshots named Anti_ransomware_backup when it detects a potential r
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-12-01",
+                    "api-version", "2026-01-01",
                     required=True,
                 ),
             }

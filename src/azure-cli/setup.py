@@ -17,7 +17,7 @@ except ImportError:
     logging.warning("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.85.0"
+VERSION = "2.86.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -65,7 +65,7 @@ DEPENDENCIES = [
     'azure-keyvault-securitydomain==1.0.0b1',
     'azure-mgmt-advisor==9.0.0',
     'azure-mgmt-apimanagement==4.0.0',
-    'azure-mgmt-appconfiguration==6.0.0b1',
+    'azure-mgmt-appconfiguration==6.0.0b2',
     'azure-mgmt-appcontainers==2.0.0',
     'azure-mgmt-applicationinsights~=1.0.0',
     'azure-mgmt-authorization==5.0.0b1',
@@ -74,15 +74,16 @@ DEPENDENCIES = [
     'azure-mgmt-billing==6.0.0',
     'azure-mgmt-botservice~=2.0.0b3',
     'azure-mgmt-cdn==12.0.0',
-    'azure-mgmt-cognitiveservices~=14.1.0',
+    'azure-mgmt-cognitiveservices~=15.0.0b1',
     'azure-mgmt-compute~=34.1.0',
     'azure-mgmt-containerinstance==10.2.0b1',
     'azure-mgmt-containerregistry==15.1.0b1',
     'azure-mgmt-containerregistrytasks==1.0.0b1',
-    'azure-mgmt-containerservice~=41.0.0',
+    'azure-mgmt-containerservice~=41.2.0',
     'azure-mgmt-cosmosdb==9.9.0',
     'azure-mgmt-datalake-store~=1.1.0b1',
     'azure-mgmt-datamigration~=10.0.0',
+    'azure-mgmt-domainregistration==1.0.0b1',
     'azure-mgmt-eventgrid==10.2.0b2',
     'azure-mgmt-eventhub~=12.0.0b1',
     'azure-mgmt-extendedlocation==1.0.0b2',
@@ -114,7 +115,7 @@ DEPENDENCIES = [
     'azure-mgmt-resource-deploymentscripts==1.0.0b1',
     'azure-mgmt-resource-deploymentstacks==1.0.0',
     'azure-mgmt-resource-templatespecs==1.0.0b1',
-    'azure-mgmt-search~=9.0',
+    'azure-mgmt-search~=9.2',
     'azure-mgmt-security==6.0.0',
     'azure-mgmt-servicebus~=10.0.0b1',
     'azure-mgmt-servicefabricmanagedclusters==2.1.0b1',
@@ -123,16 +124,16 @@ DEPENDENCIES = [
     'azure-mgmt-signalr==2.0.0b2',
     'azure-mgmt-sqlvirtualmachine==1.0.0b5',
     'azure-mgmt-sql==4.0.0b22',
-    'azure-mgmt-storage==24.0.0',
+    'azure-mgmt-storage==25.0.0',
     'azure-mgmt-synapse==2.1.0b5',
     'azure-mgmt-trafficmanager~=1.0.0',
-    'azure-mgmt-web==9.0.0',
+    'azure-mgmt-web==11.0.0',
     'azure-monitor-query==1.2.0',
     'azure-storage-common~=1.4',
-    'azure-storage-blob==12.28.0b1',
-    'azure-storage-file-datalake==12.23.0b1',
-    'azure-storage-file-share==12.24.0b1',
-    'azure-storage-queue==12.15.0b1',
+    'azure-storage-blob==12.29.0b1',
+    'azure-storage-file-datalake==12.24.0b1',
+    'azure-storage-file-share==12.25.0b1',
+    'azure-storage-queue==12.16.0b1',
     'azure-synapse-accesscontrol~=0.5.0',
     'azure-synapse-artifacts~=0.22.0',
     'azure-synapse-managedprivateendpoints~=0.4.0',

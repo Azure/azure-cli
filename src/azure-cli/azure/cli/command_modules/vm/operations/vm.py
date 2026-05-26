@@ -9,7 +9,8 @@ from knack.log import get_logger
 
 from azure.cli.core.aaz import AAZStrType
 from ..aaz.latest.vm import (Show as _VMShow, ListSizes as _VMListSizes, Patch as _VMPatch,
-                             Update as _VMUpdate, Capture as _VMCapture, Create as _VMCreate)
+                             Update as _VMUpdate, Capture as _VMCapture, Create as _VMCreate,
+                             ListUsage as _VMListUsage, Deallocate as _VMDeallocate)
 from .._vm_utils import IdentityType
 
 logger = get_logger(__name__)
@@ -196,16 +197,7 @@ class VMIdentityRemove(_VMPatch):
                 if has_value(resource.type):
                     resource.type = AAZUndefined
 
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-
-        identity = result.get('identity')
-        if not identity:
-            return result
-
-        if not identity.get('userAssignedIdentities'):
-            identity['userAssignedIdentities'] = None
-
-        return result
+        return self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
 
     class VirtualMachinesUpdate(_VMPatch.VirtualMachinesUpdate):
         # Override to solve key conflict of _schema_on_200.resources.Element.properties.type when deserializing
@@ -260,6 +252,29 @@ class VMIdentityRemove(_VMPatch):
             return self.on_error(session.http_response)
 
 
+class VMListUsage(_VMListUsage):
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
+        next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
+
+        for item in result:
+            item['currentValue'] = str(item['currentValue'])
+            item['limit'] = str(item['limit'])
+            item['localName'] = item['name']['localizedValue']
+
+        return result, next_link
+
+
+class VMDeallocate(_VMDeallocate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+
+        args_schema.force_deallocate._registered = False
+
+        return args_schema
+
+
 def convert_show_result_to_snake_case(result):
     new_result = {}
     if "id" in result:
@@ -278,6 +293,16 @@ def convert_show_result_to_snake_case(result):
         new_result["tags"] = result["tags"]
     if "zones" in result:
         new_result["zones"] = result["zones"]
+
+    if "resiliencyProfile" in result:
+        resiliency_profile = result["resiliencyProfile"]
+        if "zoneMovement" in resiliency_profile:
+            resiliency_profile['zone_movement'] = resiliency_profile["zoneMovement"]
+            resiliency_profile.pop('zoneMovement')
+            if "isEnabled" in resiliency_profile['zone_movement']:
+                resiliency_profile['zone_movement']['is_enabled'] = resiliency_profile['zone_movement']['isEnabled']
+                resiliency_profile['zone_movement'].pop('isEnabled')
+        new_result["resiliency_profile"] = resiliency_profile
 
     identity = new_result.get("identity", {}) or {}
     if "userAssignedIdentities" in identity:

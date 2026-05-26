@@ -24,13 +24,30 @@ class PostgreSQLFlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
         new_version = '18'
         location = DEFAULT_LOCATION
 
-        # create server
+        # Create server
         self.cmd('postgres flexible-server create -g {} -n {} --tier GeneralPurpose --location {} --version {} --public-access none --yes'.format(
             resource_group, server_name, location, current_version))
 
         self.cmd('postgres flexible-server show -g {} -n {}'.format(resource_group, server_name),
                  checks=[JMESPathCheck('version', current_version)])
 
-        # upgrade server
+        # Upgrade server
         result = self.cmd('postgres flexible-server upgrade -g {} -n {} --version {} --yes'.format(resource_group, server_name, new_version)).get_output_in_json()
         self.assertTrue(result['version'].startswith(new_version))
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
+    def test_postgres_flexible_server_create_premiumv2_lrs_version_below_14(self, resource_group):
+        self._test_flexible_server_create_premiumv2_lrs_version_below_14(resource_group)
+
+    def _test_flexible_server_create_premiumv2_lrs_version_below_14(self, resource_group):
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        version = '13'
+        location = DEFAULT_LOCATION
+
+        # creating a server with PremiumV2_LRS storage type and PG version < 14 should fail
+        self.cmd('postgres flexible-server create -g {} -n {} --tier GeneralPurpose --location {} '
+                 '--version {} --storage-type PremiumV2_LRS --iops 3000 --throughput 125 '
+                 '--public-access none --yes'.format(
+                     resource_group, server_name, location, version),
+                 expect_failure=True)
