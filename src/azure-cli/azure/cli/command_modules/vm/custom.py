@@ -6958,7 +6958,7 @@ def vm_cp(cmd, source, destination, storage_account=None, container_name='azvmcp
         if dest_vm:
             # UPLOAD: Local -> VM
             logger.info("Uploading local file to bridge storage...")
-            upload_blob(cmd, blob_client, file_path=source)
+            upload_blob(cmd, blob_client, file_path=source, blob_type='block')
 
             # Get SAS with READ permission (2 hours expiry)
             sas_token = create_short_lived_blob_sas_v2(cmd, sa_name, container_name, blob_name, account_key=account_key)
