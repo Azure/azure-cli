@@ -37,25 +37,25 @@ import os
 from azure.cli.testsdk import ScenarioTest
 
 
-_DEFAULT_SERVICE_GROUP = "arm-sdk-tests-sg"
+_DEFAULT_SERVICE_GROUP = "cli-test-sli-sg"
 # Resource IDs are built relative to the test's current subscription so the
 # cassette (scrubbed to MOCKED_SUBSCRIPTION_ID) replays cleanly without the AAZ
 # auxiliary-subscription lookup failing against the mocked profile.
 _DEFAULT_UAMI_TEMPLATE = (
-    "/subscriptions/{sub}/resourcegroups/mfrei/providers/"
-    "Microsoft.ManagedIdentity/userAssignedIdentities/mfrei-test-user-managed-identity"
+    "/subscriptions/{sub}/resourcegroups/cli-test-sli-rg/providers/"
+    "Microsoft.ManagedIdentity/userAssignedIdentities/cli-test-sli-uami"
 )
 _DEFAULT_UAMI_2_TEMPLATE = (
-    "/subscriptions/{sub}/resourcegroups/mfrei/providers/"
-    "Microsoft.ManagedIdentity/userAssignedIdentities/mfrei-test-user-managed-identity-2"
+    "/subscriptions/{sub}/resourcegroups/cli-test-sli-rg/providers/"
+    "Microsoft.ManagedIdentity/userAssignedIdentities/cli-test-sli-uami-2"
 )
 _DEFAULT_AMW_TEMPLATE = (
-    "/subscriptions/{sub}/resourceGroups/mfrei/providers/"
-    "microsoft.monitor/accounts/streaming-3p-slo-am2cbn-eastus2euap-1"
+    "/subscriptions/{sub}/resourceGroups/cli-test-sli-rg/providers/"
+    "microsoft.monitor/accounts/cli-test-sli-amw"
 )
 
 
-def _build_signal_source(uami_id, amw_id):
+def _build_signal_source(uami_id, amw_id, signal_source_id="A"):
     return {
         "filters": [
             {
@@ -65,9 +65,9 @@ def _build_signal_source(uami_id, amw_id):
                 "samplingType": "Count",
             },
         ],
-        "metricName": "mfreiTestMetric1",
-        "metricNamespace": "mfreiTestNamespace",
-        "signalSourceId": "A",
+        "metricName": "cliTestMetric1",
+        "metricNamespace": "cliTestNamespace",
+        "signalSourceId": signal_source_id,
         "sourceAmwAccountManagedIdentity": uami_id,
         "sourceAmwAccountResourceId": amw_id,
         "spatialAggregation": {"dimensions": ["dimName1"], "type": "Count"},
@@ -97,7 +97,7 @@ class TestMonitorSliScenarios(ScenarioTest):
         self.kwargs.update(self._common_kwargs(sub_id, "clisli"))
 
         good_signal_source = _build_signal_source(self.kwargs["uami_id"], self.kwargs["amw_id"])
-        total_signal_source = dict(good_signal_source)
+        total_signal_source = _build_signal_source(self.kwargs["uami_id"], self.kwargs["amw_id"], signal_source_id="B")
         self.kwargs.update({
             "baseline": json.dumps({
                 "baseline": {
@@ -112,7 +112,7 @@ class TestMonitorSliScenarios(ScenarioTest):
             }]),
             "sli_properties": json.dumps({
                 "goodSignals": {"signalFormula": "A", "signalSources": [good_signal_source]},
-                "totalSignals": {"signalFormula": "A", "signalSources": [total_signal_source]},
+                "totalSignals": {"signalFormula": "B", "signalSources": [total_signal_source]},
             }),
         })
 
@@ -175,7 +175,7 @@ class TestMonitorSliScenarios(ScenarioTest):
         self.kwargs.update(self._common_kwargs(sub_id, "clislirot"))
 
         good_signal_source = _build_signal_source(self.kwargs["uami_id"], self.kwargs["amw_id"])
-        total_signal_source = dict(good_signal_source)
+        total_signal_source = _build_signal_source(self.kwargs["uami_id"], self.kwargs["amw_id"], signal_source_id="B")
         self.kwargs.update({
             "baseline": json.dumps({
                 "baseline": {
@@ -190,7 +190,7 @@ class TestMonitorSliScenarios(ScenarioTest):
             }]),
             "sli_properties": json.dumps({
                 "goodSignals": {"signalFormula": "A", "signalSources": [good_signal_source]},
-                "totalSignals": {"signalFormula": "A", "signalSources": [total_signal_source]},
+                "totalSignals": {"signalFormula": "B", "signalSources": [total_signal_source]},
             }),
             # ARM IDs contain dots (Microsoft.ManagedIdentity, etc.), so they
             # cannot be addressed as path segments by --set/--remove. The

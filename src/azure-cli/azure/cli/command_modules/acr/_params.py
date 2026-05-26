@@ -156,6 +156,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('registry_name', options_list=['--registry', '-r', c.deprecate(target='-n', redirect='-r', hide=True), c.deprecate(target='--name', redirect='--registry', hide=True)])
         c.argument('status', help="Indicate whether authentication-as-arm is enabled.", arg_type=get_enum_type(PolicyStatus))
 
+    with self.argument_context('acr config content-trust update') as c:
+        c.argument('status', help="Indicates whether content-trust is enabled. Only 'disabled' is allowed.", arg_type=get_enum_type([PolicyStatus.disabled]))
+
     with self.argument_context('acr config content-trust') as c:
         c.argument('registry_name', options_list=['--registry', '-r', c.deprecate(target='-n', redirect='-r', hide=True), c.deprecate(target='--name', redirect='--registry', hide=True)])
         c.argument('status', help="Indicates whether content-trust is enabled.", arg_type=get_enum_type(PolicyStatus))

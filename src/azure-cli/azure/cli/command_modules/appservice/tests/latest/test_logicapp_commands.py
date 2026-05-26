@@ -25,7 +25,7 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 # you can use to rebuild the repository
 WINDOWS_ASP_LOCATION_LOGICAPP = 'francecentral'
 LINUX_ASP_LOCATION_LOGICAPP = 'ukwest'
-DEFAULT_LOCATION = "westus"
+DEFAULT_LOCATION = "eastus"
 
 class LogicappBasicE2ETest(ScenarioTest):
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
@@ -333,7 +333,7 @@ class LogicAppPlanTest(ScenarioTest):
             JMESPathCheck('resourceGroup', resource_group),
             JMESPathCheck('state', 'Running'),
             JMESPathCheck('enabled', True),
-            JMESPathCheck('appServicePlanId', plan_id),
+            JMESPathCheck('serverFarmId', plan_id),
             JMESPathCheck('kind', 'functionapp,workflowapp'),
         ])
 
@@ -364,7 +364,7 @@ class LogicAppPlanTest(ScenarioTest):
         name = self.create_random_name('logicapp', 24)
         self.cmd('logicapp create -g {} -n {} --storage-account {}'.format(resource_group, name, storage_account))
         show = self.cmd('logicapp show -g {} -n {}'.format(resource_group, name))
-        plan = parse_resource_id(show.get_output_in_json()["appServicePlanId"])
+        plan = parse_resource_id(show.get_output_in_json()["serverFarmId"])
         sku = "WS1"
         self._validate_logicapp_create(name, resource_group, plan["name"])
         self._validate_ws_plan(plan["name"], resource_group, sku)
