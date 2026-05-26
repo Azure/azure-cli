@@ -3,6 +3,105 @@
 Release History
 ===============
 
+2.87.0
+++++++
+
+**ACR**
+
+* [BREAKING CHANGE] `az acr replication create/update`: Remove deprecated `--region-endpoint-enabled` flag and use `--global-endpoint-routing` instead (#33173)
+* [BREAKING CHANGE] `az acr config content-trust update`: No longer accept the `enabled` status (#33174)
+* [BREAKING CHANGE] `az acr check-health`: Remove Notary client check due to Docker Content Trust deprecation (#33174)
+* `az acr login`: Make ACR audience customizable in AAD token acquisition (#33294)
+* `az acr connected-registry resync`: Add command to manually trigger a sync from the parent registry (#33236)
+* `az acr update`: Add `--endpoint-protocol` parameter to support specifying the endpoint protocol for the registry (#33089)
+* `az acr login`: Fix regional endpoint matching for registries with DNL suffix (#33381)
+* `az acr config content-trust/show/update`: Add deprecation labels and notices (#33174)
+
+**AKS**
+
+* Skip subnet validation for existing outbound type on update (#33418)
+* `az aks add/update`: Add `enable-artifact-streaming` and `disable_artifact_streaming` options (#33257)
+
+**App Config**
+
+* `az appconfig kv set-snapshot-reference`: Add support to create a snapshot reference key-value (#33278)
+* `az appconfig kv list`: Add support to list key-values from a snapshot reference (#33278)
+* `az appconfig create\update\network-security-perimeter-configuration`: Add NSP support (#33407)
+
+**App Service**
+
+* [BREAKING CHANGE] `az webapp list-runtimes`: Output changed from flat string list to structured list of dicts with keys: os, runtime, version, config, support, end_of_life. Added `--runtime` and `--support` filter parameters. Removed deprecated `--linux` and `--show-runtime-details` parameters. (#32903)
+* Remove stale `az webapp list-runtimes` breaking change pre-announcements (#33434)
+* `az webapp log startup`: Add commands to list and view Linux container startup logs (#33256)
+* `az webapp create`: Add `--site-scoped-certs` parameter to support enabling or disabling site-scoped certificates (#33306)
+* `az webapp up`: Add warning message for future deprecation (#33410)
+* `az functionapp deployment source config-zip`: Fix `KeyError` `'FUNCTIONS_WORKER_RUNTIME'` for Go function apps on Flex Consumption (#33404)
+* `az functionapp update-strategy config set`: Add new command to set or update a function app's update strategy configuration (#33341)
+* `az functionapp update-strategy config show`: Add new command to get the details of a function app's update strategy configuration (#33341)
+* Fix #31394: `az functionapp deployment source config-zip`: Never ending loop on flex function app health check (#33388)
+
+**Compute**
+
+* [BREAKING CHANGE] `az vm create`: Change default `--size` from `Standard_DS1_v2` to `Standard_D2s_v5` (#33323)
+* [BREAKING CHANGE] `az vmss create`: Change default `--vm-sku` from `Standard_DS1_v2` to `Standard_D2s_v5` (#33323)
+* `az sig image-definition update`: Add ability to update image-definition start version (#33273)
+* `az vm create/ update`: Support zone-resilient VM with `--zone-movement` (#33242)
+* `az vm update`: Support cross-zone movement (#33242)
+* `az vm deallocate`: Support vm force deallocate with `--force-deallocate` (#33242)
+* `az vm/vmss create`: Support Ephemeral OS disk with full caching with `--ephemeral-os-disk-enable-full-caching` (#33292)
+
+**Container app**
+
+* `az containerapp`: Fix typo in help message (#33082)
+* Fix #33369: `az containerapp up`: Resolve OS/Architecture models from correct SDK package (#33371)
+
+**Cosmos DB**
+
+* `az cosmosdb restore`: Fix cross-region restore by preserving source region in top-level location (#33274)
+
+**Key Vault**
+
+* `az keyvault create`: Fix keyvault create RequestDisallowedByPolicy error by explicitly setting `enableSoftDelete` in the request body (#33265)
+
+**MySQL**
+
+* BREAKING CHANGE `az mysql flexible-server backup create/restore/geo-restore/replica`: Remove `--storage-redundancy` (#33428)
+
+**NetAppFiles**
+
+* [BREAKING CHANGE] `az netappfiles volume update`: `--remote-volume-resource-id` has been deprecated (#33217)
+* [BREAKING CHANGE] `az netappfiles volume create`: `--network-features` default value has changed to `Standard` (#33217)
+* `az netappfiles cache`: Add new command group to mange Cache resources (#33217)
+* `az netappfiles volume bucket`: Add new command group to mange Bucket resources (#33217)
+
+**Network**
+
+* `az network vnet create/update`: Add `--summarized-gateway-prefixes` to support summarized gateway prefixes (#33241)
+* `az network application-gateway ssl-cert create/update`: Add `--hsm` to support Managed HSM (#33353)
+* `az network virtual-network-appliance create/update`: Add `--private-ip-address-version` to support private ip address version (#33315)
+
+**POSGRESQL**
+
+* [BREAKING CHANGE] `az postgres flexible-server create/update`: Remove `--high-availability` for preferred argument `--zonal-resiliency` (#33300)
+
+**PostgreSQL**
+
+* [BREAKING CHANGE] `az postgres flexible-server upgrade`: Remove the enum for `--version` (#33116)
+* [BREAKING CHANGE] `az postgres flexible-server create/update`: Remove deprecated `--cluster-option` and update validation logic (#33244)
+* [BREAKING CHANGE] `az postgres flexible-server index-tuning`: Remove support for command group (#33344)
+* [BREAKING CHANGE] `az postgres flexible-server backup create`: Remove backup name requirement and implement automatic name generation for backups (#33340)
+* [BREAKING CHANGE] `az postgres flexible-server create/geo-restore/restore/revive-dropped`: Don't create or alter networking components like virtual network, subnet, or private DNS zone. Stop supporting `--address-prefixes` and `--subnet-prefixes` anymore (#33192)
+* [BREAKING CHANGE] `az postgres flexible-server replica create`: Don't create or alter networking components like virtual network, subnet, or private DNS zone. Stop supporting `--address-prefixes` and `--subnet-prefixes` anymore (#33192)
+* [BREAKING CHANGE] `az postgres flexible-server backup/db/firewall-rule/long-term-retention/migration/replica create`: Make consistent use of `--name` and `--server-name` across all commands (#33343)
+* [BREAKING CHANGE] `az postgres flexible-server long-term-retention`: Remove support for command group (#33345)
+
+**Storage**
+
+* `az storage account create/update`: Support new value `Smart` for `--access-tier` (#33423)
+* `az storage account create/update`: Support `--allowed-copy-scope` (#33423)
+* `az storage account blob-service-properties update`: Add `--enable-static-website`, `--index-document`, `--default-index-document-path`, `--error-document-404-path` (#33423)
+* `az storage account or-policy create/update`: Add `--tags-replication` (#33423)
+
 2.86.0
 ++++++
 

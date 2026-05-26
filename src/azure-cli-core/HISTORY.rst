@@ -3,6 +3,16 @@
 Release History
 ===============
 
+2.87.0
+++++++
+* Raw githubusercontent urls are updated to refer azcli blob to restrict external system access (#33240)
+* Resolve CVE-2026-44431 (#33351)
+* Resolve CVE-2026-44432 (#33351)
+* `az login`: Support Entra agentic session differentiation for Copilot agent requests (#33309)
+* Resolve CVE-2026-45409 (#33401)
+* Bump pymsalruntime to 0.20.6 (#33433)
+* Git diff updated to match the two commits (branches head) only — no merge base needed (#33400)
+
 2.86.0
 ++++++
 * Resolve CVE-2025-15467 (#33201)
