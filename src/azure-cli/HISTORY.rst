@@ -80,12 +80,9 @@ Release History
 * `az network application-gateway ssl-cert create/update`: Add `--hsm` to support Managed HSM (#33353)
 * `az network virtual-network-appliance create/update`: Add `--private-ip-address-version` to support private ip address version (#33315)
 
-**POSGRESQL**
-
-* [BREAKING CHANGE] `az postgres flexible-server create/update`: Remove `--high-availability` for preferred argument `--zonal-resiliency` (#33300)
-
 **PostgreSQL**
 
+* [BREAKING CHANGE] `az postgres flexible-server create/update`: Remove `--high-availability` for preferred argument `--zonal-resiliency` (#33300)
 * [BREAKING CHANGE] `az postgres flexible-server upgrade`: Remove the enum for `--version` (#33116)
 * [BREAKING CHANGE] `az postgres flexible-server create/update`: Remove deprecated `--cluster-option` and update validation logic (#33244)
 * [BREAKING CHANGE] `az postgres flexible-server index-tuning`: Remove support for command group (#33344)

@@ -9,7 +9,6 @@ Release History
 * Resolve CVE-2026-44432 (#33351)
 * `az login`: Support Entra agentic session differentiation for Copilot agent requests (#33309)
 * Resolve CVE-2026-45409 (#33401)
-* Bump pymsalruntime to 0.20.6 (#33433)
 
 2.86.0
 ++++++
