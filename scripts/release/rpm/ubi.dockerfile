@@ -7,8 +7,12 @@ FROM ${image} AS build-env
 ARG cli_version=dev
 ARG python_package=python3.12
 
-RUN yum update -y
-RUN yum install -y wget rpm-build gcc libffi-devel ${python_package}-devel openssl-devel make bash diffutils patch dos2unix perl
+# Combine update + install into a single transaction so dnf resolves a
+# consistent set of packages. Running them separately can fail when the
+# BaseOS and AppStream repos are temporarily out of sync (e.g. AppStream
+# ships glibc-devel-X but BaseOS hasn't published the matching glibc-X yet).
+RUN yum update -y && \
+    yum install -y wget rpm-build gcc libffi-devel ${python_package}-devel openssl-devel make bash diffutils patch dos2unix perl
 
 WORKDIR /azure-cli
 

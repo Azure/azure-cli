@@ -4,8 +4,10 @@ FROM ${image} AS build-env
 ARG cli_version=dev
 ARG python_package=python3
 
-RUN dnf update -y
-RUN dnf install -y wget rpm-build gcc libffi-devel ${python_package}-devel openssl-devel make bash coreutils diffutils patch dos2unix perl
+# Combine update + install into a single transaction so dnf resolves a
+# consistent set of packages and avoids transient repo-sync skew failures.
+RUN dnf update -y && \
+    dnf install -y wget rpm-build gcc libffi-devel ${python_package}-devel openssl-devel make bash coreutils diffutils patch dos2unix perl
 
 WORKDIR /azure-cli
 
