@@ -19,7 +19,7 @@ Release History
 
 **AKS**
 
-* `az aks add/update`: Add `enable-artifact-streaming` and `disable_artifact_streaming` options (#33257)
+* `az aks add/update`: Add `--enable-artifact-streaming` and `--disable-artifact-streaming` parameters (#33257)
 
 **App Config**
 
@@ -71,8 +71,8 @@ Release History
 
 * [BREAKING CHANGE] `az netappfiles volume update`: `--remote-volume-resource-id` has been deprecated (#33217)
 * [BREAKING CHANGE] `az netappfiles volume create`: `--network-features` default value has changed to `Standard` (#33217)
-* `az netappfiles cache`: Add new command group to mange Cache resources (#33217)
-* `az netappfiles volume bucket`: Add new command group to mange Bucket resources (#33217)
+* `az netappfiles cache`: Add new command group to manage Cache resources (#33217)
+* `az netappfiles volume bucket`: Add new command group to manage Bucket resources (#33217)
 
 **Network**
 
