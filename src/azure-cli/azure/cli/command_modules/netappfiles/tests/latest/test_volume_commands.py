@@ -448,16 +448,15 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         volume = self.cmd("az netappfiles volume create --resource-group {rg} --account-name %s --pool-name %s "
                           "--volume-name %s -l %s %s --file-path %s --vnet %s --subnet %s --smb-encryption %s "
                           "--smb-continuously-avl %s --encryption-key-source %s --ldap-enabled %s "
-                          "--is-def-quota-enabled %s --avs-data-store %s" %
+                          "--avs-data-store %s" %
                           (account_name, pool_name, volume_name, RG_LOCATION, VOLUME_DEFAULT, volume_name, vnet_name,
                            subnet_name, smb_encryption, smb_continuously_avl, encryption_key_source, ldap_enabled,
-                           is_default_quota_enabled, avs_data_store)).get_output_in_json()
+                           avs_data_store)).get_output_in_json()
         assert volume['name'] == account_name + '/' + pool_name + '/' + volume_name
         assert volume['smbEncryption'] == smb_encryption
         assert volume['smbContinuouslyAvailable'] == smb_continuously_avl
         assert volume['encryptionKeySource'] == encryption_key_source
         assert volume['ldapEnabled'] == ldap_enabled
-        assert volume['isDefaultQuotaEnabled'] == is_default_quota_enabled
         assert volume['avsDataStore'] == avs_data_store
 
     @serial_test()
