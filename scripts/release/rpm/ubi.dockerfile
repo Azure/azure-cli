@@ -7,12 +7,15 @@ FROM ${image} AS build-env
 ARG cli_version=dev
 ARG python_package=python3.12
 
-# Combine update + install into a single transaction so dnf resolves a
-# consistent set of packages. Running them separately can fail when the
-# BaseOS and AppStream repos are temporarily out of sync (e.g. AppStream
-# ships glibc-devel-X but BaseOS hasn't published the matching glibc-X yet).
-RUN yum update -y && \
-    yum install -y wget rpm-build gcc libffi-devel ${python_package}-devel openssl-devel make bash diffutils patch dos2unix perl
+# Install build dependencies in a single dnf transaction so the resolver
+# picks a mutually consistent set of packages. A separate `yum update -y`
+# step is intentionally avoided: when BaseOS and AppStream are temporarily
+# out of sync (e.g. AppStream ships glibc-devel-X but BaseOS has not yet
+# published the matching glibc-X), updating first pins glibc to a version
+# that no installable glibc-devel matches, which then breaks `gcc` install.
+# The base UBI image already ships with security updates; `dnf install`
+# will pull any newer transitive dependencies it needs.
+RUN yum install -y wget rpm-build gcc libffi-devel ${python_package}-devel openssl-devel make bash diffutils patch dos2unix perl
 
 WORKDIR /azure-cli
 

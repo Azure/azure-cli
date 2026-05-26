@@ -4,10 +4,12 @@ FROM ${image} AS build-env
 ARG cli_version=dev
 ARG python_package=python3
 
-# Combine update + install into a single transaction so dnf resolves a
-# consistent set of packages and avoids transient repo-sync skew failures.
-RUN dnf update -y && \
-    dnf install -y wget rpm-build gcc libffi-devel ${python_package}-devel openssl-devel make bash coreutils diffutils patch dos2unix perl
+# Install build dependencies in a single dnf transaction so the resolver
+# picks a mutually consistent set of packages. A separate `dnf update -y`
+# step is intentionally avoided: when BaseOS and AppStream are temporarily
+# out of sync, updating first can pin glibc to a version whose matching
+# glibc-devel is not yet available, breaking the subsequent install.
+RUN dnf install -y wget rpm-build gcc libffi-devel ${python_package}-devel openssl-devel make bash coreutils diffutils patch dos2unix perl
 
 WORKDIR /azure-cli
 
