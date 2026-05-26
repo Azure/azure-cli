@@ -13,23 +13,21 @@ interactions:
       ParameterSetName:
       - -n -g --kind
       User-Agent:
-      - AZURECLI/2.78.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2024-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","test":"test_storage_blob_update_service_properties","date":"2025-10-24T09:39:20Z","module":"storage"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","test":"test_storage_blob_update_service_properties","date":"2026-05-14T08:42:27Z","module":"storage"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
-      connection:
-      - close
       content-length:
       - '382'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Fri, 24 Oct 2025 09:39:23 GMT
+      - Thu, 14 May 2026 08:42:33 GMT
       expires:
       - '-1'
       pragma:
@@ -61,9 +59,9 @@ interactions:
       ParameterSetName:
       - -n -g --kind
       User-Agent:
-      - AZURECLI/2.78.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/checkNameAvailability?api-version=2025-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/checkNameAvailability?api-version=2025-08-01
   response:
     body:
       string: '{"nameAvailable":true}'
@@ -75,7 +73,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Fri, 24 Oct 2025 09:39:25 GMT
+      - Thu, 14 May 2026 08:43:06 GMT
       expires:
       - '-1'
       pragma:
@@ -87,7 +85,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=7b31ddc4-9101-4ef0-a387-79ce181cacdb,objectId=7b1bdbe4-80ac-47f9-882b-33d6e62950ab/eastus2euap/d9e48ee3-735c-4952-982f-8e53c603e854
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/0a63ccc4-b5ed-442e-bf87-e4e83442b95e
       x-ms-throttling-version:
       - v2
     status:
@@ -95,7 +93,8 @@ interactions:
       message: OK
 - request:
     body: '{"sku": {"name": "Standard_RAGRS"}, "kind": "StorageV2", "location": "westus",
-      "properties": {"encryption": {"services": {"blob": {}}, "keySource": "Microsoft.Storage"}}}'
+      "properties": {"encryption": {"keySource": "Microsoft.Storage", "services":
+      {"blob": {}}}}}'
     headers:
       Accept:
       - application/json
@@ -112,25 +111,27 @@ interactions:
       ParameterSetName:
       - -n -g --kind
       User-Agent:
-      - AZURECLI/2.78.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/account000002?api-version=2025-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/account000002?api-version=2025-08-01
   response:
     body:
       string: ''
     headers:
       cache-control:
       - no-cache
+      connection:
+      - close
       content-length:
       - '0'
       content-type:
       - text/plain; charset=utf-8
       date:
-      - Fri, 24 Oct 2025 09:39:29 GMT
+      - Thu, 14 May 2026 08:43:12 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/00f4b3fd-497e-4773-894b-f4d4b461ab1a?monitor=true&api-version=2025-06-01&t=638968955695595211&c=MIIIpDCCBoygAwIBAgITFgIdx-8P5Q2flkVe0wABAh3H7zANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDMwHhcNMjUxMDIwMTM0ODIxWhcNMjYwMTE4MTM0ODIxWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJsx40wbBQQVymBKxEYB3QsXs7DWrmkLk1cvGC9Oh6ZUsiS6z4fZ9KUiL7u4Cb1R-5gfYTplSDkCfn9Y776fzY9tgxKTFF2KMooWQSUUNfMYuwrWFbbHGDx79k-SN6J44MhkxgVnvirjK5cOgtR1YwGjnk0x5Ea3-szYPplTQi12yBEDft-JR3YCKn54jq1stV1W2hRp_2g1BQImqyuswXZKY2DD-s3bQClN3clms4KDqdtTyXsWYLLd1wyrriHRsQnNbYpC1EqjwDyNGLTXHMVXKbeUefj5AwkYLnb77HgLc0IW7nFQwaOLB01n0OsHuhWZeUiilCDsiV76B_8MF0CAwEAAaOCBJEwggSNMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwIwCgYIKwYBBQUHAwEwPAYJKwYBBAGCNxUHBC8wLQYlKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFgh8fIENbYcQIBZAIBBjCCAdoGCCsGAQUFBwEBBIIBzDCCAcgwZgYIKwYBBQUHMAKGWmh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9wa2lpbmZyYS9DZXJ0cy9BTTNQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDAzKDEpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDEuYW1lLmdibC9haWEvQU0zUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMygxKS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwyLmFtZS5nYmwvYWlhL0FNM1BLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDMoMSkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMy5hbWUuZ2JsL2FpYS9BTTNQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDAzKDEpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDQuYW1lLmdibC9haWEvQU0zUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMygxKS5jcnQwHQYDVR0OBBYEFBIs_XIgrlYGjVV6tC88QEhsK39fMA4GA1UdDwEB_wQEAwIFoDCCATUGA1UdHwSCASwwggEoMIIBJKCCASCgggEchkJodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ1JML0FNRSUyMEluZnJhJTIwQ0ElMjAwMygxKS5jcmyGNGh0dHA6Ly9jcmwxLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwMygxKS5jcmyGNGh0dHA6Ly9jcmwyLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwMygxKS5jcmyGNGh0dHA6Ly9jcmwzLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwMygxKS5jcmyGNGh0dHA6Ly9jcmw0LmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwMygxKS5jcmwwgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDAjAMBgorBgEEAYI3ewQCMB8GA1UdIwQYMBaAFEijrWB1am_sYPNpVdEAsTJX_GzkMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDATANBgkqhkiG9w0BAQsFAAOCAgEAoWGeh2L-xOp4WFwNcK7-42nE8XWzyiVfNq-en8umv6B7FIlZBqRTSHucIlGoZqT7uEkuOIkyfwKUKMHeX3kte0w5f4gSgSX-JsexZj509BqurtDEgPbEjh9zUpbDAM7sODNvfiZ0HVF6sREKDyDIRGhYl_C7qO6FPNUH0wiEMRNI92WewkvN5kxHFBO56OS26He5ElMpeDPNifRXSj2RrthZNiLhtVNqOXCXV8HvAO-8PBPQGpetO260pqROBjblZfst9LCba3YKdZ8o2ojOeG5_ANB5mSX3bsBsY2ULkbRKgNBi5AXJ7q0-n01yM6-uiSvZ8wrkHLfDJ6KlzSDTLJpoVa8AUeZoPEhJgyQInNCPK5nFOD-F1QNRwQj-B-s7y16iUVZiLZ3hkxODdrbMjfPRL2P3DYn1cg-jZVq0xDX1aSlRyQq6qi9xZ9RfBPeOrsZ3SHGm0XIJdlqtaYt0Evo6fWKiFXuJ-H6nf5Qy8sLTk2q160CH2IgsW5_tA0n0ySGt5n-9j610wwPdH6ImEQ1jli9U8Ur82WjB7qQhpmYPuHOyytAGttfk1271zkw5TOpkzJfGWvT5zYv436XCj6pouSk2GJmG1iR-9pO4kPK1LWp3ujV-IXZjP_-xg0wwwsvc0BDJJZZk4tElY91ySFzLXlN8QfTH67VHl7D8ILg&s=SYOlt-D-O6yQbLXtClx6uqyMnTL9CjpwSEz6GpkiSb_14_nGqA1XPBhnh9I4jQ1MvIA8QE9JaVmWY-7Funy5t15P_lOp9jboYAm8DcCFPI41p96_-xWZwFAD3_O7q1RdYAbRN1lZOiPLvkPRjZebB8Od_ijJrRlvXLrBbPiY_-9jQYRKxmlbKIrDjs7MMIoNLs5VoCnaSxlmrVs7xeJETMsudq5bATf-GuZenT3XAHBxbAJV95exDGC0yaVbhjpMXr4k8BZbul8BF9zyCfTt2oOz4NWa9bJZs5dvXp4VzFGULOFqgP4THX22wPYkySFJZoIx3BK87bQPyPgN6_-ATg&h=gt3GW5ikbi7oApko-o81ANfV9UTsHuRfVSSAQJ51wcg
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/ed6b3ca8-b517-4fd7-8714-3af51fc4f4c7?monitor=true&api-version=2025-08-01&t=639143449923676803&c=MIIH9DCCBtygAwIBAgIQSjf8N8vu6a2s5d6lDssJBTANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBFVTJDIENBIDAxMB4XDTI2MDQyMTIwNDkyM1oXDTI2MDcxNzAyNDkyM1owQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDVaCBqLVZkrXQTvgcTvOw0T0uyIxtVnyKlnJ0eqcudfBnOYjBkECAfP6YZEeymGICyDr6Gl0my3J59XHhJV7jl_Bke64FFsCgJjV7Xlk2u2Oqgt27hFVroUrW6KKUOnuYWbqGVXbQAEdDrhRTc4z6vndU1RbA3lHpQrjCBJvxM3uAinNUDmz8GxpMfWAMWV0KMV-6rdnGxVP7Z0oEFWND3y07F4qczUyMHY2Ej9nHOUhS6DqPpnez9009ogzrE7KwhIzVfosnsEI1wZZKHbp98weX4FOizPoPRs7pFUYOeCUGhCdCt3OPu1qXcdMzzBarbtZOHLgfNvVo02s_BruNVAgMBAAGjggTyMIIE7jCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBQHozZ6-55-u8Ua28LK_Ui12mAGwDAfBgNVHSMEGDAWgBTPUQGq6UMsZHYbSvCqwPKS-E_DuzCCAeIGA1UdHwSCAdkwggHVMHWgc6Bxhm9odHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvZWFzdHVzMmV1YXAvY3Jscy9jY21lZWFzdHVzMmV1YXBwa2kvY2NtZWVhc3R1czJldWFwaWNhMDEvNDkvY3VycmVudC5jcmwwd6B1oHOGcWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L2Vhc3R1czJldWFwL2NybHMvY2NtZWVhc3R1czJldWFwcGtpL2NjbWVlYXN0dXMyZXVhcGljYTAxLzQ5L2N1cnJlbnQuY3JsMGagZKBihmBodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vZWFzdHVzMmV1YXAvY3Jscy9jY21lZWFzdHVzMmV1YXBwa2kvY2NtZWVhc3R1czJldWFwaWNhMDEvNDkvY3VycmVudC5jcmwwe6B5oHeGdWh0dHA6Ly9jY21lZWFzdHVzMmV1YXBwa2kuZWFzdHVzMmV1YXAucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21lZWFzdHVzMmV1YXBpY2EwMS80OS9jdXJyZW50LmNybDCCAecGCCsGAQUFBwEBBIIB2TCCAdUweAYIKwYBBQUHMAKGbGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9lYXN0dXMyZXVhcC9jYWNlcnRzL2NjbWVlYXN0dXMyZXVhcHBraS9jY21lZWFzdHVzMmV1YXBpY2EwMS9jZXJ0LmNlcjB6BggrBgEFBQcwAoZuaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvZWFzdHVzMmV1YXAvY2FjZXJ0cy9jY21lZWFzdHVzMmV1YXBwa2kvY2NtZWVhc3R1czJldWFwaWNhMDEvY2VydC5jZXIwaQYIKwYBBQUHMAKGXWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9lYXN0dXMyZXVhcC9jYWNlcnRzL2NjbWVlYXN0dXMyZXVhcHBraS9jY21lZWFzdHVzMmV1YXBpY2EwMS9jZXJ0LmNlcjByBggrBgEFBQcwAoZmaHR0cDovL2NjbWVlYXN0dXMyZXVhcHBraS5lYXN0dXMyZXVhcC5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWVlYXN0dXMyZXVhcGljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQAyDur8rYbF5IQWvjkn0gR-ZYvZzyV7PI2dJS04ig0e8zCcPvYuE3UluDtyIDtK9ZubD56tVpDxQoXIiRv_SSWWTOyKddsY0vRcX6Gn4s53bTLO251Qib8grqgmcqb8um2fGhdHp-XBLPfJc6kSQbXX2a55bRhQhmAOrc2Wil_hiQLmtXHax6bUL23OldYtr6aprc7WrJFyhahssZHCQq-1APZ3Sfq8X4yjznK7fGzH69Nb60bKucIAwL18Jsrtzcr_JE73YxRiQs8kSkrjwxyPWTKy6tll23_YOi49bIWpqDldaEBoA0OIjqCm49L_Epa2BvzIpUAC1JAVAyW87DTU&s=fiPmaR5VKgNDw5ggTd4OafLV4yqX3oVqzA3_KShA-HP0GODfUdjXSAKqRyCZw6eQvqx516ejDLlQBJB85f4qTMUgaKHXKzBoXLHJEX6bH9DKac2zNlyx4dcu9JbGWID6bBELCUwaYgeyyCf0cO3GHClKXjUe7FUWibiS7enG93fNbyT-PjyT9t86mdKHkSHYVDjZsM24RDUhx_YqkQQNOTEYxIU6Grxrd0VtwVQp9aJJNCpXxYLO7umZ1PCW5Mws-4OExhJmSR1ijGLAF4SbgXW5R_Sv_cPqWvNgNdkhOIj6JWMkiVIGdY6TnpYrYfXTDLIzveq1iceuwnnmVUxWvg&h=EE46xy-TU2f1WRrZXHjSyPRObBlGhDJwtPzHh-nx_Kk
       pragma:
       - no-cache
       server:
@@ -140,7 +141,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=7b31ddc4-9101-4ef0-a387-79ce181cacdb,objectId=7b1bdbe4-80ac-47f9-882b-33d6e62950ab/eastus2euap/dec24c29-93e3-4051-b58b-84863a0eb11f
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/31792256-5c73-465c-9877-ec836e85d183
       x-ms-ratelimit-remaining-subscription-writes:
       - '199'
       x-ms-throttling-version:
@@ -162,9 +163,9 @@ interactions:
       ParameterSetName:
       - -n -g --kind
       User-Agent:
-      - AZURECLI/2.78.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/00f4b3fd-497e-4773-894b-f4d4b461ab1a?monitor=true&api-version=2025-06-01&t=638968955695595211&c=MIIIpDCCBoygAwIBAgITFgIdx-8P5Q2flkVe0wABAh3H7zANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDMwHhcNMjUxMDIwMTM0ODIxWhcNMjYwMTE4MTM0ODIxWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJsx40wbBQQVymBKxEYB3QsXs7DWrmkLk1cvGC9Oh6ZUsiS6z4fZ9KUiL7u4Cb1R-5gfYTplSDkCfn9Y776fzY9tgxKTFF2KMooWQSUUNfMYuwrWFbbHGDx79k-SN6J44MhkxgVnvirjK5cOgtR1YwGjnk0x5Ea3-szYPplTQi12yBEDft-JR3YCKn54jq1stV1W2hRp_2g1BQImqyuswXZKY2DD-s3bQClN3clms4KDqdtTyXsWYLLd1wyrriHRsQnNbYpC1EqjwDyNGLTXHMVXKbeUefj5AwkYLnb77HgLc0IW7nFQwaOLB01n0OsHuhWZeUiilCDsiV76B_8MF0CAwEAAaOCBJEwggSNMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwIwCgYIKwYBBQUHAwEwPAYJKwYBBAGCNxUHBC8wLQYlKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFgh8fIENbYcQIBZAIBBjCCAdoGCCsGAQUFBwEBBIIBzDCCAcgwZgYIKwYBBQUHMAKGWmh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9wa2lpbmZyYS9DZXJ0cy9BTTNQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDAzKDEpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDEuYW1lLmdibC9haWEvQU0zUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMygxKS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwyLmFtZS5nYmwvYWlhL0FNM1BLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDMoMSkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMy5hbWUuZ2JsL2FpYS9BTTNQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDAzKDEpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDQuYW1lLmdibC9haWEvQU0zUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMygxKS5jcnQwHQYDVR0OBBYEFBIs_XIgrlYGjVV6tC88QEhsK39fMA4GA1UdDwEB_wQEAwIFoDCCATUGA1UdHwSCASwwggEoMIIBJKCCASCgggEchkJodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ1JML0FNRSUyMEluZnJhJTIwQ0ElMjAwMygxKS5jcmyGNGh0dHA6Ly9jcmwxLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwMygxKS5jcmyGNGh0dHA6Ly9jcmwyLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwMygxKS5jcmyGNGh0dHA6Ly9jcmwzLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwMygxKS5jcmyGNGh0dHA6Ly9jcmw0LmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwMygxKS5jcmwwgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDAjAMBgorBgEEAYI3ewQCMB8GA1UdIwQYMBaAFEijrWB1am_sYPNpVdEAsTJX_GzkMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDATANBgkqhkiG9w0BAQsFAAOCAgEAoWGeh2L-xOp4WFwNcK7-42nE8XWzyiVfNq-en8umv6B7FIlZBqRTSHucIlGoZqT7uEkuOIkyfwKUKMHeX3kte0w5f4gSgSX-JsexZj509BqurtDEgPbEjh9zUpbDAM7sODNvfiZ0HVF6sREKDyDIRGhYl_C7qO6FPNUH0wiEMRNI92WewkvN5kxHFBO56OS26He5ElMpeDPNifRXSj2RrthZNiLhtVNqOXCXV8HvAO-8PBPQGpetO260pqROBjblZfst9LCba3YKdZ8o2ojOeG5_ANB5mSX3bsBsY2ULkbRKgNBi5AXJ7q0-n01yM6-uiSvZ8wrkHLfDJ6KlzSDTLJpoVa8AUeZoPEhJgyQInNCPK5nFOD-F1QNRwQj-B-s7y16iUVZiLZ3hkxODdrbMjfPRL2P3DYn1cg-jZVq0xDX1aSlRyQq6qi9xZ9RfBPeOrsZ3SHGm0XIJdlqtaYt0Evo6fWKiFXuJ-H6nf5Qy8sLTk2q160CH2IgsW5_tA0n0ySGt5n-9j610wwPdH6ImEQ1jli9U8Ur82WjB7qQhpmYPuHOyytAGttfk1271zkw5TOpkzJfGWvT5zYv436XCj6pouSk2GJmG1iR-9pO4kPK1LWp3ujV-IXZjP_-xg0wwwsvc0BDJJZZk4tElY91ySFzLXlN8QfTH67VHl7D8ILg&s=SYOlt-D-O6yQbLXtClx6uqyMnTL9CjpwSEz6GpkiSb_14_nGqA1XPBhnh9I4jQ1MvIA8QE9JaVmWY-7Funy5t15P_lOp9jboYAm8DcCFPI41p96_-xWZwFAD3_O7q1RdYAbRN1lZOiPLvkPRjZebB8Od_ijJrRlvXLrBbPiY_-9jQYRKxmlbKIrDjs7MMIoNLs5VoCnaSxlmrVs7xeJETMsudq5bATf-GuZenT3XAHBxbAJV95exDGC0yaVbhjpMXr4k8BZbul8BF9zyCfTt2oOz4NWa9bJZs5dvXp4VzFGULOFqgP4THX22wPYkySFJZoIx3BK87bQPyPgN6_-ATg&h=gt3GW5ikbi7oApko-o81ANfV9UTsHuRfVSSAQJ51wcg
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/ed6b3ca8-b517-4fd7-8714-3af51fc4f4c7?monitor=true&api-version=2025-08-01&t=639143449923676803&c=MIIH9DCCBtygAwIBAgIQSjf8N8vu6a2s5d6lDssJBTANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBFVTJDIENBIDAxMB4XDTI2MDQyMTIwNDkyM1oXDTI2MDcxNzAyNDkyM1owQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDVaCBqLVZkrXQTvgcTvOw0T0uyIxtVnyKlnJ0eqcudfBnOYjBkECAfP6YZEeymGICyDr6Gl0my3J59XHhJV7jl_Bke64FFsCgJjV7Xlk2u2Oqgt27hFVroUrW6KKUOnuYWbqGVXbQAEdDrhRTc4z6vndU1RbA3lHpQrjCBJvxM3uAinNUDmz8GxpMfWAMWV0KMV-6rdnGxVP7Z0oEFWND3y07F4qczUyMHY2Ej9nHOUhS6DqPpnez9009ogzrE7KwhIzVfosnsEI1wZZKHbp98weX4FOizPoPRs7pFUYOeCUGhCdCt3OPu1qXcdMzzBarbtZOHLgfNvVo02s_BruNVAgMBAAGjggTyMIIE7jCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBQHozZ6-55-u8Ua28LK_Ui12mAGwDAfBgNVHSMEGDAWgBTPUQGq6UMsZHYbSvCqwPKS-E_DuzCCAeIGA1UdHwSCAdkwggHVMHWgc6Bxhm9odHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvZWFzdHVzMmV1YXAvY3Jscy9jY21lZWFzdHVzMmV1YXBwa2kvY2NtZWVhc3R1czJldWFwaWNhMDEvNDkvY3VycmVudC5jcmwwd6B1oHOGcWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L2Vhc3R1czJldWFwL2NybHMvY2NtZWVhc3R1czJldWFwcGtpL2NjbWVlYXN0dXMyZXVhcGljYTAxLzQ5L2N1cnJlbnQuY3JsMGagZKBihmBodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vZWFzdHVzMmV1YXAvY3Jscy9jY21lZWFzdHVzMmV1YXBwa2kvY2NtZWVhc3R1czJldWFwaWNhMDEvNDkvY3VycmVudC5jcmwwe6B5oHeGdWh0dHA6Ly9jY21lZWFzdHVzMmV1YXBwa2kuZWFzdHVzMmV1YXAucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21lZWFzdHVzMmV1YXBpY2EwMS80OS9jdXJyZW50LmNybDCCAecGCCsGAQUFBwEBBIIB2TCCAdUweAYIKwYBBQUHMAKGbGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9lYXN0dXMyZXVhcC9jYWNlcnRzL2NjbWVlYXN0dXMyZXVhcHBraS9jY21lZWFzdHVzMmV1YXBpY2EwMS9jZXJ0LmNlcjB6BggrBgEFBQcwAoZuaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvZWFzdHVzMmV1YXAvY2FjZXJ0cy9jY21lZWFzdHVzMmV1YXBwa2kvY2NtZWVhc3R1czJldWFwaWNhMDEvY2VydC5jZXIwaQYIKwYBBQUHMAKGXWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9lYXN0dXMyZXVhcC9jYWNlcnRzL2NjbWVlYXN0dXMyZXVhcHBraS9jY21lZWFzdHVzMmV1YXBpY2EwMS9jZXJ0LmNlcjByBggrBgEFBQcwAoZmaHR0cDovL2NjbWVlYXN0dXMyZXVhcHBraS5lYXN0dXMyZXVhcC5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWVlYXN0dXMyZXVhcGljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQAyDur8rYbF5IQWvjkn0gR-ZYvZzyV7PI2dJS04ig0e8zCcPvYuE3UluDtyIDtK9ZubD56tVpDxQoXIiRv_SSWWTOyKddsY0vRcX6Gn4s53bTLO251Qib8grqgmcqb8um2fGhdHp-XBLPfJc6kSQbXX2a55bRhQhmAOrc2Wil_hiQLmtXHax6bUL23OldYtr6aprc7WrJFyhahssZHCQq-1APZ3Sfq8X4yjznK7fGzH69Nb60bKucIAwL18Jsrtzcr_JE73YxRiQs8kSkrjwxyPWTKy6tll23_YOi49bIWpqDldaEBoA0OIjqCm49L_Epa2BvzIpUAC1JAVAyW87DTU&s=fiPmaR5VKgNDw5ggTd4OafLV4yqX3oVqzA3_KShA-HP0GODfUdjXSAKqRyCZw6eQvqx516ejDLlQBJB85f4qTMUgaKHXKzBoXLHJEX6bH9DKac2zNlyx4dcu9JbGWID6bBELCUwaYgeyyCf0cO3GHClKXjUe7FUWibiS7enG93fNbyT-PjyT9t86mdKHkSHYVDjZsM24RDUhx_YqkQQNOTEYxIU6Grxrd0VtwVQp9aJJNCpXxYLO7umZ1PCW5Mws-4OExhJmSR1ijGLAF4SbgXW5R_Sv_cPqWvNgNdkhOIj6JWMkiVIGdY6TnpYrYfXTDLIzveq1iceuwnnmVUxWvg&h=EE46xy-TU2f1WRrZXHjSyPRObBlGhDJwtPzHh-nx_Kk
   response:
     body:
       string: ''
@@ -176,11 +177,11 @@ interactions:
       content-type:
       - text/plain; charset=utf-8
       date:
-      - Fri, 24 Oct 2025 09:39:30 GMT
+      - Thu, 14 May 2026 08:43:14 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/00f4b3fd-497e-4773-894b-f4d4b461ab1a?monitor=true&api-version=2025-06-01&t=638968955712313805&c=MIIIpDCCBoygAwIBAgITFgIdx-8P5Q2flkVe0wABAh3H7zANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDMwHhcNMjUxMDIwMTM0ODIxWhcNMjYwMTE4MTM0ODIxWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJsx40wbBQQVymBKxEYB3QsXs7DWrmkLk1cvGC9Oh6ZUsiS6z4fZ9KUiL7u4Cb1R-5gfYTplSDkCfn9Y776fzY9tgxKTFF2KMooWQSUUNfMYuwrWFbbHGDx79k-SN6J44MhkxgVnvirjK5cOgtR1YwGjnk0x5Ea3-szYPplTQi12yBEDft-JR3YCKn54jq1stV1W2hRp_2g1BQImqyuswXZKY2DD-s3bQClN3clms4KDqdtTyXsWYLLd1wyrriHRsQnNbYpC1EqjwDyNGLTXHMVXKbeUefj5AwkYLnb77HgLc0IW7nFQwaOLB01n0OsHuhWZeUiilCDsiV76B_8MF0CAwEAAaOCBJEwggSNMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwIwCgYIKwYBBQUHAwEwPAYJKwYBBAGCNxUHBC8wLQYlKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFgh8fIENbYcQIBZAIBBjCCAdoGCCsGAQUFBwEBBIIBzDCCAcgwZgYIKwYBBQUHMAKGWmh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9wa2lpbmZyYS9DZXJ0cy9BTTNQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDAzKDEpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDEuYW1lLmdibC9haWEvQU0zUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMygxKS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwyLmFtZS5nYmwvYWlhL0FNM1BLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDMoMSkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMy5hbWUuZ2JsL2FpYS9BTTNQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDAzKDEpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDQuYW1lLmdibC9haWEvQU0zUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMygxKS5jcnQwHQYDVR0OBBYEFBIs_XIgrlYGjVV6tC88QEhsK39fMA4GA1UdDwEB_wQEAwIFoDCCATUGA1UdHwSCASwwggEoMIIBJKCCASCgggEchkJodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ1JML0FNRSUyMEluZnJhJTIwQ0ElMjAwMygxKS5jcmyGNGh0dHA6Ly9jcmwxLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwMygxKS5jcmyGNGh0dHA6Ly9jcmwyLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwMygxKS5jcmyGNGh0dHA6Ly9jcmwzLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwMygxKS5jcmyGNGh0dHA6Ly9jcmw0LmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwMygxKS5jcmwwgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDAjAMBgorBgEEAYI3ewQCMB8GA1UdIwQYMBaAFEijrWB1am_sYPNpVdEAsTJX_GzkMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDATANBgkqhkiG9w0BAQsFAAOCAgEAoWGeh2L-xOp4WFwNcK7-42nE8XWzyiVfNq-en8umv6B7FIlZBqRTSHucIlGoZqT7uEkuOIkyfwKUKMHeX3kte0w5f4gSgSX-JsexZj509BqurtDEgPbEjh9zUpbDAM7sODNvfiZ0HVF6sREKDyDIRGhYl_C7qO6FPNUH0wiEMRNI92WewkvN5kxHFBO56OS26He5ElMpeDPNifRXSj2RrthZNiLhtVNqOXCXV8HvAO-8PBPQGpetO260pqROBjblZfst9LCba3YKdZ8o2ojOeG5_ANB5mSX3bsBsY2ULkbRKgNBi5AXJ7q0-n01yM6-uiSvZ8wrkHLfDJ6KlzSDTLJpoVa8AUeZoPEhJgyQInNCPK5nFOD-F1QNRwQj-B-s7y16iUVZiLZ3hkxODdrbMjfPRL2P3DYn1cg-jZVq0xDX1aSlRyQq6qi9xZ9RfBPeOrsZ3SHGm0XIJdlqtaYt0Evo6fWKiFXuJ-H6nf5Qy8sLTk2q160CH2IgsW5_tA0n0ySGt5n-9j610wwPdH6ImEQ1jli9U8Ur82WjB7qQhpmYPuHOyytAGttfk1271zkw5TOpkzJfGWvT5zYv436XCj6pouSk2GJmG1iR-9pO4kPK1LWp3ujV-IXZjP_-xg0wwwsvc0BDJJZZk4tElY91ySFzLXlN8QfTH67VHl7D8ILg&s=JwNRcBeMabqVxMXj6084fcfE9OwLAUfEKloPjSFF4HouAiw1HKpEG-s4TA_A8pPYmsbCCmoe-2kNI4Lt7SAr1fnLadIHi2jnuHlsiKor6n5NmOV51AL4rMEvRey2muj1Bb2WlLb5ZbImQoAPZ8_kYPNNPbRvaKnjehzwJlt-H1JEUVJFalPIJpz89E63ADDMTA10RR4RyIYb0TGFitJ18b9bLynYS5eS0IO65wPGzXwOb10w8srJ1M9eNN7qJp8gfFr9459_F3SgHmdNH8-7QRycpOwV4Nidw9Jj_4En5nouYhoH7hbkv2rVpJpGIDFmOa7bmcU-QwfK7CQF7P9trg&h=6TrYQ96Qd7NJeOUi5OJ62hJAkfTfZjTD4JEN3UaNAmY
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/ed6b3ca8-b517-4fd7-8714-3af51fc4f4c7?monitor=true&api-version=2025-08-01&t=639143449951653740&c=MIIH9DCCBtygAwIBAgIQSjf8N8vu6a2s5d6lDssJBTANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBFVTJDIENBIDAxMB4XDTI2MDQyMTIwNDkyM1oXDTI2MDcxNzAyNDkyM1owQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDVaCBqLVZkrXQTvgcTvOw0T0uyIxtVnyKlnJ0eqcudfBnOYjBkECAfP6YZEeymGICyDr6Gl0my3J59XHhJV7jl_Bke64FFsCgJjV7Xlk2u2Oqgt27hFVroUrW6KKUOnuYWbqGVXbQAEdDrhRTc4z6vndU1RbA3lHpQrjCBJvxM3uAinNUDmz8GxpMfWAMWV0KMV-6rdnGxVP7Z0oEFWND3y07F4qczUyMHY2Ej9nHOUhS6DqPpnez9009ogzrE7KwhIzVfosnsEI1wZZKHbp98weX4FOizPoPRs7pFUYOeCUGhCdCt3OPu1qXcdMzzBarbtZOHLgfNvVo02s_BruNVAgMBAAGjggTyMIIE7jCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBQHozZ6-55-u8Ua28LK_Ui12mAGwDAfBgNVHSMEGDAWgBTPUQGq6UMsZHYbSvCqwPKS-E_DuzCCAeIGA1UdHwSCAdkwggHVMHWgc6Bxhm9odHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvZWFzdHVzMmV1YXAvY3Jscy9jY21lZWFzdHVzMmV1YXBwa2kvY2NtZWVhc3R1czJldWFwaWNhMDEvNDkvY3VycmVudC5jcmwwd6B1oHOGcWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L2Vhc3R1czJldWFwL2NybHMvY2NtZWVhc3R1czJldWFwcGtpL2NjbWVlYXN0dXMyZXVhcGljYTAxLzQ5L2N1cnJlbnQuY3JsMGagZKBihmBodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vZWFzdHVzMmV1YXAvY3Jscy9jY21lZWFzdHVzMmV1YXBwa2kvY2NtZWVhc3R1czJldWFwaWNhMDEvNDkvY3VycmVudC5jcmwwe6B5oHeGdWh0dHA6Ly9jY21lZWFzdHVzMmV1YXBwa2kuZWFzdHVzMmV1YXAucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21lZWFzdHVzMmV1YXBpY2EwMS80OS9jdXJyZW50LmNybDCCAecGCCsGAQUFBwEBBIIB2TCCAdUweAYIKwYBBQUHMAKGbGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9lYXN0dXMyZXVhcC9jYWNlcnRzL2NjbWVlYXN0dXMyZXVhcHBraS9jY21lZWFzdHVzMmV1YXBpY2EwMS9jZXJ0LmNlcjB6BggrBgEFBQcwAoZuaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvZWFzdHVzMmV1YXAvY2FjZXJ0cy9jY21lZWFzdHVzMmV1YXBwa2kvY2NtZWVhc3R1czJldWFwaWNhMDEvY2VydC5jZXIwaQYIKwYBBQUHMAKGXWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9lYXN0dXMyZXVhcC9jYWNlcnRzL2NjbWVlYXN0dXMyZXVhcHBraS9jY21lZWFzdHVzMmV1YXBpY2EwMS9jZXJ0LmNlcjByBggrBgEFBQcwAoZmaHR0cDovL2NjbWVlYXN0dXMyZXVhcHBraS5lYXN0dXMyZXVhcC5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWVlYXN0dXMyZXVhcGljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQAyDur8rYbF5IQWvjkn0gR-ZYvZzyV7PI2dJS04ig0e8zCcPvYuE3UluDtyIDtK9ZubD56tVpDxQoXIiRv_SSWWTOyKddsY0vRcX6Gn4s53bTLO251Qib8grqgmcqb8um2fGhdHp-XBLPfJc6kSQbXX2a55bRhQhmAOrc2Wil_hiQLmtXHax6bUL23OldYtr6aprc7WrJFyhahssZHCQq-1APZ3Sfq8X4yjznK7fGzH69Nb60bKucIAwL18Jsrtzcr_JE73YxRiQs8kSkrjwxyPWTKy6tll23_YOi49bIWpqDldaEBoA0OIjqCm49L_Epa2BvzIpUAC1JAVAyW87DTU&s=06abMVQNrkipfo7DUydkb34xddaNx2krWHB6qLxBTBg3_idXdfbLWK5VrRo8c6LvhtVFmTftkHQlxy7KbOrFT9qSqAdBRdpkBwdJV_jAPcT1Weo7rSVi-fPx9zWF4r0hcjnhbrIk8bvXQADQtrtT6WGkUfOZwpuxy9C9ZWCFzkfcSJPrGclI5KjRaMCc2-lIFSgtFc09jD4oeHAx7fpYyZed4MZS6mCIZ-Nvk7PJ2Lo4LwT06Ku6I4g8_sNmpfu1a1vZrjIInZyBm1fzYlGpvXgruFLVZy0OE9NBeJuvYiMSRiiVigLZ8cRjZvNbBi8tLKlQKuG3a5uEysnr1LnSHg&h=AB5CsHT4Vjj7i468b_ejinQgPQgOgvPf-5AoL-Nfamk
       pragma:
       - no-cache
       server:
@@ -190,7 +191,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=7b31ddc4-9101-4ef0-a387-79ce181cacdb,objectId=7b1bdbe4-80ac-47f9-882b-33d6e62950ab/eastus2euap/67071c29-0a09-47a1-83c7-0df9a62c8252
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/c892d4c3-30e6-4c5e-a97a-9947970fddb0
       x-ms-throttling-version:
       - v2
     status:
@@ -210,12 +211,12 @@ interactions:
       ParameterSetName:
       - -n -g --kind
       User-Agent:
-      - AZURECLI/2.78.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/00f4b3fd-497e-4773-894b-f4d4b461ab1a?monitor=true&api-version=2025-06-01&t=638968955712313805&c=MIIIpDCCBoygAwIBAgITFgIdx-8P5Q2flkVe0wABAh3H7zANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDMwHhcNMjUxMDIwMTM0ODIxWhcNMjYwMTE4MTM0ODIxWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJsx40wbBQQVymBKxEYB3QsXs7DWrmkLk1cvGC9Oh6ZUsiS6z4fZ9KUiL7u4Cb1R-5gfYTplSDkCfn9Y776fzY9tgxKTFF2KMooWQSUUNfMYuwrWFbbHGDx79k-SN6J44MhkxgVnvirjK5cOgtR1YwGjnk0x5Ea3-szYPplTQi12yBEDft-JR3YCKn54jq1stV1W2hRp_2g1BQImqyuswXZKY2DD-s3bQClN3clms4KDqdtTyXsWYLLd1wyrriHRsQnNbYpC1EqjwDyNGLTXHMVXKbeUefj5AwkYLnb77HgLc0IW7nFQwaOLB01n0OsHuhWZeUiilCDsiV76B_8MF0CAwEAAaOCBJEwggSNMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwIwCgYIKwYBBQUHAwEwPAYJKwYBBAGCNxUHBC8wLQYlKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFgh8fIENbYcQIBZAIBBjCCAdoGCCsGAQUFBwEBBIIBzDCCAcgwZgYIKwYBBQUHMAKGWmh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9wa2lpbmZyYS9DZXJ0cy9BTTNQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDAzKDEpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDEuYW1lLmdibC9haWEvQU0zUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMygxKS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwyLmFtZS5nYmwvYWlhL0FNM1BLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDMoMSkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMy5hbWUuZ2JsL2FpYS9BTTNQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDAzKDEpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDQuYW1lLmdibC9haWEvQU0zUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwMygxKS5jcnQwHQYDVR0OBBYEFBIs_XIgrlYGjVV6tC88QEhsK39fMA4GA1UdDwEB_wQEAwIFoDCCATUGA1UdHwSCASwwggEoMIIBJKCCASCgggEchkJodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ1JML0FNRSUyMEluZnJhJTIwQ0ElMjAwMygxKS5jcmyGNGh0dHA6Ly9jcmwxLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwMygxKS5jcmyGNGh0dHA6Ly9jcmwyLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwMygxKS5jcmyGNGh0dHA6Ly9jcmwzLmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwMygxKS5jcmyGNGh0dHA6Ly9jcmw0LmFtZS5nYmwvY3JsL0FNRSUyMEluZnJhJTIwQ0ElMjAwMygxKS5jcmwwgZ0GA1UdIASBlTCBkjAMBgorBgEEAYI3ewEBMGYGCisGAQQBgjd7AgIwWDBWBggrBgEFBQcCAjBKHkgAMwAzAGUAMAAxADkAMgAxAC0ANABkADYANAAtADQAZgA4AGMALQBhADAANQA1AC0ANQBiAGQAYQBmAGYAZAA1AGUAMwAzAGQwDAYKKwYBBAGCN3sDAjAMBgorBgEEAYI3ewQCMB8GA1UdIwQYMBaAFEijrWB1am_sYPNpVdEAsTJX_GzkMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDATANBgkqhkiG9w0BAQsFAAOCAgEAoWGeh2L-xOp4WFwNcK7-42nE8XWzyiVfNq-en8umv6B7FIlZBqRTSHucIlGoZqT7uEkuOIkyfwKUKMHeX3kte0w5f4gSgSX-JsexZj509BqurtDEgPbEjh9zUpbDAM7sODNvfiZ0HVF6sREKDyDIRGhYl_C7qO6FPNUH0wiEMRNI92WewkvN5kxHFBO56OS26He5ElMpeDPNifRXSj2RrthZNiLhtVNqOXCXV8HvAO-8PBPQGpetO260pqROBjblZfst9LCba3YKdZ8o2ojOeG5_ANB5mSX3bsBsY2ULkbRKgNBi5AXJ7q0-n01yM6-uiSvZ8wrkHLfDJ6KlzSDTLJpoVa8AUeZoPEhJgyQInNCPK5nFOD-F1QNRwQj-B-s7y16iUVZiLZ3hkxODdrbMjfPRL2P3DYn1cg-jZVq0xDX1aSlRyQq6qi9xZ9RfBPeOrsZ3SHGm0XIJdlqtaYt0Evo6fWKiFXuJ-H6nf5Qy8sLTk2q160CH2IgsW5_tA0n0ySGt5n-9j610wwPdH6ImEQ1jli9U8Ur82WjB7qQhpmYPuHOyytAGttfk1271zkw5TOpkzJfGWvT5zYv436XCj6pouSk2GJmG1iR-9pO4kPK1LWp3ujV-IXZjP_-xg0wwwsvc0BDJJZZk4tElY91ySFzLXlN8QfTH67VHl7D8ILg&s=JwNRcBeMabqVxMXj6084fcfE9OwLAUfEKloPjSFF4HouAiw1HKpEG-s4TA_A8pPYmsbCCmoe-2kNI4Lt7SAr1fnLadIHi2jnuHlsiKor6n5NmOV51AL4rMEvRey2muj1Bb2WlLb5ZbImQoAPZ8_kYPNNPbRvaKnjehzwJlt-H1JEUVJFalPIJpz89E63ADDMTA10RR4RyIYb0TGFitJ18b9bLynYS5eS0IO65wPGzXwOb10w8srJ1M9eNN7qJp8gfFr9459_F3SgHmdNH8-7QRycpOwV4Nidw9Jj_4En5nouYhoH7hbkv2rVpJpGIDFmOa7bmcU-QwfK7CQF7P9trg&h=6TrYQ96Qd7NJeOUi5OJ62hJAkfTfZjTD4JEN3UaNAmY
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/ed6b3ca8-b517-4fd7-8714-3af51fc4f4c7?monitor=true&api-version=2025-08-01&t=639143449951653740&c=MIIH9DCCBtygAwIBAgIQSjf8N8vu6a2s5d6lDssJBTANBgkqhkiG9w0BAQsFADA2MTQwMgYDVQQDEytDQ01FIEcxIFRMUyBSU0EgMjA0OCBTSEEyNTYgMjA0OSBFVTJDIENBIDAxMB4XDTI2MDQyMTIwNDkyM1oXDTI2MDcxNzAyNDkyM1owQDE-MDwGA1UEAxM1YXN5bmNvcGVyYXRpb25zaWduaW5nY2VydGlmaWNhdGUubWFuYWdlbWVudC5henVyZS5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDVaCBqLVZkrXQTvgcTvOw0T0uyIxtVnyKlnJ0eqcudfBnOYjBkECAfP6YZEeymGICyDr6Gl0my3J59XHhJV7jl_Bke64FFsCgJjV7Xlk2u2Oqgt27hFVroUrW6KKUOnuYWbqGVXbQAEdDrhRTc4z6vndU1RbA3lHpQrjCBJvxM3uAinNUDmz8GxpMfWAMWV0KMV-6rdnGxVP7Z0oEFWND3y07F4qczUyMHY2Ej9nHOUhS6DqPpnez9009ogzrE7KwhIzVfosnsEI1wZZKHbp98weX4FOizPoPRs7pFUYOeCUGhCdCt3OPu1qXcdMzzBarbtZOHLgfNvVo02s_BruNVAgMBAAGjggTyMIIE7jCBnQYDVR0gBIGVMIGSMAwGCisGAQQBgjd7AQEwZgYKKwYBBAGCN3sCAjBYMFYGCCsGAQUFBwICMEoeSAAzADMAZQAwADEAOQAyADEALQA0AGQANgA0AC0ANABmADgAYwAtAGEAMAA1ADUALQA1AGIAZABhAGYAZgBkADUAZQAzADMAZDAMBgorBgEEAYI3ewMCMAwGCisGAQQBgjd7BAIwDAYDVR0TAQH_BAIwADAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDgYDVR0PAQH_BAQDAgWgMB0GA1UdDgQWBBQHozZ6-55-u8Ua28LK_Ui12mAGwDAfBgNVHSMEGDAWgBTPUQGq6UMsZHYbSvCqwPKS-E_DuzCCAeIGA1UdHwSCAdkwggHVMHWgc6Bxhm9odHRwOi8vcHJpbWFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvZWFzdHVzMmV1YXAvY3Jscy9jY21lZWFzdHVzMmV1YXBwa2kvY2NtZWVhc3R1czJldWFwaWNhMDEvNDkvY3VycmVudC5jcmwwd6B1oHOGcWh0dHA6Ly9zZWNvbmRhcnktY2RuLnBraS5jb3JlLndpbmRvd3MubmV0L2Vhc3R1czJldWFwL2NybHMvY2NtZWVhc3R1czJldWFwcGtpL2NjbWVlYXN0dXMyZXVhcGljYTAxLzQ5L2N1cnJlbnQuY3JsMGagZKBihmBodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vZWFzdHVzMmV1YXAvY3Jscy9jY21lZWFzdHVzMmV1YXBwa2kvY2NtZWVhc3R1czJldWFwaWNhMDEvNDkvY3VycmVudC5jcmwwe6B5oHeGdWh0dHA6Ly9jY21lZWFzdHVzMmV1YXBwa2kuZWFzdHVzMmV1YXAucGtpLmNvcmUud2luZG93cy5uZXQvY2VydGlmaWNhdGVBdXRob3JpdGllcy9jY21lZWFzdHVzMmV1YXBpY2EwMS80OS9jdXJyZW50LmNybDCCAecGCCsGAQUFBwEBBIIB2TCCAdUweAYIKwYBBQUHMAKGbGh0dHA6Ly9wcmltYXJ5LWNkbi5wa2kuY29yZS53aW5kb3dzLm5ldC9lYXN0dXMyZXVhcC9jYWNlcnRzL2NjbWVlYXN0dXMyZXVhcHBraS9jY21lZWFzdHVzMmV1YXBpY2EwMS9jZXJ0LmNlcjB6BggrBgEFBQcwAoZuaHR0cDovL3NlY29uZGFyeS1jZG4ucGtpLmNvcmUud2luZG93cy5uZXQvZWFzdHVzMmV1YXAvY2FjZXJ0cy9jY21lZWFzdHVzMmV1YXBwa2kvY2NtZWVhc3R1czJldWFwaWNhMDEvY2VydC5jZXIwaQYIKwYBBQUHMAKGXWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9lYXN0dXMyZXVhcC9jYWNlcnRzL2NjbWVlYXN0dXMyZXVhcHBraS9jY21lZWFzdHVzMmV1YXBpY2EwMS9jZXJ0LmNlcjByBggrBgEFBQcwAoZmaHR0cDovL2NjbWVlYXN0dXMyZXVhcHBraS5lYXN0dXMyZXVhcC5wa2kuY29yZS53aW5kb3dzLm5ldC9jZXJ0aWZpY2F0ZUF1dGhvcml0aWVzL2NjbWVlYXN0dXMyZXVhcGljYTAxMA0GCSqGSIb3DQEBCwUAA4IBAQAyDur8rYbF5IQWvjkn0gR-ZYvZzyV7PI2dJS04ig0e8zCcPvYuE3UluDtyIDtK9ZubD56tVpDxQoXIiRv_SSWWTOyKddsY0vRcX6Gn4s53bTLO251Qib8grqgmcqb8um2fGhdHp-XBLPfJc6kSQbXX2a55bRhQhmAOrc2Wil_hiQLmtXHax6bUL23OldYtr6aprc7WrJFyhahssZHCQq-1APZ3Sfq8X4yjznK7fGzH69Nb60bKucIAwL18Jsrtzcr_JE73YxRiQs8kSkrjwxyPWTKy6tll23_YOi49bIWpqDldaEBoA0OIjqCm49L_Epa2BvzIpUAC1JAVAyW87DTU&s=06abMVQNrkipfo7DUydkb34xddaNx2krWHB6qLxBTBg3_idXdfbLWK5VrRo8c6LvhtVFmTftkHQlxy7KbOrFT9qSqAdBRdpkBwdJV_jAPcT1Weo7rSVi-fPx9zWF4r0hcjnhbrIk8bvXQADQtrtT6WGkUfOZwpuxy9C9ZWCFzkfcSJPrGclI5KjRaMCc2-lIFSgtFc09jD4oeHAx7fpYyZed4MZS6mCIZ-Nvk7PJ2Lo4LwT06Ku6I4g8_sNmpfu1a1vZrjIInZyBm1fzYlGpvXgruFLVZy0OE9NBeJuvYiMSRiiVigLZ8cRjZvNbBi8tLKlQKuG3a5uEysnr1LnSHg&h=AB5CsHT4Vjj7i468b_ejinQgPQgOgvPf-5AoL-Nfamk
   response:
     body:
-      string: '{"sku":{"name":"Standard_RAGRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/account000002","name":"account000002","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"allowCrossTenantDelegationSas":false,"keyCreationTime":{"key1":"2025-10-24T09:39:27.4396864Z","key2":"2025-10-24T09:39:27.4396864Z"},"allowCrossTenantReplication":false,"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":false,"networkAcls":{"ipv6Rules":[],"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2025-10-24T09:39:27.4553129Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2025-10-24T09:39:27.4553129Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2025-10-24T09:39:27.3459469Z","primaryEndpoints":{"dfs":"https://account000002.dfs.core.windows.net/","web":"https://account000002.z22.web.core.windows.net/","blob":"https://account000002.blob.core.windows.net/","queue":"https://account000002.queue.core.windows.net/","table":"https://account000002.table.core.windows.net/","file":"https://account000002.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available","secondaryLocation":"eastus","statusOfSecondary":"available","secondaryEndpoints":{"dfs":"https://account000002-secondary.dfs.core.windows.net/","web":"https://account000002-secondary.z22.web.core.windows.net/","blob":"https://account000002-secondary.blob.core.windows.net/","queue":"https://account000002-secondary.queue.core.windows.net/","table":"https://account000002-secondary.table.core.windows.net/"}}}'
+      string: '{"sku":{"name":"Standard_RAGRS","tier":"Standard"},"kind":"StorageV2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/account000002","name":"account000002","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"allowCrossTenantDelegationSas":false,"keyCreationTime":{"key1":"2026-05-14T08:43:09.8690513Z","key2":"2026-05-14T08:43:09.8690513Z"},"allowCrossTenantReplication":false,"privateEndpointConnections":[],"minimumTlsVersion":"TLS1_0","allowBlobPublicAccess":false,"networkAcls":{"ipv6Rules":[],"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"supportsHttpsTrafficOnly":true,"encryption":{"services":{"file":{"keyType":"Account","enabled":true,"lastEnabledTime":"2026-05-14T08:43:09.8782010Z"},"blob":{"keyType":"Account","enabled":true,"lastEnabledTime":"2026-05-14T08:43:09.8782010Z"}},"keySource":"Microsoft.Storage"},"accessTier":"Hot","provisioningState":"Succeeded","creationTime":"2026-05-14T08:43:09.6171947Z","primaryEndpoints":{"dfs":"https://account000002.dfs.core.windows.net/","web":"https://account000002.z22.web.core.windows.net/","blob":"https://account000002.blob.core.windows.net/","queue":"https://account000002.queue.core.windows.net/","table":"https://account000002.table.core.windows.net/","file":"https://account000002.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available","secondaryLocation":"eastus","statusOfSecondary":"available","secondaryEndpoints":{"dfs":"https://account000002-secondary.dfs.core.windows.net/","web":"https://account000002-secondary.z22.web.core.windows.net/","blob":"https://account000002-secondary.blob.core.windows.net/","queue":"https://account000002-secondary.queue.core.windows.net/","table":"https://account000002-secondary.table.core.windows.net/"}}}'
     headers:
       cache-control:
       - no-cache
@@ -224,7 +225,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Fri, 24 Oct 2025 09:39:49 GMT
+      - Thu, 14 May 2026 08:43:34 GMT
       expires:
       - '-1'
       pragma:
@@ -236,7 +237,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=7b31ddc4-9101-4ef0-a387-79ce181cacdb,objectId=7b1bdbe4-80ac-47f9-882b-33d6e62950ab/eastus2euap/8911df55-b22f-49c2-bad3-99d559788a6a
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/19174523-0d38-470e-9415-be5c82cfec0c
       x-ms-throttling-version:
       - v2
     status:
@@ -258,12 +259,12 @@ interactions:
       ParameterSetName:
       - -n -g --query -o
       User-Agent:
-      - AZURECLI/2.78.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-core/1.39.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/account000002/listKeys?api-version=2025-06-01&$expand=kerb
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/account000002/listKeys?api-version=2025-08-01&$expand=kerb
   response:
     body:
-      string: '{"keys":[{"creationTime":"2025-10-24T09:39:27.4396864Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2025-10-24T09:39:27.4396864Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+      string: '{"keys":[{"creationTime":"2026-05-14T08:43:09.8690513Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2026-05-14T08:43:09.8690513Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
     headers:
       cache-control:
       - no-cache
@@ -272,7 +273,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Fri, 24 Oct 2025 09:39:51 GMT
+      - Thu, 14 May 2026 08:43:38 GMT
       expires:
       - '-1'
       pragma:
@@ -284,7 +285,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=7b31ddc4-9101-4ef0-a387-79ce181cacdb,objectId=7b1bdbe4-80ac-47f9-882b-33d6e62950ab/eastus2euap/99ad9e10-b11b-471b-9ec5-b9816e4a2b33
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=a7250e3a-0e5e-48e2-9a34-45f1f5e1a91e/eastus2euap/418bc064-224a-41ff-a19c-e3e2d209dc6b
       x-ms-ratelimit-remaining-subscription-resource-requests:
       - '799'
       x-ms-throttling-version:
@@ -306,11 +307,11 @@ interactions:
       ParameterSetName:
       - --account-name --account-key
       User-Agent:
-      - AZURECLI/2.78.0 azsdk-python-storage-blob/12.16.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-storage-blob/12.29.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 24 Oct 2025 09:39:52 GMT
+      - Thu, 14 May 2026 08:43:39 GMT
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     method: GET
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -321,13 +322,13 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Fri, 24 Oct 2025 09:39:53 GMT
+      - Thu, 14 May 2026 08:43:41 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     status:
       code: 200
       message: OK
@@ -345,11 +346,11 @@ interactions:
       ParameterSetName:
       - --static-website --index-document --404-document --account-name --account-key
       User-Agent:
-      - AZURECLI/2.78.0 azsdk-python-storage-blob/12.16.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-storage-blob/12.29.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 24 Oct 2025 09:39:53 GMT
+      - Thu, 14 May 2026 08:43:41 GMT
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     method: GET
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -360,13 +361,13 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Fri, 24 Oct 2025 09:39:54 GMT
+      - Thu, 14 May 2026 08:43:43 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     status:
       code: 200
       message: OK
@@ -391,11 +392,11 @@ interactions:
       ParameterSetName:
       - --static-website --index-document --404-document --account-name --account-key
       User-Agent:
-      - AZURECLI/2.78.0 azsdk-python-storage-blob/12.16.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-storage-blob/12.29.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 24 Oct 2025 09:39:54 GMT
+      - Thu, 14 May 2026 08:43:43 GMT
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     method: PUT
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -405,11 +406,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 24 Oct 2025 09:39:55 GMT
+      - Thu, 14 May 2026 08:43:45 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     status:
       code: 202
       message: Accepted
@@ -427,11 +428,11 @@ interactions:
       ParameterSetName:
       - --static-website --index-document --404-document --account-name --account-key
       User-Agent:
-      - AZURECLI/2.78.0 azsdk-python-storage-blob/12.16.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-storage-blob/12.29.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 24 Oct 2025 09:39:56 GMT
+      - Thu, 14 May 2026 08:43:46 GMT
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     method: GET
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -442,13 +443,13 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Fri, 24 Oct 2025 09:39:57 GMT
+      - Thu, 14 May 2026 08:43:47 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     status:
       code: 200
       message: OK
@@ -466,11 +467,11 @@ interactions:
       ParameterSetName:
       - --delete-retention --delete-retention-period --account-name --account-key
       User-Agent:
-      - AZURECLI/2.78.0 azsdk-python-storage-blob/12.16.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-storage-blob/12.29.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 24 Oct 2025 09:39:57 GMT
+      - Thu, 14 May 2026 08:43:48 GMT
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     method: GET
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -481,13 +482,13 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Fri, 24 Oct 2025 09:39:58 GMT
+      - Thu, 14 May 2026 08:43:50 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     status:
       code: 200
       message: OK
@@ -512,11 +513,11 @@ interactions:
       ParameterSetName:
       - --delete-retention --delete-retention-period --account-name --account-key
       User-Agent:
-      - AZURECLI/2.78.0 azsdk-python-storage-blob/12.16.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-storage-blob/12.29.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 24 Oct 2025 09:39:58 GMT
+      - Thu, 14 May 2026 08:43:50 GMT
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     method: PUT
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -526,11 +527,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 24 Oct 2025 09:39:59 GMT
+      - Thu, 14 May 2026 08:43:52 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     status:
       code: 202
       message: Accepted
@@ -548,11 +549,11 @@ interactions:
       ParameterSetName:
       - --delete-retention --delete-retention-period --account-name --account-key
       User-Agent:
-      - AZURECLI/2.78.0 azsdk-python-storage-blob/12.16.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-storage-blob/12.29.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 24 Oct 2025 09:40:00 GMT
+      - Thu, 14 May 2026 08:43:53 GMT
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     method: GET
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -563,13 +564,13 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Fri, 24 Oct 2025 09:40:00 GMT
+      - Thu, 14 May 2026 08:43:54 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     status:
       code: 200
       message: OK
@@ -587,11 +588,11 @@ interactions:
       ParameterSetName:
       - --set --account-name --account-key
       User-Agent:
-      - AZURECLI/2.78.0 azsdk-python-storage-blob/12.16.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-storage-blob/12.29.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 24 Oct 2025 09:40:01 GMT
+      - Thu, 14 May 2026 08:43:55 GMT
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     method: GET
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -602,13 +603,13 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Fri, 24 Oct 2025 09:40:01 GMT
+      - Thu, 14 May 2026 08:43:56 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     status:
       code: 200
       message: OK
@@ -633,11 +634,11 @@ interactions:
       ParameterSetName:
       - --set --account-name --account-key
       User-Agent:
-      - AZURECLI/2.78.0 azsdk-python-storage-blob/12.16.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-storage-blob/12.29.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 24 Oct 2025 09:40:02 GMT
+      - Thu, 14 May 2026 08:43:57 GMT
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     method: PUT
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -647,11 +648,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 24 Oct 2025 09:40:03 GMT
+      - Thu, 14 May 2026 08:43:58 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     status:
       code: 202
       message: Accepted
@@ -669,11 +670,11 @@ interactions:
       ParameterSetName:
       - --set --account-name --account-key
       User-Agent:
-      - AZURECLI/2.78.0 azsdk-python-storage-blob/12.16.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-storage-blob/12.29.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 24 Oct 2025 09:40:03 GMT
+      - Thu, 14 May 2026 08:43:59 GMT
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     method: GET
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -684,13 +685,13 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Fri, 24 Oct 2025 09:40:04 GMT
+      - Thu, 14 May 2026 08:44:01 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     status:
       code: 200
       message: OK
@@ -708,11 +709,11 @@ interactions:
       ParameterSetName:
       - --set --account-name --account-key
       User-Agent:
-      - AZURECLI/2.78.0 azsdk-python-storage-blob/12.16.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-storage-blob/12.29.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 24 Oct 2025 09:40:04 GMT
+      - Thu, 14 May 2026 08:44:02 GMT
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     method: GET
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -723,13 +724,13 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Fri, 24 Oct 2025 09:40:05 GMT
+      - Thu, 14 May 2026 08:44:03 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     status:
       code: 200
       message: OK
@@ -754,11 +755,11 @@ interactions:
       ParameterSetName:
       - --set --account-name --account-key
       User-Agent:
-      - AZURECLI/2.78.0 azsdk-python-storage-blob/12.16.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-storage-blob/12.29.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 24 Oct 2025 09:40:05 GMT
+      - Thu, 14 May 2026 08:44:04 GMT
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     method: PUT
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -768,11 +769,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 24 Oct 2025 09:40:06 GMT
+      - Thu, 14 May 2026 08:44:06 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     status:
       code: 202
       message: Accepted
@@ -790,11 +791,11 @@ interactions:
       ParameterSetName:
       - --set --account-name --account-key
       User-Agent:
-      - AZURECLI/2.78.0 azsdk-python-storage-blob/12.16.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-storage-blob/12.29.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 24 Oct 2025 09:40:07 GMT
+      - Thu, 14 May 2026 08:44:06 GMT
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     method: GET
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -805,13 +806,13 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Fri, 24 Oct 2025 09:40:07 GMT
+      - Thu, 14 May 2026 08:44:08 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     status:
       code: 200
       message: OK
@@ -829,11 +830,11 @@ interactions:
       ParameterSetName:
       - --set --account-name --account-key
       User-Agent:
-      - AZURECLI/2.78.0 azsdk-python-storage-blob/12.16.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-storage-blob/12.29.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 24 Oct 2025 09:40:08 GMT
+      - Thu, 14 May 2026 08:44:09 GMT
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     method: GET
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -844,13 +845,13 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Fri, 24 Oct 2025 09:40:09 GMT
+      - Thu, 14 May 2026 08:44:10 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     status:
       code: 200
       message: OK
@@ -875,11 +876,11 @@ interactions:
       ParameterSetName:
       - --set --account-name --account-key
       User-Agent:
-      - AZURECLI/2.78.0 azsdk-python-storage-blob/12.16.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-storage-blob/12.29.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 24 Oct 2025 09:40:09 GMT
+      - Thu, 14 May 2026 08:44:11 GMT
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     method: PUT
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -889,11 +890,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 24 Oct 2025 09:40:09 GMT
+      - Thu, 14 May 2026 08:44:12 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     status:
       code: 202
       message: Accepted
@@ -911,11 +912,11 @@ interactions:
       ParameterSetName:
       - --set --account-name --account-key
       User-Agent:
-      - AZURECLI/2.78.0 azsdk-python-storage-blob/12.16.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-storage-blob/12.29.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 24 Oct 2025 09:40:10 GMT
+      - Thu, 14 May 2026 08:44:13 GMT
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     method: GET
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -926,13 +927,13 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Fri, 24 Oct 2025 09:40:10 GMT
+      - Thu, 14 May 2026 08:44:15 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     status:
       code: 200
       message: OK
@@ -950,11 +951,11 @@ interactions:
       ParameterSetName:
       - --account-name --account-key
       User-Agent:
-      - AZURECLI/2.78.0 azsdk-python-storage-blob/12.16.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-storage-blob/12.29.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 24 Oct 2025 09:40:11 GMT
+      - Thu, 14 May 2026 08:44:15 GMT
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     method: GET
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -965,13 +966,13 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Fri, 24 Oct 2025 09:40:11 GMT
+      - Thu, 14 May 2026 08:44:17 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     status:
       code: 200
       message: OK
@@ -989,11 +990,11 @@ interactions:
       ParameterSetName:
       - --index-document --404-document --account-name --account-key
       User-Agent:
-      - AZURECLI/2.78.0 azsdk-python-storage-blob/12.16.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-storage-blob/12.29.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 24 Oct 2025 09:40:12 GMT
+      - Thu, 14 May 2026 08:44:18 GMT
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     method: GET
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -1004,13 +1005,13 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Fri, 24 Oct 2025 09:40:13 GMT
+      - Thu, 14 May 2026 08:44:19 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     status:
       code: 200
       message: OK
@@ -1035,11 +1036,11 @@ interactions:
       ParameterSetName:
       - --index-document --404-document --account-name --account-key
       User-Agent:
-      - AZURECLI/2.78.0 azsdk-python-storage-blob/12.16.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-storage-blob/12.29.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 24 Oct 2025 09:40:13 GMT
+      - Thu, 14 May 2026 08:44:20 GMT
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     method: PUT
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -1049,11 +1050,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 24 Oct 2025 09:40:14 GMT
+      - Thu, 14 May 2026 08:44:22 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     status:
       code: 202
       message: Accepted
@@ -1071,11 +1072,11 @@ interactions:
       ParameterSetName:
       - --index-document --404-document --account-name --account-key
       User-Agent:
-      - AZURECLI/2.78.0 azsdk-python-storage-blob/12.16.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-storage-blob/12.29.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 24 Oct 2025 09:40:15 GMT
+      - Thu, 14 May 2026 08:44:22 GMT
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     method: GET
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -1086,13 +1087,13 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Fri, 24 Oct 2025 09:40:16 GMT
+      - Thu, 14 May 2026 08:44:24 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     status:
       code: 200
       message: OK
@@ -1110,11 +1111,11 @@ interactions:
       ParameterSetName:
       - --static-website --account-name --account-key
       User-Agent:
-      - AZURECLI/2.78.0 azsdk-python-storage-blob/12.16.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-storage-blob/12.29.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 24 Oct 2025 09:40:16 GMT
+      - Thu, 14 May 2026 08:44:25 GMT
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     method: GET
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -1125,13 +1126,13 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Fri, 24 Oct 2025 09:40:16 GMT
+      - Thu, 14 May 2026 08:44:26 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     status:
       code: 200
       message: OK
@@ -1156,11 +1157,11 @@ interactions:
       ParameterSetName:
       - --static-website --account-name --account-key
       User-Agent:
-      - AZURECLI/2.78.0 azsdk-python-storage-blob/12.16.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-storage-blob/12.29.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 24 Oct 2025 09:40:17 GMT
+      - Thu, 14 May 2026 08:44:27 GMT
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     method: PUT
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -1170,11 +1171,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 24 Oct 2025 09:40:18 GMT
+      - Thu, 14 May 2026 08:44:29 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     status:
       code: 202
       message: Accepted
@@ -1192,11 +1193,11 @@ interactions:
       ParameterSetName:
       - --static-website --account-name --account-key
       User-Agent:
-      - AZURECLI/2.78.0 azsdk-python-storage-blob/12.16.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-storage-blob/12.29.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 24 Oct 2025 09:40:18 GMT
+      - Thu, 14 May 2026 08:44:29 GMT
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     method: GET
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -1207,13 +1208,13 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Fri, 24 Oct 2025 09:40:19 GMT
+      - Thu, 14 May 2026 08:44:31 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     status:
       code: 200
       message: OK
@@ -1231,11 +1232,11 @@ interactions:
       ParameterSetName:
       - --days --account-name --account-key
       User-Agent:
-      - AZURECLI/2.78.0 azsdk-python-storage-blob/12.16.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-storage-blob/12.29.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 24 Oct 2025 09:40:20 GMT
+      - Thu, 14 May 2026 08:44:32 GMT
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     method: GET
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -1246,13 +1247,13 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Fri, 24 Oct 2025 09:40:20 GMT
+      - Thu, 14 May 2026 08:44:34 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     status:
       code: 200
       message: OK
@@ -1276,11 +1277,11 @@ interactions:
       ParameterSetName:
       - --days --account-name --account-key
       User-Agent:
-      - AZURECLI/2.78.0 azsdk-python-storage-blob/12.16.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-storage-blob/12.29.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 24 Oct 2025 09:40:21 GMT
+      - Thu, 14 May 2026 08:44:34 GMT
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     method: PUT
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -1290,11 +1291,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Fri, 24 Oct 2025 09:40:21 GMT
+      - Thu, 14 May 2026 08:44:37 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     status:
       code: 202
       message: Accepted
@@ -1312,11 +1313,11 @@ interactions:
       ParameterSetName:
       - --days --account-name --account-key
       User-Agent:
-      - AZURECLI/2.78.0 azsdk-python-storage-blob/12.16.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-storage-blob/12.29.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 24 Oct 2025 09:40:22 GMT
+      - Thu, 14 May 2026 08:44:38 GMT
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     method: GET
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -1327,13 +1328,13 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Fri, 24 Oct 2025 09:40:22 GMT
+      - Thu, 14 May 2026 08:44:40 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     status:
       code: 200
       message: OK
@@ -1351,11 +1352,11 @@ interactions:
       ParameterSetName:
       - --account-name --account-key
       User-Agent:
-      - AZURECLI/2.78.0 azsdk-python-storage-blob/12.16.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.86.0 azsdk-python-storage-blob/12.29.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Fri, 24 Oct 2025 09:40:23 GMT
+      - Thu, 14 May 2026 08:44:40 GMT
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     method: GET
     uri: https://account000002.blob.core.windows.net/?restype=service&comp=properties
   response:
@@ -1366,13 +1367,13 @@ interactions:
       content-type:
       - application/xml
       date:
-      - Fri, 24 Oct 2025 09:40:23 GMT
+      - Thu, 14 May 2026 08:44:42 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       transfer-encoding:
       - chunked
       x-ms-version:
-      - '2022-11-02'
+      - '2026-04-06'
     status:
       code: 200
       message: OK

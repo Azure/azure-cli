@@ -162,7 +162,12 @@ def _get_storage_account_key(cli_ctx, account_name, account_key):
     keys_list_result = storage_client.storage_accounts.list_keys(resource_group, account_name)
     if not keys_list_result or not keys_list_result.keys:
         raise CLIError('Cannot find a key for "{0}" storage account.'.format(account_name))
-    return keys_list_result.keys[0].value
+    key_value = None
+    try:
+        key_value = keys_list_result.keys_property[0].value
+    except AttributeError:
+        key_value = keys_list_result.keys[0].value
+    return key_value
 
 
 def _get_effective_storage_account_name_and_key(cli_ctx, account_name, account_key):

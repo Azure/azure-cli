@@ -34,9 +34,19 @@ def acr_config_content_trust_update(cmd,
                                     client,
                                     registry_name,
                                     status=None,
-                                    resource_group_name=None):
+                                    resource_group_name=None,
+                                    yes=False):
     registry, resource_group_name = validate_premium_registry(
         cmd, registry_name, resource_group_name, POLICIES_NOT_SUPPORTED)
+
+    warning_message = (
+        "Content Trust is being deprecated and will be completely removed on March 31, 2028. "
+        "It cannot be enabled once disabled. Please submit a support ticket if you wish to "
+        "disable and subsequently re-enable this feature. When disabled, your images will "
+        "remain in the registry, but all your signatures will be deleted permanently. "
+        "Are you sure you want to disable content trust?"
+    )
+    user_confirmation(warning_message, yes)
 
     policies = registry.policies
 

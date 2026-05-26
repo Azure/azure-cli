@@ -70,7 +70,7 @@ class Update(AAZCommand):
         )
         _args_schema.ddos_protection_plan = AAZStrArg(
             options=["--ddos-protection-plan"],
-            help="Name or ID of a DDoS protection plan to associate with the VNet.",
+            help="Name or identifier of a DDoS protection plan to associate with the VNet.",
             nullable=True,
         )
         _args_schema.dns_servers = AAZListArg(
@@ -199,7 +199,7 @@ class Update(AAZCommand):
         sub_resource_update = cls._args_sub_resource_update
         sub_resource_update.id = AAZStrArg(
             options=["id"],
-            help="Resource ID.",
+            help="Resource identifier.",
             nullable=True,
         )
 
