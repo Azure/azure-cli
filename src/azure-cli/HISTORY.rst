@@ -19,19 +19,19 @@ Release History
 
 **AKS**
 
-* Skip subnet validation for existing outbound type on update (#33418)
 * `az aks add/update`: Add `enable-artifact-streaming` and `disable_artifact_streaming` options (#33257)
 
 **App Config**
 
 * `az appconfig kv set-snapshot-reference`: Add support to create a snapshot reference key-value (#33278)
 * `az appconfig kv list`: Add support to list key-values from a snapshot reference (#33278)
-* `az appconfig create\update\network-security-perimeter-configuration`: Add NSP support (#33407)
+* `az appconfig create/update/network-security-perimeter-configuration`: Add Network Security Perimeter (NSP) support (#33407)
 
 **App Service**
 
-* [BREAKING CHANGE] `az webapp list-runtimes`: Output changed from flat string list to structured list of dicts with keys: os, runtime, version, config, support, end_of_life. Added `--runtime` and `--support` filter parameters. Removed deprecated `--linux` and `--show-runtime-details` parameters. (#32903)
-* Remove stale `az webapp list-runtimes` breaking change pre-announcements (#33434)
+* [BREAKING CHANGE] `az webapp list-runtimes`: Change output from flat string list to structured list of dicts with keys: os, runtime, version, config, support, end_of_life (#32903)
+* `az webapp list-runtimes`: Add `--runtime` and `--support` filter parameters (#32903)
+* [BREAKING CHANGE] `az webapp list-runtimes`: Remove deprecated `--linux` and `--show-runtime-details` parameters (#32903)
 * `az webapp log startup`: Add commands to list and view Linux container startup logs (#33256)
 * `az webapp create`: Add `--site-scoped-certs` parameter to support enabling or disabling site-scoped certificates (#33306)
 * `az webapp up`: Add warning message for future deprecation (#33410)
@@ -45,7 +45,7 @@ Release History
 * [BREAKING CHANGE] `az vm create`: Change default `--size` from `Standard_DS1_v2` to `Standard_D2s_v5` (#33323)
 * [BREAKING CHANGE] `az vmss create`: Change default `--vm-sku` from `Standard_DS1_v2` to `Standard_D2s_v5` (#33323)
 * `az sig image-definition update`: Add ability to update image-definition start version (#33273)
-* `az vm create/ update`: Support zone-resilient VM with `--zone-movement` (#33242)
+* `az vm create/update`: Support zone-resilient VM with `--zone-movement` (#33242)
 * `az vm update`: Support cross-zone movement (#33242)
 * `az vm deallocate`: Support vm force deallocate with `--force-deallocate` (#33242)
 * `az vm/vmss create`: Support Ephemeral OS disk with full caching with `--ephemeral-os-disk-enable-full-caching` (#33292)
@@ -65,7 +65,7 @@ Release History
 
 **MySQL**
 
-* BREAKING CHANGE `az mysql flexible-server backup create/restore/geo-restore/replica`: Remove `--storage-redundancy` (#33428)
+* [BREAKING CHANGE] `az mysql flexible-server backup create/restore/geo-restore/replica`: Remove `--storage-redundancy` (#33428)
 
 **NetAppFiles**
 
