@@ -7,13 +7,13 @@ FROM ${image} AS build-env
 ARG cli_version=dev
 ARG python_package=python3.12
 
-# Install build dependencies in a single dnf transaction so the resolver
+# Install build dependencies in a single yum transaction so the resolver
 # picks a mutually consistent set of packages. A separate `yum update -y`
 # step is intentionally avoided: when BaseOS and AppStream are temporarily
 # out of sync (e.g. AppStream ships glibc-devel-X but BaseOS has not yet
 # published the matching glibc-X), updating first pins glibc to a version
 # that no installable glibc-devel matches, which then breaks `gcc` install.
-# The base UBI image already ships with security updates; `dnf install`
+# The base UBI image already ships with security updates; `yum install`
 # will pull any newer transitive dependencies it needs.
 RUN yum install -y wget rpm-build gcc libffi-devel ${python_package}-devel openssl-devel make bash diffutils patch dos2unix perl
 
@@ -32,8 +32,11 @@ RUN --mount=type=secret,id=PIP_INDEX_URL export PIP_INDEX_URL=$(cat /run/secrets
 
 FROM ${image} AS execution-env
 
-RUN yum update -y
-
+# Install the built RPM in a single yum transaction (no standalone
+# `yum update -y` beforehand) for the same reason as the build stage:
+# avoid BaseOS/AppStream repo-sync skew failures. The base UBI image
+# already ships with security updates, and any newer transitive
+# dependencies required by azure-cli will be pulled in by this install.
 COPY --from=build-env /azure-cli-dev.rpm ./
 RUN yum install -y ./azure-cli-dev.rpm && \
     az --version

@@ -6,9 +6,12 @@ ARG python_package=python3
 
 # Install build dependencies in a single dnf transaction so the resolver
 # picks a mutually consistent set of packages. A separate `dnf update -y`
-# step is intentionally avoided: when BaseOS and AppStream are temporarily
-# out of sync, updating first can pin glibc to a version whose matching
-# glibc-devel is not yet available, breaking the subsequent install.
+# step is intentionally avoided: if the configured repositories are
+# temporarily out of sync (e.g. a newer glibc-devel is published before
+# the matching glibc, or vice versa), updating first can pin a package
+# to a version whose tightly-coupled companion is not yet available,
+# breaking the subsequent install. The base image already ships with
+# updates, and any newer transitive dependencies will be pulled in here.
 RUN dnf install -y wget rpm-build gcc libffi-devel ${python_package}-devel openssl-devel make bash coreutils diffutils patch dos2unix perl
 
 WORKDIR /azure-cli
