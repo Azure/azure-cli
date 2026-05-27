@@ -1124,7 +1124,8 @@ def list_flex_migration_candidates(cmd):
             continue
 
         try:
-            is_eligible, warnings = validate_flex_migration_eligibility_for_linux_consumption_app(cmd, site, flex_regions)
+            is_eligible, warnings = validate_flex_migration_eligibility_for_linux_consumption_app(
+                cmd, site, flex_regions)
             if is_eligible:
                 site_entry = {
                     'name': site.name,
@@ -6874,7 +6875,7 @@ def delete_ssl_cert(cmd, resource_group_name, certificate_thumbprint, name=None)
 
 
 def import_ssl_cert(cmd, resource_group_name, key_vault, key_vault_certificate_name, name=None, certificate_name=None,
-                    load_to_code=None, enable_using_msi=None):
+                    load_to_code=None, enable_using_msi=None):  # pylint: disable=too-many-branches
     Certificate = cmd.get_models('Certificate')
     client = web_client_factory(cmd.cli_ctx)
 
@@ -6941,10 +6942,7 @@ def import_ssl_cert(cmd, resource_group_name, key_vault, key_vault_certificate_n
     if not kv_secret_name:
         kv_secret_name = key_vault_certificate_name
 
-    if certificate_name:
-        cert_name = certificate_name
-    else:
-        cert_name = '{}-{}-{}'.format(resource_group_name, kv_name, key_vault_certificate_name)
+    cert_name = certificate_name or '{}-{}-{}'.format(resource_group_name, kv_name, key_vault_certificate_name)
 
     lnk = 'https://azure.github.io/AppService/2016/05/24/Deploying-Azure-Web-App-Certificate-through-Key-Vault.html'
     lnk_msg = 'Find more details here: {}'.format(lnk)

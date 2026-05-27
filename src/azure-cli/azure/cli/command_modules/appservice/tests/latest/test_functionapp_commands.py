@@ -14,7 +14,7 @@ import datetime
 
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
-                               StorageAccountPreparer, JMESPathCheck, live_only, VirtualNetworkPreparer)
+                               StorageAccountPreparer, KeyVaultPreparer, JMESPathCheck, live_only, VirtualNetworkPreparer)
 from azure.cli.testsdk.checkers import JMESPathCheckNotExists, JMESPathPatternCheck
 from azure.cli.core.azclierror import ValidationError, ArgumentUsageError, RequiredArgumentMissingError, MutuallyExclusiveArgumentError
 
@@ -1610,6 +1610,132 @@ class FunctionAppFlex(LiveScenarioTest):
         update_strategy_config = self.cmd('functionapp update-strategy config set -g {} -n {} --type rollingupdate'
                                           .format(resource_group, functionapp_name)).get_output_in_json()
         self.assertEqual(update_strategy_config['type'], 'RollingUpdate')
+
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_flex_ssl_commands(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name('flexssltest', 40)
+        pfx_file = os.path.join(TEST_DIR, 'server.pfx')
+        cert_password = 'test'
+        cert_thumbprint = '9E9735C45C792B03B3FFCCA614852B32EE71AD6B'
+        cert_name = 'test-flex-cert'
+
+        # Create a Flex Consumption function app
+        self.cmd('functionapp create -g {} -n {} -f {} -s {} --runtime python --runtime-version 3.11'
+                 .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account))
+
+        # Upload SSL certificate with --load-to-code parameter
+        self.cmd('functionapp config ssl upload -g {} -n {} --certificate-file "{}" --certificate-password {} --certificate-name {} --load-to-code true'
+                 .format(resource_group, functionapp_name, pfx_file, cert_password, cert_name), checks=[
+            JMESPathCheck('thumbprint', cert_thumbprint),
+            JMESPathCheck('name', cert_name)
+        ])
+
+        # List SSL certificates with -n parameter (site-scoped for Flex)
+        certs = self.cmd('functionapp config ssl list -g {} -n {}'
+                         .format(resource_group, functionapp_name)).get_output_in_json()
+        self.assertTrue(len(certs) >= 1)
+        cert_names = [c['name'] for c in certs]
+        self.assertIn(cert_name, cert_names)
+
+        # Show SSL certificate with -n parameter
+        cert = self.cmd('functionapp config ssl show -g {} -n {} --certificate-name {}'
+                        .format(resource_group, functionapp_name, cert_name)).get_output_in_json()
+        self.assertEqual(cert['thumbprint'], cert_thumbprint)
+
+        # Delete SSL certificate with -n parameter
+        self.cmd('functionapp config ssl delete -g {} -n {} --certificate-thumbprint {}'
+                 .format(resource_group, functionapp_name, cert_thumbprint))
+
+        # Verify certificate is deleted
+        certs_after = self.cmd('functionapp config ssl list -g {} -n {}'
+                               .format(resource_group, functionapp_name)).get_output_in_json()
+        cert_names_after = [c['name'] for c in certs_after]
+        self.assertNotIn(cert_name, cert_names_after)
+
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    @KeyVaultPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP, name_prefix='kv-flex-ssl', name_len=20, additional_params='--enable-rbac-authorization false')
+    def test_functionapp_flex_ssl_import(self, resource_group, storage_account, key_vault):
+        functionapp_name = self.create_random_name('flexsslimport', 40)
+        pfx_file = os.path.join(TEST_DIR, 'server.pfx')
+        cert_password = 'test'
+        cert_thumbprint = '9E9735C45C792B03B3FFCCA614852B32EE71AD6B'
+        cert_name = 'test-flex-import-cert'
+        kv_cert_name = 'test-import-cert'
+
+        # Create a Flex Consumption function app
+        self.cmd('functionapp create -g {} -n {} -f {} -s {} --runtime python --runtime-version 3.11'
+                 .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account))
+
+        # Enable managed identity for the function app (required for MSI-based certificate import)
+        identity_result = self.cmd('functionapp identity assign -g {} -n {}'.format(resource_group, functionapp_name)).get_output_in_json()
+        principal_id = identity_result['principalId']
+
+        # Set Key Vault policy for App Service resource provider
+        self.cmd('keyvault set-policy -g {} --name {} --spn {} --secret-permissions get'.format(
+            resource_group, key_vault, 'Microsoft.Azure.WebSites'))
+
+        # Set Key Vault policy for the function app's managed identity (required for MSI-based import)
+        self.cmd('keyvault set-policy -g {} --name {} --object-id {} --secret-permissions get'.format(
+            resource_group, key_vault, principal_id))
+
+        # Import certificate to Key Vault
+        self.cmd('keyvault certificate import --name {} --vault-name {} --file "{}" --password {}'.format(
+            kv_cert_name, key_vault, pfx_file, cert_password))
+
+        # Import SSL certificate from Key Vault with --load-to-code and --enable-using-msi parameters
+        self.cmd('functionapp config ssl import -g {} -n {} --key-vault {} --key-vault-certificate-name {} --certificate-name {} --load-to-code true --enable-using-msi true'
+                 .format(resource_group, functionapp_name, key_vault, kv_cert_name, cert_name), checks=[
+            JMESPathCheck('thumbprint', cert_thumbprint),
+            JMESPathCheck('name', cert_name)
+        ])
+
+        # Verify certificate is listed
+        certs = self.cmd('functionapp config ssl list -g {} -n {}'
+                         .format(resource_group, functionapp_name)).get_output_in_json()
+        cert_names = [c['name'] for c in certs]
+        self.assertIn(cert_name, cert_names)
+
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_flex_ssl_bind_unbind(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name('flexsslbind', 40)
+        pfx_file = os.path.join(TEST_DIR, 'server.pfx')
+        cert_password = 'test'
+        cert_thumbprint = '9E9735C45C792B03B3FFCCA614852B32EE71AD6B'
+        cert_name = 'test-flex-bind-cert'
+
+        # Create a Flex Consumption function app
+        self.cmd('functionapp create -g {} -n {} -f {} -s {} --runtime python --runtime-version 3.11'
+                 .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account))
+
+        # Upload SSL certificate
+        self.cmd('functionapp config ssl upload -g {} -n {} --certificate-file "{}" --certificate-password {} --certificate-name {}'
+                 .format(resource_group, functionapp_name, pfx_file, cert_password, cert_name), checks=[
+            JMESPathCheck('thumbprint', cert_thumbprint),
+            JMESPathCheck('name', cert_name)
+        ])
+
+        # Bind SSL certificate to the default hostname
+        self.cmd('functionapp config ssl bind -g {} -n {} --certificate-thumbprint {} --ssl-type {}'
+                 .format(resource_group, functionapp_name, cert_thumbprint, 'SNI'), checks=[
+            JMESPathCheck("hostNameSslStates|[?name=='{}.azurewebsites.net']|[0].sslState".format(
+                functionapp_name), 'SniEnabled'),
+            JMESPathCheck("hostNameSslStates|[?name=='{}.azurewebsites.net']|[0].thumbprint".format(
+                functionapp_name), cert_thumbprint)
+        ])
+
+        # Unbind SSL certificate from the hostname
+        self.cmd('functionapp config ssl unbind -g {} -n {} --certificate-thumbprint {}'
+                 .format(resource_group, functionapp_name, cert_thumbprint), checks=[
+            JMESPathCheck("hostNameSslStates|[?name=='{}.azurewebsites.net']|[0].sslState".format(
+                functionapp_name), 'Disabled')
+        ])
+
+        # Clean up - delete the certificate
+        self.cmd('functionapp config ssl delete -g {} -n {} --certificate-thumbprint {}'
+                 .format(resource_group, functionapp_name, cert_thumbprint))
 
 
 class FunctionAppManagedEnvironment(ScenarioTest):

@@ -710,7 +710,7 @@ subscription than the app service environment, please use the resource ID for --
 
     # Add optional 'name' parameter for functionapp SSL commands to support Flex Consumption apps
     with self.argument_context('functionapp config ssl list') as c:
-        c.argument('name', options_list=['--name', '-n'], help='Name of the function app. Required for Flex Consumption apps to list site-scoped certificates.')
+        c.argument('name', options_list=['--name', '-n'], id_part=None, help='Name of the function app. Required for Flex Consumption apps to list site-scoped certificates.')
 
     with self.argument_context('functionapp config ssl show') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the function app. Required for Flex Consumption apps to show site-scoped certificates.')
@@ -725,6 +725,16 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('functionapp config ssl import') as c:
         c.argument('load_to_code', arg_type=get_three_state_flag(), help='For Flex Consumption apps only. When set to true, the certificate is accessible to app code')
         c.argument('enable_using_msi', arg_type=get_three_state_flag(), help='For Flex Consumption apps only. Enable Key Vault access using Managed Service Identity. When set to true, the app will use its managed identity to access Key Vault instead of service principal.')
+
+    with self.argument_context('webapp config ssl list') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+
+    with self.argument_context('webapp config ssl upload') as c:
+        c.ignore('load_to_code')
+
+    with self.argument_context('webapp config ssl import') as c:
+        c.ignore('load_to_code')
+        c.ignore('enable_using_msi')
 
     with self.argument_context('webapp config connection-string list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
