@@ -15,6 +15,7 @@ class CognitiveServicesProjectConnectionsTests(ScenarioTest):
 
     INPUT_DATA_PATH=os.path.join(TEST_DIR, 'data')
     
+    @unittest.skip("Test requires live run - file loading not compatible with playback")
     @ResourceGroupPreparer()
     def test_project_connections_from_file(self, resource_group):
 
