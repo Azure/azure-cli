@@ -211,36 +211,44 @@ def validate_is_flex_functionapp(cmd, namespace):
 
 def warn_linux_consumption_eol(cmd, namespace):
     """Shows a warning if the function app is on Linux Consumption plan."""
-    resource_group_name = getattr(namespace, 'resource_group_name', None)
+    from azure.core.exceptions import ResourceNotFoundError as ResNotFoundError, HttpResponseError
+
+    resource_group_name = getattr(namespace, 'resource_group_name', None) or getattr(namespace, 'resource_group', None)
     name = _get_app_name(namespace)
     slot = getattr(namespace, 'slot', None)
     if not name or not resource_group_name:
         return
 
-    functionapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
+    functionapp = None
+    try:
+        functionapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
+    except (ResNotFoundError, HttpResponseError):
+        # App doesn't exist yet (e.g., during create command) or is inaccessible, skip warning
+        pass
     if functionapp is None:
         return
 
-    # Check if Linux (reserved=True)
+    # Check if Linux (reserved=True) and get the plan
     is_linux = getattr(functionapp, 'reserved', False)
-    if not is_linux:
-        return
-
-    # Get the plan and check if it's Consumption (Dynamic tier)
     server_farm_id = get_site_server_farm_id(functionapp)
-    if server_farm_id is None:
+    if not is_linux or server_farm_id is None:
         return
 
     parsed_plan_id = parse_resource_id(server_farm_id)
     client = web_client_factory(cmd.cli_ctx)
-    plan_info = client.app_service_plans.get(parsed_plan_id['resource_group'], parsed_plan_id['name'])
+    plan_info = None
+    try:
+        plan_info = client.app_service_plans.get(parsed_plan_id['resource_group'], parsed_plan_id['name'])
+    except (ResNotFoundError, HttpResponseError):
+        # Plan not found or inaccessible, skip warning
+        pass
     if plan_info is None or not hasattr(plan_info, 'sku') or plan_info.sku is None:
         return
 
     if plan_info.sku.tier == 'Dynamic':
         logger.warning(
             "Migrate your app to Flex Consumption as Linux Consumption will reach EOL on "
-            "September 30 2028 and will no longer be supported. Flex Consumption is now the "
+            "September 30, 2028 and will no longer be supported. Flex Consumption is now the "
             "recommended serverless hosting plan for Azure Functions. It offers faster scaling, "
             "reduced cold starts, private networking, and more control over performance and cost. Help link: "
             "https://learn.microsoft.com/en-us/azure/azure-functions/migration/migrate-plan-consumption-to-flex"
