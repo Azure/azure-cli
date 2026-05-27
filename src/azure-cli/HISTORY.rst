@@ -41,6 +41,8 @@ Release History
 * `az webapp create`: Add error message that clearly lists all valid options and specifies how to discover available runtimes (#33252)
 * `az appservice plan create`: Make `P0V3` as default SKU when `--sku` is omitted for linux webapp (#33237)
 * `az appservice plan create`: Add `PREMIUM0V3` tier for elastic scale (#33237)
+* Fix #32951: `az functionapp create`: When the Application Insights component already exists, log "already exists and will be used" instead of the misleading "was created" message
+* Fix #32951: `az functionapp create --flexconsumption-location`: Translate the Microsoft.Web "hosting constraints" service error into an actionable CLI validation error with remediation steps
 
 **Cloud**
 

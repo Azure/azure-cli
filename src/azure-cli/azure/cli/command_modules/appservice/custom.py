@@ -8497,6 +8497,68 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
             poller = client.web_apps.begin_create_or_update(resource_group_name, name, functionapp_def,
                                                             api_version='2023-12-01')
             functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
+        except HttpResponseError as ex:
+            # Translate the Microsoft.Web RP "hosting constraints" error into a CLI
+            message = str(getattr(ex, 'message', ex) or ex)
+            error_code = ''
+            inner_error = getattr(ex, 'error', None)
+            if inner_error is not None:
+                error_code = str(getattr(inner_error, 'code', '') or '')
+            normalized = message.lower()
+            is_hosting_constraint = (
+                'hosting constraints' in normalized
+                or 'hosting constraint' in normalized
+                or (error_code == 'Conflict' and 'cannot change the site' in normalized)
+            )
+            if is_hosting_constraint:
+                existing_site = None
+                try:
+                    existing_site = client.web_apps.get(resource_group_name, name)
+                except HttpResponseError:
+                    existing_site = None
+
+                client.app_service_plans.delete(resource_group_name, plan_name)
+                if is_storage_container_created:
+                    delete_storage_container(cmd, resource_group_name, deployment_storage_name,
+                                             deployment_storage_container_name)
+                if is_user_assigned_identity_created:
+                    delete_user_assigned_identity(cmd, resource_group_name,
+                                                  deployment_storage_user_assigned_identity.name)
+
+                if existing_site is not None:
+                    headline = (
+                        "A function app or site named '{0}' already exists in resource group "
+                        "'{1}' and is incompatible with Flex Consumption."
+                        .format(name, resource_group_name))
+                    recommendations = [
+                        "Retry with a different --name.",
+                        "Inspect the existing site: az functionapp show -g {0} -n {1}".format(
+                            resource_group_name, name),
+                        "Check supported regions: az functionapp list-flexconsumption-locations",
+                        "To replace the existing site (this is destructive and deletes it): "
+                        "az functionapp delete -g {0} -n {1}".format(resource_group_name, name),
+                    ]
+                else:
+                    headline = (
+                        "Failed to create Flex Consumption function app '{0}' in resource group "
+                        "'{1}' due to a hosting conflict reported by the Microsoft.Web service."
+                        .format(name, resource_group_name))
+                    recommendations = [
+                        "Retry with a different --name in case a soft-deleted or hidden site "
+                        "is reserving the name.",
+                        "Check supported regions: az functionapp list-flexconsumption-locations",
+                        "Confirm the subscription is enabled for Flex Consumption in the target "
+                        "region.",
+                        "Re-run with --debug to view the full Microsoft.Web service response.",
+                    ]
+                raise ValidationError(headline, recommendation=recommendations) from ex
+            client.app_service_plans.delete(resource_group_name, plan_name)
+            if is_storage_container_created:
+                delete_storage_container(cmd, resource_group_name, deployment_storage_name,
+                                         deployment_storage_container_name)
+            if is_user_assigned_identity_created:
+                delete_user_assigned_identity(cmd, resource_group_name, deployment_storage_user_assigned_identity.name)
+            raise ex
         except Exception as ex:  # pylint: disable=broad-except
             client.app_service_plans.delete(resource_group_name, plan_name)
             if is_storage_container_created:
@@ -8671,6 +8733,13 @@ def try_create_workspace_based_application_insights(cmd, functionapp, workspace_
         api_version='2020-02-02-preview'
     )
 
+    # Check whether an Application Insights component with this name already exists so we
+    existing_appinsights = None
+    try:
+        existing_appinsights = app_insights_client.components.get(ai_resource_group_name, ai_name)
+    except HttpResponseError:
+        existing_appinsights = None
+
     ai_properties = {
         "name": ai_name,
         "location": ai_location,
@@ -8686,10 +8755,16 @@ def try_create_workspace_based_application_insights(cmd, functionapp, workspace_
         logger.warning(creation_failed_warn)
         return
 
-    # We make this success message as a warning to no interfere with regular JSON output in stdout
-    logger.warning('Application Insights \"%s\" was created for this Function App. '
-                   'You can visit https://portal.azure.com/#resource%s/overview to view your '
-                   'Application Insights component', appinsights.name, appinsights.id)
+    # Emit the Application Insights status as a warning so it goes to stderr and does not
+    # interfere with the regular JSON output on stdout.
+    if existing_appinsights is not None:
+        logger.warning('Application Insights \"%s\" already exists and will be used for this Function App. '
+                       'You can visit https://portal.azure.com/#resource%s/overview to view your '
+                       'Application Insights component', appinsights.name, appinsights.id)
+    else:
+        logger.warning('Application Insights \"%s\" was created for this Function App. '
+                       'You can visit https://portal.azure.com/#resource%s/overview to view your '
+                       'Application Insights component', appinsights.name, appinsights.id)
 
     update_app_settings(cmd, functionapp.resource_group, functionapp.name,
                         ['APPLICATIONINSIGHTS_CONNECTION_STRING={}'.format(appinsights.connection_string)])
@@ -8705,6 +8780,15 @@ def try_create_application_insights(cmd, functionapp):
     ai_location = functionapp.location
 
     app_insights_client = get_mgmt_service_client(cmd.cli_ctx, ApplicationInsightsManagementClient)
+
+    # Check whether an Application Insights component with this name already exists so we
+    # don't emit a misleading "was created" message on re-runs.
+    existing_appinsights = None
+    try:
+        existing_appinsights = app_insights_client.components.get(ai_resource_group_name, ai_name)
+    except HttpResponseError:
+        existing_appinsights = None
+
     ai_properties = {
         "name": ai_name,
         "location": ai_location,
@@ -8718,10 +8802,16 @@ def try_create_application_insights(cmd, functionapp):
         logger.warning(creation_failed_warn)
         return
 
-    # We make this success message as a warning to no interfere with regular JSON output in stdout
-    logger.warning('Application Insights \"%s\" was created for this Function App. '
-                   'You can visit https://portal.azure.com/#resource%s/overview to view your '
-                   'Application Insights component', appinsights.name, appinsights.id)
+    # Emit the Application Insights status as a warning so it goes to stderr and does not
+    # interfere with the regular JSON output on stdout.
+    if existing_appinsights is not None:
+        logger.warning('Application Insights \"%s\" already exists and will be used for this Function App. '
+                       'You can visit https://portal.azure.com/#resource%s/overview to view your '
+                       'Application Insights component', appinsights.name, appinsights.id)
+    else:
+        logger.warning('Application Insights \"%s\" was created for this Function App. '
+                       'You can visit https://portal.azure.com/#resource%s/overview to view your '
+                       'Application Insights component', appinsights.name, appinsights.id)
 
     if not is_centauri_functionapp(cmd, ai_resource_group_name, ai_name):
         update_app_settings(cmd, functionapp.resource_group, functionapp.name,
