@@ -47,7 +47,7 @@ def database_delete_func(cmd, client, resource_group_name=None, server_name=None
 
     result = None
     if resource_group_name is None or server_name is None or database_name is None:
-        raise CLIError("Incorrect Usage : Deleting a database needs resource-group, server-name and database-name. "
+        raise CLIError("Incorrect Usage : Deleting a database needs --resource-group, --server-name and --name. "
                        "If your parameter persistence is turned ON, make sure these three parameters exist in "
                        "persistent parameters using \'az config param-persist show\'. "
                        "If your parameter persistence is turned OFF, consider passing them explicitly.")

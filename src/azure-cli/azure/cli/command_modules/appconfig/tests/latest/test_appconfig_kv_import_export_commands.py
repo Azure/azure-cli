@@ -1253,21 +1253,23 @@ class AppConfigKubernetesConfigMapImportLiveScenarioTest(LiveScenarioTest):
         configmap_import_store_prefix = get_resource_name_prefix('ConfigMapImportTest')
         configmap_import_aks_prefix = get_resource_name_prefix('ImportAKSTest')
         config_store_name = self.create_random_name(prefix=configmap_import_store_prefix, length=24)
-        
-        # Create AKS cluster for testing
-        aks_cluster_name = self.create_random_name(prefix=configmap_import_aks_prefix, length=24)
-        
+
+        aks_cluster_name = self.create_random_name(prefix=configmap_import_aks_prefix, length=18)
+
         location = 'westus2'
         sku = 'standard'
         namespace = 'default'
-        
+
+        node_resource_group = self.create_random_name(prefix='MC_aks_', length=24)
+
         self.kwargs.update({
             'config_store_name': config_store_name,
             'aks_cluster_name': aks_cluster_name,
             'rg_loc': location,
             'rg': resource_group,
             'sku': sku,
-            'namespace': namespace
+            'namespace': namespace,
+            'node_resource_group': node_resource_group
         })
         
         # Create App Configuration store
@@ -1277,7 +1279,7 @@ class AppConfigKubernetesConfigMapImportLiveScenarioTest(LiveScenarioTest):
         
         try:
             # Create AKS cluster and wait for completion
-            self.cmd('aks create -g {rg} -n {aks_cluster_name} -l {rg_loc} --node-count 1 --generate-ssh-keys --enable-managed-identity --enable-image-cleaner --node-os-upgrade-channel NodeImage')
+            self.cmd('aks create -g {rg} -n {aks_cluster_name} -l {rg_loc} --node-resource-group {node_resource_group} --node-count 1 --generate-ssh-keys --enable-managed-identity --enable-image-cleaner --node-os-upgrade-channel NodeImage --os-sku AzureLinux')
             
             # Wait for AKS cluster to be ready
             self.cmd('aks wait -g {rg} -n {aks_cluster_name} --created')

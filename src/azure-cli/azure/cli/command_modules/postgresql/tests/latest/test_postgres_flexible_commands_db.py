@@ -27,10 +27,10 @@ class FlexibleServerDatabaseMgmtScenarioTest(ScenarioTest):
 
         database_name = self.create_random_name('database', 20)
 
-        self.cmd('postgres flexible-server db create -g {} -s {} -d {}'.format(resource_group, server, database_name),
+        self.cmd('postgres flexible-server db create -g {} -s {} -n {}'.format(resource_group, server, database_name),
                  checks=[JMESPathCheck('name', database_name)])
 
-        self.cmd('postgres flexible-server db show -g {} -s {} -d {}'.format(resource_group, server, database_name),
+        self.cmd('postgres flexible-server db show -g {} -s {} -n {}'.format(resource_group, server, database_name),
                  checks=[
                      JMESPathCheck('name', database_name),
                      JMESPathCheck('resourceGroup', resource_group)])
@@ -38,5 +38,5 @@ class FlexibleServerDatabaseMgmtScenarioTest(ScenarioTest):
         self.cmd('postgres flexible-server db list -g {} -s {} '.format(resource_group, server),
                  checks=[JMESPathCheck('type(@)', 'array')])
 
-        self.cmd('postgres flexible-server db delete -g {} -s {} -d {} --yes'.format(resource_group, server, database_name),
+        self.cmd('postgres flexible-server db delete -g {} -s {} -n {} --yes'.format(resource_group, server, database_name),
                  checks=NoneCheck())
