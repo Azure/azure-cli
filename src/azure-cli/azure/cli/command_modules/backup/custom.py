@@ -71,6 +71,8 @@ secondary_region_map = {
     "chinanorth": "chinaeast",
     "chinanorth2": "chinaeast2",
     "chinanorth3": "chinaeast3",
+    "deloscloudgermanycentral": "deloscloudgermanynorth",
+    "deloscloudgermanynorth": "deloscloudgermanycentral",
     "eastasia": "southeastasia",
     "eastus": "westus",
     "eastus2": "centralus",
