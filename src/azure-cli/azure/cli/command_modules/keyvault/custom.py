@@ -1939,7 +1939,7 @@ def create_role_assignment(cmd, client, role, scope, assignee_object_id=None,
         name=role_assignment_name,
     )
 
-    role_defs = list_role_definitions(client)
+    role_defs = list_role_definitions(client, scope=scope)
     role_dics = _get_role_dics(role_defs)
     principal_dics = _get_principal_dics(cmd.cli_ctx, [role_assignment])
 
@@ -2004,7 +2004,7 @@ def list_role_assignments(cmd, client, scope=None, assignee=None, role=None, ass
                 continue
         matched_role_assignments.append(role_assignment)
 
-    role_defs = list_role_definitions(client)
+    role_defs = list_role_definitions(client, scope=query_scope)
     role_dics = _get_role_dics(role_defs)
     principal_dics = _get_principal_dics(cmd.cli_ctx, matched_role_assignments)
 
