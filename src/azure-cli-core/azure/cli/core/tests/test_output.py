@@ -7,6 +7,11 @@ import unittest
 
 
 class TestCoreCLIOutput(unittest.TestCase):
+    @staticmethod
+    def _create_translating_stream():
+        import io
+        return io.TextIOWrapper(io.BytesIO(), encoding='utf-8', newline='\r\n')
+
     def test_create_AzOutputProducer(self):
         from azure.cli.core._output import AzOutputProducer
         from azure.cli.core.mock import DummyCli
@@ -40,6 +45,35 @@ class TestCoreCLIOutput(unittest.TestCase):
         output_producer = AzOutputProducer(DummyCli())
         yaml_output = output_producer.get_formatter('yaml')(CommandResultItem(result=OrderedDict(account_dict)))
         self.assertEqual(account_dict, yaml.safe_load(yaml_output))
+
+    def test_tsv_output_uses_lf_line_endings(self):
+        from azure.cli.core._output import AzOutputProducer
+        from azure.cli.core.mock import DummyCli
+        from knack.util import CommandResultItem
+
+        output_producer = AzOutputProducer(DummyCli())
+        out_file = self._create_translating_stream()
+
+        output_producer.out(CommandResultItem(result=['topic1', 'topic2']),
+                            formatter=output_producer.get_formatter('tsv'),
+                            out_file=out_file)
+
+        self.assertEqual(b'topic1\ntopic2\n', out_file.buffer.getvalue())
+
+    def test_json_output_preserves_stream_translation(self):
+        from azure.cli.core._output import AzOutputProducer
+        from azure.cli.core.mock import DummyCli
+        from knack.util import CommandResultItem
+
+        output_producer = AzOutputProducer(DummyCli())
+        out_file = self._create_translating_stream()
+
+        output_producer.out(CommandResultItem(result=[{'name': 'topic1'}]),
+                            formatter=output_producer.get_formatter('json'),
+                            out_file=out_file)
+
+        out_file.flush()
+        self.assertIn(b'\r\n', out_file.buffer.getvalue())
 
 
 if __name__ == '__main__':
