@@ -99,13 +99,22 @@ def _handle_challenge_phase(login_server,
     logger.debug(add_timestamp("Sending a HTTP Get request to {}".format(request_url)))
     challenge = requests.get(request_url, verify=not should_disable_connection_verify())
 
-    if challenge.status_code != 401 or 'WWW-Authenticate' not in challenge.headers:
+    authenticate = challenge.headers.get('WWW-Authenticate')
+    if not authenticate:
+        if is_aad_token and challenge.status_code == 403:
+            logger.warning(
+                "Received 403 challenge response without WWW-Authenticate from '%s'. "
+                "Falling back to default ACR token endpoints.",
+                login_server,
+            )
+            return {
+                'realm': 'https://{}/oauth2/token'.format(login_server),
+                'service': login_server
+            }
         from ._errors import CONNECTIVITY_CHALLENGE_ERROR
         if is_diagnostics_context:
             return CONNECTIVITY_CHALLENGE_ERROR.format_error_message(login_server)
         raise CLIError(CONNECTIVITY_CHALLENGE_ERROR.format_error_message(login_server).get_error_message())
-
-    authenticate = challenge.headers['WWW-Authenticate']
 
     tokens = authenticate.split(' ', 2)
 

@@ -1219,6 +1219,71 @@ class AcrMockCommandsTests(unittest.TestCase):
         get_access_credentials(cmd, registry_name, tenant_suffix=tenant_suffix, artifact_repository=TEST_REPOSITORY, permission=HelmAccessTokenPermission.PULL.value)
         self._validate_access_token_request(mock_requests_get, mock_requests_post, login_server, 'artifact-repository:{}:{}'.format(TEST_REPOSITORY, HelmAccessTokenPermission.PULL.value))
 
+    @mock.patch('azure.cli.core._profile.Profile.get_subscription_id', autospec=True)
+    @mock.patch('azure.cli.command_modules.acr._docker_utils.get_registry_by_name')
+    @mock.patch('requests.post', autospec=True)
+    @mock.patch('requests.get', autospec=True)
+    @mock.patch('azure.cli.core._profile.Profile.get_raw_token')
+    def test_get_access_credentials_supports_403_without_www_authenticate(
+            self, mock_get_raw_token, mock_requests_get, mock_requests_post, mock_get_registry_by_name,
+            mock_get_subscription):
+        from azure.mgmt.containerregistry.models import Registry, Sku
+
+        registry = Registry(location='westus', sku=Sku(name='Standard'))
+        login_server = 'testregistry.azurecr.io'
+        registry.login_server = login_server
+        mock_get_registry_by_name.return_value = registry, None
+
+        cmd = self._setup_cmd()
+        mock_get_subscription.return_value = TEST_SUBSCRIPTION
+        mock_get_raw_token.return_value = ('Bearer', TEST_AAD_ACCESS_TOKEN, {}), TEST_SUBSCRIPTION, TEST_TENANT
+
+        initial_connectivity_response = mock.MagicMock()
+        initial_connectivity_response.status_code = 200
+        initial_connectivity_response.headers = {}
+        challenge_response = mock.MagicMock()
+        challenge_response.status_code = 403
+        challenge_response.headers = {}
+        mock_requests_get.side_effect = [initial_connectivity_response, challenge_response]
+
+        token_response = mock.MagicMock()
+        token_response.status_code = 200
+        token_response.headers = {}
+        token_response.content = json.dumps({
+            'refresh_token': TEST_ACR_REFRESH_TOKEN,
+            'access_token': TEST_ACR_ACCESS_TOKEN
+        }).encode()
+        mock_requests_post.return_value = token_response
+
+        login_server, username, password = get_access_credentials(
+            cmd,
+            'testregistry',
+            artifact_repository=TEST_REPOSITORY,
+            permission=HelmAccessTokenPermission.PULL.value
+        )
+        self.assertEqual((login_server, username, password), ('testregistry.azurecr.io', EMPTY_GUID, TEST_ACR_ACCESS_TOKEN))
+
+        mock_requests_post.assert_any_call(
+            'https://{}/oauth2/exchange'.format(login_server),
+            urlencode({
+                'grant_type': 'access_token',
+                'service': login_server,
+                'tenant': TEST_TENANT,
+                'access_token': TEST_AAD_ACCESS_TOKEN
+            }),
+            headers={'Content-Type': 'application/x-www-form-urlencoded'},
+            verify=mock.ANY)
+        mock_requests_post.assert_any_call(
+            'https://{}/oauth2/token'.format(login_server),
+            urlencode({
+                'grant_type': 'refresh_token',
+                'service': login_server,
+                'scope': 'artifact-repository:{}:{}'.format(TEST_REPOSITORY, HelmAccessTokenPermission.PULL.value),
+                'refresh_token': TEST_ACR_REFRESH_TOKEN
+            }),
+            headers={'Content-Type': 'application/x-www-form-urlencoded'},
+            verify=mock.ANY)
+
     def _setup_mock_token_requests(self, mock_get_aad_token, mock_requests_get, mock_requests_post, login_server):
         # Set up AAD token with only access token
         mock_get_aad_token.return_value = ('Bearer', TEST_AAD_ACCESS_TOKEN, {}), TEST_SUBSCRIPTION, TEST_TENANT
