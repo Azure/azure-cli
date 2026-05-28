@@ -807,21 +807,17 @@ def sdk_no_wait(no_wait, func, *args, **kwargs):
     except Exception as ex:  # pylint: disable=broad-except
         if no_wait or not _is_provisioning_retryable_error(ex):
             raise
-        initial_ex = ex
 
-    retry_ex = None
-    # The first attempt has already been made above.
-    for _ in range(_PROVISIONING_RETRY_ATTEMPTS - 1):
+    # Attempt 1 failed with a retryable provisioning-state error, so retry attempts 2..N.
+    for retry_attempt in range(2, _PROVISIONING_RETRY_ATTEMPTS + 1):
         logger.warning("Resource is still provisioning. Retrying in %s seconds...",
                        _PROVISIONING_RETRY_INTERVAL_SECONDS)
         time.sleep(_PROVISIONING_RETRY_INTERVAL_SECONDS)
         try:
             return func(*args, **kwargs)
-        except Exception as ex_after_retry:  # pylint: disable=broad-except
-            retry_ex = ex_after_retry
-            if not _is_provisioning_retryable_error(retry_ex):
+        except Exception as retry_ex:  # pylint: disable=broad-except
+            if not _is_provisioning_retryable_error(retry_ex) or retry_attempt == _PROVISIONING_RETRY_ATTEMPTS:
                 raise
-    raise retry_ex or initial_ex
 
 
 def open_page_in_browser(url):
