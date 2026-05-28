@@ -150,7 +150,7 @@ DEPENDENCIES = [
     'pycomposefile>=0.0.34',
     'PyGithub~=1.38',
     'PyNaCl~=1.6.2',
-    'rpds-py>=0.22.0',
+    'rpds-py~=0.29.0',
     'scp~=0.13.2',
     'semver~=3.0',
     'setuptools',
