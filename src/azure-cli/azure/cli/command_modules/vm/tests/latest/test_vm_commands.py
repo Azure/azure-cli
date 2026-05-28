@@ -2131,14 +2131,14 @@ class VMAvailSetScenarioTest(ScenarioTest):
                  checks=self.check('length(@)', 0))
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_availset_scheduled_events_policy_', location='centraluseuap')
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_availset_scheduled_events_policy_', location='westus')
     def test_vm_availset_scheduled_events_policy(self, resource_group):
         self.kwargs.update({
             'availset1': 'availset-test1',
             'availset2': 'availset-test2'
         })
 
-        self.cmd('vm availability-set create -g {rg} -n {availset1} --additional-events True --enable-reboot True --enable-redeploy True --platform-fault-domain-count 1 --platform-update-domain-count 1', checks=[
+        self.cmd('vm availability-set create -g {rg} -n {availset1} --additional-events True --scheduled-events-api-version 2020-07-01 --enable-reboot True --enable-redeploy True --platform-fault-domain-count 1 --platform-update-domain-count 1', checks=[
             self.check('name', '{availset1}'),
             self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True),
             self.check('scheduledEventsPolicy.userInitiatedRedeploy.automaticallyApprove', True),
@@ -2157,7 +2157,7 @@ class VMAvailSetScenarioTest(ScenarioTest):
             self.check('scheduledEventsPolicy', None),
         ])
 
-        self.cmd('vm availability-set update -g {rg} -n {availset2} --enable-reboot False --additional-events True', checks=[
+        self.cmd('vm availability-set update -g {rg} -n {availset2} --enable-reboot False --additional-events True --scheduled-events-api-version 2020-07-01', checks=[
             self.check('name', '{availset2}'),
             self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True),
             self.check('scheduledEventsPolicy.userInitiatedRedeploy', None),
@@ -2203,7 +2203,7 @@ class VMAvailSetLiveScenarioTest(ScenarioTest):
             self.check('sku.name', 'Aligned')
         ])
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_avset_migrate', location='eastus2euap')
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_avset_migrate', location='westus')
     def test_vm_avset_migrate(self, resource_group):
         self.kwargs.update({
             'avset1': self.create_random_name('avset', 15),
@@ -2218,8 +2218,8 @@ class VMAvailSetLiveScenarioTest(ScenarioTest):
             self.check('name', '{avset1}'),
             self.check('platformFaultDomainCount', 2)
         ])
-        self.cmd('vm create -g {rg} -n {vm1} --image OpenLogic:CentOS:7.5:latest --admin-username vmtest --nsg-rule NONE --size Standard_B2ms --availability-set {avset1}')
-        self.cmd('vmss create -g {rg} -n {vmss} --image OpenLogic:CentOS:7.5:latest --admin-username vmsstest --vm-sku Standard_B2ms')
+        self.cmd('vm create -g {rg} -n {vm1} --image OpenLogic:CentOS:7.5:latest --admin-username vmtest --nsg-rule NONE --size Standard_D2s_v3 --availability-set {avset1}')
+        self.cmd('vmss create -g {rg} -n {vmss} --image OpenLogic:CentOS:7.5:latest --admin-username vmsstest --vm-sku Standard_D2s_v3')
         vmss = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()
         self.kwargs.update({
             'vmss_id': vmss['id'],
@@ -3642,13 +3642,16 @@ class VMCreateExistingOptions(ScenarioTest):
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
-        self.cmd('vm create --image Canonical:UbuntuServer:18.04-LTS:latest --os-disk-name {disk} --os-disk-delete-option Delete '
-                 '--vnet-name {vnet} --subnet {subnet} --availability-set {availset} --public-ip-address {pubip} -l "West US" --nsg {nsg} --use-unmanaged-disk --size Standard_DS2 --admin-username user11 --storage-account {sa} --storage-container-name {container} -g {rg} --name {vm} --ssh-key-value \'{ssh_key}\'')
+        self.cmd('vm create --image Canonical:UbuntuServer:16.04-LTS:latest --os-disk-name {disk} '
+                 '--os-disk-delete-option Delete --vnet-name {vnet} --subnet {subnet} --availability-set {availset} '
+                 '--public-ip-address {pubip} -l "West US" --nsg {nsg} --use-unmanaged-disk --size Standard_D2s_v3 '
+                 '--admin-username user11 --storage-account {sa} --storage-container-name {container} -g {rg} '
+                 '--name {vm} --ssh-key-value \'{ssh_key}\'')
 
         self.cmd('vm availability-set show -n {availset} -g {rg}',
                  checks=self.check('virtualMachines[0].id.ends_with(@, \'{}\')'.format(self.kwargs['vm'].upper()), True))
         self.cmd('network nsg show -n {nsg} -g {rg}',
-                 checks=self.check('networkInterfaces[0].id.ends_with(@, \'{vm}VMNic\')', True))
+                 checks=self.check("networkInterfaces[0].id.ends_with(@, '{}VMNIC')".format(self.kwargs['vm'].upper()), True))
         self.cmd('network nic show -n {vm}VMNic -g {rg}',
                  checks=self.check('ipConfigurations[0].publicIPAddress.id.ends_with(@, \'{pubip}\')', True))
         self.cmd('vm show -n {vm} -g {rg}',
@@ -3765,14 +3768,14 @@ class VMCreateExistingIdsOptions(ScenarioTest):
         assert is_valid_resource_id(self.kwargs['subnet_id'])
         assert is_valid_resource_id(self.kwargs['nsg_id'])
 
-        self.cmd('vm create --image Canonical:UbuntuServer:18.04-LTS:latest --os-disk-name {disk} --subnet {subnet_id} '
+        self.cmd('vm create --image Canonical:UbuntuServer:16.04-LTS:latest --os-disk-name {disk} --subnet {subnet_id} '
                  '--availability-set {availset_id} --public-ip-address {pubip_id} -l "West US" --nsg {nsg_id} --use-unmanaged-disk '
-                 '--size Standard_DS2 --admin-username user11 --storage-account {sa} --storage-container-name {container} -g {rg} --name {vm} --ssh-key-value \'{ssh_key}\'')
+                 '--size Standard_D2s_v3 --admin-username user11 --storage-account {sa} --storage-container-name {container} -g {rg} --name {vm} --ssh-key-value \'{ssh_key}\'')
 
         self.cmd('vm availability-set show -n {availset} -g {rg}',
                  checks=self.check('virtualMachines[0].id.ends_with(@, \'{}\')'.format(self.kwargs['vm'].upper()), True))
         self.cmd('network nsg show -n {nsg} -g {rg}',
-                 checks=self.check('networkInterfaces[0].id.ends_with(@, \'{vm}VMNic\')', True))
+                 checks=self.check("networkInterfaces[0].id.ends_with(@, '{}VMNIC')".format(self.kwargs['vm'].upper()), True))
         self.cmd('network nic show -n {vm}VMNic -g {rg}',
                  checks=self.check('ipConfigurations[0].publicIPAddress.id.ends_with(@, \'{pubip}\')', True))
         self.cmd('vm show -n {vm} -g {rg}',
@@ -9531,13 +9534,16 @@ class ProximityPlacementGroupScenarioTest(ScenarioTest):
 
         self.kwargs['vm_id'] = self.cmd(
             'vm create -g {rg} -n {vm} --image Debian:debian-10:10:latest --admin-username debian --use-unmanaged-disk '
-            '--ssh-key-value \'{ssh_key}\' --ppg {ppg} --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE').get_output_in_json()['id']
+            '--ssh-key-value \'{ssh_key}\' --ppg {ppg} --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE '
+            '--size Standard_D2s_v3').get_output_in_json()['id']
 
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
         self.cmd('network nsg create -g {rg} -n {nsg}')
-        self.cmd('vmss create -g {rg} -n {vmss} --image Debian:debian-10:10:latest --admin-username debian --ssh-key-value \'{ssh_key}\' --ppg {ppg_id} --orchestration-mode Flexible --nsg {nsg}')
+        self.cmd('vmss create -g {rg} -n {vmss} --image Debian:debian-10:10:latest --admin-username debian '
+                 '--ssh-key-value \'{ssh_key}\' --ppg {ppg_id} --orchestration-mode Flexible --nsg {nsg} '
+                 '--vm-sku Standard_D2s_v3')
         self.kwargs['vmss_id'] = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()['id']
 
         self.kwargs['avset_id'] = self.cmd('vm availability-set create -g {rg} -n {avset} --ppg {ppg}').get_output_in_json()['id']
