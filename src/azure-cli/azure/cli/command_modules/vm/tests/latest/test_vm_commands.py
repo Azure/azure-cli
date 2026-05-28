@@ -2170,14 +2170,18 @@ class VMAvailSetScenarioTest(ScenarioTest):
             'avset': self.create_random_name('avset', 15)
         })
 
-        self.cmd('vm availability-set create -g {rg} -n {avset} --platform-fault-domain-count 1 --platform-update-domain-count 1')
-        self.cmd('vm availability-set update -g {rg} -n {avset} --enable-all-instance-down True', checks=[
+        self.cmd('vm availability-set create -g {rg} -n {avset} --platform-fault-domain-count 1 --platform-update-domain-count 1 '
+                 '--additional-events True --enable-reboot True --enable-redeploy True '
+                 '--scheduled-events-api-version 2020-07-01 --enable-all-instance-down True', checks=[
+            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True),
+            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.scheduledEventsApiVersion', '2020-07-01'),
+            self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', True),
+            self.check('scheduledEventsPolicy.userInitiatedRedeploy.automaticallyApprove', True),
             self.check('scheduledEventsPolicy.allInstancesDown.automaticallyApprove', True)
         ])
-        with self.assertRaises(HttpResponseError): # No available regions found
-            self.cmd('vm availability-set update -g {rg} -n {avset} --scheduled-events-api-version 2020-07-01', checks=[
-                self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.scheduledEventsApiVersion', '2020-07-01')
-            ])
+        self.cmd('vm availability-set update -g {rg} -n {avset} --enable-all-instance-down False', checks=[
+            self.check('scheduledEventsPolicy.allInstancesDown.automaticallyApprove', False)
+        ])
 
 class VMAvailSetLiveScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_availset_live')
