@@ -2083,14 +2083,14 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
                 vm["scheduled_events_policy"]["scheduled_events_additional_publishing_targets"] = {}
             if vm["scheduled_events_policy"]["scheduled_events_additional_publishing_targets"]\
                     .get("event_grid_and_resource_graph") is None:
-                vm["scheduled_events_policy"]["scheduled_events_additional_publishing_targets"]\
-                    ["event_grid_and_resource_graph"] = {}
+                vm["scheduled_events_policy"]["scheduled_events_additional_publishing_targets"][
+                    "event_grid_and_resource_graph"] = {}
             if additional_scheduled_events is not None:
-                vm["scheduled_events_policy"]["scheduled_events_additional_publishing_targets"]\
-                    ["event_grid_and_resource_graph"]["enable"] = additional_scheduled_events
+                vm["scheduled_events_policy"]["scheduled_events_additional_publishing_targets"][
+                    "event_grid_and_resource_graph"]["enable"] = additional_scheduled_events
             if scheduled_events_api_version is not None:
-                vm["scheduled_events_policy"]["scheduled_events_additional_publishing_targets"]\
-                    ["event_grid_and_resource_graph"]["scheduled_events_api_version"] = scheduled_events_api_version
+                vm["scheduled_events_policy"]["scheduled_events_additional_publishing_targets"][
+                    "event_grid_and_resource_graph"]["scheduled_events_api_version"] = scheduled_events_api_version
 
         if enable_user_reboot_scheduled_events is not None:
             if vm["scheduled_events_policy"].get("user_initiated_reboot") is None:
