@@ -400,6 +400,33 @@ class TestUtils(unittest.TestCase):
             request = send_mock.call_args[0][1]
             self.assertEqual(request.headers['User-Agent'], get_az_rest_user_agent() + ' env-ua ARG-UA')
 
+    @mock.patch.dict('os.environ')
+    @mock.patch('azure.cli.core._profile.Profile.get_raw_token', autospec=True)
+    @mock.patch('requests.Session.send', autospec=True)
+    def test_send_raw_request_adds_json_content_type_for_string_body(self, send_mock, get_raw_token_mock):
+        return_val = mock.MagicMock()
+        return_val.is_ok = True
+        send_mock.return_value = return_val
+        get_raw_token_mock.return_value = ("Bearer", "******", None), None, None
+
+        cli_ctx = DummyCli()
+        cli_ctx.data = {
+            'command': 'rest',
+            'safe_params': ['method', 'uri']
+        }
+        url = 'https://management.azure.com/subscriptions/00000001-0000-0000-0000-000000000000/resourcegroups/02?api-version=2019-07-01'
+
+        for method in ['PUT', 'POST', 'PATCH']:
+            send_raw_request(cli_ctx, method, url, body='auth4.json', generated_client_request_id_name=None)
+            request = send_mock.call_args[0][1]
+            self.assertEqual(request.headers['Content-Type'], 'application/json')
+            self.assertEqual(request.body, 'auth4.json')
+
+        send_raw_request(cli_ctx, 'PUT', url, body='auth4.json', headers={'Content-Type=text/plain'},
+                         generated_client_request_id_name=None)
+        request = send_mock.call_args[0][1]
+        self.assertEqual(request.headers['Content-Type'], 'text/plain')
+
     @mock.patch("psutil.Process")
     def test_get_parent_proc_name(self, mock_process_type):
         process = mock_process_type.return_value

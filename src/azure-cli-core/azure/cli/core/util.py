@@ -1003,10 +1003,10 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
             # https://github.com/python/cpython/blob/3.10/Lib/http/client.py#L164
             # https://github.com/python/cpython/blob/3.10/Lib/http/client.py#L1324-L1327
             body = json.dumps(body_object)
-            if 'Content-Type' not in headers:
-                headers['Content-Type'] = 'application/json'
         except Exception:  # pylint: disable=broad-except
             pass
+        if 'Content-Type' not in headers and method and method.upper() in ['PUT', 'POST', 'PATCH']:
+            headers['Content-Type'] = 'application/json'
 
     # add telemetry
     headers['CommandName'] = cli_ctx.data['command']
