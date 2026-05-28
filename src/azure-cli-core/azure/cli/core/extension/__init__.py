@@ -363,6 +363,10 @@ def is_preview_from_extension_meta(extension_meta):
             is_preview_from_semantic_version(extension_meta.get('version')))
 
 
+def is_experimental_from_extension_meta(extension_meta):
+    return bool(extension_meta.get(EXT_METADATA_ISEXPERIMENTAL, False))
+
+
 def is_preview_from_semantic_version(version):
     """
     pre = [a, b] -> preview

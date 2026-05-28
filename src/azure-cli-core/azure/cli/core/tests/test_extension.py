@@ -299,7 +299,7 @@ class TestExtensions(TestExtensionsBase):
             self.assertEqual(res[0]['summary'], 'AzureMachineLearningWorkspaces Extension')
             self.assertEqual(res[0]['version'], '2.0.0a1')
             self.assertEqual(res[0]['preview'], True)
-            self.assertEqual(res[0]['experimental'], False)
+            self.assertEqual(res[0]['experimental'], True)
             self.assertEqual(res[1]['name'], 'test_sample_extension1')
             self.assertEqual(res[1]['version'], '1.15.0')
             self.assertEqual(res[1]['preview'], True)
