@@ -37,6 +37,8 @@ examples:
     text: az container create -g MyResourceGroup --name myapp --image myimage:latest --command-line "echo hello" --restart-policy Never
   - name: Create a container in a container group with environment variables.
     text: az container create -g MyResourceGroup --name myapp --image myimage:latest --environment-variables key1=value1 key2=value2
+  - name: In PowerShell, use azps to preserve special characters in environment variable values.
+    text: azps container create -g MyResourceGroup --name myapp --image myimage:latest --environment-variables APP_DB_PASSWORD="$env:APP_DB_PASSWORD"
   - name: Create a container in a container group using container image from Azure Container Registry.
     text: az container create -g MyResourceGroup --name myapp --image myAcrRegistry.azurecr.io/myimage:latest --registry-password password
   - name: Create a container in a container group that mounts an Azure File share as volume.
