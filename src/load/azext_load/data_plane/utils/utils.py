@@ -850,8 +850,9 @@ def upload_generic_files_helper(
 def upload_properties_file_helper(
     client, test_id, yaml_data, load_test_config_file, existing_test_files, wait
 ):
-    if yaml_data and (yaml_data.get("properties") or {}).get("userPropertyFile") is not None:
-        user_prop_file = (yaml_data.get("properties") or {}).get("userPropertyFile")
+    properties = yaml_data.get("properties") if yaml_data else None
+    if properties and properties.get("userPropertyFile") is not None:
+        user_prop_file = properties.get("userPropertyFile")
         existing_properties_files = []
         for file in existing_test_files:
             if AllowedFileTypes.USER_PROPERTIES.value == file["fileType"]:
@@ -994,7 +995,7 @@ def validate_engine_data_with_regionwiseload_data(engine_instances, regionwise_e
 
 
 def _get_metrics_from_sampler(test_run, sampler_name, metric_name):
-    return (test_run.get("testRunStatistics") or {}).get(sampler_name, {}).get(metric_name)
+    return ((test_run.get("testRunStatistics") or {}).get(sampler_name) or {}).get(metric_name)
 
 
 def generate_trends_row(test_run, response_time_aggregate=None):
