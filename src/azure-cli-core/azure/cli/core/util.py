@@ -53,6 +53,16 @@ DISALLOWED_USER_NAMES = [
 #   - https://azcliprod.blob.core.windows.net/cli/vm/aliases.json (VM image aliases)
 AME_STORAGE_BASE_URL = "https://azcliprod.blob.core.windows.net/cli"
 
+_PROVISIONING_RETRY_ATTEMPTS = 6
+_PROVISIONING_RETRY_INTERVAL_SECONDS = 10
+_PROVISIONING_RETRYABLE_ERROR = 'resource cannot be updated during provisioning'
+
+
+def _is_provisioning_retryable_error(ex):
+    error_msg = getattr(ex, 'message', str(ex))
+    status_code = getattr(ex, 'status_code', None)
+    return status_code == 400 and _PROVISIONING_RETRYABLE_ERROR in error_msg.lower()
+
 
 def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
     # For error code, follow guidelines at https://docs.python.org/2/library/sys.html#sys.exit,
@@ -792,25 +802,26 @@ def sdk_no_wait(no_wait, func, *args, **kwargs):
     if no_wait:
         kwargs.update({'polling': False})
 
-    retry_attempts = 6
-    retry_interval_in_seconds = 10
-    for attempt in range(retry_attempts):
+    try:
+        return func(*args, **kwargs)
+    except Exception as ex:  # pylint: disable=broad-except
+        if no_wait or not _is_provisioning_retryable_error(ex):
+            raise
+        initial_ex = ex
+
+    retry_ex = None
+    # The first attempt has already been made above.
+    for _ in range(_PROVISIONING_RETRY_ATTEMPTS - 1):
+        logger.warning("Resource is still provisioning. Retrying in %s seconds...",
+                       _PROVISIONING_RETRY_INTERVAL_SECONDS)
+        time.sleep(_PROVISIONING_RETRY_INTERVAL_SECONDS)
         try:
             return func(*args, **kwargs)
-        except Exception as ex:  # pylint: disable=broad-except
-            error_msg = getattr(ex, 'message', str(ex))
-            status_code = getattr(ex, 'status_code', None)
-            should_retry = (
-                not no_wait and
-                status_code == 400 and
-                'resource cannot be updated during provisioning' in error_msg.lower() and
-                attempt < retry_attempts - 1
-            )
-            if not should_retry:
+        except Exception as ex_after_retry:  # pylint: disable=broad-except
+            retry_ex = ex_after_retry
+            if not _is_provisioning_retryable_error(retry_ex):
                 raise
-
-            logger.warning("Resource is still provisioning. Retrying in %s seconds...", retry_interval_in_seconds)
-            time.sleep(retry_interval_in_seconds)
+    raise retry_ex or initial_ex
 
 
 def open_page_in_browser(url):
