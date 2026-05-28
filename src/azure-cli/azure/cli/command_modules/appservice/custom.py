@@ -8506,9 +8506,9 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                 error_code = str(getattr(inner_error, 'code', '') or '')
             normalized = message.lower()
             is_hosting_constraint = (
-                'hosting constraints' in normalized
-                or 'hosting constraint' in normalized
-                or (error_code == 'Conflict' and 'cannot change the site' in normalized)
+                'hosting constraints' in normalized or
+                'hosting constraint' in normalized or
+                (error_code == 'Conflict' and 'cannot change the site' in normalized)
             )
             if is_hosting_constraint:
                 existing_site = None
