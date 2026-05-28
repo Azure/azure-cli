@@ -10,6 +10,7 @@ import os
 import platform
 import re
 import sys
+import time
 
 from knack.log import get_logger
 from knack.util import CLIError, to_snake_case, to_camel_case
@@ -799,17 +800,17 @@ def sdk_no_wait(no_wait, func, *args, **kwargs):
         except Exception as ex:  # pylint: disable=broad-except
             error_msg = getattr(ex, 'message', str(ex))
             status_code = getattr(ex, 'status_code', None)
-            if not (
+            should_retry = (
                 not no_wait and
                 status_code == 400 and
                 'resource cannot be updated during provisioning' in error_msg.lower() and
                 attempt < retry_attempts - 1
-            ):
+            )
+            if not should_retry:
                 raise
 
             logger.warning("Resource is still provisioning. Retrying in %s seconds...", retry_interval_in_seconds)
-            from time import sleep
-            sleep(retry_interval_in_seconds)
+            time.sleep(retry_interval_in_seconds)
 
 
 def open_page_in_browser(url):
