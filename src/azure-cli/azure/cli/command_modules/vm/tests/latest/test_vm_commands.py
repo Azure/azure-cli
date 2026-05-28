@@ -10072,56 +10072,80 @@ class VMSSTerminateNotificationScenarioTest(ScenarioTest):
             self.check('virtualMachineProfile.scheduledEventsProfile.osImageNotificationProfile', None)
         ])
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vmss_scheduled_events_policy_', location='centraluseuap')
+    # Required Microsoft.Compute/SendScheduledEventsPolicy
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_scheduled_events_policy_', location='eastus2')
     def test_vmss_scheduled_events_policy(self, resource_group):
         self.kwargs.update({
             'vmss1': self.create_random_name('vmss', 10),
             'vmss2': self.create_random_name('vmss', 10)
         })
-        self.cmd('vmss create -g {rg} -n {vmss1} --image Canonical:UbuntuServer:18.04-LTS:latest --additional-events True --enable-reboot True --enable-redeploy True', checks=[
+        self.cmd('vmss create -g {rg} -n {vmss1} --image Canonical:UbuntuServer:16.04-LTS:latest '
+                 '--additional-events True --enable-reboot True --enable-redeploy True '
+                 '--scheduled-events-api-version 2020-07-01 --enable-all-instance-down True '
+                 '--vm-sku Standard_D2s_v3 --instance-count 1', checks=[
             self.check('vmss.scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True),
+            self.check('vmss.scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', True),
             self.check('vmss.scheduledEventsPolicy.userInitiatedRedeploy.automaticallyApprove', True),
-            self.check('vmss.scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', True)
+            self.check('vmss.scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.scheduledEventsApiVersion', '2020-07-01'),
+            self.check('vmss.scheduledEventsPolicy.allInstancesDown.automaticallyApprove', True)
         ])
-        self.cmd('vmss update -g {rg} -n {vmss1} --additional-events False --enable-reboot False --enable-redeploy False', checks=[
-            self.check('scheduledEventsPolicy', None)
+        self.cmd('vmss update -g {rg} -n {vmss1} --additional-events False --enable-reboot False '
+                 '--enable-redeploy False --enable-all-instance-down False', checks=[
+            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', False),
+            self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', False),
+            self.check('scheduledEventsPolicy.userInitiatedRedeploy.automaticallyApprove', False),
+            self.check('scheduledEventsPolicy.allInstancesDown.automaticallyApprove', False)
         ])
-        self.cmd('vmss update -g {rg} -n {vmss1} --additional-events true --enable-redeploy true --enable-reboot False ', checks=[
+        self.cmd('vmss update -g {rg} -n {vmss1} --additional-events true --enable-redeploy true '
+                 '--enable-reboot False --scheduled-events-api-version 2020-07-01 --enable-all-instance-down True', checks=[
             self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True),
             self.check('scheduledEventsPolicy.userInitiatedRedeploy.automaticallyApprove', True),
-            self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', False)
+            self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', False),
+            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.scheduledEventsApiVersion', '2020-07-01'),
+            self.check('scheduledEventsPolicy.allInstancesDown.automaticallyApprove', True)
         ])
 
-        self.cmd('vmss create -g {rg} -n {vmss2} --image Canonical:UbuntuServer:18.04-LTS:latest', checks=[
+        self.cmd('vmss create -g {rg} -n {vmss2} --image Canonical:UbuntuServer:16.04-LTS:latest '
+                 '--vm-sku Standard_D2s_v3 --instance-count 1', checks=[
             self.check('vmss.scheduledEventsPolicy', None)
         ])
 
-        self.cmd('vmss update -g {rg} -n {vmss2} --additional-events True ', checks=[
-            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True)
+        self.cmd('vmss update -g {rg} -n {vmss2} --additional-events True --scheduled-events-api-version 2020-07-01 --enable-all-instance-down True', checks=[
+            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True),
+            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.scheduledEventsApiVersion', '2020-07-01'),
+            self.check('scheduledEventsPolicy.allInstancesDown.automaticallyApprove', True)
         ])
         self.cmd('vmss update -g {rg} -n {vmss2} --enable-reboot True --enable-redeploy true', checks=[
             self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True),
+            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.scheduledEventsApiVersion', '2020-07-01'),
+            self.check('scheduledEventsPolicy.allInstancesDown.automaticallyApprove', True),
             self.check('scheduledEventsPolicy.userInitiatedRedeploy.automaticallyApprove', True),
             self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', True)
         ])
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_scheduled_events_policy_', location='centraluseuap')
+    # Required Microsoft.Compute/SendScheduledEventsPolicy
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_scheduled_events_policy_', location='eastus2')
     def test_vm_scheduled_events_policy(self, resource_group):
         self.kwargs.update({
             'vm1': self.create_random_name('vm', 10),
             'vm2': self.create_random_name('vm', 10),
             'vm3': self.create_random_name('vm', 10),
         })
-        self.cmd('vm create -g {rg} -n {vm1} --image Canonical:UbuntuServer:18.04-LTS:latest --additional-events True --enable-reboot True --enable-redeploy True --nsg-rule NONE')
+        self.cmd('vm create -g {rg} -n {vm1} --image Canonical:UbuntuServer:16.04-LTS:latest --additional-events True '
+                 '--enable-reboot True --enable-redeploy True --scheduled-events-api-version 2020-07-01 '
+                 '--enable-all-instance-down True --nsg-rule NONE --size Standard_D2s_v3')
         self.cmd('vm show -g {rg} -n {vm1}', checks=[
             self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True),
+            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.scheduledEventsApiVersion', '2020-07-01'),
             self.check('scheduledEventsPolicy.userInitiatedRedeploy.automaticallyApprove', True),
-            self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', True)
+            self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', True),
+            self.check('scheduledEventsPolicy.allInstancesDown.automaticallyApprove', True)
         ])
-        self.cmd('vm update -g {rg} -n {vm1} --additional-events False --enable-reboot False --enable-redeploy False', checks=[
+        self.cmd('vm update -g {rg} -n {vm1} --additional-events False --enable-reboot False --enable-redeploy False --enable-all-instance-down False', checks=[
             self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', False),
             self.check('scheduledEventsPolicy.userInitiatedRedeploy.automaticallyApprove', False),
-            self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', False)
+            self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', False),
+            self.check('scheduledEventsPolicy.allInstancesDown.automaticallyApprove', False)
         ])
         self.cmd('vm update -g {rg} -n {vm1} --additional-events true --enable-redeploy true --enable-reboot False ', checks=[
             self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True),
@@ -10129,26 +10153,35 @@ class VMSSTerminateNotificationScenarioTest(ScenarioTest):
             self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', False)
         ])
 
-        self.cmd('vm create -g {rg} -n {vm2} --image Canonical:UbuntuServer:18.04-LTS:latest --nsg-rule NONE')
+        self.cmd('vm create -g {rg} -n {vm2} --image Canonical:UbuntuServer:16.04-LTS:latest --nsg-rule NONE '
+                 '--size Standard_D2s_v3')
         self.cmd('vm show -g {rg} -n {vm2}', checks=[
             self.check('scheduledEventsPolicy', None)
         ])
-        self.cmd('vm update -g {rg} -n {vm2} --additional-events True ', checks=[
-            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True)
+        self.cmd('vm update -g {rg} -n {vm2} --additional-events True --enable-all-instance-down True --scheduled-events-api-version 2020-07-01', checks=[
+            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True),
+            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.scheduledEventsApiVersion', '2020-07-01'),
+            self.check('scheduledEventsPolicy.allInstancesDown.automaticallyApprove', True)
         ])
         self.cmd('vm update -g {rg} -n {vm2} --enable-reboot True --enable-redeploy true', checks=[
             self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True),
+            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.scheduledEventsApiVersion', '2020-07-01'),
             self.check('scheduledEventsPolicy.userInitiatedRedeploy.automaticallyApprove', True),
-            self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', True)
+            self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', True),
+            self.check('scheduledEventsPolicy.allInstancesDown.automaticallyApprove', True)
         ])
-        self.cmd('vm create -g {rg} -n {vm3} --image Canonical:UbuntuServer:18.04-LTS:latest --additional-events True --nsg-rule NONE')
+
+        self.cmd('vm create -g {rg} -n {vm3} --image Canonical:UbuntuServer:16.04-LTS:latest --additional-events True '
+                 '--scheduled-events-api-version 2020-07-01 --nsg-rule NONE --size Standard_D2s_v3')
         self.cmd('vm show -g {rg} -n {vm3}', checks=[
             self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True),
+            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.scheduledEventsApiVersion', '2020-07-01'),
             self.check('scheduledEventsPolicy.userInitiatedRedeploy', None),
             self.check('scheduledEventsPolicy.userInitiatedReboot', None)
         ])
         self.cmd('vm update -g {rg} -n {vm3} --enable-reboot True', checks=[
-            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable',True),
+            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.enable', True),
+            self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.scheduledEventsApiVersion', '2020-07-01'),
             self.check('scheduledEventsPolicy.userInitiatedRedeploy', None),
             self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', True)
         ])
