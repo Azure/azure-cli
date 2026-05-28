@@ -9,6 +9,8 @@ import unittest
 from unittest import mock
 import sys
 
+from knack.util import CLIError
+
 from azure.cli.command_modules.acr.repository import (
     acr_repository_list,
     acr_repository_show_tags,
@@ -44,6 +46,7 @@ from azure.cli.command_modules.acr._docker_utils import (
     get_access_credentials,
     get_authorization_header,
     get_manifest_authorization_header,
+    _handle_challenge_phase,
     _resolve_acr_scope,
     RepoAccessTokenPermission,
     HelmAccessTokenPermission,
@@ -1224,7 +1227,7 @@ class AcrMockCommandsTests(unittest.TestCase):
     @mock.patch('requests.post', autospec=True)
     @mock.patch('requests.get', autospec=True)
     @mock.patch('azure.cli.core._profile.Profile.get_raw_token')
-    def test_get_access_credentials_supports_403_without_www_authenticate(
+    def test_get_access_credentials_fallback_on_403_without_www_authenticate(
             self, mock_get_raw_token, mock_requests_get, mock_requests_post, mock_get_registry_by_name,
             mock_get_subscription):
         from azure.mgmt.containerregistry.models import Registry, Sku
@@ -1304,6 +1307,42 @@ class AcrMockCommandsTests(unittest.TestCase):
             'refresh_token': TEST_ACR_REFRESH_TOKEN,
             'access_token': TEST_ACR_ACCESS_TOKEN}).encode()
         mock_requests_post.return_value = token_response
+
+    @mock.patch('requests.get', autospec=True)
+    def test_handle_challenge_phase_allows_403_with_www_authenticate(self, mock_requests_get):
+        challenge_response = mock.MagicMock()
+        challenge_response.status_code = 403
+        challenge_response.headers = {
+            'WWW-Authenticate': 'Bearer realm="https://testregistry.azurecr.io/oauth2/token",service="testregistry.azurecr.io"'
+        }
+        mock_requests_get.return_value = challenge_response
+
+        token_params = _handle_challenge_phase(
+            login_server='testregistry.azurecr.io',
+            repository=TEST_REPOSITORY,
+            artifact_repository=None,
+            permission=RepoAccessTokenPermission.METADATA_READ.value
+        )
+        self.assertEqual(
+            token_params,
+            {'realm': 'https://testregistry.azurecr.io/oauth2/token', 'service': 'testregistry.azurecr.io'}
+        )
+
+    @mock.patch('requests.get', autospec=True)
+    def test_handle_challenge_phase_rejects_403_without_www_authenticate_for_non_aad_auth(self, mock_requests_get):
+        challenge_response = mock.MagicMock()
+        challenge_response.status_code = 403
+        challenge_response.headers = {}
+        mock_requests_get.return_value = challenge_response
+
+        with self.assertRaises(CLIError):
+            _handle_challenge_phase(
+                login_server='testregistry.azurecr.io',
+                repository=TEST_REPOSITORY,
+                artifact_repository=None,
+                permission=RepoAccessTokenPermission.METADATA_READ.value,
+                is_aad_token=False
+            )
 
     def _validate_raw_token_request(self, mock_get_raw_token):
         mock_get_raw_token.assert_called_with(mock.ANY, resource="https://containerregistry.azure.net", subscription=mock.ANY)
