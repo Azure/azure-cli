@@ -17,7 +17,7 @@ from azure.cli.core.util import \
     (get_file_json, truncate_text, shell_safe_json_parse, b64_to_hex, hash_string, random_string,
      open_page_in_browser, can_launch_browser, handle_exception, ConfiguredDefaultSetter, send_raw_request,
      should_disable_connection_verify, parse_proxy_resource_id, get_az_user_agent, get_az_rest_user_agent,
-    _get_parent_proc_name, is_wsl, run_cmd, run_az_cmd, roughly_parse_command)
+    _get_parent_proc_name, is_wsl, run_cmd, run_az_cmd, roughly_parse_command, sdk_no_wait)
 from azure.cli.core.mock import DummyCli
 
 
@@ -462,6 +462,47 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(output.error, None, "unexpected error when run az cmd")
         self.assertIsInstance(output.result, dict, "unexpected cmd execution result")
         self.assertIn("azure-cli-core", output.result, "unexpected cmd execution result")
+
+    @mock.patch('time.sleep', autospec=True)
+    def test_sdk_no_wait_retries_on_provisioning_bad_request(self, sleep_mock):
+        class MockHttpError(Exception):
+            status_code = 400
+            message = 'Resource cannot be updated during provisioning'
+
+        operation = mock.Mock(side_effect=[MockHttpError(), MockHttpError(), 'ok'])
+        result = sdk_no_wait(False, operation)
+
+        self.assertEqual(result, 'ok')
+        self.assertEqual(operation.call_count, 3)
+        self.assertEqual(sleep_mock.call_count, 2)
+
+    @mock.patch('time.sleep', autospec=True)
+    def test_sdk_no_wait_no_wait_does_not_retry(self, sleep_mock):
+        class MockHttpError(Exception):
+            status_code = 400
+            message = 'Resource cannot be updated during provisioning'
+
+        operation = mock.Mock(side_effect=MockHttpError())
+
+        with self.assertRaises(MockHttpError):
+            sdk_no_wait(True, operation)
+
+        self.assertEqual(operation.call_count, 1)
+        self.assertEqual(sleep_mock.call_count, 0)
+
+    @mock.patch('time.sleep', autospec=True)
+    def test_sdk_no_wait_non_matching_error_no_retry(self, sleep_mock):
+        class MockHttpError(Exception):
+            status_code = 400
+            message = 'A different bad request'
+
+        operation = mock.Mock(side_effect=MockHttpError())
+
+        with self.assertRaises(MockHttpError):
+            sdk_no_wait(False, operation)
+
+        self.assertEqual(operation.call_count, 1)
+        self.assertEqual(sleep_mock.call_count, 0)
 
 
 class TestBase64ToHex(unittest.TestCase):

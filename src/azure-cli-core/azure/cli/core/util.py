@@ -790,7 +790,26 @@ def augment_no_wait_handler_args(no_wait_enabled, handler, handler_args):
 def sdk_no_wait(no_wait, func, *args, **kwargs):
     if no_wait:
         kwargs.update({'polling': False})
-    return func(*args, **kwargs)
+
+    retry_attempts = 6
+    retry_interval_in_seconds = 10
+    for attempt in range(retry_attempts):
+        try:
+            return func(*args, **kwargs)
+        except Exception as ex:  # pylint: disable=broad-except
+            error_msg = getattr(ex, 'message', str(ex))
+            status_code = getattr(ex, 'status_code', None)
+            if not (
+                not no_wait and
+                status_code == 400 and
+                'resource cannot be updated during provisioning' in error_msg.lower() and
+                attempt < retry_attempts - 1
+            ):
+                raise
+
+            logger.warning("Resource is still provisioning. Retrying in %s seconds...", retry_interval_in_seconds)
+            from time import sleep
+            sleep(retry_interval_in_seconds)
 
 
 def open_page_in_browser(url):
