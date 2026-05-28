@@ -140,7 +140,7 @@ class RedisCacheTests(ScenarioTest):
             'access-policy-name': "accessPolicy1",
             'permissions1': "\"+get +hget\"",
             'permissions2': "+get",
-            'access-policy-assignment-name': "accessPolicyAssignmentName1",
+            'access-policy-assignment-name': "76e670c5-eaf4-4674-8a48-2def9d37929c",
             'object-id': "a8263550-d587-4433-9eff-64020dd56c13", # replace with valid object id of the newly created user assigned managed identity while running tests in live mode
             'object-id-alias1': "kj-aad-testing",
             'object-id-alias2': "aad-testing-app"
