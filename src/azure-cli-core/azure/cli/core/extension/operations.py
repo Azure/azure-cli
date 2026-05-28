@@ -42,6 +42,7 @@ OUT_KEY_PATH = 'path'
 IS_WINDOWS = sys.platform.lower() in ['windows', 'win32']
 LIST_FILE_PATH = os.path.join(os.sep, 'etc', 'apt', 'sources.list.d', 'azure-cli.list')
 LSB_RELEASE_FILE = os.path.join(os.sep, 'etc', 'lsb-release')
+PSYCOPG2_EXTENSIONS = {'rdbms-connect', 'serviceconnector-passwordless'}
 
 
 def _run_pip(pip_exec_args, extension_path=None):
@@ -111,7 +112,7 @@ def _add_whl_ext(cli_ctx, source, ext_sha256=None, pip_extra_index_urls=None, pi
         raise CLIError('Unable to determine extension name from {}. Is the file name correct?'.format(source))
     if extension_exists(extension_name, ext_type=WheelExtension):
         raise CLIError('The extension {} already exists.'.format(extension_name))
-    if extension_name == 'rdbms-connect' or extension_name == 'serviceconnector-passwordless':
+    if extension_name in PSYCOPG2_EXTENSIONS:
         _install_deps_for_psycopg2()
     ext_file = None
     if is_url:
@@ -157,6 +158,8 @@ def _add_whl_ext(cli_ctx, source, ext_sha256=None, pip_extra_index_urls=None, pi
     # Install with pip
     extension_path = build_extension_path(extension_name, system)
     pip_args = ['install', '--target', extension_path, ext_file]
+    if IS_WINDOWS and extension_name in PSYCOPG2_EXTENSIONS:
+        pip_args.append('--no-build-isolation')
 
     if pip_proxy:
         pip_args = pip_args + ['--proxy', pip_proxy]

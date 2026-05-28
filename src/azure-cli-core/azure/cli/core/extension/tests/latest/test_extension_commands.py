@@ -12,7 +12,7 @@ import sys
 
 from azure.cli.core.util import CLIError
 from azure.cli.core.extension import get_extension, build_extension_path
-from azure.cli.core.extension.operations import (add_extension_to_path, list_extensions, add_extension,
+from azure.cli.core.extension.operations import (_add_whl_ext, add_extension_to_path, list_extensions, add_extension,
                                                  show_extension, remove_extension, update_extension,
                                                  list_available_extensions, OUT_KEY_NAME, OUT_KEY_VERSION,
                                                  OUT_KEY_METADATA, OUT_KEY_PATH)
@@ -173,6 +173,36 @@ class TestExtensionCommands(unittest.TestCase):
             pip_cmd = args[0][0]
             if '--proxy' in pip_cmd:
                 raise AssertionError("proxy parameter in check_output args although no proxy specified")
+
+    def test_add_psycopg2_extension_on_windows_disables_build_isolation(self):
+        source = os.path.join(self.ext_dir, 'rdbms_connect-1.0.0-py2.py3-none-any.whl')
+        with mock.patch('azure.cli.core.extension.operations.IS_WINDOWS', True), \
+                mock.patch('azure.cli.core.extension.operations.extension_exists', return_value=False), \
+                mock.patch('azure.cli.core.extension.operations._install_deps_for_psycopg2') as install_deps, \
+                mock.patch('azure.cli.core.extension.operations.os.path.isfile', return_value=True), \
+                mock.patch('azure.cli.core.extension.operations._validate_whl_extension'), \
+                mock.patch('azure.cli.core.extension.operations.check_distro_consistency'), \
+                mock.patch('azure.cli.core.extension.operations.build_extension_path', return_value=self.ext_dir), \
+                mock.patch('azure.cli.core.extension.operations._run_pip', return_value=0) as run_pip, \
+                mock.patch('azure.cli.core.extension.operations.shutil.copyfile'):
+            _add_whl_ext(self.cmd.cli_ctx, source)
+
+        install_deps.assert_called_once_with()
+        pip_args = run_pip.call_args.args[0]
+        self.assertIn('--no-build-isolation', pip_args)
+
+    def test_add_non_psycopg2_extension_on_windows_keeps_build_isolation(self):
+        with mock.patch('azure.cli.core.extension.operations.IS_WINDOWS', True), \
+                mock.patch('azure.cli.core.extension.operations.extension_exists', return_value=False), \
+                mock.patch('azure.cli.core.extension.operations._validate_whl_extension'), \
+                mock.patch('azure.cli.core.extension.operations.check_distro_consistency'), \
+                mock.patch('azure.cli.core.extension.operations.build_extension_path', return_value=self.ext_dir), \
+                mock.patch('azure.cli.core.extension.operations._run_pip', return_value=0) as run_pip, \
+                mock.patch('azure.cli.core.extension.operations.shutil.copyfile'):
+            _add_whl_ext(self.cmd.cli_ctx, MY_EXT_SOURCE)
+
+        pip_args = run_pip.call_args.args[0]
+        self.assertNotIn('--no-build-isolation', pip_args)
 
     def test_add_extension_with_specific_version(self):
         extension_name = MY_EXT_NAME
