@@ -809,14 +809,14 @@ def sdk_no_wait(no_wait, func, *args, **kwargs):
             raise
 
     # Attempt 1 failed with a retryable provisioning-state error, so retry attempts 2..N.
-    for retry_attempt in range(2, _PROVISIONING_RETRY_ATTEMPTS + 1):
+    for attempt_number in range(2, _PROVISIONING_RETRY_ATTEMPTS + 1):
         logger.warning("Resource is still provisioning. Retrying in %s seconds...",
                        _PROVISIONING_RETRY_INTERVAL_SECONDS)
         time.sleep(_PROVISIONING_RETRY_INTERVAL_SECONDS)
         try:
             return func(*args, **kwargs)
         except Exception as retry_ex:  # pylint: disable=broad-except
-            if not _is_provisioning_retryable_error(retry_ex) or retry_attempt == _PROVISIONING_RETRY_ATTEMPTS:
+            if not _is_provisioning_retryable_error(retry_ex) or attempt_number >= _PROVISIONING_RETRY_ATTEMPTS:
                 raise
 
 
