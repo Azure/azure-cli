@@ -2186,6 +2186,7 @@ class VMAvailSetScenarioTest(ScenarioTest):
 class VMAvailSetLiveScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_availset_live')
     @AllowLargeResponse(size_kb=99999)
+    @live_only() # Response is too large
     def test_vm_availset_convert(self, resource_group):
 
         self.kwargs.update({
@@ -2203,7 +2204,7 @@ class VMAvailSetLiveScenarioTest(ScenarioTest):
             self.check('sku.name', 'Aligned')
         ])
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vm_avset_migrate', location='westus')
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_avset_migrate', location='eastus2euap')
     def test_vm_avset_migrate(self, resource_group):
         self.kwargs.update({
             'avset1': self.create_random_name('avset', 15),
@@ -2218,8 +2219,8 @@ class VMAvailSetLiveScenarioTest(ScenarioTest):
             self.check('name', '{avset1}'),
             self.check('platformFaultDomainCount', 2)
         ])
-        self.cmd('vm create -g {rg} -n {vm1} --image OpenLogic:CentOS:7.5:latest --admin-username vmtest --nsg-rule NONE --size Standard_D2s_v3 --availability-set {avset1}')
-        self.cmd('vmss create -g {rg} -n {vmss} --image OpenLogic:CentOS:7.5:latest --admin-username vmsstest --vm-sku Standard_D2s_v3')
+        self.cmd('vm create -g {rg} -n {vm1} --image OpenLogic:CentOS:7.5:latest --admin-username vmtest --nsg-rule NONE --size Standard_B2ms --availability-set {avset1}')
+        self.cmd('vmss create -g {rg} -n {vmss} --image OpenLogic:CentOS:7.5:latest --admin-username vmsstest --vm-sku Standard_B2ms')
         vmss = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()
         self.kwargs.update({
             'vmss_id': vmss['id'],
