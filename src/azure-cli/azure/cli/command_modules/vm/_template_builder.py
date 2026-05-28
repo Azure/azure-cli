@@ -1774,13 +1774,15 @@ def build_av_set_resource(cmd, name, location, tags, platform_update_domain_coun
                           platform_fault_domain_count, unmanaged, proximity_placement_group=None,
                           additional_scheduled_events=None,
                           enable_user_reboot_scheduled_events=None,
-                          enable_user_redeploy_scheduled_events=None):
+                          enable_user_redeploy_scheduled_events=None,
+                          scheduled_events_api_version=None,
+                          enable_all_instance_down=None):
     av_set = {
         'type': 'Microsoft.Compute/availabilitySets',
         'name': name,
         'location': location,
         'tags': tags,
-        'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='availability_sets'),
+        'apiVersion': "2025-04-01",
     }
 
     if cmd.supported_api_version(min_api='2016-04-30-preview', operation_group='availability_sets'):
@@ -1790,12 +1792,15 @@ def build_av_set_resource(cmd, name, location, tags, platform_update_domain_coun
 
     properties = {"platformFaultDomainCount": platform_fault_domain_count}
     scheduled_events_policy = {}
-    if additional_scheduled_events is not None:
+    if additional_scheduled_events is not None or scheduled_events_api_version is not None:
+        event_grid_and_resource_graph = {}
+        if additional_scheduled_events is not None:
+            event_grid_and_resource_graph["enable"] = additional_scheduled_events
+        if scheduled_events_api_version is not None:
+            event_grid_and_resource_graph["scheduledEventsApiVersion"] = scheduled_events_api_version
         scheduled_events_policy.update({
             "scheduledEventsAdditionalPublishingTargets": {
-                "eventGridAndResourceGraph": {
-                    "enable": additional_scheduled_events
-                }
+                "eventGridAndResourceGraph": event_grid_and_resource_graph
             }
         })
     if enable_user_redeploy_scheduled_events is not None:
@@ -1808,6 +1813,12 @@ def build_av_set_resource(cmd, name, location, tags, platform_update_domain_coun
         scheduled_events_policy.update({
             "userInitiatedReboot": {
                 "automaticallyApprove": enable_user_reboot_scheduled_events
+            }
+        })
+    if enable_all_instance_down is not None:
+        scheduled_events_policy.update({
+            "allInstancesDown": {
+                "automaticallyApprove": enable_all_instance_down
             }
         })
 

@@ -2181,7 +2181,8 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
 def create_av_set(cmd, availability_set_name, resource_group_name, platform_fault_domain_count=2,
                   platform_update_domain_count=None, location=None, proximity_placement_group=None, unmanaged=False,
                   no_wait=False, tags=None, validate=False, additional_scheduled_events=None,
-                  enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None):
+                  enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None,
+                  scheduled_events_api_version=None, enable_all_instance_down=None):
     from azure.cli.core.util import random_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
     from azure.cli.command_modules.vm._template_builder import build_av_set_resource
@@ -2197,7 +2198,9 @@ def create_av_set(cmd, availability_set_name, resource_group_name, platform_faul
                                             proximity_placement_group=proximity_placement_group,
                                             additional_scheduled_events=additional_scheduled_events,
                                             enable_user_reboot_scheduled_events=enable_user_reboot_scheduled_events,
-                                            enable_user_redeploy_scheduled_events=enable_user_redeploy_scheduled_events)
+                                            enable_user_redeploy_scheduled_events=enable_user_redeploy_scheduled_events,
+                                            scheduled_events_api_version=scheduled_events_api_version,
+                                            enable_all_instance_down=enable_all_instance_down)
     master_template.add_resource(av_set_resource)
 
     template = master_template.build()

@@ -400,6 +400,8 @@ def load_arguments(self, _):
         c.argument('additional_scheduled_events', options_list=['--additional-scheduled-events', '--additional-events'], arg_type=get_three_state_flag(), min_api='2024-07-01', help='The configuration parameter used while creating event grid and resource graph scheduled event setting.')
         c.argument('enable_user_reboot_scheduled_events', options_list=['--enable-user-reboot-scheduled-events', '--enable-reboot'], arg_type=get_three_state_flag(), min_api='2024-07-01', help='The configuration parameter used while publishing scheduled events additional publishing targets.')
         c.argument('enable_user_redeploy_scheduled_events', options_list=['--enable-user-redeploy-scheduled-events', '--enable-redeploy'], arg_type=get_three_state_flag(), min_api='2024-07-01', help='The configuration parameter used while creating user initiated redeploy scheduled event setting creation.')
+        c.argument('scheduled_events_api_version', options_list=['--scheduled-events-api-version', '--se-api-version'], help='Specifies the api-version to determine which Scheduled Events configuration schema version will be delivered.')
+        c.argument('enable_all_instance_down', options_list=['--enable-all-instance-down', '--all-instance-down'], arg_type=get_three_state_flag(), help='Specifies if Scheduled Events should be auto-approved when all instances are down. Its default value is true.')
     # endregion
 
     # region VirtualMachines
