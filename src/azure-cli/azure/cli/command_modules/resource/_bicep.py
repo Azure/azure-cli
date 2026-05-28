@@ -140,7 +140,8 @@ def ensure_bicep_installation(cli_ctx, release_tag=None, target_platform=None, s
 
     if os.path.isfile(installation_path):
         if not release_tag:
-            output(f"Bicep CLI is already installed at '{installation_path}'. Skipping installation as no specific version was requested.")  # pylint: disable=line-too-long
+            if get_check_version_config(cli_ctx):
+                output(f"Bicep CLI is already installed at '{installation_path}'. Skipping installation as no specific version was requested.")  # pylint: disable=line-too-long
             return
 
         installed_version = _get_bicep_installed_version(installation_path)

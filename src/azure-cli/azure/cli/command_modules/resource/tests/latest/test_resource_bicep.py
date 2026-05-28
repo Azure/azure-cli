@@ -202,7 +202,43 @@ class TestBicep(unittest.TestCase):
 
         dirname_mock.assert_not_called()
 
-            
+    @mock.patch("azure.cli.command_modules.resource._bicep.get_check_version_config")
+    @mock.patch("azure.cli.command_modules.resource._bicep._use_binary_from_path")
+    @mock.patch("azure.cli.command_modules.resource._bicep._get_bicep_installation_path")
+    @mock.patch("os.path.isfile")
+    @mock.patch("builtins.print")
+    def test_ensure_bicep_installation_no_message_if_check_version_is_disabled(
+        self, print_mock, isfile_stub, get_bicep_installation_path_mock, use_binary_from_path_mock, get_check_version_config_mock
+    ):
+        isfile_stub.return_value = True
+        get_bicep_installation_path_mock.return_value = "/tmp/bicep"
+        use_binary_from_path_mock.return_value = False
+        get_check_version_config_mock.return_value = False
+
+        ensure_bicep_installation(self.cli_ctx)
+
+        print_mock.assert_not_called()
+
+    @mock.patch("azure.cli.command_modules.resource._bicep.get_check_version_config")
+    @mock.patch("azure.cli.command_modules.resource._bicep._use_binary_from_path")
+    @mock.patch("azure.cli.command_modules.resource._bicep._get_bicep_installation_path")
+    @mock.patch("os.path.isfile")
+    @mock.patch("builtins.print")
+    def test_ensure_bicep_installation_message_if_check_version_is_enabled(
+        self, print_mock, isfile_stub, get_bicep_installation_path_mock, use_binary_from_path_mock, get_check_version_config_mock
+    ):
+        isfile_stub.return_value = True
+        get_bicep_installation_path_mock.return_value = "/tmp/bicep"
+        use_binary_from_path_mock.return_value = False
+        get_check_version_config_mock.return_value = True
+
+        ensure_bicep_installation(self.cli_ctx)
+
+        print_mock.assert_called_once_with(
+            "Bicep CLI is already installed at '/tmp/bicep'. Skipping installation as no specific version was requested."
+        )
+
+
     @mock.patch("azure.cli.command_modules.resource._bicep.get_use_binary_from_path_config")
     @mock.patch("azure.cli.command_modules.resource._bicep._get_bicep_installation_path")
     @mock.patch("shutil.which")
