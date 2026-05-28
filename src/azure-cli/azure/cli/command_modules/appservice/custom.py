@@ -1183,8 +1183,8 @@ def validate_flex_migration_eligibility_for_linux_consumption_app(cmd, site, fle
     # Check for SSL bindings - warn but allow migration
     for ssl_state in site.host_name_ssl_states or []:
         if ssl_state.ssl_state != 'Disabled':
-            warnings.append("The site '{}' is using TSL/SSL certificates. "
-                            "Site-scoped TSL/SSL certificates are supported in Flex Consumption in preview. "
+            warnings.append("The site '{}' is using TLS/SSL certificates. "
+                            "Site-scoped TLS/SSL certificates are supported in Flex Consumption in preview. "
                             "Re-configure certificates after migration using the new site-scoped model. "
                             "Help Link: https://aka.ms/flex-site-scoped-certs-docs."
                             .format(site.name))

@@ -883,7 +883,7 @@ class FunctionAppFlexMigrationTest(LiveScenarioTest):
         self.assertTrue(eligible_ssl_functionapp_name in candidate_names)
         ssl_candidate = next((c for c in candidates if c.get('name') == eligible_ssl_functionapp_name), None)
         self.assertIsNotNone(ssl_candidate)
-        self.assertIn('TSL/SSL certificates', ssl_candidate.get('note', ''))
+        self.assertIn('TLS/SSL certificates', ssl_candidate.get('note', ''))
 
 
     @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
