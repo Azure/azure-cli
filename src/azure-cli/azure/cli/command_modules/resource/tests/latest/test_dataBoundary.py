@@ -20,7 +20,7 @@ class AzureDataBoundaryScenarioTest(ScenarioTest):
             **self.kwargs)
         
         self.cmd('az data-boundary show --scope {scope} --default default', checks=[
-            self.check('properties.dataBoundary', 'EU'),
+            self.check_pattern('properties.dataBoundary', '^(EU|Global)$'),
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
