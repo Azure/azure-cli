@@ -730,7 +730,6 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
                     public_network_access=None, accelerated_network=None, architecture=None,
                     elastic_san_resource_id=None, bandwidth_copy_speed=None, instant_access_duration_minutes=None):
     from azure.mgmt.core.tools import resource_id, is_valid_resource_id
-    from azure.cli.core.commands.client_factory import get_subscription_id
 
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     if source_blob_uri:
@@ -928,7 +927,6 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_D2s_
               key_incarnation_id=None, add_proxy_agent_extension=None, disk_iops_read_write=None,
               disk_mbps_read_write=None, zone_movement=None):
 
-    from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
     from azure.cli.command_modules.vm._template_builder import (build_vm_resource,
@@ -1309,7 +1307,6 @@ def auto_shutdown_vm(cmd, resource_group_name, vm_name, off=None, email=None, we
                      location=None):
     from ..lab.aaz.latest.lab.global_schedule import Delete as DeleteSchedule, Create as CreateSchedule
     from azure.mgmt.core.tools import resource_id
-    from azure.cli.core.commands.client_factory import get_subscription_id
     subscription_id = get_subscription_id(cmd.cli_ctx)
     name = 'shutdown-computevm-' + vm_name
     vm_id = resource_id(subscription=subscription_id, resource_group=resource_group_name,
@@ -1468,7 +1465,6 @@ def list_usage(cmd, location):
 # pylint: disable=redefined-builtin
 def list_vm(cmd, resource_group_name=None, show_details=False, vmss=None):
     from azure.mgmt.core.tools import resource_id, is_valid_resource_id, parse_resource_id
-    from azure.cli.core.commands.client_factory import get_subscription_id
     from .aaz.latest.vm import List as VMList
     if vmss is not None:
         if is_valid_resource_id(vmss):
@@ -3715,7 +3711,6 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 automatic_zone_balancing_strategy=None, automatic_zone_balancing_behavior=None,
                 enable_automatic_repairs=None, zone_placement_policy=None, include_zones=None,
                 exclude_zones=None, max_zone_count=None, instance_percent_policy=None, max_instance_percent=None):
-    from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
     from azure.cli.command_modules.vm._template_builder import (StorageProfile, build_vmss_resource,
@@ -5666,7 +5661,6 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                          allow_replicated_location_deletion=None, block_deletion_before_end_of_life=None,
                          no_wait=False):
     from azure.mgmt.core.tools import resource_id, is_valid_resource_id
-    from azure.cli.core.commands.client_factory import get_subscription_id
 
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     end_of_life_date = fix_gallery_image_date_info(end_of_life_date)
@@ -6007,7 +6001,6 @@ def update_dedicated_host(cmd, host_group_name, host_name, resource_group_name, 
 
 # region VMMonitor
 def _get_log_analytics_client(cmd):
-    from azure.cli.core.commands.client_factory import get_subscription_id
     subscription_id = get_subscription_id(cmd.cli_ctx)
     return cf_log_analytics(cmd.cli_ctx, subscription_id)
 
@@ -6043,7 +6036,6 @@ def _prepare_workspace(cmd, resource_group_name, workspace):
 
 
 def _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_name):
-    from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.mgmt.loganalytics.models import DataSource
     from azure.core.exceptions import HttpResponseError
 
