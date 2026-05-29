@@ -124,13 +124,13 @@ class Update(AAZCommand):
             ),
         )
         _args_schema.default_outbound_access = AAZBoolArg(
-            options=["--default-outbound-access"],
+            options=["--default-outbound", "--default-outbound-access"],
             arg_group="Properties",
             help="Set this property to false to disable default outbound connectivity for all VMs in the subnet.",
             nullable=True,
         )
         _args_schema.ipam_pool_prefix_allocations = AAZListArg(
-            options=["--ipam-pool-prefix-allocations"],
+            options=["--ipam-allocations", "--ipam-pool-prefix-allocations"],
             arg_group="Properties",
             help="A list of IPAM Pools for allocating IP address prefixes.",
             nullable=True,
