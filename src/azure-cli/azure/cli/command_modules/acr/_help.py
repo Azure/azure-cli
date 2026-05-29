@@ -185,6 +185,9 @@ examples:
   - name: Create a managed container registry with the Premium SKU and regional endpoints enabled.
     text: >
         az acr create -n myregistry -g MyResourceGroup --sku Premium --regional-endpoints enabled
+  - name: Create a managed container registry with the Premium SKU and dual-stack (IPv4 and IPv6) endpoint protocol.
+    text: >
+        az acr create -n myregistry -g MyResourceGroup --sku Premium --data-endpoint-enabled true --endpoint-protocol IPv4AndIPv6
 """
 
 helps['acr credential'] = """
