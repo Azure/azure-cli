@@ -81,11 +81,6 @@ class Create(AAZCommand):
             arg_group="Properties",
             help="The list of DDoS detection rules associated with the custom policy.",
         )
-        _args_schema.front_end_ip_configuration = AAZListArg(
-            options=["--fip-config", "--front-end-ip-configuration"],
-            arg_group="Properties",
-            help="The list of frontend IP configurations associated with the custom policy.",
-        )
 
         detection_rules = cls._args_schema.detection_rules
         detection_rules.Element = AAZObjectArg()
@@ -114,15 +109,6 @@ class Create(AAZCommand):
             options=["traffic-type"],
             help="The traffic type (one of Tcp, Udp, TcpSyn) that the detection rule will be applied upon.",
             enum={"Tcp": "Tcp", "TcpSyn": "TcpSyn", "Udp": "Udp"},
-        )
-
-        front_end_ip_configuration = cls._args_schema.front_end_ip_configuration
-        front_end_ip_configuration.Element = AAZObjectArg()
-
-        _element = cls._args_schema.front_end_ip_configuration.Element
-        _element.id = AAZStrArg(
-            options=["id"],
-            help="Resource ID.",
         )
         return cls._args_schema
 
@@ -239,7 +225,6 @@ class Create(AAZCommand):
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("detectionRules", AAZListType, ".detection_rules")
-                properties.set_prop("frontEndIpConfiguration", AAZListType, ".front_end_ip_configuration")
 
             detection_rules = _builder.get(".properties.detectionRules")
             if detection_rules is not None:
@@ -259,14 +244,6 @@ class Create(AAZCommand):
             if traffic_detection_rule is not None:
                 traffic_detection_rule.set_prop("packetsPerSecond", AAZIntType, ".packets_per_second")
                 traffic_detection_rule.set_prop("trafficType", AAZStrType, ".traffic_type")
-
-            front_end_ip_configuration = _builder.get(".properties.frontEndIpConfiguration")
-            if front_end_ip_configuration is not None:
-                front_end_ip_configuration.set_elements(AAZObjectType, ".")
-
-            _elements = _builder.get(".properties.frontEndIpConfiguration[]")
-            if _elements is not None:
-                _elements.set_prop("id", AAZStrType, ".id")
 
             tags = _builder.get(".tags")
             if tags is not None:

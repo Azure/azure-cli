@@ -9558,31 +9558,15 @@ class DdosCustomPolicyScenarioTest(ScenarioTest):
             'traffic_type2': 'Udp',
             'packets_per_second2': '200000',
             'detection_rule_name3': 'RuleName3',
-            'pip_name': 'pip1',
-            'lb_name': 'lb1',
-            'fip_name': 'fip1',
-            'pip_name2': 'pip2',
-            'lb_name2': 'lb2',
-            'fip_name2': 'fip2',
         })
 
-        self.cmd('network public-ip create -g {rg} -n {pip_name} --sku Standard --allocation-method Static')
-
-        self.cmd('network lb create -g {rg} -n {lb_name} --sku Standard --public-ip-address {pip_name} --frontend-ip-name {fip_name}')
-
-        fip_id = self.cmd('network lb frontend-ip show -g {rg} --lb-name {lb_name} -n {fip_name}').get_output_in_json()['id']
-        self.kwargs['fip_id'] = fip_id
-
         self.cmd('network ddos-custom-policy create -g {rg} -n {policy_name} --detection-rule-name {detection_rule_name1} '
-                 '--detection-mode {detection_mode} --traffic-type {traffic_type1} --packets-per-second {packets_per_second1} '
-                 '--fip-config {fip_id}', checks=[
+                 '--detection-mode {detection_mode} --traffic-type {traffic_type1} --packets-per-second {packets_per_second1}', checks=[
             self.check('length(detectionRules)', 1),
             self.check('detectionRules[0].name', '{detection_rule_name1}'),
             self.check('detectionRules[0].trafficDetectionRule.packetsPerSecond', '{packets_per_second1}'),
             self.check('detectionRules[0].trafficDetectionRule.trafficType', '{traffic_type1}'),
             self.check('name', '{policy_name}'),
-            self.check('length(frontEndIpConfiguration)', 1),
-            self.check('frontEndIpConfiguration[0].id', '{fip_id}'),
         ])
 
         self.cmd('network ddos-custom-policy show -g {rg} -n {policy_name}', checks=[
@@ -9591,8 +9575,6 @@ class DdosCustomPolicyScenarioTest(ScenarioTest):
             self.check('detectionRules[0].trafficDetectionRule.packetsPerSecond', '{packets_per_second1}'),
             self.check('detectionRules[0].trafficDetectionRule.trafficType', '{traffic_type1}'),
             self.check('name', '{policy_name}'),
-            self.check('length(frontEndIpConfiguration)', 1),
-            self.check('frontEndIpConfiguration[0].id', '{fip_id}'),
         ])
 
         self.cmd('network ddos-custom-policy create -g {rg} -n {policy_name} --detection-rule-name {detection_rule_name2} '
@@ -9605,27 +9587,11 @@ class DdosCustomPolicyScenarioTest(ScenarioTest):
             self.check('detectionRules[1].trafficDetectionRule.packetsPerSecond', '{packets_per_second2}'),
             self.check('detectionRules[1].trafficDetectionRule.trafficType', '{traffic_type2}'),
             self.check('name', '{policy_name}'),
-            self.check('length(frontEndIpConfiguration)', 1),
-            self.check('frontEndIpConfiguration[0].id', '{fip_id}'),
         ])
 
         self.cmd('network ddos-custom-policy list -g {rg}', checks=[
             self.check('length(@)', 1),
             self.check('[0].name', '{policy_name}'),
-            self.check('length([0].frontEndIpConfiguration)', 1),
-            self.check('[0].frontEndIpConfiguration[0].id', '{fip_id}'),
-        ])
-
-        self.cmd('network public-ip create -g {rg} -n {pip_name2} --sku Standard --allocation-method Static')
-
-        self.cmd('network lb create -g {rg} -n {lb_name2} --sku Standard --public-ip-address {pip_name2} --frontend-ip-name {fip_name2}')
-
-        fip_id2 = self.cmd('network lb frontend-ip show -g {rg} --lb-name {lb_name2} -n {fip_name2}').get_output_in_json()['id']
-        self.kwargs['fip_id2'] = fip_id2
-
-        self.cmd('network ddos-custom-policy update -g {rg} -n {policy_name} '
-                 '--fip-config "[{{id:{fip_id}}},{{id:{fip_id2}}}]"', checks=[
-            self.check('length(frontEndIpConfiguration)', 2),
         ])
 
         self.cmd('network ddos-custom-policy update -g {rg} -n {policy_name} --set detectionRules[0].name={detection_rule_name3}', checks=[
@@ -9646,6 +9612,43 @@ class DdosCustomPolicyScenarioTest(ScenarioTest):
         ])
 
         self.cmd('network ddos-custom-policy delete -g {rg} -n {policy_name} -y', checks=self.is_empty())
+
+    @ResourceGroupPreparer(name_prefix='test_ddos_cuspol_lb', location='eastus')
+    def test_ddos_custom_policy_attach_to_lb_fip(self, resource_group):
+        self.kwargs.update({
+            'policy_name': 'policy1',
+            'pip_name': 'pip1',
+            'lb_name': 'lb1',
+            'fip_name': 'fip1',
+        })
+
+        dcp = self.cmd('network ddos-custom-policy create -g {rg} -n {policy_name} '
+                       '--detection-rule-name rule1 --detection-mode TrafficThreshold '
+                       '--traffic-type Tcp --packets-per-second 1000000', checks=[
+            self.check('name', '{policy_name}'),
+        ]).get_output_in_json()
+        self.kwargs['dcp_id'] = dcp['id']
+
+        self.cmd('network public-ip create -g {rg} -n {pip_name} --sku Standard --allocation-method Static')
+        self.cmd('network lb create -g {rg} -n {lb_name} --sku Standard '
+                 '--public-ip-address {pip_name} --frontend-ip-name {fip_name}')
+
+        # Attach the DDoS custom policy to the LB frontend IP configuration
+        self.cmd('network lb frontend-ip update -g {rg} --lb-name {lb_name} -n {fip_name} '
+                 '--ddos-settings ddos-custom-policy={{id:{dcp_id}}}', checks=[
+            self.check('ddosSettings.ddosCustomPolicy.id', '{dcp_id}'),
+        ])
+
+        self.cmd('network lb frontend-ip show -g {rg} --lb-name {lb_name} -n {fip_name}', checks=[
+            self.check('ddosSettings.ddosCustomPolicy.id', '{dcp_id}'),
+        ])
+
+        self.cmd('network lb frontend-ip update -g {rg} --lb-name {lb_name} -n {fip_name} '
+                 '--ddos-settings ddos-custom-policy=null', checks=[
+            self.check('ddosSettings.ddosCustomPolicy', None),
+        ])
+
+        self.cmd('network ddos-custom-policy delete -g {rg} -n {policy_name} -y')
 
 
 class NetworkPrivateEndpointScenarioTest(ScenarioTest):

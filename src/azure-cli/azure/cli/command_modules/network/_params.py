@@ -853,5 +853,4 @@ def load_arguments(self, _):
         c.argument('detection_mode', arg_group='Detection Rules', help='The detection mode for the DDoS detection rule.')
         c.argument('traffic_type', arg_group='Detection Rules', help='The traffic type (one of Tcp, Udp, TcpSyn) that the detection rule will be applied upon.')
         c.argument('packets_per_second', arg_group='Detection Rules', help='The customized packets per second threshold.')
-        c.argument('front_end_ip_configuration', options_list=['--fip-config', '--front-end-ip-configuration'], nargs='+', arg_group='Properties', help='The list of frontend IP configuration resource IDs associated with the custom policy.')
     # endregion
