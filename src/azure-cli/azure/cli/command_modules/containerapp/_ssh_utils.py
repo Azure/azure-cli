@@ -102,10 +102,34 @@ class WebSocketConnection:
         return self._socket.recv(*args, **kwargs)
 
 
+def _write_to_terminal(text):
+    # The terminal's encoding (e.g. cp1252 on Windows) may not be able to
+    # represent every character the container emits (emoji, non-Latin scripts).
+    # On a UTF-8 terminal the fast path prints natively; only when the console
+    # codec cannot encode a character do we fall back to a non-failing policy so
+    # the rest of the output is still shown instead of crashing the exec session.
+    try:
+        print(text, end="", flush=True)
+        return
+    except UnicodeEncodeError:
+        pass
+
+    encoding = getattr(sys.stdout, "encoding", None) or SSH_DEFAULT_ENCODING
+    encoded = text.encode(encoding, errors="backslashreplace")
+    buffer = getattr(sys.stdout, "buffer", None)
+    if buffer is not None:
+        buffer.write(encoded)
+        buffer.flush()
+    else:
+        # Stream has no binary buffer (already wrapped / replaced) -> round-trip
+        # through the same codec so the write itself cannot raise.
+        print(encoded.decode(encoding, errors="backslashreplace"), end="", flush=True)
+
+
 def _decode_and_output_to_terminal(connection: WebSocketConnection, response, encodings):
     for i, encoding in enumerate(encodings):
         try:
-            print(response[2:].decode(encoding), end="", flush=True)
+            decoded = response[2:].decode(encoding)
             break
         except UnicodeDecodeError as e:
             if i == len(encodings) - 1:  # ran out of encodings to try
@@ -114,7 +138,11 @@ def _decode_and_output_to_terminal(connection: WebSocketConnection, response, en
                 logger.info("Cluster Control Byte: %s", response[1])
                 logger.info("Hexdump: %s", response[2:].hex())
                 raise CLIInternalError("Failed to decode server data") from e
-            logger.info("Failed to encode with encoding %s", encoding)
+            logger.info("Failed to decode with encoding %s", encoding)
+    else:
+        return  # empty encodings list: nothing to decode or print
+
+    _write_to_terminal(decoded)
 
 
 def read_ssh(connection: WebSocketConnection, response_encodings):
