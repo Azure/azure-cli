@@ -16955,6 +16955,113 @@ interactions:
       code: 200
       message: OK
 - request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim graphql resolver update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g --service-name --api-id --resolver-id --display-name --description
+      User-Agent:
+      - AZURECLI/2.82.0 azsdk-python-core/1.37.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/apis/gr-api000005/resolvers/newresolver?api-version=2022-08-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/apis/gr-api000005/resolvers/newresolver\"\
+        ,\r\n  \"type\": \"Microsoft.ApiManagement/service/apis/resolvers\",\r\n \
+        \ \"name\": \"newresolver\",\r\n  \"properties\": {\r\n    \"internalId\"\
+        : \"6978f28a217d2008f012a50d\",\r\n    \"publicId\": \"newresolver\",\r\n\
+        \    \"description\": \"A GraphQL Resolver example\",\r\n    \"path\": \"\
+        Query/allFamilies\"\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '480'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Jan 2026 17:14:50 GMT
+      etag:
+      - '"FAoAAAAAAAA="'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"properties": {"displayName": "Query-allFamilies-Updated", "path": "Query/allFamilies",
+      "description": "An updated GraphQL Resolver example"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - apim graphql resolver update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '143'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g --service-name --api-id --resolver-id --display-name --description
+      User-Agent:
+      - AZURECLI/2.82.0 azsdk-python-core/1.37.0 Python/3.12.10 (Windows-11-10.0.26200-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/apis/gr-api000005/resolvers/newresolver?api-version=2022-08-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_apim-000001/providers/Microsoft.ApiManagement/service/cli-test-apim-000003/apis/gr-api000005/resolvers/newresolver\"\
+        ,\r\n  \"type\": \"Microsoft.ApiManagement/service/apis/resolvers\",\r\n \
+        \ \"name\": \"newresolver\",\r\n  \"properties\": {\r\n    \"internalId\"\
+        : \"6978f28a217d2008f012a50d\",\r\n    \"publicId\": \"newresolver\",\r\n\
+        \    \"description\": \"An updated GraphQL Resolver example\",\r\n    \"path\"\
+        : \"Query/allFamilies\"\r\n  }\r\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '489'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Tue, 27 Jan 2026 17:14:50 GMT
+      etag:
+      - '"FAoAAAAAAAA="'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '199'
+    status:
+      code: 200
+      message: OK
+- request:
     body: '{"properties": {"value": "<http-data-source>\n\t<http-request>\n\t\t<set-method>GET</set-method>\n\t\t<set-url>https://some.service.com</set-url>\n\t</http-request>\n</http-data-source>",
       "format": "xml"}}'
     headers:

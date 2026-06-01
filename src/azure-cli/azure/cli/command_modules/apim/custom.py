@@ -1120,6 +1120,21 @@ def apim_graphql_resolver_list(client, resource_group_name, service_name, api_id
     return client.graph_ql_api_resolver.list_by_api(resource_group_name, service_name, api_id)
 
 
+def apim_graphql_resolver_update(instance, display_name=None, path=None, description=None):
+    """Updates the details of the resolver in the GraphQL API specified by its identifier."""
+
+    if display_name is not None:
+        instance.display_name = display_name
+
+    if path is not None:
+        instance.path = path
+
+    if description is not None:
+        instance.description = description
+
+    return instance
+
+
 # Graphql Resolver Policy Operations
 def apim_graphql_resolver_policy_create(
         client, resource_group_name, service_name, api_id, resolver_id, value_path, policy_format=None, no_wait=False):

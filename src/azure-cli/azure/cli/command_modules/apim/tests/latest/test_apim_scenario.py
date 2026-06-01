@@ -410,6 +410,8 @@ class ApimScenarioTest(ScenarioTest):
             'resolver_display_name': 'Query-allFamilies',
             'resolver_path': 'Query/allFamilies',
             'resolver_decription': "A GraphQL Resolver example",
+            'resolver_updated_display_name': 'Query-allFamilies-Updated',
+            'resolver_updated_description': "An updated GraphQL Resolver example",
             'value_path': policypath
         })
 
@@ -452,6 +454,13 @@ class ApimScenarioTest(ScenarioTest):
         #list resolvers
         resolver_count = len(self.cmd('apim graphql resolver list -g "{rg}" -n "{service_name}" --api-id "{graphql_api_id}"').get_output_in_json())
         self.assertEqual(resolver_count, 1)
+
+        #update resolver
+        self.cmd(
+            'apim graphql resolver update -g "{rg}" --service-name "{service_name}" --api-id "{graphql_api_id}" --resolver-id "{resolver_id}" --display-name "{resolver_updated_display_name}" --description "{resolver_updated_description}"',
+            checks=[self.check('name', '{resolver_id}'),
+                    self.check('path', '{resolver_path}'),
+                    self.check('description', '{resolver_updated_description}')])
 
         #create resolver policy
         self.cmd(
