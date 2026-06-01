@@ -7,6 +7,7 @@ import hashlib
 import random
 import json
 import re
+import shlex
 import sys
 import platform
 import requests
@@ -27,7 +28,7 @@ EXTENSION_NAME = 'find'
 Example = namedtuple("Example", "title snippet")
 
 
-def process_query(cli_term):
+def process_query(cmd, cli_term):
     if not cli_term:
         logger.error('Please provide a search term e.g. az find "vm"')
     else:
@@ -50,18 +51,27 @@ def process_query(cli_term):
                 print("\nSorry I am not able to help with [" + cli_term + "]."
                       "\nTry typing the beginning of a command e.g. " + style_message('az vm') + ".", file=sys.stderr)
             else:
-                if answer_list[0]['source'] == 'pruned':
+                if answer_list[0].get('source') == 'pruned':
                     has_pruned_answer = True
                     answer_list.pop(0)
-                print("\nHere are the most common ways to use [" + cli_term + "]: \n", file=sys.stderr)
 
-                for answer in answer_list:
-                    cleaned_answer = clean_from_http_answer(answer)
-                    print(style_message(cleaned_answer.title))
-                    print(cleaned_answer.snippet + '\n')
-                if has_pruned_answer:
-                    print(style_message("More commands and examples are available in the latest version of the CLI. "
-                                        "Please update for the best experience.\n"))
+                command_loader = _get_command_loader(cmd.cli_ctx)
+                answer_list = _filter_existing_command_examples(answer_list, command_loader)
+
+                if not answer_list:
+                    print("\nSorry I am not able to help with [" + cli_term + "]."
+                          "\nTry typing the beginning of a command e.g. " + style_message('az vm') + ".",
+                          file=sys.stderr)
+                else:
+                    print("\nHere are the most common ways to use [" + cli_term + "]: \n", file=sys.stderr)
+
+                    for answer in answer_list:
+                        cleaned_answer = clean_from_http_answer(answer)
+                        print(style_message(cleaned_answer.title))
+                        print(cleaned_answer.snippet + '\n')
+                    if has_pruned_answer:
+                        print(style_message("More commands and examples are available in the latest version of the CLI. "
+                                            "Please update for the best experience.\n"))
     from azure.cli.core.util import show_updates_available
     show_updates_available()
 
@@ -150,3 +160,56 @@ def clean_from_http_answer(http_answer):
     current_snippet = current_snippet.replace('```', '').replace(current_title, '').strip()
     current_snippet = re.sub(r'\[.*\]', '', current_snippet).strip()
     return Example(current_title, current_snippet)
+
+
+def _get_command_loader(cli_ctx):
+    return getattr(getattr(cli_ctx, 'invocation', None), 'commands_loader', None)
+
+
+def _filter_existing_command_examples(answer_list, command_loader):
+    if not command_loader:
+        return answer_list
+
+    filtered_examples = []
+    for answer in answer_list:
+        cleaned_answer = clean_from_http_answer(answer)
+        if _example_command_exists(cleaned_answer.snippet, command_loader):
+            filtered_examples.append(answer)
+    return filtered_examples
+
+
+def _example_command_exists(snippet, command_loader):
+    command_name = _extract_command_name(snippet)
+    if command_name is None:
+        return True
+
+    try:
+        command_loader.load_command_table(command_name.split())
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.debug('Unable to validate az find example command %s: %s', command_name, ex)
+        return True
+
+    command_table = getattr(command_loader, 'command_table', {}) or {}
+    return command_name in command_table
+
+
+def _extract_command_name(snippet):
+    match = re.search(r'(^|\s)az\s+', snippet)
+    if not match:
+        return None
+
+    command_text = snippet[match.end():].splitlines()[0]
+    try:
+        tokens = shlex.split(command_text)
+    except ValueError:
+        tokens = command_text.split()
+
+    command_tokens = []
+    for token in tokens:
+        if token.startswith('-'):
+            break
+        command_tokens.append(token)
+
+    if not command_tokens:
+        return None
+    return ' '.join(command_tokens)
