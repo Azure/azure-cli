@@ -1,6 +1,6 @@
 name: Git Hook Notice
 on:
-  pull_request_target:
+  pull_request:
     types: [opened]
     branches:
       - dev
@@ -11,7 +11,7 @@ jobs:
   git-hook-notice:
     runs-on: ubuntu-latest
     permissions:
-      pull-requests: write
+      contents: read
     name: Introduce git hook in developer env
     steps:
       - name: Checkout git hook notice message
@@ -19,10 +19,8 @@ jobs:
         with:
           sparse-checkout: |
             .github/template/git-hooks-note.md
-      - name: Comment on pull request
-        uses: mshick/add-pr-comment@v2
-        with:
-           repo-token: ${{ secrets.GITHUB_TOKEN }}
-           message-id: gitHookNoticeComment
-           message-path: |
-            .github/template/git-hooks-note.md 
+      - name: Show git hook notice
+        run: |
+          echo "::group::Git hook notice"
+          cat .github/template/git-hooks-note.md
+          echo "::endgroup::"
