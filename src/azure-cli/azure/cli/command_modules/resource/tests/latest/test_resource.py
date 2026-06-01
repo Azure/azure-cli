@@ -5529,6 +5529,232 @@ class PolicyScenarioTest(ScenarioTest):
 
         self.resource_policyexemption_operations(resource_group, None, other_sub_id)
 
+    def resource_policyenrollment_operations(self, resource_group, management_group=None, subscription=None, use_resource_group_scope=False):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+
+        self.kwargs.update({
+            'pn': self.create_random_name('clitest', 30),
+            'pdn': self.create_random_name('clitest', 20),
+            'desc': 'desc_for_test_policy_123',
+            'dpn': self.create_random_name('clitest-dp', 30),
+            'dpdn': self.create_random_name('clitest_dp', 20),
+            'dp_desc': 'desc_for_clitest_data_policy_123',
+            'dp_mode': 'Microsoft.KeyVault.Data',
+            'psn': self.create_random_name('clitest', 30),
+            'psdn': self.create_random_name('clitest', 20),
+            'pan': self.create_random_name('clitest', 24),
+            'padn': self.create_random_name('clitest', 20),
+            'pen': self.create_random_name('clitest', 24),
+            'pedn': self.create_random_name('clitest', 20),
+            'pe_desc': 'desc_for_clitest_policyenrollment_123',
+            'rf': os.path.join(curr_dir, 'sample_policy_rule.json').replace('\\', '\\\\'),
+            'dprf': os.path.join(curr_dir, 'sample_data_policy_rule.json').replace('\\', '\\\\'),
+            'psf': os.path.join(curr_dir, 'sample_policy_set.json').replace('\\', '\\\\'),
+            'pdf': os.path.join(curr_dir, 'sample_policy_param_def.json').replace('\\', '\\\\'),
+            'metadata': 'test',
+            'updated_metadata': 'test2',
+        })
+        if (management_group):
+            self.kwargs.update({'mg': management_group})
+        if (subscription):
+            self.kwargs.update({'sub': subscription})
+
+        if not self.in_recording:
+            time.sleep(60)
+
+        # create a policy
+        cmd = self.cmdstring('policy definition create -n {pn} --rules "{rf}" --params "{pdf}" --display-name {pdn} --description {desc}', management_group, subscription)
+        policy = self.cmd(cmd).get_output_in_json()
+
+        # create a data policy
+        cmd = self.cmdstring('policy definition create -n {dpn} --rules "{dprf}" --mode {dp_mode} --display-name {dpdn} --description {dp_desc}', management_group, subscription)
+        datapolicy = self.cmd(cmd).get_output_in_json()
+
+        # create a policy set
+        policyset = get_file_json(self.kwargs['psf'])
+        policyset[0]['policyDefinitionId'] = policy['id']
+        policyset[1]['policyDefinitionId'] = datapolicy['id']
+        with open(os.path.join(curr_dir, 'sample_policy_set.json'), 'w') as outfile:
+            json.dump(policyset, outfile)
+
+        cmd = self.cmdstring('policy set-definition create -n {psn} --definitions @"{psf}" --display-name {psdn}', management_group, subscription)
+        policyset = self.cmd(cmd).get_output_in_json()
+        self.kwargs.update({'prids': policyset['policyDefinitions'][0]['policyDefinitionReferenceId']})
+
+        scope = None
+        if management_group:
+            scope = '/providers/Microsoft.Management/managementGroups/{mg}'.format(mg=management_group)
+        elif subscription:
+            scope = '/subscriptions/{sub}'.format(sub=subscription)
+        elif use_resource_group_scope:
+            sub_id = get_subscription_id(self.cli_ctx)
+            scope = '/subscriptions/{sub}/resourceGroups/{rg}'.format(sub=sub_id, rg=resource_group)
+
+        if scope:
+            self.kwargs.update({'scope': scope})
+            assignment = self.cmd('policy assignment create -d {psid} -n {pan} --scope {scope} --display-name {padn}'.format(psid=policyset['id'], **self.kwargs)).get_output_in_json()
+            cmd = self.cmdstring('policy enrollment create -n {pen} -a {pa} --scope {scope} --display-name {pedn} --description {pe_desc} --metadata category={metadata}'.format(pa=assignment['id'], **self.kwargs))
+            self.cmd(cmd, checks=[
+                self.check('name', '{pen}'),
+                self.check('displayName', '{pedn}'),
+                self.check('description', '{pe_desc}'),
+                self.check('metadata.category', '{metadata}')
+            ]).get_output_in_json()
+
+            # ensure the enrollment appears in the list results
+            self.cmd('policy enrollment list --scope {scope}'.format(**self.kwargs), checks=self.check("length([?name=='{pen}'])", 1))
+
+            # update the enrollment
+            self.kwargs['pe_desc'] = self.kwargs['pe_desc'] + '_new'
+            self.kwargs['pedn'] = self.kwargs['pedn'] + '_new'
+            cmd = self.cmdstring('policy enrollment update -n {pen} --scope {scope} -r {prids} -v DoNotValidate --display-name {pedn} --description {pe_desc} --metadata category={updated_metadata}'.format(**self.kwargs))
+            self.cmd(cmd, checks=[
+                self.check('name', '{pen}'),
+                self.check('displayName', '{pedn}'),
+                self.check('description', '{pe_desc}'),
+                self.check('metadata.category', '{updated_metadata}'),
+                self.check('policyDefinitionReferenceIds[0]', '{prids}'),
+                self.check('assignmentScopeValidation', 'DoNotValidate')
+            ])
+
+            # ensure the enrollment still appears in the list results just once and the update is present
+            self.cmd('policy enrollment list --scope {scope}'.format(**self.kwargs), checks=[
+                self.check("length([?name=='{pen}'])", 1),
+                self.check("[?name=='{pen}'] | [0].assignmentScopeValidation", 'DoNotValidate')
+            ])
+
+            # verify properties of the updated enrollment
+            cmd = self.cmdstring('policy enrollment show -n {pen} --scope {scope}'.format(**self.kwargs))
+            self.cmd(cmd, checks=[
+                self.check('name', '{pen}'),
+                self.check('displayName', '{pedn}'),
+                self.check('description', '{pe_desc}'),
+                self.check('metadata.category', '{updated_metadata}'),
+                self.check('policyDefinitionReferenceIds[0]', '{prids}'),
+                self.check('assignmentScopeValidation', 'DoNotValidate')
+            ])
+
+            # delete the enrollment and validate it's gone
+            self.cmd('policy enrollment delete -n {pen} --scope {scope}'.format(**self.kwargs))
+            self.cmd('policy assignment delete -n {pan} --scope {scope}'.format(**self.kwargs))
+            self.cmd('policy enrollment list --disable-scope-strict-match', checks=self.check("length([?name=='{pen}'])", 0))
+            self.cmd('policy assignment list --disable-scope-strict-match', checks=self.check("length([?name=='{pan}'])", 0))
+        else:
+            assignment = self.cmd('policy assignment create -d {psn} -n {pan} -g {rg} --display-name {padn}'.format(**self.kwargs), checks=[
+                self.check('name', '{pan}'),
+                self.check('displayName', '{padn}')
+            ]).get_output_in_json()
+
+            # ensure the assignment appears in the list results
+            self.cmd('policy assignment list --resource-group {rg}', checks=self.check("length([?name=='{pan}'])", 1))
+
+            cmd = self.cmdstring('policy enrollment create -n {pen} -a {pa} -g {rg} --display-name {pedn} --description {pe_desc} --metadata category={metadata}'.format(pa=assignment['id'], **self.kwargs))
+            self.cmd(cmd, checks=[
+                self.check('name', '{pen}'),
+                self.check('displayName', '{pedn}'),
+                self.check('description', '{pe_desc}'),
+                self.check('metadata.category', '{metadata}')
+            ]).get_output_in_json()
+
+            # ensure the enrollment appears in the list results
+            self.cmd('policy enrollment list --resource-group {rg}', checks=self.check("length([?name=='{pen}'])", 1))
+
+            # update the enrollment
+            self.kwargs['pe_desc'] = self.kwargs['pe_desc'] + '_new'
+            self.kwargs['pedn'] = self.kwargs['pedn'] + '_new'
+            cmd = self.cmdstring('policy enrollment update -n {pen} -g {rg} -r {prids} -v DoNotValidate --display-name {pedn} --description {pe_desc} --metadata category={updated_metadata}'.format(**self.kwargs))
+            self.cmd(cmd, checks=[
+                self.check('name', '{pen}'),
+                self.check('displayName', '{pedn}'),
+                self.check('description', '{pe_desc}'),
+                self.check('metadata.category', '{updated_metadata}'),
+                self.check('policyDefinitionReferenceIds[0]', '{prids}'),
+                self.check('assignmentScopeValidation', 'DoNotValidate')
+            ])
+
+            cmd = self.cmdstring('policy enrollment show -n {pen} -g {rg}'.format(**self.kwargs))
+            self.cmd(cmd, checks=[
+                self.check('name', '{pen}'),
+                self.check('displayName', '{pedn}'),
+                self.check('description', '{pe_desc}'),
+                self.check('metadata.category', '{updated_metadata}'),
+                self.check('policyDefinitionReferenceIds[0]', '{prids}'),
+                self.check('assignmentScopeValidation', 'DoNotValidate')
+            ])
+
+            # delete the enrollment and validate it's gone
+            self.cmd('policy enrollment delete -n {pen} -g {rg}'.format(**self.kwargs))
+            self.cmd('policy assignment delete -n {pan} -g {rg}'.format(**self.kwargs))
+            self.cmd('policy enrollment list', checks=self.check("length([?name=='{pen}'])", 0))
+
+        # list and show it
+        cmd = self.cmdstring('policy set-definition list', management_group, subscription)
+        self.cmd(cmd, checks=self.check("length([?name=='{psn}'])", 1))
+
+        cmd = self.cmdstring('policy set-definition show -n {psn}', management_group, subscription)
+        self.cmd(cmd, checks=[
+            self.check('name', '{psn}'),
+            self.check('displayName', '{psdn}')
+        ])
+
+        # delete the policy set
+        cmd = self.cmdstring('policy set-definition delete -n {psn}', management_group, subscription)
+        self.cmd(cmd)
+        if not self.in_recording:
+            time.sleep(10)  # ensure the policy is gone when run live.
+
+        cmd = self.cmdstring('policy set-definition list', management_group, subscription)
+        self.cmd(cmd, checks=self.check("length([?name=='{psn}'])", 0))
+
+        # delete the policy
+        cmd = self.cmdstring('policy definition delete -n {pn}', management_group, subscription)
+        self.cmd(cmd)
+        if not self.in_recording:
+            time.sleep(10)
+
+        # delete the data policy
+        cmd = self.cmdstring('policy definition delete -n {dpn}', management_group, subscription)
+        self.cmd(cmd)
+        if not self.in_recording:
+            time.sleep(10)
+
+        # ensure the policy is gone when run live.
+        cmd = self.cmdstring('policy definition list', management_group, subscription)
+        self.cmd(cmd, checks=self.check("length([?name=='{pn}'])", 0))
+        self.cmd(cmd, checks=self.check("length([?name=='{dpn}'])", 0))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_policyenrollment')
+    @AllowLargeResponse(16384)
+    def test_resource_policyenrollment_default(self, resource_group):
+        self.resource_policyenrollment_operations(resource_group)
+
+    @ResourceGroupPreparer(name_prefix='cli_test_policyenrollment_management_group')
+    @AllowLargeResponse(16384)
+    def test_resource_policyenrollment_management_group(self, resource_group):
+        management_group_name = 'PowershellTesting'
+        self.resource_policyenrollment_operations(resource_group, management_group_name)
+
+    @ResourceGroupPreparer(name_prefix='cli_test_policyenrollment_subscription')
+    @AllowLargeResponse(16384)
+    def test_resource_policyenrollment_subscription_id(self, resource_group):
+        # under playback, we mock it so the subscription id will be '00000000...' and it will match
+        # the same sanitized value in the recording
+        if not self.in_recording:
+            other_sub_id = '00000000-0000-0000-0000-000000000000'     # subscription id in recording file
+        else:
+            # This must be a subscription you have Owner access to OTHER THAN the current subscription
+            other_sub_id = 'e5a130f3-57fd-46b6-9c55-03d21a853935'     # Azure Governance Perf 20
+            sub_id = get_subscription_id(self.cli_ctx)
+            self.assertFalse(sub_id == other_sub_id, 'This test requires a subscription other than that of the current context')
+
+        self.resource_policyenrollment_operations(resource_group, None, other_sub_id)
+
+    @ResourceGroupPreparer(name_prefix='cli_test_policyenrollment_rg_scope')
+    @AllowLargeResponse(16384)
+    def test_resource_policyenrollment_resource_group_scope(self, resource_group):
+        # exercise the --scope path using a resource group's fully-qualified scope
+        self.resource_policyenrollment_operations(resource_group, use_resource_group_scope=True)
+
     def test_resource_policy_arg_validate(self):
 
         from azure.cli.core.azclierror import InvalidArgumentValueError, ArgumentUsageError
