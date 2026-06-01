@@ -296,18 +296,6 @@ class Create(AAZCommand):
                 min_length=1,
             ),
         )
-        _args_schema.default_group_quota_in_ki_bs = AAZIntArg(
-            options=["--default-group-quota", "--default-group-quota-in-ki-bs"],
-            arg_group="Properties",
-            help="Default group quota for volume in KiBs. If isDefaultQuotaEnabled is set, the minimum value of 4 KiBs applies.",
-            default=0,
-        )
-        _args_schema.default_user_quota_in_ki_bs = AAZIntArg(
-            options=["--default-user-quota", "--default-user-quota-in-ki-bs"],
-            arg_group="Properties",
-            help="Default user quota for volume in KiBs. If isDefaultQuotaEnabled is set, the minimum value of 4 KiBs applies .",
-            default=0,
-        )
         _args_schema.delete_base_snapshot = AAZBoolArg(
             options=["--delete-base-snapshot"],
             arg_group="Properties",
@@ -319,12 +307,6 @@ class Create(AAZCommand):
             help="Flag indicating whether subvolume operations are enabled on the volume",
             default="Disabled",
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
-        )
-        _args_schema.is_default_quota_enabled = AAZBoolArg(
-            options=["--is-def-quota-enabled", "--default-quota-enabled", "--is-default-quota-enabled"],
-            arg_group="Properties",
-            help="Specifies if default quota is enabled for the volume.",
-            default=False,
         )
         _args_schema.is_large_volume = AAZBoolArg(
             options=["--is-large-volume"],
@@ -348,7 +330,7 @@ class Create(AAZCommand):
             options=["--network-features"],
             arg_group="Properties",
             help="Basic network, or Standard features available to the volume.",
-            default="Basic",
+            default="Standard",
             enum={"Basic": "Basic", "Basic_Standard": "Basic_Standard", "Standard": "Standard", "Standard_Basic": "Standard_Basic"},
         )
         _args_schema.placement_rules = AAZListArg(
@@ -679,13 +661,10 @@ class Create(AAZCommand):
                 properties.set_prop("coolnessPeriod", AAZIntType, ".coolness_period")
                 properties.set_prop("creationToken", AAZStrType, ".creation_token", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("dataProtection", AAZObjectType)
-                properties.set_prop("defaultGroupQuotaInKiBs", AAZIntType, ".default_group_quota_in_ki_bs")
-                properties.set_prop("defaultUserQuotaInKiBs", AAZIntType, ".default_user_quota_in_ki_bs")
                 properties.set_prop("deleteBaseSnapshot", AAZBoolType, ".delete_base_snapshot")
                 properties.set_prop("enableSubvolumes", AAZStrType, ".enable_subvolumes")
                 properties.set_prop("encryptionKeySource", AAZStrType, ".encryption_key_source")
                 properties.set_prop("exportPolicy", AAZObjectType)
-                properties.set_prop("isDefaultQuotaEnabled", AAZBoolType, ".is_default_quota_enabled")
                 properties.set_prop("isLargeVolume", AAZBoolType, ".is_large_volume")
                 properties.set_prop("kerberosEnabled", AAZBoolType, ".kerberos_enabled")
                 properties.set_prop("keyVaultPrivateEndpointResourceId", AAZStrType, ".key_vault_private_endpoint_resource_id")

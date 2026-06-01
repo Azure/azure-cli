@@ -110,10 +110,21 @@ if not exist %PYTHON_DIR% (
     del python-archive.zip
     echo Python downloaded and extracted successfully
 
-    REM Delete _pth file so that Lib\site-packages is included in sys.path
+    REM Append `import site` to python*._pth so site.py runs at startup
+    REM (which adds Lib\site-packages to sys.path). We keep the file (rather
+    REM than deleting it) because on Python 3.14+ removing it breaks pip's
+    REM PEP 517 isolated BuildEnvironment subprocess: the child python.exe
+    REM can no longer locate the stdlib zip and dies in init_fs_encoding
+    REM with ModuleNotFoundError: No module named 'encodings'.
+    REM Keeping an explicit _pth makes stdlib + site-packages discoverable
+    REM in both the parent and any spawned subprocess.
     REM https://github.com/pypa/pip/issues/4207#issuecomment-297396913
-    REM https://docs.python.org/3.10/using/windows.html#finding-modules
-    del python*._pth
+    REM https://docs.python.org/3/using/windows.html#finding-modules
+    if exist python*._pth (
+        for %%f in (python*._pth) do (
+            findstr /x "import site" "%%f" >nul || echo import site>> %%f
+        )
+    )
 
     echo Installing pip
     curl --output get-pip.py %GET_PIP_DOWNLOAD_URL%
