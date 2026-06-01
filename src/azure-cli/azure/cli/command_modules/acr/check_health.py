@@ -17,7 +17,12 @@ logger = get_logger(__name__)
 
 DOCKER_PULL_SUCCEEDED = "Downloaded newer image for {}"
 DOCKER_IMAGE_UP_TO_DATE = "Image is up to date for {}"
-IMAGE = "mcr.microsoft.com/mcr/hello-world:latest"
+_DEFAULT_MCR_HOST = "mcr.microsoft.com"
+_CLOUD_MCR_HOSTS = {
+    "ussec": "mcr.microsoft.scloud",
+    "usnat": "mcr.microsoft.eaglex.ic.gov",
+}
+_HEALTH_CHECK_IMAGE_PATH = "/mcr/hello-world:latest"
 FAQ_MESSAGE = "\nPlease refer to https://aka.ms/acr/health-check for more information."
 ERROR_MSG_DEEP_LINK = "\nPlease refer to https://aka.ms/acr/errors#{} for more information."
 MIN_HELM_VERSION = "2.11.0"
@@ -72,9 +77,16 @@ def _subprocess_communicate(command_parts, shell=False):
     return output, warning, stderr, succeeded
 
 
+def _get_health_check_image(cmd):
+    """Return the MCR hello-world image appropriate for the current cloud."""
+    cloud_name = cmd.cli_ctx.cloud.name.lower()
+    mcr_host = _CLOUD_MCR_HOSTS.get(cloud_name, _DEFAULT_MCR_HOST)
+    return mcr_host + _HEALTH_CHECK_IMAGE_PATH
+
+
 # Checks for the environment
 # Checks docker command, docker daemon, docker version and docker pull
-def _get_docker_status_and_version(ignore_errors, yes):
+def _get_docker_status_and_version(cmd, ignore_errors, yes):
     from ._errors import DOCKER_DAEMON_ERROR, DOCKER_PULL_ERROR, DOCKER_VERSION_ERROR
 
     # Docker command and docker daemon check
@@ -103,25 +115,26 @@ def _get_docker_status_and_version(ignore_errors, yes):
 
     # Docker pull check - only if docker daemon is available
     if docker_daemon_available:
+        image = _get_health_check_image(cmd)
         if not yes:
             from knack.prompting import prompt_y_n
-            confirmation = prompt_y_n("This will pull the image {}. Proceed?".format(IMAGE))
+            confirmation = prompt_y_n("This will pull the image {}. Proceed?".format(image))
             if not confirmation:
                 logger.warning("Skipping pull check.")
                 return
 
-        output, warning, stderr, succeeded = _subprocess_communicate([docker_command, "pull", IMAGE])
+        output, warning, stderr, succeeded = _subprocess_communicate([docker_command, "pull", image])
 
         if not succeeded:
             if stderr and DOCKER_PULL_WRONG_PLATFORM in stderr:
-                print_pass("Docker pull of '{}'".format(IMAGE))
-                logger.warning("Image '%s' can be pulled but cannot be used on this platform", IMAGE)
+                print_pass("Docker pull of '{}'".format(image))
+                logger.warning("Image '%s' can be pulled but cannot be used on this platform", image)
                 return
             _handle_error(DOCKER_PULL_ERROR.append_error_message(stderr), ignore_errors)
         else:
             if warning:
                 logger.warning(warning)
-            print_pass("Docker pull of '{}'".format(IMAGE))
+            print_pass("Docker pull of '{}'".format(image))
 
 
 # Get current CLI version
@@ -458,7 +471,7 @@ def acr_check_health(cmd,  # pylint: disable useless-return
     if in_cloud_console:
         logger.warning("Environment checks are not supported in Azure Cloud Shell.")
     else:
-        _get_docker_status_and_version(ignore_errors, yes)
+        _get_docker_status_and_version(cmd, ignore_errors, yes)
         _get_cli_version()
 
     _check_registry_health(cmd, registry_name, repository, ignore_errors)
