@@ -37,10 +37,6 @@ REFRESH_EXTENSION_HELP_OVERLAY_SENTINEL = '__refresh_extension_help_overlay__'
 ALWAYS_LOADED_MODULES = []
 # Extensions that will always be loaded if installed. They don't expose commands but hook into CLI core.
 ALWAYS_LOADED_EXTENSIONS = ['azext_ai_examples', 'azext_next']
-# Timeout (in seconds) for loading a single module. Acts as a safety valve to prevent indefinite hangs
-MODULE_LOAD_TIMEOUT_SECONDS = 60
-# Maximum number of worker threads for parallel module loading.
-MAX_WORKER_THREAD_COUNT = 4
 
 
 def _get_top_level_command(args):
@@ -322,6 +318,7 @@ class MainCommandsLoader(CLICommandsLoader):
 
             start_time = time.perf_counter()
             logger.debug("Loading command modules...")
+            logger.debug(self.header_mod)
             results = self._load_modules(args, command_modules)
 
             count, cumulative_group_count, cumulative_command_count = \
@@ -664,42 +661,14 @@ class MainCommandsLoader(CLICommandsLoader):
                 loader._update_command_definitions()  # pylint: disable=protected-access
 
     def _load_modules(self, args, command_modules):
-        """Load command modules using ThreadPoolExecutor with timeout protection."""
-        import concurrent.futures
-        from concurrent.futures import ThreadPoolExecutor
+        """Load command modules sequentially."""
         from azure.cli.core.commands import BLOCKED_MODS
 
         results = []
-        with ThreadPoolExecutor(max_workers=MAX_WORKER_THREAD_COUNT) as executor:
-            future_to_module = {executor.submit(self._load_single_module, mod, args): mod
-                                for mod in command_modules if mod not in BLOCKED_MODS}
-
-            try:
-                for future in concurrent.futures.as_completed(future_to_module, timeout=MODULE_LOAD_TIMEOUT_SECONDS):
-                    try:
-                        result = future.result()
-                        results.append(result)
-                    except (ImportError, AttributeError, TypeError, ValueError) as ex:
-                        mod = future_to_module[future]
-                        logger.warning("Module '%s' load failed: %s", mod, ex)
-                        results.append(ModuleLoadResult(mod, {}, {}, 0, ex))
-                    except Exception as ex:  # pylint: disable=broad-exception-caught
-                        mod = future_to_module[future]
-                        logger.warning("Module '%s' load failed with unexpected exception: %s", mod, ex)
-                        results.append(ModuleLoadResult(mod, {}, {}, 0, ex))
-            except concurrent.futures.TimeoutError:
-                for future, mod in future_to_module.items():
-                    if future.done():
-                        try:
-                            result = future.result()
-                            results.append(result)
-                        except Exception as ex:  # pylint: disable=broad-exception-caught
-                            logger.warning("Module '%s' load failed: %s", mod, ex)
-                            results.append(ModuleLoadResult(mod, {}, {}, 0, ex))
-                    else:
-                        logger.warning("Module '%s' load timeout after %s seconds", mod, MODULE_LOAD_TIMEOUT_SECONDS)
-                        results.append(ModuleLoadResult(mod, {}, {}, 0,
-                                                        Exception(f"Module '{mod}' load timeout")))
+        for mod in command_modules:
+            if mod in BLOCKED_MODS:
+                continue
+            results.append(self._load_single_module(mod, args))
 
         return results
 
@@ -712,6 +681,8 @@ class MainCommandsLoader(CLICommandsLoader):
             module_command_table, module_group_table, command_loader = _load_module_command_loader(self, args, mod)
             import_module_breaking_changes(mod)
             elapsed_time = time.perf_counter() - start_time
+            logger.debug(self.item_format_string, mod, elapsed_time,
+                         len(module_group_table), len(module_command_table))
             return ModuleLoadResult(mod, module_command_table, module_group_table, elapsed_time, command_loader=command_loader)
         except Exception as ex:  # pylint: disable=broad-except
             tb_str = traceback.format_exc()
@@ -744,13 +715,9 @@ class MainCommandsLoader(CLICommandsLoader):
         self.command_table.update(result.command_table)
         self.command_group_table.update(result.group_table)
 
-        logger.debug(self.item_format_string, result.module_name, result.elapsed_time,
-                     len(result.group_table), len(result.command_table))
-
     def _process_results_with_timing(self, results):
         """Process pre-loaded module results with timing and progress reporting."""
-        logger.debug("Loaded command modules in parallel:")
-        logger.debug(self.header_mod)
+        logger.debug("Loaded command modules:")
 
         count = 0
         cumulative_group_count = 0
