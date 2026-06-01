@@ -111,6 +111,12 @@ def _validate_asp_sku(sku, app_service_environment, zone_redundant):
 
 def validate_asp_create(namespace):
     validate_tags(namespace)
+    # is_linux is None when not explicitly provided by the user (default).
+    # Resolve the default: Linux unless --hyper-v is specified.
+    if namespace.is_linux is None:
+        namespace.is_linux = not namespace.hyper_v
+    elif namespace.is_linux and namespace.hyper_v:
+        raise MutuallyExclusiveArgumentError('Usage error: --is-linux true and --hyper-v cannot be used together.')
     if namespace.sku is None:
         if namespace.is_linux:
             namespace.sku = 'P0V3'
@@ -122,8 +128,6 @@ def validate_asp_create(namespace):
             namespace.sku = 'B1'
     sku = _normalize_sku(namespace.sku)
     _validate_asp_sku(sku, namespace.app_service_environment, namespace.zone_redundant)
-    if namespace.is_linux and namespace.hyper_v:
-        raise MutuallyExclusiveArgumentError('Usage error: --is-linux and --hyper-v cannot be used together.')
 
 
 def validate_functionapp_asp_create(namespace):
