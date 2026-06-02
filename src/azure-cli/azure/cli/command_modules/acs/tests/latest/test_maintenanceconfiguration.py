@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import unittest
+import datetime
 from types import SimpleNamespace
 
 # from azure.cli.core.util import CLIError
@@ -119,7 +120,6 @@ class TestAddMaintenanceConfiguration(unittest.TestCase):
 
     def test_add_default_maintenance_configuration_rejects_inapplicable_schedule_params(self):
         """interval_days, interval_months, day_of_month, week_index are rejected for default config."""
-        err = ("--interval-days, --interval-months, --day-of-month and --week-index cannot be used for default maintenance configuration.")
         for param in ("interval_days", "interval_months", "day_of_month", "week_index"):
             with self.subTest(param=param):
                 cmd = MockCmd(self.cli_ctx)
@@ -138,9 +138,38 @@ class TestAddMaintenanceConfiguration(unittest.TestCase):
                     "week_index": None,
                 }
                 raw_parameters[param] = 1
+                expected_flag = "--" + param.replace("_", "-")
                 with self.assertRaises(MutuallyExclusiveArgumentError) as cm:
                     aks_maintenanceconfiguration_update_internal(cmd, None, raw_parameters)
-                self.assertEqual(str(cm.exception), err)
+                self.assertIn(expected_flag, str(cm.exception))
+                self.assertIn("cannot be used for default maintenance configuration", str(cm.exception))
+
+    def test_add_default_maintenance_configuration_rejects_multiple_inapplicable_params(self):
+        """Error message names all offending flags when multiple inapplicable params are passed together."""
+        cmd = MockCmd(self.cli_ctx)
+        raw_parameters = {
+            "resource_group_name": "test_rg",
+            "cluster_name": "test_cluster",
+            "config_name": "default",
+            "weekday": None,
+            "start_hour": None,
+            "schedule_type": "Weekly",
+            "interval_days": 2,
+            "interval_weeks": None,
+            "interval_months": None,
+            "day_of_week": "Monday",
+            "day_of_month": 15,
+            "week_index": None,
+        }
+        with self.assertRaises(MutuallyExclusiveArgumentError) as cm:
+            aks_maintenanceconfiguration_update_internal(cmd, None, raw_parameters)
+        msg = str(cm.exception)
+        self.assertIn("--interval-days", msg)
+        self.assertIn("--day-of-month", msg)
+        self.assertIn("cannot be used for default maintenance configuration", msg)
+        # flags not passed should not appear in the message
+        self.assertNotIn("--interval-months", msg)
+        self.assertNotIn("--week-index", msg)
 
     def test_add_non_default_schedule_with_weekday(self):
         cmd = SimpleNamespace()
@@ -339,3 +368,63 @@ class TestAddMaintenanceConfiguration(unittest.TestCase):
         self.assertIsNotNone(result.maintenance_window.schedule.weekly)
         self.assertEqual(result.maintenance_window.schedule.weekly.interval_weeks, 1)
         self.assertIsNone(getattr(result, 'time_in_week', None))
+
+    def test_add_default_maintenance_configuration_with_utc_offset_and_start_date(self):
+        """utc_offset and start_date must be passed through to the constructed maintenance_window."""
+        cmd = MockCmd(self.cli_ctx)
+
+        class MockMaintenanceConfigClient:
+            def create_or_update(self, **kwargs):
+                return kwargs.get('parameters')
+
+        raw_parameters = {
+            "resource_group_name": "test_rg",
+            "cluster_name": "test_cluster",
+            "config_name": "default",
+            "weekday": None,
+            "start_hour": None,
+            "schedule_type": "Weekly",
+            "interval_days": None,
+            "interval_weeks": None,
+            "interval_months": None,
+            "day_of_week": "Monday",
+            "day_of_month": None,
+            "week_index": None,
+            "start_time": "09:00",
+            "duration_hours": 4,
+            "utc_offset": "+05:30",
+            "start_date": "2026-01-15",
+        }
+
+        result = aks_maintenanceconfiguration_update_internal(cmd, MockMaintenanceConfigClient(), raw_parameters)
+
+        self.assertIsNotNone(result.maintenance_window)
+        self.assertEqual(result.maintenance_window.utc_offset, "+05:30")
+        self.assertEqual(result.maintenance_window.start_date, datetime.date(2026, 1, 15))
+
+    def test_add_default_maintenance_configuration_requires_day_of_week(self):
+        """--schedule-type Weekly without --day-of-week must raise a clear error for default config."""
+        cmd = MockCmd(self.cli_ctx)
+
+        raw_parameters = {
+            "resource_group_name": "test_rg",
+            "cluster_name": "test_cluster",
+            "config_name": "default",
+            "weekday": None,
+            "start_hour": None,
+            "schedule_type": "Weekly",
+            "interval_days": None,
+            "interval_weeks": None,
+            "interval_months": None,
+            "day_of_week": None,
+            "day_of_month": None,
+            "week_index": None,
+            "start_time": "09:00",
+            "duration_hours": 4,
+            "utc_offset": None,
+            "start_date": None,
+        }
+
+        with self.assertRaises(RequiredArgumentMissingError) as cm:
+            aks_maintenanceconfiguration_update_internal(cmd, None, raw_parameters)
+        self.assertIn("--day-of-week", str(cm.exception))

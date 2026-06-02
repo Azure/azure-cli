@@ -67,8 +67,14 @@ def constructDefaultMaintenanceConfiguration(cmd, raw_parameters):
             raise InvalidArgumentValueError('--schedule-type for default maintenance configuration must be Weekly.')
         if raw_parameters.get("interval_weeks") is not None:
             raise InvalidArgumentValueError('--interval-weeks cannot be specified for default maintenance configuration; the interval is always 1 week.')
-        if any(raw_parameters.get(p) is not None for p in ("interval_days", "interval_months", "day_of_month", "week_index")):
-            raise MutuallyExclusiveArgumentError('--interval-days, --interval-months, --day-of-month and --week-index cannot be used for default maintenance configuration.')
+        offending = [p for p in ("interval_days", "interval_months", "day_of_month", "week_index")
+                     if raw_parameters.get(p) is not None]
+        if offending:
+            flags = ", ".join("--" + p.replace("_", "-") for p in offending)
+            raise MutuallyExclusiveArgumentError(
+                f'{flags} cannot be used for default maintenance configuration.')
+        if raw_parameters.get("day_of_week") is None:
+            raise RequiredArgumentMissingError('--day-of-week is required for default maintenance configuration when --schedule-type Weekly is specified.')
         raw_parameters["interval_weeks"] = 1
         maintenance_configuration_models = AKSManagedClusterModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).maintenance_configuration_models
         MaintenanceConfiguration = (

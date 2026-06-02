@@ -1487,10 +1487,10 @@ helps["aks maintenanceconfiguration add"] = """
     parameters:
         - name: --weekday
           type: string
-          short-summary: A day in week on which maintenance is allowed. E.g. Monday. Applicable to default maintenance configuration only, using the legacy timeInWeek format. Use --schedule-type Weekly with --day-of-week, --start-time, and --duration instead for the maintenanceWindow format, which also supports --utc-offset and --start-date.
+          short-summary: A day in week on which maintenance is allowed (legacy timeInWeek format, default config only). See examples for the maintenanceWindow alternative.
         - name: --start-hour
           type: string
-          short-summary: The start of a 1-hour maintenance window. E.g. 1 means maintenance is allowed between 1:00am and 2:00am. Applicable to default maintenance configuration only, using the legacy timeInWeek format. Use --schedule-type Weekly with --start-time and --duration instead for the maintenanceWindow format, which also supports --utc-offset and --start-date.
+          short-summary: The start of a 1-hour maintenance window, e.g. 1 means 1:00am-2:00am (legacy timeInWeek format, default config only). See examples for the maintenanceWindow alternative.
         - name: --schedule-type
           type: string
           short-summary: Choose either 'Daily', 'Weekly', 'AbsoluteMonthly' or 'RelativeMonthly' for your maintenance schedule. For default maintenance configuration, only 'Weekly' is supported.
@@ -1625,10 +1625,10 @@ helps["aks maintenanceconfiguration update"] = """
     parameters:
         - name: --weekday
           type: string
-          short-summary: A day in week on which maintenance is allowed. E.g. Monday. Applicable to default maintenance configuration only, using the legacy timeInWeek format. Use --schedule-type Weekly with --day-of-week, --start-time, and --duration instead for the maintenanceWindow format, which also supports --utc-offset and --start-date.
+          short-summary: A day in week on which maintenance is allowed (legacy timeInWeek format, default config only). See examples for the maintenanceWindow alternative.
         - name: --start-hour
           type: string
-          short-summary: The start of a 1-hour maintenance window. E.g. 1 means maintenance is allowed between 1:00am and 2:00am. Applicable to default maintenance configuration only, using the legacy timeInWeek format. Use --schedule-type Weekly with --start-time and --duration instead for the maintenanceWindow format, which also supports --utc-offset and --start-date.
+          short-summary: The start of a 1-hour maintenance window, e.g. 1 means 1:00am-2:00am (legacy timeInWeek format, default config only). See examples for the maintenanceWindow alternative.
         - name: --schedule-type
           type: string
           short-summary: Choose either 'Daily', 'Weekly', 'AbsoluteMonthly' or 'RelativeMonthly' for your maintenance schedule. For default maintenance configuration, only 'Weekly' is supported.
