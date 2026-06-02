@@ -9,6 +9,7 @@
 # flake8: noqa
 
 from azure.cli.core.aaz import *
+from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
 
 
 @register_command(
@@ -104,7 +105,13 @@ class Update(AAZCommand):
 
     @register_callback
     def pre_operations(self):
-        pass
+        args = self.ctx.args
+        if has_value(args.latest_scan) and bool(args.latest_scan) and has_value(args.results):
+            raise MutuallyExclusiveArgumentError(
+                "--latest-scan and --results are mutually exclusive. "
+                "Use --latest-scan to populate the baseline from the most recent scan, "
+                "or use --results to provide explicit expected results."
+            )
 
     @register_callback
     def post_operations(self):
@@ -130,6 +137,15 @@ class Update(AAZCommand):
             session = self.client.send_request(request=request, stream=False, **kwargs)
             if session.http_response.status_code in [200]:
                 return self.on_200(session)
+            if session.http_response.status_code == 404:
+                # Upsert semantics: if no baseline exists yet for this rule,
+                # initialize an empty instance so the subsequent PUT creates one.
+                self.ctx.set_var(
+                    "instance",
+                    {},
+                    schema_builder=self._build_schema_on_200
+                )
+                return
 
             return self.on_error(session.http_response)
 

@@ -96,7 +96,9 @@ Release History
 
 * `az security va sql`: [BREAKING CHANGE] Replaced hand-authored SQL Vulnerability Assessment commands with atomic aaz-generated commands targeting API version `2026-04-01-preview`. A single `--resource-id` argument now identifies the assessed resource, replacing the previous combination of `--vm-resource-id`, `--workspace-id`, `--server-name`, `--database-name`, `--vm-name`, `--agent-id`, and `--vm-uuid`. Optional `--database-name` is used only for server-level scopes (e.g. `master`). Supported scopes include Azure SQL Server, Azure SQL Managed Instance, Synapse, Azure VM (SQL on VM), and Arc-enabled SQL servers.
 * `az security va sql`: Add new SQL Vulnerability Assessment settings commands: `create`, `delete`, `show`, `update` for enabling/disabling SQL VA on a resource.
-* `az security va sql baseline`: Add `add` (set baseline for all rules), `create` (single-rule baseline), and `update` commands. Remove `set` command (use `add` instead).
+* `az security va sql baseline`: Add `add` (set baseline for all rules), `create` (single-rule baseline), and `update` commands. The legacy `set` command is preserved as a deprecated alias of `add`.
+* `az security va sql results show`: Accept both `--rule-id` (preferred, consistent with `baseline` commands) and `--scan-result-id` (alias) for the rule identifier.
+* `az security va sql baseline update`: Behaves as an upsert. If no baseline exists yet for the specified rule, the command initializes an empty instance and creates it via PUT, matching the legacy command's behavior.
 * `az security va sql scans`: Add `initiate-scan` command to trigger a vulnerability assessment scan, and `scan-operation-result show` to poll the operation result.
 * `az security va sql`: All commands are tagged Preview, matching the underlying API version.
 

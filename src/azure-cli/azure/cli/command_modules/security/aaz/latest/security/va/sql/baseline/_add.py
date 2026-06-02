@@ -9,6 +9,7 @@
 # flake8: noqa
 
 from azure.cli.core.aaz import *
+from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
 
 
 @register_command(
@@ -22,7 +23,7 @@ class Add(AAZCommand):
         az security va sql baseline add --resource-id /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Sql/servers/{server}/databases/{db} --latest-scan true
 
     :example: Set baseline for multiple rules with explicit results on a SQL DB hosted on an Azure VM.
-        az security va sql baseline add --resource-id /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Compute/virtualMachines/{vm} --database-name MyDb --results "{VA1234:[[col1,col2],[col3,col4]],VA5678:[[user1,SELECT]]}"
+        az security va sql baseline add --resource-id /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Compute/virtualMachines/{vm} --database-name MyDb --results '{"VA1234":[["col1","col2"],["col3","col4"]],"VA5678":[["user1","SELECT"]]}'
 
     :example: Set baseline at the server level using latest scan results (system database 'master').
         az security va sql baseline add --resource-id /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Sql/servers/{server} --database-name master --latest-scan true
@@ -92,7 +93,13 @@ class Add(AAZCommand):
 
     @register_callback
     def pre_operations(self):
-        pass
+        args = self.ctx.args
+        if has_value(args.latest_scan) and bool(args.latest_scan) and has_value(args.results):
+            raise MutuallyExclusiveArgumentError(
+                "--latest-scan and --results are mutually exclusive. "
+                "Use --latest-scan to populate the baseline from the most recent scan, "
+                "or use --results to provide explicit expected results."
+            )
 
     @register_callback
     def post_operations(self):

@@ -9,6 +9,7 @@
 # flake8: noqa
 
 from azure.cli.core.aaz import *
+from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
 
 
 @register_command(
@@ -91,7 +92,13 @@ class Create(AAZCommand):
 
     @register_callback
     def pre_operations(self):
-        pass
+        args = self.ctx.args
+        if has_value(args.latest_scan) and bool(args.latest_scan) and has_value(args.results):
+            raise MutuallyExclusiveArgumentError(
+                "--latest-scan and --results are mutually exclusive. "
+                "Use --latest-scan to populate the baseline from the most recent scan, "
+                "or use --results to provide explicit expected results."
+            )
 
     @register_callback
     def post_operations(self):

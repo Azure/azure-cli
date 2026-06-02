@@ -19,10 +19,10 @@ class Show(AAZCommand):
     """Get the scan results of a single rule in a scan record.
 
     :example: Show results for rule VA1234 from a given scan id on an Azure SQL database.
-        az security va sql results show --resource-id /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Sql/servers/{server}/databases/{db} --scan-id Scan_2026-01-01T00-00-00Z --scan-result-id VA1234
+        az security va sql results show --resource-id /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Sql/servers/{server}/databases/{db} --scan-id Scan_2026-01-01T00-00-00Z --rule-id VA1234
 
     :example: Show results for a single rule on an Arc-enabled SQL server.
-        az security va sql results show --resource-id /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.HybridCompute/machines/{arc} --database-name MyDb --scan-id Scan_2026-01-01T00-00-00Z --scan-result-id VA1234
+        az security va sql results show --resource-id /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.HybridCompute/machines/{arc} --database-name MyDb --scan-id Scan_2026-01-01T00-00-00Z --rule-id VA1234
     """
 
     _aaz_info = {
@@ -59,7 +59,7 @@ class Show(AAZCommand):
             required=True,
         )
         _args_schema.scan_result_id = AAZStrArg(
-            options=["--scan-result-id"],
+            options=["--rule-id", "--scan-result-id"],
             help="The rule Id of the results.",
             required=True,
         )
