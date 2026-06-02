@@ -75,7 +75,7 @@ def constructDefaultMaintenanceConfiguration(cmd, raw_parameters):
                 f'{flags} cannot be used for default maintenance configuration.')
         if raw_parameters.get("day_of_week") is None:
             raise RequiredArgumentMissingError('--day-of-week is required for default maintenance configuration when --schedule-type Weekly is specified.')
-        raw_parameters["interval_weeks"] = 1
+        maintenance_window_parameters = {**raw_parameters, "interval_weeks": 1}
         maintenance_configuration_models = AKSManagedClusterModels(cmd, ResourceType.MGMT_CONTAINERSERVICE).maintenance_configuration_models
         MaintenanceConfiguration = (
             maintenance_configuration_models.MaintenanceConfiguration
@@ -83,7 +83,7 @@ def constructDefaultMaintenanceConfiguration(cmd, raw_parameters):
         maintenanceConfiguration = MaintenanceConfiguration()
         # utc_offset and start_date are intentionally not validated here: the RP accepts the full
         # MaintenanceWindow schema (including these optional fields) for all maintenance config types.
-        maintenanceConfiguration.maintenance_window = constructMaintenanceWindow(cmd, raw_parameters)
+        maintenanceConfiguration.maintenance_window = constructMaintenanceWindow(cmd, maintenance_window_parameters)
         return maintenanceConfiguration
 
     # Legacy timeInWeek format

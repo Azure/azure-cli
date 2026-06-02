@@ -367,6 +367,7 @@ class TestAddMaintenanceConfiguration(unittest.TestCase):
         self.assertIsNotNone(result.maintenance_window.schedule)
         self.assertIsNotNone(result.maintenance_window.schedule.weekly)
         self.assertEqual(result.maintenance_window.schedule.weekly.interval_weeks, 1)
+        self.assertIsNone(raw_parameters["interval_weeks"])
         self.assertIsNone(getattr(result, 'time_in_week', None))
 
     def test_add_default_maintenance_configuration_with_utc_offset_and_start_date(self):
