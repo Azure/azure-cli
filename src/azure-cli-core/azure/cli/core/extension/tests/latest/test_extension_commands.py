@@ -14,7 +14,7 @@ from azure.cli.core.util import CLIError
 from azure.cli.core.extension import get_extension, build_extension_path
 from azure.cli.core.extension.operations import (add_extension_to_path, list_extensions, add_extension,
                                                  show_extension, remove_extension, update_extension,
-                                                 list_available_extensions, OUT_KEY_NAME, OUT_KEY_VERSION,
+                                                 list_available_extensions, list_versions, OUT_KEY_NAME, OUT_KEY_VERSION,
                                                  OUT_KEY_METADATA, OUT_KEY_PATH)
 from azure.cli.core.extension._resolve import NoExtensionCandidatesError
 from azure.cli.core.mock import DummyCli
@@ -381,6 +381,31 @@ class TestExtensionCommands(unittest.TestCase):
             self.assertEqual(res[1]['summary'], 'my summary')
             self.assertEqual(res[1]['version'], '0.1.0')
             self.assertEqual(res[1]['preview'], True)
+            self.assertEqual(res[1]['experimental'], True)
+
+    def test_list_versions_preserves_experimental_status(self):
+        sample_index_extensions = {
+            'test_sample_extension': [
+                {
+                    'metadata': {
+                        'name': 'test_sample_extension',
+                        'summary': 'my summary',
+                        'version': '0.1.0'
+                    }
+                },
+                {
+                    'metadata': {
+                        'name': 'test_sample_extension',
+                        'summary': 'my summary',
+                        'version': '0.2.0',
+                        'azext.isExperimental': True
+                    }
+                }
+            ]
+        }
+        with mock.patch('azure.cli.core.extension.operations.get_index_extensions', return_value=sample_index_extensions):
+            res = list_versions('test_sample_extension', cli_ctx=self.cmd.cli_ctx)
+            self.assertEqual(res[0]['experimental'], False)
             self.assertEqual(res[1]['experimental'], True)
 
     def test_list_available_extensions_incompatible_cli_version(self):

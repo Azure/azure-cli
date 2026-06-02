@@ -20,6 +20,7 @@ from azure.cli.core import CommandIndex
 from azure.cli.core.util import CLIError, reload_module, rmtree_with_retry
 from azure.cli.core.extension import (extension_exists, build_extension_path, get_extensions, get_extension_modname,
                                       get_extension, ext_compat_with_cli, is_preview_from_extension_meta,
+                                      is_experimental_from_extension_meta,
                                       WheelExtension, DevExtension, ExtensionNotInstalledException, WHEEL_INFO_RE)
 from azure.cli.core.telemetry import set_extension_management_detail
 
@@ -466,7 +467,7 @@ def list_available_extensions(index_url=None, show_details=False, cli_ctx=None):
             'version': latest['metadata']['version'],
             'summary': latest['metadata']['summary'],
             'preview': is_preview_from_extension_meta(latest['metadata']),
-            'experimental': False,
+            'experimental': is_experimental_from_extension_meta(latest['metadata']),
             'installed': installed
         })
     return results
@@ -503,7 +504,7 @@ def list_versions(extension_name, index_url=None, cli_ctx=None):
             'name': extension_name,
             'version': version,
             'preview': is_preview_from_extension_meta(ext['metadata']),
-            'experimental': False,
+            'experimental': is_experimental_from_extension_meta(ext['metadata']),
             'installed': installed,
             'compatible': compatible
         })
