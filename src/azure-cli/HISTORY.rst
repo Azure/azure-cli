@@ -92,6 +92,14 @@ Release History
 * [BREAKING CHANGE] `az postgres flexible-server backup/db/firewall-rule/long-term-retention/migration/replica create`: Make consistent use of `--name` and `--server-name` across all commands (#33343)
 * [BREAKING CHANGE] `az postgres flexible-server long-term-retention`: Remove support for command group (#33345)
 
+**Security**
+
+* `az security va sql`: [BREAKING CHANGE] Replaced hand-authored SQL Vulnerability Assessment commands with atomic aaz-generated commands targeting API version `2026-04-01-preview`. A single `--resource-id` argument now identifies the assessed resource, replacing the previous combination of `--vm-resource-id`, `--workspace-id`, `--server-name`, `--database-name`, `--vm-name`, `--agent-id`, and `--vm-uuid`. Optional `--database-name` is used only for server-level scopes (e.g. `master`). Supported scopes include Azure SQL Server, Azure SQL Managed Instance, Synapse, Azure VM (SQL on VM), and Arc-enabled SQL servers.
+* `az security va sql`: Add new SQL Vulnerability Assessment settings commands: `create`, `delete`, `show`, `update` for enabling/disabling SQL VA on a resource.
+* `az security va sql baseline`: Add `add` (set baseline for all rules), `create` (single-rule baseline), and `update` commands. Remove `set` command (use `add` instead).
+* `az security va sql scans`: Add `initiate-scan` command to trigger a vulnerability assessment scan, and `scan-operation-result show` to poll the operation result.
+* `az security va sql`: All commands are tagged Preview, matching the underlying API version.
+
 **Storage**
 
 * `az storage account create/update`: Support new value `Smart` for `--access-tier` (#33423)
