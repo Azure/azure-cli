@@ -23,7 +23,7 @@ class Create(AAZCommand):
         az security va sql baseline create --resource-id /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Sql/servers/{server}/databases/{db} --rule-id VA1234 --latest-scan true
 
     :example: Create a baseline for a single rule on an Arc-enabled SQL server with explicit results.
-        az security va sql baseline create --resource-id /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.HybridCompute/machines/{arc} --database-name MyDb --rule-id VA1234 --results "[[col1,col2,col3],[col4,col5,col6]]"
+        az security va sql baseline create --resource-id /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.HybridCompute/machines/{arc} --database-name MyDb --rule-id VA1234 --results '[["col1","col2","col3"],["col4","col5","col6"]]'
     """
 
     _aaz_info = {
