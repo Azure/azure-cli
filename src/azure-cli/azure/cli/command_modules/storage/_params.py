@@ -190,8 +190,39 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     allow_shared_key_access_type = CLIArgumentType(
         arg_type=get_three_state_flag(), options_list=['--allow-shared-key-access', '-k'],
+        arg_group='Shared Key Access',
         help='Indicate whether the storage account permits requests to be authorized with the account access key via '
-             'Shared Key. If false, then all requests, including shared access signatures, must be authorized with '
+             'Shared Key to the blob service. If false, then all requests, including shared access signatures, must be authorized with '
+             'Azure Active Directory (Azure AD). The default value is null, which is equivalent to true.')
+
+    allow_shared_key_access_for_blob_type = CLIArgumentType(
+        arg_type=get_three_state_flag(), options_list=['--allow-shared-key-access-for-blob', '--shared-key-blob'],
+        arg_group='Shared Key Access',
+        help='Indicate whether the storage account permits requests to the blob service to be authorized with the '
+             'account access key via Shared Key. '
+             'If false, then all requests, including shared access signatures, must be authorized with '
+             'Azure Active Directory (Azure AD). The default value is null, which is equivalent to true.')
+    allow_shared_key_access_for_file_type = CLIArgumentType(
+        arg_type=get_three_state_flag(), options_list=['--allow-shared-key-access-for-file', '--shared-key-file'],
+        arg_group='Shared Key Access',
+        help='Indicate whether the storage account permits requests to the file service to be authorized with the '
+             'account access key via Shared Key. '
+             'If false, then all requests, including shared access signatures, must be authorized with '
+             'Azure Active Directory (Azure AD). The default value is null, which is equivalent to true.')
+    allow_shared_key_access_for_table_type = CLIArgumentType(
+        arg_type=get_three_state_flag(), options_list=['--allow-shared-key-access-for-table', '--shared-key-table'],
+        arg_group='Shared Key Access',
+        help='Indicate whether the storage account permits requests to the table service be authorized with the '
+             'account access key via Shared Key. '
+             'If false, then all requests, including shared access signatures, must be authorized with '
+             'Azure Active Directory (Azure AD). The default value is null, which is equivalent to true.')
+
+    allow_shared_key_access_for_queue_type = CLIArgumentType(
+        arg_type=get_three_state_flag(), options_list=['--allow-shared-key-access-for-queue', '--shared-key-queue'],
+        arg_group='Shared Key Access',
+        help='Indicate whether the storage account permits requests to the queue service be authorized with the '
+             'account access key via Shared Key. '
+             'If false, then all requests, including shared access signatures, must be authorized with '
              'Azure Active Directory (Azure AD). The default value is null, which is equivalent to true.')
 
     sas_expiration_period_type = CLIArgumentType(
@@ -450,6 +481,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('allowed_copy_scope', arg_type=get_enum_type(t_allowed_copy_scope),
                    help='Restrict copy to and from Storage Accounts within an AAD tenant or with Private Links to the '
                         'same VNet.')
+        c.argument('allow_shared_key_access_for_blob', allow_shared_key_access_for_blob_type)
+        c.argument('allow_shared_key_access_for_file', allow_shared_key_access_for_file_type)
+        c.argument('allow_shared_key_access_for_table', allow_shared_key_access_for_table_type)
+        c.argument('allow_shared_key_access_for_queue', allow_shared_key_access_for_queue_type)
 
     with self.argument_context('storage account private-endpoint-connection',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
@@ -556,6 +591,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('allowed_copy_scope', arg_type=get_enum_type(t_allowed_copy_scope),
                    help='Restrict copy to and from Storage Accounts within an AAD tenant or with Private Links to the '
                         'same VNet.')
+        c.argument('allow_shared_key_access_for_blob', allow_shared_key_access_for_blob_type)
+        c.argument('allow_shared_key_access_for_file', allow_shared_key_access_for_file_type)
+        c.argument('allow_shared_key_access_for_table', allow_shared_key_access_for_table_type)
+        c.argument('allow_shared_key_access_for_queue', allow_shared_key_access_for_queue_type)
 
     for scope in ['storage account create', 'storage account update']:
         with self.argument_context(scope, arg_group='Customer managed key',
