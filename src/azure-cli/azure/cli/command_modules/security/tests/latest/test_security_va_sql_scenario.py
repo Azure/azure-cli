@@ -398,6 +398,175 @@ class SecurityVaSqlScenarioTest(ScenarioTest):
         # ---- Cleanup: disable VA on the server -------------------------------------
         self.cmd('security va sql delete --resource-id {srv_id} --yes')
 
+    @AllowLargeResponse(size_kb=4096)
+    def test_security_va_sql_arc_lifecycle(self):
+        """Arc-enabled SQL path (IaaS-flavor) against a *pre-existing* resource.
+
+        Arc-enabled SQL Server uses a different resource hierarchy than Azure SQL
+        PaaS but the same Microsoft.Security extension routes apply::
+
+          srv_id = /subscriptions/.../Microsoft.HybridCompute/machines/{arc}/sqlServers/{srv}
+          db_id  = {srv_id}/databases/{db}
+
+        On Arc, **the following commands are NOT supported** by the RP and return
+        404 -- so they are deliberately excluded from this test:
+
+          * ``security va sql {create,show,update,delete}`` -- settings singleton
+          * ``security va sql scans initiate-scan``         -- scans are
+                                                              auto-scheduled by
+                                                              the Arc SQL agent
+                                                              (MicrosoftDefenderForSQL
+                                                              extension)
+          * ``security va sql scans scan-operation-result show`` -- no on-demand
+                                                                    scan to poll
+
+        Read-only and baseline mutation flows ARE supported. This test
+        therefore exercises:
+
+          * scans (show via ``--scan-id latest`` + list)
+          * results (list + show via both --rule-id and --scan-result-id)
+          * baseline (create + show + delete on a *single* rule that is NOT
+            already baselined, so we never touch the user's existing baselines)
+
+        Setup: this test targets a fixed real resource (the agent must be
+        installed and reporting scans). We do NOT use ``ResourceGroupPreparer``
+        -- the RG is pre-existing and we never create or delete any Arc/SQL
+        infra. The only mutation is creating then deleting one baseline entry.
+
+        Re-recording: requires ``az account set --subscription
+        cca24ec8-99b5-4aa7-9ff6-486e886f304c`` and the galLaptop Arc SQL agent
+        to be reporting at least one completed scan. After recording, anonymize
+        the subscription id in the cassette (see paas_lifecycle for the
+        recipe).
+        """
+        # Use ``self.get_subscription_id()`` rather than hardcoding the real
+        # subscription id: during live recording it returns the currently
+        # active subscription (the user must ``az account set --subscription
+        # cca24ec8-99b5-4aa7-9ff6-486e886f304c`` first), and during replay it
+        # returns the testsdk's mock subscription (matching the anonymized
+        # cassette). Hardcoding the real sub would break replay because the
+        # cassette URLs are anonymized.
+        srv_id = (
+            '/subscriptions/{0}'
+            '/resourceGroups/ggoldshtein'
+            '/providers/Microsoft.HybridCompute/machines/galLaptop'
+            '/sqlServers/SQLEXPRESS'
+        ).format(self.get_subscription_id())
+        self.kwargs.update({
+            'srv_id': srv_id,
+            'db_id': srv_id + '/databases/master',
+        })
+
+        # ---- Step 1: scans show --scan-id latest -----------------------------------
+        scan = self.cmd(
+            'security va sql scans show --resource-id {db_id} --scan-id latest'
+        ).get_output_in_json()
+        assert scan.get('name'), 'Arc scans show should return a scan record with a name'
+        assert scan.get('properties', {}).get('totalRulesCount', 0) >= 1, \
+            'Arc scan record should report at least one rule'
+        self.kwargs['scan_id'] = scan['name']
+
+        # ---- Step 2: scans list ----------------------------------------------------
+        scans = self.cmd(
+            'security va sql scans list --resource-id {db_id}'
+        ).get_output_in_json()
+        assert isinstance(scans, list) and len(scans) >= 1, \
+            'Arc scans list should include at least the latest scan'
+
+        # ---- Step 3: snapshot pre-existing baselines (so we can avoid them) -------
+        # NOTE: the service returns a 404 ``NoBaseline`` when zero baselines
+        # exist on the DB (instead of an empty list). The aaz codegen surfaces
+        # that as ``ResourceNotFoundError``. We treat it as "empty set" here.
+        try:
+            existing_baselines = self.cmd(
+                'security va sql baseline list --resource-id {db_id}'
+            ).get_output_in_json()
+        except Exception as ex:  # pylint: disable=broad-except
+            if 'NoBaseline' in str(ex) or 'No baseline have been found' in str(ex):
+                existing_baselines = []
+            else:
+                raise
+        if not isinstance(existing_baselines, list):
+            existing_baselines = []
+        existing_rule_ids = {b['name'] for b in existing_baselines if 'name' in b}
+
+        # ---- Step 4: results list --------------------------------------------------
+        results = self.cmd(
+            'security va sql results list --resource-id {db_id} --scan-id latest'
+        ).get_output_in_json()
+        assert isinstance(results, list) and len(results) >= 1, \
+            'Arc results list should return entries for the latest scan'
+        # Pick the first rule that:
+        #   1. Has status == 'Finding' (NonFinding/Failed rules have empty
+        #      queryResults; the service returns 400 ``EmptyBaseline`` when you
+        #      try to create a baseline from --latest-scan on such a rule), AND
+        #   2. Does NOT already have a baseline on this machine -- this
+        #      guarantees the baseline-create/delete pair is a round-trip and
+        #      we never overwrite the user's real baselines.
+        candidate = next(
+            (r for r in results
+             if r.get('name')
+             and r.get('properties', {}).get('status') == 'Finding'
+             and r['name'] not in existing_rule_ids),
+            None,
+        )
+        assert candidate is not None, \
+            ('Could not find a scan rule with status="Finding" that is not '
+             'already baselined; the test DB has no baselineable rules')
+        rule_id = candidate['name']
+        self.kwargs['rule_id'] = rule_id
+
+        # ---- Step 5: results show via --rule-id (preferred alias) -----------------
+        self.cmd(
+            'security va sql results show --resource-id {db_id} '
+            '--scan-id latest --rule-id {rule_id}',
+            checks=[JMESPathCheck('properties.ruleMetadata.ruleId', rule_id)],
+        )
+
+        # ---- Step 6: results show via --scan-result-id (legacy alias) -------------
+        self.cmd(
+            'security va sql results show --resource-id {db_id} '
+            '--scan-id latest --scan-result-id {rule_id}',
+            checks=[JMESPathCheck('properties.ruleMetadata.ruleId', rule_id)],
+        )
+
+        # ---- Step 7: baseline create (single rule, from latest scan) --------------
+        # Using --latest-scan instead of --results avoids guessing the rule's
+        # expected-results schema and keeps the test recording stable.
+        self.cmd(
+            'security va sql baseline create --resource-id {db_id} '
+            '--rule-id {rule_id} --latest-scan true',
+            checks=[JMESPathCheck('name', rule_id)],
+        )
+
+        # ---- Step 8: baseline show (verify created) -------------------------------
+        self.cmd(
+            'security va sql baseline show --resource-id {db_id} --rule-id {rule_id}',
+            checks=[JMESPathCheck('name', rule_id)],
+        )
+
+        # ---- Step 9: baseline delete (CLEANUP -- restore the user's prior state) --
+        self.cmd(
+            'security va sql baseline delete --resource-id {db_id} '
+            '--rule-id {rule_id} --yes'
+        )
+
+        # ---- Step 10: baseline show after delete -- should 404 --------------------
+        self.cmd(
+            'security va sql baseline show --resource-id {db_id} --rule-id {rule_id}',
+            expect_failure=True,
+        )
+
+        # ---- Step 11: results show after baseline removed -------------------------
+        # The same scan results call still returns 200 (the underlying scan data
+        # is unchanged); just verifies the read path is independent of baseline
+        # state.
+        self.cmd(
+            'security va sql results show --resource-id {db_id} '
+            '--scan-id latest --rule-id {rule_id}',
+            checks=[JMESPathCheck('properties.ruleMetadata.ruleId', rule_id)],
+        )
+
     def test_security_va_sql_negative(self):
         """Negative-path coverage that doesn't need any cloud resources.
 
