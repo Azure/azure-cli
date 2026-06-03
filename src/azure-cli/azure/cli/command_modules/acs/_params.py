@@ -1050,7 +1050,7 @@ def load_arguments(self, _):
             c.argument('weekday', help='Weekday on which maintenance can happen. e.g. Monday')
             c.argument('start_hour', type=int, help='Maintenance start hour of 1 hour window on the weekday. e.g. 1 means 1:00am - 2:00am')
             c.argument('schedule_type', arg_type=get_enum_type(schedule_types),
-                       help='Schedule type for non-default maintenance configuration.')
+                       help='Schedule type for maintenance configuration. For default configuration, only Weekly is supported.')
             c.argument('interval_days', type=int, help='The number of days between each set of occurrences for Daily schedule.')
             c.argument('interval_weeks', type=int, help='The number of weeks between each set of occurrences for Weekly schedule.')
             c.argument('interval_months', type=int, help='The number of months between each set of occurrences for AbsoluteMonthly or RelativeMonthly schedule.')
