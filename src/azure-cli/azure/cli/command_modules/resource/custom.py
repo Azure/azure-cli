@@ -23,7 +23,7 @@ from azure.mgmt.resource.resources.models import GenericResource
 from azure.mgmt.resource.deployments.models import DeploymentMode
 import azure.mgmt.resource.deploymentstacks.models as StackModels
 
-from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueError, ResourceNotFoundError
+from azure.cli.core.azclierror import ArgumentUsageError, InvalidArgumentValueError, ResourceNotFoundError, ValidationError
 from azure.cli.core.parser import IncorrectUsageError
 from azure.cli.core.util import get_file_json, read_file_content, shell_safe_json_parse, sdk_no_wait
 from azure.cli.core.commands import LongRunningOperation
@@ -4578,6 +4578,63 @@ def lint_bicep_file(cmd, file, no_restore=None, diagnostics_format=None):
         print(output)
     else:
         logger.error("az bicep lint could not be executed with the current version of Bicep CLI. Please upgrade Bicep CLI to v%s or later.", minimum_supported_version)
+
+
+def snapshot_bicep_file(cmd, file, mode=None, tenant_id=None, subscription_id=None,
+                        management_group_id=None, location=None, resource_group=None,
+                        deployment_name=None):
+    ensure_bicep_installation(cmd.cli_ctx, stdout=False)
+
+    minimum_supported_version = "0.41.2"
+    if bicep_version_greater_than_or_equal_to(cmd.cli_ctx, minimum_supported_version):
+        args = ["snapshot", file]
+        if mode:
+            args += ["--mode", mode]
+        if tenant_id:
+            args += ["--tenant-id", tenant_id]
+        if subscription_id:
+            args += ["--subscription-id", subscription_id]
+        if management_group_id:
+            args += ["--management-group-id", management_group_id]
+        if location:
+            args += ["--location", location]
+        if resource_group:
+            args += ["--resource-group", resource_group]
+        if deployment_name:
+            args += ["--deployment-name", deployment_name]
+
+        output = run_bicep_command(cmd.cli_ctx, args)
+
+        if output:
+            print(output)
+    else:
+        raise ValidationError(
+            f"az bicep snapshot could not be executed with the current version of Bicep CLI. "
+            f"Please upgrade Bicep CLI to v{minimum_supported_version} or later."
+        )
+
+
+def run_bicep_cli_passthrough(cmd, command_string):
+    import shlex
+
+    ensure_bicep_installation(cmd.cli_ctx, stdout=False)
+
+    # Use non-POSIX mode so that backslashes in Windows paths are preserved.
+    # In non-POSIX mode, shlex retains the surrounding quotes on quoted tokens,
+    # so strip them so the values are passed through cleanly to the Bicep CLI.
+    args = []
+    for token in shlex.split(command_string, posix=False):
+        if len(token) >= 2 and token[0] in ('"', "'") and token[0] == token[-1]:
+            token = token[1:-1]
+        args.append(token)
+
+    if not args:
+        raise InvalidArgumentValueError("--command must not be empty.")
+
+    output = run_bicep_command(cmd.cli_ctx, args)
+
+    if output:
+        print(output)
 
 
 def create_resourcemanager_privatelink(

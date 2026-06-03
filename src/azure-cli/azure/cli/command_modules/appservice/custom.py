@@ -824,6 +824,9 @@ def check_flex_app_after_deployment(cmd, resource_group_name, name):
                                 verify=not should_disable_connection_verify())
         if 200 <= response.status_code <= 299:
             break
+        if response.status_code == 403 and response.reason == 'Ip Forbidden':
+            return "Deployment was successful but health check failed due to IP restriction."
+        num_trials = num_trials + 1
 
     if response.status_code != 200:
         raise CLIError("Deployment was successful but the app appears to be unhealthy. Please "
@@ -4976,12 +4979,18 @@ def is_async_response(poller, timeout_seconds=30):
     return status_code == 202
 
 
-def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, per_site_scaling=False,
+def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, per_site_scaling=False,  # pylint: disable=too-many-branches
                             app_service_environment=None, sku=None, number_of_workers=None, location=None,
                             tags=None, no_wait=False, zone_redundant=False, async_scaling_enabled=None,
                             is_managed_instance=None, mi_system_assigned=None, mi_user_assigned=None,
                             default_identity=None, rdp_enabled=None, vnet=None, subnet=None,
                             registry_adapters=None, install_scripts=None, storage_mounts=None):
+    if is_linux is None:
+        is_linux = not hyper_v
+    elif is_linux and hyper_v:
+        raise MutuallyExclusiveArgumentError('--hyper-v creates a Windows container plan and cannot be combined '
+                                             'with --is-linux true. Omit --is-linux or use "--is-linux false".')
+
     if sku is None:
         sku = 'P0V3' if is_linux else 'B1'
 
@@ -5070,6 +5079,9 @@ has been deployed ".format(app_service_environment)
             args = self.ctx.args
             args.no_wait = no_wait
 
+    os_type = 'Linux' if is_linux else ('Hyper-V' if hyper_v else 'Windows')
+    logger.warning("Creating App Service Plan '%s' (%s, SKU: %s).", name, os_type, sku)
+
     poller = AppServicePlanCreateWithNoWait(cli_ctx=cmd.cli_ctx)(command_args={
         "name": name,
         "resource_group": resource_group_name,
@@ -5094,9 +5106,6 @@ has been deployed ".format(app_service_environment)
         "install_scripts": install_scripts,
         "storage_mounts": storage_mounts,
     })
-
-    os_type = 'Linux' if is_linux else ('Hyper-V' if hyper_v else 'Windows')
-    logger.warning("Creating App Service Plan '%s' (%s).", name, os_type)
 
     if no_wait:
         return poller.result()
