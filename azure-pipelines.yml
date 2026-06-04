@@ -25,7 +25,7 @@ variables:
 
 # macOS Cask parameters
 - name: macos_cask_python_version
-  value: '3.13'
+  value: '3.14'
 
 parameters:
 - name: architectures
@@ -137,9 +137,9 @@ jobs:
 
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.13'
+    displayName: 'Use Python 3.14'
     inputs:
-      versionSpec: 3.13
+      versionSpec: '3.14'
 
   - bash: ./scripts/ci/dependency_check.sh
     displayName: 'Verify src/azure-cli/requirements.py3.Linux.txt'
@@ -152,9 +152,9 @@ jobs:
 
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.13'
+    displayName: 'Use Python 3.14'
     inputs:
-      versionSpec: 3.13
+      versionSpec: '3.14'
 
   - bash: ./scripts/ci/dependency_check.sh
     displayName: 'Verify src/azure-cli/requirements.py3.Darwin.txt'
@@ -167,9 +167,9 @@ jobs:
 
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.13'
+    displayName: 'Use Python 3.14'
     inputs:
-      versionSpec: 3.13
+      versionSpec: '3.14'
 
   - task: BatchScript@1
     inputs:
@@ -184,9 +184,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.13'
+    displayName: 'Use Python 3.14'
     inputs:
-      versionSpec: 3.13
+      versionSpec: '3.14'
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -439,9 +439,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.13'
+    displayName: 'Use Python 3.14'
     inputs:
-      versionSpec: 3.13
+      versionSpec: '3.14'
 
   - task: PipAuthenticate@1
     condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/release')
@@ -476,8 +476,8 @@ jobs:
     matrix:
       Python312:
         python.version: '3.12'
-      Python313:
-        python.version: '3.13'
+      Python314:
+        python.version: '3.14'
   dependsOn: BuildPythonWheel
   condition: succeeded()
   pool:
@@ -516,8 +516,8 @@ jobs:
     matrix:
       Python312:
         python.version: '3.12'
-      Python313:
-        python.version: '3.13'
+      Python314:
+        python.version: '3.14'
   steps:
   - template: .azure-pipelines/templates/automation_test.yml
     parameters:
@@ -533,8 +533,8 @@ jobs:
     matrix:
       Python312:
         python.version: '3.12'
-      Python313:
-        python.version: '3.13'
+      Python314:
+        python.version: '3.14'
   steps:
   - template: .azure-pipelines/templates/automation_test.yml
     parameters:
@@ -553,8 +553,8 @@ jobs:
     matrix:
       Python312:
         python.version: '3.12'
-      Python313:
-        python.version: '3.13'
+      Python314:
+        python.version: '3.14'
   steps:
   - task: UsePythonVersion@0
     displayName: 'Use Python $(python.version)'
@@ -574,8 +574,8 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   strategy:
     matrix:
-      Python313:
-        python.version: '3.13'
+      Python314:
+        python.version: '3.14'
   steps:
   - task: UsePythonVersion@0
     displayName: 'Use Python $(python.version)'
@@ -667,7 +667,7 @@ jobs:
       set -ev
       # Force relink python@3.xx in Homebrew to resolve the conflict with pre-installed python 3.xx on macOS-12 image
       # See: https://github.com/Azure/azure-cli/issues/29054
-      python_version=3.13
+      python_version=3.14
       brew unlink python@$python_version && brew link --overwrite python@$python_version
       
       echo == Remove pre-installed azure-cli ==
@@ -1087,9 +1087,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.13'
+    displayName: 'Use Python 3.14'
     inputs:
-      versionSpec: 3.13
+      versionSpec: '3.14'
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -1104,9 +1104,9 @@ jobs:
     name: ${{ variables.ubuntu_multi_core_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.13'
+    displayName: 'Use Python 3.14'
     inputs:
-      versionSpec: 3.13
+      versionSpec: '3.14'
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -1120,9 +1120,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.13'
+    displayName: 'Use Python 3.14'
     inputs:
-      versionSpec: 3.13
+      versionSpec: '3.14'
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -1137,8 +1137,8 @@ jobs:
     matrix:
       Python312:
         python.version: '3.12'
-      Python313:
-        python.version: '3.13'
+      Python314:
+        python.version: '3.14'
   pool:
     name: ${{ variables.ubuntu_pool }}
   steps:
@@ -1166,9 +1166,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
     - task: UsePythonVersion@0
-      displayName: 'Use Python 3.13'
+      displayName: 'Use Python 3.14'
       inputs:
-        versionSpec: 3.13
+        versionSpec: '3.14'
     - bash: |
         #!/usr/bin/env bash
         set -ev
@@ -1184,9 +1184,9 @@ jobs:
     name: ${{ variables.ubuntu_multi_core_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.13'
+    displayName: 'Use Python 3.14'
     inputs:
-      versionSpec: 3.13
+      versionSpec: '3.14'
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -1207,9 +1207,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
     - task: UsePythonVersion@0
-      displayName: 'Use Python 3.13'
+      displayName: 'Use Python 3.14'
       inputs:
-        versionSpec: 3.13
+        versionSpec: '3.14'
     - template: .azure-pipelines/templates/azdev_setup.yml
     - bash: |
         set -ev
@@ -1242,7 +1242,7 @@ jobs:
   - task: UsePythonVersion@0
     displayName: 'Use Python 3.11'
     inputs:
-      versionSpec: 3.11
+      versionSpec: '3.11'
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
