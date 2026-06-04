@@ -9,7 +9,7 @@ from knack.help_files import helps  # pylint: disable=unused-import
 
 helps['find'] = """
 type: command
-short-summary: I'm an AI robot, my advice is based on our Azure documentation as well as the usage patterns of Azure CLI and Azure ARM users. Using me improves Azure products and documentation.
+short-summary: I'm an AI assistant, my advice is based on Microsoft Learn documentation as well as the usage patterns of Azure CLI and Azure ARM users. Using me improves Azure products and documentation.
 examples:
   - name: Give me any Azure CLI group and I’ll show the most popular commands within the group.
     text: |
