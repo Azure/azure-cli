@@ -137,6 +137,7 @@ Release History
 * `az webapp create`: Add error message that clearly lists all valid options and specifies how to discover available runtimes (#33252)
 * `az appservice plan create`: Make `P0V3` as default SKU when `--sku` is omitted for linux webapp (#33237)
 * `az appservice plan create`: Add `PREMIUM0V3` tier for elastic scale (#33237)
+* Fix #33379: `az functionapp config appsettings set`: Stop emitting a misleading "Invalid version" warning for Java/.NET runtime versions stored without a matching decimal suffix (e.g. `Java|21` vs API `21.0`, or `8.0` vs API `8`); normalize between the two forms instead of using a hardcoded version map
 
 **Cloud**
 
