@@ -653,10 +653,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
         image = _show_vm_image(cmd, namespace)
 
         os_system = image.get('osDiskImage', {}).get('operatingSystem', '')
-        if 'windows' in os_system.lower():
-            namespace.os_type = 'windows'
-        else:
-            namespace.os_type = 'linux'
+        namespace.os_type = os_system.lower()
 
     if getattr(namespace, 'source_snapshots_or_disks', None) and \
             getattr(namespace, 'source_snapshots_or_disks_size_gb', None):
