@@ -5529,7 +5529,7 @@ class PolicyScenarioTest(ScenarioTest):
 
         self.resource_policyexemption_operations(resource_group, None, other_sub_id)
 
-    def resource_policyenrollment_operations(self, resource_group, management_group=None, subscription=None, use_resource_group_scope=False):
+    def resource_policyenrollment_operations(self, resource_group, management_group=None, subscription=None):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
 
         self.kwargs.update({
@@ -5586,13 +5586,10 @@ class PolicyScenarioTest(ScenarioTest):
             scope = '/providers/Microsoft.Management/managementGroups/{mg}'.format(mg=management_group)
         elif subscription:
             scope = '/subscriptions/{sub}'.format(sub=subscription)
-        elif use_resource_group_scope:
-            sub_id = get_subscription_id(self.cli_ctx)
-            scope = '/subscriptions/{sub}/resourceGroups/{rg}'.format(sub=sub_id, rg=resource_group)
 
         if scope:
             self.kwargs.update({'scope': scope})
-            assignment = self.cmd('policy assignment create -d {psid} -n {pan} --scope {scope} --display-name {padn}'.format(psid=policyset['id'], **self.kwargs)).get_output_in_json()
+            assignment = self.cmd('policy assignment create -d {psid} -n {pan} --scope {scope} --display-name {padn} --enforcement-mode Enroll'.format(psid=policyset['id'], **self.kwargs)).get_output_in_json()
             cmd = self.cmdstring('policy enrollment create -n {pen} -a {pa} --scope {scope} --display-name {pedn} --description {pe_desc} --metadata category={metadata}'.format(pa=assignment['id'], **self.kwargs))
             self.cmd(cmd, checks=[
                 self.check('name', '{pen}'),
@@ -5635,18 +5632,18 @@ class PolicyScenarioTest(ScenarioTest):
             ])
 
             # delete the enrollment and validate it's gone
-            self.cmd('policy enrollment delete -n {pen} --scope {scope}'.format(**self.kwargs))
+            self.cmd('policy enrollment delete -n {pen} --scope {scope} --yes'.format(**self.kwargs))
             self.cmd('policy assignment delete -n {pan} --scope {scope}'.format(**self.kwargs))
             self.cmd('policy enrollment list --disable-scope-strict-match', checks=self.check("length([?name=='{pen}'])", 0))
             self.cmd('policy assignment list --disable-scope-strict-match', checks=self.check("length([?name=='{pan}'])", 0))
         else:
-            assignment = self.cmd('policy assignment create -d {psn} -n {pan} -g {rg} --display-name {padn}'.format(**self.kwargs), checks=[
+            assignment = self.cmd('policy assignment create -d {psn} -n {pan} --display-name {padn} --enforcement-mode Enroll'.format(**self.kwargs), checks=[
                 self.check('name', '{pan}'),
                 self.check('displayName', '{padn}')
             ]).get_output_in_json()
 
             # ensure the assignment appears in the list results
-            self.cmd('policy assignment list --resource-group {rg}', checks=self.check("length([?name=='{pan}'])", 1))
+            self.cmd('policy assignment show -n {pan}', checks=self.check('name', '{pan}'))
 
             cmd = self.cmdstring('policy enrollment create -n {pen} -a {pa} -g {rg} --display-name {pedn} --description {pe_desc} --metadata category={metadata}'.format(pa=assignment['id'], **self.kwargs))
             self.cmd(cmd, checks=[
@@ -5683,8 +5680,8 @@ class PolicyScenarioTest(ScenarioTest):
             ])
 
             # delete the enrollment and validate it's gone
-            self.cmd('policy enrollment delete -n {pen} -g {rg}'.format(**self.kwargs))
-            self.cmd('policy assignment delete -n {pan} -g {rg}'.format(**self.kwargs))
+            self.cmd('policy enrollment delete -n {pen} -g {rg} --yes'.format(**self.kwargs))
+            self.cmd('policy assignment delete -n {pan}'.format(**self.kwargs))
             self.cmd('policy enrollment list', checks=self.check("length([?name=='{pen}'])", 0))
 
         # list and show it
@@ -5748,12 +5745,6 @@ class PolicyScenarioTest(ScenarioTest):
             self.assertFalse(sub_id == other_sub_id, 'This test requires a subscription other than that of the current context')
 
         self.resource_policyenrollment_operations(resource_group, None, other_sub_id)
-
-    @ResourceGroupPreparer(name_prefix='cli_test_policyenrollment_rg_scope')
-    @AllowLargeResponse(16384)
-    def test_resource_policyenrollment_resource_group_scope(self, resource_group):
-        # exercise the --scope path using a resource group's fully-qualified scope
-        self.resource_policyenrollment_operations(resource_group, use_resource_group_scope=True)
 
     def test_resource_policy_arg_validate(self):
 

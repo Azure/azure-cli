@@ -1229,7 +1229,7 @@ class PolicyEnrollmentCreate(EnrollmentCreate):
         Common.GenerateNameIfNone(self.ctx)
 
     def post_operations(self):
-        Common.AdjustUTCFormat(self.ctx.vars.instance)
+        pass
 
 
 class PolicyEnrollmentDelete(EnrollmentDelete):
@@ -1306,9 +1306,7 @@ class PolicyEnrollmentList(EnrollmentList):
         self.post_operations()
 
     def post_operations(self):
-        listing = self.ctx.vars.instance.value
-        for item in listing:
-            Common.AdjustUTCFormat(item)
+        pass
 
 
 class PolicyEnrollmentShow(EnrollmentShow):
@@ -1327,7 +1325,7 @@ class PolicyEnrollmentShow(EnrollmentShow):
         Common.PopulateScopeFromContext(self.ctx, self.cli_ctx)
 
     def post_operations(self):
-        Common.AdjustUTCFormat(self.ctx.vars.instance)
+        pass
 
 
 class PolicyEnrollmentUpdate(EnrollmentUpdate):
@@ -1347,7 +1345,7 @@ class PolicyEnrollmentUpdate(EnrollmentUpdate):
         Common.PopulateScopeFromContext(self.ctx, self.cli_ctx)
 
     def post_operations(self):
-        Common.AdjustUTCFormat(self.ctx.vars.instance)
+        pass
 
 
 class PolicyExemptionCreate(ExemptionCreate):
