@@ -15,7 +15,9 @@ from azure.cli.core.aaz import *
     "policy set-definition version update",
 )
 class Update(AAZCommand):
-    """Update operation creates or updates a policy set definition version in the given management group with the given name and version.
+    """Update a policy set definition version.
+
+    Update the policy set definition version in the given subscription or management group with the given name and version by applying the given properties.
 
     :example: Update a policy set definition version
         az az policy set-definition version update -n readOnlyStorage --display-name "Updated display name goes here"

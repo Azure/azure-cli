@@ -26,7 +26,7 @@ class Create(AAZCommand):
         az policy enrollment create -n enrollTestVm --policy-assignment "/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policyAssignments/limitVMSku" --resource-group MyResourceGroup
 
     :example: Create a policy enrollment in the management group
-        az az policy enrollment create -n enrollTestVm --policy-assignment "/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policyAssignments/limitVMSku" --scope "/providers/Microsoft.Management/managementGroups/{managementGroupName}"
+        az policy enrollment create -n enrollTestVm --policy-assignment "/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policyAssignments/limitVMSku" --scope "/providers/Microsoft.Management/managementGroups/{managementGroupName}"
     """
 
     _aaz_info = {

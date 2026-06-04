@@ -17,7 +17,7 @@ from azure.cli.core.aaz import *
 class __CMDGroup(AAZCommandGroup):
     """Manage policy enrollments.
 
-    Policy exemptions specify resources that a policy assignment on 'Enroll' mode applies to.
+    Policy enrollments specify resources that a policy assignment on 'Enroll' mode applies to.
     """
     pass
 

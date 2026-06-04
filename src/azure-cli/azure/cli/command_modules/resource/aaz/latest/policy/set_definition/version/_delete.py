@@ -16,7 +16,9 @@ from azure.cli.core.aaz import *
     confirmation="Are you sure you want to perform this operation?",
 )
 class Delete(AAZCommand):
-    """Delete operation deletes the policy set definition version in the given management group with the given name and version.
+    """Delete a policy set definition version.
+
+    Delete the policy set definition version in the given subscription or management group with the given name and other properties.
 
     :example: Delete a policy set definition version
         az policy set-definition version delete --name CostManagement --version 1.2.1

@@ -15,7 +15,9 @@ from azure.cli.core.aaz import *
     "policy set-definition version show",
 )
 class Show(AAZCommand):
-    """Get operation retrieves the policy set definition version in the given management group with the given name and version.
+    """Retrieves a policy set definition version.
+
+    Retrieve and show the details of the policy set definition version in the given subscription or management group with the given name and version.
 
     :example: Retrieve a policy set definition version
         az policy set-definition version show --name CostManagement --version 1.2.1

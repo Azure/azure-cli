@@ -15,7 +15,9 @@ from azure.cli.core.aaz import *
     "policy set-definition version create",
 )
 class Create(AAZCommand):
-    """Create operation creates or updates a policy set definition version in the given management group with the given name and version.
+    """Create a policy set definition version.
+
+    Create a policy set definition version in the given subscription or management group with the given name and other properties.
 
     :example: Create a policy set definition with older version
         az policy set-definition version create -n readOnlyStorage --definitions "[ { 'policyDefinitionId': '/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policyDefinitions/{policyDefinitionName}' } ]" --version 1.1.0
