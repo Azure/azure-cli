@@ -18,17 +18,15 @@ from azure.cli.core.aaz import *
 class List(AAZCommand):
     """List Fleet resources by subscription ID and resource group
 
-    List Fleet resources by subscription ID and resource group
-
     :example: Fleets_ListBySubscription
         az azure-fleet list
     """
 
     _aaz_info = {
-        "version": "2024-11-01",
+        "version": "2026-04-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.azurefleet/fleets", "2024-11-01"],
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.azurefleet/fleets", "2024-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.azurefleet/fleets", "2026-04-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.azurefleet/fleets", "2026-04-01-preview"],
         ]
     }
 
@@ -119,7 +117,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-11-01",
+                    "api-version", "2026-04-01-preview",
                     required=True,
                 ),
             }
@@ -237,10 +235,14 @@ class List(AAZCommand):
             properties.additional_locations_profile = AAZObjectType(
                 serialized_name="additionalLocationsProfile",
             )
+            properties.capacity_type = AAZStrType(
+                serialized_name="capacityType",
+            )
             properties.compute_profile = AAZObjectType(
                 serialized_name="computeProfile",
                 flags={"required": True},
             )
+            properties.mode = AAZStrType()
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
@@ -262,9 +264,15 @@ class List(AAZCommand):
             properties.vm_attributes = AAZObjectType(
                 serialized_name="vmAttributes",
             )
+            properties.vm_name_prefix = AAZStrType(
+                serialized_name="vmNamePrefix",
+            )
             properties.vm_sizes_profile = AAZListType(
                 serialized_name="vmSizesProfile",
                 flags={"required": True},
+            )
+            properties.zone_allocation_policy = AAZObjectType(
+                serialized_name="zoneAllocationPolicy",
             )
 
             additional_locations_profile = cls._schema_on_200.value.Element.properties.additional_locations_profile
@@ -436,6 +444,24 @@ class List(AAZCommand):
                 flags={"required": True},
             )
             _element.rank = AAZIntType()
+
+            zone_allocation_policy = cls._schema_on_200.value.Element.properties.zone_allocation_policy
+            zone_allocation_policy.distribution_strategy = AAZStrType(
+                serialized_name="distributionStrategy",
+                flags={"required": True},
+            )
+            zone_allocation_policy.zone_preferences = AAZListType(
+                serialized_name="zonePreferences",
+            )
+
+            zone_preferences = cls._schema_on_200.value.Element.properties.zone_allocation_policy.zone_preferences
+            zone_preferences.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.zone_allocation_policy.zone_preferences.Element
+            _element.rank = AAZIntType()
+            _element.zone = AAZStrType(
+                flags={"required": True},
+            )
 
             system_data = cls._schema_on_200.value.Element.system_data
             system_data.created_at = AAZStrType(
@@ -505,7 +531,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-11-01",
+                    "api-version", "2026-04-01-preview",
                     required=True,
                 ),
             }
@@ -623,10 +649,14 @@ class List(AAZCommand):
             properties.additional_locations_profile = AAZObjectType(
                 serialized_name="additionalLocationsProfile",
             )
+            properties.capacity_type = AAZStrType(
+                serialized_name="capacityType",
+            )
             properties.compute_profile = AAZObjectType(
                 serialized_name="computeProfile",
                 flags={"required": True},
             )
+            properties.mode = AAZStrType()
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
@@ -648,9 +678,15 @@ class List(AAZCommand):
             properties.vm_attributes = AAZObjectType(
                 serialized_name="vmAttributes",
             )
+            properties.vm_name_prefix = AAZStrType(
+                serialized_name="vmNamePrefix",
+            )
             properties.vm_sizes_profile = AAZListType(
                 serialized_name="vmSizesProfile",
                 flags={"required": True},
+            )
+            properties.zone_allocation_policy = AAZObjectType(
+                serialized_name="zoneAllocationPolicy",
             )
 
             additional_locations_profile = cls._schema_on_200.value.Element.properties.additional_locations_profile
@@ -822,6 +858,24 @@ class List(AAZCommand):
                 flags={"required": True},
             )
             _element.rank = AAZIntType()
+
+            zone_allocation_policy = cls._schema_on_200.value.Element.properties.zone_allocation_policy
+            zone_allocation_policy.distribution_strategy = AAZStrType(
+                serialized_name="distributionStrategy",
+                flags={"required": True},
+            )
+            zone_allocation_policy.zone_preferences = AAZListType(
+                serialized_name="zonePreferences",
+            )
+
+            zone_preferences = cls._schema_on_200.value.Element.properties.zone_allocation_policy.zone_preferences
+            zone_preferences.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.zone_allocation_policy.zone_preferences.Element
+            _element.rank = AAZIntType()
+            _element.zone = AAZStrType(
+                flags={"required": True},
+            )
 
             system_data = cls._schema_on_200.value.Element.system_data
             system_data.created_at = AAZStrType(
@@ -1024,7 +1078,7 @@ class _ListHelper:
             flags={"read_only": True},
         )
         properties.publisher = AAZStrType()
-        properties.settings = AAZFreeFormDictType()
+        properties.settings = AAZDictType()
         properties.suppress_failures = AAZBoolType(
             serialized_name="suppressFailures",
         )
@@ -1046,6 +1100,9 @@ class _ListHelper:
 
         provision_after_extensions = _schema_base_virtual_machine_profile_read.extension_profile.extensions.Element.properties.provision_after_extensions
         provision_after_extensions.Element = AAZStrType()
+
+        settings = _schema_base_virtual_machine_profile_read.extension_profile.extensions.Element.properties.settings
+        settings.Element = AAZAnyType()
 
         hardware_profile = _schema_base_virtual_machine_profile_read.hardware_profile
         hardware_profile.vm_size_properties = AAZObjectType(

@@ -19,16 +19,14 @@ from azure.cli.core.aaz import *
 class Delete(AAZCommand):
     """Delete an Azure Compute  Fleet
 
-    Delete an Azure Compute  Fleet
-
     :example: Fleets_Delete
         az azure-fleet delete --resource-group rgazurefleet --fleet-name testFleet
     """
 
     _aaz_info = {
-        "version": "2024-11-01",
+        "version": "2026-04-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.azurefleet/fleets/{}", "2024-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.azurefleet/fleets/{}", "2026-04-01-preview"],
         ]
     }
 
@@ -149,7 +147,7 @@ class Delete(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-11-01",
+                    "api-version", "2026-04-01-preview",
                     required=True,
                 ),
             }
