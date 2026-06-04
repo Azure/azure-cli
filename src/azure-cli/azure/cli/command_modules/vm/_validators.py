@@ -319,9 +319,10 @@ def _parse_image_argument(cmd, namespace):
         raise CLIError(err)
 
 
+# pylint: disable=protected-access
 def _show_vm_image(cmd, namespace):
-    if hasattr(namespace, 'vm_image_info_cache'):
-        return namespace.vm_image_info_cache
+    if hasattr(namespace, '_vm_image_info_cache'):
+        return namespace._vm_image_info_cache
 
     from .aaz.latest.vm.image import Show as VMImageShow
     image_version = namespace.os_version
@@ -337,8 +338,8 @@ def _show_vm_image(cmd, namespace):
         'version': image_version,
     }
 
-    namespace.vm_image_info_cache = VMImageShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
-    return namespace.vm_image_info_cache
+    namespace._vm_image_info_cache = VMImageShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+    return namespace._vm_image_info_cache
 
 
 def _get_image_plan_info_if_exists(cmd, namespace):
