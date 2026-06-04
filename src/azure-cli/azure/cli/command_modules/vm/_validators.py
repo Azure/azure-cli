@@ -320,7 +320,7 @@ def _parse_image_argument(cmd, namespace):
 
 
 def _show_vm_image(cmd, namespace):
-    if getattr(namespace, '_vm_image_info', None):
+    if hasattr(namespace, '_vm_image_info'):
         return namespace._vm_image_info
 
     from .aaz.latest.vm.image import Show as VMImageShow
