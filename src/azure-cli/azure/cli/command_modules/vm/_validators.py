@@ -319,24 +319,32 @@ def _parse_image_argument(cmd, namespace):
         raise CLIError(err)
 
 
+# pylint: disable=protected-access
+def _show_vm_image(cmd, namespace):
+    if hasattr(namespace, '_vm_image_info_cache'):
+        return namespace._vm_image_info_cache
+
+    from .aaz.latest.vm.image import Show as VMImageShow
+    image_version = namespace.os_version
+    if namespace.os_version.lower() == 'latest':
+        image_version = _get_latest_image_version_by_aaz(cmd.cli_ctx, namespace.location, namespace.os_publisher,
+                                                         namespace.os_offer, namespace.os_sku)
+
+    command_args = {
+        'location': namespace.location,
+        'offer': namespace.os_offer,
+        'publisher': namespace.os_publisher,
+        'sku': namespace.os_sku,
+        'version': image_version,
+    }
+
+    namespace._vm_image_info_cache = VMImageShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+    return namespace._vm_image_info_cache
+
+
 def _get_image_plan_info_if_exists(cmd, namespace):
     try:
-        from .aaz.latest.vm.image import Show as VmImageShow
-        if namespace.os_version.lower() == 'latest':
-            image_version = _get_latest_image_version_by_aaz(cmd.cli_ctx, namespace.location, namespace.os_publisher,
-                                                             namespace.os_offer, namespace.os_sku)
-        else:
-            image_version = namespace.os_version
-
-        command_args = {
-            'location': namespace.location,
-            'offer': namespace.os_offer,
-            'publisher': namespace.os_publisher,
-            'sku': namespace.os_sku,
-            'version': image_version,
-        }
-        image = VmImageShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
-
+        image = _show_vm_image(cmd, namespace)
         return image.get('plan')
     except ResourceNotFoundError as ex:
         logger.warning("Querying the image of '%s' failed for an error '%s'. Configuring plan settings "
@@ -643,7 +651,10 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                 'when "--security-type" is "ConfidentialVM" and "--enable-vtpm" is True')
 
     if not namespace.os_type:
-        namespace.os_type = 'windows' if 'windows' in namespace.os_offer.lower() else 'linux'
+        image = _show_vm_image(cmd, namespace)
+
+        os_system = image.get('osDiskImage', {}).get('operatingSystem', '')
+        namespace.os_type = os_system.lower()
 
     if getattr(namespace, 'source_snapshots_or_disks', None) and \
             getattr(namespace, 'source_snapshots_or_disks_size_gb', None):
@@ -1499,20 +1510,7 @@ def _validate_generation_version_and_trusted_launch(cmd, namespace):
             return
 
         if image_type == 'urn':
-            from .aaz.latest.vm.image import Show as VmImageShow
-            os_version = namespace.os_version
-            if os_version.lower() == 'latest':
-                os_version = _get_latest_image_version_by_aaz(cmd.cli_ctx, namespace.location, namespace.os_publisher,
-                                                              namespace.os_offer, namespace.os_sku)
-
-            command_args = {
-                'location': namespace.location,
-                'offer': namespace.os_offer,
-                'publisher': namespace.os_publisher,
-                'sku': namespace.os_sku,
-                'version': os_version
-            }
-            vm_image_info = VmImageShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+            vm_image_info = _show_vm_image(cmd, namespace)
 
             if vm_image_info.get('imageDeprecationStatus', {}).get('imageState') == 'ScheduledForDeprecation':
                 from datetime import datetime
