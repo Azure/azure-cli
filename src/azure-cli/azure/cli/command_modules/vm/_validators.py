@@ -320,6 +320,9 @@ def _parse_image_argument(cmd, namespace):
 
 
 def _show_vm_image(cmd, namespace):
+    if getattr(namespace, '_vm_image_info', None):
+        return namespace._vm_image_info
+
     from .aaz.latest.vm.image import Show as VMImageShow
     image_version = namespace.os_version
     if namespace.os_version.lower() == 'latest':
@@ -334,7 +337,8 @@ def _show_vm_image(cmd, namespace):
         'version': image_version,
     }
 
-    return VMImageShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+    namespace._vm_image_info = VMImageShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+    return namespace._vm_image_info
 
 
 def _get_image_plan_info_if_exists(cmd, namespace):
