@@ -6791,6 +6791,13 @@ def upload_ssl_cert(cmd, resource_group_name,
     # Check if this is a Flex Consumption function app
     is_flex = is_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
 
+    # Validate parameter usage
+    if is_flex and slot:
+        raise ArgumentUsageError("--slot is not supported for Flex Consumption function apps. "
+                                 "Site-scoped certificates apply to the parent app.")
+    if load_to_code is not None and not is_flex:
+        raise ArgumentUsageError("--load-to-code is only supported for Flex Consumption function apps.")
+
     # For Flex Consumption apps, use the site-scoped certificates endpoint (slots not supported)
     if is_flex:
         # Build certificate envelope as dict to include loadCertificateToWebsitesSettings
@@ -6836,6 +6843,9 @@ def list_ssl_certs(cmd, resource_group_name, name=None):
     # Check if this is a Flex Consumption function app
     if name and is_flex_functionapp(cmd.cli_ctx, resource_group_name, name):
         return client.site_certificates.list(resource_group_name=resource_group_name, name=name)
+    if name:
+        raise ArgumentUsageError("--name is only supported for Flex Consumption function apps. "
+                                 "For other app types, certificates are managed at the resource group level.")
     return client.certificates.list_by_resource_group(resource_group_name)
 
 
@@ -6849,6 +6859,9 @@ def show_ssl_cert(cmd, resource_group_name, certificate_name, name=None):
             name=name,
             certificate_name=certificate_name
         )
+    if name:
+        raise ArgumentUsageError("--name is only supported for Flex Consumption function apps. "
+                                 "For other app types, certificates are managed at the resource group level.")
     return client.certificates.get(resource_group_name, certificate_name)
 
 
@@ -6867,6 +6880,9 @@ def delete_ssl_cert(cmd, resource_group_name, certificate_thumbprint, name=None)
                 )
         raise ResourceNotFoundError("Certificate for thumbprint '{}' not found".format(certificate_thumbprint))
 
+    if name:
+        raise ArgumentUsageError("--name is only supported for Flex Consumption function apps. "
+                                 "For other app types, certificates are managed at the resource group level.")
     webapp_certs = client.certificates.list_by_resource_group(resource_group_name)
     for webapp_cert in webapp_certs:
         if webapp_cert.thumbprint == certificate_thumbprint:
@@ -6874,8 +6890,20 @@ def delete_ssl_cert(cmd, resource_group_name, certificate_thumbprint, name=None)
     raise ResourceNotFoundError("Certificate for thumbprint '{}' not found".format(certificate_thumbprint))
 
 
+def _validate_flex_ssl_params(is_flex, load_to_code, enable_using_msi, webapp, resource_group_name, name):
+    """Validate SSL import parameters for Flex Consumption apps."""
+    if load_to_code is not None and not is_flex:
+        raise ArgumentUsageError("--load-to-code is only supported for Flex Consumption function apps.")
+    if enable_using_msi is not None and not is_flex:
+        raise ArgumentUsageError("--enable-using-msi is only supported for Flex Consumption function apps.")
+    if enable_using_msi and (not webapp.identity or not webapp.identity.type):
+        raise ArgumentUsageError(
+            "--enable-using-msi requires a managed identity assigned to the function app. "
+            "Assign one with: az functionapp identity assign -g {} -n {}".format(resource_group_name, name))
+
+
 def import_ssl_cert(cmd, resource_group_name, key_vault, key_vault_certificate_name, name=None, certificate_name=None,
-                    load_to_code=None, enable_using_msi=None):  # pylint: disable=too-many-branches
+                    load_to_code=None, enable_using_msi=None):
     Certificate = cmd.get_models('Certificate')
     client = web_client_factory(cmd.cli_ctx)
 
@@ -6937,6 +6965,10 @@ def import_ssl_cert(cmd, resource_group_name, key_vault, key_vault_certificate_n
                 if asc.name == key_vault_certificate_name:
                     kv_secret_name = asc.certificates[key_vault_certificate_name].key_vault_secret_name
                     break
+        else:
+            logger.warning("Unable to check App Service Certificate orders. "
+                           "If '%s' is an App Service Certificate, the import may not resolve "
+                           "the correct Key Vault secret name.", key_vault_certificate_name)
 
     # if kv_secret_name is not populated, it is not an appservice certificate, proceed for KV certificates
     if not kv_secret_name:
@@ -6944,18 +6976,29 @@ def import_ssl_cert(cmd, resource_group_name, key_vault, key_vault_certificate_n
 
     cert_name = certificate_name or '{}-{}-{}'.format(resource_group_name, kv_name, key_vault_certificate_name)
 
-    lnk = 'https://azure.github.io/AppService/2016/05/24/Deploying-Azure-Web-App-Certificate-through-Key-Vault.html'
-    lnk_msg = 'Find more details here: {}'.format(lnk)
-    if not _check_service_principal_permissions(cmd, kv_resource_group_name, kv_name, kv_subscription):
-        logger.warning('Unable to verify Key Vault permissions.')
-        logger.warning('You may need to grant Microsoft.Azure.WebSites service principal the Secret:Get permission')
-        logger.warning(lnk_msg)
+    # When using MSI, the app's managed identity accesses Key Vault, not the service principal
+    if enable_using_msi:
+        logger.warning('Using managed identity to access Key Vault. '
+                       'Ensure the app\'s managed identity has the permission on the Key Vault.')
+    else:
+        lnk = 'https://azure.github.io/AppService/2016/05/24/Deploying-Azure-Web-App-Certificate-through-Key-Vault.html'
+        lnk_msg = 'Find more details here: {}'.format(lnk)
+        if not _check_service_principal_permissions(cmd, kv_resource_group_name, kv_name, kv_subscription):
+            logger.warning('Unable to verify Key Vault permissions.')
+            logger.warning('You may need to grant Microsoft.Azure.WebSites service principal the Secret:Get permission')
+            logger.warning(lnk_msg)
 
     kv_cert_def = Certificate(location=location, key_vault_id=kv_id, password='',
                               key_vault_secret_name=kv_secret_name)
 
     # Check if this is a Flex Consumption function app
-    if name and is_flex_functionapp(cmd.cli_ctx, resource_group_name, name):
+    is_flex = name and is_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
+
+    # Validate parameter usage
+    _validate_flex_ssl_params(is_flex, load_to_code, enable_using_msi, webapp if name else None,
+                              resource_group_name, name)
+
+    if is_flex:
         # Build certificate envelope as dict to include loadCertificateToWebsitesSettings
         # (not in SDK model yet)
         cert_envelope = {
@@ -6963,7 +7006,8 @@ def import_ssl_cert(cmd, resource_group_name, key_vault, key_vault_certificate_n
             "properties": {
                 "keyVaultId": kv_id,
                 "password": "",
-                "keyVaultSecretName": kv_secret_name
+                "keyVaultSecretName": kv_secret_name,
+                "serverFarmId": get_site_server_farm_id(webapp)
             }
         }
         if load_to_code is not None:
@@ -7012,6 +7056,11 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None,
 
     # Check if this is a Flex Consumption function app
     is_flex = is_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
+
+    # Validate parameter usage
+    if is_flex and slot:
+        raise ArgumentUsageError("--slot is not supported for Flex Consumption function apps. "
+                                 "Site-scoped certificates apply to the parent app.")
 
     # Default certificate_name to hostname if not provided
     if not certificate_name:
@@ -7097,6 +7146,11 @@ def _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint, 
     # Check if this is a Flex Consumption function app
     is_flex = is_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
 
+    # Validate parameter usage for Flex apps
+    if is_flex and slot:
+        raise ArgumentUsageError("--slot is not supported for Flex Consumption function apps. "
+                                 "Site-scoped certificates apply to the parent app.")
+
     found_cert = None
 
     # For Flex Consumption apps, search in site-scoped certificates
@@ -7127,6 +7181,12 @@ def _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint, 
 
     if found_cert:
         if not hostname:
+            # For Flex Consumption apps, site-scoped certificates may not populate host_names
+            # Require --hostname to be specified explicitly in this case
+            if is_flex and (not found_cert.host_names or len(found_cert.host_names) == 0):
+                raise ArgumentUsageError(
+                    "The site-scoped certificate does not have associated host names. "
+                    "Please specify the hostname explicitly using --hostname.")
             if len(found_cert.host_names) == 1 and not found_cert.host_names[0].startswith('*'):
                 return _update_host_name_ssl_state(cmd, resource_group_name, name, webapp,
                                                    found_cert.host_names[0], ssl_type,

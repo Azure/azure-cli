@@ -1737,6 +1737,33 @@ class FunctionAppFlex(LiveScenarioTest):
         self.cmd('functionapp config ssl delete -g {} -n {} --certificate-thumbprint {}'
                  .format(resource_group, functionapp_name, cert_thumbprint))
 
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_flex_managed_ssl_cert_create(self, resource_group, storage_account):
+        """Test create_managed_ssl_cert on Flex Consumption function apps.
+
+        This test validates the Flex-specific path in create_managed_ssl_cert which uses
+        site_certificates.create_or_update instead of certificates.create_or_update.
+        """
+        functionapp_name = self.create_random_name('flexsslcreate', 40)
+        test_hostname = 'test.customdomain.com'
+        cert_name = 'test-managed-cert'
+
+        # Create a Flex Consumption function app
+        self.cmd('functionapp create -g {} -n {} -f {} -s {} --runtime python --runtime-version 3.11'
+                 .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account))
+
+        # Test that --slot is rejected for Flex Consumption apps
+        self.cmd('functionapp config ssl create -g {} -n {} --hostname {} --slot staging'
+                 .format(resource_group, functionapp_name, test_hostname),
+                 expect_failure=True)
+
+        # Test that managed certificate creation fails with validation error when hostname is not registered
+        # This validates the Flex path is being taken (site_certificates endpoint)
+        self.cmd('functionapp config ssl create -g {} -n {} --hostname {} --certificate-name {}'
+                 .format(resource_group, functionapp_name, test_hostname, cert_name),
+                 expect_failure=True)
+
 
 class FunctionAppManagedEnvironment(ScenarioTest):
     @AllowLargeResponse()
