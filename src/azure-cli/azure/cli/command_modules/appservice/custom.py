@@ -11437,8 +11437,11 @@ def update_function_key(cmd, resource_group_name, name, function_name, key_name,
 def list_function_keys(cmd, resource_group_name, name, function_name, slot=None):
     client = web_client_factory(cmd.cli_ctx)
     if slot:
-        return client.web_apps.list_function_keys_slot(resource_group_name, name, function_name, slot)
-    return client.web_apps.list_function_keys(resource_group_name, name, function_name)
+        keys = client.web_apps.list_function_keys_slot(resource_group_name, name, function_name, slot)
+    else:
+        keys = client.web_apps.list_function_keys(resource_group_name, name, function_name)
+    # SDK may return .properties as None for flat dictionary responses; fall back to raw payload
+    return keys.properties if keys.properties is not None else dict(keys)
 
 
 def delete_function_key(cmd, resource_group_name, name, key_name, function_name=None, slot=None):
