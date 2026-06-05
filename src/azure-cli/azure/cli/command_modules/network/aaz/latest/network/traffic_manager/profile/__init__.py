@@ -10,7 +10,6 @@
 
 from .__cmd_group import *
 from ._check_dns import *
-from ._check_dns_v2 import *
 from ._create import *
 from ._delete import *
 from ._list import *
