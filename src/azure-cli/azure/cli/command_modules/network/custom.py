@@ -5381,9 +5381,10 @@ def create_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_g
         "port": monitor_port,
         "protocol": monitor_protocol,
         "timeout": timeout,
-        "max_failures": max_failures,
-        "record_type": record_type
+        "max_failures": max_failures
     }
+    if record_type is not None:
+        args["record_type"] = record_type
 
     return Create(cli_ctx=cmd.cli_ctx)(command_args=args)
 
