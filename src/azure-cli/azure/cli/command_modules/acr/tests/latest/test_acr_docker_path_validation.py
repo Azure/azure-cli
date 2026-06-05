@@ -86,9 +86,13 @@ class TestValidateCommandPath(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.acr.custom.shutil.which')
     @mock.patch('azure.cli.command_modules.acr.custom.os.getcwd')
     def test_windows_cwd_binary_is_blocked(self, mock_getcwd, mock_which):
-        """On Windows, a docker.exe in CWD should be blocked (case-insensitive)."""
-        mock_getcwd.return_value = 'C:\\Users\\dev\\repo'
-        mock_which.return_value = 'C:\\Users\\dev\\repo\\docker.exe'
+        """A docker binary (with platform extension) in CWD should be blocked."""
+        if os.name == 'nt':
+            mock_getcwd.return_value = 'C:\\Users\\dev\\repo'
+            mock_which.return_value = 'C:\\Users\\dev\\repo\\docker.exe'
+        else:
+            mock_getcwd.return_value = '/home/dev/repo'
+            mock_which.return_value = '/home/dev/repo/docker'
 
         with self.assertRaises(CLIError):
             _validate_command_path('docker', is_diagnostics_context=False)
@@ -96,9 +100,13 @@ class TestValidateCommandPath(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.acr.custom.shutil.which')
     @mock.patch('azure.cli.command_modules.acr.custom.os.getcwd')
     def test_windows_system_docker_is_allowed(self, mock_getcwd, mock_which):
-        """On Windows, Docker Desktop in Program Files should be allowed."""
-        mock_getcwd.return_value = 'C:\\Users\\dev\\repo'
-        mock_which.return_value = 'C:\\Program Files\\Docker\\docker.exe'
+        """Docker in a system directory (not CWD) should be allowed."""
+        if os.name == 'nt':
+            mock_getcwd.return_value = 'C:\\Users\\dev\\repo'
+            mock_which.return_value = 'C:\\Program Files\\Docker\\docker.exe'
+        else:
+            mock_getcwd.return_value = '/home/dev/repo'
+            mock_which.return_value = '/usr/local/bin/docker'
 
         result = _validate_command_path('docker', is_diagnostics_context=False)
         self.assertFalse(result)
@@ -106,9 +114,13 @@ class TestValidateCommandPath(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.acr.custom.shutil.which')
     @mock.patch('azure.cli.command_modules.acr.custom.os.getcwd')
     def test_windows_root_cwd_does_not_block_system_docker(self, mock_getcwd, mock_which):
-        """When CWD is C:\\, Docker at C:\\Program Files should not be blocked."""
-        mock_getcwd.return_value = 'C:\\'
-        mock_which.return_value = 'C:\\Program Files\\Docker\\docker.exe'
+        """When CWD is the filesystem root, system docker should not be blocked."""
+        if os.name == 'nt':
+            mock_getcwd.return_value = 'C:\\'
+            mock_which.return_value = 'C:\\Program Files\\Docker\\docker.exe'
+        else:
+            mock_getcwd.return_value = '/'
+            mock_which.return_value = '/usr/bin/docker'
 
         result = _validate_command_path('docker', is_diagnostics_context=False)
         self.assertFalse(result)
