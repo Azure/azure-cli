@@ -5359,7 +5359,8 @@ def create_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_g
                                    monitor_port=80, monitor_protocol="HTTP",
                                    profile_status="Enabled",
                                    ttl=30, tags=None, interval=None, timeout=None, max_failures=None,
-                                   monitor_custom_headers=None, status_code_ranges=None, max_return=None):
+                                   monitor_custom_headers=None, status_code_ranges=None, max_return=None,
+                                   record_type=None):
     from .aaz.latest.network.traffic_manager.profile import Create
     if monitor_path is None and monitor_protocol == 'HTTP':
         monitor_path = '/'
@@ -5380,7 +5381,8 @@ def create_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_g
         "port": monitor_port,
         "protocol": monitor_protocol,
         "timeout": timeout,
-        "max_failures": max_failures
+        "max_failures": max_failures,
+        "record_type": record_type
     }
 
     return Create(cli_ctx=cmd.cli_ctx)(command_args=args)
@@ -5390,7 +5392,8 @@ def update_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_g
                                    profile_status=None, routing_method=None, tags=None,
                                    monitor_protocol=None, monitor_port=None, monitor_path=None,
                                    ttl=None, timeout=None, interval=None, max_failures=None,
-                                   monitor_custom_headers=None, status_code_ranges=None, max_return=None):
+                                   monitor_custom_headers=None, status_code_ranges=None, max_return=None,
+                                   record_type=None):
     from .aaz.latest.network.traffic_manager.profile import Update
     args = {
         "name": traffic_manager_profile_name,
@@ -5422,6 +5425,8 @@ def update_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_g
         args["timeout"] = timeout
     if max_failures is not None:
         args["max_failures"] = max_failures
+    if record_type is not None:
+        args["record_type"] = record_type
 
     return Update(cli_ctx=cmd.cli_ctx)(command_args=args)
 

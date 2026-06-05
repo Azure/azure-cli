@@ -12,19 +12,16 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network traffic-manager endpoint show-geographic-hierarchy",
+    "network traffic-manager profile check-dns-v2",
 )
-class ShowGeographicHierarchy(AAZCommand):
-    """Get the default geographic hierarchy used by the geographic traffic routing method.
-
-    :example: Get the default geographic hierarchy used by the geographic traffic routing method.
-        az network traffic-manager endpoint show-geographic-hierarchy
+class CheckDnsV2(AAZCommand):
+    """Checks the availability of a Traffic Manager Relative DNS name.
     """
 
     _aaz_info = {
         "version": "2024-04-01-preview",
         "resources": [
-            ["mgmt-plane", "/providers/microsoft.network/trafficmanagergeographichierarchies/default", "2024-04-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.network/checktrafficmanagernameavailabilityv2", "2024-04-01-preview"],
         ]
     }
 
@@ -33,9 +30,34 @@ class ShowGeographicHierarchy(AAZCommand):
         self._execute_operations()
         return self._output()
 
+    _args_schema = None
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        if cls._args_schema is not None:
+            return cls._args_schema
+        cls._args_schema = super()._build_arguments_schema(*args, **kwargs)
+
+        # define Arg Group ""
+
+        # define Arg Group "Parameters"
+
+        _args_schema = cls._args_schema
+        _args_schema.name = AAZStrArg(
+            options=["--name"],
+            arg_group="Parameters",
+            help="The name of the resource.",
+        )
+        _args_schema.type = AAZStrArg(
+            options=["--type"],
+            arg_group="Parameters",
+            help="The type of the resource.",
+        )
+        return cls._args_schema
+
     def _execute_operations(self):
         self.pre_operations()
-        self.GeographicHierarchiesGetDefault(ctx=self.ctx)()
+        self.ProfilesCheckTrafficManagerNameAvailabilityV2(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -50,7 +72,7 @@ class ShowGeographicHierarchy(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class GeographicHierarchiesGetDefault(AAZHttpOperation):
+    class ProfilesCheckTrafficManagerNameAvailabilityV2(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -64,17 +86,27 @@ class ShowGeographicHierarchy(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/providers/Microsoft.Network/trafficManagerGeographicHierarchies/default",
+                "/subscriptions/{subscriptionId}/providers/Microsoft.Network/checkTrafficManagerNameAvailabilityV2",
                 **self.url_parameters
             )
 
         @property
         def method(self):
-            return "GET"
+            return "POST"
 
         @property
         def error_format(self):
             return "ODataV4Format"
+
+        @property
+        def url_parameters(self):
+            parameters = {
+                **self.serialize_url_param(
+                    "subscriptionId", self.ctx.subscription_id,
+                    required=True,
+                ),
+            }
+            return parameters
 
         @property
         def query_parameters(self):
@@ -90,10 +122,25 @@ class ShowGeographicHierarchy(AAZCommand):
         def header_parameters(self):
             parameters = {
                 **self.serialize_header_param(
+                    "Content-Type", "application/json",
+                ),
+                **self.serialize_header_param(
                     "Accept", "application/json",
                 ),
             }
             return parameters
+
+        @property
+        def content(self):
+            _content_value, _builder = self.new_content_builder(
+                self.ctx.args,
+                typ=AAZObjectType,
+                typ_kwargs={"flags": {"required": True, "client_flatten": True}}
+            )
+            _builder.set_prop("name", AAZStrType, ".name")
+            _builder.set_prop("type", AAZStrType, ".type")
+
+            return self.serialize_content(_content_value)
 
         def on_200(self, session):
             data = self.deserialize_http_content(session)
@@ -113,49 +160,19 @@ class ShowGeographicHierarchy(AAZCommand):
             cls._schema_on_200 = AAZObjectType()
 
             _schema_on_200 = cls._schema_on_200
-            _schema_on_200.id = AAZStrType()
+            _schema_on_200.message = AAZStrType()
             _schema_on_200.name = AAZStrType()
-            _schema_on_200.properties = AAZObjectType(
-                flags={"client_flatten": True},
+            _schema_on_200.name_available = AAZBoolType(
+                serialized_name="nameAvailable",
             )
+            _schema_on_200.reason = AAZStrType()
             _schema_on_200.type = AAZStrType()
-
-            properties = cls._schema_on_200.properties
-            properties.geographic_hierarchy = AAZObjectType(
-                serialized_name="geographicHierarchy",
-            )
-            _ShowGeographicHierarchyHelper._build_schema_region_read(properties.geographic_hierarchy)
 
             return cls._schema_on_200
 
 
-class _ShowGeographicHierarchyHelper:
-    """Helper class for ShowGeographicHierarchy"""
-
-    _schema_region_read = None
-
-    @classmethod
-    def _build_schema_region_read(cls, _schema):
-        if cls._schema_region_read is not None:
-            _schema.code = cls._schema_region_read.code
-            _schema.name = cls._schema_region_read.name
-            _schema.regions = cls._schema_region_read.regions
-            return
-
-        cls._schema_region_read = _schema_region_read = AAZObjectType()
-
-        region_read = _schema_region_read
-        region_read.code = AAZStrType()
-        region_read.name = AAZStrType()
-        region_read.regions = AAZListType()
-
-        regions = _schema_region_read.regions
-        regions.Element = AAZObjectType()
-        cls._build_schema_region_read(regions.Element)
-
-        _schema.code = cls._schema_region_read.code
-        _schema.name = cls._schema_region_read.name
-        _schema.regions = cls._schema_region_read.regions
+class _CheckDnsV2Helper:
+    """Helper class for CheckDnsV2"""
 
 
-__all__ = ["ShowGeographicHierarchy"]
+__all__ = ["CheckDnsV2"]

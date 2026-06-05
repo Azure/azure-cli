@@ -8,11 +8,16 @@
 # pylint: skip-file
 # flake8: noqa
 
-from .__cmd_group import *
-from ._check_dns import *
-from ._check_dns_v2 import *
-from ._create import *
-from ._delete import *
-from ._list import *
-from ._show import *
-from ._update import *
+from azure.cli.core.aaz import *
+
+
+@register_command_group(
+    "network traffic-manager profile heat-map",
+)
+class __CMDGroup(AAZCommandGroup):
+    """Manage Heat Map
+    """
+    pass
+
+
+__all__ = ["__CMDGroup"]

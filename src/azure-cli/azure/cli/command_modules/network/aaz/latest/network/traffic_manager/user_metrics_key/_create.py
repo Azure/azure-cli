@@ -12,19 +12,16 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network traffic-manager profile check-dns",
+    "network traffic-manager user-metrics-key create",
 )
-class CheckDns(AAZCommand):
-    """Check the availability of a relative DNS name.
-
-    :example: Check the availability of 'mywebapp.trafficmanager.net' in Azure.
-        az network traffic-manager profile check-dns -n mywebapp
+class Create(AAZCommand):
+    """Create a subscription-level key used for Real User Metrics collection.
     """
 
     _aaz_info = {
         "version": "2024-04-01-preview",
         "resources": [
-            ["mgmt-plane", "/providers/microsoft.network/checktrafficmanagernameavailability", "2024-04-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.network/trafficmanagerusermetricskeys/default", "2024-04-01-preview"],
         ]
     }
 
@@ -41,25 +38,12 @@ class CheckDns(AAZCommand):
             return cls._args_schema
         cls._args_schema = super()._build_arguments_schema(*args, **kwargs)
 
-        # define Arg Group "Parameters"
-
-        _args_schema = cls._args_schema
-        _args_schema.name = AAZStrArg(
-            options=["-n", "--name"],
-            arg_group="Parameters",
-            help="DNS prefix to verify availability for.",
-        )
-        _args_schema.type = AAZStrArg(
-            options=["--type"],
-            arg_group="Parameters",
-            help="The type of the resource.",
-            default="Microsoft.Network/trafficManagerProfiles",
-        )
+        # define Arg Group ""
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.ProfilesCheckTrafficManagerRelativeDnsNameAvailability(ctx=self.ctx)()
+        self.TrafficManagerUserMetricsKeysCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -74,31 +58,41 @@ class CheckDns(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class ProfilesCheckTrafficManagerRelativeDnsNameAvailability(AAZHttpOperation):
+    class TrafficManagerUserMetricsKeysCreateOrUpdate(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
             request = self.make_request()
             session = self.client.send_request(request=request, stream=False, **kwargs)
-            if session.http_response.status_code in [200]:
-                return self.on_200(session)
+            if session.http_response.status_code in [201]:
+                return self.on_201(session)
 
             return self.on_error(session.http_response)
 
         @property
         def url(self):
             return self.client.format_url(
-                "/providers/Microsoft.Network/checkTrafficManagerNameAvailability",
+                "/subscriptions/{subscriptionId}/providers/Microsoft.Network/trafficManagerUserMetricsKeys/default",
                 **self.url_parameters
             )
 
         @property
         def method(self):
-            return "POST"
+            return "PUT"
 
         @property
         def error_format(self):
             return "ODataV4Format"
+
+        @property
+        def url_parameters(self):
+            parameters = {
+                **self.serialize_url_param(
+                    "subscriptionId", self.ctx.subscription_id,
+                    required=True,
+                ),
+            }
+            return parameters
 
         @property
         def query_parameters(self):
@@ -114,57 +108,44 @@ class CheckDns(AAZCommand):
         def header_parameters(self):
             parameters = {
                 **self.serialize_header_param(
-                    "Content-Type", "application/json",
-                ),
-                **self.serialize_header_param(
                     "Accept", "application/json",
                 ),
             }
             return parameters
 
-        @property
-        def content(self):
-            _content_value, _builder = self.new_content_builder(
-                self.ctx.args,
-                typ=AAZObjectType,
-                typ_kwargs={"flags": {"required": True, "client_flatten": True}}
-            )
-            _builder.set_prop("name", AAZStrType, ".name")
-            _builder.set_prop("type", AAZStrType, ".type")
-
-            return self.serialize_content(_content_value)
-
-        def on_200(self, session):
+        def on_201(self, session):
             data = self.deserialize_http_content(session)
             self.ctx.set_var(
                 "instance",
                 data,
-                schema_builder=self._build_schema_on_200
+                schema_builder=self._build_schema_on_201
             )
 
-        _schema_on_200 = None
+        _schema_on_201 = None
 
         @classmethod
-        def _build_schema_on_200(cls):
-            if cls._schema_on_200 is not None:
-                return cls._schema_on_200
+        def _build_schema_on_201(cls):
+            if cls._schema_on_201 is not None:
+                return cls._schema_on_201
 
-            cls._schema_on_200 = AAZObjectType()
+            cls._schema_on_201 = AAZObjectType()
 
-            _schema_on_200 = cls._schema_on_200
-            _schema_on_200.message = AAZStrType()
-            _schema_on_200.name = AAZStrType()
-            _schema_on_200.name_available = AAZBoolType(
-                serialized_name="nameAvailable",
+            _schema_on_201 = cls._schema_on_201
+            _schema_on_201.id = AAZStrType()
+            _schema_on_201.name = AAZStrType()
+            _schema_on_201.properties = AAZObjectType(
+                flags={"client_flatten": True},
             )
-            _schema_on_200.reason = AAZStrType()
-            _schema_on_200.type = AAZStrType()
+            _schema_on_201.type = AAZStrType()
 
-            return cls._schema_on_200
+            properties = cls._schema_on_201.properties
+            properties.key = AAZStrType()
 
-
-class _CheckDnsHelper:
-    """Helper class for CheckDns"""
+            return cls._schema_on_201
 
 
-__all__ = ["CheckDns"]
+class _CreateHelper:
+    """Helper class for Create"""
+
+
+__all__ = ["Create"]

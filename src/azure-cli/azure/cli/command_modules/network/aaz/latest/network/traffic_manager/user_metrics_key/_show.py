@@ -12,19 +12,16 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network traffic-manager endpoint show-geographic-hierarchy",
+    "network traffic-manager user-metrics-key show",
 )
-class ShowGeographicHierarchy(AAZCommand):
-    """Get the default geographic hierarchy used by the geographic traffic routing method.
-
-    :example: Get the default geographic hierarchy used by the geographic traffic routing method.
-        az network traffic-manager endpoint show-geographic-hierarchy
+class Show(AAZCommand):
+    """Get the subscription-level key used for Real User Metrics collection.
     """
 
     _aaz_info = {
         "version": "2024-04-01-preview",
         "resources": [
-            ["mgmt-plane", "/providers/microsoft.network/trafficmanagergeographichierarchies/default", "2024-04-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.network/trafficmanagerusermetricskeys/default", "2024-04-01-preview"],
         ]
     }
 
@@ -33,9 +30,20 @@ class ShowGeographicHierarchy(AAZCommand):
         self._execute_operations()
         return self._output()
 
+    _args_schema = None
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        if cls._args_schema is not None:
+            return cls._args_schema
+        cls._args_schema = super()._build_arguments_schema(*args, **kwargs)
+
+        # define Arg Group ""
+        return cls._args_schema
+
     def _execute_operations(self):
         self.pre_operations()
-        self.GeographicHierarchiesGetDefault(ctx=self.ctx)()
+        self.TrafficManagerUserMetricsKeysGet(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -50,7 +58,7 @@ class ShowGeographicHierarchy(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class GeographicHierarchiesGetDefault(AAZHttpOperation):
+    class TrafficManagerUserMetricsKeysGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -64,7 +72,7 @@ class ShowGeographicHierarchy(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/providers/Microsoft.Network/trafficManagerGeographicHierarchies/default",
+                "/subscriptions/{subscriptionId}/providers/Microsoft.Network/trafficManagerUserMetricsKeys/default",
                 **self.url_parameters
             )
 
@@ -75,6 +83,16 @@ class ShowGeographicHierarchy(AAZCommand):
         @property
         def error_format(self):
             return "ODataV4Format"
+
+        @property
+        def url_parameters(self):
+            parameters = {
+                **self.serialize_url_param(
+                    "subscriptionId", self.ctx.subscription_id,
+                    required=True,
+                ),
+            }
+            return parameters
 
         @property
         def query_parameters(self):
@@ -121,41 +139,13 @@ class ShowGeographicHierarchy(AAZCommand):
             _schema_on_200.type = AAZStrType()
 
             properties = cls._schema_on_200.properties
-            properties.geographic_hierarchy = AAZObjectType(
-                serialized_name="geographicHierarchy",
-            )
-            _ShowGeographicHierarchyHelper._build_schema_region_read(properties.geographic_hierarchy)
+            properties.key = AAZStrType()
 
             return cls._schema_on_200
 
 
-class _ShowGeographicHierarchyHelper:
-    """Helper class for ShowGeographicHierarchy"""
-
-    _schema_region_read = None
-
-    @classmethod
-    def _build_schema_region_read(cls, _schema):
-        if cls._schema_region_read is not None:
-            _schema.code = cls._schema_region_read.code
-            _schema.name = cls._schema_region_read.name
-            _schema.regions = cls._schema_region_read.regions
-            return
-
-        cls._schema_region_read = _schema_region_read = AAZObjectType()
-
-        region_read = _schema_region_read
-        region_read.code = AAZStrType()
-        region_read.name = AAZStrType()
-        region_read.regions = AAZListType()
-
-        regions = _schema_region_read.regions
-        regions.Element = AAZObjectType()
-        cls._build_schema_region_read(regions.Element)
-
-        _schema.code = cls._schema_region_read.code
-        _schema.name = cls._schema_region_read.name
-        _schema.regions = cls._schema_region_read.regions
+class _ShowHelper:
+    """Helper class for Show"""
 
 
-__all__ = ["ShowGeographicHierarchy"]
+__all__ = ["Show"]

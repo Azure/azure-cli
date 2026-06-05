@@ -12,19 +12,16 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network traffic-manager endpoint show",
+    "network traffic-manager profile heat-map show",
 )
 class Show(AAZCommand):
-    """Get the details of a traffic manager endpoint.
-
-    :example: Get the details of a traffic manager endpoint.
-        az network traffic-manager endpoint show -g MyResourceGroup --profile-name MyTmProfile -n MyEndpoint --type azureEndpoints
+    """Get latest heatmap for Traffic Manager profile.
     """
 
     _aaz_info = {
         "version": "2024-04-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/trafficmanagerprofiles/{}/{}/{}", "2024-04-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/trafficmanagerprofiles/{}/heatmaps/{}", "2024-04-01-preview"],
         ]
     }
 
@@ -44,33 +41,49 @@ class Show(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.name = AAZStrArg(
-            options=["-n", "--name"],
-            help="Endpoint name.",
+        _args_schema.heat_map_type = AAZStrArg(
+            options=["-n", "--name", "--heat-map-type"],
+            help="The type of the heatmap.",
             required=True,
             id_part="child_name_1",
-        )
-        _args_schema.type = AAZStrArg(
-            options=["-t", "--type"],
-            help="Endpoint type. Allowed values: azureEndpoints, externalEndpoints, nestedEndpoints.",
-            required=True,
-            id_part="child_type_1",
-            enum={"AzureEndpoints": "AzureEndpoints", "ExternalEndpoints": "ExternalEndpoints", "NestedEndpoints": "NestedEndpoints"},
+            enum={"default": "default"},
         )
         _args_schema.profile_name = AAZStrArg(
             options=["--profile-name"],
-            help="Name of parent profile.",
+            help="The name of the Traffic Manager profile.",
             required=True,
             id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
+        _args_schema.bot_right = AAZListArg(
+            options=["--bot-right"],
+            help="The bottom right latitude,longitude pair of the rectangular viewport to query for.",
+            fmt=AAZListArgFormat(
+                max_length=2,
+                min_length=2,
+            ),
+        )
+        _args_schema.top_left = AAZListArg(
+            options=["--top-left"],
+            help="The top left latitude,longitude pair of the rectangular viewport to query for.",
+            fmt=AAZListArgFormat(
+                max_length=2,
+                min_length=2,
+            ),
+        )
+
+        bot_right = cls._args_schema.bot_right
+        bot_right.Element = AAZFloatArg()
+
+        top_left = cls._args_schema.top_left
+        top_left.Element = AAZFloatArg()
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.EndpointsGet(ctx=self.ctx)()
+        self.HeatMapGet(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -85,7 +98,7 @@ class Show(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class EndpointsGet(AAZHttpOperation):
+    class HeatMapGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -99,7 +112,7 @@ class Show(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/trafficmanagerprofiles/{profileName}/{endpointType}/{endpointName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/trafficmanagerprofiles/{profileName}/heatMaps/{heatMapType}",
                 **self.url_parameters
             )
 
@@ -115,11 +128,7 @@ class Show(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "endpointName", self.ctx.args.name,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "endpointType", self.ctx.args.type,
+                    "heatMapType", self.ctx.args.heat_map_type,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -140,6 +149,12 @@ class Show(AAZCommand):
         @property
         def query_parameters(self):
             parameters = {
+                **self.serialize_query_param(
+                    "botRight", self.ctx.args.bot_right,
+                ),
+                **self.serialize_query_param(
+                    "topLeft", self.ctx.args.top_left,
+                ),
                 **self.serialize_query_param(
                     "api-version", "2024-04-01-preview",
                     required=True,
@@ -182,58 +197,54 @@ class Show(AAZCommand):
             _schema_on_200.type = AAZStrType()
 
             properties = cls._schema_on_200.properties
-            properties.always_serve = AAZStrType(
-                serialized_name="alwaysServe",
+            properties.end_time = AAZStrType(
+                serialized_name="endTime",
             )
-            properties.custom_headers = AAZListType(
-                serialized_name="customHeaders",
+            properties.endpoints = AAZListType()
+            properties.start_time = AAZStrType(
+                serialized_name="startTime",
             )
-            properties.endpoint_location = AAZStrType(
-                serialized_name="endpointLocation",
+            properties.traffic_flows = AAZListType(
+                serialized_name="trafficFlows",
             )
-            properties.endpoint_monitor_status = AAZStrType(
-                serialized_name="endpointMonitorStatus",
-            )
-            properties.endpoint_status = AAZStrType(
-                serialized_name="endpointStatus",
-            )
-            properties.geo_mapping = AAZListType(
-                serialized_name="geoMapping",
-            )
-            properties.min_child_endpoints = AAZIntType(
-                serialized_name="minChildEndpoints",
-            )
-            properties.min_child_endpoints_i_pv4 = AAZIntType(
-                serialized_name="minChildEndpointsIPv4",
-            )
-            properties.min_child_endpoints_i_pv6 = AAZIntType(
-                serialized_name="minChildEndpointsIPv6",
-            )
-            properties.priority = AAZIntType()
-            properties.subnets = AAZListType()
-            properties.target = AAZStrType()
-            properties.target_resource_id = AAZStrType(
-                serialized_name="targetResourceId",
-            )
-            properties.weight = AAZIntType()
 
-            custom_headers = cls._schema_on_200.properties.custom_headers
-            custom_headers.Element = AAZObjectType()
+            endpoints = cls._schema_on_200.properties.endpoints
+            endpoints.Element = AAZObjectType()
 
-            _element = cls._schema_on_200.properties.custom_headers.Element
-            _element.name = AAZStrType()
-            _element.value = AAZStrType()
+            _element = cls._schema_on_200.properties.endpoints.Element
+            _element.endpoint_id = AAZIntType(
+                serialized_name="endpointId",
+            )
+            _element.resource_id = AAZStrType(
+                serialized_name="resourceId",
+            )
 
-            geo_mapping = cls._schema_on_200.properties.geo_mapping
-            geo_mapping.Element = AAZStrType()
+            traffic_flows = cls._schema_on_200.properties.traffic_flows
+            traffic_flows.Element = AAZObjectType()
 
-            subnets = cls._schema_on_200.properties.subnets
-            subnets.Element = AAZObjectType()
+            _element = cls._schema_on_200.properties.traffic_flows.Element
+            _element.latitude = AAZFloatType()
+            _element.longitude = AAZFloatType()
+            _element.query_experiences = AAZListType(
+                serialized_name="queryExperiences",
+            )
+            _element.source_ip = AAZStrType(
+                serialized_name="sourceIp",
+            )
 
-            _element = cls._schema_on_200.properties.subnets.Element
-            _element.first = AAZStrType()
-            _element.last = AAZStrType()
-            _element.scope = AAZIntType()
+            query_experiences = cls._schema_on_200.properties.traffic_flows.Element.query_experiences
+            query_experiences.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.properties.traffic_flows.Element.query_experiences.Element
+            _element.endpoint_id = AAZIntType(
+                serialized_name="endpointId",
+                flags={"required": True},
+            )
+            _element.latency = AAZFloatType()
+            _element.query_count = AAZIntType(
+                serialized_name="queryCount",
+                flags={"required": True},
+            )
 
             return cls._schema_on_200
 
