@@ -136,7 +136,7 @@ def get_key_for_storage_account(cmd, storage_account):  # pylint: disable=unused
 
         storage_client = cf_storage(cmd.cli_ctx)
         keys = storage_client.storage_accounts.list_keys(resource_group_name, storage_account_name)
-        storage_account_key = keys.keys[0].value  # pylint: disable=no-member
+        storage_account_key = keys.keys_property[0].value  # pylint: disable=no-member
     elif storage_account:
         raise CLIError('Failed to get access key for storage account: {}'.format(storage_account))
     return storage_account_key

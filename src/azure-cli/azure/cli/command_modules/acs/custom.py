@@ -3010,6 +3010,7 @@ def aks_agentpool_add(
     gateway_prefix_size=None,
     # local DNS
     localdns_config=None,
+    enable_artifact_streaming=False,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -3073,6 +3074,8 @@ def aks_agentpool_update(
     # local DNS
     localdns_config=None,
     gpu_driver=None,
+    enable_artifact_streaming=False,
+    disable_artifact_streaming=False,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -3189,6 +3192,8 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
         instance.upgrade_settings.node_soak_duration_in_minutes = node_soak_duration
     if undrainable_node_behavior:
         instance.upgrade_settings.undrainable_node_behavior = undrainable_node_behavior
+    if max_unavailable:
+        instance.upgrade_settings.max_unavailable = max_unavailable
 
     # custom headers
     aks_custom_headers = extract_comma_separated_string(

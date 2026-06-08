@@ -72,11 +72,11 @@ class Create(AAZCommand):
         )
         _args_schema.nat_gateway = AAZStrArg(
             options=["--nat-gateway"],
-            help="Name or ID of a NAT gateway to attach.",
+            help="Name or identifier of a NAT gateway to attach.",
         )
         _args_schema.network_security_group = AAZResourceIdArg(
             options=["--nsg", "--network-security-group"],
-            help="Name or ID of a network security group (NSG).",
+            help="Name or identifier of a network security group (NSG).",
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/networkSecurityGroups/{}",
             ),
@@ -95,7 +95,7 @@ class Create(AAZCommand):
         )
         _args_schema.route_table = AAZResourceIdArg(
             options=["--route-table"],
-            help="Name or ID of a route table to associate with the subnet.",
+            help="Name or identifier of a route table to associate with the subnet.",
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/routeTables/{}",
             ),
@@ -118,7 +118,7 @@ class Create(AAZCommand):
         _element = cls._args_schema.delegated_services.Element
         _element.id = AAZStrArg(
             options=["id"],
-            help="Resource ID.",
+            help="Resource identifier.",
         )
         _element.name = AAZStrArg(
             options=["name"],
@@ -139,7 +139,7 @@ class Create(AAZCommand):
         _element = cls._args_schema.policies.Element
         _element.id = AAZResourceIdArg(
             options=["id"],
-            help="Resource ID.",
+            help="Resource identifier.",
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/serviceEndpointPolicies/{}",
             ),
@@ -177,7 +177,7 @@ class Create(AAZCommand):
         _element = cls._args_schema.policies.Element.service_endpoint_policy_definitions.Element
         _element.id = AAZResourceIdArg(
             options=["id"],
-            help="Resource ID.",
+            help="Resource identifier.",
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/serviceEndpointPolicies/{}/serviceEndpointPolicyDefinitions/{}",
             ),
@@ -277,7 +277,7 @@ class Create(AAZCommand):
         sub_resource_create = cls._args_sub_resource_create
         sub_resource_create.id = AAZStrArg(
             options=["id"],
-            help="Resource ID.",
+            help="Resource identifier.",
         )
 
         _schema.id = cls._args_sub_resource_create.id

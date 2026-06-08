@@ -6,7 +6,7 @@ import os
 
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, JMESPathCheck)
 
-DEFAULT_LOCATION = "westus"
+DEFAULT_LOCATION = "eastus"
 
 class StaticAppBasicE2ETest(ScenarioTest):
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
