@@ -6900,6 +6900,9 @@ def _validate_flex_ssl_params(is_flex, load_to_code, enable_using_msi, webapp, r
         raise ArgumentUsageError(
             "--enable-using-msi requires a managed identity assigned to the function app. "
             "Assign one with: az functionapp identity assign -g {} -n {}".format(resource_group_name, name))
+    if enable_using_msi:
+        logger.warning('Using managed identity to access Key Vault. '
+                       'Ensure the app\'s managed identity has the permission on the Key Vault.')
 
 
 def import_ssl_cert(cmd, resource_group_name, key_vault, key_vault_certificate_name, name=None, certificate_name=None,
@@ -6951,11 +6954,9 @@ def import_ssl_cert(cmd, resource_group_name, key_vault, key_vault_certificate_n
     from azure.cli.core.commands.client_factory import get_subscription_id
     subscription_id = get_subscription_id(cmd.cli_ctx)
     if cloud_type.lower() == PUBLIC_CLOUD.lower():
-        # Check if app_service_certificate_orders operation group is available in the SDK
         if kv_subscription.lower() != subscription_id.lower():
-            diff_subscription_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_APPSERVICE,
-                                                               subscription_id=kv_subscription)
-            cert_orders_client = diff_subscription_client
+            cert_orders_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_APPSERVICE,
+                                                         subscription_id=kv_subscription)
         else:
             cert_orders_client = client
 
@@ -6964,23 +6965,18 @@ def import_ssl_cert(cmd, resource_group_name, key_vault, key_vault_certificate_n
             for asc in ascs:
                 if asc.name == key_vault_certificate_name:
                     kv_secret_name = asc.certificates[key_vault_certificate_name].key_vault_secret_name
-                    break
         else:
             logger.warning("Unable to check App Service Certificate orders. "
                            "If '%s' is an App Service Certificate, the import may not resolve "
                            "the correct Key Vault secret name.", key_vault_certificate_name)
 
     # if kv_secret_name is not populated, it is not an appservice certificate, proceed for KV certificates
-    if not kv_secret_name:
-        kv_secret_name = key_vault_certificate_name
+    kv_secret_name = kv_secret_name or key_vault_certificate_name
 
     cert_name = certificate_name or '{}-{}-{}'.format(resource_group_name, kv_name, key_vault_certificate_name)
 
     # When using MSI, the app's managed identity accesses Key Vault, not the service principal
-    if enable_using_msi:
-        logger.warning('Using managed identity to access Key Vault. '
-                       'Ensure the app\'s managed identity has the permission on the Key Vault.')
-    else:
+    if not enable_using_msi:
         lnk = 'https://azure.github.io/AppService/2016/05/24/Deploying-Azure-Web-App-Certificate-through-Key-Vault.html'
         lnk_msg = 'Find more details here: {}'.format(lnk)
         if not _check_service_principal_permissions(cmd, kv_resource_group_name, kv_name, kv_subscription):
