@@ -3104,6 +3104,94 @@ def aks_agentpool_get_upgrade_profile(cmd, client, resource_group_name, cluster_
     return client.get_upgrade_profile(resource_group_name, cluster_name, nodepool_name)
 
 
+def aks_agentpool_get_rollback_versions(cmd, client, resource_group_name, cluster_name, nodepool_name):
+    upgrade_profile = client.get_upgrade_profile(resource_group_name, cluster_name, nodepool_name)
+    return upgrade_profile.recently_used_versions
+
+
+def aks_agentpool_rollback(
+    cmd,
+    client,
+    resource_group_name,
+    cluster_name,
+    nodepool_name,
+    aks_custom_headers=None,
+    if_match=None,
+    if_none_match=None,
+    no_wait=False,
+):
+    from azure.cli.command_modules.acs._client_factory import cf_managed_clusters
+
+    managed_clusters_client = cf_managed_clusters(cmd.cli_ctx)
+    managed_cluster = managed_clusters_client.get(resource_group_name, cluster_name)
+    auto_upgrade_profile = getattr(managed_cluster, "auto_upgrade_profile", None)
+
+    upgrade_channel = getattr(auto_upgrade_profile, "upgrade_channel", None) if auto_upgrade_profile else None
+    node_os_upgrade_channel = (
+        getattr(auto_upgrade_profile, "node_os_upgrade_channel", None) if auto_upgrade_profile else None
+    )
+
+    upgrade_channel_enabled = upgrade_channel and str(upgrade_channel).lower() != "none"
+    node_os_channel_enabled = (
+        node_os_upgrade_channel and str(node_os_upgrade_channel).lower() not in ["none", "unmanaged"]
+    )
+
+    if upgrade_channel_enabled or node_os_channel_enabled:
+        logger.warning(
+            "Auto-upgrade is enabled on cluster '%s' (upgradeChannel=%s, nodeOSUpgradeChannel=%s). "
+            "Rollback will not succeed until auto-upgrade is disabled. Please disable auto-upgrade to roll back the node pool.",
+            cluster_name,
+            upgrade_channel or "none",
+            node_os_upgrade_channel or "Unmanaged",
+        )
+
+    logger.info("Fetching the most recent rollback version...")
+    upgrade_profile = client.get_upgrade_profile(resource_group_name, cluster_name, nodepool_name)
+
+    if not upgrade_profile.recently_used_versions:
+        raise CLIError(
+            "No rollback versions available. The nodepool must have been upgraded at least once "
+            "to have rollback history available."
+        )
+
+    sorted_versions = sorted(
+        upgrade_profile.recently_used_versions,
+        key=lambda version: version.timestamp if version.timestamp else datetime.datetime.min,
+        reverse=True,
+    )
+    most_recent = sorted_versions[0]
+
+    logger.info(
+        "Rolling back to the most recent version: Kubernetes version: %s, Node image version: %s (timestamp: %s)",
+        most_recent.orchestrator_version,
+        most_recent.node_image_version,
+        most_recent.timestamp,
+    )
+
+    instance = client.get(resource_group_name, cluster_name, nodepool_name)
+    instance.orchestrator_version = most_recent.orchestrator_version
+    instance.node_image_version = most_recent.node_image_version
+
+    aks_custom_headers = extract_comma_separated_string(
+        aks_custom_headers,
+        enable_strip=True,
+        extract_kv=True,
+        default_value={},
+        allow_appending_values_to_same_key=True,
+    )
+
+    return sdk_no_wait(
+        no_wait,
+        client.begin_create_or_update,
+        resource_group_name,
+        cluster_name,
+        nodepool_name,
+        instance,
+        headers=aks_custom_headers,
+        **build_etag_kwargs(if_match, if_none_match),
+    )
+
+
 def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
                           nodepool_name,
                           kubernetes_version='',

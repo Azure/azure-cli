@@ -20,6 +20,7 @@ Release History
 **AKS**
 
 * `az aks add/update`: Add `--enable-artifact-streaming` and `--disable-artifact-streaming` parameters (#33257)
+* `az aks nodepool get-rollback-versions`, `az aks nodepool rollback`: Add commands to get rollback versions and roll back an agent pool to the most recently used configuration.
 
 **App Config**
 

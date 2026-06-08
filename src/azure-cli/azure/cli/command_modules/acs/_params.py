@@ -1182,6 +1182,14 @@ def load_arguments(self, _):
         c.argument('snapshot_id', validator=validate_snapshot_id)
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
 
+    with self.argument_context("aks nodepool get-rollback-versions") as c:
+        pass
+
+    with self.argument_context("aks nodepool rollback") as c:
+        c.argument("aks_custom_headers")
+        c.argument("if_match")
+        c.argument("if_none_match")
+
     with self.argument_context("aks nodepool manual-scale add") as c:
         c.argument("vm_sizes")
 

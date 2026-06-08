@@ -3659,6 +3659,106 @@ spec:
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_nodepool_rollback(self, resource_group, resource_group_location):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        aks_name = self.create_random_name('cliakstest', 16)
+        node_pool_name = self.create_random_name('c', 6)
+        create_version, upgrade_version = self._get_versions(resource_group_location)
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'node_pool_name': node_pool_name,
+            'ssh_key_value': self.generate_ssh_keys(),
+            'create_version': create_version,
+            'upgrade_version': upgrade_version
+        })
+
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
+                     '--vm-set-type VirtualMachineScaleSets --node-count=1 ' \
+                     '--ssh-key-value={ssh_key_value} --kubernetes-version {upgrade_version} ' \
+                     '-o json'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded')
+        ])
+
+        create_nodepool_cmd = 'aks nodepool add ' \
+                              '--resource-group={resource_group} ' \
+                              '--cluster-name={name} ' \
+                              '-n {node_pool_name} ' \
+                              '--node-count=1 ' \
+                              '--kubernetes-version {create_version} '
+        self.cmd(create_nodepool_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('orchestratorVersion', '{create_version}')
+        ])
+
+        upgrade_nodepool_cmd = 'aks nodepool upgrade ' \
+                               '--resource-group={resource_group} ' \
+                               '--cluster-name={name} --nodepool-name {node_pool_name} ' \
+                               '--kubernetes-version {upgrade_version} --yes '
+        self.cmd(upgrade_nodepool_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('orchestratorVersion', '{upgrade_version}')
+        ])
+
+        rollback_versions = self.cmd(
+            'aks nodepool get-rollback-versions '
+            '--resource-group={resource_group} '
+            '--cluster-name={name} '
+            '--nodepool-name {node_pool_name}'
+        ).get_output_in_json()
+        self.assertGreater(len(rollback_versions), 0)
+
+        rollback_version = sorted(
+            rollback_versions,
+            key=lambda version: version.get('timestamp') or '',
+            reverse=True
+        )[0]
+        self.assertEqual(rollback_version.get('orchestratorVersion'), create_version)
+        self.kwargs.update({
+            'rollback_kubernetes_version': rollback_version.get('orchestratorVersion'),
+            'rollback_node_image_version': rollback_version.get('nodeImageVersion')
+        })
+
+        self.cmd(
+            'aks nodepool get-rollback-versions '
+            '--resource-group={resource_group} '
+            '--cluster-name={name} '
+            '--nodepool-name {node_pool_name} '
+            '-o table',
+            checks=[
+                StringContainCheck(create_version),
+                StringContainCheck(self.kwargs['rollback_node_image_version'])
+            ]
+        )
+
+        self.cmd(
+            'aks nodepool rollback '
+            '--resource-group={resource_group} '
+            '--cluster-name={name} '
+            '--nodepool-name {node_pool_name}',
+            checks=[
+                self.check('provisioningState', 'Succeeded'),
+                self.check('orchestratorVersion', '{rollback_kubernetes_version}'),
+                self.check('nodeImageVersion', '{rollback_node_image_version}')
+            ]
+        )
+
+        self.cmd(
+            'aks nodepool show '
+            '--resource-group={resource_group} '
+            '--cluster-name={name} '
+            '--nodepool-name {node_pool_name}',
+            checks=[
+                self.check('provisioningState', 'Succeeded'),
+                self.check('orchestratorVersion', '{rollback_kubernetes_version}'),
+                self.check('nodeImageVersion', '{rollback_node_image_version}')
+            ]
+        )
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_create_spot_node_pool(self, resource_group, resource_group_location):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
