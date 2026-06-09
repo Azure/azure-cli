@@ -72,7 +72,10 @@ class AzureSearchServicesTests(ScenarioTest):
     def _build_create_request_body(command_args):
         # Builds the ARM PUT request body that 'az search service create' would send for the given
         # arguments, without making any network calls. This mirrors how the AAZ-generated command
-        # serializes its arguments after pre_operations runs.
+        # serializes its arguments after pre_operations runs. The operation is constructed through
+        # its normal constructor (with the HTTP client mocked out) so the test exercises the same
+        # code path as production rather than bypassing initialization.
+        from unittest import mock
         from azure.cli.core.mock import DummyCli
         from azure.cli.core.aaz._command_ctx import AAZCommandCtx
         from azure.cli.command_modules.search.custom import SearchServiceCreate
@@ -87,8 +90,8 @@ class AzureSearchServicesTests(ScenarioTest):
         command.ctx.format_args()
         command.pre_operations()
 
-        operation = object.__new__(SearchServiceCreate.ServicesCreateOrUpdate)
-        operation.ctx = command.ctx
+        with mock.patch.object(command.ctx, 'get_http_client', return_value=None):
+            operation = SearchServiceCreate.ServicesCreateOrUpdate(command.ctx)
         return operation.content
 
     def test_service_create_serverless_omits_replica_partition_hosting(self):
@@ -137,9 +140,9 @@ class AzureSearchServicesTests(ScenarioTest):
     def test_service_create_serverless_rejects_replica_partition_hosting(self):
         # Explicitly supplying replica/partition counts or a non-default hosting mode for the
         # serverless SKU is invalid and must fail fast rather than be silently dropped.
-        from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
+        from azure.cli.core.azclierror import ArgumentUsageError
 
-        with self.assertRaises(MutuallyExclusiveArgumentError):
+        with self.assertRaises(ArgumentUsageError):
             self._build_create_request_body({
                 'resource_group': 'rg',
                 'search_service_name': 'svc',
@@ -151,7 +154,7 @@ class AzureSearchServicesTests(ScenarioTest):
                 'public_network_access': 'enabled',
             })
 
-        with self.assertRaises(MutuallyExclusiveArgumentError):
+        with self.assertRaises(ArgumentUsageError):
             self._build_create_request_body({
                 'resource_group': 'rg',
                 'search_service_name': 'svc',

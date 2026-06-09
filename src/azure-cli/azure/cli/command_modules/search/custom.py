@@ -5,7 +5,7 @@
 from knack.log import get_logger
 from azure.cli.core.util import sdk_no_wait
 from azure.cli.core.azclierror import (UnrecognizedArgumentError, MutuallyExclusiveArgumentError,
-                                       RequiredArgumentMissingError)
+                                       RequiredArgumentMissingError, ArgumentUsageError)
 from .aaz.latest.search.service import Create as _SearchServiceCreate, Update as _SearchServiceUpdate
 
 logger = get_logger(__name__)
@@ -62,13 +62,13 @@ class SearchServiceCreate(_SearchServiceCreate):
         # serialize them and the service rejects the request with HTTP 400. Unset them for serverless.
         if has_value(args.sku) and args.sku == "serverless":
             if has_value(args.replica_count) and args.replica_count != 1:
-                raise MutuallyExclusiveArgumentError(
+                raise ArgumentUsageError(
                     "SearchService.ReplicaCount: --replica-count is not applicable to the serverless SKU")
             if has_value(args.partition_count) and args.partition_count != 1:
-                raise MutuallyExclusiveArgumentError(
+                raise ArgumentUsageError(
                     "SearchService.PartitionCount: --partition-count is not applicable to the serverless SKU")
             if has_value(args.hosting_mode) and args.hosting_mode != "default":
-                raise MutuallyExclusiveArgumentError(
+                raise ArgumentUsageError(
                     "SearchService.HostingMode: --hosting-mode is not applicable to the serverless SKU")
             args.replica_count = AAZUndefined
             args.partition_count = AAZUndefined
