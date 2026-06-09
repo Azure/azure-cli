@@ -1041,10 +1041,10 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
     if not skip_authorization_header and url.lower().startswith('https://'):
         # Prepare `resource` for `get_raw_token`
         if not resource:
-            # If url starts with ARM endpoint, like `https://management.azure.com/`,
+            # If url's origin matches the ARM endpoint, like `https://management.azure.com/`,
             # use `active_directory_resource_id` for resource, like `https://management.core.windows.net/`.
             # This follows the same behavior as `azure.cli.core.commands.client_factory._get_mgmt_service_client`
-            if url.lower().startswith(endpoints.resource_manager.rstrip('/')):
+            if is_same_origin(url, endpoints.resource_manager):
                 resource = endpoints.active_directory_resource_id
             else:
                 from azure.cli.core.cloud import CloudEndpointNotSetException
@@ -1053,7 +1053,7 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
                         value = getattr(endpoints, p)
                     except CloudEndpointNotSetException:
                         continue
-                    if isinstance(value, str) and url.lower().startswith(value.lower()):
+                    if isinstance(value, str) and is_same_origin(url, value):
                         resource = value
                         break
         if resource:
@@ -1063,7 +1063,7 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
             # TODO: In the future when multi-tenant subscription is supported, we won't be able to uniquely identify
             #   the token from subscription anymore.
             token_subscription = None
-            if url.lower().startswith(endpoints.resource_manager.rstrip('/')):
+            if is_same_origin(url, endpoints.resource_manager):
                 token_subscription = _extract_subscription_id(url)
             if token_subscription:
                 logger.debug('Retrieving token for resource %s, subscription %s', resource, token_subscription)
@@ -1208,6 +1208,53 @@ def urlretrieve(url):
     from urllib.request import urlopen
     req = urlopen(url, context=_ssl_context())
     return req.read()
+
+
+def is_same_origin(url, endpoint):
+    """Check whether ``url`` and ``endpoint`` share the same origin (scheme + host + port).
+
+    This performs an exact origin comparison rather than substring or prefix matching, so a
+    malicious host such as ``https://management.azure.com.attacker`` is not mistaken for
+    the trusted endpoint ``https://management.azure.com``. It is intended for validating that a
+    URL points to a trusted endpoint before sensitive data (e.g., an Azure access token) is sent
+    to it.
+
+    :param url: The URL to validate, e.g., ``https://management.azure.com/subscriptions/...``.
+    :param endpoint: The trusted endpoint to validate against, e.g., ``https://management.azure.com/``.
+    :return: ``True`` if both share the same origin, otherwise ``False``.
+    :rtype: bool
+    """
+    from urllib.parse import urlparse
+    try:
+        url_parts = urlparse(url)
+        endpoint_parts = urlparse(endpoint)
+
+    except ValueError:
+        return False
+
+    # Require a real host on both sides to avoid false positives against non-URL endpoint values.
+    # `hostname` (rather than `netloc`) is used so that userinfo tricks like
+    # `https://management.azure.com@attacker` resolve to the actual host `attacker`.
+    if not url_parts.hostname or not endpoint_parts.hostname:
+        return False
+
+    def _effective_port(parts):
+        # Treat a missing port as the scheme's default port so that, e.g.,
+        # `https://management.azure.com:443/` and `https://management.azure.com/` are equivalent.
+        if parts.port is not None:
+            return parts.port
+
+        return {'http': 80, 'https': 443}.get(parts.scheme.lower())
+
+    try:
+        if _effective_port(url_parts) != _effective_port(endpoint_parts):
+            return False
+
+    except ValueError:
+        return False
+
+    return (url_parts.scheme.lower() == endpoint_parts.scheme.lower() and
+            url_parts.hostname.lower() == endpoint_parts.hostname.lower())
 
 
 def parse_proxy_resource_id(rid):
