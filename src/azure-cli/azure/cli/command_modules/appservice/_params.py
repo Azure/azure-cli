@@ -162,7 +162,7 @@ subscription than the app service environment, please use the resource ID for --
                    help='SKU of the app service plan. Use this to scale up/down (change machine size), e.g. --sku P1v3.')
         c.argument('elastic_scale', arg_type=get_three_state_flag(), help='Enable or disable automatic scaling. Set to "true" to enable elastic scale for this plan, or "false" to disable elastic scale for this plan. The SKU must be a Premium V2 SKU (P1V2, P2V2, P3V2) or a Premium V3 SKU (P1V3, P2V3, P3V3)')
         c.argument('max_elastic_worker_count', options_list=['--max-elastic-worker-count', '-m'], type=int, help='Maximum number of instances that the plan can scale out to. The plan must be an elastic scale plan.')
-        c.argument('number_of_workers', type=int, help='Number of workers to be allocated. Use this to scale out/in (add or remove instances), e.g. --number-of-workers 3.')
+        c.argument('number_of_workers', type=int, default=None, help='Number of workers to be allocated. Use this to scale out/in (add or remove instances), e.g. --number-of-workers 3.')
         c.ignore('allow_pending_state')
         c.argument('async_scaling_enabled', arg_type=get_three_state_flag(), help='Enables async scaling for the app service plan. Set to "true" to create an async operation if there are insufficient workers to scale synchronously. The SKU must be Dedicated.')
         c.argument('default_identity', is_preview=True,
