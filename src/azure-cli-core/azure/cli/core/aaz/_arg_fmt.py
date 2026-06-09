@@ -760,9 +760,19 @@ class AAZPaginationTokenArgFormat(AAZBaseArgFormat):
                 raise AAZInvalidArgValueError("Decoded object is not a dictionary.")
 
             try:
-                _, _ = obj["next_link"], obj["offset"]
+                next_link, _ = obj["next_link"], obj["offset"]
             except KeyError:
                 raise AAZInvalidArgValueError("`next_link` or `offset` doesn't exist.")
+
+            # `next_link` is a URL that the next page request is sent to with an Azure access token.
+            # Validate it shares the same origin as the trusted ARM endpoint to prevent the token
+            # from being sent to an attacker-controlled host such as
+            # `https://management.azure.com.attacker`.
+            if next_link is not None:
+                from azure.cli.core.util import is_same_origin
+                resource_manager = ctx.cli_ctx.cloud.endpoints.resource_manager
+                if not is_same_origin(next_link, resource_manager):
+                    raise AAZInvalidArgValueError("`next_link` '{}' is not a valid endpoint.".format(next_link))
 
         assert isinstance(value, AAZSimpleValue)
         data = value._data
