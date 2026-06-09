@@ -38,7 +38,7 @@ Archive Contents:
     ├── bin/
     │   └── az (entry script - Homebrew or AZ_PYTHON)
     └── lib/
-        └── python3.13
+        └── python3.14
             └── site-packages/
                 ├── azure/
                 ├── msal/
@@ -81,7 +81,7 @@ TARBALL_NAME_TEMPLATE_DEFAULT = "{APP_NAME}-{VERSION}-{PLATFORM_TAG}-nopython.ta
 
 # Python version we're building for (must match Homebrew python@X.Y)
 # Can be overridden via PYTHON_MAJOR_MINOR env var
-PYTHON_MAJOR_MINOR = os.environ.get("PYTHON_MAJOR_MINOR", "3.13")
+PYTHON_MAJOR_MINOR = os.environ.get("PYTHON_MAJOR_MINOR", "3.14")
 PYTHON_BIN = "python3"
 TEMPLATE_DIR = Path(__file__).resolve().parent / "templates"
 LAUNCHER_TEMPLATE_PATH = TEMPLATE_DIR / "az_launcher.sh.in"

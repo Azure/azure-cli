@@ -688,6 +688,34 @@ examples:
     text: az functionapp scale config always-ready set --name MyFunctionApp --resource-group MyResourceGroup --settings key1=value1 key2=value2
 """
 
+helps['functionapp update-strategy'] = """
+type: group
+short-summary: Manage a function app's update strategy.
+"""
+
+helps['functionapp update-strategy config'] = """
+type: group
+short-summary: Manage a function app's update strategy configuration.
+"""
+
+helps['functionapp update-strategy config show'] = """
+type: command
+short-summary: Get the details of a function app's update strategy configuration.
+examples:
+  - name: Get the details of a function app's update strategy configuration.
+    text: az functionapp update-strategy config show --name MyFunctionApp --resource-group MyResourceGroup
+"""
+
+helps['functionapp update-strategy config set'] = """
+type: command
+short-summary: Set or update a function app's update strategy configuration.
+examples:
+  - name: Set the update strategy to Recreate.
+    text: az functionapp update-strategy config set --name MyFunctionApp --resource-group MyResourceGroup --type Recreate
+  - name: Set the update strategy to RollingUpdate.
+    text: az functionapp update-strategy config set --name MyFunctionApp --resource-group MyResourceGroup --type RollingUpdate
+"""
+
 helps['functionapp cors'] = """
 type: group
 short-summary: Manage Cross-Origin Resource Sharing (CORS)

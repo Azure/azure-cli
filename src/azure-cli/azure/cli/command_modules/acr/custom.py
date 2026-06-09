@@ -77,7 +77,9 @@ def acr_create(cmd,
                allow_metadata_search=None,
                dnl_scope=None,
                role_assignment_mode=None,
-               regional_endpoints=None):
+               regional_endpoints=None,
+               data_endpoint_enabled=None,
+               endpoint_protocol=None):
     if default_action and sku not in get_premium_sku(cmd):
         raise CLIError(NETWORK_RULE_NOT_SUPPORTED)
 
@@ -113,6 +115,12 @@ def acr_create(cmd,
 
     if regional_endpoints is not None:
         _configure_regional_endpoints(cmd, registry, sku, regional_endpoints)
+
+    if data_endpoint_enabled is not None:
+        registry.data_endpoint_enabled = data_endpoint_enabled
+
+    if endpoint_protocol is not None:
+        registry.endpoint_protocol = endpoint_protocol
 
     _handle_network_bypass(cmd, registry, allow_trusted_services)
     _handle_export_policy(cmd, registry, allow_exports)
@@ -160,7 +168,8 @@ def acr_update_custom(cmd,
                       tags=None,
                       allow_metadata_search=None,
                       role_assignment_mode=None,
-                      regional_endpoints=None):
+                      regional_endpoints=None,
+                      endpoint_protocol=None):
     if sku is not None:
         Sku = cmd.get_models('Sku')
         instance.sku = Sku(name=sku)
@@ -191,6 +200,9 @@ def acr_update_custom(cmd,
 
     if regional_endpoints is not None:
         _configure_regional_endpoints(cmd, instance, sku, regional_endpoints)
+
+    if endpoint_protocol is not None:
+        instance.endpoint_protocol = endpoint_protocol
 
     _handle_network_bypass(cmd, instance, allow_trusted_services)
     _handle_export_policy(cmd, instance, allow_exports)
@@ -398,7 +410,9 @@ def acr_login(cmd,
         RegionalEndpoints = cmd.get_models('RegionalEndpoints')
         if registry.regional_endpoints == RegionalEndpoints.ENABLED and registry.regional_endpoint_host_names:
             # Build the expected regional endpoint prefix: registryname.region.geo.
-            regional_endpoint_prefix = f"{registry_name}.{endpoint}.geo.".lower()
+            # Use login_server hostname (before the first dot) to account for the DNL suffix if set.
+            login_server_name = registry.login_server.split('.')[0]
+            regional_endpoint_prefix = f"{login_server_name}.{endpoint}.geo.".lower()
             matching_endpoint = next(
                 (url for url in registry.regional_endpoint_host_names
                  if url.lower().strip().startswith(regional_endpoint_prefix)), None)

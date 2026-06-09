@@ -44,35 +44,6 @@ def backup_create_func(client, resource_group_name, server_name, backup_name=Non
         backup_name)
 
 
-def ltr_precheck_func(client, resource_group_name, server_name, backup_name):
-    validate_resource_group(resource_group_name)
-
-    return client.check_prerequisites(
-        resource_group_name=resource_group_name,
-        server_name=server_name,
-        parameters={"backupSettings": {"backupName": backup_name}}
-    )
-
-
-def ltr_start_func(client, resource_group_name, server_name, backup_name, sas_url):
-    validate_resource_group(resource_group_name)
-
-    parameters = {
-        "backupSettings": {
-            "backupName": backup_name
-        },
-        "targetDetails": {
-            "sasUriList": [sas_url]
-        }
-    }
-
-    return client.begin_start(
-        resource_group_name=resource_group_name,
-        server_name=server_name,
-        parameters=parameters
-    )
-
-
 def backup_delete_func(client, resource_group_name, server_name, backup_name, yes=False):
     validate_resource_group(resource_group_name)
 

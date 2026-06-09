@@ -11,7 +11,6 @@ from azure.cli.command_modules.postgresql._client_factory import (
     cf_postgres_flexible_db,
     cf_postgres_flexible_location_capabilities,
     cf_postgres_flexible_backups,
-    cf_postgres_flexible_ltr_backups,
     cf_postgres_flexible_replica,
     cf_postgres_flexible_admin,
     cf_postgres_flexible_migrations,
@@ -65,11 +64,6 @@ def load_flexibleserver_command_table(self, _):
     postgres_flexible_backups_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.postgresqlflexibleservers.operations#BackupsAutomaticAndOnDemandOperations.{}',
         client_factory=cf_postgres_flexible_backups
-    )
-
-    postgres_flexible_ltr_backup_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.postgresqlflexibleservers.operations#BackupsLongTermRetentionOperations.{}',
-        client_factory=cf_postgres_flexible_ltr_backups
     )
 
     postgres_flexible_replica_sdk = CliCommandType(
@@ -240,14 +234,6 @@ def load_flexibleserver_command_table(self, _):
         g.show_command('show', 'get', transform=transform_backup)
         g.custom_command('create', 'backup_create_func')
         g.custom_command('delete', 'backup_delete_func')
-
-    with self.command_group('postgres flexible-server long-term-retention', postgres_flexible_ltr_backup_sdk,
-                            custom_command_type=backup_commands,
-                            client_factory=cf_postgres_flexible_ltr_backups) as g:
-        g.command('list', 'list_by_server', transform=transform_backups_list)
-        g.show_command('show', 'get', transform=transform_backup)
-        g.custom_command('pre-check', 'ltr_precheck_func')
-        g.custom_command('start', 'ltr_start_func')
 
     replica_commands = CliCommandType(
         operations_tmpl='azure.cli.command_modules.postgresql.commands.replica_commands#{}')

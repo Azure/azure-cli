@@ -19,7 +19,7 @@ from azure.mgmt.web.models import (DatabaseType, ConnectionStringType, BuiltInAu
 
 from ._completers import get_hostname_completion_list
 from ._constants import (FUNCTIONS_VERSIONS, LOGICAPPS_NODE_RUNTIME_VERSIONS, WINDOWS_OS_NAME, LINUX_OS_NAME,
-                         DEPLOYMENT_STORAGE_AUTH_TYPES)
+                         DEPLOYMENT_STORAGE_AUTH_TYPES, UPDATE_STRATEGY_TYPES)
 
 from ._validators import (validate_timeout_value, validate_site_create, validate_asp_create,
                           validate_ase_create, validate_ip_address,
@@ -126,7 +126,9 @@ def load_arguments(self, _):
 subscription than the app service environment, please use the resource ID for --app-service-environment parameter. ",
                    local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.GET]))
         c.argument('sku', arg_type=sku_arg_type)
-        c.argument('is_linux', action='store_true', required=False, help='host web app on Linux worker')
+        c.argument('is_linux', arg_type=get_three_state_flag(), default=None, required=False,
+                   help='Host web app on Linux worker. Defaults to true unless --hyper-v is specified. '
+                        'Use "--is-linux false" to create a Windows plan.')
         c.argument('hyper_v', action='store_true', required=False, help='Host Windows Container Web App on Hyper-V worker.')
         c.argument('per_site_scaling', action='store_true', required=False, help='Enable per-app scaling at the '
                                                                                  'App Service plan level to allow for '
@@ -339,6 +341,10 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('end_to_end_encryption_enabled', options_list=['--end-to-end-encryption-enabled', '-e'],
                    help='Enable or disable end-to-end encryption between the Front End and the Workers.',
                    arg_type=get_three_state_flag(return_label=True))
+        c.argument('site_scoped_certs',
+                   options_list=['--site-scoped-certs'],
+                   help='Enable or disable site-scoped certificates.',
+                   arg_type=get_three_state_flag(return_label=True))
         c.argument('min_tls_version',
                    help="The minimum version of TLS required for SSL requests, e.g., '1.0', '1.1', '1.2'")
         c.argument('min_tls_cipher_suite', options_list=['--min-tls-cipher-suite'],
@@ -471,6 +477,10 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('platform_release_channel', options_list=['--platform-release-channel'],
                    help='Set the platform release channel for the web app. Possible values: Latest, Standard, Extended.',
                    arg_type=get_enum_type(PLATFORM_RELEASE_CHANNEL_TYPES))
+        c.argument('site_scoped_certs',
+                   options_list=['--site-scoped-certs'],
+                   help='Enable or disable site-scoped certificates.',
+                   arg_type=get_three_state_flag(return_label=True))
 
     with self.argument_context('webapp browse') as c:
         c.argument('logs', options_list=['--logs', '-l'], action='store_true',
@@ -693,6 +703,10 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('functionapp scale config always-ready') as c:
         c.argument('setting_names', nargs='+', help="space-separated always-ready setting names")
         c.argument('settings', nargs='+', help="space-separated configuration for the number of pre-allocated instances in the format `<name>=<value>`")
+
+    with self.argument_context('functionapp update-strategy config') as c:
+        c.argument('strategy_type', options_list=['--type'], arg_type=get_enum_type(UPDATE_STRATEGY_TYPES),
+                   help="The update strategy type. Allowed values: Recreate, RollingUpdate.")
 
     with self.argument_context('webapp config connection-string list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)

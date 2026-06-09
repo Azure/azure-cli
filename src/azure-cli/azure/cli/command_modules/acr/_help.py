@@ -71,6 +71,7 @@ type: group
 short-summary: Configure policies for Azure Container Registries.
 """
 
+# To be deprecated
 helps['acr config content-trust'] = """
 type: group
 short-summary: Manage content-trust policy for Azure Container Registries.
@@ -102,6 +103,7 @@ examples:
         az acr config authentication-as-arm update -r myregistry --status Enabled
 """
 
+# To be deprecated
 helps['acr config content-trust show'] = """
 type: command
 short-summary: Show the configured content-trust policy for an Azure Container Registry.
@@ -111,6 +113,7 @@ examples:
         az acr config content-trust show -r myregistry
 """
 
+# To be deprecated
 helps['acr config content-trust update'] = """
 type: command
 short-summary: Update content-trust policy for an Azure Container Registry.
@@ -182,6 +185,9 @@ examples:
   - name: Create a managed container registry with the Premium SKU and regional endpoints enabled.
     text: >
         az acr create -n myregistry -g MyResourceGroup --sku Premium --regional-endpoints enabled
+  - name: Create a managed container registry with the Premium SKU and dual-stack (IPv4 and IPv6) endpoint protocol.
+    text: >
+        az acr create -n myregistry -g MyResourceGroup --sku Premium --data-endpoint-enabled true --endpoint-protocol IPv4AndIPv6
 """
 
 helps['acr credential'] = """
@@ -1526,6 +1532,9 @@ examples:
   - name: Enable regional endpoints on an existing registry.
     text: >
         az acr update -n myregistry --regional-endpoints enabled
+  - name: Update the endpoint protocol for an Azure Container Registry.
+    text: >
+        az acr update -n myregistry --endpoint-protocol IPv4AndIPv6
 """
 
 helps['acr webhook'] = """
