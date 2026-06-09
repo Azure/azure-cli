@@ -2427,7 +2427,7 @@ examples:
   - name: Publish a bicep file.
     text: az bicep publish --file {bicep_file} --target "br:{registry}/{module_path}:{tag}"
   - name: Publish a bicep file overwriting an existing tag.
-    text: az bicep publish --file {bicep_file} --target "br:{registry}/{module_path}:{tag} --force"
+    text: az bicep publish --file {bicep_file} --target "br:{registry}/{module_path}:{tag}" --force
   - name: Publish a bicep file with documentation uri.
     text: az bicep publish --file {bicep_file} --target "br:{registry}/{module_path}:{tag}" --documentation-uri {documentation_uri}
   - name: Publish a bicep file with documentation uri and include source code
