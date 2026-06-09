@@ -68,6 +68,101 @@ class AzureSearchServicesTests(ScenarioTest):
         self.assertIn('serverless', Create._build_arguments_schema().sku.enum.items)
         self.assertIn('serverless', Update._build_arguments_schema().sku.enum.items)
 
+    @staticmethod
+    def _build_create_request_body(command_args):
+        # Builds the ARM PUT request body that 'az search service create' would send for the given
+        # arguments, without making any network calls. This mirrors how the AAZ-generated command
+        # serializes its arguments after pre_operations runs.
+        from azure.cli.core.mock import DummyCli
+        from azure.cli.core.aaz._command_ctx import AAZCommandCtx
+        from azure.cli.command_modules.search.custom import SearchServiceCreate
+
+        cli_ctx = DummyCli()
+        command = SearchServiceCreate(cli_ctx=cli_ctx)
+        command.ctx = AAZCommandCtx(
+            cli_ctx=cli_ctx,
+            schema=command.get_arguments_schema(),
+            command_args=dict(command_args),
+        )
+        command.ctx.format_args()
+        command.pre_operations()
+
+        operation = object.__new__(SearchServiceCreate.ServicesCreateOrUpdate)
+        operation.ctx = command.ctx
+        return operation.content
+
+    def test_service_create_serverless_omits_replica_partition_hosting(self):
+        # Regression test for https://github.com/Azure/azure-cli/issues/33514
+        # replicaCount/partitionCount default to 1 and hostingMode to 'default', so without the
+        # serverless special-casing the CLI always serialized them and ARM rejected the serverless
+        # create with HTTP 400. The serverless body must omit all three.
+        body = self._build_create_request_body({
+            'resource_group': 'rg',
+            'search_service_name': 'svc',
+            'location': 'westus2',
+            'sku': 'serverless',
+            'replica_count': 1,
+            'partition_count': 1,
+            'hosting_mode': 'default',
+            'public_network_access': 'enabled',
+        })
+
+        self.assertEqual(body['sku'], {'name': 'serverless'})
+        properties = body.get('properties', {})
+        self.assertNotIn('replicaCount', properties)
+        self.assertNotIn('partitionCount', properties)
+        self.assertNotIn('hostingMode', properties)
+
+    def test_service_create_non_serverless_keeps_replica_partition_hosting(self):
+        # The serverless fix must not change behavior for other SKUs, which still require
+        # replicaCount, partitionCount and hostingMode in the request body.
+        for sku_name in ('free', 'basic', 'standard', 'standard2', 'standard3', 'storage_optimized_l1'):
+            body = self._build_create_request_body({
+                'resource_group': 'rg',
+                'search_service_name': 'svc',
+                'location': 'westus2',
+                'sku': sku_name,
+                'replica_count': 1,
+                'partition_count': 1,
+                'hosting_mode': 'default',
+                'public_network_access': 'enabled',
+            })
+
+            self.assertEqual(body['sku'], {'name': sku_name})
+            properties = body.get('properties', {})
+            self.assertEqual(properties.get('replicaCount'), 1)
+            self.assertEqual(properties.get('partitionCount'), 1)
+            self.assertEqual(properties.get('hostingMode'), 'default')
+
+    def test_service_create_serverless_rejects_replica_partition_hosting(self):
+        # Explicitly supplying replica/partition counts or a non-default hosting mode for the
+        # serverless SKU is invalid and must fail fast rather than be silently dropped.
+        from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
+
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            self._build_create_request_body({
+                'resource_group': 'rg',
+                'search_service_name': 'svc',
+                'location': 'westus2',
+                'sku': 'serverless',
+                'replica_count': 2,
+                'partition_count': 1,
+                'hosting_mode': 'default',
+                'public_network_access': 'enabled',
+            })
+
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            self._build_create_request_body({
+                'resource_group': 'rg',
+                'search_service_name': 'svc',
+                'location': 'westus2',
+                'sku': 'serverless',
+                'replica_count': 1,
+                'partition_count': 3,
+                'hosting_mode': 'default',
+                'public_network_access': 'enabled',
+            })
+
     @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
     def test_service_create_multi_partition(self, resource_group):
         self.kwargs.update({
