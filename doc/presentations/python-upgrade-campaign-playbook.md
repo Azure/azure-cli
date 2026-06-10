@@ -33,44 +33,44 @@ flowchart LR
 ## Step-by-Step Process
 
 1. Open and structure the tracking issue.
-- Create Support Python X.Y.
-- Add explicit checklist sections:
-    - quality squad: azdev and aaz-dev
-    - knack bump and release
-    - customer-reported issues on new Python
-    - final Azure CLI bump PR
+     - Create Support Python X.Y.
+     - Add explicit checklist sections:
+         - quality squad: azdev and aaz-dev
+         - knack bump and release
+         - customer-reported issues on new Python
+         - final Azure CLI bump PR
 
 2. Start parallel workstreams after the tracking issue is created.
-- Send email to Quality Squad for azdev and aaz-dev bumping.
-- Coordination point: contact Ethan to align schedule and status for those items.
-- In parallel, bump and release knack (owned by us).
-- In parallel, track customer-reported issues from new Python usage.
-- These reports usually arrive before official bump merge because users test Azure CLI on the new Python early.
+     - Send email to Quality Squad for azdev and aaz-dev bumping.
+     - Coordination point: contact Ethan to align schedule and status for those items.
+     - In parallel, bump and release knack (owned by us).
+     - In parallel, track customer-reported issues from new Python usage.
+     - These reports usually arrive before official bump merge because users test Azure CLI on the new Python early.
 
 3. Burn down blockers in each workstream.
-- Confirm azdev and aaz-dev bumps are completed and consumable.
-- Confirm knack is released, then prepare Azure CLI knack version update.
-- Fix blocking customer-reported regressions before final bump merge.
+     - Confirm azdev and aaz-dev bumps are completed and consumable.
+     - Confirm knack is released, then prepare Azure CLI knack version update.
+     - Fix blocking customer-reported regressions before final bump merge.
 
 4. Validate readiness.
-- Verify dependency checklist is complete.
-- Verify customer-facing blockers are resolved or explicitly accepted.
-- Verify CI is healthy for the new Python minor.
-- Verify Azure CLI CI extension-loading jobs pass on the new Python minor to confirm extension compatibility.
+     - Verify dependency checklist is complete.
+     - Verify customer-facing blockers are resolved or explicitly accepted.
+     - Verify CI is healthy for the new Python minor.
+     - Verify Azure CLI CI extension-loading jobs pass on the new Python minor to confirm extension compatibility.
 
 5. Open final Azure CLI bump PR.
-- Apply mechanical version updates in Azure CLI.
-- Keep scope tightly focused on version enablement.
-- Preferred in this workflow: open it early as a draft to surface CI failures sooner.
-- Include Azure CLI update to consume the new released knack version.
+     - Apply mechanical version updates in Azure CLI.
+     - Keep scope tightly focused on version enablement.
+     - Preferred in this workflow: open it early as a draft to surface CI failures sooner.
+     - Include Azure CLI update to consume the new released knack version.
 
 6. Validate and merge.
-- Complete normal review and CI validation.
-- Merge only after the tracking issue is fully green.
+     - Complete normal review and CI validation.
+     - Merge only after the tracking issue is fully green.
 
 7. Close and document.
-- Close tracking issue after final PR merge.
-- Record short notes for the next Python cycle.
+     - Close tracking issue after final PR merge.
+     - Record short notes for the next Python cycle.
 
 ## Python 3.14 Reference (Issue #32869)
 
