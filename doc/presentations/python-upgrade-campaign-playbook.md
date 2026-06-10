@@ -22,7 +22,7 @@ flowchart LR
 
 - The tracking issue is the single source of truth.
 - After opening the tracking issue, three workstreams run in parallel:
-    - Quality Squad bumps `azdev` and `aaz-dev` (coordinate with Ethan)
+     - Quality Squad bumps `azdev` and `aaz-dev` (coordinate with the Quality Squad point of contact)
     - Azure CLI team bumps and releases `knack`
     - Azure CLI team tracks and fixes customer-reported issues
 - Customer issues typically appear before official bump merge because users adopt new Python early and run `pip install azure-cli`.
@@ -42,7 +42,7 @@ flowchart LR
 
 2. Start parallel workstreams after the tracking issue is created.
      - Send email to Quality Squad for azdev and aaz-dev bumping.
-     - Coordination point: contact Ethan to align schedule and status for those items.
+     - Coordination point: contact the Quality Squad point of contact to align schedule and status for those items.
      - In parallel, bump and release knack (owned by us).
      - In parallel, track customer-reported issues from new Python usage.
      - These reports usually arrive before official bump merge because users test Azure CLI on the new Python early.
@@ -80,8 +80,8 @@ Tracking issue:
 Representative linked work:
 - Azure CLI final bump PR: [Packaging] Bump Python version to 3.14 (#33313)
 - Knack support and follow-ups: microsoft/knack#296, microsoft/knack#300
-- Azure CLI knack version bump PR: {Packaging} Bump knack to 0.14.0 (#33377)
-- Azdev support: Azure/azure-cli-dev-tools#544, #547
+- Azure CLI knack version bump PR: [Packaging] Bump knack to 0.14.0 (#33377)
+- Azdev support: Azure/azure-cli-dev-tools#544, Azure/azure-cli-dev-tools#547
 - Additional dependency compatibility and CI fix PRs
 
 Case-study takeaway:
