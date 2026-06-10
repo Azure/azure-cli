@@ -847,6 +847,13 @@ class TestAAZArgBaseFmt(unittest.TestCase):
 
         self.assertEqual(args.to_serialized_data(), {"token": base64.b64decode(data).decode("utf-8")})
 
+        # next_link pointing to a trusted data-plane endpoint, e.g., Microsoft Graph is accepted
+        dataplane_next_link = "https://graph.microsoft.com/v1.0/users?$skiptoken=abc"
+        data = _encode({"next_link": dataplane_next_link, "offset": 0})
+        args = self.format_arg(schema, {"token": data})
+
+        self.assertEqual(args.to_serialized_data(), {"token": base64.b64decode(data).decode("utf-8")})
+
         # next_link pointing to a lookalike host must be rejected (prefix-matching attack)
         spoofed_next_link = "https://management.azure.com.attacker/subscriptions/00000000-0000-0000-0000-000000000000/resources?api-version=2025-09-01"
         data = _encode({"next_link": spoofed_next_link, "offset": 0})

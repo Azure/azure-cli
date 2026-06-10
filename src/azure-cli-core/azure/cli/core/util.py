@@ -1047,15 +1047,7 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
             if is_same_origin(url, endpoints.resource_manager):
                 resource = endpoints.active_directory_resource_id
             else:
-                from azure.cli.core.cloud import CloudEndpointNotSetException
-                for p in [x for x in dir(endpoints) if not x.startswith('_')]:
-                    try:
-                        value = getattr(endpoints, p)
-                    except CloudEndpointNotSetException:
-                        continue
-                    if isinstance(value, str) and is_same_origin(url, value):
-                        resource = value
-                        break
+                resource = match_cloud_endpoint(url, cli_ctx)
         if resource:
             # Prepare `subscription` for `get_raw_token`
             # If this is an ARM request, try to extract subscription ID from the URL.
@@ -1255,6 +1247,41 @@ def is_same_origin(url, endpoint):
 
     return (url_parts.scheme.lower() == endpoint_parts.scheme.lower() and
             url_parts.hostname.lower() == endpoint_parts.hostname.lower())
+
+
+def match_cloud_endpoint(url, cli_ctx):
+    """Return the active cloud endpoint that shares the same origin as ``url``.
+
+    :param url: The URL to match, e.g., ``https://management.azure.com/subscriptions/...``.
+    :param cli_ctx: The CLI context whose active cloud's endpoints are treated as trusted.
+    :return: The matching endpoint value, or ``None`` if no endpoint shares ``url``'s origin.
+    :rtype: str or None
+    """
+    from azure.cli.core.cloud import CloudEndpointNotSetException
+
+    endpoints = cli_ctx.cloud.endpoints
+    for p in [x for x in dir(endpoints) if not x.startswith('_')]:
+        try:
+            value = getattr(endpoints, p)
+
+        except CloudEndpointNotSetException:
+            continue
+
+        if isinstance(value, str) and is_same_origin(url, value):
+            return value
+
+    return None
+
+
+def is_trusted_cloud_endpoint(url, cli_ctx):
+    """Check whether ``url`` shares the same origin as any endpoint of the active cloud.
+
+    :param url: The URL to validate, e.g., ``https://management.azure.com/subscriptions/...``.
+    :param cli_ctx: The CLI context whose active cloud's endpoints are treated as trusted.
+    :return: ``True`` if ``url`` shares the same origin as any cloud endpoint, otherwise ``False``.
+    :rtype: bool
+    """
+    return match_cloud_endpoint(url, cli_ctx) is not None
 
 
 def parse_proxy_resource_id(rid):
