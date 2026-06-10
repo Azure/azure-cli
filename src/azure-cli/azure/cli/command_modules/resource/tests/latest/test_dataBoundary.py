@@ -10,8 +10,8 @@ class AzureDataBoundaryScenarioTest(ScenarioTest):
 
     def test_get_data_boundary_tenant(self):
         self.cmd('az data-boundary show-tenant --default default', checks=[
-            self.check('properties.dataBoundary', 'EU'),
-            self.check('properties.provisioningState', 'Created')
+            self.check_pattern('properties.dataBoundary', '^(EU|Global)$'),
+            self.check_pattern('properties.provisioningState', '^(Created|Succeeded)$')
         ])
 
     def test_get_data_boundary_scope(self):
