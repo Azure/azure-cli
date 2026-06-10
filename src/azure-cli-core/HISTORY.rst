@@ -5,6 +5,7 @@ Release History
 
 2.87.0
 ++++++
+* `az extension list-available`, `az extension list-versions`: Fix `experimental` field always showing `False` regardless of `azext.isExperimental` metadata (#33458)
 * Resolve CVE-2026-44431 (#33351)
 * Resolve CVE-2026-44432 (#33351)
 * `az login`: Support Entra agentic session differentiation for Copilot agent requests (#33309)
