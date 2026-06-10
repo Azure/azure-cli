@@ -43,13 +43,3 @@ def cf_log_analytics_data_plane(cli_ctx, _):
     return LogsQueryClient(cred, endpoint=cli_ctx.cloud.endpoints.log_analytics_resource_id + '/' + api_version,
                            audience=cli_ctx.cloud.endpoints.log_analytics_resource_id)
 
-
-def cf_vm_cl(cli_ctx, *_):
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.compute import ComputeManagementClient
-    return get_mgmt_service_client(cli_ctx,
-                                   ComputeManagementClient)
-
-
-def cf_community_gallery(cli_ctx, *_):
-    return cf_vm_cl(cli_ctx).community_galleries
