@@ -73,7 +73,7 @@ def flexible_server_create(cmd, client,
                            password_auth=None, administrator_login=None, administrator_login_password=None,
                            tags=None, subnet=None, vnet=None,
                            private_dns_zone_arguments=None, public_access=None,
-                           high_availability=None, zonal_resiliency=None, allow_same_zone=False,
+                           zonal_resiliency=None, allow_same_zone=False,
                            zone=None, standby_availability_zone=None,
                            geo_redundant_backup=None, byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
                            auto_grow=None, performance_tier=None,
@@ -93,7 +93,7 @@ def flexible_server_create(cmd, client,
         logging_name='PostgreSQL', command_group='postgres', server_client=client, location=location)
 
     server_name = server_name.lower()
-    high_availability_mode = high_availability
+    high_availability_mode = "Disabled"
 
     if (sku_name is None) or (version is None) or \
        (zonal_resiliency is not None and zonal_resiliency.lower() != 'disabled'):
@@ -126,7 +126,6 @@ def flexible_server_create(cmd, client,
                            auto_grow=auto_grow,
                            storage_type=storage_type,
                            iops=iops, throughput=throughput,
-                           high_availability=high_availability,
                            zonal_resiliency=zonal_resiliency,
                            allow_same_zone=allow_same_zone,
                            standby_availability_zone=standby_availability_zone,
@@ -412,7 +411,6 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                        storage_gb=None,
                                        backup_retention=None,
                                        administrator_login_password=None,
-                                       high_availability=None,
                                        zonal_resiliency=None,
                                        allow_same_zone=False,
                                        standby_availability_zone=None,
@@ -444,7 +442,6 @@ def flexible_server_update_custom_func(cmd, client, instance,
                            auto_grow=auto_grow,
                            iops=iops,
                            throughput=throughput,
-                           high_availability=high_availability,
                            zonal_resiliency=zonal_resiliency,
                            allow_same_zone=allow_same_zone,
                            zone=instance.availability_zone,
@@ -559,6 +556,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
 
     # High availability can't be updated with existing properties
     high_availability_param = postgresql_flexibleservers.models.HighAvailability()
+    high_availability = None
     if zonal_resiliency is not None:
         if zonal_resiliency.lower() == 'disabled':
             high_availability = 'Disabled'

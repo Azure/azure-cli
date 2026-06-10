@@ -77,7 +77,9 @@ def acr_create(cmd,
                allow_metadata_search=None,
                dnl_scope=None,
                role_assignment_mode=None,
-               regional_endpoints=None):
+               regional_endpoints=None,
+               data_endpoint_enabled=None,
+               endpoint_protocol=None):
     if default_action and sku not in get_premium_sku(cmd):
         raise CLIError(NETWORK_RULE_NOT_SUPPORTED)
 
@@ -113,6 +115,12 @@ def acr_create(cmd,
 
     if regional_endpoints is not None:
         _configure_regional_endpoints(cmd, registry, sku, regional_endpoints)
+
+    if data_endpoint_enabled is not None:
+        registry.data_endpoint_enabled = data_endpoint_enabled
+
+    if endpoint_protocol is not None:
+        registry.endpoint_protocol = endpoint_protocol
 
     _handle_network_bypass(cmd, registry, allow_trusted_services)
     _handle_export_policy(cmd, registry, allow_exports)

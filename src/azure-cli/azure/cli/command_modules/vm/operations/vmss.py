@@ -10,7 +10,8 @@ from ..aaz.latest.vmss import (ListInstances as _VMSSListInstances,
                                Start as _Start,
                                Create as _VMSSCreate,
                                Show as _VMSSShow,
-                               Patch as _VMSSPatch)
+                               Patch as _VMSSPatch,
+                               List as _VMSSList)
 from azure.cli.core.aaz import AAZUndefined, has_value
 from .._vm_utils import IdentityType
 
@@ -131,6 +132,32 @@ class VMSSIdentityRemove(_VMSSPatch):
                 )
 
             return self.on_error(session.http_response)
+
+
+class VMSSList(_VMSSList):
+    class VirtualMachineScaleSetsList(_VMSSList.VirtualMachineScaleSetsList):
+        def _output(self, *args, **kwargs):
+            # Resolve flatten conflict
+            # When the type field conflicts, the type in inner layer is ignored and the outer layer is applied
+            for value in self.ctx.vars.instance.value:
+                if has_value(value.properties.virtual_machine_profile.extension_profile.extensions):
+                    for extension in value.properties.virtual_machine_profile.extension_profile.extensions:
+                        if has_value(extension.type):
+                            extension.type = AAZUndefined
+
+            return self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+
+    class VirtualMachineScaleSetsListAll(_VMSSList.VirtualMachineScaleSetsListAll):
+        def _output(self, *args, **kwargs):
+            # Resolve flatten conflict
+            # When the type field conflicts, the type in inner layer is ignored and the outer layer is applied
+            for value in self.ctx.vars.instance.value:
+                if has_value(value.properties.virtual_machine_profile.extension_profile.extensions):
+                    for extension in value.properties.virtual_machine_profile.extension_profile.extensions:
+                        if has_value(extension.type):
+                            extension.type = AAZUndefined
+
+            return self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
 
 
 def convert_show_result_to_snake_case(result):

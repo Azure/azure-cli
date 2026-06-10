@@ -186,7 +186,7 @@ class PostgreSQLFlexibleServerValidatorScenarioTest(ScenarioTest):
         invalid_tier = self.create_random_name('tier', RANDOM_VARIABLE_MAX_LENGTH)
         valid_tier = 'GeneralPurpose'
         invalid_backup_retention = 40
-        ha_value = 'ZoneRedundant'
+        zonal_resiliency_value = 'Enabled'
         valid_vnet_name = self.create_random_name('vnet', RANDOM_VARIABLE_MAX_LENGTH)
         invalid_vnet_name = self.create_random_name('vnet(/?\\)', RANDOM_VARIABLE_MAX_LENGTH)
         valid_subnet_name = self.create_random_name('subnet', RANDOM_VARIABLE_MAX_LENGTH)
@@ -194,7 +194,6 @@ class PostgreSQLFlexibleServerValidatorScenarioTest(ScenarioTest):
         valid_vnet_identifier = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resource-group/providers/Microsoft.Network/virtualNetworks/{}'.format(valid_vnet_name)
         invalid_vnet_identifier = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resource-group/providers/Microsoft.Network/virtualNetworks/{}'.format(invalid_vnet_name)
         valid_subnet_identifier = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resource-group/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(valid_vnet_name, valid_subnet_name)
-        invalid_subnet_identifier = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resource-group/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(invalid_vnet_name, invalid_subnet_name)
         valid_private_dns_zone = '{}.private.postgres.database.azure.com'.format(server_name)
         invalid_private_dns_zones = ['{}.postgres.database.azure.com'.format(server_name), 'invalidprivate.dns.zone', '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/resource-group/providers/Microsoft.Network/privateDnsZones/{}.invalid(/?\\)segment.postgres.database.azure.com'.format(server_name)]
 
@@ -223,24 +222,24 @@ class PostgreSQLFlexibleServerValidatorScenarioTest(ScenarioTest):
                  resource_group, server_name, location, invalid_backup_retention),
                  expect_failure=True)
 
-        # Create server with zone redundant high availability in a location that does not support it, because it's a single zone location.
-        self.cmd('postgres flexible-server create -g {} -n {} -l {} --high-availability {} '.format(
-                 resource_group, server_name, location, ha_value),
+        # Create server with zone redundant high availability in a location that does not support it, because it's a single zone location
+        self.cmd('postgres flexible-server create -g {} -n {} -l {} --zonal-resiliency {} '.format(
+                 resource_group, server_name, location, zonal_resiliency_value),
                  expect_failure=True)
 
-        # Create server with zone redundant high availability with a tier that does not support it.
-        self.cmd('postgres flexible-server create -g {} -n {} -l {} --tier Burstable --sku-name Standard_B1ms --high-availability {}'.format(
-                 resource_group, server_name, location, ha_value),
+        # Create server with zone redundant high availability with a tier that does not support it
+        self.cmd('postgres flexible-server create -g {} -n {} -l {} --tier Burstable --sku-name Standard_B1ms --zonal-resiliency {}'.format(
+                 resource_group, server_name, location, zonal_resiliency_value),
                  expect_failure=True)
 
-        # Create server with zone redundant high availability in a location that does not support it, because it's a single zone location.
-        self.cmd('postgres flexible-server create -g {} -n {} -l {} --tier GeneralPurpose --sku-name Standard_D4ds_v4 --high-availability {}'.format(
-                 resource_group, server_name, location, ha_value),
+        # Create server with zone redundant high availability in a location that does not support it, because it's a single zone location
+        self.cmd('postgres flexible-server create -g {} -n {} -l {} --tier GeneralPurpose --sku-name Standard_D4ds_v4 --zonal-resiliency {}'.format(
+                 resource_group, server_name, location, zonal_resiliency_value),
                  expect_failure=True)
 
-        # Create server with zone redundant high availability and forcing same zone for primary and standby.
-        self.cmd('postgres flexible-server create -g {} -n {} -l {} --tier GeneralPurpose --sku-name Standard_D2ads_v5 --high-availability {} --zone 1 --standby-zone 1'.format(
-                 resource_group, server_name, location, ha_value),
+        # Create server with zone redundant high availability and forcing same zone for primary and standby
+        self.cmd('postgres flexible-server create -g {} -n {} -l {} --tier GeneralPurpose --sku-name Standard_D2ads_v5 --zonal-resiliency {} --zone 1 --standby-zone 1'.format(
+                 resource_group, server_name, location, zonal_resiliency_value),
                  expect_failure=True)
 
         # Create server with private network arguments but without a private DNS zone.
@@ -370,9 +369,9 @@ class PostgreSQLFlexibleServerValidatorScenarioTest(ScenarioTest):
                  expect_failure=True)
 
         # Update server with high availability on a tier that does not support it
-        ha_value = 'ZoneRedundant'
-        self.cmd('postgres flexible-server update -g {} -n {} --high-availability {}'.format(
-                 resource_group, server_name, ha_value),
+        zonal_resiliency_value = 'Enabled'
+        self.cmd('postgres flexible-server update -g {} -n {} --zonal-resiliency {}'.format(
+                 resource_group, server_name, zonal_resiliency_value),
                  expect_failure=True)
 
         # Delete server

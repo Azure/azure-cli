@@ -142,8 +142,7 @@ class StorageArgumentContext(AzArgumentContext):
                            'the premium block blobs storage account type.')
 
         if t_encryption_services:
-            encryption_choices = list(
-                t_encryption_services._attribute_map.keys())  # pylint: disable=protected-access
+            encryption_choices = [s for s in vars(t_encryption_services).keys() if not s.startswith('_')]  # pylint: disable=protected-access
             self.argument('encryption_services', arg_type=get_enum_type(encryption_choices),
                           resource_type=ResourceType.MGMT_STORAGE, nargs='+',
                           validator=validate_encryption_services, help='Specifies which service(s) to encrypt.')

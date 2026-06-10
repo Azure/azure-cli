@@ -139,6 +139,7 @@ from azure.cli.command_modules.acs._validators import (
     validate_custom_ca_trust_certificates,
     validate_bootstrap_container_registry_resource_id,
     validate_gateway_prefix_size,
+    validate_artifact_streaming,
 )
 from azure.cli.core.commands.parameters import (
     edge_zone_type, file_type, get_enum_type,
@@ -1049,7 +1050,7 @@ def load_arguments(self, _):
             c.argument('weekday', help='Weekday on which maintenance can happen. e.g. Monday')
             c.argument('start_hour', type=int, help='Maintenance start hour of 1 hour window on the weekday. e.g. 1 means 1:00am - 2:00am')
             c.argument('schedule_type', arg_type=get_enum_type(schedule_types),
-                       help='Schedule type for non-default maintenance configuration.')
+                       help='Schedule type for maintenance configuration. For default configuration, only Weekly is supported.')
             c.argument('interval_days', type=int, help='The number of days between each set of occurrences for Daily schedule.')
             c.argument('interval_weeks', type=int, help='The number of weeks between each set of occurrences for Weekly schedule.')
             c.argument('interval_months', type=int, help='The number of months between each set of occurrences for AbsoluteMonthly or RelativeMonthly schedule.')
@@ -1135,6 +1136,7 @@ def load_arguments(self, _):
         c.argument("gateway_prefix_size", type=int, validator=validate_gateway_prefix_size)
         c.argument('localdns_config', help='Path to a JSON file to configure the local DNS profile for a new nodepool.')
         c.argument('workload_runtime', arg_type=get_enum_type(workload_runtime_types), help="The workload runtime to use on the nodepool.")
+        c.argument('enable_artifact_streaming', action='store_true', validator=validate_artifact_streaming)
 
     with self.argument_context('aks nodepool update', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='agent_pools') as c:
         c.argument('enable_cluster_autoscaler', options_list=[
@@ -1168,6 +1170,8 @@ def load_arguments(self, _):
         c.argument("if_none_match")
         c.argument('localdns_config', help='Path to a JSON file to configure the local DNS profile for a new nodepool.')
         c.argument('gpu_driver', arg_type=get_enum_type(gpu_driver_install_modes))
+        c.argument('enable_artifact_streaming', action='store_true', validator=validate_artifact_streaming)
+        c.argument('disable_artifact_streaming', action='store_true', validator=validate_artifact_streaming)
 
     with self.argument_context('aks nodepool upgrade') as c:
         c.argument('max_surge', validator=validate_max_surge)

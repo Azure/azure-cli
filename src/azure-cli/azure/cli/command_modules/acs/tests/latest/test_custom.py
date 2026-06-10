@@ -25,6 +25,7 @@ from azure.cli.command_modules.acs.addonconfiguration import (
 from azure.cli.command_modules.acs.custom import (
     _get_command_context,
     _update_addons,
+    aks_agentpool_upgrade,
     aks_enable_addons,
     aks_stop,
     is_monitoring_addon_enabled,
@@ -1454,6 +1455,42 @@ class TestAksEnableAddonsAutoHLSM(unittest.TestCase):
         _, kwargs = mock_ensure.call_args
         self.assertIsNone(kwargs.get("enable_high_log_scale_mode"))
 
+
+class AksAgentpoolUpgradeTest(unittest.TestCase):
+    def setUp(self):
+        self.cli = MockCLI()
+        self.cmd = MockCmd(self.cli)
+        self.models = AKSManagedClusterModels(self.cmd, ResourceType.MGMT_CONTAINERSERVICE)
+
+    @mock.patch("azure.cli.command_modules.acs.custom.sdk_no_wait")
+    def test_aks_agentpool_upgrade_sets_max_unavailable(self, mock_sdk_no_wait):
+        """Test that max_unavailable is set on upgrade_settings during agentpool upgrade."""
+        AgentPoolUpgradeSettings = self.cmd.get_models(
+            "AgentPoolUpgradeSettings",
+            resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+            operation_group="managed_clusters",
+        )
+        instance = mock.Mock()
+        instance.orchestrator_version = "1.32.0"
+        instance.provisioning_state = "Succeeded"
+        instance.upgrade_settings = AgentPoolUpgradeSettings()
+
+        client = mock.Mock()
+        client.get.return_value = instance
+
+        aks_agentpool_upgrade(
+            self.cmd,
+            client,
+            resource_group_name="rg",
+            cluster_name="cluster",
+            nodepool_name="nodepool1",
+            kubernetes_version="1.33.0",
+            max_unavailable="5",
+            yes=True,
+        )
+
+        self.assertEqual(instance.upgrade_settings.max_unavailable, "5")
+        mock_sdk_no_wait.assert_called_once()
 
 if __name__ == "__main__":
     unittest.main()
