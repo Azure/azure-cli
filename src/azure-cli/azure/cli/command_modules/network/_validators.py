@@ -668,7 +668,7 @@ def process_vpn_connection_create_namespace(cmd, namespace):
 
     _normalize_shared_key_fields(namespace)
 
-    if (namespace.local_gateway2 or namespace.vnet_gateway2) and not namespace.shared_key:
+    if (namespace.local_gateway2 or namespace.vnet_gateway2) and not namespace.shared_key and auth != 'certificate':
         raise CLIError('--shared-key is required for VNET-to-VNET or Site-to-Site connections.')
 
     if namespace.express_route_circuit2 and namespace.shared_key:
