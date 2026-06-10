@@ -42,7 +42,7 @@ from ._vm_diagnostics_templates import get_default_diag_config
 
 from ._actions import (load_images_from_aliases_doc, load_extension_images_thru_services,
                        load_images_thru_services, _get_latest_image_version_by_aaz)
-from ._client_factory import _compute_client_factory, cf_log_analytics, cf_log_analytics_data_sources, cf_vm_image_term
+from ._client_factory import cf_log_analytics, cf_log_analytics_data_sources, cf_vm_image_term
 
 from .aaz.latest.vm.disk import AttachDetachDataDisk
 from .aaz.latest.vm import Update as UpdateVM
