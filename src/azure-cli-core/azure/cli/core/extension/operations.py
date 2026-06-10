@@ -504,7 +504,7 @@ def list_versions(extension_name, index_url=None, cli_ctx=None):
             'name': extension_name,
             'version': version,
             'preview': is_preview_from_extension_meta(ext['metadata']),
-            'experimental': False,
+            'experimental': is_experimental_from_extension_meta(ext['metadata']),
             'installed': installed,
             'compatible': compatible
         })
