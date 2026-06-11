@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+from azure.cli.command_modules.acs._client_factory import get_container_service_client
 from azure.cli.command_modules.acs.azuremonitormetrics.addonput import addon_put
 from azure.cli.command_modules.acs.azuremonitormetrics.amg.link import link_grafana_instance
 from azure.cli.command_modules.acs.azuremonitormetrics.amw.helper import get_azure_monitor_workspace_resource
@@ -18,11 +19,49 @@ from azure.cli.command_modules.acs.azuremonitormetrics.helper import (
 )
 from azure.cli.command_modules.acs.azuremonitormetrics.recordingrules.create import create_rules
 from azure.cli.command_modules.acs.azuremonitormetrics.recordingrules.delete import delete_rules
-from azure.cli.core.azclierror import InvalidArgumentValueError
+from azure.cli.core.azclierror import CLIError, InvalidArgumentValueError, UnknownError
 from knack.log import get_logger
 
 
 logger = get_logger(__name__)
+
+
+# pylint: disable=line-too-long
+def _addon_put_with_control_plane(cmd, cluster_subscription, cluster_resource_group_name, cluster_name):
+    """Sibling of ``addon_put`` that ALSO flips ``metrics.controlPlane.enabled=True``.
+
+    Used by the greenfield ``aks create --enable-control-plane-metrics`` path. The
+    initial cluster PUT intentionally leaves ``control_plane`` unset so the RP does
+    not schedule the control-plane-metrics collection (CCP) pod before the DCRA is
+    created in postprocessing. Once the DCRA exists, we issue this PUT so the CCP
+    pod is scheduled with its DCRA already in place (race-free).
+    """
+    client = get_container_service_client(cmd.cli_ctx, cluster_subscription).managed_clusters
+    try:
+        mc = client.get(cluster_resource_group_name, cluster_name)
+    except CLIError as e:
+        raise UnknownError(e)
+    # Enable metrics if present and not already enabled (mirrors addon_put).
+    if hasattr(mc, "azure_monitor_profile") and mc.azure_monitor_profile:
+        if hasattr(mc.azure_monitor_profile, "metrics") and mc.azure_monitor_profile.metrics:
+            if getattr(mc.azure_monitor_profile.metrics, "enabled", None) is False:
+                mc.azure_monitor_profile.metrics.enabled = True
+            # Flip control plane now that DCRA exists.
+            try:
+                from azure.mgmt.containerservice.models import (
+                    ManagedClusterAzureMonitorProfileMetricsControlPlane,
+                )
+                mc.azure_monitor_profile.metrics.control_plane = (
+                    ManagedClusterAzureMonitorProfileMetricsControlPlane(enabled=True)
+                )
+            except ImportError:
+                # Fallback for SDK versions that don't expose the model directly:
+                # set a dict that the generated client will serialize as the property.
+                mc.azure_monitor_profile.metrics.control_plane = {"enabled": True}
+    try:
+        client.begin_create_or_update(cluster_resource_group_name, cluster_name, mc)
+    except Exception as e:
+        raise UnknownError(e)
 
 
 # pylint: disable=line-too-long
@@ -49,7 +88,15 @@ def link_azure_monitor_profile_artifacts(
     create_rules(cmd, cluster_subscription, cluster_resource_group_name, cluster_name, azure_monitor_workspace_resource_id, azure_monitor_workspace_location, raw_parameters)
     # if aks cluster create flow -> do a PUT on the AKS cluster to enable the addon
     if create_flow:
-        addon_put(cmd, cluster_subscription, cluster_resource_group_name, cluster_name)
+        # If --enable-control-plane-metrics was specified on create, flip
+        # metrics.controlPlane.enabled HERE (after DCRA creation) instead of on
+        # the initial cluster PUT. This avoids the CCP pod being scheduled before
+        # its DCRA exists (which would cause CrashLoopBackOff until reconciliation).
+        enable_cp = bool(raw_parameters and raw_parameters.get("enable_control_plane_metrics"))
+        if enable_cp:
+            _addon_put_with_control_plane(cmd, cluster_subscription, cluster_resource_group_name, cluster_name)
+        else:
+            addon_put(cmd, cluster_subscription, cluster_resource_group_name, cluster_name)
 
 
 # pylint: disable=line-too-long
