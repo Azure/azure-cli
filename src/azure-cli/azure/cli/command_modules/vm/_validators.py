@@ -23,7 +23,6 @@ from azure.cli.command_modules.vm._template_builder import StorageProfile
 from azure.cli.core import keys
 from azure.core.exceptions import ResourceNotFoundError
 
-from ._client_factory import _compute_client_factory
 from ._actions import _get_latest_image_version_by_aaz
 
 
