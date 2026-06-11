@@ -352,7 +352,12 @@ def _aks_browse(
         return return_msg
 
     # otherwise open the kube-dashboard addon
-    if not which('kubectl'):
+    # Resolve kubectl to an absolute path from PATH so subprocess does not
+    # fall back to searching the current working directory (Windows
+    # CreateProcess), which could execute a repo-controlled kubectl(.exe)
+    # against the temporary kubeconfig.
+    kubectl_path = which('kubectl')
+    if not kubectl_path:
         raise FileOperationError('Can not find kubectl executable in PATH')
 
     fd, browse_path = tempfile.mkstemp()
@@ -364,7 +369,7 @@ def _aks_browse(
         try:
             dashboard_pod = subprocess.check_output(
                 [
-                    "kubectl",
+                    kubectl_path,
                     "get",
                     "pods",
                     "--kubeconfig",
@@ -394,7 +399,7 @@ def _aks_browse(
         try:
             dashboard_port = subprocess.check_output(
                 [
-                    "kubectl",
+                    kubectl_path,
                     "get",
                     "pods",
                     "--kubeconfig",
@@ -456,7 +461,7 @@ def _aks_browse(
             try:
                 subprocess.check_output(
                     [
-                        "kubectl",
+                        kubectl_path,
                         "--kubeconfig",
                         browse_path,
                         "proxy",
@@ -478,7 +483,7 @@ def _aks_browse(
                         logger.warning(
                             'The "--listen-address" argument will be ignored.')
                     try:
-                        subprocess.call(["kubectl", "--kubeconfig",
+                        subprocess.call([kubectl_path, "--kubeconfig",
                                         browse_path, "proxy", "--port", listen_port], timeout=timeout)
                     except subprocess.TimeoutExpired:
                         logger.warning(
@@ -2191,7 +2196,12 @@ def aks_update_credentials(cmd, client, resource_group_name, name,
 
 
 def aks_check_acr(cmd, client, resource_group_name, name, acr, node_name=None):
-    if not which("kubectl"):
+    # Resolve kubectl to an absolute path from PATH. Passing a bare "kubectl"
+    # to subprocess lets Windows CreateProcess search the current working
+    # directory first, allowing a repo-controlled kubectl(.exe) to run and read
+    # the temporary kubeconfig credentials. Always invoke the resolved path.
+    kubectl_path = which("kubectl")
+    if not kubectl_path:
         raise ValidationError("Can not find kubectl executable in PATH")
 
     return_msg = None
@@ -2204,7 +2214,7 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr, node_name=None):
         # Get kubectl minor version
         kubectl_minor_version = -1
         try:
-            kubectl_cmd = ["kubectl", "version", "-o", "json", "--kubeconfig", browse_path]
+            kubectl_cmd = [kubectl_path, "version", "-o", "json", "--kubeconfig", browse_path]
             output = subprocess.Popen(kubectl_cmd, stdout=subprocess.PIPE)
             jsonS, _ = output.communicate()
             kubectl_version = json.loads(jsonS)
@@ -2279,7 +2289,7 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr, node_name=None):
 
         try:
             cmd = [
-                "kubectl",
+                kubectl_path,
                 "run",
                 "--kubeconfig",
                 browse_path,
