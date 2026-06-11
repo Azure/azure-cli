@@ -4121,6 +4121,10 @@ class NetworkCrossRegionLoadBalancerScenarioTest(ScenarioTest):
             self.check("loadBalancer.frontendIPConfigurations[0].properties.publicIPAddress.contains(id, '{pub_ip}')", True)
         ])
 
+        self.cmd('network cross-region-lb list', checks=[
+            self.check('type(@)', 'array'),
+            self.check("length([?type == '{rt}']) == length(@)", True)
+        ])
         self.cmd('network cross-region-lb list --resource-group {rg}', checks=[
             self.check('type(@)', 'array'),
             self.check("length([?type == '{rt}']) == length(@)", True),
@@ -4329,6 +4333,10 @@ class NetworkLoadBalancerScenarioTest(ScenarioTest):
             self.check("loadBalancer.frontendIPConfigurations[0].properties.publicIPAddress.contains(id, '{pub_ip}')", True)
         ])
 
+        self.cmd('network lb list', checks=[
+            self.check('type(@)', 'array'),
+            self.check("length([?type == '{rt}']) == length(@)", True)
+        ])
         self.cmd('network lb list --resource-group {rg}', checks=[
             self.check('type(@)', 'array'),
             self.check("length([?type == '{rt}']) == length(@)", True),

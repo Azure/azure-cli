@@ -24,6 +24,7 @@ class List(AAZCommand):
     _aaz_info = {
         "version": "2025-07-01",
         "resources": [
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.network/loadbalancers", "2025-07-01"],
             ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/loadbalancers", "2025-07-01"],
         ]
     }
@@ -45,14 +46,17 @@ class List(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.resource_group = AAZResourceGroupNameArg(
-            required=True,
-        )
+        _args_schema.resource_group = AAZResourceGroupNameArg()
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.LoadBalancersList(ctx=self.ctx)()
+        condition_0 = has_value(self.ctx.subscription_id) and has_value(self.ctx.args.resource_group) is not True
+        condition_1 = has_value(self.ctx.args.resource_group) and has_value(self.ctx.subscription_id)
+        if condition_0:
+            self.LoadBalancersListAll(ctx=self.ctx)()
+        if condition_1:
+            self.LoadBalancersList(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -67,6 +71,377 @@ class List(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
         next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
         return result, next_link
+
+    class LoadBalancersListAll(AAZHttpOperation):
+        CLIENT_TYPE = "MgmtClient"
+
+        def __call__(self, *args, **kwargs):
+            request = self.make_request()
+            session = self.client.send_request(request=request, stream=False, **kwargs)
+            if session.http_response.status_code in [200]:
+                return self.on_200(session)
+
+            return self.on_error(session.http_response)
+
+        @property
+        def url(self):
+            return self.client.format_url(
+                "/subscriptions/{subscriptionId}/providers/Microsoft.Network/loadBalancers",
+                **self.url_parameters
+            )
+
+        @property
+        def method(self):
+            return "GET"
+
+        @property
+        def error_format(self):
+            return "ODataV4Format"
+
+        @property
+        def url_parameters(self):
+            parameters = {
+                **self.serialize_url_param(
+                    "subscriptionId", self.ctx.subscription_id,
+                    required=True,
+                ),
+            }
+            return parameters
+
+        @property
+        def query_parameters(self):
+            parameters = {
+                **self.serialize_query_param(
+                    "api-version", "2025-07-01",
+                    required=True,
+                ),
+            }
+            return parameters
+
+        @property
+        def header_parameters(self):
+            parameters = {
+                **self.serialize_header_param(
+                    "Accept", "application/json",
+                ),
+            }
+            return parameters
+
+        def on_200(self, session):
+            data = self.deserialize_http_content(session)
+            self.ctx.set_var(
+                "instance",
+                data,
+                schema_builder=self._build_schema_on_200
+            )
+
+        _schema_on_200 = None
+
+        @classmethod
+        def _build_schema_on_200(cls):
+            if cls._schema_on_200 is not None:
+                return cls._schema_on_200
+
+            cls._schema_on_200 = AAZObjectType()
+
+            _schema_on_200 = cls._schema_on_200
+            _schema_on_200.next_link = AAZStrType(
+                serialized_name="nextLink",
+            )
+            _schema_on_200.value = AAZListType(
+                flags={"required": True},
+            )
+
+            value = cls._schema_on_200.value
+            value.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element
+            _element.etag = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.extended_location = AAZObjectType(
+                serialized_name="extendedLocation",
+            )
+            _ListHelper._build_schema_common_extended_location_read(_element.extended_location)
+            _element.id = AAZStrType()
+            _element.location = AAZStrType()
+            _element.name = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
+            _element.sku = AAZObjectType()
+            _element.tags = AAZDictType()
+            _element.type = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            properties = cls._schema_on_200.value.Element.properties
+            properties.backend_address_pools = AAZListType(
+                serialized_name="backendAddressPools",
+            )
+            properties.frontend_ip_configurations = AAZListType(
+                serialized_name="frontendIPConfigurations",
+            )
+            properties.inbound_nat_pools = AAZListType(
+                serialized_name="inboundNatPools",
+            )
+            properties.inbound_nat_rules = AAZListType(
+                serialized_name="inboundNatRules",
+            )
+            properties.load_balancing_rules = AAZListType(
+                serialized_name="loadBalancingRules",
+            )
+            properties.outbound_rules = AAZListType(
+                serialized_name="outboundRules",
+            )
+            properties.probes = AAZListType()
+            properties.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
+                flags={"read_only": True},
+            )
+            properties.resource_guid = AAZStrType(
+                serialized_name="resourceGuid",
+                flags={"read_only": True},
+            )
+            properties.scope = AAZStrType()
+
+            backend_address_pools = cls._schema_on_200.value.Element.properties.backend_address_pools
+            backend_address_pools.Element = AAZObjectType()
+            _ListHelper._build_schema_common_backend_address_pool_read(backend_address_pools.Element)
+
+            frontend_ip_configurations = cls._schema_on_200.value.Element.properties.frontend_ip_configurations
+            frontend_ip_configurations.Element = AAZObjectType()
+            _ListHelper._build_schema_common_frontend_ip_configuration_read(frontend_ip_configurations.Element)
+
+            inbound_nat_pools = cls._schema_on_200.value.Element.properties.inbound_nat_pools
+            inbound_nat_pools.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.inbound_nat_pools.Element
+            _element.etag = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.id = AAZStrType()
+            _element.name = AAZStrType()
+            _element.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
+            _element.type = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            properties = cls._schema_on_200.value.Element.properties.inbound_nat_pools.Element.properties
+            properties.backend_port = AAZIntType(
+                serialized_name="backendPort",
+                flags={"required": True},
+            )
+            properties.enable_floating_ip = AAZBoolType(
+                serialized_name="enableFloatingIP",
+            )
+            properties.enable_tcp_reset = AAZBoolType(
+                serialized_name="enableTcpReset",
+            )
+            properties.frontend_ip_configuration = AAZObjectType(
+                serialized_name="frontendIPConfiguration",
+            )
+            _ListHelper._build_schema_common_sub_resource_read(properties.frontend_ip_configuration)
+            properties.frontend_port_range_end = AAZIntType(
+                serialized_name="frontendPortRangeEnd",
+                flags={"required": True},
+            )
+            properties.frontend_port_range_start = AAZIntType(
+                serialized_name="frontendPortRangeStart",
+                flags={"required": True},
+            )
+            properties.idle_timeout_in_minutes = AAZIntType(
+                serialized_name="idleTimeoutInMinutes",
+            )
+            properties.protocol = AAZStrType(
+                flags={"required": True},
+            )
+            properties.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
+                flags={"read_only": True},
+            )
+
+            inbound_nat_rules = cls._schema_on_200.value.Element.properties.inbound_nat_rules
+            inbound_nat_rules.Element = AAZObjectType()
+            _ListHelper._build_schema_common_inbound_nat_rule_read(inbound_nat_rules.Element)
+
+            load_balancing_rules = cls._schema_on_200.value.Element.properties.load_balancing_rules
+            load_balancing_rules.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.load_balancing_rules.Element
+            _element.etag = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.id = AAZStrType()
+            _element.name = AAZStrType()
+            _element.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
+            _element.type = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            properties = cls._schema_on_200.value.Element.properties.load_balancing_rules.Element.properties
+            properties.backend_address_pool = AAZObjectType(
+                serialized_name="backendAddressPool",
+            )
+            _ListHelper._build_schema_common_sub_resource_read(properties.backend_address_pool)
+            properties.backend_address_pools = AAZListType(
+                serialized_name="backendAddressPools",
+            )
+            properties.backend_port = AAZIntType(
+                serialized_name="backendPort",
+            )
+            properties.disable_outbound_snat = AAZBoolType(
+                serialized_name="disableOutboundSnat",
+            )
+            properties.enable_connection_tracking = AAZBoolType(
+                serialized_name="enableConnectionTracking",
+            )
+            properties.enable_floating_ip = AAZBoolType(
+                serialized_name="enableFloatingIP",
+            )
+            properties.enable_tcp_reset = AAZBoolType(
+                serialized_name="enableTcpReset",
+            )
+            properties.frontend_ip_configuration = AAZObjectType(
+                serialized_name="frontendIPConfiguration",
+            )
+            _ListHelper._build_schema_common_sub_resource_read(properties.frontend_ip_configuration)
+            properties.frontend_port = AAZIntType(
+                serialized_name="frontendPort",
+                flags={"required": True},
+            )
+            properties.idle_timeout_in_minutes = AAZIntType(
+                serialized_name="idleTimeoutInMinutes",
+            )
+            properties.load_distribution = AAZStrType(
+                serialized_name="loadDistribution",
+            )
+            properties.probe = AAZObjectType()
+            _ListHelper._build_schema_common_sub_resource_read(properties.probe)
+            properties.protocol = AAZStrType(
+                flags={"required": True},
+            )
+            properties.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
+                flags={"read_only": True},
+            )
+
+            backend_address_pools = cls._schema_on_200.value.Element.properties.load_balancing_rules.Element.properties.backend_address_pools
+            backend_address_pools.Element = AAZObjectType()
+            _ListHelper._build_schema_common_sub_resource_read(backend_address_pools.Element)
+
+            outbound_rules = cls._schema_on_200.value.Element.properties.outbound_rules
+            outbound_rules.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.outbound_rules.Element
+            _element.etag = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.id = AAZStrType()
+            _element.name = AAZStrType()
+            _element.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
+            _element.type = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            properties = cls._schema_on_200.value.Element.properties.outbound_rules.Element.properties
+            properties.allocated_outbound_ports = AAZIntType(
+                serialized_name="allocatedOutboundPorts",
+            )
+            properties.backend_address_pool = AAZObjectType(
+                serialized_name="backendAddressPool",
+                flags={"required": True},
+            )
+            _ListHelper._build_schema_common_sub_resource_read(properties.backend_address_pool)
+            properties.enable_tcp_reset = AAZBoolType(
+                serialized_name="enableTcpReset",
+            )
+            properties.frontend_ip_configurations = AAZListType(
+                serialized_name="frontendIPConfigurations",
+                flags={"required": True},
+            )
+            properties.idle_timeout_in_minutes = AAZIntType(
+                serialized_name="idleTimeoutInMinutes",
+            )
+            properties.protocol = AAZStrType(
+                flags={"required": True},
+            )
+            properties.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
+                flags={"read_only": True},
+            )
+
+            frontend_ip_configurations = cls._schema_on_200.value.Element.properties.outbound_rules.Element.properties.frontend_ip_configurations
+            frontend_ip_configurations.Element = AAZObjectType()
+            _ListHelper._build_schema_common_sub_resource_read(frontend_ip_configurations.Element)
+
+            probes = cls._schema_on_200.value.Element.properties.probes
+            probes.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.probes.Element
+            _element.etag = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.id = AAZStrType()
+            _element.name = AAZStrType()
+            _element.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
+            _element.type = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            properties = cls._schema_on_200.value.Element.properties.probes.Element.properties
+            properties.interval_in_seconds = AAZIntType(
+                serialized_name="intervalInSeconds",
+            )
+            properties.load_balancing_rules = AAZListType(
+                serialized_name="loadBalancingRules",
+                flags={"read_only": True},
+            )
+            properties.no_healthy_backends_behavior = AAZStrType(
+                serialized_name="noHealthyBackendsBehavior",
+            )
+            properties.number_of_probes = AAZIntType(
+                serialized_name="numberOfProbes",
+            )
+            properties.port = AAZIntType(
+                flags={"required": True},
+            )
+            properties.probe_threshold = AAZIntType(
+                serialized_name="probeThreshold",
+            )
+            properties.protocol = AAZStrType(
+                flags={"required": True},
+            )
+            properties.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
+                flags={"read_only": True},
+            )
+            properties.request_path = AAZStrType(
+                serialized_name="requestPath",
+            )
+
+            load_balancing_rules = cls._schema_on_200.value.Element.properties.probes.Element.properties.load_balancing_rules
+            load_balancing_rules.Element = AAZObjectType()
+            _ListHelper._build_schema_common_sub_resource_read(load_balancing_rules.Element)
+
+            sku = cls._schema_on_200.value.Element.sku
+            sku.name = AAZStrType()
+            sku.tier = AAZStrType()
+
+            tags = cls._schema_on_200.value.Element.tags
+            tags.Element = AAZStrType()
+
+            return cls._schema_on_200
 
     class LoadBalancersList(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
