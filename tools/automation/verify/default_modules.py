@@ -25,9 +25,13 @@ def get_cli_dependencies(build_folder):
     # ``metadata.json`` artifact, which only ``wheel==0.30.0`` writes into
     # ``.dist-info/`` (removed in wheel>=0.31.0, see pypa/wheel#195). This lets
     # the CLI wheel be built with any modern wheel/setuptools version.
+    # ``requires_dist`` entries are full PEP 508 strings (e.g. ``azure-cli-foo==1.2.3``
+    # or with markers); normalize them to bare distribution names so callers can
+    # compare against module names directly.
     from pkginfo import Wheel
+    from packaging.requirements import Requirement
     print('Load metadata from {}'.format(azure_cli_wheel))
-    return list(Wheel(azure_cli_wheel).requires_dist or [])
+    return [Requirement(r).name for r in (Wheel(azure_cli_wheel).requires_dist or [])]
 
 
 def verify_default_modules(args):
