@@ -5,8 +5,7 @@
 
 import unittest
 
-from azure.keyvault.keys import JsonWebKey, KeyProperties, KeyVaultKey
-from azure.keyvault.keys._models import DeletedKey
+from azure.keyvault.keys import DeletedKey, JsonWebKey, KeyProperties, KeyVaultKey
 
 from azure.cli.command_modules.keyvault._transformers import (
     transform_key_list_output,
