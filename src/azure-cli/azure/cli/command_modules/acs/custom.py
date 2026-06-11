@@ -359,6 +359,7 @@ def _aks_browse(
     kubectl_path = which('kubectl')
     if not kubectl_path:
         raise FileOperationError('Can not find kubectl executable in PATH')
+    kubectl_path = os.path.abspath(kubectl_path)
 
     fd, browse_path = tempfile.mkstemp()
     try:
@@ -2203,6 +2204,7 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr, node_name=None):
     kubectl_path = which("kubectl")
     if not kubectl_path:
         raise ValidationError("Can not find kubectl executable in PATH")
+    kubectl_path = os.path.abspath(kubectl_path)
 
     return_msg = None
     fd, browse_path = tempfile.mkstemp()
