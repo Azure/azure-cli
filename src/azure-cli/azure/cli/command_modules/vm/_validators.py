@@ -2147,7 +2147,7 @@ def process_snapshot_create_namespace(cmd, namespace):
                     from azure.cli.core.util import parse_proxy_resource_id
                     result = parse_proxy_resource_id(namespace.source_disk or namespace.source_snapshot)
                     try:
-                        source_info, _ = _get_disk_or_snapshot_info(cmd.cli_ctx,
+                        source_info, _ = _get_disk_or_snapshot_info_by_aaz(cmd.cli_ctx,
                                                                     result['resource_group'],
                                                                     result['name'])
                     except Exception:  # pylint: disable=broad-except
@@ -2161,7 +2161,7 @@ def process_snapshot_create_namespace(cmd, namespace):
                     get_default_location_from_resource_group(cmd, namespace)
                 # if the source location differs from target location, then it's copy_start scenario
                 if namespace.incremental:
-                    namespace.copy_start = source_info.location != namespace.location
+                    namespace.copy_start = source_info.get('location') != namespace.location
         except HttpResponseError:
             raise ArgumentUsageError(usage_error)
 
@@ -2231,11 +2231,11 @@ def _figure_out_storage_source(cli_ctx, resource_group_name, source):
     elif '/restorepoints/' in source.lower():
         source_restore_point = source
     else:
-        source_info, is_snapshot = _get_disk_or_snapshot_info(cli_ctx, resource_group_name, source)
+        source_info, is_snapshot = _get_disk_or_snapshot_info_by_aaz(cli_ctx, resource_group_name, source)
         if is_snapshot:
-            source_snapshot = source_info.id
+            source_snapshot = source_info.get('id')
         else:
-            source_disk = source_info.id
+            source_disk = source_info.get('id')
 
     return (source_blob_uri, source_disk, source_snapshot, source_restore_point, source_info)
 
@@ -2262,19 +2262,6 @@ def _figure_out_storage_source_by_aaz(cli_ctx, resource_group_name, source):
             source_disk = source_info.get('id')
 
     return (source_blob_uri, source_disk, source_snapshot, source_restore_point, source_info)
-
-
-def _get_disk_or_snapshot_info(cli_ctx, resource_group_name, source):
-    compute_client = _compute_client_factory(cli_ctx)
-    is_snapshot = True
-
-    try:
-        info = compute_client.snapshots.get(resource_group_name, source)
-    except ResourceNotFoundError:
-        is_snapshot = False
-        info = compute_client.disks.get(resource_group_name, source)
-
-    return info, is_snapshot
 
 
 def _get_disk_or_snapshot_info_by_aaz(cli_ctx, resource_group_name, source):
