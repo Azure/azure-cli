@@ -6006,7 +6006,7 @@ class AKSManagedClusterContext(BaseAKSContext):
                         "Specify --enable-azure-monitor-metrics or run on a cluster that already has "
                         "Azure Monitor metrics enabled."
                     )
-        return enable_control_plane_metrics
+        return bool(enable_control_plane_metrics)
 
     def get_enable_control_plane_metrics(self) -> bool:
         """Obtain the value of enable_control_plane_metrics.
@@ -6031,7 +6031,7 @@ class AKSManagedClusterContext(BaseAKSContext):
                     "Cannot specify --enable-control-plane-metrics and --disable-control-plane-metrics "
                     "at the same time."
                 )
-        return disable_control_plane_metrics
+        return bool(disable_control_plane_metrics)
 
     def get_disable_control_plane_metrics(self) -> bool:
         """Obtain the value of disable_control_plane_metrics.

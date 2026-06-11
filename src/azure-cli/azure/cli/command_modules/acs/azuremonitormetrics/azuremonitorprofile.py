@@ -40,7 +40,7 @@ def _addon_put_with_control_plane(cmd, cluster_subscription, cluster_resource_gr
     try:
         mc = client.get(cluster_resource_group_name, cluster_name)
     except CLIError as e:
-        raise UnknownError(e)
+        raise UnknownError(str(e)) from e
     # Enable metrics if present and not already enabled (mirrors addon_put).
     if hasattr(mc, "azure_monitor_profile") and mc.azure_monitor_profile:
         if hasattr(mc.azure_monitor_profile, "metrics") and mc.azure_monitor_profile.metrics:
@@ -58,10 +58,17 @@ def _addon_put_with_control_plane(cmd, cluster_subscription, cluster_resource_gr
                 # Fallback for SDK versions that don't expose the model directly:
                 # set a dict that the generated client will serialize as the property.
                 mc.azure_monitor_profile.metrics.control_plane = {"enabled": True}
+    # Unlike the sibling ``addon_put`` (where ``metrics.enabled`` is already true on the
+    # cluster from the initial PUT and the postprocessing PUT is just a safety re-affirm),
+    # this is the ONLY place where ``controlPlane.enabled`` is set during ``aks create``.
+    # Wait for the LRO so the CP flip is durably persisted before the create command
+    # returns; otherwise callers / tests that read the cluster immediately could see the
+    # pre-flip state.
     try:
-        client.begin_create_or_update(cluster_resource_group_name, cluster_name, mc)
+        poller = client.begin_create_or_update(cluster_resource_group_name, cluster_name, mc)
+        poller.result()
     except Exception as e:
-        raise UnknownError(e)
+        raise UnknownError(str(e)) from e
 
 
 # pylint: disable=line-too-long
