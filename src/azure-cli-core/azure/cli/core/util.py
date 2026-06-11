@@ -1217,11 +1217,15 @@ def is_same_origin(url, endpoint):
     :rtype: bool
     """
     from urllib.parse import urlparse
+
+    if not isinstance(url, str) or not isinstance(endpoint, str):
+        return False
+
     try:
         url_parts = urlparse(url)
         endpoint_parts = urlparse(endpoint)
 
-    except ValueError:
+    except (TypeError, ValueError):
         return False
 
     # Require a real host on both sides to avoid false positives against non-URL endpoint values.
