@@ -112,7 +112,7 @@ def load_arguments(self, _):
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                    configured_default='appserviceplan', id_part='name',
                    local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
-        c.argument('number_of_workers', help='Number of workers to be allocated.', type=int, default=1)
+        c.argument('number_of_workers', help='Number of workers to be allocated.', type=int, default=None)
         c.ignore('max_burst')
 
     with self.argument_context('appservice plan create') as c:
