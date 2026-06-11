@@ -2148,8 +2148,8 @@ def process_snapshot_create_namespace(cmd, namespace):
                     result = parse_proxy_resource_id(namespace.source_disk or namespace.source_snapshot)
                     try:
                         source_info, _ = _get_disk_or_snapshot_info_by_aaz(cmd.cli_ctx,
-                                                                    result['resource_group'],
-                                                                    result['name'])
+                                                                           result['resource_group'],
+                                                                           result['name'])
                     except Exception:  # pylint: disable=broad-except
                         # There's a chance that the source doesn't exist, eg, vmss os disk.
                         # You can get the id of vmss os disk by
