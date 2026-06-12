@@ -5956,13 +5956,70 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         return self._get_disable_azure_monitor_metrics(enable_validation=True)
 
+    def _validate_control_plane_metrics_params(self) -> None:
+        """Validate the --enable/--disable-control-plane-metrics flag combo and
+        its interaction with --enable/--disable-azure-monitor-metrics.
+
+        Raises MutuallyExclusiveArgumentError or RequiredArgumentMissingError on
+        an invalid combination. Returns nothing — use this when you want to
+        surface validation errors without consuming a parameter value.
+
+        Reads raw_param directly to avoid recursing back into the getters that
+        themselves delegate here when enable_validation is True.
+        """
+        enable_cp = self.raw_param.get("enable_control_plane_metrics")
+        disable_cp = self.raw_param.get("disable_control_plane_metrics")
+        # On create, the property may already be set on the incoming mc object.
+        if self.decorator_mode == DecoratorMode.CREATE:
+            if (
+                self.mc and
+                self.mc.azure_monitor_profile and
+                self.mc.azure_monitor_profile.metrics and
+                self.mc.azure_monitor_profile.metrics.control_plane
+            ):
+                enable_cp = self.mc.azure_monitor_profile.metrics.control_plane.enabled
+
+        if enable_cp and disable_cp:
+            raise MutuallyExclusiveArgumentError(
+                "Cannot specify --enable-control-plane-metrics and --disable-control-plane-metrics "
+                "at the same time."
+            )
+
+        if enable_cp:
+            # Reject combining enable-control-plane-metrics with disable-azure-monitor-metrics
+            # in the same command — the resulting payload would be inconsistent.
+            if self._get_disable_azure_monitor_metrics(False):
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify --enable-control-plane-metrics together with "
+                    "--disable-azure-monitor-metrics."
+                )
+            # Must have Azure Monitor metrics enabled (either already or in this command).
+            already_enabled = (
+                self.mc and
+                self.mc.azure_monitor_profile and
+                self.mc.azure_monitor_profile.metrics and
+                self.mc.azure_monitor_profile.metrics.enabled
+            )
+            enabling_now = self._get_enable_azure_monitor_metrics(False)
+            if not already_enabled and not enabling_now:
+                raise RequiredArgumentMissingError(
+                    "--enable-control-plane-metrics requires Azure Monitor metrics to be enabled. "
+                    "Specify --enable-azure-monitor-metrics or run on a cluster that already has "
+                    "Azure Monitor metrics enabled."
+                )
+
+    def validate_control_plane_metrics_params(self) -> None:
+        """Public entry-point for validating the control-plane-metrics flag combo
+        without consuming a parameter value. Useful in code paths that need to
+        surface validation errors even when the parent --enable-azure-monitor-metrics
+        flag was not passed.
+        """
+        self._validate_control_plane_metrics_params()
+
     def _get_enable_control_plane_metrics(self, enable_validation: bool = False) -> bool:
         """Internal function to obtain the value of enable_control_plane_metrics.
-        This function supports the option of enable_validation. When enabled, if both
-        enable_control_plane_metrics and disable_control_plane_metrics are specified, raise a
-        MutuallyExclusiveArgumentError. Additionally, --enable-control-plane-metrics requires
-        Azure Monitor metrics to either already be enabled on the cluster or to be enabled in
-        the same command via --enable-azure-monitor-metrics.
+        When enable_validation is True, the flag combinations are validated via
+        _validate_control_plane_metrics_params before the value is returned.
 
         :return: bool
         """
@@ -5977,35 +6034,8 @@ class AKSManagedClusterContext(BaseAKSContext):
                 self.mc.azure_monitor_profile.metrics.control_plane
             ):
                 enable_control_plane_metrics = self.mc.azure_monitor_profile.metrics.control_plane.enabled
-        # This parameter does not need dynamic completion.
         if enable_validation:
-            if enable_control_plane_metrics and self._get_disable_control_plane_metrics(False):
-                raise MutuallyExclusiveArgumentError(
-                    "Cannot specify --enable-control-plane-metrics and --disable-control-plane-metrics "
-                    "at the same time."
-                )
-            if enable_control_plane_metrics:
-                # Reject combining enable-control-plane-metrics with disable-azure-monitor-metrics
-                # in the same command — the resulting payload would be inconsistent.
-                if self._get_disable_azure_monitor_metrics(False):
-                    raise MutuallyExclusiveArgumentError(
-                        "Cannot specify --enable-control-plane-metrics together with "
-                        "--disable-azure-monitor-metrics."
-                    )
-                # Must have Azure Monitor metrics enabled (either already or in this command).
-                already_enabled = (
-                    self.mc and
-                    self.mc.azure_monitor_profile and
-                    self.mc.azure_monitor_profile.metrics and
-                    self.mc.azure_monitor_profile.metrics.enabled
-                )
-                enabling_now = self._get_enable_azure_monitor_metrics(False)
-                if not already_enabled and not enabling_now:
-                    raise RequiredArgumentMissingError(
-                        "--enable-control-plane-metrics requires Azure Monitor metrics to be enabled. "
-                        "Specify --enable-azure-monitor-metrics or run on a cluster that already has "
-                        "Azure Monitor metrics enabled."
-                    )
+            self._validate_control_plane_metrics_params()
         return bool(enable_control_plane_metrics)
 
     def get_enable_control_plane_metrics(self) -> bool:
@@ -6018,19 +6048,15 @@ class AKSManagedClusterContext(BaseAKSContext):
 
     def _get_disable_control_plane_metrics(self, enable_validation: bool = False) -> bool:
         """Internal function to obtain the value of disable_control_plane_metrics.
-        This function supports the option of enable_validation. When enabled, if both
-        enable_control_plane_metrics and disable_control_plane_metrics are specified, raise a
-        MutuallyExclusiveArgumentError.
+        When enable_validation is True, the flag combinations are validated via
+        _validate_control_plane_metrics_params before the value is returned.
+
         :return: bool
         """
         # Read the original value passed by the command.
         disable_control_plane_metrics = self.raw_param.get("disable_control_plane_metrics")
         if enable_validation:
-            if disable_control_plane_metrics and self._get_enable_control_plane_metrics(False):
-                raise MutuallyExclusiveArgumentError(
-                    "Cannot specify --enable-control-plane-metrics and --disable-control-plane-metrics "
-                    "at the same time."
-                )
+            self._validate_control_plane_metrics_params()
         return bool(disable_control_plane_metrics)
 
     def get_disable_control_plane_metrics(self) -> bool:
@@ -7799,10 +7825,11 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             ksm_metric_labels_allow_list = ""
         if ksm_metric_annotations_allow_list is None:
             ksm_metric_annotations_allow_list = ""
-        # Trigger control-plane-metrics validation even if the parent metrics flag was
-        # not specified, so users get a clear error instead of silent ignore when they
-        # pass --enable-control-plane-metrics on its own.
-        self.context.get_enable_control_plane_metrics()
+        # Surface control-plane-metrics flag combination errors even when the
+        # parent metrics flag was not specified, so users get a clear error
+        # instead of a silent ignore when they pass --enable-control-plane-metrics
+        # on its own.
+        self.context.validate_control_plane_metrics_params()
         if self.context.get_enable_azure_monitor_metrics():
             if mc.azure_monitor_profile is None:
                 mc.azure_monitor_profile = self.models.ManagedClusterAzureMonitorProfile()
