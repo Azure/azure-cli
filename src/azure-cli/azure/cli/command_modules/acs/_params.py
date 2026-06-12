@@ -579,7 +579,8 @@ def load_arguments(self, _):
             action='store_true',
             help=(
                 'Enable collection of Azure Monitor managed Prometheus control plane metrics for managed '
-                'cluster components (kube-apiserver, etcd, etc). Requires Azure Monitor metrics to be enabled '
+                'cluster components (controlplane-apiserver and controlplane-etcd targets by default). '
+                'Requires Azure Monitor metrics to be enabled '
                 '(already enabled or via --enable-azure-monitor-metrics).'
             ),
         )
@@ -828,7 +829,8 @@ def load_arguments(self, _):
             action='store_true',
             help=(
                 'Enable collection of Azure Monitor managed Prometheus control plane metrics for managed '
-                'cluster components (kube-apiserver, etcd, etc). Requires Azure Monitor metrics to be enabled '
+                'cluster components (controlplane-apiserver and controlplane-etcd targets by default). '
+                'Requires Azure Monitor metrics to be enabled '
                 '(already enabled or via --enable-azure-monitor-metrics).'
             ),
         )
