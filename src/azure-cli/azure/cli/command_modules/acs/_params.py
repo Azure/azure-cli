@@ -580,7 +580,7 @@ def load_arguments(self, _):
             help=(
                 'Enable collection of Azure Monitor managed Prometheus control plane metrics for managed '
                 'cluster components (kube-apiserver, etcd, etc). Requires Azure Monitor metrics to be enabled '
-                '(already enabled or via --enable-azure-monitor-metrics). See aka.ms/aks/controlplane-metrics.'
+                '(already enabled or via --enable-azure-monitor-metrics).'
             ),
         )
         c.argument('enable_azure_monitor_app_monitoring', action='store_true')
@@ -829,7 +829,7 @@ def load_arguments(self, _):
             help=(
                 'Enable collection of Azure Monitor managed Prometheus control plane metrics for managed '
                 'cluster components (kube-apiserver, etcd, etc). Requires Azure Monitor metrics to be enabled '
-                '(already enabled or via --enable-azure-monitor-metrics). See aka.ms/aks/controlplane-metrics.'
+                '(already enabled or via --enable-azure-monitor-metrics).'
             ),
         )
         c.argument(
