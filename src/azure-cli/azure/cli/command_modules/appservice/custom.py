@@ -8814,6 +8814,28 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
             raise ValidationError("Location is invalid. Use: az functionapp list-flexconsumption-locations")
         is_linux = True
 
+    # Show warnings for Consumption plan (Linux or Windows)
+    # Check if using --consumption-plan-location OR --plan with a consumption SKU (Dynamic tier)
+    plan_sku = getattr(plan_info, 'sku', None) if plan_info else None
+    plan_sku_tier = getattr(plan_sku, 'tier', None)
+    is_consumption_plan = consumption_plan_location is not None or (plan_info and plan_sku_tier == 'Dynamic')
+    if is_consumption_plan:
+        if is_linux:
+            logger.warning(
+                "Linux Consumption will reach EOL on September 30, 2028 and will no longer be supported. "
+                "Flex Consumption is now the recommended serverless hosting plan for Azure Functions. "
+                "It offers faster scaling, reduced cold starts, private networking, and more control over "
+                "performance and cost. Help link: "
+                "https://learn.microsoft.com/en-us/azure/azure-functions/migration/migrate-plan-consumption-to-flex"
+            )
+        else:
+            logger.warning(
+                "Flex Consumption is now the recommended serverless hosting plan for Azure Functions. "
+                "It offers faster scaling, reduced cold starts, private networking, and more control over "
+                "performance and cost. Help link: "
+                "https://learn.microsoft.com/en-us/azure/azure-functions/migration/migrate-plan-consumption-to-flex"
+            )
+
     if environment is not None:
         if consumption_plan_location is not None:
             raise ArgumentUsageError(
