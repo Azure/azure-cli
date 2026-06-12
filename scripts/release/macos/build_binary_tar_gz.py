@@ -138,8 +138,8 @@ def _load_template(path: Path) -> str:
 def find_homebrew_python() -> Path:
     """Find necessary Homebrew Python x.yz installation."""
     candidates = [
-        Path(f"/opt/homebrew/opt/python@{PYTHON_MAJOR_MINOR}/libexec/bin/python3"),
-        Path(f"/usr/local/opt/python@{PYTHON_MAJOR_MINOR}/libexec/bin/python3"),
+        Path(f"/opt/homebrew/opt/python@{PYTHON_MAJOR_MINOR}/libexec/bin/python"),
+        Path(f"/usr/local/opt/python@{PYTHON_MAJOR_MINOR}/libexec/bin/python"),
         Path(f"/opt/homebrew/bin/python{PYTHON_MAJOR_MINOR}"),
         Path(f"/usr/local/bin/python{PYTHON_MAJOR_MINOR}"),
     ]
@@ -157,7 +157,7 @@ def find_homebrew_python() -> Path:
             check=True,
         )
         prefix = Path(result.stdout.strip())
-        python_path = prefix / "libexec" / "bin" / "python3"
+        python_path = prefix / "libexec" / "bin" / "python"
         if python_path.exists() and _is_python_version(python_path, PYTHON_MAJOR_MINOR):
             print(f"Found Homebrew Python via brew --prefix: {python_path}")
             return python_path
