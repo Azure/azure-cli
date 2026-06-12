@@ -5956,7 +5956,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         return self._get_disable_azure_monitor_metrics(enable_validation=True)
 
-    def _validate_control_plane_metrics_params(self) -> None:
+    def validate_control_plane_metrics_params(self) -> None:
         """Validate the --enable/--disable-control-plane-metrics flag combo and
         its interaction with --enable/--disable-azure-monitor-metrics.
 
@@ -5964,8 +5964,8 @@ class AKSManagedClusterContext(BaseAKSContext):
         an invalid combination. Returns nothing — use this when you want to
         surface validation errors without consuming a parameter value.
 
-        Reads raw_param directly to avoid recursing back into the getters that
-        themselves delegate here when enable_validation is True.
+        Reads raw_param directly so the getters can also delegate here from
+        their enable_validation=True path without recursing.
         """
         enable_cp = self.raw_param.get("enable_control_plane_metrics")
         disable_cp = self.raw_param.get("disable_control_plane_metrics")
@@ -6008,18 +6008,10 @@ class AKSManagedClusterContext(BaseAKSContext):
                     "Azure Monitor metrics enabled."
                 )
 
-    def validate_control_plane_metrics_params(self) -> None:
-        """Public entry-point for validating the control-plane-metrics flag combo
-        without consuming a parameter value. Useful in code paths that need to
-        surface validation errors even when the parent --enable-azure-monitor-metrics
-        flag was not passed.
-        """
-        self._validate_control_plane_metrics_params()
-
     def _get_enable_control_plane_metrics(self, enable_validation: bool = False) -> bool:
         """Internal function to obtain the value of enable_control_plane_metrics.
         When enable_validation is True, the flag combinations are validated via
-        _validate_control_plane_metrics_params before the value is returned.
+        validate_control_plane_metrics_params before the value is returned.
 
         :return: bool
         """
@@ -6035,7 +6027,7 @@ class AKSManagedClusterContext(BaseAKSContext):
             ):
                 enable_control_plane_metrics = self.mc.azure_monitor_profile.metrics.control_plane.enabled
         if enable_validation:
-            self._validate_control_plane_metrics_params()
+            self.validate_control_plane_metrics_params()
         return bool(enable_control_plane_metrics)
 
     def get_enable_control_plane_metrics(self) -> bool:
@@ -6049,14 +6041,14 @@ class AKSManagedClusterContext(BaseAKSContext):
     def _get_disable_control_plane_metrics(self, enable_validation: bool = False) -> bool:
         """Internal function to obtain the value of disable_control_plane_metrics.
         When enable_validation is True, the flag combinations are validated via
-        _validate_control_plane_metrics_params before the value is returned.
+        validate_control_plane_metrics_params before the value is returned.
 
         :return: bool
         """
         # Read the original value passed by the command.
         disable_control_plane_metrics = self.raw_param.get("disable_control_plane_metrics")
         if enable_validation:
-            self._validate_control_plane_metrics_params()
+            self.validate_control_plane_metrics_params()
         return bool(disable_control_plane_metrics)
 
     def get_disable_control_plane_metrics(self) -> bool:
