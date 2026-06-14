@@ -52,7 +52,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         )
 
     def cmd(self, command, checks=None, expect_failure=False):
-        if (checks and self.is_live and
+        if (checks and
             os.environ.get('AZURE_CLI_TEST_RETRY_PROVISIONING_CHECK') == 'true'):
             normalized_checks = checks if isinstance(checks, (list, tuple)) else [checks]
             return self._cmd_with_retry(command, normalized_checks, expect_failure)
@@ -104,7 +104,10 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                 # Poll with exponential backoff + jitter until terminal state
                 for attempt in range(max_retries):
                     delay = base_delay * (2 ** attempt) + random.uniform(0, 1)
-                    time.sleep(delay)
+                    # Skip the sleep in replay; cassette entries are served
+                    # instantly and the backoff is meaningless.
+                    if self.is_live:
+                        time.sleep(delay)
                     poll_result = execute(self.cli_ctx, f'resource show --ids {resource_id}', expect_failure=False)
                     poll_data = poll_result.get_output_in_json()
                     current_provisioning_state = poll_data.get('provisioningState')

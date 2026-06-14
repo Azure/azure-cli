@@ -85,7 +85,7 @@ class TestShouldRetryForProvisioningState(unittest.TestCase):
 
 class TestCmdWithRetry(unittest.TestCase):
 
-    def _make_instance(self):
+    def _make_instance(self, is_live=True):
         from azure.cli.command_modules.acs.tests.latest.test_aks_commands import (
             AzureKubernetesServiceScenarioTest,
         )
@@ -93,6 +93,9 @@ class TestCmdWithRetry(unittest.TestCase):
         instance.kwargs = {}
         instance._apply_kwargs = lambda cmd: cmd
         instance.cli_ctx = MagicMock()
+        # is_live drives whether time.sleep runs during polling. Default True
+        # so existing tests behave as before; replay-mode tests pass False.
+        instance.is_live = is_live
         return instance
 
     def _result(self, data):
@@ -198,6 +201,32 @@ class TestCmdWithRetry(unittest.TestCase):
                 [JMESPathCheck('provisioningState', 'Succeeded')],
                 False,
             )
+
+    @patch.dict(os.environ, {'AZURE_CLI_TEST_PROVISIONING_MAX_RETRIES': '3', 'AZURE_CLI_TEST_PROVISIONING_BASE_DELAY': '0.01'})
+    @patch('time.sleep')
+    @patch('random.uniform', return_value=0)
+    @patch('azure.cli.testsdk.base.execute')
+    def test_replay_with_race_polls_captured_entries(self, mock_execute, _mock_random, mock_sleep):
+        # Reproduces the replay-mode race scenario: a cassette was recorded
+        # where the initial response showed 'Updating' and the subsequent
+        # poll responses were captured. In replay mode (is_live=False) the
+        # adapter must still poll, consuming the captured entries, so the
+        # assertion succeeds against the polled body. Without this, the
+        # check would fail against the stale initial 'Updating' response.
+        resource_id = '/subscriptions/xxx/resourceGroups/rg/providers/Microsoft.ContainerService/managedClusters/mc'
+        mock_execute.side_effect = [
+            self._result({'id': resource_id, 'provisioningState': 'Updating'}),
+            self._result({'provisioningState': 'Updating'}),
+            self._result({'provisioningState': 'Succeeded'}),
+        ]
+        self._make_instance(is_live=False)._cmd_with_retry(
+            'aks show',
+            [JMESPathCheck('provisioningState', 'Succeeded')],
+            False,
+        )
+        self.assertEqual(mock_execute.call_count, 3)
+        # No sleep in replay; the cassette serves polls instantly.
+        mock_sleep.assert_not_called()
 
 
 if __name__ == '__main__':
