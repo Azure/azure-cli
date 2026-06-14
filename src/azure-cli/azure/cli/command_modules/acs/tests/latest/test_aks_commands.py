@@ -130,8 +130,11 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                         f"provisioningState did not reach 'Succeeded' after {max_retries} retries. "
                         f"Final state: {current_provisioning_state}{final_etag_msg}"
                     )
-
-            # Provisioning checks already verified via polling, skip re-checking stale result
+                # Polled to 'Succeeded'; don't re-check `result` (stale body).
+            else:
+                # Did not poll (already Succeeded, or missing id/state).
+                # Run the assertion anyway so it can't be silently dropped.
+                result.assert_with_checks(provisioning_checks)
 
         # Run all non-provisioning checks against the original result
         if other_checks:

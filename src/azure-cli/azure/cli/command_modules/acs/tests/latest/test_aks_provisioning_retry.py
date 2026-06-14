@@ -164,5 +164,41 @@ class TestCmdWithRetry(unittest.TestCase):
         name_check.assert_called_once()
 
 
+    @patch.dict(os.environ, {'AZURE_CLI_TEST_PROVISIONING_MAX_RETRIES': '3', 'AZURE_CLI_TEST_PROVISIONING_BASE_DELAY': '0.01'})
+    @patch('time.sleep', return_value=None)
+    @patch('random.uniform', return_value=0)
+    @patch('azure.cli.testsdk.base.execute')
+    def test_missing_provisioning_state_fails_loudly(self, mock_execute, _mock_random, _mock_sleep):
+        # Regression: when the response body has no 'provisioningState',
+        # _should_retry_for_provisioning_state returns (False, None) and the
+        # adapter MUST still run the provisioning check against the result
+        # so the assertion fails loudly rather than being silently dropped.
+        from azure.cli.testsdk.exceptions import JMESPathCheckAssertionError
+        mock_execute.return_value = self._result({'id': '/rg/mc', 'name': 'mc'})
+        with self.assertRaises(JMESPathCheckAssertionError):
+            self._make_instance()._cmd_with_retry(
+                'aks show',
+                [JMESPathCheck('provisioningState', 'Succeeded')],
+                False,
+            )
+
+    @patch.dict(os.environ, {'AZURE_CLI_TEST_PROVISIONING_MAX_RETRIES': '3', 'AZURE_CLI_TEST_PROVISIONING_BASE_DELAY': '0.01'})
+    @patch('time.sleep', return_value=None)
+    @patch('random.uniform', return_value=0)
+    @patch('azure.cli.testsdk.base.execute')
+    def test_missing_id_fails_loudly(self, mock_execute, _mock_random, _mock_sleep):
+        # Regression: when the response body has no 'id', polling cannot
+        # proceed; the provisioning check MUST still run against the result
+        # rather than be silently dropped.
+        from azure.cli.testsdk.exceptions import JMESPathCheckAssertionError
+        mock_execute.return_value = self._result({'provisioningState': 'Updating'})
+        with self.assertRaises(JMESPathCheckAssertionError):
+            self._make_instance()._cmd_with_retry(
+                'aks show',
+                [JMESPathCheck('provisioningState', 'Succeeded')],
+                False,
+            )
+
+
 if __name__ == '__main__':
     unittest.main()
