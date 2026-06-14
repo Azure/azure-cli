@@ -1,4 +1,4 @@
-# --------------------------------------------------------------------------------------------
+﻿# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
@@ -9877,11 +9877,12 @@ def _get_latest_deployment_id(cmd, rg_name, name, deployment_status_url, slot, d
 
 def _check_runtimestatus_with_deploymentstatusapi(cmd, resource_group_name, name, slot,
                                                   deployment_status_url, is_async, timeout,
-                                                  deploy_params=None):
+                                                  deploy_params=None,
+                                                  build_logs='summary'):
     response_body = None
-    logger.warning('Polling the status of %s deployment. Start Time: %s UTC',
-                   "async" if is_async else "sync",
-                   datetime.datetime.now(datetime.timezone.utc))
+    timestamp = _utc_timestamp()
+    deployment_type = "async" if is_async else "sync"
+    logger.warning("%s  Polling the status of %s deployment...", timestamp, deployment_type)
     # verify if the app is a linux web app
     if deploy_params is not None:
         # Reuse the Site fetched (or cached) during the publish leg. Saves
@@ -9912,7 +9913,7 @@ def _check_runtimestatus_with_deploymentstatusapi(cmd, resource_group_name, name
                                                                   name, slot, deployment_id)
             response_body = _poll_deployment_runtime_status(cmd, resource_group_name, name, slot,
                                                             deploymentstatisapi_url, deployment_id, timeout,
-                                                            deploy_params=deploy_params)
+                                                            deploy_params=deploy_params, build_logs=build_logs)
             # incase we are unable to fetch response from deploymentstatus API
             # fallback to polling kudu for deployment status
             if response_body is None:
@@ -9923,19 +9924,197 @@ def _check_runtimestatus_with_deploymentstatusapi(cmd, resource_group_name, name
     return response_body
 
 
+def _utc_timestamp():
+    """Return current UTC time as HH:MM:SS string."""
+    return datetime.datetime.now(datetime.timezone.utc).strftime('%H:%M:%S')
+
+
+def _parse_log_time(log_time_str):
+    """Parse log_time from Kudu API (ISO 8601) into HH:MM:SS string in UTC.
+
+    Returns UTC-formatted timestamp, or None if parsing fails.
+    """
+    if not log_time_str:
+        return None
+    try:
+        # Kudu returns ISO 8601 with nanosecond precision: "2026-06-14T08:10:17.4127389Z"
+        # Python's fromisoformat() only supports up to 6 fractional digits (microseconds)
+        without_z = log_time_str.rstrip('Z')
+        if '.' in without_z:
+            date_part, fractional_seconds = without_z.rsplit('.', 1)
+            fractional_seconds = fractional_seconds[:6]  # truncate to microseconds
+            without_z = f"{date_part}.{fractional_seconds}"
+        utc_datetime = datetime.datetime.fromisoformat(without_z).replace(
+            tzinfo=datetime.timezone.utc)
+        return utc_datetime.strftime('%H:%M:%S')
+    except (ValueError, AttributeError):
+        return None
+
+
+def _fetch_kudu_log_entries(cmd, resource_group_name, webapp_name, slot, deployment_id):
+    """Fetch raw log entries from Kudu deployment log API.
+
+    Returns a list of (message, log_time, detail_entries) tuples, or None if fetching fails.
+    Each detail_entries is a list of (message, log_time) tuples from the details_url.
+    """
+    import requests
+    from azure.cli.core.util import should_disable_connection_verify
+
+    try:
+        headers = get_scm_site_headers(cmd.cli_ctx, webapp_name, resource_group_name, slot)
+        scm_url = _get_scm_url(cmd, resource_group_name, webapp_name, slot)
+        log_url = scm_url + f'/api/deployments/{deployment_id}/log'
+
+        response = requests.get(log_url, headers=headers,
+                                verify=not should_disable_connection_verify(),
+                                timeout=15)
+
+        if response.status_code != 200:
+            return None
+
+        log_entries = response.json()
+        if not isinstance(log_entries, list):
+            return None
+
+        results = []
+        for entry in log_entries:
+            message = (entry.get('message') or '').rstrip()
+            log_time = entry.get('log_time')
+            entry_id = entry.get('id') or log_time or message
+            details_url = entry.get('details_url')
+
+            detail_items = []
+            if details_url:
+                try:
+                    detail_response = requests.get(details_url, headers=headers,
+                                                   verify=not should_disable_connection_verify(),
+                                                   timeout=10)
+                    if detail_response.status_code == 200:
+                        detail_entries = detail_response.json()
+                        if isinstance(detail_entries, list):
+                            for detail in detail_entries:
+                                detail_msg = (detail.get('message') or '').rstrip()
+                                detail_time = detail.get('log_time')
+                                detail_id = detail.get('id')
+                                if detail_msg:
+                                    detail_items.append((detail_msg, detail_time, detail_id))
+                except Exception:  # pylint: disable=broad-except
+                    pass
+
+            results.append((message, log_time, entry_id, detail_items))
+
+        return results if results else None
+
+    except Exception:  # pylint: disable=broad-except
+        return None
+
+
+def _display_build_logs(cmd, resource_group_name, webapp_name, slot, deployment_id,
+                        log_formatter=None, seen_log_ids=None):
+    """Fetch and display build logs from Kudu.
+
+    Handles all log display scenarios:
+    - Real-time streaming during BuildInProgress (called every 5s)
+    - Retrospective display after fast/sync builds complete
+    - Deduplication via seen_log_ids across multiple calls
+
+    Passes through the formatter so summary/full/none modes are respected.
+    """
+    if seen_log_ids is None:
+        seen_log_ids = set()
+
+    entries = _fetch_kudu_log_entries(cmd, resource_group_name, webapp_name, slot, deployment_id)
+    if not entries:
+        return
+
+    for message, log_time, entry_key, detail_items in entries:
+        if entry_key and entry_key in seen_log_ids:
+            pass  # Still check details for new sub-entries
+        elif message:
+            seen_log_ids.add(entry_key)
+            ts = _parse_log_time(log_time)
+            _emit_build_log_line(message, log_formatter, timestamp=ts, indent=False)
+
+        for detail_msg, detail_time, detail_id in detail_items:
+            detail_key = 'detail:' + str(detail_time or detail_id or detail_msg)
+            if detail_key in seen_log_ids:
+                continue
+            seen_log_ids.add(detail_key)
+            _emit_build_log_line(detail_msg, log_formatter, timestamp=None, indent=True)
+
+
+def _fetch_full_build_logs(cmd, resource_group_name, webapp_name, slot, deployment_id):
+    """Fetch all build logs as flat formatted lines (used on failure auto-expand).
+
+    Returns a list of formatted log lines, or None if fetching fails.
+    """
+    entries = _fetch_kudu_log_entries(cmd, resource_group_name, webapp_name, slot, deployment_id)
+    if not entries:
+        return None
+
+    lines = []
+    for message, log_time, _entry_id, detail_items in entries:
+        if message:
+            ts = _parse_log_time(log_time)
+            prefix = f"{ts}  " if ts else "          "
+            lines.append(f"{prefix}{message}\n")
+
+        for detail_msg, _detail_time, _detail_id in detail_items:
+            lines.append(f"            {detail_msg}\n")
+
+    return lines if lines else None
+
+
+def _emit_build_log_line(message, log_formatter, timestamp=None, indent=False):
+    """Emit a single build log line through the formatter.
+
+    If formatter is None or verbosity is 'full', prints directly.
+    Otherwise, the formatter decides whether to show, suppress, or aggregate.
+
+    The formatter classifies based on the raw message text (without timestamp prefix)
+    to ensure patterns match regardless of how the line is formatted for display.
+    """
+    if indent or not timestamp:
+        display_line = f"            {message}\n"
+    else:
+        display_line = f"{timestamp}  {message}\n"
+
+    if log_formatter is None:
+        logger.warning("%s", display_line.rstrip('\n'))
+        return
+
+    # Pass message with indent prefix for classification (patterns expect leading whitespace)
+    classify_line = f"            {message}\n"
+    formatted = log_formatter.format_log_line(classify_line)
+    if formatted is not None:
+        # Show the display_line (with timestamp) not the classify_line
+        logger.warning("%s", display_line.rstrip('\n'))
+
+
 # pylint: disable=too-many-branches
 def _poll_deployment_runtime_status(cmd, resource_group_name, webapp_name, slot, deploymentstatusapi_url,
-                                    deployment_id, timeout=None, deploy_params=None):
+                                    deployment_id, timeout=None, deploy_params=None, build_logs='summary'):
+    from azure.cli.command_modules.appservice._build_log_formatter import (
+        BuildLogFormatter, format_build_failure_with_logs, BUILD_LOGS_SUMMARY
+    )
+
     max_time_sec = int(timeout) if timeout else 1000
     start_time = time.time()
     time_elapsed = 0
     deployment_status = None
     response_body = None
+    seen_log_ids = set()
+    last_log_poll_time = 0
+    previous_status_text = None
+    build_phase_start = None
+
+    # Initialize the log formatter based on verbosity
+    log_formatter = BuildLogFormatter(verbosity=build_logs or BUILD_LOGS_SUMMARY)
+
     while time_elapsed < max_time_sec:
         try:
             response_body = send_raw_request(cmd.cli_ctx, "GET", deploymentstatusapi_url).json()
         except Exception as ex:  # pylint: disable=broad-except
-            # we might get a 404 if a new deployment has started and this deployment_id is no longer latest
             logger.warning("Deployment status endpoint %s returned error: %s.", deploymentstatusapi_url, ex)
             break
         deployment_properties = response_body.get('properties')
@@ -9943,7 +10122,46 @@ def _poll_deployment_runtime_status(cmd, resource_group_name, webapp_name, slot,
         time_elapsed = int(time.time() - start_time)
         status = RUNTIME_STATUS_TEXT_MAP.get(deployment_status)
         status = deployment_status if status is None else status
-        logger.warning("Status: %s Time: %s(s)", status, time_elapsed)
+
+        # Print phase transitions with timing
+        if status != previous_status_text:
+            timestamp = _utc_timestamp()
+
+            # Track build phase duration
+            if deployment_status == "BuildInProgress":
+                build_phase_start = time.time()
+                logger.warning("%s  --- Build Phase ---------------------------------", timestamp)
+            elif deployment_status == "BuildSuccessful":
+                # Always fetch and display build logs on completion.
+                # For async (fast builds), real-time streaming may have missed most logs.
+                # For sync, build happened during POST so no logs were streamed at all.
+                # Pass seen_log_ids to avoid duplicating lines already shown in real-time.
+                if build_phase_start is None:
+                    logger.warning("%s  --- Build Phase ---------------------------------", timestamp)
+                _display_build_logs(cmd, resource_group_name, webapp_name,
+                                    slot, deployment_id, log_formatter, seen_log_ids)
+                warning_summary = log_formatter.get_warning_summary()
+                if warning_summary:
+                    logger.warning("%s", warning_summary.rstrip('\n'))
+                if build_phase_start is not None:
+                    elapsed = int(time.time() - build_phase_start)
+                    logger.warning("%s  --- Build Complete (%ds) -----------------------", timestamp, elapsed)
+                else:
+                    logger.warning("%s  --- Build Complete --------------------------------", timestamp)
+            elif deployment_status == "RuntimeStarting":
+                logger.warning("%s  --- Site Startup --------------------------------", timestamp)
+            elif deployment_status == "RuntimeSuccessful":
+                logger.warning("%s  [OK] Site started successfully", timestamp)
+            else:
+                logger.warning("%s  %s", timestamp, status)
+            previous_status_text = status
+
+        # Stream Kudu logs during build (every 5 seconds)
+        if deployment_status == "BuildInProgress" and time_elapsed - last_log_poll_time >= 5:
+            _display_build_logs(cmd, resource_group_name, webapp_name, slot,
+                                deployment_id, log_formatter, seen_log_ids)
+            last_log_poll_time = time_elapsed
+
         if deployment_status == "RuntimeStarting":
             logger.info("InprogressInstances: %s, SuccessfulInstances: %s",
                         deployment_properties.get('numberOfInstancesInProgress'),
@@ -10004,6 +10222,14 @@ def _poll_deployment_runtime_status(cmd, resource_group_name, webapp_name, slot,
                 deployment_logs = scm_url + f"/api/deployments/{deployment_id}/log"
             else:
                 deployment_logs = deployment_logs[0]
+
+            # Auto-expand: fetch full build logs from Kudu and display them
+            full_build_logs = _fetch_full_build_logs(cmd, resource_group_name, webapp_name,
+                                                     slot, deployment_id)
+            if full_build_logs:
+                full_error = format_build_failure_with_logs(error_text, full_build_logs)
+                raise CLIError(full_error)
+
             error_text += "Please check the build logs for more info: {}\n".format(deployment_logs)
             raise CLIError(error_text)
         time.sleep(15)
@@ -11074,7 +11300,8 @@ def perform_onedeploy_webapp(cmd,
                              slot=None,
                              track_status=True,
                              enable_kudu_warmup=True,
-                             enriched_errors=False):
+                             enriched_errors=False,
+                             build_logs='summary'):
     params = OneDeployParams()
 
     params.cmd = cmd
@@ -11093,6 +11320,7 @@ def perform_onedeploy_webapp(cmd,
     params.track_status = track_status
     params.enable_kudu_warmup = enable_kudu_warmup
     params.enriched_errors = enriched_errors
+    params.build_logs = build_logs
 
     # When a slot is targeted, fetch the slot's Site (not production) so the
     # cached model matches what every downstream consumer expects — slots have
@@ -11136,6 +11364,7 @@ class OneDeployParams:
         self.is_linux_webapp = None
         self.is_functionapp = None
         self.enriched_errors = False
+        self.build_logs = 'summary'
         # Per-invocation caches. Populated during a single deploy and
         # cleared in _perform_onedeploy_internal's `finally` block. These MUST
         # NOT be logged, serialized, or accessed outside the current call
@@ -11491,7 +11720,8 @@ def _warmup_kudu_and_get_cookie_internal(params):
                 response = send_raw_request(params.cmd.cli_ctx, "GET", kudu_warmup_url)
 
             if response.status_code in (200, 201, 202):
-                logger.warning("Warmed up Kudu instance successfully.")
+                timestamp = _utc_timestamp()
+                logger.warning("%s  Warmed up Kudu instance successfully.", timestamp)
                 return cookies
             time_out = 300
         except Exception as ex:  # pylint: disable=broad-except
@@ -11500,6 +11730,49 @@ def _warmup_kudu_and_get_cookie_internal(params):
     logger.warning("Failed to warm-up Kudu with instanceid: %s, "
                    "the deployment will proceed without pre-warmup.", instance_id)
     return None
+
+
+def _display_build_logs_on_sync_failure(params, scm_url):
+    """For sync deployment failures, fetch build logs and return formatted error text.
+
+    This handles the case where the Kudu POST returns an error (e.g., 400) after the build
+    completed on the server. Without this, the customer only sees 'Status Code: 400' with no
+    build output.
+
+    Returns a formatted error string with logs included, or None if logs can't be fetched.
+    """
+    import requests
+    from azure.cli.core.util import should_disable_connection_verify
+    from azure.cli.command_modules.appservice._build_log_formatter import format_build_failure_with_logs
+
+    try:
+        headers = get_scm_site_headers(params.cmd.cli_ctx, params.webapp_name,
+                                       params.resource_group_name, params.slot)
+
+        # Get the latest deployment ID
+        latest_url = scm_url + "/api/deployments/latest"
+        resp = requests.get(latest_url, headers=headers,
+                            verify=not should_disable_connection_verify(), timeout=15)
+        if resp.status_code != 200:
+            return None
+
+        deployment_info = resp.json()
+        deployment_id = deployment_info.get('id')
+        if not deployment_id:
+            return None
+
+        # Fetch build logs
+        full_logs = _fetch_full_build_logs(params.cmd, params.resource_group_name,
+                                           params.webapp_name, params.slot, deployment_id)
+        if not full_logs:
+            return None
+
+        # Format in the same style as async BuildFailed
+        error_text = "Deployment failed because the build process failed\n"
+        return format_build_failure_with_logs(error_text, full_logs)
+
+    except Exception:  # pylint: disable=broad-except
+        return None
 
 
 def _make_onedeploy_request(params):
@@ -11522,7 +11795,8 @@ def _make_onedeploy_request(params):
         # if linux webapp and not function app, then warmup kudu and use warmed up kudu for deployment
         if params.is_linux_webapp and not params.is_functionapp and params.enable_kudu_warmup:
             try:
-                logger.warning("Warming up Kudu before deployment.")
+                timestamp = _utc_timestamp()
+                logger.warning("%s  Warming up Kudu before deployment.", timestamp)
                 cookies = _warmup_kudu_and_get_cookie_internal(params)
                 if cookies is None:
                     logger.info("Failed to fetch affinity cookie for Kudu. "
@@ -11544,7 +11818,8 @@ def _make_onedeploy_request(params):
     else:
         if params.is_linux_webapp and not params.is_functionapp and params.enable_kudu_warmup:
             try:
-                logger.warning("Warming up Kudu before deployment.")
+                timestamp = _utc_timestamp()
+                logger.warning("%s  Warming up Kudu before deployment.", timestamp)
                 cookies = _warmup_kudu_and_get_cookie_internal(params)
                 if cookies is None:
                     logger.info("Failed to fetch affinity cookie for Kudu. "
@@ -11573,7 +11848,8 @@ def _make_onedeploy_request(params):
                     deployment_status_url,
                     params.is_async_deployment,
                     params.timeout,
-                    deploy_params=params)
+                    deploy_params=params,
+                    build_logs=params.build_logs)
             else:
                 response_body = _check_zip_deployment_status(
                     params.cmd, params.resource_group_name,
@@ -11587,8 +11863,10 @@ def _make_onedeploy_request(params):
                 if state:
                     logger.warning("Deployment status is: \"%s\"", state)
                 response_body = response.json().get("properties", {})
-        logger.warning("Deployment has completed successfully")
-        logger.warning("You can visit your app at: %s", _get_visit_url(params))
+
+        from azure.cli.command_modules.appservice._build_log_formatter import format_final_url
+        app_url = _get_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
+        logger.warning("%s", format_final_url(app_url).rstrip('\n'))
         return response_body
 
     # API not available yet!
@@ -11614,6 +11892,12 @@ def _make_onedeploy_request(params):
     if response.status_code:
         scm_url = _get_or_fetch_scm_url(params)
         latest_deploymentinfo_url = scm_url + "/api/deployments/latest"
+
+        # For sync deployment failures, fetch and display build logs in the error message
+        build_failure_text = _display_build_logs_on_sync_failure(params, scm_url)
+        if build_failure_text:
+            raise CLIError(build_failure_text)
+
         if _should_enrich_errors and response.status_code >= 400:
             logger.error("Deployment failed. Visit %s to get more information about your deployment.",
                          latest_deploymentinfo_url)
@@ -11647,7 +11931,8 @@ def _perform_onedeploy_internal(params):
     _should_enrich_errors = params.enriched_errors and params.is_linux_webapp and not params.is_functionapp
 
     # Now make the OneDeploy API call
-    logger.warning("Initiating deployment")
+    timestamp = _utc_timestamp()
+    logger.warning("%s  Initiating deployment", timestamp)
     try:
         try:
             response = _make_onedeploy_request(params)

@@ -1100,6 +1100,12 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('enriched_errors', options_list=['--enriched-errors'],
                    help='If true, deployment failures will show context-enriched diagnostics with error codes, suggested fixes, and Copilot prompts.',
                    arg_type=get_three_state_flag())
+        c.argument('build_logs', options_list=['--build-logs'],
+                   help='Controls verbosity of build log output during deployment. '
+                        '"summary" (default): shows phases, milestones, and aggregated warnings. '
+                        '"full": shows all raw build logs. '
+                        '"none": suppresses build logs entirely (auto-expands on failure).',
+                   choices=['full', 'summary', 'none'], default='summary')
 
     with self.argument_context('functionapp deploy') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the function app to deploy to.')
