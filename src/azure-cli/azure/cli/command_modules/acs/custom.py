@@ -3675,6 +3675,50 @@ def aks_trustedaccess_role_binding_delete(cmd, client, resource_group_name, clus
     return client.begin_delete(resource_group_name, cluster_name, role_binding_name)
 
 
+def aks_identity_binding_create(cmd, client, resource_group_name, cluster_name, name,
+                                managed_identity_resource_id, no_wait=False):
+    IdentityBinding, IdentityBindingProperties, IdentityBindingManagedIdentityProfile = cmd.get_models(
+        "IdentityBinding",
+        "IdentityBindingProperties",
+        "IdentityBindingManagedIdentityProfile",
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        operation_group="identity_bindings",
+    )
+    instance = IdentityBinding(
+        properties=IdentityBindingProperties(
+            managed_identity=IdentityBindingManagedIdentityProfile(
+                resource_id=managed_identity_resource_id,
+            )
+        )
+    )
+    return sdk_no_wait(
+        no_wait,
+        client.begin_create_or_update,
+        resource_group_name,
+        cluster_name,
+        name,
+        instance,
+    )
+
+
+def aks_identity_binding_delete(cmd, client, resource_group_name, cluster_name, name, no_wait=False):  # pylint: disable=unused-argument
+    return sdk_no_wait(
+        no_wait,
+        client.begin_delete,
+        resource_group_name,
+        cluster_name,
+        name,
+    )
+
+
+def aks_identity_binding_show(cmd, client, resource_group_name, cluster_name, name):  # pylint: disable=unused-argument
+    return client.get(resource_group_name, cluster_name, name)
+
+
+def aks_identity_binding_list(cmd, client, resource_group_name, cluster_name):  # pylint: disable=unused-argument
+    return client.list_by_managed_cluster(resource_group_name, cluster_name)
+
+
 def aks_mesh_enable(
         cmd,
         client,
