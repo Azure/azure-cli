@@ -70,8 +70,8 @@ def process_query(cmd, cli_term):
                         print(style_message(cleaned_answer.title))
                         print(cleaned_answer.snippet + '\n')
                     if has_pruned_answer:
-                        print(style_message("More commands and examples are available in the latest version of the CLI. "
-                                            "Please update for the best experience.\n"))
+                        print(style_message("More commands and examples are available in the latest version of the "
+                                            "CLI. Please update for the best experience.\n"))
     from azure.cli.core.util import show_updates_available
     show_updates_available()
 
