@@ -15,11 +15,12 @@ import colorama  # pylint: disable=import-error
 
 from azure.cli.core import telemetry as telemetry_core
 from azure.cli.core import __version__ as core_version
+from azure.cli.core.style import Style, format_styled_text
 from packaging.version import parse
 from knack.log import get_logger
 logger = get_logger(__name__)
 
-WAIT_MESSAGE = ['Finding examples...']
+WAIT_MESSAGE = ['Finding examples and documentation...']
 
 # Display limits
 MAX_DOC_RESULTS = 5
@@ -336,12 +337,127 @@ def _extract_summary(content):
     return content[:150]
 
 
+def _clean_title(title):
+    """Normalize a title into a real sentence.
+
+    Strips leading markdown header markers ('#') and ensures the title
+    ends with a sentence mark (period, question mark, or exclamation mark).
+
+    Args:
+        title: Raw title string.
+
+    Returns:
+        Cleaned title string, or empty string if no title.
+    """
+    if not title:
+        return ""
+
+    title = title.strip().lstrip('#').strip()
+    if title and title[-1] not in '.?!':
+        title += '.'
+    return title
+
+
+def _to_imperative(text):
+    """Convert a leading third-person-singular verb to imperative mood.
+
+    Examples:
+        'Deploys the template.' -> 'Deploy the template.'
+        'Creates a virtual machine.' -> 'Create a virtual machine.'
+        'Specifies the name.' -> 'Specify the name.'
+
+    Args:
+        text: A description sentence.
+
+    Returns:
+        The sentence with its first word converted to imperative mood.
+    """
+    if not text:
+        return text
+
+    first, _, rest = text.partition(' ')
+    lower = first.lower()
+    if lower.endswith('ies') and len(first) > 4:
+        first = first[:-3] + 'y'
+    elif lower.endswith('s') and not lower.endswith('ss'):
+        first = first[:-1]
+
+    return first + (' ' + rest if rest else '')
+
+
+def _extract_description(description):
+    """Extract the human-readable description from a code sample's metadata.
+
+    The MCP code sample 'description' field is a metadata blob such as:
+        'description: Deploys the ARM template ...\\nlanguage: azurecli\\n'
+    This extracts just the description text as a clean sentence.
+
+    Args:
+        description: Raw description metadata string.
+
+    Returns:
+        Cleaned description sentence, or 'Example.' as a fallback.
+    """
+    if description:
+        for line in description.split('\n'):
+            line = line.strip()
+            if line.lower().startswith('description:'):
+                return _clean_title(_to_imperative(line[len('description:'):].strip()))
+
+        # Fallback: first non-empty, non-metadata line
+        for line in description.split('\n'):
+            line = line.strip()
+            if line and not line.lower().startswith(('language:', 'package:')):
+                return _clean_title(_to_imperative(line))
+
+    return "Example."
+
+
+def _extract_command(snippet):
+    """Extract the `az` command block from a code snippet.
+
+    Returns the snippet lines starting from the first line that begins with
+    'az', preserving the server's original formatting. Stops at a blank line
+    that isn't a shell line-continuation, so a single example is returned.
+
+    Args:
+        snippet: Raw code snippet string.
+
+    Returns:
+        List of command lines (server formatting preserved), or empty list.
+    """
+    if not snippet:
+        return []
+
+    lines = snippet.split('\n')
+    start = next((i for i, line in enumerate(lines) if line.strip().startswith('az ')), None)
+    if start is None:
+        return []
+
+    # If the command block is indented, strip the leading indent of the first
+    # `az` line from every line, preserving relative indentation.
+    indent = len(lines[start]) - len(lines[start].lstrip())
+    result = []
+    for line in lines[start:]:
+        if not line.strip():
+            continue
+        # Remove up to `indent` leading whitespace chars, keeping deeper indents.
+        stripped = line
+        for _ in range(indent):
+            if stripped[:1] in (' ', '\t'):
+                stripped = stripped[1:]
+            else:
+                break
+        result.append(stripped.rstrip())
+    return result
+
+
 def format_results(query, docs_results, code_results):
     """Format and print search results to stdout.
 
     Displays results in two sections:
-    1. Commands & Documentation - from microsoft_docs_search
-    2. Code Examples - from microsoft_code_sample_search
+    1. Examples - from microsoft_code_sample_search (shown first)
+    2. Documentation - from microsoft_docs_search
 
     Args:
         query: Original search query (for display).
@@ -350,41 +466,45 @@ def format_results(query, docs_results, code_results):
     """
     if not docs_results and not code_results:
         print("\nSorry I am not able to help with [" + query + "]."
-              "\nTry typing the beginning of a command e.g. " + style_message('az vm') + ".", file=sys.stderr)
+              "\nTry typing the beginning of a command e.g., " + style_message('az vm') + ".", file=sys.stderr)
         return
 
-    print("\nHere are the most common ways to use [" + query + "]: \n", file=sys.stderr)
-
-    if docs_results:
-        print(style_message(" Commands & Documentation"))
-        print("  " + "─" * 50)
-        for result in docs_results[:MAX_DOC_RESULTS]:
-            title = result.get("title", "")
-            content = result.get("content", "")
-            url = result.get("contentUrl", "")
-
-            summary = _extract_summary(content)
-
-            print(style_message("  " + title))
-            if summary:
-                print("  " + summary)
-            if url:
-                print("  " + url)
-            print()
+    print("\nHere is what I found for [" + query + "]: \n", file=sys.stderr)
 
     if code_results:
-        print(style_message(" Code Examples"))
-        print("  " + "─" * 50)
+        examples = []
         for result in code_results[:MAX_CODE_RESULTS]:
-            snippet = result.get("codeSnippet", "")
-            url = result.get("link", "")
+            command_lines = _extract_command(result.get("codeSnippet", ""))
+            if not command_lines:
+                continue
+            examples.append((
+                _extract_description(result.get("description", "")),
+                command_lines,
+                result.get("link", "")
+            ))
 
-            if snippet:
-                # Indent the code snippet
-                for line in snippet.strip().split('\n'):
-                    print("  " + line)
+        if examples:
+            print("Examples")
+            for title, command_lines, url in examples:
+                print("    " + format_styled_text((Style.ACTION, title)))
+                for line in command_lines:
+                    print("    " + line)
+                if url:
+                    print("    " + format_styled_text((Style.SECONDARY, url)))
+                print()
+
+    if docs_results:
+        print("Documentation")
+        for result in docs_results[:MAX_DOC_RESULTS]:
+            title = _clean_title(result.get("title", ""))
+            summary = _extract_summary(result.get("content", ""))
+            url = result.get("contentUrl", "")
+
+            print("    " + format_styled_text((Style.ACTION, title)))
+            if summary:
+                print("    " + summary)
             if url:
-                print("  Source: " + url)
+                print("    " + format_styled_text((Style.SECONDARY, url)))
             print()
 
 
@@ -400,7 +520,8 @@ def process_query(cli_term):
             logger.debug("MCP request failed: %s", ex)
             logger.error(
                 "Unable to search Microsoft Learn. Please check your network connection. "
-                "In the meantime, use `az <command> --help` or visit https://aka.ms/cli_ref."
+                "In the meantime, please use `az <command> --help` to explore commands and examples, "
+                "or visit https://aka.ms/cli_ref for reference documentation."
             )
             return
 
