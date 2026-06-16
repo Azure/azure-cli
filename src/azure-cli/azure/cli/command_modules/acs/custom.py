@@ -2252,6 +2252,21 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr, node_name=None):
                         "args": ["-v6", acr],
                         "stdin": True,
                         "stdinOnce": True,
+                        # On national/sovereign clouds, node provisioning stamps
+                        # "cloud": "AzureStackCloud" in /etc/kubernetes/azure.json and
+                        # writes the cloud-specific endpoints to a companion
+                        # /etc/kubernetes/akscustom.json (a go-autorest environment file).
+                        # go-autorest's EnvironmentFromName only resolves AzureStackCloud
+                        # when AZURE_ENVIRONMENT_FILEPATH points at that file; otherwise
+                        # canipull aborts with "Unknown Azure cloud name: AzureStackCloud"
+                        # before running any MSI/ACR check. The env var is ignored on public
+                        # clouds (cloud != AzureStackCloud), so this is safe everywhere.
+                        "env": [
+                            {
+                                "name": "AZURE_ENVIRONMENT_FILEPATH",
+                                "value": "/etc/kubernetes/akscustom.json",
+                            }
+                        ],
                         "volumeMounts": [
                             {"name": "azurejson", "mountPath": "/etc/kubernetes"},
                             {"name": "sslcerts", "mountPath": "/etc/ssl/certs"},
