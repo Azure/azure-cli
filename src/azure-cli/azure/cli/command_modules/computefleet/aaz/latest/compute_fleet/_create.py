@@ -997,7 +997,9 @@ class Create(AAZCommand):
         os_profile.custom_data = AAZPasswordArg(
             options=["custom-data"],
             help="Specifies a base-64 encoded string of custom data. The base-64 encoded string is decoded to a binary array that is saved as a file on the Virtual Machine. The maximum length of the binary array is 65535 bytes. For using cloud-init for your VM, see [Using cloud-init to customize a Linux VM during creation](https://learn.microsoft.com/azure/virtual-machines/linux/using-cloud-init)",
-            prompt={"cls": "AAZPromptPasswordInput", "kwargs": {"msg": "Please enter VM Password:", "confirm": True}},
+            blank=AAZPromptPasswordInput(
+               msg="VM Admin Password",
+               confirm=True),
         )
         os_profile.linux_configuration = AAZObjectArg(
             options=["linux-configuration"],
