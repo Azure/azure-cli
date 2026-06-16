@@ -679,6 +679,10 @@ jobs:
       git config --global user.name "Your Name"
       brew tap-new dev/azure-cli
       cp $SYSTEM_ARTIFACTSDIRECTORY/homebrew/azure-cli.rb $(brew --repository)/Library/Taps/dev/homebrew-azure-cli/Formula/
+      # `no_autobump!` is carried over from the upstream homebrew-core formula but is only
+      # allowed in official Homebrew taps. Remove it so the formula can be installed from
+      # this local dev tap. It must remain in the released formula, so we only strip it here.
+      sed -i '' '/no_autobump!/d' $(brew --repository)/Library/Taps/dev/homebrew-azure-cli/Formula/azure-cli.rb
       brew install --build-from-source dev/homebrew-azure-cli/azure-cli
       
       echo == Az Version ==

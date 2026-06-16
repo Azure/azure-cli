@@ -17,7 +17,8 @@ from azure.cli.command_modules.appservice.custom import (
     remove_remote_build_app_settings,
     config_source_control,
     validate_app_settings_in_scm,
-    update_container_settings_functionapp)
+    update_container_settings_functionapp,
+    list_function_keys)
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.azclierror import (AzureInternalError, UnclassifiedUserFault)
 from azure.cli.core.azclierror import ResourceNotFoundError
@@ -849,3 +850,42 @@ class TestFunctionappMocked(unittest.TestCase):
 
         # assert
         self.assertEqual(matched.name, 'dotnet-isolated')
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    def test_list_function_keys_unwraps_broken_string_dictionary(self, web_client_factory_mock):
+        # azure-mgmt-web 11.0.0 deserializes flat dictionary responses with .properties = None
+        from azure.mgmt.web import models as _models
+        from azure.mgmt.web._utils.model_base import _deserialize
+
+        broken = _deserialize(
+            _models.StringDictionary,
+            {'default': 'vvrX4LJY1JWbimFI28UM', 'myCustomKey': 'abc'})
+        self.assertIsNone(broken.properties)
+
+        cmd_mock = _get_test_cmd()
+        client_mock = mock.MagicMock()
+        client_mock.web_apps.list_function_keys.return_value = broken
+        web_client_factory_mock.return_value = client_mock
+
+        result = list_function_keys(cmd_mock, 'rg', 'app', 'httpget')
+
+        self.assertEqual(result, {'default': 'vvrX4LJY1JWbimFI28UM', 'myCustomKey': 'abc'})
+        client_mock.web_apps.list_function_keys.assert_called_once_with('rg', 'app', 'httpget')
+        client_mock.web_apps.list_function_keys_slot.assert_not_called()
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
+    def test_list_function_keys_uses_properties_when_sdk_returns_enveloped_response(self, web_client_factory_mock):
+        # Prefers .properties when populated (forward-compatible with a future SDK fix)
+        fixed = mock.MagicMock()
+        fixed.properties = {'default': 'abc'}
+
+        cmd_mock = _get_test_cmd()
+        client_mock = mock.MagicMock()
+        client_mock.web_apps.list_function_keys_slot.return_value = fixed
+        web_client_factory_mock.return_value = client_mock
+
+        result = list_function_keys(cmd_mock, 'rg', 'app', 'httpget', slot='staging')
+
+        self.assertEqual(result, {'default': 'abc'})
+        client_mock.web_apps.list_function_keys_slot.assert_called_once_with('rg', 'app', 'httpget', 'staging')
+        client_mock.web_apps.list_function_keys.assert_not_called()

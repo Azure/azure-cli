@@ -23,7 +23,7 @@ from ._constants import (FUNCTIONS_VERSIONS, LOGICAPPS_NODE_RUNTIME_VERSIONS, WI
 
 from ._validators import (validate_timeout_value, validate_site_create, validate_asp_create,
                           validate_ase_create, validate_ip_address,
-                          validate_service_tag, validate_public_cloud)
+                          validate_service_tag, validate_public_cloud, warn_linux_consumption_eol)
 
 AUTH_TYPES = {
     'AllowAnonymous': 'na',
@@ -93,6 +93,14 @@ def load_arguments(self, _):
         c.argument('slot', options_list=['--slot', '-s'],
                    help="the name of the slot. Default to the productions slot if not specified")
         c.argument('name', arg_type=webapp_name_arg_type)
+
+    with self.argument_context('functionapp') as c:
+        c.ignore('app_instance')
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('location', arg_type=get_location_type(self.cli_ctx))
+        c.argument('slot', options_list=['--slot', '-s'],
+                   help="the name of the slot. Default to the productions slot if not specified")
+        c.argument('name', arg_type=functionapp_name_arg_type, validator=warn_linux_consumption_eol)
 
     with self.argument_context('appservice') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
@@ -707,6 +715,34 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('functionapp update-strategy config') as c:
         c.argument('strategy_type', options_list=['--type'], arg_type=get_enum_type(UPDATE_STRATEGY_TYPES),
                    help="The update strategy type. Allowed values: Recreate, RollingUpdate.")
+
+    # Add optional 'name' parameter for functionapp SSL commands to support Flex Consumption apps
+    with self.argument_context('functionapp config ssl list') as c:
+        c.argument('name', options_list=['--name', '-n'], id_part=None, help='Name of the function app. Required for Flex Consumption apps to list site-scoped certificates.')
+
+    with self.argument_context('functionapp config ssl show') as c:
+        c.argument('name', options_list=['--name', '-n'], help='Name of the function app. Required for Flex Consumption apps to show site-scoped certificates.')
+
+    with self.argument_context('functionapp config ssl delete') as c:
+        c.argument('name', options_list=['--name', '-n'], help='Name of the function app. Required for Flex Consumption apps to delete site-scoped certificates.')
+
+    # Add load_to_code parameter for functionapp SSL commands that create/update certificates (Flex Consumption only)
+    with self.argument_context('functionapp config ssl upload') as c:
+        c.argument('load_to_code', arg_type=get_three_state_flag(), help='For Flex Consumption apps only. When set to true, the certificate is accessible to app code.')
+
+    with self.argument_context('functionapp config ssl import') as c:
+        c.argument('load_to_code', arg_type=get_three_state_flag(), help='For Flex Consumption apps only. When set to true, the certificate is accessible to app code')
+        c.argument('enable_using_msi', arg_type=get_three_state_flag(), help='For Flex Consumption apps only. Enable Key Vault access using Managed Service Identity. When set to true, the app will use its managed identity to access Key Vault instead of service principal.')
+
+    with self.argument_context('webapp config ssl list') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+
+    with self.argument_context('webapp config ssl upload') as c:
+        c.ignore('load_to_code')
+
+    with self.argument_context('webapp config ssl import') as c:
+        c.ignore('load_to_code')
+        c.ignore('enable_using_msi')
 
     with self.argument_context('webapp config connection-string list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)

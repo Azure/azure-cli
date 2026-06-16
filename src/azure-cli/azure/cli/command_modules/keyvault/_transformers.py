@@ -101,6 +101,7 @@ def transform_key_list_output(result, **command_args):  # pylint: disable=unused
         k['attributes'] = key._attributes    # pylint: disable=protected-access
         k['kid'] = key.id
         k['name'] = key.name
+        k['keySize'] = key.key_size
         k['managed'] = key.managed
         k['tags'] = key.tags
         k['releasePolicy'] = key.release_policy
@@ -129,6 +130,7 @@ def transform_key_output(result, **command_args):
             'expires': result.properties.expires_on,
             'exportable': result.properties.exportable,
             'hsmPlatform': result.properties.hsm_platform,
+            'keySize': result.properties.key_size,
             'notBefore': result.properties.not_before,
             'recoverableDays': result.properties.recoverable_days,
             'recoveryLevel': result.properties.recovery_level,

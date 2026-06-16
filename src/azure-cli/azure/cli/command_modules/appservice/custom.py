@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import ast
+import base64
 import threading
 import time
 import re
@@ -1123,18 +1124,26 @@ def list_flex_migration_candidates(cmd):
             continue
 
         try:
-            if validate_flex_migration_eligibility_for_linux_consumption_app(cmd, site, flex_regions):
+            is_eligible, warnings = validate_flex_migration_eligibility_for_linux_consumption_app(
+                cmd, site, flex_regions)
+            if is_eligible:
                 site_entry = {
                     'name': site.name,
                     'resource_group': site.resource_group,
                 }
 
+                notes = []
                 has_slots = len(list_slots(cmd, site.resource_group, site.name)) > 0
 
                 if has_slots:
-                    slots_warning = (f"The site '{site.name}' has slots configured. This will not block migration, "
-                                     f"but please note that slots are not supported in Flex Consumption.")
-                    site_entry['note'] = slots_warning
+                    notes.append(f"The site '{site.name}' has slots configured. This will not block migration, "
+                                 f"but please note that slots are not supported in Flex Consumption.")
+
+                # Add certificate-related warnings as notes
+                notes.extend(warnings)
+
+                if notes:
+                    site_entry['note'] = ' '.join(notes)
 
                 eligible_sites.append(site_entry)
 
@@ -1152,6 +1161,8 @@ def list_flex_migration_candidates(cmd):
 
 
 def validate_flex_migration_eligibility_for_linux_consumption_app(cmd, site, flex_regions):
+    warnings = []
+
     # Validating that the site is in a Flex Consumption-supported region
     normalized_site_location = _normalize_location(cmd, site.location)
     if normalized_site_location not in flex_regions:
@@ -1169,18 +1180,26 @@ def validate_flex_migration_eligibility_for_linux_consumption_app(cmd, site, fle
     runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, normalized_site_location, runtime)
     runtime_helper.resolve(runtime, runtime_version)
 
-    # Validating that the site does not have SSL bindings configured
+    # Check for SSL bindings - warn but allow migration
     for ssl_state in site.host_name_ssl_states or []:
         if ssl_state.ssl_state != 'Disabled':
-            raise ValidationError("The site '{}' is using TSL/SSL certificates. "
-                                  "TSL/SSL certificates are not supported in Flex Consumption.".format(site.name))
+            warnings.append("The site '{}' is using TLS/SSL certificates. "
+                            "Site-scoped TLS/SSL certificates are supported in Flex Consumption in preview. "
+                            "Re-configure certificates after migration using the new site-scoped model. "
+                            "Help Link: https://aka.ms/flex-site-scoped-certs-docs."
+                            .format(site.name))
+            break
 
-    # Validating that the site does not have WEBSITE_LOAD_CERTIFICATES app setting configured
+    # Check for WEBSITE_LOAD_CERTIFICATES app setting - warn but allow migration
     app_settings = get_app_settings(cmd, site.resource_group, site.name)
     for setting in app_settings:
         if setting['name'] == 'WEBSITE_LOAD_CERTIFICATES':
-            raise ValidationError("The site '{}' has the WEBSITE_LOAD_CERTIFICATES app setting configured. "
-                                  "Certificate loading is not supported in Flex Consumption.".format(site.name))
+            warnings.append("The site '{}' has the WEBSITE_LOAD_CERTIFICATES app setting configured. "
+                            "Site-scoped certificate loading is supported in Flex Consumption in preview. "
+                            "Re-configure certificates after migration using the new site-scoped model. "
+                            "Help Link: https://aka.ms/flex-site-scoped-certs-docs."
+                            .format(site.name))
+            break
 
     # Validating that the site has triggers supported in Flex Consumption
     functions = list_functions(cmd, site.resource_group, site.name)
@@ -1199,7 +1218,7 @@ def validate_flex_migration_eligibility_for_linux_consumption_app(cmd, site, fle
                               "Please convert these triggers to use Event Grid or replace them with Event Grid "
                               "triggers before migration.".format(site.name, function_list))
 
-    return True
+    return True, warnings
 
 
 def get_storage_account_from_functionapp(cmd, resource_group_name, name):
@@ -1259,11 +1278,16 @@ def migrate_consumption_to_flex(cmd, source_resource_group, source_name, resourc
                               "migration is only supported for Function Apps on Linux Consumption plans."
                               .format(source.name))
 
-    if validate_flex_migration_eligibility_for_linux_consumption_app(cmd, source, flex_regions):
+    is_eligible, warnings = validate_flex_migration_eligibility_for_linux_consumption_app(cmd, source, flex_regions)
+    if is_eligible:
         slots = list_slots(cmd, source_resource_group, source_name)
         if len(slots) > 0:
             print(f"The site '{source_name}' has slots configured. This will not block migration, "
                   f"but please note that slots are not supported in Flex Consumption.")
+
+        # Print certificate-related warnings
+        for warning in warnings:
+            logger.warning(warning)
         print(f"Source app '{source_name}' is eligible for Flex Consumption migration.")
 
     source_site_configs = get_site_configs(cmd, source_resource_group, source_name)
@@ -6742,7 +6766,7 @@ def _get_log(url, headers, log_file=None):
 def upload_ssl_cert(cmd, resource_group_name,
                     name, certificate_password,
                     certificate_file, slot=None,
-                    certificate_name=None):
+                    certificate_name=None, load_to_code=None):
     Certificate = cmd.get_models('Certificate')
     client = web_client_factory(cmd.cli_ctx)
     webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
@@ -6763,6 +6787,39 @@ def upload_ssl_cert(cmd, resource_group_name,
                                         webapp.location, resource_group_name)
     cert = Certificate(password=certificate_password, pfx_blob=cert_contents,
                        location=webapp.location, server_farm_id=get_site_server_farm_id(webapp))
+
+    # Check if this is a Flex Consumption function app
+    is_flex = is_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
+
+    # Validate parameter usage
+    if is_flex and slot:
+        raise ArgumentUsageError("--slot is not supported for Flex Consumption function apps. "
+                                 "Site-scoped certificates apply to the parent app.")
+    if load_to_code is not None and not is_flex:
+        raise ArgumentUsageError("--load-to-code is only supported for Flex Consumption function apps.")
+
+    # For Flex Consumption apps, use the site-scoped certificates endpoint (slots not supported)
+    if is_flex:
+        # Build certificate envelope as dict to include loadCertificateToWebsitesSettings
+        # (not in SDK model yet)
+        cert_envelope = {
+            "location": webapp.location,
+            "properties": {
+                "password": certificate_password,
+                "pfxBlob": base64.b64encode(cert_contents).decode('utf-8'),
+                "serverFarmId": get_site_server_farm_id(webapp)
+            }
+        }
+        if load_to_code is not None:
+            cert_envelope["properties"]["loadCertificateToWebsitesSettings"] = {
+                "loadToWebsite": load_to_code
+            }
+        return client.site_certificates.create_or_update(
+            resource_group_name=resource_group_name,
+            name=name,
+            certificate_name=cert_name,
+            certificate_envelope=cert_envelope
+        )
     return client.certificates.create_or_update(resource_group_name, cert_name, cert)
 
 
@@ -6780,18 +6837,52 @@ def _get_cert(certificate_password, certificate_file):
     return thumbprint
 
 
-def list_ssl_certs(cmd, resource_group_name):
+def list_ssl_certs(cmd, resource_group_name, name=None):
     client = web_client_factory(cmd.cli_ctx)
+
+    # Check if this is a Flex Consumption function app
+    if name and is_flex_functionapp(cmd.cli_ctx, resource_group_name, name):
+        return client.site_certificates.list(resource_group_name=resource_group_name, name=name)
+    if name:
+        raise ArgumentUsageError("--name is only supported for Flex Consumption function apps. "
+                                 "For other app types, certificates are managed at the resource group level.")
     return client.certificates.list_by_resource_group(resource_group_name)
 
 
-def show_ssl_cert(cmd, resource_group_name, certificate_name):
+def show_ssl_cert(cmd, resource_group_name, certificate_name, name=None):
     client = web_client_factory(cmd.cli_ctx)
+
+    # Check if this is a Flex Consumption function app
+    if name and is_flex_functionapp(cmd.cli_ctx, resource_group_name, name):
+        return client.site_certificates.get(
+            resource_group_name=resource_group_name,
+            name=name,
+            certificate_name=certificate_name
+        )
+    if name:
+        raise ArgumentUsageError("--name is only supported for Flex Consumption function apps. "
+                                 "For other app types, certificates are managed at the resource group level.")
     return client.certificates.get(resource_group_name, certificate_name)
 
 
-def delete_ssl_cert(cmd, resource_group_name, certificate_thumbprint):
+def delete_ssl_cert(cmd, resource_group_name, certificate_thumbprint, name=None):
     client = web_client_factory(cmd.cli_ctx)
+
+    # Check if this is a Flex Consumption function app
+    if name and is_flex_functionapp(cmd.cli_ctx, resource_group_name, name):
+        site_certs = client.site_certificates.list(resource_group_name=resource_group_name, name=name)
+        for site_cert in site_certs:
+            if site_cert.thumbprint == certificate_thumbprint:
+                return client.site_certificates.delete(
+                    resource_group_name=resource_group_name,
+                    name=name,
+                    certificate_name=site_cert.name
+                )
+        raise ResourceNotFoundError("Certificate for thumbprint '{}' not found".format(certificate_thumbprint))
+
+    if name:
+        raise ArgumentUsageError("--name is only supported for Flex Consumption function apps. "
+                                 "For other app types, certificates are managed at the resource group level.")
     webapp_certs = client.certificates.list_by_resource_group(resource_group_name)
     for webapp_cert in webapp_certs:
         if webapp_cert.thumbprint == certificate_thumbprint:
@@ -6799,7 +6890,23 @@ def delete_ssl_cert(cmd, resource_group_name, certificate_thumbprint):
     raise ResourceNotFoundError("Certificate for thumbprint '{}' not found".format(certificate_thumbprint))
 
 
-def import_ssl_cert(cmd, resource_group_name, key_vault, key_vault_certificate_name, name=None, certificate_name=None):
+def _validate_flex_ssl_params(is_flex, load_to_code, enable_using_msi, webapp, resource_group_name, name):
+    """Validate SSL import parameters for Flex Consumption apps."""
+    if load_to_code is not None and not is_flex:
+        raise ArgumentUsageError("--load-to-code is only supported for Flex Consumption function apps.")
+    if enable_using_msi is not None and not is_flex:
+        raise ArgumentUsageError("--enable-using-msi is only supported for Flex Consumption function apps.")
+    if enable_using_msi and (not webapp.identity or not webapp.identity.type):
+        raise ArgumentUsageError(
+            "--enable-using-msi requires a managed identity assigned to the function app. "
+            "Assign one with: az functionapp identity assign -g {} -n {}".format(resource_group_name, name))
+    if enable_using_msi:
+        logger.warning('Using managed identity to access Key Vault. '
+                       'Ensure the app\'s managed identity has the permission on the Key Vault.')
+
+
+def import_ssl_cert(cmd, resource_group_name, key_vault, key_vault_certificate_name, name=None, certificate_name=None,
+                    load_to_code=None, enable_using_msi=None):
     Certificate = cmd.get_models('Certificate')
     client = web_client_factory(cmd.cli_ctx)
 
@@ -6848,35 +6955,69 @@ def import_ssl_cert(cmd, resource_group_name, key_vault, key_vault_certificate_n
     subscription_id = get_subscription_id(cmd.cli_ctx)
     if cloud_type.lower() == PUBLIC_CLOUD.lower():
         if kv_subscription.lower() != subscription_id.lower():
-            diff_subscription_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_APPSERVICE,
-                                                               subscription_id=kv_subscription)
-            ascs = diff_subscription_client.app_service_certificate_orders.list(api_version=VERSION_2022_09_01)
+            cert_orders_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_APPSERVICE,
+                                                         subscription_id=kv_subscription)
         else:
-            ascs = client.app_service_certificate_orders.list(api_version=VERSION_2022_09_01)
+            cert_orders_client = client
 
-        kv_secret_name = None
-        for asc in ascs:
-            if asc.name == key_vault_certificate_name:
-                kv_secret_name = asc.certificates[key_vault_certificate_name].key_vault_secret_name
+        if hasattr(cert_orders_client, 'app_service_certificate_orders'):
+            ascs = cert_orders_client.app_service_certificate_orders.list(api_version=VERSION_2022_09_01)
+            for asc in ascs:
+                if asc.name == key_vault_certificate_name:
+                    kv_secret_name = asc.certificates[key_vault_certificate_name].key_vault_secret_name
+        else:
+            logger.warning("Unable to check App Service Certificate orders. "
+                           "If '%s' is an App Service Certificate, the import may not resolve "
+                           "the correct Key Vault secret name.", key_vault_certificate_name)
 
     # if kv_secret_name is not populated, it is not an appservice certificate, proceed for KV certificates
-    if not kv_secret_name:
-        kv_secret_name = key_vault_certificate_name
+    kv_secret_name = kv_secret_name or key_vault_certificate_name
 
-    if certificate_name:
-        cert_name = certificate_name
-    else:
-        cert_name = '{}-{}-{}'.format(resource_group_name, kv_name, key_vault_certificate_name)
+    cert_name = certificate_name or '{}-{}-{}'.format(resource_group_name, kv_name, key_vault_certificate_name)
 
-    lnk = 'https://azure.github.io/AppService/2016/05/24/Deploying-Azure-Web-App-Certificate-through-Key-Vault.html'
-    lnk_msg = 'Find more details here: {}'.format(lnk)
-    if not _check_service_principal_permissions(cmd, kv_resource_group_name, kv_name, kv_subscription):
-        logger.warning('Unable to verify Key Vault permissions.')
-        logger.warning('You may need to grant Microsoft.Azure.WebSites service principal the Secret:Get permission')
-        logger.warning(lnk_msg)
+    # When using MSI, the app's managed identity accesses Key Vault, not the service principal
+    if not enable_using_msi:
+        lnk = 'https://azure.github.io/AppService/2016/05/24/Deploying-Azure-Web-App-Certificate-through-Key-Vault.html'
+        lnk_msg = 'Find more details here: {}'.format(lnk)
+        if not _check_service_principal_permissions(cmd, kv_resource_group_name, kv_name, kv_subscription):
+            logger.warning('Unable to verify Key Vault permissions.')
+            logger.warning('You may need to grant Microsoft.Azure.WebSites service principal the Secret:Get permission')
+            logger.warning(lnk_msg)
 
     kv_cert_def = Certificate(location=location, key_vault_id=kv_id, password='',
                               key_vault_secret_name=kv_secret_name)
+
+    # Check if this is a Flex Consumption function app
+    is_flex = name and is_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
+
+    # Validate parameter usage
+    _validate_flex_ssl_params(is_flex, load_to_code, enable_using_msi, webapp if name else None,
+                              resource_group_name, name)
+
+    if is_flex:
+        # Build certificate envelope as dict to include loadCertificateToWebsitesSettings
+        # (not in SDK model yet)
+        cert_envelope = {
+            "location": location,
+            "properties": {
+                "keyVaultId": kv_id,
+                "password": "",
+                "keyVaultSecretName": kv_secret_name,
+                "serverFarmId": get_site_server_farm_id(webapp)
+            }
+        }
+        if load_to_code is not None:
+            cert_envelope["properties"]["loadCertificateToWebsitesSettings"] = {
+                "loadToWebsite": load_to_code
+            }
+        if enable_using_msi is not None:
+            cert_envelope["properties"]["enableKeyVaultAccessUsingMSI"] = enable_using_msi
+        return client.site_certificates.create_or_update(
+            resource_group_name=resource_group_name,
+            name=name,
+            certificate_name=cert_name,
+            certificate_envelope=cert_envelope
+        )
 
     return client.certificates.create_or_update(name=cert_name, resource_group_name=resource_group_name,
                                                 certificate_envelope=kv_cert_def)
@@ -6909,9 +7050,28 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None,
     easy_cert_def = Certificate(location=location, canonical_name=hostname,
                                 server_farm_id=server_farm_id, password='')
 
+    # Check if this is a Flex Consumption function app
+    is_flex = is_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
+
+    # Validate parameter usage
+    if is_flex and slot:
+        raise ArgumentUsageError("--slot is not supported for Flex Consumption function apps. "
+                                 "Site-scoped certificates apply to the parent app.")
+
+    # Default certificate_name to hostname if not provided
+    if not certificate_name:
+        certificate_name = hostname
+
     # TODO: Update manual polling to use LongRunningOperation once backend API & new SDK supports polling
     try:
-        certificate_name = hostname if not certificate_name else certificate_name
+        # For Flex Consumption apps, use the site-scoped certificates endpoint (slots not supported)
+        if is_flex:
+            return client.site_certificates.create_or_update(
+                resource_group_name=resource_group_name,
+                name=name,
+                certificate_name=certificate_name,
+                certificate_envelope=easy_cert_def
+            )
         return client.certificates.create_or_update(name=certificate_name, resource_group_name=resource_group_name,
                                                     certificate_envelope=easy_cert_def)
     except Exception as ex:
@@ -6979,26 +7139,50 @@ def _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint, 
     if not webapp:
         raise ResourceNotFoundError("'{}' app doesn't exist".format(name))
 
-    cert_resource_group_name = parse_resource_id(get_site_server_farm_id(webapp))['resource_group']
-    webapp_certs = client.certificates.list_by_resource_group(cert_resource_group_name)
+    # Check if this is a Flex Consumption function app
+    is_flex = is_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
+
+    # Validate parameter usage for Flex apps
+    if is_flex and slot:
+        raise ArgumentUsageError("--slot is not supported for Flex Consumption function apps. "
+                                 "Site-scoped certificates apply to the parent app.")
 
     found_cert = None
-    # search for a cert that matches in the app service plan's RG
-    for webapp_cert in webapp_certs:
-        if webapp_cert.thumbprint == certificate_thumbprint:
-            found_cert = webapp_cert
-    # search for a cert that matches in the webapp's RG
-    if not found_cert:
-        webapp_certs = client.certificates.list_by_resource_group(resource_group_name)
+
+    # For Flex Consumption apps, search in site-scoped certificates
+    if is_flex:
+        site_certs = client.site_certificates.list(resource_group_name=resource_group_name, name=name)
+        for site_cert in site_certs:
+            if site_cert.thumbprint == certificate_thumbprint:
+                found_cert = site_cert
+                break
+    # If not a Flex app, search in regular certificates
+    else:
+        cert_resource_group_name = parse_resource_id(get_site_server_farm_id(webapp))['resource_group']
+        webapp_certs = client.certificates.list_by_resource_group(cert_resource_group_name)
+        # search for a cert that matches in the app service plan's RG
         for webapp_cert in webapp_certs:
             if webapp_cert.thumbprint == certificate_thumbprint:
                 found_cert = webapp_cert
-    # search for a cert that matches in the subscription, filtering on the serverfarm
-    if not found_cert:
-        sub_certs = client.certificates.list(filter=f"ServerFarmId eq '{get_site_server_farm_id(webapp)}'")
-        found_cert = next(iter([c for c in sub_certs if c.thumbprint == certificate_thumbprint]), None)
+        # search for a cert that matches in the webapp's RG
+        if not found_cert:
+            webapp_certs = client.certificates.list_by_resource_group(resource_group_name)
+            for webapp_cert in webapp_certs:
+                if webapp_cert.thumbprint == certificate_thumbprint:
+                    found_cert = webapp_cert
+        # search for a cert that matches in the subscription, filtering on the serverfarm
+        if not found_cert:
+            sub_certs = client.certificates.list(filter=f"ServerFarmId eq '{get_site_server_farm_id(webapp)}'")
+            found_cert = next(iter([c for c in sub_certs if c.thumbprint == certificate_thumbprint]), None)
+
     if found_cert:
         if not hostname:
+            # For Flex Consumption apps, site-scoped certificates may not populate host_names
+            # Require --hostname to be specified explicitly in this case
+            if is_flex and (not found_cert.host_names or len(found_cert.host_names) == 0):
+                raise ArgumentUsageError(
+                    "The site-scoped certificate does not have associated host names. "
+                    "Please specify the hostname explicitly using --hostname.")
             if len(found_cert.host_names) == 1 and not found_cert.host_names[0].startswith('*'):
                 return _update_host_name_ssl_state(cmd, resource_group_name, name, webapp,
                                                    found_cert.host_names[0], ssl_type,
@@ -8629,6 +8813,28 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         if location is None:
             raise ValidationError("Location is invalid. Use: az functionapp list-flexconsumption-locations")
         is_linux = True
+
+    # Show warnings for Consumption plan (Linux or Windows)
+    # Check if using --consumption-plan-location OR --plan with a consumption SKU (Dynamic tier)
+    plan_sku = getattr(plan_info, 'sku', None) if plan_info else None
+    plan_sku_tier = getattr(plan_sku, 'tier', None)
+    is_consumption_plan = consumption_plan_location is not None or (plan_info and plan_sku_tier == 'Dynamic')
+    if is_consumption_plan:
+        if is_linux:
+            logger.warning(
+                "Linux Consumption will reach EOL on September 30, 2028 and will no longer be supported. "
+                "Flex Consumption is now the recommended serverless hosting plan for Azure Functions. "
+                "It offers faster scaling, reduced cold starts, private networking, and more control over "
+                "performance and cost. Help link: "
+                "https://learn.microsoft.com/en-us/azure/azure-functions/migration/migrate-plan-consumption-to-flex"
+            )
+        else:
+            logger.warning(
+                "Flex Consumption is now the recommended serverless hosting plan for Azure Functions. "
+                "It offers faster scaling, reduced cold starts, private networking, and more control over "
+                "performance and cost. Help link: "
+                "https://learn.microsoft.com/en-us/azure/azure-functions/migration/migrate-plan-consumption-to-flex"
+            )
 
     if environment is not None:
         if consumption_plan_location is not None:
@@ -11443,8 +11649,11 @@ def update_function_key(cmd, resource_group_name, name, function_name, key_name,
 def list_function_keys(cmd, resource_group_name, name, function_name, slot=None):
     client = web_client_factory(cmd.cli_ctx)
     if slot:
-        return client.web_apps.list_function_keys_slot(resource_group_name, name, function_name, slot)
-    return client.web_apps.list_function_keys(resource_group_name, name, function_name)
+        keys = client.web_apps.list_function_keys_slot(resource_group_name, name, function_name, slot)
+    else:
+        keys = client.web_apps.list_function_keys(resource_group_name, name, function_name)
+    # SDK may return .properties as None for flat dictionary responses; fall back to raw payload
+    return keys.properties if keys.properties is not None else dict(keys)
 
 
 def delete_function_key(cmd, resource_group_name, name, key_name, function_name=None, slot=None):
