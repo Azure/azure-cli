@@ -1155,7 +1155,9 @@ class Create(AAZCommand):
         _element.content = AAZPasswordArg(
             options=["content"],
             help="Specifies the XML formatted content that is added to the unattend.xml file for the specified path and component. The XML must be less than 4KB and must include the root element for the setting or feature that is being inserted.",
-            prompt={"cls": "AAZPromptPasswordInput", "kwargs": {"msg": "Password:"}},
+            blank=AAZPromptPasswordInput(
+               msg="VM Admin Password",
+               confirm=True),
         )
         _element.pass_name = AAZStrArg(
             options=["pass-name"],
