@@ -4225,6 +4225,134 @@ spec:
             checks=[self.is_empty()],
         )
 
+    # the availability of features is controlled by a toggle and cannot be fully tested yet,
+    # however, existing test results show that the client side works as expected, so exclude it at this moment
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17, name_prefix="clitest", location="eastus"
+    )
+    def test_aks_nodepool_add_with_artifact_streaming(
+        self, resource_group, resource_group_location
+    ):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name("cliakstest", 16)
+        self.kwargs.update(
+            {
+                "resource_group": resource_group,
+                "name": aks_name,
+                "dns_name_prefix": self.create_random_name("cliaksdns", 16),
+                "location": resource_group_location,
+                "resource_type": "Microsoft.ContainerService/ManagedClusters",
+                "nodepool2_name": "np2",
+                "ssh_key_value": self.generate_ssh_keys(),
+            }
+        )
+
+        # create
+        create_cmd = (
+            "aks create --resource-group={resource_group} --name={name} "
+            "--ssh-key-value={ssh_key_value} "
+            "--aks-custom-headers=AKSHTTPCustomFeatures=Microsoft.ContainerService/ArtifactStreamingPreview "
+        )
+        self.cmd(
+            create_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+            ],
+        )
+
+        # nodepool add
+        self.cmd(
+            "aks nodepool add --resource-group={resource_group} --cluster-name={name} --name={nodepool2_name} "
+            "--enable-artifact-streaming --aks-custom-headers=AKSHTTPCustomFeatures=Microsoft.ContainerService/ArtifactStreamingPreview",
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("artifactStreamingProfile.enabled", True),
+            ],
+        )
+
+        # delete
+        self.cmd(
+            "aks delete -g {resource_group} -n {name} --yes --no-wait",
+            checks=[self.is_empty()],
+        )
+
+    # the availability of features is controlled by a toggle and cannot be fully tested yet,
+    # however, existing test results show that the client side works as expected, so exclude it at this moment
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17, name_prefix="clitest", location="eastus"
+    )
+    def test_aks_nodepool_update_with_artifact_streaming(
+        self, resource_group, resource_group_location
+    ):
+        aks_name = self.create_random_name("cliakstest", 16)
+        nodepool_name = self.create_random_name("n", 6)
+
+        self.kwargs.update(
+            {
+                "resource_group": resource_group,
+                "name": aks_name,
+                "location": resource_group_location,
+                "ssh_key_value": self.generate_ssh_keys(),
+                "node_pool_name": nodepool_name,
+                "node_vm_size": "standard_d2s_v3",
+            }
+        )
+
+        self.cmd(
+            "aks create "
+            "--resource-group={resource_group} "
+            "--name={name} "
+            "--location={location} "
+            "--ssh-key-value={ssh_key_value} "
+            "--nodepool-name={node_pool_name} "
+            "--node-count=1 "
+            "--node-vm-size={node_vm_size} "
+            "--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/ArtifactStreamingPreview",
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+            ],
+        )
+
+        # enable artifact streaming
+        self.cmd(
+            "aks nodepool update "
+            "--resource-group={resource_group} "
+            "--cluster-name={name} "
+            "--name={node_pool_name} "
+            "--enable-artifact-streaming "
+            "--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/ArtifactStreamingPreview",
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("artifactStreamingProfile.enabled", True),
+            ],
+        )
+
+        # disable artifact streaming
+        self.cmd(
+            "aks nodepool update "
+            "--resource-group={resource_group} "
+            "--cluster-name={name} "
+            "--name={node_pool_name} "
+            "--disable-artifact-streaming "
+            "--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/ArtifactStreamingPreview",
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("artifactStreamingProfile.enabled", False),
+            ],
+        )
+
+        # delete
+        self.cmd(
+            "aks delete --resource-group={resource_group} --name={name} --yes --no-wait",
+            checks=[self.is_empty()],
+        )
+
     @AllowLargeResponse()
     @unittest.skip('Permission denied when trying to write to {}.')
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westcentralus')
@@ -8202,6 +8330,151 @@ spec:
         self.cmd(cmd, checks=[
             self.is_empty(),
         ])
+
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_with_control_plane_metrics(self, resource_group, resource_group_location):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        aks_name = self.create_random_name('cliakstest', 16)
+        node_vm_size = 'standard_d2s_v3'
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'ssh_key_value': self.generate_ssh_keys(),
+            'node_vm_size': node_vm_size,
+        })
+
+        # create: --enable-azure-monitor-metrics + --enable-control-plane-metrics
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--ssh-key-value={ssh_key_value} --node-vm-size={node_vm_size} --enable-managed-identity ' \
+                     '--enable-azure-monitor-metrics --enable-control-plane-metrics --output=json'
+        # NOTE: ``--enable-control-plane-metrics`` on create is intentionally deferred to a
+        # postprocessing PUT (after DCRA creation) to avoid scheduling the CCP pod before its
+        # DCRA exists. The create response may therefore reflect the pre-flip state; assert
+        # the final state via ``aks show`` after the cluster settles.
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('azureMonitorProfile.metrics.enabled', True),
+        ])
+
+        wait_cmd = 'aks wait --resource-group={resource_group} --name={name} --created ' \
+                   '--interval 60 --timeout 1800'
+        self.cmd(wait_cmd, checks=[self.is_empty()])
+
+        # Verify the deferred control-plane-metrics flip landed on the cluster.
+        self.cmd(
+            'aks show --resource-group={resource_group} --name={name} --output=json',
+            checks=[
+                self.check('azureMonitorProfile.metrics.enabled', True),
+                self.check('azureMonitorProfile.metrics.controlPlane.enabled', True),
+            ],
+        )
+
+        # delete
+        self.cmd('aks delete --resource-group={resource_group} --name={name} --yes --no-wait',
+                 checks=[self.is_empty()])
+
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_update_with_control_plane_metrics(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        node_vm_size = 'standard_d2s_v3'
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'ssh_key_value': self.generate_ssh_keys(),
+            'node_vm_size': node_vm_size,
+        })
+
+        # create: with azure monitor metrics but without control plane metrics
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--ssh-key-value={ssh_key_value} --node-vm-size={node_vm_size} --enable-managed-identity ' \
+                     '--enable-azure-monitor-metrics --output=json'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('azureMonitorProfile.metrics.enabled', True),
+        ])
+
+        # wait for AMW background setup to complete before issuing update
+        wait_cmd = 'aks wait --resource-group={resource_group} --name={name} --updated --timeout=1800'
+        self.cmd(wait_cmd, checks=[self.is_empty()])
+
+        # update: enable-control-plane-metrics on a cluster that already has AM metrics
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} --yes --output=json ' \
+                     '--enable-control-plane-metrics'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('azureMonitorProfile.metrics.controlPlane.enabled', True),
+        ])
+
+        self.cmd(wait_cmd, checks=[self.is_empty()])
+
+        # update: disable-control-plane-metrics
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} --yes --output=json ' \
+                     '--disable-control-plane-metrics'
+        self.cmd(update_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('azureMonitorProfile.metrics.controlPlane.enabled', False),
+        ])
+
+        self.cmd(wait_cmd, checks=[self.is_empty()])
+
+        # delete
+        self.cmd('aks delete --resource-group={resource_group} --name={name} --yes --no-wait',
+                 checks=[self.is_empty()])
+
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_control_plane_metrics_negative(self, resource_group, resource_group_location):
+        aks_name = self.create_random_name('cliakstest', 16)
+        node_vm_size = 'standard_d2s_v3'
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'ssh_key_value': self.generate_ssh_keys(),
+            'node_vm_size': node_vm_size,
+        })
+
+        # negative: --enable-control-plane-metrics without --enable-azure-monitor-metrics on create
+        create_missing_parent = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                                '--ssh-key-value={ssh_key_value} --node-vm-size={node_vm_size} --enable-managed-identity ' \
+                                '--enable-control-plane-metrics --output=json'
+        self.cmd(create_missing_parent, expect_failure=True)
+
+        # create a baseline cluster (no AM metrics) so we can exercise the update-time negatives
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--ssh-key-value={ssh_key_value} --node-vm-size={node_vm_size} --enable-managed-identity ' \
+                     '--output=json'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.not_exists('azureMonitorProfile.metrics'),
+        ])
+
+        # negative: update --enable-control-plane-metrics on a cluster without AM metrics enabled
+        update_missing_parent = 'aks update --resource-group={resource_group} --name={name} --yes --output=json ' \
+                                '--enable-control-plane-metrics'
+        self.cmd(update_missing_parent, expect_failure=True)
+
+        # negative: --enable-control-plane-metrics with --disable-azure-monitor-metrics on update
+        update_conflicting = 'aks update --resource-group={resource_group} --name={name} --yes --output=json ' \
+                             '--enable-azure-monitor-metrics --enable-control-plane-metrics --disable-azure-monitor-metrics'
+        self.cmd(update_conflicting, expect_failure=True)
+
+        # negative: both --enable-control-plane-metrics and --disable-control-plane-metrics on update
+        update_both = 'aks update --resource-group={resource_group} --name={name} --yes --output=json ' \
+                      '--enable-azure-monitor-metrics --enable-control-plane-metrics --disable-control-plane-metrics'
+        self.cmd(update_both, expect_failure=True)
+
+        # delete
+        self.cmd('aks delete --resource-group={resource_group} --name={name} --yes --no-wait',
+                 checks=[self.is_empty()])
 
     # live only due to dependency `_add_role_assignment` is not mocked
     @live_only()

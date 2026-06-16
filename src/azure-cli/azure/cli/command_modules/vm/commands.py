@@ -407,12 +407,12 @@ def load_command_table(self, _):
         g.custom_command('disable', 'decrypt_vmss')
         g.custom_show_command('show', 'show_vmss_encryption_status')
 
-    with self.command_group('vmss extension', compute_vmss_sdk) as g:
+    with self.command_group('vmss extension') as g:
         g.custom_command('delete', 'delete_vmss_extension', supports_no_wait=True)
         g.custom_show_command('show', 'get_vmss_extension')
         g.custom_command('set', 'set_vmss_extension', supports_no_wait=True)
         g.custom_command('list', 'list_vmss_extensions')
-        g.custom_command('upgrade', 'upgrade_vmss_extension', min_api='2020-06-01', supports_no_wait=True)
+        g.custom_command('upgrade', 'upgrade_vmss_extension', supports_no_wait=True)
 
     with self.command_group('vmss extension image', compute_vm_extension_image_sdk) as g:
         g.custom_command('list', 'list_vm_extension_images')

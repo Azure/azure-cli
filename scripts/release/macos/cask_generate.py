@@ -77,7 +77,7 @@ def main() -> None:
     parser.add_argument("--arm64-sha", dest="arm64_sha", help="ARM64 tarball SHA256")
     parser.add_argument("--x86-64-sha", dest="x86_64_sha", help="x86_64 tarball SHA256")
     parser.add_argument("--github-repo", dest="github_repo", help="GitHub repo, e.g. Azure/azure-cli")
-    parser.add_argument("--python-version", dest="python_version", help="Python major.minor version, e.g. 3.13")
+    parser.add_argument("--python-version", dest="python_version", help="Python major.minor version, e.g. 3.14")
     parser.add_argument("--template", dest="template", help="Template path (.rb.in)")
     parser.add_argument("--output", dest="output", help="Output cask path (.rb)")
     parser.set_defaults(func=generate_cask)
