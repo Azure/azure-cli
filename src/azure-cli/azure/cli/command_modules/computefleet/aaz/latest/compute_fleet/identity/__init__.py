@@ -8,16 +8,8 @@
 # pylint: skip-file
 # flake8: noqa
 
-from azure.cli.core.aaz import *
-
-
-@register_command_group(
-    "compute-fleet",
-)
-class __CMDGroup(AAZCommandGroup):
-    """Manage for Azure Compute Fleet
-    """
-    pass
-
-
-__all__ = ["__CMDGroup"]
+from .__cmd_group import *
+from ._assign import *
+from ._remove import *
+from ._show import *
+from ._wait import *

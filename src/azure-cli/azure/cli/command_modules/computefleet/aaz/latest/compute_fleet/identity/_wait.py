@@ -12,29 +12,22 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "compute-fleet list",
-    is_preview=True,
+    "compute-fleet identity wait",
 )
-class List(AAZCommand):
-    """List Fleet resources by subscription ID and resource group
-
-    :example: Fleets_ListBySubscription
-        az compute-fleet list
+class Wait(AAZWaitCommand):
+    """Place the CLI in a waiting state until a condition is met.
     """
 
     _aaz_info = {
-        "version": "2026-04-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.azurefleet/fleets", "2026-04-01-preview"],
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.azurefleet/fleets", "2026-04-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.azurefleet/fleets/{}", "2026-04-01-preview", "identity"],
         ]
     }
 
-    AZ_SUPPORT_PAGINATION = True
-
     def _handler(self, command_args):
         super()._handler(command_args)
-        return self.build_paging(self._execute_operations, self._output)
+        self._execute_operations()
+        return self._output()
 
     _args_schema = None
 
@@ -47,17 +40,23 @@ class List(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.resource_group = AAZResourceGroupNameArg()
+        _args_schema.fleet_name = AAZStrArg(
+            options=["-n", "--name", "--fleet-name"],
+            help="The name of the Compute Fleet",
+            required=True,
+            id_part="name",
+            fmt=AAZStrArgFormat(
+                pattern="^[^_\\W][\\w\\-._]{0,79}(?<![-.])$",
+            ),
+        )
+        _args_schema.resource_group = AAZResourceGroupNameArg(
+            required=True,
+        )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        condition_0 = has_value(self.ctx.args.resource_group) and has_value(self.ctx.subscription_id)
-        condition_1 = has_value(self.ctx.subscription_id) and has_value(self.ctx.args.resource_group) is not True
-        if condition_0:
-            self.FleetsListByResourceGroup(ctx=self.ctx)()
-        if condition_1:
-            self.FleetsListBySubscription(ctx=self.ctx)()
+        self.FleetsGet(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -69,11 +68,10 @@ class List(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
-        next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
-        return result, next_link
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=False)
+        return result
 
-    class FleetsListByResourceGroup(AAZHttpOperation):
+    class FleetsGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -87,7 +85,7 @@ class List(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AzureFleet/fleets",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AzureFleet/fleets/{fleetName}",
                 **self.url_parameters
             )
 
@@ -102,6 +100,10 @@ class List(AAZCommand):
         @property
         def url_parameters(self):
             parameters = {
+                **self.serialize_url_param(
+                    "fleetName", self.ctx.args.fleet_name,
+                    required=True,
+                ),
                 **self.serialize_url_param(
                     "resourceGroupName", self.ctx.args.resource_group,
                     required=True,
@@ -148,766 +150,13 @@ class List(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-
-            _schema_on_200 = cls._schema_on_200
-            _schema_on_200.next_link = AAZStrType(
-                serialized_name="nextLink",
-            )
-            _schema_on_200.value = AAZListType(
-                flags={"required": True},
-            )
-
-            value = cls._schema_on_200.value
-            value.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element
-            _element.id = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.identity = AAZIdentityObjectType()
-            _element.location = AAZStrType(
-                flags={"required": True},
-            )
-            _element.name = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.plan = AAZObjectType()
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-            _element.system_data = AAZObjectType(
-                serialized_name="systemData",
-                flags={"read_only": True},
-            )
-            _element.tags = AAZDictType()
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.zones = AAZListType()
-
-            identity = cls._schema_on_200.value.Element.identity
-            identity.principal_id = AAZStrType(
-                serialized_name="principalId",
-                flags={"read_only": True},
-            )
-            identity.tenant_id = AAZStrType(
-                serialized_name="tenantId",
-                flags={"read_only": True},
-            )
-            identity.type = AAZStrType(
-                flags={"required": True},
-            )
-            identity.user_assigned_identities = AAZDictType(
-                serialized_name="userAssignedIdentities",
-            )
-
-            user_assigned_identities = cls._schema_on_200.value.Element.identity.user_assigned_identities
-            user_assigned_identities.Element = AAZObjectType(
-                nullable=True,
-            )
-
-            _element = cls._schema_on_200.value.Element.identity.user_assigned_identities.Element
-            _element.client_id = AAZStrType(
-                serialized_name="clientId",
-                flags={"read_only": True},
-            )
-            _element.principal_id = AAZStrType(
-                serialized_name="principalId",
-                flags={"read_only": True},
-            )
-
-            plan = cls._schema_on_200.value.Element.plan
-            plan.name = AAZStrType(
-                flags={"required": True},
-            )
-            plan.product = AAZStrType(
-                flags={"required": True},
-            )
-            plan.promotion_code = AAZStrType(
-                serialized_name="promotionCode",
-            )
-            plan.publisher = AAZStrType(
-                flags={"required": True},
-            )
-            plan.version = AAZStrType()
-
-            properties = cls._schema_on_200.value.Element.properties
-            properties.additional_locations_profile = AAZObjectType(
-                serialized_name="additionalLocationsProfile",
-            )
-            properties.capacity_type = AAZStrType(
-                serialized_name="capacityType",
-            )
-            properties.compute_profile = AAZObjectType(
-                serialized_name="computeProfile",
-                flags={"required": True},
-            )
-            properties.mode = AAZStrType()
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
-            properties.regular_priority_profile = AAZObjectType(
-                serialized_name="regularPriorityProfile",
-            )
-            properties.spot_priority_profile = AAZObjectType(
-                serialized_name="spotPriorityProfile",
-            )
-            properties.time_created = AAZStrType(
-                serialized_name="timeCreated",
-                flags={"read_only": True},
-            )
-            properties.unique_id = AAZStrType(
-                serialized_name="uniqueId",
-                flags={"read_only": True},
-            )
-            properties.vm_attributes = AAZObjectType(
-                serialized_name="vmAttributes",
-            )
-            properties.vm_name_prefix = AAZStrType(
-                serialized_name="vmNamePrefix",
-            )
-            properties.vm_sizes_profile = AAZListType(
-                serialized_name="vmSizesProfile",
-                flags={"required": True},
-            )
-            properties.zone_allocation_policy = AAZObjectType(
-                serialized_name="zoneAllocationPolicy",
-            )
-
-            additional_locations_profile = cls._schema_on_200.value.Element.properties.additional_locations_profile
-            additional_locations_profile.location_profiles = AAZListType(
-                serialized_name="locationProfiles",
-                flags={"required": True},
-            )
-
-            location_profiles = cls._schema_on_200.value.Element.properties.additional_locations_profile.location_profiles
-            location_profiles.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.additional_locations_profile.location_profiles.Element
-            _element.location = AAZStrType(
-                flags={"required": True},
-            )
-            _element.virtual_machine_profile_override = AAZObjectType(
-                serialized_name="virtualMachineProfileOverride",
-            )
-            _ListHelper._build_schema_base_virtual_machine_profile_read(_element.virtual_machine_profile_override)
-
-            compute_profile = cls._schema_on_200.value.Element.properties.compute_profile
-            compute_profile.additional_virtual_machine_capabilities = AAZObjectType(
-                serialized_name="additionalVirtualMachineCapabilities",
-            )
-            compute_profile.base_virtual_machine_profile = AAZObjectType(
-                serialized_name="baseVirtualMachineProfile",
-                flags={"required": True},
-            )
-            _ListHelper._build_schema_base_virtual_machine_profile_read(compute_profile.base_virtual_machine_profile)
-            compute_profile.compute_api_version = AAZStrType(
-                serialized_name="computeApiVersion",
-            )
-            compute_profile.platform_fault_domain_count = AAZIntType(
-                serialized_name="platformFaultDomainCount",
-            )
-
-            additional_virtual_machine_capabilities = cls._schema_on_200.value.Element.properties.compute_profile.additional_virtual_machine_capabilities
-            additional_virtual_machine_capabilities.hibernation_enabled = AAZBoolType(
-                serialized_name="hibernationEnabled",
-            )
-            additional_virtual_machine_capabilities.ultra_ssd_enabled = AAZBoolType(
-                serialized_name="ultraSSDEnabled",
-            )
-
-            regular_priority_profile = cls._schema_on_200.value.Element.properties.regular_priority_profile
-            regular_priority_profile.allocation_strategy = AAZStrType(
-                serialized_name="allocationStrategy",
-            )
-            regular_priority_profile.capacity = AAZIntType()
-            regular_priority_profile.min_capacity = AAZIntType(
-                serialized_name="minCapacity",
-            )
-
-            spot_priority_profile = cls._schema_on_200.value.Element.properties.spot_priority_profile
-            spot_priority_profile.allocation_strategy = AAZStrType(
-                serialized_name="allocationStrategy",
-            )
-            spot_priority_profile.capacity = AAZIntType()
-            spot_priority_profile.eviction_policy = AAZStrType(
-                serialized_name="evictionPolicy",
-            )
-            spot_priority_profile.maintain = AAZBoolType()
-            spot_priority_profile.max_price_per_vm = AAZFloatType(
-                serialized_name="maxPricePerVM",
-            )
-            spot_priority_profile.min_capacity = AAZIntType(
-                serialized_name="minCapacity",
-            )
-
-            vm_attributes = cls._schema_on_200.value.Element.properties.vm_attributes
-            vm_attributes.accelerator_count = AAZObjectType(
-                serialized_name="acceleratorCount",
-            )
-            _ListHelper._build_schema_vm_attribute_min_max_integer_read(vm_attributes.accelerator_count)
-            vm_attributes.accelerator_manufacturers = AAZListType(
-                serialized_name="acceleratorManufacturers",
-            )
-            vm_attributes.accelerator_support = AAZStrType(
-                serialized_name="acceleratorSupport",
-            )
-            vm_attributes.accelerator_types = AAZListType(
-                serialized_name="acceleratorTypes",
-            )
-            vm_attributes.architecture_types = AAZListType(
-                serialized_name="architectureTypes",
-            )
-            vm_attributes.burstable_support = AAZStrType(
-                serialized_name="burstableSupport",
-            )
-            vm_attributes.cpu_manufacturers = AAZListType(
-                serialized_name="cpuManufacturers",
-            )
-            vm_attributes.data_disk_count = AAZObjectType(
-                serialized_name="dataDiskCount",
-            )
-            _ListHelper._build_schema_vm_attribute_min_max_integer_read(vm_attributes.data_disk_count)
-            vm_attributes.excluded_vm_sizes = AAZListType(
-                serialized_name="excludedVMSizes",
-            )
-            vm_attributes.local_storage_disk_types = AAZListType(
-                serialized_name="localStorageDiskTypes",
-            )
-            vm_attributes.local_storage_in_gi_b = AAZObjectType(
-                serialized_name="localStorageInGiB",
-            )
-            _ListHelper._build_schema_vm_attribute_min_max_double_read(vm_attributes.local_storage_in_gi_b)
-            vm_attributes.local_storage_support = AAZStrType(
-                serialized_name="localStorageSupport",
-            )
-            vm_attributes.memory_in_gi_b = AAZObjectType(
-                serialized_name="memoryInGiB",
-                flags={"required": True},
-            )
-            _ListHelper._build_schema_vm_attribute_min_max_double_read(vm_attributes.memory_in_gi_b)
-            vm_attributes.memory_in_gi_b_per_v_cpu = AAZObjectType(
-                serialized_name="memoryInGiBPerVCpu",
-            )
-            _ListHelper._build_schema_vm_attribute_min_max_double_read(vm_attributes.memory_in_gi_b_per_v_cpu)
-            vm_attributes.network_bandwidth_in_mbps = AAZObjectType(
-                serialized_name="networkBandwidthInMbps",
-            )
-            _ListHelper._build_schema_vm_attribute_min_max_double_read(vm_attributes.network_bandwidth_in_mbps)
-            vm_attributes.network_interface_count = AAZObjectType(
-                serialized_name="networkInterfaceCount",
-            )
-            _ListHelper._build_schema_vm_attribute_min_max_integer_read(vm_attributes.network_interface_count)
-            vm_attributes.rdma_network_interface_count = AAZObjectType(
-                serialized_name="rdmaNetworkInterfaceCount",
-            )
-            _ListHelper._build_schema_vm_attribute_min_max_integer_read(vm_attributes.rdma_network_interface_count)
-            vm_attributes.rdma_support = AAZStrType(
-                serialized_name="rdmaSupport",
-            )
-            vm_attributes.v_cpu_count = AAZObjectType(
-                serialized_name="vCpuCount",
-                flags={"required": True},
-            )
-            _ListHelper._build_schema_vm_attribute_min_max_integer_read(vm_attributes.v_cpu_count)
-            vm_attributes.vm_categories = AAZListType(
-                serialized_name="vmCategories",
-            )
-
-            accelerator_manufacturers = cls._schema_on_200.value.Element.properties.vm_attributes.accelerator_manufacturers
-            accelerator_manufacturers.Element = AAZStrType()
-
-            accelerator_types = cls._schema_on_200.value.Element.properties.vm_attributes.accelerator_types
-            accelerator_types.Element = AAZStrType()
-
-            architecture_types = cls._schema_on_200.value.Element.properties.vm_attributes.architecture_types
-            architecture_types.Element = AAZStrType()
-
-            cpu_manufacturers = cls._schema_on_200.value.Element.properties.vm_attributes.cpu_manufacturers
-            cpu_manufacturers.Element = AAZStrType()
-
-            excluded_vm_sizes = cls._schema_on_200.value.Element.properties.vm_attributes.excluded_vm_sizes
-            excluded_vm_sizes.Element = AAZStrType()
-
-            local_storage_disk_types = cls._schema_on_200.value.Element.properties.vm_attributes.local_storage_disk_types
-            local_storage_disk_types.Element = AAZStrType()
-
-            vm_categories = cls._schema_on_200.value.Element.properties.vm_attributes.vm_categories
-            vm_categories.Element = AAZStrType()
-
-            vm_sizes_profile = cls._schema_on_200.value.Element.properties.vm_sizes_profile
-            vm_sizes_profile.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.vm_sizes_profile.Element
-            _element.name = AAZStrType(
-                flags={"required": True},
-            )
-            _element.rank = AAZIntType()
-
-            zone_allocation_policy = cls._schema_on_200.value.Element.properties.zone_allocation_policy
-            zone_allocation_policy.distribution_strategy = AAZStrType(
-                serialized_name="distributionStrategy",
-                flags={"required": True},
-            )
-            zone_allocation_policy.zone_preferences = AAZListType(
-                serialized_name="zonePreferences",
-            )
-
-            zone_preferences = cls._schema_on_200.value.Element.properties.zone_allocation_policy.zone_preferences
-            zone_preferences.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.zone_allocation_policy.zone_preferences.Element
-            _element.rank = AAZIntType()
-            _element.zone = AAZStrType(
-                flags={"required": True},
-            )
-
-            system_data = cls._schema_on_200.value.Element.system_data
-            system_data.created_at = AAZStrType(
-                serialized_name="createdAt",
-            )
-            system_data.created_by = AAZStrType(
-                serialized_name="createdBy",
-            )
-            system_data.created_by_type = AAZStrType(
-                serialized_name="createdByType",
-            )
-            system_data.last_modified_at = AAZStrType(
-                serialized_name="lastModifiedAt",
-            )
-            system_data.last_modified_by = AAZStrType(
-                serialized_name="lastModifiedBy",
-            )
-            system_data.last_modified_by_type = AAZStrType(
-                serialized_name="lastModifiedByType",
-            )
-
-            tags = cls._schema_on_200.value.Element.tags
-            tags.Element = AAZStrType()
-
-            zones = cls._schema_on_200.value.Element.zones
-            zones.Element = AAZStrType()
+            _WaitHelper._build_schema_fleet_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
-    class FleetsListBySubscription(AAZHttpOperation):
-        CLIENT_TYPE = "MgmtClient"
 
-        def __call__(self, *args, **kwargs):
-            request = self.make_request()
-            session = self.client.send_request(request=request, stream=False, **kwargs)
-            if session.http_response.status_code in [200]:
-                return self.on_200(session)
-
-            return self.on_error(session.http_response)
-
-        @property
-        def url(self):
-            return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/Microsoft.AzureFleet/fleets",
-                **self.url_parameters
-            )
-
-        @property
-        def method(self):
-            return "GET"
-
-        @property
-        def error_format(self):
-            return "MgmtErrorFormat"
-
-        @property
-        def url_parameters(self):
-            parameters = {
-                **self.serialize_url_param(
-                    "subscriptionId", self.ctx.subscription_id,
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def query_parameters(self):
-            parameters = {
-                **self.serialize_query_param(
-                    "api-version", "2026-04-01-preview",
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def header_parameters(self):
-            parameters = {
-                **self.serialize_header_param(
-                    "Accept", "application/json",
-                ),
-            }
-            return parameters
-
-        def on_200(self, session):
-            data = self.deserialize_http_content(session)
-            self.ctx.set_var(
-                "instance",
-                data,
-                schema_builder=self._build_schema_on_200
-            )
-
-        _schema_on_200 = None
-
-        @classmethod
-        def _build_schema_on_200(cls):
-            if cls._schema_on_200 is not None:
-                return cls._schema_on_200
-
-            cls._schema_on_200 = AAZObjectType()
-
-            _schema_on_200 = cls._schema_on_200
-            _schema_on_200.next_link = AAZStrType(
-                serialized_name="nextLink",
-            )
-            _schema_on_200.value = AAZListType(
-                flags={"required": True},
-            )
-
-            value = cls._schema_on_200.value
-            value.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element
-            _element.id = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.identity = AAZIdentityObjectType()
-            _element.location = AAZStrType(
-                flags={"required": True},
-            )
-            _element.name = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.plan = AAZObjectType()
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-            _element.system_data = AAZObjectType(
-                serialized_name="systemData",
-                flags={"read_only": True},
-            )
-            _element.tags = AAZDictType()
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.zones = AAZListType()
-
-            identity = cls._schema_on_200.value.Element.identity
-            identity.principal_id = AAZStrType(
-                serialized_name="principalId",
-                flags={"read_only": True},
-            )
-            identity.tenant_id = AAZStrType(
-                serialized_name="tenantId",
-                flags={"read_only": True},
-            )
-            identity.type = AAZStrType(
-                flags={"required": True},
-            )
-            identity.user_assigned_identities = AAZDictType(
-                serialized_name="userAssignedIdentities",
-            )
-
-            user_assigned_identities = cls._schema_on_200.value.Element.identity.user_assigned_identities
-            user_assigned_identities.Element = AAZObjectType(
-                nullable=True,
-            )
-
-            _element = cls._schema_on_200.value.Element.identity.user_assigned_identities.Element
-            _element.client_id = AAZStrType(
-                serialized_name="clientId",
-                flags={"read_only": True},
-            )
-            _element.principal_id = AAZStrType(
-                serialized_name="principalId",
-                flags={"read_only": True},
-            )
-
-            plan = cls._schema_on_200.value.Element.plan
-            plan.name = AAZStrType(
-                flags={"required": True},
-            )
-            plan.product = AAZStrType(
-                flags={"required": True},
-            )
-            plan.promotion_code = AAZStrType(
-                serialized_name="promotionCode",
-            )
-            plan.publisher = AAZStrType(
-                flags={"required": True},
-            )
-            plan.version = AAZStrType()
-
-            properties = cls._schema_on_200.value.Element.properties
-            properties.additional_locations_profile = AAZObjectType(
-                serialized_name="additionalLocationsProfile",
-            )
-            properties.capacity_type = AAZStrType(
-                serialized_name="capacityType",
-            )
-            properties.compute_profile = AAZObjectType(
-                serialized_name="computeProfile",
-                flags={"required": True},
-            )
-            properties.mode = AAZStrType()
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
-            properties.regular_priority_profile = AAZObjectType(
-                serialized_name="regularPriorityProfile",
-            )
-            properties.spot_priority_profile = AAZObjectType(
-                serialized_name="spotPriorityProfile",
-            )
-            properties.time_created = AAZStrType(
-                serialized_name="timeCreated",
-                flags={"read_only": True},
-            )
-            properties.unique_id = AAZStrType(
-                serialized_name="uniqueId",
-                flags={"read_only": True},
-            )
-            properties.vm_attributes = AAZObjectType(
-                serialized_name="vmAttributes",
-            )
-            properties.vm_name_prefix = AAZStrType(
-                serialized_name="vmNamePrefix",
-            )
-            properties.vm_sizes_profile = AAZListType(
-                serialized_name="vmSizesProfile",
-                flags={"required": True},
-            )
-            properties.zone_allocation_policy = AAZObjectType(
-                serialized_name="zoneAllocationPolicy",
-            )
-
-            additional_locations_profile = cls._schema_on_200.value.Element.properties.additional_locations_profile
-            additional_locations_profile.location_profiles = AAZListType(
-                serialized_name="locationProfiles",
-                flags={"required": True},
-            )
-
-            location_profiles = cls._schema_on_200.value.Element.properties.additional_locations_profile.location_profiles
-            location_profiles.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.additional_locations_profile.location_profiles.Element
-            _element.location = AAZStrType(
-                flags={"required": True},
-            )
-            _element.virtual_machine_profile_override = AAZObjectType(
-                serialized_name="virtualMachineProfileOverride",
-            )
-            _ListHelper._build_schema_base_virtual_machine_profile_read(_element.virtual_machine_profile_override)
-
-            compute_profile = cls._schema_on_200.value.Element.properties.compute_profile
-            compute_profile.additional_virtual_machine_capabilities = AAZObjectType(
-                serialized_name="additionalVirtualMachineCapabilities",
-            )
-            compute_profile.base_virtual_machine_profile = AAZObjectType(
-                serialized_name="baseVirtualMachineProfile",
-                flags={"required": True},
-            )
-            _ListHelper._build_schema_base_virtual_machine_profile_read(compute_profile.base_virtual_machine_profile)
-            compute_profile.compute_api_version = AAZStrType(
-                serialized_name="computeApiVersion",
-            )
-            compute_profile.platform_fault_domain_count = AAZIntType(
-                serialized_name="platformFaultDomainCount",
-            )
-
-            additional_virtual_machine_capabilities = cls._schema_on_200.value.Element.properties.compute_profile.additional_virtual_machine_capabilities
-            additional_virtual_machine_capabilities.hibernation_enabled = AAZBoolType(
-                serialized_name="hibernationEnabled",
-            )
-            additional_virtual_machine_capabilities.ultra_ssd_enabled = AAZBoolType(
-                serialized_name="ultraSSDEnabled",
-            )
-
-            regular_priority_profile = cls._schema_on_200.value.Element.properties.regular_priority_profile
-            regular_priority_profile.allocation_strategy = AAZStrType(
-                serialized_name="allocationStrategy",
-            )
-            regular_priority_profile.capacity = AAZIntType()
-            regular_priority_profile.min_capacity = AAZIntType(
-                serialized_name="minCapacity",
-            )
-
-            spot_priority_profile = cls._schema_on_200.value.Element.properties.spot_priority_profile
-            spot_priority_profile.allocation_strategy = AAZStrType(
-                serialized_name="allocationStrategy",
-            )
-            spot_priority_profile.capacity = AAZIntType()
-            spot_priority_profile.eviction_policy = AAZStrType(
-                serialized_name="evictionPolicy",
-            )
-            spot_priority_profile.maintain = AAZBoolType()
-            spot_priority_profile.max_price_per_vm = AAZFloatType(
-                serialized_name="maxPricePerVM",
-            )
-            spot_priority_profile.min_capacity = AAZIntType(
-                serialized_name="minCapacity",
-            )
-
-            vm_attributes = cls._schema_on_200.value.Element.properties.vm_attributes
-            vm_attributes.accelerator_count = AAZObjectType(
-                serialized_name="acceleratorCount",
-            )
-            _ListHelper._build_schema_vm_attribute_min_max_integer_read(vm_attributes.accelerator_count)
-            vm_attributes.accelerator_manufacturers = AAZListType(
-                serialized_name="acceleratorManufacturers",
-            )
-            vm_attributes.accelerator_support = AAZStrType(
-                serialized_name="acceleratorSupport",
-            )
-            vm_attributes.accelerator_types = AAZListType(
-                serialized_name="acceleratorTypes",
-            )
-            vm_attributes.architecture_types = AAZListType(
-                serialized_name="architectureTypes",
-            )
-            vm_attributes.burstable_support = AAZStrType(
-                serialized_name="burstableSupport",
-            )
-            vm_attributes.cpu_manufacturers = AAZListType(
-                serialized_name="cpuManufacturers",
-            )
-            vm_attributes.data_disk_count = AAZObjectType(
-                serialized_name="dataDiskCount",
-            )
-            _ListHelper._build_schema_vm_attribute_min_max_integer_read(vm_attributes.data_disk_count)
-            vm_attributes.excluded_vm_sizes = AAZListType(
-                serialized_name="excludedVMSizes",
-            )
-            vm_attributes.local_storage_disk_types = AAZListType(
-                serialized_name="localStorageDiskTypes",
-            )
-            vm_attributes.local_storage_in_gi_b = AAZObjectType(
-                serialized_name="localStorageInGiB",
-            )
-            _ListHelper._build_schema_vm_attribute_min_max_double_read(vm_attributes.local_storage_in_gi_b)
-            vm_attributes.local_storage_support = AAZStrType(
-                serialized_name="localStorageSupport",
-            )
-            vm_attributes.memory_in_gi_b = AAZObjectType(
-                serialized_name="memoryInGiB",
-                flags={"required": True},
-            )
-            _ListHelper._build_schema_vm_attribute_min_max_double_read(vm_attributes.memory_in_gi_b)
-            vm_attributes.memory_in_gi_b_per_v_cpu = AAZObjectType(
-                serialized_name="memoryInGiBPerVCpu",
-            )
-            _ListHelper._build_schema_vm_attribute_min_max_double_read(vm_attributes.memory_in_gi_b_per_v_cpu)
-            vm_attributes.network_bandwidth_in_mbps = AAZObjectType(
-                serialized_name="networkBandwidthInMbps",
-            )
-            _ListHelper._build_schema_vm_attribute_min_max_double_read(vm_attributes.network_bandwidth_in_mbps)
-            vm_attributes.network_interface_count = AAZObjectType(
-                serialized_name="networkInterfaceCount",
-            )
-            _ListHelper._build_schema_vm_attribute_min_max_integer_read(vm_attributes.network_interface_count)
-            vm_attributes.rdma_network_interface_count = AAZObjectType(
-                serialized_name="rdmaNetworkInterfaceCount",
-            )
-            _ListHelper._build_schema_vm_attribute_min_max_integer_read(vm_attributes.rdma_network_interface_count)
-            vm_attributes.rdma_support = AAZStrType(
-                serialized_name="rdmaSupport",
-            )
-            vm_attributes.v_cpu_count = AAZObjectType(
-                serialized_name="vCpuCount",
-                flags={"required": True},
-            )
-            _ListHelper._build_schema_vm_attribute_min_max_integer_read(vm_attributes.v_cpu_count)
-            vm_attributes.vm_categories = AAZListType(
-                serialized_name="vmCategories",
-            )
-
-            accelerator_manufacturers = cls._schema_on_200.value.Element.properties.vm_attributes.accelerator_manufacturers
-            accelerator_manufacturers.Element = AAZStrType()
-
-            accelerator_types = cls._schema_on_200.value.Element.properties.vm_attributes.accelerator_types
-            accelerator_types.Element = AAZStrType()
-
-            architecture_types = cls._schema_on_200.value.Element.properties.vm_attributes.architecture_types
-            architecture_types.Element = AAZStrType()
-
-            cpu_manufacturers = cls._schema_on_200.value.Element.properties.vm_attributes.cpu_manufacturers
-            cpu_manufacturers.Element = AAZStrType()
-
-            excluded_vm_sizes = cls._schema_on_200.value.Element.properties.vm_attributes.excluded_vm_sizes
-            excluded_vm_sizes.Element = AAZStrType()
-
-            local_storage_disk_types = cls._schema_on_200.value.Element.properties.vm_attributes.local_storage_disk_types
-            local_storage_disk_types.Element = AAZStrType()
-
-            vm_categories = cls._schema_on_200.value.Element.properties.vm_attributes.vm_categories
-            vm_categories.Element = AAZStrType()
-
-            vm_sizes_profile = cls._schema_on_200.value.Element.properties.vm_sizes_profile
-            vm_sizes_profile.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.vm_sizes_profile.Element
-            _element.name = AAZStrType(
-                flags={"required": True},
-            )
-            _element.rank = AAZIntType()
-
-            zone_allocation_policy = cls._schema_on_200.value.Element.properties.zone_allocation_policy
-            zone_allocation_policy.distribution_strategy = AAZStrType(
-                serialized_name="distributionStrategy",
-                flags={"required": True},
-            )
-            zone_allocation_policy.zone_preferences = AAZListType(
-                serialized_name="zonePreferences",
-            )
-
-            zone_preferences = cls._schema_on_200.value.Element.properties.zone_allocation_policy.zone_preferences
-            zone_preferences.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.zone_allocation_policy.zone_preferences.Element
-            _element.rank = AAZIntType()
-            _element.zone = AAZStrType(
-                flags={"required": True},
-            )
-
-            system_data = cls._schema_on_200.value.Element.system_data
-            system_data.created_at = AAZStrType(
-                serialized_name="createdAt",
-            )
-            system_data.created_by = AAZStrType(
-                serialized_name="createdBy",
-            )
-            system_data.created_by_type = AAZStrType(
-                serialized_name="createdByType",
-            )
-            system_data.last_modified_at = AAZStrType(
-                serialized_name="lastModifiedAt",
-            )
-            system_data.last_modified_by = AAZStrType(
-                serialized_name="lastModifiedBy",
-            )
-            system_data.last_modified_by_type = AAZStrType(
-                serialized_name="lastModifiedByType",
-            )
-
-            tags = cls._schema_on_200.value.Element.tags
-            tags.Element = AAZStrType()
-
-            zones = cls._schema_on_200.value.Element.zones
-            zones.Element = AAZStrType()
-
-            return cls._schema_on_200
-
-
-class _ListHelper:
-    """Helper class for List"""
+class _WaitHelper:
+    """Helper class for Wait"""
 
     _schema_api_entity_reference_read = None
 
@@ -1650,6 +899,365 @@ class _ListHelper:
 
         _schema.id = cls._schema_disk_encryption_set_parameters_read.id
 
+    _schema_fleet_read = None
+
+    @classmethod
+    def _build_schema_fleet_read(cls, _schema):
+        if cls._schema_fleet_read is not None:
+            _schema.id = cls._schema_fleet_read.id
+            _schema.identity = cls._schema_fleet_read.identity
+            _schema.location = cls._schema_fleet_read.location
+            _schema.name = cls._schema_fleet_read.name
+            _schema.plan = cls._schema_fleet_read.plan
+            _schema.properties = cls._schema_fleet_read.properties
+            _schema.system_data = cls._schema_fleet_read.system_data
+            _schema.tags = cls._schema_fleet_read.tags
+            _schema.type = cls._schema_fleet_read.type
+            _schema.zones = cls._schema_fleet_read.zones
+            return
+
+        cls._schema_fleet_read = _schema_fleet_read = AAZObjectType()
+
+        fleet_read = _schema_fleet_read
+        fleet_read.id = AAZStrType(
+            flags={"read_only": True},
+        )
+        fleet_read.identity = AAZIdentityObjectType()
+        fleet_read.location = AAZStrType(
+            flags={"required": True},
+        )
+        fleet_read.name = AAZStrType(
+            flags={"read_only": True},
+        )
+        fleet_read.plan = AAZObjectType()
+        fleet_read.properties = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+        fleet_read.system_data = AAZObjectType(
+            serialized_name="systemData",
+            flags={"read_only": True},
+        )
+        fleet_read.tags = AAZDictType()
+        fleet_read.type = AAZStrType(
+            flags={"read_only": True},
+        )
+        fleet_read.zones = AAZListType()
+
+        identity = _schema_fleet_read.identity
+        identity.principal_id = AAZStrType(
+            serialized_name="principalId",
+            flags={"read_only": True},
+        )
+        identity.tenant_id = AAZStrType(
+            serialized_name="tenantId",
+            flags={"read_only": True},
+        )
+        identity.type = AAZStrType(
+            flags={"required": True},
+        )
+        identity.user_assigned_identities = AAZDictType(
+            serialized_name="userAssignedIdentities",
+        )
+
+        user_assigned_identities = _schema_fleet_read.identity.user_assigned_identities
+        user_assigned_identities.Element = AAZObjectType(
+            nullable=True,
+        )
+
+        _element = _schema_fleet_read.identity.user_assigned_identities.Element
+        _element.client_id = AAZStrType(
+            serialized_name="clientId",
+            flags={"read_only": True},
+        )
+        _element.principal_id = AAZStrType(
+            serialized_name="principalId",
+            flags={"read_only": True},
+        )
+
+        plan = _schema_fleet_read.plan
+        plan.name = AAZStrType(
+            flags={"required": True},
+        )
+        plan.product = AAZStrType(
+            flags={"required": True},
+        )
+        plan.promotion_code = AAZStrType(
+            serialized_name="promotionCode",
+        )
+        plan.publisher = AAZStrType(
+            flags={"required": True},
+        )
+        plan.version = AAZStrType()
+
+        properties = _schema_fleet_read.properties
+        properties.additional_locations_profile = AAZObjectType(
+            serialized_name="additionalLocationsProfile",
+        )
+        properties.capacity_type = AAZStrType(
+            serialized_name="capacityType",
+        )
+        properties.compute_profile = AAZObjectType(
+            serialized_name="computeProfile",
+            flags={"required": True},
+        )
+        properties.mode = AAZStrType()
+        properties.provisioning_state = AAZStrType(
+            serialized_name="provisioningState",
+            flags={"read_only": True},
+        )
+        properties.regular_priority_profile = AAZObjectType(
+            serialized_name="regularPriorityProfile",
+        )
+        properties.spot_priority_profile = AAZObjectType(
+            serialized_name="spotPriorityProfile",
+        )
+        properties.time_created = AAZStrType(
+            serialized_name="timeCreated",
+            flags={"read_only": True},
+        )
+        properties.unique_id = AAZStrType(
+            serialized_name="uniqueId",
+            flags={"read_only": True},
+        )
+        properties.vm_attributes = AAZObjectType(
+            serialized_name="vmAttributes",
+        )
+        properties.vm_name_prefix = AAZStrType(
+            serialized_name="vmNamePrefix",
+        )
+        properties.vm_sizes_profile = AAZListType(
+            serialized_name="vmSizesProfile",
+            flags={"required": True},
+        )
+        properties.zone_allocation_policy = AAZObjectType(
+            serialized_name="zoneAllocationPolicy",
+        )
+
+        additional_locations_profile = _schema_fleet_read.properties.additional_locations_profile
+        additional_locations_profile.location_profiles = AAZListType(
+            serialized_name="locationProfiles",
+            flags={"required": True},
+        )
+
+        location_profiles = _schema_fleet_read.properties.additional_locations_profile.location_profiles
+        location_profiles.Element = AAZObjectType()
+
+        _element = _schema_fleet_read.properties.additional_locations_profile.location_profiles.Element
+        _element.location = AAZStrType(
+            flags={"required": True},
+        )
+        _element.virtual_machine_profile_override = AAZObjectType(
+            serialized_name="virtualMachineProfileOverride",
+        )
+        cls._build_schema_base_virtual_machine_profile_read(_element.virtual_machine_profile_override)
+
+        compute_profile = _schema_fleet_read.properties.compute_profile
+        compute_profile.additional_virtual_machine_capabilities = AAZObjectType(
+            serialized_name="additionalVirtualMachineCapabilities",
+        )
+        compute_profile.base_virtual_machine_profile = AAZObjectType(
+            serialized_name="baseVirtualMachineProfile",
+            flags={"required": True},
+        )
+        cls._build_schema_base_virtual_machine_profile_read(compute_profile.base_virtual_machine_profile)
+        compute_profile.compute_api_version = AAZStrType(
+            serialized_name="computeApiVersion",
+        )
+        compute_profile.platform_fault_domain_count = AAZIntType(
+            serialized_name="platformFaultDomainCount",
+        )
+
+        additional_virtual_machine_capabilities = _schema_fleet_read.properties.compute_profile.additional_virtual_machine_capabilities
+        additional_virtual_machine_capabilities.hibernation_enabled = AAZBoolType(
+            serialized_name="hibernationEnabled",
+        )
+        additional_virtual_machine_capabilities.ultra_ssd_enabled = AAZBoolType(
+            serialized_name="ultraSSDEnabled",
+        )
+
+        regular_priority_profile = _schema_fleet_read.properties.regular_priority_profile
+        regular_priority_profile.allocation_strategy = AAZStrType(
+            serialized_name="allocationStrategy",
+        )
+        regular_priority_profile.capacity = AAZIntType()
+        regular_priority_profile.min_capacity = AAZIntType(
+            serialized_name="minCapacity",
+        )
+
+        spot_priority_profile = _schema_fleet_read.properties.spot_priority_profile
+        spot_priority_profile.allocation_strategy = AAZStrType(
+            serialized_name="allocationStrategy",
+        )
+        spot_priority_profile.capacity = AAZIntType()
+        spot_priority_profile.eviction_policy = AAZStrType(
+            serialized_name="evictionPolicy",
+        )
+        spot_priority_profile.maintain = AAZBoolType()
+        spot_priority_profile.max_price_per_vm = AAZFloatType(
+            serialized_name="maxPricePerVM",
+        )
+        spot_priority_profile.min_capacity = AAZIntType(
+            serialized_name="minCapacity",
+        )
+
+        vm_attributes = _schema_fleet_read.properties.vm_attributes
+        vm_attributes.accelerator_count = AAZObjectType(
+            serialized_name="acceleratorCount",
+        )
+        cls._build_schema_vm_attribute_min_max_integer_read(vm_attributes.accelerator_count)
+        vm_attributes.accelerator_manufacturers = AAZListType(
+            serialized_name="acceleratorManufacturers",
+        )
+        vm_attributes.accelerator_support = AAZStrType(
+            serialized_name="acceleratorSupport",
+        )
+        vm_attributes.accelerator_types = AAZListType(
+            serialized_name="acceleratorTypes",
+        )
+        vm_attributes.architecture_types = AAZListType(
+            serialized_name="architectureTypes",
+        )
+        vm_attributes.burstable_support = AAZStrType(
+            serialized_name="burstableSupport",
+        )
+        vm_attributes.cpu_manufacturers = AAZListType(
+            serialized_name="cpuManufacturers",
+        )
+        vm_attributes.data_disk_count = AAZObjectType(
+            serialized_name="dataDiskCount",
+        )
+        cls._build_schema_vm_attribute_min_max_integer_read(vm_attributes.data_disk_count)
+        vm_attributes.excluded_vm_sizes = AAZListType(
+            serialized_name="excludedVMSizes",
+        )
+        vm_attributes.local_storage_disk_types = AAZListType(
+            serialized_name="localStorageDiskTypes",
+        )
+        vm_attributes.local_storage_in_gi_b = AAZObjectType(
+            serialized_name="localStorageInGiB",
+        )
+        cls._build_schema_vm_attribute_min_max_double_read(vm_attributes.local_storage_in_gi_b)
+        vm_attributes.local_storage_support = AAZStrType(
+            serialized_name="localStorageSupport",
+        )
+        vm_attributes.memory_in_gi_b = AAZObjectType(
+            serialized_name="memoryInGiB",
+            flags={"required": True},
+        )
+        cls._build_schema_vm_attribute_min_max_double_read(vm_attributes.memory_in_gi_b)
+        vm_attributes.memory_in_gi_b_per_v_cpu = AAZObjectType(
+            serialized_name="memoryInGiBPerVCpu",
+        )
+        cls._build_schema_vm_attribute_min_max_double_read(vm_attributes.memory_in_gi_b_per_v_cpu)
+        vm_attributes.network_bandwidth_in_mbps = AAZObjectType(
+            serialized_name="networkBandwidthInMbps",
+        )
+        cls._build_schema_vm_attribute_min_max_double_read(vm_attributes.network_bandwidth_in_mbps)
+        vm_attributes.network_interface_count = AAZObjectType(
+            serialized_name="networkInterfaceCount",
+        )
+        cls._build_schema_vm_attribute_min_max_integer_read(vm_attributes.network_interface_count)
+        vm_attributes.rdma_network_interface_count = AAZObjectType(
+            serialized_name="rdmaNetworkInterfaceCount",
+        )
+        cls._build_schema_vm_attribute_min_max_integer_read(vm_attributes.rdma_network_interface_count)
+        vm_attributes.rdma_support = AAZStrType(
+            serialized_name="rdmaSupport",
+        )
+        vm_attributes.v_cpu_count = AAZObjectType(
+            serialized_name="vCpuCount",
+            flags={"required": True},
+        )
+        cls._build_schema_vm_attribute_min_max_integer_read(vm_attributes.v_cpu_count)
+        vm_attributes.vm_categories = AAZListType(
+            serialized_name="vmCategories",
+        )
+
+        accelerator_manufacturers = _schema_fleet_read.properties.vm_attributes.accelerator_manufacturers
+        accelerator_manufacturers.Element = AAZStrType()
+
+        accelerator_types = _schema_fleet_read.properties.vm_attributes.accelerator_types
+        accelerator_types.Element = AAZStrType()
+
+        architecture_types = _schema_fleet_read.properties.vm_attributes.architecture_types
+        architecture_types.Element = AAZStrType()
+
+        cpu_manufacturers = _schema_fleet_read.properties.vm_attributes.cpu_manufacturers
+        cpu_manufacturers.Element = AAZStrType()
+
+        excluded_vm_sizes = _schema_fleet_read.properties.vm_attributes.excluded_vm_sizes
+        excluded_vm_sizes.Element = AAZStrType()
+
+        local_storage_disk_types = _schema_fleet_read.properties.vm_attributes.local_storage_disk_types
+        local_storage_disk_types.Element = AAZStrType()
+
+        vm_categories = _schema_fleet_read.properties.vm_attributes.vm_categories
+        vm_categories.Element = AAZStrType()
+
+        vm_sizes_profile = _schema_fleet_read.properties.vm_sizes_profile
+        vm_sizes_profile.Element = AAZObjectType()
+
+        _element = _schema_fleet_read.properties.vm_sizes_profile.Element
+        _element.name = AAZStrType(
+            flags={"required": True},
+        )
+        _element.rank = AAZIntType()
+
+        zone_allocation_policy = _schema_fleet_read.properties.zone_allocation_policy
+        zone_allocation_policy.distribution_strategy = AAZStrType(
+            serialized_name="distributionStrategy",
+            flags={"required": True},
+        )
+        zone_allocation_policy.zone_preferences = AAZListType(
+            serialized_name="zonePreferences",
+        )
+
+        zone_preferences = _schema_fleet_read.properties.zone_allocation_policy.zone_preferences
+        zone_preferences.Element = AAZObjectType()
+
+        _element = _schema_fleet_read.properties.zone_allocation_policy.zone_preferences.Element
+        _element.rank = AAZIntType()
+        _element.zone = AAZStrType(
+            flags={"required": True},
+        )
+
+        system_data = _schema_fleet_read.system_data
+        system_data.created_at = AAZStrType(
+            serialized_name="createdAt",
+        )
+        system_data.created_by = AAZStrType(
+            serialized_name="createdBy",
+        )
+        system_data.created_by_type = AAZStrType(
+            serialized_name="createdByType",
+        )
+        system_data.last_modified_at = AAZStrType(
+            serialized_name="lastModifiedAt",
+        )
+        system_data.last_modified_by = AAZStrType(
+            serialized_name="lastModifiedBy",
+        )
+        system_data.last_modified_by_type = AAZStrType(
+            serialized_name="lastModifiedByType",
+        )
+
+        tags = _schema_fleet_read.tags
+        tags.Element = AAZStrType()
+
+        zones = _schema_fleet_read.zones
+        zones.Element = AAZStrType()
+
+        _schema.id = cls._schema_fleet_read.id
+        _schema.identity = cls._schema_fleet_read.identity
+        _schema.location = cls._schema_fleet_read.location
+        _schema.name = cls._schema_fleet_read.name
+        _schema.plan = cls._schema_fleet_read.plan
+        _schema.properties = cls._schema_fleet_read.properties
+        _schema.system_data = cls._schema_fleet_read.system_data
+        _schema.tags = cls._schema_fleet_read.tags
+        _schema.type = cls._schema_fleet_read.type
+        _schema.zones = cls._schema_fleet_read.zones
+
     _schema_sub_resource_read = None
 
     @classmethod
@@ -1739,4 +1347,4 @@ class _ListHelper:
         _schema.storage_account_type = cls._schema_virtual_machine_scale_set_managed_disk_parameters_read.storage_account_type
 
 
-__all__ = ["List"]
+__all__ = ["Wait"]

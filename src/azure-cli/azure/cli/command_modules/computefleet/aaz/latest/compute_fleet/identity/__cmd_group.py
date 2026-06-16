@@ -12,10 +12,10 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "compute-fleet",
+    "compute-fleet identity",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Manage for Azure Compute Fleet
+    """Manage Identity
     """
     pass
 
