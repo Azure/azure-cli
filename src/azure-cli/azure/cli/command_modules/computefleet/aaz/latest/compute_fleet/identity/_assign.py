@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Assign(AAZCommand):
     """Assign the user or system managed identities.
+
+    :example: Fleets_CreateOrUpdate_MaximumSet_Gen
+        az compute-fleet identity assign --resource-group rgazurefleet --fleet-name myFleet
     """
 
     _aaz_info = {

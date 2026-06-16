@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Show(AAZCommand):
     """Show the details of managed identities.
+
+    :example: Fleets_Get_MaximumSet_Gen
+        az compute-fleet identity show --resource-group rgazurefleet --fleet-name myFleet
     """
 
     _aaz_info = {

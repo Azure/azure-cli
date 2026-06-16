@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Remove(AAZCommand):
     """Remove the user or system managed identities.
+
+    :example: Fleets_CreateOrUpdate_MaximumSet_Gen
+        az compute-fleet identity remove --resource-group rgazurefleet --fleet-name myFleet
     """
 
     _aaz_info = {
