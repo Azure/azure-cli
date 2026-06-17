@@ -6846,7 +6846,14 @@ def list_ssl_certs(cmd, resource_group_name, name=None):
     if name:
         raise ArgumentUsageError("--name is only supported for Flex Consumption function apps. "
                                  "For other app types, certificates are managed at the resource group level.")
-    return client.certificates.list_by_resource_group(resource_group_name)
+    # Resource-group-level listing. Classic certificates are managed at the resource group level,
+    # but certificates for Flex Consumption function apps are stored per-site and are not returned
+    # by certificates.list_by_resource_group. Include those so the listing is complete.
+    certs = list(client.certificates.list_by_resource_group(resource_group_name))
+    for app in client.web_apps.list_by_resource_group(resource_group_name):
+        if app.kind and 'functionapp' in app.kind and \n                is_flex_functionapp(cmd.cli_ctx, resource_group_name, app.name):
+            certs.extend(client.site_certificates.list(resource_group_name=resource_group_name, name=app.name))
+    return certs
 
 
 def show_ssl_cert(cmd, resource_group_name, certificate_name, name=None):
