@@ -163,7 +163,6 @@ class TestCmdWithRetry(unittest.TestCase):
         self._make_instance()._cmd_with_retry('aks show', [JMESPathCheck('provisioningState', 'Succeeded'), name_check], False)
         name_check.assert_called_once()
 
-
     @patch.dict(os.environ, {'AZURE_CLI_TEST_PROVISIONING_MAX_RETRIES': '3', 'AZURE_CLI_TEST_PROVISIONING_BASE_DELAY': '0.01'})
     @patch('time.sleep', return_value=None)
     @patch('random.uniform', return_value=0)
@@ -198,6 +197,33 @@ class TestCmdWithRetry(unittest.TestCase):
                 [JMESPathCheck('provisioningState', 'Succeeded')],
                 False,
             )
+
+    @patch.dict(os.environ, {
+        'AZURE_CLI_TEST_PROVISIONING_MAX_RETRIES': '5',
+        'AZURE_CLI_TEST_PROVISIONING_BASE_DELAY': '2.0',
+        'AZURE_CLI_TEST_PROVISIONING_MAX_DELAY': '10.0',
+    })
+    @patch('time.sleep', return_value=None)
+    @patch('random.uniform', return_value=0)
+    @patch('azure.cli.testsdk.base.execute')
+    def test_delay_is_clamped_to_max_delay(self, mock_execute, _mock_random, mock_sleep):
+        # Regression: exponential backoff must be capped by
+        # AZURE_CLI_TEST_PROVISIONING_MAX_DELAY so a single sleep can't grow
+        # unbounded (e.g. base 2.0 * 2^9 = 1024s on attempt 9).
+        resource_id = '/subscriptions/xxx/resourceGroups/rg/providers/Microsoft.ContainerService/managedClusters/mc'
+        mock_execute.side_effect = [
+            self._result({'id': resource_id, 'provisioningState': 'Updating'}),
+            self._result({'provisioningState': 'Updating'}),
+            self._result({'provisioningState': 'Updating'}),
+            self._result({'provisioningState': 'Updating'}),
+            self._result({'provisioningState': 'Updating'}),
+            self._result({'provisioningState': 'Succeeded'}),
+        ]
+        self._make_instance()._cmd_with_retry('aks show', [JMESPathCheck('provisioningState', 'Succeeded')], False)
+        # Without the cap, attempts 3 and 4 would sleep 16s and 32s.
+        # With max_delay=10.0 and jitter pinned to 0, every sleep must be <= 10.0.
+        for call in mock_sleep.call_args_list:
+            self.assertLessEqual(call.args[0], 10.0)
 
 
 if __name__ == '__main__':

@@ -106,10 +106,14 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                 last_seen_etag = initial_etag
                 max_retries = max(1, int(os.environ.get('AZURE_CLI_TEST_PROVISIONING_MAX_RETRIES', '10')))
                 base_delay = float(os.environ.get('AZURE_CLI_TEST_PROVISIONING_BASE_DELAY', '2.0'))
+                # Cap per-attempt sleep so unbounded exponential growth can't
+                # stall a runner. Default 60s keeps worst-case total under
+                # max_retries * max_delay (e.g. 10 * 60s = 10 min).
+                max_delay = float(os.environ.get('AZURE_CLI_TEST_PROVISIONING_MAX_DELAY', '60.0'))
 
                 # Poll with exponential backoff + jitter until terminal state
                 for attempt in range(max_retries):
-                    delay = base_delay * (2 ** attempt) + random.uniform(0, 1)
+                    delay = min(base_delay * (2 ** attempt), max_delay) + random.uniform(0, 1)
                     time.sleep(delay)
                     poll_result = execute(self.cli_ctx, f'resource show --ids {resource_id}', expect_failure=False)
                     poll_data = poll_result.get_output_in_json()
