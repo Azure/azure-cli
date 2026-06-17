@@ -23,7 +23,7 @@ from ._constants import (FUNCTIONS_VERSIONS, LOGICAPPS_NODE_RUNTIME_VERSIONS, WI
 
 from ._validators import (validate_timeout_value, validate_site_create, validate_asp_create,
                           validate_ase_create, validate_ip_address,
-                          validate_service_tag, validate_public_cloud)
+                          validate_service_tag, validate_public_cloud, warn_linux_consumption_eol)
 
 AUTH_TYPES = {
     'AllowAnonymous': 'na',
@@ -93,6 +93,14 @@ def load_arguments(self, _):
         c.argument('slot', options_list=['--slot', '-s'],
                    help="the name of the slot. Default to the productions slot if not specified")
         c.argument('name', arg_type=webapp_name_arg_type)
+
+    with self.argument_context('functionapp') as c:
+        c.ignore('app_instance')
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('location', arg_type=get_location_type(self.cli_ctx))
+        c.argument('slot', options_list=['--slot', '-s'],
+                   help="the name of the slot. Default to the productions slot if not specified")
+        c.argument('name', arg_type=functionapp_name_arg_type, validator=warn_linux_consumption_eol)
 
     with self.argument_context('appservice') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)

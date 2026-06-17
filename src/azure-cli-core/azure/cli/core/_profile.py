@@ -441,6 +441,11 @@ class Profile:
     def get_msal_token(self, scopes, data):
         """Get VM SSH certificate. DO NOT use it for other purposes. To get an access token, use get_raw_token instead.
         """
+        account = self.get_subscription()
+        managed_identity_type, _ = Profile._parse_managed_identity_account(account)
+        if managed_identity_type or (in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID)):
+            raise AuthenticationError("VM SSH currently doesn't support managed identity or Cloud Shell.")
+
         credential, _, _ = self.get_login_credentials(sdk_credential=False)
         from .auth.constants import ACCESS_TOKEN
         certificate_string = credential.acquire_token(scopes, data=data)[ACCESS_TOKEN]

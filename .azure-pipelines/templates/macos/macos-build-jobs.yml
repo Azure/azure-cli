@@ -62,7 +62,7 @@ jobs:
       echo "Architecture: $(Architecture)"
       brew install python@${{ parameters.PythonVersion }}
       
-      PYTHON_PATH=$(brew --prefix python@${{ parameters.PythonVersion }})/libexec/bin/python3
+      PYTHON_PATH=$(brew --prefix python@${{ parameters.PythonVersion }})/libexec/bin/python
       echo "Python path: $PYTHON_PATH"
       $PYTHON_PATH --version
       
@@ -171,7 +171,7 @@ jobs:
         brew install python@${{ parameters.PythonVersion }}
       fi
 
-      AZ_PYTHON="$(brew --prefix python@${{ parameters.PythonVersion }})/libexec/bin/python3"
+      AZ_PYTHON="$(brew --prefix python@${{ parameters.PythonVersion }})/libexec/bin/python"
       export AZ_PYTHON
       
       echo "System architecture: $(uname -m)"
