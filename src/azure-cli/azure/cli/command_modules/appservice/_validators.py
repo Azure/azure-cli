@@ -18,7 +18,7 @@ from ._appservice_utils import _generic_site_operation
 from ._client_factory import web_client_factory
 from .utils import (_normalize_sku, get_sku_tier, get_resource_name_and_group,
                     get_resource_if_exists, is_functionapp, is_logicapp, is_webapp, is_centauri_functionapp,
-                    _normalize_location)
+                    _normalize_location, get_site_server_farm_id)
 
 from .aaz.latest.network import ListServiceTags
 from .aaz.latest.network.vnet import List as VNetList, Show as VNetShow
@@ -82,10 +82,12 @@ def validate_site_create(cmd, namespace):
 
 def validate_ase_create(cmd, namespace):
     # Validate the ASE Name availability
+    from azure.mgmt.web.models import ResourceNameAvailabilityRequest
     client = web_client_factory(cmd.cli_ctx)
     resource_type = 'Microsoft.Web/hostingEnvironments'
     if isinstance(namespace.name, str):
-        name_validation = client.check_name_availability(namespace.name, resource_type)
+        request = ResourceNameAvailabilityRequest(name=namespace.name, type=resource_type)
+        name_validation = client.check_name_availability(request)
         if not name_validation.name_available:
             raise ValidationError(name_validation.message)
 
@@ -109,6 +111,12 @@ def _validate_asp_sku(sku, app_service_environment, zone_redundant):
 
 def validate_asp_create(namespace):
     validate_tags(namespace)
+    # is_linux is None when not explicitly provided by the user (default).
+    # Resolve the default: Linux unless --hyper-v is specified.
+    if namespace.is_linux is None:
+        namespace.is_linux = not namespace.hyper_v
+    elif namespace.is_linux and namespace.hyper_v:
+        raise MutuallyExclusiveArgumentError('Usage error: --is-linux true and --hyper-v cannot be used together.')
     if namespace.sku is None:
         if namespace.is_linux:
             namespace.sku = 'P0V3'
@@ -120,8 +128,6 @@ def validate_asp_create(namespace):
             namespace.sku = 'B1'
     sku = _normalize_sku(namespace.sku)
     _validate_asp_sku(sku, namespace.app_service_environment, namespace.zone_redundant)
-    if namespace.is_linux and namespace.hyper_v:
-        raise MutuallyExclusiveArgumentError('Usage error: --is-linux and --hyper-v cannot be used together.')
 
 
 def validate_functionapp_asp_create(namespace):
@@ -141,6 +147,7 @@ def validate_functionapp_on_containerapp_site_config_set(cmd, namespace):
         raise ValidationError(
             "Invalid command. This is not supported for Azure Functions on Azure Container app environments.",
             "Please use the following command instead: az functionapp config container set")
+    warn_linux_consumption_eol(cmd, namespace)
 
 
 def validate_functionapp_on_containerapp_container_settings_delete(cmd, namespace):
@@ -160,6 +167,7 @@ def validate_functionapp_on_containerapp_update(cmd, namespace):
         raise ValidationError(
             "Invalid command. This is currently not supported for Azure Functions on Azure Container app environments.",
             "Please use either 'az functionapp config appsettings set' or 'az functionapp config container set'")
+    warn_linux_consumption_eol(cmd, namespace)
 
 
 def validate_functionapp_on_containerapp_site_config_show(cmd, namespace):
@@ -169,15 +177,17 @@ def validate_functionapp_on_containerapp_site_config_show(cmd, namespace):
         raise ValidationError(
             "Invalid command. This is not supported for Azure Functions on Azure Container app environments.",
             "Please use the following command instead: az functionapp config container show")
+    warn_linux_consumption_eol(cmd, namespace)
 
 
 def validate_functionapp_on_flex_plan(cmd, namespace):
     resource_group_name = namespace.resource_group_name
     name = _get_app_name(namespace)
     functionapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
-    if functionapp.server_farm_id is None:
+    server_farm_id = get_site_server_farm_id(functionapp)
+    if server_farm_id is None:
         return
-    parsed_plan_id = parse_resource_id(functionapp.server_farm_id)
+    parsed_plan_id = parse_resource_id(server_farm_id)
     client = web_client_factory(cmd.cli_ctx)
     plan_info = client.app_service_plans.get(parsed_plan_id['resource_group'], parsed_plan_id['name'])
     if plan_info is None:
@@ -191,15 +201,63 @@ def validate_is_flex_functionapp(cmd, namespace):
     resource_group_name = namespace.resource_group_name
     name = namespace.name
     functionapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
-    if functionapp.server_farm_id is None:
+    server_farm_id = get_site_server_farm_id(functionapp)
+    if server_farm_id is None:
         raise ValidationError('This command is only valid for Azure Functions on the FlexConsumption plan.')
-    parsed_plan_id = parse_resource_id(functionapp.server_farm_id)
+    parsed_plan_id = parse_resource_id(server_farm_id)
     client = web_client_factory(cmd.cli_ctx)
     plan_info = client.app_service_plans.get(parsed_plan_id['resource_group'], parsed_plan_id['name'])
     if plan_info is None:
         raise ResourceNotFoundError('Could not determine the current plan of the functionapp')
     if plan_info.sku.tier.lower() != 'flexconsumption':
         raise ValidationError('This command is only valid for Azure Functions on the FlexConsumption plan.')
+
+
+def warn_linux_consumption_eol(cmd, namespace):
+    """Shows a warning if the function app is on Linux Consumption plan.
+
+    This function is designed to never fail or raise exceptions. Any errors are silently ignored.
+    """
+    # pylint: disable=broad-except
+    try:
+        resource_group_name = (getattr(namespace, 'resource_group_name', None) or
+                               getattr(namespace, 'resource_group', None))
+        name = _get_app_name(namespace)
+        slot = getattr(namespace, 'slot', None)
+        if not name or not resource_group_name:
+            return
+
+        functionapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
+        if functionapp is None:
+            return
+
+        # Check if Linux (reserved=True)
+        is_linux = getattr(functionapp, 'reserved', False)
+        if not is_linux:
+            return
+
+        # Get the plan and check if it's Consumption (Dynamic tier)
+        server_farm_id = get_site_server_farm_id(functionapp)
+        if server_farm_id is None:
+            return
+
+        parsed_plan_id = parse_resource_id(server_farm_id)
+        client = web_client_factory(cmd.cli_ctx)
+        plan_info = client.app_service_plans.get(parsed_plan_id['resource_group'], parsed_plan_id['name'])
+        if plan_info is None or not hasattr(plan_info, 'sku') or plan_info.sku is None:
+            return
+
+        if plan_info.sku.tier == 'Dynamic':
+            logger.warning(
+                "Migrate your app to Flex Consumption as Linux Consumption will reach EOL on "
+                "September 30, 2028 and will no longer be supported. Flex Consumption is now the "
+                "recommended serverless hosting plan for Azure Functions. It offers faster scaling, "
+                "reduced cold starts, private networking, and more control over performance and cost. Help link: "
+                "https://learn.microsoft.com/en-us/azure/azure-functions/migration/migrate-plan-consumption-to-flex"
+            )
+    except Exception:
+        # This warning function should never fail or block the main command execution.
+        pass
 
 
 def validate_app_exists(cmd, namespace):
@@ -223,6 +281,7 @@ def validate_functionapp_on_containerapp_vnet(cmd, namespace):
         raise ValidationError(
             'Unsupported operation on function app.',
             'Please set virtual network configuration for the function app at Container app environment level.')
+    warn_linux_consumption_eol(cmd, namespace)
 
 
 def validate_add_vnet(cmd, namespace):
@@ -625,6 +684,7 @@ def validate_app_is_functionapp(cmd, namespace):
         raise ValidationError(f"App '{name}' in group '{rg}' is a logic app.")
     if is_webapp(app):
         raise ValidationError(f"App '{name}' in group '{rg}' is a web app.")
+    warn_linux_consumption_eol(cmd, namespace)
 
 
 def validate_centauri_delete_function(cmd, namespace):
@@ -634,6 +694,7 @@ def validate_centauri_delete_function(cmd, namespace):
         raise ValidationError(
             "Invalid Operation. This function is currently present in your image",
             "Please modify your image to remove the function and provide an updated image.")
+    warn_linux_consumption_eol(cmd, namespace)
 
 
 def validate_registry_server(namespace):

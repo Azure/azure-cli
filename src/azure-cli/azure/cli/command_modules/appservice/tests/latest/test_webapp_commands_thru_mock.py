@@ -103,8 +103,8 @@ class TestWebappMocked(unittest.TestCase):
         client = mock.Mock()
         client_factory_mock.return_value = client
         cmd_mock = _get_test_cmd()
-        SourceControl = cmd_mock.get_models('SourceControl')
-        sc = SourceControl(name='not-really-needed', source_control_name='GitHub', token='veryNiceToken')
+        SourceControl, SourceControlProperties = cmd_mock.get_models('SourceControl', 'SourceControlProperties')
+        sc = SourceControl(properties=SourceControlProperties(token='veryNiceToken'))
         client.update_source_control.return_value = sc
 
         # action
@@ -126,8 +126,7 @@ class TestWebappMocked(unittest.TestCase):
 
         # set up the result value of putting a domain name
         domain = 'veryNiceDomain'
-        binding = HostNameBinding(location=webapp.location,
-                                  domain_id=domain,
+        binding = HostNameBinding(domain_id=domain,
                                   custom_host_name_dns_record_type='A',
                                   host_name_type='Managed')
         client.web_apps.create_or_update_host_name_binding.return_value = binding
@@ -217,7 +216,7 @@ class TestWebappMocked(unittest.TestCase):
 
         cmd_mock = _get_test_cmd()
         SiteConfig = cmd_mock.get_models('SiteConfig')
-        site_config = SiteConfig(name='antarctica')
+        site_config = SiteConfig()
         site_op_mock.return_value = site_config
 
         is_centauri_functionapp_mock.return_value = False
@@ -470,10 +469,11 @@ class TestWebappMocked(unittest.TestCase):
         self.assertIn('--runtime', str(context.exception))
         self.assertIn('--os-type linux', str(context.exception))
 
+    @mock.patch('azure.cli.command_modules.appservice.custom.is_flex_functionapp', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom._verify_hostname_binding', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
-    def test_create_managed_ssl_cert(self, generic_site_op_mock, client_factory_mock, verify_binding_mock):
+    def test_create_managed_ssl_cert(self, generic_site_op_mock, client_factory_mock, verify_binding_mock, is_flex_mock):
         webapp_name = 'someWebAppName'
         rg_name = 'someRgName'
         farm_id = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg1/providers/Microsoft.Web/serverfarms/farm1'
@@ -489,6 +489,7 @@ class TestWebappMocked(unittest.TestCase):
         site = Site(name=webapp_name, location='westeurope')
         site.server_farm_id = farm_id
         generic_site_op_mock.return_value = site
+        is_flex_mock.return_value = False
 
         verify_binding_mock.return_value = False
         with self.assertRaises(CLIError):
@@ -654,7 +655,7 @@ class TestUpdateWebapp(unittest.TestCase):
 
         result = update_webapp(cmd_mock, instance, platform_release_channel='Extended')
 
-        self.assertEqual(result.additional_properties["properties"]["platformReleaseChannel"], "Extended")
+        self.assertEqual(result.properties["platformReleaseChannel"], "Extended")
 
     def test_update_webapp_platform_release_channel_standard(self):
         cmd_mock = _get_test_cmd()
@@ -662,7 +663,7 @@ class TestUpdateWebapp(unittest.TestCase):
 
         result = update_webapp(cmd_mock, instance, platform_release_channel='Standard')
 
-        self.assertEqual(result.additional_properties["properties"]["platformReleaseChannel"], "Standard")
+        self.assertEqual(result.properties["platformReleaseChannel"], "Standard")
 
     def test_update_webapp_platform_release_channel_latest(self):
         cmd_mock = _get_test_cmd()
@@ -670,7 +671,7 @@ class TestUpdateWebapp(unittest.TestCase):
 
         result = update_webapp(cmd_mock, instance, platform_release_channel='Latest')
 
-        self.assertEqual(result.additional_properties["properties"]["platformReleaseChannel"], "Latest")
+        self.assertEqual(result.properties["platformReleaseChannel"], "Latest")
 
 
 class TestStartupLogsMocked(unittest.TestCase):

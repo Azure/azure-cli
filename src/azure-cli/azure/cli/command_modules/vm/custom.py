@@ -936,7 +936,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_D2s_
               proxy_agent_mode=None, source_snapshots_or_disks=None, source_snapshots_or_disks_size_gb=None,
               source_disk_restore_point=None, source_disk_restore_point_size_gb=None, ssh_key_type=None,
               additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
-              enable_user_redeploy_scheduled_events=None, zone_placement_policy=None, include_zones=None,
+              enable_user_redeploy_scheduled_events=None, scheduled_events_api_version=None,
+              enable_all_instance_down=None, zone_placement_policy=None, include_zones=None,
               exclude_zones=None, align_regional_disks_to_vm_zone=None, wire_server_mode=None, imds_mode=None,
               wire_server_access_control_profile_reference_id=None, imds_access_control_profile_reference_id=None,
               key_incarnation_id=None, add_proxy_agent_extension=None, disk_iops_read_write=None,
@@ -1165,6 +1166,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_D2s_
         proxy_agent_mode=proxy_agent_mode, additional_scheduled_events=additional_scheduled_events,
         enable_user_reboot_scheduled_events=enable_user_reboot_scheduled_events,
         enable_user_redeploy_scheduled_events=enable_user_redeploy_scheduled_events,
+        scheduled_events_api_version=scheduled_events_api_version,
+        enable_all_instance_down=enable_all_instance_down,
         zone_placement_policy=zone_placement_policy, include_zones=include_zones, exclude_zones=exclude_zones,
         align_regional_disks_to_vm_zone=align_regional_disks_to_vm_zone, wire_server_mode=wire_server_mode,
         imds_mode=imds_mode,
@@ -1815,6 +1818,7 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
               enable_hibernation=None, v_cpus_available=None, v_cpus_per_core=None, disk_controller_type=None,
               security_type=None, enable_proxy_agent=None, proxy_agent_mode=None, additional_scheduled_events=None,
               enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None,
+              scheduled_events_api_version=None, enable_all_instance_down=None,
               align_regional_disks_to_vm_zone=None, wire_server_mode=None, imds_mode=None,
               add_proxy_agent_extension=None,
               wire_server_access_control_profile_reference_id=None, imds_access_control_profile_reference_id=None,
@@ -2055,44 +2059,62 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
         vm["storage_profile"]["disk_controller_type"] = disk_controller_type
 
     if additional_scheduled_events is not None or \
-            enable_user_reboot_scheduled_events is not None or enable_user_redeploy_scheduled_events is not None:
-        if vm.get("scheduled_events_policy", None) is None:
+            enable_user_reboot_scheduled_events is not None or \
+            enable_user_redeploy_scheduled_events is not None or \
+            scheduled_events_api_version is not None or \
+            enable_all_instance_down is not None:
+        if vm.get("scheduled_events_policy") is None:
             vm["scheduled_events_policy"] = {
                 "scheduled_events_additional_publishing_targets": {
                     "event_grid_and_resource_graph": {
-                        "enable": additional_scheduled_events if additional_scheduled_events is not None else False
-                    },
+                        "enable": False
+                    }
                 },
                 "user_initiated_reboot": {
-                    "automatically_approve":
-                        enable_user_reboot_scheduled_events if enable_user_reboot_scheduled_events is not None else False   # pylint: disable=line-too-long
+                    "automatically_approve": False
                 },
                 "user_initiated_redeploy": {
-                    "automatically_approve":
-                        enable_user_redeploy_scheduled_events if enable_user_redeploy_scheduled_events is not None else False   # pylint: disable=line-too-long
+                    "automatically_approve": False
                 }
             }
-        else:
-            if additional_scheduled_events is not None:
-                vm["scheduled_events_policy"]["scheduled_events_additional_publishing_targets"] = {
-                    "event_grid_and_resource_graph": {
-                        "enable": additional_scheduled_events
-                    }
-                }
-            if enable_user_redeploy_scheduled_events is not None:
-                vm["scheduled_events_policy"]["user_initiated_redeploy"] = {
-                    "automatically_approve": enable_user_redeploy_scheduled_events
-                }
-            if enable_user_reboot_scheduled_events is not None:
-                vm["scheduled_events_policy"]["user_initiated_reboot"] = {
-                    "automatically_approve": enable_user_reboot_scheduled_events
-                }
 
-    if vm.get("resiliency_profile") is None:
-        vm["resiliency_profile"] = {}
-    if vm["resiliency_profile"].get("zone_movement") is None:
-        vm["resiliency_profile"]["zone_movement"] = {}
-    vm["resiliency_profile"]["zone_movement"]["is_enabled"] = zone_movement
+        if additional_scheduled_events is not None or scheduled_events_api_version is not None:
+            if vm["scheduled_events_policy"].get("scheduled_events_additional_publishing_targets") is None:
+                vm["scheduled_events_policy"]["scheduled_events_additional_publishing_targets"] = {}
+            if vm["scheduled_events_policy"]["scheduled_events_additional_publishing_targets"]\
+                    .get("event_grid_and_resource_graph") is None:
+                vm["scheduled_events_policy"]["scheduled_events_additional_publishing_targets"][
+                    "event_grid_and_resource_graph"] = {}
+            if additional_scheduled_events is not None:
+                vm["scheduled_events_policy"]["scheduled_events_additional_publishing_targets"][
+                    "event_grid_and_resource_graph"]["enable"] = additional_scheduled_events
+            if scheduled_events_api_version is not None:
+                vm["scheduled_events_policy"]["scheduled_events_additional_publishing_targets"][
+                    "event_grid_and_resource_graph"]["scheduled_events_api_version"] = scheduled_events_api_version
+
+        if enable_user_reboot_scheduled_events is not None:
+            if vm["scheduled_events_policy"].get("user_initiated_reboot") is None:
+                vm["scheduled_events_policy"]["user_initiated_reboot"] = {}
+            vm["scheduled_events_policy"]["user_initiated_reboot"]["automatically_approve"] = \
+                enable_user_reboot_scheduled_events
+
+        if enable_user_redeploy_scheduled_events is not None:
+            if vm["scheduled_events_policy"].get("user_initiated_redeploy") is None:
+                vm["scheduled_events_policy"]["user_initiated_redeploy"] = {}
+            vm["scheduled_events_policy"]["user_initiated_redeploy"]["automatically_approve"] = \
+                enable_user_redeploy_scheduled_events
+
+        if enable_all_instance_down is not None:
+            vm["scheduled_events_policy"]["all_instances_down"] = {
+                "automatically_approve": enable_all_instance_down
+            }
+
+    if zone_movement is not None:
+        if vm.get("resiliency_profile") is None:
+            vm["resiliency_profile"] = {}
+        if vm["resiliency_profile"].get("zone_movement") is None:
+            vm["resiliency_profile"]["zone_movement"] = {}
+        vm["resiliency_profile"]["zone_movement"]["is_enabled"] = zone_movement
 
     # Zone move orchestration: force deallocate → PUT with new zone → start
     zone_change = False
@@ -2159,7 +2181,8 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
 def create_av_set(cmd, availability_set_name, resource_group_name, platform_fault_domain_count=2,
                   platform_update_domain_count=None, location=None, proximity_placement_group=None, unmanaged=False,
                   no_wait=False, tags=None, validate=False, additional_scheduled_events=None,
-                  enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None):
+                  enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None,
+                  scheduled_events_api_version=None, enable_all_instance_down=None):
     from azure.cli.core.util import random_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
     from azure.cli.command_modules.vm._template_builder import build_av_set_resource
@@ -2175,7 +2198,9 @@ def create_av_set(cmd, availability_set_name, resource_group_name, platform_faul
                                             proximity_placement_group=proximity_placement_group,
                                             additional_scheduled_events=additional_scheduled_events,
                                             enable_user_reboot_scheduled_events=enable_user_reboot_scheduled_events,
-                                            enable_user_redeploy_scheduled_events=enable_user_redeploy_scheduled_events)
+                                            enable_user_redeploy_scheduled_events=enable_user_redeploy_scheduled_events,
+                                            scheduled_events_api_version=scheduled_events_api_version,
+                                            enable_all_instance_down=enable_all_instance_down)
     master_template.add_resource(av_set_resource)
 
     template = master_template.build()
@@ -3763,7 +3788,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 security_posture_reference_id=None, security_posture_reference_exclude_extensions=None,
                 enable_resilient_creation=None, enable_resilient_deletion=None,
                 additional_scheduled_events=None, enable_user_reboot_scheduled_events=None,
-                enable_user_redeploy_scheduled_events=None, skuprofile_vmsizes=None,
+                enable_user_redeploy_scheduled_events=None, scheduled_events_api_version=None,
+                enable_all_instance_down=None, skuprofile_vmsizes=None,
                 skuprofile_allostrat=None, skuprofile_rank=None,
                 security_posture_reference_is_overridable=None, zone_balance=None, wire_server_mode=None,
                 imds_mode=None, add_proxy_agent_extension=None, wire_server_access_control_profile_reference_id=None,
@@ -4084,6 +4110,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             additional_scheduled_events=additional_scheduled_events,
             enable_user_reboot_scheduled_events=enable_user_reboot_scheduled_events,
             enable_user_redeploy_scheduled_events=enable_user_redeploy_scheduled_events,
+            scheduled_events_api_version=scheduled_events_api_version,
+            enable_all_instance_down=enable_all_instance_down,
             skuprofile_vmsizes=skuprofile_vmsizes, skuprofile_allostrat=skuprofile_allostrat,
             skuprofile_rank=skuprofile_rank,
             security_posture_reference_is_overridable=security_posture_reference_is_overridable,
@@ -4641,6 +4669,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 max_surge=None, enable_resilient_creation=None, enable_resilient_deletion=None,
                 ephemeral_os_disk=None, ephemeral_os_disk_option=None, zones=None, additional_scheduled_events=None,
                 enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None,
+                scheduled_events_api_version=None, enable_all_instance_down=None,
                 upgrade_policy_mode=None, enable_auto_os_upgrade=None, skuprofile_vmsizes=None,
                 skuprofile_allostrat=None, skuprofile_rank=None,
                 security_posture_reference_is_overridable=None, zone_balance=None,
@@ -4777,17 +4806,23 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
              "enable": enable_terminate_notification}
 
     if additional_scheduled_events is not None or \
-            enable_user_reboot_scheduled_events is not None or enable_user_redeploy_scheduled_events is not None:
+            enable_user_reboot_scheduled_events is not None or \
+            enable_user_redeploy_scheduled_events is not None or \
+            scheduled_events_api_version is not None or \
+            enable_all_instance_down is not None:
         if vmss.get("scheduled_events_policy", None) is None:
             vmss["scheduled_events_policy"] = {}
 
-        if additional_scheduled_events is not None:
+        if additional_scheduled_events is not None or scheduled_events_api_version is not None:
             if vmss["scheduled_events_policy"].get("scheduled_events_additional_publishing_targets", None) is None:
                 vmss["scheduled_events_policy"]["scheduled_events_additional_publishing_targets"] = {}
             if vmss["scheduled_events_policy"]["scheduled_events_additional_publishing_targets"].get("event_grid_and_resource_graph", None) is None:  # pylint: disable=line-too-long
                 vmss["scheduled_events_policy"]["scheduled_events_additional_publishing_targets"]["event_grid_and_resource_graph"] = {}  # pylint: disable=line-too-long
-            vmss["scheduled_events_policy"]["scheduled_events_additional_publishing_targets"][
-                "event_grid_and_resource_graph"]["enable"] = additional_scheduled_events
+            event_grid_and_resource_graph = vmss["scheduled_events_policy"]["scheduled_events_additional_publishing_targets"]["event_grid_and_resource_graph"]  # pylint: disable=line-too-long
+            if additional_scheduled_events is not None:
+                event_grid_and_resource_graph["enable"] = additional_scheduled_events
+            if scheduled_events_api_version is not None:
+                event_grid_and_resource_graph["scheduled_events_api_version"] = scheduled_events_api_version
 
         if enable_user_redeploy_scheduled_events is not None:
             if vmss["scheduled_events_policy"].get("user_initiated_redeploy", None) is None:
@@ -4800,6 +4835,12 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 vmss["scheduled_events_policy"]["user_initiated_reboot"] = {}
             vmss["scheduled_events_policy"]["user_initiated_reboot"][
                 "automatically_approve"] = enable_user_reboot_scheduled_events
+
+        if enable_all_instance_down is not None:
+            if vmss["scheduled_events_policy"].get("all_instances_down", None) is None:
+                vmss["scheduled_events_policy"]["all_instances_down"] = {}
+            vmss["scheduled_events_policy"]["all_instances_down"][
+                "automatically_approve"] = enable_all_instance_down
 
     if enable_osimage_notification is not None:
         if vmss.get("virtual_machine_profile", None) is None:
@@ -5283,42 +5324,49 @@ def detach_disk_from_vmss(cmd, resource_group_name, vmss_name, lun, instance_id=
 
 # region VirtualMachineScaleSets Extensions
 def delete_vmss_extension(cmd, resource_group_name, vmss_name, extension_name):
-    client = _compute_client_factory(cmd.cli_ctx)
-    vmss = client.virtual_machine_scale_sets.get(resource_group_name=resource_group_name, vm_scale_set_name=vmss_name)
+    from .operations.vmss import convert_show_result_to_snake_case, VMSSCreate
+
+    vmss = get_vmss_by_aaz(cmd, resource_group_name, vmss_name)
     # Avoid unnecessary permission error
-    vmss.virtual_machine_profile.storage_profile.image_reference = None
+    if not vmss.get('virtualMachineProfile', {}):
+        vmss['virtualMachineProfile'] = {}
+    if not vmss.get('virtualMachineProfile', {}).get('storageProfile', {}):
+        vmss['virtualMachineProfile']['storageProfile'] = {}
+    vmss['virtualMachineProfile']['storageProfile']['imageReference'] = None
     # pylint: disable=no-member
-    if not vmss.virtual_machine_profile.extension_profile:
+    if not vmss.get('virtualMachineProfile', {}).get('extensionProfile'):
         raise CLIError('Scale set has no extensions to delete')
 
-    keep_list = [e for e in vmss.virtual_machine_profile.extension_profile.extensions
-                 if e.name != extension_name]
-    if len(keep_list) == len(vmss.virtual_machine_profile.extension_profile.extensions):
+    keep_list = [e for e in vmss.get('virtualMachineProfile', {}).get('extensionProfile', {}).get('extensions', [])
+                 if e.get('name') != extension_name]
+    if len(keep_list) == len(vmss.get('virtualMachineProfile', {}).get('extensionProfile', {}).get('extensions', [])):
         raise CLIError('Extension {} not found'.format(extension_name))
 
-    vmss.virtual_machine_profile.extension_profile.extensions = keep_list
+    if not vmss.get('virtualMachineProfile'):
+        vmss['virtualMachineProfile'] = {}
+    if not vmss.get('virtualMachineProfile', {}).get('extensionProfile'):
+        vmss['virtualMachineProfile']['extensionProfile'] = {}
 
-    return client.virtual_machine_scale_sets.begin_create_or_update(resource_group_name=resource_group_name,
-                                                                    vm_scale_set_name=vmss_name, parameters=vmss)
+    vmss['virtualMachineProfile']['extensionProfile']['extensions'] = keep_list
+
+    vmss = convert_show_result_to_snake_case(vmss)
+    vmss['resource_group'] = resource_group_name
+    vmss['vm_scale_set_name'] = vmss_name
+
+    return VMSSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss)
 
 
 # pylint: disable=inconsistent-return-statements
 def get_vmss_extension(cmd, resource_group_name, vmss_name, extension_name):
-    client = _compute_client_factory(cmd.cli_ctx)
-    vmss = client.virtual_machine_scale_sets.get(resource_group_name=resource_group_name, vm_scale_set_name=vmss_name)
-    # pylint: disable=no-member
-    if not vmss.virtual_machine_profile.extension_profile:
-        return
-    return next((e for e in vmss.virtual_machine_profile.extension_profile.extensions
-                 if e.name == extension_name), None)
+    vmss = get_vmss_by_aaz(cmd, resource_group_name, vmss_name)
+    return next((e for e in vmss.get('virtualMachineProfile', {}).get('extensionProfile', {}).get('extensions', [])
+                 if e.get('name') == extension_name), None)
 
 
 def list_vmss_extensions(cmd, resource_group_name, vmss_name):
-    client = _compute_client_factory(cmd.cli_ctx)
-    vmss = client.virtual_machine_scale_sets.get(resource_group_name=resource_group_name, vm_scale_set_name=vmss_name)
-    # pylint: disable=no-member
-    if vmss.virtual_machine_profile and vmss.virtual_machine_profile.extension_profile:
-        return vmss.virtual_machine_profile.extension_profile.extensions
+    vmss = get_vmss_by_aaz(cmd, resource_group_name, vmss_name)
+    if vmss.get('virtualMachineProfile', {}).get('extensionProfile'):
+        return vmss['virtualMachineProfile']['extensionProfile'].get('extensions', [])
     return None
 
 
@@ -5326,6 +5374,8 @@ def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publ
                        settings=None, protected_settings=None, no_auto_upgrade=False, force_update=False,
                        no_wait=False, extension_instance_name=None, provision_after_extensions=None,
                        enable_auto_upgrade=None):
+    from .operations.vmss import VMSSCreate, convert_show_result_to_snake_case
+
     if not extension_instance_name:
         extension_instance_name = extension_name
 
@@ -5333,52 +5383,51 @@ def set_vmss_extension(cmd, resource_group_name, vmss_name, extension_name, publ
     if extension_name in auto_upgrade_extensions and enable_auto_upgrade is None:
         enable_auto_upgrade = True
 
-    client = _compute_client_factory(cmd.cli_ctx)
-    vmss = client.virtual_machine_scale_sets.get(resource_group_name=resource_group_name, vm_scale_set_name=vmss_name)
+    vmss = get_vmss_by_aaz(cmd, resource_group_name, vmss_name)
     # Avoid unnecessary permission error
-    vmss.virtual_machine_profile.storage_profile.image_reference = None
-    VirtualMachineScaleSetExtension, VirtualMachineScaleSetExtensionProfile = cmd.get_models(
-        'VirtualMachineScaleSetExtension', 'VirtualMachineScaleSetExtensionProfile')
+    if vmss.get('virtualMachineProfile', {}).get('storageProfile', {}):
+        vmss['virtualMachineProfile']['storageProfile']['imageReference'] = None
 
-    # pylint: disable=no-member
-    version = _normalize_extension_version(cmd.cli_ctx, publisher, extension_name, version, vmss.location)
-    extension_profile = vmss.virtual_machine_profile.extension_profile
+    version = _normalize_extension_version(cmd.cli_ctx, publisher, extension_name, version, vmss.get('location'))
+    extension_profile = vmss.get('virtualMachineProfile', {}).get('extensionProfile')
     if extension_profile:
-        extensions = extension_profile.extensions
+        extensions = extension_profile.get('extensions')
         if extensions:
-            extension_profile.extensions = [x for x in extensions if
-                                            x.type_properties_type.lower() != extension_name.lower() or x.publisher.lower() != publisher.lower()]  # pylint: disable=line-too-long
+            extension_profile['extensions'] = \
+                [x for x in extensions if
+                 x.get('type_properties_type', '').lower() != extension_name.lower() or
+                 x.get('publisher', '').lower() != publisher.lower()]
 
-    if cmd.supported_api_version(min_api='2019-07-01', operation_group='virtual_machine_scale_sets'):
-        ext = VirtualMachineScaleSetExtension(name=extension_instance_name,
-                                              publisher=publisher,
-                                              type_properties_type=extension_name,
-                                              protected_settings=protected_settings,
-                                              type_handler_version=version,
-                                              settings=settings,
-                                              auto_upgrade_minor_version=(not no_auto_upgrade),
-                                              provision_after_extensions=provision_after_extensions,
-                                              enable_automatic_upgrade=enable_auto_upgrade)
-    else:
-        ext = VirtualMachineScaleSetExtension(name=extension_instance_name,
-                                              publisher=publisher,
-                                              type=extension_name,
-                                              protected_settings=protected_settings,
-                                              type_handler_version=version,
-                                              settings=settings,
-                                              auto_upgrade_minor_version=(not no_auto_upgrade),
-                                              provision_after_extensions=provision_after_extensions,
-                                              enable_automatic_upgrade=enable_auto_upgrade)
+    ext = {
+        'name': extension_instance_name,
+        'auto_upgrade_minor_version': (not no_auto_upgrade),
+        'enable_automatic_upgrade': enable_auto_upgrade,
+        'protected_settings': protected_settings,
+        'provision_after_extensions': provision_after_extensions,
+        'publisher': publisher,
+        'settings': settings,
+        'type': extension_name,
+        'type_handler_version': version
+    }
 
     if force_update:
-        ext.force_update_tag = str(_gen_guid())
+        ext['force_update_tag'] = str(_gen_guid())
 
-    if not vmss.virtual_machine_profile.extension_profile:
-        vmss.virtual_machine_profile.extension_profile = VirtualMachineScaleSetExtensionProfile(extensions=[])
-    vmss.virtual_machine_profile.extension_profile.extensions.append(ext)
+    vmss = convert_show_result_to_snake_case(vmss)
 
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update,
-                       resource_group_name, vmss_name, vmss)
+    if not vmss.get('virtual_machine_profile'):
+        vmss['virtual_machine_profile'] = {}
+    if not vmss.get('virtual_machine_profile', {}).get('extension_profile'):
+        vmss['virtual_machine_profile']['extension_profile'] = {}
+    if not vmss.get('virtual_machine_profile', {}).get('extension_profile').get('extensions'):
+        vmss['virtual_machine_profile']['extension_profile']['extensions'] = []
+    vmss['virtual_machine_profile']['extension_profile']['extensions'].append(ext)
+
+    vmss['resource_group'] = resource_group_name
+    vmss['vm_scale_set_name'] = vmss_name
+    vmss['no_wait'] = no_wait
+
+    return VMSSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss)
 
 
 def set_orchestration_service_state(cmd, resource_group_name, vm_scale_set_name, service_name, action, no_wait=False):
@@ -5397,9 +5446,13 @@ def set_orchestration_service_state(cmd, resource_group_name, vm_scale_set_name,
 
 
 def upgrade_vmss_extension(cmd, resource_group_name, vm_scale_set_name, no_wait=False):
-    client = _compute_client_factory(cmd.cli_ctx)
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_set_rolling_upgrades.begin_start_extension_upgrade,
-                       resource_group_name, vm_scale_set_name)
+    from .aaz.latest.vmss.extension import RollingUpgrade as VMSSRollingUpgrade
+    command_args = {
+        'resource_group': resource_group_name,
+        'vm_scale_set_name': vm_scale_set_name,
+        'no_wait': no_wait
+    }
+    return VMSSRollingUpgrade(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 # endregion
 
 

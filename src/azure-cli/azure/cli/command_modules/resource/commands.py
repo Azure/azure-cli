@@ -635,6 +635,8 @@ def load_command_table(self, _):
         g.custom_command('list-versions', 'list_bicep_cli_versions')
         g.custom_command('generate-params', 'generate_params_file')
         g.custom_command('lint', 'lint_bicep_file')
+        g.custom_command('snapshot', 'snapshot_bicep_file')
+        g.custom_command('run', 'run_bicep_cli_passthrough')
 
     with self.command_group('resourcemanagement private-link', resource_resourcemanagementprivatelink_sdk, resource_type=ResourceType.MGMT_RESOURCE_PRIVATELINKS) as g:
         g.custom_command('create', 'create_resourcemanager_privatelink')

@@ -12,7 +12,7 @@ from azure.cli.core.azclierror import ValidationError
 
 
 from azure.mgmt.web import WebSiteManagementClient
-from azure.mgmt.web.models import HostingEnvironmentProfile, AseV3NetworkingConfiguration
+from azure.mgmt.web.models import HostingEnvironmentProfile, AseV3NetworkingConfiguration, AseV3NetworkingConfigurationProperties
 
 from azure.cli.command_modules.appservice.appservice_environment import (show_appserviceenvironment,
                                                                          list_appserviceenvironments,
@@ -142,7 +142,8 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
         host_env.kind = 'ASEv3'
         ase_client.get.return_value = host_env
         ase_client.list.return_value = [host_env]
-        ase_networking_conf = AseV3NetworkingConfiguration(allow_new_private_endpoint_connections=False, allow_remote_debugging=False, allow_incoming_ftp_connections=False)
+        ase_networking_props = AseV3NetworkingConfigurationProperties(allow_new_private_endpoint_connections=False, remote_debug_enabled=False, ftp_enabled=False)
+        ase_networking_conf = AseV3NetworkingConfiguration(properties=ase_networking_props)
         ase_client.get_ase_v3_networking_configuration.return_value = ase_networking_conf
 
         update_appserviceenvironment(self.mock_cmd, ase_name, allow_new_private_endpoint_connections=True, allow_remote_debugging=True, allow_incoming_ftp_connections=True)
