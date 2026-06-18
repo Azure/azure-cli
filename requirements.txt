@@ -1,3 +1,6 @@
 # basic
-setuptools>=65.5.1
+# Cap setuptools<81: newer setuptools breaks the CLI's setup.py-based builds
+# (81 removes setup.py --dry-run and changes distutils command signatures;
+# 82 removes pkg_resources). Pin to the last 80.x line.
+setuptools>=65.5.1,<81
 pip>=9.0.1
