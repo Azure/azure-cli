@@ -14800,7 +14800,7 @@ class VMZoneMovementScenarioTest(ScenarioTest):
             self.check('resiliencyProfile.zoneMovement.isEnabled', True),
         ])
 
-    # Required Microsoft.Compute/ForceDeallocateVMPreview and Microsoft.Compute/VMAvailabilityZoneUpdate enabled
+    # Required Microsoft.Compute/ForceDeallocateVMPreview and Microsoft.Compute/VMAvailabilityZoneUpdate to be enabled
     # to use --zone-movement.
     @ResourceGroupPreparer(name_prefix='cli_test_vm_zone_movement_preserved_', location='eastus2')
     def test_vm_zone_movement_preserved(self, resource_group):
