@@ -423,7 +423,7 @@ def load_arguments(self, _):
         c.argument('principal_id', options_list=['--principal-object-id'],
                    help='The object ID of a specific User or ServicePrincipal to deny. '
                         'If omitted, the deny assignment applies to Everyone (all principals) and '
-                         '--exclude-principal-ids is required. Group principals are not permitted.')
+                        '--exclude-principal-ids is required. Group principals are not permitted.')
         c.argument('principal_type', options_list=['--principal-type'],
                    arg_type=get_enum_type(['User', 'ServicePrincipal']),
                    help='The type of the principal specified by --principal-object-id. '
