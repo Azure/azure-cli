@@ -6,10 +6,6 @@ Release History
 2.87.0
 ++++++
 
-**App Service**
-
-* `az webapp deploy`/`az functionapp deploy`: Cache the Site model, SCM URL, and SCM authentication headers for the lifetime of a single deploy invocation, derive `is_flex` from cached Site SKU, reducing per-deploy ARM calls from ~12 to ~3 and halving exposure to transient credential-fetch failures during the post-publish status poll (#33560)
-
 **ACR**
 
 * [BREAKING CHANGE] `az acr replication create/update`: Remove deprecated `--region-endpoint-enabled` flag and use `--global-endpoint-routing` instead (#33173)
