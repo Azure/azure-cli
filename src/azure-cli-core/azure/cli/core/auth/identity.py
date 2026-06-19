@@ -192,8 +192,9 @@ class Identity:  # pylint: disable=too-many-instance-attributes
                 self.wfile.write(
                     b'<html><body><h2>Authentication complete.</h2>'
                     b'<p>You may close this tab and return to your terminal.</p></body></html>')
-                if 'code' in params or 'error' in params:
+                if ('code' in params and 'state' in params) or 'error' in params:
                     callbacks.put(params)
+                    threading.Thread(target=self.server.shutdown, daemon=True).start()
 
             def log_message(self, fmt, *args):
                 pass
@@ -222,9 +223,10 @@ class Identity:  # pylint: disable=too-many-instance-attributes
                 auth_response = _parse_codespaces_auth_response(url)
             else:
                 try:
-                    auth_response = callbacks.get(timeout=60)
+                    auth_response = callbacks.get(timeout=300)
                 except queue.Empty:
-                    raise CLIError('Login timed out. Please try again.')
+                    raise CLIError('Login timed out waiting for the redirected response. '
+                                   'Please try again, or paste the redirected URL.')
         finally:
             server.shutdown()
             server.server_close()
@@ -509,10 +511,13 @@ def _parse_codespaces_auth_response(redirected_url):
         description = params.get('error_description', [''])[0]
         raise CLIError('Authentication failed: {} {}'.format(params.get('error', [''])[0], description).strip())
 
-    if 'code' not in params or 'state' not in params:
+    code = params.get('code', [''])[0]
+    state = params.get('state', [''])[0]
+
+    if not code or not state:
         raise CLIError('Redirected URL does not include required parameters "code" and "state".')
 
-    return {k: v[0] for k, v in params.items() if v}
+    return {k: v[0] for k, v in params.items() if v and v[0] != ''}
 
 
 def get_environment_credential():
