@@ -192,7 +192,8 @@ class Identity:  # pylint: disable=too-many-instance-attributes
                 self.wfile.write(
                     b'<html><body><h2>Authentication complete.</h2>'
                     b'<p>You may close this tab and return to your terminal.</p></body></html>')
-                callbacks.put(params)
+                if 'code' in params or 'error' in params:
+                    callbacks.put(params)
 
             def log_message(self, fmt, *args):
                 pass
@@ -216,16 +217,17 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         url = input('After signing in, press Enter to continue '
                     '(or paste the redirected URL if your browser shows a connection error): ').strip()
 
-        server.shutdown()
-
-        if url:
-            auth_response = _parse_codespaces_auth_response(url)
-        else:
-            try:
-                auth_response = callbacks.get(timeout=60)
-            except queue.Empty:
-                raise CLIError('Login timed out. Please try again.')
-
+        try:
+            if url:
+                auth_response = _parse_codespaces_auth_response(url)
+            else:
+                try:
+                    auth_response = callbacks.get(timeout=60)
+                except queue.Empty:
+                    raise CLIError('Login timed out. Please try again.')
+        finally:
+            server.shutdown()
+            server.server_close()
         result = self._msal_app.acquire_token_by_auth_code_flow(flow, auth_response, scopes=scopes)
         return check_result(result)
 
@@ -507,8 +509,8 @@ def _parse_codespaces_auth_response(redirected_url):
         description = params.get('error_description', [''])[0]
         raise CLIError('Authentication failed: {} {}'.format(params.get('error', [''])[0], description).strip())
 
-    if 'code' not in params:
-        raise CLIError('Redirected URL does not include an authorization code.')
+    if 'code' not in params or 'state' not in params:
+        raise CLIError('Redirected URL does not include required parameters "code" and "state".')
 
     return {k: v[0] for k, v in params.items() if v}
 
