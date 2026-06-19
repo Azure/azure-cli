@@ -70,7 +70,7 @@ class DenyAssignmentCrudTest(LiveScenarioTest):
             'exclude_id': self.create_guid()
         })
 
-        # Create in Everyone mode (no --principal-id)
+        # Create in Everyone mode (no --principal-object-id)
         result = self.cmd(
             'role deny-assignment create '
             '--name "{name}" '
@@ -119,7 +119,7 @@ class DenyAssignmentCrudTest(LiveScenarioTest):
             '--name "{name}" '
             '--scope {scope} '
             '--actions {action} '
-            '--principal-id {principal_id} '
+            '--principal-object-id {principal_id} '
             '--principal-type User '
             '--description "CLI test deny assignment - per-principal mode"',
             checks=[
@@ -148,7 +148,7 @@ class DenyAssignmentCrudTest(LiveScenarioTest):
             '--name "{name}" '
             '--scope {scope} '
             '--actions {action} '
-            '--principal-id {principal_id} '
+            '--principal-object-id {principal_id} '
             '--principal-type ServicePrincipal '
             '--exclude-principal-ids {exclude_id} '
             '--exclude-principal-types ServicePrincipal '
@@ -202,23 +202,23 @@ class DenyAssignmentCrudTest(LiveScenarioTest):
                 '--name "Test" '
                 '--scope /subscriptions/{sub} '
                 '--actions "Microsoft.Authorization/roleAssignments/write" '
-                '--principal-id 00000000-0000-0000-0000-000000000001 '
+                '--principal-object-id 00000000-0000-0000-0000-000000000001 '
                 '--principal-type Group'
             )
 
     def test_deny_assignment_create_validation_principal_type_required(self):
-        """Should fail if --principal-id is given without --principal-type."""
+        """Should fail if --principal-object-id is given without --principal-type."""
         with self.assertRaises(SystemExit):
             self.cmd(
                 'role deny-assignment create '
                 '--name "Test" '
                 '--scope /subscriptions/{sub} '
                 '--actions "Microsoft.Authorization/roleAssignments/write" '
-                '--principal-id 00000000-0000-0000-0000-000000000001'
+                '--principal-object-id 00000000-0000-0000-0000-000000000001'
             )
 
     def test_deny_assignment_create_validation_principal_id_required(self):
-        """Should fail if --principal-type is given without --principal-id."""
+        """Should fail if --principal-type is given without --principal-object-id."""
         with self.assertRaises(SystemExit):
             self.cmd(
                 'role deny-assignment create '

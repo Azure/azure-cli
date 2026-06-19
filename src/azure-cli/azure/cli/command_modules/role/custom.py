@@ -754,7 +754,7 @@ def create_deny_assignment(cmd, scope=None, deny_assignment_name=None,
     - Everyone mode (default): Denies actions for all principals at the scope. Requires at least one
       excluded principal via --exclude-principal-ids.
     - Per-principal mode: Denies actions for a specific User or ServicePrincipal. Specify the target
-      with --principal-id and --principal-type. Excluded principals are optional in this mode.
+      with --principal-object-id and --principal-type. Excluded principals are optional in this mode.
 
     Constraints:
     - DataActions and NotDataActions are not supported
@@ -780,12 +780,12 @@ def create_deny_assignment(cmd, scope=None, deny_assignment_name=None,
 
     # Validate principal arguments and build principals list
     if principal_type and not principal_id:
-        raise CLIError('--principal-id is required when --principal-type is specified. '
-                       'Provide both --principal-id and --principal-type together, '
+        raise CLIError('--principal-object-id is required when --principal-type is specified. '
+                       'Provide both --principal-object-id and --principal-type together, '
                        'or omit both for Everyone mode.')
     if principal_id:
         if not principal_type:
-            raise CLIError('--principal-type is required when --principal-id is specified. '
+            raise CLIError('--principal-type is required when --principal-object-id is specified. '
                            'Accepted values: User, ServicePrincipal.')
         if principal_type == 'Group':
             raise CLIError('Group type principals are not permitted for user-assigned deny assignments. '
@@ -793,7 +793,7 @@ def create_deny_assignment(cmd, scope=None, deny_assignment_name=None,
     elif not exclude_principal_ids:
         # Everyone mode requires at least one exclusion
         raise CLIError('At least one excluded principal is required via --exclude-principal-ids '
-                       'when using Everyone mode (no --principal-id specified). '
+                       'when using Everyone mode (no --principal-object-id specified). '
                        'User-assigned deny assignments that deny Everyone require at least one exclusion.')
 
     if exclude_principal_ids and exclude_principal_types \

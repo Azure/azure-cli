@@ -855,7 +855,7 @@ short-summary: Create a user-assigned deny assignment.
 long-summary: >-
     Creates a deny assignment that blocks specific actions at the given scope. Two modes are supported:
     (1) Everyone mode (default) — denies actions for all principals, requiring at least one excluded principal;
-    (2) Per-principal mode — denies actions for a specific User or ServicePrincipal specified via --principal-id.
+    (2) Per-principal mode — denies actions for a specific User or ServicePrincipal specified via --principal-object-id.
     DataActions are not supported, DoNotApplyToChildScopes is not supported, read actions (*/read) are not
     permitted, and Group type principals are not allowed.
 examples:
@@ -873,7 +873,7 @@ examples:
         --name "Deny resource deletion for user"
         --scope /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myGroup
         --actions "*/delete"
-        --principal-id 00000000-0000-0000-0000-000000000001
+        --principal-object-id 00000000-0000-0000-0000-000000000001
         --principal-type User
   - name: Create a deny assignment targeting a specific service principal with exclusions.
     text: >-
@@ -881,7 +881,7 @@ examples:
         --name "Deny write actions for app"
         --scope /subscriptions/00000000-0000-0000-0000-000000000000
         --actions "*/write"
-        --principal-id 00000000-0000-0000-0000-000000000001
+        --principal-object-id 00000000-0000-0000-0000-000000000001
         --principal-type ServicePrincipal
         --exclude-principal-ids 00000000-0000-0000-0000-000000000002
         --exclude-principal-types ServicePrincipal

@@ -420,18 +420,18 @@ def load_arguments(self, _):
                         'Note: read actions (*/read) are not permitted for user-assigned deny assignments.')
         c.argument('not_actions', nargs='+',
                    help='Space-separated list of actions to exclude from the deny.')
-        c.argument('principal_id', options_list=['--principal-id'],
+        c.argument('principal_id', options_list=['--principal-object-id'],
                    help='The object ID of a specific User or ServicePrincipal to deny. '
                         'If omitted, the deny assignment applies to Everyone (all principals) and '
-                        '--exclude-principal-ids is required. Group principals are not permitted.')
+                         '--exclude-principal-ids is required. Group principals are not permitted.')
         c.argument('principal_type', options_list=['--principal-type'],
                    arg_type=get_enum_type(['User', 'ServicePrincipal']),
-                   help='The type of the principal specified by --principal-id. '
-                        'Required when --principal-id is provided. Accepted values: User, ServicePrincipal.')
+                   help='The type of the principal specified by --principal-object-id. '
+                        'Required when --principal-object-id is provided. Accepted values: User, ServicePrincipal.')
         c.argument('exclude_principal_ids', nargs='+', options_list=['--exclude-principal-ids'],
                    help='Space-separated list of principal object IDs to exclude from the deny. '
-                        'Required when no --principal-id is specified (Everyone mode). '
-                        'Optional when --principal-id is specified.')
+                        'Required when no --principal-object-id is specified (Everyone mode). '
+                        'Optional when --principal-object-id is specified.')
         c.argument('exclude_principal_types', nargs='+', options_list=['--exclude-principal-types'],
                    help='Space-separated list of principal types corresponding to --exclude-principal-ids. '
                         'Accepted values: User, Group, ServicePrincipal.')
