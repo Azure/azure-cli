@@ -197,7 +197,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
             def log_message(self, fmt, *args):
                 pass
 
-        server = http.server.HTTPServer(('', 0), _CallbackHandler)
+        server = http.server.HTTPServer(('localhost', 0), _CallbackHandler)
         port = server.server_address[1]
         threading.Thread(target=server.serve_forever, daemon=True).start()
 
