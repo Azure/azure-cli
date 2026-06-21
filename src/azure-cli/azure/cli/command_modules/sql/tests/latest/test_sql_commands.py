@@ -32,7 +32,8 @@ from azure.cli.command_modules.sql.custom import (
     ClientAuthenticationType,
     ClientType,
     ComputeModelType,
-    ResourceIdType)
+    ResourceIdType,
+    server_update)
 from datetime import datetime, timedelta
 
 # Constants
@@ -9846,3 +9847,58 @@ class SqlServerDeletedServerScenarioTest(ScenarioTest):
             # Clean up both resource groups
             self.cmd('group delete -n {} --yes --no-wait'.format(rg1_name))
             self.cmd('group delete -n {} --yes --no-wait'.format(rg2_name))
+
+
+class ServerUpdateRetentionDaysUnitTest(unittest.TestCase):
+    """Unit tests for server_update retention_days handling."""
+
+    def _make_instance(self, retention_days):
+        """Create a minimal mock server instance with the given retention_days value."""
+        from unittest.mock import MagicMock
+        instance = MagicMock()
+        instance.identity = None
+        instance.retention_days = retention_days
+        return instance
+
+    def test_retention_days_negative_one_normalized_to_zero(self):
+        """When the server GET returns retention_days=-1 (legacy 'not configured' value)
+        and the user does not specify --soft-delete-retention-days,
+        server_update should normalize -1 to 0 (disabled) to avoid an API error."""
+        instance = self._make_instance(-1)
+        result = server_update(instance)
+        self.assertEqual(result.retention_days, 0)
+
+    def test_retention_days_none_not_modified(self):
+        """When the server GET returns retention_days=None and the user does not specify
+        --soft-delete-retention-days, server_update should leave retention_days as None
+        (the field will be omitted from the PUT body)."""
+        instance = self._make_instance(None)
+        result = server_update(instance)
+        self.assertIsNone(result.retention_days)
+
+    def test_retention_days_zero_preserved(self):
+        """When the server has retention_days=0 (soft delete disabled) and the user does
+        not specify --soft-delete-retention-days, the value should be preserved."""
+        instance = self._make_instance(0)
+        result = server_update(instance)
+        self.assertEqual(result.retention_days, 0)
+
+    def test_retention_days_positive_preserved(self):
+        """When the server has retention_days=7 (soft delete enabled) and the user does
+        not specify --soft-delete-retention-days, the value should be preserved."""
+        instance = self._make_instance(7)
+        result = server_update(instance)
+        self.assertEqual(result.retention_days, 7)
+
+    def test_soft_delete_retention_days_specified_sets_value(self):
+        """When the user specifies --soft-delete-retention-days, that value should be used
+        regardless of the existing retention_days."""
+        instance = self._make_instance(-1)
+        result = server_update(instance, soft_delete_retention_days=5)
+        self.assertEqual(result.retention_days, 5)
+
+    def test_soft_delete_retention_days_zero_disables(self):
+        """When the user specifies --soft-delete-retention-days 0, soft delete is disabled."""
+        instance = self._make_instance(7)
+        result = server_update(instance, soft_delete_retention_days=0)
+        self.assertEqual(result.retention_days, 0)
