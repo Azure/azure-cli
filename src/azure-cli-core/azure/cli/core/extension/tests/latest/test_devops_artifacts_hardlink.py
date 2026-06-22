@@ -11,22 +11,29 @@ to ArtifactTool, fixing failures on file systems that do not support hard linkin
 See: https://github.com/Azure/azure-cli/issues/32528
 """
 
-import os
 import sys
 import unittest
 from unittest import mock
 
 
-AZURE_DEVOPS_EXT_PATH = '/opt/az/azcliextensions/azure-devops'
+def _get_azure_devops_extension_path():
+    """Find the azure-devops extension path using the CLI extension system."""
+    try:
+        from azure.cli.core.extension import get_extension
+        ext = get_extension('azure-devops')
+        return ext.path
+    except Exception:  # pylint: disable=broad-except
+        return None
 
 
 def _extension_available():
     """Check if the azure-devops extension is installed and importable."""
-    if not os.path.isdir(AZURE_DEVOPS_EXT_PATH):
+    ext_path = _get_azure_devops_extension_path()
+    if not ext_path:
         return False
     try:
-        if AZURE_DEVOPS_EXT_PATH not in sys.path:
-            sys.path.insert(0, AZURE_DEVOPS_EXT_PATH)
+        if ext_path not in sys.path:
+            sys.path.insert(0, ext_path)
         import azext_devops.dev.common.artifacttool  # noqa: F401
         return True
     except ImportError:
@@ -50,8 +57,9 @@ class TestArtifactToolHardlinkFallback(unittest.TestCase):
     """
 
     def setUp(self):
-        if AZURE_DEVOPS_EXT_PATH not in sys.path:
-            sys.path.insert(0, AZURE_DEVOPS_EXT_PATH)
+        ext_path = _get_azure_devops_extension_path()
+        if ext_path and ext_path not in sys.path:
+            sys.path.insert(0, ext_path)
         from azext_devops.dev.common.artifacttool import ArtifactToolInvoker
         self.ArtifactToolInvoker = ArtifactToolInvoker
 
@@ -60,17 +68,15 @@ class TestArtifactToolHardlinkFallback(unittest.TestCase):
         mock_tool_invoker = mock.MagicMock()
         mock_updater = mock.MagicMock()
         mock_updater.get_latest_artifacttool.return_value = '/mock/artifacttool/path'
-        return self.ArtifactToolInvoker(mock_tool_invoker, mock_updater), mock_tool_invoker
-
-    def _get_captured_args(self, mock_tool_invoker):
-        """Extract the command args from the mock tool invoker's run call."""
-        call_args = mock_tool_invoker.run.call_args
-        if call_args is None:
-            return []
-        return call_args[0][0]  # First positional arg is command_args list
+        return self.ArtifactToolInvoker(mock_tool_invoker, mock_updater)
 
     def _run_download_universal(self, invoker, **kwargs):
-        """Run download_universal with mocked credentials."""
+        """Run download_universal with run_artifacttool mocked to capture args.
+
+        Patches run_artifacttool on the invoker instance to intercept the args list
+        before any external calls (credential lookup, binary download, process spawn).
+        Returns the args that were passed to run_artifacttool.
+        """
         defaults = dict(
             organization='https://dev.azure.com/TestOrg/',
             project=None,
@@ -82,13 +88,16 @@ class TestArtifactToolHardlinkFallback(unittest.TestCase):
         )
         defaults.update(kwargs)
 
-        mock_run_result = mock.MagicMock()
-        mock_run_result.stdout.read.return_value = b'{}'
-        invoker._tool_invoker.run.return_value = mock_run_result
+        captured = {}
 
-        with mock.patch('azext_devops.dev.common.artifacttool._get_credentials') as mock_creds:
-            mock_creds.return_value = mock.MagicMock(password='test-pat')
+        def _capture_run(organization, args, message):
+            captured['args'] = list(args)
+            return None
+
+        with mock.patch.object(invoker, 'run_artifacttool', side_effect=_capture_run):
             invoker.download_universal(**defaults)
+
+        return captured.get('args', [])
 
     def test_download_universal_passes_allow_hardlink_fallback_flag(self):
         """download_universal must pass --allow-hardlink-fallback to the ArtifactTool binary.
@@ -97,10 +106,9 @@ class TestArtifactToolHardlinkFallback(unittest.TestCase):
             System.IO.IOException: Hard linking failed! Status: FailedSinceNotSupportedByFilesystem
         on file systems that do not support hard links.
         """
-        invoker, mock_tool_invoker = self._make_invoker()
-        self._run_download_universal(invoker)
+        invoker = self._make_invoker()
+        args = self._run_download_universal(invoker)
 
-        args = self._get_captured_args(mock_tool_invoker)
         self.assertIn(
             '--allow-hardlink-fallback', args,
             "download_universal must pass --allow-hardlink-fallback to ArtifactTool to support "
@@ -110,17 +118,16 @@ class TestArtifactToolHardlinkFallback(unittest.TestCase):
 
     def test_download_universal_hardlink_fallback_enabled_by_default(self):
         """--allow-hardlink-fallback should be passed by default (no user action required)."""
-        invoker, mock_tool_invoker = self._make_invoker()
+        invoker = self._make_invoker()
         # Call without specifying allow_hardlink_fallback (should default to True)
-        self._run_download_universal(invoker)
+        args = self._run_download_universal(invoker)
 
-        args = self._get_captured_args(mock_tool_invoker)
         self.assertIn('--allow-hardlink-fallback', args)
 
     def test_download_universal_basic_args_present(self):
         """download_universal passes required --feed, --package-name, --package-version and --path."""
-        invoker, mock_tool_invoker = self._make_invoker()
-        self._run_download_universal(
+        invoker = self._make_invoker()
+        args = self._run_download_universal(
             invoker,
             feed='my-feed',
             package_name='my-pkg',
@@ -128,7 +135,6 @@ class TestArtifactToolHardlinkFallback(unittest.TestCase):
             path='/downloads',
         )
 
-        args = self._get_captured_args(mock_tool_invoker)
         self.assertIn('--feed', args)
         self.assertEqual(args[args.index('--feed') + 1], 'my-feed')
         self.assertIn('--package-name', args)
@@ -140,10 +146,9 @@ class TestArtifactToolHardlinkFallback(unittest.TestCase):
 
     def test_download_universal_with_project_scope(self):
         """download_universal passes --project when project is specified."""
-        invoker, mock_tool_invoker = self._make_invoker()
-        self._run_download_universal(invoker, project='my-project')
+        invoker = self._make_invoker()
+        args = self._run_download_universal(invoker, project='my-project')
 
-        args = self._get_captured_args(mock_tool_invoker)
         self.assertIn('--project', args)
         self.assertEqual(args[args.index('--project') + 1], 'my-project')
         # Hardlink fallback must still be present even with project scope
@@ -151,10 +156,9 @@ class TestArtifactToolHardlinkFallback(unittest.TestCase):
 
     def test_download_universal_with_file_filter(self):
         """download_universal passes --filter when file_filter is specified."""
-        invoker, mock_tool_invoker = self._make_invoker()
-        self._run_download_universal(invoker, file_filter='*.txt')
+        invoker = self._make_invoker()
+        args = self._run_download_universal(invoker, file_filter='*.txt')
 
-        args = self._get_captured_args(mock_tool_invoker)
         self.assertIn('--filter', args)
         self.assertEqual(args[args.index('--filter') + 1], '*.txt')
         # Hardlink fallback must still be present even with file filter
