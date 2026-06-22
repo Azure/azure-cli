@@ -34,7 +34,7 @@ def _extension_available():
     try:
         if ext_path not in sys.path:
             sys.path.insert(0, ext_path)
-        import azext_devops.dev.common.artifacttool  # noqa: F401  # import only to verify availability
+        import azext_devops.dev.common.artifacttool  # noqa: F401
         return True
     except ImportError:
         return False
