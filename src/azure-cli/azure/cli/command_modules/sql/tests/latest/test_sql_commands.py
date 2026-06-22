@@ -9850,7 +9850,7 @@ class SqlServerDeletedServerScenarioTest(ScenarioTest):
 
 
 class SqlServerUpdateRetentionDaysUnitTest(unittest.TestCase):
-    """Unit tests for server_update to verify fix for GitHub issue #32726.
+    """Unit tests for server_update to verify fix for Azure/azure-cli#32726.
 
     When 'az sql server update --assign_identity' is run against a legacy server
     that has retention_days=-1, the CLI was re-sending that invalid value to the API,
@@ -9876,7 +9876,7 @@ class SqlServerUpdateRetentionDaysUnitTest(unittest.TestCase):
     def test_assign_identity_clears_legacy_retention_days(self):
         """--assign_identity without --soft-delete-retention-days must set retention_days=None.
 
-        This is the primary regression test for GitHub issue #32726: legacy servers
+        This is the primary regression test for Azure/azure-cli#32726: legacy servers
         return retention_days=-1 from the API; re-sending -1 causes an InvalidParameterValue
         error.  After the fix, server_update must clear the value to None so it is omitted
         from the PUT request body.
