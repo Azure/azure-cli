@@ -107,7 +107,7 @@ def _get_artifacttool_dir(organization):
             # Sort by the version suffix (last underscore-separated segment) using semantic versioning.
             # Return a tuple (is_parsed, version_or_str) to ensure consistent type comparison when sorting:
             # parsed versions sort before unparseable strings, and unparseable strings sort lexicographically.
-            def _version_key(dir_name):
+            def _get_version_sort_key(dir_name):
                 parts = dir_name.rsplit('_', 1)
                 version_str = parts[-1] if len(parts) > 1 else dir_name
                 if _PackagingVersion is not None:
@@ -117,7 +117,7 @@ def _get_artifacttool_dir(organization):
                         logger.debug("Could not parse version '%s' as semantic version: %s", version_str, ex)
                 return (0, version_str)
 
-            latest = sorted(versions, key=_version_key)[-1]
+            latest = sorted(versions, key=_get_version_sort_key)[-1]
             release_dir = os.path.join(artifacttool_root, latest)
             binary = os.path.join(release_dir, "artifacttool")
             if os.path.exists(binary):
@@ -294,8 +294,8 @@ def _run_process(command_args, env, stderr_handler, update_progress_callback):
             stderr_remaining = proc.stderr.read().decode('utf-8', 'ignore').strip()
             err_suffix = "\n{}".format(stderr_remaining) if stderr_remaining else ""
             raise CLIError(
-                "Process {proc} with PID {pid} exited with return code {code}{err}"
-                .format(proc=' '.join(command_args), pid=proc.pid, code=proc.returncode, err=err_suffix)
+                "Command '{command}' (PID {pid}) exited with return code {code}{err}"
+                .format(command=' '.join(command_args), pid=proc.pid, code=proc.returncode, err=err_suffix)
             )
         return proc
     finally:
