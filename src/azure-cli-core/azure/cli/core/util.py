@@ -1009,7 +1009,10 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
             if isinstance(body, str):
                 candidate_file_path = body[1:] if body.startswith('@') else body
                 if os.path.isfile(candidate_file_path):
-                    body = read_file_content(candidate_file_path)
+                    try:
+                        body = read_file_content(candidate_file_path)
+                    except OSError as ex:
+                        raise CLIError("Failed to read file '{}' with exception:\n{}".format(candidate_file_path, ex)) from ex
                     try:
                         body_object = shell_safe_json_parse(body)
                         body = json.dumps(body_object)
