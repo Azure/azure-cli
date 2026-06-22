@@ -29,7 +29,7 @@ class AzOutputProducer(knack.output.OutputProducer):
         output = formatter(obj)
         stream = out_file or sys.stdout
         binary_stream = getattr(stream, 'buffer', None)
-        encoding = stream.encoding or ('utf-8' if binary_stream is not None else None)
+        encoding = stream.encoding or 'utf-8'
 
         try:
             if binary_stream is not None:
