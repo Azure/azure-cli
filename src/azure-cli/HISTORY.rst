@@ -59,6 +59,10 @@ Release History
 
 * `az cosmosdb restore`: Fix cross-region restore by preserving source region in top-level location (#33274)
 
+**Extension**
+
+* `az extension add/update`: Ignore `PIP_REQUIRE_VIRTUALENV` when invoking pip for extension installs (#32914)
+
 **Key Vault**
 
 * `az keyvault create`: Fix keyvault create RequestDisallowedByPolicy error by explicitly setting `enableSoftDelete` in the request body (#33265)

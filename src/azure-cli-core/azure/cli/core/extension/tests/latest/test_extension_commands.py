@@ -174,6 +174,16 @@ class TestExtensionCommands(unittest.TestCase):
             if '--proxy' in pip_cmd:
                 raise AssertionError("proxy parameter in check_output args although no proxy specified")
 
+    def test_add_extension_ignores_pip_require_virtualenv(self):
+        extension_name = MY_EXT_NAME
+        computed_extension_sha256 = _compute_file_hash(MY_EXT_SOURCE)
+        with mock.patch.dict(os.environ, {'PIP_REQUIRE_VIRTUALENV': 'true'}), \
+                mock.patch('azure.cli.core.extension.operations.resolve_from_index', return_value=(MY_EXT_SOURCE, computed_extension_sha256)), \
+                mock.patch('azure.cli.core.extension.operations.shutil'), \
+                mock.patch('azure.cli.core.extension.operations.check_output') as check_output:
+            add_extension(cmd=self.cmd, extension_name=extension_name)
+            self.assertNotIn('PIP_REQUIRE_VIRTUALENV', check_output.call_args.kwargs['env'])
+
     def test_add_extension_with_specific_version(self):
         extension_name = MY_EXT_NAME
         extension1 = 'myfirstcliextension-0.0.3+dev-py2.py3-none-any.whl'
