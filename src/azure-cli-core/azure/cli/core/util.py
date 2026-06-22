@@ -1114,7 +1114,8 @@ def _normalize_odata_next_link_url(url):
     has_empty_keys = len(non_empty_key_pairs) != len(query_pairs)
     if has_empty_keys:
         # If both empty and valid keys exist, keep valid keys and drop empty ones.
-        # If all keys are empty (e.g. `?=old&=new`), use the last value as $skiptoken by design.
+        # If all keys are empty (e.g. `?=old&=new`), use the last value as $skiptoken so
+        # pagination continues with the most recent token from a malformed nextLink chain.
         # `query_pairs` is guaranteed to be non-empty by the guard above.
         if not non_empty_key_pairs:
             normalized_pairs = [('$skiptoken', query_pairs[-1][1])]
