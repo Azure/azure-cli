@@ -11646,6 +11646,22 @@ def _perform_onedeploy_internal(params):
     _update_artifact_type(params)
     _should_enrich_errors = params.enriched_errors and params.is_linux_webapp and not params.is_functionapp
 
+    # Linux Consumption function apps (SKU = Dynamic) do not support the OneDeploy
+    # /api/publish endpoint for JAR, WAR, or EAR artifact types — those requests return HTTP 404.
+    # Detect this early and surface a user-friendly error rather than the generic
+    # "This API isn't available in this environment yet!" message.
+    if params.is_functionapp and _get_or_fetch_is_linux_webapp(params):
+        cached_site = params._cached_site  # pylint: disable=protected-access
+        app_sku = getattr(cached_site, 'sku', None) if cached_site else None
+        if app_sku and app_sku.lower() == 'dynamic' and params.artifact_type in ('jar', 'war', 'ear'):
+            raise ValidationError(
+                "Deployment of '{}' artifacts to Linux Consumption function apps via "
+                "'az functionapp deploy' is not supported. "
+                "Create a deployment ZIP package containing your artifact and host.json, "
+                "then use 'az functionapp deployment source config-zip' to deploy it."
+                .format(params.artifact_type)
+            )
+
     # Now make the OneDeploy API call
     logger.warning("Initiating deployment")
     try:

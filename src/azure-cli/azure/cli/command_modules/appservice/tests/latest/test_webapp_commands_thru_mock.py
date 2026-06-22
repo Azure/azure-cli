@@ -1605,5 +1605,141 @@ class TestOneDeploySiteCache(unittest.TestCase):
         get_url_mock.assert_called_once_with(params.cmd, 'myRG', 'myApp', None)
 
 
+class TestLinuxConsumptionFunctionAppDeploy(unittest.TestCase):
+    """Tests for the early-exit validation added to _perform_onedeploy_internal.
+
+    Linux Consumption function apps (SKU = Dynamic) do not support the OneDeploy
+    /api/publish endpoint for JAR/WAR/EAR artifact types.  The CLI must raise a
+    helpful ValidationError before making the network request, rather than letting
+    the caller see a confusing "This API isn't available in this environment yet!"
+    message from the HTTP 404 response.
+    """
+
+    def _make_params(self, artifact_type, is_functionapp=True, sku='Dynamic', is_linux=True):
+        from azure.cli.command_modules.appservice.custom import OneDeployParams
+        params = OneDeployParams()
+        params.cmd = mock.MagicMock()
+        params.cmd.cli_ctx = mock.MagicMock()
+        params.resource_group_name = 'rg'
+        params.webapp_name = 'myfuncapp'
+        params.slot = None
+        params.src_path = '/tmp/app.{}'.format(artifact_type)
+        params.src_url = None
+        params.artifact_type = artifact_type
+        params.is_functionapp = is_functionapp
+        params.is_linux_webapp = is_linux
+        params.enriched_errors = False
+        params.track_status = False
+        params.enable_kudu_warmup = False
+        params.is_async_deployment = None
+        params.should_restart = None
+        params.is_clean_deployment = None
+        params.should_ignore_stack = None
+        params.target_path = None
+        params.timeout = None
+        site_mock = mock.MagicMock()
+        site_mock.sku = sku
+        params._cached_site = site_mock
+        params._cached_scm_headers = None
+        return params
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._make_onedeploy_request')
+    @mock.patch('azure.cli.command_modules.appservice.custom._update_artifact_type')
+    def test_jar_on_linux_consumption_raises_validation_error(
+            self, _update_type_mock, make_request_mock):
+        from azure.cli.command_modules.appservice.custom import _perform_onedeploy_internal
+        from azure.cli.core.azclierror import ValidationError
+        params = self._make_params(artifact_type='jar')
+
+        with self.assertRaises(ValidationError) as ctx:
+            _perform_onedeploy_internal(params)
+
+        self.assertIn('jar', str(ctx.exception))
+        self.assertIn('config-zip', str(ctx.exception))
+        make_request_mock.assert_not_called()
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._make_onedeploy_request')
+    @mock.patch('azure.cli.command_modules.appservice.custom._update_artifact_type')
+    def test_war_on_linux_consumption_raises_validation_error(
+            self, _update_type_mock, make_request_mock):
+        from azure.cli.command_modules.appservice.custom import _perform_onedeploy_internal
+        from azure.cli.core.azclierror import ValidationError
+        params = self._make_params(artifact_type='war')
+
+        with self.assertRaises(ValidationError):
+            _perform_onedeploy_internal(params)
+
+        make_request_mock.assert_not_called()
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._make_onedeploy_request')
+    @mock.patch('azure.cli.command_modules.appservice.custom._update_artifact_type')
+    def test_ear_on_linux_consumption_raises_validation_error(
+            self, _update_type_mock, make_request_mock):
+        from azure.cli.command_modules.appservice.custom import _perform_onedeploy_internal
+        from azure.cli.core.azclierror import ValidationError
+        params = self._make_params(artifact_type='ear')
+
+        with self.assertRaises(ValidationError):
+            _perform_onedeploy_internal(params)
+
+        make_request_mock.assert_not_called()
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._make_onedeploy_request',
+                return_value={'status': 'ok'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._update_artifact_type')
+    def test_zip_on_linux_consumption_proceeds_normally(
+            self, _update_type_mock, make_request_mock):
+        """ZIP artifacts on a Linux consumption function app should not be blocked."""
+        from azure.cli.command_modules.appservice.custom import _perform_onedeploy_internal
+        params = self._make_params(artifact_type='zip')
+
+        result = _perform_onedeploy_internal(params)
+
+        self.assertEqual(result, {'status': 'ok'})
+        make_request_mock.assert_called_once()
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._make_onedeploy_request',
+                return_value={'status': 'ok'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._update_artifact_type')
+    def test_jar_on_linux_premium_proceeds_normally(
+            self, _update_type_mock, make_request_mock):
+        """JAR on a Premium (non-consumption) Linux function app must not be blocked."""
+        from azure.cli.command_modules.appservice.custom import _perform_onedeploy_internal
+        params = self._make_params(artifact_type='jar', sku='ElasticPremium')
+
+        result = _perform_onedeploy_internal(params)
+
+        self.assertEqual(result, {'status': 'ok'})
+        make_request_mock.assert_called_once()
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._make_onedeploy_request',
+                return_value={'status': 'ok'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._update_artifact_type')
+    def test_jar_on_windows_consumption_proceeds_normally(
+            self, _update_type_mock, make_request_mock):
+        """JAR on a Windows consumption function app is not blocked (only Linux is affected)."""
+        from azure.cli.command_modules.appservice.custom import _perform_onedeploy_internal
+        params = self._make_params(artifact_type='jar', is_linux=False)
+
+        result = _perform_onedeploy_internal(params)
+
+        self.assertEqual(result, {'status': 'ok'})
+        make_request_mock.assert_called_once()
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._make_onedeploy_request',
+                return_value={'status': 'ok'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._update_artifact_type')
+    def test_jar_on_webapp_proceeds_normally(
+            self, _update_type_mock, make_request_mock):
+        """For web apps (not function apps) the check must not interfere."""
+        from azure.cli.command_modules.appservice.custom import _perform_onedeploy_internal
+        params = self._make_params(artifact_type='jar', is_functionapp=False)
+
+        result = _perform_onedeploy_internal(params)
+
+        self.assertEqual(result, {'status': 'ok'})
+        make_request_mock.assert_called_once()
+
+
 if __name__ == '__main__':
     unittest.main()

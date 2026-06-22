@@ -39,6 +39,7 @@ Release History
 * `az functionapp update-strategy config set`: Add new command to set or update a function app's update strategy configuration (#33341)
 * `az functionapp update-strategy config show`: Add new command to get the details of a function app's update strategy configuration (#33341)
 * Fix #31394: `az functionapp deployment source config-zip`: Never ending loop on flex function app health check (#33388)
+* Fix #33014: `az functionapp deploy`: Surface a clear error when deploying JAR/WAR/EAR artifacts to Linux Consumption function apps (use `az functionapp deployment source config-zip` instead)
 
 **Compute**
 
