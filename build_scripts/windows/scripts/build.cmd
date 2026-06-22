@@ -189,10 +189,19 @@ copy %REPO_ROOT%\build_scripts\windows\resources\ThirdPartyNotices.txt %BUILDING
 copy %REPO_ROOT%\NOTICE.txt %BUILDING_DIR%
 
 REM Remove .py and only deploy .pyc files
-REM The '.cpython-3XX' tag appended to pyc filenames inside __pycache__ is 12 chars for Python 3.10-3.99.
-REM Validate this assumption before processing; if it ever changes (e.g., Python 3.100 would be 13 chars),
-REM the BASE_FILENAME truncation below must be updated accordingly.
-for /f %%l in ('%BUILDING_DIR%\python.exe -c "import sys; print(9 + len(str(sys.version_info.major)) + len(str(sys.version_info.minor)))"') do set PYCTAG_LEN=%%l
+REM Validate Python bytecode tag length for pyc filename truncation below.
+REM Expected length is 12 for '.cpython-3XX' (Python 3.10 through 3.99).
+REM If the minor version becomes 3 digits (e.g., 3.100), update the truncation constant below.
+set PYCTAG_LEN=
+%BUILDING_DIR%\python.exe -c "import sys; print(9 + len(str(sys.version_info.major)) + len(str(sys.version_info.minor)))" >%TEMP%\pyctag_len.tmp 2>&1
+if !errorlevel! neq 0 (
+    echo ERROR: Failed to compute Python bytecode tag length. Python output:
+    type %TEMP%\pyctag_len.tmp
+    del %TEMP%\pyctag_len.tmp
+    goto ERROR
+)
+for /f "usebackq" %%l in ("%TEMP%\pyctag_len.tmp") do set PYCTAG_LEN=%%l
+del %TEMP%\pyctag_len.tmp
 if "!PYCTAG_LEN!" == "" (
     echo ERROR: Could not determine Python bytecode tag length. Verify that %BUILDING_DIR%\python.exe is available and working.
     goto ERROR
