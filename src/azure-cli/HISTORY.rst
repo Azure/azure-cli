@@ -99,6 +99,10 @@ Release History
 * `az storage account blob-service-properties update`: Add `--enable-static-website`, `--index-document`, `--default-index-document-path`, `--error-document-404-path` (#33423)
 * `az storage account or-policy create/update`: Add `--tags-replication` (#33423)
 
+**Core**
+
+* Fix Azure/azure-cli#32644: Add `az.ps1` PowerShell wrapper for Windows MSI and ZIP installations to fix multiline argument truncation that occurs when using `az.cmd` through PowerShell (#32644)
+
 2.86.0
 ++++++
 

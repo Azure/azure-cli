@@ -176,12 +176,14 @@ if "%TARGET%"=="msi" (
     REM Creating the wbin (Windows binaries) folder that will be added to the path...
     mkdir %BUILDING_DIR%\wbin
     copy %REPO_ROOT%\build_scripts\windows\scripts\az_msi.cmd %BUILDING_DIR%\wbin\az.cmd
+    copy %REPO_ROOT%\build_scripts\windows\scripts\az_msi.ps1 %BUILDING_DIR%\wbin\az.ps1
     copy %REPO_ROOT%\build_scripts\windows\scripts\azps.ps1 %BUILDING_DIR%\wbin\
     copy %REPO_ROOT%\build_scripts\windows\scripts\az %BUILDING_DIR%\wbin\
 ) else (
     REM Creating the bin folder that will be added to the path...
     mkdir %BUILDING_DIR%\bin
     copy %REPO_ROOT%\build_scripts\windows\scripts\az_zip.cmd %BUILDING_DIR%\bin\az.cmd
+    copy %REPO_ROOT%\build_scripts\windows\scripts\az_zip.ps1 %BUILDING_DIR%\bin\az.ps1
 )
 if %errorlevel% neq 0 goto ERROR
 copy %REPO_ROOT%\build_scripts\windows\resources\CLI_LICENSE.rtf %BUILDING_DIR%
