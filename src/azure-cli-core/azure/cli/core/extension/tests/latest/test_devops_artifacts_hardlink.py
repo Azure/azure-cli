@@ -88,16 +88,15 @@ class TestArtifactToolHardlinkFallback(unittest.TestCase):
         )
         defaults.update(kwargs)
 
-        captured = {}
-
-        def _capture_run(organization, args, message):
-            captured['args'] = list(args)
-            return None
-
-        with mock.patch.object(invoker, 'run_artifacttool', side_effect=_capture_run):
+        with mock.patch.object(invoker, 'run_artifacttool') as mock_run:
+            mock_run.return_value = None
             invoker.download_universal(**defaults)
 
-        return captured.get('args', [])
+        if mock_run.called:
+            # Signature: run_artifacttool(organization, args, message)
+            # args is the second positional argument (index 1)
+            return list(mock_run.call_args[0][1])
+        return []
 
     def _assert_flag_value(self, args, flag, expected_value):
         """Assert that a flag is present in args and has the expected value immediately after it."""
