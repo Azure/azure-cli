@@ -466,7 +466,7 @@ def list_available_extensions(index_url=None, show_details=False, cli_ctx=None):
             'version': latest['metadata']['version'],
             'summary': latest['metadata']['summary'],
             'preview': is_preview_from_extension_meta(latest['metadata']),
-            'experimental': False,
+            'experimental': bool(latest['metadata'].get('azext.isExperimental', False)),
             'installed': installed
         })
     return results
