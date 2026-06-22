@@ -411,6 +411,43 @@ class TestUtils(unittest.TestCase):
             request = send_mock.call_args[0][1]
             self.assertEqual(request.headers['User-Agent'], get_az_rest_user_agent() + ' env-ua ARG-UA')
 
+    @mock.patch.dict('os.environ')
+    @mock.patch('azure.cli.core._profile.Profile.get_raw_token', autospec=True)
+    @mock.patch('requests.Session.send', autospec=True)
+    def test_send_raw_request_loads_json_body_from_file_path(self, send_mock, get_raw_token_mock):
+        return_val = mock.MagicMock()
+        return_val.ok = True
+        return_val.content = b''
+        return_val.text = ''
+        send_mock.return_value = return_val
+        get_raw_token_mock.return_value = ("Bearer", "******", None), None, None
+
+        cli_ctx = DummyCli()
+        cli_ctx.data = {
+            'command': 'rest',
+            'safe_params': ['method', 'uri']
+        }
+
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as body_file:
+            body_file.write('{"b1": "v1"}')
+            body_path = body_file.name
+
+        try:
+            for body_arg in (body_path, '@' + body_path):
+                with self.subTest(body=body_arg):
+                    send_raw_request(
+                        cli_ctx,
+                        'PUT',
+                        '/subscriptions/00000001-0000-0000-0000-000000000000/resourcegroups/02?api-version=2019-07-01',
+                        body=body_arg,
+                        generated_client_request_id_name=None)
+
+                    request = send_mock.call_args[0][1]
+                    self.assertEqual(request.body, '{"b1": "v1"}')
+                    self.assertEqual(request.headers.get('Content-Type'), 'application/json')
+        finally:
+            os.unlink(body_path)
+
     def test_is_same_origin(self):
         endpoint = 'https://management.azure.com/'
 

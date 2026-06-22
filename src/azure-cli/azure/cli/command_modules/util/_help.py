@@ -17,8 +17,8 @@ long-summary: >
     use --resource for a custom resource.
 
 
-    If Content-Type header is not set and --body is a valid JSON string, Content-Type header will default to
-    application/json.
+    If Content-Type header is not set and --body is a valid JSON string or a file path containing JSON,
+    Content-Type header will default to application/json.
 
 
     For passing JSON in PowerShell, see https://github.com/Azure/azure-cli/blob/dev/doc/quoting-issues-with-powershell.md

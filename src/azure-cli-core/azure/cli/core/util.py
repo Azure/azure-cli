@@ -1006,7 +1006,17 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
             if 'Content-Type' not in headers:
                 headers['Content-Type'] = 'application/json'
         except Exception:  # pylint: disable=broad-except
-            pass
+            if isinstance(body, str):
+                candidate_file_path = body[1:] if body.startswith('@') else body
+                if os.path.isfile(candidate_file_path):
+                    body = read_file_content(candidate_file_path)
+                    try:
+                        body_object = shell_safe_json_parse(body)
+                        body = json.dumps(body_object)
+                        if 'Content-Type' not in headers:
+                            headers['Content-Type'] = 'application/json'
+                    except Exception:  # pylint: disable=broad-except
+                        pass
 
     # add telemetry
     headers['CommandName'] = cli_ctx.data['command']
