@@ -19,10 +19,10 @@ from unittest import mock
 def _get_azure_devops_extension_path():
     """Find the azure-devops extension path using the CLI extension system."""
     try:
-        from azure.cli.core.extension import get_extension
+        from azure.cli.core.extension import get_extension, ExtensionNotInstalledException
         ext = get_extension('azure-devops')
         return ext.path
-    except Exception:  # pylint: disable=broad-except
+    except (ImportError, ExtensionNotInstalledException, AttributeError):
         return None
 
 
@@ -34,7 +34,7 @@ def _extension_available():
     try:
         if ext_path not in sys.path:
             sys.path.insert(0, ext_path)
-        import azext_devops.dev.common.artifacttool  # noqa: F401
+        import azext_devops.dev.common.artifacttool  # noqa: F401 - import only to verify availability
         return True
     except ImportError:
         return False
