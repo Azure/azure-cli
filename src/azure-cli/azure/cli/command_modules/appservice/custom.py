@@ -11503,6 +11503,7 @@ def _warmup_kudu_and_get_cookie_internal(params):
 
 
 def _make_onedeploy_request(params):
+    import json as _json
     import requests
     from azure.cli.core.util import should_disable_connection_verify
 
@@ -11583,10 +11584,23 @@ def _make_onedeploy_request(params):
             logger.info('Server response: %s', response_body)
         else:
             if 'application/json' in response.headers.get('content-type', ""):
-                state = response.json().get("properties", {}).get("provisioningState")
+                try:
+                    response_json = response.json()
+                except ValueError:
+                    # The server occasionally returns extra non-JSON data (e.g., trailing HTML)
+                    # after the JSON payload.  raw_decode() reads only the leading valid JSON
+                    # and ignores whatever follows it.
+                    try:
+                        response_json, _ = _json.JSONDecoder().raw_decode(response.text)
+                        logger.warning("Deployment response contained extra non-JSON data; "
+                                       "extracted JSON payload successfully.")
+                    except (ValueError, TypeError):
+                        logger.warning("Could not parse deployment response as JSON.")
+                        response_json = {}
+                state = response_json.get("properties", {}).get("provisioningState")
                 if state:
                     logger.warning("Deployment status is: \"%s\"", state)
-                response_body = response.json().get("properties", {})
+                response_body = response_json.get("properties", {})
         logger.warning("Deployment has completed successfully")
         logger.warning("You can visit your app at: %s", _get_visit_url(params))
         return response_body

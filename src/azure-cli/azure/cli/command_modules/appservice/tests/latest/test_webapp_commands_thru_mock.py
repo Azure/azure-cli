@@ -1605,5 +1605,96 @@ class TestOneDeploySiteCache(unittest.TestCase):
         get_url_mock.assert_called_once_with(params.cmd, 'myRG', 'myApp', None)
 
 
+class TestMakeOneDeployRequestJsonParsing(unittest.TestCase):
+    """Tests that _make_onedeploy_request handles malformed JSON responses gracefully.
+
+    Some deploy endpoints return extra non-JSON data (e.g., trailing HTML) after
+    the JSON payload, causing response.json() to raise JSONDecodeError: Extra data.
+    The fix uses raw_decode() to extract only the leading JSON portion.
+    See https://github.com/Azure/azure-cli/issues/32443.
+    """
+
+    def _make_params(self):
+        from azure.cli.command_modules.appservice.custom import OneDeployParams
+        params = OneDeployParams()
+        params.cmd = mock.MagicMock()
+        params.cmd.cli_ctx = mock.MagicMock()
+        params.resource_group_name = 'myRG'
+        params.webapp_name = 'myApp'
+        params.slot = None
+        params.src_url = 'https://example.com/package.zip'
+        params.src_path = None
+        params.artifact_type = 'zip'
+        params.is_async_deployment = False
+        params.timeout = None
+        params.track_status = True
+        params.is_linux_webapp = True
+        params.is_functionapp = True
+        params.enable_kudu_warmup = False
+        params.enriched_errors = False
+        params._cached_scm_headers = None
+        params._cached_site = None
+        params._cached_scm_url = None
+        return params
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_visit_url', return_value='https://myapp.azurewebsites.net')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_ondeploy_headers', return_value={})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_onedeploy_status_url', return_value='https://status.url')
+    @mock.patch('azure.cli.command_modules.appservice.custom._build_onedeploy_url', return_value='https://deploy.url')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_onedeploy_request_body', return_value=(b'body', None))
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    def test_make_onedeploy_request_handles_extra_data_in_json_response(
+            self, send_raw_request_mock, _body_mock, _url_mock, _status_url_mock, _headers_mock, _visit_url_mock):
+        """When the response contains trailing non-JSON data after the JSON payload,
+        the function should extract the valid JSON via raw_decode and not crash."""
+        import json as _json
+        from azure.cli.command_modules.appservice.custom import _make_onedeploy_request
+
+        valid_json = '{"properties": {"provisioningState": "Succeeded"}}'
+        extra_data = '<html><body>some extra content</body></html>'
+        response_text = valid_json + extra_data
+
+        mock_response = mock.MagicMock()
+        mock_response.status_code = 200
+        mock_response.headers = {'content-type': 'application/json'}
+        mock_response.text = response_text
+        # Simulate the JSONDecodeError that requests raises for extra data
+        mock_response.json.side_effect = ValueError(
+            "Extra data: line 1 column {} (char {})".format(len(valid_json) + 1, len(valid_json))
+        )
+        send_raw_request_mock.return_value = mock_response
+
+        params = self._make_params()
+        result = _make_onedeploy_request(params)
+
+        # The function should have extracted the valid JSON portion and returned
+        # the 'properties' dict without raising an exception.
+        self.assertEqual(result, {'provisioningState': 'Succeeded'})
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_visit_url', return_value='https://myapp.azurewebsites.net')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_ondeploy_headers', return_value={})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_onedeploy_status_url', return_value='https://status.url')
+    @mock.patch('azure.cli.command_modules.appservice.custom._build_onedeploy_url', return_value='https://deploy.url')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_onedeploy_request_body', return_value=(b'body', None))
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    def test_make_onedeploy_request_handles_completely_invalid_json_response(
+            self, send_raw_request_mock, _body_mock, _url_mock, _status_url_mock, _headers_mock, _visit_url_mock):
+        """When the response body is not valid JSON at all, the function should log a
+        warning and return None (response_body is never set) rather than crashing."""
+        from azure.cli.command_modules.appservice.custom import _make_onedeploy_request
+
+        mock_response = mock.MagicMock()
+        mock_response.status_code = 200
+        mock_response.headers = {'content-type': 'application/json'}
+        mock_response.text = '<html><body>not json at all</body></html>'
+        mock_response.json.side_effect = ValueError("No JSON object could be decoded")
+        send_raw_request_mock.return_value = mock_response
+
+        params = self._make_params()
+        # Should not raise an exception even when the response is entirely non-JSON
+        result = _make_onedeploy_request(params)
+        self.assertEqual(result, {})
+
+
 if __name__ == '__main__':
     unittest.main()
