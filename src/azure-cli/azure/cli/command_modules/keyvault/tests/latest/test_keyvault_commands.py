@@ -154,6 +154,96 @@ class CreateVaultSoftDeleteTest(unittest.TestCase):
                       "to satisfy Azure Policy checks")
 
 
+class HSMRoleAssignmentScopeTest(unittest.TestCase):
+    """Verify that create_role_assignment and list_role_assignments call list_role_definitions
+    with the operation scope rather than always querying the root scope.  Without this fix
+    callers that only hold key-level RBAC permissions get AccessDenied on the auxiliary
+    root-scope read."""
+
+    def _make_role_assignment(self, scope, role_definition_id):
+        """Return a minimal mock role-assignment object."""
+        ra = mock.MagicMock()
+        ra.role_assignment_id = 'some-id'
+        ra.name = 'some-name'
+        ra.type = 'Microsoft.Authorization/roleAssignments'
+        ra.properties.scope = scope
+        ra.properties.role_definition_id = role_definition_id
+        ra.properties.principal_id = '00000000-0000-0000-0000-000000000001'
+        return ra
+
+    def _make_role_definition(self, role_id, role_name):
+        rd = mock.MagicMock()
+        rd.id = role_id
+        rd.role_name = role_name
+        rd.role_type = 'BuiltInRole'
+        return rd
+
+    @mock.patch('azure.cli.command_modules.keyvault.custom._get_principal_dics', return_value={})
+    @mock.patch('azure.cli.command_modules.keyvault.custom._gen_guid', return_value='test-guid')
+    def test_create_role_assignment_uses_key_scope(self, _mock_guid, _mock_principal):
+        """list_role_definitions must be called with the same scope passed to create_role_assignment,
+        not the root scope."""
+        from azure.cli.command_modules.keyvault.custom import create_role_assignment
+
+        key_scope = '/keys/my-key'
+        role_id = 'Microsoft.KeyVault/providers/Microsoft.Authorization/roleDefinitions/00000000-0000-0000-0000-000000000002'
+
+        role_def = self._make_role_definition(role_id, 'Managed HSM Crypto User')
+        role_assignment = self._make_role_assignment(key_scope, role_id)
+
+        client = mock.MagicMock()
+        client.list_role_definitions.return_value = [role_def]
+        client.create_role_assignment.return_value = role_assignment
+
+        cmd = mock.MagicMock()
+
+        create_role_assignment(
+            cmd, client,
+            role=role_id,
+            scope=key_scope,
+            assignee_object_id='00000000-0000-0000-0000-000000000001',
+        )
+
+        # list_role_definitions must be called with the key-level scope, not root
+        for call_args in client.list_role_definitions.call_args_list:
+            called_scope = call_args.kwargs.get('scope') or (call_args.args[0] if call_args.args else None)
+            self.assertNotEqual(called_scope, '',
+                                "list_role_definitions must not be called with root scope '' "
+                                "when the operation scope is a key scope")
+            self.assertNotEqual(called_scope, '/',
+                                "list_role_definitions must not be called with root scope '/' "
+                                "when the operation scope is a key scope")
+
+    @mock.patch('azure.cli.command_modules.keyvault.custom._get_principal_dics', return_value={})
+    def test_list_role_assignments_uses_query_scope(self, _mock_principal):
+        """list_role_definitions must be called with the query_scope, not the root scope."""
+        from azure.cli.command_modules.keyvault.custom import list_role_assignments
+
+        key_scope = '/keys/my-key'
+        role_id = 'Microsoft.KeyVault/providers/Microsoft.Authorization/roleDefinitions/00000000-0000-0000-0000-000000000002'
+
+        role_def = self._make_role_definition(role_id, 'Managed HSM Crypto User')
+        role_assignment = self._make_role_assignment(key_scope, role_id)
+
+        client = mock.MagicMock()
+        client.list_role_definitions.return_value = [role_def]
+        client.list_role_assignments.return_value = [role_assignment]
+
+        cmd = mock.MagicMock()
+
+        list_role_assignments(cmd, client, scope=key_scope)
+
+        # list_role_definitions must be called with the key-level scope, not root
+        for call_args in client.list_role_definitions.call_args_list:
+            called_scope = call_args.kwargs.get('scope') or (call_args.args[0] if call_args.args else None)
+            self.assertNotEqual(called_scope, '',
+                                "list_role_definitions must not be called with root scope '' "
+                                "when the query scope is a key scope")
+            self.assertNotEqual(called_scope, '/',
+                                "list_role_definitions must not be called with root scope '/' "
+                                "when the query scope is a key scope")
+
+
 class KeyVaultPrivateLinkResourceScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_plr')
     @KeyVaultPreparer(name_prefix='cli-test-kv-plr-', location='eastus2')

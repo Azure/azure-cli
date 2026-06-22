@@ -62,6 +62,7 @@ Release History
 **Key Vault**
 
 * `az keyvault create`: Fix keyvault create RequestDisallowedByPolicy error by explicitly setting `enableSoftDelete` in the request body (#33265)
+* `az keyvault role assignment create/list`: Fix AccessDenied error when caller only has key-scope permissions by passing the operation scope to role definition lookups instead of always querying the root scope (#32719)
 
 **MySQL**
 
