@@ -216,6 +216,9 @@ properties:
   restartPolicy: Never
 ```
 
+Use single quotes when setting the PowerShell environment variable so both the embedded double quote and
+the caret are passed through literally:
+
 ```powershell
 $env:APP_DB_PASSWORD = 'wada"wada^'
 az container create --resource-group MyResourceGroup --file containerGroup.yaml
