@@ -1824,6 +1824,7 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
               wire_server_access_control_profile_reference_id=None, imds_access_control_profile_reference_id=None,
               key_incarnation_id=None, zone_movement=None, zone=None, **kwargs):
     from azure.mgmt.core.tools import parse_resource_id, resource_id, is_valid_resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching_by_aaz
     from .operations.vm import convert_show_result_to_snake_case as vm_convert_show_result_to_snake_case
     vm = kwargs['parameters']
@@ -1864,7 +1865,6 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
 
     disk_name = None
     if os_disk is not None:
-        from azure.cli.core.commands.client_factory import get_subscription_id
         if is_valid_resource_id(os_disk):
             disk_id = os_disk
             os_disk_id_parsed = parse_resource_id(os_disk)
