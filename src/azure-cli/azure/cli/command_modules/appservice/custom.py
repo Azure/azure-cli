@@ -386,10 +386,12 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
 
     _enable_basic_auth(cmd, name, None, resource_group_name, basic_auth.lower())
     # Only suggest deployment command when no deployment method is already configured
-    if not using_webapp_up and not any([container_image_name, deployment_container_image_name,
-                                        multicontainer_config_type, sitecontainers_app,
-                                        deployment_source_url, deployment_local_git]):
-        logger.warning("Webapp '%s' created. Deploy your code with: az webapp deploy", name)
+    if not using_webapp_up:
+        if not any([container_image_name, deployment_container_image_name,
+                    multicontainer_config_type, sitecontainers_app,
+                    deployment_source_url, deployment_local_git]):
+            logger.warning("Webapp '%s' created. Deploy your code with: az webapp deploy", name)
+        _log_webapp_status_tip(name, resource_group_name)
     return webapp
 
 
@@ -2461,6 +2463,85 @@ def show_app(cmd, resource_group_name, name, slot=None):
     return app
 
 
+def _log_webapp_status_tip(name, resource_group_name):
+    logger.warning("Tip: run 'az webapp status --name %s --resource-group %s' "
+                   "to see per-instance runtime status.",
+                   name, resource_group_name)
+
+
+def _extract_webapp_status_items(result):
+    # The siteStatus ARM API returns a ResponseMessageEnvelope whose 'properties'
+    # holds the list of per-instance SiteRuntimeStatusOnWorker objects.
+    if isinstance(result, dict):
+        properties = result.get('properties')
+        if isinstance(properties, list):
+            return properties
+        if isinstance(properties, dict):
+            return [properties]
+    return []
+
+
+def format_webapp_status_output(result):
+    from collections import OrderedDict
+
+    items = _extract_webapp_status_items(result)
+    # LastError is a nullable field on the backend SiteRuntimeStatusOnWorker contract,
+    # so the error columns (LastError, LastErrorDetails, LastErrorTimestamp) are only
+    # surfaced when at least one instance reports a LastError. Details and DetailsLevel
+    # are always serialized by the backend and are always shown.
+    show_errors = any(item.get('lastError') for item in items)
+
+    rows = []
+    for item in items:
+        row = OrderedDict([
+            ('InstanceId', item.get('instanceId')),
+            ('State', item.get('state')),
+            ('Action', item.get('action'))
+        ])
+        if show_errors:
+            row['LastError'] = item.get('lastError')
+            row['LastErrorDetails'] = item.get('lastErrorDetails')
+            row['LastErrorTimestamp'] = item.get('lastErrorTimestamp')
+        row['Details'] = item.get('details')
+        row['DetailsLevel'] = item.get('detailsLevel')
+        rows.append(row)
+    return rows
+
+
+def show_webapp_status(cmd, resource_group_name, name, slot=None, instance=None):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
+    client = web_client_factory(cmd.cli_ctx)
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    api_version = client.DEFAULT_API_VERSION
+    slot_segment = '/slots/{}'.format(slot) if slot else ''
+    # When an instance is requested, call the dedicated siteStatus/{instanceId} route
+    # so the backend resolves and validates the instance (returning 404 if missing).
+    instance_segment = '/{}'.format(instance) if instance else ''
+    request_url = (
+        '{}/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}{}/siteStatus{}'
+        '?api-version={}'.format(
+            cmd.cli_ctx.cloud.endpoints.resource_manager,
+            subscription_id,
+            resource_group_name,
+            name,
+            slot_segment,
+            instance_segment,
+            api_version
+        )
+    )
+
+    try:
+        return send_raw_request(cmd.cli_ctx, 'GET', request_url).json()
+    except HttpResponseError as ex:
+        if instance and ex.status_code == 404:
+            scope = 'webapp and slot' if slot else 'webapp'
+            raise ResourceNotFoundError(
+                "Instance '{}' was not found for this {}. "
+                "Run 'az webapp list-instances' to see available instance IDs.".format(instance, scope))
+        raise
+
+
 def _list_app(cli_ctx, resource_group_name=None, show_details=False):
     client = web_client_factory(cli_ctx)
     if resource_group_name:
@@ -3584,11 +3665,15 @@ def stop_webapp(cmd, resource_group_name, name, slot=None):
 
 
 def start_webapp(cmd, resource_group_name, name, slot=None):
-    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'start', slot)
+    result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'start', slot)
+    _log_webapp_status_tip(name, resource_group_name)
+    return result
 
 
 def restart_webapp(cmd, resource_group_name, name, slot=None):
-    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'restart', slot)
+    result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'restart', slot)
+    _log_webapp_status_tip(name, resource_group_name)
+    return result
 
 
 def get_site_configs(cmd, resource_group_name, name, slot=None):
@@ -9974,6 +10059,7 @@ def _poll_deployment_runtime_status(cmd, resource_group_name, webapp_name, slot,
     time_elapsed = 0
     deployment_status = None
     response_body = None
+    status_tip_logged = False
     while time_elapsed < max_time_sec:
         try:
             response_body = send_raw_request(cmd.cli_ctx, "GET", deploymentstatusapi_url).json()
@@ -9988,10 +10074,15 @@ def _poll_deployment_runtime_status(cmd, resource_group_name, webapp_name, slot,
         status = deployment_status if status is None else status
         logger.warning("Status: %s Time: %s(s)", status, time_elapsed)
         if deployment_status == "RuntimeStarting":
+            if not status_tip_logged:
+                _log_webapp_status_tip(webapp_name, resource_group_name)
+                status_tip_logged = True
             logger.info("InprogressInstances: %s, SuccessfulInstances: %s",
                         deployment_properties.get('numberOfInstancesInProgress'),
                         deployment_properties.get('numberOfInstancesSuccessful'))
         if deployment_status == "RuntimeSuccessful":
+            if not status_tip_logged:
+                _log_webapp_status_tip(webapp_name, resource_group_name)
             break
         if deployment_status == "RuntimeFailed":
             error_text = ""
@@ -10877,6 +10968,8 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
         logger.warning("You can launch the app at %s", _url)
         create_json.update({'URL': _url})
 
+    _log_webapp_status_tip(name, rg_name)
+
     if logs:
         _configure_default_logging(cmd, rg_name, name)
         try:
@@ -11631,6 +11724,8 @@ def _make_onedeploy_request(params):
                     logger.warning("Deployment status is: \"%s\"", state)
                 response_body = response.json().get("properties", {})
         logger.warning("Deployment has completed successfully")
+        if not (poll_async_deployment_for_debugging and params.track_status):
+            _log_webapp_status_tip(params.webapp_name, params.resource_group_name)
         logger.warning("You can visit your app at: %s", _get_visit_url(params))
         return response_body
 

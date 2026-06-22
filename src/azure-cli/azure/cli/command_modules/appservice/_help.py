@@ -2478,6 +2478,20 @@ examples:
     crafted: true
 """
 
+helps['webapp status'] = """
+type: command
+short-summary: Show per-instance Site Runtime Status for a web app.
+long-summary: >
+    Returns the runtime status of each instance.
+examples:
+  - name: Show runtime status for all instances in the production slot.
+    text: az webapp status --name MyWebapp --resource-group MyResourceGroup
+  - name: Show runtime status for a deployment slot.
+    text: az webapp status --name MyWebapp --resource-group MyResourceGroup --slot staging
+  - name: Show runtime status for a specific instance.
+    text: az webapp status --name MyWebapp --resource-group MyResourceGroup --instance 6d3f0a2b8e5c4d1fb97a3c6e2f4a1b09
+"""
+
 helps['webapp ssh'] = """
 type: command
 short-summary: SSH command establishes a ssh session to the web container and developer would get a shell terminal remotely.

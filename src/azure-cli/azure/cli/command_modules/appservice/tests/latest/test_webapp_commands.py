@@ -340,6 +340,26 @@ class WebappQuickCreateTest(ScenarioTest):
         ])
 
 
+class WebappStatusScenarioTest(ScenarioTest):
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_status(self, resource_group):
+        webapp_name = self.create_random_name(prefix='webapp-status', length=24)
+        plan = self.create_random_name(prefix='plan-status', length=24)
+        self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan))
+        self.cmd('webapp create -g {} -n {} --plan {} --runtime "NODE|22-lts"'.format(resource_group, webapp_name, plan), checks=[
+            JMESPathCheck('name', webapp_name)
+        ])
+
+        # Site Runtime Status aggregated across all running instances of the app
+        status = self.cmd('webapp status -g {} -n {}'.format(resource_group, webapp_name)).get_output_in_json()
+        instances = status['properties']
+        self.assertTrue(isinstance(instances, list))
+        for instance in instances:
+            self.assertIn('instanceId', instance)
+            self.assertIn('state', instance)
+
+
 class BackupRestoreTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name='resource_group', location=WINDOWS_ASP_LOCATION_WEBAPP)
