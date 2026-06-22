@@ -76,6 +76,7 @@ Release History
 
 **Network**
 
+* `az network bastion rdp`: Fix Azure/azure-cli#32592: `az network bastion rdp --enable-mfa` now properly requests an MFA-enforced access token using claims challenge, preventing "Unexpected internal error" when connecting to Azure Bastion with MFA authentication (#33622)
 * `az network vnet create/update`: Add `--summarized-gateway-prefixes` to support summarized gateway prefixes (#33241)
 * `az network application-gateway ssl-cert create/update`: Add `--hsm` to support Managed HSM (#33353)
 * `az network virtual-network-appliance create/update`: Add `--private-ip-address-version` to support private ip address version (#33315)

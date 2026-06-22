@@ -52,12 +52,14 @@ class MsalCredentialStub:
         # If acquire_token_scopes is checked, make sure to create a new instance of MsalCredentialStub
         # to avoid interference from other tests.
         self.acquire_token_scopes = None
-        self.acquire_token_data=None
+        self.acquire_token_data = None
+        self.acquire_token_claims_challenge = None
         super().__init__()
 
     def acquire_token(self, scopes, **kwargs):
         self.acquire_token_scopes = scopes
         self.acquire_token_data = kwargs.get('data')
+        self.acquire_token_claims_challenge = kwargs.get('claims_challenge')
         return {
             'access_token': MOCK_ACCESS_TOKEN,
             'token_type': 'Bearer',
@@ -1087,6 +1089,43 @@ class TestProfile(unittest.TestCase):
         # subscription shouldn't be set
         self.assertIsNone(sub)
         self.assertEqual(tenant, self.tenant_id)
+
+    @mock.patch('azure.cli.core.auth.util.now_timestamp', new=now_timestamp_mock)
+    @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential')
+    def test_get_raw_token_with_claims_challenge(self, get_user_credential_mock):
+        credential_mock_temp = MsalCredentialStub()
+        get_user_credential_mock.return_value = credential_mock_temp
+        cli = DummyCli()
+        # setup
+        storage_mock = {'subscriptions': None}
+        profile = Profile(cli_ctx=cli, storage=storage_mock)
+        consolidated = profile._normalize_properties(self.user1,
+                                                     [self.subscription1],
+                                                     False, None, None)
+        profile._set_subscriptions(consolidated)
+
+        # action: request a token with a claims challenge (e.g. for MFA enforcement)
+        test_claims_challenge = '{"access_token": {"acrs": {"essential": true, "values": ["p1"]}}}'
+        creds, sub, tenant = profile.get_raw_token(resource=self.adal_resource,
+                                                   claims_challenge=test_claims_challenge)
+
+        # verify the claims_challenge was forwarded to acquire_token
+        assert credential_mock_temp.acquire_token_claims_challenge == test_claims_challenge
+
+        self.assertEqual(creds[0], 'Bearer')
+        self.assertEqual(creds[1], MOCK_ACCESS_TOKEN)
+        self.assertEqual(creds[2]['expires_on'], MOCK_EXPIRES_ON_INT)
+        self.assertEqual(creds[2]['expiresOn'], MOCK_EXPIRES_ON_DATETIME)
+
+        # subscription should be set
+        self.assertEqual(sub, self.subscription1.subscription_id)
+        self.assertEqual(tenant, self.tenant_id)
+
+        # verify that without claims_challenge, it is not passed
+        credential_mock_temp2 = MsalCredentialStub()
+        get_user_credential_mock.return_value = credential_mock_temp2
+        profile.get_raw_token(resource=self.adal_resource)
+        assert credential_mock_temp2.acquire_token_claims_challenge is None
 
     @mock.patch('azure.cli.core.auth.util.now_timestamp', new=now_timestamp_mock)
     @mock.patch('azure.cli.core.auth.identity.Identity.get_service_principal_credential')

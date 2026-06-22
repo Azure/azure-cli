@@ -376,7 +376,8 @@ class Profile:
                 str(account[_SUBSCRIPTION_ID]),
                 str(account[_TENANT_ID]))
 
-    def get_raw_token(self, resource=None, scopes=None, subscription=None, tenant=None, credential_out=None):
+    def get_raw_token(self, resource=None, scopes=None, subscription=None, tenant=None, credential_out=None,
+                      claims_challenge=None):
         # credential_out is only used by unit tests to inspect the credential. Do not use it!
         # Convert resource to scopes
         if resource and not scopes:
@@ -415,7 +416,7 @@ class Profile:
         else:
             cred = self._create_credential(account, tenant_id=tenant)
 
-        msal_token = cred.acquire_token(scopes)
+        msal_token = cred.acquire_token(scopes, claims_challenge=claims_challenge)
         # Convert epoch int 'expires_on' to datetime string 'expiresOn' for backward compatibility
         # WARNING: expiresOn is deprecated and will be removed in future release.
         import datetime
