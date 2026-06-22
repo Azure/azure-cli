@@ -430,6 +430,7 @@ class TestUtils(unittest.TestCase):
 
         with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as body_file:
             body_file.write('{"b1": "v1"}')
+            body_file.flush()
             body_path = body_file.name
 
         try:
@@ -445,6 +446,42 @@ class TestUtils(unittest.TestCase):
                     request = send_mock.call_args[0][1]
                     self.assertEqual(request.body, '{"b1": "v1"}')
                     self.assertEqual(request.headers.get('Content-Type'), 'application/json')
+        finally:
+            os.unlink(body_path)
+
+    @mock.patch.dict('os.environ')
+    @mock.patch('azure.cli.core._profile.Profile.get_raw_token', autospec=True)
+    @mock.patch('requests.Session.send', autospec=True)
+    def test_send_raw_request_keeps_non_json_file_path_as_literal_body(self, send_mock, get_raw_token_mock):
+        return_val = mock.MagicMock()
+        return_val.ok = True
+        return_val.content = b''
+        return_val.text = ''
+        send_mock.return_value = return_val
+        get_raw_token_mock.return_value = ("Bearer", "******", None), None, None
+
+        cli_ctx = DummyCli()
+        cli_ctx.data = {
+            'command': 'rest',
+            'safe_params': ['method', 'uri']
+        }
+
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as body_file:
+            body_file.write('hello world')
+            body_file.flush()
+            body_path = body_file.name
+
+        try:
+            send_raw_request(
+                cli_ctx,
+                'PUT',
+                '/subscriptions/00000001-0000-0000-0000-000000000000/resourcegroups/02?api-version=2019-07-01',
+                body=body_path,
+                generated_client_request_id_name=None)
+
+            request = send_mock.call_args[0][1]
+            self.assertEqual(request.body, body_path)
+            self.assertIsNone(request.headers.get('Content-Type'))
         finally:
             os.unlink(body_path)
 

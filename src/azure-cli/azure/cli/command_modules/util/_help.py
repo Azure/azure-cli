@@ -17,7 +17,7 @@ long-summary: >
     use --resource for a custom resource.
 
 
-    If Content-Type header is not set and --body is a valid JSON string or a file path containing JSON,
+    If Content-Type header is not set and --body is a valid JSON string or a .json file path,
     Content-Type header will default to application/json.
 
 
