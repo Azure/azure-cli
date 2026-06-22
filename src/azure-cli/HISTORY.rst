@@ -40,6 +40,10 @@ Release History
 * `az functionapp update-strategy config show`: Add new command to get the details of a function app's update strategy configuration (#33341)
 * Fix #31394: `az functionapp deployment source config-zip`: Never ending loop on flex function app health check (#33388)
 
+**Backup**
+
+* Fix #32571: `az backup container unregister`: Fix `AttributeError` crash when the specified container does not exist; now raises a descriptive `ResourceNotFoundError` (#33598)
+
 **Compute**
 
 * [BREAKING CHANGE] `az vm create`: Change default `--size` from `Standard_DS1_v2` to `Standard_D2s_v5` (#33323)
