@@ -25,6 +25,7 @@ from azure.cli.command_modules.vm._validators import (validate_ssh_key,
 from azure.cli.command_modules.vm._vm_utils import normalize_disk_info, update_disk_sku_info
 from azure.cli.command_modules.vm.custom import update_vm
 from azure.cli.core.mock import DummyCli
+from azure.cli.core.azclierror import RequiredArgumentMissingError
 from knack.util import CLIError
 
 
@@ -678,6 +679,105 @@ class TestActions(unittest.TestCase):
             command_args['storage_profile']['os_disk']['managed_disk']['id'],
             expected_disk_id
         )
+
+    @mock.patch('azure.cli.command_modules.vm.operations.vm.VMCreate')
+    @mock.patch('azure.cli.command_modules.vm.operations.vm.convert_show_result_to_snake_case')
+    def test_update_vm_os_disk_without_resource_group_name(self, convert_show_result_to_snake_case_mock, vm_create_mock):
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = DummyCli()
+        cmd.cli_ctx.data['subscription_id'] = '00000000-0000-0000-0000-000000000000'
+        parameters = {
+            'id': '/subscriptions/00000000-0000-0000-0000-000000000000/'
+                  'resourceGroups/test-rg/providers/Microsoft.Compute/virtualMachines/test-vm',
+            'name': 'test-vm',
+            'storageProfile': {
+                'osDisk': {
+                    'name': 'old-os-disk',
+                    'managedDisk': {
+                        'id': '/subscriptions/00000000-0000-0000-0000-000000000000/'
+                              'resourceGroups/test-rg/providers/Microsoft.Compute/disks/old-os-disk'
+                    }
+                }
+            }
+        }
+
+        convert_show_result_to_snake_case_mock.return_value = {
+            'id': '/subscriptions/00000000-0000-0000-0000-000000000000/'
+                  'resourceGroups/test-rg/providers/Microsoft.Compute/virtualMachines/test-vm',
+            'name': 'test-vm',
+            'storage_profile': {
+                'os_disk': {
+                    'name': 'old-os-disk',
+                    'managed_disk': {
+                        'id': '/subscriptions/00000000-0000-0000-0000-000000000000/'
+                              'resourceGroups/test-rg/providers/Microsoft.Compute/disks/old-os-disk'
+                    }
+                }
+            }
+        }
+        vm_create_instance_mock = mock.MagicMock()
+        vm_create_instance_mock.return_value = {
+            'id': '/subscriptions/00000000-0000-0000-0000-000000000000/'
+                  'resourceGroups/test-rg/providers/Microsoft.Compute/virtualMachines/test-vm',
+            'name': 'test-vm',
+            'type': 'Microsoft.Compute/virtualMachines'
+        }
+        vm_create_mock.return_value = vm_create_instance_mock
+
+        result = update_vm(
+            cmd,
+            resource_group_name=None,
+            vm_name='test-vm',
+            os_disk='new-os-disk',
+            parameters=parameters
+        )
+
+        self.assertEqual(result['name'], 'test-vm')
+        vm_create_instance_mock.assert_called_once()
+        command_args = vm_create_instance_mock.call_args.kwargs['command_args']
+        expected_disk_id = (
+            '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-rg/'
+            'providers/Microsoft.Compute/disks/new-os-disk'
+        )
+        self.assertEqual(
+            command_args['storage_profile']['os_disk']['managed_disk']['id'],
+            expected_disk_id
+        )
+
+    @mock.patch('azure.cli.command_modules.vm.operations.vm.VMCreate')
+    @mock.patch('azure.cli.command_modules.vm.operations.vm.convert_show_result_to_snake_case')
+    def test_update_vm_os_disk_without_resource_group_name_or_vm_id_raises(
+            self, convert_show_result_to_snake_case_mock, vm_create_mock):
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = DummyCli()
+        cmd.cli_ctx.data['subscription_id'] = '00000000-0000-0000-0000-000000000000'
+        parameters = {
+            'name': 'test-vm',
+            'storageProfile': {
+                'osDisk': {
+                    'name': 'old-os-disk'
+                }
+            }
+        }
+
+        convert_show_result_to_snake_case_mock.return_value = {
+            'name': 'test-vm',
+            'storage_profile': {
+                'os_disk': {
+                    'name': 'old-os-disk'
+                }
+            }
+        }
+        vm_create_mock.return_value = mock.MagicMock()
+
+        with self.assertRaisesRegex(RequiredArgumentMissingError, 'Please provide --resource-group for --os-disk <disk-name>'):
+            update_vm(
+                cmd,
+                resource_group_name=None,
+                vm_name='test-vm',
+                os_disk='new-os-disk',
+                parameters=parameters
+            )
 
 
 if __name__ == '__main__':
