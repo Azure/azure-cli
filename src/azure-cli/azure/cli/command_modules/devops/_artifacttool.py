@@ -14,6 +14,11 @@ from knack.util import CLIError
 
 logger = get_logger(__name__)
 
+try:
+    from packaging.version import Version as _PackagingVersion
+except ImportError:
+    _PackagingVersion = None
+
 ARTIFACTTOOL_PAT_ENVKEY = 'AZURE_DEVOPS_EXT_ARTIFACTTOOL_PATVAR'
 ARTIFACTTOOL_OVERRIDE_PATH_ENVKEY = 'AZURE_DEVOPS_EXT_ARTIFACTTOOL_OVERRIDE_PATH'
 
@@ -105,12 +110,12 @@ def _get_artifacttool_dir(organization):
             def _version_key(dir_name):
                 parts = dir_name.rsplit('_', 1)
                 version_str = parts[-1] if len(parts) > 1 else dir_name
-                try:
-                    from packaging.version import Version  # pylint: disable=import-outside-toplevel
-                    return (1, Version(version_str))
-                except (ImportError, ValueError) as ex:
-                    logger.debug("Could not parse version '%s' as semantic version: %s", version_str, ex)
-                    return (0, version_str)
+                if _PackagingVersion is not None:
+                    try:
+                        return (1, _PackagingVersion(version_str))
+                    except ValueError as ex:
+                        logger.debug("Could not parse version '%s' as semantic version: %s", version_str, ex)
+                return (0, version_str)
 
             latest = sorted(versions, key=_version_key)[-1]
             release_dir = os.path.join(artifacttool_root, latest)
@@ -162,8 +167,10 @@ def _get_pat(organization):
 
         for (tenant_id, _) in tenants:
             try:
-                token = profile.get_raw_token(resource='499b84ac-1321-427f-aa17-267ca6975798',
-                                              tenant=tenant_id)[0][1]
+                token = profile.get_raw_token(
+                    # Azure DevOps resource ID for OAuth authentication
+                    resource='499b84ac-1321-427f-aa17-267ca6975798',
+                    tenant=tenant_id)[0][1]
                 if token:
                     return token
             except CLIError as ex:
@@ -265,14 +272,13 @@ def _run_process(command_args, env, stderr_handler, update_progress_callback):
     old_handler = signal.signal(signal.SIGINT, _sigint_handler)
     try:
         logger.debug("Running external command: %s", ' '.join(command_args))
-        with open(os.devnull, 'w') as devnull:
-            proc_state['proc'] = subprocess.Popen(
-                command_args,
-                shell=False,
-                stdin=devnull,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                env=env)
+        proc_state['proc'] = subprocess.Popen(
+            command_args,
+            shell=False,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            env=env)
 
         proc = proc_state['proc']
         try:

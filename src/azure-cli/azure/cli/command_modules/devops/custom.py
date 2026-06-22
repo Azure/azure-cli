@@ -22,10 +22,9 @@ def _resolve_organization(organization, project, scope, detect):
                 return resolve_instance_and_project(detect=detect, organization=organization, project=project)
             return resolve_instance(detect=detect, organization=organization), project
         except ImportError:
-            pass
-        raise CLIError("--organization is required. Please provide the organization URL or "
-                       "install the azure-devops extension (az extension add --name azure-devops) "
-                       "to use automatic detection.")
+            raise CLIError("--organization is required. Please provide the organization URL or "
+                           "install the azure-devops extension (az extension add --name azure-devops) "
+                           "to use automatic detection.")
     if scope == 'project' and not project:
         raise CLIError("--project is required when --scope is 'project'.")
     return organization, project
