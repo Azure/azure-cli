@@ -1032,8 +1032,8 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
     if '://' not in url:
         url = endpoints.resource_manager.rstrip('/') + url
     else:
-        # Some commands/extensions still use the public ARM endpoint in request URLs.
-        # Normalize to the active cloud ARM endpoint so the request works in sovereign/private clouds.
+        # If the URL explicitly uses the public ARM endpoint while a different cloud is active,
+        # normalize to that cloud's ARM endpoint for sovereign/private cloud compatibility.
         if (is_same_origin(url, AZURE_PUBLIC_ARM_ENDPOINT) and
                 not is_same_origin(url, endpoints.resource_manager)):
             url = _replace_url_origin(url, endpoints.resource_manager)
@@ -1260,6 +1260,14 @@ def is_same_origin(url, endpoint):
 
 
 def _replace_url_origin(url, endpoint):
+    """Replace URL origin with endpoint origin.
+
+    :param url: Original URL to modify.
+    :param endpoint: Target endpoint whose scheme and netloc are applied.
+    :return: URL using ``endpoint`` origin and preserving original path/query/fragment.
+             Returns original ``url`` if parsing fails.
+    :rtype: str
+    """
     try:
         url_parts = urlparse(url)
         endpoint_parts = urlparse(endpoint)
@@ -1269,7 +1277,14 @@ def _replace_url_origin(url, endpoint):
     if not url_parts.hostname or not endpoint_parts.netloc:
         return url
 
-    return urlunparse(url_parts._replace(scheme=endpoint_parts.scheme, netloc=endpoint_parts.netloc))
+    return urlunparse((
+        endpoint_parts.scheme,
+        endpoint_parts.netloc,
+        url_parts.path,
+        url_parts.params,
+        url_parts.query,
+        url_parts.fragment
+    ))
 
 
 def match_cloud_endpoint(url, cli_ctx):
