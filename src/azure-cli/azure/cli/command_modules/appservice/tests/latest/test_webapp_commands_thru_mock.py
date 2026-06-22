@@ -1078,6 +1078,9 @@ class TestOneDeployScmCache(unittest.TestCase):
     _check_zip_deployment_status in custom.py.
     """
 
+    # Computed at class definition time so no literal Base64 credential sits in source.
+    BASIC_AUTH_HEADER = 'Basic ' + base64.b64encode(b'user:pass').decode()
+
     def _make_params(self):
         from azure.cli.command_modules.appservice.custom import OneDeployParams
         params = OneDeployParams()
@@ -1129,9 +1132,8 @@ class TestOneDeployScmCache(unittest.TestCase):
         # auth code path is covered.
         from azure.cli.command_modules.appservice.custom import _populate_cached_scm_headers
         params = self._make_params()
-        _basic_auth = 'Basic ' + base64.b64encode(b'user:pass').decode()
         headers = {
-            'authorization': _basic_auth,
+            'authorization': self.BASIC_AUTH_HEADER,
             'User-Agent': 'AzureCLI/2.86.0',
             'x-ms-client-request-id': 'req-1',
             'Content-Type': 'application/octet-stream',
@@ -1143,7 +1145,7 @@ class TestOneDeployScmCache(unittest.TestCase):
         # Lowercase key preserved (byte-equivalent to a fresh fetch on this
         # path). User-Agent included. Request id and content-type excluded.
         self.assertEqual(set(params._cached_scm_headers.keys()), {'authorization', 'User-Agent'})
-        self.assertEqual(params._cached_scm_headers['authorization'], _basic_auth)
+        self.assertEqual(params._cached_scm_headers['authorization'], self.BASIC_AUTH_HEADER)
 
     def test_populate_cached_scm_headers_aad_capitalized_key(self):
         # The AAD branch of get_scm_site_headers sets headers["Authorization"]
@@ -1213,9 +1215,8 @@ class TestOneDeployScmCache(unittest.TestCase):
         from azure.cli.command_modules.appservice.custom import (
             _populate_cached_scm_headers, _check_zip_deployment_status)
         params = self._make_params()
-        _basic_auth = 'Basic ' + base64.b64encode(b'user:pass').decode()
         _populate_cached_scm_headers(params, {
-            'authorization': _basic_auth,  # lowercase from urllib3
+            'authorization': self.BASIC_AUTH_HEADER,  # lowercase from urllib3
             'User-Agent': 'AzureCLI/test',
             'x-ms-client-request-id': 'publish-leg-id',
             'Content-Type': 'application/octet-stream',
@@ -1236,7 +1237,7 @@ class TestOneDeployScmCache(unittest.TestCase):
         sent_headers = requests_get_mock.call_args.kwargs['headers']
         # Lowercase key faithfully forwarded — HTTP is case-insensitive so the
         # server treats this the same as 'Authorization'.
-        self.assertEqual(sent_headers['authorization'], _basic_auth)
+        self.assertEqual(sent_headers['authorization'], self.BASIC_AUTH_HEADER)
         self.assertEqual(sent_headers['User-Agent'], 'AzureCLI/test')
         # Fresh request id, not the one from the publish leg.
         self.assertEqual(sent_headers['x-ms-client-request-id'], 'req-1')
