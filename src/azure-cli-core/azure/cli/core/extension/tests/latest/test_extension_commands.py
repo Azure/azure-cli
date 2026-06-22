@@ -194,6 +194,7 @@ class TestExtensionCommands(unittest.TestCase):
                 mock.patch('azure.cli.core.extension.operations.check_output') as check_output:
             add_extension(cmd=self.cmd, extension_name=extension_name)
             self.assertNotIn('pip_require_virtualenv', check_output.call_args.kwargs['env'])
+            self.assertNotIn('PIP_REQUIRE_VIRTUALENV', check_output.call_args.kwargs['env'])
 
     def test_add_extension_with_specific_version(self):
         extension_name = MY_EXT_NAME
