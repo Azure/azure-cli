@@ -295,7 +295,7 @@ def _run_process(command_args, env, stderr_handler, update_progress_callback):
             err_suffix = "\n{}".format(stderr_remaining) if stderr_remaining else ""
             raise CLIError(
                 "Process {proc} with PID {pid} exited with return code {code}{err}"
-                .format(proc=command_args, pid=proc.pid, code=proc.returncode, err=err_suffix)
+                .format(proc=' '.join(command_args), pid=proc.pid, code=proc.returncode, err=err_suffix)
             )
         return proc
     finally:
