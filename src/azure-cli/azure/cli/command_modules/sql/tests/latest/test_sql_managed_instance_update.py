@@ -39,7 +39,7 @@ class SqlManagedInstanceUpdateTest(unittest.TestCase):
 
         cmd = SimpleNamespace(cli_ctx=DummyCli())
 
-        updated_admin_login_secret = 'regression-marker'
+        expected_admin_login_value = 'regression-marker'
 
         with mock.patch('azure.cli.command_modules.sql.custom._find_managed_instance_sku_from_capabilities',
                         side_effect=lambda *_args: instance.sku), \
@@ -53,9 +53,9 @@ class SqlManagedInstanceUpdateTest(unittest.TestCase):
                 cmd=cmd,
                 instance=instance,
                 resource_group_name='rg',
-                administrator_login_password=updated_admin_login_secret)
+                administrator_login_password=expected_admin_login_value)
 
-        self.assertEqual(updated.administrator_login_password, updated_admin_login_secret)
+        self.assertEqual(updated.administrator_login_password, expected_admin_login_value)
         self.assertIsNone(updated.requested_logical_availability_zone)
         self.assertNotIn('requestedLogicalAvailabilityZone',
                          updated.serialize().get('properties', {}))
