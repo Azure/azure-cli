@@ -2488,7 +2488,7 @@ def format_webapp_status_output(result):
     items = _extract_webapp_status_items(result)
     # LastError is a nullable field on the backend SiteRuntimeStatusOnWorker contract,
     # so the error columns (LastError, LastErrorDetails, LastErrorTimestamp) are only
-    # surfaced when at least one instance reports a LastError. 
+    # surfaced when at least one instance reports a LastError.
     show_errors = any(item.get('lastError') for item in items)
 
     rows = []
@@ -2514,21 +2514,13 @@ def show_webapp_status(cmd, resource_group_name, name, slot=None, instance=None)
     client = web_client_factory(cmd.cli_ctx)
     subscription_id = get_subscription_id(cmd.cli_ctx)
     api_version = client.DEFAULT_API_VERSION
-    slot_segment = '/slots/{}'.format(slot) if slot else ''
-    # When an instance is requested, call the dedicated siteStatus/{instanceId} route
-    # so the backend resolves and validates the instance (returning 404 if missing).
-    instance_segment = '/{}'.format(instance) if instance else ''
+    resource_manager = cmd.cli_ctx.cloud.endpoints.resource_manager
+    slot_segment = f'/slots/{slot}' if slot else ''
+    instance_segment = f'/{instance}' if instance else ''
     request_url = (
-        '{}/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}{}/siteStatus{}'
-        '?api-version={}'.format(
-            cmd.cli_ctx.cloud.endpoints.resource_manager,
-            subscription_id,
-            resource_group_name,
-            name,
-            slot_segment,
-            instance_segment,
-            api_version
-        )
+        f'{resource_manager}/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}'
+        f'/providers/Microsoft.Web/sites/{name}{slot_segment}/siteStatus{instance_segment}'
+        f'?api-version={api_version}'
     )
 
     try:
@@ -2537,8 +2529,8 @@ def show_webapp_status(cmd, resource_group_name, name, slot=None, instance=None)
         if instance and ex.status_code == 404:
             scope = 'webapp and slot' if slot else 'webapp'
             raise ResourceNotFoundError(
-                "Instance '{}' was not found for this {}. "
-                "Run 'az webapp list-instances' to see available instance IDs.".format(instance, scope))
+                f"Instance '{instance}' was not found for this {scope}. "
+                "Run 'az webapp list-instances' to see available instance IDs.")
         raise
 
 
