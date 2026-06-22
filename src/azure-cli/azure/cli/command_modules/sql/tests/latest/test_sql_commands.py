@@ -9923,12 +9923,20 @@ class SqlServerUpdateRetentionDaysUnitTest(unittest.TestCase):
         self.assertEqual(result.retention_days, 0,
                          'retention_days must be 0 when soft delete is explicitly disabled')
 
-    def test_assign_identity_sets_system_assigned_identity(self):
-        """--assign_identity must set instance.identity to SystemAssigned."""
-        instance = self._make_instance(retention_days=-1)
+    def test_assign_identity_with_zero_retention_days_sets_identity(self):
+        """--assign_identity on a server with retention_days=0 correctly sets identity.
+
+        Verifies the fix works for servers that have soft-delete explicitly disabled
+        (retention_days=0, a valid value): the identity is assigned and retention_days is
+        cleared to None (omitted from the request body) since no --soft-delete-retention-days
+        was provided.
+        """
+        instance = self._make_instance(retention_days=0)
 
         result = server_update(instance=instance, assign_identity=True)
 
+        self.assertIsNone(result.retention_days,
+                          'retention_days must be None when --soft-delete-retention-days is omitted')
         self.assertIsNotNone(result.identity,
                              'identity must be set when --assign_identity is used')
         self.assertEqual(result.identity.type, ResourceIdType.system_assigned.value,
