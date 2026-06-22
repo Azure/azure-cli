@@ -190,9 +190,9 @@ copy %REPO_ROOT%\NOTICE.txt %BUILDING_DIR%
 
 REM Remove .py and only deploy .pyc files
 REM Compute the Python bytecode tag length, e.g. 12 for '.cpython-314' on Python 3.14:
-REM 9 chars for '.cpython-', 1 for major ('3'), and 2 for the two-digit minor (10-99).
-REM If the minor version reaches 3 digits (e.g., 3.100), the total becomes 13; this is
-REM used directly for truncation below so no manual update is required.
+REM 9 chars for '.cpython-', 1 for major ('3'), and variable chars for the minor version
+REM (1 digit for 3.0-3.9, 2 for 3.10-3.99, 3 for 3.100+). This is used directly for
+REM truncation below, so no manual update is needed when the Python version changes.
 set PYCTAG_LEN=
 %BUILDING_DIR%\python.exe -c "import sys; print(9 + len(str(sys.version_info.major)) + len(str(sys.version_info.minor)))" >%TEMP%\pyctag_len.tmp 2>&1
 if !errorlevel! neq 0 (
