@@ -28,11 +28,12 @@ class AzOutputProducer(knack.output.OutputProducer):
 
         output = formatter(obj)
         stream = out_file or sys.stdout
+        binary_stream = getattr(stream, 'buffer', None)
+        encoding = stream.encoding or 'utf-8'
 
         try:
-            binary_stream = getattr(stream, 'buffer', None)
             if binary_stream is not None:
-                binary_stream.write(output.encode(stream.encoding or 'utf-8'))
+                binary_stream.write(output.encode(encoding))
             else:
                 stream.write(output)
         except IOError as ex:
@@ -40,12 +41,12 @@ class AzOutputProducer(knack.output.OutputProducer):
                 raise
         except UnicodeEncodeError:
             knack.output.logger.warning("Unable to encode the output with %s encoding. Unsupported characters are discarded.",
-                                        stream.encoding)
-            fallback_output = output.encode('ascii', 'ignore')
+                                        encoding)
+            fallback_output = output.encode('ascii', 'ignore').decode('utf-8', 'ignore')
             if binary_stream is not None:
-                binary_stream.write(fallback_output)
+                binary_stream.write(fallback_output.encode(encoding, 'ignore'))
             else:
-                stream.write(fallback_output.decode('utf-8', 'ignore'))
+                stream.write(fallback_output)
 
 
 def get_output_format(cli_ctx):
