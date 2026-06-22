@@ -102,7 +102,7 @@ class TestArtifactToolHardlinkFallback(unittest.TestCase):
         """Assert that a flag is present in args and has the expected value immediately after it."""
         self.assertIn(flag, args)
         idx = args.index(flag)
-        self.assertLess(idx + 1, len(args), "Flag '{}' has no value after it".format(flag))
+        self.assertLess(idx + 1, len(args), f"Flag '{flag}' has no value after it")
         self.assertEqual(args[idx + 1], expected_value)
 
     def test_download_universal_passes_allow_hardlink_fallback_flag(self):
