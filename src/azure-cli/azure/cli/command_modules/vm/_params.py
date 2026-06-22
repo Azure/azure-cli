@@ -166,11 +166,8 @@ def load_arguments(self, _):
             c.argument('source_storage_account_id', help='used when source blob is in a different subscription')
             c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GB. Max size: 4095 GB (certain preview disks can be larger).', type=int)
             c.argument('duration_in_seconds', help='Time duration in seconds until the SAS access expires', type=int)
-            if self.supported_api_version(min_api='2018-09-30', operation_group='disks'):
-                c.argument('access_level', arg_type=get_enum_type(AccessLevel), default='Read', help='access level')
-                c.argument('hyper_v_generation', arg_type=disk_snapshot_hyper_v_gen_sku, help='The hypervisor generation of the Virtual Machine. Applicable to OS disks only.')
-            else:
-                c.ignore('access_level', 'for_upload', 'hyper_v_generation')
+            c.argument('access_level', arg_type=get_enum_type(AccessLevel), default='Read', help='access level')
+            c.argument('hyper_v_generation', arg_type=disk_snapshot_hyper_v_gen_sku, help='The hypervisor generation of the Virtual Machine. Applicable to OS disks only.')
             c.argument('encryption_type', arg_type=get_enum_type(EncryptionType),
                        help='Encryption type. EncryptionAtRestWithPlatformKey: Disk is encrypted with XStore managed key at rest. It is the default encryption type. EncryptionAtRestWithCustomerKey: Disk is encrypted with Customer managed key at rest.')
             c.argument('disk_encryption_set', help='Name or ID of disk encryption set that is used to encrypt the disk.')
@@ -517,7 +514,7 @@ def load_arguments(self, _):
         c.argument('dedicated_host_group', options_list=['--host-group'], is_preview=True, help="Name or resource ID of the dedicated host group that the VM will reside in. --host and --host-group can't be used together.")
         c.argument('dedicated_host', options_list=['--host'], is_preview=True, help="Resource ID of the dedicated host that the VM will reside in. --host and --host-group can't be used together.")
 
-    with self.argument_context('vm update', arg_group='Dedicated Host', min_api='2019-03-01') as c:
+    with self.argument_context('vm update', arg_group='Dedicated Host') as c:
         c.argument('dedicated_host_group', options_list=['--host-group'], is_preview=True, help="Name or resource ID of the dedicated host group that the VM will reside in. --host and --host-group can't be used together. You should deallocate the VM before update, and start the VM after update. Please check out help for more examples.")
         c.argument('dedicated_host', options_list=['--host'], is_preview=True, help="Resource ID of the dedicated host that the VM will reside in. --host and --host-group can't be used together. You should deallocate the VM before update, and start the VM after update. Please check out help for more examples.")
 
@@ -915,7 +912,7 @@ def load_arguments(self, _):
                  'Valid values are integers between 1 and 100.'
         )
 
-    with self.argument_context('vmss update', min_api='2018-10-01', arg_group='Automatic Repairs') as c:
+    with self.argument_context('vmss update', arg_group='Automatic Repairs') as c:
 
         c.argument('enable_automatic_repairs', arg_type=get_three_state_flag(), help='Enable automatic repairs')
         c.argument(
@@ -1325,7 +1322,7 @@ def load_arguments(self, _):
         c.argument('force_update', action='store_true', help='force to update even if the extension configuration has not changed.')
         c.argument('extension_instance_name', extension_instance_name_type)
 
-    with self.argument_context('vmss extension set', min_api='2017-12-01') as c:
+    with self.argument_context('vmss extension set') as c:
         c.argument('force_update', action='store_true', help='force to update even if the extension configuration has not changed.')
         c.argument('extension_instance_name', extension_instance_name_type)
         c.argument('provision_after_extensions', nargs='+', help='Space-separated list of extension names after which this extension should be provisioned. These extensions must already be set on the vm.')
@@ -1504,15 +1501,15 @@ def load_arguments(self, _):
         c.argument('proximity_placement_group', options_list=['--ppg'], help="The name or ID of the proximity placement group the availability set should be associated with.",
                    validator=_validate_proximity_placement_group)
 
-    with self.argument_context('vm update', min_api='2018-04-01') as c:
+    with self.argument_context('vm update') as c:
         c.argument('proximity_placement_group', options_list=['--ppg'], help="The name or ID of the proximity placement group the VM should be associated with.",
                    validator=_validate_proximity_placement_group)
 
-    with self.argument_context('vmss update', min_api='2018-04-01') as c:
+    with self.argument_context('vmss update') as c:
         c.argument('proximity_placement_group', options_list=['--ppg'], help="The name or ID of the proximity placement group the VMSS should be associated with.",
                    validator=_validate_proximity_placement_group)
 
-    with self.argument_context('vm availability-set update', min_api='2018-04-01') as c:
+    with self.argument_context('vm availability-set update') as c:
         c.argument('proximity_placement_group', options_list=['--ppg'], help="The name or ID of the proximity placement group the availability set should be associated with.",
                    validator=_validate_proximity_placement_group)
     # endregion
