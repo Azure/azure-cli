@@ -1680,7 +1680,7 @@ class TestMakeOneDeployRequestJsonParsing(unittest.TestCase):
     def test_make_onedeploy_request_handles_completely_invalid_json_response(
             self, send_raw_request_mock, _body_mock, _url_mock, _status_url_mock, _headers_mock, _visit_url_mock):
         """When the response body is not valid JSON at all, the function should log a
-        warning and return None (response_body is never set) rather than crashing."""
+        warning and return an empty dict rather than crashing."""
         import json
         from azure.cli.command_modules.appservice.custom import _make_onedeploy_request
 

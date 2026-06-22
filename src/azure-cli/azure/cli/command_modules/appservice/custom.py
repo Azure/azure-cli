@@ -11586,7 +11586,7 @@ def _make_onedeploy_request(params):
             if 'application/json' in response.headers.get('content-type', ""):
                 try:
                     response_json = response.json()
-                except ValueError:
+                except json.JSONDecodeError:
                     # The server occasionally returns extra non-JSON data (e.g., trailing HTML)
                     # after the JSON payload.  raw_decode() reads only the leading valid JSON
                     # and ignores whatever follows it.
