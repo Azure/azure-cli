@@ -1009,15 +1009,19 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
             if isinstance(body, str):
                 body_is_file_reference = body.startswith('@')
                 candidate_file_path = body[1:] if body_is_file_reference else body
+                is_json_file_path = candidate_file_path.lower().endswith('.json')
                 should_load_from_file = (
                     os.path.isfile(candidate_file_path) and
-                    (body_is_file_reference or candidate_file_path.lower().endswith('.json'))
+                    (body_is_file_reference or is_json_file_path)
                 )
                 if should_load_from_file:
                     try:
                         body = read_file_content(candidate_file_path)
                     except OSError as ex:
-                        raise CLIError(f"Failed to read file '{candidate_file_path}': {ex}") from ex
+                        raise CLIError(
+                            f"Failed to read file '{candidate_file_path}'. "
+                            f"Verify that the file exists and is readable: {ex}"
+                        ) from ex
                     try:
                         body_object = shell_safe_json_parse(body)
                         body = json.dumps(body_object)
