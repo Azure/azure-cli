@@ -877,6 +877,123 @@ class TestTemplateSizeOptimization(unittest.TestCase):
         # This demonstrates why bicep templates using template_obj avoid size inflation
 
 
+class TestJsonCTemplatePolicy(unittest.TestCase):
+    """Tests for JsonCTemplatePolicy to ensure it produces valid JSON."""
+
+    def _make_request(self, data):
+        """Helper to create a mock request with the given data."""
+        http_request = mock.MagicMock()
+        http_request.data = data
+        request = mock.MagicMock()
+        request.http_request = http_request
+        return request
+
+    def test_on_request_produces_valid_json_with_quoted_template_key(self):
+        """Verify that JsonCTemplatePolicy produces valid JSON with a properly quoted 'template' key.
+
+        This is the regression test for Azure/azure-cli#32357: custom cloud environments
+        rejected the previous JSONC output (unquoted 'template:' key). The policy must now
+        embed the template as a proper JSON object with a quoted key so the payload is valid
+        JSON accepted by all Azure environments.
+        """
+        import json
+        from azure.cli.command_modules.resource.custom import JsonCTemplatePolicy
+
+        template_content = '{"$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#", "contentVersion": "1.0.0.0", "resources": []}'
+        request_body = json.dumps({
+            "properties": {
+                "template": template_content,
+                "parameters": {},
+                "mode": "Incremental"
+            }
+        })
+
+        request = self._make_request(request_body)
+        policy = JsonCTemplatePolicy()
+        policy.on_request(request)
+
+        result_bytes = request.http_request.data
+        result_str = result_bytes.decode('utf-8')
+
+        # Must be valid JSON
+        parsed = json.loads(result_str)
+
+        # The template must be present under properties as a JSON object (not a string)
+        self.assertIn("template", parsed["properties"])
+        self.assertIsInstance(parsed["properties"]["template"], dict)
+        self.assertEqual(parsed["properties"]["template"]["$schema"],
+                         "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#")
+
+        # Must NOT contain the old unquoted JSONC pattern 'template:{'
+        self.assertNotIn(", template:{", result_str)
+        # Must contain the valid JSON pattern '"template":{'
+        self.assertIn('"template":', result_str)
+
+    def test_on_request_with_multiline_template_produces_valid_json(self):
+        """Verify that JsonCTemplatePolicy handles multiline (formatted) ARM templates correctly.
+
+        Formatted templates with newlines and indentation must still produce valid JSON
+        because the template is embedded as a JSON object value (whitespace between tokens
+        is valid JSON), not as a JSON string.
+        """
+        import json
+        from azure.cli.command_modules.resource.custom import JsonCTemplatePolicy
+
+        # A formatted template with actual newlines (as produced by read_file_content)
+        template_content = '{\n  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",\n  "contentVersion": "1.0.0.0",\n  "resources": []\n}'
+        request_body = json.dumps({
+            "properties": {
+                "template": template_content,
+                "parameters": {},
+                "mode": "Incremental"
+            }
+        })
+
+        request = self._make_request(request_body)
+        policy = JsonCTemplatePolicy()
+        policy.on_request(request)
+
+        result_bytes = request.http_request.data
+        result_str = result_bytes.decode('utf-8')
+
+        # Must be valid JSON even with embedded newlines (whitespace between tokens is valid)
+        parsed = json.loads(result_str)
+        self.assertIn("template", parsed["properties"])
+        self.assertIsInstance(parsed["properties"]["template"], dict)
+
+    def test_on_request_skips_when_no_template(self):
+        """Verify that JsonCTemplatePolicy does not modify requests without a template property."""
+        import json
+        from azure.cli.command_modules.resource.custom import JsonCTemplatePolicy
+
+        request_body = json.dumps({
+            "properties": {
+                "templateLink": {"uri": "https://example.com/template.json"},
+                "parameters": {},
+                "mode": "Incremental"
+            }
+        })
+
+        request = self._make_request(request_body)
+        policy = JsonCTemplatePolicy()
+        policy.on_request(request)
+
+        # data should not be modified when there is no 'template' key
+        self.assertEqual(request.http_request.data, request_body)
+
+    def test_on_request_skips_retry_bytes(self):
+        """Verify that JsonCTemplatePolicy is a no-op on retry (when data is already bytes)."""
+        from azure.cli.command_modules.resource.custom import JsonCTemplatePolicy
+
+        original_bytes = b'{"properties": {"parameters": {}, "mode": "Incremental"}}'
+        request = self._make_request(original_bytes)
+        policy = JsonCTemplatePolicy()
+        policy.on_request(request)
+
+        # data should remain unchanged on retry
+        self.assertEqual(request.http_request.data, original_bytes)
+
+
 class BicepTemplateSizeOptimizationScenarioTest(ScenarioTest):
     """Functional tests for bicep template size optimization.
     
