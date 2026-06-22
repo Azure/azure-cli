@@ -106,7 +106,8 @@ def _get_artifacttool_dir(organization):
                 try:
                     from packaging.version import Version  # pylint: disable=import-outside-toplevel
                     return Version(version_str)
-                except Exception:  # pylint: disable=broad-except
+                except (ImportError, ValueError) as ex:
+                    logger.debug("Could not parse version '%s' as semantic version: %s", version_str, ex)
                     return version_str
 
             latest = sorted(versions, key=_version_key)[-1]
@@ -163,9 +164,9 @@ def _get_pat(organization):
                                               tenant=tenant_id)[0][1]
                 if token:
                     return token
-            except Exception as ex:  # pylint: disable=broad-except
+            except CLIError as ex:
                 logger.debug("Failed to get token for tenant %s: %s", tenant_id, ex)
-    except Exception as ex:  # pylint: disable=broad-except
+    except (ImportError, AttributeError, KeyError) as ex:
         logger.debug("Failed to get token from az login: %s", ex)
 
     # Check for PAT in environment variable
@@ -184,7 +185,7 @@ def _process_stderr(line, update_progress_callback):
     """Process a single line of stderr output from ArtifactTool."""
     try:
         json_line = json.loads(line)
-    except Exception:  # pylint: disable=broad-except
+    except ValueError:
         json_line = None
         logger.warning("Failed to parse structured output from ArtifactTool.")
         logger.warning("Log line: %s", line)
