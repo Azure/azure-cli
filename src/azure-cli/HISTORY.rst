@@ -21,6 +21,10 @@ Release History
 
 * `az aks add/update`: Add `--enable-artifact-streaming` and `--disable-artifact-streaming` parameters (#33257)
 
+**ARO**
+
+* Fix #32120: `az aro create/validate`: Add `--enable-managed-identity`, `--assign-cluster-identity`, and `--assign-platform-workload-identity` parameters to support creating ARO clusters with managed identities (#32796)
+
 **App Config**
 
 * `az appconfig kv set-snapshot-reference`: Add support to create a snapshot reference key-value (#33278)
