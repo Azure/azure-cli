@@ -1197,6 +1197,7 @@ Release History
 
 **Role**
 
+* `az role assignment list`: Fix role assignments at root scope ('/') not returned when `--role` is specified (#32533)
 * `az role assignment list`: Drop `--include-classic-administrators` argument (#29470)
 
 **Service Connector**

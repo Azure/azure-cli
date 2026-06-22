@@ -540,7 +540,14 @@ def _search_role_assignments(assignments_client, definitions_client,
 
         if role:
             role_id = _resolve_role_id(role, scope, definitions_client)
-            assignments = [ra for ra in assignments if ra.role_definition_id == role_id]
+            # Role assignments at root scope ("/") store role_definition_id without a subscription
+            # prefix (e.g. "/providers/Microsoft.Authorization/roleDefinitions/{guid}"), while
+            # _resolve_role_id builds a subscription-prefixed path when given a bare GUID.
+            # Compare by the name (GUID) segment so both formats are handled correctly.
+            role_definition_name = role_id.split('/')[-1].lower()
+            assignments = [ra for ra in assignments
+                           if ra.role_definition_id and
+                           ra.role_definition_id.split('/')[-1].lower() == role_definition_name]
 
         # filter the assignee if "include_groups" is not provided because service side
         # does not accept filter "principalId eq and atScope()"
