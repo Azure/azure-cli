@@ -443,6 +443,16 @@ class TestUtils(unittest.TestCase):
 
     def test_normalize_odata_next_link_url(self):
         self.assertEqual(
+            _normalize_odata_next_link_url('https://graph.microsoft.com/v1.0/servicePrincipals'),
+            'https://graph.microsoft.com/v1.0/servicePrincipals'
+        )
+
+        self.assertEqual(
+            _normalize_odata_next_link_url('https://graph.microsoft.com/v1.0/servicePrincipals?foo=bar'),
+            'https://graph.microsoft.com/v1.0/servicePrincipals?foo=bar'
+        )
+
+        self.assertEqual(
             _normalize_odata_next_link_url('https://graph.microsoft.com/v1.0/servicePrincipals?=token'),
             'https://graph.microsoft.com/v1.0/servicePrincipals?%24skiptoken=token'
         )
@@ -460,6 +470,16 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(
             _normalize_odata_next_link_url('https://graph.microsoft.com/v1.0/servicePrincipals?$skiptoken=token'),
             'https://graph.microsoft.com/v1.0/servicePrincipals?$skiptoken=token'
+        )
+
+        self.assertEqual(
+            _normalize_odata_next_link_url('https://graph.microsoft.com/v1.0/servicePrincipals?='),
+            'https://graph.microsoft.com/v1.0/servicePrincipals?='
+        )
+
+        self.assertEqual(
+            _normalize_odata_next_link_url('not a url'),
+            'not a url'
         )
 
     @mock.patch("psutil.Process")
