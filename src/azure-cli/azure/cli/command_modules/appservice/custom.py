@@ -2488,8 +2488,7 @@ def format_webapp_status_output(result):
     items = _extract_webapp_status_items(result)
     # LastError is a nullable field on the backend SiteRuntimeStatusOnWorker contract,
     # so the error columns (LastError, LastErrorDetails, LastErrorTimestamp) are only
-    # surfaced when at least one instance reports a LastError. Details and DetailsLevel
-    # are always serialized by the backend and are always shown.
+    # surfaced when at least one instance reports a LastError. 
     show_errors = any(item.get('lastError') for item in items)
 
     rows = []
