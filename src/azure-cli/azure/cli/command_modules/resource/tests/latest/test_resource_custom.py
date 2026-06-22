@@ -1083,5 +1083,102 @@ output keyVaultName string = keyVault.name
                     os.unlink(file_path)
 
 
+class TestJsonCTemplatePolicy(unittest.TestCase):
+    """Tests for JsonCTemplatePolicy to ensure proper JSON serialization."""
+
+    def _make_policy_request(self, body):
+        """Helper to create a mock pipeline request and run it through JsonCTemplatePolicy."""
+        from azure.cli.command_modules.resource.custom import JsonCTemplatePolicy
+        from unittest.mock import MagicMock
+        import json
+
+        policy = JsonCTemplatePolicy()
+        http_request = MagicMock()
+        http_request.data = json.dumps(body)
+        request = MagicMock()
+        request.http_request = http_request
+        policy.on_request(request)
+        return http_request.data
+
+    def test_template_key_is_quoted(self):
+        """Verify that the template key is properly quoted in the output JSON payload.
+        
+        Without this fix, the output was: template:{...} (unquoted key)
+        which causes InternalError on custom cloud environments.
+        With the fix:          "template":{...} (quoted key) - valid JSON.
+        """
+        import json
+
+        template_content = '{\n  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",\n  "resources": []\n}'
+        body = {
+            "properties": {
+                "template": template_content,
+                "parameters": {},
+                "mode": "Incremental"
+            }
+        }
+
+        result_bytes = self._make_policy_request(body)
+        result_str = result_bytes.decode('utf-8')
+
+        # The template key must be quoted - this is required for custom cloud environments
+        self.assertIn('"template":', result_str)
+        # Ensure unquoted key is NOT present
+        self.assertNotIn(', template:', result_str)
+
+    def test_template_content_preserved(self):
+        """Verify that the raw template content (including whitespace) is preserved."""
+        template_content = '{\n  "$schema": "test",\n  "resources": []\n}'
+        body = {
+            "properties": {
+                "template": template_content,
+                "parameters": {},
+                "mode": "Incremental"
+            }
+        }
+
+        result_bytes = self._make_policy_request(body)
+        result_str = result_bytes.decode('utf-8')
+
+        # The raw template content should be in the output
+        self.assertIn(template_content, result_str)
+
+    def test_no_template_leaves_data_unchanged(self):
+        """If there is no template in properties, data should not be modified."""
+        import json
+        from azure.cli.command_modules.resource.custom import JsonCTemplatePolicy
+        from unittest.mock import MagicMock
+
+        policy = JsonCTemplatePolicy()
+        original_body = {"properties": {"parameters": {}, "mode": "Incremental"}}
+        original_json = json.dumps(original_body)
+        http_request = MagicMock()
+        http_request.data = original_json
+        request = MagicMock()
+        request.http_request = http_request
+
+        policy.on_request(request)
+
+        # The original data is unchanged when there's no template
+        self.assertEqual(http_request.data, original_json)
+
+    def test_retry_bytes_data_unchanged(self):
+        """If data is already bytes (retry), the policy should skip processing."""
+        from azure.cli.command_modules.resource.custom import JsonCTemplatePolicy
+        from unittest.mock import MagicMock
+
+        policy = JsonCTemplatePolicy()
+        original_bytes = b'{"properties": {"template": "...", "mode": "Incremental"}}'
+        http_request = MagicMock()
+        http_request.data = original_bytes
+        request = MagicMock()
+        request.http_request = http_request
+
+        policy.on_request(request)
+
+        # data should remain unchanged because it's already bytes
+        self.assertEqual(http_request.data, original_bytes)
+
+
 if __name__ == '__main__':
     unittest.main()
