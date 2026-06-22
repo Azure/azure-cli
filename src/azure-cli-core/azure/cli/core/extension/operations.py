@@ -44,7 +44,7 @@ LIST_FILE_PATH = os.path.join(os.sep, 'etc', 'apt', 'sources.list.d', 'azure-cli
 LSB_RELEASE_FILE = os.path.join(os.sep, 'etc', 'lsb-release')
 
 
-def _is_pip_require_virtualenv_env_var(env_var_name):
+def _is_pip_require_virtualenv(env_var_name):
     return env_var_name.upper() == 'PIP_REQUIRE_VIRTUALENV' if IS_WINDOWS else env_var_name == 'PIP_REQUIRE_VIRTUALENV'
 
 
@@ -52,7 +52,7 @@ def _run_pip(pip_exec_args, extension_path=None):
     cmd = [sys.executable, '-m', 'pip'] + pip_exec_args + ['--disable-pip-version-check', '--no-cache-dir']
     env = {
         key: value for key, value in os.environ.items()
-        if not _is_pip_require_virtualenv_env_var(key)
+        if not _is_pip_require_virtualenv(key)
     }
     logger.debug('Running: %s', cmd)
     try:
