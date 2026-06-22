@@ -101,7 +101,7 @@ Release History
 
 **Core**
 
-* Fix Azure/azure-cli#32644: Add `az.ps1` PowerShell wrapper for Windows MSI and ZIP installations to fix multiline argument truncation that occurs when using `az.cmd` through PowerShell (#32644)
+* Fix Azure/azure-cli#32644: Add `az.ps1` PowerShell wrapper for Windows MSI and ZIP installations to fix multiline argument truncation that occurs when using `az.cmd` through PowerShell
 
 2.86.0
 ++++++
