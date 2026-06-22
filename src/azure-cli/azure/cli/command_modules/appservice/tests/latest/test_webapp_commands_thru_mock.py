@@ -1606,7 +1606,7 @@ class TestOneDeploySiteCache(unittest.TestCase):
 
 
 class TestLinuxConsumptionFunctionAppDeploy(unittest.TestCase):
-    """Tests for the early-exit validation added to _perform_onedeploy_internal.
+    """Tests for the pre-flight validation added to _perform_onedeploy_internal.
 
     Linux Consumption function apps (SKU = Dynamic) do not support the OneDeploy
     /api/publish endpoint for JAR/WAR/EAR artifact types.  The CLI must raise a
