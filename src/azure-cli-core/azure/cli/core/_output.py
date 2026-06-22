@@ -31,7 +31,7 @@ class AzOutputProducer(knack.output.OutputProducer):
             if ex.errno != errno.EPIPE:
                 raise
         except UnicodeEncodeError:
-            knack.output.logger.warning("Unable to encode the output with %s encoding. Unsupported characters are discarded.",
+            knack.output.logger.warning("Unable to encode TSV output with %s encoding. Unsupported characters are discarded.",
                                         encoding)
             binary_stream.write(output.encode('ascii', 'ignore'))
 
