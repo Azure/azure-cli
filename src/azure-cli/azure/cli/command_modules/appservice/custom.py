@@ -2470,8 +2470,9 @@ def _log_webapp_status_tip(name, resource_group_name):
 
 
 def _extract_webapp_status_items(result):
-    # The siteStatus ARM API returns a ResponseMessageEnvelope whose 'properties'
-    # holds the list of per-instance SiteRuntimeStatusOnWorker objects.
+    # The siteStatus response holds per-instance status under 'properties':
+    # a list for /siteStatus, a single object for /siteStatus/{instanceId}.
+    # Normalize both shapes into a list for uniform formatting.
     if isinstance(result, dict):
         properties = result.get('properties')
         if isinstance(properties, list):
