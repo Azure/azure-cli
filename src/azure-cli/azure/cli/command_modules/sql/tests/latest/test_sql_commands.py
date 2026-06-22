@@ -9860,7 +9860,7 @@ class SqlServerUpdateRetentionDaysUnitTest(unittest.TestCase):
     when --soft-delete-retention-days is not explicitly provided.
     """
 
-    class _MockServerInstance:
+    class MockServerInstance:
         """Minimal mock of a Server object as returned by the Azure SQL API GET call."""
 
         def __init__(self, retention_days=-1):
@@ -9881,17 +9881,17 @@ class SqlServerUpdateRetentionDaysUnitTest(unittest.TestCase):
         error.  After the fix, server_update must clear the value to None so it is omitted
         from the PUT request body.
         """
-        instance = self._MockServerInstance(retention_days=-1)
+        instance = self.MockServerInstance(retention_days=-1)
 
         result = server_update(instance=instance, assign_identity=True)
 
         self.assertIsNone(result.retention_days,
-                          'retention_days must be None (not -1) when --soft-delete-retention-days '
-                          'is omitted, to prevent InvalidParameterValue from the API')
+                          'retention_days must be None when --soft-delete-retention-days is omitted '
+                          'to avoid InvalidParameterValue error')
 
     def test_update_without_soft_delete_param_clears_retention_days(self):
         """Any server update without --soft-delete-retention-days must set retention_days=None."""
-        instance = self._MockServerInstance(retention_days=-1)
+        instance = self.MockServerInstance(retention_days=-1)
 
         result = server_update(instance=instance)
 
@@ -9900,7 +9900,7 @@ class SqlServerUpdateRetentionDaysUnitTest(unittest.TestCase):
 
     def test_explicit_soft_delete_retention_days_is_applied(self):
         """When --soft-delete-retention-days N is given, retention_days must be set to N."""
-        instance = self._MockServerInstance(retention_days=-1)
+        instance = self.MockServerInstance(retention_days=-1)
 
         result = server_update(instance=instance, soft_delete_retention_days=5)
 
@@ -9909,7 +9909,7 @@ class SqlServerUpdateRetentionDaysUnitTest(unittest.TestCase):
 
     def test_soft_delete_retention_days_zero_disables_soft_delete(self):
         """--soft-delete-retention-days 0 must set retention_days=0 to disable soft delete."""
-        instance = self._MockServerInstance(retention_days=7)
+        instance = self.MockServerInstance(retention_days=7)
 
         result = server_update(instance=instance, soft_delete_retention_days=0)
 
@@ -9918,7 +9918,7 @@ class SqlServerUpdateRetentionDaysUnitTest(unittest.TestCase):
 
     def test_assign_identity_sets_system_assigned_identity(self):
         """--assign_identity must set instance.identity to SystemAssigned."""
-        instance = self._MockServerInstance(retention_days=-1)
+        instance = self.MockServerInstance(retention_days=-1)
 
         result = server_update(instance=instance, assign_identity=True)
 
