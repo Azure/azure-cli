@@ -45,7 +45,8 @@ LSB_RELEASE_FILE = os.path.join(os.sep, 'etc', 'lsb-release')
 
 
 def _run_pip(pip_exec_args, extension_path=None):
-    cmd = [sys.executable, '-m', 'pip'] + pip_exec_args + ['--disable-pip-version-check', '--no-cache-dir']
+    cmd = [sys.executable, '-m', 'pip'] + pip_exec_args + ['--disable-pip-version-check', '--no-cache-dir',
+                                                            '--no-build-isolation']
     logger.debug('Running: %s', cmd)
     try:
         log_output = check_output(cmd, stderr=STDOUT, universal_newlines=True)
