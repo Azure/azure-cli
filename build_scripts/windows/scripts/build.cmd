@@ -183,7 +183,7 @@ if "%TARGET%"=="msi" (
     REM Creating the bin folder that will be added to the path...
     mkdir %BUILDING_DIR%\bin
     copy %REPO_ROOT%\build_scripts\windows\scripts\az_zip.cmd %BUILDING_DIR%\bin\az.cmd
-    copy %REPO_ROOT%\build_scripts\windows\scripts\az.ps1 %BUILDING_DIR%\bin\az.ps1
+    copy %REPO_ROOT%\build_scripts\windows\scripts\az_zip.ps1 %BUILDING_DIR%\bin\az.ps1
 )
 if %errorlevel% neq 0 goto ERROR
 copy %REPO_ROOT%\build_scripts\windows\resources\CLI_LICENSE.rtf %BUILDING_DIR%
