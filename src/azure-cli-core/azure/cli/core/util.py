@@ -1276,6 +1276,7 @@ def _replace_url_origin(url, endpoint):
         return url
 
     if not url_parts.hostname or not endpoint_parts.hostname:
+        logger.debug("Skip origin replacement for url=%s endpoint=%s due to missing hostname", url, endpoint)
         return url
 
     return urlunparse((
