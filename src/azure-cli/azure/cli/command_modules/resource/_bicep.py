@@ -115,8 +115,10 @@ def run_bicep_command(cli_ctx, args, auto_install=True, custom_env=None):
 
 
 def ensure_bicep_installation(cli_ctx, release_tag=None, target_platform=None, stdout=True):
+    check_version = get_check_version_config(cli_ctx)
+
     def output(message):
-        if stdout:
+        if stdout and check_version:
             print(message)
         else:
             _logger.info(message)

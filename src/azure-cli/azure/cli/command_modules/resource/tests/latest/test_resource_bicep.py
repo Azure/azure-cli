@@ -191,6 +191,7 @@ class TestBicep(unittest.TestCase):
             self._remove_bicep_version_check_file()
 
 
+
     @mock.patch("azure.cli.command_modules.resource._bicep._use_binary_from_path")
     @mock.patch("os.path.isfile")
     @mock.patch("azure.cli.command_modules.resource._bicep._get_bicep_installed_version")
@@ -205,6 +206,34 @@ class TestBicep(unittest.TestCase):
         ensure_bicep_installation(self.cli_ctx, release_tag="v0.1.0")
 
         dirname_mock.assert_not_called()
+
+    @mock.patch("azure.cli.command_modules.resource._bicep._use_binary_from_path")
+    @mock.patch("os.path.isfile")
+    @mock.patch("builtins.print")
+    def test_ensure_bicep_installation_suppresses_output_if_check_version_is_false(
+        self, print_mock, isfile_stub, use_binary_from_path_stub
+    ):
+        isfile_stub.return_value = True
+        use_binary_from_path_stub.return_value = False
+        self.cli_ctx.config.set_value("bicep", "check_version", "false")
+
+        ensure_bicep_installation(self.cli_ctx, release_tag=None)
+
+        print_mock.assert_not_called()
+
+    @mock.patch("azure.cli.command_modules.resource._bicep._use_binary_from_path")
+    @mock.patch("os.path.isfile")
+    @mock.patch("builtins.print")
+    def test_ensure_bicep_installation_prints_output_if_check_version_is_true(
+        self, print_mock, isfile_stub, use_binary_from_path_stub
+    ):
+        isfile_stub.return_value = True
+        use_binary_from_path_stub.return_value = False
+        self.cli_ctx.config.set_value("bicep", "check_version", "true")
+
+        ensure_bicep_installation(self.cli_ctx, release_tag=None)
+
+        print_mock.assert_called_once()
 
             
     @mock.patch("azure.cli.command_modules.resource._bicep.get_use_binary_from_path_config")
