@@ -448,6 +448,11 @@ class TestUtils(unittest.TestCase):
         )
 
         self.assertEqual(
+            _normalize_odata_next_link_url('https://graph.microsoft.com/v1.0/servicePrincipals?'),
+            'https://graph.microsoft.com/v1.0/servicePrincipals?'
+        )
+
+        self.assertEqual(
             _normalize_odata_next_link_url('https://graph.microsoft.com/v1.0/servicePrincipals?foo=bar'),
             'https://graph.microsoft.com/v1.0/servicePrincipals?foo=bar'
         )

@@ -1110,8 +1110,8 @@ def _normalize_odata_next_link_url(url):
     if not query_pairs:
         return url
 
+    has_empty_keys = any(k == '' for k, _ in query_pairs)
     non_empty_key_pairs = [(k, v) for k, v in query_pairs if k != '']
-    has_empty_keys = len(non_empty_key_pairs) != len(query_pairs)
     if has_empty_keys:
         # If both empty and valid keys exist, keep valid keys and drop empty ones.
         # If all keys are empty (e.g. `?=old&=new`), use the last value as $skiptoken so
