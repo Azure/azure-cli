@@ -7,7 +7,6 @@ import errno
 import sys
 
 import knack.output
-from knack.util import CommandResultItem
 
 
 class AzOutputProducer(knack.output.OutputProducer):
@@ -16,33 +15,25 @@ class AzOutputProducer(knack.output.OutputProducer):
         return format_type in self._FORMAT_DICT
 
     def out(self, obj, formatter=None, out_file=None):
-        if getattr(formatter, '__name__', None) != knack.output.format_tsv.__name__:
+        if formatter != self._FORMAT_DICT['tsv']:
             return super().out(obj, formatter=formatter, out_file=out_file)
-
-        if not isinstance(obj, CommandResultItem):
-            raise TypeError('Expected CommandResultItem, got {}'.format(type(obj)))
 
         output = formatter(obj)
         stream = out_file or sys.stdout
         binary_stream = getattr(stream, 'buffer', None)
+        if binary_stream is None:
+            return super().out(obj, formatter=formatter, out_file=out_file)
         encoding = stream.encoding or 'utf-8'
 
         try:
-            if binary_stream is not None:
-                binary_stream.write(output.encode(encoding))
-            else:
-                stream.write(output)
+            binary_stream.write(output.encode(encoding))
         except IOError as ex:
             if ex.errno != errno.EPIPE:
                 raise
         except UnicodeEncodeError:
             knack.output.logger.warning("Unable to encode the output with %s encoding. Unsupported characters are discarded.",
                                         encoding)
-            fallback_output = output.encode('ascii', 'ignore').decode('ascii')
-            if binary_stream is not None:
-                binary_stream.write(fallback_output.encode('ascii'))
-            else:
-                stream.write(fallback_output)
+            binary_stream.write(output.encode('ascii', 'ignore'))
 
 
 def get_output_format(cli_ctx):
