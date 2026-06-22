@@ -190,8 +190,9 @@ copy %REPO_ROOT%\NOTICE.txt %BUILDING_DIR%
 
 REM Remove .py and only deploy .pyc files
 REM Validate Python bytecode tag length for pyc filename truncation below.
-REM Expected length is 12 for '.cpython-3XX' (Python 3.10 through 3.99).
-REM If the minor version becomes 3 digits (e.g., 3.100), update the truncation constant below.
+REM The '.cpython-3XX' tag has 9 chars for '.cpython-', 1 for major ('3'), and 2 for
+REM the two-digit minor version (10-99), for a total of 12 chars (Python 3.10 through 3.99).
+REM If the minor version reaches 3 digits (e.g., 3.100), the total becomes 13; update below.
 set PYCTAG_LEN=
 %BUILDING_DIR%\python.exe -c "import sys; print(9 + len(str(sys.version_info.major)) + len(str(sys.version_info.minor)))" >%TEMP%\pyctag_len.tmp 2>&1
 if !errorlevel! neq 0 (
@@ -214,7 +215,7 @@ pushd %BUILDING_DIR%\Lib\site-packages
 for /f %%f in ('dir /b /s *.pyc') do (
     set PARENT_DIR=%%~df%%~pf..
     echo !PARENT_DIR! | findstr /C:\Lib\site-packages\pip\ 1>nul
-    if !errorlevel! neq  0 (
+    if !errorlevel! neq 0 (
         REM Only take the file name without 'pyc' extension: e.g., (same below) __init__.cpython-314
         set FILENAME=%%~nf
         REM Truncate the '.cpython-3XX' postfix which is 12 chars long (for Python 3.10-3.99): __init__
