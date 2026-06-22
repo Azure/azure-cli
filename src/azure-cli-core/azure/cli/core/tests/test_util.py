@@ -374,6 +374,26 @@ class TestUtils(unittest.TestCase):
         request = send_mock.call_args[0][1]
         self.assertEqual(request.url, 'https://management.azure.com:443/subscriptions/00000001-0000-0000-0000-000000000000/resourcegroups/02?api-version=2019-07-01')
 
+        # Test hardcoded public ARM URL is normalized to active cloud endpoint.
+        default_resource_manager = cli_ctx.cloud.endpoints.resource_manager
+        default_ad_resource_id = cli_ctx.cloud.endpoints.active_directory_resource_id
+        cli_ctx.cloud.endpoints.resource_manager = 'https://management.contoso.example/'
+        cli_ctx.cloud.endpoints.active_directory_resource_id = 'https://management.core.contoso.example/'
+        send_raw_request(cli_ctx, 'GET', full_arm_rest_url)
+
+        get_raw_token_mock.assert_called_with(
+            mock.ANY,
+            'https://management.core.contoso.example/',
+            subscription=subscription_id
+        )
+        request = send_mock.call_args[0][1]
+        self.assertEqual(
+            request.url,
+            'https://management.contoso.example/subscriptions/00000001-0000-0000-0000-000000000000/resourcegroups/02?api-version=2019-07-01'
+        )
+        cli_ctx.cloud.endpoints.resource_manager = default_resource_manager
+        cli_ctx.cloud.endpoints.active_directory_resource_id = default_ad_resource_id
+
         # Test lookalike host is NOT mistaken for the trusted ARM endpoint via prefix matching.
         # The access token must NOT be attached to an attacker-controlled origin.
         for spoofed_host in ['https://management.azure.com.attacker', 'https://management.azure.com@attacker']:

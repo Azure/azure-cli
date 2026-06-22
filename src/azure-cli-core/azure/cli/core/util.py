@@ -1029,6 +1029,13 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
     # https://management.azure.com + /subscriptions/xxx/resourcegroups/xxx?api-version=2019-07-01
     if '://' not in url:
         url = endpoints.resource_manager.rstrip('/') + url
+    else:
+        from azure.cli.core.cloud import AZURE_PUBLIC_CLOUD
+        # Some commands/extensions still use the public ARM endpoint in request URLs.
+        # Normalize to the active cloud ARM endpoint so the request works in sovereign/private clouds.
+        if (is_same_origin(url, AZURE_PUBLIC_CLOUD.endpoints.resource_manager) and
+                not is_same_origin(url, endpoints.resource_manager)):
+            url = _replace_url_origin(url, endpoints.resource_manager)
 
     # Replace common tokens with real values. It is for smooth experience if users copy and paste the url from
     # Azure Rest API doc
@@ -1251,6 +1258,21 @@ def is_same_origin(url, endpoint):
 
     return (url_parts.scheme.lower() == endpoint_parts.scheme.lower() and
             url_parts.hostname.lower() == endpoint_parts.hostname.lower())
+
+
+def _replace_url_origin(url, endpoint):
+    from urllib.parse import urlparse, urlunparse
+
+    try:
+        url_parts = urlparse(url)
+        endpoint_parts = urlparse(endpoint)
+    except (TypeError, ValueError):
+        return url
+
+    if not url_parts.hostname or not endpoint_parts.netloc:
+        return url
+
+    return urlunparse(url_parts._replace(scheme=endpoint_parts.scheme, netloc=endpoint_parts.netloc))
 
 
 def match_cloud_endpoint(url, cli_ctx):
