@@ -9863,7 +9863,7 @@ class SqlServerUpdateRetentionDaysUnitTest(unittest.TestCase):
     All tests below call the real server_update() implementation from custom.py.
     """
 
-    def _make_instance(self, retention_days, identity=None):
+    def _make_instance(self, retention_days, server_identity=None):
         """Return a lightweight mock of the Server object returned by the Azure SQL GET call.
 
         Only the two properties that server_update reads in a way that matters for this
@@ -9872,7 +9872,7 @@ class SqlServerUpdateRetentionDaysUnitTest(unittest.TestCase):
         """
         instance = MagicMock()
         instance.retention_days = retention_days
-        instance.identity = identity
+        instance.identity = server_identity
         return instance
 
     def test_assign_identity_clears_legacy_retention_days(self):
@@ -9888,9 +9888,10 @@ class SqlServerUpdateRetentionDaysUnitTest(unittest.TestCase):
 
         result = server_update(instance=instance, assign_identity=True)
 
-        self.assertIsNone(result.retention_days,
-                          'retention_days must be None when --soft-delete-retention-days is omitted '
-                          'to avoid InvalidParameterValue error')
+        self.assertIsNone(
+            result.retention_days,
+            'retention_days must be None when --soft-delete-retention-days is omitted '
+            'to avoid InvalidParameterValue error')
         self.assertIsNotNone(result.identity,
                              'identity must be set when --assign_identity is used')
         self.assertEqual(result.identity.type, ResourceIdType.system_assigned.value,
