@@ -625,9 +625,14 @@ class TestActions(unittest.TestCase):
         cmd.cli_ctx = DummyCli()
         cmd.cli_ctx.data['subscription_id'] = '00000000-0000-0000-0000-000000000000'
 
-        convert_show_result_to_snake_case_mock.return_value = {}
+        convert_show_result_to_snake_case_mock.return_value = {'name': 'test-vm'}
         vm_create_instance = mock.MagicMock()
-        vm_create_instance.return_value = {'result': 'ok'}
+        vm_create_instance.return_value = {
+            'id': '/subscriptions/00000000-0000-0000-0000-000000000000/'
+                  'resourceGroups/test-rg/providers/Microsoft.Compute/virtualMachines/test-vm',
+            'name': 'test-vm',
+            'type': 'Microsoft.Compute/virtualMachines'
+        }
         vm_create_mock.return_value = vm_create_instance
 
         result = update_vm(
@@ -638,9 +643,10 @@ class TestActions(unittest.TestCase):
             parameters={}
         )
 
-        self.assertEqual(result, {'result': 'ok'})
+        self.assertEqual(result['name'], 'test-vm')
         vm_create_instance.assert_called_once()
         command_args = vm_create_instance.call_args.kwargs['command_args']
+        self.assertNotIn('id', command_args)
         self.assertEqual(
             command_args['storage_profile']['os_disk']['managed_disk']['id'],
             '/subscriptions/00000000-0000-0000-0000-000000000000/'
