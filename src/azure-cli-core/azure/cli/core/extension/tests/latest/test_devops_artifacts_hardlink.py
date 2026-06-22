@@ -34,7 +34,7 @@ def _extension_available():
     try:
         if ext_path not in sys.path:
             sys.path.insert(0, ext_path)
-        import azext_devops.dev.common.artifacttool  # noqa: F401 - import only to verify availability
+        import azext_devops.dev.common.artifacttool  # noqa: F401  # import only to verify availability
         return True
     except ImportError:
         return False
@@ -99,6 +99,13 @@ class TestArtifactToolHardlinkFallback(unittest.TestCase):
 
         return captured.get('args', [])
 
+    def _assert_flag_value(self, args, flag, expected_value):
+        """Assert that a flag is present in args and has the expected value immediately after it."""
+        self.assertIn(flag, args)
+        idx = args.index(flag)
+        self.assertLess(idx + 1, len(args), "Flag '{}' has no value after it".format(flag))
+        self.assertEqual(args[idx + 1], expected_value)
+
     def test_download_universal_passes_allow_hardlink_fallback_flag(self):
         """download_universal must pass --allow-hardlink-fallback to the ArtifactTool binary.
 
@@ -135,22 +142,17 @@ class TestArtifactToolHardlinkFallback(unittest.TestCase):
             path='/downloads',
         )
 
-        self.assertIn('--feed', args)
-        self.assertEqual(args[args.index('--feed') + 1], 'my-feed')
-        self.assertIn('--package-name', args)
-        self.assertEqual(args[args.index('--package-name') + 1], 'my-pkg')
-        self.assertIn('--package-version', args)
-        self.assertEqual(args[args.index('--package-version') + 1], '2.3.4')
-        self.assertIn('--path', args)
-        self.assertEqual(args[args.index('--path') + 1], '/downloads')
+        self._assert_flag_value(args, '--feed', 'my-feed')
+        self._assert_flag_value(args, '--package-name', 'my-pkg')
+        self._assert_flag_value(args, '--package-version', '2.3.4')
+        self._assert_flag_value(args, '--path', '/downloads')
 
     def test_download_universal_with_project_scope(self):
         """download_universal passes --project when project is specified."""
         invoker = self._make_invoker()
         args = self._run_download_universal(invoker, project='my-project')
 
-        self.assertIn('--project', args)
-        self.assertEqual(args[args.index('--project') + 1], 'my-project')
+        self._assert_flag_value(args, '--project', 'my-project')
         # Hardlink fallback must still be present even with project scope
         self.assertIn('--allow-hardlink-fallback', args)
 
@@ -159,11 +161,11 @@ class TestArtifactToolHardlinkFallback(unittest.TestCase):
         invoker = self._make_invoker()
         args = self._run_download_universal(invoker, file_filter='*.txt')
 
-        self.assertIn('--filter', args)
-        self.assertEqual(args[args.index('--filter') + 1], '*.txt')
+        self._assert_flag_value(args, '--filter', '*.txt')
         # Hardlink fallback must still be present even with file filter
         self.assertIn('--allow-hardlink-fallback', args)
 
 
 if __name__ == '__main__':
     unittest.main()
+
