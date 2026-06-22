@@ -16,7 +16,7 @@ class AzOutputProducer(knack.output.OutputProducer):
 
     def out(self, obj, formatter=None, out_file=None):
         tsv_formatter = self._FORMAT_DICT['tsv']
-        is_tsv_formatter = formatter == tsv_formatter or getattr(formatter, '__name__', None) == tsv_formatter.__name__
+        is_tsv_formatter = formatter is tsv_formatter or formatter == tsv_formatter
         if not is_tsv_formatter:
             return super().out(obj, formatter=formatter, out_file=out_file)
 
@@ -24,6 +24,7 @@ class AzOutputProducer(knack.output.OutputProducer):
         stream = out_file or sys.stdout
         binary_stream = getattr(stream, 'buffer', None)
         if binary_stream is None:
+            knack.output.logger.warning("TSV output stream does not expose a binary buffer; falling back to default writer.")
             return super().out(obj, formatter=formatter, out_file=out_file)
         encoding = stream.encoding or 'utf-8'
 
