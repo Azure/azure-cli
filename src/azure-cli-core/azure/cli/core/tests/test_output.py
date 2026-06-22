@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import io
 import unittest
 
 
@@ -40,6 +41,21 @@ class TestCoreCLIOutput(unittest.TestCase):
         output_producer = AzOutputProducer(DummyCli())
         yaml_output = output_producer.get_formatter('yaml')(CommandResultItem(result=OrderedDict(account_dict)))
         self.assertEqual(account_dict, yaml.safe_load(yaml_output))
+
+    def test_tsv_output_uses_lf_only(self):
+        from azure.cli.core._output import AzOutputProducer
+        from azure.cli.core.mock import DummyCli
+        from knack.util import CommandResultItem
+
+        output_producer = AzOutputProducer(DummyCli())
+        formatter = output_producer.get_formatter('tsv')
+
+        bytes_buffer = io.BytesIO()
+        output_stream = io.TextIOWrapper(bytes_buffer, encoding='utf-8', newline='\r\n')
+        output_producer.out(CommandResultItem(result=['topic1', 'topic2']), formatter=formatter, out_file=output_stream)
+        output_stream.flush()
+
+        self.assertEqual(b'topic1\ntopic2\n', bytes_buffer.getvalue())
 
 
 if __name__ == '__main__':
