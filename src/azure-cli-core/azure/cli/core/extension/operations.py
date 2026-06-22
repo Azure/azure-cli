@@ -48,7 +48,7 @@ def _run_pip(pip_exec_args, extension_path=None):
     cmd = [sys.executable, '-m', 'pip'] + pip_exec_args + ['--disable-pip-version-check', '--no-cache-dir']
     env = {
         key: value for key, value in os.environ.items()
-        if key.upper() != 'PIP_REQUIRE_VIRTUALENV'
+        if (key.upper() if IS_WINDOWS else key) != 'PIP_REQUIRE_VIRTUALENV'
     }
     logger.debug('Running: %s', cmd)
     try:
