@@ -79,15 +79,18 @@ class TestVMImage(unittest.TestCase):
         mock_cloud = mock.MagicMock()
         mock_cloud.endpoints.vm_image_alias_doc = 'https://example.com/aliases.json'
         mock_get_active_cloud.return_value = mock_cloud
-        mock_response = mock.MagicMock()
-        mock_response.status_code = 200
-        mock_response.content = b'{} extra data that breaks json parsing'
-        mock_requests_get.return_value = mock_response
         cli_ctx = DummyCli()
         cli_ctx.cloud = mock_cloud
-        # Should not raise, falls back to local copy
-        images = load_images_from_aliases_doc(cli_ctx)
-        self.assertTrue(len(images) > 0)
+
+        for bad_content in [b'<html><body>Service Unavailable</body></html>', b'{} extra data']:
+            with self.subTest(content=bad_content):
+                mock_response = mock.MagicMock()
+                mock_response.status_code = 200
+                mock_response.content = bad_content
+                mock_requests_get.return_value = mock_response
+                # Should not raise, falls back to local copy
+                images = load_images_from_aliases_doc(cli_ctx)
+                self.assertTrue(len(images) > 0)
 
 
 if __name__ == '__main__':
