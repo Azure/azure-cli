@@ -624,8 +624,31 @@ class TestActions(unittest.TestCase):
         cmd = mock.MagicMock()
         cmd.cli_ctx = DummyCli()
         cmd.cli_ctx.data['subscription_id'] = '00000000-0000-0000-0000-000000000000'
+        parameters = {
+            'name': 'test-vm',
+            'storageProfile': {
+                'osDisk': {
+                    'name': 'old-os-disk',
+                    'managedDisk': {
+                        'id': '/subscriptions/00000000-0000-0000-0000-000000000000/'
+                              'resourceGroups/test-rg/providers/Microsoft.Compute/disks/old-os-disk'
+                    }
+                }
+            }
+        }
 
-        convert_show_result_to_snake_case_mock.return_value = {'name': 'test-vm'}
+        convert_show_result_to_snake_case_mock.return_value = {
+            'name': 'test-vm',
+            'storage_profile': {
+                'os_disk': {
+                    'name': 'old-os-disk',
+                    'managed_disk': {
+                        'id': '/subscriptions/00000000-0000-0000-0000-000000000000/'
+                              'resourceGroups/test-rg/providers/Microsoft.Compute/disks/old-os-disk'
+                    }
+                }
+            }
+        }
         vm_create_instance = mock.MagicMock()
         vm_create_instance.return_value = {
             'id': '/subscriptions/00000000-0000-0000-0000-000000000000/'
@@ -640,7 +663,7 @@ class TestActions(unittest.TestCase):
             resource_group_name='test-rg',
             vm_name='test-vm',
             os_disk='new-os-disk',
-            parameters={}
+            parameters=parameters
         )
 
         self.assertEqual(result['name'], 'test-vm')
