@@ -11503,7 +11503,6 @@ def _warmup_kudu_and_get_cookie_internal(params):
 
 
 def _make_onedeploy_request(params):
-    import json
     import requests
     from azure.cli.core.util import should_disable_connection_verify
 
