@@ -18,7 +18,8 @@ class ResourceGroupScenarioTest(ScenarioTest):
         from knack.util import CLIError
 
         self.kwargs.update({
-            'rg': self.create_random_name("test-rest-rg", length=20)
+            'rg': self.create_random_name("test-rest-rg", length=20),
+            'resource_group_create_body': os.path.join(TEST_DIR, 'rest_resource_group_create_body.json')
         })
 
         # Test ARM Subscriptions - List
@@ -34,7 +35,7 @@ class ResourceGroupScenarioTest(ScenarioTest):
         # Resource Groups - Create Or Update
         # https://learn.microsoft.com/en-us/rest/api/resources/resourcegroups/createorupdate
         self.cmd('az rest -m PUT -u https://management.azure.com/subscriptions/{{subscriptionId}}/resourcegroups/{rg}?api-version=2019-10-01 '
-                 '--body \'{{"location": "eastus"}}\'',
+                 '--body "{resource_group_create_body}"',
                  checks=[self.check("name", '{rg}')])
 
         # Resource Groups - Get
