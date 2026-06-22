@@ -1294,6 +1294,8 @@ short-summary: register a preview feature.
 examples:
   - name: register the "Shared Image Gallery" feature
     text: az feature register --namespace Microsoft.Compute --name GalleryPreview
+  - name: register a preview feature in a specific subscription
+    text: az feature register --namespace Microsoft.Compute --name GalleryPreview --subscription <subscription-id>
 """
 
 helps['feature unregister'] = """
@@ -1302,6 +1304,8 @@ short-summary: unregister a preview feature.
 examples:
   - name: unregister the "Shared Image Gallery" feature
     text: az feature unregister --namespace Microsoft.Compute --name GalleryPreview
+  - name: unregister a preview feature in a specific subscription
+    text: az feature unregister --namespace Microsoft.Compute --name GalleryPreview --subscription <subscription-id>
 """
 
 helps['feature registration'] = """
@@ -1755,6 +1759,9 @@ examples:
   - name: Register a provider from RPaaS.
     text: |
         az provider register -n 'Microsoft.Confluent' --accept-terms
+  - name: Register a provider in a specific subscription.
+    text: |
+        az provider register -n 'Microsoft.CognitiveServices' --subscription <subscription-id>
   - name: Register a management group.
     text: |
         az provider register --namespace Microsoft.Automation -m mgID

@@ -4,8 +4,12 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
+from unittest import mock
+
 from azure.cli.command_modules.resource.custom import (_list_resources_odata_filter_builder,
-                                                       _find_missing_parameters)
+                                                       _find_missing_parameters,
+                                                       register_feature,
+                                                       unregister_feature)
 from azure.cli.core.parser import IncorrectUsageError
 
 
@@ -71,6 +75,34 @@ class TestListResources(unittest.TestCase):
     def test_tag_and_name_fails(self):
         with self.assertRaises(IncorrectUsageError):
             _list_resources_odata_filter_builder(tag='foo=bar', name='should not work')
+
+
+class TestFeatureRegistrationMessaging(unittest.TestCase):
+    @mock.patch('azure.cli.command_modules.resource.custom.logger.warning')
+    def test_register_feature_warning_recommends_subscription(self, logger_warning):
+        client = mock.MagicMock()
+
+        register_feature(client, 'Microsoft.CognitiveServices', 'OpenAI.BlockedTools.web_search')
+
+        client.register.assert_called_once_with('Microsoft.CognitiveServices', 'OpenAI.BlockedTools.web_search')
+        expected_message = ("Once the feature '%s' is registered, invoking 'az provider register -n %s "
+                            "--subscription <subscription-id>' is required to get the change propagated "
+                            "to the intended subscription.")
+        logger_warning.assert_called_once_with(expected_message, 'OpenAI.BlockedTools.web_search',
+                                               'Microsoft.CognitiveServices')
+
+    @mock.patch('azure.cli.command_modules.resource.custom.logger.warning')
+    def test_unregister_feature_warning_recommends_subscription(self, logger_warning):
+        client = mock.MagicMock()
+
+        unregister_feature(client, 'Microsoft.CognitiveServices', 'OpenAI.BlockedTools.web_search')
+
+        client.unregister.assert_called_once_with('Microsoft.CognitiveServices', 'OpenAI.BlockedTools.web_search')
+        expected_message = ("Once the feature '%s' is unregistered, invoking 'az provider register -n %s "
+                            "--subscription <subscription-id>' is required to get the change propagated "
+                            "to the intended subscription.")
+        logger_warning.assert_called_once_with(expected_message, 'OpenAI.BlockedTools.web_search',
+                                               'Microsoft.CognitiveServices')
 
 
 if __name__ == '__main__':

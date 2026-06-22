@@ -3459,14 +3459,16 @@ def list_features(client, resource_provider_namespace=None):
 
 
 def register_feature(client, resource_provider_namespace, feature_name):
-    logger.warning("Once the feature '%s' is registered, invoking 'az provider register -n %s' is required "
-                   "to get the change propagated", feature_name, resource_provider_namespace)
+    logger.warning("Once the feature '%s' is registered, invoking 'az provider register -n %s "
+                   "--subscription <subscription-id>' is required to get the change propagated "
+                   "to the intended subscription.", feature_name, resource_provider_namespace)
     return client.register(resource_provider_namespace, feature_name)
 
 
 def unregister_feature(client, resource_provider_namespace, feature_name):
-    logger.warning("Once the feature '%s' is unregistered, invoking 'az provider register -n %s' is required "
-                   "to get the change propagated", feature_name, resource_provider_namespace)
+    logger.warning("Once the feature '%s' is unregistered, invoking 'az provider register -n %s "
+                   "--subscription <subscription-id>' is required to get the change propagated "
+                   "to the intended subscription.", feature_name, resource_provider_namespace)
     return client.unregister(resource_provider_namespace, feature_name)
 
 
