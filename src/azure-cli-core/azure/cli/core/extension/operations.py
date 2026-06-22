@@ -45,6 +45,7 @@ LSB_RELEASE_FILE = os.path.join(os.sep, 'etc', 'lsb-release')
 
 
 def _matches_pip_require_virtualenv(env_var_name):
+    """Match pip's require-virtualenv env var exactly on Unix and case-insensitively on Windows."""
     return env_var_name.upper() == 'PIP_REQUIRE_VIRTUALENV' if IS_WINDOWS else env_var_name == 'PIP_REQUIRE_VIRTUALENV'
 
 
