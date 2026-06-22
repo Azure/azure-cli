@@ -12,7 +12,7 @@ from azure.cli.command_modules.backup._validators import validate_reconfigure_cl
 from azure.cli.command_modules.backup._client_factory import protection_policies_cf, backup_protected_items_cf, \
     backup_protection_containers_cf, backup_protectable_items_cf, registered_identities_cf, vaults_cf
 from azure.cli.core.azclierror import ValidationError, RequiredArgumentMissingError, InvalidArgumentValueError, \
-    MutuallyExclusiveArgumentError, ArgumentUsageError
+    MutuallyExclusiveArgumentError, ArgumentUsageError, ResourceNotFoundError
 from azure.mgmt.recoveryservicesbackup.activestamp import RecoveryServicesBackupClient
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 # pylint: disable=import-error
@@ -371,6 +371,8 @@ def unregister_container(cmd, client, vault_name, resource_group_name, container
     containrs_client = backup_protection_containers_cf(cmd.cli_ctx)
     container = show_container(cmd, containrs_client, container_name, resource_group_name, vault_name,
                                backup_management_type)
+    if container is None:
+        raise ResourceNotFoundError("Container '{}' not found in vault '{}'.".format(container_name, vault_name))
     container_name = container.name
     container_friendly_name = container.properties.friendly_name
 
