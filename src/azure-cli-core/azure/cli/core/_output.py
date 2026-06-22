@@ -11,16 +11,17 @@ from knack.util import CommandResultItem
 
 
 class AzOutputProducer(knack.output.OutputProducer):
+    _TSV_FORMATTER = knack.output.format_tsv
 
     def check_valid_format_type(self, format_type):
         return format_type in self._FORMAT_DICT
 
     def out(self, obj, formatter=None, out_file=None):
-        if formatter != self.get_formatter('tsv'):
+        if formatter != type(self)._TSV_FORMATTER:
             return super().out(obj, formatter=formatter, out_file=out_file)
 
         if not isinstance(obj, CommandResultItem):
-            raise TypeError('Expected CommandResultItem got {}'.format(type(obj)))
+            raise TypeError('Expected CommandResultItem, got {}'.format(type(obj)))
 
         output = formatter(obj)
         stream = out_file or sys.stdout
