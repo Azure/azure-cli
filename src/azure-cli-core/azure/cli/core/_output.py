@@ -24,12 +24,12 @@ class AzOutputProducer(knack.output.OutputProducer):
             return super().out(obj, formatter=formatter, out_file=out_file)
 
         if not isinstance(obj, CommandResultItem):
-            raise TypeError('Expected {} got {}'.format(CommandResultItem.__name__, type(obj)))
+            raise TypeError('Expected CommandResultItem got {}'.format(type(obj)))
 
         output = formatter(obj)
         stream = out_file or sys.stdout
         binary_stream = getattr(stream, 'buffer', None)
-        encoding = stream.encoding or 'utf-8'
+        encoding = stream.encoding or ('utf-8' if binary_stream is not None else None)
 
         try:
             if binary_stream is not None:
@@ -42,9 +42,9 @@ class AzOutputProducer(knack.output.OutputProducer):
         except UnicodeEncodeError:
             knack.output.logger.warning("Unable to encode the output with %s encoding. Unsupported characters are discarded.",
                                         encoding)
-            fallback_output = output.encode('ascii', 'ignore').decode('utf-8', 'ignore')
+            fallback_output = output.encode('ascii', 'ignore').decode('ascii')
             if binary_stream is not None:
-                binary_stream.write(fallback_output.encode(encoding, 'ignore'))
+                binary_stream.write(fallback_output.encode(encoding or 'utf-8', 'ignore'))
             else:
                 stream.write(fallback_output)
 
