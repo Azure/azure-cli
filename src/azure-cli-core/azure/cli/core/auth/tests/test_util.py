@@ -6,7 +6,7 @@
 # pylint: disable=protected-access
 
 import unittest
-from azure.cli.core.auth.util import scopes_to_resource, resource_to_scopes, _generate_login_command
+from azure.cli.core.auth.util import scopes_to_resource, resource_to_scopes, _generate_login_command, aad_error_handler
 
 
 class TestUtil(unittest.TestCase):
@@ -52,20 +52,21 @@ class TestUtil(unittest.TestCase):
 
     def test_generate_login_command(self):
         # No parameter is given
-        assert _generate_login_command() == 'az login'
+        assert _generate_login_command() == 'az logout\naz login'
 
         # tenant
         actual = _generate_login_command(tenant='21987a97-4e85-47c5-9a13-9dc3e11b2a9a')
-        assert actual == 'az login --tenant "21987a97-4e85-47c5-9a13-9dc3e11b2a9a"'
+        assert actual == 'az logout\naz login --tenant "21987a97-4e85-47c5-9a13-9dc3e11b2a9a"'
 
         # scope
         actual = _generate_login_command(scopes=["https://management.core.windows.net//.default"])
-        assert actual == 'az login --scope "https://management.core.windows.net//.default"'
+        assert actual == 'az logout\naz login --scope "https://management.core.windows.net//.default"'
 
         # tenant and scopes
         actual = _generate_login_command(tenant='21987a97-4e85-47c5-9a13-9dc3e11b2a9a',
                                          scopes=["https://management.core.windows.net//.default"])
-        assert actual == ('az login --tenant "21987a97-4e85-47c5-9a13-9dc3e11b2a9a" '
+        assert actual == ('az logout\n'
+                          'az login --tenant "21987a97-4e85-47c5-9a13-9dc3e11b2a9a" '
                           '--scope "https://management.core.windows.net//.default"')
 
         # tenant, scopes and claims_challenge
@@ -77,6 +78,30 @@ class TestUtil(unittest.TestCase):
                           'az login --tenant "21987a97-4e85-47c5-9a13-9dc3e11b2a9a" '
                           '--scope "https://management.core.windows.net//.default" '
                           '--claims-challenge "eyJhY2Nlc3NfdG9rZW4iOnsiYWNycyI6eyJlc3NlbnRpYWwiOnRydWUsInZhbHVlcyI6WyJwMSJdfX19"')
+
+    def test_aad_error_handler_65002(self):
+        """Test that AADSTS65002 error produces a helpful message with service principal workaround."""
+        from azure.cli.core.azclierror import AuthenticationError
+
+        error = {
+            'error': 'invalid_request',
+            'error_description': (
+                "AADSTS65002: Consent between first party application "
+                "'04b07795-8ddb-461a-bbee-02f9e1bf7b46' and first party resource "
+                "'00000003-0000-0000-c000-000000000000' must be configured via preauthorization - "
+                "applications owned and operated by Microsoft must get approval from the API owner "
+                "before requesting tokens for that API."
+            ),
+            'error_codes': [65002],
+        }
+
+        with self.assertRaises(AuthenticationError) as cm:
+            aad_error_handler(error, scopes=['Policy.ReadWrite.ConditionalAccess'])
+
+        recommendation = cm.exception.recommendations[0]
+        self.assertIn('service principal', recommendation)
+        self.assertIn('az ad sp create-for-rbac', recommendation)
+        self.assertIn('az login --service-principal', recommendation)
 
 
 if __name__ == '__main__':

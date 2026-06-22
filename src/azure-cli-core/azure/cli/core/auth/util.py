@@ -44,6 +44,19 @@ def aad_error_handler(error, tenant=None, scopes=None, claims_challenge=None):
     recommendation = None
     if error_codes and 7000215 in error_codes:
         recommendation = PASSWORD_CERTIFICATE_WARNING
+    elif error_codes and 65002 in error_codes:
+        # AADSTS65002: The Azure CLI first-party app is not pre-authorized to request this scope
+        # from a first-party resource like Microsoft Graph. Only pre-authorized scopes can be
+        # requested via the Azure CLI app.
+        recommendation = (
+            "The scope cannot be requested by the Azure CLI application. "
+            "Only scopes pre-authorized by the API owner can be requested.\n"
+            "To work around this limitation, authenticate using a service principal instead:\n"
+            "  1. Create a service principal: az ad sp create-for-rbac\n"
+            "  2. Log in with the service principal:\n"
+            "     az login --service-principal -u <CLIENT_ID> -p <CLIENT_SECRET_OR_CERT> "
+            "--tenant <TENANT_ID>"
+        )
     else:
         login_command = _generate_login_command(tenant=tenant, scopes=scopes, claims_challenge=claims_challenge)
         login_message = ('Run the command below to authenticate interactively; '

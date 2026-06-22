@@ -171,6 +171,7 @@ Release History
 **Profile**
 
 * `az login`: Add `--subscription` and `--skip-subscription-discovery` to filter subscriptions during login (#33181)
+* `az login`: Fix AADSTS65002 error by providing actionable guidance to use a service principal when the requested scope is not pre-authorized for the Azure CLI application (#33062)
 
 **Storage**
 
