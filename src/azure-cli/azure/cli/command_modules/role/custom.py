@@ -535,12 +535,13 @@ def _search_role_assignments(assignments_client, definitions_client,
             # Note that assignments below the scope are already excluded by atScope()
             include_inherited or
             # If scope is provided, list assignments at the scope
-            ra.scope.lower() == scope.lower()
+            _normalize_role_assignment_scope(ra.scope).lower() == scope.lower()
         )]
 
         if role:
             role_id = _resolve_role_id(role, scope, definitions_client)
-            assignments = [ra for ra in assignments if ra.role_definition_id == role_id]
+            assignments = [ra for ra in assignments if _normalize_role_definition_id(ra.role_definition_id) ==
+                           _normalize_role_definition_id(role_id)]
 
         # filter the assignee if "include_groups" is not provided because service side
         # does not accept filter "principalId eq and atScope()"
@@ -548,6 +549,14 @@ def _search_role_assignments(assignments_client, definitions_client,
             assignments = [ra for ra in assignments if ra.principal_id == assignee_object_id]
 
     return assignments
+
+
+def _normalize_role_assignment_scope(scope):
+    return scope or '/'
+
+
+def _normalize_role_definition_id(role_definition_id):
+    return role_definition_id.rsplit('/', maxsplit=1)[-1].lower() if role_definition_id else role_definition_id
 
 
 def _build_role_scope(resource_group_name, scope, subscription_id):
