@@ -99,6 +99,10 @@ Release History
 * `az storage account blob-service-properties update`: Add `--enable-static-website`, `--index-document`, `--default-index-document-path`, `--error-document-404-path` (#33423)
 * `az storage account or-policy create/update`: Add `--tags-replication` (#33423)
 
+**Resource**
+
+* Fix #32159: `az policy assignment/definition/set-definition`: Fix `--name` validation rejecting names with dots (e.g. `ALZ-Policy-v1.0.0`) (#32159)
+
 2.86.0
 ++++++
 

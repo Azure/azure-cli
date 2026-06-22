@@ -59,7 +59,7 @@ class Show(AAZCommand):
             help="The name of the policy set definition.",
             required=True,
             fmt=AAZStrArgFormat(
-                pattern="^[^<>*%&:\\?.+/]*[^<>*%&:\\?.+/ ]+$",
+                pattern="^[^<>*%&:\\?+/]*[^<>*%&:\\?+/ ]+$",
             ),
         )
         _args_schema.expand = AAZStrArg(

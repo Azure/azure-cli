@@ -51,7 +51,7 @@ class Show(AAZCommand):
             help={"short-summary": "The name of the policy assignment.", "long-summary": "The name of the policy assignment is the name segment of its resource ID."},
             required=True,
             fmt=AAZStrArgFormat(
-                pattern="^[^<>*%&:\\?.+/]*[^<>*%&:\\?.+/ ]+$",
+                pattern="^[^<>*%&:\\?+/]*[^<>*%&:\\?+/ ]+$",
             ),
         )
         _args_schema.scope = AAZStrArg(

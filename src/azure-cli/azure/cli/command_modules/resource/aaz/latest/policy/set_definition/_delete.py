@@ -56,7 +56,7 @@ class Delete(AAZCommand):
             help="The name of the policy set definition.",
             required=True,
             fmt=AAZStrArgFormat(
-                pattern="^[^<>*%&:\\?.+/]*[^<>*%&:\\?.+/ ]+$",
+                pattern="^[^<>*%&:\\?+/]*[^<>*%&:\\?+/ ]+$",
             ),
         )
         return cls._args_schema

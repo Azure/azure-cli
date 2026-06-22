@@ -58,7 +58,7 @@ class Update(AAZCommand):
             help="The name of the policy definition.",
             required=True,
             fmt=AAZStrArgFormat(
-                pattern="^[^<>*%&:\\?.+/]*[^<>*%&:\\?.+/ ]+$",
+                pattern="^[^<>*%&:\\?+/]*[^<>*%&:\\?+/ ]+$",
             ),
         )
 
