@@ -8356,12 +8356,16 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
             except Exception as e:  # pylint: disable=broad-except
                 logger.warning("Could not get signed in user: %s", str(e))
             else:
+                # signed_in_user_get() calls Graph /me, which only succeeds for a delegated
+                # (interactive) user; service principal / managed identity logins raise GraphError
+                # and are handled by the except branch above. So the assignee here is always a User.
                 self.context.external_functions.add_role_assignment_executor(  # type: ignore # pylint: disable=protected-access
                     self.cmd,
                     "Azure Kubernetes Service RBAC Cluster Admin",
                     user["id"],
                     scope=cluster.id,
                     resolve_assignee=False,
+                    assignee_principal_type="User",
                 )
 
     def put_mc(self, mc: ManagedCluster) -> ManagedCluster:

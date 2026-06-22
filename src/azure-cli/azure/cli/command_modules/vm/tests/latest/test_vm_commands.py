@@ -14800,5 +14800,32 @@ class VMZoneMovementScenarioTest(ScenarioTest):
             self.check('resiliencyProfile.zoneMovement.isEnabled', True),
         ])
 
+    # Required Microsoft.Compute/ForceDeallocateVMPreview and Microsoft.Compute/VMAvailabilityZoneUpdate to be enabled
+    # to use --zone-movement.
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_zone_movement_preserved_', location='eastus2')
+    def test_vm_zone_movement_preserved(self, resource_group):
+        self.kwargs.update({
+            'vm': self.create_random_name('vm', 15),
+        })
+
+        # Create a VM with zone movement enabled.
+        # --location is passed explicitly so the create validator skips the
+        # subscription-wide Microsoft.Compute/skus listing (a multi-MB response that
+        # would otherwise require @AllowLargeResponse).
+        self.cmd('vm create -g {rg} -n {vm} --image ubuntu2204 --zone 1 --location eastus2 '
+            '--zone-movement true --nsg-rule NONE '
+            '--storage-sku Premium_ZRS --admin-username azureuser --generate-ssh-keys '
+            '--size Standard_D2s_v7',
+        )
+
+        # Update an unrelated field (tag) without --zone-movement;
+        # zone movement should be preserved (regression test for the bug where
+        # zone_movement defaulted to None and overwrote the existing setting)
+        self.cmd('vm update -g {rg} -n {vm} --set tags.foo=bar', checks=[
+            self.check('tags.foo', 'bar'),
+            self.check('resiliencyProfile.zoneMovement.isEnabled', True),
+        ])
+
+
 if __name__ == '__main__':
     unittest.main()

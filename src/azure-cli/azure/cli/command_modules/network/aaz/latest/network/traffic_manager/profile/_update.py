@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "network traffic-manager profile update",
 )
 class Update(AAZCommand):
-    """Update a traffic manager profile.
+    """Update a Traffic Manager profile.
 
     :example: Update a traffic manager profile to change the TTL to 300.
         az network traffic-manager profile update -g MyResourceGroup -n MyTmProfile --ttl 300
@@ -28,9 +28,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-04-01",
+        "version": "2024-04-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/trafficmanagerprofiles/{}", "2022-04-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/trafficmanagerprofiles/{}", "2024-04-01-preview"],
         ]
     }
 
@@ -192,6 +192,13 @@ class Update(AAZCommand):
             nullable=True,
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
+        _args_schema.record_type = AAZStrArg(
+            options=["--record-type"],
+            arg_group="Properties",
+            help="When record type is set, a traffic manager profile will allow only endpoints that match this type.",
+            nullable=True,
+            enum={"A": "A", "AAAA": "AAAA", "CNAME": "CNAME"},
+        )
         _args_schema.routing_method = AAZStrArg(
             options=["--routing-method"],
             arg_group="Properties",
@@ -279,7 +286,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-04-01",
+                    "api-version", "2024-04-01-preview",
                     required=True,
                 ),
             }
@@ -362,7 +369,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-04-01",
+                    "api-version", "2024-04-01-preview",
                     required=True,
                 ),
             }
@@ -430,6 +437,7 @@ class Update(AAZCommand):
                 properties.set_prop("maxReturn", AAZIntType, ".max_return")
                 properties.set_prop("monitorConfig", AAZObjectType)
                 properties.set_prop("profileStatus", AAZStrType, ".status")
+                properties.set_prop("recordType", AAZStrType, ".record_type")
                 properties.set_prop("trafficRoutingMethod", AAZStrType, ".routing_method")
 
             dns_config = _builder.get(".properties.dnsConfig")
@@ -524,6 +532,9 @@ class _UpdateHelper:
         )
         properties.profile_status = AAZStrType(
             serialized_name="profileStatus",
+        )
+        properties.record_type = AAZStrType(
+            serialized_name="recordType",
         )
         properties.traffic_routing_method = AAZStrType(
             serialized_name="trafficRoutingMethod",

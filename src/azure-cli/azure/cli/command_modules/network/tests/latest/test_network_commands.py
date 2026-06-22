@@ -7959,6 +7959,109 @@ class NetworkTrafficManagerScenarioTest(ScenarioTest):
             ]
         )
 
+    @ResourceGroupPreparer('cli_test_traffic_manager_record_type')
+    def test_network_traffic_manager_record_type(self, resource_group):
+        self.kwargs.update({
+            'tm': 'mytmprofile-rt',
+            'dns': self.create_random_name('testtmrt', 20),
+            'endpoint': 'myendpoint-rt',
+        })
+
+        # Create a profile with record-type A
+        self.cmd(
+            'network traffic-manager profile create -n {tm} -g {rg} '
+            '--routing-method priority --unique-dns-name {dns} --record-type A',
+            checks=[
+                self.check('TrafficManagerProfile.recordType', 'A'),
+            ]
+        )
+
+        # Verify record-type is returned on show
+        self.cmd(
+            'network traffic-manager profile show -g {rg} -n {tm}',
+            checks=[
+                self.check('recordType', 'A'),
+                self.check('dnsConfig.relativeName', '{dns}'),
+            ]
+        )
+
+        # Verify record-type is returned on list
+        self.cmd(
+            'network traffic-manager profile list -g {rg}',
+            checks=[
+                self.check('length(@)', 1),
+                self.check('[0].recordType', 'A'),
+            ]
+        )
+
+        # Clean up
+        self.cmd('network traffic-manager profile delete -g {rg} -n {tm}')
+
+    @ResourceGroupPreparer('cli_test_traffic_manager_record_type_update')
+    def test_network_traffic_manager_record_type_update(self, resource_group):
+        self.kwargs.update({
+            'tm': 'mytmprofile-rtu',
+            'dns': self.create_random_name('testtmrtu', 20),
+            'endpoint': 'myendpoint-rtu',
+        })
+
+        # Create a profile without record-type
+        self.cmd(
+            'network traffic-manager profile create -n {tm} -g {rg} '
+            '--routing-method priority --unique-dns-name {dns}',
+            checks=[
+                self.check('TrafficManagerProfile.recordType', None),
+            ]
+        )
+
+        # Show and confirm no record-type
+        self.cmd(
+            'network traffic-manager profile show -g {rg} -n {tm}',
+            checks=[
+                self.check('recordType', None),
+            ]
+        )
+
+        # Add an endpoint with IPv4 target
+        self.cmd(
+            'network traffic-manager endpoint create -n {endpoint} --profile-name {tm} -g {rg} '
+            '--type externalEndpoints --weight 50 --target 10.0.0.1',
+            checks=[
+                self.check('type', 'Microsoft.Network/trafficManagerProfiles/externalEndpoints'),
+            ]
+        )
+
+        # Show and confirm still no record-type
+        self.cmd(
+            'network traffic-manager profile show -g {rg} -n {tm}',
+            checks=[
+                self.check('recordType', None),
+                self.check('length(endpoints)', 1),
+            ]
+        )
+
+        # Update the profile to set record-type A
+        self.cmd(
+            'network traffic-manager profile update -n {tm} -g {rg} --record-type A',
+            checks=[
+                self.check('recordType', 'A'),
+            ]
+        )
+
+        # Show and confirm record-type is set and endpoint still exists
+        self.cmd(
+            'network traffic-manager profile show -g {rg} -n {tm}',
+            checks=[
+                self.check('recordType', 'A'),
+                self.check('length(endpoints)', 1),
+                self.check('endpoints[0].name', '{endpoint}'),
+            ]
+        )
+
+        # Clean up
+        self.cmd('network traffic-manager endpoint delete -g {rg} --profile-name {tm} -t externalEndpoints -n {endpoint}')
+        self.cmd('network traffic-manager profile delete -g {rg} -n {tm}')
+
 
 class NetworkWatcherConfigureScenarioTest(LiveScenarioTest):
 

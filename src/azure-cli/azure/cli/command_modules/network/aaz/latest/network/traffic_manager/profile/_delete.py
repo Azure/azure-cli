@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "network traffic-manager profile delete",
 )
 class Delete(AAZCommand):
-    """Delete a traffic manager profile.
+    """Delete a Traffic Manager profile.
 
     :example: Delete a traffic manager profile.
         az network traffic-manager profile delete -g MyResourceGroup -n MyTmProfile
@@ -25,16 +25,16 @@ class Delete(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-04-01",
+        "version": "2024-04-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/trafficmanagerprofiles/{}", "2022-04-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/trafficmanagerprofiles/{}", "2024-04-01-preview"],
         ]
     }
 
     def _handler(self, command_args):
         super()._handler(command_args)
         self._execute_operations()
-        return self._output()
+        return None
 
     _args_schema = None
 
@@ -70,10 +70,6 @@ class Delete(AAZCommand):
     @register_callback
     def post_operations(self):
         pass
-
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
 
     class ProfilesDelete(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
@@ -125,7 +121,7 @@ class Delete(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-04-01",
+                    "api-version", "2024-04-01-preview",
                     required=True,
                 ),
             }
