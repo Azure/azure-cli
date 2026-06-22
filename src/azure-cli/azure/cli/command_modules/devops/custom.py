@@ -58,6 +58,12 @@ def download_package(feed,
     :param no_hardlinks: Disable the use of hard links when downloading. Use on file systems
                          that do not support hard linking.
     :type no_hardlinks: bool
+    :param organization: Azure DevOps organization URL, e.g. 'https://dev.azure.com/MyOrg'.
+    :type organization: str
+    :param project: Name or ID of the project (required when --scope is 'project').
+    :type project: str
+    :param detect: Automatically detect organization from git remote config.
+    :type detect: bool
     """
     if scope == 'project':
         organization, project = _resolve_organization(organization, project, scope, detect)
@@ -95,6 +101,12 @@ def publish_package(feed,
     :type description: str
     :param path: Directory containing the package contents.
     :type path: str
+    :param organization: Azure DevOps organization URL, e.g. 'https://dev.azure.com/MyOrg'.
+    :type organization: str
+    :param project: Name or ID of the project (required when --scope is 'project').
+    :type project: str
+    :param detect: Automatically detect organization from git remote config.
+    :type detect: bool
     """
     if scope == 'project':
         organization, project = _resolve_organization(organization, project, scope, detect)
