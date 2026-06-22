@@ -49,6 +49,7 @@ Release History
 * `az vm update`: Support cross-zone movement (#33242)
 * `az vm deallocate`: Support vm force deallocate with `--force-deallocate` (#33242)
 * `az vm/vmss create`: Support Ephemeral OS disk with full caching with `--ephemeral-os-disk-enable-full-caching` (#33292)
+* Fix #33152: `az vm create`: Fix image alias doc parsing failure when endpoint returns non-JSON response (#33608)
 
 **Container app**
 

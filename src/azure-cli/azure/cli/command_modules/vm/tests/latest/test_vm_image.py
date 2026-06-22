@@ -69,6 +69,26 @@ class TestVMImage(unittest.TestCase):
                                      'offer': 'CentOS', 'sku': '8_5-gen2', 'version': 'latest',
                                      'architecture': 'x64'})
 
+    @mock.patch('azure.cli.core.cloud.get_active_cloud', autospec=True)
+    @mock.patch('requests.get')
+    def test_when_alias_doc_returns_non_json_body(self, mock_requests_get, mock_get_active_cloud):
+        # Regression test for https://github.com/Azure/azure-cli/issues/33152
+        # When the alias doc endpoint returns HTTP 200 with non-JSON content (e.g. a CDN error page),
+        # load_images_from_aliases_doc should fall back to the local copy instead of raising JSONDecodeError.
+        from azure.cli.command_modules.vm._actions import load_images_from_aliases_doc
+        mock_cloud = mock.MagicMock()
+        mock_cloud.endpoints.vm_image_alias_doc = 'https://example.com/aliases.json'
+        mock_get_active_cloud.return_value = mock_cloud
+        mock_response = mock.MagicMock()
+        mock_response.status_code = 200
+        mock_response.content = b'{} extra data that breaks json parsing'
+        mock_requests_get.return_value = mock_response
+        cli_ctx = DummyCli()
+        cli_ctx.cloud = mock_cloud
+        # Should not raise, falls back to local copy
+        images = load_images_from_aliases_doc(cli_ctx)
+        self.assertTrue(len(images) > 0)
+
 
 if __name__ == '__main__':
     unittest.main()
