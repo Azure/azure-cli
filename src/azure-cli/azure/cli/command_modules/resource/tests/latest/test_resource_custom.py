@@ -1102,10 +1102,10 @@ class TestJsonCTemplatePolicy(unittest.TestCase):
 
     def test_template_key_is_quoted(self):
         """Verify that the template key is properly quoted in the output JSON payload.
-        
+
         Without this fix, the output was: template:{...} (unquoted key)
         which causes InternalError on custom cloud environments.
-        With the fix:          "template":{...} (quoted key) - valid JSON.
+        With the fix: "template":{...} (quoted key) - valid JSON.
         """
         import json
 
