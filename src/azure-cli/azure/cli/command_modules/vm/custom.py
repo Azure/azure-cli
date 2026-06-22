@@ -1864,14 +1864,14 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
 
     disk_name = None
     if os_disk is not None:
+        from azure.cli.core.commands.client_factory import get_subscription_id
         if is_valid_resource_id(os_disk):
             disk_id = os_disk
             os_disk_id_parsed = parse_resource_id(os_disk)
             disk_name = os_disk_id_parsed['name']
         else:
-            vm_id_parsed = parse_resource_id(vm["id"])
-            disk_id = resource_id(subscription=vm_id_parsed['subscription'],
-                                  resource_group=vm_id_parsed['resource_group'],
+            disk_id = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
+                                  resource_group=resource_group_name,
                                   namespace='Microsoft.Compute', type='disks', name=os_disk)
             disk_name = os_disk
 

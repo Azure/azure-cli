@@ -23,6 +23,7 @@ from azure.cli.command_modules.vm._validators import (validate_ssh_key,
                                                       _validate_vm_vmss_accelerated_networking,
                                                       process_gallery_image_version_namespace)
 from azure.cli.command_modules.vm._vm_utils import normalize_disk_info, update_disk_sku_info
+from azure.cli.command_modules.vm.custom import update_vm
 from azure.cli.core.mock import DummyCli
 from knack.util import CLIError
 
@@ -616,6 +617,35 @@ class TestActions(unittest.TestCase):
             target_regions_list = ["westus=standard_lrs=2"]
             np.target_regions = target_regions_list
             process_gallery_image_version_namespace(cmd, np)
+
+    @mock.patch('azure.cli.command_modules.vm.operations.vm.VMCreate')
+    @mock.patch('azure.cli.command_modules.vm.operations.vm.convert_show_result_to_snake_case')
+    def test_update_vm_os_disk_without_vm_id(self, convert_show_result_to_snake_case_mock, vm_create_mock):
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = DummyCli()
+        cmd.cli_ctx.data['subscription_id'] = '00000000-0000-0000-0000-000000000000'
+
+        convert_show_result_to_snake_case_mock.return_value = {}
+        vm_create_instance = mock.MagicMock()
+        vm_create_instance.return_value = {'result': 'ok'}
+        vm_create_mock.return_value = vm_create_instance
+
+        result = update_vm(
+            cmd,
+            resource_group_name='test-rg',
+            vm_name='test-vm',
+            os_disk='new-os-disk',
+            parameters={}
+        )
+
+        self.assertEqual(result, {'result': 'ok'})
+        vm_create_instance.assert_called_once()
+        command_args = vm_create_instance.call_args.kwargs['command_args']
+        self.assertEqual(
+            command_args['storage_profile']['os_disk']['managed_disk']['id'],
+            '/subscriptions/00000000-0000-0000-0000-000000000000/'
+            'resourceGroups/test-rg/providers/Microsoft.Compute/disks/new-os-disk'
+        )
 
 
 if __name__ == '__main__':
