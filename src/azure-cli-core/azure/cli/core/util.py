@@ -52,6 +52,7 @@ DISALLOWED_USER_NAMES = [
 #   - https://azcliprod.blob.core.windows.net/cli/{package}/setup.py (CLI versions)
 #   - https://azcliprod.blob.core.windows.net/cli/vm/aliases.json (VM image aliases)
 AME_STORAGE_BASE_URL = "https://azcliprod.blob.core.windows.net/cli"
+AZURE_PUBLIC_ARM_ENDPOINT = "https://management.azure.com/"
 
 
 def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
@@ -1031,10 +1032,9 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
     if '://' not in url:
         url = endpoints.resource_manager.rstrip('/') + url
     else:
-        from azure.cli.core.cloud import AZURE_PUBLIC_CLOUD
         # Some commands/extensions still use the public ARM endpoint in request URLs.
         # Normalize to the active cloud ARM endpoint so the request works in sovereign/private clouds.
-        if (is_same_origin(url, AZURE_PUBLIC_CLOUD.endpoints.resource_manager) and
+        if (is_same_origin(url, AZURE_PUBLIC_ARM_ENDPOINT) and
                 not is_same_origin(url, endpoints.resource_manager)):
             url = _replace_url_origin(url, endpoints.resource_manager)
 
