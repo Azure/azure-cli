@@ -6,6 +6,10 @@ Release History
 2.87.0
 ++++++
 
+**Azure DevOps**
+
+* `az artifacts universal download`: Add `--no-hardlinks` flag to fix download failures on file systems that do not support hard linking, such as certain network shares, containers, or virtual file systems (#33627)
+
 **ACR**
 
 * [BREAKING CHANGE] `az acr replication create/update`: Remove deprecated `--region-endpoint-enabled` flag and use `--global-endpoint-routing` instead (#33173)
