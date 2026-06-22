@@ -16,7 +16,7 @@ class AzOutputProducer(knack.output.OutputProducer):
         return format_type in self._FORMAT_DICT
 
     def out(self, obj, formatter=None, out_file=None):
-        if formatter is not self.get_formatter('tsv'):
+        if formatter != self.get_formatter('tsv'):
             return super().out(obj, formatter=formatter, out_file=out_file)
 
         if not isinstance(obj, CommandResultItem):
