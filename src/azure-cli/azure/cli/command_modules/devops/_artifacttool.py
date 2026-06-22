@@ -99,7 +99,17 @@ def _get_artifacttool_dir(organization):
         versions = [d for d in os.listdir(artifacttool_root)
                     if os.path.isdir(os.path.join(artifacttool_root, d))]
         if versions:
-            latest = sorted(versions)[-1]
+            # Sort by the version suffix (last underscore-separated segment) using semantic versioning
+            def _version_key(dir_name):
+                parts = dir_name.rsplit('_', 1)
+                version_str = parts[-1] if len(parts) > 1 else dir_name
+                try:
+                    from packaging.version import Version  # pylint: disable=import-outside-toplevel
+                    return Version(version_str)
+                except Exception:  # pylint: disable=broad-except
+                    return version_str
+
+            latest = sorted(versions, key=_version_key)[-1]
             release_dir = os.path.join(artifacttool_root, latest)
             binary = os.path.join(release_dir, "artifacttool")
             if os.path.exists(binary):
@@ -138,11 +148,14 @@ def _get_pat(organization):
         profile = Profile()
         subscriptions = profile.load_cached_subscriptions(False)
         tenants = OrderedDict()
+
+        # Add the default subscription's tenant first so it is tried first,
+        # then add any remaining tenants from other subscriptions.
         for sub in subscriptions:
             if sub.get('isDefault'):
-                tenants[(sub['tenantId'], sub['user']['name'])] = ''
+                tenants.setdefault((sub['tenantId'], sub['user']['name']), '')
         for sub in subscriptions:
-            tenants[(sub['tenantId'], sub['user']['name'])] = ''
+            tenants.setdefault((sub['tenantId'], sub['user']['name']), '')
 
         for (tenant_id, _) in tenants:
             try:

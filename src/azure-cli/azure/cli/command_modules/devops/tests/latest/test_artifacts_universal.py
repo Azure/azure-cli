@@ -40,7 +40,9 @@ class TestArtifactsUniversal(unittest.TestCase):
         self.mock_get_pat.return_value = 'mock-token'
 
     def tearDown(self):
-        patch.stopall()
+        self.patcher_run.stop()
+        self.patcher_get_dir.stop()
+        self.patcher_get_pat.stop()
 
     # ---- download_package tests ----
 
