@@ -372,7 +372,10 @@ def unregister_container(cmd, client, vault_name, resource_group_name, container
     container = show_container(cmd, containrs_client, container_name, resource_group_name, vault_name,
                                backup_management_type)
     if container is None:
-        raise ResourceNotFoundError("Container '{}' not found in vault '{}'.".format(container_name, vault_name))
+        raise ResourceNotFoundError(
+            "Container '{}' of type '{}' not found in vault '{}'. "
+            "Please verify the container name, backup management type, and vault.".format(
+                container_name, container_type, vault_name))
     container_name = container.name
     container_friendly_name = container.properties.friendly_name
 
