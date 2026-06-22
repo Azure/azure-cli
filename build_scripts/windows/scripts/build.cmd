@@ -192,13 +192,13 @@ REM Remove .py and only deploy .pyc files
 REM The '.cpython-3XX' tag appended to pyc filenames inside __pycache__ is 12 chars for Python 3.10-3.99.
 REM Validate this assumption before processing; if it ever changes (e.g., Python 3.100 would be 13 chars),
 REM the BASE_FILENAME truncation below must be updated accordingly.
-for /f %%l in ('%BUILDING_DIR%\python.exe -c "import sys; print(len(f'.cpython-{sys.version_info.major}{sys.version_info.minor}'))"') do set PYCTAG_LEN=%%l
+for /f %%l in ('%BUILDING_DIR%\python.exe -c "import sys; print(9 + len(str(sys.version_info.major)) + len(str(sys.version_info.minor)))"') do set PYCTAG_LEN=%%l
 if "!PYCTAG_LEN!" == "" (
     echo ERROR: Could not determine Python bytecode tag length. Verify that %BUILDING_DIR%\python.exe is available and working.
     goto ERROR
 )
 if "!PYCTAG_LEN!" NEQ "12" (
-    echo ERROR: Python bytecode tag length is !PYCTAG_LEN! but 12 was expected. Update the truncation constant in build.cmd.
+    echo ERROR: Python bytecode tag length is !PYCTAG_LEN! but 12 was expected. Update the FILENAME:~0,-12 truncation constant in build.cmd.
     goto ERROR
 )
 pushd %BUILDING_DIR%\Lib\site-packages
