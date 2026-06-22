@@ -12,15 +12,11 @@ from knack.util import CommandResultItem
 
 class AzOutputProducer(knack.output.OutputProducer):
 
-    _LF_ONLY_FORMATTERS = {
-        knack.output.format_tsv
-    }
-
     def check_valid_format_type(self, format_type):
         return format_type in self._FORMAT_DICT
 
     def out(self, obj, formatter=None, out_file=None):
-        if formatter not in self._LF_ONLY_FORMATTERS:
+        if formatter is not self.get_formatter('tsv'):
             return super().out(obj, formatter=formatter, out_file=out_file)
 
         if not isinstance(obj, CommandResultItem):
@@ -44,7 +40,7 @@ class AzOutputProducer(knack.output.OutputProducer):
                                         encoding)
             fallback_output = output.encode('ascii', 'ignore').decode('ascii')
             if binary_stream is not None:
-                binary_stream.write(fallback_output.encode(encoding, 'ignore'))
+                binary_stream.write(fallback_output.encode('ascii'))
             else:
                 stream.write(fallback_output)
 
