@@ -407,6 +407,9 @@ def update_extension(cmd=None, extension_name=None, index_url=None, pip_extra_in
             raise CLIError(
                 f"Cannot update system extension {extension_name}, please wait until Cloud Shell updates it in the next release.")
         cur_version = ext.get_version()
+        if cur_version is None:
+            logger.warning("The '%s' extension appears to be partially installed or corrupted. "
+                           "Attempting to reinstall it.", extension_name)
         try:
             if not download_url:
                 download_url, ext_sha256 = resolve_from_index(extension_name, cur_version=cur_version, index_url=index_url, target_version=version, cli_ctx=cmd_cli_ctx, allow_preview=allow_preview)

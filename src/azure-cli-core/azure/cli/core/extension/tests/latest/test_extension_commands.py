@@ -304,6 +304,34 @@ class TestExtensionCommands(unittest.TestCase):
         self.assertEqual(str(err.exception),
             f"The extension {MY_EXT_NAME} is not installed. Please install the extension via `az extension add -n {MY_EXT_NAME}`.")
 
+    def test_update_extension_with_partial_install(self):
+        """Test that update_extension succeeds when a previous installation was interrupted,
+        leaving the extension directory in a partial state with no valid metadata."""
+        # Simulate a partially-installed extension: the directory exists and contains a .dist-info
+        # directory that does NOT match the expected name pattern (azure_devops*.*-info), so
+        # get_metadata() returns None but get_all() still detects the extension directory.
+        partial_ext_dir = os.path.join(self.ext_dir, MY_EXT_NAME)
+        os.makedirs(partial_ext_dir)
+        # Create a mismatched .dist-info directory that get_all() detects via *.*-info glob
+        # but get_metadata() won't find because it doesn't start with the package name
+        mismatched_dist_info = os.path.join(partial_ext_dir, 'some_other_package-0.0.1.dist-info')
+        os.makedirs(mismatched_dist_info)
+
+        newer_extension = _get_test_data_file('myfirstcliextension-0.0.4+dev-py2.py3-none-any.whl')
+        computed_extension_sha256 = _compute_file_hash(newer_extension)
+        with mock.patch('azure.cli.core.extension.operations.resolve_from_index',
+                        return_value=(newer_extension, computed_extension_sha256)), \
+             mock.patch('azure.cli.core.extension.operations.logger') as mock_logger:
+            update_extension(self.cmd, MY_EXT_NAME)
+            # Verify a warning is issued about the partial/corrupt extension
+            warning_msgs = [str(call) for call in mock_logger.warning.call_args_list]
+            self.assertTrue(
+                any('partially installed or corrupted' in msg for msg in warning_msgs),
+                "Expected warning about partial installation not found"
+            )
+        ext = show_extension(MY_EXT_NAME)
+        self.assertEqual(ext[OUT_KEY_VERSION], '0.0.4+dev')
+
     def test_update_extension_no_updates(self):
         logger_msgs = []
 

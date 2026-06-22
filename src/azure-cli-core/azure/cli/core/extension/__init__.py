@@ -129,7 +129,7 @@ class WheelExtension(Extension):
         super().__init__(name, 'whl', path)
 
     def get_version(self):
-        return self.metadata.get('version')
+        return self.metadata.get('version') if self.metadata else None
 
     def get_metadata(self):
         from glob import glob
@@ -210,7 +210,7 @@ class DevExtension(Extension):
         super().__init__(name, 'dev', path)
 
     def get_version(self):
-        return self.metadata.get('version')
+        return self.metadata.get('version') if self.metadata else None
 
     def get_metadata(self):
         import pkginfo
