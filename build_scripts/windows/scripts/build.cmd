@@ -189,10 +189,10 @@ copy %REPO_ROOT%\build_scripts\windows\resources\ThirdPartyNotices.txt %BUILDING
 copy %REPO_ROOT%\NOTICE.txt %BUILDING_DIR%
 
 REM Remove .py and only deploy .pyc files
-REM Validate Python bytecode tag length for pyc filename truncation below.
-REM The '.cpython-3XX' tag has 9 chars for '.cpython-', 1 for major ('3'), and 2 for
-REM the two-digit minor version (10-99), for a total of 12 chars (Python 3.10 through 3.99).
-REM If the minor version reaches 3 digits (e.g., 3.100), the total becomes 13; update below.
+REM Compute the Python bytecode tag length, e.g. 12 for '.cpython-314' on Python 3.14:
+REM 9 chars for '.cpython-', 1 for major ('3'), and 2 for the two-digit minor (10-99).
+REM If the minor version reaches 3 digits (e.g., 3.100), the total becomes 13; this is
+REM used directly for truncation below so no manual update is required.
 set PYCTAG_LEN=
 %BUILDING_DIR%\python.exe -c "import sys; print(9 + len(str(sys.version_info.major)) + len(str(sys.version_info.minor)))" >%TEMP%\pyctag_len.tmp 2>&1
 if !errorlevel! neq 0 (
@@ -207,10 +207,7 @@ if "!PYCTAG_LEN!" == "" (
     echo ERROR: Could not determine Python bytecode tag length. Verify that %BUILDING_DIR%\python.exe is available and working.
     goto ERROR
 )
-if "!PYCTAG_LEN!" NEQ "12" (
-    echo ERROR: Python bytecode tag length is !PYCTAG_LEN! but 12 was expected. Update the FILENAME:~0,-12 truncation constant in build.cmd.
-    goto ERROR
-)
+set /a PYCTAG_NEG_LEN=0-!PYCTAG_LEN!
 pushd %BUILDING_DIR%\Lib\site-packages
 for /f %%f in ('dir /b /s *.pyc') do (
     set PARENT_DIR=%%~df%%~pf..
@@ -218,9 +215,11 @@ for /f %%f in ('dir /b /s *.pyc') do (
     if !errorlevel! neq 0 (
         REM Only take the file name without 'pyc' extension: e.g., (same below) __init__.cpython-314
         set FILENAME=%%~nf
-        REM Truncate the '.cpython-3XX' postfix which is 12 chars long (for Python 3.10-3.99): __init__
+        REM Truncate the '.cpython-3XX' postfix using the computed tag length: __init__
+        REM Batch substring does not support variable indices directly; the for-variable
+        REM trick expands %%n to PYCTAG_NEG_LEN before delayed expansion evaluates the slice.
         REM https://stackoverflow.com/a/636391/2199657
-        set BASE_FILENAME=!FILENAME:~0,-12!
+        for %%n in (!PYCTAG_NEG_LEN!) do set BASE_FILENAME=!FILENAME:~0,%%n!
         REM __init__.pyc
         set pyc=!BASE_FILENAME!.pyc
         REM Delete ..\__init__.py
