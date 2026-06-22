@@ -10,6 +10,7 @@ import os
 import platform
 import re
 import sys
+from urllib.parse import urlparse, urlunparse
 
 from knack.log import get_logger
 from knack.util import CLIError, to_snake_case, to_camel_case
@@ -1223,8 +1224,6 @@ def is_same_origin(url, endpoint):
     :return: ``True`` if both share the same origin, otherwise ``False``.
     :rtype: bool
     """
-    from urllib.parse import urlparse
-
     if not isinstance(url, str) or not isinstance(endpoint, str):
         return False
 
@@ -1261,8 +1260,6 @@ def is_same_origin(url, endpoint):
 
 
 def _replace_url_origin(url, endpoint):
-    from urllib.parse import urlparse, urlunparse
-
     try:
         url_parts = urlparse(url)
         endpoint_parts = urlparse(endpoint)
