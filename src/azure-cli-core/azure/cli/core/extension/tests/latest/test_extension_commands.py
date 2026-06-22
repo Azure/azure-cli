@@ -177,12 +177,13 @@ class TestExtensionCommands(unittest.TestCase):
     def test_add_extension_ignores_pip_require_virtualenv(self):
         extension_name = MY_EXT_NAME
         computed_extension_sha256 = _compute_file_hash(MY_EXT_SOURCE)
-        with mock.patch.dict(os.environ, {'PIP_REQUIRE_VIRTUALENV': 'true'}), \
+        with mock.patch.dict(os.environ, {'PIP_REQUIRE_VIRTUALENV': 'true', 'AZURE_CLI_TEST_ENV': 'preserved'}), \
                 mock.patch('azure.cli.core.extension.operations.resolve_from_index', return_value=(MY_EXT_SOURCE, computed_extension_sha256)), \
                 mock.patch('azure.cli.core.extension.operations.shutil'), \
                 mock.patch('azure.cli.core.extension.operations.check_output') as check_output:
             add_extension(cmd=self.cmd, extension_name=extension_name)
             self.assertNotIn('PIP_REQUIRE_VIRTUALENV', check_output.call_args.kwargs['env'])
+            self.assertEqual('preserved', check_output.call_args.kwargs['env']['AZURE_CLI_TEST_ENV'])
 
     def test_add_extension_ignores_pip_require_virtualenv_case_insensitive_on_windows(self):
         extension_name = MY_EXT_NAME

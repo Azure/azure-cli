@@ -52,7 +52,7 @@ def _matches_pip_require_virtualenv(env_var_name):
 def _run_pip(pip_exec_args, extension_path=None):
     cmd = [sys.executable, '-m', 'pip'] + pip_exec_args + ['--disable-pip-version-check', '--no-cache-dir']
     env = os.environ.copy()
-    for key in list(env):
+    for key in list(env.keys()):
         if _matches_pip_require_virtualenv(key):
             del env[key]
     logger.debug('Running: %s', cmd)
