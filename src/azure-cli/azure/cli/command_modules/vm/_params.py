@@ -742,7 +742,7 @@ def load_arguments(self, _):
             for dest in scaleset_name_aliases:
                 c.argument(dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
 
-    with self.argument_context('vmss deallocate', operation_group='virtual_machine_scale_sets') as c:
+    with self.argument_context('vmss deallocate') as c:
         c.argument('hibernate', arg_type=get_three_state_flag(), help='Hibernate a virtual machine from the VM scale set. Available for VMSS with Flexible OrchestrationMode only.')
 
     with self.argument_context('vmss reimage') as c:
@@ -1454,7 +1454,7 @@ def load_arguments(self, _):
                    'Format: `<MajorVersion>.<MinorVersion>.<Patch>`', id_part='child_name_3')
 
     for scope in ['sig image-version create', 'sig image-version update']:
-        with self.argument_context(scope, operation_group='gallery_image_versions') as c:
+        with self.argument_context(scope) as c:
             c.argument('target_regions', nargs='*',
                        help='Space-separated list of regions and their replica counts. Use `<region>[=<replica count>][=<storage account type>]` to optionally set the replica count and/or storage account type for each region. '
                             'If a replica count is not specified, the default replica count will be used. If a storage account type is not specified, the default storage account type will be used')
@@ -1468,7 +1468,7 @@ def load_arguments(self, _):
                        help="Indicate whether or not the deletion is blocked for this gallery image version if its end of life has not expired")
 
     for scope in ['sig image-version create', 'sig image-version update', 'sig image-version undelete']:
-        with self.argument_context(scope, operation_group='gallery_image_versions') as c:
+        with self.argument_context(scope) as c:
             c.argument('allow_replicated_location_deletion', arg_type=get_three_state_flag(), help='Indicate whether or not removing this gallery image version from replicated regions is allowed.')
 
     with self.argument_context('sig list-community') as c:
@@ -1561,7 +1561,7 @@ def load_arguments(self, _):
                    options_list=['--enable-auto-key-rotation', '--auto-rotation'],
                    help='Enable automatic rotation of keys.')
 
-    with self.argument_context('disk-encryption-set identity', operation_group='disk_encryption_sets') as c:
+    with self.argument_context('disk-encryption-set identity') as c:
         c.argument('mi_system_assigned', options_list=['--system-assigned'],
                    arg_group='Managed Identity', arg_type=get_three_state_flag(),
                    help='Provide this flag to use system assigned identity for disk encryption set. '
