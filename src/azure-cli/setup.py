@@ -148,6 +148,7 @@ DEPENDENCIES = [
     'jsondiff~=2.0.0',
     'packaging>=20.9',
     'paramiko>=2.0.8,<4.0.0',
+    'pip-system-certs==5.3; sys_platform == "win32"',
     'pycomposefile>=0.0.34',
     'PyGithub~=1.38',
     'PyNaCl~=1.6.2',

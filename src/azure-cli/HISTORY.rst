@@ -40,6 +40,10 @@ Release History
 * `az functionapp update-strategy config show`: Add new command to get the details of a function app's update strategy configuration (#33341)
 * Fix #31394: `az functionapp deployment source config-zip`: Never ending loop on flex function app health check (#33388)
 
+**Core**
+
+* On Windows MSI/ZIP builds, trust the OS certificate store for HTTPS requests so Azure DevOps Server and other private CA endpoints work without manually patching certifi.
+
 **Compute**
 
 * [BREAKING CHANGE] `az vm create`: Change default `--size` from `Standard_DS1_v2` to `Standard_D2s_v5` (#33323)
