@@ -1007,8 +1007,11 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
                 headers['Content-Type'] = 'application/json'
         except Exception:  # pylint: disable=broad-except
             if isinstance(body, str):
-                candidate_file_path = body[1:] if body.startswith('@') else body
-                if os.path.isfile(candidate_file_path) and (body.startswith('@') or candidate_file_path.lower().endswith('.json')):
+                body_is_file_reference = body.startswith('@')
+                candidate_file_path = body[1:] if body_is_file_reference else body
+                should_load_from_file = os.path.isfile(candidate_file_path) and \
+                    (body_is_file_reference or candidate_file_path.lower().endswith('.json'))
+                if should_load_from_file:
                     try:
                         body = read_file_content(candidate_file_path)
                     except OSError as ex:
