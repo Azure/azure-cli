@@ -669,11 +669,14 @@ class TestActions(unittest.TestCase):
         self.assertEqual(result['name'], 'test-vm')
         vm_create_instance.assert_called_once()
         command_args = vm_create_instance.call_args.kwargs['command_args']
+        expected_disk_id = (
+            '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-rg/'
+            'providers/Microsoft.Compute/disks/new-os-disk'
+        )
         self.assertNotIn('id', command_args)
         self.assertEqual(
             command_args['storage_profile']['os_disk']['managed_disk']['id'],
-            '/subscriptions/00000000-0000-0000-0000-000000000000/'
-            'resourceGroups/test-rg/providers/Microsoft.Compute/disks/new-os-disk'
+            expected_disk_id
         )
 
 
