@@ -55,7 +55,7 @@ class TestCoreCLIOutput(unittest.TestCase):
         output_producer.out(CommandResultItem(result=['topic1', 'topic2']), formatter=formatter, out_file=output_stream)
         output_stream.flush()
 
-        self.assertEqual(b'topic1\ntopic2\n', bytes_buffer.getvalue())
+        self.assertEqual(bytes_buffer.getvalue(), b'topic1\ntopic2\n')
 
 
 if __name__ == '__main__':

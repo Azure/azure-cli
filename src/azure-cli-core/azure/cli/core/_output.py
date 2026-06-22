@@ -16,7 +16,7 @@ class AzOutputProducer(knack.output.OutputProducer):
 
     def out(self, obj, formatter=None, out_file=None):
         tsv_formatter = self._FORMAT_DICT['tsv']
-        is_tsv_formatter = formatter is tsv_formatter or formatter == tsv_formatter
+        is_tsv_formatter = formatter == tsv_formatter
         if not is_tsv_formatter:
             return super().out(obj, formatter=formatter, out_file=out_file)
 
@@ -29,7 +29,8 @@ class AzOutputProducer(knack.output.OutputProducer):
         encoding = stream.encoding or 'utf-8'
 
         try:
-            binary_stream.write(output.encode(encoding))
+            encoded_output = output.encode(encoding)
+            binary_stream.write(encoded_output)
         except IOError as ex:
             if ex.errno != errno.EPIPE:
                 raise
