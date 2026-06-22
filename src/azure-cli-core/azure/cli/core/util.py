@@ -66,6 +66,29 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
     error_msg = getattr(ex, 'message', str(ex))
     exit_code = 1
 
+    def _contains_ssl_error(exception):
+        """Check if an exception or one of its wrapped exceptions is SSLError."""
+        stack = [exception]
+        seen = set()
+        while stack:
+            current = stack.pop()
+            if current is None:
+                continue
+            current_id = id(current)
+            if current_id in seen:
+                continue
+            seen.add(current_id)
+
+            if isinstance(current, SSLError):
+                return True
+
+            stack.extend([
+                getattr(current, 'inner_exception', None),
+                getattr(current, '__cause__', None),
+                getattr(current, '__context__', None)
+            ])
+        return False
+
     if isinstance(ex, azclierror.AzCLIError):
         az_error = ex
 
@@ -101,8 +124,12 @@ def handle_exception(ex):  # pylint: disable=too-many-locals, too-many-statement
             az_error = azclierror.UnclassifiedUserFault(ex)
 
     elif isinstance(ex, CLIError):
-        # TODO: Fine-grained analysis here
-        az_error = azclierror.UnclassifiedUserFault(error_msg)
+        if _contains_ssl_error(ex):
+            az_error = azclierror.AzureConnectionError(error_msg)
+            az_error.set_recommendation(SSLERROR_TEMPLATE)
+        else:
+            # TODO: Fine-grained analysis here
+            az_error = azclierror.UnclassifiedUserFault(error_msg)
 
     elif isinstance(ex, AzureError):
         if extract_common_error_message(ex):

@@ -5,6 +5,7 @@
 
 # pylint: disable=line-too-long
 from collections import namedtuple
+import io
 import os
 import sys
 import unittest
@@ -562,6 +563,28 @@ class TestHandleException(unittest.TestCase):
         # test behavior
         self.assertTrue(mock_logger_error.called)
         self.assertIn(err_msg, mock_logger_error.call_args[0][0])
+        self.assertEqual(ex_result, 1)
+
+    @mock.patch('azure.cli.core.azclierror.logger.error', autospec=True)
+    def test_handle_exception_clierror_with_ssl_cause(self, mock_logger_error):
+        from knack.util import CLIError
+        from requests.exceptions import SSLError
+
+        err_msg = "Failed to authenticate using the supplied token"
+        ssl_err_msg = "[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed"
+
+        try:
+            raise SSLError(ssl_err_msg)
+        except SSLError as ssl_error:
+            with mock.patch('sys.stderr', new=io.StringIO()) as mock_stderr:
+                try:
+                    raise CLIError(err_msg) from ssl_error
+                except CLIError as cli_error:
+                    ex_result = handle_exception(cli_error)
+
+        self.assertTrue(mock_logger_error.called)
+        self.assertIn(err_msg, mock_logger_error.call_args[0][0])
+        self.assertIn("Certificate verification failed.", mock_stderr.getvalue())
         self.assertEqual(ex_result, 1)
 
     @mock.patch('azure.cli.core.azclierror.logger.error', autospec=True)
