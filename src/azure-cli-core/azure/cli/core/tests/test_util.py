@@ -396,6 +396,22 @@ class TestUtils(unittest.TestCase):
             cli_ctx.cloud.endpoints.resource_manager = default_resource_manager
             cli_ctx.cloud.endpoints.active_directory_resource_id = default_ad_resource_id
 
+        # If --resource is explicitly provided, preserve the caller-provided URL.
+        default_resource_manager = cli_ctx.cloud.endpoints.resource_manager
+        try:
+            cli_ctx.cloud.endpoints.resource_manager = 'https://management.contoso.example/'
+            send_raw_request(
+                cli_ctx,
+                'GET',
+                full_arm_rest_url,
+                resource='https://management.core.windows.net/'
+            )
+            get_raw_token_mock.assert_called_with(mock.ANY, 'https://management.core.windows.net/')
+            request = send_mock.call_args[0][1]
+            self.assertEqual(request.url, full_arm_rest_url)
+        finally:
+            cli_ctx.cloud.endpoints.resource_manager = default_resource_manager
+
         # Test lookalike host is NOT mistaken for the trusted ARM endpoint via prefix matching.
         # The access token must NOT be attached to an attacker-controlled origin.
         for spoofed_host in ['https://management.azure.com.attacker', 'https://management.azure.com@attacker']:

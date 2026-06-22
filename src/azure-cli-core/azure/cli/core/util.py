@@ -1037,7 +1037,7 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
         # normalize to that cloud's ARM endpoint for sovereign/private cloud compatibility.
         uses_public_arm_endpoint = is_same_origin(url, AZURE_PUBLIC_ARM_ENDPOINT)
         active_cloud_is_public = is_same_origin(endpoints.resource_manager, AZURE_PUBLIC_ARM_ENDPOINT)
-        if uses_public_arm_endpoint and not active_cloud_is_public:
+        if uses_public_arm_endpoint and not active_cloud_is_public and not resource and not skip_authorization_header:
             url = _replace_url_origin(url, endpoints.resource_manager)
 
     # Replace common tokens with real values. It is for smooth experience if users copy and paste the url from
