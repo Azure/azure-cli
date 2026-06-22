@@ -308,7 +308,7 @@ class TestExtensionCommands(unittest.TestCase):
         """Test that update_extension succeeds when a previous installation was interrupted,
         leaving the extension directory in a partial state with no valid metadata."""
         # Simulate a partially-installed extension: the directory exists and contains a .dist-info
-        # directory that does NOT match the expected name pattern (azure_devops*.*-info), so
+        # directory that does NOT match the expected name pattern (myfirstcliextension*.*-info), so
         # get_metadata() returns None but get_all() still detects the extension directory.
         partial_ext_dir = os.path.join(self.ext_dir, MY_EXT_NAME)
         os.makedirs(partial_ext_dir)
