@@ -78,7 +78,7 @@ class TestArtifactToolHardlinkFallback(unittest.TestCase):
         Returns the args that were passed to run_artifacttool.
         """
         defaults = dict(
-            organization='https://dev.azure.com/TestOrg/',
+            organization='https://example.com/',
             project=None,
             feed='test-feed',
             package_name='test-package',
@@ -167,4 +167,3 @@ class TestArtifactToolHardlinkFallback(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
