@@ -24,6 +24,11 @@ examples:
 helps['container create'] = """
 type: command
 short-summary: Create a container group.
+long-summary: >
+    PowerShell and Windows Command Prompt can re-parse inline arguments before Azure CLI receives them.
+    If an environment variable value contains special characters such as double quotes or carets, prefer
+    using --file so the value is read from YAML instead of the shell. See
+    https://github.com/Azure/azure-cli/blob/dev/doc/quoting-issues-with-powershell.md for more details.
 examples:
   - name: Create a container in a container group with 1 core and 1Gb of memory.
     text: az container create -g MyResourceGroup --name myapp --image myimage:latest --cpu 1 --memory 1
@@ -37,6 +42,8 @@ examples:
     text: az container create -g MyResourceGroup --name myapp --image myimage:latest --command-line "echo hello" --restart-policy Never
   - name: Create a container in a container group with environment variables.
     text: az container create -g MyResourceGroup --name myapp --image myimage:latest --environment-variables key1=value1 key2=value2
+  - name: Create a container from a YAML file when environment variable values contain special characters.
+    text: az container create -g MyResourceGroup -f containerGroup.yaml
   - name: Create a container in a container group using container image from Azure Container Registry.
     text: az container create -g MyResourceGroup --name myapp --image myAcrRegistry.azurecr.io/myimage:latest --registry-password password
   - name: Create a container in a container group that mounts an Azure File share as volume.

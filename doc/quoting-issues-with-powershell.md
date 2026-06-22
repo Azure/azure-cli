@@ -184,3 +184,42 @@ You may also use `@-` to read from `stdin`:
 ```powershell
 Get-Content -Path manifest.json | az ad app create ... --required-resource-accesses "@-"
 ```
+
+## Best practice: use `--file` for container environment variables with special characters
+
+Inline `key=value` arguments for `az container create --environment-variables` can still be re-parsed by
+PowerShell and Command Prompt before Azure CLI receives them. Characters such as double quotes (`"`) and
+carets (`^`) are especially troublesome because `az` is launched through `az.cmd` on Windows.
+
+When an environment variable value contains these characters, the most reliable approach is to move the
+container definition into a YAML file and let Azure CLI expand `${ENV_NAME}` placeholders from the process
+environment:
+
+```yaml
+# containerGroup.yaml
+apiVersion: 2021-09-01
+location: westus
+name: myapp
+properties:
+  containers:
+    - name: myapp
+      properties:
+        image: mcr.microsoft.com/azuredocs/aci-helloworld
+        environmentVariables:
+          - name: APP_DB_PASSWORD
+            value: ${APP_DB_PASSWORD}
+        resources:
+          requests:
+            cpu: 1
+            memoryInGB: 1.5
+  osType: Linux
+  restartPolicy: Never
+```
+
+```powershell
+$env:APP_DB_PASSWORD = 'wada"wada^'
+az container create --resource-group MyResourceGroup --file containerGroup.yaml
+```
+
+If you must keep the inline flag, use PowerShell's stop-parsing symbol `--%` and escape the remaining text
+for Command Prompt syntax as described above.
