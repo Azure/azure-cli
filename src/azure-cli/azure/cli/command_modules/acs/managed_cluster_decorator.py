@@ -2367,11 +2367,24 @@ class AKSManagedClusterContext(BaseAKSContext):
         return skuName
 
     @staticmethod
-    def _raise_missing_vnet_subnet_for_outbound_type(outbound_type: str, sku_name: str) -> None:
+    def _raise_missing_vnet_subnet_for_outbound_type(
+        outbound_type: str, sku_name: str, decorator_mode: DecoratorMode
+    ) -> None:
         if outbound_type == CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING:
             subnet_requirement = "a route table with egress rules"
         else:
             subnet_requirement = "a NAT gateway with outbound ips"
+
+        if decorator_mode == DecoratorMode.UPDATE:
+            raise InvalidArgumentValueError(
+                "Updating --outbound-type to {outbound_type} is only supported for clusters created with "
+                "a custom virtual network (BYO VNet). Clusters using a managed virtual network cannot be "
+                "updated to this outbound type. Please refer to "
+                "https://learn.microsoft.com/en-us/azure/aks/egress-outboundtype#updating-outboundtype-after-cluster-creation "  # pylint:disable=line-too-long
+                "for more details.".format(
+                    outbound_type=outbound_type,
+                )
+            )
 
         if sku_name == CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC:
             raise RequiredArgumentMissingError(
@@ -2491,7 +2504,9 @@ class AKSManagedClusterContext(BaseAKSContext):
                 CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY,
             ]:
                 if not read_from_mc and self.get_vnet_subnet_id() in ["", None] and not byo_subnets_configured:
-                    self._raise_missing_vnet_subnet_for_outbound_type(outbound_type, skuName)
+                    self._raise_missing_vnet_subnet_for_outbound_type(
+                        outbound_type, skuName, self.decorator_mode
+                    )
             if outbound_type == CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY:
                 if self.get_vnet_subnet_id() not in ["", None] or byo_subnets_set:
                     raise InvalidArgumentValueError(

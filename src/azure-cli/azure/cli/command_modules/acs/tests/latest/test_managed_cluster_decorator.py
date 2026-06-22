@@ -2320,6 +2320,21 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             ctx_existing_byo.attach_mc(mc_existing_byo)
             self.assertEqual(ctx_existing_byo.get_outbound_type(), outbound_type)
 
+        ctx_update_managed_vnet = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"outbound_type": CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING}),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        ctx_update_managed_vnet.agentpool_context = mock.MagicMock()
+        ctx_update_managed_vnet.agentpool_context.get_vnet_subnet_id.return_value = None
+        ctx_update_managed_vnet.attach_mc(mc_14)
+        with self.assertRaisesRegex(
+            InvalidArgumentValueError,
+            "only supported for clusters created with a custom virtual network",
+        ):
+            ctx_update_managed_vnet.get_outbound_type()
+
         ctx_14_1 = AKSManagedClusterContext(
             self.cmd,
             AKSManagedClusterParamDict({
