@@ -206,8 +206,8 @@ properties:
       properties:
         image: mcr.microsoft.com/azuredocs/aci-helloworld
         environmentVariables:
-          - name: APP_DB_PASSWORD
-            value: ${APP_DB_PASSWORD}
+          - name: APP_MESSAGE
+            value: ${APP_MESSAGE}
         resources:
           requests:
             cpu: 1
@@ -220,7 +220,7 @@ Use single quotes when setting the PowerShell environment variable so both the e
 the caret are passed through literally:
 
 ```powershell
-$env:APP_DB_PASSWORD = 'wada"wada^'
+$env:APP_MESSAGE = 'wada"wada^'
 az container create --resource-group MyResourceGroup --file containerGroup.yaml
 ```
 

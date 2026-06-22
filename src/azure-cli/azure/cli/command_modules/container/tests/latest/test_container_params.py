@@ -13,17 +13,17 @@ from azure.cli.command_modules.container._params import _environment_variables_t
 class ContainerParamsTests(unittest.TestCase):
 
     def test_environment_variables_type_preserves_quotes_and_carets(self):
-        result = _environment_variables_type('APP_DB_PASSWORD=wada"wada^')
+        result = _environment_variables_type('APP_MESSAGE=wada"wada^')
 
         self.assertEqual(result, {
-            'name': 'APP_DB_PASSWORD',
+            'name': 'APP_MESSAGE',
             'value': 'wada"wada^'
         })
 
-    @mock.patch.dict('os.environ', {'APP_DB_PASSWORD': 'wada"wada^'}, clear=False)
+    @mock.patch.dict('os.environ', {'APP_MESSAGE': 'wada"wada^'}, clear=False)
     def test_yaml_env_var_constructor_preserves_quotes_and_carets(self):
         result = container_custom.yaml.safe_load("""
-value: ${APP_DB_PASSWORD}
+value: ${APP_MESSAGE}
 """)
 
         self.assertEqual(result['value'], 'wada"wada^')
