@@ -1113,12 +1113,7 @@ def _normalize_odata_next_link_url(url):
     non_empty_pairs = [(k, v) for k, v in query_pairs if k]
     if len(non_empty_pairs) != len(query_pairs):
         # Recover malformed forms like `?=token` or `?=old&=new` by treating the last value as $skiptoken.
-        if not non_empty_pairs:
-            if not query_pairs:
-                return url
-            non_empty_pairs = [('$skiptoken', query_pairs[-1][1])]
-
-        normalized_query = urlencode(non_empty_pairs, doseq=True)
+        normalized_query = urlencode(non_empty_pairs or [('$skiptoken', query_pairs[-1][1])], doseq=True)
         parsed_url = parsed_url._replace(query=normalized_query)
         return urlunsplit(parsed_url)
 
