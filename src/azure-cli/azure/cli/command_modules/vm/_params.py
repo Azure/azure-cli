@@ -187,7 +187,7 @@ def load_arguments(self, _):
     # region Disks
     with self.argument_context('disk') as c:
         # The `Standard` is used for backward compatibility to allow customers to keep their current behavior after changing the default values to Trusted Launch VMs in the future.
-        t_disk_security = ['TrustedLaunch', 'ConfidentialVM_DiskEncryptedWithPlatformKey', 'ConfidentialVM_DiskEncryptedWithCustomerKey', COMPATIBLE_SECURITY_TYPE_VALUE]
+        t_disk_security = ['TrustedLaunch', 'ConfidentialVM_VMGuestStateOnlyEncryptedWithPlatformKey', 'ConfidentialVM_DiskEncryptedWithPlatformKey', 'ConfidentialVM_DiskEncryptedWithCustomerKey', COMPATIBLE_SECURITY_TYPE_VALUE]
 
         c.argument('zone', zone_type, options_list=['--zone'])  # TODO: --size-gb currently has claimed -z. We can do a breaking change later if we want to.
         c.argument('disk_name', existing_disk_name, completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
