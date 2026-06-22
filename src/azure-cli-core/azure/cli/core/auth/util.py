@@ -53,7 +53,9 @@ def aad_error_handler(error, tenant=None, scopes=None, claims_challenge=None):
             "Only scopes pre-authorized by the API owner can be requested.\n"
             "To work around this limitation, authenticate using a service principal instead:\n"
             "  1. Create a service principal: az ad sp create-for-rbac\n"
-            "  2. Log in with the service principal:\n"
+            "  2. Grant the required API permissions to the service principal in the Azure portal "
+            "or with: az ad app permission add\n"
+            "  3. Log in with the service principal:\n"
             "     az login --service-principal -u <CLIENT_ID> -p <CLIENT_SECRET_OR_CERT> "
             "--tenant <TENANT_ID>"
         )
