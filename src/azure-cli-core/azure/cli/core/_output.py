@@ -44,7 +44,7 @@ class AzOutputProducer(knack.output.OutputProducer):
                                         encoding)
             fallback_output = output.encode('ascii', 'ignore').decode('ascii')
             if binary_stream is not None:
-                binary_stream.write(fallback_output.encode(encoding or 'utf-8', 'ignore'))
+                binary_stream.write(fallback_output.encode(encoding, 'ignore'))
             else:
                 stream.write(fallback_output)
 
