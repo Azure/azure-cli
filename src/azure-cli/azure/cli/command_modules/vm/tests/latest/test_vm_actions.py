@@ -620,7 +620,7 @@ class TestActions(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.vm.operations.vm.VMCreate')
     @mock.patch('azure.cli.command_modules.vm.operations.vm.convert_show_result_to_snake_case')
-    def test_update_vm_os_disk_without_vm_id(self, convert_show_result_to_snake_case_mock, vm_create_mock):
+    def test_update_vm_os_disk_without_vm_id_in_parameters(self, convert_show_result_to_snake_case_mock, vm_create_mock):
         cmd = mock.MagicMock()
         cmd.cli_ctx = DummyCli()
         cmd.cli_ctx.data['subscription_id'] = '00000000-0000-0000-0000-000000000000'
@@ -649,14 +649,14 @@ class TestActions(unittest.TestCase):
                 }
             }
         }
-        vm_create_instance = mock.MagicMock()
-        vm_create_instance.return_value = {
+        vm_create_instance_mock = mock.MagicMock()
+        vm_create_instance_mock.return_value = {
             'id': '/subscriptions/00000000-0000-0000-0000-000000000000/'
                   'resourceGroups/test-rg/providers/Microsoft.Compute/virtualMachines/test-vm',
             'name': 'test-vm',
             'type': 'Microsoft.Compute/virtualMachines'
         }
-        vm_create_mock.return_value = vm_create_instance
+        vm_create_mock.return_value = vm_create_instance_mock
 
         result = update_vm(
             cmd,
@@ -667,8 +667,8 @@ class TestActions(unittest.TestCase):
         )
 
         self.assertEqual(result['name'], 'test-vm')
-        vm_create_instance.assert_called_once()
-        command_args = vm_create_instance.call_args.kwargs['command_args']
+        vm_create_instance_mock.assert_called_once()
+        command_args = vm_create_instance_mock.call_args.kwargs['command_args']
         expected_disk_id = (
             '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-rg/'
             'providers/Microsoft.Compute/disks/new-os-disk'
