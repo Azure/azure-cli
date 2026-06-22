@@ -9863,7 +9863,7 @@ class SqlServerUpdateRetentionDaysUnitTest(unittest.TestCase):
     All tests below call the real server_update() implementation from custom.py.
     """
 
-    def _make_instance(self, retention_days=-1, identity=None):
+    def _make_instance(self, retention_days, identity=None):
         """Return a lightweight mock of the Server object returned by the Azure SQL GET call.
 
         Only the two properties that server_update reads in a way that matters for this
@@ -9881,7 +9881,8 @@ class SqlServerUpdateRetentionDaysUnitTest(unittest.TestCase):
         This is the primary regression test for Azure/azure-cli#32726: legacy servers
         return retention_days=-1 from the API; re-sending -1 causes an InvalidParameterValue
         error.  After the fix, server_update must clear the value to None so it is omitted
-        from the PUT request body.
+        from the PUT request body.  The test also verifies that the SystemAssigned identity
+        is correctly applied, since that is the operation being performed.
         """
         instance = self._make_instance(retention_days=-1)
 
@@ -9890,6 +9891,10 @@ class SqlServerUpdateRetentionDaysUnitTest(unittest.TestCase):
         self.assertIsNone(result.retention_days,
                           'retention_days must be None when --soft-delete-retention-days is omitted '
                           'to avoid InvalidParameterValue error')
+        self.assertIsNotNone(result.identity,
+                             'identity must be set when --assign_identity is used')
+        self.assertEqual(result.identity.type, ResourceIdType.system_assigned.value,
+                         'identity type must be SystemAssigned when --assign_identity is used')
 
     def test_update_without_soft_delete_param_clears_retention_days(self):
         """Any server update without --soft-delete-retention-days must set retention_days=None."""
