@@ -51,9 +51,9 @@ class SqlManagedInstanceUpdateTest(unittest.TestCase):
                 cmd=cmd,
                 instance=instance,
                 resource_group_name='rg',
-                administrator_login_password='new-password')
+                administrator_login_password='fake-password-value')
 
-        self.assertEqual(updated.administrator_login_password, 'new-password')
+        self.assertEqual(updated.administrator_login_password, 'fake-password-value')
         self.assertIsNone(updated.requested_logical_availability_zone)
         self.assertNotIn('requestedLogicalAvailabilityZone',
                          updated.serialize().get('properties', {}))
