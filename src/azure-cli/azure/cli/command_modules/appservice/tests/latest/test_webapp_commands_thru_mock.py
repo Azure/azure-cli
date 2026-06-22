@@ -1430,6 +1430,79 @@ class TestOneDeployScmCache(unittest.TestCase):
         is_flex_mock.assert_called_once_with(cli_ctx, 'myRG', 'myApp')
 
 
+class TestMakeOneDeployRequest(unittest.TestCase):
+    """Tests for _make_onedeploy_request error handling."""
+
+    def _make_params(self):
+        from azure.cli.command_modules.appservice.custom import OneDeployParams
+        params = OneDeployParams()
+        params.cmd = mock.MagicMock()
+        params.cmd.cli_ctx = mock.MagicMock()
+        params.resource_group_name = 'myRG'
+        params.webapp_name = 'myApp'
+        params.slot = None
+        params.src_url = 'https://example.blob.core.windows.net/app.zip'
+        params.src_path = None
+        params.artifact_type = 'zip'
+        params.is_async_deployment = False
+        params.timeout = None
+        params.track_status = True
+        params.is_linux_webapp = False
+        params.is_functionapp = True
+        params.enable_kudu_warmup = False
+        params._cached_scm_headers = None
+        params._cached_site = None
+        return params
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_visit_url', return_value='https://myapp.azurewebsites.net')
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_ondeploy_headers', return_value={})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_onedeploy_status_url', return_value='https://status-url')
+    @mock.patch('azure.cli.command_modules.appservice.custom._build_onedeploy_url', return_value='https://deploy-url')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_onedeploy_request_body', return_value=(None, None))
+    def test_make_onedeploy_request_handles_json_decode_error(
+            self, _body_mock, _url_mock, _status_url_mock, _headers_mock,
+            send_raw_mock, _visit_url_mock):
+        """Verify that _make_onedeploy_request handles JSONDecodeError gracefully
+        when the deployment response contains extra/invalid data (issue #32443)."""
+        from azure.cli.command_modules.appservice.custom import _make_onedeploy_request
+
+        resp_mock = mock.MagicMock()
+        resp_mock.status_code = 200
+        resp_mock.headers = {'content-type': 'application/json'}
+        resp_mock.json.side_effect = ValueError("Extra data: line 1 column 1253 (char 1252)")
+        send_raw_mock.return_value = resp_mock
+
+        params = self._make_params()
+        # Should not raise despite json() failing
+        result = _make_onedeploy_request(params)
+        self.assertIsNone(result)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_visit_url', return_value='https://myapp.azurewebsites.net')
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_ondeploy_headers', return_value={})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_onedeploy_status_url', return_value='https://status-url')
+    @mock.patch('azure.cli.command_modules.appservice.custom._build_onedeploy_url', return_value='https://deploy-url')
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_onedeploy_request_body', return_value=(None, None))
+    def test_make_onedeploy_request_returns_properties_on_valid_json(
+            self, _body_mock, _url_mock, _status_url_mock, _headers_mock,
+            send_raw_mock, _visit_url_mock):
+        """Verify that _make_onedeploy_request returns the properties dict on a valid JSON response."""
+        from azure.cli.command_modules.appservice.custom import _make_onedeploy_request
+
+        resp_mock = mock.MagicMock()
+        resp_mock.status_code = 200
+        resp_mock.headers = {'content-type': 'application/json'}
+        resp_mock.json.return_value = {
+            "properties": {"provisioningState": "Succeeded", "status": 4}
+        }
+        send_raw_mock.return_value = resp_mock
+
+        params = self._make_params()
+        result = _make_onedeploy_request(params)
+        self.assertEqual(result, {"provisioningState": "Succeeded", "status": 4})
+
+
 class TestOneDeploySiteCache(unittest.TestCase):
     """Tests for the per-invocation Site cache on OneDeployParams.
 

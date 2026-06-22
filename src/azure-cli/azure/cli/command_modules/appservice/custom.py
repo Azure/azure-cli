@@ -11583,10 +11583,15 @@ def _make_onedeploy_request(params):
             logger.info('Server response: %s', response_body)
         else:
             if 'application/json' in response.headers.get('content-type', ""):
-                state = response.json().get("properties", {}).get("provisioningState")
-                if state:
-                    logger.warning("Deployment status is: \"%s\"", state)
-                response_body = response.json().get("properties", {})
+                try:
+                    response_json = response.json()
+                    state = response_json.get("properties", {}).get("provisioningState")
+                    if state:
+                        logger.warning("Deployment status is: \"%s\"", state)
+                    response_body = response_json.get("properties", {})
+                except ValueError:
+                    logger.warning("Could not parse the deployment response as JSON. "
+                                   "Response text: %s", response.text)
         logger.warning("Deployment has completed successfully")
         logger.warning("You can visit your app at: %s", _get_visit_url(params))
         return response_body
