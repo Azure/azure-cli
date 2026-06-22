@@ -15,7 +15,9 @@ class AzOutputProducer(knack.output.OutputProducer):
         return format_type in self._FORMAT_DICT
 
     def out(self, obj, formatter=None, out_file=None):
-        if formatter != self._FORMAT_DICT['tsv']:
+        tsv_formatter = self._FORMAT_DICT['tsv']
+        is_tsv_formatter = formatter == tsv_formatter or getattr(formatter, '__name__', None) == tsv_formatter.__name__
+        if not is_tsv_formatter:
             return super().out(obj, formatter=formatter, out_file=out_file)
 
         output = formatter(obj)
@@ -30,6 +32,7 @@ class AzOutputProducer(knack.output.OutputProducer):
         except IOError as ex:
             if ex.errno != errno.EPIPE:
                 raise
+            return
         except UnicodeEncodeError:
             knack.output.logger.warning("Unable to encode TSV output with %s encoding. Unsupported characters are discarded.",
                                         encoding)
