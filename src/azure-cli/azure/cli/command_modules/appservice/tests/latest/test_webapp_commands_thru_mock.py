@@ -1647,7 +1647,7 @@ class TestMakeOneDeployRequestJsonParsing(unittest.TestCase):
             self, send_raw_request_mock, _body_mock, _url_mock, _status_url_mock, _headers_mock, _visit_url_mock):
         """When the response contains trailing non-JSON data after the JSON payload,
         the function should extract the valid JSON via raw_decode and not crash."""
-        import json as _json
+        import json
         from azure.cli.command_modules.appservice.custom import _make_onedeploy_request
 
         valid_json = '{"properties": {"provisioningState": "Succeeded"}}'
@@ -1659,8 +1659,8 @@ class TestMakeOneDeployRequestJsonParsing(unittest.TestCase):
         mock_response.headers = {'content-type': 'application/json'}
         mock_response.text = response_text
         # Simulate the JSONDecodeError that requests raises for extra data
-        mock_response.json.side_effect = ValueError(
-            "Extra data: line 1 column {} (char {})".format(len(valid_json) + 1, len(valid_json))
+        mock_response.json.side_effect = json.JSONDecodeError(
+            "Extra data", response_text, len(valid_json)
         )
         send_raw_request_mock.return_value = mock_response
 
@@ -1681,13 +1681,15 @@ class TestMakeOneDeployRequestJsonParsing(unittest.TestCase):
             self, send_raw_request_mock, _body_mock, _url_mock, _status_url_mock, _headers_mock, _visit_url_mock):
         """When the response body is not valid JSON at all, the function should log a
         warning and return None (response_body is never set) rather than crashing."""
+        import json
         from azure.cli.command_modules.appservice.custom import _make_onedeploy_request
 
         mock_response = mock.MagicMock()
         mock_response.status_code = 200
         mock_response.headers = {'content-type': 'application/json'}
-        mock_response.text = '<html><body>not json at all</body></html>'
-        mock_response.json.side_effect = ValueError("No JSON object could be decoded")
+        not_json = '<html><body>not json at all</body></html>'
+        mock_response.text = not_json
+        mock_response.json.side_effect = json.JSONDecodeError("No JSON object could be decoded", not_json, 0)
         send_raw_request_mock.return_value = mock_response
 
         params = self._make_params()

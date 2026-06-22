@@ -11503,7 +11503,7 @@ def _warmup_kudu_and_get_cookie_internal(params):
 
 
 def _make_onedeploy_request(params):
-    import json as _json
+    import json
     import requests
     from azure.cli.core.util import should_disable_connection_verify
 
@@ -11591,7 +11591,7 @@ def _make_onedeploy_request(params):
                     # after the JSON payload.  raw_decode() reads only the leading valid JSON
                     # and ignores whatever follows it.
                     try:
-                        response_json, _ = _json.JSONDecoder().raw_decode(response.text)
+                        response_json, _ = json.JSONDecoder().raw_decode(response.text)
                         logger.warning("Deployment response contained extra non-JSON data; "
                                        "extracted JSON payload successfully.")
                     except (ValueError, TypeError):
