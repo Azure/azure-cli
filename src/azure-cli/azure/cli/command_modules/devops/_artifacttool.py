@@ -99,16 +99,18 @@ def _get_artifacttool_dir(organization):
         versions = [d for d in os.listdir(artifacttool_root)
                     if os.path.isdir(os.path.join(artifacttool_root, d))]
         if versions:
-            # Sort by the version suffix (last underscore-separated segment) using semantic versioning
+            # Sort by the version suffix (last underscore-separated segment) using semantic versioning.
+            # Return a tuple (is_parsed, version_or_str) to ensure consistent type comparison when sorting:
+            # parsed versions sort before unparseable strings, and unparseable strings sort lexicographically.
             def _version_key(dir_name):
                 parts = dir_name.rsplit('_', 1)
                 version_str = parts[-1] if len(parts) > 1 else dir_name
                 try:
                     from packaging.version import Version  # pylint: disable=import-outside-toplevel
-                    return Version(version_str)
+                    return (1, Version(version_str))
                 except (ImportError, ValueError) as ex:
                     logger.debug("Could not parse version '%s' as semantic version: %s", version_str, ex)
-                    return version_str
+                    return (0, version_str)
 
             latest = sorted(versions, key=_version_key)[-1]
             release_dir = os.path.join(artifacttool_root, latest)
@@ -200,7 +202,7 @@ def _log_message(json_line):
     if json_line is not None and '@m' in json_line:
         log_level = json_line.get('@l', 'Information')
         message = json_line['@m']
-        if log_level in ["Critical", "Error"]:
+        if log_level in {"Critical", "Error"}:
             ex = json_line.get('@x')
             if ex:
                 message = "{}\n{}".format(message, ex)

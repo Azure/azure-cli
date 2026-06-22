@@ -50,7 +50,7 @@ def download_package(feed,
     :type feed: str
     :param name: Name of the package, e.g. 'foo-package'.
     :type name: str
-    :param version: Version of the package, e.g. 1.0.0.
+    :param version: Version of the package, e.g. '1.0.0'.
     :type version: str
     :param path: Directory to place the package contents.
     :type path: str

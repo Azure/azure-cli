@@ -58,7 +58,7 @@ class TestArtifactsUniversal(unittest.TestCase):
             organization=self._TEST_ORGANIZATION,
         )
         self.mock_run.assert_called_once()
-        args = self.mock_run.call_args[0][1]
+        args = self.mock_run.call_args.args[1]
         self.assertIn('--no-hardlinks', args)
 
     def test_download_package_without_no_hardlinks_flag(self):
@@ -73,7 +73,7 @@ class TestArtifactsUniversal(unittest.TestCase):
             organization=self._TEST_ORGANIZATION,
         )
         self.mock_run.assert_called_once()
-        args = self.mock_run.call_args[0][1]
+        args = self.mock_run.call_args.args[1]
         self.assertNotIn('--no-hardlinks', args)
 
     def test_download_package_with_project_scope(self):
@@ -89,7 +89,7 @@ class TestArtifactsUniversal(unittest.TestCase):
             project=self._TEST_PROJECT,
         )
         self.mock_run.assert_called_once()
-        args = self.mock_run.call_args[0][1]
+        args = self.mock_run.call_args.args[1]
         self.assertIn('--project', args)
         self.assertIn(self._TEST_PROJECT, args)
 
@@ -105,7 +105,7 @@ class TestArtifactsUniversal(unittest.TestCase):
             organization=self._TEST_ORGANIZATION,
         )
         self.mock_run.assert_called_once()
-        args = self.mock_run.call_args[0][1]
+        args = self.mock_run.call_args.args[1]
         self.assertIn('--filter', args)
         self.assertIn(self._TEST_FILTER, args)
 
@@ -134,7 +134,7 @@ class TestArtifactsUniversal(unittest.TestCase):
             path=self._TEST_PATH,
             organization=self._TEST_ORGANIZATION,
         )
-        args = self.mock_run.call_args[0][1]
+        args = self.mock_run.call_args.args[1]
         self.assertIn('universal', args)
         self.assertIn('download', args)
         self.assertIn('--service', args)
@@ -163,7 +163,7 @@ class TestArtifactsUniversal(unittest.TestCase):
             path=self._TEST_PATH,
             organization=self._TEST_ORGANIZATION,
         )
-        args = self.mock_run.call_args[0][1]
+        args = self.mock_run.call_args.args[1]
         self.assertIn('universal', args)
         self.assertIn('publish', args)
         self.assertIn('--service', args)
@@ -185,7 +185,7 @@ class TestArtifactsUniversal(unittest.TestCase):
             description=self._TEST_DESCRIPTION,
             organization=self._TEST_ORGANIZATION,
         )
-        args = self.mock_run.call_args[0][1]
+        args = self.mock_run.call_args.args[1]
         self.assertIn('--description', args)
         self.assertIn(self._TEST_DESCRIPTION, args)
 
@@ -201,7 +201,7 @@ class TestArtifactsUniversal(unittest.TestCase):
             organization=self._TEST_ORGANIZATION,
             project=self._TEST_PROJECT,
         )
-        args = self.mock_run.call_args[0][1]
+        args = self.mock_run.call_args.args[1]
         self.assertIn('--project', args)
         self.assertIn(self._TEST_PROJECT, args)
 
