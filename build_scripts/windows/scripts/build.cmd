@@ -189,14 +189,22 @@ copy %REPO_ROOT%\build_scripts\windows\resources\ThirdPartyNotices.txt %BUILDING
 copy %REPO_ROOT%\NOTICE.txt %BUILDING_DIR%
 
 REM Remove .py and only deploy .pyc files
+REM The '.cpython-3XX' tag appended to pyc filenames inside __pycache__ is 12 chars for Python 3.10-3.99.
+REM Validate this assumption before processing; if it ever changes (e.g., Python 3.100 would be 13 chars),
+REM the BASE_FILENAME truncation below must be updated accordingly.
+for /f %%l in ('%BUILDING_DIR%\python.exe -c "import sys; print(len(f'.cpython-{sys.version_info.major}{sys.version_info.minor}'))"') do set PYCTAG_LEN=%%l
+if "!PYCTAG_LEN!" NEQ "12" (
+    echo ERROR: Python bytecode tag length is !PYCTAG_LEN! but 12 was expected. Update the truncation constant in build.cmd.
+    goto ERROR
+)
 pushd %BUILDING_DIR%\Lib\site-packages
 for /f %%f in ('dir /b /s *.pyc') do (
     set PARENT_DIR=%%~df%%~pf..
     echo !PARENT_DIR! | findstr /C:\Lib\site-packages\pip\ 1>nul
     if !errorlevel! neq  0 (
-        REM Only take the file name without 'pyc' extension: e.g., (same below) __init__.cpython-310
+        REM Only take the file name without 'pyc' extension: e.g., (same below) __init__.cpython-314
         set FILENAME=%%~nf
-        REM Truncate the '.cpython-310' postfix which is 12 chars long: __init__
+        REM Truncate the '.cpython-3XX' postfix which is 12 chars long (for Python 3.10-3.99): __init__
         REM https://stackoverflow.com/a/636391/2199657
         set BASE_FILENAME=!FILENAME:~0,-12!
         REM __init__.pyc
