@@ -52,6 +52,7 @@ DISALLOWED_USER_NAMES = [
 #   - https://azcliprod.blob.core.windows.net/cli/{package}/setup.py (CLI versions)
 #   - https://azcliprod.blob.core.windows.net/cli/vm/aliases.json (VM image aliases)
 AME_STORAGE_BASE_URL = "https://azcliprod.blob.core.windows.net/cli"
+# Keep trailing slash for consistency with other endpoint constants; origin checks are slash-insensitive.
 AZURE_PUBLIC_ARM_ENDPOINT = "https://management.azure.com/"
 
 
