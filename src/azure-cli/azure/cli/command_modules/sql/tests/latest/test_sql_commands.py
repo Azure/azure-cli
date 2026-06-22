@@ -32,7 +32,8 @@ from azure.cli.command_modules.sql.custom import (
     ClientAuthenticationType,
     ClientType,
     ComputeModelType,
-    ResourceIdType)
+    ResourceIdType,
+    server_update)
 from datetime import datetime, timedelta
 
 # Constants
@@ -9846,3 +9847,82 @@ class SqlServerDeletedServerScenarioTest(ScenarioTest):
             # Clean up both resource groups
             self.cmd('group delete -n {} --yes --no-wait'.format(rg1_name))
             self.cmd('group delete -n {} --yes --no-wait'.format(rg2_name))
+
+
+class SqlServerUpdateRetentionDaysUnitTest(unittest.TestCase):
+    """Unit tests for server_update to verify fix for GitHub issue #32726.
+
+    When 'az sql server update --assign_identity' is run against a legacy server
+    that has retention_days=-1, the CLI was re-sending that invalid value to the API,
+    causing: ERROR: (InvalidParameterValue) Invalid value given for parameter RetentionDays.
+
+    The fix ensures retention_days is set to None (omitted from the request body)
+    when --soft-delete-retention-days is not explicitly provided.
+    """
+
+    class _MockServerInstance:
+        """Minimal mock of a Server object as returned by the Azure SQL API GET call."""
+
+        def __init__(self, retention_days=-1):
+            self.retention_days = retention_days
+            self.identity = None
+            self.administrator_login_password = None
+            self.minimal_tls_version = '1.2'
+            self.public_network_access = 'Enabled'
+            self.primary_user_assigned_identity_id = None
+            self.key_id = None
+            self.federated_client_id = None
+
+    def test_assign_identity_clears_legacy_retention_days(self):
+        """--assign_identity without --soft-delete-retention-days must set retention_days=None.
+
+        This is the primary regression test for GitHub issue #32726: legacy servers
+        return retention_days=-1 from the API; re-sending -1 causes an InvalidParameterValue
+        error.  After the fix, server_update must clear the value to None so it is omitted
+        from the PUT request body.
+        """
+        instance = self._MockServerInstance(retention_days=-1)
+
+        result = server_update(instance=instance, assign_identity=True)
+
+        self.assertIsNone(result.retention_days,
+                          'retention_days must be None (not -1) when --soft-delete-retention-days '
+                          'is omitted, to prevent InvalidParameterValue from the API')
+
+    def test_update_without_soft_delete_param_clears_retention_days(self):
+        """Any server update without --soft-delete-retention-days must set retention_days=None."""
+        instance = self._MockServerInstance(retention_days=-1)
+
+        result = server_update(instance=instance)
+
+        self.assertIsNone(result.retention_days,
+                          'retention_days must be None when --soft-delete-retention-days is omitted')
+
+    def test_explicit_soft_delete_retention_days_is_applied(self):
+        """When --soft-delete-retention-days N is given, retention_days must be set to N."""
+        instance = self._MockServerInstance(retention_days=-1)
+
+        result = server_update(instance=instance, soft_delete_retention_days=5)
+
+        self.assertEqual(result.retention_days, 5,
+                         'retention_days must equal the value passed via --soft-delete-retention-days')
+
+    def test_soft_delete_retention_days_zero_disables_soft_delete(self):
+        """--soft-delete-retention-days 0 must set retention_days=0 to disable soft delete."""
+        instance = self._MockServerInstance(retention_days=7)
+
+        result = server_update(instance=instance, soft_delete_retention_days=0)
+
+        self.assertEqual(result.retention_days, 0,
+                         'retention_days must be 0 when soft delete is explicitly disabled')
+
+    def test_assign_identity_sets_system_assigned_identity(self):
+        """--assign_identity must set instance.identity to SystemAssigned."""
+        instance = self._MockServerInstance(retention_days=-1)
+
+        result = server_update(instance=instance, assign_identity=True)
+
+        self.assertIsNotNone(result.identity,
+                             'identity must be set when --assign_identity is used')
+        self.assertEqual(result.identity.type, ResourceIdType.system_assigned.value,
+                         'identity type must be SystemAssigned when --assign_identity is used')
