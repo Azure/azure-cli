@@ -1036,6 +1036,7 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
     profile = Profile(cli_ctx=cli_ctx)
     if '{subscriptionId}' in url:
         url = url.replace('{subscriptionId}', cli_ctx.data['subscription_id'] or profile.get_subscription_id())
+    url = _normalize_odata_next_link_url(url)
 
     # Prepare the Bearer token for `Authorization` header
     if not skip_authorization_header and url.lower().startswith('https://'):
@@ -1092,6 +1093,34 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
             for chunk in r.iter_content(chunk_size=128):
                 fd.write(chunk)
     return r
+
+
+def _normalize_odata_next_link_url(url):
+    """Normalize malformed OData nextLink URLs caused by shell expansion on `$skiptoken`."""
+    from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
+    try:
+        parsed_url = urlsplit(url)
+    except (AttributeError, TypeError, ValueError):
+        return url
+
+    if not parsed_url.query:
+        return url
+
+    query_pairs = parse_qsl(parsed_url.query, keep_blank_values=True)
+    if not query_pairs:
+        return url
+
+    non_empty_pairs = [(k, v) for k, v in query_pairs if k]
+    if len(non_empty_pairs) != len(query_pairs):
+        # Recover malformed forms like `?=token` or `?=old&=new` by treating the last value as $skiptoken.
+        if not non_empty_pairs:
+            non_empty_pairs = [('$skiptoken', query_pairs[-1][1])]
+
+        normalized_query = urlencode(non_empty_pairs, doseq=True)
+        parsed_url = parsed_url._replace(query=normalized_query)
+        return urlunsplit(parsed_url)
+
+    return url
 
 
 def _extract_subscription_id(url):

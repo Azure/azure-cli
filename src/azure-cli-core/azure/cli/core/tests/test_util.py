@@ -17,7 +17,8 @@ from azure.cli.core.util import \
     (get_file_json, truncate_text, shell_safe_json_parse, b64_to_hex, hash_string, random_string,
      open_page_in_browser, can_launch_browser, handle_exception, ConfiguredDefaultSetter, send_raw_request,
      should_disable_connection_verify, parse_proxy_resource_id, get_az_user_agent, get_az_rest_user_agent,
-    _get_parent_proc_name, is_wsl, run_cmd, run_az_cmd, roughly_parse_command, is_same_origin)
+    _get_parent_proc_name, is_wsl, run_cmd, run_az_cmd, roughly_parse_command, is_same_origin,
+    _normalize_odata_next_link_url)
 from azure.cli.core.mock import DummyCli
 
 
@@ -439,6 +440,27 @@ class TestUtils(unittest.TestCase):
         self.assertFalse(is_same_origin('not a url', endpoint))
         self.assertFalse(is_same_origin('', endpoint))
         self.assertFalse(is_same_origin('https://management.azure.com/path', 'not a url'))
+
+    def test_normalize_odata_next_link_url(self):
+        self.assertEqual(
+            _normalize_odata_next_link_url('https://graph.microsoft.com/v1.0/servicePrincipals?=token'),
+            'https://graph.microsoft.com/v1.0/servicePrincipals?%24skiptoken=token'
+        )
+
+        self.assertEqual(
+            _normalize_odata_next_link_url('https://graph.microsoft.com/v1.0/servicePrincipals?=old&=new'),
+            'https://graph.microsoft.com/v1.0/servicePrincipals?%24skiptoken=new'
+        )
+
+        self.assertEqual(
+            _normalize_odata_next_link_url('https://graph.microsoft.com/v1.0/servicePrincipals?=old&$skiptoken=new'),
+            'https://graph.microsoft.com/v1.0/servicePrincipals?%24skiptoken=new'
+        )
+
+        self.assertEqual(
+            _normalize_odata_next_link_url('https://graph.microsoft.com/v1.0/servicePrincipals?$skiptoken=token'),
+            'https://graph.microsoft.com/v1.0/servicePrincipals?$skiptoken=token'
+        )
 
     @mock.patch("psutil.Process")
     def test_get_parent_proc_name(self, mock_process_type):
