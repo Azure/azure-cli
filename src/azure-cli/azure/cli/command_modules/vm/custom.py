@@ -1875,7 +1875,7 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
                 disk_resource_group = parse_resource_id(vm["id"]).get("resource_group", None)
             if not disk_resource_group:
                 raise RequiredArgumentMissingError(
-                    "Please provide --resource-group for --os-disk <disk-name> when VM resource group cannot be inferred."
+                    f"Please provide --resource-group for --os-disk {os_disk} when VM resource group cannot be inferred."
                 )
             disk_id = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
                                   resource_group=disk_resource_group,

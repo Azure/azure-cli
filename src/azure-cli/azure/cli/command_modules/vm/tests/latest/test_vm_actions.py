@@ -770,7 +770,7 @@ class TestActions(unittest.TestCase):
         }
         vm_create_mock.return_value = mock.MagicMock()
 
-        with self.assertRaisesRegex(RequiredArgumentMissingError, 'Please provide --resource-group for --os-disk <disk-name>'):
+        with self.assertRaisesRegex(RequiredArgumentMissingError, 'Please provide --resource-group for --os-disk new-os-disk'):
             update_vm(
                 cmd,
                 resource_group_name=None,
