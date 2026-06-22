@@ -44,6 +44,14 @@ class TestArtifactsUniversal(unittest.TestCase):
         self.patcher_get_dir.stop()
         self.patcher_get_pat.stop()
 
+    def _get_tool_args(self):
+        """Return the artifacttool CLI args list from the last mock call.
+
+        `_run_artifacttool` is called as `_run_artifacttool(organization, args, ...)`,
+        so the CLI args list is the second positional argument (index 1).
+        """
+        return self.mock_run.call_args.args[1]
+
     # ---- download_package tests ----
 
     def test_download_package_passes_no_hardlinks_flag(self):
@@ -58,8 +66,7 @@ class TestArtifactsUniversal(unittest.TestCase):
             organization=self._TEST_ORGANIZATION,
         )
         self.mock_run.assert_called_once()
-        args = self.mock_run.call_args.args[1]  # args[1] is the artifacttool CLI args list: _run_artifacttool(organization, args, ...)
-        self.assertIn('--no-hardlinks', args)
+        self.assertIn('--no-hardlinks', self._get_tool_args())
 
     def test_download_package_without_no_hardlinks_flag(self):
         """Verify that --no-hardlinks is NOT passed when the flag is not set."""
@@ -73,8 +80,7 @@ class TestArtifactsUniversal(unittest.TestCase):
             organization=self._TEST_ORGANIZATION,
         )
         self.mock_run.assert_called_once()
-        args = self.mock_run.call_args.args[1]  # args[1] is the artifacttool CLI args list: _run_artifacttool(organization, args, ...)
-        self.assertNotIn('--no-hardlinks', args)
+        self.assertNotIn('--no-hardlinks', self._get_tool_args())
 
     def test_download_package_with_project_scope(self):
         """Verify project scope download includes --project."""
@@ -89,7 +95,7 @@ class TestArtifactsUniversal(unittest.TestCase):
             project=self._TEST_PROJECT,
         )
         self.mock_run.assert_called_once()
-        args = self.mock_run.call_args.args[1]  # args[1] is the artifacttool CLI args list: _run_artifacttool(organization, args, ...)
+        args = self._get_tool_args()
         self.assertIn('--project', args)
         self.assertIn(self._TEST_PROJECT, args)
 
@@ -105,7 +111,7 @@ class TestArtifactsUniversal(unittest.TestCase):
             organization=self._TEST_ORGANIZATION,
         )
         self.mock_run.assert_called_once()
-        args = self.mock_run.call_args.args[1]  # args[1] is the artifacttool CLI args list: _run_artifacttool(organization, args, ...)
+        args = self._get_tool_args()
         self.assertIn('--filter', args)
         self.assertIn(self._TEST_FILTER, args)
 
@@ -134,7 +140,7 @@ class TestArtifactsUniversal(unittest.TestCase):
             path=self._TEST_PATH,
             organization=self._TEST_ORGANIZATION,
         )
-        args = self.mock_run.call_args.args[1]  # args[1] is the artifacttool CLI args list: _run_artifacttool(organization, args, ...)
+        args = self._get_tool_args()
         self.assertIn('universal', args)
         self.assertIn('download', args)
         self.assertIn('--service', args)
@@ -163,7 +169,7 @@ class TestArtifactsUniversal(unittest.TestCase):
             path=self._TEST_PATH,
             organization=self._TEST_ORGANIZATION,
         )
-        args = self.mock_run.call_args.args[1]  # args[1] is the artifacttool CLI args list: _run_artifacttool(organization, args, ...)
+        args = self._get_tool_args()
         self.assertIn('universal', args)
         self.assertIn('publish', args)
         self.assertIn('--service', args)
@@ -185,7 +191,7 @@ class TestArtifactsUniversal(unittest.TestCase):
             description=self._TEST_DESCRIPTION,
             organization=self._TEST_ORGANIZATION,
         )
-        args = self.mock_run.call_args.args[1]  # args[1] is the artifacttool CLI args list: _run_artifacttool(organization, args, ...)
+        args = self._get_tool_args()
         self.assertIn('--description', args)
         self.assertIn(self._TEST_DESCRIPTION, args)
 
@@ -201,7 +207,7 @@ class TestArtifactsUniversal(unittest.TestCase):
             organization=self._TEST_ORGANIZATION,
             project=self._TEST_PROJECT,
         )
-        args = self.mock_run.call_args.args[1]  # args[1] is the artifacttool CLI args list: _run_artifacttool(organization, args, ...)
+        args = self._get_tool_args()
         self.assertIn('--project', args)
         self.assertIn(self._TEST_PROJECT, args)
 
