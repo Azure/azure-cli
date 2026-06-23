@@ -1971,6 +1971,44 @@ examples:
     text: az webapp create-remote-connection --name MyWebApp --resource-group MyResourceGroup
 """
 
+helps['webapp exec'] = """
+type: command
+short-summary: Interact with a Linux web app container via command execution or an interactive shell session.
+long-summary: >
+    Interact with your Linux web app container using two modes.
+    This command is only supported for Linux App Service plans.
+    'execute' runs a command in the container and returns immediately without waiting for completion or output.
+    Redirect to a file to capture results (see examples).
+    'shell' starts an interactive shell session with the main webapp container.
+    Shell sessions are subject to an idle timeout and may be terminated if inactive for an extended period.
+    Requires SCM Basic Auth Publishing Credentials to be enabled.
+examples:
+  - name: Run a direct command in the container
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode execute --command pwd
+  - name: Run a bash command and redirect output to a file
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode execute --command bash --args "-c" "pwd &> pwd.txt"
+  - name: Create a file in a specific working directory
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode execute --command touch --args "newfile.txt" --cwd /home/site
+  - name: Execute a command on a specific instance
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode execute --command pwd --instance MyInstanceId
+  - name: Execute a command on all instances
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode execute --command pwd --instance all
+  - name: Execute a command on a deployment slot
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp -s staging --mode execute --command pwd
+  - name: Start an interactive shell session with the web app container
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode shell
+  - name: Start an interactive shell session on a specific instance
+    text: >
+        az webapp exec -g MyResourceGroup -n MyWebapp --mode shell --instance MyInstanceId
+"""
+
 helps['webapp delete'] = """
 type: command
 short-summary: Delete a web app.

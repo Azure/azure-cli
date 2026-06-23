@@ -1605,3 +1605,21 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('environment_name', help="Name of the environment of static site")
     with self.argument_context('staticwebapp enterprise-edge') as c:
         c.argument("no_register", help="Don't try to register the Microsoft.CDN provider. Registration can be done manually with: az provider register --wait --namespace Microsoft.CDN. For more details, please review the documentation available at https://go.microsoft.com/fwlink/?linkid=2184995 .", default=False)
+    with self.argument_context('webapp exec') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+        c.argument('command', options_list=['--command'],
+                   help='The command or executable to run in the container (e.g., pwd, bash, touch).')
+        c.argument('args', options_list=['--args'], nargs='+',
+                   help='Arguments to pass to the command. For shell commands, use: --command bash --args "-c" "your command here".')
+        c.argument('mode',
+                   help="Execution mode. 'execute': Starts command execution and returns immediately without returning"
+                   " command output. 'shell': Starts an interactive shell session with the main webapp container.",
+                   arg_type=get_enum_type(['execute', 'shell']), default='execute')
+        c.argument('working_directory', options_list=['--working-directory', '--cwd'],
+                   help="Working directory for command execution. Defaults to the container's working directory"
+                   " (typically /home/site/wwwroot for App Service images).")
+        c.argument('instance', options_list=['--instance', '-i'],
+                   help='Webapp instance(s) to target. Specify a comma-separated list of instance IDs'
+                   ' (use "az webapp list-instances" to get IDs) or "all" for all instances. Defaults to a random instance.')
+        c.argument('slot', options_list=['--slot', '-s'],
+                   help='Name of the web app slot. Default to the production slot if not specified.')
