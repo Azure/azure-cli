@@ -336,11 +336,11 @@ class TestFormatResults(unittest.TestCase):
         format_results("az vm delete", SAMPLE_DOC_RESULTS, SAMPLE_CODE_RESULTS)
 
         output = mock_stdout.getvalue()
-        self.assertIn("Commands & Documentation", output)
+        self.assertIn("Documentation", output)
         self.assertIn("az vm delete", output)
         self.assertIn("Delete a virtual machine.", output)
         self.assertIn("learn.microsoft.com/cli/azure/vm", output)
-        self.assertIn("Code Examples", output)
+        self.assertIn("Examples", output)
         self.assertIn("--resource-group myResourceGroup", output)
         self.assertIn("--force-deletion true", output)
 
@@ -356,16 +356,16 @@ class TestFormatResults(unittest.TestCase):
     def test_format_docs_only(self, mock_stdout, _):
         format_results("az vm", SAMPLE_DOC_RESULTS, [])
         output = mock_stdout.getvalue()
-        self.assertIn("Commands & Documentation", output)
-        self.assertNotIn("Code Examples", output)
+        self.assertIn("Documentation", output)
+        self.assertNotIn("Examples", output)
 
     @mock.patch('azure.cli.command_modules.find.custom.should_enable_styling', return_value=False)
     @mock.patch('sys.stdout', new_callable=StringIO)
     def test_format_code_only(self, mock_stdout, _):
         format_results("az vm", [], SAMPLE_CODE_RESULTS)
         output = mock_stdout.getvalue()
-        self.assertNotIn("Commands & Documentation", output)
-        self.assertIn("Code Examples", output)
+        self.assertNotIn("Documentation", output)
+        self.assertIn("Examples", output)
 
     @mock.patch('azure.cli.command_modules.find.custom.should_enable_styling', return_value=False)
     @mock.patch('sys.stdout', new_callable=StringIO)
