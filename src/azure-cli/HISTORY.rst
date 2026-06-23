@@ -92,6 +92,10 @@ Release History
 * [BREAKING CHANGE] `az postgres flexible-server backup/db/firewall-rule/long-term-retention/migration/replica create`: Make consistent use of `--name` and `--server-name` across all commands (#33343)
 * [BREAKING CHANGE] `az postgres flexible-server long-term-retention`: Remove support for command group (#33345)
 
+**SQL**
+
+* `az sql server update`: Fix `InvalidParameterValue` error on `RetentionDays` when using `--assign-identity` against legacy servers (#32726)
+
 **Storage**
 
 * `az storage account create/update`: Support new value `Smart` for `--access-tier` (#33423)
