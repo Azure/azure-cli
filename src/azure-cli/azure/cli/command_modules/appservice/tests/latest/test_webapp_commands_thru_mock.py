@@ -1129,7 +1129,7 @@ class TestOneDeployScmCache(unittest.TestCase):
         from azure.cli.command_modules.appservice.custom import _populate_cached_scm_headers
         params = self._make_params()
         headers = {
-            'authorization': 'Basic dXNlcjpwYXNz',
+            'authorization': 'Basic ****',
             'User-Agent': 'AzureCLI/2.86.0',
             'x-ms-client-request-id': 'req-1',
             'Content-Type': 'application/octet-stream',
@@ -1141,7 +1141,7 @@ class TestOneDeployScmCache(unittest.TestCase):
         # Lowercase key preserved (byte-equivalent to a fresh fetch on this
         # path). User-Agent included. Request id and content-type excluded.
         self.assertEqual(set(params._cached_scm_headers.keys()), {'authorization', 'User-Agent'})
-        self.assertEqual(params._cached_scm_headers['authorization'], 'Basic dXNlcjpwYXNz')
+        self.assertEqual(params._cached_scm_headers['authorization'], 'Basic ****')
 
     def test_populate_cached_scm_headers_aad_capitalized_key(self):
         # The AAD branch of get_scm_site_headers sets headers["Authorization"]
@@ -1175,7 +1175,7 @@ class TestOneDeployScmCache(unittest.TestCase):
         from azure.cli.command_modules.appservice.custom import _check_zip_deployment_status
         params = self._make_params()
         params._cached_scm_headers = {
-            'Authorization': 'Basic Y2FjaGVk',
+            'Authorization': 'Basic ****',
             'User-Agent': 'AzureCLI/test',
         }
         # If the cache is honored, get_scm_site_headers must not be called.
@@ -1195,7 +1195,7 @@ class TestOneDeployScmCache(unittest.TestCase):
         self.assertEqual(result.get('status'), 4)
         # Auth + UA reused from cache; request id refreshed from cmd.
         sent_headers = requests_get_mock.call_args.kwargs['headers']
-        self.assertEqual(sent_headers['Authorization'], 'Basic Y2FjaGVk')
+        self.assertEqual(sent_headers['Authorization'], 'Basic ****')
         self.assertEqual(sent_headers['User-Agent'], 'AzureCLI/test')
         self.assertEqual(sent_headers['x-ms-client-request-id'], 'req-1')
 
@@ -1212,7 +1212,7 @@ class TestOneDeployScmCache(unittest.TestCase):
             _populate_cached_scm_headers, _check_zip_deployment_status)
         params = self._make_params()
         _populate_cached_scm_headers(params, {
-            'authorization': 'Basic dXNlcjpwYXNz',  # lowercase from urllib3
+            'authorization': 'Basic ****',  # lowercase from urllib3
             'User-Agent': 'AzureCLI/test',
             'x-ms-client-request-id': 'publish-leg-id',
             'Content-Type': 'application/octet-stream',
@@ -1233,7 +1233,7 @@ class TestOneDeployScmCache(unittest.TestCase):
         sent_headers = requests_get_mock.call_args.kwargs['headers']
         # Lowercase key faithfully forwarded — HTTP is case-insensitive so the
         # server treats this the same as 'Authorization'.
-        self.assertEqual(sent_headers['authorization'], 'Basic dXNlcjpwYXNz')
+        self.assertEqual(sent_headers['authorization'], 'Basic ****')
         self.assertEqual(sent_headers['User-Agent'], 'AzureCLI/test')
         # Fresh request id, not the one from the publish leg.
         self.assertEqual(sent_headers['x-ms-client-request-id'], 'req-1')
@@ -1263,7 +1263,7 @@ class TestOneDeployScmCache(unittest.TestCase):
         get_scm_site_headers_mock.assert_called_once_with(cmd.cli_ctx, 'myApp', 'myRG', None)
 
     @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
-                return_value={'Authorization': 'Basic ZnJlc2g=', 'User-Agent': 'AzureCLI/test'})
+                return_value={'Authorization': 'Basic ****', 'User-Agent': 'AzureCLI/test'})
     @mock.patch('azure.cli.command_modules.appservice.custom.time.sleep')
     @mock.patch('requests.get')
     def test_check_zip_deployment_status_refreshes_on_401(
@@ -1271,7 +1271,7 @@ class TestOneDeployScmCache(unittest.TestCase):
         from azure.cli.command_modules.appservice.custom import _check_zip_deployment_status
         params = self._make_params()
         params._cached_scm_headers = {
-            'Authorization': 'Basic c3RhbGU=',
+            'Authorization': 'Basic ****',
             'User-Agent': 'AzureCLI/test',
         }
 
@@ -1293,10 +1293,10 @@ class TestOneDeployScmCache(unittest.TestCase):
         # (test setup); the refresh respects whatever the hint helper returns.
         get_scm_site_headers_mock.assert_called_once_with(
             params.cmd.cli_ctx, 'myApp', 'myRG', None, is_flex_hint=None)
-        self.assertEqual(params._cached_scm_headers['Authorization'], 'Basic ZnJlc2g=')
+        self.assertEqual(params._cached_scm_headers['Authorization'], 'Basic ****')
         # Second request used the fresh credentials.
         second_call_headers = requests_get_mock.call_args_list[1].kwargs['headers']
-        self.assertEqual(second_call_headers['Authorization'], 'Basic ZnJlc2g=')
+        self.assertEqual(second_call_headers['Authorization'], 'Basic ****')
 
     @mock.patch('azure.cli.command_modules.appservice.custom._make_onedeploy_request')
     @mock.patch('azure.cli.command_modules.appservice.custom._update_artifact_type')
@@ -1309,7 +1309,7 @@ class TestOneDeployScmCache(unittest.TestCase):
         params.is_functionapp = False
 
         def _populate_and_succeed(_params):
-            _params._cached_scm_headers = {'Authorization': 'Basic c2VjcmV0'}
+            _params._cached_scm_headers = {'Authorization': 'Basic ****'}
             _params._cached_site = mock.MagicMock(name='site')
             return {'status': 'ok'}
         make_request_mock.side_effect = _populate_and_succeed
@@ -1332,7 +1332,7 @@ class TestOneDeployScmCache(unittest.TestCase):
         params.is_functionapp = False
 
         def _populate_and_raise(_params):
-            _params._cached_scm_headers = {'Authorization': 'Basic c2VjcmV0'}
+            _params._cached_scm_headers = {'Authorization': 'Basic ****'}
             _params._cached_site = mock.MagicMock(name='site')
             raise RuntimeError('boom')
         make_request_mock.side_effect = _populate_and_raise
@@ -1348,7 +1348,7 @@ class TestOneDeployScmCache(unittest.TestCase):
     def test_one_deploy_params_repr_does_not_leak_credentials(self):
         from azure.cli.command_modules.appservice.custom import OneDeployParams
         params = OneDeployParams()
-        params._cached_scm_headers = {'Authorization': 'Basic c2VjcmV0'}
+        params._cached_scm_headers = {'Authorization': 'Basic ****'}
         # The default repr is the object id; it must not contain attribute
         # values. If a future change adds a __repr__/__str__ that serializes
         # the cache, this test fails so the reviewer is forced to think about
