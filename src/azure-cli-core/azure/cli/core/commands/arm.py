@@ -774,6 +774,11 @@ def create_role_assignment(cli_ctx, principal_id, identity_role=None, identity_s
     import time
     from azure.core.exceptions import HttpResponseError
 
+    # Coerce AAZSimpleValue/model values to plain strings for SDK 5.0.0b2 compatibility
+    principal_id = str(principal_id) if principal_id else principal_id
+    identity_role = str(identity_role) if identity_role else identity_role
+    identity_scope = str(identity_scope) if identity_scope else identity_scope
+
     identity_role_id = resolve_role_id(cli_ctx, identity_role, identity_scope)
     assignments_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_AUTHORIZATION).role_assignments
     RoleAssignmentCreateParameters = get_sdk(cli_ctx, ResourceType.MGMT_AUTHORIZATION,
