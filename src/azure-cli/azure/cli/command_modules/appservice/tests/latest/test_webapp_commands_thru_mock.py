@@ -381,8 +381,6 @@ class TestWebappMocked(unittest.TestCase):
         generic_site_op_mock.return_value = site
 
         client_factory_mock.return_value = client
-        
-
 
         SnapshotRecoverySource, SnapshotRestoreRequest = \
             cmd_mock.get_models('SnapshotRecoverySource', 'SnapshotRestoreRequest')
@@ -503,14 +501,13 @@ class TestWebappMocked(unittest.TestCase):
         client.certificates.create_or_update.assert_called_once_with(name=host_name, resource_group_name=rg_name,
                                                                      certificate_envelope=cert_def)
 
-
     def test_update_app_settings_error_handling_no_parameters(self):
         """Test that MutuallyExclusiveArgumentError is raised when neither settings nor slot_settings are provided."""
         cmd_mock = _get_test_cmd()
-        
+
         # Test missing both parameters - should fail early without calling any services
-        with self.assertRaisesRegex(MutuallyExclusiveArgumentError, 
-                                   "Please provide either --settings or --slot-settings parameter"):
+        with self.assertRaisesRegex(MutuallyExclusiveArgumentError,
+                                    "Please provide either --settings or --slot-settings parameter"):
             update_app_settings(cmd_mock, 'test-rg', 'test-app')
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
@@ -518,19 +515,19 @@ class TestWebappMocked(unittest.TestCase):
     def test_update_app_settings_error_handling_invalid_format(self, mock_json_parse, mock_site_op):
         """Test that InvalidArgumentValueError is raised for invalid setting formats."""
         cmd_mock = _get_test_cmd()
-        
+
         # Setup minimal mocks needed to reach the error handling code
         mock_app_settings = mock.MagicMock()
         mock_app_settings.properties = {}
         mock_site_op.return_value = mock_app_settings
-        
+
         # Mock shell_safe_json_parse to raise InvalidArgumentValueError (simulating invalid JSON)
         mock_json_parse.side_effect = InvalidArgumentValueError("Invalid JSON format")
-        
+
         # Test invalid format that can't be parsed as JSON or key=value
         invalid_setting = "invalid_format_no_equals_no_json"
         expected_message = r"Invalid setting format.*Expected 'key=value' format or valid JSON"
-        
+
         with self.assertRaisesRegex(InvalidArgumentValueError, expected_message):
             update_app_settings(cmd_mock, 'test-rg', 'test-app', settings=[invalid_setting])
 
@@ -539,19 +536,19 @@ class TestWebappMocked(unittest.TestCase):
     def test_update_app_settings_error_handling_invalid_format_no_equals(self, mock_json_parse, mock_site_op):
         """Test ValueError path when shell_safe_json_parse raises InvalidArgumentValueError and string contains no '='."""
         cmd_mock = _get_test_cmd()
-        
+
         # Setup minimal mocks needed to reach the error handling code
         mock_app_settings = mock.MagicMock()
         mock_app_settings.properties = {}
         mock_site_op.return_value = mock_app_settings
-        
+
         # Mock shell_safe_json_parse to raise InvalidArgumentValueError
         mock_json_parse.side_effect = InvalidArgumentValueError("Invalid JSON format")
-        
+
         # Test invalid format with no equals sign - this should trigger ValueError in split('=', 1)
         invalid_setting_no_equals = "invalidformatthatcontainsnoequalsign"
         expected_message = r"Invalid setting format.*Expected 'key=value' format or valid JSON"
-        
+
         with self.assertRaisesRegex(InvalidArgumentValueError, expected_message):
             update_app_settings(cmd_mock, 'test-rg', 'test-app', settings=[invalid_setting_no_equals])
 
@@ -560,26 +557,26 @@ class TestWebappMocked(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.appservice.custom.is_centauri_functionapp')
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_settings_operation')
     @mock.patch('azure.cli.command_modules.appservice.custom._build_app_settings_output')
-    def test_update_app_settings_success_key_value_format(self, mock_build, mock_settings_op, mock_centauri, 
-                                                         mock_client_factory, mock_site_op):
+    def test_update_app_settings_success_key_value_format(self, mock_build, mock_settings_op, mock_centauri,
+                                                          mock_client_factory, mock_site_op):
         """Test successful processing of key=value format settings."""
         cmd_mock = _get_test_cmd()
-        
+
         # Setup mocks
         mock_app_settings = mock.MagicMock()
         mock_app_settings.properties = {}
         mock_site_op.return_value = mock_app_settings
-        
+
         mock_client = mock.MagicMock()
         mock_client_factory.return_value = mock_client
         mock_centauri.return_value = False
         mock_settings_op.return_value = mock_app_settings
         mock_build.return_value = {"KEY1": "value1", "KEY2": "value2"}
-        
+
         # Test valid key=value format
-        result = update_app_settings(cmd_mock, 'test-rg', 'test-app', 
-                                   settings=['KEY1=value1', 'KEY2=value2'])
-        
+        result = update_app_settings(cmd_mock, 'test-rg', 'test-app',
+                                     settings=['KEY1=value1', 'KEY2=value2'])
+
         # Verify the function completed successfully
         self.assertEqual(result["KEY1"], "value1")
         self.assertEqual(result["KEY2"], "value2")
@@ -589,20 +586,20 @@ class TestWebappMocked(unittest.TestCase):
     def test_update_application_settings_polling_error_handling(self, mock_send_request):
         """Test that AzureResponseError is raised in polling function when appropriate."""
         cmd_mock = _get_test_cmd()
-        
+
         # Mock an exception that doesn't have the expected structure
         class MockException(Exception):
             def __init__(self):
                 self.response = mock.MagicMock()
                 self.response.status_code = 400  # Not 202
                 self.response.headers = {}
-        
+
         # Mock _generic_settings_operation to raise the exception
         with mock.patch('azure.cli.command_modules.appservice.custom._generic_settings_operation') as mock_settings_op, \
              self.assertRaisesRegex(AzureResponseError, "Failed to update application settings"):
             mock_settings_op.side_effect = MockException()
-            update_application_settings_polling(cmd_mock, 'test-rg', 'test-app', 
-                                               mock.MagicMock(), None, mock.MagicMock())
+            update_application_settings_polling(cmd_mock, 'test-rg', 'test-app',
+                                                mock.MagicMock(), None, mock.MagicMock())
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
@@ -610,15 +607,15 @@ class TestWebappMocked(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_settings_operation')
     @mock.patch('azure.cli.command_modules.appservice.custom._build_app_settings_output')
     def test_update_app_settings_success_with_slot_settings(self, mock_build, mock_settings_op, mock_centauri,
-                                                           mock_client_factory, mock_site_op):
+                                                            mock_client_factory, mock_site_op):
         """Test successful processing with slot settings."""
         cmd_mock = _get_test_cmd()
-        
+
         # Setup mocks
         mock_app_settings = mock.MagicMock()
         mock_app_settings.properties = {}
         mock_site_op.return_value = mock_app_settings
-        
+
         mock_client = mock.MagicMock()
         mock_slot_config = mock.MagicMock()
         mock_slot_config.app_setting_names = []
@@ -627,12 +624,12 @@ class TestWebappMocked(unittest.TestCase):
         mock_centauri.return_value = False
         mock_settings_op.return_value = mock_app_settings
         mock_build.return_value = {"SLOT_KEY": "slot_value"}
-        
+
         # Test with slot settings
-        result = update_app_settings(cmd_mock, 'test-rg', 'test-app', 
-                                   settings=['REGULAR_KEY=regular_value'],
-                                   slot_settings=['SLOT_KEY=slot_value'])
-        
+        result = update_app_settings(cmd_mock, 'test-rg', 'test-app',
+                                     settings=['REGULAR_KEY=regular_value'],
+                                     slot_settings=['SLOT_KEY=slot_value'])
+
         # Verify slot configuration was updated
         mock_client.web_apps.list_slot_configuration_names.assert_called_once()
         mock_client.web_apps.update_slot_configuration_names.assert_called_once()
