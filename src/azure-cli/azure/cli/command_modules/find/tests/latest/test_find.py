@@ -364,16 +364,51 @@ class TestFormatResults(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.find.custom.should_enable_styling', return_value=False)
     @mock.patch('sys.stdout', new_callable=StringIO)
     def test_format_caps_results(self, mock_stdout, _):
-        # Create more results than the max
-        many_docs = [SAMPLE_DOC_RESULTS[0]] * (MAX_DOC_RESULTS + 5)
-        many_code = [SAMPLE_CODE_RESULTS[0]] * (MAX_CODE_RESULTS + 5)
+        # Create more (distinct-URL) results than the max.
+        many_docs = []
+        for i in range(MAX_DOC_RESULTS + 5):
+            doc = dict(SAMPLE_DOC_RESULTS[0])
+            doc["contentUrl"] = "https://learn.microsoft.com/doc/%d" % i
+            many_docs.append(doc)
+        many_code = []
+        for i in range(MAX_CODE_RESULTS + 5):
+            code = dict(SAMPLE_CODE_RESULTS[0])
+            code["link"] = "https://learn.microsoft.com/code/%d" % i
+            many_code.append(code)
         format_results("az vm", many_docs, many_code)
         output = mock_stdout.getvalue()
-        # Count occurrences of the contentUrl (unique per doc result printed)
-        doc_count = output.count(SAMPLE_DOC_RESULTS[0]["contentUrl"])
-        code_count = output.count("--force-deletion true")
+        # Count printed doc/code URLs to confirm the caps are enforced.
+        doc_count = output.count("https://learn.microsoft.com/doc/")
+        code_count = output.count("https://learn.microsoft.com/code/")
         self.assertEqual(doc_count, MAX_DOC_RESULTS)
         self.assertEqual(code_count, MAX_CODE_RESULTS)
+
+    @mock.patch('azure.cli.command_modules.find.custom.should_enable_styling', return_value=False)
+    @mock.patch('sys.stdout', new_callable=StringIO)
+    def test_format_dedupes_by_url(self, mock_stdout, _):
+        # Duplicate URLs should be collapsed (first kept), and later unique
+        # results used to fill up to the cap.
+        dup_doc = dict(SAMPLE_DOC_RESULTS[0])
+        extra_doc = dict(SAMPLE_DOC_RESULTS[1])
+        extra_doc["contentUrl"] = "https://learn.microsoft.com/doc/extra"
+        # With MAX_DOC_RESULTS == 2, the duplicate must be collapsed so the
+        # unique extra_doc fills the freed slot.
+        docs = [SAMPLE_DOC_RESULTS[0], dup_doc, extra_doc]
+
+        dup_code = dict(SAMPLE_CODE_RESULTS[0])
+        extra_code = dict(SAMPLE_CODE_RESULTS[1])
+        extra_code["link"] = "https://learn.microsoft.com/code/extra"
+        code = [SAMPLE_CODE_RESULTS[0], dup_code, SAMPLE_CODE_RESULTS[1], extra_code]
+
+        format_results("az vm", docs, code)
+        output = mock_stdout.getvalue()
+
+        # Each duplicated URL is printed only once.
+        self.assertEqual(output.count(SAMPLE_DOC_RESULTS[0]["contentUrl"]), 1)
+        self.assertEqual(output.count(SAMPLE_CODE_RESULTS[0]["link"]), 1)
+        # Caps are filled from the remaining unique results.
+        self.assertIn("https://learn.microsoft.com/doc/extra", output)
+        self.assertIn("https://learn.microsoft.com/code/extra", output)
 
 
 class TestProcessQuery(unittest.TestCase):

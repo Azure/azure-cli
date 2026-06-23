@@ -23,7 +23,7 @@ logger = get_logger(__name__)
 WAIT_MESSAGE = ['Finding examples and documentation...']
 
 # Display limits
-MAX_DOC_RESULTS = 5
+MAX_DOC_RESULTS = 2
 MAX_CODE_RESULTS = 3
 
 Example = namedtuple("Example", "title snippet")
@@ -473,15 +473,24 @@ def format_results(query, docs_results, code_results):
 
     if code_results:
         examples = []
-        for result in code_results[:MAX_CODE_RESULTS]:
+        seen_urls = set()
+        for result in code_results:
             command_lines = _extract_command(result.get("codeSnippet", ""))
             if not command_lines:
                 continue
+            url = result.get("link", "")
+            # Skip duplicate URLs, keeping only the first occurrence.
+            if url and url in seen_urls:
+                continue
+            if url:
+                seen_urls.add(url)
             examples.append((
                 _extract_description(result.get("description", "")),
                 command_lines,
-                result.get("link", "")
+                url
             ))
+            if len(examples) >= MAX_CODE_RESULTS:
+                break
 
         if examples:
             print("Examples")
@@ -494,18 +503,32 @@ def format_results(query, docs_results, code_results):
                 print()
 
     if docs_results:
-        print("Documentation")
-        for result in docs_results[:MAX_DOC_RESULTS]:
-            title = _clean_title(result.get("title", ""))
-            summary = _extract_summary(result.get("content", ""))
+        docs = []
+        seen_urls = set()
+        for result in docs_results:
             url = result.get("contentUrl", "")
-
-            print("    " + format_styled_text((Style.ACTION, title)))
-            if summary:
-                print("    " + summary)
+            # Skip duplicate URLs, keeping only the first occurrence.
+            if url and url in seen_urls:
+                continue
             if url:
-                print("    " + format_styled_text((Style.SECONDARY, url)))
-            print()
+                seen_urls.add(url)
+            docs.append((
+                _clean_title(result.get("title", "")),
+                _extract_summary(result.get("content", "")),
+                url
+            ))
+            if len(docs) >= MAX_DOC_RESULTS:
+                break
+
+        if docs:
+            print("Documentation")
+            for title, summary, url in docs:
+                print("    " + format_styled_text((Style.ACTION, title)))
+                if summary:
+                    print("    " + summary)
+                if url:
+                    print("    " + format_styled_text((Style.SECONDARY, url)))
+                print()
 
 
 def process_query(cli_term):
