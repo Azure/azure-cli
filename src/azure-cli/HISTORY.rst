@@ -92,6 +92,10 @@ Release History
 * [BREAKING CHANGE] `az postgres flexible-server backup/db/firewall-rule/long-term-retention/migration/replica create`: Make consistent use of `--name` and `--server-name` across all commands (#33343)
 * [BREAKING CHANGE] `az postgres flexible-server long-term-retention`: Remove support for command group (#33345)
 
+**Resource**
+
+* Fix #32357: `az deployment group create`: Fix invalid JSON deployment payload sent to custom cloud environments (#33630)
+
 **Storage**
 
 * `az storage account create/update`: Support new value `Smart` for `--access-tier` (#33423)
