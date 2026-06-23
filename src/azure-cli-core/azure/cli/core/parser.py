@@ -317,8 +317,8 @@ class AzCliCommandParser(CLICommandParser):
                 error_msg = failed_extension_error or "'{value}' is misspelled or not recognized by the system.".format(
                     value=value)
                 az_error = CommandNotFoundError(error_msg)
-                candidates = difflib.get_close_matches(value, action.choices, cutoff=0.7) \
-                    if not failed_extension_error else []
+                candidates = [] if failed_extension_error else difflib.get_close_matches(
+                    value, action.choices, cutoff=0.7)
                 if candidates:
                     # use the most likely candidate to replace the misspelled command
                     args_inferred = [item if item != value else candidates[0] for item in args]
