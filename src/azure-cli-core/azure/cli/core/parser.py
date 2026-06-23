@@ -305,9 +305,9 @@ class AzCliCommandParser(CLICommandParser):
             command_name_inferred = self.prog
             failed_extension_error = None
             use_dynamic_install = 'no'
+            candidate_choices = action.choices
             if not self.command_source:
                 from azure.cli.core.extension.dynamic_install import try_install_extension
-                candidates = []
                 args = self.prog.split() + self._raw_arguments
                 # Check if the command is from an extension. If yes, try to fix by installing the extension, then exit.
                 # The command will be rerun in another process.
@@ -317,8 +317,9 @@ class AzCliCommandParser(CLICommandParser):
                 error_msg = failed_extension_error or (
                     "'{value}' is misspelled or not recognized by the system.".format(value=value))
                 az_error = CommandNotFoundError(error_msg)
-                candidates = [] if failed_extension_error else difflib.get_close_matches(
-                    value, action.choices, cutoff=0.7)
+                if failed_extension_error:
+                    candidate_choices = []
+                candidates = difflib.get_close_matches(value, candidate_choices, cutoff=0.7)
                 if candidates:
                     # use the most likely candidate to replace the misspelled command
                     args_inferred = [item if item != value else candidates[0] for item in args]
@@ -329,7 +330,7 @@ class AzCliCommandParser(CLICommandParser):
                 error_msg = "{prog}: '{value}' is not a valid value for '{param}'. Allowed values: {choices}.".format(
                     prog=self.prog, value=value, param=parameter, choices=', '.join([str(x) for x in action.choices]))
                 az_error = InvalidArgumentValueError(error_msg)
-                candidates = difflib.get_close_matches(value, action.choices, cutoff=0.7)
+                candidates = difflib.get_close_matches(value, candidate_choices, cutoff=0.7)
 
             if candidates:
                 az_error.set_recommendation("Did you mean '{}' ?".format(candidates[0]))
