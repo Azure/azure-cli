@@ -15,12 +15,12 @@ class SqlServerUpdateUnitTest(unittest.TestCase):
     def _build_server_instance(retention_days):
         return SimpleNamespace(
             identity=None,
-            administrator_login_password='old-password',
+            administrator_login_password=None,
             minimal_tls_version='1.2',
             public_network_access=ServerNetworkAccessFlag.DISABLED,
-            primary_user_assigned_identity_id='old-primary-id',
-            key_id='old-key-id',
-            federated_client_id='old-federated-id',
+            primary_user_assigned_identity_id='existing-primary-id',
+            key_id='existing-cmk-id',
+            federated_client_id='existing-federated-client-id',
             retention_days=retention_days)
 
     def test_server_update_normalizes_legacy_negative_retention_days(self):
