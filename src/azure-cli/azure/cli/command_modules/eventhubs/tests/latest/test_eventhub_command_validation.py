@@ -6,12 +6,12 @@
 import re
 import unittest
 
-from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.eventhub._list import List
-
 
 class EventHubCommandValidationTests(unittest.TestCase):
 
     def test_eventhub_list_namespace_name_length_constraints(self):
+        from azure.cli.command_modules.eventhubs.aaz.latest.eventhubs.eventhub._list import List
+
         namespace_name_format = List._build_arguments_schema().namespace_name._fmt
         valid_min_length_namespace = 'ns0001'
         valid_short_namespace = 'ns00001'
