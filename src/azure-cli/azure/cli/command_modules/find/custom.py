@@ -46,24 +46,41 @@ class MCPClient:
             "Accept": "application/json, text/event-stream"
         }
         self._request_id = 0
-        self._add_telemetry_headers()
+        self._context = self._build_telemetry_context()
 
-    def _add_telemetry_headers(self):
-        """Add telemetry context as custom headers."""
+    def _build_telemetry_context(self):
+        """Build telemetry context sent alongside MCP requests.
+
+        Mirrors the dev branch behavior: the hashed installation id is always
+        sent as the ``X-UserId`` header (used for DDOS protection and rate
+        limiting), while the remaining contextual values are only included when
+        the user has consented to telemetry.
+        """
         # Used for DDOS protection and rate limiting
         user_id = telemetry_core._get_installation_id()  # pylint: disable=protected-access
         hashed_user_id = hashlib.sha256(user_id.encode('utf-8')).hexdigest()
         self._headers["X-UserId"] = hashed_user_id
 
+        context = {
+            "versionNumber": self.client_version,
+        }
+
+        # Only pull in the contextual values if we have consent
         if telemetry_core.is_telemetry_enabled():
             correlation_id = telemetry_core._session.correlation_id  # pylint: disable=protected-access
             event_id = telemetry_core._session.event_id  # pylint: disable=protected-access
             subscription_id = telemetry_core._get_azure_subscription_id()  # pylint: disable=protected-access
 
-            self._headers["X-CorrelationId"] = correlation_id
-            self._headers["X-EventId"] = event_id
+            context["correlationId"] = correlation_id
+            context["eventId"] = event_id
             if subscription_id is not None:
-                self._headers["X-SubscriptionId"] = subscription_id
+                context["subscriptionId"] = subscription_id
+
+        return context
+
+    @property
+    def _params(self):
+        return {"context": json.dumps(self._context)}
 
     def _next_id(self):
         self._request_id += 1
@@ -84,7 +101,7 @@ class MCPClient:
                 }
             }
         }
-        resp = requests.post(self.MCP_ENDPOINT, json=body, headers=self._headers, timeout=10)
+        resp = requests.post(self.MCP_ENDPOINT, json=body, headers=self._headers, params=self._params, timeout=10)
         resp.raise_for_status()
         self.session_id = resp.headers.get("mcp-session-id")
         if self.session_id:
@@ -94,7 +111,7 @@ class MCPClient:
     def notify_initialized(self):
         """Send initialized notification to confirm client readiness."""
         body = {"jsonrpc": "2.0", "method": "notifications/initialized"}
-        requests.post(self.MCP_ENDPOINT, json=body, headers=self._headers, timeout=10)
+        requests.post(self.MCP_ENDPOINT, json=body, headers=self._headers, params=self._params, timeout=10)
 
     def call_tool(self, tool_name, arguments):
         """Call an MCP tool and return parsed results.
@@ -115,7 +132,7 @@ class MCPClient:
                 "arguments": arguments
             }
         }
-        resp = requests.post(self.MCP_ENDPOINT, json=body, headers=self._headers, timeout=30)
+        resp = requests.post(self.MCP_ENDPOINT, json=body, headers=self._headers, params=self._params, timeout=30)
         resp.raise_for_status()
         result = self._parse_sse(resp.text)
         content_list = result.get("result", {}).get("content", [])

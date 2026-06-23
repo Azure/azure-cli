@@ -149,31 +149,37 @@ class TestMCPClient(unittest.TestCase):
         self.assertEqual(body["params"]["name"], "microsoft_docs_search")
 
     @mock.patch('azure.cli.command_modules.find.custom.telemetry_core')
-    def test_telemetry_headers_enabled(self, mock_telemetry):
+    def test_telemetry_context_enabled(self, mock_telemetry):
         mock_telemetry._get_installation_id.return_value = "test-install-id"
         mock_telemetry.is_telemetry_enabled.return_value = True
         mock_telemetry._session.correlation_id = "corr-123"
         mock_telemetry._session.event_id = "evt-456"
         mock_telemetry._get_azure_subscription_id.return_value = "sub-789"
 
-        client = MCPClient()
+        client = MCPClient(client_version="2.60.0")
 
+        # Hashed installation id is always sent as a header for rate limiting.
         self.assertIn("X-UserId", client._headers)
-        self.assertEqual(client._headers["X-CorrelationId"], "corr-123")
-        self.assertEqual(client._headers["X-EventId"], "evt-456")
-        self.assertEqual(client._headers["X-SubscriptionId"], "sub-789")
+        # Contextual values are bundled into the context object when consented.
+        self.assertEqual(client._context["versionNumber"], "2.60.0")
+        self.assertEqual(client._context["correlationId"], "corr-123")
+        self.assertEqual(client._context["eventId"], "evt-456")
+        self.assertEqual(client._context["subscriptionId"], "sub-789")
+        self.assertEqual(json.loads(client._params["context"]), client._context)
 
     @mock.patch('azure.cli.command_modules.find.custom.telemetry_core')
-    def test_telemetry_headers_disabled(self, mock_telemetry):
+    def test_telemetry_context_disabled(self, mock_telemetry):
         mock_telemetry._get_installation_id.return_value = "test-install-id"
         mock_telemetry.is_telemetry_enabled.return_value = False
 
-        client = MCPClient()
+        client = MCPClient(client_version="2.60.0")
 
         self.assertIn("X-UserId", client._headers)
-        self.assertNotIn("X-CorrelationId", client._headers)
-        self.assertNotIn("X-EventId", client._headers)
-        self.assertNotIn("X-SubscriptionId", client._headers)
+        # Without consent only the version number is sent.
+        self.assertEqual(client._context["versionNumber"], "2.60.0")
+        self.assertNotIn("correlationId", client._context)
+        self.assertNotIn("eventId", client._context)
+        self.assertNotIn("subscriptionId", client._context)
 
     def test_parse_sse(self):
         sse_text = 'event: message\ndata: {"id": 1, "result": "ok"}\n\n'
