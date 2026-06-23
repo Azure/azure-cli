@@ -135,7 +135,7 @@ class TestParser(unittest.TestCase):
     def test_command_not_found_reports_failed_extension_load(self):
         import logging
 
-        def test_handler():
+        def dummy_handler():
             pass
 
         cli = DummyCli()
@@ -145,7 +145,7 @@ class TestParser(unittest.TestCase):
             'ml': "cannot import name 'AzureOpenAIDeployment' from 'azure.ai.ml.entities'"
         }
 
-        command = AzCliCommand(cli.loader, 'vm list', test_handler)
+        command = AzCliCommand(cli.loader, 'vm list', dummy_handler)
         cmd_table = {'vm list': command}
         cli.commands_loader.command_table = cmd_table
 

@@ -314,8 +314,8 @@ class AzCliCommandParser(CLICommandParser):
                 use_dynamic_install = try_install_extension(self, args)
                 failed_extension_error = _get_failed_extension_load_error(cli_ctx, value)
                 # parser has no `command_source`, value is part of command itself
-                error_msg = failed_extension_error or "'{value}' is misspelled or not recognized by the system.".format(
-                    value=value)
+                generic_error_msg = "'{value}' is misspelled or not recognized by the system.".format(value=value)
+                error_msg = failed_extension_error or generic_error_msg
                 az_error = CommandNotFoundError(error_msg)
                 candidates = [] if failed_extension_error else difflib.get_close_matches(
                     value, action.choices, cutoff=0.7)
