@@ -13,10 +13,14 @@ class EventHubCommandValidationTests(unittest.TestCase):
 
     def test_eventhub_list_allows_short_valid_namespace_names(self):
         namespace_name_format = List._build_arguments_schema().namespace_name._fmt
+        max_length_name = 'n' + ('0' * 48) + '1'
+        over_max_length_name = 'n' + ('0' * 49) + '1'
 
         self.assertEqual(namespace_name_format._pattern, "^[a-zA-Z][a-zA-Z0-9-]{4,48}[a-zA-Z0-9]$")
         self.assertEqual(namespace_name_format._min_length, 6)
         self.assertEqual(namespace_name_format._max_length, 50)
         self.assertIsNotNone(re.fullmatch(namespace_name_format._pattern, 'ns0001'))
         self.assertIsNotNone(re.fullmatch(namespace_name_format._pattern, 'ns00001'))
+        self.assertIsNotNone(re.fullmatch(namespace_name_format._pattern, max_length_name))
         self.assertIsNone(re.fullmatch(namespace_name_format._pattern, 'ns001'))
+        self.assertIsNone(re.fullmatch(namespace_name_format._pattern, over_max_length_name))
