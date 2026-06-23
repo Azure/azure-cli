@@ -307,6 +307,7 @@ class AzCliCommandParser(CLICommandParser):
             cli_ctx = self.cli_ctx or (self.cli_help.cli_ctx if self.cli_help else None)
 
             command_name_inferred = self.prog
+            candidates = []
             failed_extension_error = None
             use_dynamic_install = 'no'
             if not self.command_source:
