@@ -35,6 +35,18 @@ EXTENSION_REFERENCE = ("If the command is from an extension, "
 OVERVIEW_REFERENCE = "https://aka.ms/cli_ref"
 
 
+def _get_failed_extension_load_error(cli_ctx, command_name):
+    if not cli_ctx or not command_name:
+        return None
+
+    load_error = cli_ctx.data.get('failed_extension_loads', {}).get(command_name)
+    if not load_error:
+        return None
+
+    return ("The installed extension '{command_name}' failed to load and its commands are unavailable. "
+            "Load error: {load_error}").format(command_name=command_name, load_error=load_error)
+
+
 class IncorrectUsageError(CLIError):
     '''Raised when a command is incorrectly used and the usage should be
     displayed to the user.
@@ -291,6 +303,7 @@ class AzCliCommandParser(CLICommandParser):
             cli_ctx = self.cli_ctx or (self.cli_help.cli_ctx if self.cli_help else None)
 
             command_name_inferred = self.prog
+            failed_extension_error = None
             use_dynamic_install = 'no'
             if not self.command_source:
                 from azure.cli.core.extension.dynamic_install import try_install_extension
@@ -299,10 +312,13 @@ class AzCliCommandParser(CLICommandParser):
                 # Check if the command is from an extension. If yes, try to fix by installing the extension, then exit.
                 # The command will be rerun in another process.
                 use_dynamic_install = try_install_extension(self, args)
+                failed_extension_error = _get_failed_extension_load_error(cli_ctx, value)
                 # parser has no `command_source`, value is part of command itself
-                error_msg = "'{value}' is misspelled or not recognized by the system.".format(value=value)
+                error_msg = failed_extension_error or "'{value}' is misspelled or not recognized by the system.".format(
+                    value=value)
                 az_error = CommandNotFoundError(error_msg)
-                candidates = difflib.get_close_matches(value, action.choices, cutoff=0.7)
+                candidates = difflib.get_close_matches(value, action.choices, cutoff=0.7) \
+                    if not failed_extension_error else []
                 if candidates:
                     # use the most likely candidate to replace the misspelled command
                     args_inferred = [item if item != value else candidates[0] for item in args]
@@ -315,22 +331,23 @@ class AzCliCommandParser(CLICommandParser):
                 az_error = InvalidArgumentValueError(error_msg)
                 candidates = difflib.get_close_matches(value, action.choices, cutoff=0.7)
 
-            command_arguments = self._get_failure_recovery_arguments(action)
             if candidates:
                 az_error.set_recommendation("Did you mean '{}' ?".format(candidates[0]))
 
-            # recommend a command for user
-            recommender = CommandRecommender(*command_arguments, error_msg, cli_ctx)
-            recommender.set_help_examples(self.get_examples(command_name_inferred))
-            recommendations = recommender.provide_recommendations()
-            if recommendations:
-                az_error.set_example_recommendation(recommendations)
+            if not failed_extension_error:
+                command_arguments = self._get_failure_recovery_arguments(action)
+                # recommend a command for user
+                recommender = CommandRecommender(*command_arguments, error_msg, cli_ctx)
+                recommender.set_help_examples(self.get_examples(command_name_inferred))
+                recommendations = recommender.provide_recommendations()
+                if recommendations:
+                    az_error.set_example_recommendation(recommendations)
 
-            # remind user to check extensions if we can not find a command to recommend
-            if isinstance(az_error, CommandNotFoundError) \
-                    and not az_error.recommendations and self.prog == 'az' \
-                    and use_dynamic_install == 'no':
-                az_error.set_recommendation(EXTENSION_REFERENCE)
+                # remind user to check extensions if we can not find a command to recommend
+                if isinstance(az_error, CommandNotFoundError) \
+                        and not az_error.recommendations and self.prog == 'az' \
+                        and use_dynamic_install == 'no':
+                    az_error.set_recommendation(EXTENSION_REFERENCE)
 
             az_error.print_error()
             az_error.send_telemetry()

@@ -368,6 +368,9 @@ class MainCommandsLoader(CLICommandsLoader):
             if not extensions:
                 return
 
+            failed_extension_loads = self.cli_ctx.data.setdefault('failed_extension_loads', {})
+            failed_extension_loads.clear()
+
             if extension_modname is not None:
                 extension_modname.extend(ALWAYS_LOADED_EXTENSIONS)
                 extensions = _filter_modname(extensions)
@@ -421,6 +424,7 @@ class MainCommandsLoader(CLICommandsLoader):
 
                     self.command_table.update(extension_command_table)
                     self.command_group_table.update(extension_group_table)
+                    failed_extension_loads.pop(ext_name, None)
 
                     elapsed_time = time.perf_counter() - start_time
                     logger.debug(self.item_ext_format_string, ext_name, elapsed_time,
@@ -431,6 +435,7 @@ class MainCommandsLoader(CLICommandsLoader):
                     cumulative_group_count += len(extension_group_table)
                     cumulative_command_count += len(extension_command_table)
                 except Exception as ex:  # pylint: disable=broad-except
+                    failed_extension_loads[ext_name] = str(ex)
                     self.cli_ctx.raise_event(EVENT_FAILED_EXTENSION_LOAD, extension_name=ext_name)
                     logger.warning("Unable to load extension '%s: %s'. Use --debug for more information.",
                                    ext_name, ex)

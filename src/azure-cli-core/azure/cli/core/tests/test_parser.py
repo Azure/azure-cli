@@ -132,6 +132,40 @@ class TestParser(unittest.TestCase):
         args = parser.parse_args('test command --opt sNake_CASE'.split())
         self.assertEqual(args.opt, 'snake_case')
 
+    def test_command_not_found_reports_failed_extension_load(self):
+        import logging
+
+        def test_handler():
+            pass
+
+        cli = DummyCli()
+        cli.loader = mock.MagicMock()
+        cli.loader.cli_ctx = cli
+        cli.data['failed_extension_loads'] = {
+            'ml': "cannot import name 'AzureOpenAIDeployment' from 'azure.ai.ml.entities'"
+        }
+
+        command = AzCliCommand(cli.loader, 'vm list', test_handler)
+        cmd_table = {'vm list': command}
+        cli.commands_loader.command_table = cmd_table
+
+        parser = AzCliCommandParser(cli)
+        parser.load_command_table(cli.commands_loader)
+
+        logger_msgs = []
+
+        def mock_log_error(logger_self, msg):
+            if logger_self.name.startswith('cli'):
+                logger_msgs.append(msg)
+
+        with mock.patch.object(logging.Logger, 'error', mock_log_error):
+            with self.assertRaises(SystemExit):
+                parser.parse_args('ml online-endpoint create'.split())
+
+        self.assertEqual(len(logger_msgs), 1)
+        self.assertIn("The installed extension 'ml' failed to load and its commands are unavailable.", logger_msgs[0])
+        self.assertIn("AzureOpenAIDeployment", logger_msgs[0])
+
     def _mock_import_lib(_):
         mock_obj = mock.MagicMock()
         mock_obj.__path__ = __name__
