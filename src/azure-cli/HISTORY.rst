@@ -11,6 +11,7 @@ Release History
 * [BREAKING CHANGE] `az acr replication create/update`: Remove deprecated `--region-endpoint-enabled` flag and use `--global-endpoint-routing` instead (#33173)
 * [BREAKING CHANGE] `az acr config content-trust update`: No longer accept the `enabled` status (#33174)
 * [BREAKING CHANGE] `az acr check-health`: Remove Notary client check due to Docker Content Trust deprecation (#33174)
+* `az acr login`: Fix ValueError when `azure-mgmt-containerregistry` 14.x multi-API package is used alongside packages that override the global API profile (#32003)
 * `az acr login`: Make ACR audience customizable in AAD token acquisition (#33294)
 * `az acr connected-registry resync`: Add command to manually trigger a sync from the parent registry (#33236)
 * `az acr update`: Add `--endpoint-protocol` parameter to support specifying the endpoint protocol for the registry (#33089)

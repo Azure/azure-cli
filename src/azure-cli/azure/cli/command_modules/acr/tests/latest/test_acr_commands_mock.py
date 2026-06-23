@@ -1488,3 +1488,57 @@ class ResolveAcrScopeTests(unittest.TestCase):
             _resolve_acr_scope(cli_ctx),
             "https://{}.azure.net".format(ACR_AUDIENCE_RESOURCE_NAME),
         )
+
+
+class AcrClientFactoryTests(unittest.TestCase):
+    """Tests for _client_factory.get_acr_service_client."""
+
+    @mock.patch('azure.cli.command_modules.acr._client_factory.get_mgmt_service_client')
+    def test_get_acr_service_client_passes_latest_profile_for_multiapi_package(self, mock_get_client):
+        """When the installed package exposes LATEST_PROFILE (old multi-API style, e.g. 14.x),
+        get_acr_service_client must pass it explicitly so that a corrupted KnownProfiles.default
+        (e.g. set by an Azure ML extension) does not cause a ValueError on operation-group access.
+        """
+        from azure.cli.command_modules.acr._client_factory import get_acr_service_client
+        from azure.cli.core.profiles import ResourceType
+
+        sentinel_profile = object()
+        mock_client_class = mock.MagicMock()
+        mock_client_class.LATEST_PROFILE = sentinel_profile
+
+        cli_ctx = DummyCli()
+        with mock.patch(
+            'azure.mgmt.containerregistry.ContainerRegistryManagementClient',
+            mock_client_class
+        ):
+            get_acr_service_client(cli_ctx)
+
+        mock_get_client.assert_called_once_with(
+            cli_ctx,
+            ResourceType.MGMT_CONTAINERREGISTRY,
+            api_version=None,
+            profile=sentinel_profile,
+        )
+
+    @mock.patch('azure.cli.command_modules.acr._client_factory.get_mgmt_service_client')
+    def test_get_acr_service_client_no_profile_for_singleapi_package(self, mock_get_client):
+        """When the installed package does NOT expose LATEST_PROFILE (new single-API style, e.g. 15.x),
+        get_acr_service_client must NOT pass a profile kwarg so the package uses its own default.
+        """
+        from azure.cli.command_modules.acr._client_factory import get_acr_service_client
+        from azure.cli.core.profiles import ResourceType
+
+        mock_client_class = mock.MagicMock(spec=[])  # no LATEST_PROFILE attribute
+
+        cli_ctx = DummyCli()
+        with mock.patch(
+            'azure.mgmt.containerregistry.ContainerRegistryManagementClient',
+            mock_client_class
+        ):
+            get_acr_service_client(cli_ctx)
+
+        mock_get_client.assert_called_once_with(
+            cli_ctx,
+            ResourceType.MGMT_CONTAINERREGISTRY,
+            api_version=None,
+        )

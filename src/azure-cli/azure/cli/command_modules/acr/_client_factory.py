@@ -9,7 +9,17 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 def get_acr_service_client(cli_ctx, api_version=None):
     """Returns the client for managing container registries. """
     from azure.cli.core.profiles import ResourceType
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_CONTAINERREGISTRY, api_version=api_version)
+    from azure.mgmt.containerregistry import ContainerRegistryManagementClient
+    kwargs = {}
+    # Older multi-API SDK packages (e.g., 14.x) expose a LATEST_PROFILE class attribute.
+    # Explicitly passing it prevents failures when the global KnownProfiles.default is
+    # overridden by other installed packages (e.g., Azure ML extensions), which can cause
+    # a ValueError when accessing operation groups such as 'registries'.
+    # New single-API packages (e.g., 15.x) do not have LATEST_PROFILE, so this is a no-op.
+    if hasattr(ContainerRegistryManagementClient, 'LATEST_PROFILE'):
+        kwargs['profile'] = ContainerRegistryManagementClient.LATEST_PROFILE
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_CONTAINERREGISTRY,
+                                   api_version=api_version, **kwargs)
 
 
 def get_acr_tasks_service_client(cli_ctx, api_version=None):
