@@ -76,7 +76,7 @@ logger.addHandler(ch)
 def main():
     logger.info("Start check pull request ...\n")
     title = TITLE
-    body = BODY.split('\r\n')
+    body = BODY.replace('\r\n', '\n').split('\n')
     sys.exit(1) if check_pull_request(title, body) else sys.exit(0)
 
 
