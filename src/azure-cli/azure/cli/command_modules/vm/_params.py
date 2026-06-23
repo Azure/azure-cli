@@ -873,6 +873,26 @@ def load_arguments(self, _):
         c.argument('skuprofile_allostrat', options_list=['--skuprofile-allocation-strategy', '--sku-allocat-strat'], arg_type=get_enum_type(['LowestPrice', 'CapacityOptimized', 'Prioritized']), min_api='2024-07-01', help='Allocation strategy for vm sizes in SKU profile.')
         c.argument('skuprofile_rank', nargs='+', min_api='2024-11-01', help='A list for ranks associated with the SKU profile vm sizes.')
         c.argument(
+            'zone_placement_policy',
+            arg_type=get_enum_type(['Auto']),
+            help='Specify the policy for availability zone placement of the virtual machine scale set. '
+                 'When set to Auto, the platform automatically selects the availability zones.'
+        )
+        c.argument(
+            'include_zones',
+            nargs='+',
+            help='Specify a list of availability zones that must be considered for placement when '
+                 '--zone-placement-policy is set to Auto. '
+                 'If not specified, all availability zones in the region are considered.'
+        )
+        c.argument(
+            'exclude_zones',
+            nargs='+',
+            help='Specify a list of availability zones that must be excluded from placement when '
+                 '--zone-placement-policy is set to Auto. '
+                 'If not specified, no availability zones are excluded.'
+        )
+        c.argument(
             'max_zone_count',
             type=int,
             help='Specify the maximum number of availability zones to use for this scale set. '
