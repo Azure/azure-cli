@@ -510,11 +510,11 @@ def format_results(query, docs_results, code_results):
                 break
 
         if examples:
-            print("Examples")
+            print(format_styled_text((Style.IMPORTANT, "Examples")))
             for title, command_lines, url in examples:
-                print("    " + format_styled_text((Style.ACTION, title)))
+                print("    " + format_styled_text((Style.ACTION, "> " + title)))
                 for line in command_lines:
-                    print("    " + line)
+                    print("    " + format_styled_text((Style.HIGHLIGHT, line)))
                 if url:
                     print("    " + format_styled_text((Style.SECONDARY, url)))
                 print()
@@ -538,9 +538,9 @@ def format_results(query, docs_results, code_results):
                 break
 
         if docs:
-            print("Documentation")
+            print(format_styled_text((Style.IMPORTANT, "Documentation")))
             for title, summary, url in docs:
-                print("    " + format_styled_text((Style.ACTION, title)))
+                print("    " + format_styled_text((Style.ACTION, "> " + title)))
                 if summary:
                     print("    " + summary)
                 if url:
