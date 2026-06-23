@@ -36,6 +36,7 @@ OVERVIEW_REFERENCE = "https://aka.ms/cli_ref"
 
 
 def _get_failed_extension_load_error(cli_ctx, command_name):
+    """Return a recorded extension load error for a top-level command, if any."""
     if not cli_ctx or not command_name:
         return None
 
@@ -48,6 +49,7 @@ def _get_failed_extension_load_error(cli_ctx, command_name):
 
 
 def _get_close_matches(value, choices):
+    """Return close parser choice matches using the existing CLI spellcheck cutoff."""
     return difflib.get_close_matches(value, choices, cutoff=0.7)
 
 
