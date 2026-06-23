@@ -47,6 +47,10 @@ def _get_failed_extension_load_error(cli_ctx, command_name):
             "Load error: {load_error}").format(command_name=command_name, load_error=load_error)
 
 
+def _get_close_matches(value, choices):
+    return difflib.get_close_matches(value, choices, cutoff=0.7)
+
+
 class IncorrectUsageError(CLIError):
     '''Raised when a command is incorrectly used and the usage should be
     displayed to the user.
@@ -305,7 +309,6 @@ class AzCliCommandParser(CLICommandParser):
             command_name_inferred = self.prog
             failed_extension_error = None
             use_dynamic_install = 'no'
-            candidate_choices = action.choices
             if not self.command_source:
                 from azure.cli.core.extension.dynamic_install import try_install_extension
                 args = self.prog.split() + self._raw_arguments
@@ -317,9 +320,7 @@ class AzCliCommandParser(CLICommandParser):
                 error_msg = failed_extension_error or (
                     "'{value}' is misspelled or not recognized by the system.".format(value=value))
                 az_error = CommandNotFoundError(error_msg)
-                if failed_extension_error:
-                    candidate_choices = []
-                candidates = difflib.get_close_matches(value, candidate_choices, cutoff=0.7)
+                candidates = [] if failed_extension_error else _get_close_matches(value, action.choices)
                 if candidates:
                     # use the most likely candidate to replace the misspelled command
                     args_inferred = [item if item != value else candidates[0] for item in args]
@@ -330,7 +331,7 @@ class AzCliCommandParser(CLICommandParser):
                 error_msg = "{prog}: '{value}' is not a valid value for '{param}'. Allowed values: {choices}.".format(
                     prog=self.prog, value=value, param=parameter, choices=', '.join([str(x) for x in action.choices]))
                 az_error = InvalidArgumentValueError(error_msg)
-                candidates = difflib.get_close_matches(value, candidate_choices, cutoff=0.7)
+                candidates = _get_close_matches(value, action.choices)
 
             if candidates:
                 az_error.set_recommendation("Did you mean '{}' ?".format(candidates[0]))

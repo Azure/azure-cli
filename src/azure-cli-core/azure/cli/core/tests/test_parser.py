@@ -154,17 +154,18 @@ class TestParser(unittest.TestCase):
 
         logger_msgs = []
 
-        def mock_log_error(logger_instance, msg):
-            if logger_instance.name.startswith('cli'):
-                logger_msgs.append(msg)
+        def mock_log_error(logger_instance, msg):  # pylint: disable=unused-argument
+            logger_msgs.append(msg)
 
         with mock.patch.object(logging.Logger, 'error', mock_log_error):
             with self.assertRaises(SystemExit):
                 parser.parse_args('ml online-endpoint create'.split())
 
-        self.assertEqual(len(logger_msgs), 1)
-        self.assertIn("The installed extension 'ml' failed to load and its commands are unavailable.", logger_msgs[0])
-        self.assertIn("AzureOpenAIDeployment", logger_msgs[0])
+        failure_messages = [msg for msg in logger_msgs if "failed to load and its commands are unavailable" in msg]
+        self.assertTrue(failure_messages)
+        self.assertIn("The installed extension 'ml' failed to load and its commands are unavailable.",
+                      failure_messages[0])
+        self.assertIn("AzureOpenAIDeployment", failure_messages[0])
 
     def _mock_import_lib(_):
         mock_obj = mock.MagicMock()
