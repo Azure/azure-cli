@@ -240,7 +240,7 @@ Release History
 * Fix #33180: `az functionapp plan create`: Simplify reserved parameter assignment in AppServicePlan (#33202)
 * `az webapp sitecontainers convert`: Add support for converting Docker Compose multi-container apps to Sitecontainers mode (#33131)
 * `az webapp up/deploy`: Add `--enriched-errors` parameter to see detailed deployment failure log (#32940)
-* `az webapp status`: Add new command to show per-instance Site Runtime Status (#160)
+* `az webapp status`: Add new command to show per-instance Site Runtime Status (#33632)
 * `az webapp create`: Add error message that clearly lists all valid options and specifies how to discover available runtimes (#33252)
 * `az appservice plan create`: Make `P0V3` as default SKU when `--sku` is omitted for linux webapp (#33237)
 * `az appservice plan create`: Add `PREMIUM0V3` tier for elastic scale (#33237)
