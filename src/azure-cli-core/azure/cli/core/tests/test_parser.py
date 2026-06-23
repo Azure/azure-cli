@@ -154,7 +154,7 @@ class TestParser(unittest.TestCase):
 
         logger_msgs = []
 
-        def mock_log_error(_, msg):  # pylint: disable=unused-argument
+        def mock_log_error(logger_instance, msg):  # pylint: disable=unused-argument
             logger_msgs.append(msg)
 
         with mock.patch.object(logging.Logger, 'error', mock_log_error):

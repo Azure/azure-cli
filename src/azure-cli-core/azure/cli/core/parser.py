@@ -43,8 +43,8 @@ def _get_failed_extension_load_error(cli_ctx, command_name):
     if not load_error:
         return None
 
-    return ("The installed extension '{command_name}' failed to load and its commands are unavailable. "
-            "Load error: {load_error}").format(command_name=command_name, load_error=load_error)
+    return (f"The installed extension '{command_name}' failed to load and its commands are unavailable. "
+            f"Load error: {load_error}")
 
 
 def _get_close_matches(value, choices):
