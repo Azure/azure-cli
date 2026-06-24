@@ -5101,12 +5101,12 @@ class NetworkPrivateLinkMongoClustersTest(ScenarioTest):
 
 class NetworkPrivateLinkHorizonDBScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_hdb', random_name_length=18, location='westus2')
+    @ResourceGroupPreparer(name_prefix='cli_test_hdb', random_name_length=18, location='uksouth')
     def test_private_link_resource_horizondb_cluster(self, resource_group):
         self.kwargs.update({
             'cluster_name': self.create_random_name(prefix='clitest', length=15),
             'sub': self.get_subscription_id(),
-            'location': 'westus2',
+            'location': 'uksouth',
             'api_version': '2026-01-20-preview',
             'resource_type': 'Microsoft.HorizonDB/clusters',
             'headers': '{\\"Content-Type\\":\\"application/json\\"}',
@@ -5123,8 +5123,7 @@ class NetworkPrivateLinkHorizonDBScenarioTest(ScenarioTest):
                  '--type {resource_type}',
                  checks=[self.check('length(@)', 1)])
 
-    @live_only()
-    @ResourceGroupPreparer(name_prefix='cli_test_hdb', random_name_length=18, location='westus2')
+    @ResourceGroupPreparer(name_prefix='cli_test_hdb', random_name_length=18, location='uksouth')
     def test_private_endpoint_connection_horizondb_cluster(self, resource_group):
         from azure.mgmt.core.tools import resource_id
 
@@ -5141,7 +5140,7 @@ class NetworkPrivateLinkHorizonDBScenarioTest(ScenarioTest):
         self.kwargs.update({
             'cluster_name': resource_name,
             'target_resource_id': target_resource_id,
-            'location': 'westus2',
+            'location': 'uksouth',
             'resource_type': 'Microsoft.HorizonDB/clusters',
             'vnet': self.create_random_name('cli-vnet-', 24),
             'subnet': self.create_random_name('cli-subnet-', 24),
@@ -5207,7 +5206,7 @@ class NetworkPrivateLinkHorizonDBScenarioTest(ScenarioTest):
         self.cmd('az network private-endpoint-connection delete --id {pec_id} -y')
 
     def _get_horizondb_cluster_body(self):
-        return ('{\\"location\\": \\"westus2\\", '
+        return ('{\\"location\\": \\"uksouth\\", '
                 '\\"properties\\": {'
                 '\\"createMode\\": \\"Default\\", '
                 '\\"version\\": \\"17\\", '
