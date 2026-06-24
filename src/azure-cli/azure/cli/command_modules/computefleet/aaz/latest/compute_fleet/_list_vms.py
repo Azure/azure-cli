@@ -12,20 +12,19 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "compute-fleet list-vmss",
-    is_preview=True,
+    "compute-fleet list-vms",
 )
-class ListVmss(AAZCommand):
-    """List VirtualMachineScaleSet resources by Fleet
+class ListVms(AAZCommand):
+    """List VirtualMachine resources of a Launch mode Fleet.
 
-    :example: Fleets_ListVirtualMachineScaleSets
-        az compute-fleet list-vmss --resource-group rgazurefleet --name myFleet
+    :example: Fleets_ListVirtualMachines_MaximumSet_Gen
+        az compute-fleet list-vms --resource-group rgazurefleet --name testFleet
     """
 
     _aaz_info = {
         "version": "2026-04-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.azurefleet/fleets/{}/virtualmachinescalesets", "2026-04-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.azurefleet/fleets/{}/virtualmachines", "2026-04-01-preview"],
         ]
     }
 
@@ -57,11 +56,19 @@ class ListVmss(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
+        _args_schema.filter = AAZStrArg(
+            options=["--filter"],
+            help="Filter expression to filter the virtual machines.",
+        )
+        _args_schema.skiptoken = AAZStrArg(
+            options=["--skiptoken"],
+            help="Skip token for pagination. Uses the token from a previous response to fetch the next page of results.",
+        )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.FleetsListVirtualMachineScaleSets(ctx=self.ctx)()
+        self.FleetsListVirtualMachines(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -77,7 +84,7 @@ class ListVmss(AAZCommand):
         next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
         return result, next_link
 
-    class FleetsListVirtualMachineScaleSets(AAZHttpOperation):
+    class FleetsListVirtualMachines(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -91,7 +98,7 @@ class ListVmss(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AzureFleet/fleets/{name}/virtualMachineScaleSets",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AzureFleet/fleets/{name}/virtualMachines",
                 **self.url_parameters
             )
 
@@ -124,6 +131,12 @@ class ListVmss(AAZCommand):
         @property
         def query_parameters(self):
             parameters = {
+                **self.serialize_query_param(
+                    "$filter", self.ctx.args.filter,
+                ),
+                **self.serialize_query_param(
+                    "$skiptoken", self.ctx.args.skiptoken,
+                ),
                 **self.serialize_query_param(
                     "api-version", "2026-04-01-preview",
                     required=True,
@@ -212,8 +225,8 @@ class ListVmss(AAZCommand):
             return cls._schema_on_200
 
 
-class _ListVmssHelper:
-    """Helper class for ListVmss"""
+class _ListVmsHelper:
+    """Helper class for ListVms"""
 
 
-__all__ = ["ListVmss"]
+__all__ = ["ListVms"]

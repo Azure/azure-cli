@@ -47,7 +47,8 @@ def load_arguments(self, _):
                    name_type,
                    help='Name of cluster.')
         c.argument('tags',
-                   tags_type)
+                   tags_type,
+                   help='Tags to be assigned to the openShiftCluster resource. ' + tags_type.settings.get('help', ''))
 
         c.argument('pull_secret',
                    help='Pull secret of cluster.',
@@ -99,7 +100,7 @@ def load_arguments(self, _):
                    options_list=['--worker-encryption-at-host', '--worker-enc-host'],
                    help='Encryption at host flag for worker VMs. [Default: false]')
         c.argument('worker_vm_size',
-                   help='Size of worker VMs. [Default: Standard_D4s_v5]')
+                   help='Size of worker VMs.')
         c.argument('worker_vm_disk_size_gb',
                    type=int,
                    help='Disk size in GB of worker VMs. [Default: 128]',
