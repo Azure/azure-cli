@@ -79,6 +79,7 @@ Release History
 * `az network vnet create/update`: Add `--summarized-gateway-prefixes` to support summarized gateway prefixes (#33241)
 * `az network application-gateway ssl-cert create/update`: Add `--hsm` to support Managed HSM (#33353)
 * `az network virtual-network-appliance create/update`: Add `--private-ip-address-version` to support private ip address version (#33315)
+* `az network private-link-resource`, `az network private-endpoint-connection`: Add support for HorizonDB clusters
 
 **PostgreSQL**
 
