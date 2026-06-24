@@ -5101,13 +5101,12 @@ class NetworkPrivateLinkMongoClustersTest(ScenarioTest):
 
 class NetworkPrivateLinkHorizonDBScenarioTest(ScenarioTest):
 
-    @live_only()
-    @ResourceGroupPreparer(name_prefix='cli_test_hdb', random_name_length=18, location='eastus2euap')
+    @ResourceGroupPreparer(name_prefix='cli_test_hdb', random_name_length=18, location='westus2')
     def test_private_link_resource_horizondb_cluster(self, resource_group):
         self.kwargs.update({
             'cluster_name': self.create_random_name(prefix='clitest', length=15),
             'sub': self.get_subscription_id(),
-            'location': 'eastus2euap',
+            'location': 'westus2',
             'api_version': '2026-01-20-preview',
             'resource_type': 'Microsoft.HorizonDB/clusters',
             'headers': '{\\"Content-Type\\":\\"application/json\\"}',
@@ -5125,7 +5124,7 @@ class NetworkPrivateLinkHorizonDBScenarioTest(ScenarioTest):
                  checks=[self.check('length(@)', 1)])
 
     @live_only()
-    @ResourceGroupPreparer(name_prefix='cli_test_hdb', random_name_length=18, location='eastus2euap')
+    @ResourceGroupPreparer(name_prefix='cli_test_hdb', random_name_length=18, location='westus2')
     def test_private_endpoint_connection_horizondb_cluster(self, resource_group):
         from azure.mgmt.core.tools import resource_id
 
@@ -5142,7 +5141,7 @@ class NetworkPrivateLinkHorizonDBScenarioTest(ScenarioTest):
         self.kwargs.update({
             'cluster_name': resource_name,
             'target_resource_id': target_resource_id,
-            'location': 'eastus2euap',
+            'location': 'westus2',
             'resource_type': 'Microsoft.HorizonDB/clusters',
             'vnet': self.create_random_name('cli-vnet-', 24),
             'subnet': self.create_random_name('cli-subnet-', 24),
@@ -5208,7 +5207,7 @@ class NetworkPrivateLinkHorizonDBScenarioTest(ScenarioTest):
         self.cmd('az network private-endpoint-connection delete --id {pec_id} -y')
 
     def _get_horizondb_cluster_body(self):
-        return ('{\\"location\\": \\"eastus2euap\\", '
+        return ('{\\"location\\": \\"westus2\\", '
                 '\\"properties\\": {'
                 '\\"createMode\\": \\"Default\\", '
                 '\\"version\\": \\"17\\", '
@@ -5227,7 +5226,8 @@ class NetworkPrivateLinkHorizonDBScenarioTest(ScenarioTest):
                             'providers/Microsoft.HorizonDB/clusters/{cluster_name}?api-version={api_version}"'
                             ).get_output_in_json()
 
-        return response['properties']['provisioningState']
+        properties = response.get('properties') or {}
+        return properties.get('provisioningState') or properties.get('state') or response.get('status')
 
     def check_provisioning_state_for_horizondb_cluster(self):
         time.sleep(10)
@@ -5235,8 +5235,8 @@ class NetworkPrivateLinkHorizonDBScenarioTest(ScenarioTest):
         print("checking status of creation...........")
         state = self.get_provisioning_state_for_horizondb_cluster()
         print(state)
-        while state != "Succeeded":
-            if state in ["Provisioning", "Updating"]:
+        while state not in ["Succeeded", "Ready"]:
+            if state in ["Provisioning", "Updating", "Accepted", None]:
                 print("instance not yet created. waiting for 1 more min...")
                 time.sleep(60)
             elif count == 15:
