@@ -1,0 +1,58 @@
+name: Azure CLI Trigger Reference Docs CI
+
+trigger:
+  branches:
+    include:
+    - release
+    - release-lts-*
+    - test-release-*
+
+pr: none
+
+resources:
+- repo: self
+
+variables:
+- template: ${{ variables.Pipeline.Workspace }}/.azure-pipelines/templates/variables.yml
+# - group: '<docs-reference-variable-group>'  # provides ADO_DocsReference_Organization / _Project / _Latest_Pipeline_ID / _LTS_Pipeline_ID / _ServiceConnection
+
+jobs:
+- job: TriggerReferenceDocsCI
+  displayName: 'Queue Microsoft Learn Docs Reference CI'
+  condition: or(eq(variables['Build.SourceBranchName'], 'release'), startsWith(variables['Build.SourceBranchName'], 'release-lts-'), startsWith(variables['Build.SourceBranchName'], 'test-release-'))
+  pool:
+    name: ${{ variables.ubuntu_pool }}
+  steps:
+  - checkout: none
+  - task: AzureCLI@2
+    displayName: 'Queue docs reference pipeline'
+    inputs:
+      azureSubscription: $(ADO_DocsReference_ServiceConnection)
+      scriptType: pscore
+      scriptLocation: inlineScript
+      inlineScript: |
+        $organization = $env:AdoOrg
+        $project = $env:AdoProject
+        $thisRepoLink = $env:ThisRepoLink
+        $thisRunLink = $env:ThisRunLink
+        $triggerBranch = $env:ReleaseBranch
+        $definitionId = $triggerBranch -like 'release-lts-*' ? $env:AdoLtsPipelineId : $env:AdoLatestPipelineId
+        $variables = @("triggerBranch=$triggerBranch", "triggerFromRepo=$thisRepoLink", "triggerByPipeline=$thisRunLink")
+
+        $output = az pipelines build queue --definition-id $definitionId --project $project --organization $organization --variables @variables | ConvertFrom-Json -AsHashtable
+        if ($? -eq $false)
+        {
+            $pipelineDefinitionLink = $organization + [uri]::EscapeDataString($project) + "/_build?definitionId=$definitionId"
+            Write-Error "Failed to queue the pipeline run for $pipelineDefinitionLink, please check above error message."
+        }
+        $runId = $output.id
+        $runLink = $organization + [uri]::EscapeDataString($project) + "/_build/results?buildId=$runId"
+        Write-Host "Triggered reference pipeline run, for details please check: $runLink"
+    env:
+      AdoOrg: $(ADO_DocsReference_Organization)
+      AdoProject: $(ADO_DocsReference_Project)
+      AdoLatestPipelineId: $(ADO_DocsReference_Latest_Pipeline_ID)
+      AdoLtsPipelineId: $(ADO_DocsReference_LTS_Pipeline_ID)
+      ReleaseBranch: $(Build.SourceBranchName)
+      ThisRepoLink: $(Build.Repository.Uri)
+      ThisRunLink: $(System.CollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)
