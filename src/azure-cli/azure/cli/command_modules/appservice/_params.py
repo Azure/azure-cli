@@ -164,6 +164,9 @@ subscription than the app service environment, please use the resource ID for --
                    help="Install script configurations. Provide key-value pairs for `name=<name> source-uri=<uri> type=<type>`.")
         c.argument('storage_mounts', options_list=['--storage-mount'], is_preview=True, action=StorageMountAddAction, nargs='+',
                    help="Storage mount configurations. Provide key-value pairs for `name=<name> source=<source> type=<type> destination-path=<path> credentials-secret-uri=<uri>`.")
+        c.argument('enriched_errors', options_list=['--enriched-errors'],
+                   help='If true, App Service plan creation failures will show context-enriched diagnostics with error codes, suggested fixes, and Copilot prompts.',
+                   arg_type=get_three_state_flag())
 
     with self.argument_context('appservice plan update') as c:
         c.argument('sku', arg_type=sku_arg_type,

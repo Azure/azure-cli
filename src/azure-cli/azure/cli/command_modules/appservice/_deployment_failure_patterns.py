@@ -109,8 +109,88 @@ DEPLOYMENT_FAILURE_PATTERNS = [
 _PATTERN_INDEX = {p["errorCode"]: p for p in DEPLOYMENT_FAILURE_PATTERNS}
 
 
+# Control-plane (ARM) failure patterns for resource creation operations such as
+# 'az appservice plan create'. These are management-plane errors (quota, SKU/region
+# availability, authorization, registration) rather than Kudu deployment failures.
+CONTROL_PLANE_FAILURE_PATTERNS = [
+    {
+        "errorCode": "QuotaExceeded",
+        "stage": "ResourceProvisioning",
+        "httpStatus": 401,
+        "suggestedFixes": [
+            "Your subscription has reached its quota for this SKU/region",
+            "Request a quota increase: 'az quota' or the Azure portal (Help + support > New support request)",
+            "Try a different region or a lower SKU/worker count"
+        ]
+    },
+    {
+        "errorCode": "SkuNotAvailable",
+        "stage": "ResourceProvisioning",
+        "httpStatus": 400,
+        "suggestedFixes": [
+            "The selected --sku is not available in the chosen region",
+            "List available SKUs/regions: 'az appservice list-locations --sku <SKU>'",
+            "Choose a supported SKU or deploy to a different region"
+        ]
+    },
+    {
+        "errorCode": "LocationNotAvailable",
+        "stage": "ResourceProvisioning",
+        "httpStatus": 400,
+        "suggestedFixes": [
+            "The resource type is not available in the specified --location",
+            "List supported regions: 'az appservice list-locations'",
+            "Pick a region where App Service plans of this SKU are offered"
+        ]
+    },
+    {
+        "errorCode": "AuthorizationFailed",
+        "stage": "Authorization",
+        "httpStatus": 403,
+        "suggestedFixes": [
+            "Your account lacks permission to create the App Service plan in this scope",
+            "Ensure you have at least 'Contributor' on the resource group/subscription",
+            "Verify the active subscription: 'az account show'"
+        ]
+    },
+    {
+        "errorCode": "ResourceGroupNotFound",
+        "stage": "ResourceProvisioning",
+        "httpStatus": 404,
+        "suggestedFixes": [
+            "The target resource group does not exist",
+            "Create it first: 'az group create -n <name> -l <location>'",
+            "Check the --resource-group value and active subscription"
+        ]
+    },
+    {
+        "errorCode": "MissingSubscriptionRegistration",
+        "stage": "ResourceProvisioning",
+        "httpStatus": 409,
+        "suggestedFixes": [
+            "The Microsoft.Web resource provider is not registered for this subscription",
+            "Register it: 'az provider register --namespace Microsoft.Web'",
+            "Check status: 'az provider show --namespace Microsoft.Web --query registrationState'"
+        ]
+    },
+    {
+        "errorCode": "ZoneRedundancyUnsupported",
+        "stage": "ResourceProvisioning",
+        "httpStatus": 400,
+        "suggestedFixes": [
+            "Zone redundancy requires a supported SKU and a minimum of 2 workers",
+            "Use a Premium V2/V3 SKU and set --number-of-workers to 2 or more",
+            "Or remove --zone-redundant to create a non-zone-redundant plan"
+        ]
+    },
+]
+
+# Index for O(1) lookup by error code (deployment + control-plane)
+_CONTROL_PLANE_PATTERN_INDEX = {p["errorCode"]: p for p in CONTROL_PLANE_FAILURE_PATTERNS}
+
+
 def get_failure_pattern(error_code):
-    return _PATTERN_INDEX.get(error_code)
+    return _PATTERN_INDEX.get(error_code) or _CONTROL_PLANE_PATTERN_INDEX.get(error_code)
 
 
 def match_failure_pattern(status_code=None, error_message=None):  # pylint: disable=too-many-return-statements,too-many-branches
@@ -143,4 +223,43 @@ def match_failure_pattern(status_code=None, error_message=None):  # pylint: disa
             return get_failure_pattern("RunFromRemoteZipConfigured")
         # Generic 409 - deployment lock conflict
         return get_failure_pattern("DeploymentInProgress")
+    return None
+
+
+def match_control_plane_failure_pattern(status_code=None, error_message=None):  # pylint: disable=too-many-return-statements,too-many-branches
+    if error_message is None:
+        error_message = ""
+
+    error_lower = error_message.lower()
+
+    # Message-based matching first (status codes are inconsistent across ARM errors)
+    if "quota" in error_lower and ("exceed" in error_lower or "insufficient" in error_lower or
+                                   "additional" in error_lower):
+        return get_failure_pattern("QuotaExceeded")
+    if "authorizationfailed" in error_lower or "does not have authorization" in error_lower or \
+            "not authorized" in error_lower:
+        return get_failure_pattern("AuthorizationFailed")
+    if "missingsubscriptionregistration" in error_lower or "not registered to use namespace" in error_lower:
+        return get_failure_pattern("MissingSubscriptionRegistration")
+    if "resource group" in error_lower and ("could not be found" in error_lower or "not found" in error_lower):
+        return get_failure_pattern("ResourceGroupNotFound")
+    if ("sku" in error_lower or "tier" in error_lower) and ("not available" in error_lower or
+                                                            "not supported" in error_lower or
+                                                            "skunotavailable" in error_lower):
+        return get_failure_pattern("SkuNotAvailable")
+    if ("location" in error_lower or "region" in error_lower) and ("not available" in error_lower or
+                                                                   "not supported" in error_lower):
+        return get_failure_pattern("LocationNotAvailable")
+    if "zone" in error_lower and ("redundan" in error_lower):
+        return get_failure_pattern("ZoneRedundancyUnsupported")
+
+    # Status-code fallbacks
+    if status_code == 401 or status_code == 403:
+        return get_failure_pattern("AuthorizationFailed")
+    if status_code == 404:
+        return get_failure_pattern("ResourceGroupNotFound")
+    if status_code == 409:
+        return get_failure_pattern("MissingSubscriptionRegistration")
+    if status_code == 400:
+        return get_failure_pattern("SkuNotAvailable")
     return None
