@@ -73,6 +73,7 @@ Azure
 {Color.GREEN}+ {Color.RESET}{Color.GREEN}/subscriptions/6d41d86d-eb6b-473a-b31d-bbd084e1814d/resourceGroups/503ace4c-9b1c-4059-a3e9-09553d24e9e1/providers/Microsoft.Test/testD/resourceD [2021-05-01]{Color.RESET}
   {Color.PURPLE}~ {Color.RESET}Management Status: {Color.PURPLE}"NotManaged"{Color.RESET} => {Color.PURPLE}"Managed"{Color.RESET}
   {Color.PURPLE}~ {Color.RESET}Deny Status: {Color.PURPLE}"None"{Color.RESET} => {Color.PURPLE}"DenyDelete"{Color.RESET}
+
 >> {Color.PURPLE}Potential Resource Changes (Learn more at https://aka.ms/whatIfPotentialChanges){Color.RESET}
 {Color.CYAN}?{Color.RESET}{Color.PURPLE}~ {Color.RESET}{Color.CYAN}[Potential] {Color.RESET}{Color.PURPLE}/subscriptions/6d41d86d-eb6b-473a-b31d-bbd084e1814d/resourceGroups/503ace4c-9b1c-4059-a3e9-09553d24e9e1/providers/Microsoft.Test/testC/resourceC [2021-05-01]{Color.RESET}
   = Management Status: "Managed"
@@ -90,6 +91,7 @@ Contoso@2.0.0
 {Color.RED}- {Color.RESET}{Color.RED}Contoso/example name="defResource"{Color.RESET}
   {Color.PURPLE}~ {Color.RESET}Management Status: {Color.PURPLE}"Managed"{Color.RESET} => {Color.PURPLE}"Unmanaged"{Color.RESET}
   {Color.PURPLE}~ {Color.RESET}Deny Status: {Color.PURPLE}"NotSupported"{Color.RESET} => {Color.PURPLE}"None"{Color.RESET}
+
 >> {Color.PURPLE}Potential Resource Changes (Learn more at https://aka.ms/whatIfPotentialChanges){Color.RESET}
 {Color.CYAN}?{Color.RESET}! {Color.CYAN}[Potential] {Color.RESET}Contoso/noPreview 
   {Color.PURPLE}~ {Color.RESET}Management Status: {Color.PURPLE}null{Color.RESET} => {Color.PURPLE}"Managed"{Color.RESET}
@@ -104,15 +106,24 @@ Kubernetes@2.0.0 namespace="myNs", kubeconfig=<Secret 'mySecret' in key vault '/
 {Color.RED}Deleting - {Color.RESET}Resources Marked for Deletion 2 total:
 
 Azure
+
 >> {Color.RED}Potential Deletions 1 total (Learn more at https://aka.ms/whatIfPotentialChanges){Color.RESET}
 {Color.CYAN}?{Color.RESET}{Color.RED}- {Color.RESET}{Color.CYAN}[Potential] {Color.RESET}{Color.RED}/subscriptions/6d41d86d-eb6b-473a-b31d-bbd084e1814d/resourceGroups/503ace4c-9b1c-4059-a3e9-09553d24e9e1/providers/Microsoft.Test/testC/resourceC{Color.RESET}
 
 Contoso@2.0.0
 {Color.RED}- {Color.RESET}{Color.RED}Contoso/example name="defResource"{Color.RESET}
 
-Diagnostics (4):
+Diagnostics (5):
+
 INFO: [InfoCode] InfoMessage
+
 {Color.DARK_YELLOW}WARNING: [Abc] Xyz{Color.RESET}
+
 {Color.DARK_YELLOW}WARNING: [NoSupportForExtensibleResources] Extensible resources are currently not supported{Color.RESET}
+
 {Color.RED}ERROR: [ErrorCode] ErrorMessage{Color.RESET}
+
+{Color.RED}ERROR: [ErrorCode] This is an error diagnostic with a target.{Color.RESET}
+  {Color.RED}Target: /subscriptions/d41d86d-eb6b-473a-b31d-bbd084e1814d/resourceGroups/503ace4c-9b1c-4059-a3e9-09553d24e9e1/providers/Microsoft.Test/tests/testResource{Color.RESET}
+
 """

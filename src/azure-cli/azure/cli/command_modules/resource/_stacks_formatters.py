@@ -196,7 +196,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
 
             if not has_potential_changes and str_lower_eq(
                     change.change_certainty, StackModels.DeploymentStacksWhatIfChangeCertainty.POTENTIAL):
-                self.builder.append(">> ").append_line(
+                self.builder.append("\n>> ").append_line(
                     "Potential Resource Changes (Learn more at https://aka.ms/whatIfPotentialChanges)",
                     Color.PURPLE)
                 has_potential_changes = True
@@ -255,7 +255,7 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
 
             if not has_potential_deletions and str_lower_eq(
                     delete_change.change_certainty, StackModels.DeploymentStacksWhatIfChangeCertainty.POTENTIAL):
-                self.builder.append(">> ").append_line(
+                self.builder.append("\n>> ").append_line(
                     f"Potential Deletions {self._get_num_potential_resource_changes(delete_changes, i)} total"
                     " (Learn more at https://aka.ms/whatIfPotentialChanges)",
                     Color.RED)
@@ -306,19 +306,27 @@ class DeploymentStacksWhatIfResultFormatter:  # pylint: disable=too-few-public-m
             self.what_if_props.diagnostics,
             key=lambda x: (
                 DeploymentStacksWhatIfResultFormatter.DIAGNOSTIC_LEVEL_PRIORITIES.get(x.level, 0),
-                x.code or ""))
+                x.code or "",
+                x.message or ""))
 
         self.builder.append_line(f"Diagnostics ({len(diagnostics_sorted)}):")
+        self.builder.append_line()
 
         for diagnostic in diagnostics_sorted:
             self._format_diagnostic(diagnostic)
+            self.builder.append_line()
 
         return True
 
     def _format_diagnostic(self, diagnostic: StackModels.DeploymentStacksDiagnostic):
-        self.builder.append_line(
-            f"{diagnostic.level.upper()}: [{diagnostic.code}] {diagnostic.message}",
-            DeploymentStacksWhatIfResultFormatter.DIAGNOSTIC_COLORS.get(diagnostic.level, None))
+        diag_color = DeploymentStacksWhatIfResultFormatter.DIAGNOSTIC_COLORS.get(diagnostic.level, None)
+
+        self.builder.append_line(f"{diagnostic.level.upper()}: [{diagnostic.code}] {diagnostic.message}", diag_color)
+
+        if diagnostic.target:
+            self.builder.push_indent("  ")
+            self.builder.append_line(f"Target: {diagnostic.target}", diag_color)
+            self.builder.pop_indent()
 
     def _format_change(
         self,
