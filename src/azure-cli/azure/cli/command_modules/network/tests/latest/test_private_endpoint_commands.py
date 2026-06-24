@@ -5235,12 +5235,14 @@ class NetworkPrivateLinkHorizonDBScenarioTest(ScenarioTest):
         state = self.get_provisioning_state_for_horizondb_cluster()
         print(state)
         while state not in ["Succeeded", "Ready"]:
-            if state in ["Provisioning", "Updating", "Accepted", None]:
-                print("instance not yet created. waiting for 1 more min...")
-                time.sleep(60)
-            elif count == 15:
+            if state in ["Failed", "Canceled"]:
+                print("creation failed!")
+                self.assertTrue(False)
+            if count == 15:
                 print("TimeOut after waiting for 15 mins!")
                 self.assertTrue(False)
+            print("instance not yet created. waiting for 1 more min...")
+            time.sleep(60)
             count += 1
             state = self.get_provisioning_state_for_horizondb_cluster()
         print("Cluster creation succeeded!")
