@@ -100,6 +100,14 @@ def add_role_assignment_executor(cmd, role, assignee, resource_group_name=None,
 
 def add_role_assignment(cmd, role, service_principal_msi_id, is_service_principal=True,
                         delay=2, scope=None, assignee_principal_type=None):
+    # Every caller of add_role_assignment targets either a service principal or a managed
+    # identity, both of which are represented as a ServicePrincipal in Microsoft Entra ID.
+    # Explicitly setting the principal type lets the Authorization RP skip the Entra ID
+    # existence check, which avoids PrincipalNotFound failures caused by replication delay
+    # for freshly created identities.
+    if assignee_principal_type is None:
+        assignee_principal_type = "ServicePrincipal"
+
     # AAD can have delays in propagating data, so sleep and retry
     hook = cmd.cli_ctx.get_progress_controller(True)
     hook.add(message="Waiting for AAD role to propagate", value=0, total_val=1.0)
