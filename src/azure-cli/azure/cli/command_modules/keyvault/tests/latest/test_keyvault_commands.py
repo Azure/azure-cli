@@ -308,12 +308,17 @@ class KeyVaultEkmScenarioTest(ScenarioTest):
     EKM (External Key Manager) requires a Managed HSM that is already wired to an external
     key-manager proxy. That infrastructure cannot be provisioned by a preparer or captured in a
     recording, so this test is live-only and reads the target from environment variables. It is
-    skipped unless all of them are set:
+    skipped unless the required ones are set:
 
       AZURE_CLI_TEST_EKM_MHSM_URL        - Managed HSM URL (https://<name>.managedhsm.azure.net)
       AZURE_CLI_TEST_EKM_HOST            - EKM proxy host (FQDN or FQDN:port)
       AZURE_CLI_TEST_EKM_CA_CERT         - path to the EKM proxy server CA certificate (PEM/DER)
       AZURE_CLI_TEST_EKM_EXTERNAL_KEY_ID - id of a key that already exists in the EKM proxy
+      AZURE_CLI_TEST_EKM_PATH_PREFIX     - optional proxy path prefix (e.g. /api/v1); some
+                                           proxies require it for the connection check to succeed
+
+    NOTE: this test creates AND deletes the EKM connection on the target MHSM, so run it against a
+    dedicated/disposable Managed HSM, not a shared pool with a connection you need to keep.
     """
 
     def test_keyvault_ekm_connection_and_external_key(self):
@@ -321,6 +326,7 @@ class KeyVaultEkmScenarioTest(ScenarioTest):
         ekm_host = os.environ.get('AZURE_CLI_TEST_EKM_HOST')
         ca_cert = os.environ.get('AZURE_CLI_TEST_EKM_CA_CERT')
         ext_key_id = os.environ.get('AZURE_CLI_TEST_EKM_EXTERNAL_KEY_ID')
+        path_prefix = os.environ.get('AZURE_CLI_TEST_EKM_PATH_PREFIX')
         if not all([mhsm_url, ekm_host, ca_cert, ext_key_id]):
             self.skipTest('Set AZURE_CLI_TEST_EKM_MHSM_URL / _HOST / _CA_CERT / _EXTERNAL_KEY_ID '
                           'to run the EKM live scenario test.')
@@ -335,8 +341,19 @@ class KeyVaultEkmScenarioTest(ScenarioTest):
         })
 
         # --- EKM connection lifecycle ---
-        self.cmd('keyvault ekm-connection create --id {mhsm} --host {host} '
-                 '--server-ca-certificate "{ca_cert}"')
+        # The service rejects 'create' when a connection already exists, so start from a clean
+        # slate (best-effort delete; ignored if there is no pre-existing connection).
+        try:
+            self.cmd('keyvault ekm-connection delete --id {mhsm}')
+        except Exception:  # pylint: disable=broad-except
+            pass
+
+        create_cmd = ('keyvault ekm-connection create --id {mhsm} --host {host} '
+                      '--server-ca-certificate "{ca_cert}"')
+        if path_prefix:
+            self.kwargs['path_prefix'] = path_prefix
+            create_cmd += ' --path-prefix {path_prefix}'
+        self.cmd(create_cmd)
         show = self.cmd('keyvault ekm-connection show --id {mhsm}').get_output_in_json()
         self.assertIn('host', show)
         self.cmd('keyvault ekm-connection check --id {mhsm}')
