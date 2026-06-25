@@ -538,9 +538,16 @@ def _search_role_assignments(assignments_client, definitions_client,
             ra.scope.lower() == scope.lower()
         )]
 
+        # Filter by role. Compare role definition IDs instead of full resource IDs because
+        # the same role can have different resource ID formats depending on scope
         if role:
-            role_id = _resolve_role_id(role, scope, definitions_client)
-            assignments = [ra for ra in assignments if ra.role_definition_id == role_id]
+            resource_id = _resolve_role_id(role, scope, definitions_client)
+            # If the role ID couldn't be parsed to a valid GUID, no assignments can match
+            if not (role_id := _get_role_definition_id(resource_id)):
+                return []
+
+            assignments = [ra for ra in assignments
+                           if _get_role_definition_id(ra.role_definition_id) == role_id]
 
         # filter the assignee if "include_groups" is not provided because service side
         # does not accept filter "principalId eq and atScope()"
@@ -548,6 +555,19 @@ def _search_role_assignments(assignments_client, definitions_client,
             assignments = [ra for ra in assignments if ra.principal_id == assignee_object_id]
 
     return assignments
+
+
+def _get_role_definition_id(resource_id):
+    """Extract the role definition GUID from a role definition resource ID.
+
+    Returns the GUID as a UUID object for case-insensitive comparison, or None if invalid.
+    """
+    if resource_id:
+        try:
+            return uuid.UUID(resource_id.rsplit('/', 1)[-1])
+        except ValueError:
+            pass
+    return None
 
 
 def _build_role_scope(resource_group_name, scope, subscription_id):
@@ -567,24 +587,30 @@ def _build_role_scope(resource_group_name, scope, subscription_id):
 
 
 def _resolve_role_id(role, scope, definitions_client):
-    role_id = None
-    if re.match(r'/subscriptions/.+/providers/Microsoft.Authorization/roleDefinitions/',
-                role, re.I):
-        role_id = role
-    else:
-        if is_guid(role):
-            role_id = '/subscriptions/{}/providers/Microsoft.Authorization/roleDefinitions/{}'.format(
-                definitions_client._config.subscription_id, role)
-        if not role_id:  # retrieve role id
-            role_defs = list(definitions_client.list(scope, "roleName eq '{}'".format(role)))
-            if not role_defs:
-                raise CLIError("Role '{}' doesn't exist.".format(role))
-            if len(role_defs) > 1:
-                ids = [r.id for r in role_defs]
-                err = "More than one role matches the given name '{}'. Please pick a value from '{}'"
-                raise CLIError(err.format(role, ids))
-            role_id = role_defs[0].id
-    return role_id
+    """Resolve a role to its full role definition resource ID.
+
+    Accepts:
+        - role definition resource ID (returned as-is)
+        - role definition GUID
+        - role name (e.g. 'Reader')
+    """
+    # Check if it's a role definition resource ID: /providers/Microsoft.Authorization/roleDefinitions/<guid>
+    # optionally prefixed with /subscriptions/... The last segment must be a valid GUID.
+    if (re.match(r'(/subscriptions/[^/]+)?/providers/Microsoft.Authorization/roleDefinitions/[^/]+$', role, re.I) and
+            is_guid(role.rsplit('/', 1)[-1])):
+        return role
+
+    if is_guid(role):
+        return f"/providers/Microsoft.Authorization/roleDefinitions/{role}"
+
+    role_defs = list(definitions_client.list(scope, "roleName eq '{}'".format(role)))
+    if not role_defs:
+        raise CLIError("Role '{}' doesn't exist.".format(role))
+    if len(role_defs) > 1:
+        ids = [r.id for r in role_defs]
+        err = "More than one role matches the given name '{}'. Please pick a value from '{}'"
+        raise CLIError(err.format(role, ids))
+    return role_defs[0].id
 
 
 def create_application(cmd, client, display_name, identifier_uris=None,
