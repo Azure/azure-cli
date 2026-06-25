@@ -3,13 +3,6 @@
 Release History
 ===============
 
-Upcoming Release
-++++++++++++++++
-
-**Monitor**
-
-* `az monitor sli`: Add command group with `create`, `show`, `list`, `update`, and `delete` using `Microsoft.Monitor` preview API `2025-03-01-preview`. Only user-assigned managed identity is supported; system-assigned identity is not. Identity rotation is performed via `az monitor sli update --set 'identity.userAssignedIdentities={"<arm-id>":{}}'` plus matching `--set` updates on `destinationAmwAccounts[*].identity` and each `signalSources[*].sourceAmwAccountManagedIdentity`; see `az monitor sli update --help` for the full recipe.
-
 2.87.0
 ++++++
 
@@ -69,6 +62,10 @@ Upcoming Release
 **Key Vault**
 
 * `az keyvault create`: Fix keyvault create RequestDisallowedByPolicy error by explicitly setting `enableSoftDelete` in the request body (#33265)
+
+**Monitor**
+
+* `az monitor sli`: Add command group with `create`, `show`, `list`, `update`, and `delete` using `Microsoft.Monitor` preview API `2025-03-01-preview`. Only user-assigned managed identity is supported; system-assigned identity is not. Identity rotation is performed via `az monitor sli update --set 'identity.userAssignedIdentities={"<arm-id>":{}}'` plus matching `--set` updates on `destinationAmwAccounts[*].identity` and each `signalSources[*].sourceAmwAccountManagedIdentity`; see `az monitor sli update --help` for the full recipe.
 
 **MySQL**
 
