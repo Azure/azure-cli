@@ -18,7 +18,7 @@ from ipaddress import ip_network
 from azure.cli.testsdk.decorators import serial_test
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.testsdk.scenario_tests import RecordingProcessor
-from azure.cli.testsdk import ResourceGroupPreparer, StorageAccountPreparer, KeyVaultPreparer, ManagedHSMPreparer, ScenarioTest
+from azure.cli.testsdk import ResourceGroupPreparer, StorageAccountPreparer, KeyVaultPreparer, ManagedHSMPreparer, ScenarioTest, live_only
 from azure.core.exceptions import HttpResponseError
 from knack.util import CLIError
 
@@ -299,6 +299,68 @@ class KeyVaultEkmCertificateSerializationUnitTest(unittest.TestCase):
         self.assertIsInstance(result, dict)
         self.assertEqual(result.get('format'), 'der')
         self.assertIsInstance(result.get('cer'), str)
+
+
+@live_only()
+class KeyVaultEkmScenarioTest(ScenarioTest):
+    """Live EKM scenario test.
+
+    EKM (External Key Manager) requires a Managed HSM that is already wired to an external
+    key-manager proxy. That infrastructure cannot be provisioned by a preparer or captured in a
+    recording, so this test is live-only and reads the target from environment variables. It is
+    skipped unless all of them are set:
+
+      AZURE_CLI_TEST_EKM_MHSM_URL        - Managed HSM URL (https://<name>.managedhsm.azure.net)
+      AZURE_CLI_TEST_EKM_HOST            - EKM proxy host (FQDN or FQDN:port)
+      AZURE_CLI_TEST_EKM_CA_CERT         - path to the EKM proxy server CA certificate (PEM/DER)
+      AZURE_CLI_TEST_EKM_EXTERNAL_KEY_ID - id of a key that already exists in the EKM proxy
+    """
+
+    def test_keyvault_ekm_connection_and_external_key(self):
+        mhsm_url = os.environ.get('AZURE_CLI_TEST_EKM_MHSM_URL')
+        ekm_host = os.environ.get('AZURE_CLI_TEST_EKM_HOST')
+        ca_cert = os.environ.get('AZURE_CLI_TEST_EKM_CA_CERT')
+        ext_key_id = os.environ.get('AZURE_CLI_TEST_EKM_EXTERNAL_KEY_ID')
+        if not all([mhsm_url, ekm_host, ca_cert, ext_key_id]):
+            self.skipTest('Set AZURE_CLI_TEST_EKM_MHSM_URL / _HOST / _CA_CERT / _EXTERNAL_KEY_ID '
+                          'to run the EKM live scenario test.')
+
+        self.kwargs.update({
+            'mhsm': mhsm_url,
+            'host': ekm_host,
+            'ca_cert': ca_cert,
+            'ext_key_id': ext_key_id,
+            'key_name': self.create_random_name('cli-ekm-key-', 24),
+            'normal_key': self.create_random_name('cli-norm-key-', 24),
+        })
+
+        # --- EKM connection lifecycle ---
+        self.cmd('keyvault ekm-connection create --id {mhsm} --host {host} '
+                 '--server-ca-certificate "{ca_cert}"')
+        show = self.cmd('keyvault ekm-connection show --id {mhsm}').get_output_in_json()
+        self.assertIn('host', show)
+        self.cmd('keyvault ekm-connection check --id {mhsm}')
+        cert = self.cmd('keyvault ekm-connection certificate show --id {mhsm}').get_output_in_json()
+        self.assertIsInstance(cert, dict)
+
+        # --- External (EKM-backed) key create/show/list-versions/delete ---
+        created = self.cmd('keyvault key create --id {mhsm}/keys/{key_name} '
+                           '--external-key-id {ext_key_id}').get_output_in_json()
+        self.assertEqual(created.get('externalKeyId'), ext_key_id)
+        self.cmd('keyvault key show --id {mhsm}/keys/{key_name}')
+        self.cmd('keyvault key list-versions --id {mhsm}/keys/{key_name}')
+        self.cmd('keyvault key delete --id {mhsm}/keys/{key_name}')
+
+        # --- Fail fast: key-shape args are incompatible with --external-key-id ---
+        self.cmd('keyvault key create --id {mhsm}/keys/{key_name} '
+                 '--external-key-id {ext_key_id} --size 2048', expect_failure=True)
+
+        # --- Regression: a normal HSM key still works ---
+        self.cmd('keyvault key create --id {mhsm}/keys/{normal_key} --kty RSA --size 2048 --protection hsm')
+        self.cmd('keyvault key delete --id {mhsm}/keys/{normal_key}')
+
+        # --- Clean up the connection ---
+        self.cmd('keyvault ekm-connection delete --id {mhsm}')
 
 
 class KeyVaultPrivateLinkResourceScenarioTest(ScenarioTest):
