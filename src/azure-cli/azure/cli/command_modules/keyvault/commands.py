@@ -143,14 +143,14 @@ def load_command_table(self, _):
         g.keyvault_custom('download', 'security_domain_download', supports_no_wait=True)
         g.keyvault_custom('wait', '_wait_security_domain_operation')
 
-    with self.command_group('keyvault ekm-connection', command_type=data_ekm_custom) as g:
+    with self.command_group('keyvault ekm-connection', command_type=data_ekm_custom, is_preview=True) as g:
         g.keyvault_custom('create', 'create_ekm_connection', validator=validate_ekm_connection_create)
         g.keyvault_custom('update', 'update_ekm_connection', validator=validate_ekm_connection_update)
         g.keyvault_custom('show', 'get_ekm_connection', validator=validate_ekm_connection_base)
         g.keyvault_custom('check', 'check_ekm_connection', validator=validate_ekm_connection_base)
         g.keyvault_custom('delete', 'delete_ekm_connection', validator=validate_ekm_connection_base)
 
-    with self.command_group('keyvault ekm-connection certificate', command_type=data_ekm_custom) as g:
+    with self.command_group('keyvault ekm-connection certificate', command_type=data_ekm_custom, is_preview=True) as g:
         g.keyvault_custom('show', 'get_ekm_certificate', validator=validate_ekm_connection_base)
 
     with self.command_group('keyvault key', data_key_entity.command_type) as g:

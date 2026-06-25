@@ -751,8 +751,8 @@ def validate_external_key_id(ns):
     external_key_id = getattr(ns, 'external_key_id', None)
     if not external_key_id:
         return
-    if len(external_key_id) > 128:
-        raise CLIError('--external-key-id must be at most 128 characters.')
+    if len(external_key_id) > 64:
+        raise CLIError('--external-key-id must be at most 64 characters.')
     if not re.match(r'^[0-9A-Za-z-]+$', external_key_id):
         raise CLIError('--external-key-id may contain only letters, digits, and hyphens.')
 

@@ -1089,35 +1089,31 @@ def create_key(client, name=None, protection=None,  # pylint: disable=unused-arg
                not_before=None, tags=None, kty=None, curve=None, exportable=None, release_policy=None,
                external_key_id=None):
 
-    external_key = None
+    # External keys are backed by an External Key Manager (EKM). They use a dedicated SDK method,
+    # and the service rejects client-specified key type/size/curve/operations for them.
     if external_key_id:
-        try:
-            from azure.keyvault.keys._generated.models import ExternalKey
-        except ImportError as ex:
-            raise CLIError('External keys require a preview version of azure-keyvault-keys with ExternalKey support.') from ex
-        external_key = ExternalKey(id=external_key_id)
+        from azure.keyvault.keys import ExternalKey
+        return client.create_external_key(
+            name=name,
+            external_key=ExternalKey(id=external_key_id),
+            enabled=not disabled,
+            not_before=not_before,
+            expires_on=expires,
+            tags=tags,
+            release_policy=release_policy)
 
-    kwargs = {
-        'name': name,
-        'key_operations': key_ops,
-        'enabled': not disabled,
-        'not_before': not_before,
-        'expires_on': expires,
-        'tags': tags,
-        'exportable': exportable,
-        'external_key': external_key,
-        'release_policy': release_policy
-    }
-
-    # External keys are backed by EKM and the service rejects client-specified key type/size/curve.
-    if external_key is None:
-        kwargs.update({
-            'key_type': kty,
-            'size': key_size,
-            'curve': curve
-        })
-
-    return client.create_key(**kwargs)
+    return client.create_key(
+        name=name,
+        key_type=kty,
+        size=key_size,
+        curve=curve,
+        key_operations=key_ops,
+        enabled=not disabled,
+        not_before=not_before,
+        expires_on=expires,
+        tags=tags,
+        exportable=exportable,
+        release_policy=release_policy)
 
 
 # region KeyVault EKM Connection
@@ -1161,7 +1157,7 @@ def get_ekm_certificate(client):
 
         return None
 
-    def _find_bytes_anywhere(obj, *, _seen=None, _depth=0, _max_depth=4):
+    def _find_bytes_anywhere(obj, *, _seen=None, _depth=0, _max_depth=4):  # pylint: disable=too-many-return-statements
         if obj is None:
             return None
         if isinstance(obj, (bytes, bytearray, memoryview)):
@@ -1266,7 +1262,8 @@ def create_ekm_connection(client, host, path_prefix=None, server_ca_certificates
     return client.create_ekm_connection(ekm_connection)
 
 
-def update_ekm_connection(client, host=None, path_prefix=None, server_ca_certificates=None, server_subject_common_name=None):
+def update_ekm_connection(client, host=None, path_prefix=None, server_ca_certificates=None,
+                          server_subject_common_name=None):
     existing = client.get_ekm_connection()
     if host is not None:
         existing.host = host

@@ -124,9 +124,15 @@ class KeyVaultEkmValidatorUnitTest(unittest.TestCase):
     def test_validate_external_key_id_too_long(self):
         from azure.cli.command_modules.keyvault._validators import validate_external_key_id
 
-        ns = argparse.Namespace(external_key_id='a' * 129)
+        ns = argparse.Namespace(external_key_id='a' * 65)
         with self.assertRaises(CLIError):
             validate_external_key_id(ns)
+
+    def test_validate_external_key_id_max_length(self):
+        from azure.cli.command_modules.keyvault._validators import validate_external_key_id
+
+        ns = argparse.Namespace(external_key_id='a' * 64)
+        validate_external_key_id(ns)
 
     def test_validate_ekm_path_prefix_rules(self):
         from azure.cli.command_modules.keyvault._validators import _validate_ekm_path_prefix

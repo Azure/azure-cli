@@ -361,7 +361,8 @@ def load_arguments(self, _):
         c.argument('curve', arg_type=get_enum_type(KeyCurveName),
                    help='Elliptic curve name. For valid values, see: https://learn.microsoft.com/rest/api/keyvault/keys/create-key/create-key#jsonwebkeycurvename')
         c.extra('external_key_id', options_list=['--external-key-id'], arg_group='External Key',
-            help='Create an external Managed HSM key backed by an External Key Manager (EKM) key id.')
+                is_preview=True,
+                help='Create an external Managed HSM key backed by an External Key Manager (EKM) key id.')
 
     with self.argument_context('keyvault key import') as c:
         c.argument('kty', arg_type=get_enum_type(CLIKeyTypeForBYOKImport), validator=validate_key_import_type,
@@ -635,7 +636,7 @@ def load_arguments(self, _):
         c.extra('server_ca_certificates', options_list=['--server-ca-certificate'], nargs='+', type=file_type,
                 completer=FilesCompleter(),
                 help='Path(s) to server CA certificate(s) in PEM or DER format.')
-        c.extra('server_subject_common_name', options_list=['--server-subject-common-name'],
+        c.extra('server_subject_common_name', options_list=['--server-subject-common-name', '--server-cn'],
                 help='Optional expected Common Name (CN) for the EKM proxy server certificate.')
 
     with self.argument_context('keyvault ekm-connection update', arg_group='EKM Connection') as c:
@@ -646,7 +647,7 @@ def load_arguments(self, _):
         c.extra('server_ca_certificates', options_list=['--server-ca-certificate'], nargs='+', type=file_type,
                 completer=FilesCompleter(),
                 help='Path(s) to server CA certificate(s) in PEM or DER format.')
-        c.extra('server_subject_common_name', options_list=['--server-subject-common-name'],
+        c.extra('server_subject_common_name', options_list=['--server-subject-common-name', '--server-cn'],
                 help='Optional expected Common Name (CN) for the EKM proxy server certificate.')
 
     with self.argument_context('keyvault ekm-connection certificate show', arg_group='HSM Id') as c:
