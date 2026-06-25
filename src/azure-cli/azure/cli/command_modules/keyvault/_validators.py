@@ -734,13 +734,22 @@ def validate_key_create(cmd, ns):
     validate_keyvault_resource_id('key')(ns)
     validate_external_key_id(ns)
 
-    # External keys are backed by EKM and the service rejects client-specified key type/size/curve.
-    # Avoid the defaulting behavior in validate_key_type (RSA) when --external-key-id is present.
     if getattr(ns, 'external_key_id', None):
-        setattr(ns, 'kty', None)
-        setattr(ns, 'key_size', None)
-        setattr(ns, 'curve', None)
-        setattr(ns, 'protection', None)
+        # External keys are backed by an External Key Manager (EKM); the service controls the
+        # key material, so client-specified key-shape arguments are not supported. Fail fast with
+        # a clear error instead of silently ignoring them.
+        incompatible = [opt for opt, val in (
+            ('--kty', getattr(ns, 'kty', None)),
+            ('--size', getattr(ns, 'key_size', None)),
+            ('--curve', getattr(ns, 'curve', None)),
+            ('--ops', getattr(ns, 'key_ops', None)),
+            ('--protection', getattr(ns, 'protection', None)),
+            ('--exportable', getattr(ns, 'exportable', None)),
+        ) if val is not None]
+        if incompatible:
+            raise CLIError(
+                '{} cannot be used with --external-key-id. External keys are backed by an External '
+                'Key Manager and the service controls the key material.'.format(', '.join(incompatible)))
     else:
         validate_key_type(ns)
 
@@ -822,8 +831,11 @@ def _load_certificates_as_der_bytes(cert_paths):
         if not cert_path:
             continue
         expanded = os.path.expanduser(cert_path)
-        with open(expanded, 'rb') as f:
-            raw = f.read()
+        try:
+            with open(expanded, 'rb') as f:
+                raw = f.read()
+        except OSError as ex:
+            raise CLIError("Unable to load certificate file '{}': {}.".format(cert_path, ex.strerror)) from ex
 
         # PEM may contain multiple cert blocks.
         if b'-----BEGIN CERTIFICATE-----' in raw:

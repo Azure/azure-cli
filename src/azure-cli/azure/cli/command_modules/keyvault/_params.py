@@ -21,7 +21,7 @@ from azure.cli.command_modules.keyvault._completers import (
 from azure.cli.command_modules.keyvault._validators import (
     datetime_type, certificate_type, validate_retention_days_on_creation,
     get_vault_base_url_type, get_hsm_base_url_type, validate_key_import_type,
-    validate_key_import_source, validate_key_type, validate_policy_permissions, validate_principal,
+    validate_key_import_source, validate_policy_permissions, validate_principal,
     validate_resource_group_name, validate_x509_certificate_chain,
     secret_text_encoding_values, secret_binary_encoding_values, validate_subnet, validate_ip_address,
     validate_vault_or_hsm,
@@ -356,7 +356,7 @@ def load_arguments(self, _):
                          'Release policies are mutable by default.')
 
     with self.argument_context('keyvault key create') as c:
-        c.argument('kty', arg_type=get_enum_type(JsonWebKeyType), validator=validate_key_type,
+        c.argument('kty', arg_type=get_enum_type(JsonWebKeyType),
                    help='The type of key to create. For valid values, see: https://learn.microsoft.com/rest/api/keyvault/keys/create-key/create-key#jsonwebkeytype')
         c.argument('curve', arg_type=get_enum_type(KeyCurveName),
                    help='Elliptic curve name. For valid values, see: https://learn.microsoft.com/rest/api/keyvault/keys/create-key/create-key#jsonwebkeycurvename')
