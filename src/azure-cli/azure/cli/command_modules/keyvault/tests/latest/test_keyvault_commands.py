@@ -5,6 +5,7 @@
 
 import json
 import os
+import argparse
 import pytest
 import tempfile
 import time
@@ -152,6 +153,152 @@ class CreateVaultSoftDeleteTest(unittest.TestCase):
         self.assertIs(vault_properties.enable_soft_delete, True,
                       "create_vault must explicitly set enable_soft_delete=True in the request body "
                       "to satisfy Azure Policy checks")
+
+
+class KeyVaultEkmValidatorUnitTest(unittest.TestCase):
+    def test_validate_external_key_id_valid(self):
+        from azure.cli.command_modules.keyvault._validators import validate_external_key_id
+
+        ns = argparse.Namespace(external_key_id='test-aes-key')
+        validate_external_key_id(ns)
+
+    def test_validate_external_key_id_invalid_chars(self):
+        from azure.cli.command_modules.keyvault._validators import validate_external_key_id
+
+        ns = argparse.Namespace(external_key_id='bad_id')
+        with self.assertRaises(CLIError):
+            validate_external_key_id(ns)
+
+    def test_validate_external_key_id_too_long(self):
+        from azure.cli.command_modules.keyvault._validators import validate_external_key_id
+
+        ns = argparse.Namespace(external_key_id='a' * 65)
+        with self.assertRaises(CLIError):
+            validate_external_key_id(ns)
+
+    def test_validate_external_key_id_max_length(self):
+        from azure.cli.command_modules.keyvault._validators import validate_external_key_id
+
+        ns = argparse.Namespace(external_key_id='a' * 64)
+        validate_external_key_id(ns)
+
+    def test_validate_ekm_path_prefix_rules(self):
+        from azure.cli.command_modules.keyvault._validators import _validate_ekm_path_prefix
+
+        _validate_ekm_path_prefix('/api/v1')
+        with self.assertRaises(CLIError):
+            _validate_ekm_path_prefix('api/v1')
+        with self.assertRaises(CLIError):
+            _validate_ekm_path_prefix('/api/v1/')
+
+    def test_normalize_ekm_host_rules(self):
+        from azure.cli.command_modules.keyvault._validators import _normalize_ekm_host
+
+        self.assertEqual(_normalize_ekm_host('example.com'), 'example.com:443')
+        self.assertEqual(_normalize_ekm_host('example.com:443'), 'example.com:443')
+        with self.assertRaises(CLIError):
+            _normalize_ekm_host('https://example.com')
+        with self.assertRaises(CLIError):
+            _normalize_ekm_host('example.com/path')
+        with self.assertRaises(CLIError):
+            _normalize_ekm_host('example.com:abc')
+
+    def test_load_certificates_as_der_bytes_from_pem(self):
+        from azure.cli.command_modules.keyvault._validators import _load_certificates_as_der_bytes
+
+        pem_path = os.path.join(TEST_DIR, 'certs', 'cert_0.cer')
+        certs = _load_certificates_as_der_bytes([pem_path])
+        self.assertTrue(certs)
+        self.assertIsInstance(certs[0], (bytes, bytearray))
+
+
+class KeyVaultEkmCertificateSerializationUnitTest(unittest.TestCase):
+    def test_get_ekm_certificate_serializes_der_bytes(self):
+        from azure.cli.command_modules.keyvault._validators import _load_certificates_as_der_bytes
+        from azure.cli.command_modules.keyvault.custom import get_ekm_certificate
+
+        pem_path = os.path.join(TEST_DIR, 'certs', 'cert_0.cer')
+        der_bytes = _load_certificates_as_der_bytes([pem_path])[0]
+
+        class DummyClient:
+            def get_ekm_certificate(self):
+                return der_bytes
+
+        result = get_ekm_certificate(DummyClient())
+        self.assertIsInstance(result, dict)
+        self.assertEqual(result.get('format'), 'der')
+        self.assertIsInstance(result.get('cer'), str)
+        # PEM is best-effort; if present, it should be a string with header.
+        if result.get('pem') is not None:
+            self.assertIsInstance(result.get('pem'), str)
+            self.assertIn('BEGIN CERTIFICATE', result.get('pem'))
+
+    def test_get_ekm_certificate_serializes_model_value_bytes(self):
+        from azure.cli.command_modules.keyvault._validators import _load_certificates_as_der_bytes
+        from azure.cli.command_modules.keyvault.custom import get_ekm_certificate
+
+        pem_path = os.path.join(TEST_DIR, 'certs', 'cert_0.cer')
+        der_bytes = _load_certificates_as_der_bytes([pem_path])[0]
+
+        class CertModel:
+            def __init__(self, value):
+                self.value = value
+
+        class DummyClient:
+            def get_ekm_certificate(self):
+                return CertModel(der_bytes)
+
+        result = get_ekm_certificate(DummyClient())
+        self.assertIsInstance(result, dict)
+        self.assertEqual(result.get('format'), 'der')
+        self.assertIsInstance(result.get('cer'), str)
+
+    def test_get_ekm_certificate_handles_subject_cn_and_ca_list(self):
+        from azure.cli.command_modules.keyvault.custom import get_ekm_certificate
+
+        class SdkModel:
+            def __init__(self, subject_common_name, ca_certificates):
+                self.subject_common_name = subject_common_name
+                self.ca_certificates = ca_certificates
+
+        class DummyClient:
+            def get_ekm_certificate(self):
+                return SdkModel('*.managedhsm-int.azure-int.net', [b'\x01\x02'])
+
+        result = get_ekm_certificate(DummyClient())
+        self.assertEqual(result.get('subjectCommonName'), '*.managedhsm-int.azure-int.net')
+        self.assertEqual(result.get('caCertificates'), ['AQI='])
+
+    def test_get_ekm_certificate_fallback_json_safe_dict(self):
+        from azure.cli.command_modules.keyvault.custom import get_ekm_certificate
+
+        class DummyClient:
+            def get_ekm_certificate(self):
+                return {'someField': b'\x01\x02\x03'}
+
+        result = get_ekm_certificate(DummyClient())
+        self.assertIsInstance(result, dict)
+        self.assertIsInstance(result.get('someField'), str)
+
+    def test_get_ekm_certificate_finds_bytes_in_unknown_field(self):
+        from azure.cli.command_modules.keyvault._validators import _load_certificates_as_der_bytes
+        from azure.cli.command_modules.keyvault.custom import get_ekm_certificate
+
+        pem_path = os.path.join(TEST_DIR, 'certs', 'cert_0.cer')
+        der_bytes = _load_certificates_as_der_bytes([pem_path])[0]
+
+        class WeirdModel:
+            def __init__(self):
+                self.notCer = der_bytes
+
+        class DummyClient:
+            def get_ekm_certificate(self):
+                return WeirdModel()
+
+        result = get_ekm_certificate(DummyClient())
+        self.assertIsInstance(result, dict)
+        self.assertEqual(result.get('format'), 'der')
+        self.assertIsInstance(result.get('cer'), str)
 
 
 class KeyVaultPrivateLinkResourceScenarioTest(ScenarioTest):
