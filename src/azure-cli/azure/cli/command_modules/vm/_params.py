@@ -510,18 +510,19 @@ def load_arguments(self, _):
         c.argument('source_snapshots_or_disks_size_gb', options_list=['--source-snapshots-or-disks-size-gb', '--source-resource-size'], nargs='+', type=int, help='The size of the source disk in GB')
         c.argument('source_disk_restore_point', options_list=['--source-disk-restore-point', '--source-disk-rp'], nargs='+', help='create a data disk from a disk restore point. Can use the ID of a disk restore point.')
         c.argument('source_disk_restore_point_size_gb', options_list=['--source-disk-restore-point-size-gb', '--source-rp-size'], nargs='+', type=int, help='The size of the source disk restore point in GB')
-    c.argument(
-        'data_disk_storage_fault_domain_alignment',
-        options_list=['--data-disk-storage-fd-alignment', '--data-disk-fda'],
-        arg_type=get_enum_type(DiskStorageAlignment),
-        help='Specifies the storage fault domain alignment type for the disk.'
-    )
-    c.argument(
-        'os_disk_storage_fault_domain_alignment',
-        options_list=['--os-disk-storage-fd-alignment', '--os-disk-fda'],
-        arg_type=get_enum_type(DiskStorageAlignment),
-        help='Specifies the storage fault domain alignment type for the disk.'
-    )
+        c.argument(
+            'data_disk_storage_fault_domain_alignment',
+            options_list=['--data-disk-storage-fd-alignment', '--data-disk-fda'],
+            arg_type=get_enum_type(DiskStorageAlignment),
+            help='Specifies the storage fault domain alignment type for the disk.'
+        )
+        c.argument(
+            'os_disk_storage_fault_domain_alignment',
+            options_list=['--os-disk-storage-fd-alignment', '--os-disk-fda'],
+            arg_type=get_enum_type(DiskStorageAlignment),
+            help='Specifies the storage fault domain alignment type for the disk.'
+        )
+
     with self.argument_context('vm create', arg_group='Dedicated Host', min_api='2019-03-01') as c:
         c.argument('dedicated_host_group', options_list=['--host-group'], is_preview=True, help="Name or resource ID of the dedicated host group that the VM will reside in. --host and --host-group can't be used together.")
         c.argument('dedicated_host', options_list=['--host'], is_preview=True, help="Resource ID of the dedicated host that the VM will reside in. --host and --host-group can't be used together.")
