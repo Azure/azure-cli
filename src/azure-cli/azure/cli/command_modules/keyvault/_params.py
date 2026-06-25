@@ -634,8 +634,10 @@ def load_arguments(self, _):
         c.extra('path_prefix', options_list=['--path-prefix'],
                 help='Optional path prefix to append to EKM proxy requests. Must start with "/".')
         c.extra('server_ca_certificates', options_list=['--server-ca-certificate'], nargs='+', type=file_type,
-                completer=FilesCompleter(),
-                help='Path(s) to server CA certificate(s) in PEM or DER format.')
+                required=True, completer=FilesCompleter(),
+                help='Path(s) to server CA certificate(s) in PEM or DER format. '
+                     'Pass a single file containing a PEM chain (multiple certificate blocks), '
+                     'or multiple space-separated file paths (each PEM or DER).')
         c.extra('server_subject_common_name', options_list=['--server-subject-common-name', '--server-cn'],
                 help='Optional expected Common Name (CN) for the EKM proxy server certificate.')
 
@@ -646,7 +648,9 @@ def load_arguments(self, _):
                 help='Optional path prefix to append to EKM proxy requests. Must start with "/".')
         c.extra('server_ca_certificates', options_list=['--server-ca-certificate'], nargs='+', type=file_type,
                 completer=FilesCompleter(),
-                help='Path(s) to server CA certificate(s) in PEM or DER format.')
+                help='Path(s) to server CA certificate(s) in PEM or DER format. '
+                     'Pass a single file containing a PEM chain (multiple certificate blocks), '
+                     'or multiple space-separated file paths (each PEM or DER).')
         c.extra('server_subject_common_name', options_list=['--server-subject-common-name', '--server-cn'],
                 help='Optional expected Common Name (CN) for the EKM proxy server certificate.')
 

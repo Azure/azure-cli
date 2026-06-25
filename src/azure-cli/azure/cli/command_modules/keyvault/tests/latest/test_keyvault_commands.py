@@ -211,6 +211,80 @@ class KeyVaultEkmValidatorUnitTest(unittest.TestCase):
         self.assertTrue(certs)
         self.assertIsInstance(certs[0], (bytes, bytearray))
 
+    def test_load_certificates_single_file_with_multiple_pem_blocks(self):
+        # Scenario 1: one file containing a PEM "chain" (multiple BEGIN/END CERTIFICATE blocks).
+        # The validator must split it and return each certificate as a separate DER blob.
+        from azure.cli.command_modules.keyvault._validators import _load_certificates_as_der_bytes
+
+        cert_paths = [os.path.join(TEST_DIR, 'certs', name) for name in ('cert_0.cer', 'cert_1.cer', 'cert_2.cer')]
+        chain = b'\n'.join(open(p, 'rb').read() for p in cert_paths)
+        with tempfile.NamedTemporaryFile(suffix='.pem', delete=False) as tmp:
+            tmp.write(chain)
+            chain_path = tmp.name
+        try:
+            certs = _load_certificates_as_der_bytes([chain_path])
+        finally:
+            os.remove(chain_path)
+        self.assertEqual(len(certs), 3)
+        for der in certs:
+            self.assertIsInstance(der, (bytes, bytearray))
+        # Each split block must match the DER of the individual source certificate.
+        individual = [_load_certificates_as_der_bytes([p])[0] for p in cert_paths]
+        self.assertEqual(certs, individual)
+
+    def test_load_certificates_multiple_files_space_separated(self):
+        # Scenario 2: multiple file paths passed to the same flag (nargs='+', space-separated).
+        # Each file contributes its certificate(s); order is preserved.
+        from azure.cli.command_modules.keyvault._validators import _load_certificates_as_der_bytes
+
+        cert_paths = [os.path.join(TEST_DIR, 'certs', name) for name in ('cert_0.cer', 'cert_1.cer', 'cert_2.cer')]
+        certs = _load_certificates_as_der_bytes(cert_paths)
+        self.assertEqual(len(certs), 3)
+        individual = [_load_certificates_as_der_bytes([p])[0] for p in cert_paths]
+        self.assertEqual(certs, individual)
+
+    def test_load_certificates_multiple_files_with_chain_and_der(self):
+        # Mixed: one file is a multi-cert PEM chain, another is single-cert DER.
+        # Total certs returned must equal the sum across all files.
+        import ssl
+        from azure.cli.command_modules.keyvault._validators import _load_certificates_as_der_bytes
+
+        cert_0 = os.path.join(TEST_DIR, 'certs', 'cert_0.cer')
+        cert_1 = os.path.join(TEST_DIR, 'certs', 'cert_1.cer')
+        cert_2 = os.path.join(TEST_DIR, 'certs', 'cert_2.cer')
+
+        # Build a 2-cert PEM chain file.
+        chain = open(cert_0, 'rb').read() + b'\n' + open(cert_1, 'rb').read()
+        # Build a DER-encoded file from cert_2 (no PEM headers).
+        der_2 = ssl.PEM_cert_to_DER_cert(open(cert_2, 'r', encoding='utf-8').read())
+
+        with tempfile.NamedTemporaryFile(suffix='.pem', delete=False) as tmp_pem:
+            tmp_pem.write(chain)
+            chain_path = tmp_pem.name
+        with tempfile.NamedTemporaryFile(suffix='.der', delete=False) as tmp_der:
+            tmp_der.write(der_2)
+            der_path = tmp_der.name
+        try:
+            certs = _load_certificates_as_der_bytes([chain_path, der_path])
+        finally:
+            os.remove(chain_path)
+            os.remove(der_path)
+        self.assertEqual(len(certs), 3)
+        # The DER file must round-trip unchanged as the last entry.
+        self.assertEqual(certs[-1], der_2)
+
+    def test_validate_ekm_connection_create_requires_certificate(self):
+        # Chandan's feedback: --server-ca-certificate is mandatory for create.
+        # Even if the param-level required check is bypassed, the validator must reject empty certs.
+        from azure.cli.command_modules.keyvault._validators import validate_ekm_connection_create
+
+        ns = argparse.Namespace(
+            hsm_name=None, identifier='https://example.managedhsm.azure.net',
+            host='example.com:443', path_prefix='/api/v1', server_ca_certificates=None)
+        with mock.patch('azure.cli.command_modules.keyvault._validators.set_vault_base_url'):
+            with self.assertRaises(CLIError):
+                validate_ekm_connection_create(None, ns)
+
 
 class KeyVaultEkmCertificateSerializationUnitTest(unittest.TestCase):
     def test_get_ekm_certificate_serializes_der_bytes(self):
