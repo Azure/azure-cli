@@ -131,7 +131,8 @@ def load_command_table(self, _):
 
     with self.command_group('webapp', webapp_sdk) as g:
         g.custom_command('create', 'create_webapp', exception_handler=ex_handler_factory(), validator=validate_vnet_integration)
-        g.custom_command('up', 'webapp_up', exception_handler=ex_handler_factory(), validator=validate_webapp_up)
+        g.custom_command('up', 'webapp_up', exception_handler=ex_handler_factory(), validator=validate_webapp_up,
+                         deprecate_info=g.deprecate(redirect='webapp create and webapp deploy'))
         g.custom_command('ssh', 'ssh_webapp', exception_handler=ex_handler_factory(), is_preview=True)
         g.custom_command('list', 'list_webapp', table_transformer=transform_web_list_output)
         g.custom_show_command('show', 'show_app', table_transformer=transform_web_output)
@@ -415,6 +416,10 @@ def load_command_table(self, _):
     with self.command_group('functionapp scale config always-ready') as g:
         g.custom_command('delete', 'delete_always_ready_settings', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)
         g.custom_command('set', 'update_always_ready_settings', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)
+
+    with self.command_group('functionapp update-strategy config') as g:
+        g.custom_show_command('show', 'get_update_strategy_config', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)
+        g.custom_command('set', 'set_update_strategy_config', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)
 
     with self.command_group('functionapp config hostname') as g:
         g.custom_command('add', 'add_hostname', exception_handler=ex_handler_factory())

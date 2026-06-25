@@ -13,7 +13,7 @@ from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathChec
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 # Test location for managed instance plans
-MANAGED_INSTANCE_LOCATION = 'eastus2euap'
+MANAGED_INSTANCE_LOCATION = 'eastasia'
 
 
 class AppServicePlanManagedInstanceTest(ScenarioTest):

@@ -7,7 +7,7 @@
 
 from azure.cli.core.commands import CliCommandType
 
-from ._client_factory import cf_configstore, cf_configstore_operations, cf_replicas
+from ._client_factory import cf_configstore, cf_configstore_operations, cf_replicas, cf_nsp_configurations
 from ._format import (configstore_credential_format,
                       configstore_identity_format,
                       configstore_output_format,
@@ -16,7 +16,8 @@ from ._format import (configstore_credential_format,
                       featurefilter_entry_format,
                       deleted_configstore_output_format,
                       configstore_replica_output_format,
-                      configstore_snapshot_output_format)
+                      configstore_snapshot_output_format,
+                      configstore_nsp_output_format)
 
 
 def load_command_table(self, _):
@@ -54,6 +55,12 @@ def load_command_table(self, _):
     configstore_snapshot_util = CliCommandType(
         operations_tmpl='azure.cli.command_modules.appconfig.snapshot#{}',
         table_transformer=configstore_snapshot_output_format
+    )
+
+    configstore_nsp_util = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.appconfig.network_security_perimeter#{}',
+        table_transformer=configstore_nsp_output_format,
+        client_factory=cf_nsp_configurations
     )
 
     def get_custom_sdk(custom_module, client_factory, table_transformer):
@@ -141,3 +148,9 @@ def load_command_table(self, _):
         g.command('list', 'list_snapshots')
         g.command('archive', 'archive_snapshot')
         g.command('recover', 'recover_snapshot')
+
+    # NSP Commands
+    with self.command_group('appconfig network-security-perimeter-configuration', configstore_nsp_util, is_preview=True) as g:
+        g.command('list', 'list_nsp_configurations')
+        g.show_command('show', 'show_nsp_configuration')
+        g.command('reconcile', 'reconcile_nsp_configuration')

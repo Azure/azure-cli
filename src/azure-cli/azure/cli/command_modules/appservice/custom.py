@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import ast
+import base64
 import threading
 import time
 import re
@@ -36,7 +37,7 @@ from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id, resou
 
 from azure.mgmt.storage import StorageManagementClient
 from azure.mgmt.applicationinsights import ApplicationInsightsManagementClient
-from azure.mgmt.web.models import KeyInfo, SiteContainer, AuthType
+from azure.mgmt.web.models import SiteContainer, AuthType
 from azure.mgmt.web import WebSiteManagementClient
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -69,15 +70,15 @@ from .utils import (_normalize_sku,
                     is_functionapp,
                     is_linux_webapp,
                     _rename_server_farm_props,
-                    _get_location_from_webapp,
                     _normalize_flex_location,
                     _normalize_location,
-                    get_pool_manager, use_additional_properties, get_app_service_plan_from_webapp,
+                    get_pool_manager, get_app_service_plan_from_webapp,
                     get_resource_if_exists, repo_url_to_name, get_token,
                     app_service_plan_exists, is_centauri_functionapp, is_flex_functionapp,
                     _remove_list_duplicates, get_raw_functionapp,
                     register_app_provider,
-                    is_sku_tier_enabled_for_managed_instance)
+                    is_sku_tier_enabled_for_managed_instance,
+                    get_site_server_farm_id)
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            check_resource_group_exists, set_location, get_site_availability,
                            get_regional_site_availability, get_profile_username,
@@ -129,7 +130,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                   role='Contributor', scope=None, vnet=None, subnet=None, https_only=False,
                   public_network_access=None, acr_use_identity=False, acr_identity=None, basic_auth="",
                   auto_generated_domain_name_label_scope=None, end_to_end_encryption_enabled=None,
-                  min_tls_version=None, min_tls_cipher_suite=None):
+                  min_tls_version=None, min_tls_cipher_suite=None, site_scoped_certs=None):
     from azure.mgmt.web.models import Site, OutboundVnetRouting
     from azure.core.exceptions import ResourceNotFoundError as _ResourceNotFoundError
     SiteConfig, SkuDescription, NameValuePair = cmd.get_models(
@@ -260,6 +261,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                       public_network_access=public_network_access, outbound_vnet_routing=outbound_vnet_routing,
                       auto_generated_domain_name_label_scope=auto_generated_domain_name_label_scope,
                       end_to_end_encryption_enabled=end_to_end_encryption_enabled)
+    if site_scoped_certs is not None:
+        webapp_def.site_scoped_certs = site_scoped_certs
     if runtime:
         runtime = _StackRuntimeHelper.remove_delimiters(runtime)
 
@@ -752,7 +755,7 @@ def enable_zip_deploy_functionapp(cmd, resource_group_name, name, src, build_rem
     if app is None:
         raise ResourceNotFoundError('The function app \'{}\' was not found in resource group \'{}\'. '
                                     'Please make sure these values are correct.'.format(name, resource_group_name))
-    parse_plan_id = parse_resource_id(app.server_farm_id)
+    parse_plan_id = parse_resource_id(get_site_server_farm_id(app))
     plan_info = None
     retry_delay = 10  # seconds
     # We need to retry getting the plan because sometimes if the plan is created as part of function app,
@@ -822,6 +825,9 @@ def check_flex_app_after_deployment(cmd, resource_group_name, name):
                                 verify=not should_disable_connection_verify())
         if 200 <= response.status_code <= 299:
             break
+        if response.status_code == 403 and response.reason == 'Ip Forbidden':
+            return "Deployment was successful but health check failed due to IP restriction."
+        num_trials = num_trials + 1
 
     if response.status_code != 200:
         raise CLIError("Deployment was successful but the app appears to be unhealthy. Please "
@@ -1084,11 +1090,12 @@ def _is_linux_consumption_function_app(cmd, site):
     if site.kind != 'functionapp,linux':
         return False
 
-    if not is_valid_resource_id(site.server_farm_id):
+    server_farm_id = get_site_server_farm_id(site)
+    if not is_valid_resource_id(server_farm_id):
         return False
 
     try:
-        parsed_plan_id = parse_resource_id(site.server_farm_id)
+        parsed_plan_id = parse_resource_id(server_farm_id)
         plan_info = web_client.app_service_plans.get(parsed_plan_id['resource_group'], parsed_plan_id['name'])
         if plan_info is None:
             return False
@@ -1117,18 +1124,26 @@ def list_flex_migration_candidates(cmd):
             continue
 
         try:
-            if validate_flex_migration_eligibility_for_linux_consumption_app(cmd, site, flex_regions):
+            is_eligible, warnings = validate_flex_migration_eligibility_for_linux_consumption_app(
+                cmd, site, flex_regions)
+            if is_eligible:
                 site_entry = {
                     'name': site.name,
                     'resource_group': site.resource_group,
                 }
 
+                notes = []
                 has_slots = len(list_slots(cmd, site.resource_group, site.name)) > 0
 
                 if has_slots:
-                    slots_warning = (f"The site '{site.name}' has slots configured. This will not block migration, "
-                                     f"but please note that slots are not supported in Flex Consumption.")
-                    site_entry['note'] = slots_warning
+                    notes.append(f"The site '{site.name}' has slots configured. This will not block migration, "
+                                 f"but please note that slots are not supported in Flex Consumption.")
+
+                # Add certificate-related warnings as notes
+                notes.extend(warnings)
+
+                if notes:
+                    site_entry['note'] = ' '.join(notes)
 
                 eligible_sites.append(site_entry)
 
@@ -1146,6 +1161,8 @@ def list_flex_migration_candidates(cmd):
 
 
 def validate_flex_migration_eligibility_for_linux_consumption_app(cmd, site, flex_regions):
+    warnings = []
+
     # Validating that the site is in a Flex Consumption-supported region
     normalized_site_location = _normalize_location(cmd, site.location)
     if normalized_site_location not in flex_regions:
@@ -1163,18 +1180,26 @@ def validate_flex_migration_eligibility_for_linux_consumption_app(cmd, site, fle
     runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, normalized_site_location, runtime)
     runtime_helper.resolve(runtime, runtime_version)
 
-    # Validating that the site does not have SSL bindings configured
+    # Check for SSL bindings - warn but allow migration
     for ssl_state in site.host_name_ssl_states or []:
         if ssl_state.ssl_state != 'Disabled':
-            raise ValidationError("The site '{}' is using TSL/SSL certificates. "
-                                  "TSL/SSL certificates are not supported in Flex Consumption.".format(site.name))
+            warnings.append("The site '{}' is using TLS/SSL certificates. "
+                            "Site-scoped TLS/SSL certificates are supported in Flex Consumption in preview. "
+                            "Re-configure certificates after migration using the new site-scoped model. "
+                            "Help Link: https://aka.ms/flex-site-scoped-certs-docs."
+                            .format(site.name))
+            break
 
-    # Validating that the site does not have WEBSITE_LOAD_CERTIFICATES app setting configured
+    # Check for WEBSITE_LOAD_CERTIFICATES app setting - warn but allow migration
     app_settings = get_app_settings(cmd, site.resource_group, site.name)
     for setting in app_settings:
         if setting['name'] == 'WEBSITE_LOAD_CERTIFICATES':
-            raise ValidationError("The site '{}' has the WEBSITE_LOAD_CERTIFICATES app setting configured. "
-                                  "Certificate loading is not supported in Flex Consumption.".format(site.name))
+            warnings.append("The site '{}' has the WEBSITE_LOAD_CERTIFICATES app setting configured. "
+                            "Site-scoped certificate loading is supported in Flex Consumption in preview. "
+                            "Re-configure certificates after migration using the new site-scoped model. "
+                            "Help Link: https://aka.ms/flex-site-scoped-certs-docs."
+                            .format(site.name))
+            break
 
     # Validating that the site has triggers supported in Flex Consumption
     functions = list_functions(cmd, site.resource_group, site.name)
@@ -1193,7 +1218,7 @@ def validate_flex_migration_eligibility_for_linux_consumption_app(cmd, site, fle
                               "Please convert these triggers to use Event Grid or replace them with Event Grid "
                               "triggers before migration.".format(site.name, function_list))
 
-    return True
+    return True, warnings
 
 
 def get_storage_account_from_functionapp(cmd, resource_group_name, name):
@@ -1253,11 +1278,16 @@ def migrate_consumption_to_flex(cmd, source_resource_group, source_name, resourc
                               "migration is only supported for Function Apps on Linux Consumption plans."
                               .format(source.name))
 
-    if validate_flex_migration_eligibility_for_linux_consumption_app(cmd, source, flex_regions):
+    is_eligible, warnings = validate_flex_migration_eligibility_for_linux_consumption_app(cmd, source, flex_regions)
+    if is_eligible:
         slots = list_slots(cmd, source_resource_group, source_name)
         if len(slots) > 0:
             print(f"The site '{source_name}' has slots configured. This will not block migration, "
                   f"but please note that slots are not supported in Flex Consumption.")
+
+        # Print certificate-related warnings
+        for warning in warnings:
+            logger.warning(warning)
         print(f"Source app '{source_name}' is eligible for Flex Consumption migration.")
 
     source_site_configs = get_site_configs(cmd, source_resource_group, source_name)
@@ -1610,8 +1640,9 @@ def _add_single_access_restriction(cmd, resource_group, name, restriction, scm_s
     action = restriction.get('action', 'Allow')
     description = restriction.get('description')
     tag = restriction.get('tag', 'Default')
-    ip_address = restriction.get('ip_address')
-    subnet_id = restriction.get('vnet_subnet_resource_id')
+    # as_dict() returns camelCase keys matching the REST API
+    ip_address = restriction.get('ipAddress') or restriction.get('ip_address')
+    subnet_id = restriction.get('vnetSubnetResourceId') or restriction.get('vnet_subnet_resource_id')
     headers = restriction.get('headers')
 
     if not ip_address and not subnet_id:
@@ -2233,7 +2264,7 @@ def set_webapp(cmd, resource_group_name, name, slot=None, skip_dns_registration=
 
 def update_webapp(cmd, instance, client_affinity_enabled=None, https_only=None, minimum_elastic_instance_count=None,
                   prewarmed_instance_count=None, end_to_end_encryption_enabled=None,
-                  platform_release_channel=None):
+                  platform_release_channel=None, site_scoped_certs=None):
     if 'function' in instance.kind:
         raise ValidationError("please use 'az functionapp update' to update this function app")
     if minimum_elastic_instance_count or prewarmed_instance_count:
@@ -2260,19 +2291,21 @@ def update_webapp(cmd, instance, client_affinity_enabled=None, https_only=None, 
     if end_to_end_encryption_enabled is not None:
         instance.end_to_end_encryption_enabled = end_to_end_encryption_enabled == 'true'
 
+    if site_scoped_certs is not None:
+        instance.site_scoped_certs = site_scoped_certs == 'true'
+
     if minimum_elastic_instance_count is not None:
-        from azure.mgmt.web.models import SiteConfig
-        # Need to create a new SiteConfig object to ensure that the new property is included in request body
-        conf = SiteConfig(**instance.site_config.as_dict())
-        conf.minimum_elastic_instance_count = minimum_elastic_instance_count
-        instance.site_config = conf
+        instance.site_config.minimum_elastic_instance_count = minimum_elastic_instance_count
 
     if prewarmed_instance_count is not None:
         instance.site_config.pre_warmed_instance_count = prewarmed_instance_count
 
     if platform_release_channel is not None:
-        use_additional_properties(instance)
-        instance.additional_properties["properties"]["platformReleaseChannel"] = platform_release_channel
+        # platformReleaseChannel is not in the SDK yet, so set it using dictionary access
+        from azure.mgmt.web.models import SiteProperties
+        if instance.properties is None:
+            instance.properties = SiteProperties()
+        instance.properties['platformReleaseChannel'] = platform_release_channel
 
     return instance
 
@@ -2295,7 +2328,7 @@ def update_functionapp(cmd, instance, plan=None, force=False):
 
 def validate_plan_switch_compatibility(cmd, client, src_functionapp_instance, dest_plan_instance, force):
     general_switch_msg = 'Currently the switch is only allowed between a Consumption or an Elastic Premium plan.'
-    src_parse_result = parse_resource_id(src_functionapp_instance.server_farm_id)
+    src_parse_result = parse_resource_id(get_site_server_farm_id(src_functionapp_instance))
     src_plan_info = client.app_service_plans.get(src_parse_result['resource_group'],
                                                  src_parse_result['name'])
 
@@ -3640,7 +3673,11 @@ def _fill_ftp_publishing_url(cmd, webapp, resource_group_name, name, slot=None):
     profiles = list_publish_profiles(cmd, resource_group_name, name, slot)
     try:
         url = next(p['publishUrl'] for p in profiles if p['publishMethod'] == 'FTP')
-        setattr(webapp, 'ftpPublishingUrl', url)
+        # Support both dict-style (new SDK) and attribute-style (old SDK) access
+        try:
+            webapp['ftpPublishingUrl'] = url
+        except (TypeError, AttributeError):
+            setattr(webapp, 'ftpPublishingUrl', url)
     except StopIteration:
         pass
     return webapp
@@ -4128,6 +4165,44 @@ def update_scale_config(cmd, resource_group_name, name, maximum_instance_count=N
         "scaleAndConcurrency", {})
 
 
+def get_update_strategy_config(cmd, resource_group_name, name):
+    functionapp = get_raw_functionapp(cmd.cli_ctx, resource_group_name, name)
+
+    return functionapp.get("properties", {}).get("functionAppConfig", {}).get(
+        "siteUpdateStrategy", {})
+
+
+def set_update_strategy_config(cmd, resource_group_name, name, strategy_type):
+    from ._constants import UPDATE_STRATEGY_TYPES
+
+    # Case-insensitive validation - find the correctly cased value
+    strategy_type_lower = strategy_type.lower()
+    matched_type = None
+    for valid_type in UPDATE_STRATEGY_TYPES:
+        if valid_type.lower() == strategy_type_lower:
+            matched_type = valid_type
+            break
+
+    if not matched_type:
+        raise ValidationError(
+            f"Invalid update strategy type '{strategy_type}'. "
+            f"Allowed values are: {', '.join(UPDATE_STRATEGY_TYPES)}."
+        )
+
+    functionapp = get_raw_functionapp(cmd.cli_ctx, resource_group_name, name)
+
+    # Initialize siteUpdateStrategy if it doesn't exist
+    if "siteUpdateStrategy" not in functionapp["properties"]["functionAppConfig"]:
+        functionapp["properties"]["functionAppConfig"]["siteUpdateStrategy"] = {}
+
+    functionapp["properties"]["functionAppConfig"]["siteUpdateStrategy"]["type"] = matched_type
+
+    result = update_flex_functionapp(cmd, resource_group_name, name, functionapp)
+
+    return result.get("properties", {}).get("functionAppConfig", {}).get(
+        "siteUpdateStrategy", {})
+
+
 def delete_app_settings(cmd, resource_group_name, name, setting_names, slot=None):
     app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings', slot)
     client = web_client_factory(cmd.cli_ctx)
@@ -4271,9 +4346,11 @@ def update_connection_strings(cmd, resource_group_name, name, connection_string_
     if sticky_slot_settings or rm_sticky_slot_settings:
         new_slot_setting_names = set(n['name'] for n in sticky_slot_settings)  # add setting name
         slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
-        slot_cfg_names.connection_string_names = set(slot_cfg_names.connection_string_names or [])
-        slot_cfg_names.connection_string_names.update(new_slot_setting_names)
-        slot_cfg_names.connection_string_names -= rm_sticky_slot_settings
+        connection_string_names_set = set(slot_cfg_names.connection_string_names or [])
+        connection_string_names_set.update(new_slot_setting_names)
+        connection_string_names_set -= rm_sticky_slot_settings
+        # Convert set back to list for SDK serialization (SDK 11.0.0+ requires JSON-serializable types)
+        slot_cfg_names.connection_string_names = list(connection_string_names_set)
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
 
     return _redact_connection_strings(result.properties)
@@ -4580,7 +4657,7 @@ def create_webapp_slot(cmd, resource_group_name, webapp, slot, configuration_sou
         raise ValidationError("'{}' is a function app. Please use "
                               "`az functionapp deployment slot create`.".format(webapp))
     location = site.location
-    slot_def = Site(server_farm_id=site.server_farm_id, location=location)
+    slot_def = Site(server_farm_id=get_site_server_farm_id(site), location=location)
     slot_def.site_config = SiteConfig()
 
     # Do not clone site config when cloning from production
@@ -4631,16 +4708,22 @@ def create_functionapp_slot(cmd, resource_group_name, name, slot, configuration_
 
     docker_registry_server_url = parse_docker_image_name(image)
 
-    Site = cmd.get_models('Site')
+    Site, SitePatchResource = cmd.get_models('Site', 'SitePatchResource')
     client = web_client_factory(cmd.cli_ctx)
     site = client.web_apps.get(resource_group_name, name)
     if not site:
         raise ResourceNotFoundError("'{}' function app doesn't exist".format(name))
     location = site.location
-    slot_def = Site(server_farm_id=site.server_farm_id, location=location, https_only=https_only)
 
+    slot_def = Site(server_farm_id=get_site_server_farm_id(site), location=location, https_only=https_only)
     poller = client.web_apps.begin_create_or_update_slot(resource_group_name, name, site_envelope=slot_def, slot=slot)
     result = LongRunningOperation(cmd.cli_ctx)(poller)
+
+    # Azure service may default https_only to True during slot creation.
+    # Use PATCH to explicitly update the slot if https_only is False.
+    if not https_only:
+        patch_resource = SitePatchResource(https_only=False)
+        result = client.web_apps.update_slot(resource_group_name, name, slot, patch_resource)
 
     if configuration_source:
         update_slot_configuration_from_source(cmd, client, resource_group_name, name, slot, configuration_source,
@@ -4666,7 +4749,7 @@ def _set_site_config_storage_keys(cmd, site_config):
         if acct.access_key is None:
             scf = cf_sa_for_keys(cmd.cli_ctx, None)
             acct_rg = _resolve_storage_account_resource_group(cmd, acct.account_name)
-            keys = scf.list_keys(acct_rg, acct.account_name, logging_enable=False).keys
+            keys = scf.list_keys(acct_rg, acct.account_name, logging_enable=False).keys_property
             if keys:
                 key = keys[0]
                 logger.info("Retreived key %s", key.key_name)
@@ -4722,14 +4805,13 @@ def update_slot_configuration_from_source(cmd, client, resource_group_name, weba
 def config_source_control(cmd, resource_group_name, name, repo_url, repository_type='git', branch=None,  # pylint: disable=too-many-locals
                           manual_integration=None, git_token=None, slot=None, github_action=None):
     client = web_client_factory(cmd.cli_ctx)
-    location = _get_location_from_webapp(client, resource_group_name, name)
 
-    from azure.mgmt.web.models import SiteSourceControl, SourceControl
+    from azure.mgmt.web.models import SiteSourceControl, SourceControl, SourceControlProperties
     if git_token:
-        sc = SourceControl(location=location, source_control_name='GitHub', token=git_token)
+        sc = SourceControl(properties=SourceControlProperties(token=git_token))
         client.update_source_control('GitHub', sc)
 
-    source_control = SiteSourceControl(location=location, repo_url=repo_url, branch=branch,
+    source_control = SiteSourceControl(repo_url=repo_url, branch=branch,
                                        is_manual_integration=manual_integration,
                                        is_mercurial=(repository_type != 'git'), is_git_hub_action=bool(github_action))
 
@@ -4762,8 +4844,8 @@ def update_git_token(cmd, git_token=None):
     the command will clean up existing token. Note that tokens are now redacted in the result.
     '''
     client = web_client_factory(cmd.cli_ctx)
-    from azure.mgmt.web.models import SourceControl
-    sc = SourceControl(name='not-really-needed', source_control_name='GitHub', token=git_token or '')
+    from azure.mgmt.web.models import SourceControl, SourceControlProperties
+    sc = SourceControl(properties=SourceControlProperties(token=git_token or ''))
     response = client.update_source_control('GitHub', sc)
     logger.warning('Tokens have been redacted.')
     response.refresh_token = None
@@ -4805,18 +4887,25 @@ def list_app_service_plans(cmd, resource_group_name=None):
     else:
         plans = list(client.app_service_plans.list_by_resource_group(resource_group_name))
     for plan in plans:
-        # prune a few useless fields
-        del plan.geo_region
-        del plan.subscription
+        # prune a few useless fields if they exist
+        try:
+            del plan.geo_region
+        except AttributeError:
+            pass
+        try:
+            del plan.subscription
+        except AttributeError:
+            pass
     return plans
 
 
-# TODO use zone_redundant field on ASP model when we switch to SDK version 5.0.0
+# Set zone_redundant on the AppServicePlan properties
 def _enable_zone_redundant(plan_def, sku_def, number_of_workers):
-    plan_def.enable_additional_properties_sending()
-    existing_properties = plan_def.serialize()["properties"]
-    plan_def.additional_properties["properties"] = existing_properties
-    plan_def.additional_properties["properties"]["zoneRedundant"] = True
+    from azure.mgmt.web.models import AppServicePlanProperties
+    # Ensure properties object exists
+    if plan_def.properties is None:
+        plan_def.properties = AppServicePlanProperties()
+    plan_def.properties.zone_redundant = True
     if number_of_workers is None:
         sku_def.capacity = 3
     else:
@@ -4914,12 +5003,18 @@ def is_async_response(poller, timeout_seconds=30):
     return status_code == 202
 
 
-def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, per_site_scaling=False,
+def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, per_site_scaling=False,  # pylint: disable=too-many-branches
                             app_service_environment=None, sku=None, number_of_workers=None, location=None,
                             tags=None, no_wait=False, zone_redundant=False, async_scaling_enabled=None,
                             is_managed_instance=None, mi_system_assigned=None, mi_user_assigned=None,
                             default_identity=None, rdp_enabled=None, vnet=None, subnet=None,
                             registry_adapters=None, install_scripts=None, storage_mounts=None):
+    if is_linux is None:
+        is_linux = not hyper_v
+    elif is_linux and hyper_v:
+        raise MutuallyExclusiveArgumentError('--hyper-v creates a Windows container plan and cannot be combined '
+                                             'with --is-linux true. Omit --is-linux or use "--is-linux false".')
+
     if sku is None:
         sku = 'P0V3' if is_linux else 'B1'
 
@@ -5001,19 +5096,22 @@ has been deployed ".format(app_service_environment)
 
     hosting_environment_profile = None
     if plan_def.hosting_environment_profile:
-        hosting_environment_profile = plan_def.hosting_environment_profile.__dict__
+        hosting_environment_profile = plan_def.hosting_environment_profile.as_dict()
 
     class AppServicePlanCreateWithNoWait(AppServicePlanCreate):
         def pre_operations(self):
             args = self.ctx.args
             args.no_wait = no_wait
 
+    os_type = 'Linux' if is_linux else ('Hyper-V' if hyper_v else 'Windows')
+    logger.warning("Creating App Service Plan '%s' (%s, SKU: %s).", name, os_type, sku)
+
     poller = AppServicePlanCreateWithNoWait(cli_ctx=cmd.cli_ctx)(command_args={
         "name": name,
         "resource_group": resource_group_name,
         "location": location,
         "tags": tags,
-        "sku": sku_def.__dict__,
+        "sku": sku_def.as_dict(),
         "reserved": plan_def.reserved,
         "hyper_v": plan_def.hyper_v,
         "per_site_scaling": plan_def.per_site_scaling,
@@ -5032,9 +5130,6 @@ has been deployed ".format(app_service_environment)
         "install_scripts": install_scripts,
         "storage_mounts": storage_mounts,
     })
-
-    os_type = 'Linux' if is_linux else ('Hyper-V' if hyper_v else 'Windows')
-    logger.warning("Creating App Service Plan '%s' (%s).", name, os_type)
 
     if no_wait:
         return poller.result()
@@ -5112,9 +5207,11 @@ def update_app_service_plan(cmd, instance, sku=None, number_of_workers=None, ela
                                   "Use command help to see all available SKUs.")
 
     if elastic_scale is not None:
-        # TODO use instance.elastic_scale_enabled once the ASP client factories are updated
-        use_additional_properties(instance)
-        instance.additional_properties["properties"]["elasticScaleEnabled"] = elastic_scale
+        # Set elastic_scale_enabled on the properties object
+        if instance.properties is None:
+            from azure.mgmt.web.models import AppServicePlanProperties
+            instance.properties = AppServicePlanProperties()
+        instance.properties.elastic_scale_enabled = elastic_scale
 
     if max_elastic_worker_count is not None:
         instance.maximum_elastic_worker_count = max_elastic_worker_count
@@ -5122,9 +5219,11 @@ def update_app_service_plan(cmd, instance, sku=None, number_of_workers=None, ela
             raise InvalidArgumentValueError("--max-elastic-worker-count must be greater than or equal to the "
                                             "plan's number of workers. To update the plan's number of workers, use "
                                             "--number-of-workers ")
-        # TODO use instance.maximum_elastic_worker_count once the ASP client factories are updated
-        use_additional_properties(instance)
-        instance.additional_properties["properties"]["maximumElasticWorkerCount"] = max_elastic_worker_count
+        # Set maximum_elastic_worker_count on the properties object
+        if instance.properties is None:
+            from azure.mgmt.web.models import AppServicePlanProperties
+            instance.properties = AppServicePlanProperties()
+        instance.properties.maximum_elastic_worker_count = max_elastic_worker_count
 
     if async_scaling_enabled is not None:
         instance.async_scaling_enabled = async_scaling_enabled
@@ -5166,6 +5265,8 @@ def update_app_service_plan(cmd, instance, sku=None, number_of_workers=None, ela
 def _enable_managed_instance_properties(plan_def, default_identity=None, subnet_resource_id=None, rdp_enabled=None,
                                         registry_adapters=None, install_scripts=None, storage_mounts=None):
     """Configure additional properties for managed instance App Service Plan features."""
+    from azure.mgmt.web.models import AppServicePlanProperties
+
     # Only enable additional properties if we have managed instance features to configure
     has_managed_instance_features = any([
         default_identity,
@@ -5179,38 +5280,33 @@ def _enable_managed_instance_properties(plan_def, default_identity=None, subnet_
     if not has_managed_instance_features:
         return
 
-    plan_def.enable_additional_properties_sending()
-
-    # Only set properties if they haven't been set already (e.g., by elastic scale)
-    if "properties" not in plan_def.additional_properties:
-        existing_properties = plan_def.serialize()["properties"]
-        plan_def.additional_properties["properties"] = existing_properties
+    # Ensure properties object exists
+    if plan_def.properties is None:
+        plan_def.properties = AppServicePlanProperties()
 
     # Configure network (VNet integration)
     if subnet_resource_id:
-        plan_def.additional_properties["properties"]["network"] = {
-            "virtualNetworkSubnetId": subnet_resource_id
-        }
+        plan_def.properties.network = {'virtualNetworkSubnetId': subnet_resource_id}
 
     # Configure RDP access
     if rdp_enabled is not None:
-        plan_def.additional_properties["properties"]["rdpEnabled"] = rdp_enabled
+        plan_def.properties.rdp_enabled = rdp_enabled
 
     # Configure default identity
     if default_identity:
-        plan_def.additional_properties["properties"]["planDefaultIdentity"] = default_identity
+        plan_def.properties.plan_default_identity = default_identity
 
     # Configure registry adapters
     if registry_adapters:
-        plan_def.additional_properties["properties"]["registryAdapters"] = registry_adapters
+        plan_def.properties.registry_adapters = registry_adapters
 
     # Configure install scripts
     if install_scripts:
-        plan_def.additional_properties["properties"]["installScripts"] = install_scripts
+        plan_def.properties.install_scripts = install_scripts
 
     # Configure storage mounts
     if storage_mounts:
-        plan_def.additional_properties["properties"]["storageMounts"] = storage_mounts
+        plan_def.properties.storage_mounts = storage_mounts
 
 
 def show_plan(cmd, resource_group_name, name):
@@ -5218,7 +5314,8 @@ def show_plan(cmd, resource_group_name, name):
     client = web_client_factory(cmd.cli_ctx)
     serverfarm_url_base = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/serverfarms/{}?api-version={}'
     subscription_id = get_subscription_id(cmd.cli_ctx)
-    serverfarm_url = serverfarm_url_base.format(subscription_id, resource_group_name, name, client.DEFAULT_API_VERSION)
+    # pylint: disable-next=protected-access
+    serverfarm_url = serverfarm_url_base.format(subscription_id, resource_group_name, name, client._config.api_version)
     request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + serverfarm_url
     response = send_raw_request(cmd.cli_ctx, "GET", request_url)
     return response.json()
@@ -6188,10 +6285,18 @@ def view_in_browser(cmd, resource_group_name, name, slot=None, logs=False):
 
 
 def _get_url(cmd, resource_group_name, name, slot=None):
-    SslState = cmd.get_models('SslState')
     site = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
     if not site:
         raise ResourceNotFoundError("'{}' app doesn't exist".format(name))
+    return _url_from_site(cmd, site)
+
+
+def _url_from_site(cmd, site):
+    # Shared URL derivation used by _get_url (which fetches the site itself)
+    # and by _get_visit_url in the onedeploy flow (which reuses the cached
+    # Site from perform_onedeploy_webapp). Factored out so the two paths
+    # cannot drift in how they pick the host or determine HTTPS.
+    SslState = cmd.get_models('SslState')
     url = site.enabled_host_names[0]  # picks the custom domain URL incase a domain is assigned
     ssl_host = next((h for h in site.host_name_ssl_states
                      if h.ssl_state != SslState.disabled), None)
@@ -6423,8 +6528,14 @@ def list_slots(cmd, resource_group_name, webapp):
     slots = list(client.web_apps.list_slots(resource_group_name, webapp))
     for slot in slots:
         slot.name = slot.name.split('/')[-1]
-        setattr(slot, 'app_service_plan', parse_resource_id(slot.server_farm_id)['name'])
-        del slot.server_farm_id
+        server_farm_id = get_site_server_farm_id(slot)
+        setattr(slot, 'app_service_plan', parse_resource_id(server_farm_id)['name'])
+        # Remove server_farm_id if it exists as an attribute (for old SDK compatibility)
+        if hasattr(slot, 'server_farm_id'):
+            try:
+                del slot.server_farm_id
+            except (AttributeError, TypeError):
+                pass
     return slots
 
 
@@ -6586,10 +6697,20 @@ def basic_auth_supported(cli_ctx, name, resource_group_name, slot=None):
 
 
 # auth with basic auth if available
-def get_scm_site_headers(cli_ctx, name, resource_group_name, slot=None, additional_headers=None):
+def get_scm_site_headers(cli_ctx, name, resource_group_name, slot=None, additional_headers=None,
+                         is_flex_hint=None):
     import urllib3
 
-    is_flex = is_flex_functionapp(cli_ctx, resource_group_name, name)
+    # is_flex_functionapp issues an ARM GET /sites (api 2023-12-01) via
+    # send_raw_request. Callers that already know whether the site is a
+    # FlexConsumption function app (e.g., perform_onedeploy_webapp knows the
+    # target is a Web App, so is_flex must be False) can pass is_flex_hint
+    # to skip the redundant call. Default None preserves existing behavior
+    # for all other callers.
+    if is_flex_hint is None:
+        is_flex = is_flex_functionapp(cli_ctx, resource_group_name, name)
+    else:
+        is_flex = is_flex_hint
 
     if not is_flex and basic_auth_supported(cli_ctx, name, resource_group_name, slot):
         logger.info("[AUTH]: basic")
@@ -6663,7 +6784,7 @@ def _get_log(url, headers, log_file=None):
 def upload_ssl_cert(cmd, resource_group_name,
                     name, certificate_password,
                     certificate_file, slot=None,
-                    certificate_name=None):
+                    certificate_name=None, load_to_code=None):
     Certificate = cmd.get_models('Certificate')
     client = web_client_factory(cmd.cli_ctx)
     webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
@@ -6683,7 +6804,40 @@ def upload_ssl_cert(cmd, resource_group_name,
         cert_name = _generate_cert_name(thumb_print, hosting_environment_profile_param,
                                         webapp.location, resource_group_name)
     cert = Certificate(password=certificate_password, pfx_blob=cert_contents,
-                       location=webapp.location, server_farm_id=webapp.server_farm_id)
+                       location=webapp.location, server_farm_id=get_site_server_farm_id(webapp))
+
+    # Check if this is a Flex Consumption function app
+    is_flex = is_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
+
+    # Validate parameter usage
+    if is_flex and slot:
+        raise ArgumentUsageError("--slot is not supported for Flex Consumption function apps. "
+                                 "Site-scoped certificates apply to the parent app.")
+    if load_to_code is not None and not is_flex:
+        raise ArgumentUsageError("--load-to-code is only supported for Flex Consumption function apps.")
+
+    # For Flex Consumption apps, use the site-scoped certificates endpoint (slots not supported)
+    if is_flex:
+        # Build certificate envelope as dict to include loadCertificateToWebsitesSettings
+        # (not in SDK model yet)
+        cert_envelope = {
+            "location": webapp.location,
+            "properties": {
+                "password": certificate_password,
+                "pfxBlob": base64.b64encode(cert_contents).decode('utf-8'),
+                "serverFarmId": get_site_server_farm_id(webapp)
+            }
+        }
+        if load_to_code is not None:
+            cert_envelope["properties"]["loadCertificateToWebsitesSettings"] = {
+                "loadToWebsite": load_to_code
+            }
+        return client.site_certificates.create_or_update(
+            resource_group_name=resource_group_name,
+            name=name,
+            certificate_name=cert_name,
+            certificate_envelope=cert_envelope
+        )
     return client.certificates.create_or_update(resource_group_name, cert_name, cert)
 
 
@@ -6701,18 +6855,52 @@ def _get_cert(certificate_password, certificate_file):
     return thumbprint
 
 
-def list_ssl_certs(cmd, resource_group_name):
+def list_ssl_certs(cmd, resource_group_name, name=None):
     client = web_client_factory(cmd.cli_ctx)
+
+    # Check if this is a Flex Consumption function app
+    if name and is_flex_functionapp(cmd.cli_ctx, resource_group_name, name):
+        return client.site_certificates.list(resource_group_name=resource_group_name, name=name)
+    if name:
+        raise ArgumentUsageError("--name is only supported for Flex Consumption function apps. "
+                                 "For other app types, certificates are managed at the resource group level.")
     return client.certificates.list_by_resource_group(resource_group_name)
 
 
-def show_ssl_cert(cmd, resource_group_name, certificate_name):
+def show_ssl_cert(cmd, resource_group_name, certificate_name, name=None):
     client = web_client_factory(cmd.cli_ctx)
+
+    # Check if this is a Flex Consumption function app
+    if name and is_flex_functionapp(cmd.cli_ctx, resource_group_name, name):
+        return client.site_certificates.get(
+            resource_group_name=resource_group_name,
+            name=name,
+            certificate_name=certificate_name
+        )
+    if name:
+        raise ArgumentUsageError("--name is only supported for Flex Consumption function apps. "
+                                 "For other app types, certificates are managed at the resource group level.")
     return client.certificates.get(resource_group_name, certificate_name)
 
 
-def delete_ssl_cert(cmd, resource_group_name, certificate_thumbprint):
+def delete_ssl_cert(cmd, resource_group_name, certificate_thumbprint, name=None):
     client = web_client_factory(cmd.cli_ctx)
+
+    # Check if this is a Flex Consumption function app
+    if name and is_flex_functionapp(cmd.cli_ctx, resource_group_name, name):
+        site_certs = client.site_certificates.list(resource_group_name=resource_group_name, name=name)
+        for site_cert in site_certs:
+            if site_cert.thumbprint == certificate_thumbprint:
+                return client.site_certificates.delete(
+                    resource_group_name=resource_group_name,
+                    name=name,
+                    certificate_name=site_cert.name
+                )
+        raise ResourceNotFoundError("Certificate for thumbprint '{}' not found".format(certificate_thumbprint))
+
+    if name:
+        raise ArgumentUsageError("--name is only supported for Flex Consumption function apps. "
+                                 "For other app types, certificates are managed at the resource group level.")
     webapp_certs = client.certificates.list_by_resource_group(resource_group_name)
     for webapp_cert in webapp_certs:
         if webapp_cert.thumbprint == certificate_thumbprint:
@@ -6720,7 +6908,23 @@ def delete_ssl_cert(cmd, resource_group_name, certificate_thumbprint):
     raise ResourceNotFoundError("Certificate for thumbprint '{}' not found".format(certificate_thumbprint))
 
 
-def import_ssl_cert(cmd, resource_group_name, key_vault, key_vault_certificate_name, name=None, certificate_name=None):
+def _validate_flex_ssl_params(is_flex, load_to_code, enable_using_msi, webapp, resource_group_name, name):
+    """Validate SSL import parameters for Flex Consumption apps."""
+    if load_to_code is not None and not is_flex:
+        raise ArgumentUsageError("--load-to-code is only supported for Flex Consumption function apps.")
+    if enable_using_msi is not None and not is_flex:
+        raise ArgumentUsageError("--enable-using-msi is only supported for Flex Consumption function apps.")
+    if enable_using_msi and (not webapp.identity or not webapp.identity.type):
+        raise ArgumentUsageError(
+            "--enable-using-msi requires a managed identity assigned to the function app. "
+            "Assign one with: az functionapp identity assign -g {} -n {}".format(resource_group_name, name))
+    if enable_using_msi:
+        logger.warning('Using managed identity to access Key Vault. '
+                       'Ensure the app\'s managed identity has the permission on the Key Vault.')
+
+
+def import_ssl_cert(cmd, resource_group_name, key_vault, key_vault_certificate_name, name=None, certificate_name=None,
+                    load_to_code=None, enable_using_msi=None):
     Certificate = cmd.get_models('Certificate')
     client = web_client_factory(cmd.cli_ctx)
 
@@ -6769,35 +6973,69 @@ def import_ssl_cert(cmd, resource_group_name, key_vault, key_vault_certificate_n
     subscription_id = get_subscription_id(cmd.cli_ctx)
     if cloud_type.lower() == PUBLIC_CLOUD.lower():
         if kv_subscription.lower() != subscription_id.lower():
-            diff_subscription_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_APPSERVICE,
-                                                               subscription_id=kv_subscription)
-            ascs = diff_subscription_client.app_service_certificate_orders.list(api_version=VERSION_2022_09_01)
+            cert_orders_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_APPSERVICE,
+                                                         subscription_id=kv_subscription)
         else:
-            ascs = client.app_service_certificate_orders.list(api_version=VERSION_2022_09_01)
+            cert_orders_client = client
 
-        kv_secret_name = None
-        for asc in ascs:
-            if asc.name == key_vault_certificate_name:
-                kv_secret_name = asc.certificates[key_vault_certificate_name].key_vault_secret_name
+        if hasattr(cert_orders_client, 'app_service_certificate_orders'):
+            ascs = cert_orders_client.app_service_certificate_orders.list(api_version=VERSION_2022_09_01)
+            for asc in ascs:
+                if asc.name == key_vault_certificate_name:
+                    kv_secret_name = asc.certificates[key_vault_certificate_name].key_vault_secret_name
+        else:
+            logger.warning("Unable to check App Service Certificate orders. "
+                           "If '%s' is an App Service Certificate, the import may not resolve "
+                           "the correct Key Vault secret name.", key_vault_certificate_name)
 
     # if kv_secret_name is not populated, it is not an appservice certificate, proceed for KV certificates
-    if not kv_secret_name:
-        kv_secret_name = key_vault_certificate_name
+    kv_secret_name = kv_secret_name or key_vault_certificate_name
 
-    if certificate_name:
-        cert_name = certificate_name
-    else:
-        cert_name = '{}-{}-{}'.format(resource_group_name, kv_name, key_vault_certificate_name)
+    cert_name = certificate_name or '{}-{}-{}'.format(resource_group_name, kv_name, key_vault_certificate_name)
 
-    lnk = 'https://azure.github.io/AppService/2016/05/24/Deploying-Azure-Web-App-Certificate-through-Key-Vault.html'
-    lnk_msg = 'Find more details here: {}'.format(lnk)
-    if not _check_service_principal_permissions(cmd, kv_resource_group_name, kv_name, kv_subscription):
-        logger.warning('Unable to verify Key Vault permissions.')
-        logger.warning('You may need to grant Microsoft.Azure.WebSites service principal the Secret:Get permission')
-        logger.warning(lnk_msg)
+    # When using MSI, the app's managed identity accesses Key Vault, not the service principal
+    if not enable_using_msi:
+        lnk = 'https://azure.github.io/AppService/2016/05/24/Deploying-Azure-Web-App-Certificate-through-Key-Vault.html'
+        lnk_msg = 'Find more details here: {}'.format(lnk)
+        if not _check_service_principal_permissions(cmd, kv_resource_group_name, kv_name, kv_subscription):
+            logger.warning('Unable to verify Key Vault permissions.')
+            logger.warning('You may need to grant Microsoft.Azure.WebSites service principal the Secret:Get permission')
+            logger.warning(lnk_msg)
 
     kv_cert_def = Certificate(location=location, key_vault_id=kv_id, password='',
                               key_vault_secret_name=kv_secret_name)
+
+    # Check if this is a Flex Consumption function app
+    is_flex = name and is_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
+
+    # Validate parameter usage
+    _validate_flex_ssl_params(is_flex, load_to_code, enable_using_msi, webapp if name else None,
+                              resource_group_name, name)
+
+    if is_flex:
+        # Build certificate envelope as dict to include loadCertificateToWebsitesSettings
+        # (not in SDK model yet)
+        cert_envelope = {
+            "location": location,
+            "properties": {
+                "keyVaultId": kv_id,
+                "password": "",
+                "keyVaultSecretName": kv_secret_name,
+                "serverFarmId": get_site_server_farm_id(webapp)
+            }
+        }
+        if load_to_code is not None:
+            cert_envelope["properties"]["loadCertificateToWebsitesSettings"] = {
+                "loadToWebsite": load_to_code
+            }
+        if enable_using_msi is not None:
+            cert_envelope["properties"]["enableKeyVaultAccessUsingMSI"] = enable_using_msi
+        return client.site_certificates.create_or_update(
+            resource_group_name=resource_group_name,
+            name=name,
+            certificate_name=cert_name,
+            certificate_envelope=cert_envelope
+        )
 
     return client.certificates.create_or_update(name=cert_name, resource_group_name=resource_group_name,
                                                 certificate_envelope=kv_cert_def)
@@ -6814,7 +7052,8 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None,
                                                                                             name,
                                                                                             resource_group_name))
 
-    parsed_plan_id = parse_resource_id(webapp.server_farm_id)
+    server_farm_id = get_site_server_farm_id(webapp)
+    parsed_plan_id = parse_resource_id(server_farm_id)
     plan_info = client.app_service_plans.get(parsed_plan_id['resource_group'], parsed_plan_id['name'])
     if plan_info.sku.tier.upper() == 'FREE' or plan_info.sku.tier.upper() == 'SHARED':
         raise ValidationError('Managed Certificate is not supported on Free and Shared tier.')
@@ -6825,15 +7064,32 @@ def create_managed_ssl_cert(cmd, resource_group_name, name, hostname, slot=None,
                               "Use 'az webapp config hostname add --resource-group {2} "
                               "--webapp-name {1}{3} --hostname {0}' "
                               "to register the hostname.".format(hostname, name, resource_group_name, slot_text))
-
-    server_farm_id = webapp.server_farm_id
     location = webapp.location
     easy_cert_def = Certificate(location=location, canonical_name=hostname,
                                 server_farm_id=server_farm_id, password='')
 
+    # Check if this is a Flex Consumption function app
+    is_flex = is_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
+
+    # Validate parameter usage
+    if is_flex and slot:
+        raise ArgumentUsageError("--slot is not supported for Flex Consumption function apps. "
+                                 "Site-scoped certificates apply to the parent app.")
+
+    # Default certificate_name to hostname if not provided
+    if not certificate_name:
+        certificate_name = hostname
+
     # TODO: Update manual polling to use LongRunningOperation once backend API & new SDK supports polling
     try:
-        certificate_name = hostname if not certificate_name else certificate_name
+        # For Flex Consumption apps, use the site-scoped certificates endpoint (slots not supported)
+        if is_flex:
+            return client.site_certificates.create_or_update(
+                resource_group_name=resource_group_name,
+                name=name,
+                certificate_name=certificate_name,
+                certificate_envelope=easy_cert_def
+            )
         return client.certificates.create_or_update(name=certificate_name, resource_group_name=resource_group_name,
                                                     certificate_envelope=easy_cert_def)
     except Exception as ex:
@@ -6901,26 +7157,50 @@ def _update_ssl_binding(cmd, resource_group_name, name, certificate_thumbprint, 
     if not webapp:
         raise ResourceNotFoundError("'{}' app doesn't exist".format(name))
 
-    cert_resource_group_name = parse_resource_id(webapp.server_farm_id)['resource_group']
-    webapp_certs = client.certificates.list_by_resource_group(cert_resource_group_name)
+    # Check if this is a Flex Consumption function app
+    is_flex = is_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
+
+    # Validate parameter usage for Flex apps
+    if is_flex and slot:
+        raise ArgumentUsageError("--slot is not supported for Flex Consumption function apps. "
+                                 "Site-scoped certificates apply to the parent app.")
 
     found_cert = None
-    # search for a cert that matches in the app service plan's RG
-    for webapp_cert in webapp_certs:
-        if webapp_cert.thumbprint == certificate_thumbprint:
-            found_cert = webapp_cert
-    # search for a cert that matches in the webapp's RG
-    if not found_cert:
-        webapp_certs = client.certificates.list_by_resource_group(resource_group_name)
+
+    # For Flex Consumption apps, search in site-scoped certificates
+    if is_flex:
+        site_certs = client.site_certificates.list(resource_group_name=resource_group_name, name=name)
+        for site_cert in site_certs:
+            if site_cert.thumbprint == certificate_thumbprint:
+                found_cert = site_cert
+                break
+    # If not a Flex app, search in regular certificates
+    else:
+        cert_resource_group_name = parse_resource_id(get_site_server_farm_id(webapp))['resource_group']
+        webapp_certs = client.certificates.list_by_resource_group(cert_resource_group_name)
+        # search for a cert that matches in the app service plan's RG
         for webapp_cert in webapp_certs:
             if webapp_cert.thumbprint == certificate_thumbprint:
                 found_cert = webapp_cert
-    # search for a cert that matches in the subscription, filtering on the serverfarm
-    if not found_cert:
-        sub_certs = client.certificates.list(filter=f"ServerFarmId eq '{webapp.server_farm_id}'")
-        found_cert = next(iter([c for c in sub_certs if c.thumbprint == certificate_thumbprint]), None)
+        # search for a cert that matches in the webapp's RG
+        if not found_cert:
+            webapp_certs = client.certificates.list_by_resource_group(resource_group_name)
+            for webapp_cert in webapp_certs:
+                if webapp_cert.thumbprint == certificate_thumbprint:
+                    found_cert = webapp_cert
+        # search for a cert that matches in the subscription, filtering on the serverfarm
+        if not found_cert:
+            sub_certs = client.certificates.list(filter=f"ServerFarmId eq '{get_site_server_farm_id(webapp)}'")
+            found_cert = next(iter([c for c in sub_certs if c.thumbprint == certificate_thumbprint]), None)
+
     if found_cert:
         if not hostname:
+            # For Flex Consumption apps, site-scoped certificates may not populate host_names
+            # Require --hostname to be specified explicitly in this case
+            if is_flex and (not found_cert.host_names or len(found_cert.host_names) == 0):
+                raise ArgumentUsageError(
+                    "The site-scoped certificate does not have associated host names. "
+                    "Please specify the hostname explicitly using --hostname.")
             if len(found_cert.host_names) == 1 and not found_cert.host_names[0].startswith('*'):
                 return _update_host_name_ssl_state(cmd, resource_group_name, name, webapp,
                                                    found_cert.host_names[0], ssl_type,
@@ -7301,6 +7581,10 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                 "node|12-lts": "node|12lts",
                 "node|14-lts": "node|14lts",
                 "node|16-lts": "node|16lts",
+                "node|18-lts": "node|18lts",
+                "node|20-lts": "node|20lts",
+                "node|22-lts": "node|22lts",
+                "node|24-lts": "node|24lts",
                 "dotnet|5.0": "dotnet|5",
                 "dotnet|6.0": "dotnet|6",
             }
@@ -7472,14 +7756,47 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
     @staticmethod
     def _get_java_versions_from_windows_container(container_settings):
         """Dynamically extract Java versions from Windows container settings.
-        Looks at the 'runtimes' array in additional_properties.
+        Looks at the 'runtimes' array in additional_properties or directly on the object.
         Returns versions sorted in descending order (newest first)."""
         java_versions = set()
-        additional_props = getattr(container_settings, 'additional_properties', {}) or {}
-        runtimes_array = additional_props.get('runtimes', [])
+        runtimes_array = []
+
+        # Handle both dict and object representations of container_settings
+        if isinstance(container_settings, dict):
+            runtimes_array = container_settings.get('runtimes', [])
+        else:
+            # Try multiple ways to access the runtimes array
+            # 1. Check additional_properties (where SDK puts unknown fields)
+            additional_props = getattr(container_settings, 'additional_properties', None)
+            if additional_props and isinstance(additional_props, dict):
+                runtimes_array = additional_props.get('runtimes', [])
+
+            # 2. Try direct attribute access (in case SDK exposes it directly)
+            if not runtimes_array:
+                runtimes_array = getattr(container_settings, 'runtimes', None) or []
+
+            # 3. Try as_dict() if available (converts SDK model to dict)
+            if not runtimes_array and hasattr(container_settings, 'as_dict'):
+                try:
+                    settings_dict = container_settings.as_dict()
+                    runtimes_array = settings_dict.get('runtimes', [])
+                except (AttributeError, TypeError, KeyError):
+                    pass
+
+            # 4. Try serialize() if available
+            if not runtimes_array and hasattr(container_settings, 'serialize'):
+                try:
+                    settings_dict = container_settings.serialize()
+                    runtimes_array = settings_dict.get('runtimes', [])
+                except (AttributeError, TypeError, KeyError):
+                    pass
 
         for runtime_info in runtimes_array:
-            version = runtime_info.get('runtimeVersion')
+            if isinstance(runtime_info, dict):
+                version = runtime_info.get('runtimeVersion')
+            else:
+                # Handle case where runtime_info might be an object with attributes
+                version = getattr(runtime_info, 'runtime_version', None)
             if version:
                 # Add version as-is (e.g., "25", "21", "17", "11", "1.8")
                 java_versions.add(version)
@@ -7540,9 +7857,13 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                 eol_date = self._format_eol_date(getattr(container_settings, 'end_of_life_date', None))
                 # Get Java versions from the container's runtimes array
                 javas = self._get_java_versions_from_windows_container(container_settings)
+                # Fallback: if no Java versions found, use standard versions based on container type
+                # This handles cases where SDK doesn't properly expose the runtimes array
                 if not javas:
                     logger.debug("No Java versions found in Windows container settings for "
-                                 "container '%s' (version: '%s')", java_container, container_version)
+                                 "container '%s' (version: '%s'), using fallback", java_container, container_version)
+                    # Use standard Java versions as fallback (8, 11, 17, 21, 25)
+                    javas = ["25", "21", "17", "11", "8"]
                 for java in javas:
                     runtime = self.get_windows_java_runtime(
                         java,
@@ -7551,7 +7872,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                         container_settings.is_auto_update)
                     # Look up EOL from the Java stack if the container doesn't have one
                     java_ver = self._extract_java_version_from_runtime(runtime.display_name) or \
-                        ("8" if java.startswith("1.8") else java.split('.')[0])
+                        ("8" if java.startswith("1.8") else java.split('.', maxsplit=1)[0])
                     runtime.eol_date = eol_date or (java_eol_map or {}).get(java_ver)
                     runtime.runtime_family = self._get_java_runtime_family(runtime.display_name)
                     runtime.version_label = self._get_java_version_label(runtime.display_name)
@@ -7768,7 +8089,7 @@ class _FlexFunctionAppStackRuntimeHelper:
                         continue
 
                     runtime_settings = minor_version['stackSettings']['linuxRuntimeSettings']
-                    runtime_name = (runtime_settings['appSettingsDictionary']['FUNCTIONS_WORKER_RUNTIME'] or
+                    runtime_name = (runtime_settings.get('appSettingsDictionary', {}).get('FUNCTIONS_WORKER_RUNTIME') or
                                     runtime['name'])
 
                     skus = runtime_settings['Sku']
@@ -8206,11 +8527,13 @@ def update_functionapp_polling(cmd, resource_group_name, name, functionapp):
     from azure.cli.core.commands.client_factory import get_subscription_id
     client = web_client_factory(cmd.cli_ctx)
     sub_id = get_subscription_id(cmd.cli_ctx)
+    # pylint: disable-next=protected-access
+    api_version = client._config.api_version
     base_url = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Web/sites/{}?api-version={}'.format(
         sub_id,
         resource_group_name,
         name,
-        client.DEFAULT_API_VERSION
+        api_version
     )
     url = cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
 
@@ -8509,6 +8832,28 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
             raise ValidationError("Location is invalid. Use: az functionapp list-flexconsumption-locations")
         is_linux = True
 
+    # Show warnings for Consumption plan (Linux or Windows)
+    # Check if using --consumption-plan-location OR --plan with a consumption SKU (Dynamic tier)
+    plan_sku = getattr(plan_info, 'sku', None) if plan_info else None
+    plan_sku_tier = getattr(plan_sku, 'tier', None)
+    is_consumption_plan = consumption_plan_location is not None or (plan_info and plan_sku_tier == 'Dynamic')
+    if is_consumption_plan:
+        if is_linux:
+            logger.warning(
+                "Linux Consumption will reach EOL on September 30, 2028 and will no longer be supported. "
+                "Flex Consumption is now the recommended serverless hosting plan for Azure Functions. "
+                "It offers faster scaling, reduced cold starts, private networking, and more control over "
+                "performance and cost. Help link: "
+                "https://learn.microsoft.com/en-us/azure/azure-functions/migration/migrate-plan-consumption-to-flex"
+            )
+        else:
+            logger.warning(
+                "Flex Consumption is now the recommended serverless hosting plan for Azure Functions. "
+                "It offers faster scaling, reduced cold starts, private networking, and more control over "
+                "performance and cost. Help link: "
+                "https://learn.microsoft.com/en-us/azure/azure-functions/migration/migrate-plan-consumption-to-flex"
+            )
+
     if environment is not None:
         if consumption_plan_location is not None:
             raise ArgumentUsageError(
@@ -8629,7 +8974,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     else:
         functionapp_def.kind = 'functionapp'
 
-    if site_config_dict.additional_properties:
+    if getattr(site_config_dict, 'additional_properties', None):
         for prop, value in site_config_dict.additional_properties.items():
             snake_case_prop = _convert_camel_to_snake_case(prop)
             setattr(site_config, snake_case_prop, value)
@@ -8835,13 +9180,15 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                 "alwaysReady": always_ready_config
             }
 
-            functionapp_def.enable_additional_properties_sending()
-            existing_properties = functionapp_def.serialize()["properties"]
-            functionapp_def.additional_properties["properties"] = existing_properties
-            functionapp_def.additional_properties["properties"]["functionAppConfig"] = function_app_config
-            functionapp_def.additional_properties["properties"]["sku"] = "FlexConsumption"
-            poller = client.web_apps.begin_create_or_update(resource_group_name, name, functionapp_def,
-                                                            api_version='2023-12-01')
+            # Set flex consumption properties on the site
+            from azure.mgmt.web.models import SiteProperties
+            if functionapp_def.properties is None:
+                functionapp_def.properties = SiteProperties()
+            functionapp_def.properties.function_app_config = function_app_config
+            functionapp_def.properties.sku = "FlexConsumption"
+            # Use a client with specific API version for flex consumption
+            flex_client = web_client_factory(cmd.cli_ctx, api_version='2025-05-01')
+            poller = flex_client.web_apps.begin_create_or_update(resource_group_name, name, functionapp_def)
             functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
         except Exception as ex:  # pylint: disable=broad-except
             client.app_service_plans.delete(resource_group_name, plan_name)
@@ -9207,7 +9554,7 @@ def _get_storage_connection_string(cli_ctx, deployment_storage_account):
     storage_client = get_mgmt_service_client(cli_ctx, StorageManagementClient)
     access_keys = storage_client.storage_accounts.list_keys(resource_group_name, deployment_storage_name)
     try:
-        key = access_keys.keys[0].value
+        key = access_keys.keys_property[0].value
     except AttributeError:
         # Older API versions have a slightly different structure
         key = access_keys.key1
@@ -9296,7 +9643,7 @@ def _validate_and_get_connection_string(cli_ctx, resource_group_name, storage_ac
 
     obj = storage_client.storage_accounts.list_keys(sa_resource_group, storage_account)  # pylint: disable=no-member
     try:
-        keys = [obj.keys[0].value, obj.keys[1].value]  # pylint: disable=no-member
+        keys = [obj.keys_property[0].value, obj.keys_property[1].value]  # pylint: disable=no-member
     except AttributeError:
         # Older API versions have a slightly different structure
         keys = [obj.key1, obj.key2]  # pylint: disable=no-member
@@ -9424,17 +9771,42 @@ def _list_managed_instance_locations(cmd, sku_tier):
     return [SimpleNamespace(**location) for location in locations]
 
 
-def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, slot, timeout=None):
+def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, slot, timeout=None,
+                                 deploy_params=None):
     import requests
     from azure.cli.core.util import should_disable_connection_verify
 
-    headers = get_scm_site_headers(cmd.cli_ctx, name, rg_name, slot)
+    # Reuse SCM headers acquired during the publish leg when invoked from the
+    # onedeploy flow. Removes 3 ARM calls per deploy (is_flex_functionapp +
+    # basic_auth_supported + _get_site_credential). Falls back to a fresh
+    # fetch for legacy callers (enable_zip_deploy) that don't pass params,
+    # and on 401 in case credentials were rotated mid-deploy.
+    headers = None
+    if deploy_params is not None and deploy_params._cached_scm_headers is not None:  # pylint: disable=protected-access
+        headers = dict(deploy_params._cached_scm_headers)  # pylint: disable=protected-access
+        client_id = (cmd.cli_ctx.data or {}).get('headers', {}).get('x-ms-client-request-id')
+        if client_id:
+            headers['x-ms-client-request-id'] = client_id
+    if headers is None:
+        headers = get_scm_site_headers(cmd.cli_ctx, name, rg_name, slot)
     total_trials = (int(timeout) // 2) if timeout else 450
     num_trials = 0
+    refreshed_headers = False
     while num_trials < total_trials:
         time.sleep(2)
         response = requests.get(deployment_status_url, headers=headers,
                                 verify=not should_disable_connection_verify())
+        if response.status_code == 401 and not refreshed_headers:
+            # Cached credentials may be stale (rotated between publish and
+            # status poll). Drop the cache and refetch once before giving up.
+            if deploy_params is not None:
+                deploy_params._cached_scm_headers = None  # pylint: disable=protected-access
+            headers = get_scm_site_headers(cmd.cli_ctx, name, rg_name, slot,
+                                           is_flex_hint=_known_is_flex_hint(deploy_params))
+            if deploy_params is not None:
+                _populate_cached_scm_headers(deploy_params, headers)
+            refreshed_headers = True
+            continue
         try:
             res_dict = response.json()
         except json.decoder.JSONDecodeError:
@@ -9459,11 +9831,26 @@ def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, slot
     return res_dict
 
 
-def _get_latest_deployment_id(cmd, rg_name, name, deployment_status_url, slot):
+def _get_latest_deployment_id(cmd, rg_name, name, deployment_status_url, slot, deploy_params=None):
     import requests
     from azure.cli.core.util import should_disable_connection_verify
 
-    headers = get_scm_site_headers(cmd.cli_ctx, name, rg_name, slot)
+    # Reuse the SCM headers already cached during the publish leg when the
+    # OneDeploy flow is the caller; this saves a full get_scm_site_headers
+    # round-trip (is_flex_functionapp + basic_auth_supported +
+    # publishingcredentials/list — 3 ARM calls per status poll start).
+    if deploy_params is not None and deploy_params._cached_scm_headers is not None:  # pylint: disable=protected-access
+        headers = dict(deploy_params._cached_scm_headers)  # pylint: disable=protected-access
+        # x-ms-client-request-id must be fresh per call so distributed
+        # tracing stays useful; the cache deliberately omits it.
+        client_id = (cmd.cli_ctx.data or {}).get('headers', {}).get('x-ms-client-request-id')
+        if client_id:
+            headers['x-ms-client-request-id'] = client_id
+    else:
+        headers = get_scm_site_headers(cmd.cli_ctx, name, rg_name, slot,
+                                       is_flex_hint=_known_is_flex_hint(deploy_params))
+        if deploy_params is not None:
+            _populate_cached_scm_headers(deploy_params, headers)
     total_trials = 30
     num_trials = 0
     while num_trials < total_trials:
@@ -9489,47 +9876,56 @@ def _get_latest_deployment_id(cmd, rg_name, name, deployment_status_url, slot):
 
 
 def _check_runtimestatus_with_deploymentstatusapi(cmd, resource_group_name, name, slot,
-                                                  deployment_status_url, is_async, timeout):
+                                                  deployment_status_url, is_async, timeout,
+                                                  deploy_params=None):
     response_body = None
     logger.warning('Polling the status of %s deployment. Start Time: %s UTC',
                    "async" if is_async else "sync",
                    datetime.datetime.now(datetime.timezone.utc))
     # verify if the app is a linux web app
-    client = web_client_factory(cmd.cli_ctx)
-    app = client.web_apps.get(resource_group_name, name)
-    app_is_linux_webapp = is_linux_webapp(app)
+    if deploy_params is not None:
+        # Reuse the Site fetched (or cached) during the publish leg. Saves
+        # 1 GET /sites per deploy invocation.
+        app_is_linux_webapp = _get_or_fetch_is_linux_webapp(deploy_params)
+    else:
+        # Legacy caller (enable_zip_deploy) — preserve original behavior.
+        client = web_client_factory(cmd.cli_ctx)
+        app = client.web_apps.get(resource_group_name, name)
+        app_is_linux_webapp = is_linux_webapp(app)
     # TODO: enable tracking for slot deployments again once site warmup is fixed for slots
     if not app_is_linux_webapp or slot is not None:
         response_body = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
-                                                     slot, timeout)
+                                                     slot, timeout, deploy_params=deploy_params)
     else:
         # get the deployment id
         # once deploymentstatus/latest is available, we can use it to track the deployment
         deployment_id = _get_latest_deployment_id(cmd, resource_group_name,
-                                                  name, deployment_status_url, slot)
+                                                  name, deployment_status_url, slot,
+                                                  deploy_params=deploy_params)
         if deployment_id is None:
             logger.warning("Failed to enable tracking runtime status for this deployment. "
                            "Resuming without tracking status.")
             response_body = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
-                                                         slot, timeout)
+                                                         slot, timeout, deploy_params=deploy_params)
         else:
             deploymentstatisapi_url = _build_deploymentstatus_url(cmd, resource_group_name,
                                                                   name, slot, deployment_id)
             response_body = _poll_deployment_runtime_status(cmd, resource_group_name, name, slot,
-                                                            deploymentstatisapi_url, deployment_id, timeout)
+                                                            deploymentstatisapi_url, deployment_id, timeout,
+                                                            deploy_params=deploy_params)
             # incase we are unable to fetch response from deploymentstatus API
             # fallback to polling kudu for deployment status
             if response_body is None:
                 logger.warning("Failed to track the runtime status for this deployment. "
                                "Resuming without tracking status.")
                 response_body = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
-                                                             slot, timeout)
+                                                             slot, timeout, deploy_params=deploy_params)
     return response_body
 
 
 # pylint: disable=too-many-branches
 def _poll_deployment_runtime_status(cmd, resource_group_name, webapp_name, slot, deploymentstatusapi_url,
-                                    deployment_id, timeout=None):
+                                    deployment_id, timeout=None, deploy_params=None):
     max_time_sec = int(timeout) if timeout else 1000
     start_time = time.time()
     time_elapsed = 0
@@ -9613,7 +10009,12 @@ def _poll_deployment_runtime_status(cmd, resource_group_name, webapp_name, slot,
         time.sleep(15)
 
     if time_elapsed >= max_time_sec and deployment_status != "RuntimeSuccessful":
-        scm_url = _get_scm_url(cmd, resource_group_name, webapp_name, slot)
+        # Derive SCM URL from cache when available (avoids yet another GET /sites
+        # in an error path that the customer never expected to hit).
+        if deploy_params is not None:
+            scm_url = _get_or_fetch_scm_url(deploy_params)
+        else:
+            scm_url = _get_scm_url(cmd, resource_group_name, webapp_name, slot)
         if deployment_status == "BuildInProgress":
             deployments_log_url = scm_url + f"/api/deployments/{deployment_id}/log"
             raise CLIError("Timeout reached while build was still in progress. "
@@ -9753,23 +10154,67 @@ def list_hc(cmd, name, resource_group_name, slot=None):
 
     # reformats hybrid connection, to prune unnecessary fields
     mod_list = []
-    for x in listed_vals.additional_properties["value"]:
-        properties = x["properties"]
-        resourceGroup = x["id"].split("/")
+    # Handle both old SDK (additional_properties["value"]) and new SDK (dict-like access)
+    items = []
+    if hasattr(listed_vals, 'additional_properties') and listed_vals.additional_properties:
+        items = listed_vals.additional_properties.get("value", [])
+    else:
+        # Try dictionary-style access first (new SDK with hybrid dict/model nature)
+        try:
+            items = listed_vals["value"] or []
+        except (KeyError, TypeError):
+            # Fall back to attribute access (old SDK)
+            if hasattr(listed_vals, 'value'):
+                items = listed_vals.value or []
+            elif hasattr(listed_vals, '__iter__'):
+                items = list(listed_vals)
+
+    # Helper to get property value from either dict or object
+    def get_prop(props, prop_dict_key, prop_attr_name):
+        # Try dictionary-style access first (new SDK with hybrid dict/model)
+        try:
+            return props[prop_dict_key]
+        except (KeyError, TypeError):
+            pass
+        # Fall back to attribute access (old SDK)
+        return getattr(props, prop_attr_name, None)
+
+    for x in items:
+        # Try dictionary-style access first (new SDK with hybrid dict/model nature)
+        try:
+            properties = x["properties"] or {}
+            x_id = x["id"] or ""
+            x_name = x["name"] or ""
+            x_type = x["type"] or ""
+            # location may not always be present
+            try:
+                x_location = x["location"]
+            except (KeyError, TypeError):
+                x_location = None
+        except (KeyError, TypeError):
+            # Fall back to attribute access (old SDK)
+            props = x.properties if hasattr(x, 'properties') else x
+            properties = props.as_dict() if hasattr(props, 'as_dict') else {}
+            x_id = x.id if hasattr(x, 'id') else ""
+            x_location = getattr(x, 'location', None)
+            x_name = x.name if hasattr(x, 'name') else ""
+            x_type = x.type if hasattr(x, 'type') else ""
+        resourceGroup = x_id.split("/")
+
         mod_hc = {
-            "id": x["id"],
-            "location": x["location"],
-            "name": x["name"],
+            "id": x_id,
+            "location": x_location,
+            "name": x_name,
             "properties": {
-                "hostname": properties["hostname"],
-                "port": properties["port"],
-                "relayArmUri": properties["relayArmUri"],
-                "relayName": properties["relayName"],
-                "serviceBusNamespace": properties["serviceBusNamespace"],
-                "serviceBusSuffix": properties["serviceBusSuffix"]
+                "hostname": get_prop(properties, "hostname", "hostname"),
+                "port": get_prop(properties, "port", "port"),
+                "relayArmUri": get_prop(properties, "relayArmUri", "relay_arm_uri"),
+                "relayName": get_prop(properties, "relayName", "relay_name"),
+                "serviceBusNamespace": get_prop(properties, "serviceBusNamespace", "service_bus_namespace"),
+                "serviceBusSuffix": get_prop(properties, "serviceBusSuffix", "service_bus_suffix")
             },
-            "resourceGroup": resourceGroup[4],
-            "type": x["type"]
+            "resourceGroup": resourceGroup[4] if len(resourceGroup) > 4 else "",
+            "type": x_type
         }
         mod_list.append(mod_hc)
     return mod_list
@@ -9856,16 +10301,18 @@ def add_hc(cmd, name, resource_group_name, namespace, hybrid_connection, slot=No
 
     # reformats hybrid connection, to prune unnecessary fields
     resourceGroup = return_hc.id.split("/")
+    # Access properties - in new SDK, these are on return_hc.properties
+    props = return_hc.properties if return_hc.properties else return_hc
     mod_hc = {
-        "hostname": return_hc.hostname,
+        "hostname": getattr(props, 'hostname', None),
         "id": return_hc.id,
-        "location": return_hc.additional_properties["location"],
+        "location": getattr(return_hc, 'location', None),  # location may not be available in new SDK
         "name": return_hc.name,
-        "port": return_hc.port,
-        "relayArmUri": return_hc.relay_arm_uri,
-        "resourceGroup": resourceGroup[4],
-        "serviceBusNamespace": return_hc.service_bus_namespace,
-        "serviceBusSuffix": return_hc.service_bus_suffix
+        "port": getattr(props, 'port', None),
+        "relayArmUri": getattr(props, 'relay_arm_uri', None),
+        "resourceGroup": resourceGroup[4] if len(resourceGroup) > 4 else "",
+        "serviceBusNamespace": getattr(props, 'service_bus_namespace', None),
+        "serviceBusSuffix": getattr(props, 'service_bus_suffix', None)
     }
     return mod_hc
 
@@ -9989,14 +10436,16 @@ def list_vnet_integration(cmd, name, resource_group_name, slot=None):
         v_id = x.id
         lastSlash = v_id.rindex('/')
         shortId = v_id[:lastSlash] + '/' + shortName
-        # extracts desired fields
-        certThumbprint = x.cert_thumbprint
-        location = x.additional_properties["location"]
+        # extracts desired fields - properties are now on x.properties in the new SDK
+        props = x.properties if x.properties else x
+        certThumbprint = getattr(props, 'cert_thumbprint', None)
+        # location is no longer available in the SDK response
+        location = None
         v_type = x.type
-        vnet_resource_id = x.vnet_resource_id
+        vnet_resource_id = getattr(props, 'vnet_resource_id', None)
         id_strings = v_id.split('/')
         resourceGroup = id_strings[4]
-        routes = x.routes
+        routes = getattr(props, 'routes', None)
 
         vnet_mod = {"certThumbprint": certThumbprint,
                     "id": shortId,
@@ -10019,7 +10468,7 @@ def add_functionapp_vnet_integration(cmd, name, resource_group_name, vnet, subne
                                      skip_delegation_check=False):
     client = web_client_factory(cmd.cli_ctx)
     functionapp = get_functionapp(cmd, resource_group_name, name)
-    parsed_plan_id = parse_resource_id(functionapp.server_farm_id)
+    parsed_plan_id = parse_resource_id(get_site_server_farm_id(functionapp))
     plan_info = client.app_service_plans.get(parsed_plan_id['resource_group'], parsed_plan_id['name'])
     if plan_info is None:
         raise ResourceNotFoundError('Could not determine the current plan of the functionapp')
@@ -10039,7 +10488,7 @@ def _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=Non
 
     app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot, client=client)
 
-    parsed_plan = parse_resource_id(app.server_farm_id)
+    parsed_plan = parse_resource_id(get_site_server_farm_id(app))
     plan_info = client.app_service_plans.get(parsed_plan['resource_group'], parsed_plan["name"])
     is_flex = is_flex_functionapp(cmd.cli_ctx, resource_group_name, name)
 
@@ -10255,7 +10704,7 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
             loc = app_details.location.replace(" ", "").lower()
         else:
             loc = location.replace(" ", "").lower()
-        plan_details = parse_resource_id(app_details.server_farm_id)
+        plan_details = parse_resource_id(get_site_server_farm_id(app_details))
         current_plan = plan_details['name']
         if plan is not None and current_plan.lower() != plan.lower():
             raise ValidationError("The plan name entered '{}' does not match the plan name that the webapp is "
@@ -10598,6 +11047,15 @@ def perform_onedeploy_functionapp(cmd,
     params.track_status = False
     params.is_functionapp = True
 
+    # Eagerly fetch (and cache) the Site so downstream helpers
+    # (_get_or_fetch_scm_url, _get_visit_url, _get_or_fetch_is_linux_webapp)
+    # can derive answers from the cached model without issuing additional
+    # GET /sites calls. The is_flex hint is derived later by
+    # _known_is_flex_hint which reads site.sku from the cached model.
+    app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
+    params._cached_site = app  # pylint: disable=protected-access
+    params.is_linux_webapp = is_linux_webapp(app)
+
     return _perform_onedeploy_internal(params)
 
 
@@ -10636,8 +11094,12 @@ def perform_onedeploy_webapp(cmd,
     params.enable_kudu_warmup = enable_kudu_warmup
     params.enriched_errors = enriched_errors
 
-    client = web_client_factory(cmd.cli_ctx)
-    app = client.web_apps.get(resource_group_name, name)
+    # When a slot is targeted, fetch the slot's Site (not production) so the
+    # cached model matches what every downstream consumer expects — slots have
+    # their own host_name_ssl_states and enabled_host_names, and is_linux is
+    # inherited but read off whichever Site we serve out of the cache.
+    app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
+    params._cached_site = app  # pylint: disable=protected-access
     params.is_linux_webapp = is_linux_webapp(app)
 
     # Warn that zip deploy won't auto-build on Linux
@@ -10674,7 +11136,92 @@ class OneDeployParams:
         self.is_linux_webapp = None
         self.is_functionapp = None
         self.enriched_errors = False
+        # Per-invocation caches. Populated during a single deploy and
+        # cleared in _perform_onedeploy_internal's `finally` block. These MUST
+        # NOT be logged, serialized, or accessed outside the current call
+        # stack. Underscore prefix signals "do not touch / do not persist".
+        # _cached_scm_headers may contain a Basic-auth Authorization header
+        # built from the site's publishing credentials; it is the only secret
+        # in OneDeployParams and is handled with the same care as the bare
+        # credential would be.
+        # _cached_site holds the SDK Site model returned by web_apps.get; it
+        # contains no secrets. The SCM URL is derived from its
+        # host_name_ssl_states on each access (trivial iteration).
+        self._cached_scm_headers = None
+        self._cached_site = None
 # pylint: enable=too-many-instance-attributes,too-few-public-methods
+
+
+def _get_or_fetch_site(params):
+    # Lazily fetch and cache the SDK Site model. The site's metadata
+    # (kind, host names, SKU, etc.) does not change during a single deploy
+    # invocation, so all consumers in the onedeploy flow share one fetch.
+    # When params.slot is set, fetch the slot's Site via get_slot so the
+    # cached host_name_ssl_states / enabled_host_names belong to the slot
+    # and not to production.
+    if params._cached_site is None:  # pylint: disable=protected-access
+        params._cached_site = _generic_site_operation(  # pylint: disable=protected-access
+            params.cmd.cli_ctx, params.resource_group_name, params.webapp_name, 'get', params.slot)
+    return params._cached_site  # pylint: disable=protected-access
+
+
+def _get_or_fetch_is_linux_webapp(params):
+    # Reuse the cached Site to answer the is-Linux question without an extra
+    # ARM call. perform_onedeploy_webapp populates params.is_linux_webapp
+    # eagerly; perform_onedeploy_functionapp does not, so we may need to
+    # fetch on first use for function apps.
+    if params.is_linux_webapp is None:
+        params.is_linux_webapp = is_linux_webapp(_get_or_fetch_site(params))
+    return params.is_linux_webapp
+
+
+def _get_visit_url(params):
+    # Build the "You can visit your app at: …" URL without issuing another
+    # GET /sites when the Site is already cached. perform_onedeploy_webapp
+    # fetches the slot's Site when params.slot is set, so the cached model
+    # already has slot-specific host_name_ssl_states and we can serve both
+    # production and slot URLs from the cache.
+    if params._cached_site is None:  # pylint: disable=protected-access
+        return _get_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
+    return _url_from_site(params.cmd, params._cached_site)  # pylint: disable=protected-access
+
+
+def _get_or_fetch_scm_url(params):
+    # Derive the SCM hostname from the cached Site model. Both entry points
+    # (perform_onedeploy_webapp, perform_onedeploy_functionapp) eagerly
+    # populate _cached_site, so this is always a local iteration over ~3
+    # host_name_ssl_states entries — no ARM call needed.
+    cached_site = params._cached_site  # pylint: disable=protected-access
+    if cached_site is not None:
+        from azure.mgmt.web.models import HostType
+        for host in cached_site.host_name_ssl_states or []:
+            if host.host_type == HostType.repository:
+                return "https://{}".format(host.name)
+    # Fallback for defensive safety (should not be reached in normal flow).
+    return _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
+
+
+def _populate_cached_scm_headers(params, headers):
+    # Cache only the stable, request-independent fields of the SCM headers so
+    # the post-publish status poller can skip a second round-trip through
+    # is_flex_functionapp + basic_auth_supported + _get_site_credential
+    # (3 ARM calls). Per-request fields like x-ms-client-request-id MUST NOT
+    # be cached: every ARM/SCM call needs a fresh request id so distributed
+    # traces remain useful.
+    #
+    # The auth header key may be either 'Authorization' (AAD branch in
+    # get_scm_site_headers, which capitalizes the name) or 'authorization'
+    # (basic-auth branch, which inherits urllib3.util.make_headers' lowercase
+    # key). Match case-insensitively and preserve whichever casing the source
+    # used, so the cached headers are byte-equivalent to a freshly fetched
+    # dict on either auth path.
+    auth_key = next((k for k in headers if k.lower() == 'authorization'), None)
+    if auth_key is None:
+        return
+    cached = {auth_key: headers[auth_key]}
+    if 'User-Agent' in headers:
+        cached['User-Agent'] = headers['User-Agent']
+    params._cached_scm_headers = cached  # pylint: disable=protected-access
 
 
 def _build_onedeploy_url(params, instance_id=None):
@@ -10684,7 +11231,7 @@ def _build_onedeploy_url(params, instance_id=None):
 
 
 def _build_kudu_warmup_scm_url(params):
-    scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
+    scm_url = _get_or_fetch_scm_url(params)
     return scm_url + '/api/deployments?warmup=true'
 
 
@@ -10693,23 +11240,25 @@ def _build_kudu_warmup_arm_url(params, instance_id=None):
     client = web_client_factory(params.cmd.cli_ctx)
     sub_id = get_subscription_id(params.cmd.cli_ctx)
     instances_segment = f"/instances/{instance_id}" if instance_id is not None else ""
+    # pylint: disable=protected-access
     if not params.slot:
         base_url = (
             f"subscriptions/{sub_id}/resourceGroups/{params.resource_group_name}/providers/Microsoft.Web/sites/"
-            f"{params.webapp_name}{instances_segment}/deployments?api-version={client.DEFAULT_API_VERSION}"
+            f"{params.webapp_name}{instances_segment}/deployments?api-version={client._config.api_version}"
             f"&warmup=true"
         )
     else:
         base_url = (
             f"subscriptions/{sub_id}/resourceGroups/{params.resource_group_name}/providers/Microsoft.Web/sites/"
             f"{params.webapp_name}/slots/{params.slot}{instances_segment}/deployments"
-            f"?api-version={client.DEFAULT_API_VERSION}&warmup=true"
+            f"?api-version={client._config.api_version}&warmup=true"
         )
+    # pylint: enable=protected-access
     return params.cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
 
 
 def _build_onedeploy_scm_url(params):
-    scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
+    scm_url = _get_or_fetch_scm_url(params)
     deploy_url = scm_url + '/api/publish?type=' + params.artifact_type
 
     if params.is_async_deployment is not None:
@@ -10735,17 +11284,19 @@ def _build_onedeploy_arm_url(params, instance_id):
     client = web_client_factory(params.cmd.cli_ctx)
     sub_id = get_subscription_id(params.cmd.cli_ctx)
     instances_param = f"/instances/{instance_id}" if instance_id is not None else ""
+    # pylint: disable=protected-access
     if not params.slot:
         base_url = (
             f"subscriptions/{sub_id}/resourceGroups/{params.resource_group_name}/providers/Microsoft.Web/sites/"
-            f"{params.webapp_name}{instances_param}/extensions/onedeploy?api-version={client.DEFAULT_API_VERSION}"
+            f"{params.webapp_name}{instances_param}/extensions/onedeploy?api-version={client._config.api_version}"
         )
     else:
         base_url = (
             f"subscriptions/{sub_id}/resourceGroups/{params.resource_group_name}/providers/Microsoft.Web/sites/"
             f"{params.webapp_name}/slots/{params.slot}{instances_param}/extensions/onedeploy"
-            f"?api-version={client.DEFAULT_API_VERSION}"
+            f"?api-version={client._config.api_version}"
         )
+    # pylint: enable=protected-access
     return params.cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
 
 
@@ -10755,10 +11306,12 @@ def _build_deploymentstatus_url(cmd, resource_group_name, webapp_name, slot, dep
     sub_id = get_subscription_id(cmd.cli_ctx)
 
     slot_info = "/slots/" + slot if slot else ""
+    # pylint: disable-next=protected-access
+    api_version = client._config.api_version
     base_url = (
         f"subscriptions/{sub_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Web/sites/"
         f"{webapp_name}{slot_info}/deploymentStatus/{deployment_id}"
-        f"?api-version={client.DEFAULT_API_VERSION}"
+        f"?api-version={api_version}"
     )
     return cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
 
@@ -10773,12 +11326,38 @@ def _get_ondeploy_headers(params):
 
     additional_headers = {"Content-Type": content_type, "Cache-Control": "no-cache"}
 
-    return get_scm_site_headers(params.cmd.cli_ctx, params.webapp_name, params.resource_group_name, params.slot,
-                                additional_headers=additional_headers)
+    headers = get_scm_site_headers(params.cmd.cli_ctx, params.webapp_name, params.resource_group_name, params.slot,
+                                   additional_headers=additional_headers,
+                                   is_flex_hint=_known_is_flex_hint(params))
+    # Stash credentials for reuse by the status poller (see
+    # _check_zip_deployment_status). The cache is cleared in
+    # _perform_onedeploy_internal's finally block.
+    _populate_cached_scm_headers(params, headers)
+    return headers
+
+
+def _known_is_flex_hint(params):
+    # FlexConsumption is a function-app SKU; if the caller has already
+    # determined the site is a Web App (is_functionapp=False, set in
+    # perform_onedeploy_webapp line ~11029) then is_flex is necessarily
+    # False and the is_flex_functionapp ARM call can be skipped.
+    # For function apps, if the Site is already cached we can read the SKU
+    # directly (site.sku == 'FlexConsumption') without a separate ARM call.
+    if params is None:
+        return None
+    if params.is_functionapp is False:
+        return False
+    # When the Site model is cached (perform_onedeploy_functionapp populates
+    # it eagerly), derive the flex answer from site.sku.
+    cached = getattr(params, '_cached_site', None)
+    if cached is not None:
+        sku = getattr(cached, 'sku', None)
+        return bool(sku and sku.lower() == 'flexconsumption')
+    return None
 
 
 def _get_onedeploy_status_url(params):
-    scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
+    scm_url = _get_or_fetch_scm_url(params)
     return scm_url + '/api/deployments/latest'
 
 
@@ -10791,9 +11370,10 @@ def _get_onedeploy_request_body(params):
         logger.warning('Deploying from local path: %s', params.src_path)
 
         if params.track_status is not None and params.track_status:
-            client = web_client_factory(params.cmd.cli_ctx)
-            app = client.web_apps.get(params.resource_group_name, params.webapp_name)
-            app_is_linux_webapp = is_linux_webapp(app)
+            # Was: client.web_apps.get(...). Reuses the cached Site populated
+            # by perform_onedeploy_webapp (or fetches on first use for
+            # function apps). Saves 1 GET /sites per web-app deploy.
+            app_is_linux_webapp = _get_or_fetch_is_linux_webapp(params)
 
         try:
             with open(os.path.realpath(os.path.expanduser(params.src_path)), 'rb') as fs:
@@ -10847,17 +11427,19 @@ def _get_instance_id_internal(cmd, resource_group_name, webapp_name, slot):
     try:
         client = web_client_factory(cmd.cli_ctx)
         sub_id = get_subscription_id(cmd.cli_ctx)
+        # pylint: disable=protected-access
         if slot:
             base_url = (
                 f"subscriptions/{sub_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Web/sites/"
                 f"{webapp_name}/slots/{slot}/instances"
-                f"?api-version={client.DEFAULT_API_VERSION}"
+                f"?api-version={client._config.api_version}"
             )
         else:
             base_url = (
                 f"subscriptions/{sub_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Web/sites/"
-                f"{webapp_name}/instances?api-version={client.DEFAULT_API_VERSION}"
+                f"{webapp_name}/instances?api-version={client._config.api_version}"
             )
+        # pylint: enable=protected-access
 
         url = cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
         response = send_raw_request(cmd.cli_ctx, "GET", url)
@@ -10888,7 +11470,21 @@ def _warmup_kudu_and_get_cookie_internal(params):
         try:
             if not params.src_url:  # use SCM endpoint for Kudu warmup
                 kudu_warmup_url = _build_kudu_warmup_scm_url(params)
-                headers = get_scm_site_headers(params.cmd.cli_ctx, params.webapp_name, params.resource_group_name)
+                # Reuse the cached SCM headers populated by _get_ondeploy_headers
+                # when available. Saves another full get_scm_site_headers
+                # round-trip (is_flex_functionapp + basic_auth_supported +
+                # publishingcredentials/list — 3 ARM calls) before the
+                # actual POST /api/publish.
+                if params._cached_scm_headers is not None:  # pylint: disable=protected-access
+                    headers = dict(params._cached_scm_headers)  # pylint: disable=protected-access
+                    client_id = (params.cmd.cli_ctx.data or {}).get('headers', {}).get('x-ms-client-request-id')
+                    if client_id:
+                        headers['x-ms-client-request-id'] = client_id
+                else:
+                    headers = get_scm_site_headers(
+                        params.cmd.cli_ctx, params.webapp_name, params.resource_group_name,
+                        params.slot, is_flex_hint=_known_is_flex_hint(params))
+                    _populate_cached_scm_headers(params, headers)
                 response = requests.get(kudu_warmup_url, headers=headers, cookies=cookies, timeout=time_out)
             else:  # use ARM endpoint for Kudu warmup
                 kudu_warmup_url = _build_kudu_warmup_arm_url(params, instance_id)
@@ -10976,12 +11572,14 @@ def _make_onedeploy_request(params):
                     params.webapp_name, params.slot,
                     deployment_status_url,
                     params.is_async_deployment,
-                    params.timeout)
+                    params.timeout,
+                    deploy_params=params)
             else:
                 response_body = _check_zip_deployment_status(
                     params.cmd, params.resource_group_name,
                     params.webapp_name,
-                    deployment_status_url, params.slot, params.timeout)
+                    deployment_status_url, params.slot, params.timeout,
+                    deploy_params=params)
             logger.info('Server response: %s', response_body)
         else:
             if 'application/json' in response.headers.get('content-type', ""):
@@ -10990,8 +11588,7 @@ def _make_onedeploy_request(params):
                     logger.warning("Deployment status is: \"%s\"", state)
                 response_body = response.json().get("properties", {})
         logger.warning("Deployment has completed successfully")
-        logger.warning("You can visit your app at: %s", _get_url(params.cmd, params.resource_group_name,
-                                                                 params.webapp_name, params.slot))
+        logger.warning("You can visit your app at: %s", _get_visit_url(params))
         return response_body
 
     # API not available yet!
@@ -11015,7 +11612,7 @@ def _make_onedeploy_request(params):
 
     # check if an error occurred during deployment
     if response.status_code:
-        scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
+        scm_url = _get_or_fetch_scm_url(params)
         latest_deploymentinfo_url = scm_url + "/api/deployments/latest"
         if _should_enrich_errors and response.status_code >= 400:
             logger.error("Deployment failed. Visit %s to get more information about your deployment.",
@@ -11052,14 +11649,24 @@ def _perform_onedeploy_internal(params):
     # Now make the OneDeploy API call
     logger.warning("Initiating deployment")
     try:
-        response = _make_onedeploy_request(params)
-        return response
-    except (ValidationError, ResourceNotFoundError, EnrichedDeploymentError):
-        raise
-    except Exception as ex:  # pylint: disable=broad-except
-        if _should_enrich_errors:
-            _try_enrich_and_raise(params, error_message=str(ex), last_known_step="Deployment request")
-        raise
+        try:
+            response = _make_onedeploy_request(params)
+            return response
+        except (ValidationError, ResourceNotFoundError, EnrichedDeploymentError):
+            raise
+        except Exception as ex:  # pylint: disable=broad-except
+            if _should_enrich_errors:
+                _try_enrich_and_raise(params, error_message=str(ex), last_known_step="Deployment request")
+            raise
+    finally:
+        # Drop cached SCM headers as early as possible.
+        # _cached_scm_headers may contain a Basic-auth header derived from the
+        # site's publishing password and must not outlive the deploy invocation.
+        # Python doesn't guarantee zeroing memory, but clearing the reference
+        # makes the object eligible for GC and ensures it cannot be picked up
+        # by any outer exception handler or telemetry path.
+        params._cached_scm_headers = None  # pylint: disable=protected-access
+        params._cached_site = None  # pylint: disable=protected-access
 
 
 def _wait_for_webapp(tunnel_server):
@@ -11185,12 +11792,8 @@ def _verify_hostname_binding(cmd, resource_group_name, name, hostname, slot=None
 
 
 def update_host_key(cmd, resource_group_name, name, key_type, key_name, key_value=None, slot=None):
-    # pylint: disable=protected-access
-    key_info = KeyInfo(name=key_name, value=key_value)
-    KeyInfo._attribute_map = {
-        'name': {'key': 'properties.name', 'type': 'str'},
-        'value': {'key': 'properties.value', 'type': 'str'},
-    }
+    # SDK 11.0.0+ requires properties wrapper in the request body
+    key_info = {"properties": {"name": key_name, "value": key_value}}
     client = web_client_factory(cmd.cli_ctx)
     if slot:
         response = client.web_apps.create_or_update_host_secret_slot(resource_group_name,
@@ -11244,12 +11847,8 @@ def delete_function(cmd, resource_group_name, name, function_name):
 
 
 def update_function_key(cmd, resource_group_name, name, function_name, key_name, key_value=None, slot=None):
-    # pylint: disable=protected-access
-    key_info = KeyInfo(name=key_name, value=key_value)
-    KeyInfo._attribute_map = {
-        'name': {'key': 'properties.name', 'type': 'str'},
-        'value': {'key': 'properties.value', 'type': 'str'},
-    }
+    # SDK 11.0.0+ requires properties wrapper in the request body
+    key_info = {"properties": {"name": key_name, "value": key_value}}
     client = web_client_factory(cmd.cli_ctx)
     if slot:
         response = client.web_apps.create_or_update_function_secret_slot(resource_group_name,
@@ -11272,8 +11871,11 @@ def update_function_key(cmd, resource_group_name, name, function_name, key_name,
 def list_function_keys(cmd, resource_group_name, name, function_name, slot=None):
     client = web_client_factory(cmd.cli_ctx)
     if slot:
-        return client.web_apps.list_function_keys_slot(resource_group_name, name, function_name, slot)
-    return client.web_apps.list_function_keys(resource_group_name, name, function_name)
+        keys = client.web_apps.list_function_keys_slot(resource_group_name, name, function_name, slot)
+    else:
+        keys = client.web_apps.list_function_keys(resource_group_name, name, function_name)
+    # SDK may return .properties as None for flat dictionary responses; fall back to raw payload
+    return keys.properties if keys.properties is not None else dict(keys)
 
 
 def delete_function_key(cmd, resource_group_name, name, key_name, function_name=None, slot=None):
@@ -11311,7 +11913,7 @@ def add_github_actions(cmd, resource_group, name, repo, runtime=None, token=None
         raise ResourceNotFoundError("The webapp %s exists in ResourceGroup %s and does not match the "
                                     "value entered %s. Please re-run command with the correct "
                                     "parameters." % (name, current_rg, resource_group))
-    parsed_plan_id = parse_resource_id(app_details.server_farm_id)
+    parsed_plan_id = parse_resource_id(get_site_server_farm_id(app_details))
     client = web_client_factory(cmd.cli_ctx)
     plan_info = client.app_service_plans.get(parsed_plan_id['resource_group'], parsed_plan_id['name'])
     is_linux = plan_info.reserved

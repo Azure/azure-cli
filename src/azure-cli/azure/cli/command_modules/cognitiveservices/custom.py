@@ -394,6 +394,68 @@ def deployment_begin_create_or_update(
     return client.begin_create_or_update(resource_group_name, account_name, deployment_name, dpy, polling=False)
 
 
+def managed_compute_deployment_create(
+        client, resource_group_name, account_name, deployment_name,
+        model, deployment_template=None, accelerator_type=None,
+        version_upgrade_option=None,
+        sku_name=None, sku_capacity=None, tags=None):
+    """
+    Create a managed compute deployment for Azure Cognitive Services account.
+    """
+    from azure.mgmt.cognitiveservices.models import ManagedComputeDeployment, ManagedComputeDeploymentProperties
+    properties = ManagedComputeDeploymentProperties(
+        model=model,
+        deployment_template=deployment_template,
+        accelerator_type=accelerator_type,
+        version_upgrade_option=version_upgrade_option,
+    )
+    deployment = ManagedComputeDeployment(properties=properties)
+    if sku_name is not None:
+        deployment.sku = Sku(name=sku_name, capacity=sku_capacity)
+    if tags is not None:
+        deployment.tags = tags
+    return client.begin_create_or_update(
+        resource_group_name, account_name, deployment_name, deployment)
+
+
+def managed_compute_deployment_update(
+        client, resource_group_name, account_name, deployment_name,
+        sku_name=None, sku_capacity=None, tags=None):
+    """
+    Update a managed compute deployment for Azure Cognitive Services account.
+    Only SKU (name/capacity) and tags can be updated.
+    """
+    from azure.mgmt.cognitiveservices.models import PatchResourceSku
+    patch = PatchResourceSku()
+    if sku_name is not None or sku_capacity is not None:
+        patch.sku = Sku(name=sku_name, capacity=sku_capacity)
+    if tags is not None:
+        patch.tags = tags
+    return client.begin_update(
+        resource_group_name, account_name, deployment_name, patch)
+
+
+def managed_compute_deployment_show(client, resource_group_name, account_name, deployment_name):
+    """
+    Show a managed compute deployment for Azure Cognitive Services account.
+    """
+    return client.get(resource_group_name, account_name, deployment_name)
+
+
+def managed_compute_deployment_list(client, resource_group_name, account_name):
+    """
+    List managed compute deployments for Azure Cognitive Services account.
+    """
+    return client.list(resource_group_name, account_name)
+
+
+def managed_compute_deployment_delete(client, resource_group_name, account_name, deployment_name):
+    """
+    Delete a managed compute deployment from Azure Cognitive Services account.
+    """
+    return client.begin_delete(resource_group_name, account_name, deployment_name)
+
+
 def commitment_plan_create_or_update(
     client,
     resource_group_name,

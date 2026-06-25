@@ -19,11 +19,11 @@ from azure.mgmt.web.models import (DatabaseType, ConnectionStringType, BuiltInAu
 
 from ._completers import get_hostname_completion_list
 from ._constants import (FUNCTIONS_VERSIONS, LOGICAPPS_NODE_RUNTIME_VERSIONS, WINDOWS_OS_NAME, LINUX_OS_NAME,
-                         DEPLOYMENT_STORAGE_AUTH_TYPES)
+                         DEPLOYMENT_STORAGE_AUTH_TYPES, UPDATE_STRATEGY_TYPES)
 
 from ._validators import (validate_timeout_value, validate_site_create, validate_asp_create,
                           validate_ase_create, validate_ip_address,
-                          validate_service_tag, validate_public_cloud)
+                          validate_service_tag, validate_public_cloud, warn_linux_consumption_eol)
 
 AUTH_TYPES = {
     'AllowAnonymous': 'na',
@@ -94,6 +94,14 @@ def load_arguments(self, _):
                    help="the name of the slot. Default to the productions slot if not specified")
         c.argument('name', arg_type=webapp_name_arg_type)
 
+    with self.argument_context('functionapp') as c:
+        c.ignore('app_instance')
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('location', arg_type=get_location_type(self.cli_ctx))
+        c.argument('slot', options_list=['--slot', '-s'],
+                   help="the name of the slot. Default to the productions slot if not specified")
+        c.argument('name', arg_type=functionapp_name_arg_type, validator=warn_linux_consumption_eol)
+
     with self.argument_context('appservice') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
         c.argument('location', arg_type=get_location_type(self.cli_ctx))
@@ -126,7 +134,9 @@ def load_arguments(self, _):
 subscription than the app service environment, please use the resource ID for --app-service-environment parameter. ",
                    local_context_attribute=LocalContextAttribute(name='ase_name', actions=[LocalContextAction.GET]))
         c.argument('sku', arg_type=sku_arg_type)
-        c.argument('is_linux', action='store_true', required=False, help='host web app on Linux worker')
+        c.argument('is_linux', arg_type=get_three_state_flag(), default=None, required=False,
+                   help='Host web app on Linux worker. Defaults to true unless --hyper-v is specified. '
+                        'Use "--is-linux false" to create a Windows plan.')
         c.argument('hyper_v', action='store_true', required=False, help='Host Windows Container Web App on Hyper-V worker.')
         c.argument('per_site_scaling', action='store_true', required=False, help='Enable per-app scaling at the '
                                                                                  'App Service plan level to allow for '
@@ -339,6 +349,10 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('end_to_end_encryption_enabled', options_list=['--end-to-end-encryption-enabled', '-e'],
                    help='Enable or disable end-to-end encryption between the Front End and the Workers.',
                    arg_type=get_three_state_flag(return_label=True))
+        c.argument('site_scoped_certs',
+                   options_list=['--site-scoped-certs'],
+                   help='Enable or disable site-scoped certificates.',
+                   arg_type=get_three_state_flag(return_label=True))
         c.argument('min_tls_version',
                    help="The minimum version of TLS required for SSL requests, e.g., '1.0', '1.1', '1.2'")
         c.argument('min_tls_cipher_suite', options_list=['--min-tls-cipher-suite'],
@@ -471,6 +485,10 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('platform_release_channel', options_list=['--platform-release-channel'],
                    help='Set the platform release channel for the web app. Possible values: Latest, Standard, Extended.',
                    arg_type=get_enum_type(PLATFORM_RELEASE_CHANNEL_TYPES))
+        c.argument('site_scoped_certs',
+                   options_list=['--site-scoped-certs'],
+                   help='Enable or disable site-scoped certificates.',
+                   arg_type=get_three_state_flag(return_label=True))
 
     with self.argument_context('webapp browse') as c:
         c.argument('logs', options_list=['--logs', '-l'], action='store_true',
@@ -693,6 +711,38 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('functionapp scale config always-ready') as c:
         c.argument('setting_names', nargs='+', help="space-separated always-ready setting names")
         c.argument('settings', nargs='+', help="space-separated configuration for the number of pre-allocated instances in the format `<name>=<value>`")
+
+    with self.argument_context('functionapp update-strategy config') as c:
+        c.argument('strategy_type', options_list=['--type'], arg_type=get_enum_type(UPDATE_STRATEGY_TYPES),
+                   help="The update strategy type. Allowed values: Recreate, RollingUpdate.")
+
+    # Add optional 'name' parameter for functionapp SSL commands to support Flex Consumption apps
+    with self.argument_context('functionapp config ssl list') as c:
+        c.argument('name', options_list=['--name', '-n'], id_part=None, help='Name of the function app. Required for Flex Consumption apps to list site-scoped certificates.')
+
+    with self.argument_context('functionapp config ssl show') as c:
+        c.argument('name', options_list=['--name', '-n'], help='Name of the function app. Required for Flex Consumption apps to show site-scoped certificates.')
+
+    with self.argument_context('functionapp config ssl delete') as c:
+        c.argument('name', options_list=['--name', '-n'], help='Name of the function app. Required for Flex Consumption apps to delete site-scoped certificates.')
+
+    # Add load_to_code parameter for functionapp SSL commands that create/update certificates (Flex Consumption only)
+    with self.argument_context('functionapp config ssl upload') as c:
+        c.argument('load_to_code', arg_type=get_three_state_flag(), help='For Flex Consumption apps only. When set to true, the certificate is accessible to app code.')
+
+    with self.argument_context('functionapp config ssl import') as c:
+        c.argument('load_to_code', arg_type=get_three_state_flag(), help='For Flex Consumption apps only. When set to true, the certificate is accessible to app code')
+        c.argument('enable_using_msi', arg_type=get_three_state_flag(), help='For Flex Consumption apps only. Enable Key Vault access using Managed Service Identity. When set to true, the app will use its managed identity to access Key Vault instead of service principal.')
+
+    with self.argument_context('webapp config ssl list') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+
+    with self.argument_context('webapp config ssl upload') as c:
+        c.ignore('load_to_code')
+
+    with self.argument_context('webapp config ssl import') as c:
+        c.ignore('load_to_code')
+        c.ignore('enable_using_msi')
 
     with self.argument_context('webapp config connection-string list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)

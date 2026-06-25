@@ -757,6 +757,27 @@ def load_arguments(self, _):
         c.argument('no_restore', arg_type=bicep_no_restore_type, help="When set, generates the parameters file without restoring external modules.")
         c.argument('diagnostics_format', arg_type=get_enum_type(['default', 'sarif']), help="Set diagnostics format.")
 
+    with self.argument_context('bicep snapshot') as c:
+        c.argument('file', arg_type=bicep_file_type, help="The path to the .bicepparam file to capture a snapshot for.")
+        c.argument('mode', arg_type=get_enum_type(['Overwrite', 'Validate']),
+                   help="The snapshot mode. 'Overwrite' (default) writes the snapshot file. 'Validate' compares the existing snapshot against the current template and fails if differences are detected.")
+        c.argument('tenant_id', options_list=['--tenant-id'],
+                   help="Tenant ID forwarded to the Bicep CLI as the deployment context used to resolve `existing` references when capturing the snapshot. This does not affect Azure CLI authentication.")
+        c.argument('subscription_id', options_list=['--subscription-id'],
+                   help="Subscription ID forwarded to the Bicep CLI as the deployment context used to resolve `existing` references when capturing the snapshot. This does not affect Azure CLI authentication; use the global `--subscription` argument to switch the active subscription.")
+        c.argument('management_group_id', options_list=['--management-group-id'],
+                   help="Management group ID forwarded to the Bicep CLI as the deployment context used to resolve `existing` references when capturing the snapshot.")
+        c.argument('location', arg_type=get_location_type(self.cli_ctx),
+                   help="Location forwarded to the Bicep CLI as the deployment context used to resolve `existing` references when capturing the snapshot.")
+        c.argument('resource_group', arg_type=resource_group_name_type,
+                   help="Resource group name forwarded to the Bicep CLI as the deployment context used to resolve `existing` references when capturing the snapshot.")
+        c.argument('deployment_name', options_list=['--deployment-name'],
+                   help="Deployment name forwarded to the Bicep CLI as the deployment context used to resolve `existing` references when capturing the snapshot.")
+
+    with self.argument_context('bicep run') as c:
+        c.argument('command_string', options_list=['--command', '-c'],
+                   help="The Bicep CLI command to run, including its arguments, as a single quoted string (e.g. \"build main.bicep\").")
+
     with self.argument_context('resourcemanagement private-link create') as c:
         c.argument('resource_group', arg_type=resource_group_name_type,
                    help='The name of the resource group.')
