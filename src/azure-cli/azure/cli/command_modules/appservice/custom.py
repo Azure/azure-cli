@@ -2477,12 +2477,11 @@ def _extract_webapp_status_items(result):
     # The siteStatus response holds per-instance status under 'properties':
     # a list for /siteStatus, a single object for /siteStatus/{instanceId}.
     # Normalize both shapes into a list for uniform formatting.
-    if isinstance(result, dict):
-        properties = result.get('properties')
-        if isinstance(properties, list):
-            return properties
-        if isinstance(properties, dict):
-            return [properties]
+    properties = result.get('properties')
+    if isinstance(properties, list):
+        return properties
+    if isinstance(properties, dict):
+        return [properties]
     return []
 
 
