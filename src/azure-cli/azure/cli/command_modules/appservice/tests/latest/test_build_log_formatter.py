@@ -51,12 +51,6 @@ class TestBuildLogFormatterFullMode(unittest.TestCase):
             self.assertEqual(_text(result), line)
             self.assertTrue(_is_persistent(result), msg="full mode should be persistent")
 
-    def test_full_mode_does_not_aggregate_warnings(self):
-        fmt = BuildLogFormatter(verbosity=BUILD_LOGS_FULL)
-        fmt.format_log_line("npm warn deprecated foo\n")
-        # Warnings are passed through, not counted, so there is no summary.
-        self.assertIsNone(fmt.get_warning_summary())
-
 
 class TestBuildLogFormatterNoneMode(unittest.TestCase):
     def test_none_mode_suppresses_everything(self):
@@ -95,27 +89,14 @@ class TestBuildLogFormatterSummaryMode(unittest.TestCase):
             self.assertTrue(_is_persistent(result), msg="expected persistent for: {}".format(line))
 
     def test_unknown_lines_are_transient(self):
-        line = "ModuleNotFoundError: No module named 'foo'\n"
-        result = self.fmt.format_log_line(line)
-        self.assertTrue(_is_transient(result))
-
-    def test_npm_warnings_counted_and_transient(self):
-        r1 = self.fmt.format_log_line("npm warn deprecated a@1\n")
-        r2 = self.fmt.format_log_line("npm warn deprecated b@2\n")
-        self.assertTrue(_is_transient(r1))
-        self.assertTrue(_is_transient(r2))
-        summary = self.fmt.get_warning_summary()
-        self.assertIsNotNone(summary)
-        self.assertIn("2 warning(s)", summary)
-
-    def test_pip_notice_counted_and_transient(self):
-        result = self.fmt.format_log_line("[notice] A new release of pip\n")
-        self.assertTrue(_is_transient(result))
-        self.assertIn("1 warning(s)", self.fmt.get_warning_summary())
-
-    def test_no_warning_summary_when_no_warnings(self):
-        self.fmt.format_log_line("Running pip install\n")
-        self.assertIsNone(self.fmt.get_warning_summary())
+        # Unknown lines, npm warnings and pip notices all fall through to the transient path.
+        for line in [
+            "ModuleNotFoundError: No module named 'foo'\n",
+            "npm warn deprecated a@1\n",
+            "[notice] A new release of pip\n",
+        ]:
+            result = self.fmt.format_log_line(line)
+            self.assertTrue(_is_transient(result), msg="expected transient for: {}".format(line))
 
     def test_pip_collecting_lines_are_transient(self):
         self.assertTrue(_is_transient(self.fmt.format_log_line("[12:00:00+00:00] Collecting flask\n")))
@@ -228,7 +209,7 @@ class TestBuildLogFormatterHelpers(unittest.TestCase):
         out = format_build_failure_with_logs(
             "Deployment failed because the build process failed\n",
             ["line one\n", "line two"])  # second line intentionally lacks newline
-        self.assertIn("Build Failed", out)
+        self.assertIn("Full Build Logs", out)
         self.assertIn("line one", out)
         self.assertIn("line two", out)
         self.assertIn("Deployment failed because the build process failed", out)

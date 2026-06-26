@@ -9913,7 +9913,8 @@ def _check_runtimestatus_with_deploymentstatusapi(cmd, resource_group_name, name
                                                                   name, slot, deployment_id)
             response_body = _poll_deployment_runtime_status(cmd, resource_group_name, name, slot,
                                                             deploymentstatisapi_url, deployment_id, timeout,
-                                                            deploy_params=deploy_params, build_logs=build_logs)
+                                                            deploy_params=deploy_params, build_logs=build_logs,
+                                                            is_async=is_async)
             # incase we are unable to fetch response from deploymentstatus API
             # fallback to polling kudu for deployment status
             if response_body is None:
@@ -9930,25 +9931,9 @@ def _utc_timestamp():
 
 
 def _parse_log_time(log_time_str):
-    """Parse log_time from Kudu API (ISO 8601) into HH:MM:SS string in UTC.
-
-    Returns UTC-formatted timestamp, or None if parsing fails.
-    """
-    if not log_time_str:
-        return None
-    try:
-        # Kudu returns ISO 8601 with nanosecond precision: "2026-06-14T08:10:17.4127389Z"
-        # Python's fromisoformat() only supports up to 6 fractional digits (microseconds)
-        without_z = log_time_str.rstrip('Z')
-        if '.' in without_z:
-            date_part, fractional_seconds = without_z.rsplit('.', 1)
-            fractional_seconds = fractional_seconds[:6]  # truncate to microseconds
-            without_z = f"{date_part}.{fractional_seconds}"
-        utc_datetime = datetime.datetime.fromisoformat(without_z).replace(
-            tzinfo=datetime.timezone.utc)
-        return utc_datetime.strftime('%H:%M:%S')
-    except (ValueError, AttributeError):
-        return None
+    """Extract HH:MM:SS from a Kudu ISO-8601 timestamp (already UTC); None if absent."""
+    match = re.search(r'T(\d{2}:\d{2}:\d{2})', log_time_str or '')
+    return match.group(1) if match else None
 
 
 def _fetch_log_detail_items(details_url, headers):
@@ -9979,8 +9964,10 @@ def _fetch_kudu_log_entries(cmd, resource_group_name, webapp_name, slot, deploym
                             details_complete_ids=None):
     """Fetch Kudu deployment log entries as (message, log_time, entry_id, detail_items) tuples.
 
-    details_complete_ids (optional set) avoids the N+1 fetch while streaming: non-tail entries
-    have final details and are skipped on later polls. Pass None to fetch every entry's details.
+    Each entry may carry a details_url that needs a separate HTTP call. When polling in a loop,
+    pass a details_complete_ids set so each entry's details are fetched only once: every entry
+    except the last is already final, so once fetched its id is remembered and skipped next time.
+    Pass None to fetch every entry's details on every call.
     """
     import requests
     from azure.cli.core.util import should_disable_connection_verify
@@ -10006,24 +9993,27 @@ def _fetch_kudu_log_entries(cmd, resource_group_name, webapp_name, slot, deploym
         for idx, entry in enumerate(log_entries):
             message = (entry.get('message') or '').rstrip()
             log_time = entry.get('log_time')
-            entry_id = entry.get('id') or log_time or message
+            # Prefer the unique id; fall back to a time|message composite so two distinct
+            # entries that share a log_time (and have no id) don't collide in the dedup set.
+            entry_id = entry.get('id') or f"{log_time}|{message}"
             details_url = entry.get('details_url')
             is_last_entry = idx == total - 1
 
-            # Skip details already finalized; the in-progress tail entry is always re-fetched.
-            skip_details = (
+            # The last entry is still being written, so always re-fetch it. Skip any earlier
+            # entry whose details we already pulled on a previous poll.
+            details_already_fetched = (
                 details_complete_ids is not None and
                 not is_last_entry and
                 entry_id in details_complete_ids
             )
 
             detail_items = []
-            if details_url and not skip_details:
+            if details_url and not details_already_fetched:
                 detail_items = _fetch_log_detail_items(details_url, headers)
 
             results.append((message, log_time, entry_id, detail_items))
 
-            # Non-tail entries are final; record so later polls skip their details_url fetch.
+            # Remember the id, so the next poll skips re-fetching its details.
             if details_complete_ids is not None and not is_last_entry and entry_id:
                 details_complete_ids.add(entry_id)
 
@@ -10074,7 +10064,7 @@ def _display_build_logs(cmd, resource_group_name, webapp_name, slot, deployment_
             _pace(_emit_build_log_line(message, log_formatter, renderer, timestamp=ts, indent=False))
 
         for detail_msg, detail_time, detail_id in detail_items:
-            detail_key = 'detail:' + str(detail_time or detail_id or detail_msg)
+            detail_key = 'detail:' + str(detail_id or f"{detail_time}|{detail_msg}")
             if detail_key in seen_log_ids:
                 continue
             seen_log_ids.add(detail_key)
@@ -10154,10 +10144,11 @@ def _format_deployment_status_error(deployment_properties):
 
 
 def _poll_deployment_runtime_status(cmd, resource_group_name, webapp_name, slot, deploymentstatusapi_url,
-                                    deployment_id, timeout=None, deploy_params=None, build_logs='summary'):
+                                    deployment_id, timeout=None, deploy_params=None, build_logs='summary',
+                                    is_async=False):
     from azure.cli.command_modules.appservice._build_log_formatter import (
         BuildLogFormatter, BuildLogRenderer, format_build_failure_with_logs,
-        format_phase_header, BUILD_LOGS_SUMMARY
+        format_phase_header, BUILD_LOGS_SUMMARY, BUILD_LOGS_FULL, BUILD_LOGS_NONE
     )
 
     max_time_sec = int(timeout) if timeout else 1000
@@ -10174,7 +10165,20 @@ def _poll_deployment_runtime_status(cmd, resource_group_name, webapp_name, slot,
     # full -> verbatim lines; summary -> milestones + self-overwriting status line; none -> hidden.
     verbosity = build_logs or BUILD_LOGS_SUMMARY
     log_formatter = BuildLogFormatter(verbosity=verbosity)
-    renderer = BuildLogRenderer(interactive=False if verbosity == "full" else None)
+    # full mode prints verbatim with no status line/pacing; others auto-detect the terminal.
+    force_plain = verbosity == BUILD_LOGS_FULL
+    renderer = BuildLogRenderer(interactive=False if force_plain else None)
+    # Build logs stream only for async deployments; sync builds run during the POST, so there
+    # is nothing to stream and we just report status transitions as before.
+    stream_logs = is_async is True
+    # In 'none' mode we hide the build-phase frame (Build Phase / Build Complete) since there is
+    # no build output to wrap; runtime markers (Site Startup / [OK]) still show progress.
+    show_build_markers = verbosity != BUILD_LOGS_NONE
+
+    def _stream_build_logs():
+        _display_build_logs(cmd, resource_group_name, webapp_name, slot,
+                            deployment_id, log_formatter, seen_log_ids,
+                            details_complete_ids, renderer)
 
     while time_elapsed < max_time_sec:
         try:
@@ -10189,34 +10193,29 @@ def _poll_deployment_runtime_status(cmd, resource_group_name, webapp_name, slot,
         status = deployment_status if status is None else status
 
         # Print phase transitions with timing
-        if status != previous_status_text:
+        if not stream_logs:
+            # Sync deployment: report status without streaming build logs (original behavior).
+            logger.warning("Status: %s Time: %s(s)", status, time_elapsed)
+        elif status != previous_status_text:
             timestamp = _utc_timestamp()
 
             # Track build phase duration
             if deployment_status == "BuildInProgress":
                 build_phase_start = time.time()
-                renderer.emit_persistent(f"{timestamp}  {format_phase_header('Build Phase')}")
+                if show_build_markers:
+                    renderer.emit_persistent(f"{format_phase_header('Build Phase')}")
             elif deployment_status == "BuildSuccessful":
                 # Fetch the full set on completion; fast builds may finish between polls
                 # so real-time streaming can miss lines. seen_log_ids prevents duplicates.
-                if build_phase_start is None:
-                    renderer.emit_persistent(f"{timestamp}  {format_phase_header('Build Phase')}")
-                _display_build_logs(cmd, resource_group_name, webapp_name,
-                                    slot, deployment_id, log_formatter, seen_log_ids,
-                                    details_complete_ids, renderer)
+                if show_build_markers and build_phase_start is None:
+                    renderer.emit_persistent(f"{format_phase_header('Build Phase')}")
+                _stream_build_logs()
                 # Build done: erase the transient chatter window before the summary.
                 renderer.finalize()
-                warning_summary = log_formatter.get_warning_summary()
-                if warning_summary:
-                    renderer.emit_persistent(warning_summary.rstrip('\n'))
-                if build_phase_start is not None:
-                    elapsed = int(time.time() - build_phase_start)
-                    renderer.emit_persistent(
-                        f"{timestamp}  {format_phase_header(f'Build Complete ({elapsed}s)')}")
-                else:
-                    renderer.emit_persistent(f"{timestamp}  {format_phase_header('Build Complete')}")
+                if show_build_markers:
+                    renderer.emit_persistent(f"{format_phase_header('Build Complete')}")
             elif deployment_status == "RuntimeStarting":
-                renderer.emit_persistent(f"{timestamp}  {format_phase_header('Site Startup')}")
+                renderer.emit_persistent(f"{format_phase_header('Site Startup')}")
             elif deployment_status == "RuntimeSuccessful":
                 renderer.emit_persistent(f"{timestamp}  [OK] Site started successfully")
             else:
@@ -10224,10 +10223,8 @@ def _poll_deployment_runtime_status(cmd, resource_group_name, webapp_name, slot,
             previous_status_text = status
 
         # Stream Kudu logs during build (polled ~every 5s while the build is in progress)
-        if deployment_status == "BuildInProgress" and time_elapsed - last_log_poll_time >= 5:
-            _display_build_logs(cmd, resource_group_name, webapp_name, slot,
-                                deployment_id, log_formatter, seen_log_ids,
-                                details_complete_ids, renderer)
+        if stream_logs and deployment_status == "BuildInProgress" and time_elapsed - last_log_poll_time >= 5:
+            _stream_build_logs()
             last_log_poll_time = time_elapsed
 
         if deployment_status == "RuntimeStarting":
@@ -10279,12 +10276,13 @@ def _poll_deployment_runtime_status(cmd, resource_group_name, webapp_name, slot,
             else:
                 deployment_logs = deployment_logs[0]
 
-            # Auto-expand: fetch full build logs from Kudu and display them
-            full_build_logs = _fetch_full_build_logs(cmd, resource_group_name, webapp_name,
-                                                     slot, deployment_id)
-            if full_build_logs:
-                full_error = format_build_failure_with_logs(error_text, full_build_logs)
-                raise CLIError(full_error)
+            # Auto-expand: fetch full build logs from Kudu and display them (async only).
+            if stream_logs:
+                full_build_logs = _fetch_full_build_logs(cmd, resource_group_name, webapp_name,
+                                                         slot, deployment_id)
+                if full_build_logs:
+                    full_error = format_build_failure_with_logs(error_text, full_build_logs)
+                    raise CLIError(full_error)
 
             error_text += "Please check the build logs for more info: {}\n".format(deployment_logs)
             raise CLIError(error_text)
@@ -11910,7 +11908,6 @@ def _make_onedeploy_request(params):
     if response.status_code:
         scm_url = _get_or_fetch_scm_url(params)
         latest_deploymentinfo_url = scm_url + "/api/deployments/latest"
-
         if _should_enrich_errors and response.status_code >= 400:
             logger.error("Deployment failed. Visit %s to get more information about your deployment.",
                          latest_deploymentinfo_url)

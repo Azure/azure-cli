@@ -4,11 +4,11 @@
 # --------------------------------------------------------------------------------------------
 
 """
-Build log formatter for `az webapp deploy` / `az functionapp deploy`.
+Build log formatter for `az webapp deploy`.
 
-Renders a curated view of the Oryx build by default: milestones, aggregated package counts and
-a warning tally stay on screen, while ordinary chatter is shown on a single self-overwriting
-status line. --build-logs full shows verbatim output; --build-logs none hides build logs.
+Renders a curated view of the Oryx build by default: milestones and aggregated package counts
+stay on screen, while ordinary chatter is shown on a single self-overwriting status line.
+--build-logs full shows verbatim output; --build-logs none hides build logs.
 """
 
 import re
@@ -27,31 +27,15 @@ BUILD_LOGS_NONE = "none"
 
 # Patterns for counting packages
 _PIP_COLLECTING = re.compile(r'^\s*\[[\d:+]+\]\s*Collecting\s+(\S+)')
-_PIP_CACHED = re.compile(r'^\s*\[[\d:+]+\]\s*Using cached\s+\S+')
-_PIP_INSTALLING = re.compile(r'^\s*\[[\d:+]+\]\s*Installing collected packages:')
 _PIP_INSTALLED = re.compile(r'^\s*\[[\d:+]+\]\s*Successfully installed\s+(.*)')
 _NPM_ADDED = re.compile(r'^\s*added (\d+) packages')
 
-# Warning patterns (aggregated in summary mode)
-_WARNING_PATTERNS = [
-    re.compile(r'^\s*npm warn deprecated\s+(.+)'),
-    re.compile(r'^\s*npm warn\s+(.+)'),
-    re.compile(r'^\s*\[notice\]\s+(.+)'),
-    re.compile(r'^\s*\[[\d:+]+\]\s*WARNING:\s+(.+)'),
-    re.compile(r'^\s*DEPRECATION:\s+(.+)'),
-    re.compile(r'^\s*Deprecation Notice:\s+(.+)'),
-    re.compile(r'^\s*Deprecated:\s+(.+)'),
-]
-
 # Important milestone lines (always shown in summary)
 _MILESTONE_PATTERNS = [
+    # Generic Oryx build lifecycle (platform-agnostic)
     re.compile(r'^\s*(Detected following platforms:)'),
-    re.compile(r'^\s*(python|nodejs|dotnet|java|php|ruby):\s*[\d.]+', re.IGNORECASE),
+    re.compile(r'^\s*(python|nodejs|dotnet|php):\s*[\d.]+', re.IGNORECASE),
     re.compile(r'^\s*(Detected the following frameworks:)'),
-    re.compile(r'^\s*(Running pip install)'),
-    re.compile(r"^\s*(Running 'npm install')"),
-    re.compile(r"^\s*(Running 'yarn install')"),
-    re.compile(r'^\s*(pip install done in)'),
     re.compile(r'^\s*(Running build script)'),
     re.compile(r'^\s*(Build script snippets done in)'),
     re.compile(r'^\s*(Preparing output)'),
@@ -65,21 +49,27 @@ _MILESTONE_PATTERNS = [
     re.compile(r'^\s*(Installing platform)'),
     re.compile(r'^\s*(Downloading and extracting)'),
     re.compile(r'^\s*(Successfully extracted)'),
-    re.compile(r'^\s*(Using Node version:)'),
-    re.compile(r'^\s*(Using Npm version:)'),
-    re.compile(r'^\s*v\d+\.\d+\.\d+$'),  # version number lines like v24.15.0
-    re.compile(r'^\s*\d+\.\d+\.\d+$'),    # version number lines like 11.12.1
-    re.compile(r'^\s*(Python Version:)'),
-    re.compile(r'^\s*(Python Virtual Environment:)'),
-    re.compile(r'^\s*(Creating virtual environment)'),
-    re.compile(r'^\s*(Activating virtual environment)'),
     re.compile(r'^\s*(Source directory)'),
     re.compile(r'^\s*(Destination directory)'),
     re.compile(r'^\s*(Running oryx build)'),
     re.compile(r'^\s*(Command:)'),
     re.compile(r'^\s*(Running post deployment command)'),
     re.compile(r'^\s*(Deployment successful)'),
-    # PHP/Composer milestones
+    re.compile(r'^\s*v\d+\.\d+\.\d+$'),  # version number lines like v24.15.0
+    re.compile(r'^\s*\d+\.\d+\.\d+$'),    # version number lines like 11.12.1
+    # Node / npm / yarn milestones
+    re.compile(r"^\s*(Running 'npm install')"),
+    re.compile(r"^\s*(Running 'yarn install')"),
+    re.compile(r'^\s*(Using Node version:)'),
+    re.compile(r'^\s*(Using Npm version:)'),
+    # Python / pip / virtualenv milestones
+    re.compile(r'^\s*(Running pip install)'),
+    re.compile(r'^\s*(pip install done in)'),
+    re.compile(r'^\s*(Python Version:)'),
+    re.compile(r'^\s*(Python Virtual Environment:)'),
+    re.compile(r'^\s*(Creating virtual environment)'),
+    re.compile(r'^\s*(Activating virtual environment)'),
+    # PHP / Composer milestones
     re.compile(r"^\s*(Running 'composer install)"),
     re.compile(r'^\s*(PHP executable:)'),
     re.compile(r'^\s*(Composer archive:)'),
@@ -97,7 +87,6 @@ class BuildLogFormatter:
     def __init__(self, verbosity=BUILD_LOGS_SUMMARY):
         self.verbosity = verbosity
         self._package_count = 0
-        self._warning_count = 0
 
     def format_log_line(self, line):  # pylint: disable=too-many-return-statements
         """Classify a log line: returns (text, is_persistent), or None to omit.
@@ -116,18 +105,9 @@ class BuildLogFormatter:
         if not stripped:
             return None
 
-        # Warnings (incl. "npm warn ...") are counted, then shown transiently.
-        for pattern in _WARNING_PATTERNS:
-            if pattern.match(stripped):
-                self._warning_count += 1
-                return (line, False)
-
         # pip "Collecting <pkg>": count for the install summary, then scroll transiently.
         if _PIP_COLLECTING.match(stripped):
             self._package_count += 1
-            return (line, False)
-
-        if _PIP_CACHED.match(stripped) or _PIP_INSTALLING.match(stripped):
             return (line, False)
 
         # "Successfully installed ..." -> aggregated persistent milestone.
@@ -157,12 +137,6 @@ class BuildLogFormatter:
         """Generate summary line for package installation."""
         count = installed_count if installed_count > 0 else self._package_count
         return f"            Installed {count} packages successfully\n"
-
-    def get_warning_summary(self):
-        """Get aggregated warning summary. Call at end of build phase."""
-        if self._warning_count > 0:
-            return f"            [!] {self._warning_count} warning(s)\n"
-        return None
 
 
 class BuildLogRenderer:
@@ -284,9 +258,9 @@ def format_final_url(url):
 def format_build_failure_with_logs(error_text, log_lines):
     """On build failure, dump the full build logs for debugging, followed by the error."""
     output = []
-    output.append("\n-- Build Failed -- Showing full build logs for debugging --\n\n")
+    output.append("\n------------------- Full Build Logs -------------------\n\n")
     for log_line in log_lines:
         output.append(log_line if log_line.endswith('\n') else log_line + '\n')
-    output.append("\n-- End of build logs --\n\n")
+    output.append("\n------------------- End of Build Logs -------------------\n\n")
     output.append(error_text)
     return "".join(output)
