@@ -10,7 +10,7 @@ import re
 
 from dateutil.relativedelta import relativedelta
 
-from knack.util import CLIError, todict
+from knack.util import CLIError
 from knack.log import get_logger
 from msrest.serialization import TZ_UTC
 from azure.core.exceptions import HttpResponseError
@@ -137,6 +137,35 @@ def _get_displayable_name(graph_object):
     return graph_object.get('name') or ''
 
 
+def _role_assignment_to_dict(assignment):
+    '''Project a role assignment to the legacy flat camelCase dict.
+
+    azure-mgmt-authorization 5.x (TypeSpec-generated) wraps the role assignment's
+    domain attributes in a nested ``properties`` envelope, and ``knack.util.todict``
+    does not walk these MutableMapping models. The SDK still exposes the values as
+    snake_case attributes, so read them directly to keep the flat shape downstream
+    code expects.
+    '''
+    if assignment is None:
+        return None
+
+    def _coerce(value):
+        from enum import Enum
+        if isinstance(value, Enum):
+            return value.value
+        return value
+
+    result = {}
+    for attr in ('id', 'name', 'type'):
+        result[attr] = _coerce(getattr(assignment, attr, None))
+    for snake_attr, camel_key in (('scope', 'scope'),
+                                  ('role_definition_id', 'roleDefinitionId'),
+                                  ('principal_id', 'principalId'),
+                                  ('principal_type', 'principalType')):
+        result[camel_key] = _coerce(getattr(assignment, snake_attr, None))
+    return result
+
+
 def list_role_assignments(cmd, assignee_object_id, scope=None):
     '''
     :param include_groups: include extra assignments to the groups of which the user is a
@@ -151,7 +180,7 @@ def list_role_assignments(cmd, assignee_object_id, scope=None):
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
-    results = todict(assignments) if assignments else []
+    results = [_role_assignment_to_dict(a) for a in assignments] if assignments else []
 
     if not results:
         return []
@@ -214,7 +243,7 @@ def _resolve_role_id(cli_ctx, role, scope, definitions_client):
             role_id = '/subscriptions/{}/providers/Microsoft.Authorization/roleDefinitions/{}'.format(
                 subscription_id, role)
         if not role_id:  # retrieve role id
-            role_defs = list(definitions_client.list(scope, "roleName eq '{}'".format(role)))
+            role_defs = list(definitions_client.list(scope, filter="roleName eq '{}'".format(role)))
 
             if not role_defs:
                 raise CLIError("Role '{}' doesn't exist.".format(role))
