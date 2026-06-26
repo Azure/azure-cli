@@ -320,6 +320,45 @@ examples:
     text: az postgres flexible-server restore --resource-group testgroup --name testservernew --source-server testserver --storage-type PremiumV2_LRS
 """
 
+helps['postgres flexible-server maintenance-event'] = """
+type: group
+short-summary: Manage maintenance events for PostgreSQL flexible servers.
+"""
+
+helps['postgres flexible-server maintenance-event list'] = """
+type: command
+short-summary: List maintenance events for a flexible server.
+examples:
+  - name: List all maintenance events for a server.
+    text: az postgres flexible-server maintenance-event list --resource-group testgroup --server-name testserver
+  - name: List only upcoming maintenance events.
+    text: az postgres flexible-server maintenance-event list --resource-group testgroup --server-name testserver --maintenance-status Upcoming
+"""
+
+helps['postgres flexible-server maintenance-event show'] = """
+type: command
+short-summary: Show details of a maintenance event.
+examples:
+  - name: Get a maintenance event by ID.
+    text: az postgres flexible-server maintenance-event show --resource-group testgroup --server-name testserver --maintenance-event-id XXXX-111
+"""
+
+helps['postgres flexible-server maintenance-event reschedule'] = """
+type: command
+short-summary: Reschedule a maintenance event to a new UTC datetime.
+examples:
+  - name: Reschedule a maintenance event.
+    text: az postgres flexible-server maintenance-event reschedule --resource-group testgroup --server-name testserver --maintenance-event-id XXXX-111 --start-time 2026-04-10T10:00:00+00:00
+"""
+
+helps['postgres flexible-server maintenance-event apply-now'] = """
+type: command
+short-summary: Apply a maintenance event immediately.
+examples:
+  - name: Apply a maintenance event now.
+    text: az postgres flexible-server maintenance-event apply-now --resource-group testgroup --server-name testserver --maintenance-event-id XXXX-111
+"""
+
 helps['postgres flexible-server restart'] = """
 type: command
 short-summary: Restart a flexible server.
