@@ -2517,14 +2517,14 @@ def show_webapp_status(cmd, resource_group_name, name, slot=None, instance=None)
     client = web_client_factory(cmd.cli_ctx)
     subscription_id = get_subscription_id(cmd.cli_ctx)
     api_version = client.DEFAULT_API_VERSION
-    resource_manager = cmd.cli_ctx.cloud.endpoints.resource_manager
     slot_segment = f'/slots/{slot}' if slot else ''
     instance_segment = f'/{instance}' if instance else ''
-    request_url = (
-        f'{resource_manager}/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}'
+    base_url = (
+        f'/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}'
         f'/providers/Microsoft.Web/sites/{name}{slot_segment}/siteStatus{instance_segment}'
         f'?api-version={api_version}'
     )
+    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
 
     try:
         return send_raw_request(cmd.cli_ctx, 'GET', request_url).json()
