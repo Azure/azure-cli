@@ -119,7 +119,8 @@ CONTROL_PLANE_FAILURE_PATTERNS = [
         "httpStatus": 401,
         "suggestedFixes": [
             "Your subscription has reached its App Service Plan worker quota for this SKU/region",
-            "Request an increase in the Azure portal: Subscription > Usage + quotas, filter Provider = App Service, then New Quota Request",
+            "Request an increase in the Azure portal: Subscription > Usage + quotas, "
+            "filter Provider = App Service, then New Quota Request",
             "Or try a different region or a lower SKU/worker count"
         ]
     },
