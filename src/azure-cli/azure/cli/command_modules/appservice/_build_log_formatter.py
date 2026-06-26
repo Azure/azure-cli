@@ -6,17 +6,9 @@
 """
 Build log formatter for `az webapp deploy` / `az functionapp deploy`.
 
-Renders a clean, curated view of the Oryx build by default: deterministic milestones,
-aggregated package counts and a warning tally are kept permanently on screen, while
-ordinary build chatter is shown on a single self-overwriting status line (the current
-line is replaced in place by the next -- like a progress line). Full verbatim output is
-available via --build-logs full; --build-logs none hides build logs entirely.
-
-Classification (summary mode):
-  - PERSISTENT: stack/version detection, phase milestones, "Installed N packages"
-  - TRANSIENT:  package downloads, oryx/SDK metadata, warnings, other chatter
-                (shown on the self-overwriting status line; warnings are also counted)
-  - OMITTED:    blank lines
+Renders a curated view of the Oryx build by default: milestones, aggregated package counts and
+a warning tally stay on screen, while ordinary chatter is shown on a single self-overwriting
+status line. --build-logs full shows verbatim output; --build-logs none hides build logs.
 """
 
 import re
@@ -30,13 +22,8 @@ BUILD_LOGS_FULL = "full"
 BUILD_LOGS_SUMMARY = "summary"
 BUILD_LOGS_NONE = "none"
 
-# --- Patterns for classification ---
-#
-# Design: we intentionally do NOT keep a denylist of "noise" lines. A line is shown
-# *permanently* only if it matches a deterministic milestone (or is an aggregated
-# package summary); every other non-blank line is treated as transient chatter shown on
-# the self-overwriting status line (still fully available via --build-logs full). This
-# avoids the brittle per-stack denylists that previously needed constant maintenance.
+# Design: no denylist of "noise". A line is kept permanently only if it matches a milestone
+# (or is an aggregated summary); every other non-blank line is transient chatter.
 
 # Patterns for counting packages
 _PIP_COLLECTING = re.compile(r'^\s*\[[\d:+]+\]\s*Collecting\s+(\S+)')
@@ -113,14 +100,10 @@ class BuildLogFormatter:
         self._warning_count = 0
 
     def format_log_line(self, line):  # pylint: disable=too-many-return-statements
-        """Classify a single log line for display.
+        """Classify a log line: returns (text, is_persistent), or None to omit.
 
-        Returns:
-            (text, is_persistent): ``text`` is the string to display; ``is_persistent``
-                True means keep it permanently on screen (milestones, aggregated
-                summaries), False means it is transient build chatter shown on the
-                self-overwriting status line.
-            None: omit the line entirely (blank lines, or --build-logs none).
+        is_persistent True keeps it on screen (milestones/summaries); False shows it on the
+        transient status line. None omits blank lines or --build-logs none.
         """
         if self.verbosity == BUILD_LOGS_FULL:
             return (line, True)
@@ -185,17 +168,9 @@ class BuildLogFormatter:
 class BuildLogRenderer:
     """Render build logs as persistent milestones plus one self-overwriting status line.
 
-    Milestones and phase headers are printed permanently (each on its own line). Ordinary
-    build chatter is shown on a single transient line that overwrites itself in place as new
-    chatter arrives -- like a progress/status line. Only a carriage return + clear-to-end-of-
-    line are used (no vertical cursor movement), so the display cannot desync even for very
-    long or very rapid output; each transient line is also truncated to the terminal width so
-    it never wraps.
-
-    On a non-TTY -- or when interactive rendering is disabled (``--build-logs full``) -- there
-    is no overwriting: persistent and transient lines are all printed plainly so nothing is
-    lost. All output goes to a single stream (stdout by default); callers must route every
-    build-phase line through this renderer so no other writer corrupts the status line.
+    Chatter overwrites itself in place via carriage-return + clear-to-EOL (no vertical cursor
+    moves), truncated to terminal width so it never wraps. On a non-TTY or --build-logs full,
+    lines are printed plainly with no overwriting. All output goes through one stream.
     """
 
     _DIM = "\x1b[90m"
@@ -275,9 +250,7 @@ class BuildLogRenderer:
         self._stream.flush()
 
     def pace(self):
-        """Briefly pause between batched lines so a poll's worth of output streams in
-        one-by-one instead of appearing all at once. No-op unless interactive (so
-        --build-logs full, CI and piped output stay instant)."""
+        """Briefly pause between batched lines so a poll streams in one-by-one. No-op unless interactive."""
         if self._interactive and self._PACE_SECONDS:
             time.sleep(self._PACE_SECONDS)
 

@@ -9952,11 +9952,7 @@ def _parse_log_time(log_time_str):
 
 
 def _fetch_log_detail_items(details_url, headers):
-    """Fetch and parse a deployment-log entry's details_url.
-
-    Returns a list of (detail_msg, detail_time, detail_id) tuples, or an empty list on any
-    failure (network error, non-200, or unexpected payload shape).
-    """
+    """Fetch a log entry's details_url as (detail_msg, detail_time, detail_id) tuples; [] on failure."""
     import requests
     from azure.cli.core.util import should_disable_connection_verify
 
@@ -9981,18 +9977,10 @@ def _fetch_log_detail_items(details_url, headers):
 
 def _fetch_kudu_log_entries(cmd, resource_group_name, webapp_name, slot, deployment_id,
                             details_complete_ids=None):
-    """Fetch raw log entries from Kudu deployment log API.
+    """Fetch Kudu deployment log entries as (message, log_time, entry_id, detail_items) tuples.
 
-    Returns a list of (message, log_time, entry_id, detail_items) tuples (empty if fetching
-    fails). Each detail_items is a list of (detail_msg, detail_time, detail_id) tuples fetched
-    from the entry's details_url.
-
-    details_complete_ids (optional set): used to avoid the N+1 network pattern when this is
-    called repeatedly while streaming. Every parent entry except the last one has final details,
-    so once an entry is no longer the tail it is recorded here and its details_url is not
-    re-fetched on subsequent polls. The last (in-progress) entry's details keep growing, so it is
-    always re-fetched. Skipped entries return an empty detail_items list. Pass None (the default,
-    used by the failure-path full-log fetch) to always fetch every entry's details.
+    details_complete_ids (optional set) avoids the N+1 fetch while streaming: non-tail entries
+    have final details and are skipped on later polls. Pass None to fetch every entry's details.
     """
     import requests
     from azure.cli.core.util import should_disable_connection_verify
@@ -10022,8 +10010,7 @@ def _fetch_kudu_log_entries(cmd, resource_group_name, webapp_name, slot, deploym
             details_url = entry.get('details_url')
             is_last_entry = idx == total - 1
 
-            # Skip re-fetching details for entries whose details are already final.
-            # The last (in-progress) entry's details keep growing, so always re-fetch it.
+            # Skip details already finalized; the in-progress tail entry is always re-fetched.
             skip_details = (
                 details_complete_ids is not None and
                 not is_last_entry and
@@ -10036,8 +10023,7 @@ def _fetch_kudu_log_entries(cmd, resource_group_name, webapp_name, slot, deploym
 
             results.append((message, log_time, entry_id, detail_items))
 
-            # Once an entry is no longer the tail, its details are final; record it so future
-            # polls skip the redundant details_url fetch.
+            # Non-tail entries are final; record so later polls skip their details_url fetch.
             if details_complete_ids is not None and not is_last_entry and entry_id:
                 details_complete_ids.add(entry_id)
 
@@ -10050,19 +10036,10 @@ def _fetch_kudu_log_entries(cmd, resource_group_name, webapp_name, slot, deploym
 def _display_build_logs(cmd, resource_group_name, webapp_name, slot, deployment_id,
                         log_formatter=None, seen_log_ids=None, details_complete_ids=None,
                         renderer=None):
-    """Fetch and display build logs from Kudu.
+    """Fetch and display Kudu build logs, deduping across calls.
 
-    Handles all log display scenarios:
-    - Real-time streaming during BuildInProgress (called every 5s)
-    - Retrospective display after fast/sync builds complete
-    - Deduplication via seen_log_ids across multiple calls
-
-    seen_log_ids dedupes already-displayed lines; details_complete_ids avoids re-fetching the
-    details_url of entries whose details are already final (see _fetch_kudu_log_entries). Both
-    persist across calls for the lifetime of a single deployment poll loop.
-
-    Lines are routed through the formatter (summary/full/none modes) and the renderer
-    (persistent milestones vs the self-overwriting status line).
+    seen_log_ids skips already-shown lines; details_complete_ids skips finalized details_urls.
+    Lines route through the formatter (summary/full/none) and renderer (milestones vs status line).
     """
     if seen_log_ids is None:
         seen_log_ids = set()
@@ -10075,10 +10052,8 @@ def _display_build_logs(cmd, resource_group_name, webapp_name, slot, deployment_
     if not entries:
         return
 
-    # Reveal a batched poll one line at a time (renderer.pace() no-ops unless interactive).
-    # Persistent milestones are always paced (they are few and worth the reveal); high-volume
-    # transient chatter is capped so a large catch-up burst can't stall output for long, and
-    # can't exhaust the budget before the milestones that follow it.
+    # Reveal a batched poll one line at a time: always pace milestones, cap transient chatter so
+    # a large catch-up burst can't stall output (pace() no-ops unless interactive).
     paced_chatter = 0
     pace_limit = 40
 
@@ -10129,20 +10104,10 @@ def _fetch_full_build_logs(cmd, resource_group_name, webapp_name, slot, deployme
 
 
 def _emit_build_log_line(message, log_formatter, renderer, timestamp=None, indent=False):
-    """Classify a raw build log line and route it to the renderer.
+    """Classify a build log line and route it to the renderer.
 
-    Milestones / aggregated summaries are emitted as persistent lines (kept on screen);
-    all other build chatter is shown on the self-overwriting status line. When log_formatter
-    is None the line is shown verbatim as persistent output.
-
-    Persistent lines use a consistent two-level hierarchy:
-      - top-level entries:  "HH:MM:SS  message"
-      - detail items:       "            message" (12-space indent)
-      - aggregated summaries already carry their own indentation.
-
-    Returns the kind of line emitted so callers can pace output: ``'persistent'`` for a
-    milestone/summary line, ``'transient'`` for build chatter on the status line, or None
-    if the line was omitted (blank line or --build-logs none).
+    Milestones/summaries are persistent (kept on screen); other chatter goes to the
+    self-overwriting status line. Returns 'persistent', 'transient', or None (omitted).
     """
     if log_formatter is None:
         if indent or not timestamp:
@@ -10178,11 +10143,7 @@ def _emit_build_log_line(message, log_formatter, renderer, timestamp=None, inden
 
 # pylint: disable=too-many-branches
 def _format_deployment_status_error(deployment_properties):
-    """Extract a human-readable error line from a deployment-status payload's 'errors'.
-
-    Returns "Error: <message>\n" when a message is present, else "Extended ErrorCode:
-    <code>\n", or "" when there are no errors. Shared by the RuntimeFailed/BuildFailed paths.
-    """
+    """Extract an error line from a deployment-status payload's 'errors' ("" when none)."""
     errors = deployment_properties.get('errors')
     if not errors:
         return ""
@@ -10210,13 +10171,9 @@ def _poll_deployment_runtime_status(cmd, resource_group_name, webapp_name, slot,
     previous_status_text = None
     build_phase_start = None
 
-    # Initialize the log formatter and renderer based on verbosity. The renderer keeps
-    # milestones/phase headers permanent and shows build chatter on a single self-
-    # overwriting status line on a TTY. For --build-logs full there is no overwriting
-    # (every line is printed verbatim); none hides build logs entirely.
+    # full -> verbatim lines; summary -> milestones + self-overwriting status line; none -> hidden.
     verbosity = build_logs or BUILD_LOGS_SUMMARY
     log_formatter = BuildLogFormatter(verbosity=verbosity)
-    # full -> plain line-by-line (no overwrite); otherwise auto-detect TTY (interactive=None).
     renderer = BuildLogRenderer(interactive=False if verbosity == "full" else None)
 
     while time_elapsed < max_time_sec:
@@ -10240,10 +10197,8 @@ def _poll_deployment_runtime_status(cmd, resource_group_name, webapp_name, slot,
                 build_phase_start = time.time()
                 renderer.emit_persistent(f"{timestamp}  {format_phase_header('Build Phase')}")
             elif deployment_status == "BuildSuccessful":
-                # Always fetch and display build logs on completion.
-                # For async (fast builds), real-time streaming may have missed most logs.
-                # For sync, build happened during POST so no logs were streamed at all.
-                # Pass seen_log_ids to avoid duplicating lines already shown in real-time.
+                # Fetch the full set on completion; fast builds may finish between polls
+                # so real-time streaming can miss lines. seen_log_ids prevents duplicates.
                 if build_phase_start is None:
                     renderer.emit_persistent(f"{timestamp}  {format_phase_header('Build Phase')}")
                 _display_build_logs(cmd, resource_group_name, webapp_name,
@@ -11838,49 +11793,6 @@ def _warmup_kudu_and_get_cookie_internal(params):
     return None
 
 
-def _display_build_logs_on_sync_failure(params, scm_url):
-    """For sync deployment failures, fetch build logs and return formatted error text.
-
-    This handles the case where the Kudu POST returns an error (e.g., 400) after the build
-    completed on the server. Without this, the customer only sees 'Status Code: 400' with no
-    build output.
-
-    Returns a formatted error string with logs included, or None if logs can't be fetched.
-    """
-    import requests
-    from azure.cli.core.util import should_disable_connection_verify
-    from azure.cli.command_modules.appservice._build_log_formatter import format_build_failure_with_logs
-
-    try:
-        headers = get_scm_site_headers(params.cmd.cli_ctx, params.webapp_name,
-                                       params.resource_group_name, params.slot)
-
-        # Get the latest deployment ID
-        latest_url = scm_url + "/api/deployments/latest"
-        resp = requests.get(latest_url, headers=headers,
-                            verify=not should_disable_connection_verify(), timeout=15)
-        if resp.status_code != 200:
-            return None
-
-        deployment_info = resp.json()
-        deployment_id = deployment_info.get('id')
-        if not deployment_id:
-            return None
-
-        # Fetch build logs
-        full_logs = _fetch_full_build_logs(params.cmd, params.resource_group_name,
-                                           params.webapp_name, params.slot, deployment_id)
-        if not full_logs:
-            return None
-
-        # Format in the same style as async BuildFailed
-        error_text = "Deployment failed because the build process failed\n"
-        return format_build_failure_with_logs(error_text, full_logs)
-
-    except Exception:  # pylint: disable=broad-except
-        return None
-
-
 def _make_onedeploy_request(params):
     import requests
     from azure.cli.core.util import should_disable_connection_verify
@@ -11998,11 +11910,6 @@ def _make_onedeploy_request(params):
     if response.status_code:
         scm_url = _get_or_fetch_scm_url(params)
         latest_deploymentinfo_url = scm_url + "/api/deployments/latest"
-
-        # For sync deployment failures, fetch and display build logs in the error message
-        build_failure_text = _display_build_logs_on_sync_failure(params, scm_url)
-        if build_failure_text:
-            raise CLIError(build_failure_text)
 
         if _should_enrich_errors and response.status_code >= 400:
             logger.error("Deployment failed. Visit %s to get more information about your deployment.",
