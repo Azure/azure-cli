@@ -6,17 +6,23 @@
 """
 Build log formatter for `az webapp deploy` / `az functionapp deploy`.
 
-Provides intelligent log filtering that shows a clean summary by default,
-with full verbosity available via --build-logs full.
+Renders a clean, curated view of the Oryx build by default: deterministic milestones,
+aggregated package counts and a warning tally are kept permanently on screen, while
+ordinary build chatter is shown on a single self-overwriting status line (the current
+line is replaced in place by the next -- like a progress line). Full verbatim output is
+available via --build-logs full; --build-logs none hides build logs entirely.
 
-Log levels:
-  - PHASE:   Major deployment phases (always shown)
-  - INFO:    Important milestones (shown in summary + full)
-  - DETAIL:  Individual package lines, SDK metadata (shown only in full)
-  - WARNING: Deprecation notices, pip warnings (aggregated in summary, shown in full)
+Classification (summary mode):
+  - PERSISTENT: stack/version detection, phase milestones, "Installed N packages"
+  - TRANSIENT:  package downloads, oryx/SDK metadata, warnings, other chatter
+                (shown on the self-overwriting status line; warnings are also counted)
+  - OMITTED:    blank lines
 """
 
 import re
+import shutil
+import sys
+import time
 
 
 # Log verbosity levels
@@ -25,90 +31,12 @@ BUILD_LOGS_SUMMARY = "summary"
 BUILD_LOGS_NONE = "none"
 
 # --- Patterns for classification ---
-
-# Oryx internal metadata lines (hidden in summary mode)
-_ORYX_METADATA_PATTERNS = [
-    re.compile(r'^\s*(Operation performed by Microsoft Oryx)'),
-    re.compile(r'^\s*(You can report issues at)'),
-    re.compile(r'^\s*(Oryx Version:)'),
-    re.compile(r'^\s*(Build Operation ID:)'),
-    re.compile(r'^\s*(Repository Commit\s*:)'),
-    re.compile(r'^\s*(OS Type\s*:)'),
-    re.compile(r'^\s*(Image Type\s*:)'),
-    re.compile(r'^\s*(Primary SDK Storage URL:)'),
-    re.compile(r'^\s*(Backup SDK Storage URL:)'),
-    re.compile(r'^\s*(ACR SDK Registry URL:)'),
-    re.compile(r'^\s*(SDK provider status:)'),
-    re.compile(r'^\s*(External ACR SDK provider)'),
-    re.compile(r'^\s*(External SDK provider)'),
-    re.compile(r'^\s*(Direct ACR SDK provider)'),
-    re.compile(r'^\s*(Blob SDK provider)'),
-    re.compile(r'^\s*(External ACR provider resolved)'),
-    re.compile(r'^\s*(Version resolved using)'),
-    re.compile(r'^\s*(Requesting SDK from ACR)'),
-    re.compile(r'^\s*(Successfully pulled SDK from ACR)'),
-    re.compile(r'^\s*(SDK for .* fetched via)'),
-    re.compile(r'^\s*(Requesting metadata for platform)'),
-    re.compile(r'^\s*(Not a vso image)'),
-    re.compile(r'^\s*(Creating directory for command manifest)'),
-    re.compile(r'^\s*(Removing existing manifest file)'),
-    re.compile(r'^\s*(Creating a manifest file)'),
-    re.compile(r'^\s*(Manifest file created)'),
-    re.compile(r'^\s*(Copying \.ostype)'),
-    re.compile(r'^\s*(Node Build Command Manifest)'),
-    # .NET first-run banner (noisy, not useful for deployment)
-    re.compile(r'^\s*(Welcome to \.NET)'),
-    re.compile(r'^\s*-{5,}$'),  # separator lines like "---------------------"
-    re.compile(r'^\s*(SDK Version:)'),
-    re.compile(r'^\s*(Telemetry)$'),
-    re.compile(r'^\s*(The \.NET tools collect usage data)'),
-    re.compile(r'^\s*(Read more about \.NET CLI Tools telemetry)'),
-    re.compile(r'^\s*(Installed an ASP\.NET Core HTTPS)'),
-    re.compile(r'^\s*(To trust the certificate)'),
-    re.compile(r'^\s*(Learn about HTTPS)'),
-    re.compile(r'^\s*(Write your first app)'),
-    re.compile(r'^\s*(Find out what.s new)'),
-    re.compile(r'^\s*(Explore documentation)'),
-    re.compile(r'^\s*(Report issues and find source)'),
-    re.compile(r'^\s*(Use .dotnet --help.)'),
-    re.compile(r'^\s*={5,}$'),  # separator lines like "==================="
-    # Kudu internal deployment metadata
-    re.compile(r'^\s*(PreDeployment:)'),
-    re.compile(r'^\s*(Repository path is)'),
-    re.compile(r'^\s*(Using standard output preparation)'),
-    re.compile(r'^\s*(Total time for destination directory preparation)'),
-    # Kudu build summary noise (0 errors/warnings not useful on success)
-    re.compile(r'^\s*(Found \d+ issue)'),
-    re.compile(r'^\s*(Build Summary)'),
-    re.compile(r'^\s*(Errors \(\d+\))'),
-    re.compile(r'^\s*(Warnings \(\d+\))'),
-    re.compile(r'^\s*(Parsing the build logs)'),
-    re.compile(r'^\s*(Preparing deployment for commit id)'),
-    # Kudu post-build noise
-    re.compile(r'^\s*(Updating submodules)'),
-    re.compile(r'^\s*(Triggering container recycle)'),
-    re.compile(r'^\s*(Generating summary of Oryx build)'),
-]
-
-# Package download/cache lines (suppressed, counted instead)
-_PACKAGE_LINE_PATTERNS = [
-    re.compile(r'^\s*\[[\d:+]+\]\s*(Collecting|Using cached|Downloading|Using)'),
-    re.compile(r'^\s*\[[\d:+]+\]\s*(Successfully installed)'),
-    re.compile(r'^\s*(npm warn|npm notice)'),
-    re.compile(r'^\s*added \d+ packages'),
-    re.compile(r'^\s*-\s+(Locking|Installing|Downloading)\s+\S+'),  # composer package ops
-    re.compile(r'^\s*\d+/\d+\s*\[[\s=>-]*\]\s*\d+%'),  # composer progress bars (X/Y format)
-    re.compile(r'^\s*\d+\s*\[[->=<>\s]*\]'),  # composer progress bars (single number format)
-    re.compile(r'^\s*Loading composer repositories'),
-    re.compile(r'^\s*(Updating dependencies|Lock file operations:)'),
-    re.compile(r'^\s*(Installing dependencies from lock file)'),
-    re.compile(r'^\s*(Writing lock file)'),
-    re.compile(r'^\s*Package operations:'),
-    re.compile(r'^\s*Generating autoload files'),
-    re.compile(r'^\s*\d+ package suggestions were added'),
-    re.compile(r'^\s*\d+ package you are using is looking for funding'),
-    re.compile(r'^\s*Use the `composer'),
-]
+#
+# Design: we intentionally do NOT keep a denylist of "noise" lines. A line is shown
+# *permanently* only if it matches a deterministic milestone (or is an aggregated
+# package summary); every other non-blank line is treated as transient chatter shown on
+# the self-overwriting status line (still fully available via --build-logs full). This
+# avoids the brittle per-stack denylists that previously needed constant maintenance.
 
 # Patterns for counting packages
 _PIP_COLLECTING = re.compile(r'^\s*\[[\d:+]+\]\s*Collecting\s+(\S+)')
@@ -182,97 +110,65 @@ class BuildLogFormatter:
     def __init__(self, verbosity=BUILD_LOGS_SUMMARY):
         self.verbosity = verbosity
         self._package_count = 0
-        self._packages_collecting = False
-        self._packages_installing = False
         self._warning_count = 0
-        self._suppressed_lines = []  # stored for auto-expand on failure
 
-    def format_log_line(self, line):
-        """Process a single log line and return formatted output or None to suppress.
+    def format_log_line(self, line):  # pylint: disable=too-many-return-statements
+        """Classify a single log line for display.
 
         Returns:
-            str or None: The formatted line to display, or None if suppressed.
+            (text, is_persistent): ``text`` is the string to display; ``is_persistent``
+                True means keep it permanently on screen (milestones, aggregated
+                summaries), False means it is transient build chatter shown on the
+                self-overwriting status line.
+            None: omit the line entirely (blank lines, or --build-logs none).
         """
         if self.verbosity == BUILD_LOGS_FULL:
-            return line
+            return (line, True)
         if self.verbosity == BUILD_LOGS_NONE:
-            self._suppressed_lines.append(line)
             return None
 
-        # Summary mode: intelligent filtering
+        # Summary mode: milestones/aggregates are persistent; everything else (warnings,
+        # package chatter, oryx metadata, unknown lines) is transient. Blank lines drop.
         stripped = line.strip()
         if not stripped:
             return None
 
-        # Check if it's a warning line - aggregate it
-        if stripped.startswith('npm warn'):
-            self._warning_count += 1
-            self._suppressed_lines.append(line)
-            return None
-
+        # Warnings (incl. "npm warn ...") are counted, then shown transiently.
         for pattern in _WARNING_PATTERNS:
             if pattern.match(stripped):
                 self._warning_count += 1
-                self._suppressed_lines.append(line)
-                return None
+                return (line, False)
 
-        # Check if it's a package download/install line - count it
+        # pip "Collecting <pkg>": count for the install summary, then scroll transiently.
         if _PIP_COLLECTING.match(stripped):
             self._package_count += 1
-            if not self._packages_collecting:
-                self._packages_collecting = True
-                self._suppressed_lines.append(line)
-                return None
-            self._suppressed_lines.append(line)
-            return None
+            return (line, False)
 
-        if _PIP_CACHED.match(stripped):
-            self._suppressed_lines.append(line)
-            return None
+        if _PIP_CACHED.match(stripped) or _PIP_INSTALLING.match(stripped):
+            return (line, False)
 
-        if _PIP_INSTALLING.match(stripped):
-            self._packages_installing = True
-            self._suppressed_lines.append(line)
-            return None
-
-        # "Successfully installed ..." - emit summary instead
+        # "Successfully installed ..." -> aggregated persistent milestone.
         pip_installed_match = _PIP_INSTALLED.match(stripped)
         if pip_installed_match:
             pkg_list = pip_installed_match.group(1)
             count = len(pkg_list.split())
-            self._suppressed_lines.append(line)
             result = self._emit_package_summary(count)
-            self._packages_collecting = False
-            self._packages_installing = False
             self._package_count = 0
-            return result
+            return (result, True)
 
-        # npm "added N packages"
+        # npm "added N packages" -> aggregated persistent milestone.
         npm_match = _NPM_ADDED.match(stripped)
         if npm_match:
             count = int(npm_match.group(1))
-            self._suppressed_lines.append(line)
-            return f"            Installed {count} packages\n"
+            return (f"            Installed {count} packages\n", True)
 
-        # Check for Oryx metadata lines - suppress
-        for pattern in _ORYX_METADATA_PATTERNS:
-            if pattern.match(stripped):
-                self._suppressed_lines.append(line)
-                return None
-
-        # Check for other package-level detail lines
-        for pattern in _PACKAGE_LINE_PATTERNS:
-            if pattern.match(stripped):
-                self._suppressed_lines.append(line)
-                return None
-
-        # Check if it's a milestone line - always show
+        # Deterministic milestones -> persistent.
         for pattern in _MILESTONE_PATTERNS:
             if pattern.match(stripped):
-                return line
+                return (line, True)
 
-        # Default: show lines that aren't matched by any suppression pattern
-        return line
+        # Everything else is build chatter -> transient rolling window.
+        return (line, False)
 
     def _emit_package_summary(self, installed_count):
         """Generate summary line for package installation."""
@@ -282,9 +178,123 @@ class BuildLogFormatter:
     def get_warning_summary(self):
         """Get aggregated warning summary. Call at end of build phase."""
         if self._warning_count > 0:
-            return (f"            [!] {self._warning_count} warning(s) "
-                    f"(use --build-logs full to view)\n")
+            return f"            [!] {self._warning_count} warning(s)\n"
         return None
+
+
+class BuildLogRenderer:
+    """Render build logs as persistent milestones plus one self-overwriting status line.
+
+    Milestones and phase headers are printed permanently (each on its own line). Ordinary
+    build chatter is shown on a single transient line that overwrites itself in place as new
+    chatter arrives -- like a progress/status line. Only a carriage return + clear-to-end-of-
+    line are used (no vertical cursor movement), so the display cannot desync even for very
+    long or very rapid output; each transient line is also truncated to the terminal width so
+    it never wraps.
+
+    On a non-TTY -- or when interactive rendering is disabled (``--build-logs full``) -- there
+    is no overwriting: persistent and transient lines are all printed plainly so nothing is
+    lost. All output goes to a single stream (stdout by default); callers must route every
+    build-phase line through this renderer so no other writer corrupts the status line.
+    """
+
+    _DIM = "\x1b[90m"
+    _RESET = "\x1b[0m"
+    _CLEAR_LINE = "\r\x1b[2K"
+    _TRANSIENT_INDENT = "            "  # align the moving line under detail milestones
+    _PACE_SECONDS = 0.1  # small per-line delay so a batched reveal "streams" in (TTY only)
+
+    def __init__(self, stream=None, interactive=None):
+        if interactive is None:
+            probe = stream if stream is not None else sys.stdout
+            try:
+                interactive = bool(probe.isatty())
+            except Exception:  # pylint: disable=broad-except
+                interactive = False
+        self._interactive = interactive
+        # On legacy Windows consoles colorama makes the ANSI escapes work; only needed
+        # when we own the real stdout (tests pass a StringIO and don't need it).
+        if self._interactive and stream is None:
+            try:
+                import colorama
+                if hasattr(colorama, 'just_fix_windows_console'):
+                    colorama.just_fix_windows_console()
+                else:
+                    colorama.init()
+            except Exception:  # pylint: disable=broad-except
+                pass
+        self._stream = stream if stream is not None else sys.stdout
+        # True while a transient status line is on screen without a trailing newline.
+        self._active = False
+
+    def _width(self):
+        try:
+            return shutil.get_terminal_size((100, 24)).columns
+        except Exception:  # pylint: disable=broad-except
+            return 100
+
+    def _truncate(self, text):
+        # Collapse to a single physical row and clip to the terminal width so the status
+        # line never wraps (wrapping would leave stranded rows the clear cannot reach).
+        text = text.replace('\r', ' ').replace('\n', ' ').rstrip()
+        width = max(self._width() - 1, 20)
+        if len(text) > width:
+            text = text[:width - 1] + '\u2026'
+        return text
+
+    def _clear_active(self):
+        if self._active:
+            self._stream.write(self._CLEAR_LINE)
+            self._active = False
+
+    def emit_persistent(self, text):
+        """Print a line that stays on screen permanently (clears any active status line)."""
+        text = text.rstrip('\n')
+        self._clear_active()
+        self._stream.write(text + '\n')
+        self._stream.flush()
+
+    def emit_transient(self, text):
+        """Show a chatter line on the single self-overwriting status line."""
+        if not self._interactive:
+            line = text.rstrip('\n')
+            if line.strip():
+                self._stream.write(line + '\n')
+                self._stream.flush()
+            return
+        line = self._truncate(self._TRANSIENT_INDENT + text)
+        if not line.strip():
+            return
+        self._stream.write(self._CLEAR_LINE + self._DIM + line + self._RESET)
+        self._stream.flush()
+        self._active = True
+
+    def finalize(self):
+        """Erase the active status line, leaving only the persistent lines."""
+        self._clear_active()
+        self._stream.flush()
+
+    def pace(self):
+        """Briefly pause between batched lines so a poll's worth of output streams in
+        one-by-one instead of appearing all at once. No-op unless interactive (so
+        --build-logs full, CI and piped output stay instant)."""
+        if self._interactive and self._PACE_SECONDS:
+            time.sleep(self._PACE_SECONDS)
+
+
+def format_phase_header(label, width=50):
+    """Render a phase header with the label centered in a band of dashes.
+
+    e.g. format_phase_header("Build Phase") ->
+        "------------------- Build Phase -------------------"
+    """
+    label = " {} ".format(label.strip())
+    if len(label) >= width:
+        return label.strip()
+    dashes = width - len(label)
+    left = dashes // 2
+    right = dashes - left
+    return ("-" * left) + label + ("-" * right)
 
 
 def format_final_url(url):
@@ -298,11 +308,11 @@ def format_final_url(url):
     )
 
 
-def format_build_failure_with_logs(error_text, suppressed_logs):
-    """On build failure, auto-expand suppressed logs for debugging."""
+def format_build_failure_with_logs(error_text, log_lines):
+    """On build failure, dump the full build logs for debugging, followed by the error."""
     output = []
     output.append("\n-- Build Failed -- Showing full build logs for debugging --\n\n")
-    for log_line in suppressed_logs:
+    for log_line in log_lines:
         output.append(log_line if log_line.endswith('\n') else log_line + '\n')
     output.append("\n-- End of build logs --\n\n")
     output.append(error_text)
