@@ -373,7 +373,7 @@ def _is_resource_name(resource):
 
 def build_identity_and_data_encryption(db_engine, byok_identity=None, backup_byok_identity=None,
                                        byok_key=None, backup_byok_key=None,
-                                       federated_client_id=None, geo_backup_federated_client_id=None,
+                                       federated_client_id=None, backup_federated_client_id=None,
                                        instance=None):
     identity, data_encryption = None, None
 
@@ -400,7 +400,7 @@ def build_identity_and_data_encryption(db_engine, byok_identity=None, backup_byo
             geo_backup_user_assigned_identity_id=geo_backup_user_assigned_identity_id,
             geo_backup_key_uri=geo_backup_key_uri,
             primary_federated_identity_client_id=federated_client_id,
-            geo_backup_federated_identity_client_id=geo_backup_federated_client_id,
+            geo_backup_federated_identity_client_id=backup_federated_client_id,
             type="AzureKeyVault")
 
     return identity, data_encryption

@@ -328,8 +328,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             help='The client ID of the federated identity.'
         )
 
-        geo_backup_federated_client_id_arg_type = CLIArgumentType(
-            options_list=['--geo-backup-federated-client-id', '-f'],
+        backup_federated_client_id_arg_type = CLIArgumentType(
+            options_list=['--backup-federated-client-id', '-f'],
             help='The client ID of the geo backup federated identity.'
         )
 
@@ -423,7 +423,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('zone', zone_arg_type)
             c.argument('tags', tags_type)
             c.argument('standby_availability_zone', arg_type=standby_availability_zone_arg_type)
-            c.argument('geo_backup_federated_client_id', arg_type=geo_backup_federated_client_id_arg_type)
+            c.argument('backup_federated_client_id', arg_type=backup_federated_client_id_arg_type)
             c.argument('federated_client_id', arg_type=federated_client_id_arg_type)
             c.argument('yes', arg_type=yes_arg_type)
 
@@ -442,7 +442,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
             c.argument('zone', arg_type=zone_arg_type)
             c.argument('yes', arg_type=yes_arg_type)
-            c.argument('geo_backup_federated_client_id', arg_type=geo_backup_federated_client_id_arg_type)
+            c.argument('backup_federated_client_id', arg_type=backup_federated_client_id_arg_type)
             c.argument('federated_client_id', arg_type=federated_client_id_arg_type)
             c.argument('byok_key', arg_type=key_arg_type)
             c.argument('byok_identity', arg_type=identity_arg_type)
@@ -466,7 +466,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('byok_identity', arg_type=identity_arg_type)
             c.argument('backup_byok_identity', arg_type=backup_identity_arg_type)
             c.argument('backup_byok_key', arg_type=backup_key_arg_type)
-            c.argument('geo_backup_federated_client_id', arg_type=geo_backup_federated_client_id_arg_type)
+            c.argument('backup_federated_client_id', arg_type=backup_federated_client_id_arg_type)
             c.argument('federated_client_id', arg_type=federated_client_id_arg_type)
 
         with self.argument_context('{} flexible-server revive-dropped'. format(command_group)) as c:
@@ -497,7 +497,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('byok_identity', arg_type=identity_arg_type)
             c.argument('backup_byok_identity', arg_type=backup_identity_arg_type)
             c.argument('backup_byok_key', arg_type=backup_key_arg_type)
-            c.argument('geo_backup_federated_client_id', arg_type=geo_backup_federated_client_id_arg_type)
+            c.argument('backup_federated_client_id', arg_type=backup_federated_client_id_arg_type)
             c.argument('federated_client_id', arg_type=federated_client_id_arg_type)
             c.argument('public_access', arg_type=public_access_update_arg_type)
             c.argument('auto_grow', arg_type=auto_grow_arg_type)
@@ -610,7 +610,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
             c.argument('byok_key', arg_type=key_arg_type)
             c.argument('byok_identity', arg_type=identity_arg_type)
-            c.argument('geo_backup_federated_client_id', arg_type=geo_backup_federated_client_id_arg_type)
+            c.argument('backup_federated_client_id', arg_type=backup_federated_client_id_arg_type)
             c.argument('federated_client_id', arg_type=federated_client_id_arg_type)
             c.argument('tier', arg_type=tier_arg_type)
             c.argument('sku_name', arg_type=sku_name_arg_type)
