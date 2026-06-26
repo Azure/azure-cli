@@ -118,9 +118,9 @@ CONTROL_PLANE_FAILURE_PATTERNS = [
         "stage": "ResourceProvisioning",
         "httpStatus": 401,
         "suggestedFixes": [
-            "Your subscription has reached its quota for this SKU/region",
-            "Request a quota increase: 'az quota' or the Azure portal (Help + support > New support request)",
-            "Try a different region or a lower SKU/worker count"
+            "Your subscription has reached its App Service Plan worker quota for this SKU/region",
+            "Request an increase in the Azure portal: Subscription > Usage + quotas, filter Provider = App Service, then New Quota Request",
+            "Or try a different region or a lower SKU/worker count"
         ]
     },
     {
@@ -178,8 +178,8 @@ CONTROL_PLANE_FAILURE_PATTERNS = [
         "stage": "ResourceProvisioning",
         "httpStatus": 400,
         "suggestedFixes": [
-            "Zone redundancy requires a supported SKU and a minimum of 2 workers",
-            "Use a Premium V2/V3 SKU and set --number-of-workers to 2 or more",
+            "Zone redundancy requires a supported SKU and a minimum of 3 workers",
+            "Use a Premium V2/V3 SKU and set --number-of-workers to 3 or more",
             "Or remove --zone-redundant to create a non-zone-redundant plan"
         ]
     },
@@ -260,6 +260,7 @@ def match_control_plane_failure_pattern(status_code=None, error_message=None):  
         return get_failure_pattern("ResourceGroupNotFound")
     if status_code == 409:
         return get_failure_pattern("MissingSubscriptionRegistration")
-    if status_code == 400:
-        return get_failure_pattern("SkuNotAvailable")
+    # Note: no generic 400 fallback. A 400 that did not match a specific message
+    # pattern above is left unclassified (returns None) so the caller produces a
+    # generic HTTP_400 context rather than a potentially wrong SKU diagnosis.
     return None
