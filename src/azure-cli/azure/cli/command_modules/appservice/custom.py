@@ -10076,6 +10076,8 @@ def _poll_deployment_runtime_status(cmd, resource_group_name, webapp_name, slot,
                 _log_webapp_status_tip(webapp_name, resource_group_name, True)
             break
         if deployment_status == "RuntimeFailed":
+            if not status_tip_logged:
+                _log_webapp_status_tip(webapp_name, resource_group_name, True)
             error_text = ""
             total_num_instances = int(deployment_properties.get('numberOfInstancesInProgress')) + \
                 int(deployment_properties.get('numberOfInstancesSuccessful')) + \
