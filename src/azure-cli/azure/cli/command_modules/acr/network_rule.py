@@ -50,7 +50,11 @@ def _format_registry_response(response):
     network_rule_set = properties.get('networkRuleSet', {})
 
     virtual_network_rules = [
-        {'virtualNetworkResourceId': rule.get('id'), 'action': rule.get('action', 'Allow')}
+        {
+            'virtualNetworkResourceId': rule.get('virtualNetworkSubnetResourceId') or rule.get('id'),
+            'virtualNetworkSubnetResourceId': rule.get('virtualNetworkSubnetResourceId') or rule.get('id'),
+            'action': rule.get('action', 'Allow')
+        }
         for rule in (network_rule_set.get('virtualNetworkRules') or [])
     ]
     ip_rules = [
@@ -93,7 +97,7 @@ def acr_network_rule_add(cmd,
     if subnet or vnet_name:
         virtual_network_rules = list(rules.get('virtualNetworkRules') or [])
         subnet_id = _validate_subnet(cmd.cli_ctx, subnet, vnet_name, resource_group_name)
-        virtual_network_rules.append({'id': subnet_id, 'action': 'Allow'})
+        virtual_network_rules.append({'virtualNetworkSubnetResourceId': subnet_id, 'action': 'Allow'})
         rules['virtualNetworkRules'] = virtual_network_rules
 
     if ip_address:
@@ -122,7 +126,8 @@ def acr_network_rule_remove(cmd,
         virtual_network_rules = list(rules.get('virtualNetworkRules') or [])
         subnet_id = _validate_subnet(cmd.cli_ctx, subnet, vnet_name, resource_group_name).lower()
         rules['virtualNetworkRules'] = [
-            x for x in virtual_network_rules if x.get('id', '').lower() != subnet_id
+            x for x in virtual_network_rules
+            if (x.get('virtualNetworkSubnetResourceId') or x.get('id') or '').lower() != subnet_id
         ]
 
     if ip_address:
