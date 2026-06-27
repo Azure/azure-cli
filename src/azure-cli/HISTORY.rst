@@ -16,6 +16,7 @@ Release History
 * `az acr update`: Add `--endpoint-protocol` parameter to support specifying the endpoint protocol for the registry (#33089)
 * `az acr login`: Fix regional endpoint matching for registries with DNL suffix (#33381)
 * `az acr config content-trust/show/update`: Add deprecation labels and notices (#33174)
+* `az acr network-rule list`: Fix `virtualNetworkRules` entries always showing `virtualNetworkResourceId` as null; add `virtualNetworkSubnetResourceId` field to output (#33660)
 
 **AKS**
 
