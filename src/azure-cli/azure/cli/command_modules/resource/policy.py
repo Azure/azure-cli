@@ -137,10 +137,10 @@ class Common:
         if has_value(ctx.args.identity_scope):
             identity_role = None
             if has_value(ctx.args.role):
-                identity_role = ctx.args.role
+                identity_role = ctx.args.role._data
             assign_identity(
                 cli_ctx, lambda: assignment, lambda resource: assignment,
-                identity_role._data, ctx.args.identity_scope._data)
+                identity_role, ctx.args.identity_scope._data)
 
     # Implement default identity type behavior for policy assignment create
     @staticmethod
