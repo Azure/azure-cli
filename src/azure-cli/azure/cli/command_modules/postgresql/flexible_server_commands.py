@@ -305,6 +305,7 @@ def load_flexibleserver_command_table(self, _):
         g.custom_show_command('show', 'flexible_server_maintenance_event_show')
         g.custom_command('reschedule', 'flexible_server_maintenance_event_reschedule', supports_no_wait=True)
         g.custom_command('apply-now', 'flexible_server_maintenance_event_apply_now', supports_no_wait=True)
+        g.custom_wait_command('wait', 'flexible_server_maintenance_event_show')
 
     private_endpoint_commands = CliCommandType(
         operations_tmpl='azure.cli.command_modules.postgresql.commands.private_endpoint_commands#{}')
