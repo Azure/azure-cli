@@ -19,12 +19,14 @@ steps:
       # 82 removes pkg_resources) so `azdev setup` builds under a supported
       # setuptools regardless of what the agent image ships.
       python -m pip install -U pip "setuptools<81"
-      # azdev 0.2.11b1 decouples extension metadata generation from wheel==0.30.0
-      # (see Azure/azure-cli-extensions#7740). It is not on PyPI yet, so install it
-      # pinned to the azure-cli-dev-tools#549 merge commit (0.2.11b1) for a
-      # reproducible build. Switch this to `pip install --upgrade "azdev==0.2.11b1"`
-      # once the pre-release is published to PyPI.
-      pip install --upgrade "git+https://github.com/Azure/azure-cli-dev-tools.git@49390f30c6a822620d2fbdf88889c4445d22666f#egg=azdev"
+      # Pin azdev to azure-cli-dev-tools commit 644d296 (0.2.12). This bundles:
+      # decouple extension metadata from wheel==0.30.0 (#549), quote paths in
+      # editable installs (#551), and --no-build-isolation for editable installs
+      # (#552) so extensions whose setup.py imports azure (e.g. confcom) build
+      # against the environment instead of an isolated PEP 517 env under
+      # setuptools>=79. It is not on PyPI yet; switch this to
+      # `pip install --upgrade "azdev==0.2.12"` once published to PyPI.
+      pip install --upgrade "git+https://github.com/Azure/azure-cli-dev-tools.git@644d296d9ca9b322b438d5ca21141b247258d0e5#egg=azdev"
       azdev --version
 
       if [ -z "$CLI_EXT_REPO_PATH" ]; then
