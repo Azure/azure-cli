@@ -25,6 +25,7 @@ from azure.cli.command_modules.appservice._deployment_context_engine import (
     EnrichedDeploymentError,
     _determine_deployment_type,
 )
+from azure.cli.command_modules.appservice import custom
 
 
 def _make_mock_params(**overrides):
@@ -448,6 +449,50 @@ class TestExtractStatusCode(unittest.TestCase):
     # --- Edge case: 200-range should NOT be extracted ---
     def test_200_not_extracted(self):
         self.assertIsNone(extract_status_code_from_message("Status Code: 200"))
+
+
+# ---------------------------------------------------------------------------
+# Deployment-id attribution: prefer the request-specific SCM-DEPLOYMENT-ID
+# (captured on OneDeployParams) over the global /api/deployments/latest lookup.
+# ---------------------------------------------------------------------------
+def _make_deploy_params(deployment_id):
+    params = MagicMock()
+    params._deployment_id = deployment_id
+    return params
+
+
+class TestDeploymentIdSelection(unittest.TestCase):
+
+    @patch.object(custom, '_poll_deployment_runtime_status', return_value={'status': 'RuntimeSuccessful'})
+    @patch.object(custom, '_build_deploymentstatus_url', return_value='https://scm/deploymentstatus/x')
+    @patch.object(custom, '_get_latest_deployment_id')
+    @patch.object(custom, '_get_or_fetch_is_linux_webapp', return_value=True)
+    def test_uses_request_specific_id_when_present(self, _linux, mock_latest, mock_build_url, _poll):
+        deploy_params = _make_deploy_params('scm-id-123')
+
+        result = custom._check_runtimestatus_with_deploymentstatusapi(
+            MagicMock(), 'rg', 'app', None,
+            'https://scm/api/deployments/latest', False, None,
+            deploy_params=deploy_params)
+
+        mock_latest.assert_not_called()
+        self.assertEqual(mock_build_url.call_args[0][4], 'scm-id-123')
+        self.assertEqual(result, {'status': 'RuntimeSuccessful'})
+
+    @patch.object(custom, '_poll_deployment_runtime_status', return_value={'status': 'RuntimeSuccessful'})
+    @patch.object(custom, '_build_deploymentstatus_url', return_value='https://scm/deploymentstatus/x')
+    @patch.object(custom, '_get_latest_deployment_id', return_value='latest-id-999')
+    @patch.object(custom, '_get_or_fetch_is_linux_webapp', return_value=True)
+    def test_falls_back_to_latest_when_id_absent(self, _linux, mock_latest, mock_build_url, _poll):
+        deploy_params = _make_deploy_params(None)
+
+        custom._check_runtimestatus_with_deploymentstatusapi(
+            MagicMock(), 'rg', 'app', None,
+            'https://scm/api/deployments/latest', False, None,
+            deploy_params=deploy_params)
+
+        mock_latest.assert_called_once()
+        self.assertEqual(mock_build_url.call_args[0][4], 'latest-id-999')
 
 
 if __name__ == '__main__':

@@ -9897,11 +9897,14 @@ def _check_runtimestatus_with_deploymentstatusapi(cmd, resource_group_name, name
         response_body = _check_zip_deployment_status(cmd, resource_group_name, name, deployment_status_url,
                                                      slot, timeout, deploy_params=deploy_params)
     else:
-        # get the deployment id
-        # once deploymentstatus/latest is available, we can use it to track the deployment
-        deployment_id = _get_latest_deployment_id(cmd, resource_group_name,
-                                                  name, deployment_status_url, slot,
-                                                  deploy_params=deploy_params)
+        # Prefer the request-specific id from the publish response; fall back to /latest.
+        deployment_id = None
+        if deploy_params is not None:
+            deployment_id = deploy_params._deployment_id  # pylint: disable=protected-access
+        if deployment_id is None:
+            deployment_id = _get_latest_deployment_id(cmd, resource_group_name,
+                                                      name, deployment_status_url, slot,
+                                                      deploy_params=deploy_params)
         if deployment_id is None:
             logger.warning("Failed to enable tracking runtime status for this deployment. "
                            "Resuming without tracking status.")
@@ -11149,6 +11152,7 @@ class OneDeployParams:
         # host_name_ssl_states on each access (trivial iteration).
         self._cached_scm_headers = None
         self._cached_site = None
+        self._deployment_id = None
 # pylint: enable=too-many-instance-attributes,too-few-public-methods
 
 
@@ -11560,6 +11564,9 @@ def _make_onedeploy_request(params):
         else:
             response = send_raw_request(params.cmd.cli_ctx, "PUT", deploy_url, body=body)
         poll_async_deployment_for_debugging = False
+
+    # Pin THIS request's deployment id from the publish response; avoids the racy /latest lookup.
+    params._deployment_id = response.headers.get('SCM-DEPLOYMENT-ID')  # pylint: disable=protected-access
 
     # check the status of deployment
     # pylint: disable=too-many-nested-blocks
