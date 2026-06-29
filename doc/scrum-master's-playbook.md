@@ -5,6 +5,7 @@ The Scrum Master role of CLI is primarily release-focused, but also includes sev
 
   ![](https://raw.githubusercontent.com/Azure/azure-cli/refs/heads/dev/doc/assets/batched-ci-pipeline.png)
   - Ensure that Batched CI is in a normal state before the release. If there are any failures, coordinate with the corresponding engineer to resolve them.
+- Monitor the status of [doc pipeline](https://apidrop.visualstudio.com/Content%20CI/_build?definitionId=6592&_a=summary) to ensure it remains healthy; otherwise, it may affect the normal release of Azure CLI documentation.
 
 The Azure CLI release process is highly automated **with some manual intervention steps** and has evolved to use both Azure DevOps and GitHub Actions.
 
