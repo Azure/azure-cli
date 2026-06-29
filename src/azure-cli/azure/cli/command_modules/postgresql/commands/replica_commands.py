@@ -109,8 +109,7 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, nam
     else:
         parameters.network = source_server_object.network
 
-    parameters.identity, parameters.data_encryption = build_identity_and_data_encryption(db_engine='postgres',
-                                                                                         byok_identity=byok_identity,
+    parameters.identity, parameters.data_encryption = build_identity_and_data_encryption(byok_identity=byok_identity,
                                                                                          byok_key=byok_key,
                                                                                          federated_client_id=federated_client_id,
                                                                                          backup_federated_client_id=backup_federated_client_id)

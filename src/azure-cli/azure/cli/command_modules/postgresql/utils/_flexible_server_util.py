@@ -371,7 +371,7 @@ def _is_resource_name(resource):
     return False
 
 
-def build_identity_and_data_encryption(db_engine, byok_identity=None, backup_byok_identity=None,
+def build_identity_and_data_encryption(byok_identity=None, backup_byok_identity=None,
                                        byok_key=None, backup_byok_key=None,
                                        federated_client_id=None, backup_federated_client_id=None,
                                        instance=None):

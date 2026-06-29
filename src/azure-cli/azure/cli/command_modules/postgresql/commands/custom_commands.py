@@ -76,7 +76,7 @@ def flexible_server_create(cmd, client,
                            zonal_resiliency=None, allow_same_zone=False,
                            zone=None, standby_availability_zone=None,
                            geo_redundant_backup=None, byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
-                           federated_client_id=None, geo_backup_federated_client_id=None,
+                           federated_client_id=None, backup_federated_client_id=None,
                            auto_grow=None, performance_tier=None,
                            storage_type=None, iops=None, throughput=None, cluster_size=None, database_name=None, yes=False):
 
@@ -140,7 +140,7 @@ def flexible_server_create(cmd, client,
                            backup_byok_identity=backup_byok_identity,
                            backup_byok_key=backup_byok_key,
                            federated_client_id=federated_client_id,
-                           geo_backup_federated_client_id=geo_backup_federated_client_id,
+                           backup_federated_client_id=backup_federated_client_id,
                            performance_tier=performance_tier,
                            password_auth=password_auth, microsoft_entra_auth=microsoft_entra_auth,
                            admin_name=admin_name, admin_id=admin_id, admin_type=admin_type, database_name=database_name)
@@ -178,13 +178,12 @@ def flexible_server_create(cmd, client,
     if is_password_auth_enabled:
         administrator_login_password = generate_password(administrator_login_password)
 
-    identity, data_encryption = build_identity_and_data_encryption(db_engine='postgres',
-                                                                   byok_identity=byok_identity,
+    identity, data_encryption = build_identity_and_data_encryption(byok_identity=byok_identity,
                                                                    byok_key=byok_key,
                                                                    backup_byok_identity=backup_byok_identity,
                                                                    backup_byok_key=backup_byok_key,
                                                                    federated_client_id=federated_client_id,
-                                                                   geo_backup_federated_client_id=geo_backup_federated_client_id)
+                                                                   backup_federated_client_id=backup_federated_client_id)
 
     auth_config = postgresql_flexibleservers.models.AuthConfig(active_directory_auth='Enabled' if is_microsoft_entra_auth_enabled else 'Disabled',
                                                                password_auth=password_auth)
@@ -332,7 +331,7 @@ def flexible_server_restore(cmd, client,
                             subnet=None, vnet=None,
                             private_dns_zone_arguments=None, geo_redundant_backup=None,
                             byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
-                            federated_client_id=None, geo_backup_federated_client_id=None,
+                            federated_client_id=None, backup_federated_client_id=None,
                             storage_type=None, yes=False):
 
     server_name = server_name.lower()
@@ -371,7 +370,7 @@ def flexible_server_restore(cmd, client,
 
         pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup,
                           federated_client_id=federated_client_id,
-                          geo_backup_federated_client_id=geo_backup_federated_client_id)
+                          backup_federated_client_id=backup_federated_client_id)
 
         pg_restore_validator(source_server_object.sku.tier, storage_type=storage_type)
         storage = postgresql_flexibleservers.models.Storage(type=storage_type if source_server_object.storage.type != "PremiumV2_LRS" else None)
@@ -402,13 +401,12 @@ def flexible_server_restore(cmd, client,
 
         parameters.backup = postgresql_flexibleservers.models.Backup(geo_redundant_backup=geo_redundant_backup)
 
-        parameters.identity, parameters.data_encryption = build_identity_and_data_encryption(db_engine='postgres',
-                                                                                             byok_identity=byok_identity,
+        parameters.identity, parameters.data_encryption = build_identity_and_data_encryption(byok_identity=byok_identity,
                                                                                              byok_key=byok_key,
                                                                                              backup_byok_identity=backup_byok_identity,
                                                                                              backup_byok_key=backup_byok_key,
                                                                                              federated_client_id=federated_client_id,
-                                                                                             geo_backup_federated_client_id=geo_backup_federated_client_id)
+                                                                                             backup_federated_client_id=backup_federated_client_id)
 
     except Exception as e:
         raise ResourceNotFoundError(e)
@@ -428,7 +426,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                        maintenance_window=None,
                                        byok_identity=None, byok_key=None,
                                        backup_byok_identity=None, backup_byok_key=None,
-                                       federated_client_id=None, geo_backup_federated_client_id=None,
+                                       federated_client_id=None, backup_federated_client_id=None,
                                        microsoft_entra_auth=None, password_auth=None,
                                        private_dns_zone_arguments=None,
                                        public_access=None,
@@ -463,7 +461,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                            backup_byok_identity=backup_byok_identity,
                            backup_byok_key=backup_byok_key,
                            federated_client_id=federated_client_id,
-                           geo_backup_federated_client_id=geo_backup_federated_client_id,
+                           backup_federated_client_id=backup_federated_client_id,
                            performance_tier=performance_tier,
                            cluster_size=cluster_size, instance=instance)
 
@@ -535,13 +533,12 @@ def flexible_server_update_custom_func(cmd, client, instance,
         instance.maintenance_window.start_minute = start_minute
         instance.maintenance_window.custom_window = custom_window
 
-    identity, data_encryption = build_identity_and_data_encryption(db_engine='postgres',
-                                                                   byok_identity=byok_identity,
+    identity, data_encryption = build_identity_and_data_encryption(byok_identity=byok_identity,
                                                                    byok_key=byok_key,
                                                                    backup_byok_identity=backup_byok_identity,
                                                                    backup_byok_key=backup_byok_key,
                                                                    federated_client_id=federated_client_id,
-                                                                   geo_backup_federated_client_id=geo_backup_federated_client_id,
+                                                                   backup_federated_client_id=backup_federated_client_id,
                                                                    instance=instance)
 
     auth_config = instance.auth_config
@@ -695,7 +692,7 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
                                vnet=None, subnet=None,
                                private_dns_zone_arguments=None, geo_redundant_backup=None, no_wait=False, yes=False,
                                byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
-                               federated_client_id=None, geo_backup_federated_client_id=None,
+                               federated_client_id=None, backup_federated_client_id=None,
                                restore_point_in_time=None):
     validate_resource_group(resource_group_name)
 
@@ -736,7 +733,7 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
 
     pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup,
                       federated_client_id=federated_client_id,
-                      geo_backup_federated_client_id=geo_backup_federated_client_id)
+                      backup_federated_client_id=backup_federated_client_id)
 
     storage = postgresql_flexibleservers.models.Storage(type=None)
 
@@ -764,13 +761,12 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
 
     parameters.backup = postgresql_flexibleservers.models.Backup(geo_redundant_backup=geo_redundant_backup)
 
-    parameters.identity, parameters.data_encryption = build_identity_and_data_encryption(db_engine='postgres',
-                                                                                         byok_identity=byok_identity,
+    parameters.identity, parameters.data_encryption = build_identity_and_data_encryption(byok_identity=byok_identity,
                                                                                          byok_key=byok_key,
                                                                                          backup_byok_identity=backup_byok_identity,
                                                                                          backup_byok_key=backup_byok_key,
                                                                                          federated_client_id=federated_client_id,
-                                                                                         geo_backup_federated_client_id=geo_backup_federated_client_id)
+                                                                                         backup_federated_client_id=backup_federated_client_id)
 
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, server_name, parameters)
 
@@ -831,8 +827,7 @@ def flexible_server_revivedropped(cmd, client, resource_group_name, server_name,
 
     parameters.backup = postgresql_flexibleservers.models.Backup(geo_redundant_backup=geo_redundant_backup)
 
-    parameters.identity, parameters.data_encryption = build_identity_and_data_encryption(db_engine='postgres',
-                                                                                         byok_identity=byok_identity,
+    parameters.identity, parameters.data_encryption = build_identity_and_data_encryption(byok_identity=byok_identity,
                                                                                          byok_key=byok_key,
                                                                                          backup_byok_identity=backup_byok_identity,
                                                                                          backup_byok_key=backup_byok_key)
