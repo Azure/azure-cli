@@ -659,7 +659,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('maintenance_status', arg_type=maintenance_status_arg_type)
             c.ignore('ids')
 
-        for scope in ['show', 'reschedule', 'apply-now', 'wait']:
+        for scope in ['show', 'reschedule', 'apply-now']:
             with self.argument_context('{} flexible-server maintenance-event {}'.format(command_group, scope)) as c:
                 c.argument('maintenance_event_id', arg_type=maintenance_event_id_arg_type)
 
