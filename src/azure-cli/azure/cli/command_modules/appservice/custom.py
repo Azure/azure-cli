@@ -5005,10 +5005,25 @@ def is_async_response(poller, timeout_seconds=30):
 
 
 def _raise_enriched_plan_create_error(ex, resource_group_name, name, location, sku):
-    error_message = getattr(ex, 'message', None) or str(ex)
+    message_parts = []
+    top_message = getattr(ex, 'message', None)
+    if top_message:
+        message_parts.append(str(top_message))
+    inner_message = getattr(getattr(ex, 'error', None), 'message', None)
+    if inner_message:
+        message_parts.append(str(inner_message))
+    response = getattr(ex, 'response', None)
+    if response is not None:
+        try:
+            body = response.text()
+            if body:
+                message_parts.append(body)
+        except Exception:  # pylint: disable=broad-except
+            pass
+    error_message = "\n".join(message_parts) if message_parts else str(ex)
+
     status_code = getattr(ex, 'status_code', None)
     if status_code is None:
-        response = getattr(ex, 'response', None)
         status_code = getattr(response, 'status_code', None)
     if status_code is None:
         status_code = extract_status_code_from_message(error_message)
