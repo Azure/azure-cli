@@ -5,9 +5,12 @@
 
 import ast
 import base64
+import os
+import sys
 import threading
 import time
 import re
+from concurrent.futures import ThreadPoolExecutor
 from xml.etree import ElementTree
 
 from urllib.parse import quote, urlparse
@@ -385,10 +388,12 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
 
     _enable_basic_auth(cmd, name, None, resource_group_name, basic_auth.lower())
     # Only suggest deployment command when no deployment method is already configured
-    if not using_webapp_up and not any([container_image_name, deployment_container_image_name,
-                                        multicontainer_config_type, sitecontainers_app,
-                                        deployment_source_url, deployment_local_git]):
-        logger.warning("Webapp '%s' created. Deploy your code with: az webapp deploy", name)
+    if not using_webapp_up:
+        if not any([container_image_name, deployment_container_image_name,
+                    multicontainer_config_type, sitecontainers_app,
+                    deployment_source_url, deployment_local_git]):
+            logger.warning("Webapp '%s' created. Deploy your code with: az webapp deploy", name)
+        _log_webapp_status_tip(name, resource_group_name, is_linux)
     return webapp
 
 
@@ -2458,6 +2463,80 @@ def show_app(cmd, resource_group_name, name, slot=None):
         _fill_ftp_publishing_url(cmd, app, resource_group_name, name, slot)
         _remove_list_duplicates(app)
     return app
+
+
+def _log_webapp_status_tip(name, resource_group_name, is_linux):
+    # Per-instance runtime status (siteStatus) is a Linux App Service feature,
+    # so only surface the tip for Linux webapps.
+    if not is_linux:
+        return
+    logger.warning("Tip: run 'az webapp status --name %s --resource-group %s' "
+                   "to see per-instance runtime status.",
+                   name, resource_group_name)
+
+
+def _extract_webapp_status_items(result):
+    # The siteStatus response holds per-instance status under 'properties':
+    # a list for /siteStatus, a single object for /siteStatus/{instanceId}.
+    # Normalize both shapes into a list for uniform formatting.
+    properties = result.get('properties')
+    if isinstance(properties, list):
+        return properties
+    if isinstance(properties, dict):
+        return [properties]
+    return []
+
+
+def format_webapp_status_output(result):
+    from collections import OrderedDict
+
+    items = _extract_webapp_status_items(result)
+    # LastError is a nullable field on the backend SiteRuntimeStatusOnWorker contract,
+    # so the error columns (LastError, LastErrorDetails, LastErrorTimestamp) are only
+    # surfaced when at least one instance reports a LastError.
+    show_errors = any(item.get('lastError') for item in items)
+
+    rows = []
+    for item in items:
+        row = OrderedDict([
+            ('InstanceId', item.get('instanceId')),
+            ('State', item.get('state')),
+            ('Action', item.get('action'))
+        ])
+        if show_errors:
+            row['LastError'] = item.get('lastError')
+            row['LastErrorDetails'] = item.get('lastErrorDetails')
+            row['LastErrorTimestamp'] = item.get('lastErrorTimestamp')
+        row['Details'] = item.get('details')
+        row['DetailsLevel'] = item.get('detailsLevel')
+        rows.append(row)
+    return rows
+
+
+def show_webapp_status(cmd, resource_group_name, name, slot=None, instance=None):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
+    client = web_client_factory(cmd.cli_ctx)
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    api_version = client._config.api_version
+    slot_segment = f'/slots/{slot}' if slot else ''
+    instance_segment = f'/{instance}' if instance else ''
+    base_url = (
+        f'/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}'
+        f'/providers/Microsoft.Web/sites/{name}{slot_segment}/siteStatus{instance_segment}'
+        f'?api-version={api_version}'
+    )
+    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
+
+    try:
+        return send_raw_request(cmd.cli_ctx, 'GET', request_url).json()
+    except HttpResponseError as ex:
+        if instance and ex.status_code == 404:
+            scope = 'webapp and slot' if slot else 'webapp'
+            raise ResourceNotFoundError(
+                f"Instance '{instance}' was not found for this {scope}. "
+                "Run 'az webapp list-instances' to see available instance IDs.")
+        raise
 
 
 def _list_app(cli_ctx, resource_group_name=None, show_details=False):
@@ -6412,6 +6491,11 @@ def list_deployment_logs(cmd, resource_group, name, slot=None):
 
 
 def _ensure_linux_webapp_for_startup_logs(cmd, resource_group, name, slot=None):
+    _ensure_linux_webapp(cmd, resource_group, name, slot,
+                         command_label="'az webapp log startup'")
+
+
+def _ensure_linux_webapp(cmd, resource_group, name, slot=None, command_label='This command'):
     client = web_client_factory(cmd.cli_ctx)
     if slot:
         app = client.web_apps.get_slot(resource_group, name, slot)
@@ -6419,7 +6503,7 @@ def _ensure_linux_webapp_for_startup_logs(cmd, resource_group, name, slot=None):
         app = client.web_apps.get(resource_group, name)
     if app is None or not is_linux_webapp(app):
         raise ArgumentUsageError(
-            "'az webapp log startup' is only supported for Linux web apps.")
+            "{} is only supported for Linux web apps.".format(command_label))
 
 
 def list_startup_logs(cmd, resource_group, name, slot=None, outcome=None, instance=None):
@@ -6514,6 +6598,372 @@ def show_startup_log(cmd, resource_group, name, slot=None, filename=None, instan
         return metadata
 
     return response.json()
+
+
+# ---------------------------------------------------------------------------
+# az webapp troubleshoot status
+# ---------------------------------------------------------------------------
+
+def troubleshoot_status(cmd, resource_group, name, slot=None, instance=None):
+    """Fetch and render runtime + startup status for a Linux web app.
+
+    Data sources:
+      * Site Runtime Status comes from ARM:
+        GET /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Web
+            /sites/{name}[/slots/{slot}]/siteStatus[/{instanceId}]?api-version=...
+      * Startup summary comes from KuduLite (SCM):
+        GET https://{scm-host}/api/startuplogs/summary[?instance={id}]
+
+    Returns the structured payload (list of instances + startup summary) so
+    `-o json` etc. work naturally. For the default (`table`/empty) output format,
+    also prints a human-readable report to stdout.
+    """
+    import requests
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from azure.core.exceptions import HttpResponseError as _Hre
+
+    _ensure_linux_webapp(cmd, resource_group, name, slot,
+                         command_label="'az webapp troubleshoot status'")
+
+    # --- 1. Map ARM hex instanceId <-> friendly machineName via ARM /instances.
+    # We fetch this first so we can accept either form on --instance and resolve
+    # the right value before calling /siteStatus (ARM) and /api/startuplogs/summary (SCM).
+    client = web_client_factory(cmd.cli_ctx)
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    api_version = client._config.api_version
+    slot_segment = '/slots/{}'.format(slot) if slot else ''
+    instances_url = (
+        '{rm}/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Web'
+        '/sites/{name}{slot_seg}/instances?api-version={ver}'
+    ).format(
+        rm=cmd.cli_ctx.cloud.endpoints.resource_manager,
+        sub=subscription_id, rg=resource_group, name=name,
+        slot_seg=slot_segment, ver=api_version)
+    id_to_machine = {}
+    machine_to_id = {}
+    try:
+        instances_payload = send_raw_request(cmd.cli_ctx, 'GET', instances_url).json()
+        for entry in instances_payload.get('value') or []:
+            entry_name = entry.get('name')
+            machine = (entry.get('properties') or {}).get('machineName')
+            if entry_name and machine:
+                id_to_machine[entry_name] = machine
+                machine_to_id[machine] = entry_name
+    except _Hre as ex:
+        logger.warning("Failed to retrieve machine names from '%s': %s", instances_url, ex)
+
+    # Resolve --instance: accept either hex GUID (ARM form) or machineName (SCM form).
+    arm_instance_id = instance
+    if instance and instance in machine_to_id:
+        arm_instance_id = machine_to_id[instance]
+    elif instance and instance not in id_to_machine and machine_to_id:
+        # User passed something that matches neither known id nor machineName.
+        raise ResourceNotFoundError(
+            "Instance '{}' was not found for this webapp. "
+            "Run 'az webapp list-instances' to see available instance IDs.".format(instance))
+
+    # --- 2. Site Runtime Status from ARM /siteStatus[/{hex-instanceId}] ---
+    instance_segment = '/{}'.format(arm_instance_id) if arm_instance_id else ''
+    arm_url = (
+        '{rm}/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Web'
+        '/sites/{name}{slot_seg}/siteStatus{inst_seg}?api-version={ver}'
+    ).format(
+        rm=cmd.cli_ctx.cloud.endpoints.resource_manager,
+        sub=subscription_id, rg=resource_group, name=name,
+        slot_seg=slot_segment, inst_seg=instance_segment, ver=api_version)
+
+    try:
+        arm_response = send_raw_request(cmd.cli_ctx, 'GET', arm_url).json()
+    except _Hre as ex:
+        if instance and getattr(ex, 'status_code', None) == 404:
+            raise ResourceNotFoundError(
+                "Instance '{}' was not found for this webapp. "
+                "Run 'az webapp list-instances' to see available instance IDs.".format(instance))
+        raise
+
+    runtime_items = _extract_webapp_status_items(arm_response)
+    for item in runtime_items:
+        machine = id_to_machine.get(item.get('instanceId'))
+        if machine:
+            item['machineName'] = machine
+
+    # --- 3. Per-instance Startup summary from SCM /api/startuplogs/summary?instance={machineName} ---
+    # Fan out the per-instance calls in parallel; each one is a SCM round-trip
+    # (KuduLite -> worker file read) and dominates wall-clock time when N > 1.
+    scm_url = _get_scm_url(cmd, resource_group, name, slot)
+    headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group, slot)
+
+    def _fetch_startup_summary(item):
+        machine = item.get('machineName')
+        if not machine:
+            # KuduLite identifies workers by machine name; without it the summary call
+            # would be ambiguous, so skip rather than send a bad query.
+            item['startup'] = None
+            return
+        summary_url = '{}/api/startuplogs/summary?instance={}'.format(
+            scm_url, quote(machine, safe=''))
+        try:
+            summary_response = requests.get(summary_url, headers=headers)
+        except requests.RequestException as ex:
+            logger.warning("Failed to call '%s': %s", summary_url, ex)
+            item['startup'] = None
+            return
+        if summary_response.status_code == 200:
+            try:
+                item['startup'] = _unwrap_startup_summary(summary_response.json(), machine)
+            except ValueError:
+                item['startup'] = None
+        elif summary_response.status_code == 404:
+            # No startup logs in window for this instance, or endpoint not rolled out.
+            item['startup'] = None
+        else:
+            logger.warning(
+                "Failed to retrieve startup summary for instance '%s' (status %s %s).",
+                machine, summary_response.status_code, summary_response.reason)
+            item['startup'] = None
+
+    if len(runtime_items) > 1:
+        with ThreadPoolExecutor(max_workers=min(8, len(runtime_items))) as pool:
+            # list() drains the iterator so exceptions in workers propagate here.
+            list(pool.map(_fetch_startup_summary, runtime_items))
+    else:
+        for item in runtime_items:
+            _fetch_startup_summary(item)
+
+    # --- 3. Assemble payload ---
+    # 'name' and 'resourceGroup' are standard top-level fields in az JSON output;
+    # the table_transformer (transform_troubleshoot_status_output) also consumes
+    # them when rendering the human-readable report.
+    payload = {
+        'name': name,
+        'resourceGroup': resource_group,
+        'instances': runtime_items,
+    }
+    return payload
+
+
+def _render_troubleshoot_status(payload):
+    """Print the human-readable report (Site Runtime Status + per-instance Startup summary).
+    Called as the table_transformer for 'az webapp troubleshoot status'."""
+    instances = payload.get('instances') or []
+    app_name = payload.get('name') or '<webapp>'
+    resource_group = payload.get('resourceGroup')
+
+    if not instances:
+        print("No runtime status reported for '{}'.".format(app_name))
+        return
+
+    print("\n{}\n".format(_c("Application status for {}.".format(app_name), 'bold')))
+
+    # Overview table (skip when only one instance is present, e.g. --instance filter).
+    if len(instances) > 1:
+        col_widths = (14, 20, 12, 24)
+        header = "{:<{w0}}{:<{w1}}{:<{w2}}{}".format(
+            'INSTANCE', 'MACHINE', 'STATE', 'UPDATED',
+            w0=col_widths[0], w1=col_widths[1], w2=col_widths[2])
+        print(_c(header, 'bold'))
+        print('-' * sum(col_widths))
+        for inst in instances:
+            startup = inst.get('startup') or {}
+            most_recent = startup.get('mostRecent') or startup.get('MostRecent') or {}
+            updated = _format_dt(most_recent.get('at') or most_recent.get('At')) or '-'
+            state = inst.get('state') or '-'
+            # ANSI escapes inflate the rendered width, so pad the plain text manually.
+            print("{}{}{}{}".format(
+                _pad(_short_id(inst.get('instanceId')), col_widths[0]),
+                _pad(inst.get('machineName') or '-', col_widths[1]),
+                _pad(_color_state(state), col_widths[2], plain_len=len(state)),
+                updated))
+        print()
+        print()
+
+    # Per-instance Site Runtime Status + Startup summary.
+    for inst in instances:
+        machine = inst.get('machineName')
+        label = machine if machine else _short_id(inst.get('instanceId')).upper()
+        sep = '-' * 66
+        header = 'Instance {} Full Status Report'.format(label)
+        print(sep)
+        print(_c(header, 'cyan'))
+        print(sep)
+        _print_runtime_block(inst)
+        print()
+        print(_c('Startup summary (last 24h)', 'cyan'))
+        _print_startup_block(inst.get('startup'))
+
+    # Hint footer — only surfaced when at least one instance reports an error detail.
+    has_error = any(
+        (inst.get('lastErrorDetails') or '').strip() for inst in instances
+    )
+    if has_error:
+        rg = resource_group or '<resource-group>'
+        print(_c('Hint:', 'yellow'))
+        print('  Check application logs:  az webapp log tail -n {} -g {}'.format(app_name, rg))
+        print('  Check startup logs:      az webapp log startup show -n {} -g {}'.format(app_name, rg))
+
+
+def _color_enabled():
+    """Honor NO_COLOR / AZURE_CORE_NO_COLOR and only emit ANSI when stdout is a TTY."""
+    if os.environ.get('NO_COLOR') or os.environ.get('AZURE_CORE_NO_COLOR'):
+        return False
+    try:
+        return sys.stdout.isatty()
+    except (AttributeError, ValueError):
+        return False
+
+
+def _c(text, color):
+    """Wrap text in ANSI color codes when color is enabled; otherwise return text unchanged.
+    Uses colorama-compatible escapes (colorama is initialized by azure-cli at startup)."""
+    if not text or not _color_enabled():
+        return text
+    codes = {
+        'green': '\033[32m',
+        'red': '\033[31m',
+        'yellow': '\033[33m',
+        'cyan': '\033[36m',
+        'bold': '\033[1m',
+        'dim': '\033[2m',
+    }
+    reset = '\033[0m'
+    return '{}{}{}'.format(codes.get(color, ''), text, reset)
+
+
+def _color_state(state):
+    if not state:
+        return '-'
+    s = state.lower()
+    if s == 'started':
+        return _c(state, 'green')
+    if s in ('stopped', 'failed', 'crashed', 'unhealthy'):
+        return _c(state, 'red')
+    if s in ('starting', 'pullingimage', 'pulling', 'pending'):
+        return _c(state, 'yellow')
+    return state
+
+
+def _color_outcome(outcome):
+    if not outcome:
+        return '-'
+    o = outcome.upper()
+    if o == 'STARTED':
+        return _c(outcome, 'green')
+    if o in ('FAILED', 'CRASHED'):
+        return _c(outcome, 'red')
+    return outcome
+
+
+def _color_count(count, kind):
+    """Color a numeric count. kind='failed' -> red when > 0; 'successful' -> green when > 0."""
+    try:
+        n = int(count)
+    except (TypeError, ValueError):
+        return str(count)
+    if kind == 'failed' and n > 0:
+        return _c(str(n), 'red')
+    if kind == 'successful' and n > 0:
+        return _c(str(n), 'green')
+    return str(n)
+
+
+def _pad(text, width, plain_len=None):
+    """Left-justify text to `width` columns. When `text` contains ANSI escapes,
+    pass plain_len so padding is based on the visible character count."""
+    visible = plain_len if plain_len is not None else len(text or '')
+    pad = max(0, width - visible)
+    return (text or '') + ' ' * pad
+
+
+def _short_id(instance_id):
+    """Truncate a long hex ARM instanceId for table display."""
+    if not instance_id:
+        return '-'
+    if len(instance_id) > 12:
+        return instance_id[:10]
+    return instance_id
+
+
+def _format_dt(value):
+    if not value:
+        return None
+    # Pass through ISO strings; trim sub-second/timezone noise for the table view.
+    if isinstance(value, str):
+        v = value.replace('T', ' ')
+        is_utc = v.endswith('Z')
+        if '.' in v:
+            v = v.split('.', 1)[0]
+        if is_utc:
+            if v.endswith('Z'):
+                v = v[:-1]
+            v = v + ' UTC'
+        elif '+' in v:
+            v = v.split('+', 1)[0]
+        return v
+    return str(value)
+
+
+def _print_runtime_block(inst):
+    """Print one Site Runtime Status block from an ARM /siteStatus item."""
+    if not inst:
+        print('  (no runtime status reported)')
+        return
+    state = inst.get('state') or '-'
+    details = inst.get('details') or '-'
+    last_error = inst.get('lastError') or '-'
+    last_error_details = inst.get('lastErrorDetails') or '-'
+    # Treat .NET DateTime.MinValue (0001-01-01...) as "no error ever" and hide it.
+    last_error_ts_raw = inst.get('lastErrorTimestamp')
+    if isinstance(last_error_ts_raw, str) and last_error_ts_raw.startswith('0001-01-01'):
+        last_error_ts_raw = None
+    last_error_ts = _format_dt(last_error_ts_raw) or '-'
+    print('  State                {}'.format(_color_state(state)))
+    print('  Details              {}'.format(details))
+    print('  Last Error           {}'.format(last_error))
+    print('  Last Error Details   {}'.format(last_error_details))
+    print('  Last Error Timestamp {}'.format(last_error_ts))
+
+
+def _unwrap_startup_summary(payload, machine):
+    """KuduLite's /api/startuplogs/summary returns a list of
+       [{'InstanceId': ..., 'Startup': {...}}] (one entry when filtered by instance).
+       Extract the inner Startup object for the matching machine, or the first entry."""
+    if payload is None:
+        return None
+    if isinstance(payload, list):
+        if not payload:
+            return None
+        match = next(
+            (e for e in payload
+             if isinstance(e, dict) and (e.get('InstanceId') == machine or e.get('instanceId') == machine)),
+            payload[0])
+        if isinstance(match, dict):
+            return match.get('Startup') or match.get('startup') or match
+        return match
+    if isinstance(payload, dict):
+        return payload.get('Startup') or payload.get('startup') or payload
+    return None
+
+
+def _print_startup_block(s):
+    if not s:
+        print('  (no startup attempts recorded)')
+        print()
+        return
+    successful = s.get('successful', s.get('Successful', 0))
+    failed = s.get('failed', s.get('Failed', 0))
+    print('  Successful   {}'.format(_color_count(successful, 'successful')))
+    print('  Failed       {}'.format(_color_count(failed, 'failed')))
+    most_recent = s.get('mostRecent') or s.get('MostRecent')
+    earliest = s.get('earliest') or s.get('Earliest')
+    if most_recent:
+        print('  Most recent  {} -> {}'.format(
+            _format_dt(most_recent.get('at') or most_recent.get('At')) or '-',
+            _color_outcome(most_recent.get('outcome') or most_recent.get('Outcome'))))
+    if earliest:
+        print('  Earliest     {} -> {}'.format(
+            _format_dt(earliest.get('at') or earliest.get('At')) or '-',
+            _color_outcome(earliest.get('outcome') or earliest.get('Outcome'))))
+    print()
 
 
 def config_slot_auto_swap(cmd, resource_group_name, webapp, slot, auto_swap_slot=None, disable=None):
@@ -9931,6 +10381,7 @@ def _poll_deployment_runtime_status(cmd, resource_group_name, webapp_name, slot,
     time_elapsed = 0
     deployment_status = None
     response_body = None
+    status_tip_logged = False
     while time_elapsed < max_time_sec:
         try:
             response_body = send_raw_request(cmd.cli_ctx, "GET", deploymentstatusapi_url).json()
@@ -9945,12 +10396,19 @@ def _poll_deployment_runtime_status(cmd, resource_group_name, webapp_name, slot,
         status = deployment_status if status is None else status
         logger.warning("Status: %s Time: %s(s)", status, time_elapsed)
         if deployment_status == "RuntimeStarting":
+            if not status_tip_logged:
+                _log_webapp_status_tip(webapp_name, resource_group_name, True)
+                status_tip_logged = True
             logger.info("InprogressInstances: %s, SuccessfulInstances: %s",
                         deployment_properties.get('numberOfInstancesInProgress'),
                         deployment_properties.get('numberOfInstancesSuccessful'))
         if deployment_status == "RuntimeSuccessful":
+            if not status_tip_logged:
+                _log_webapp_status_tip(webapp_name, resource_group_name, True)
             break
         if deployment_status == "RuntimeFailed":
+            if not status_tip_logged:
+                _log_webapp_status_tip(webapp_name, resource_group_name, True)
             error_text = ""
             total_num_instances = int(deployment_properties.get('numberOfInstancesInProgress')) + \
                 int(deployment_properties.get('numberOfInstancesSuccessful')) + \
@@ -10833,6 +11291,8 @@ def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None
         _url = _get_url(cmd, rg_name, name)
         logger.warning("You can launch the app at %s", _url)
         create_json.update({'URL': _url})
+
+    _log_webapp_status_tip(name, rg_name, _is_linux)
 
     if logs:
         _configure_default_logging(cmd, rg_name, name)

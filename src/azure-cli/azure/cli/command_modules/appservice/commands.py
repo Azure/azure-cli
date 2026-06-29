@@ -48,6 +48,19 @@ def transform_runtime_list_output(result):
     ]) for r in result]
 
 
+def transform_webapp_status_output(result):
+    from .custom import format_webapp_status_output
+    return format_webapp_status_output(result)
+
+
+def transform_troubleshoot_status_output(result):
+    from .custom import _render_troubleshoot_status
+    _render_troubleshoot_status(result)
+    # Returning an empty list bypasses azure-cli's table formatter (which would
+    # otherwise print "(empty)" after our rendered report).
+    return []
+
+
 def ex_handler_factory(creating_plan=False):
     def _ex_handler(ex):
         ex = _polish_bad_errors(ex, creating_plan)
@@ -142,6 +155,7 @@ def load_command_table(self, _):
         g.custom_command('restart', 'restart_webapp')
         g.custom_command('browse', 'view_in_browser')
         g.custom_command('list-instances', 'list_instances')
+        g.custom_command('status', 'show_webapp_status', table_transformer=transform_webapp_status_output)
         g.custom_command('list-runtimes', 'list_runtimes', table_transformer=transform_runtime_list_output)
         g.custom_command('identity assign', 'assign_identity')
         g.custom_show_command('identity show', 'show_identity')
@@ -258,6 +272,10 @@ def load_command_table(self, _):
     with self.command_group('webapp log startup', is_preview=True) as g:
         g.custom_command('list', 'list_startup_logs')
         g.custom_show_command('show', 'show_startup_log')
+
+    with self.command_group('webapp troubleshoot', is_preview=True) as g:
+        g.custom_command('status', 'troubleshoot_status',
+                         table_transformer=transform_troubleshoot_status_output)
 
     with self.command_group('functionapp log deployment') as g:
         g.custom_show_command('show', 'show_deployment_log')
