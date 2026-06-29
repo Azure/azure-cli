@@ -14,6 +14,7 @@ from urllib.parse import quote, urlparse
 from urllib.request import urlopen
 
 from binascii import hexlify
+from collections.abc import Mapping
 from os import urandom
 import datetime
 import json
@@ -7733,63 +7734,13 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
             return 0
 
     @staticmethod
-    def _get_java_versions_from_minor_versions(minor_versions):
-        """Dynamically extract unique Java versions from minor version values.
-        Used for Linux Java SE containers where minor.value is like "25.0.0", "21.0.0".
-        Returns versions sorted in descending order (newest first)."""
-        java_versions = set()
-        for minor in minor_versions:
-            # minor.value is like "25.0.0", "21.0.0", "17.0.0", "11.0.0", "8.0.0" or "1.8.0"
-            value = minor.value
-            if value:
-                # Handle both "1.8" format and newer "25", "21" formats
-                if value.startswith("1.8"):
-                    java_versions.add("1.8")
-                else:
-                    # Extract major version number (e.g., "25" from "25.0.0")
-                    major_ver = value.split('.')[0]
-                    if major_ver.isdigit():
-                        java_versions.add(major_ver)
-        # Sort descending (newest versions first)
-        return sorted(java_versions, key=_StackRuntimeHelper._java_version_sort_key)
-
-    @staticmethod
     def _get_java_versions_from_windows_container(container_settings):
         """Dynamically extract Java versions from Windows container settings.
-        Looks at the 'runtimes' array in additional_properties or directly on the object.
+        Looks at the 'runtimes' array exposed by the container settings.
         Returns versions sorted in descending order (newest first)."""
         java_versions = set()
-        runtimes_array = []
-
-        # Handle both dict and object representations of container_settings
-        if isinstance(container_settings, dict):
-            runtimes_array = container_settings.get('runtimes', [])
-        else:
-            # Try multiple ways to access the runtimes array
-            # 1. Check additional_properties (where SDK puts unknown fields)
-            additional_props = getattr(container_settings, 'additional_properties', None)
-            if additional_props and isinstance(additional_props, dict):
-                runtimes_array = additional_props.get('runtimes', [])
-
-            # 2. Try direct attribute access (in case SDK exposes it directly)
-            if not runtimes_array:
-                runtimes_array = getattr(container_settings, 'runtimes', None) or []
-
-            # 3. Try as_dict() if available (converts SDK model to dict)
-            if not runtimes_array and hasattr(container_settings, 'as_dict'):
-                try:
-                    settings_dict = container_settings.as_dict()
-                    runtimes_array = settings_dict.get('runtimes', [])
-                except (AttributeError, TypeError, KeyError):
-                    pass
-
-            # 4. Try serialize() if available
-            if not runtimes_array and hasattr(container_settings, 'serialize'):
-                try:
-                    settings_dict = container_settings.serialize()
-                    runtimes_array = settings_dict.get('runtimes', [])
-                except (AttributeError, TypeError, KeyError):
-                    pass
+        data = _StackRuntimeHelper._get_container_settings_data(container_settings)
+        runtimes_array = data.get('runtimes') or []
 
         for runtime_info in runtimes_array:
             if isinstance(runtime_info, dict):
@@ -7805,18 +7756,47 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         return sorted(java_versions, key=_StackRuntimeHelper._java_version_sort_key)
 
     @staticmethod
+    def _get_container_settings_data(container_settings):
+        """Return a dict of a container settings object's raw (camelCase) API fields.
+
+        The azure-mgmt-web SDK returns typespec models that behave like a read-only
+        ``Mapping`` and preserve API fields the SDK does not explicitly model -- e.g.
+        ``java17Runtime``/``java21Runtime``/``java25Runtime`` and the ``runtimes`` array.
+        Older msrest-based models instead expose such unknown fields via
+        ``additional_properties``. Reading only the SDK-typed attributes (which cover just
+        ``java8Runtime``/``java11Runtime``) or only ``additional_properties`` silently drops
+        newer Java versions, so consult every representation.
+        """
+        if container_settings is None:
+            return {}
+        if isinstance(container_settings, dict):
+            return container_settings
+        data = {}
+        # Legacy msrest models: unknown fields land in additional_properties.
+        additional = getattr(container_settings, 'additional_properties', None)
+        if isinstance(additional, dict):
+            data.update(additional)
+        # Typespec _Model instances are Mappings keyed by the raw camelCase field names.
+        if isinstance(container_settings, Mapping):
+            data.update(dict(container_settings))
+        return data
+
+    @staticmethod
     def _get_java_runtimes_from_container_settings(container_settings):
         """Dynamically extract Java runtimes from container settings.
         Prefers the 'runtimes' array from the API when available (most future-proof),
-        falls back to individual java*Runtime properties in additional_properties,
-        and finally SDK-defined properties (java8_runtime, java11_runtime).
+        falls back to individual java*Runtime fields, and finally to the SDK-typed
+        java8_runtime/java11_runtime attributes.
         Returns list of tuples: (runtime_name, version, is_auto_update)"""
         runtimes = []
-        is_auto_update = getattr(container_settings, 'is_auto_update', False)
-        additional_props = getattr(container_settings, 'additional_properties', {}) or {}
+        data = _StackRuntimeHelper._get_container_settings_data(container_settings)
+        is_auto_update = data.get('isAutoUpdate')
+        if is_auto_update is None:
+            is_auto_update = getattr(container_settings, 'is_auto_update', False)
+        is_auto_update = bool(is_auto_update)
 
         # Prefer the 'runtimes' array if available (cleanest, most future-proof)
-        runtimes_array = additional_props.get('runtimes', [])
+        runtimes_array = data.get('runtimes') or []
         if runtimes_array:
             for runtime_info in runtimes_array:
                 runtime_name = runtime_info.get('runtime')
@@ -7824,17 +7804,17 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                 if runtime_name and version:
                     runtimes.append((runtime_name, version, is_auto_update))
         else:
-            # Fallback: Get runtimes from additional_properties (java*Runtime keys)
-            for key, value in additional_props.items():
+            # Fallback: Get runtimes from the raw java*Runtime fields
+            for key, value in data.items():
                 # Match pattern like "java25Runtime", "java21Runtime", etc.
                 match = re.match(r'^java(\d+)Runtime$', key)
                 if match and value:
                     version = match.group(1)
                     runtimes.append((value, version, is_auto_update))
 
-            # Also get runtimes from SDK-defined properties (java8_runtime, java11_runtime)
+            # Also get runtimes from SDK-typed properties (java8_runtime, java11_runtime)
             if getattr(container_settings, 'java11_runtime', None):
-                # Avoid duplicates if already found in additional_properties
+                # Avoid duplicates if already found above
                 if not any(v == "11" for _, v, _ in runtimes):
                     runtimes.append((container_settings.java11_runtime, "11", is_auto_update))
             if getattr(container_settings, 'java8_runtime', None):
@@ -7946,13 +7926,23 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         minor_java_container_versions = self._get_valid_minor_versions(
             major_version, linux=True, java=True, include_eol=self._include_eol)
         if "SE" in major_version.display_text:
-            # Dynamically get Java versions from the available minor versions
-            java_versions = self._get_java_versions_from_minor_versions(minor_java_container_versions)
-            se_containers = [minor_java_container_versions[0]] if minor_java_container_versions else []
-            for java in java_versions:
-                se_java_containers = [c for c in minor_java_container_versions if c.value.startswith(java)]
-                se_containers = se_containers + se_java_containers
-            minor_java_container_versions = se_containers
+            # The displayed Java SE runtimes are the "friendly" auto-update names (e.g.
+            # JAVA|21-java21) carried by a single aggregate auto-update container, whose
+            # 'runtimes' array enumerates every available Java major version. Select that
+            # container by its is_auto_update flag instead of by position, which the API
+            # does not guarantee. The per-patch containers (e.g. JAVA|21.0.9) are
+            # non-auto-update and are filtered out of the table output downstream. Fall
+            # back to the first minor version if no auto-update container is present.
+            auto_update_containers = []
+            for container in minor_java_container_versions:
+                container_settings = container.stack_settings.linux_container_settings
+                settings_data = self._get_container_settings_data(container_settings)
+                if settings_data.get('isAutoUpdate') or getattr(container_settings, 'is_auto_update', False):
+                    auto_update_containers.append(container)
+            if auto_update_containers:
+                minor_java_container_versions = auto_update_containers
+            elif minor_java_container_versions:
+                minor_java_container_versions = [minor_java_container_versions[0]]
         if minor_java_container_versions:
             for minor in minor_java_container_versions:
                 linux_container_settings = minor.stack_settings.linux_container_settings
