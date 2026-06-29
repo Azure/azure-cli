@@ -302,7 +302,7 @@ def load_flexibleserver_command_table(self, _):
                             custom_command_type=maintenance_event_commands,
                             client_factory=cf_postgres_flexible_maintenance_events) as g:
         g.custom_command('list', 'flexible_server_maintenance_event_list')
-        g.custom_command('show', 'flexible_server_maintenance_event_show')
+        g.custom_show_command('show', 'flexible_server_maintenance_event_show')
         g.custom_command('reschedule', 'flexible_server_maintenance_event_reschedule', supports_no_wait=True)
         g.custom_command('apply-now', 'flexible_server_maintenance_event_apply_now', supports_no_wait=True)
 
