@@ -108,9 +108,66 @@ DEPLOYMENT_FAILURE_PATTERNS = [
 # Index for O(1) lookup by error code
 _PATTERN_INDEX = {p["errorCode"]: p for p in DEPLOYMENT_FAILURE_PATTERNS}
 
+# Failure patterns specific to creating a Linux web app (az webapp create). These
+# describe ARM/control-plane errors surfaced while provisioning the Site, not Kudu
+# deployment errors, so they have their own table and matcher.
+WEBAPP_CREATE_FAILURE_PATTERNS = [
+    {
+        "errorCode": "SubscriptionNotRegistered",
+        "stage": "WebAppCreate",
+        "suggestedFixes": [
+            "Register the App Service provider: 'az provider register --namespace Microsoft.Web'",
+            "Confirm registration: 'az provider show -n Microsoft.Web --query registrationState'"
+        ]
+    },
+    {
+        "errorCode": "QuotaExceeded",
+        "stage": "WebAppCreate",
+        "suggestedFixes": [
+            "Delete unused apps/plans in the region or pick a higher SKU/region",
+            "Check current usage: 'az appservice list-locations --sku <sku>'",
+            "Request a quota increase via an Azure support request"
+        ]
+    },
+    {
+        "errorCode": "SkuNotAvailableInRegion",
+        "stage": "WebAppCreate",
+        "suggestedFixes": [
+            "Choose a region that supports the plan SKU: 'az appservice list-locations --sku <sku> --linux-workers-enabled'",
+            "Create the plan with a different SKU, then retry 'az webapp create'"
+        ]
+    },
+    {
+        "errorCode": "ServerFarmNotFound",
+        "stage": "WebAppCreate",
+        "suggestedFixes": [
+            "Verify the plan exists: 'az appservice plan list -g <rg> -o table'",
+            "Pass an existing plan name or full resource ID via --plan"
+        ]
+    },
+    {
+        "errorCode": "SiteNameUnavailable",
+        "stage": "WebAppCreate",
+        "suggestedFixes": [
+            "Choose a globally unique app name (the default *.azurewebsites.net host is shared)",
+            "Check availability via a different --name value"
+        ]
+    },
+    {
+        "errorCode": "LinuxWorkersUnavailable",
+        "stage": "WebAppCreate",
+        "suggestedFixes": [
+            "Create a Linux plan in a region with Linux capacity: 'az appservice list-locations --linux-workers-enabled'",
+            "Recreate the plan with '--is-linux' in a supported region"
+        ]
+    },
+]
+
+_CREATE_PATTERN_INDEX = {p["errorCode"]: p for p in WEBAPP_CREATE_FAILURE_PATTERNS}
+
 
 def get_failure_pattern(error_code):
-    return _PATTERN_INDEX.get(error_code)
+    return _PATTERN_INDEX.get(error_code) or _CREATE_PATTERN_INDEX.get(error_code)
 
 
 def match_failure_pattern(status_code=None, error_message=None):  # pylint: disable=too-many-return-statements,too-many-branches
@@ -143,4 +200,23 @@ def match_failure_pattern(status_code=None, error_message=None):  # pylint: disa
             return get_failure_pattern("RunFromRemoteZipConfigured")
         # Generic 409 - deployment lock conflict
         return get_failure_pattern("DeploymentInProgress")
+    return None
+
+
+def match_create_failure_pattern(status_code=None, error_message=None):  # pylint: disable=too-many-return-statements
+    """Map an az webapp create control-plane failure to a known pattern, or None."""
+    error_lower = (error_message or "").lower()
+
+    if "register" in error_lower and "microsoft.web" in error_lower:
+        return get_failure_pattern("SubscriptionNotRegistered")
+    if "quota" in error_lower or "exceeded" in error_lower or "over quota" in error_lower:
+        return get_failure_pattern("QuotaExceeded")
+    if "linux" in error_lower and ("worker" in error_lower or "not available" in error_lower):
+        return get_failure_pattern("LinuxWorkersUnavailable")
+    if "sku" in error_lower and ("not available" in error_lower or "not supported" in error_lower):
+        return get_failure_pattern("SkuNotAvailableInRegion")
+    if "serverfarm" in error_lower or "server farm" in error_lower or "app service plan" in error_lower:
+        return get_failure_pattern("ServerFarmNotFound")
+    if status_code == 409 or "conflict" in error_lower or "already exists" in error_lower:
+        return get_failure_pattern("SiteNameUnavailable")
     return None

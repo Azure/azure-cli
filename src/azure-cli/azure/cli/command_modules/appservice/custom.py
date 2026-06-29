@@ -60,7 +60,7 @@ from ._client_factory import (web_client_factory, ex_handler_factory, providers_
 from ._appservice_utils import _generic_site_operation, _generic_settings_operation
 from ._appservice_utils import MSI_LOCAL_ID
 from ._deployment_context_engine import (
-    raise_enriched_deployment_error, EnrichedDeploymentError
+    raise_enriched_deployment_error, EnrichedDeploymentError, extract_status_code_from_message
 )
 from .utils import (_normalize_sku,
                     get_sku_tier,
@@ -130,7 +130,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                   role='Contributor', scope=None, vnet=None, subnet=None, https_only=False,
                   public_network_access=None, acr_use_identity=False, acr_identity=None, basic_auth="",
                   auto_generated_domain_name_label_scope=None, end_to_end_encryption_enabled=None,
-                  min_tls_version=None, min_tls_cipher_suite=None, site_scoped_certs=None):
+                  min_tls_version=None, min_tls_cipher_suite=None, site_scoped_certs=None,
+                  enriched_errors=False):
     from azure.mgmt.web.models import Site, OutboundVnetRouting
     from azure.core.exceptions import ResourceNotFoundError as _ResourceNotFoundError
     SiteConfig, SkuDescription, NameValuePair = cmd.get_models(
@@ -357,8 +358,27 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                                                           value='https://{}.scm.azurewebsites.net/detectors'
                                                           .format(name)))
 
-    poller = client.web_apps.begin_create_or_update(resource_group_name, name, webapp_def)
-    webapp = LongRunningOperation(cmd.cli_ctx)(poller)
+    # Only enrich Linux web app failures (parity with 'az webapp deploy'); container/Windows
+    # apps surface the raw service error unchanged.
+    _should_enrich_errors = enriched_errors and is_linux
+    try:
+        poller = client.web_apps.begin_create_or_update(resource_group_name, name, webapp_def)
+        webapp = LongRunningOperation(cmd.cli_ctx)(poller)
+    except EnrichedDeploymentError:
+        raise
+    except Exception as ex:  # pylint: disable=broad-except
+        if _should_enrich_errors:
+            raise_enriched_deployment_error(
+                cmd=cmd,
+                resource_group_name=resource_group_name,
+                webapp_name=name,
+                status_code=extract_status_code_from_message(str(ex)),
+                error_message=str(ex),
+                deployment_status="WebAppCreate",
+                last_known_step="Site create_or_update request",
+                operation="create"
+            )
+        raise
 
     if current_stack:
         _update_webapp_current_stack_property_if_needed(cmd, resource_group_name, name, current_stack)

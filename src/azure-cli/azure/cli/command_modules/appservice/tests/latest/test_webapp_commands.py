@@ -3632,6 +3632,18 @@ class WebappEnrichedErrorsScenarioTest(ScenarioTest):
                 resource_group, webapp_name, war_file))
 
     @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_create_enriched', location='westus2')
+    def test_webapp_create_enriched_errors_skipped_for_windows(self, resource_group):
+        """Windows web app failures should NOT be enriched even with --enriched-errors true."""
+        webapp_name = self.create_random_name('webapp-cr-win', 40)
+        plan_name = self.create_random_name('webapp-cr-win-plan', 40)
+        self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan_name))
+        with self.assertRaises(CLIError) as cm:
+            self.cmd('webapp create -g {} -n {} --plan {} -r "DOTNET|99.99" --enriched-errors true'.format(
+                resource_group, webapp_name, plan_name))
+        self.assertNotIn('WEB APP CREATION FAILED', str(cm.exception))
+
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_up_enriched', location='westus2')
     def test_webapp_up_enriched_errors_flag_accepted(self, resource_group):
         """Verify --enriched-errors flag is accepted by az webapp up with 409 conflict."""

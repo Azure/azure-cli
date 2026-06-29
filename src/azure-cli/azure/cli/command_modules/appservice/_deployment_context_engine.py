@@ -4,8 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 """
-Context-enriched error builder for az webapp deploy / az webapp up.
-Enabled via the --enriched-errors flag on az webapp deploy / az webapp up.
+Context-enriched error builder for az webapp deploy / up / create.
+Enabled via the --enriched-errors flag on those commands.
 """
 
 import re
@@ -13,7 +13,7 @@ import re
 from knack.log import get_logger
 from knack.util import CLIError
 
-from ._deployment_failure_patterns import match_failure_pattern
+from ._deployment_failure_patterns import match_failure_pattern, match_create_failure_pattern
 
 logger = get_logger(__name__)
 
@@ -101,7 +101,7 @@ def build_enriched_error_context(params=None, *, cmd=None, resource_group_name=N
                                  webapp_name=None, slot=None, src_url=None,
                                  artifact_type=None, status_code=None, error_message=None,
                                  deployment_status=None,
-                                 last_known_step=None, kudu_status=None):
+                                 last_known_step=None, kudu_status=None, operation='deploy'):
     _cmd = cmd or (params.cmd if params else None)
     _rg = resource_group_name or (params.resource_group_name if params else None)
     _name = webapp_name or (params.webapp_name if params else None)
@@ -112,10 +112,17 @@ def build_enriched_error_context(params=None, *, cmd=None, resource_group_name=N
     _artifact = artifact_type if artifact_type is not None else (
         getattr(params, 'artifact_type', None) if params else None)
 
-    pattern = match_failure_pattern(
-        status_code=status_code,
-        error_message=error_message,
-    )
+    is_create = operation == 'create'
+    if is_create:
+        pattern = match_create_failure_pattern(
+            status_code=status_code,
+            error_message=error_message,
+        )
+    else:
+        pattern = match_failure_pattern(
+            status_code=status_code,
+            error_message=error_message,
+        )
 
     # Build base context
     context = {}
@@ -124,8 +131,9 @@ def build_enriched_error_context(params=None, *, cmd=None, resource_group_name=N
         context["errorCode"] = pattern["errorCode"]
         context["stage"] = pattern["stage"]
     else:
-        context["errorCode"] = f"HTTP_{status_code}" if status_code else "UnknownDeploymentError"
-        context["stage"] = deployment_status or "Unknown"
+        default_code = "WebAppCreateError" if is_create else "UnknownDeploymentError"
+        context["errorCode"] = f"HTTP_{status_code}" if status_code else default_code
+        context["stage"] = deployment_status or ("WebAppCreate" if is_create else "Unknown")
 
     # App metadata (best-effort)
     if _cmd and _rg and _name:
@@ -145,6 +153,12 @@ def build_enriched_error_context(params=None, *, cmd=None, resource_group_name=N
     # Suggested fixes
     if pattern:
         context["suggestedFixes"] = pattern["suggestedFixes"]
+    elif is_create:
+        context["suggestedFixes"] = [
+            "Verify the plan exists and is Linux: 'az appservice plan show -n <plan> -g {}'".format(_rg or '<rg>'),
+            "Confirm the region/SKU supports your runtime: 'az appservice list-locations --linux-workers-enabled'",
+            "Use a globally unique --name and retry 'az webapp create'"
+        ]
     else:
         context["suggestedFixes"] = [
             "Check deployment logs: 'az webapp log deployment show -n {} -g {}'".format(
@@ -159,6 +173,8 @@ def build_enriched_error_context(params=None, *, cmd=None, resource_group_name=N
     if kudu_status:
         context["kuduStatus"] = str(kudu_status)
 
+    context["operation"] = operation
+
     # Raw details
     if error_message:
         if len(error_message) > 500:
@@ -170,17 +186,22 @@ def build_enriched_error_context(params=None, *, cmd=None, resource_group_name=N
 
 
 def format_enriched_error_message(context):
+    is_create = context.get("operation") == "create"
     lines = []
     lines.append("")
     lines.append("=" * 72)
-    lines.append("DEPLOYMENT FAILED: Context-Enriched Diagnostics")
+    if is_create:
+        lines.append("WEB APP CREATION FAILED: Context-Enriched Diagnostics")
+    else:
+        lines.append("DEPLOYMENT FAILED: Context-Enriched Diagnostics")
     lines.append("=" * 72)
     lines.append("")
 
     lines.append(f"Error Code  : {context.get('errorCode', 'Unknown')}")
     lines.append(f"Stage       : {context.get('stage', 'Unknown')}")
     lines.append(f"Runtime     : {context.get('runtime', 'Unknown')}")
-    lines.append(f"Deploy Type : {context.get('deploymentType', 'Unknown')}")
+    if not is_create:
+        lines.append(f"Deploy Type : {context.get('deploymentType', 'Unknown')}")
     lines.append(f"Region      : {context.get('region', 'Unknown')}")
     lines.append(f"Plan SKU    : {context.get('planSku', 'Unknown')}")
     if context.get("lastKnownStep"):
@@ -201,9 +222,12 @@ def format_enriched_error_message(context):
         lines.append("")
 
     # Copilot prompt
+    prompt = ("Why did my Linux App Service web app creation fail and how do I fix it?"
+              if is_create else
+              "Why did my Linux App Service deployment fail and how do I fix it?")
     lines.append("-" * 72)
     lines.append("  Copy the full error output above and paste it into GitHub Copilot Chat")
-    lines.append("  with the prompt: 'Why did my Linux App Service deployment fail and how do I fix it?'")
+    lines.append(f"  with the prompt: '{prompt}'")
     lines.append("-" * 72)
 
     return "\n".join(lines)
@@ -213,7 +237,7 @@ def raise_enriched_deployment_error(params=None, *, cmd=None, resource_group_nam
                                     webapp_name=None, slot=None, src_url=None,
                                     artifact_type=None, status_code=None, error_message=None,
                                     deployment_status=None,
-                                    last_known_step=None, kudu_status=None):
+                                    last_known_step=None, kudu_status=None, operation='deploy'):
     context = build_enriched_error_context(
         params=params,
         cmd=cmd,
@@ -226,10 +250,11 @@ def raise_enriched_deployment_error(params=None, *, cmd=None, resource_group_nam
         error_message=error_message,
         deployment_status=deployment_status,
         last_known_step=last_known_step,
-        kudu_status=kudu_status
+        kudu_status=kudu_status,
+        operation=operation
     )
 
-    logger.debug("Deployment failure context: %s", context)
+    logger.debug("%s failure context: %s", operation, context)
 
     message = format_enriched_error_message(context)
     raise EnrichedDeploymentError(message)
