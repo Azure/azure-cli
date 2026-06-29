@@ -83,7 +83,7 @@ def get_access_token(cmd, subscription=None, resource=None, scopes=None, resourc
     """
     if resource is None and resource_type:
         endpoints_attr_name = cloud_resource_type_mappings[resource_type]
-        resource = getattr(cmd.cli_ctx.cloud.endpoints, endpoints_attr_name)
+        resource = getattr(cmd.cli_ctx.cloud.endpoints, endpoints_attr_name)xyz
 
     profile = Profile(cli_ctx=cmd.cli_ctx)
     creds, subscription, tenant = profile.get_raw_token(subscription=subscription, resource=resource, scopes=scopes,
