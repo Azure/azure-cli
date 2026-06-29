@@ -116,7 +116,6 @@ CONTROL_PLANE_FAILURE_PATTERNS = [
     {
         "errorCode": "QuotaExceeded",
         "stage": "ResourceProvisioning",
-        "httpStatus": 401,
         "suggestedFixes": [
             "Your subscription has reached its App Service Plan worker quota for this SKU/region",
             "Request an increase in the Azure portal: Subscription > Usage + quotas, "
@@ -127,7 +126,6 @@ CONTROL_PLANE_FAILURE_PATTERNS = [
     {
         "errorCode": "SkuNotAvailable",
         "stage": "ResourceProvisioning",
-        "httpStatus": 400,
         "suggestedFixes": [
             "The selected --sku is not available in the chosen region",
             "List available SKUs/regions: 'az appservice list-locations --sku <SKU>'",
@@ -137,7 +135,6 @@ CONTROL_PLANE_FAILURE_PATTERNS = [
     {
         "errorCode": "LocationNotAvailable",
         "stage": "ResourceProvisioning",
-        "httpStatus": 400,
         "suggestedFixes": [
             "The resource type is not available in the specified --location",
             "List supported regions: 'az appservice list-locations'",
@@ -147,7 +144,6 @@ CONTROL_PLANE_FAILURE_PATTERNS = [
     {
         "errorCode": "AuthorizationFailed",
         "stage": "Authorization",
-        "httpStatus": 403,
         "suggestedFixes": [
             "Your account lacks permission to create the App Service plan in this scope",
             "Ensure you have at least 'Contributor' on the resource group/subscription",
@@ -157,7 +153,6 @@ CONTROL_PLANE_FAILURE_PATTERNS = [
     {
         "errorCode": "ResourceGroupNotFound",
         "stage": "ResourceProvisioning",
-        "httpStatus": 404,
         "suggestedFixes": [
             "The target resource group does not exist",
             "Create it first: 'az group create -n <name> -l <location>'",
@@ -167,7 +162,6 @@ CONTROL_PLANE_FAILURE_PATTERNS = [
     {
         "errorCode": "MissingSubscriptionRegistration",
         "stage": "ResourceProvisioning",
-        "httpStatus": 409,
         "suggestedFixes": [
             "The Microsoft.Web resource provider is not registered for this subscription",
             "Register it: 'az provider register --namespace Microsoft.Web'",
@@ -177,7 +171,6 @@ CONTROL_PLANE_FAILURE_PATTERNS = [
     {
         "errorCode": "ZoneRedundancyUnsupported",
         "stage": "ResourceProvisioning",
-        "httpStatus": 400,
         "suggestedFixes": [
             "Zone redundancy requires a supported SKU and a minimum of 3 workers",
             "Use a Premium V2/V3 SKU and set --number-of-workers to 3 or more",
