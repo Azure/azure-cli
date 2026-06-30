@@ -167,7 +167,7 @@ def _resolve_acr_scope(cli_ctx, login_server=None):
     if login_server:
         try:
             cloud_name = cli_ctx.cloud.name
-        except Exception:  # pylint: disable=broad-except
+        except AttributeError:
             cloud_name = None
         if cloud_name and cloud_name not in _STANDARD_CLOUD_NAMES:
             return "https://{}".format(login_server)
