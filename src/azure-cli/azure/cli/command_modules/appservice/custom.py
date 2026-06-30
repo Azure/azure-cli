@@ -10,7 +10,6 @@ import sys
 import threading
 import time
 import re
-from concurrent.futures import ThreadPoolExecutor
 from xml.etree import ElementTree
 
 from urllib.parse import quote, urlparse
@@ -2485,58 +2484,6 @@ def _extract_webapp_status_items(result):
     if isinstance(properties, dict):
         return [properties]
     return []
-
-
-def format_webapp_status_output(result):
-    from collections import OrderedDict
-
-    items = _extract_webapp_status_items(result)
-    # LastError is a nullable field on the backend SiteRuntimeStatusOnWorker contract,
-    # so the error columns (LastError, LastErrorDetails, LastErrorTimestamp) are only
-    # surfaced when at least one instance reports a LastError.
-    show_errors = any(item.get('lastError') for item in items)
-
-    rows = []
-    for item in items:
-        row = OrderedDict([
-            ('InstanceId', item.get('instanceId')),
-            ('State', item.get('state')),
-            ('Action', item.get('action'))
-        ])
-        if show_errors:
-            row['LastError'] = item.get('lastError')
-            row['LastErrorDetails'] = item.get('lastErrorDetails')
-            row['LastErrorTimestamp'] = item.get('lastErrorTimestamp')
-        row['Details'] = item.get('details')
-        row['DetailsLevel'] = item.get('detailsLevel')
-        rows.append(row)
-    return rows
-
-
-def show_webapp_status(cmd, resource_group_name, name, slot=None, instance=None):
-    from azure.cli.core.commands.client_factory import get_subscription_id
-
-    client = web_client_factory(cmd.cli_ctx)
-    subscription_id = get_subscription_id(cmd.cli_ctx)
-    api_version = client._config.api_version
-    slot_segment = f'/slots/{slot}' if slot else ''
-    instance_segment = f'/{instance}' if instance else ''
-    base_url = (
-        f'/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}'
-        f'/providers/Microsoft.Web/sites/{name}{slot_segment}/siteStatus{instance_segment}'
-        f'?api-version={api_version}'
-    )
-    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
-
-    try:
-        return send_raw_request(cmd.cli_ctx, 'GET', request_url).json()
-    except HttpResponseError as ex:
-        if instance and ex.status_code == 404:
-            scope = 'webapp and slot' if slot else 'webapp'
-            raise ResourceNotFoundError(
-                f"Instance '{instance}' was not found for this {scope}. "
-                "Run 'az webapp list-instances' to see available instance IDs.")
-        raise
 
 
 def _list_app(cli_ctx, resource_group_name=None, show_details=False):
@@ -6604,8 +6551,8 @@ def show_startup_log(cmd, resource_group, name, slot=None, filename=None, instan
 # az webapp troubleshoot status
 # ---------------------------------------------------------------------------
 
-def troubleshoot_status(cmd, resource_group, name, slot=None, instance=None):
-    """Fetch and render runtime + startup status for a Linux web app.
+def troubleshoot_status(cmd, resource_group, name, slot=None, instance=None, report=False):
+    """Fetch runtime + startup status for a Linux web app.
 
     Data sources:
       * Site Runtime Status comes from ARM:
@@ -6614,9 +6561,9 @@ def troubleshoot_status(cmd, resource_group, name, slot=None, instance=None):
       * Startup summary comes from KuduLite (SCM):
         GET https://{scm-host}/api/startuplogs/summary[?instance={id}]
 
-    Returns the structured payload (list of instances + startup summary) so
-    `-o json` etc. work naturally. For the default (`table`/empty) output format,
-    also prints a human-readable report to stdout.
+    By default returns the structured payload (list of instances + startup
+    summary) so the standard `-o json/yaml/tsv/table` formatters handle output.
+    Pass --report to print the human-readable report to stdout instead.
     """
     import requests
     from azure.cli.core.commands.client_factory import get_subscription_id
@@ -6687,73 +6634,101 @@ def troubleshoot_status(cmd, resource_group, name, slot=None, instance=None):
         if machine:
             item['machineName'] = machine
 
-    # --- 3. Per-instance Startup summary from SCM /api/startuplogs/summary?instance={machineName} ---
-    # Fan out the per-instance calls in parallel; each one is a SCM round-trip
-    # (KuduLite -> worker file read) and dominates wall-clock time when N > 1.
+    # --- 3. Per-instance Startup summary from SCM /api/startuplogs/summary ---
+    # KuduLite's summary endpoint already returns one entry per instance
+    # ([{InstanceId, Startup}, ...]) for everything seen in the last 24h, so we
+    # make a single round-trip and pair the entries with runtime_items locally
+    # instead of fanning out one call per instance.
     scm_url = _get_scm_url(cmd, resource_group, name, slot)
     headers = get_scm_site_headers(cmd.cli_ctx, name, resource_group, slot)
 
-    def _fetch_startup_summary(item):
-        machine = item.get('machineName')
-        if not machine:
-            # KuduLite identifies workers by machine name; without it the summary call
-            # would be ambiguous, so skip rather than send a bad query.
-            item['startup'] = None
-            return
-        summary_url = '{}/api/startuplogs/summary?instance={}'.format(
-            scm_url, quote(machine, safe=''))
-        try:
-            summary_response = requests.get(summary_url, headers=headers)
-        except requests.RequestException as ex:
-            logger.warning("Failed to call '%s': %s", summary_url, ex)
-            item['startup'] = None
-            return
+    # When --instance was supplied we still pass the filter to KuduLite so it
+    # only walks the requested worker's log directory (and the response stays
+    # small). Otherwise we fetch the full set in one call.
+    target_machine = None
+    if instance and len(runtime_items) == 1:
+        target_machine = runtime_items[0].get('machineName')
+
+    summary_url = '{}/api/startuplogs/summary'.format(scm_url)
+    if target_machine:
+        summary_url = '{}?instance={}'.format(summary_url, quote(target_machine, safe=''))
+
+    startup_by_machine = {}
+    try:
+        summary_response = requests.get(summary_url, headers=headers, timeout=30)
+    except requests.RequestException as ex:
+        logger.warning("Failed to call '%s': %s", summary_url, ex)
+        summary_response = None
+
+    if summary_response is not None:
         if summary_response.status_code == 200:
             try:
-                item['startup'] = _unwrap_startup_summary(summary_response.json(), machine)
+                body = summary_response.json()
             except ValueError:
-                item['startup'] = None
+                body = None
+            if isinstance(body, list):
+                for entry in body:
+                    if not isinstance(entry, dict):
+                        continue
+                    # KuduLite serializes its C# POCO with default settings -> PascalCase
+                    # (InstanceId, Startup, Successful, MostRecent, ...). When KuduLite
+                    # ships a [JsonPropertyName] / camelCase contract, switch the keys
+                    # here (and in _print_startup_block / overview-table renderer) accordingly.
+                    key = entry.get('InstanceId')
+                    if not key:
+                        continue
+                    startup_by_machine[key] = entry.get('Startup') or entry
+            elif isinstance(body, dict):
+                # Tolerate a single-object response (older KuduLite shape).
+                inner = body.get('Startup') or body
+                key = body.get('InstanceId') or target_machine
+                if key:
+                    startup_by_machine[key] = inner
         elif summary_response.status_code == 404:
-            # No startup logs in window for this instance, or endpoint not rolled out.
-            item['startup'] = None
+            # No startup logs in window for any instance, or endpoint not rolled out.
+            pass
         else:
             logger.warning(
-                "Failed to retrieve startup summary for instance '%s' (status %s %s).",
-                machine, summary_response.status_code, summary_response.reason)
-            item['startup'] = None
+                "Failed to retrieve startup summary (status %s %s).",
+                summary_response.status_code, summary_response.reason)
 
-    if len(runtime_items) > 1:
-        with ThreadPoolExecutor(max_workers=min(8, len(runtime_items))) as pool:
-            # list() drains the iterator so exceptions in workers propagate here.
-            list(pool.map(_fetch_startup_summary, runtime_items))
-    else:
-        for item in runtime_items:
-            _fetch_startup_summary(item)
+    for item in runtime_items:
+        machine = item.get('machineName')
+        # Without machineName we can't correlate this runtime entry to a KuduLite
+        # entry (KuduLite keys its summaries by machine name).
+        item['startup'] = startup_by_machine.get(machine) if machine else None
 
     # --- 3. Assemble payload ---
-    # 'name' and 'resourceGroup' are standard top-level fields in az JSON output;
-    # the table_transformer (transform_troubleshoot_status_output) also consumes
-    # them when rendering the human-readable report.
     payload = {
         'name': name,
         'resourceGroup': resource_group,
         'instances': runtime_items,
     }
+    if report:
+        _render_troubleshoot_status(payload)
+        return None
     return payload
 
 
 def _render_troubleshoot_status(payload):
     """Print the human-readable report (Site Runtime Status + per-instance Startup summary).
-    Called as the table_transformer for 'az webapp troubleshoot status'."""
+    Invoked by 'az webapp troubleshoot status' when --report is passed."""
+    from azure.cli.core.style import Style, print_styled_text
+
     instances = payload.get('instances') or []
     app_name = payload.get('name') or '<webapp>'
     resource_group = payload.get('resourceGroup')
 
+    def _out(*objs):
+        print_styled_text(*objs, file=sys.stdout)
+
     if not instances:
-        print("No runtime status reported for '{}'.".format(app_name))
+        _out("No runtime status reported for '{}'.".format(app_name))
         return
 
-    print("\n{}\n".format(_c("Application status for {}.".format(app_name), 'bold')))
+    _out('')
+    _out((Style.HIGHLIGHT, "Application status for {}.".format(app_name)))
+    _out('')
 
     # Overview table (skip when only one instance is present, e.g. --instance filter).
     if len(instances) > 1:
@@ -6761,35 +6736,42 @@ def _render_troubleshoot_status(payload):
         header = "{:<{w0}}{:<{w1}}{:<{w2}}{}".format(
             'INSTANCE', 'MACHINE', 'STATE', 'UPDATED',
             w0=col_widths[0], w1=col_widths[1], w2=col_widths[2])
-        print(_c(header, 'bold'))
-        print('-' * sum(col_widths))
+        _out((Style.HIGHLIGHT, header))
+        _out('-' * sum(col_widths))
         for inst in instances:
             startup = inst.get('startup') or {}
-            most_recent = startup.get('mostRecent') or startup.get('MostRecent') or {}
-            updated = _format_dt(most_recent.get('at') or most_recent.get('At')) or '-'
+            most_recent = startup.get('MostRecent') or {}
+            updated = _format_dt(most_recent.get('At')) or '-'
             state = inst.get('state') or '-'
-            # ANSI escapes inflate the rendered width, so pad the plain text manually.
-            print("{}{}{}{}".format(
-                _pad(_short_id(inst.get('instanceId')), col_widths[0]),
-                _pad(inst.get('machineName') or '-', col_widths[1]),
-                _pad(_color_state(state), col_widths[2], plain_len=len(state)),
-                updated))
-        print()
-        print()
+            # Pad plain text first, then wrap the STATE segment in its style — the
+            # framework's color escapes don't perturb the visible column width.
+            _out([
+                (Style.PRIMARY, '{:<{w}}'.format(_short_id(inst.get('instanceId')), w=col_widths[0])),
+                (Style.PRIMARY, '{:<{w}}'.format(inst.get('machineName') or '-', w=col_widths[1])),
+                (_state_style(state), '{:<{w}}'.format(state, w=col_widths[2])),
+                (Style.PRIMARY, updated),
+            ])
+        _out('')
+        _out('')
 
     # Per-instance Site Runtime Status + Startup summary.
     for inst in instances:
         machine = inst.get('machineName')
-        label = machine if machine else _short_id(inst.get('instanceId')).upper()
+        label = machine if machine else _short_id(inst.get('instanceId'))
         sep = '-' * 66
-        header = 'Instance {} Full Status Report'.format(label)
-        print(sep)
-        print(_c(header, 'cyan'))
-        print(sep)
-        _print_runtime_block(inst)
-        print()
-        print(_c('Startup summary (last 24h)', 'cyan'))
-        _print_startup_block(inst.get('startup'))
+        _out(sep)
+        _out((Style.HIGHLIGHT, 'Instance {} Full Status Report'.format(label)))
+        _out(sep)
+        _print_runtime_block(inst, _out)
+        _out('')
+        _out((Style.HIGHLIGHT, 'Startup summary (last 24h)'))
+        if not machine:
+            # Without machineName we couldn't query KuduLite for this instance, so
+            # distinguish the "couldn't ask" case from "asked, nothing recorded".
+            _out('  Startup summary unavailable: machine name could not be determined for this instance.')
+            _out('')
+        else:
+            _print_startup_block(inst.get('startup'), _out)
 
     # Hint footer — only surfaced when at least one instance reports an error detail.
     has_error = any(
@@ -6797,81 +6779,50 @@ def _render_troubleshoot_status(payload):
     )
     if has_error:
         rg = resource_group or '<resource-group>'
-        print(_c('Hint:', 'yellow'))
-        print('  Check application logs:  az webapp log tail -n {} -g {}'.format(app_name, rg))
-        print('  Check startup logs:      az webapp log startup show -n {} -g {}'.format(app_name, rg))
+        _out((Style.WARNING, 'Hint:'))
+        _out('  Check application logs:  az webapp log tail -n {} -g {}'.format(app_name, rg))
+        _out('  Check startup logs:      az webapp log startup show -n {} -g {}'.format(app_name, rg))
 
 
-def _color_enabled():
-    """Honor NO_COLOR / AZURE_CORE_NO_COLOR and only emit ANSI when stdout is a TTY."""
-    if os.environ.get('NO_COLOR') or os.environ.get('AZURE_CORE_NO_COLOR'):
-        return False
-    try:
-        return sys.stdout.isatty()
-    except (AttributeError, ValueError):
-        return False
-
-
-def _c(text, color):
-    """Wrap text in ANSI color codes when color is enabled; otherwise return text unchanged.
-    Uses colorama-compatible escapes (colorama is initialized by azure-cli at startup)."""
-    if not text or not _color_enabled():
-        return text
-    codes = {
-        'green': '\033[32m',
-        'red': '\033[31m',
-        'yellow': '\033[33m',
-        'cyan': '\033[36m',
-        'bold': '\033[1m',
-        'dim': '\033[2m',
-    }
-    reset = '\033[0m'
-    return '{}{}{}'.format(codes.get(color, ''), text, reset)
-
-
-def _color_state(state):
+def _state_style(state):
+    """Map a runtime state string to an azure-cli Style for print_styled_text."""
+    from azure.cli.core.style import Style
     if not state:
-        return '-'
+        return Style.PRIMARY
     s = state.lower()
     if s == 'started':
-        return _c(state, 'green')
+        return Style.SUCCESS
     if s in ('stopped', 'failed', 'crashed', 'unhealthy'):
-        return _c(state, 'red')
+        return Style.ERROR
     if s in ('starting', 'pullingimage', 'pulling', 'pending'):
-        return _c(state, 'yellow')
-    return state
+        return Style.WARNING
+    return Style.PRIMARY
 
 
-def _color_outcome(outcome):
+def _outcome_style(outcome):
+    from azure.cli.core.style import Style
     if not outcome:
-        return '-'
+        return Style.PRIMARY
     o = outcome.upper()
     if o == 'STARTED':
-        return _c(outcome, 'green')
+        return Style.SUCCESS
     if o in ('FAILED', 'CRASHED'):
-        return _c(outcome, 'red')
-    return outcome
+        return Style.ERROR
+    return Style.PRIMARY
 
 
-def _color_count(count, kind):
-    """Color a numeric count. kind='failed' -> red when > 0; 'successful' -> green when > 0."""
+def _count_style(count, kind):
+    """Style for a numeric count. kind='failed' -> ERROR when > 0; 'successful' -> SUCCESS when > 0."""
+    from azure.cli.core.style import Style
     try:
         n = int(count)
     except (TypeError, ValueError):
-        return str(count)
+        return Style.PRIMARY, str(count)
     if kind == 'failed' and n > 0:
-        return _c(str(n), 'red')
+        return Style.ERROR, str(n)
     if kind == 'successful' and n > 0:
-        return _c(str(n), 'green')
-    return str(n)
-
-
-def _pad(text, width, plain_len=None):
-    """Left-justify text to `width` columns. When `text` contains ANSI escapes,
-    pass plain_len so padding is based on the visible character count."""
-    visible = plain_len if plain_len is not None else len(text or '')
-    pad = max(0, width - visible)
-    return (text or '') + ' ' * pad
+        return Style.SUCCESS, str(n)
+    return Style.PRIMARY, str(n)
 
 
 def _short_id(instance_id):
@@ -6902,10 +6853,11 @@ def _format_dt(value):
     return str(value)
 
 
-def _print_runtime_block(inst):
+def _print_runtime_block(inst, emit):
     """Print one Site Runtime Status block from an ARM /siteStatus item."""
+    from azure.cli.core.style import Style
     if not inst:
-        print('  (no runtime status reported)')
+        emit('  (no runtime status reported)')
         return
     state = inst.get('state') or '-'
     details = inst.get('details') or '-'
@@ -6916,54 +6868,40 @@ def _print_runtime_block(inst):
     if isinstance(last_error_ts_raw, str) and last_error_ts_raw.startswith('0001-01-01'):
         last_error_ts_raw = None
     last_error_ts = _format_dt(last_error_ts_raw) or '-'
-    print('  State                {}'.format(_color_state(state)))
-    print('  Details              {}'.format(details))
-    print('  Last Error           {}'.format(last_error))
-    print('  Last Error Details   {}'.format(last_error_details))
-    print('  Last Error Timestamp {}'.format(last_error_ts))
+    emit([(Style.PRIMARY, '  State                '), (_state_style(state), state)])
+    emit('  Details              {}'.format(details))
+    emit('  Last Error           {}'.format(last_error))
+    emit('  Last Error Details   {}'.format(last_error_details))
+    emit('  Last Error Timestamp {}'.format(last_error_ts))
 
 
-def _unwrap_startup_summary(payload, machine):
-    """KuduLite's /api/startuplogs/summary returns a list of
-       [{'InstanceId': ..., 'Startup': {...}}] (one entry when filtered by instance).
-       Extract the inner Startup object for the matching machine, or the first entry."""
-    if payload is None:
-        return None
-    if isinstance(payload, list):
-        if not payload:
-            return None
-        match = next(
-            (e for e in payload
-             if isinstance(e, dict) and (e.get('InstanceId') == machine or e.get('instanceId') == machine)),
-            payload[0])
-        if isinstance(match, dict):
-            return match.get('Startup') or match.get('startup') or match
-        return match
-    if isinstance(payload, dict):
-        return payload.get('Startup') or payload.get('startup') or payload
-    return None
-
-
-def _print_startup_block(s):
+def _print_startup_block(s, emit):
+    from azure.cli.core.style import Style
     if not s:
-        print('  (no startup attempts recorded)')
-        print()
+        emit('  No startup attempts recorded in the last 24 hours')
+        emit('')
         return
-    successful = s.get('successful', s.get('Successful', 0))
-    failed = s.get('failed', s.get('Failed', 0))
-    print('  Successful   {}'.format(_color_count(successful, 'successful')))
-    print('  Failed       {}'.format(_color_count(failed, 'failed')))
-    most_recent = s.get('mostRecent') or s.get('MostRecent')
-    earliest = s.get('earliest') or s.get('Earliest')
+    successful = s.get('Successful', 0)
+    failed = s.get('Failed', 0)
+    emit([(Style.PRIMARY, '  Successful   '), _count_style(successful, 'successful')])
+    emit([(Style.PRIMARY, '  Failed       '), _count_style(failed, 'failed')])
+    most_recent = s.get('MostRecent')
+    earliest = s.get('Earliest')
     if most_recent:
-        print('  Most recent  {} -> {}'.format(
-            _format_dt(most_recent.get('at') or most_recent.get('At')) or '-',
-            _color_outcome(most_recent.get('outcome') or most_recent.get('Outcome'))))
+        outcome = most_recent.get('Outcome') or '-'
+        emit([
+            (Style.PRIMARY, '  Most recent  {} -> '.format(
+                _format_dt(most_recent.get('At')) or '-')),
+            (_outcome_style(outcome), outcome),
+        ])
     if earliest:
-        print('  Earliest     {} -> {}'.format(
-            _format_dt(earliest.get('at') or earliest.get('At')) or '-',
-            _color_outcome(earliest.get('outcome') or earliest.get('Outcome'))))
-    print()
+        outcome = earliest.get('Outcome') or '-'
+        emit([
+            (Style.PRIMARY, '  Earliest     {} -> '.format(
+                _format_dt(earliest.get('At')) or '-')),
+            (_outcome_style(outcome), outcome),
+        ])
+    emit('')
 
 
 def config_slot_auto_swap(cmd, resource_group_name, webapp, slot, auto_swap_slot=None, disable=None):

@@ -94,11 +94,6 @@ def load_arguments(self, _):
                    help="the name of the slot. Default to the productions slot if not specified")
         c.argument('name', arg_type=webapp_name_arg_type)
 
-    with self.argument_context('webapp status') as c:
-        c.argument('instance', options_list=['--instance'],
-                   help='show runtime status for a specific instance only. '
-                        "Run 'az webapp list-instances' to discover instance IDs.")
-
     with self.argument_context('functionapp') as c:
         c.ignore('app_instance')
         c.argument('resource_group_name', arg_type=resource_group_name_type)
@@ -858,9 +853,8 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
         c.argument('resource_group', arg_type=resource_group_name_type)
         c.argument('slot', options_list=['--slot', '-s'], help="the name of the slot. Default to the production slot if not specified")
-        c.argument('instance', options_list=['--instance'],
-                   help='Scope the report to a single worker instance ID. '
-                        'When omitted, returns an overview of every instance seen in the last 24 hours.')
+        c.argument('instance', options_list=['--instance'])
+        c.argument('report', options_list=['--report'], arg_type=get_three_state_flag())
 
     with self.argument_context('functionapp log deployment show') as c:
         c.argument('name', arg_type=functionapp_name_arg_type, id_part=None)

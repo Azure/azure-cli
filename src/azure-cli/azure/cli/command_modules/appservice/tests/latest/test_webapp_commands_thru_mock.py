@@ -39,9 +39,7 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          list_startup_logs,
                                                          show_startup_log,
                                                          troubleshoot_status,
-                                                         create_webapp,
-                                                         show_webapp_status)
-from azure.cli.command_modules.appservice.commands import transform_webapp_status_output
+                                                         create_webapp)
 
 # pylint: disable=line-too-long
 from azure.cli.core.profiles import ResourceType
@@ -1035,13 +1033,13 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
                 {'a3f1b': 'lw0sdlwk0008PB', 'b4d22': 'lw1sdlwk0009EF'}))),
             mock.MagicMock(json=mock.MagicMock(return_value=self._arm_response(arm_items))),
         ]
-        # Real KuduLite response is a list with the summary nested under "Startup".
+        # Real KuduLite response is a single list with one entry per instance.
         a3f1b_startup = {'Successful': 1, 'Failed': 0}
         b4d22_startup = {'Successful': 0, 'Failed': 3}
-        requests_get_mock.side_effect = [
-            self._make_response(200, json_data=[{'InstanceId': 'lw0sdlwk0008PB', 'Startup': a3f1b_startup}]),
-            self._make_response(200, json_data=[{'InstanceId': 'lw1sdlwk0009EF', 'Startup': b4d22_startup}]),
-        ]
+        requests_get_mock.return_value = self._make_response(200, json_data=[
+            {'InstanceId': 'lw0sdlwk0008PB', 'Startup': a3f1b_startup},
+            {'InstanceId': 'lw1sdlwk0009EF', 'Startup': b4d22_startup},
+        ])
 
         result = troubleshoot_status(self.cmd, 'myRG', 'myApp')
 
@@ -1057,13 +1055,12 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
             'https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000'
             '/resourceGroups/myRG/providers/Microsoft.Web/sites/myApp/siteStatus?api-version=2025-05-01',
         ])
-        # One startup-summary call per instance, filtered by machine name.
-        self.assertEqual(requests_get_mock.call_count, 2)
-        called_urls = [call_args.args[0] for call_args in requests_get_mock.call_args_list]
-        self.assertEqual(called_urls, [
-            'https://myapp.scm.azurewebsites.net/api/startuplogs/summary?instance=lw0sdlwk0008PB',
-            'https://myapp.scm.azurewebsites.net/api/startuplogs/summary?instance=lw1sdlwk0009EF',
-        ])
+        # Single unfiltered SCM call returns every instance in one response.
+        requests_get_mock.assert_called_once_with(
+            'https://myapp.scm.azurewebsites.net/api/startuplogs/summary',
+            headers={'Authorization': 'Bearer token'},
+            timeout=30,
+        )
 
     @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
                 return_value={'Authorization': 'Bearer token'})
@@ -1102,6 +1099,7 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
         requests_get_mock.assert_called_once_with(
             'https://myapp.scm.azurewebsites.net/api/startuplogs/summary?instance=lw0sdlwk0007AB',
             headers={'Authorization': 'Bearer token'},
+            timeout=30,
         )
 
     @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
@@ -1209,6 +1207,35 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
                 troubleshoot_status(self.cmd, 'myRG', 'myWindowsApp')
         self.assertIn('Linux', str(cm.exception))
 
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': 'Bearer token'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('requests.get')
+    @mock.patch('azure.cli.command_modules.appservice.custom._render_troubleshoot_status')
+    def test_troubleshoot_status_report_flag_renders_and_returns_none(
+            self, render_mock, requests_get_mock, send_raw_request_mock,
+            _scm_url_mock, _headers_mock):
+        """With --report, command calls the renderer and returns None (no structured payload)."""
+        arm_item = {'instanceId': '7c2d9', 'state': 'Running'}
+        send_raw_request_mock.side_effect = [
+            mock.MagicMock(json=mock.MagicMock(return_value=self._instances_payload(
+                {'7c2d9': 'lw0sdlwk0007AB'}))),
+            mock.MagicMock(json=mock.MagicMock(return_value=self._arm_response(arm_item))),
+        ]
+        requests_get_mock.return_value = self._make_response(
+            200, json_data=[{'InstanceId': 'lw0sdlwk0007AB',
+                             'Startup': {'Successful': 1, 'Failed': 0}}])
+
+        result = troubleshoot_status(self.cmd, 'myRG', 'myApp', report=True)
+
+        self.assertIsNone(result)
+        render_mock.assert_called_once()
+        rendered_payload = render_mock.call_args.args[0]
+        self.assertEqual(rendered_payload['name'], 'myApp')
+        self.assertEqual(rendered_payload['instances'][0]['instanceId'], '7c2d9')
+
 
 class TestRuntimeFailedHintMocked(unittest.TestCase):
     """Tests that the TIP hint appears in RuntimeFailed and timeout errors."""
@@ -1276,121 +1303,6 @@ class TestRuntimeFailedHintMocked(unittest.TestCase):
         error_msg = str(cm.exception)
         self.assertIn('az webapp log startup show -n myApp -g myRG', error_msg)
         self.assertIn('Timeout', error_msg)
-
-
-class TestWebappStatusMocked(unittest.TestCase):
-
-    def setUp(self):
-        self.cmd = _get_test_cmd()
-        self.cmd.cli_ctx.cloud.endpoints.resource_manager = 'https://management.azure.com'
-        self.cmd.cli_ctx.invocation = mock.MagicMock()
-        self.cmd.cli_ctx.invocation.data = {}
-
-    @staticmethod
-    def _status_response():
-        return {
-            'id': '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myRG'
-                  '/providers/Microsoft.Web/sites/myApp',
-            'name': 'myApp',
-            'type': 'Microsoft.Web/sites',
-            'location': 'East US',
-            'properties': [
-                {
-                    'instanceId': '6d3f0a2b8e5c4d1fb97a3c6e2f4a1b09',
-                    'state': 'Started',
-                    'action': 'SiteStarted',
-                    'lastError': 'StaleError',
-                    'lastErrorDetails': 'Previously failed to start',
-                    'lastErrorTimestamp': '2026-06-01T00:00:00Z',
-                    'details': 'Operation completed',
-                    'detailsLevel': 'Information'
-                },
-                {
-                    'instanceId': 'f29b7c145ad8e63b0a1f8d4c5e9b2a70',
-                    'state': 'Starting',
-                    'action': 'PullingImage',
-                    'lastError': 'ImagePullFailed',
-                    'lastErrorDetails': 'Manifest not found',
-                    'lastErrorTimestamp': '2026-06-02T00:00:00Z',
-                    'details': 'Pulling container image',
-                    'detailsLevel': 'Warning'
-                }
-            ]
-        }
-
-    @mock.patch('azure.cli.core.commands.client_factory.get_subscription_id', return_value='00000000-0000-0000-0000-000000000000')
-    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
-    def test_show_webapp_status_builds_url(self, send_raw_request_mock, _get_subscription_id_mock):
-        send_raw_request_mock.return_value.json.return_value = self._status_response()
-
-        result = show_webapp_status(self.cmd, 'myRG', 'myApp')
-
-        self.assertEqual(result, self._status_response())
-        send_raw_request_mock.assert_called_once_with(
-            self.cmd.cli_ctx,
-            'GET',
-            'https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000'
-            '/resourceGroups/myRG/providers/Microsoft.Web/sites/myApp/siteStatus?api-version=2025-05-01'
-        )
-
-    @mock.patch('azure.cli.core.commands.client_factory.get_subscription_id', return_value='00000000-0000-0000-0000-000000000000')
-    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
-    def test_show_webapp_status_filters_slot_instance(self, send_raw_request_mock, _get_subscription_id_mock):
-        instance_response = {
-            'name': 'myApp',
-            'type': 'Microsoft.Web/sites',
-            'properties': self._status_response()['properties'][1]
-        }
-        send_raw_request_mock.return_value.json.return_value = instance_response
-
-        result = show_webapp_status(self.cmd, 'myRG', 'myApp', slot='staging',
-                                    instance='f29b7c145ad8e63b0a1f8d4c5e9b2a70')
-
-        self.assertEqual(result, instance_response)
-        send_raw_request_mock.assert_called_once_with(
-            self.cmd.cli_ctx,
-            'GET',
-            'https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000'
-            '/resourceGroups/myRG/providers/Microsoft.Web/sites/myApp/slots/staging'
-            '/siteStatus/f29b7c145ad8e63b0a1f8d4c5e9b2a70?api-version=2025-05-01'
-        )
-
-    @mock.patch('azure.cli.core.commands.client_factory.get_subscription_id', return_value='00000000-0000-0000-0000-000000000000')
-    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
-    def test_show_webapp_status_raises_for_missing_instance(self, send_raw_request_mock, _get_subscription_id_mock):
-        error = HttpResponseError(message='Not found')
-        error.status_code = 404
-        send_raw_request_mock.side_effect = error
-
-        with self.assertRaises(ResourceNotFoundError):
-            show_webapp_status(self.cmd, 'myRG', 'myApp', instance='missing-instance')
-
-    def test_transform_webapp_status_output_shows_errors(self):
-        rows = transform_webapp_status_output(self._status_response())
-
-        self.assertEqual(rows[0]['InstanceId'], '6d3f0a2b8e5c4d1fb97a3c6e2f4a1b09')
-        self.assertEqual(rows[0]['State'], 'Started')
-        self.assertEqual(rows[0]['Action'], 'SiteStarted')
-        self.assertEqual(rows[0]['LastError'], 'StaleError')
-        self.assertEqual(rows[0]['LastErrorDetails'], 'Previously failed to start')
-        self.assertEqual(rows[0]['LastErrorTimestamp'], '2026-06-01T00:00:00Z')
-        self.assertEqual(rows[0]['Details'], 'Operation completed')
-        self.assertEqual(rows[0]['DetailsLevel'], 'Information')
-        self.assertEqual(rows[1]['LastError'], 'ImagePullFailed')
-        self.assertEqual(rows[1]['LastErrorDetails'], 'Manifest not found')
-
-    def test_transform_webapp_status_output_omits_error_columns_when_no_error(self):
-        healthy = {
-            'properties': [
-                {'instanceId': '6d3f0a2b8e5c4d1fb97a3c6e2f4a1b09', 'state': 'Started', 'action': 'None',
-                 'lastError': None, 'lastErrorDetails': None, 'lastErrorTimestamp': None,
-                 'details': 'Site is running', 'detailsLevel': 'INFO'}
-            ]
-        }
-        rows = transform_webapp_status_output(healthy)
-
-        self.assertEqual(list(rows[0].keys()),
-                         ['InstanceId', 'State', 'Action', 'Details', 'DetailsLevel'])
 
 
 class FakedResponse:  # pylint: disable=too-few-public-methods
