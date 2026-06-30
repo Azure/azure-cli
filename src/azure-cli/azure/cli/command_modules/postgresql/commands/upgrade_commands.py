@@ -4,15 +4,22 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
+import time
+from knack.log import get_logger
 from azure.cli.core.util import user_confirmation
 from knack.util import CLIError
-from .._client_factory import cf_postgres_flexible_replica
+from .._client_factory import cf_postgres_flexible_replica, cf_postgres_flexible_major_version_upgrade_precheck
 from ..utils._flexible_server_location_capabilities_util import get_postgres_server_capability_info
 from ..utils._flexible_server_util import resolve_poller
 from ..utils.validators import pg_version_validator, validate_citus_cluster, validate_resource_group
 
+logger = get_logger(__name__)
 
-def flexible_server_version_upgrade(cmd, client, resource_group_name, server_name, version, yes=None):
+
+def flexible_server_version_upgrade(cmd, client, resource_group_name, server_name, version, validate=None, yes=None):
+    if validate:
+        return _flexible_server_version_upgrade_validate(cmd, client, resource_group_name, server_name, version)
+
     validate_resource_group(resource_group_name)
     validate_citus_cluster(cmd, resource_group_name, server_name)
 
@@ -67,3 +74,51 @@ def flexible_server_version_upgrade(cmd, client, resource_group_name, server_nam
             parameters=parameters),
         cmd.cli_ctx, 'Upgrading server {} to major version {}'.format(server_name, version)
     )
+
+
+def _flexible_server_version_upgrade_validate(cmd, client, resource_group_name, server_name, version):
+    body = {
+        'targetVersion': version
+    }
+
+    start_response = resolve_poller(
+        client.begin_start_major_version_upgrade_precheck(
+            resource_group_name=resource_group_name,
+            server_name=server_name,
+            body=body),
+        cmd.cli_ctx,
+        'Starting major version upgrade precheck for server {} targeting version {}'.format(server_name, version)
+    )
+
+    precheck_validation_id = _get_attr_or_key(start_response, 'name')
+    if not precheck_validation_id:
+        raise CLIError('Failed to retrieve precheck validation id from the upgrade precheck response.')
+
+    precheck_client = cf_postgres_flexible_major_version_upgrade_precheck(cmd.cli_ctx, '_')
+    
+    return precheck_client.get(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        precheck_validation_id=precheck_validation_id)
+
+
+def _get_attr_or_key(obj, name):
+    if obj is None:
+        return None
+    value = getattr(obj, name, None)
+    if value is not None:
+        return value
+    if isinstance(obj, dict):
+        return obj.get(name)
+    properties = getattr(obj, 'properties', None)
+    if properties is not None:
+        return _get_attr_or_key(properties, name)
+    return None
+
+
+def _get_status(obj):
+    status = _get_attr_or_key(obj, 'status')
+    if status is None:
+        return None
+    # Some SDK enums expose .value
+    return getattr(status, 'value', status)
