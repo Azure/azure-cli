@@ -5112,7 +5112,6 @@ def vmss_lifecycle_hook_list(cmd, resource_group_name, vmss_name):
 
 
 def vmss_lifecycle_hook_show(cmd, resource_group_name, vmss_name, type):
-    from azure.cli.core.azclierror import ResourceNotFoundError
     for hook in vmss_lifecycle_hook_list(cmd, resource_group_name, vmss_name):
         if hook.get("type") == type:
             return hook
@@ -5134,7 +5133,6 @@ def _commit_vmss_lifecycle_hooks(cmd, resource_group_name, vmss_name, hooks, no_
 
 def vmss_lifecycle_hook_add(cmd, resource_group_name, vmss_name, type, wait_duration=None,
                             default_action=None, no_wait=False):
-    from azure.cli.core.azclierror import ArgumentUsageError
     lifecycle_hooks = vmss_lifecycle_hook_list(cmd, resource_group_name, vmss_name)
 
     for h in lifecycle_hooks:
@@ -5156,7 +5154,6 @@ def vmss_lifecycle_hook_add(cmd, resource_group_name, vmss_name, type, wait_dura
 
 def vmss_lifecycle_hook_update(cmd, resource_group_name, vmss_name, type, wait_duration=None,
                                default_action=None, no_wait=False):
-    from azure.cli.core.azclierror import ResourceNotFoundError
     lifecycle_hooks = vmss_lifecycle_hook_list(cmd, resource_group_name, vmss_name)
     target_hook = None
 
@@ -5179,8 +5176,6 @@ def vmss_lifecycle_hook_update(cmd, resource_group_name, vmss_name, type, wait_d
 
 def vmss_lifecycle_hook_remove(cmd, resource_group_name, vmss_name, type=None, remove_all=False,
                                no_wait=False):
-    from azure.cli.core.azclierror import ResourceNotFoundError
-
     if remove_all:
         return _commit_vmss_lifecycle_hooks(cmd, resource_group_name, vmss_name, [], no_wait)
 

@@ -2887,7 +2887,7 @@ def _validate_community_gallery_legal_agreement_acceptance(cmd, namespace):
         sys.exit(0)
 
 
-def process_vmss_lifecycle_hook_remove(cmd, namespace):
+def process_vmss_lifecycle_hook_remove(cmd, namespace):  # pylint: disable=unused-argument
     if namespace.remove_all and namespace.type:
         raise MutuallyExclusiveArgumentError("Specify exactly one of --type or --all.")
 
