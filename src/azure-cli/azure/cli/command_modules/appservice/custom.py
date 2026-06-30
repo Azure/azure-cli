@@ -885,7 +885,7 @@ def enable_zip_deploy_flex(cmd, resource_group_name, name, src, timeout=None, sl
 
 # This funtion performs deployment using /zipdeploy for both function app and web app
 def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=None,
-                      track_status=False, enable_kudu_warmup=True, enriched_errors=False):
+                      track_status=False, enable_kudu_warmup=True, enriched_errors=True):
     logger.warning("Getting scm site credentials for zip deployment")
 
     try:
@@ -10676,7 +10676,7 @@ def get_history_triggered_webjob(cmd, resource_group_name, name, webjob_name, sl
 def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None, sku=None,  # pylint: disable=too-many-statements,too-many-branches
               os_type=None, runtime=None, dryrun=False, logs=False, launch_browser=False, html=False,
               app_service_environment=None, track_status=True, enable_kudu_warmup=True, basic_auth="",
-              auto_generated_domain_name_label_scope=None, enriched_errors=False):
+              auto_generated_domain_name_label_scope=None, enriched_errors=True):
     if not name:
         name = generate_default_app_name(cmd)
 
@@ -11117,7 +11117,7 @@ def perform_onedeploy_webapp(cmd,
                              slot=None,
                              track_status=True,
                              enable_kudu_warmup=True,
-                             enriched_errors=False):
+                             enriched_errors=True):
     params = OneDeployParams()
 
     params.cmd = cmd
@@ -11178,7 +11178,7 @@ class OneDeployParams:
         self.enable_kudu_warmup = None
         self.is_linux_webapp = None
         self.is_functionapp = None
-        self.enriched_errors = False
+        self.enriched_errors = True
         # Per-invocation caches. Populated during a single deploy and
         # cleared in _perform_onedeploy_internal's `finally` block. These MUST
         # NOT be logged, serialized, or accessed outside the current call

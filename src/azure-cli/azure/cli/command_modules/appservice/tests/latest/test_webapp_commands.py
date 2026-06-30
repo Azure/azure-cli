@@ -3628,7 +3628,7 @@ class WebappEnrichedErrorsScenarioTest(ScenarioTest):
         self.cmd(
             'webapp create -g {} -n {} --plan {} -r "PYTHON|3.11"'.format(resource_group, webapp_name, plan_name))
         with self.assertRaisesRegex(CLIError, "Status Code: 400"):
-            self.cmd('webapp deploy -g {} -n {} --src-path "{}" --type war'.format(
+            self.cmd('webapp deploy -g {} -n {} --src-path "{}" --type war --enriched-errors false'.format(
                 resource_group, webapp_name, war_file))
 
     @AllowLargeResponse()
