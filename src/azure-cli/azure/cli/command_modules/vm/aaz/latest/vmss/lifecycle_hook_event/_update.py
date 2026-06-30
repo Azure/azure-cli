@@ -13,6 +13,7 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "vmss lifecycle-hook-event update",
+    is_preview=True,
 )
 class Update(AAZCommand):
     """Update operation to update a virtual machine scale set lifecycle hook event.

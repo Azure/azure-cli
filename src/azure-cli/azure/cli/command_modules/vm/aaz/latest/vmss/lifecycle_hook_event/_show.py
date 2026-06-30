@@ -13,6 +13,7 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "vmss lifecycle-hook-event show",
+    is_preview=True,
 )
 class Show(AAZCommand):
     """Get a virtual machine scale set lifecycle hook event.
