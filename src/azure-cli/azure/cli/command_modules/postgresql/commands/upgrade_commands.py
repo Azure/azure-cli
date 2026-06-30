@@ -4,10 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument, line-too-long
-import time
 from knack.log import get_logger
-from azure.cli.core.util import user_confirmation
 from knack.util import CLIError
+from azure.cli.core.util import user_confirmation
 from .._client_factory import cf_postgres_flexible_replica, cf_postgres_flexible_major_version_upgrade_precheck
 from ..utils._flexible_server_location_capabilities_util import get_postgres_server_capability_info
 from ..utils._flexible_server_util import resolve_poller
@@ -95,7 +94,7 @@ def _flexible_server_version_upgrade_validate(cmd, client, resource_group_name, 
         raise CLIError('Failed to retrieve precheck validation id from the upgrade precheck response.')
 
     precheck_client = cf_postgres_flexible_major_version_upgrade_precheck(cmd.cli_ctx, '_')
-    
+
     return precheck_client.get(
         resource_group_name=resource_group_name,
         server_name=server_name,
