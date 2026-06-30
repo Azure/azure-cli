@@ -126,7 +126,6 @@ Release History
 
 **App Service**
 
-* `az webapp create`: Add `--enriched-errors` parameter to show context-enriched diagnostics on Linux web app creation failures (#33088)
 * `az webapp create`: Add post-creation deployment guidance and startup command examples (#33088)
 * `az webapp deploy`: Add build automation guidance for Linux zip deployments (#33088)
 * `az webapp up`: Add logging for OS type, runtime auto-detection, and plan auto-generation (#33088)
