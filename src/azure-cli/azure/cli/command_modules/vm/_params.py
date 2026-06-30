@@ -59,6 +59,8 @@ def load_arguments(self, _):
     EvictionPolicy = ['Deallocate', 'Delete']
     HyperVGenerationTypes = ['V1', 'V2']
     LicenseType = ['Windows_Server', 'Windows_Client', 'RHEL_BYOS', 'SLES_BYOS', 'RHEL_BASE', 'RHEL_SAPAPPS', 'RHEL_SAPHA', 'RHEL_EUS', 'RHEL_BASESAPAPPS', 'RHEL_BASESAPHA', 'SLES_STANDARD', 'SLES', 'SLES_SAP', 'SLES_HPC', 'None', 'RHEL_ELS_6', 'UBUNTU_PRO', 'UBUNTU']
+    LifecycleHookDefaultAction = ['Approve', 'Reject']
+    LifecycleHookType = ['UpgradeAutoOSScheduling', 'UpgradeAutoOSRollingBatchStarting']
     LoadBalancerSkuName = ['Basic', 'Standard', 'Gateway']
     NetworkAccessPolicy = ['AllowAll', 'AllowPrivate', 'DenyAll']
     NsgRule = ['RDP', 'SSH']
@@ -1146,6 +1148,20 @@ def load_arguments(self, _):
         c.argument('run_command_name', run_cmd_name_type)
         c.argument('expand', help='The expand expression to apply on the operation.', deprecate_info=c.deprecate(hide=True))
         c.argument('instance_view', action='store_true', help='The instance view of a run command.')
+
+    with self.argument_context('vmss lifecycle-hook') as c:
+        c.argument('vmss_name', help='The name of the VM scale set.', id_part=None)
+        c.argument('type', arg_type=get_enum_type(LifecycleHookType), help='Specifies the type of the lifecycle hook.')
+        c.argument('wait_duration',
+                   help='Specifies the time duration a virtual machine scale set lifecycle hook event sent to the customer waits for a response from the customer. It should be in ISO 8601 format.')
+        c.argument('default_action', arg_type=get_enum_type(LifecycleHookDefaultAction),
+                   help='Specifies the action that will be applied to a target resource in the virtual machine scale set lifecycle hook event if the platform does not receive a response from the customer for the target resource before waitUntil.')
+
+    with self.argument_context('vmss lifecycle-hook remove') as c:
+        c.argument('type', arg_type=get_enum_type(LifecycleHookType),
+                   help='Specifies the type of the lifecycle hook. Mutually exclusive with --all.')
+        c.argument('remove_all', options_list=['--all'], action='store_true',
+                   help='Remove all lifecycle hooks. Mutually exclusive with --type.')
 
     for scope in ['vm identity assign', 'vmss identity assign']:
         with self.argument_context(scope) as c:

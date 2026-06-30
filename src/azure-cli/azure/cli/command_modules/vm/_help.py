@@ -2746,6 +2746,53 @@ helps['vmss run-command show'] = """
 "myResourceGroup" --run-command-name "myRunCommand" --vmss-name "myVMSS"
 """
 
+helps['vmss lifecycle-hook'] = """
+type: group
+short-summary: Manage lifecycle hooks on a Virtual Machine Scale Set (preview).
+"""
+
+helps['vmss lifecycle-hook add'] = """
+type: command
+short-summary: Add a lifecycle hook to a VMSS.
+examples:
+  - name: Add an UpgradeAutoOSScheduling hook with an 8 hour wait.
+    text: az vmss lifecycle-hook add -g MyRg --vmss-name MyVmss --type UpgradeAutoOSScheduling --wait-duration PT8H
+"""
+
+helps['vmss lifecycle-hook update'] = """
+type: command
+short-summary: Update an existing lifecycle hook on a VMSS.
+examples:
+  - name: Change the wait duration of a hook.
+    text: az vmss lifecycle-hook update -g MyRg --vmss-name MyVmss --type UpgradeAutoOSScheduling --wait-duration PT2H
+"""
+
+helps['vmss lifecycle-hook remove'] = """
+type: command
+short-summary: Remove one lifecycle hook (--type) or all lifecycle hooks (--all) from a VMSS.
+examples:
+  - name: Remove one hook type.
+    text: az vmss lifecycle-hook remove -g MyRg --vmss-name MyVmss --type UpgradeAutoOSScheduling
+  - name: Remove all hooks.
+    text: az vmss lifecycle-hook remove -g MyRg --vmss-name MyVmss --all
+"""
+
+helps['vmss lifecycle-hook show'] = """
+type: command
+short-summary: Show the details of a lifecycle hook on a VMSS.
+examples:
+  - name: Show a hook by type.
+    text: az vmss lifecycle-hook show -g MyRg --vmss-name MyVmss --type UpgradeAutoOSScheduling
+"""
+
+helps['vmss lifecycle-hook list'] = """
+type: command
+short-summary: List all lifecycle hooks on a VMSS.
+examples:
+  - name: List hooks.
+    text: az vmss lifecycle-hook list -g MyRg --vmss-name MyVmss
+"""
+
 helps['vmss scale'] = """
 type: command
 short-summary: Change the number of VMs within a VMSS.

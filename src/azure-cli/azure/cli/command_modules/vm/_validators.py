@@ -2885,3 +2885,11 @@ def _validate_community_gallery_legal_agreement_acceptance(cmd, namespace):
     if not prompt_y_n(msg, default="y"):
         import sys
         sys.exit(0)
+
+
+def process_vmss_lifecycle_hook_remove(cmd, namespace):
+    if namespace.remove_all and namespace.type:
+        raise MutuallyExclusiveArgumentError("Specify exactly one of --type or --all.")
+
+    if not namespace.remove_all and not namespace.type:
+        raise RequiredArgumentMissingError("Specify exactly one of --type or --all.")

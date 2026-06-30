@@ -17,7 +17,7 @@ from azure.cli.command_modules.vm._validators import (
     process_remove_identity_namespace, process_vm_secret_format, process_vm_vmss_stop, validate_vmss_update_namespace,
     process_vm_update_namespace, process_set_applications_namespace, process_vm_disk_attach_namespace,
     process_image_version_create_namespace, process_image_version_update_namespace,
-    process_image_version_undelete_namespace, process_vm_disk_detach_namespace)
+    process_image_version_undelete_namespace, process_vm_disk_detach_namespace, process_vmss_lifecycle_hook_remove)
 
 from azure.cli.command_modules.vm._image_builder import (
     process_image_template_create_namespace, process_img_tmpl_output_add_namespace,
@@ -335,6 +335,14 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'vmss_run_command_show')
         g.custom_command('create', 'vmss_run_command_create', supports_no_wait=True)
         g.custom_command('update', 'vmss_run_command_update', supports_no_wait=True)
+
+    with self.command_group('vmss lifecycle-hook', is_preview=True) as g:
+        g.custom_command('add', 'vmss_lifecycle_hook_add', supports_no_wait=True)
+        g.custom_command('update', 'vmss_lifecycle_hook_update', supports_no_wait=True)
+        g.custom_command('remove', 'vmss_lifecycle_hook_remove', supports_no_wait=True,
+                         validator=process_vmss_lifecycle_hook_remove)
+        g.custom_show_command('show', 'vmss_lifecycle_hook_show')
+        g.custom_command('list', 'vmss_lifecycle_hook_list')
 
     with self.command_group('sig', operation_group='galleries') as g:
         from .operations.sig import SigCreate, SigUpdate, SigShow
