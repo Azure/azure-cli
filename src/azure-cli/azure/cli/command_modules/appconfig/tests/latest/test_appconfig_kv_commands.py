@@ -366,6 +366,11 @@ class AppConfigKVScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_kv_revision_list(self, resource_group, location):
         config_store_prefix = get_resource_name_prefix('KVRevisionTest')
+        # Use an all-lowercase store name prefix. The data-plane endpoint is '<name>.azconfig.io'
+        # and HTTP lowercases the host, so a mixed-case name would not match the (case-sensitive)
+        # name registered with the recording name-replacer, leaving the live host unscrubbed in the
+        # cassette and breaking playback. A lowercase name keeps recording and playback hosts aligned.
+        config_store_prefix = get_resource_name_prefix('kvrevisiontest')
         config_store_name = self.create_random_name(prefix=config_store_prefix, length=24)
 
         location = 'eastus'
@@ -375,8 +380,13 @@ class AppConfigKVScenarioTest(ScenarioTest):
             'rg_loc': location,
             'rg': resource_group,
             'sku': sku
+            'endpoint': 'https://' + config_store_name + '.azconfig.io'
         })
-        create_config_store(self, self.kwargs)
+        # Create the store with local auth disabled and use Microsoft Entra ID (--auth-mode login)
+        # for all data-plane operations. This relies on the recording principal already holding the
+        # "App Configuration Data Owner" role at a scope that covers the store (e.g. subscription or
+        # resource group), so no in-test role assignment or RBAC propagation wait is required.
+        create_config_store(self, self.kwargs, disable_local_auth=True)
 
         entry_key = "Color"
         entry_label = 'v1.0.0'
@@ -387,7 +397,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
         })
 
         # add a new key-value entry
-        self.cmd('appconfig kv set -n {config_store_name} --key {key} --label {label} -y',
+        self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --label {label} -y',
                  checks=[self.check('contentType', ""),
                          self.check('key', entry_key),
                          self.check('value', ""),
@@ -403,7 +413,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
         })
 
         self.cmd(
-            'appconfig kv set -n {config_store_name} --key {key} --value {value} --content-type {content_type} --label {label} -y',
+            'appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --value {value} --content-type {content_type} --label {label} -y',
             checks=[self.check('contentType', entry_content_type),
                     self.check('key', entry_key),
                     self.check('value', updated_entry_value),
@@ -416,13 +426,13 @@ class AppConfigKVScenarioTest(ScenarioTest):
         })
 
         self.cmd(
-            'appconfig kv set -n {config_store_name} --key {key} --value {value} --content-type {content_type} --label {label} -y',
+            'appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --value {value} --content-type {content_type} --label {label} -y',
             checks=[self.check('contentType', entry_content_type),
                     self.check('key', entry_key),
                     self.check('value', updated_entry_value),
                     self.check('label', updated_label)])
 
-        revisions = self.cmd('appconfig revision list -n {config_store_name} --key {key} --label * --top 2 --fields content_type etag label last_modified value').get_output_in_json()
+        revisions = self.cmd('appconfig revision list --endpoint {endpoint} --auth-mode login --key {key} --label * --top 2 --fields content_type etag label last_modified value').get_output_in_json()
         assert len(revisions) == 2
 
         assert revisions[0]['content_type'] == 'text'
@@ -460,13 +470,13 @@ class AppConfigKVScenarioTest(ScenarioTest):
             'tags': tags_str
         })
 
-        self.cmd('appconfig kv set -n {config_store_name} --key {key} --label {label} --tags {tags} -y',
+        self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --label {label} --tags {tags} -y',
              checks=[self.check('key', key_with_tags),
                  self.check('label', label_with_tags),
                  self.check('tags', tags)])
 
         # List revisions with 5 tags
-        list_keys = self.cmd('appconfig revision list -n {config_store_name} --key {key} --tags {tags}').get_output_in_json()
+        list_keys = self.cmd('appconfig revision list --endpoint {endpoint} --auth-mode login --key {key} --tags {tags}').get_output_in_json()
         assert len(list_keys) == 1
 
         # Set key-value with tag1 only
@@ -478,13 +488,13 @@ class AppConfigKVScenarioTest(ScenarioTest):
             'tag1': tag1
         })
 
-        self.cmd('appconfig kv set -n {config_store_name} --key {key} --label {label} --tags {tag1} -y',
+        self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --label {label} --tags {tag1} -y',
              checks=[self.check('key', key_with_tags),
                  self.check('label', label_with_tag1),
                     self.check('tags', tag1_dict)])
 
         # List revisions with tag1 = value1
-        list_keys = self.cmd('appconfig revision list -n {config_store_name} --key {key} --tags {tag1}').get_output_in_json()
+        list_keys = self.cmd('appconfig revision list --endpoint {endpoint} --auth-mode login --key {key} --tags {tag1}').get_output_in_json()
         assert len(list_keys) == 2
 
         # Set key-value with empty tag value
@@ -494,14 +504,14 @@ class AppConfigKVScenarioTest(ScenarioTest):
             'tag_with_empty_value': tag_with_empty_value
         })
 
-        self.cmd('appconfig kv set -n {config_store_name} --key {key} --label {label} --tags {tag_with_empty_value} -y',
+        self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --label {label} --tags {tag_with_empty_value} -y',
              checks=[self.check('key', key_with_tags),
                     self.check('tags', empty_tag_value_dict)])
 
         # List revisions with tag with empty value
-        list_keys = self.cmd('appconfig revision list -n {config_store_name} --key {key} --tags {tag_with_empty_value}').get_output_in_json()
+        list_keys = self.cmd('appconfig revision list --endpoint {endpoint} --auth-mode login --key {key} --tags {tag_with_empty_value}').get_output_in_json()
         assert len(list_keys) == 1
 
         # Get all key-value revisions for key with all tags
-        revisions = self.cmd('appconfig revision list -n {config_store_name} --key {key} --label *').get_output_in_json()
+        revisions = self.cmd('appconfig revision list --endpoint {endpoint} --auth-mode login --key {key} --label *').get_output_in_json()
         assert len(revisions) == 3

@@ -10,12 +10,15 @@ from azure.cli.testsdk.scenario_tests import RecordingProcessor
 from azure.cli.testsdk.scenario_tests.utilities import is_json_payload
 from azure.cli.core.util import shell_safe_json_parse
 
-def create_config_store(test, kwargs):
+def create_config_store(test, kwargs, disable_local_auth=False):
     if 'retention_days' not in kwargs:
         kwargs.update({
             'retention_days': 1
         })
-    test.cmd('appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --retention-days {retention_days}')
+    command = 'appconfig create -n {config_store_name} -g {rg} -l {rg_loc} --sku {sku} --retention-days {retention_days}'
+    if disable_local_auth:
+        command += ' --disable-local-auth true'
+    test.cmd(command)
 
 
 def _get_local_test_resource_prefix():
