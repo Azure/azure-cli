@@ -35,7 +35,6 @@ Release History
 * `az webapp log startup`: Add commands to list and view Linux container startup logs (#33256)
 * `az webapp create`: Add `--site-scoped-certs` parameter to support enabling or disabling site-scoped certificates (#33306)
 * `az webapp up`: Add warning message for future deprecation (#33410)
-* `az webapp deploy/up`: Enable `--enriched-errors` by default for deployment failure logs; disable with `--enriched-errors false` (#33669)
 * `az functionapp deployment source config-zip`: Fix `KeyError` `'FUNCTIONS_WORKER_RUNTIME'` for Go function apps on Flex Consumption (#33404)
 * `az functionapp update-strategy config set`: Add new command to set or update a function app's update strategy configuration (#33341)
 * `az functionapp update-strategy config show`: Add new command to get the details of a function app's update strategy configuration (#33341)
