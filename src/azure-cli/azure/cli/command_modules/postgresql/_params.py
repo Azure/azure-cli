@@ -271,7 +271,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         pg_version_upgrade_validate_arg_type = CLIArgumentType(
             options_list=['--validate-only'],
             action='store_true',
-            help='Run a pre-upgrade validation against the server without performing the actual major version upgrade. '
+            help='Run a pre-upgrade validation against the server without performing major version upgrade on resource. '
                  'Returns the prevalidation check result.'
         )
 

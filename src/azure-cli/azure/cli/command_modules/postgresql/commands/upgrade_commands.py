@@ -16,11 +16,11 @@ logger = get_logger(__name__)
 
 
 def flexible_server_version_upgrade(cmd, client, resource_group_name, server_name, version, validate=None, yes=None):
-    if validate:
-        return _flexible_server_version_upgrade_validate(cmd, client, resource_group_name, server_name, version)
-
     validate_resource_group(resource_group_name)
     validate_citus_cluster(cmd, resource_group_name, server_name)
+
+    if validate:
+        return _flexible_server_version_upgrade_validate(cmd, client, resource_group_name, server_name, version)
 
     if not yes:
         user_confirmation(
