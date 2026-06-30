@@ -21,7 +21,7 @@ Release History
 * `az aks check-acr`: Support national/sovereign clouds where nodes report `cloud=AzureStackCloud` by pointing canipull at the on-node `akscustom.json` environment file (#33551)
 * `az aks create`: Add `--enable-control-plane-metrics`/`--enable-cp-metrics` to opt new clusters into Azure Monitor managed Prometheus control-plane metrics (#33537)
 * `az aks update`: Add `--enable-control-plane-metrics`/`--enable-cp-metrics` and `--disable-control-plane-metrics`/`--disable-cp-metrics` to toggle Azure Monitor managed Prometheus control-plane metrics on existing clusters (#33537)
-* `az aks nodepool get-rollback-versions/rollback`: Add commands to get rollback versions and roll back an agent pool to the most recently used configuration. (#33509)
+* `az aks nodepool get-rollback-versions/rollback`: Add commands to get rollback versions and roll back an agent pool to the most recently used configuration (#33509)
 * `az aks create/update`: Set `principalType` when creating role assignments to avoid `PrincipalNotFound` failures caused by Microsoft Entra ID replication delay (#33586)
 
 **App Service**
@@ -45,7 +45,7 @@ Release History
 
 **CDN**
 
-* Migrated the entire module to `azure-cli-extensions` (#33336)
+* Migrate the entire module to `azure-cli-extensions` (#33336)
 
 **Compute**
 
@@ -81,11 +81,12 @@ Release History
 * `az network vpn-connection create`: Fix `--shared-key` incorrectly required when `--auth-type Certificate` is used (#33523)
 * `az network ddos-custom-policy`: Support specifying frontend IP configuration associations (#33413)
 * `az network traffic-manager profile create/update`: Add `--record-type` parameter to support record type filtering (#33503)
-* `az network private-link-resource`, `az network private-endpoint-connection`: Add support for HorizonDB clusters (#33644)
+* `az network private-endpoint-connection`: Add provider `Microsoft.HorizonDB/clusters` (#33644)
 
 **Packaging**
 
-* Bump Python version to 3.14 (#33313)
+* Support Python 3.14
+* Bump embedded Python to 3.14.5 (#33313)
 
 **Policy**
 
@@ -94,7 +95,7 @@ Release History
 **PostgreSQL**
 
 * `az postgres flexible-server create/restore/geo-restore/replica create`: Add new arguments `--federated-client-id` and `--backup-federated-client-id` to support multi-tenant application registration (#33645)
-* `az postgresql flexible-server maintenance-event list | show | apply-now | reschedule`: Add commands for maintenance events (#33662)
+* `az postgresql flexible-server maintenance-event list/show/apply-now/reschedule`: Add commands for maintenance events (#33662)
 
 **Resource**
 
@@ -102,9 +103,9 @@ Release History
 
 **Role**
 
-* Feature: Add `az role deny-assignment` create/delete commands (#33109)
+* `az role deny-assignment create/delete`: Add new commands (#33109)
 
-**Ssh**
+**SSH**
 
 * `az ssh`: Restore explicit failure for unsupported managed identity and Cloud Shell SSH cert flows (#33534)
 
