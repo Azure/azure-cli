@@ -382,6 +382,23 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             help='The read replicas the virtual endpoints point to.'
         )
 
+        maintenance_event_id_arg_type = CLIArgumentType(
+            options_list=['--maintenance-event-id'],
+            id_part='child_name_1',
+            help='The maintenance event identifier.'
+        )
+
+        maintenance_status_arg_type = CLIArgumentType(
+            options_list=['--maintenance-status'],
+            arg_type=get_enum_type(['Upcoming', 'Past']),
+            help='Filter maintenance events by status.'
+        )
+
+        start_time_arg_type = CLIArgumentType(
+            options_list=['--start-time', '-t'],
+            help='New UTC start time to target rescheduling maintenance (ISO8601 format), e.g., 2026-04-10T10:00:00+00:00.'
+        )
+
         with self.argument_context('{} flexible-server'.format(command_group)) as c:
             c.argument('resource_group_name', arg_type=resource_group_name_type)
             c.argument('server_name', arg_type=server_name_arg_type)
@@ -653,6 +670,21 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
         with self.argument_context('{} flexible-server backup delete'.format(command_group)) as c:
             c.argument('yes', arg_type=yes_arg_type)
+
+        # maintenance-event
+        with self.argument_context('{} flexible-server maintenance-event'.format(command_group)) as c:
+            c.argument('server_name', arg_type=server_name_resource_arg_type)
+
+        with self.argument_context('{} flexible-server maintenance-event list'.format(command_group)) as c:
+            c.argument('maintenance_status', arg_type=maintenance_status_arg_type)
+            c.ignore('ids')
+
+        for scope in ['show', 'reschedule', 'apply-now']:
+            with self.argument_context('{} flexible-server maintenance-event {}'.format(command_group, scope)) as c:
+                c.argument('maintenance_event_id', arg_type=maintenance_event_id_arg_type)
+
+        with self.argument_context('{} flexible-server maintenance-event reschedule'.format(command_group)) as c:
+            c.argument('start_time', arg_type=start_time_arg_type, required=True)
 
         # identity
         with self.argument_context('{} flexible-server identity'.format(command_group)) as c:
