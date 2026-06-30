@@ -15,6 +15,7 @@ from azure.cli.command_modules.acs._client_factory import (
 )
 from azure.cli.command_modules.acs._format import (
     aks_agentpool_list_table_format,
+    aks_agentpool_rollback_versions_table_format,
     aks_namespace_list_table_format,
     aks_agentpool_show_table_format,
     aks_list_nodepool_snapshot_table_format,
@@ -176,6 +177,10 @@ def load_command_table(self, _):
         g.custom_command('update', 'aks_agentpool_update',
                          supports_no_wait=True)
         g.custom_command('get-upgrades', 'aks_agentpool_get_upgrade_profile')
+        g.custom_command('get-rollback-versions', 'aks_agentpool_get_rollback_versions',
+                         table_transformer=aks_agentpool_rollback_versions_table_format)
+        g.custom_command('rollback', 'aks_agentpool_rollback',
+                         supports_no_wait=True)
         g.custom_command('upgrade', 'aks_agentpool_upgrade',
                          supports_no_wait=True)
         g.custom_command('scale', 'aks_agentpool_scale', supports_no_wait=True)

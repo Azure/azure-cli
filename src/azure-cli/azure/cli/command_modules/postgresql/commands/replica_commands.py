@@ -33,6 +33,7 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, nam
                             location=None, vnet=None, subnet=None,
                             private_dns_zone_arguments=None, no_wait=False,
                             byok_identity=None, byok_key=None,
+                            federated_client_id=None, backup_federated_client_id=None,
                             sku_name=None, tier=None, storage_type=None,
                             storage_gb=None, performance_tier=None, yes=False, tags=None):
     validate_resource_group(resource_group_name)
@@ -82,7 +83,9 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, nam
         logging_name='PostgreSQL', command_group='postgres', server_client=client, location=location)
     validate_server_name(db_context, name, 'Microsoft.DBforPostgreSQL/flexibleServers')
 
-    pg_byok_validator(byok_identity, byok_key)
+    pg_byok_validator(byok_identity, byok_key,
+                      federated_client_id=federated_client_id,
+                      backup_federated_client_id=backup_federated_client_id)
 
     parameters = postgresql_flexibleservers.models.Server(
         tags=tags,
@@ -106,9 +109,10 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, nam
     else:
         parameters.network = source_server_object.network
 
-    parameters.identity, parameters.data_encryption = build_identity_and_data_encryption(db_engine='postgres',
-                                                                                         byok_identity=byok_identity,
-                                                                                         byok_key=byok_key)
+    parameters.identity, parameters.data_encryption = build_identity_and_data_encryption(byok_identity=byok_identity,
+                                                                                         byok_key=byok_key,
+                                                                                         federated_client_id=federated_client_id,
+                                                                                         backup_federated_client_id=backup_federated_client_id)
 
     parameters.sku = postgresql_flexibleservers.models.Sku(name=sku_name, tier=tier)
 

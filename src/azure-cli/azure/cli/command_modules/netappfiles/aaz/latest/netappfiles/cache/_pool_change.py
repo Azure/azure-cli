@@ -22,9 +22,9 @@ class PoolChange(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2026-01-01",
+        "version": "2026-04-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/caches/{}/poolchange", "2026-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/caches/{}/poolchange", "2026-04-01"],
         ]
     }
 
@@ -180,7 +180,7 @@ class PoolChange(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2026-01-01",
+                    "api-version", "2026-04-01",
                     required=True,
                 ),
             }
@@ -277,6 +277,10 @@ class PoolChange(AAZCommand):
             )
             properties.export_policy = AAZObjectType(
                 serialized_name="exportPolicy",
+            )
+            properties.file_access_logs = AAZStrType(
+                serialized_name="fileAccessLogs",
+                flags={"read_only": True},
             )
             properties.file_path = AAZStrType(
                 serialized_name="filePath",

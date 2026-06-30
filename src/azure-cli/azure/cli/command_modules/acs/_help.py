@@ -558,6 +558,9 @@ parameters:
   - name: --enable-windows-recording-rules
     type: bool
     short-summary: Enable Windows Recording Rules when enabling the Azure Monitor Metrics addon
+  - name: --enable-control-plane-metrics --enable-cp-metrics
+    type: bool
+    short-summary: Enable collection of Azure Monitor managed Prometheus control plane metrics for managed cluster components (controlplane-apiserver and controlplane-etcd targets by default). Requires Azure Monitor metrics to be enabled (already enabled or via --enable-azure-monitor-metrics).
   - name: --enable-azure-monitor-app-monitoring
     type: bool
     short-summary: Enable Azure Monitor Application Monitoring auto-instrumentation for a Kubernetes cluster.
@@ -1102,6 +1105,12 @@ parameters:
   - name: --disable-azure-monitor-metrics
     type: bool
     short-summary: Disable Azure Monitor Metrics Profile. This will delete all DCRA's associated with the cluster, any linked DCRs with the data stream = prometheus-stream and the recording rule groups created by the addon for this AKS cluster.
+  - name: --enable-control-plane-metrics --enable-cp-metrics
+    type: bool
+    short-summary: Enable collection of Azure Monitor managed Prometheus control plane metrics for managed cluster components (controlplane-apiserver and controlplane-etcd targets by default). Requires Azure Monitor metrics to be enabled (already enabled or via --enable-azure-monitor-metrics).
+  - name: --disable-control-plane-metrics --disable-cp-metrics
+    type: bool
+    short-summary: Disable collection of Azure Monitor managed Prometheus control plane metrics. Leaves Azure Monitor metrics enabled.
   - name: --enable-azure-monitor-app-monitoring
     type: bool
     short-summary: Enable Azure Monitor Application Monitoring auto-instrumentation for a Kubernetes cluster.
@@ -1487,16 +1496,16 @@ helps["aks maintenanceconfiguration add"] = """
     parameters:
         - name: --weekday
           type: string
-          short-summary: A day in week on which maintenance is allowed. E.g. Monday. Applicable to default maintenance configuration only.
+          short-summary: A day in week on which maintenance is allowed (legacy timeInWeek format, default config only). See examples for the maintenanceWindow alternative.
         - name: --start-hour
           type: string
-          short-summary: The start time of 1 hour window which maintenance is allowd. E.g. 1 means it's allowd between 1:00 am and 2:00 am. Applicable to default maintenance configuration only.
+          short-summary: The start of a 1-hour maintenance window, e.g. 1 means 1:00am-2:00am (legacy timeInWeek format, default config only). See examples for the maintenanceWindow alternative.
         - name: --schedule-type
           type: string
-          short-summary: Choose either 'Daily', 'Weekly', 'AbsoluteMonthly' or 'RelativeMonthly' for your maintenance schedule. Only applicable to 'aksManagedAutoUpgradeSchedule' and 'aksManagedNodeOSUpgradeSchedule' maintenance configuration.
+          short-summary: Choose either 'Daily', 'Weekly', 'AbsoluteMonthly' or 'RelativeMonthly' for your maintenance schedule. For default maintenance configuration, only 'Weekly' is supported.
         - name: --start-date
           type: string
-          short-summary: The date the maintenance configuration activates. If not specified, the maintenance window will be active right away."
+          short-summary: The date the maintenance configuration activates. If not specified, the maintenance window will be active right away. Supported for all configuration types, including default."
         - name: --start-time
           type: string
           short-summary: The start time of the maintenance window. Accepted values are from '00:00' to '23:59'. '--utc-offset' applies to this field. For example, '02:00' with '--utc-offset +02:00' means UTC time '00:00'.
@@ -1505,25 +1514,25 @@ helps["aks maintenanceconfiguration add"] = """
           short-summary: The length of maintenance window range from 4 to 24 hours.
         - name: --utc-offset
           type: string
-          short-summary: The UTC offset in format +/-HH:mm. For example, '+05:30' for IST and '-07:00' for PST. If not specified, the default is '+00:00'.
+          short-summary: The UTC offset in format +/-HH:mm. For example, '+05:30' for IST and '-07:00' for PST. If not specified, the default is '+00:00'. Supported for all configuration types, including default.
         - name: --interval-days
           type: int
-          short-summary: The number of days between each set of occurrences for daily schedule type.
+          short-summary: The number of days between each set of occurrences for daily schedule type. Not applicable to default maintenance configuration.
         - name: --interval-weeks
           type: int
-          short-summary: The number of weeks between each set of occurrences. Applicable to weekly schedule types only.
+          short-summary: The number of weeks between each set of occurrences. Applicable to weekly schedule types only. Cannot be specified for default maintenance configuration (the interval is always 1 week).
         - name: --interval-months
           type: int
-          short-summary: The number of months between each set of occurrences. Applicable to absolute and relative monthly schedule types.
+          short-summary: The number of months between each set of occurrences. Applicable to absolute and relative monthly schedule types. Not applicable to default maintenance configuration.
         - name: --day-of-week
           type: string
           short-summary: Specify on which day of the week the maintenance occurs. E.g. "Monday". Applicable to weekly and relative monthly schedule types.
         - name: --day-of-month
           type: int
-          short-summary: Specify on which day of the month the maintenance occurs. E.g. 1 indicates the 1st of the month. Applicable to absolute monthly schedule type only.
+          short-summary: Specify on which day of the month the maintenance occurs. E.g. 1 indicates the 1st of the month. Applicable to absolute monthly schedule type only. Not applicable to default maintenance configuration.
         - name: --week-index
           type: string
-          short-summary: Specify on which instance of the allowed days specified in '--day-of-week' the maintenance occurs. Applicable to relative monthly schedule type only.
+          short-summary: Specify on which instance of the allowed days specified in '--day-of-week' the maintenance occurs. Applicable to relative monthly schedule type only. Not applicable to default maintenance configuration.
         - name: --config-file
           type: string
           short-summary: The maintenance configuration json file.
@@ -1569,6 +1578,10 @@ helps["aks maintenanceconfiguration add"] = """
                         }
                       ]
               }
+        - name: Add default maintenance configuration with weekly maintenanceWindow schedule.
+          text: |
+            az aks maintenanceconfiguration add -g MyResourceGroup --cluster-name test1 -n default --schedule-type Weekly --day-of-week Monday --duration 4 --start-time 09:00
+              The maintenance is allowed on Monday from 09:00 to 13:00 (UTC) every week. Use --utc-offset to adjust the timezone and --start-date to set an activation date.
         - name: Add aksManagedNodeOSUpgradeSchedule maintenance configuration with daily schedule.
           text: |
             az aks maintenanceconfiguration add -g MyResourceGroup --cluster-name test1 -n aksManagedNodeOSUpgradeSchedule --schedule-type Daily --interval-days 2 --duration 12 --utc-offset=-08:00 --start-date 2023-01-16 --start-time 00:00
@@ -1621,16 +1634,16 @@ helps["aks maintenanceconfiguration update"] = """
     parameters:
         - name: --weekday
           type: string
-          short-summary: A day in week on which maintenance is allowed. E.g. Monday. Applicable to default maintenance configuration only.
+          short-summary: A day in week on which maintenance is allowed (legacy timeInWeek format, default config only). See examples for the maintenanceWindow alternative.
         - name: --start-hour
           type: string
-          short-summary: The start time of 1 hour window which maintenance is allowd. E.g. 1 means it's allowd between 1:00 am and 2:00 am. Applicable to default maintenance configuration only.
+          short-summary: The start of a 1-hour maintenance window, e.g. 1 means 1:00am-2:00am (legacy timeInWeek format, default config only). See examples for the maintenanceWindow alternative.
         - name: --schedule-type
           type: string
-          short-summary: Choose either 'Daily', 'Weekly', 'AbsoluteMonthly' or 'RelativeMonthly' for your maintenance schedule. Only applicable to 'aksManagedAutoUpgradeSchedule' and 'aksManagedNodeOSUpgradeSchedule' maintenance configuration.
+          short-summary: Choose either 'Daily', 'Weekly', 'AbsoluteMonthly' or 'RelativeMonthly' for your maintenance schedule. For default maintenance configuration, only 'Weekly' is supported.
         - name: --start-date
           type: string
-          short-summary: The date the maintenance configuration activates. If not specified, the maintenance window will be active right away."
+          short-summary: The date the maintenance configuration activates. If not specified, the maintenance window will be active right away. Supported for all configuration types, including default."
         - name: --start-time
           type: string
           short-summary: The start time of the maintenance window. Accepted values are from '00:00' to '23:59'. '--utc-offset' applies to this field. For example, '02:00' with '--utc-offset +02:00' means UTC time '00:00'.
@@ -1639,25 +1652,25 @@ helps["aks maintenanceconfiguration update"] = """
           short-summary: The length of maintenance window range from 4 to 24 hours.
         - name: --utc-offset
           type: string
-          short-summary: The UTC offset in format +/-HH:mm. For example, '+05:30' for IST and '-07:00' for PST. If not specified, the default is '+00:00'.
+          short-summary: The UTC offset in format +/-HH:mm. For example, '+05:30' for IST and '-07:00' for PST. If not specified, the default is '+00:00'. Supported for all configuration types, including default.
         - name: --interval-days
           type: int
-          short-summary: The number of days between each set of occurrences for daily schedule type.
+          short-summary: The number of days between each set of occurrences for daily schedule type. Not applicable to default maintenance configuration.
         - name: --interval-weeks
           type: int
-          short-summary: The number of weeks between each set of occurrences. Applicable to weekly schedule types only.
+          short-summary: The number of weeks between each set of occurrences. Applicable to weekly schedule types only. Cannot be specified for default maintenance configuration (the interval is always 1 week).
         - name: --interval-months
           type: int
-          short-summary: The number of months between each set of occurrences. Applicable to absolute and relative monthly schedule types.
+          short-summary: The number of months between each set of occurrences. Applicable to absolute and relative monthly schedule types. Not applicable to default maintenance configuration.
         - name: --day-of-week
           type: string
           short-summary: Specify on which day of the week the maintenance occurs. E.g. "Monday". Applicable to weekly and relative monthly schedule types.
         - name: --day-of-month
           type: int
-          short-summary: Specify on which day of the month the maintenance occurs. E.g. 1 indicates the 1st of the month. Applicable to absolute monthly schedule type only.
+          short-summary: Specify on which day of the month the maintenance occurs. E.g. 1 indicates the 1st of the month. Applicable to absolute monthly schedule type only. Not applicable to default maintenance configuration.
         - name: --week-index
           type: string
-          short-summary: Specify on which instance of the allowed days specified in '--day-of-week' the maintenance occurs. Applicable to relative monthly schedule type only.
+          short-summary: Specify on which instance of the allowed days specified in '--day-of-week' the maintenance occurs. Applicable to relative monthly schedule type only. Not applicable to default maintenance configuration.
         - name: --config-file
           type: string
           short-summary: The maintenance configuration json file.
@@ -1703,6 +1716,10 @@ helps["aks maintenanceconfiguration update"] = """
                         }
                       ]
               }
+        - name: Update default maintenance configuration with weekly maintenanceWindow schedule.
+          text: |
+            az aks maintenanceconfiguration update -g MyResourceGroup --cluster-name test1 -n default --schedule-type Weekly --day-of-week Monday --duration 4 --start-time 09:00
+              The maintenance is allowed on Monday from 09:00 to 13:00 (UTC) every week. Use --utc-offset to adjust the timezone and --start-date to set an activation date.
         - name: Update aksManagedNodeOSUpgradeSchedule maintenance configuration with daily schedule.
           text: |
             az aks maintenanceconfiguration update -g MyResourceGroup --cluster-name test1 -n aksManagedNodeOSUpgradeSchedule --schedule-type Daily --interval-days 2 --duration 12 --utc-offset=-08:00 --start-date 2023-01-16 --start-time 00:00
@@ -2075,6 +2092,9 @@ parameters:
     long-summary: |
         Azure provides a different workload-runtime to enable Kata supported workloads in your nodepools. The following values can be specified:
           - "KataVmIsolation" for Kata.
+  - name: --enable-artifact-streaming
+    type: bool
+    short-summary: Enable artifact streaming for VirtualMachineScaleSets managed by a node pool, to speed up the cold-start of containers on a node through on-demand image loading. This option is only valid for Linux nodepools. To use this feature, container images must also enable artifact streaming on ACR. If not specified, the default is false.
 
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
@@ -2122,6 +2142,17 @@ short-summary: Get the available upgrade versions for an agent pool of the manag
 examples:
   - name: Get the available upgrade versions for an agent pool of the managed Kubernetes cluster.
     text: az aks nodepool get-upgrades --resource-group MyResourceGroup --cluster-name MyManagedCluster --nodepool-name MyNodePool
+    crafted: true
+"""
+
+helps["aks nodepool get-rollback-versions"] = """
+type: command
+short-summary: Get the available rollback versions for an agent pool of the managed Kubernetes cluster.
+long-summary: |
+    Get the list of historically used Kubernetes and node image versions that can be used for rollback operations.
+examples:
+  - name: Get the available rollback versions for an agent pool.
+    text: az aks nodepool get-rollback-versions --resource-group MyResourceGroup --cluster-name MyManagedCluster --nodepool-name MyNodePool
     crafted: true
 """
 
@@ -2233,6 +2264,12 @@ parameters:
   - name: --gpu-driver
     type: string
     short-summary: Whether to install driver for GPU node pool. Possible values are "Install" or "None".
+  - name: --enable-artifact-streaming
+    type: bool
+    short-summary: Enable artifact streaming for VirtualMachineScaleSets managed by a Linux node pool, to speed up the cold-start of containers on a node through on-demand image loading. To use this feature, container images must also enable artifact streaming on ACR. If not specified, the default is false.
+  - name: --disable-artifact-streaming
+    type: bool
+    short-summary: Disable artifact streaming for VirtualMachineScaleSets managed by a Linux node pool.
 examples:
   - name: Reconcile the nodepool back to its current state.
     text: az aks nodepool update -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster
@@ -2281,6 +2318,29 @@ parameters:
   - name: --if-none-match
     type: string
     short-summary: Set to '*' to allow a new node pool to be created, but to prevent updating an existing node pool. Other values will be ignored.
+"""
+
+helps["aks nodepool rollback"] = """
+type: command
+short-summary: Rollback an agent pool to the most recently used configuration (N-1).
+long-summary: |
+    Rollback an agent pool to the most recently used version based on rollback history.
+    This will rollback both the Kubernetes version and node image version to their most recent previous state.
+    For downgrades to older versions (N-2 or earlier), use a separate downgrade operation.
+parameters:
+  - name: --aks-custom-headers
+    type: string
+    short-summary: Comma-separated key-value pairs to specify custom headers.
+  - name: --if-match
+    type: string
+    short-summary: The value provided will be compared to the ETag of the node pool, if it matches the operation will proceed. If it does not match, the request will be rejected to prevent accidental overwrites. This must not be specified when creating a new agentpool.
+  - name: --if-none-match
+    type: string
+    short-summary: Set to '*' to allow a new node pool to be created, but to prevent updating an existing node pool. Other values will be ignored.
+examples:
+  - name: Rollback a nodepool to the most recently used version.
+    text: az aks nodepool rollback --resource-group MyResourceGroup --cluster-name MyManagedCluster --nodepool-name MyNodePool
+    crafted: true
 """
 
 helps["aks nodepool stop"] = """

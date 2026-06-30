@@ -33,7 +33,7 @@ parameters:
     default: []
   - name: PythonVersion
     type: string
-    default: '3.13'
+    default: '3.14'
   - name: MacosArm64Image
     type: string
     default: 'macos-15-arm64'
@@ -713,7 +713,7 @@ jobs:
       echo "=== Functional Test ==="
       # Test CLI
       if brew list python@${{ parameters.PythonVersion }} &>/dev/null; then
-        AZ_PYTHON="$(brew --prefix python@${{ parameters.PythonVersion }})/libexec/bin/python3"
+        AZ_PYTHON="$(brew --prefix python@${{ parameters.PythonVersion }})/libexec/bin/python"
         export AZ_PYTHON
         export AZ_DEBUG=1
         if "$TEST_DIR/bin/az" version 2>&1 | head -5; then

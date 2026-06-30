@@ -23,8 +23,8 @@ ALLOWED_HTTP_HEADER_NAMES = ['x-forwarded-host', 'x-forwarded-for', 'x-azure-fdi
 
 def show_webapp_access_restrictions(cmd, resource_group_name, name, slot=None):
     configs = get_site_configs(cmd, resource_group_name, name, slot)
-    access_restrictions = [r.serialize() for r in (configs.ip_security_restrictions or [])]
-    scm_access_restrictions = [r.serialize() for r in (configs.scm_ip_security_restrictions or [])]
+    access_restrictions = [r.as_dict() for r in (configs.ip_security_restrictions or [])]
+    scm_access_restrictions = [r.as_dict() for r in (configs.scm_ip_security_restrictions or [])]
     access_rules = {
         "scmIpSecurityRestrictionsUseMain": configs.scm_ip_security_restrictions_use_main,
         "ipSecurityRestrictionsDefaultAction": configs.ip_security_restrictions_default_action,

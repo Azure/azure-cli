@@ -11,7 +11,6 @@ from azure.cli.command_modules.postgresql._client_factory import (
     cf_postgres_flexible_db,
     cf_postgres_flexible_location_capabilities,
     cf_postgres_flexible_backups,
-    cf_postgres_flexible_ltr_backups,
     cf_postgres_flexible_replica,
     cf_postgres_flexible_admin,
     cf_postgres_flexible_migrations,
@@ -20,7 +19,8 @@ from azure.cli.command_modules.postgresql._client_factory import (
     cf_postgres_flexible_virtual_endpoints,
     cf_postgres_flexible_server_threat_protection_settings,
     cf_postgres_flexible_advanced_threat_protection_settings,
-    cf_postgres_flexible_server_log_files)
+    cf_postgres_flexible_server_log_files,
+    cf_postgres_flexible_maintenance_events)
 from azure.cli.command_modules.postgresql.utils.validators import validate_private_endpoint_connection_id
 from azure.cli.command_modules.postgresql.utils._transformers import (
     table_transform_output,
@@ -67,11 +67,6 @@ def load_flexibleserver_command_table(self, _):
         client_factory=cf_postgres_flexible_backups
     )
 
-    postgres_flexible_ltr_backup_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.postgresqlflexibleservers.operations#BackupsLongTermRetentionOperations.{}',
-        client_factory=cf_postgres_flexible_ltr_backups
-    )
-
     postgres_flexible_replica_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.postgresqlflexibleservers.operations#ReplicasOperations.{}',
         client_factory=cf_postgres_flexible_replica
@@ -105,6 +100,11 @@ def load_flexibleserver_command_table(self, _):
     postgres_flexible_server_log_files_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.postgresqlflexibleservers.operations#CapturedLogsOperations.{}',
         client_factory=cf_postgres_flexible_server_log_files
+    )
+
+    postgres_flexible_maintenance_events_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.postgresqlflexibleservers.operations#MaintenanceEventsOperations.{}',
+        client_factory=cf_postgres_flexible_maintenance_events
     )
 
     postgres_flexible_server_private_endpoint_connections_sdk = CliCommandType(
@@ -241,14 +241,6 @@ def load_flexibleserver_command_table(self, _):
         g.custom_command('create', 'backup_create_func')
         g.custom_command('delete', 'backup_delete_func')
 
-    with self.command_group('postgres flexible-server long-term-retention', postgres_flexible_ltr_backup_sdk,
-                            custom_command_type=backup_commands,
-                            client_factory=cf_postgres_flexible_ltr_backups) as g:
-        g.command('list', 'list_by_server', transform=transform_backups_list)
-        g.show_command('show', 'get', transform=transform_backup)
-        g.custom_command('pre-check', 'ltr_precheck_func')
-        g.custom_command('start', 'ltr_start_func')
-
     replica_commands = CliCommandType(
         operations_tmpl='azure.cli.command_modules.postgresql.commands.replica_commands#{}')
     with self.command_group('postgres flexible-server replica', postgres_flexible_replica_sdk,
@@ -303,6 +295,16 @@ def load_flexibleserver_command_table(self, _):
                             client_factory=cf_postgres_flexible_server_log_files) as g:
         g.custom_command('list', 'flexible_server_list_log_files_with_filter')
         g.custom_command('download', 'flexible_server_download_log_files')
+
+    maintenance_event_commands = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.postgresql.commands.maintenance_event_commands#{}')
+    with self.command_group('postgres flexible-server maintenance-event', postgres_flexible_maintenance_events_sdk,
+                            custom_command_type=maintenance_event_commands,
+                            client_factory=cf_postgres_flexible_maintenance_events) as g:
+        g.custom_command('list', 'flexible_server_maintenance_event_list')
+        g.custom_show_command('show', 'flexible_server_maintenance_event_show')
+        g.custom_command('reschedule', 'flexible_server_maintenance_event_reschedule', supports_no_wait=True)
+        g.custom_command('apply-now', 'flexible_server_maintenance_event_apply_now', supports_no_wait=True)
 
     private_endpoint_commands = CliCommandType(
         operations_tmpl='azure.cli.command_modules.postgresql.commands.private_endpoint_commands#{}')

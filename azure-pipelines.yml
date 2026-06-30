@@ -25,7 +25,7 @@ variables:
 
 # macOS Cask parameters
 - name: macos_cask_python_version
-  value: '3.13'
+  value: '3.14'
 
 parameters:
 - name: architectures
@@ -137,9 +137,9 @@ jobs:
 
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.13'
+    displayName: 'Use Python 3.14'
     inputs:
-      versionSpec: 3.13
+      versionSpec: '3.14'
 
   - bash: ./scripts/ci/dependency_check.sh
     displayName: 'Verify src/azure-cli/requirements.py3.Linux.txt'
@@ -152,9 +152,9 @@ jobs:
 
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.13'
+    displayName: 'Use Python 3.14'
     inputs:
-      versionSpec: 3.13
+      versionSpec: '3.14'
 
   - bash: ./scripts/ci/dependency_check.sh
     displayName: 'Verify src/azure-cli/requirements.py3.Darwin.txt'
@@ -167,9 +167,9 @@ jobs:
 
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.13'
+    displayName: 'Use Python 3.14'
     inputs:
-      versionSpec: 3.13
+      versionSpec: '3.14'
 
   - task: BatchScript@1
     inputs:
@@ -184,9 +184,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.13'
+    displayName: 'Use Python 3.14'
     inputs:
-      versionSpec: 3.13
+      versionSpec: '3.14'
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -439,9 +439,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.13'
+    displayName: 'Use Python 3.14'
     inputs:
-      versionSpec: 3.13
+      versionSpec: '3.14'
 
   - task: PipAuthenticate@1
     condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/release')
@@ -476,8 +476,8 @@ jobs:
     matrix:
       Python312:
         python.version: '3.12'
-      Python313:
-        python.version: '3.13'
+      Python314:
+        python.version: '3.14'
   dependsOn: BuildPythonWheel
   condition: succeeded()
   pool:
@@ -516,8 +516,8 @@ jobs:
     matrix:
       Python312:
         python.version: '3.12'
-      Python313:
-        python.version: '3.13'
+      Python314:
+        python.version: '3.14'
   steps:
   - template: .azure-pipelines/templates/automation_test.yml
     parameters:
@@ -533,8 +533,8 @@ jobs:
     matrix:
       Python312:
         python.version: '3.12'
-      Python313:
-        python.version: '3.13'
+      Python314:
+        python.version: '3.14'
   steps:
   - template: .azure-pipelines/templates/automation_test.yml
     parameters:
@@ -553,14 +553,14 @@ jobs:
     matrix:
       Python312:
         python.version: '3.12'
-      Python313:
-        python.version: '3.13'
+      Python314:
+        python.version: '3.14'
   steps:
   - task: UsePythonVersion@0
     displayName: 'Use Python $(python.version)'
     inputs:
       versionSpec: '$(python.version)'
-  - bash: pip install --upgrade pip wheel setuptools
+  - bash: pip install --upgrade pip wheel "setuptools<81"
     displayName: 'Install pip and wheel'
   - bash: ./scripts/ci/test_profile_integration.sh
     displayName: 'Run Integration Test against Profiles'
@@ -574,14 +574,14 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   strategy:
     matrix:
-      Python313:
-        python.version: '3.13'
+      Python314:
+        python.version: '3.14'
   steps:
   - task: UsePythonVersion@0
     displayName: 'Use Python $(python.version)'
     inputs:
       versionSpec: '$(python.version)'
-  - bash: pip install --upgrade pip wheel setuptools
+  - bash: pip install --upgrade pip wheel "setuptools<81"
     displayName: 'Install pip and wheel setuptools'
   - bash: ./scripts/ci/test_extensions.sh
     displayName: 'Load extensions'
@@ -667,7 +667,7 @@ jobs:
       set -ev
       # Force relink python@3.xx in Homebrew to resolve the conflict with pre-installed python 3.xx on macOS-12 image
       # See: https://github.com/Azure/azure-cli/issues/29054
-      python_version=3.13
+      python_version=3.14
       brew unlink python@$python_version && brew link --overwrite python@$python_version
       
       echo == Remove pre-installed azure-cli ==
@@ -679,6 +679,16 @@ jobs:
       git config --global user.name "Your Name"
       brew tap-new dev/azure-cli
       cp $SYSTEM_ARTIFACTSDIRECTORY/homebrew/azure-cli.rb $(brew --repository)/Library/Taps/dev/homebrew-azure-cli/Formula/
+      # `no_autobump!` is carried over from the upstream homebrew-core formula but is only
+      # allowed in official Homebrew taps. Remove it so the formula can be installed from
+      # this local dev tap. It must remain in the released formula, so we only strip it here.
+      sed -i '' '/no_autobump!/d' $(brew --repository)/Library/Taps/dev/homebrew-azure-cli/Formula/azure-cli.rb
+      # TODO(packaging): remove once the macOS CI agent image's Homebrew provides formula_opt_prefix.
+      # The upstream homebrew-core formula calls `formula_opt_prefix("openssl@3")`, a newer
+      # Homebrew DSL helper not available on the older Homebrew on the macOS CI agent image
+      # (NoMethodError). Rewrite it to the backward-compatible `Formula["openssl@3"].opt_prefix`
+      # form for the local test install only; the generated/submitted formula stays upstream-faithful.
+      sed -E -i '' 's/formula_opt_prefix\(?[[:space:]]*"([^"]+)"[[:space:]]*\)?/Formula["\1"].opt_prefix/g' $(brew --repository)/Library/Taps/dev/homebrew-azure-cli/Formula/azure-cli.rb
       brew install --build-from-source dev/homebrew-azure-cli/azure-cli
       
       echo == Az Version ==
@@ -1087,9 +1097,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.13'
+    displayName: 'Use Python 3.14'
     inputs:
-      versionSpec: 3.13
+      versionSpec: '3.14'
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -1104,9 +1114,9 @@ jobs:
     name: ${{ variables.ubuntu_multi_core_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.13'
+    displayName: 'Use Python 3.14'
     inputs:
-      versionSpec: 3.13
+      versionSpec: '3.14'
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -1120,9 +1130,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.13'
+    displayName: 'Use Python 3.14'
     inputs:
-      versionSpec: 3.13
+      versionSpec: '3.14'
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -1137,8 +1147,8 @@ jobs:
     matrix:
       Python312:
         python.version: '3.12'
-      Python313:
-        python.version: '3.13'
+      Python314:
+        python.version: '3.14'
   pool:
     name: ${{ variables.ubuntu_pool }}
   steps:
@@ -1166,9 +1176,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
     - task: UsePythonVersion@0
-      displayName: 'Use Python 3.13'
+      displayName: 'Use Python 3.14'
       inputs:
-        versionSpec: 3.13
+        versionSpec: '3.14'
     - bash: |
         #!/usr/bin/env bash
         set -ev
@@ -1184,9 +1194,9 @@ jobs:
     name: ${{ variables.ubuntu_multi_core_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.13'
+    displayName: 'Use Python 3.14'
     inputs:
-      versionSpec: 3.13
+      versionSpec: '3.14'
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -1207,9 +1217,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
     - task: UsePythonVersion@0
-      displayName: 'Use Python 3.13'
+      displayName: 'Use Python 3.14'
       inputs:
-        versionSpec: 3.13
+        versionSpec: '3.14'
     - template: .azure-pipelines/templates/azdev_setup.yml
     - bash: |
         set -ev
@@ -1242,7 +1252,7 @@ jobs:
   - task: UsePythonVersion@0
     displayName: 'Use Python 3.11'
     inputs:
-      versionSpec: 3.11
+      versionSpec: '3.11'
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -1251,7 +1261,6 @@ jobs:
       cd ..
       git clone --depth 1 -b main https://github.com/Azure/azure-cli-extensions.git ./azure-cli-extensions
       azdev extension repo add ./azure-cli-extensions
-      pip install setuptools==70.0.0 wheel==0.30.0
       azdev extension add "*"
       pip install msrestazure markupsafe==2.0.1
       # Some extension will change the dependence, so run `azdev setup` again after all extensions installed.

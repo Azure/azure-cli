@@ -1933,5 +1933,58 @@ class TestCustomCATrustCertificates(unittest.TestCase):
         self.assertTrue('--custom-ca-trust-certificates can only be set for linux nodepools' in str(cm.exception), msg=str(cm.exception))
 
 
+class ArtifactStreamingNamespace:
+    def __init__(self, os_type, enable_artifact_streaming=False, disable_artifact_streaming=False):
+        self.os_type = os_type
+        self.enable_artifact_streaming = enable_artifact_streaming
+        self.disable_artifact_streaming = disable_artifact_streaming
+
+
+class TestArtifactStreaming(unittest.TestCase):
+    def test_valid_linux_enable(self):
+        validators.validate_artifact_streaming(
+            ArtifactStreamingNamespace("Linux", enable_artifact_streaming=True)
+        )
+
+    def test_valid_linux_disable(self):
+        validators.validate_artifact_streaming(
+            ArtifactStreamingNamespace("Linux", disable_artifact_streaming=True)
+        )
+
+    def test_fail_if_enable_and_disable_are_set(self):
+        with self.assertRaises(MutuallyExclusiveArgumentError) as cm:
+            validators.validate_artifact_streaming(
+                ArtifactStreamingNamespace(
+                    "Linux",
+                    enable_artifact_streaming=True,
+                    disable_artifact_streaming=True,
+                )
+            )
+        self.assertEqual(
+            str(cm.exception),
+            "Cannot specify both --enable-artifact-streaming and --disable-artifact-streaming at the same time.",
+        )
+
+    def test_fail_if_enable_for_windows(self):
+        with self.assertRaises(ArgumentUsageError) as cm:
+            validators.validate_artifact_streaming(
+                ArtifactStreamingNamespace("Windows", enable_artifact_streaming=True)
+            )
+        self.assertEqual(
+            str(cm.exception),
+            "--enable-artifact-streaming can only be set for Linux nodepools",
+        )
+
+    def test_fail_if_disable_for_windows(self):
+        with self.assertRaises(ArgumentUsageError) as cm:
+            validators.validate_artifact_streaming(
+                ArtifactStreamingNamespace("Windows", disable_artifact_streaming=True)
+            )
+        self.assertEqual(
+            str(cm.exception),
+            "--disable-artifact-streaming can only be set for Linux nodepools",
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

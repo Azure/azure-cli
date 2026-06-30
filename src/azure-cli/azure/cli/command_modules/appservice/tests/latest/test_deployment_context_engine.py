@@ -14,8 +14,10 @@ from unittest.mock import MagicMock, patch
 
 from azure.cli.command_modules.appservice._deployment_failure_patterns import (
     DEPLOYMENT_FAILURE_PATTERNS,
+    CONTROL_PLANE_FAILURE_PATTERNS,
     get_failure_pattern,
     match_failure_pattern,
+    match_control_plane_failure_pattern,
 )
 from azure.cli.command_modules.appservice._deployment_context_engine import (
     build_enriched_error_context,
@@ -24,6 +26,9 @@ from azure.cli.command_modules.appservice._deployment_context_engine import (
     extract_status_code_from_message,
     EnrichedDeploymentError,
     _determine_deployment_type,
+    build_enriched_plan_error_context,
+    format_enriched_plan_error_message,
+    raise_enriched_plan_error,
 )
 
 
@@ -448,6 +453,184 @@ class TestExtractStatusCode(unittest.TestCase):
     # --- Edge case: 200-range should NOT be extracted ---
     def test_200_not_extracted(self):
         self.assertIsNone(extract_status_code_from_message("Status Code: 200"))
+
+
+# ---------------------------------------------------------------------------
+# Tests for control-plane failure patterns (az appservice plan create)
+# ---------------------------------------------------------------------------
+class TestControlPlaneFailurePatterns(unittest.TestCase):
+    """Tests for the ARM control-plane patterns used by az appservice plan create."""
+
+    def test_all_patterns_have_required_keys(self):
+        required_keys = {"errorCode", "stage", "suggestedFixes"}
+        for pattern in CONTROL_PLANE_FAILURE_PATTERNS:
+            with self.subTest(errorCode=pattern["errorCode"]):
+                self.assertTrue(required_keys.issubset(pattern.keys()))
+                self.assertIsInstance(pattern["suggestedFixes"], list)
+                self.assertGreater(len(pattern["suggestedFixes"]), 0)
+
+    def test_get_failure_pattern_resolves_control_plane(self):
+        """get_failure_pattern should also look up control-plane error codes."""
+        pattern = get_failure_pattern("LocationNotAvailable")
+        self.assertIsNotNone(pattern)
+        self.assertEqual(pattern["errorCode"], "LocationNotAvailable")
+        self.assertEqual(pattern["stage"], "ResourceProvisioning")
+
+    # --- message-based matching ---
+    def test_match_quota_exceeded(self):
+        p = match_control_plane_failure_pattern(
+            status_code=401,
+            error_message="Operation could not be completed as it results in exceeding approved Quota")
+        self.assertEqual(p["errorCode"], "QuotaExceeded")
+
+    def test_match_authorization_failed_message(self):
+        p = match_control_plane_failure_pattern(
+            status_code=403,
+            error_message="AuthorizationFailed: The client does not have authorization to perform action")
+        self.assertEqual(p["errorCode"], "AuthorizationFailed")
+
+    def test_match_missing_subscription_registration(self):
+        p = match_control_plane_failure_pattern(
+            status_code=409,
+            error_message="The subscription is not registered to use namespace 'Microsoft.Web'")
+        self.assertEqual(p["errorCode"], "MissingSubscriptionRegistration")
+
+    def test_match_resource_group_not_found(self):
+        p = match_control_plane_failure_pattern(
+            status_code=404,
+            error_message="Resource group 'foo' could not be found.")
+        self.assertEqual(p["errorCode"], "ResourceGroupNotFound")
+
+    def test_match_sku_not_available(self):
+        p = match_control_plane_failure_pattern(
+            status_code=400,
+            error_message="The requested SKU is not available in the selected location")
+        self.assertEqual(p["errorCode"], "SkuNotAvailable")
+
+    def test_match_location_not_available(self):
+        p = match_control_plane_failure_pattern(
+            status_code=400,
+            error_message="The provided location 'nowhereland' is not available for resource type "
+                          "'Microsoft.Web/serverFarms'.")
+        self.assertEqual(p["errorCode"], "LocationNotAvailable")
+
+    def test_match_zone_redundancy_unsupported(self):
+        p = match_control_plane_failure_pattern(
+            status_code=400,
+            error_message="Zone redundancy is not supported for this configuration")
+        self.assertEqual(p["errorCode"], "ZoneRedundancyUnsupported")
+
+    # --- status-code fallbacks ---
+    def test_match_403_fallback(self):
+        p = match_control_plane_failure_pattern(status_code=403, error_message="forbidden")
+        self.assertEqual(p["errorCode"], "AuthorizationFailed")
+
+    def test_match_404_fallback(self):
+        p = match_control_plane_failure_pattern(status_code=404, error_message="missing")
+        self.assertEqual(p["errorCode"], "ResourceGroupNotFound")
+
+    def test_match_409_fallback(self):
+        p = match_control_plane_failure_pattern(status_code=409, error_message="conflict")
+        self.assertEqual(p["errorCode"], "MissingSubscriptionRegistration")
+
+    def test_match_400_unmatched_returns_none(self):
+        """An unspecific 400 should not be force-classified as SkuNotAvailable."""
+        p = match_control_plane_failure_pattern(status_code=400, error_message="bad request")
+        self.assertIsNone(p)
+
+    def test_match_no_match(self):
+        p = match_control_plane_failure_pattern(status_code=200, error_message="all good")
+        self.assertIsNone(p)
+
+
+# ---------------------------------------------------------------------------
+# Tests for plan-create enrichment (build / format / raise)
+# ---------------------------------------------------------------------------
+class TestPlanCreateEnrichment(unittest.TestCase):
+    """Tests for the App Service plan creation enrichment engine."""
+
+    def test_build_context_with_known_pattern(self):
+        ctx = build_enriched_plan_error_context(
+            resource_group_name="test-rg",
+            plan_name="test-plan",
+            location="nowhereland",
+            sku="B1",
+            status_code=400,
+            error_message="The provided location 'nowhereland' is not available for resource type "
+                          "'Microsoft.Web/serverFarms'.",
+            last_known_step="App Service Plan create (control-plane request)",
+        )
+        self.assertEqual(ctx["errorCode"], "LocationNotAvailable")
+        self.assertEqual(ctx["stage"], "ResourceProvisioning")
+        self.assertEqual(ctx["resourceGroup"], "test-rg")
+        self.assertEqual(ctx["planName"], "test-plan")
+        self.assertEqual(ctx["region"], "nowhereland")
+        self.assertEqual(ctx["planSku"], "B1")
+        self.assertEqual(ctx["lastKnownStep"], "App Service Plan create (control-plane request)")
+        self.assertIn("rawError", ctx)
+        self.assertIn("suggestedFixes", ctx)
+
+    def test_build_context_with_unknown_error(self):
+        ctx = build_enriched_plan_error_context(
+            resource_group_name="test-rg",
+            plan_name="test-plan",
+            status_code=502,
+            error_message="Something weird happened",
+        )
+        self.assertEqual(ctx["errorCode"], "HTTP_502")
+        self.assertEqual(ctx["stage"], "ResourceProvisioning")
+        self.assertIn("rawError", ctx)
+
+    def test_build_context_defaults_for_missing_fields(self):
+        ctx = build_enriched_plan_error_context(error_message="boom")
+        self.assertEqual(ctx["errorCode"], "UnknownPlanCreateError")
+        self.assertEqual(ctx["resourceGroup"], "Unknown")
+        self.assertEqual(ctx["planName"], "Unknown")
+        self.assertEqual(ctx["region"], "Unknown")
+        self.assertEqual(ctx["planSku"], "Unknown")
+
+    def test_build_context_truncates_long_error(self):
+        long_msg = "x" * 600
+        ctx = build_enriched_plan_error_context(status_code=400, error_message=long_msg)
+        self.assertTrue(ctx["rawError"].endswith("... [truncated]"))
+        self.assertLessEqual(len(ctx["rawError"]), 520)
+
+    def test_format_message_contains_key_sections(self):
+        ctx = build_enriched_plan_error_context(
+            resource_group_name="test-rg",
+            plan_name="test-plan",
+            location="eastus",
+            sku="P1V3",
+            status_code=403,
+            error_message="AuthorizationFailed: not authorized",
+        )
+        msg = format_enriched_plan_error_message(ctx)
+        self.assertIn("APP SERVICE PLAN CREATION FAILED", msg)
+        self.assertIn("AuthorizationFailed", msg)
+        self.assertIn("Plan Name   : test-plan", msg)
+        self.assertIn("Resource Grp: test-rg", msg)
+        self.assertIn("Region      : eastus", msg)
+        self.assertIn("Plan SKU    : P1V3", msg)
+        self.assertIn("Suggested Fixes:", msg)
+        self.assertIn("GitHub Copilot Chat", msg)
+        # Should be plan-specific, not deployment
+        self.assertNotIn("DEPLOYMENT FAILED", msg)
+
+    def test_raise_enriched_plan_error(self):
+        with self.assertRaises(EnrichedDeploymentError) as cm:
+            raise_enriched_plan_error(
+                resource_group_name="test-rg",
+                plan_name="test-plan",
+                location="nowhereland",
+                sku="B1",
+                status_code=400,
+                error_message="The provided location 'nowhereland' is not available for resource type "
+                              "'Microsoft.Web/serverFarms'.",
+            )
+        error_msg = str(cm.exception)
+        self.assertIn("APP SERVICE PLAN CREATION FAILED", error_msg)
+        self.assertIn("LocationNotAvailable", error_msg)
+        self.assertIn("Pick a region where App Service plans", error_msg)
 
 
 if __name__ == '__main__':
