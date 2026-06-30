@@ -218,6 +218,25 @@ examples:
         --key $keyIdentifier --identity testidentity --backup-key $geoKeyIdentifier --backup-identity geoidentity
 
   - name: >
+      Create server with Azure Key Vault from a different Microsoft Entra tenant using multi-tenant application registration.
+    text: >
+      # create multi-tenant application registration for accessing key vault from different tenant
+
+      testfederatedclientid=$(az ad app create --display-name testmultitenantapp --query appId -o tsv)
+
+
+      # get key identifier from keyvault in different tenant
+
+      keyIdentifier=$(az keyvault key show --vault-name testVault --name testKey \\
+        --query key.kid -o tsv)
+
+
+      # create flexible server with key from different tenant using multi-tenant app
+
+      az postgres flexible-server create -g testgroup -n testserver --location testlocation \\
+        --key $keyIdentifier --identity testidentity --federated-client-id $testfederatedclientid
+
+  - name: >
       Create flexible server with custom storage performance tier. Accepted values "P4", "P6", "P10", "P15", "P20", "P30", \\
       "P40", "P50", "P60", "P70", "P80". Actual allowed values depend on the --storage-size selection for flexible server creation. \\
       Default value for storage performance tier depends on the --storage-size selected for flexible server creation.
@@ -318,6 +337,45 @@ examples:
         --source-server /subscriptions/{sourceSubscriptionId}/resourceGroups/{sourceResourceGroup}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{sourceServer}
   - name: Restore 'testserver' to current point-in-time as a new server 'testservernew' using Premium SSD v2 Disks by setting storage type to "PremiumV2_LRS"
     text: az postgres flexible-server restore --resource-group testgroup --name testservernew --source-server testserver --storage-type PremiumV2_LRS
+"""
+
+helps['postgres flexible-server maintenance-event'] = """
+type: group
+short-summary: Manage maintenance events for PostgreSQL flexible servers.
+"""
+
+helps['postgres flexible-server maintenance-event list'] = """
+type: command
+short-summary: List maintenance events for a flexible server.
+examples:
+  - name: List all maintenance events for a server.
+    text: az postgres flexible-server maintenance-event list --resource-group testgroup --server-name testserver
+  - name: List only upcoming maintenance events.
+    text: az postgres flexible-server maintenance-event list --resource-group testgroup --server-name testserver --maintenance-status Upcoming
+"""
+
+helps['postgres flexible-server maintenance-event show'] = """
+type: command
+short-summary: Show details of a maintenance event.
+examples:
+  - name: Get a maintenance event by ID.
+    text: az postgres flexible-server maintenance-event show --resource-group testgroup --server-name testserver --maintenance-event-id XXXX-111
+"""
+
+helps['postgres flexible-server maintenance-event reschedule'] = """
+type: command
+short-summary: Reschedule a maintenance event to a new UTC datetime.
+examples:
+  - name: Reschedule a maintenance event.
+    text: az postgres flexible-server maintenance-event reschedule --resource-group testgroup --server-name testserver --maintenance-event-id XXXX-111 --start-time 2026-04-10T10:00:00+00:00
+"""
+
+helps['postgres flexible-server maintenance-event apply-now'] = """
+type: command
+short-summary: Apply a maintenance event immediately.
+examples:
+  - name: Apply a maintenance event now.
+    text: az postgres flexible-server maintenance-event apply-now --resource-group testgroup --server-name testserver --maintenance-event-id XXXX-111
 """
 
 helps['postgres flexible-server restart'] = """

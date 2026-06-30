@@ -2,7 +2,10 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+
+import unittest
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+
 
 LOCATION = "eastus"
 VNET_LOCATION = "eastus"
@@ -23,6 +26,7 @@ class AzureNetAppFilesSubvolumeServiceScenarioTest(ScenarioTest):
                         "--vnet {vnet} --subnet {subnet} --file-path {vol_name} --usage-threshold 100 "
                         "--enable-subvolumes {enable_subvolumes}")
 
+    @unittest.skip('Subvolume is being deprecated, skipping subvolume tests')
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_subvolume_crud_', additional_tags={'owner': 'cli_test'})
     def test_subvolume_crud(self):
         self.kwargs.update({
@@ -66,6 +70,7 @@ class AzureNetAppFilesSubvolumeServiceScenarioTest(ScenarioTest):
         self.cmd("az netappfiles subvolume list -g {rg} -a {acc_name} -p {pool_name} -v {vol_name}", checks=[
             self.check('length(@)', 0)])
 
+    @unittest.skip('Subvolume is being deprecated, skipping subvolume tests')
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_subvolume_list_', additional_tags={'owner': 'cli_test'})
     def test_subvolume_list(self):
         self.kwargs.update({
@@ -120,6 +125,7 @@ class AzureNetAppFilesSubvolumeServiceScenarioTest(ScenarioTest):
         self.cmd("az netappfiles subvolume list -g {rg} -a {acc_name} -p {pool_name} -v {vol_name}", checks=[
             self.check('length(@)', 0)])
 
+    @unittest.skip('Subvolume is being deprecated, skipping subvolume tests')
     @ResourceGroupPreparer(name_prefix='cli_netappfiles_test_subvolume_metadata_', additional_tags={'owner': 'cli_test'})
     def test_subvolume_get_metadata(self):
         self.kwargs.update({
