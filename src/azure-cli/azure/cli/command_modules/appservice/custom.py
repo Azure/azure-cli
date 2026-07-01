@@ -6740,8 +6740,7 @@ def _render_troubleshoot_status(payload):
         _out('-' * sum(col_widths))
         for inst in instances:
             startup = inst.get('startup') or {}
-            most_recent = startup.get('MostRecent') or {}
-            updated = _format_dt(most_recent.get('At')) or '-'
+            updated = _format_dt(_most_recent_startup(startup)) or '-'
             state = inst.get('state') or '-'
             # Pad plain text first, then wrap the STATE segment in its style — the
             # framework's color escapes don't perturb the visible column width.
@@ -6762,6 +6761,7 @@ def _render_troubleshoot_status(payload):
         _out(sep)
         _out((Style.HIGHLIGHT, 'Instance {} Full Status Report'.format(label)))
         _out(sep)
+        _out((Style.HIGHLIGHT, 'Last runtime status'))
         _print_runtime_block(inst, _out)
         _out('')
         _out((Style.HIGHLIGHT, 'Startup summary (last 24h)'))
@@ -6883,32 +6883,42 @@ def _print_runtime_block(inst, emit):
     emit('  Last Error Timestamp {}'.format(last_error_ts))
 
 
+def _most_recent_startup(startup):
+    """Return the most recent of MostRecentSuccess / MostRecentFailure (ISO strings),
+    or None if both are missing. Lexicographic max is correct for RFC3339/ISO-8601 UTC."""
+    if not startup:
+        return None
+    candidates = [ts for ts in (startup.get('MostRecentSuccess'),
+                                startup.get('MostRecentFailure')) if ts]
+    return max(candidates) if candidates else None
+
+
 def _print_startup_block(s, emit):
     from azure.cli.core.style import Style
     if not s:
         emit('  No startup attempts recorded in the last 24 hours')
         emit('')
         return
+    # KuduLite sets SummaryFetchError when it couldn't read the log directory for
+    # this worker (e.g. log file too large). All other fields are meaningless then.
+    error = s.get('SummaryFetchError')
+    if error:
+        emit([(Style.PRIMARY, '  Startup summary unavailable: '),
+              (Style.WARNING, str(error))])
+        emit('')
+        return
     successful = s.get('Successful', 0)
     failed = s.get('Failed', 0)
-    emit([(Style.PRIMARY, '  Successful   '), _count_style(successful, 'successful')])
-    emit([(Style.PRIMARY, '  Failed       '), _count_style(failed, 'failed')])
-    most_recent = s.get('MostRecent')
-    earliest = s.get('Earliest')
-    if most_recent:
-        outcome = most_recent.get('Outcome') or '-'
-        emit([
-            (Style.PRIMARY, '  Most recent  {} -> '.format(
-                _format_dt(most_recent.get('At')) or '-')),
-            (_outcome_style(outcome), outcome),
-        ])
-    if earliest:
-        outcome = earliest.get('Outcome') or '-'
-        emit([
-            (Style.PRIMARY, '  Earliest     {} -> '.format(
-                _format_dt(earliest.get('At')) or '-')),
-            (_outcome_style(outcome), outcome),
-        ])
+    emit([(Style.PRIMARY, '  Successful             '), _count_style(successful, 'successful')])
+    emit([(Style.PRIMARY, '  Failed                 '), _count_style(failed, 'failed')])
+    most_recent_success = _format_dt(s.get('MostRecentSuccess'))
+    most_recent_failure = _format_dt(s.get('MostRecentFailure'))
+    if most_recent_success:
+        emit([(Style.PRIMARY, '  Most recent success    '),
+              (_outcome_style('STARTED'), most_recent_success)])
+    if most_recent_failure:
+        emit([(Style.PRIMARY, '  Most recent failure    '),
+              (_outcome_style('FAILED'), most_recent_failure)])
     emit('')
 
 

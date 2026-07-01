@@ -48,6 +48,46 @@ def transform_runtime_list_output(result):
     ]) for r in result]
 
 
+def transform_troubleshoot_status_output(result):
+    """Flatten the nested `instances` payload into one row per worker for `-o table`.
+    Column layout: InstanceId / State / (LastError / LastErrorTimestamp only when
+    any row has an error) / Successful / Failed / Updated.
+
+    The framework's default table renderer would only surface top-level scalars
+    (name, resourceGroup) and drop every meaningful field."""
+    from collections import OrderedDict
+    from .custom import _format_dt, _most_recent_startup
+
+    items = (result or {}).get('instances') or []
+    # LastError* columns are only surfaced when at least one instance reports one,
+    # so healthy fleets get a compact 5-column table instead of a wide 7-column
+    # one full of empty cells.
+    show_errors = any(item.get('lastError') for item in items)
+
+    rows = []
+    for item in items:
+        startup = item.get('startup') or {}
+        # KuduLite returns SummaryFetchError when it couldn't read this worker's log
+        # directory; count/timestamp fields are meaningless in that case.
+        has_startup_error = bool(startup.get('SummaryFetchError'))
+        successful = None if has_startup_error else startup.get('Successful')
+        failed = None if has_startup_error else startup.get('Failed')
+        updated = None if has_startup_error else _format_dt(_most_recent_startup(startup))
+
+        row = OrderedDict([
+            ('InstanceId', item.get('instanceId')),
+            ('State', item.get('state')),
+        ])
+        if show_errors:
+            row['LastError'] = item.get('lastError')
+            row['LastErrorTimestamp'] = item.get('lastErrorTimestamp')
+        row['Successful'] = successful
+        row['Failed'] = failed
+        row['Updated'] = updated
+        rows.append(row)
+    return rows
+
+
 def ex_handler_factory(creating_plan=False):
     def _ex_handler(ex):
         ex = _polish_bad_errors(ex, creating_plan)
@@ -260,7 +300,8 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'show_startup_log')
 
     with self.command_group('webapp troubleshoot', is_preview=True) as g:
-        g.custom_command('status', 'troubleshoot_status')
+        g.custom_command('status', 'troubleshoot_status',
+                         table_transformer=transform_troubleshoot_status_output)
 
     with self.command_group('functionapp log deployment') as g:
         g.custom_show_command('show', 'show_deployment_log')
