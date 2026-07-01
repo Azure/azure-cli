@@ -34,7 +34,7 @@ def process_query(cli_term):
         print(random.choice(WAIT_MESSAGE), file=sys.stderr)
         response = call_aladdin_service(cli_term)
 
-        if response.status_code != 200:
+        if response is None or response.status_code != 200:
             logger.error(
                 "The `az find` command has been retired. A new experience is being developed to replace it. "
                 "In the meantime, please use `az <command> --help` to explore commands and examples, "
@@ -70,7 +70,7 @@ def get_generated_examples(cli_term):
     examples = []
     response = call_aladdin_service(cli_term)
 
-    if response.status_code == 200:
+    if response is not None and response.status_code == 200:
         for answer in json.loads(response.content):
             examples.append(clean_from_http_answer(answer))
 
@@ -126,14 +126,19 @@ def call_aladdin_service(query):
         'X-UserId': hashed_user_id
     }
 
-    response = requests.get(
-        api_url,
-        params={
-            'query': query,
-            'clientType': 'AzureCli',
-            'context': json.dumps(context)
-        },
-        headers=headers)
+    try:
+        response = requests.get(
+            api_url,
+            params={
+                'query': query,
+                'clientType': 'AzureCli',
+                'context': json.dumps(context)
+            },
+            headers=headers)
+    except requests.exceptions.ConnectionError as err:
+        logger.warning("Failed to connect to the az find service. "
+                       "Please check your network connection. Error detail: %s", err)
+        return None
 
     return response
 
