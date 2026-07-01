@@ -2489,10 +2489,15 @@ def format_webapp_status_output(result):
     from collections import OrderedDict
 
     items = _extract_webapp_status_items(result)
-    # LastError is a nullable field on the backend SiteRuntimeStatusOnWorker contract,
-    # so the error columns (LastError, LastErrorDetails, LastErrorTimestamp) are only
-    # surfaced when at least one instance reports a LastError.
-    show_errors = any(item.get('lastError') for item in items)
+
+    # LastError is a nullable field on the backend SiteRuntimeStatusOnWorker contract.
+    # A 'Started' instance is healthy, so any LastError it still carries is stale and
+    # must not be shown. We surface the error columns (LastError, LastErrorDetails,
+    # LastErrorTimestamp) only when an instance reports a LastError while NOT 'Started'.
+    def _has_visible_error(item):
+        return bool(item.get('lastError')) and item.get('state') != 'Started'
+
+    show_errors = any(_has_visible_error(item) for item in items)
 
     rows = []
     for item in items:
@@ -2502,9 +2507,14 @@ def format_webapp_status_output(result):
             ('Action', item.get('action'))
         ])
         if show_errors:
-            row['LastError'] = item.get('lastError')
-            row['LastErrorDetails'] = item.get('lastErrorDetails')
-            row['LastErrorTimestamp'] = item.get('lastErrorTimestamp')
+            if _has_visible_error(item):
+                row['LastError'] = item.get('lastError')
+                row['LastErrorDetails'] = item.get('lastErrorDetails')
+                row['LastErrorTimestamp'] = item.get('lastErrorTimestamp')
+            else:
+                row['LastError'] = None
+                row['LastErrorDetails'] = None
+                row['LastErrorTimestamp'] = None
         row['Details'] = item.get('details')
         row['DetailsLevel'] = item.get('detailsLevel')
         rows.append(row)
