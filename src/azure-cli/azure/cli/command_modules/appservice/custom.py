@@ -11361,7 +11361,10 @@ def _build_deploymentstatus_url(cmd, resource_group_name, webapp_name, slot, dep
 
 def _get_ondeploy_headers(params):
     if params.src_path:
-        content_type = 'application/octet-stream'
+        if params.artifact_type == 'zip':
+            content_type = 'application/zip'
+        else:
+            content_type = 'application/octet-stream'
     elif params.src_url:
         content_type = 'application/json'
     else:
