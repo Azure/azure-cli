@@ -59,6 +59,7 @@ def load_arguments(self, _):
     EvictionPolicy = ['Deallocate', 'Delete']
     HyperVGenerationTypes = ['V1', 'V2']
     LicenseType = ['Windows_Server', 'Windows_Client', 'RHEL_BYOS', 'SLES_BYOS', 'RHEL_BASE', 'RHEL_SAPAPPS', 'RHEL_SAPHA', 'RHEL_EUS', 'RHEL_BASESAPAPPS', 'RHEL_BASESAPHA', 'SLES_STANDARD', 'SLES', 'SLES_SAP', 'SLES_HPC', 'None', 'RHEL_ELS_6', 'UBUNTU_PRO', 'UBUNTU']
+    LifecycleHookActionState = ['Approved', 'Rejected']
     LifecycleHookDefaultAction = ['Approve', 'Reject']
     LifecycleHookType = ['UpgradeAutoOSScheduling', 'UpgradeAutoOSRollingBatchStarting']
     LoadBalancerSkuName = ['Basic', 'Standard', 'Gateway']
@@ -1162,6 +1163,24 @@ def load_arguments(self, _):
                    help='Specifies the type of the lifecycle hook. Mutually exclusive with --all.')
         c.argument('remove_all', options_list=['--all'], action='store_true',
                    help='Remove all lifecycle hooks. Mutually exclusive with --type.')
+
+    with self.argument_context('vmss lifecycle-hook-event') as c:
+        c.argument('vmss_name', help='The name of the VM scale set.', id_part='name')
+        c.argument('lifecycle_hook_event_name', options_list=['--name', '-n'], id_part='child_name_1',
+                   help='The name of the VMScaleSetLifecycleHookEvent.')
+        c.argument('instance_ids', nargs='+',
+                   help='Space-separated list of target resources to act on. For Uniform scale sets use decimal '
+                        'instance ids (e.g. 0 1 2); for Flexible scale sets use VM names. When omitted, the action '
+                        'is applied to all target resources of the event.')
+        c.argument('wait_until',
+                   help='Specifies the exact UTC timestamp in ISO 8601 format till which the event would remain in '
+                        'the current lifecycle state waiting for an action from the customer. Beyond this timestamp, '
+                        'the platform will apply the defaultAction for the event.')
+
+    with self.argument_context('vmss lifecycle-hook-event update') as c:
+        c.argument('action_state', arg_type=get_enum_type(LifecycleHookActionState),
+                   help="State of the lifecycle hook for the target resource. The customer can patch this property to "
+                        "move the lifecycle hook to a terminal state.")
 
     for scope in ['vm identity assign', 'vmss identity assign']:
         with self.argument_context(scope) as c:

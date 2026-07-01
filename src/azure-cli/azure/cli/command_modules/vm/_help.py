@@ -3075,3 +3075,40 @@ helps['restore-point collection show'] = """
         text: |-
                az restore-point collection show --resource-group "myResourceGroup" --collection-name "rpcName"
 """
+
+helps['vmss lifecycle-hook-event'] = """
+type: group
+short-summary: Manage virtual machine scale set lifecycle hook events.
+"""
+
+helps['vmss lifecycle-hook-event update'] = """
+type: command
+short-summary: Update a virtual machine scale set lifecycle hook event.
+examples:
+  - name: Approve all target resources of a lifecycle hook event.
+    text: az vmss lifecycle-hook-event update --vmss-name MyVmss -g MyRg --name {eventGuid} --action-state Approved
+  - name: Approve a subset of target resources (Uniform decimal instance ids or Flex VM names).
+    text: az vmss lifecycle-hook-event update --vmss-name MyVmss -g MyRg --name {eventGuid} --instance-ids 0 1 2 --action-state Approved
+  - name: Delay the event deadline.
+    text: az vmss lifecycle-hook-event update --vmss-name MyVmss -g MyRg --name {eventGuid} --wait-until "2026-05-08T11:00:00Z"
+"""
+
+helps['vmss lifecycle-hook-event approve'] = """
+type: command
+short-summary: Approve a virtual machine scale set lifecycle hook event.
+examples:
+  - name: Approve all target resources of a lifecycle hook event.
+    text: az vmss lifecycle-hook-event approve --vmss-name MyVmss -g MyRg --name {eventGuid}
+  - name: Approve a subset of target resources.
+    text: az vmss lifecycle-hook-event approve --vmss-name MyVmss -g MyRg --name {eventGuid} --instance-ids 0 1 2
+"""
+
+helps['vmss lifecycle-hook-event reject'] = """
+type: command
+short-summary: Reject a virtual machine scale set lifecycle hook event.
+examples:
+  - name: Reject all target resources of a lifecycle hook event.
+    text: az vmss lifecycle-hook-event reject --vmss-name MyVmss -g MyRg --name {eventGuid}
+  - name: Reject a subset of target resources.
+    text: az vmss lifecycle-hook-event reject --vmss-name MyVmss -g MyRg --name {eventGuid} --instance-ids 0 1 2
+"""

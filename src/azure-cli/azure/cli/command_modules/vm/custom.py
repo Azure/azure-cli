@@ -5195,6 +5195,41 @@ def vmss_lifecycle_hook_remove(cmd, resource_group_name, vmss_name, type=None, r
 
     return _commit_vmss_lifecycle_hooks(cmd, resource_group_name, vmss_name, hooks, no_wait)
 
+
+def vmss_lifecycle_hook_event_update(cmd, resource_group_name, vmss_name, lifecycle_hook_event_name,
+                                     action_state=None, wait_until=None, target_resource_ids=None):
+    from .aaz.latest.vmss.lifecycle_hook_event import Update as _lifecycleHookEventUpdate
+
+    command_args = {
+        "lifecycle_hook_event_name": lifecycle_hook_event_name,
+        "resource_group": resource_group_name,
+        "vmss_name": vmss_name,
+    }
+
+    if wait_until is not None:
+        command_args["wait_until"] = wait_until
+
+    if action_state is not None:
+        command_args["target_resources"] = [
+            {"action_state": action_state, "resource": {"id": resource_id}}
+            for resource_id in (target_resource_ids or [])
+        ]
+
+    return _lifecycleHookEventUpdate(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+
+
+def vmss_lifecycle_hook_event_approve(cmd, resource_group_name, vmss_name, lifecycle_hook_event_name,
+                                      wait_until=None, target_resource_ids=None):
+    return vmss_lifecycle_hook_event_update(cmd, resource_group_name, vmss_name, lifecycle_hook_event_name,
+                                            action_state="Approved", wait_until=wait_until,
+                                            target_resource_ids=target_resource_ids)
+
+
+def vmss_lifecycle_hook_event_reject(cmd, resource_group_name, vmss_name, lifecycle_hook_event_name,
+                                     wait_until=None, target_resource_ids=None):
+    return vmss_lifecycle_hook_event_update(cmd, resource_group_name, vmss_name, lifecycle_hook_event_name,
+                                            action_state="Rejected", wait_until=wait_until,
+                                            target_resource_ids=target_resource_ids)
 # endregion
 
 
