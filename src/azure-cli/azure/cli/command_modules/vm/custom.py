@@ -6924,4 +6924,8 @@ def list_vm_sizes(cmd, location):
     })
 
 
+def get_vm(cmd, resource_group_name, vm_name, expand=None):
+    from ._client_factory import _compute_client_factory
+    client = _compute_client_factory(cmd.cli_ctx)
+    return client.virtual_machines.get(resource_group_name, vm_name, expand=expand)
 # endRegion
