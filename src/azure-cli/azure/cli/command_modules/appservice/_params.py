@@ -111,7 +111,7 @@ def load_arguments(self, _):
                    help='get regions which support hosting web apps on Windows Container workers')
         c.argument('linux_workers_enabled', action='store_true',
                    help='get regions which support hosting web apps on Linux workers')
-        c.argument('managed_instance_enabled', action='store_true', is_preview=True,
+        c.argument('managed_instance_enabled', action='store_true',
                    help='get regions which support hosting web apps on Managed Instance workers')
         c.argument('sku', arg_type=sku_arg_type)
 
@@ -145,24 +145,24 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('zone_redundant', options_list=['--zone-redundant', '-z'], help='Enable zone redundancy for high availability. Minimum instance count is 2.')
         c.argument('tags', arg_type=tags_type)
         c.argument('async_scaling_enabled', arg_type=get_three_state_flag(), help='Enables async scaling for the app service plan. Set to "true" to create an async operation if there are insufficient workers to scale synchronously. The SKU must be Dedicated.')
-        c.argument('is_managed_instance', action='store_true', is_preview=True, help='host web app on managed instance')
-        c.argument('mi_system_assigned', is_preview=True,
+        c.argument('is_managed_instance', action='store_true', help='host web app on managed instance')
+        c.argument('mi_system_assigned',
                    arg_type=get_three_state_flag(),
                    help="Enable system-assigned managed identity for this app service plan.")
-        c.argument('mi_user_assigned', is_preview=True,
+        c.argument('mi_user_assigned',
                    nargs='+', help="Enable user-assigned managed identities for this app service plan. "
                    "Accepts space-separated list of identity resource IDs.")
-        c.argument('default_identity', is_preview=True,
+        c.argument('default_identity',
                    help='accept system or user assigned identity separated. Use \'[system]\' to refer system assigned identity, or a resource id to refer user assigned identity.')
-        c.argument('rdp_enabled', arg_type=get_three_state_flag(), is_preview=True,
+        c.argument('rdp_enabled', arg_type=get_three_state_flag(),
                    help='Enable RDP. Requires is-custom-mode to be true.')
-        c.argument('vnet', is_preview=True, help="Name or resource ID of the regional virtual network. If there are multiple vnets of the same name across different resource groups, use vnet resource id to specify which vnet to use. If vnet name is used, by default, the vnet in the same resource group as the webapp will be used. Must be used with --subnet argument.")
-        c.argument('subnet', is_preview=True, help="Name or resource ID of the pre-existing subnet to have the app service plan join. The --vnet is argument also needed if specifying subnet by name.")
-        c.argument('registry_adapters', options_list=['--registry-adapter'], is_preview=True, action=RegistryAdapterAddAction, nargs='+',
+        c.argument('vnet', help="Name or resource ID of the regional virtual network. If there are multiple vnets of the same name across different resource groups, use vnet resource id to specify which vnet to use. If vnet name is used, by default, the vnet in the same resource group as the webapp will be used. Must be used with --subnet argument.")
+        c.argument('subnet', help="Name or resource ID of the pre-existing subnet to have the app service plan join. The --vnet is argument also needed if specifying subnet by name.")
+        c.argument('registry_adapters', options_list=['--registry-adapter'], action=RegistryAdapterAddAction, nargs='+',
                    help="Registry adapter configurations. Provide key-value pairs for `registry-key=<key> type=<type> secret-uri=<uri>`.")
-        c.argument('install_scripts', options_list=['--install-script'], is_preview=True, action=InstallScriptAddAction, nargs='+',
+        c.argument('install_scripts', options_list=['--install-script'], action=InstallScriptAddAction, nargs='+',
                    help="Install script configurations. Provide key-value pairs for `name=<name> source-uri=<uri> type=<type>`.")
-        c.argument('storage_mounts', options_list=['--storage-mount'], is_preview=True, action=StorageMountAddAction, nargs='+',
+        c.argument('storage_mounts', options_list=['--storage-mount'], action=StorageMountAddAction, nargs='+',
                    help="Storage mount configurations. Provide key-value pairs for `name=<name> source=<source> type=<type> destination-path=<path> credentials-secret-uri=<uri>`.")
         c.argument('enriched_errors', options_list=['--enriched-errors'],
                    help='If true, Linux App Service plan creation failures will show context-enriched diagnostics with error codes, suggested fixes, and Copilot prompts. This flag only applies to Linux plans and has no effect on Windows or Hyper-V plans.',
@@ -176,17 +176,17 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('number_of_workers', type=int, help='Number of workers to be allocated. Use this to scale out/in (add or remove instances), e.g. --number-of-workers 3.')
         c.ignore('allow_pending_state')
         c.argument('async_scaling_enabled', arg_type=get_three_state_flag(), help='Enables async scaling for the app service plan. Set to "true" to create an async operation if there are insufficient workers to scale synchronously. The SKU must be Dedicated.')
-        c.argument('default_identity', is_preview=True,
+        c.argument('default_identity',
                    help='accept system or user assigned identity separated. Use \'[system]\' to refer system assigned identity, or a resource id to refer user assigned identity.')
-        c.argument('rdp_enabled', arg_type=get_three_state_flag(), is_preview=True,
+        c.argument('rdp_enabled', arg_type=get_three_state_flag(),
                    help='Enable RDP. Requires is-custom-mode to be true.')
-        c.argument('vnet', is_preview=True, help="Name or resource ID of the regional virtual network. If there are multiple vnets of the same name across different resource groups, use vnet resource id to specify which vnet to use. If vnet name is used, by default, the vnet in the same resource group as the webapp will be used. Must be used with --subnet argument.")
-        c.argument('subnet', is_preview=True, help="Name or resource ID of the pre-existing subnet to have the app service plan join. The --vnet is argument also needed if specifying subnet by name.")
-        c.argument('registry_adapters', options_list=['--registry-adapter'], is_preview=True, action=RegistryAdapterAddAction, nargs='+',
+        c.argument('vnet', help="Name or resource ID of the regional virtual network. If there are multiple vnets of the same name across different resource groups, use vnet resource id to specify which vnet to use. If vnet name is used, by default, the vnet in the same resource group as the webapp will be used. Must be used with --subnet argument.")
+        c.argument('subnet', help="Name or resource ID of the pre-existing subnet to have the app service plan join. The --vnet is argument also needed if specifying subnet by name.")
+        c.argument('registry_adapters', options_list=['--registry-adapter'], action=RegistryAdapterAddAction, nargs='+',
                    help="Registry adapter configurations. Provide key-value pairs for `registry-key=<key> type=<type> secret-uri=<uri>`.")
-        c.argument('install_scripts', options_list=['--install-script'], is_preview=True, action=InstallScriptAddAction, nargs='+',
+        c.argument('install_scripts', options_list=['--install-script'], action=InstallScriptAddAction, nargs='+',
                    help="Install script configurations. Provide key-value pairs for `name=<name> source-uri=<uri> type=<type>`.")
-        c.argument('storage_mounts', options_list=['--storage-mount'], is_preview=True, action=StorageMountAddAction, nargs='+',
+        c.argument('storage_mounts', options_list=['--storage-mount'], action=StorageMountAddAction, nargs='+',
                    help="Storage mount configurations. Provide key-value pairs for `name=<name> source=<source> type=<type> destination-path=<path> credentials-secret-uri=<uri>`.")
 
     with self.argument_context('appservice plan delete') as c:
