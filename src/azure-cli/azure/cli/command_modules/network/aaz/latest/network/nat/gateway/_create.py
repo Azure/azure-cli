@@ -142,12 +142,6 @@ class Create(AAZCommand):
             help="Whether Nat64 is enabled for the NAT gateway resource.",
             enum={"Disabled": "Disabled", "Enabled": "Enabled", "None": "None"},
         )
-        _args_schema.service_gateway = AAZObjectArg(
-            options=["--service-gateway"],
-            arg_group="Properties",
-            help="Reference to an existing service gateway.",
-        )
-        cls._build_args_common_sub_resource_create(_args_schema.service_gateway)
         return cls._args_schema
 
     _args_common_sub_resource_create = None
@@ -288,7 +282,6 @@ class Create(AAZCommand):
                 properties.set_prop("publicIpAddressesV6", AAZListType, ".pip_addrs_v6")
                 properties.set_prop("publicIpPrefixes", AAZListType, ".pip_prefixes")
                 properties.set_prop("publicIpPrefixesV6", AAZListType, ".pip_prefs_v6")
-                _CreateHelper._build_schema_common_sub_resource_create(properties.set_prop("serviceGateway", AAZObjectType, ".service_gateway"))
                 _CreateHelper._build_schema_common_sub_resource_create(properties.set_prop("sourceVirtualNetwork", AAZObjectType, ".source_vnet"))
 
             public_ip_addresses = _builder.get(".properties.publicIpAddresses")
