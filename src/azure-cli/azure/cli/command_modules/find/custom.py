@@ -136,7 +136,7 @@ def call_aladdin_service(query):
             },
             headers=headers)
     except requests.exceptions.ConnectionError as err:
-        logger.warning("Failed to connect to the az find service. "
+        logger.warning("Failed to connect to 'app.aladdin.microsoft.com'. "
                        "Please check your network connection. Error detail: %s", err)
         return None
 
