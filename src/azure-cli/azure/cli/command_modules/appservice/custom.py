@@ -6812,17 +6812,25 @@ def _outcome_style(outcome):
 
 
 def _count_style(count, kind):
-    """Style for a numeric count. kind='failed' -> ERROR when > 0; 'successful' -> SUCCESS when > 0."""
+    """Style for a numeric count. kind='failed' -> ERROR when > 0; 'successful' -> SUCCESS when > 0.
+    Accepts either an int/str integer (e.g. 3, "3") or a KuduLite capped-count
+    string like "50+" (parsed as the leading integer for the > 0 test)."""
     from azure.cli.core.style import Style
+    text = str(count)
     try:
-        n = int(count)
+        n = int(text)
     except (TypeError, ValueError):
-        return Style.PRIMARY, str(count)
+        # Handle capped forms like "50+" — parse the leading digits.
+        import re as _re
+        m = _re.match(r'\d+', text)
+        n = int(m.group(0)) if m else None
+    if n is None:
+        return Style.PRIMARY, text
     if kind == 'failed' and n > 0:
-        return Style.ERROR, str(n)
+        return Style.ERROR, text
     if kind == 'successful' and n > 0:
-        return Style.SUCCESS, str(n)
-    return Style.PRIMARY, str(n)
+        return Style.SUCCESS, text
+    return Style.PRIMARY, text
 
 
 def _short_id(instance_id):
