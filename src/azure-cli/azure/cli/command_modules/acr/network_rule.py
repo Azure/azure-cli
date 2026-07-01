@@ -44,13 +44,31 @@ def _update_registry(cli_ctx, resource_group_name, registry_name, update_payload
     return response.json()
 
 
+def _format_virtual_network_rule(rule):
+    """Normalize a single virtual network rule from the REST response.
+
+    The registry REST API returns the subnet resource ID under the
+    ``virtualNetworkSubnetResourceId`` key (confirmed on both the pinned
+    ``2021-08-01-preview`` and the ``2026-03-01-preview`` API). Older response
+    shapes used ``id``, so fall back to it for compatibility. Both
+    ``virtualNetworkResourceId`` (kept for backward compatibility) and
+    ``virtualNetworkSubnetResourceId`` are surfaced in the output.
+    """
+    subnet_id = rule.get('virtualNetworkSubnetResourceId') or rule.get('id')
+    return {
+        'virtualNetworkResourceId': subnet_id,
+        'virtualNetworkSubnetResourceId': subnet_id,
+        'action': rule.get('action', 'Allow'),
+    }
+
+
 def _format_registry_response(response):
     """Format the registry REST response for CLI output."""
     properties = response.get('properties', {})
     network_rule_set = properties.get('networkRuleSet', {})
 
     virtual_network_rules = [
-        {'virtualNetworkResourceId': rule.get('id'), 'action': rule.get('action', 'Allow')}
+        _format_virtual_network_rule(rule)
         for rule in (network_rule_set.get('virtualNetworkRules') or [])
     ]
     ip_rules = [
@@ -93,7 +111,7 @@ def acr_network_rule_add(cmd,
     if subnet or vnet_name:
         virtual_network_rules = list(rules.get('virtualNetworkRules') or [])
         subnet_id = _validate_subnet(cmd.cli_ctx, subnet, vnet_name, resource_group_name)
-        virtual_network_rules.append({'id': subnet_id, 'action': 'Allow'})
+        virtual_network_rules.append({'virtualNetworkSubnetResourceId': subnet_id, 'action': 'Allow'})
         rules['virtualNetworkRules'] = virtual_network_rules
 
     if ip_address:
@@ -122,7 +140,8 @@ def acr_network_rule_remove(cmd,
         virtual_network_rules = list(rules.get('virtualNetworkRules') or [])
         subnet_id = _validate_subnet(cmd.cli_ctx, subnet, vnet_name, resource_group_name).lower()
         rules['virtualNetworkRules'] = [
-            x for x in virtual_network_rules if x.get('id', '').lower() != subnet_id
+            x for x in virtual_network_rules
+            if (x.get('virtualNetworkSubnetResourceId') or x.get('id') or '').lower() != subnet_id
         ]
 
     if ip_address:

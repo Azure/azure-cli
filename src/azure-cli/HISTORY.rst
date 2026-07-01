@@ -13,6 +13,7 @@ Release History
 * `az acr task logs`: Align log streaming with the default TLS behavior used by the rest of Azure CLI commands (#33486)
 * `az acr run/build`: Align log streaming with the default TLS behavior used by the rest of Azure CLI commands (#33486)
 * `az acr login`: Harden binary resolution and credential passing (#33373)
+* `az acr network-rule list/add/remove`: Fix `virtualNetworkRules` entries returning `virtualNetworkResourceId` as null and surface the `virtualNetworkSubnetResourceId` field (#33660)
 
 **AKS**
 
