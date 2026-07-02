@@ -16,7 +16,6 @@ Release History
 
 **AKS**
 
-* `az aks upgrade`: Skip Machines mode agent pools during `--node-image-only` and Kubernetes version upgrade, which do not support these operations, instead of surfacing the raw RP OperationNotAllowed error
 * `az aks nodepool upgrade`: Fix `--max-unavailable` being silently ignored (#33215)
 * `az aks maintenanceconfiguration add/update`: Add support for maintenanceWindow format in default maintenance configuration (#33431)
 * `az aks check-acr`: Support national/sovereign clouds where nodes report `cloud=AzureStackCloud` by pointing canipull at the on-node `akscustom.json` environment file (#33551)
