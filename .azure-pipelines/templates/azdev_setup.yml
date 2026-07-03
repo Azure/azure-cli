@@ -15,17 +15,8 @@ steps:
       python -m venv env
       chmod +x env/bin/activate
       . env/bin/activate
-      # Cap setuptools<81 to match the CLI build (81 drops setup.py --dry-run,
-      # 82 removes pkg_resources) so `azdev setup` builds under a supported
-      # setuptools regardless of what the agent image ships.
+
       python -m pip install -U pip "setuptools<81"
-      # Pin azdev to azure-cli-dev-tools commit 644d296 (0.2.12). This bundles:
-      # decouple extension metadata from wheel==0.30.0 (#549), quote paths in
-      # editable installs (#551), and --no-build-isolation for editable installs
-      # (#552) so extensions whose setup.py imports azure (e.g. confcom) build
-      # against the environment instead of an isolated PEP 517 env under
-      # setuptools>=79. It is not on PyPI yet; switch this to
-      # `pip install --upgrade "azdev==0.2.12"` once published to PyPI.
       pip install --upgrade "azdev==0.2.12"
       azdev --version
 
