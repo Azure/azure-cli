@@ -13,6 +13,7 @@ Release History
 * `az acr task logs`: Align log streaming with the default TLS behavior used by the rest of Azure CLI commands (#33486)
 * `az acr run/build`: Align log streaming with the default TLS behavior used by the rest of Azure CLI commands (#33486)
 * `az acr login`: Harden binary resolution and credential passing (#33373)
+* `az acr login`: Fix ARM token exchange fallback for AzureML MSI/SSO environments (#33699)
 
 **AKS**
 
