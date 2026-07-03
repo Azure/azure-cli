@@ -165,9 +165,18 @@ def _get_aad_token_after_challenge(cli_ctx,
 
     scope = _resolve_acr_scope(cli_ctx)
 
-    # this might be a cross tenant scenario, so pass subscription to get_raw_token
-    creds, _, tenant = profile.get_raw_token(subscription=get_subscription_id(cli_ctx),
-                                             resource=scope)
+    # this might be a cross tenant scenario, so pass subscription to get_raw_token.
+    # In some environments (e.g. AzureML MSI/SSO), acquiring a token for the ACR-specific
+    # audience may fail while the ARM management token is still available. Fall back to the
+    # ARM token since ACR's /oauth2/exchange endpoint accepts ARM tokens via the
+    # access_token grant_type.
+    try:
+        creds, _, tenant = profile.get_raw_token(subscription=get_subscription_id(cli_ctx),
+                                                 resource=scope)
+    except CLIError as e:
+        logger.debug("Failed to get AAD token for ACR scope '%s' (%s). "
+                     "Falling back to ARM management token.", scope, str(e))
+        creds, _, tenant = profile.get_raw_token(subscription=get_subscription_id(cli_ctx))
 
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
     content = {
