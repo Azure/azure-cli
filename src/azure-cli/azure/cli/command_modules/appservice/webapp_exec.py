@@ -6,7 +6,7 @@
 from knack.log import get_logger
 from knack.util import CLIError
 
-from azure.cli.core.azclierror import ResourceNotFoundError, ValidationError, AzureConnectionError
+from azure.cli.core.azclierror import ResourceNotFoundError, ValidationError, AzureConnectionError, CLIInternalError
 
 from ._appservice_utils import _generic_site_operation
 from .custom import _get_scm_url, get_scm_site_headers, list_instances
@@ -15,6 +15,36 @@ from .utils import is_linux_webapp
 logger = get_logger(__name__)
 
 _MAX_SHELL_PATH_LENGTH = 256
+
+# Windows special key codes and ANSI escape sequences.
+_WINDOWS_KEY_MAP = {
+    72: b'\x1b[A',     # Up
+    80: b'\x1b[B',     # Down
+    77: b'\x1b[C',     # Right
+    75: b'\x1b[D',     # Left
+    71: b'\x1b[H',     # Home
+    79: b'\x1b[F',     # End
+    82: b'\x1b[2~',    # Insert
+    83: b'\x1b[3~',    # Delete
+    73: b'\x1b[5~',    # Page Up
+    81: b'\x1b[6~',    # Page Down
+    59: b'\x1bOP',     # F1
+    60: b'\x1bOQ',     # F2
+    61: b'\x1bOR',     # F3
+    62: b'\x1bOS',     # F4
+    63: b'\x1b[15~',   # F5
+    64: b'\x1b[17~',   # F6
+    65: b'\x1b[18~',   # F7
+    66: b'\x1b[19~',   # F8
+    67: b'\x1b[20~',   # F9
+    68: b'\x1b[21~',   # F10
+    133: b'\x1b[23~',  # F11
+    134: b'\x1b[24~',  # F12
+    115: b'\x1b[1;5D',  # Ctrl+Left
+    116: b'\x1b[1;5C',  # Ctrl+Right
+    141: b'\x1b[1;5A',  # Ctrl+Up
+    145: b'\x1b[1;5B',  # Ctrl+Down
+}
 
 
 def webapp_exec(cmd,
@@ -30,7 +60,8 @@ def webapp_exec(cmd,
     # Validate Linux App
     webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
     if not webapp:
-        raise ResourceNotFoundError("Unable to find web app '{}' in resource group '{}'.".format(name, resource_group_name))
+        raise ResourceNotFoundError(
+            "Unable to find web app '{}' in resource group '{}'.".format(name, resource_group_name))
 
     if not is_linux_webapp(webapp):
         raise ValidationError("Site is not a Linux web app. 'az webapp exec' is only supported for Linux web apps.")
@@ -49,7 +80,8 @@ def webapp_exec(cmd,
         if working_directory:
             raise ValidationError("--working-directory is only supported in 'execute' mode.")
         if instance and (instance.lower() == 'all' or ',' in instance):
-            raise ValidationError("Shell mode supports a single instance. Specify one instance, or omit to use a random one.")
+            raise ValidationError(
+                "Shell mode supports a single instance. Specify one instance, or omit to use a random one.")
         if shell and not shell.startswith('/'):
             raise ValidationError("--shell must be an absolute path (e.g. /bin/sh).")
         if shell and len(shell) > _MAX_SHELL_PATH_LENGTH:
@@ -74,38 +106,14 @@ def webapp_exec(cmd,
         _start_shell_session(scm_url, headers, cookies, shell=shell)
         return None
 
-    # Execute mode - execute command on the resolved instance(s)
-    def _run_on_instance(target):
-        cookies = {}
-        if target is not None:
-            cookies['ARRAffinity'] = target
-        label = target or 'default'
-        try:
-            result = _execute_command_on_instance(scm_url, headers, cookies, command, args, working_directory)
-            logger.warning("Instance '%s' succeeded%s", label, ": {}".format(result) if result else ".")
-            return {'instance': label, 'status': 'success', 'result': result}
-        except CLIError as e:
-            logger.warning("Instance '%s' failed: %s", label, e)
-            return {'instance': label, 'status': 'failed', 'error': str(e)}
+    # Execute mode - run the command on each resolved instance in parallel.
+    args_list = [(target, scm_url, headers, command, args, working_directory) for target in target_instances]
+    results = _execute_in_parallel(_run_execute_on_instance, args_list)
 
-    # Execute the command on every resolved instance, in parallel. Each task
-    # returns a result dict (never raises), so one bad instance can't abort the
-    # others. The POST timeout (in _execute_command_on_instance) bounds how long
-    # any single thread can run, so threads are always released promptly.
-    import concurrent.futures
-    with concurrent.futures.ThreadPoolExecutor(max_workers=min(10, len(target_instances))) as executor:
-        results = list(executor.map(_run_on_instance, target_instances))
-
-    return results if len(results) > 1 else results[0] if results else None
+    return results
 
 
 def _resolve_target_instances(cmd, resource_group_name, name, instance, slot):
-    # Resolve --instance into a validated list of instance names.
-    # - None means no instance was requested: returns [None] (the load balancer picks one).
-    # - "all" returns a sorted list of every instance name.
-    # - Comma-separated values (e.g. "i1,i2") returns those names, each validated to exist.
-    # Raises ValidationError if "all" finds no instances, or any requested name is invalid.
-
     if instance is None:
         return [None]
 
@@ -125,14 +133,38 @@ def _resolve_target_instances(cmd, resource_group_name, name, instance, slot):
     return requested
 
 
+def _run_execute_on_instance(target, scm_url, headers, command, args, working_directory):
+    # Run the command on a single instance and return a result dict. Never raises:
+    # a CLIError from one instance is captured so it can't abort the others.
+    cookies = {}
+    if target is not None:
+        cookies['ARRAffinity'] = target
+    label = target or 'default'
+    try:
+        result = _execute_command_on_instance(scm_url, headers, cookies, command, args, working_directory)
+        logger.warning("Instance '%s' succeeded%s", label, ": {}".format(result) if result else ".")
+        return {'instance': label, 'status': 'success', 'result': result}
+    except CLIError as e:
+        logger.warning("Instance '%s' failed: %s", label, e)
+        return {'instance': label, 'status': 'failed', 'error': str(e)}
+
+
+def _execute_in_parallel(fn, args_list, max_workers=10):
+    # Run fn(*args) for each arg tuple on a thread pool
+    import concurrent.futures
+    max_workers = min(max_workers, len(args_list))
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = [executor.submit(fn, *args) for args in args_list]
+        return [f.result() for f in futures]
+
+
 # --- shell mode ---
 
 
 def _start_shell_session(scm_url, headers, cookies=None, shell=None):
-    import sys
+    import codecs
     import platform
     import threading
-    import time
     import websocket
 
     ws_url = scm_url.replace('https://', 'wss://') + '/exec/shell'
@@ -152,10 +184,11 @@ def _start_shell_session(scm_url, headers, cookies=None, shell=None):
         )
     except websocket.WebSocketBadStatusException as ex:
         # The server rejected the upgrade handshake
-        raise CLIError(_friendly_exec_error_message(getattr(ex, 'resp_body', None)))
+        raise CLIInternalError(_friendly_exec_error_message(getattr(ex, 'resp_body', None)))
     except (OSError, websocket.WebSocketException) as ex:
         raise AzureConnectionError("Could not connect to the web app: {}".format(ex))
-    # The 30s timeout only guards the initial connect; clear it so the recv loop blocks indefinitely
+
+    # Clear the 30s connect timeout so the read_from_server loop blocks indefinitely
     ws.settimeout(None)
 
     logger.info("Connected to %s", ws_url)
@@ -164,47 +197,37 @@ def _start_shell_session(scm_url, headers, cookies=None, shell=None):
           "container restarts or the host undergoes maintenance.")
     print("Press Ctrl+C twice to exit.\n")
 
-    # Enable ANSI rendering on Windows consoles before the recv thread starts
-    # writing server output to stdout. No-op on Unix / redirected stdout.
+    # Enable ANSI rendering on Windows consoles. No-op on Unix / redirected stdout.
     vt_state = _enable_windows_vt_output()
+
+    # Incremental UTF-8 decoder: a multi-byte char can split across frames, so it buffers the
+    # partial bytes until the next frame completes them. Replace invalid char as a fallback.
+    decoder = codecs.getincrementaldecoder('utf-8')('replace')
 
     # Run two loops until one sets closed.
     #   1. _read_from_server: server output -> stdout
     #   2. _send_to_server  : stdin -> server
     closed = threading.Event()
 
-    def _read_from_server():
-        try:
-            while not closed.is_set():
-                opcode, data = ws.recv_data()
-                # Stop on a close frame; only render real shell output (text/binary).
-                # Control frames (close/ping/pong) carry non-output payloads we must not print.
-                if opcode == websocket.ABNF.OPCODE_CLOSE:
-                    break
-                if opcode not in (websocket.ABNF.OPCODE_TEXT, websocket.ABNF.OPCODE_BINARY):
-                    continue
-                text = data.decode('utf-8', errors='replace')
-                sys.stdout.write(text)
-                sys.stdout.flush()
-        except (websocket.WebSocketConnectionClosedException, OSError):
-            pass
-        finally:
-            closed.set()
+    # 1. server -> stdout, on a background thread
+    threading.Thread(
+        target=_read_from_server,
+        args=(ws, closed, decoder),
+        daemon=True).start()
 
-    recv_thread = threading.Thread(target=_read_from_server, daemon=True)
-    recv_thread.start()
-
-    # Tell the server our starting terminal size so the remote PTY matches.
+    # Send starting terminal size so the remote PTY matches.
     _send_terminal_resize(ws)
 
-    # stdin -> server
+    # 2. stdin -> server, blocks the main thread until the session ends
     if platform.system() == 'Windows':
         _send_to_server_windows(ws, closed)
     else:
         _send_to_server_non_windows(ws, closed)
 
+    # Send loop returned: signal the read thread to stop, then clean up.
     closed.set()
-    # Restore the original Windows console output mode, if we changed it.
+
+    # Restore the original Windows console output mode, if changed.
     if vt_state is not None:
         import ctypes
         ctypes.windll.kernel32.SetConsoleMode(vt_state[0], vt_state[1])
@@ -219,20 +242,46 @@ def _enable_windows_vt_output():
     # Server output contains ANSI escape sequences (colors, cursor movement from
     # vim/top/htop). Modern Windows Terminal renders these by default, but classic
     # conhost/cmd.exe shows them as raw codes unless ENABLE_VIRTUAL_TERMINAL_PROCESSING
-    # is set. Returns (handle, old_mode) so the caller can restore the original mode,
-    # or None when not applicable (non-Windows, or stdout is redirected/not a console).
+    # is set on stdout's console mode. Returns (handle, old_mode) so the caller can restore
+    # the original mode, or None when not applicable (non-Windows, or stdout is redirected/not a console).
+
     import platform
     if platform.system() != 'Windows':
         return None
     import ctypes
     kernel32 = ctypes.windll.kernel32
+
     stdout_handle = kernel32.GetStdHandle(-11)  # STD_OUTPUT_HANDLE
-    old_mode = ctypes.c_uint32()
     # GetConsoleMode returns 0 when stdout isn't a real console (e.g. redirected to a file).
+    old_mode = ctypes.c_uint32()
     if not kernel32.GetConsoleMode(stdout_handle, ctypes.byref(old_mode)):
         return None
+
+    # OR in the VT bit, preserving the other mode flags.
     kernel32.SetConsoleMode(stdout_handle, old_mode.value | 0x0004)  # ENABLE_VIRTUAL_TERMINAL_PROCESSING
     return stdout_handle, old_mode.value
+
+
+def _read_from_server(ws, closed, decoder):
+    # Runs on a background thread: stream server output -> stdout until the socket closes.
+    import sys
+    import websocket
+    try:
+        while not closed.is_set():
+            opcode, data = ws.recv_data()
+            # Stop on a close frame
+            if opcode == websocket.ABNF.OPCODE_CLOSE:
+                break
+            # Text and binary is considered shell output. Do not print non-shell output (e.g. ping/pong) to stdout.
+            if opcode not in (websocket.ABNF.OPCODE_TEXT, websocket.ABNF.OPCODE_BINARY):
+                continue
+            text = decoder.decode(data)
+            sys.stdout.write(text)
+            sys.stdout.flush()
+    except (websocket.WebSocketConnectionClosedException, OSError):
+        pass
+    finally:
+        closed.set()
 
 
 def _send_terminal_resize(ws):
@@ -255,57 +304,28 @@ def _send_to_server_windows(ws, closed):
     import msvcrt
     import websocket as ws_module
 
-    # Windows normally intercepts Ctrl+C as a local interrupt. Clear ENABLE_PROCESSED_INPUT
-    # so it arrives at getwch() as raw '\x03' to forward to the remote shell; restore on exit.
+    # Clear the ENABLE_PROCESSED_INPUT flag from stdin's console mode so a Ctrl+C is processed as
+    # a raw byte and forwarded to the remote shell, instead of interrupting az locally; restored on exit.
     kernel32 = ctypes.windll.kernel32
     stdin_handle = kernel32.GetStdHandle(-10)  # STD_INPUT_HANDLE
     old_mode = ctypes.c_uint32()
     kernel32.GetConsoleMode(stdin_handle, ctypes.byref(old_mode))
-    kernel32.SetConsoleMode(stdin_handle, old_mode.value & ~0x0001)  # clear ENABLE_PROCESSED_INPUT
-
-    # Windows special key codes → ANSI escape sequences.
-    # Tab, Ctrl+D, Ctrl+L etc. work via the regular else branch (sent as-is).
-    # NOTE: these scan codes should be validated during live Windows testing.
-    _WINDOWS_KEY_MAP = {
-        72: b'\x1b[A',     # Up
-        80: b'\x1b[B',     # Down
-        77: b'\x1b[C',     # Right
-        75: b'\x1b[D',     # Left
-        71: b'\x1b[H',     # Home
-        79: b'\x1b[F',     # End
-        82: b'\x1b[2~',    # Insert
-        83: b'\x1b[3~',    # Delete
-        73: b'\x1b[5~',    # Page Up
-        81: b'\x1b[6~',    # Page Down
-        59: b'\x1bOP',     # F1
-        60: b'\x1bOQ',     # F2
-        61: b'\x1bOR',     # F3
-        62: b'\x1bOS',     # F4
-        63: b'\x1b[15~',   # F5
-        64: b'\x1b[17~',   # F6
-        65: b'\x1b[18~',   # F7
-        66: b'\x1b[19~',   # F8
-        67: b'\x1b[20~',   # F9
-        68: b'\x1b[21~',   # F10
-        133: b'\x1b[23~',  # F11
-        134: b'\x1b[24~',  # F12
-        115: b'\x1b[1;5D',  # Ctrl+Left
-        116: b'\x1b[1;5C',  # Ctrl+Right
-        141: b'\x1b[1;5A',  # Ctrl+Up
-        145: b'\x1b[1;5B',  # Ctrl+Down
-    }
+    kernel32.SetConsoleMode(stdin_handle, old_mode.value & ~0x0001)
 
     last_ctrl_c = 0
-    # Windows has no SIGWINCH, so poll the console size ~once a second and notify
-    # the server when it changes (e.g. the user maximizes the window).
+
+    # Set up for terminal window resizing
     try:
         last_size = os.get_terminal_size()
     except OSError:
         last_size = None
     last_resize_check = time.time()
+
     try:
         while not closed.is_set():
             now = time.time()
+
+            # Poll the console size every ~1s and notify the server when it changes
             if now - last_resize_check >= 1.0:
                 last_resize_check = now
                 try:
@@ -316,31 +336,40 @@ def _send_to_server_windows(ws, closed):
                     last_size = current_size
                     _send_terminal_resize(ws)
 
-            # msvcrt is Python's Windows console API. kbhit() is a non-blocking peek
-            # (True if a key is waiting); getwch() below reads one char and blocks if
-            # the buffer is empty. So if nothing's queued, nap 50ms instead of blocking.
+            # kbhit() is a non-blocking peek: returns True when a key is waiting in the console input buffer.
+            # If no key is waiting, sleep 0.05 seconds
             if not msvcrt.kbhit():
                 time.sleep(0.05)
                 continue
 
-            ch = msvcrt.getwch()
-            if ch == '\x03':  # Ctrl+C: twice within 2s exits the session; a single press is forwarded to the shell
-                now = time.time()
-                if now - last_ctrl_c < 2:
-                    break
-                last_ctrl_c = now
-                ws.send(b'\x03', opcode=ws_module.ABNF.OPCODE_BINARY)
-            elif ch == '\r':  # Enter: Windows gives CR, Unix shells expect LF
-                ws.send(b'\n', opcode=ws_module.ABNF.OPCODE_BINARY)
-            elif ch == '\x08':  # Backspace: Windows gives BS, Unix shells expect DEL (0x7f)
-                ws.send(b'\x7f', opcode=ws_module.ABNF.OPCODE_BINARY)
-            elif ch in ('\x00', '\xe0'):  # Special key prefix
-                code = ord(msvcrt.getwch())
-                escape = _WINDOWS_KEY_MAP.get(code)
-                if escape:
-                    ws.send(escape, opcode=ws_module.ABNF.OPCODE_BINARY)
-            else:
-                ws.send(ch.encode('utf-8'), opcode=ws_module.ABNF.OPCODE_BINARY)
+            # If key is waiting: Drain every key queued right now into one buffer and send a single frame.
+            buf = bytearray()
+            exit_session = False
+            while msvcrt.kbhit():
+                ch = msvcrt.getwch()
+                # If Ctrl+C twice within 2s, exit the session. Otherwise, send to server.
+                if ch == '\x03':
+                    now = time.time()
+                    if now - last_ctrl_c < 2:
+                        exit_session = True
+                        break
+                    last_ctrl_c = now
+                    buf += b'\x03'
+                elif ch == '\r':  # Enter: Windows gives CR, Unix shells expect LF
+                    buf += b'\n'
+                elif ch == '\x08':  # Backspace: Windows gives BS, Unix shells expect DEL (0x7f)
+                    buf += b'\x7f'
+                elif ch in ('\x00', '\xe0'):  # Special key prefix: the next getwch() is the key code
+                    escape = _WINDOWS_KEY_MAP.get(ord(msvcrt.getwch()))
+                    if escape:
+                        buf += escape
+                else:
+                    buf += ch.encode('utf-8')
+
+            if buf:
+                ws.send(bytes(buf), opcode=ws_module.ABNF.OPCODE_BINARY)
+            if exit_session:
+                break
     except (ws_module.WebSocketConnectionClosedException, OSError) as ex:
         logger.info("Shell session closed: %s", ex)
     finally:
@@ -362,40 +391,41 @@ def _send_to_server_non_windows(ws, closed):
     old_settings = termios.tcgetattr(fd)
     last_ctrl_c = 0
 
-    # On Unix the terminal raises SIGWINCH whenever it's resized. The handler just
-    # flags an event; the actual send happens in the loop below so we never call
-    # ws.send() from inside an async signal handler.
+    # Set up for terminal window resizing
     resize_needed = threading.Event()
 
     def on_sigwinch(_signum, _frame):
         resize_needed.set()
 
+    # On SIGWINCH (terminal resize), run on_sigwinch to signal resize_needed.
+    # This will eventually allow send_terminal_resize to be called and send resize request to server.
     signal.signal(signal.SIGWINCH, on_sigwinch)
+
     try:
+        # Raw mode: pass keystrokes straight to the remote shell (no local echo/buffering).
         tty.setraw(fd)
         while not closed.is_set():
             if resize_needed.is_set():
                 resize_needed.clear()
                 _send_terminal_resize(ws)
 
-            # Use select with a short timeout so the loop wakes up regularly to
-            # re-check closed.is_set(); a blocking os.read() would hang here when
-            # the server ends the session until the user happened to press a key.
+            # Wait for input on fd (stdin). If nothing for 0.1s, loop back to re-check if the session closed.
             ready, _, _ = select.select([fd], [], [], 0.1)
             if not ready:
                 continue
             data = os.read(fd, 4096)
             if not data:
                 break
-            if b'\x03' in data:  # Ctrl+C (anywhere in the chunk, e.g. a paste)
+            if b'\x03' in data:  # Ctrl+C
                 now = time.time()
                 if now - last_ctrl_c < 2:
-                    break
+                    break  # Ctrl+C twice in 2 seconds will end the session
                 last_ctrl_c = now
             ws.send(data, opcode=ws_module.ABNF.OPCODE_BINARY)
     except (ws_module.WebSocketConnectionClosedException, OSError) as ex:
         logger.info("Shell session closed: %s", ex)
     finally:
+        # Reset defaults: stop listening for resize signals, restore terminal out of raw mode.
         signal.signal(signal.SIGWINCH, signal.SIG_DFL)
         termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
 
@@ -428,10 +458,14 @@ def _execute_command_on_instance(scm_url, headers, cookies, command, args=None, 
 
     if response.status_code == 202:
         return _parse_server_message(response.text)
-    raise CLIError(_friendly_exec_error_message(response.text))
+    raise CLIInternalError(_friendly_exec_error_message(response.text))
 
 
 # --- shared helpers ---
+
+
+def _friendly_exec_error_message(body):
+    return _parse_server_message(body) or "The request could not be completed. Please try again later."
 
 
 def _parse_server_message(body):
@@ -447,11 +481,6 @@ def _parse_server_message(body):
         parsed = json.loads(text)
         if isinstance(parsed, dict):
             return parsed.get('Message') or None
-    except (json.JSONDecodeError, TypeError, ValueError):
+    except ValueError:  # includes json.JSONDecodeError
         pass
     return text
-
-
-def _friendly_exec_error_message(body):
-    # Prefer the server's message; fall back to a generic line for a bodyless response.
-    return _parse_server_message(body) or "The request could not be completed. Please try again later."
