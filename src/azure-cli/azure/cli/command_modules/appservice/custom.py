@@ -6923,6 +6923,29 @@ def _validate_flex_ssl_params(is_flex, load_to_code, enable_using_msi, webapp, r
                        'Ensure the app\'s managed identity has the permission on the Key Vault.')
 
 
+def _get_app_service_certificate_kv_secret_name(cmd, subscription_id, key_vault_certificate_name):
+    # App Service Certificate orders are exposed by the Microsoft.CertificateRegistration resource provider,
+    # which the WebSiteManagementClient SDK no longer surfaces, so query the ARM REST API directly.
+    management_hostname = cmd.cli_ctx.cloud.endpoints.resource_manager
+    request_url = "{}/subscriptions/{}/providers/Microsoft.CertificateRegistration/certificateOrders" \
+                  "?api-version={}".format(management_hostname.strip('/'), subscription_id, VERSION_2022_09_01)
+    try:
+        while request_url:
+            response = send_raw_request(cmd.cli_ctx, method='get', url=request_url).json()
+            for asc in response.get('value', []):
+                if asc.get('name') == key_vault_certificate_name:
+                    certificates = asc.get('properties', {}).get('certificates') or {}
+                    cert = certificates.get(key_vault_certificate_name)
+                    if cert:
+                        return cert.get('keyVaultSecretName')
+            request_url = response.get('nextLink')
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.warning("Unable to check App Service Certificate orders (%s). If '%s' is an App Service "
+                       "Certificate, the import may not resolve the correct Key Vault secret name.",
+                       str(ex), key_vault_certificate_name)
+    return None
+
+
 def import_ssl_cert(cmd, resource_group_name, key_vault, key_vault_certificate_name, name=None, certificate_name=None,
                     load_to_code=None, enable_using_msi=None):
     Certificate = cmd.get_models('Certificate')
@@ -6966,27 +6989,13 @@ def import_ssl_cert(cmd, resource_group_name, key_vault, key_vault_certificate_n
     kv_subscription = kv_id_parts['subscription']
 
     # If in the public cloud, check if certificate is an app service certificate, in the same or a diferent
-    # subscription
+    # subscription. App Service Certificate orders belong to the Microsoft.CertificateRegistration provider,
+    # which is no longer exposed by the WebSiteManagementClient SDK, so the ARM REST API is queried directly.
     kv_secret_name = None
     cloud_type = cmd.cli_ctx.cloud.name
-    from azure.cli.core.commands.client_factory import get_subscription_id
-    subscription_id = get_subscription_id(cmd.cli_ctx)
     if cloud_type.lower() == PUBLIC_CLOUD.lower():
-        if kv_subscription.lower() != subscription_id.lower():
-            cert_orders_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_APPSERVICE,
-                                                         subscription_id=kv_subscription)
-        else:
-            cert_orders_client = client
-
-        if hasattr(cert_orders_client, 'app_service_certificate_orders'):
-            ascs = cert_orders_client.app_service_certificate_orders.list(api_version=VERSION_2022_09_01)
-            for asc in ascs:
-                if asc.name == key_vault_certificate_name:
-                    kv_secret_name = asc.certificates[key_vault_certificate_name].key_vault_secret_name
-        else:
-            logger.warning("Unable to check App Service Certificate orders. "
-                           "If '%s' is an App Service Certificate, the import may not resolve "
-                           "the correct Key Vault secret name.", key_vault_certificate_name)
+        kv_secret_name = _get_app_service_certificate_kv_secret_name(cmd, kv_subscription,
+                                                                     key_vault_certificate_name)
 
     # if kv_secret_name is not populated, it is not an appservice certificate, proceed for KV certificates
     kv_secret_name = kv_secret_name or key_vault_certificate_name
