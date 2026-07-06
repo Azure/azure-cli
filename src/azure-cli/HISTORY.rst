@@ -42,6 +42,11 @@ Release History
 **Backup**
 
 * `az backup`: Add CRR config entries for Delos cloud regions (#33448)
+* `az backup protection enable-for-vm`: Support Cross Subscription Backup by accepting the complete ARM ID of a VM residing in a different subscription than the vault via `--vm`
+* `az backup restore restore-disks`: Support Original Location Recovery (OLR) for Cross Subscription Backup protected items; the container subscription is derived from the recovery point, no additional input required
+* `az backup restore restore-disks`: Fail with a clear error instead of crashing when a friendly container name matches multiple containers in the vault; pass the native container name instead
+* `az backup item list/show`: Add `containerSubscriptionId` to the Azure VM backup item response
+* `az backup job show`: Add `containerSubscriptionId` to the Azure VM backup job response
 
 **CDN**
 

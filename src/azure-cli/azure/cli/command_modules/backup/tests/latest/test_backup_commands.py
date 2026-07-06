@@ -400,6 +400,12 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertIn(vm1.lower(), item1_json['properties']['virtualMachineId'].lower())
         self.assertIn(self.kwargs['default'].lower(), item1_json['properties']['policyId'].lower())
 
+        # containerSubscriptionId is surfaced for Azure VM items and is parsed from sourceResourceId.
+        # It equals the subscription that hosts the protected VM (which, for a Cross Subscription Backup
+        # item, differs from the vault's subscription).
+        self.assertEqual(item1_json['properties']['containerSubscriptionId'],
+                         item1_json['properties']['sourceResourceId'].split('/')[2])
+
         self.kwargs['container1_fullname'] = self.cmd('backup container show --backup-management-type AzureIaasVM -n {vm1} -v {vault} -g {rg} --query name').get_output_in_json()
 
         self.cmd('backup item show --workload-type VM -g {rg} -v {vault} -c {container1_fullname} -n {vm1}', checks=[
@@ -662,6 +668,28 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ]).get_output_in_json()
         self.wait_for_restore_complete(job_out["id"])
         self.cmd('vm delete -g {rg} -n {target_vm_name} --yes')
+
+
+    # Prerequisites (needed only for re-recording this test live): two VMs with the SAME friendly name
+    # but in different resource groups, both protected in the same vault. This produces multiple
+    # registered containers with the same friendly name, which cannot be provisioned via the standard
+    # Preparers (they generate unique names), hence this test targets pre-existing resources and is
+    # validated via its recording in playback.
+    def test_backup_restore_multiple_containers_same_friendly_name(self):
+        self.kwargs.update({
+            'rg': 'sgholapDMTesting-rg',
+            'vault': 'singhprab-csb-vault',
+            'container_name': 'testcvm123',
+            'item_name': 'testcvm123',
+            'sa': 'smorteylcdtplane1',
+            'rp': '1198973670844227'
+        })
+
+        # Passing the friendly container name resolves to multiple containers (same friendly name in
+        # different resource groups). The command must fail with a clear validation error instead of
+        # crashing, asking the customer to provide the native container name.
+        self.cmd('backup restore restore-disks -g {rg} -v {vault} -c {container_name} -i {item_name} '
+                 '--rp-name {rp} --storage-account {sa}', expect_failure=True)
 
 
     @AllowLargeResponse()
