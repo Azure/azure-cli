@@ -56,21 +56,27 @@ def transform_troubleshoot_status_output(result):
     The framework's default table renderer would only surface top-level scalars
     (name, resourceGroup) and drop every meaningful field."""
     from collections import OrderedDict
-    from .custom import _format_dt, _most_recent_startup
+    from .custom import _format_dt, _most_recent_startup, _startup_fetch_failed
 
     items = (result or {}).get('instances') or []
-    # LastError* columns are only surfaced when at least one instance reports one,
-    # so healthy fleets get a compact 5-column table instead of a wide 7-column
-    # one full of empty cells.
-    show_errors = any(item.get('lastError') for item in items)
+
+    # LastError is nullable on the backend SiteRuntimeStatusOnWorker contract.
+    # A 'Started' instance is healthy, so any LastError it still carries is stale
+    # and must not be shown. Surface the LastError columns only when an instance
+    # reports a LastError while NOT 'Started'.
+    def _has_visible_error(item):
+        return bool(item.get('lastError')) and item.get('state') != 'Started'
+
+    show_errors = any(_has_visible_error(item) for item in items)
 
     rows = []
     for item in items:
         startup = item.get('startup') or {}
-        # KuduLite returns SummaryFetchError when it couldn't read this worker's log
-        # directory; count/timestamp fields are meaningless in that case.
-        has_startup_error = bool(startup.get('SummaryFetchError'))
-        successful = None if has_startup_error else startup.get('Successful')
+        # KuduLite returns a SummaryFetchStatus failure reason when it couldn't
+        # read this worker's log directory; count/timestamp fields are
+        # meaningless in that case.
+        has_startup_error = bool(_startup_fetch_failed(startup))
+        succeeded = None if has_startup_error else startup.get('Succeeded')
         failed = None if has_startup_error else startup.get('Failed')
         updated = None if has_startup_error else _format_dt(_most_recent_startup(startup))
 
@@ -79,9 +85,13 @@ def transform_troubleshoot_status_output(result):
             ('State', item.get('state')),
         ])
         if show_errors:
-            row['LastError'] = item.get('lastError')
-            row['LastErrorTimestamp'] = item.get('lastErrorTimestamp')
-        row['Successful'] = successful
+            if _has_visible_error(item):
+                row['LastError'] = item.get('lastError')
+                row['LastErrorTimestamp'] = item.get('lastErrorTimestamp')
+            else:
+                row['LastError'] = None
+                row['LastErrorTimestamp'] = None
+        row['Succeeded'] = succeeded
         row['Failed'] = failed
         row['Updated'] = updated
         rows.append(row)

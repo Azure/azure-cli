@@ -6654,6 +6654,12 @@ def troubleshoot_status(cmd, resource_group, name, slot=None, instance=None, rep
         summary_url = '{}?instance={}'.format(summary_url, quote(target_machine, safe=''))
 
     startup_by_machine = {}
+    # KuduLite may return a plaintext (non-JSON) body when the endpoint can't
+    # produce a per-instance summary at all — for example when the customer sets
+    # WEBSITE_DISABLE_CONTAINER_STARTUP_LOGS=true. That message applies to every
+    # worker on the app, so we hoist it to the instance-level SummaryFetchStatus
+    # below (after per-instance JSON entries, if any, are already loaded).
+    app_wide_fetch_status = None
     try:
         summary_response = requests.get(summary_url, headers=headers, timeout=30)
     except requests.RequestException as ex:
@@ -6671,7 +6677,7 @@ def troubleshoot_status(cmd, resource_group, name, slot=None, instance=None, rep
                     if not isinstance(entry, dict):
                         continue
                     # KuduLite serializes its C# POCO with default settings -> PascalCase
-                    # (InstanceId, Startup, Successful, MostRecent, ...). When KuduLite
+                    # (InstanceId, Startup, Succeeded, MostRecentSuccess, ...). When KuduLite
                     # ships a [JsonPropertyName] / camelCase contract, switch the keys
                     # here (and in _print_startup_block / overview-table renderer) accordingly.
                     key = entry.get('InstanceId')
@@ -6684,6 +6690,11 @@ def troubleshoot_status(cmd, resource_group, name, slot=None, instance=None, rep
                 key = body.get('InstanceId') or target_machine
                 if key:
                     startup_by_machine[key] = inner
+            else:
+                # Plaintext body (e.g. WEBSITE_DISABLE_CONTAINER_STARTUP_LOGS notice).
+                text = (summary_response.text or '').strip()
+                if text:
+                    app_wide_fetch_status = text
         elif summary_response.status_code == 404:
             # No startup logs in window for any instance, or endpoint not rolled out.
             pass
@@ -6696,7 +6707,12 @@ def troubleshoot_status(cmd, resource_group, name, slot=None, instance=None, rep
         machine = item.get('machineName')
         # Without machineName we can't correlate this runtime entry to a KuduLite
         # entry (KuduLite keys its summaries by machine name).
-        item['startup'] = startup_by_machine.get(machine) if machine else None
+        per_instance = startup_by_machine.get(machine) if machine else None
+        if per_instance is None and app_wide_fetch_status:
+            # Synthesize a SummaryFetchStatus entry so the existing renderer /
+            # table transformer surface the app-wide message per instance.
+            per_instance = {'SummaryFetchStatus': app_wide_fetch_status}
+        item['startup'] = per_instance
 
     # --- 3. Assemble payload ---
     payload = {
@@ -6773,9 +6789,11 @@ def _render_troubleshoot_status(payload):
         else:
             _print_startup_block(inst.get('startup'), _out)
 
-    # Hint footer — only surfaced when at least one instance reports an error detail.
+    # Hint footer — surfaced only when at least one instance has a real
+    # failure in the report's window (Failed > 0 + lastError set).
     has_error = any(
-        (inst.get('lastErrorDetails') or '').strip() for inst in instances
+        (inst.get('lastError') and _failed_count(inst.get('startup')) > 0)
+        for inst in instances
     )
     if has_error:
         rg = resource_group or '<resource-group>'
@@ -6861,6 +6879,65 @@ def _format_dt(value):
     return str(value)
 
 
+def _relative_age(iso_value):
+    """Return a short 'Nh Mm ago' / 'Nm ago' / 'just now' / 'in the future' string
+    for an ISO-8601 UTC timestamp, or None if the input is unparseable/missing."""
+    if not iso_value or not isinstance(iso_value, str):
+        return None
+    from datetime import datetime, timezone
+    v = iso_value
+    if '.' in v:
+        # datetime.fromisoformat pre-3.11 chokes on fractional seconds with 'Z' — strip both.
+        head, _, tail = v.partition('.')
+        tz = ''
+        for suffix in ('Z', '+', '-'):
+            if suffix in tail:
+                idx = tail.find(suffix)
+                tz = tail[idx:]
+                break
+        v = head + tz
+    v = v.replace('Z', '+00:00')
+    try:
+        dt = datetime.fromisoformat(v)
+    except ValueError:
+        return None
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    delta = datetime.now(timezone.utc) - dt
+    total_seconds = int(delta.total_seconds())
+    if total_seconds < 0:
+        return 'in the future'
+    if total_seconds < 60:
+        return 'just now'
+    minutes = total_seconds // 60
+    if minutes < 60:
+        return '{}m ago'.format(minutes)
+    hours = minutes // 60
+    rem_min = minutes % 60
+    if hours < 24:
+        return '{}h {}m ago'.format(hours, rem_min) if rem_min else '{}h ago'.format(hours)
+    days = hours // 24
+    rem_hr = hours % 24
+    return '{}d {}h ago'.format(days, rem_hr) if rem_hr else '{}d ago'.format(days)
+
+
+def _failed_count(startup):
+    """Parse Startup.Failed into an int (0 when missing/invalid). Accepts int,
+    numeric string, or KuduLite's capped '50+' form (leading digits win)."""
+    if not startup:
+        return 0
+    raw = startup.get('Failed')
+    if raw is None:
+        return 0
+    text = str(raw)
+    try:
+        return int(text)
+    except ValueError:
+        import re as _re
+        m = _re.match(r'\d+', text)
+        return int(m.group(0)) if m else 0
+
+
 def _print_runtime_block(inst, emit):
     """Print one Site Runtime Status block from an ARM /siteStatus item."""
     from azure.cli.core.style import Style
@@ -6869,18 +6946,25 @@ def _print_runtime_block(inst, emit):
         return
     state = inst.get('state') or '-'
     details = inst.get('details') or '-'
-    last_error = inst.get('lastError') or '-'
-    last_error_details = inst.get('lastErrorDetails') or '-'
-    # Treat .NET DateTime.MinValue (0001-01-01...) as "no error ever" and hide it.
-    last_error_ts_raw = inst.get('lastErrorTimestamp')
-    if isinstance(last_error_ts_raw, str) and last_error_ts_raw.startswith('0001-01-01'):
-        last_error_ts_raw = None
-    last_error_ts = _format_dt(last_error_ts_raw) or '-'
     emit([(Style.PRIMARY, '  State                '), (_state_style(state), state)])
     emit('  Details              {}'.format(details))
-    emit('  Last Error           {}'.format(last_error))
-    emit('  Last Error Details   {}'.format(last_error_details))
-    emit('  Last Error Timestamp {}'.format(last_error_ts))
+    # LastError may be stale after a recovery, so only surface it when this
+    # worker has actually had failed startup attempts in the report's window.
+    has_visible_error = bool(inst.get('lastError')) and _failed_count(inst.get('startup')) > 0
+    if has_visible_error:
+        last_error = inst.get('lastError') or '-'
+        last_error_details = inst.get('lastErrorDetails') or '-'
+        # Treat .NET DateTime.MinValue (0001-01-01...) as "no error ever" and hide it.
+        last_error_ts_raw = inst.get('lastErrorTimestamp')
+        if isinstance(last_error_ts_raw, str) and last_error_ts_raw.startswith('0001-01-01'):
+            last_error_ts_raw = None
+        last_error_ts = _format_dt(last_error_ts_raw) or '-'
+        age = _relative_age(last_error_ts_raw) if last_error_ts_raw else None
+        if age:
+            last_error_ts = '{} ({})'.format(last_error_ts, age)
+        emit('  Last Error           {}'.format(last_error))
+        emit('  Last Error Details   {}'.format(last_error_details))
+        emit('  Last Error Timestamp {}'.format(last_error_ts))
 
 
 def _most_recent_startup(startup):
@@ -6893,23 +6977,38 @@ def _most_recent_startup(startup):
     return max(candidates) if candidates else None
 
 
+def _startup_fetch_failed(startup):
+    """Return the SummaryFetchStatus string only when it indicates a fetch failure
+    (i.e. not the KuduLite success sentinel). None means success or missing."""
+    if not startup:
+        return None
+    status = startup.get('SummaryFetchStatus')
+    if not status:
+        return None
+    # KuduLite success sentinel starts with 'Successfully'; anything else is a
+    # user-facing failure reason we want to surface.
+    if str(status).startswith('Successfully'):
+        return None
+    return status
+
+
 def _print_startup_block(s, emit):
     from azure.cli.core.style import Style
     if not s:
         emit('  No startup attempts recorded in the last 24 hours')
         emit('')
         return
-    # KuduLite sets SummaryFetchError when it couldn't read the log directory for
-    # this worker (e.g. log file too large). All other fields are meaningless then.
-    error = s.get('SummaryFetchError')
-    if error:
+    # KuduLite sets SummaryFetchStatus to a failure reason when it couldn't read
+    # the log directory for this worker; other fields are meaningless then.
+    fetch_error = _startup_fetch_failed(s)
+    if fetch_error:
         emit([(Style.PRIMARY, '  Startup summary unavailable: '),
-              (Style.WARNING, str(error))])
+              (Style.WARNING, str(fetch_error))])
         emit('')
         return
-    successful = s.get('Successful', 0)
+    succeeded = s.get('Succeeded', 0)
     failed = s.get('Failed', 0)
-    emit([(Style.PRIMARY, '  Successful             '), _count_style(successful, 'successful')])
+    emit([(Style.PRIMARY, '  Succeeded              '), _count_style(succeeded, 'successful')])
     emit([(Style.PRIMARY, '  Failed                 '), _count_style(failed, 'failed')])
     most_recent_success = _format_dt(s.get('MostRecentSuccess'))
     most_recent_failure = _format_dt(s.get('MostRecentFailure'))

@@ -2446,12 +2446,12 @@ long-summary: |
       - Site Runtime Status: ARM /siteStatus[/{instanceId}] (per-instance state,
         action, last error, details).
       - Startup summary: KuduLite (SCM) /api/startuplogs/summary (counts of
-        successful and failed startup attempts in the last 24h, plus earliest
-        and most recent).
+        successful and failed startup attempts in the last 24h, plus the
+        most recent success and failure timestamps).
 
     Use --instance to scope both to a single worker. By default returns the
-    structured payload (works with -o json/yaml/tsv/table). Pass --report to
-    print a human-readable, color-coded report instead.
+    structured payload (works with -o json, -o yaml, and -o table). Pass
+    --report to print a human-readable, color-coded report instead.
 examples:
   - name: Show status for all instances of a web app (JSON by default)
     text: az webapp troubleshoot status --name MyWebApp --resource-group MyResourceGroup
@@ -2470,9 +2470,9 @@ parameters:
     short-summary: Print a human-readable, color-coded report instead of returning structured data.
     long-summary: >
         When set, the command writes a formatted report (overview table plus
-        per-instance Site Runtime Status and Startup summary) to stdout and
+        per-instance Last runtime status and Startup summary) to stdout and
         returns no machine-readable output. Omit --report to keep the default
-        structured payload that works with `-o json/yaml/tsv/table`.
+        structured payload that works with `-o json`, `-o yaml`, and `-o table`.
 """
 
 helps['functionapp log'] = """

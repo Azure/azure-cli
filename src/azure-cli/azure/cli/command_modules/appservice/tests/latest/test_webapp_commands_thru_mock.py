@@ -1034,8 +1034,8 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
             mock.MagicMock(json=mock.MagicMock(return_value=self._arm_response(arm_items))),
         ]
         # Real KuduLite response is a single list with one entry per instance.
-        a3f1b_startup = {'Successful': 1, 'Failed': 0}
-        b4d22_startup = {'Successful': 0, 'Failed': 3}
+        a3f1b_startup = {'Succeeded': 1, 'Failed': 0}
+        b4d22_startup = {'Succeeded': 0, 'Failed': 3}
         requests_get_mock.return_value = self._make_response(200, json_data=[
             {'InstanceId': 'lw0sdlwk0008PB', 'Startup': a3f1b_startup},
             {'InstanceId': 'lw1sdlwk0009EF', 'Startup': b4d22_startup},
@@ -1079,7 +1079,7 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
                 {'7c2d9': 'lw0sdlwk0007AB'}))),
             mock.MagicMock(json=mock.MagicMock(return_value=self._arm_response(arm_item))),
         ]
-        startup_summary = {'Successful': 0, 'Failed': 4}
+        startup_summary = {'Succeeded': 0, 'Failed': 4}
         requests_get_mock.return_value = self._make_response(
             200, json_data=[{'InstanceId': 'lw0sdlwk0007AB', 'Startup': startup_summary}])
 
@@ -1177,7 +1177,7 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
         ]
         requests_get_mock.return_value = self._make_response(
             200, json_data=[{'InstanceId': 'lw0sdlwk0007AB',
-                             'Startup': {'Successful': 1, 'Failed': 0}}])
+                             'Startup': {'Succeeded': 1, 'Failed': 0}}])
 
         result = troubleshoot_status(self.cmd, 'myRG', 'myApp', instance='lw0sdlwk0007AB')
 
@@ -1226,7 +1226,7 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
         ]
         requests_get_mock.return_value = self._make_response(
             200, json_data=[{'InstanceId': 'lw0sdlwk0007AB',
-                             'Startup': {'Successful': 1, 'Failed': 0}}])
+                             'Startup': {'Succeeded': 1, 'Failed': 0}}])
 
         result = troubleshoot_status(self.cmd, 'myRG', 'myApp', report=True)
 
