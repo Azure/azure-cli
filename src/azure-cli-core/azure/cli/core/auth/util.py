@@ -33,7 +33,7 @@ _WAM_PROMPT_HTML = (
     '<strong>Web Account Manager (WAM)</strong> &mdash; the Windows authentication broker. '
     'It adds token protection, Windows Hello, conditional access, and streamlined single sign-on.</p>\n'
     '        <p>Enable it in a few steps: '
-    '<a href="' + WAM_ENABLEMENT_URL + '">Sign in with Web Account Manager (WAM) on Windows</a>.</p>\n'
+    f'<a href="{WAM_ENABLEMENT_URL}">Sign in with Web Account Manager (WAM) on Windows</a>.</p>\n'
     '    </div>')
 
 
