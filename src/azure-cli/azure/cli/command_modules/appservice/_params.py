@@ -1606,27 +1606,27 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('staticwebapp enterprise-edge') as c:
         c.argument("no_register", help="Don't try to register the Microsoft.CDN provider. Registration can be done manually with: az provider register --wait --namespace Microsoft.CDN. For more details, please review the documentation available at https://go.microsoft.com/fwlink/?linkid=2184995 .", default=False)
     with self.argument_context('webapp exec') as c:
-        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
-        c.argument('command', options_list=['--command'],
-                   help="The command or executable to run in the container (e.g., touch, mkdir, bash, python)."
-                   " Used only in 'execute' mode.")
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None, help='Name of the web app.')
+        c.argument('exec_command', options_list=['--command'],
+                   help="[Execute mode] The command or executable to run in the container"
+                   " (e.g., touch, mkdir, bash, python).")
         c.argument('args', options_list=['--args'], nargs='+',
-                   help='Arguments to pass to the command. For shell commands, use: --command bash --args "-c" "your command here".'
-                   " Used only in 'execute' mode.")
+                   help='[Execute mode] Arguments to pass to the command.'
+                   ' For a bash one-liner use: --command bash --args "-c" "your command here".')
         c.argument('mode',
                    help="Execution mode. 'shell' (default): Starts an interactive shell session with the main"
                    " web app container. 'execute': Starts command execution and returns immediately without"
                    " returning command output.",
                    arg_type=get_enum_type(['shell', 'execute']), default='shell')
         c.argument('working_directory', options_list=['--working-directory', '--cwd'],
-                   help="Working directory for command execution. Defaults to the container's working directory."
-                   " Used only in 'execute' mode.")
+                   help="[Execute mode] Working directory for command execution."
+                   " Defaults to the container's working directory.")
         c.argument('instance', options_list=['--instance', '-i'],
                    help='Webapp instance(s) to target. Specify a comma-separated list of instance IDs'
                    ' (use "az webapp list-instances" to get IDs) or "all" for all instances. Defaults to a random instance.'
-                   ' "all" is supported only in \'execute\' mode.')
+                   ' Specifying multiple instances (a comma-separated list or "all") is supported only in \'execute\' mode.')
         c.argument('shell', options_list=['--shell'],
-                   help="Absolute path of the shell to launch (e.g. /bin/sh). "
-                   "Defaults to /bin/bash. Used only in 'shell' mode.")
+                   help="[Shell mode] Absolute path of the shell to launch (e.g. /bin/sh). "
+                   "Defaults to /bin/bash.")
         c.argument('slot', options_list=['--slot', '-s'],
                    help='Name of the web app slot. Default to the production slot if not specified.')

@@ -50,7 +50,7 @@ _WINDOWS_KEY_MAP = {
 def webapp_exec(cmd,
                 resource_group_name,
                 name,
-                command=None,
+                exec_command=None,
                 args=None,
                 mode='shell',
                 working_directory=None,
@@ -68,12 +68,12 @@ def webapp_exec(cmd,
 
     # Validate parameters
     if mode.lower() == 'execute':
-        if not command:
+        if not exec_command:
             raise ValidationError("Command is required for 'execute' mode.")
         if shell:
             raise ValidationError("--shell is only supported in 'shell' mode.")
     elif mode.lower() == 'shell':
-        if command:
+        if exec_command:
             raise ValidationError("--command is only supported in 'execute' mode.")
         if args:
             raise ValidationError("--args is only supported in 'execute' mode.")
@@ -107,7 +107,7 @@ def webapp_exec(cmd,
         return None
 
     # Execute mode - run the command on each resolved instance in parallel.
-    args_list = [(target, scm_url, headers, command, args, working_directory) for target in target_instances]
+    args_list = [(target, scm_url, headers, exec_command, args, working_directory) for target in target_instances]
     results = _execute_in_parallel(_run_execute_on_instance, args_list)
 
     return results

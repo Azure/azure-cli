@@ -1980,9 +1980,12 @@ long-summary: |
     - 'execute': run a fire-and-forget command in your main app container; it returns immediately without output.
 
     Only supported for Linux App Service plans.
-    Shell sessions are intended for diagnostics, not long-running work: a session ends automatically after
+
+    'shell' mode: Shell sessions are not intended for long-running work. A session ends automatically after
     3 hours of inactivity, and may also end if the underlying instance is reimaged or platform components are updated.
-    For 'execute' mode, redirect output to a file inside the command to capture results (see examples).
+
+    'execute' mode: The command is fire-and-forget - the call returns immediately and does not wait for the
+    command to finish or return any logs or output. To capture output, redirect it to a file inside the command (see examples).
 examples:
   - name: Run a direct command in the container
     text: >
