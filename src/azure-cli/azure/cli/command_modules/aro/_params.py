@@ -94,7 +94,7 @@ def load_arguments(self, _):
                    options_list=['--master-encryption-at-host', '--master-enc-host'],
                    help='Encryption at host flag for master VMs. [Default: false]')
         c.argument('master_vm_size',
-                   help='Size of master VMs. [Default: Standard_D8s_v5]')
+                   help='Size of master VMs.')
 
         c.argument('worker_encryption_at_host', arg_type=get_three_state_flag(),
                    options_list=['--worker-encryption-at-host', '--worker-enc-host'],

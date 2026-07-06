@@ -77,7 +77,7 @@ def aro_create(*,  # pylint: disable=too-many-locals
                outbound_type=None,
                disk_encryption_set=None,
                master_encryption_at_host=False,
-               master_vm_size=None,
+               master_vm_size="Standard_D8s_v5",
                worker_encryption_at_host=False,
                worker_vm_size="Standard_D4s_v5",
                worker_vm_disk_size_gb=None,
@@ -169,7 +169,7 @@ def aro_create(*,  # pylint: disable=too-many-locals
             preconfigured_nsg='Enabled' if enable_preconfigured_nsg else 'Disabled',
         ),
         master_profile=openshiftcluster.MasterProfile(
-            vm_size=master_vm_size or 'Standard_D8s_v5',
+            vm_size=master_vm_size,
             subnet_id=master_subnet,
             encryption_at_host='Enabled' if master_encryption_at_host else 'Disabled',
             disk_encryption_set_id=disk_encryption_set,
