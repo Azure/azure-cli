@@ -7,12 +7,12 @@ import os
 from unittest import mock
 
 from knack.util import CLIError
-from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest)
+from azure.cli.testsdk import ScenarioTest
 from azure.cli.testsdk.checkers import NoneCheck
 from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants
 from azure.cli.core.azclierror import InvalidArgumentValueError
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.command_modules.appconfig.tests.latest._test_utils import create_config_store, CredentialResponseSanitizer, get_resource_name_prefix
+from azure.cli.command_modules.appconfig.tests.latest._test_utils import create_config_store, CredentialResponseSanitizer, get_resource_name_prefix, get_test_resource_group
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -23,9 +23,10 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         super().__init__(*args, **kwargs)
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(parameter_name_for_location='location')
-    def test_azconfig_feature(self, resource_group, location):
-        feature_test_store_prefix = get_resource_name_prefix('FeatureTest')
+    # Uses Entra ID auth (store created with local auth disabled); target a resource group where the
+    # recording principal holds "App Configuration Data Owner". Override via AZURE_CLI_APPCONFIG_TEST_RG.
+    def test_azconfig_feature(self):
+        feature_test_store_prefix = get_resource_name_prefix('featuretest')
         config_store_name = self.create_random_name(prefix=feature_test_store_prefix, length=24)
 
         location = 'eastus'
@@ -33,10 +34,11 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         self.kwargs.update({
             'config_store_name': config_store_name,
             'rg_loc': location,
-            'rg': resource_group,
-            'sku': sku
+            'rg': get_test_resource_group(),
+            'sku': sku,
+            'endpoint': 'https://' + config_store_name + '.azconfig.io'
         })
-        create_config_store(self, self.kwargs)
+        create_config_store(self, self.kwargs, disable_local_auth=True)
 
         entry_feature = 'Beta'
         internal_feature_key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + entry_feature
@@ -53,7 +55,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         })
 
         # add a brand new feature flag entry
-        self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} -y',
+        self.cmd('appconfig feature set --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} -y',
                  checks=[self.check('locked', default_locked),
                          self.check('name', entry_feature),
                          self.check('key', internal_feature_key),
@@ -70,7 +72,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
             'description': updated_entry_description,
             'requirement_type': updated_requirement_type
         })
-        self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} --description "{description}" --requirement-type {requirement_type} -y',
+        self.cmd('appconfig feature set --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} --description "{description}" --requirement-type {requirement_type} -y',
                  checks=[self.check('locked', default_locked),
                          self.check('name', entry_feature),
                          self.check('key', internal_feature_key),
@@ -87,7 +89,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
             'description': updated_entry_description,
             'requirement_type': "all"
         })
-        self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} --description "{description}" --requirement-type {requirement_type} -y',
+        self.cmd('appconfig feature set --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} --description "{description}" --requirement-type {requirement_type} -y',
              checks=[self.check('locked', default_locked),
                  self.check('name', entry_feature),
                  self.check('key', internal_feature_key),
@@ -103,7 +105,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
             'label': updated_label
         })
 
-        self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} -y',
+        self.cmd('appconfig feature set --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} -y',
                  checks=[self.check('locked', default_locked),
                          self.check('name', entry_feature),
                          self.check('key', internal_feature_key),
@@ -112,13 +114,8 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
                          self.check('state', default_state),
                          self.check('conditions', default_conditions)])
 
-        # set feature flag with connection string - updates the description of existing feature
-        credential_list = self.cmd(
-            'appconfig credential list -n {config_store_name} -g {rg}').get_output_in_json()
-        self.kwargs.update({
-            'connection_string': credential_list[0]['connectionString']
-        })
-        self.cmd('appconfig feature set --connection-string {connection_string} --feature {feature} --label {label} --description "{description}" -y',
+        # set feature flag with login auth - updates the description of existing feature
+        self.cmd('appconfig feature set --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} --description "{description}" -y',
                  checks=[self.check('locked', default_locked),
                          self.check('name', entry_feature),
                          self.check('key', internal_feature_key),
@@ -128,7 +125,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
                          self.check('conditions', default_conditions)])
 
         # show a feature flag with all 13 fields
-        response_dict = self.cmd('appconfig feature show -n {config_store_name} --feature {feature} --label {label}',
+        response_dict = self.cmd('appconfig feature show --endpoint {endpoint} --auth-mode login --feature {feature} --label {label}',
                                  checks=[self.check('locked', default_locked),
                                          self.check('name', entry_feature),
                                          self.check('key', internal_feature_key),
@@ -143,7 +140,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         assert len(response_dict) == 13
 
         # show a feature flag with field filtering
-        response_dict = self.cmd('appconfig feature show -n {config_store_name} --feature {feature} --label {label} --fields key label state locked',
+        response_dict = self.cmd('appconfig feature show --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} --fields key label state locked',
                                  checks=[self.check('locked', default_locked),
                                          self.check('key', internal_feature_key),
                                          self.check('label', updated_label),
@@ -156,7 +153,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
             'label': null_label_pattern
         })
 
-        self.cmd('appconfig feature list -n {config_store_name} --label "{label}"',
+        self.cmd('appconfig feature list --endpoint {endpoint} --auth-mode login --label "{label}"',
                  checks=NoneCheck())
 
         # List all features with any label with field filtering
@@ -165,7 +162,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
             'label': any_label_pattern
         })
 
-        list_features = self.cmd('appconfig feature list -n {config_store_name} --label {label} --fields key name label state locked',
+        list_features = self.cmd('appconfig feature list --endpoint {endpoint} --auth-mode login --label {label} --fields key name label state locked',
                                  checks=[self.check('[0].locked', default_locked),
                                          self.check('[0].name', entry_feature),
                                          self.check('[0].key', internal_feature_key),
@@ -174,7 +171,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         assert len(list_features) == 2
 
         #  List all features with any label
-        list_features = self.cmd('appconfig feature list -n {config_store_name}').get_output_in_json()
+        list_features = self.cmd('appconfig feature list --endpoint {endpoint} --auth-mode login').get_output_in_json()
         assert len(list_features) == 2
 
         # Add another feature with name starting with Beta, null label
@@ -186,7 +183,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
             'feature': prefix_feature
         })
 
-        self.cmd('appconfig feature set -n {config_store_name} --feature {feature} -y',
+        self.cmd('appconfig feature set --endpoint {endpoint} --auth-mode login --feature {feature} -y',
                  checks=[self.check('locked', default_locked),
                          self.check('name', prefix_feature),
                          self.check('key', internal_feature_key),
@@ -203,7 +200,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
             'feature': suffix_feature
         })
 
-        self.cmd('appconfig feature set -n {config_store_name} --feature {feature} -y',
+        self.cmd('appconfig feature set --endpoint {endpoint} --auth-mode login --feature {feature} -y',
                  checks=[self.check('locked', default_locked),
                          self.check('name', suffix_feature),
                          self.check('key', internal_feature_key),
@@ -220,7 +217,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
             'feature': contains_feature
         })
 
-        self.cmd('appconfig feature set -n {config_store_name} --feature {feature} -y',
+        self.cmd('appconfig feature set --endpoint {endpoint} --auth-mode login --feature {feature} -y',
                  checks=[self.check('locked', default_locked),
                          self.check('name', contains_feature),
                          self.check('key', internal_feature_key),
@@ -235,7 +232,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
             'feature': any_feature_pattern
         })
 
-        list_features = self.cmd('appconfig feature list -n {config_store_name} --feature {feature} --label {label}').get_output_in_json()
+        list_features = self.cmd('appconfig feature list --endpoint {endpoint} --auth-mode login --feature {feature} --label {label}').get_output_in_json()
         assert len(list_features) == 5
 
         # List all features starting with Beta, any label
@@ -244,7 +241,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
             'feature': prefix_feature_pattern
         })
 
-        list_features = self.cmd('appconfig feature list -n {config_store_name} --feature {feature} --label {label}').get_output_in_json()
+        list_features = self.cmd('appconfig feature list --endpoint {endpoint} --auth-mode login --feature {feature} --label {label}').get_output_in_json()
         assert len(list_features) == 3
 
         # List all features starting with Beta, null label
@@ -252,7 +249,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
             'label': null_label_pattern
         })
 
-        list_features = self.cmd('appconfig feature list -n {config_store_name} --feature {feature} --label "{label}"',
+        list_features = self.cmd('appconfig feature list --endpoint {endpoint} --auth-mode login --feature {feature} --label "{label}"',
                                  checks=[self.check('[0].name', prefix_feature),
                                          self.check('[0].label', null_label)]).get_output_in_json()
         assert len(list_features) == 1
@@ -264,7 +261,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         })
 
         with self.assertRaisesRegex(CLIError, "Comma separated feature names are not supported"):
-            self.cmd('appconfig feature list -n {config_store_name} --feature {feature}')
+            self.cmd('appconfig feature list --endpoint {endpoint} --auth-mode login --feature {feature}')
 
         # Invalid Pattern - contains invalid *
         invalid_pattern = 'Beta*ion'
@@ -273,7 +270,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         })
 
         with self.assertRaisesRegex(CLIError, "Bad Request"):
-            self.cmd('appconfig feature list -n {config_store_name} --feature {feature}')
+            self.cmd('appconfig feature list --endpoint {endpoint} --auth-mode login --feature {feature}')
 
         # Invalid Pattern - starts with *
         invalid_pattern = '*Beta'
@@ -282,7 +279,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         })
 
         with self.assertRaisesRegex(CLIError, "Bad Request"):
-            self.cmd('appconfig feature list -n {config_store_name} --feature {feature}')
+            self.cmd('appconfig feature list --endpoint {endpoint} --auth-mode login --feature {feature}')
 
         # Invalid Pattern - contains multiple **
         invalid_pattern = 'Beta**'
@@ -291,7 +288,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         })
 
         with self.assertRaisesRegex(CLIError, "Bad Request"):
-            self.cmd('appconfig feature list -n {config_store_name} --feature {feature}')
+            self.cmd('appconfig feature list --endpoint {endpoint} --auth-mode login --feature {feature}')
 
         # # Filter by tags test
 
@@ -313,13 +310,13 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
             'tags': tags_str
         })
 
-        self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} --tags {tags} -y',
+        self.cmd('appconfig feature set --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} --tags {tags} -y',
              checks=[self.check('name', feature_with_tags),
              self.check('label', label_with_tags),
             self.check('tags', tags)])
 
         # List features with 5 tags
-        list_features = self.cmd('appconfig feature list -n {config_store_name} --feature {feature} --tags {tags}').get_output_in_json()
+        list_features = self.cmd('appconfig feature list --endpoint {endpoint} --auth-mode login --feature {feature} --tags {tags}').get_output_in_json()
         assert(list_features[0]['name'] == feature_with_tags)
         assert(list_features[0]['label'] == label_with_tags)
         assert(list_features[0]['tags'] == tags)
@@ -334,13 +331,13 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
             'tag1': tag1
         })
 
-        self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} --tags {tag1} -y',
+        self.cmd('appconfig feature set --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} --tags {tag1} -y',
              checks=[self.check('name', feature_with_tags),
                  self.check('label', label_with_tag1),
                  self.check('tags', tag1_dict)])
 
         # List features with tag1
-        list_features = self.cmd('appconfig feature list -n {config_store_name} --feature {feature} --tags {tag1}').get_output_in_json()
+        list_features = self.cmd('appconfig feature list --endpoint {endpoint} --auth-mode login --feature {feature} --tags {tag1}').get_output_in_json()
         assert len(list_features) == 2
 
         # Set feature with empty tag value
@@ -352,17 +349,17 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
             'tag_with_empty_value': tag_with_empty_value
         })
 
-        self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} --tags {tag_with_empty_value} -y',
+        self.cmd('appconfig feature set --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} --tags {tag_with_empty_value} -y',
              checks=[self.check('name', feature_with_tags),
                  self.check('label', label_with_empty_tag_value),
                  self.check('tags', empty_tag_value_dict)])
 
         # List features with tag with empty value
-        list_features = self.cmd('appconfig feature list -n {config_store_name} --feature {feature} --tags {tag_with_empty_value}').get_output_in_json()
+        list_features = self.cmd('appconfig feature list --endpoint {endpoint} --auth-mode login --feature {feature} --tags {tag_with_empty_value}').get_output_in_json()
         assert len(list_features) == 1
 
         # Get all features with all tags
-        list_features = self.cmd('appconfig feature list -n {config_store_name} --feature {feature}').get_output_in_json()
+        list_features = self.cmd('appconfig feature list --endpoint {endpoint} --auth-mode login --feature {feature}').get_output_in_json()
         assert len(list_features) == 3
 
         # Delete features with tags tag1=value1
@@ -370,7 +367,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
             'label': '*'
         })
 
-        deleted_features = self.cmd('appconfig feature delete -n {config_store_name} --feature {feature} --label {label} --tags {tag1} -y',
+        deleted_features = self.cmd('appconfig feature delete --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} --tags {tag1} -y',
              checks=[self.check('[0].name', feature_with_tags),
                     self.check('[0].label', label_with_tag1),
                     self.check('[0].tags', tag1_dict)]).get_output_in_json()
@@ -381,7 +378,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
             'feature': feature_with_tags,
             'label': label_with_empty_tag_value
         })
-        deleted_features = self.cmd('appconfig feature delete -n {config_store_name} --feature {feature} --label {label} --tags {tag_with_empty_value} -y',
+        deleted_features = self.cmd('appconfig feature delete --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} --tags {tag_with_empty_value} -y',
                 checks=[self.check('[0].name', feature_with_tags),
                         self.check('[0].label', label_with_empty_tag_value),
                         self.check('[0].tags', empty_tag_value_dict)]).get_output_in_json()
@@ -403,16 +400,16 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         })
 
         with self.assertRaisesRegex(InvalidArgumentValueError, "Too many tag filters provided. Maximum allowed is 5."):
-            self.cmd('appconfig feature list -n {config_store_name} --tags {too_many_tags}')
+            self.cmd('appconfig feature list --endpoint {endpoint} --auth-mode login --tags {too_many_tags}')
 
-        # Delete Beta (label v2) feature flag using connection-string
+        # Delete Beta (label v2) feature flag
         self.kwargs.update({
             'feature': entry_feature,
             'label': updated_label
         })
 
         # IN CLI, since we support delete by key/label pattern matching, return is a list of deleted items
-        deleted = self.cmd('appconfig feature delete --connection-string {connection_string}  --feature {feature} --label {label} -y',
+        deleted = self.cmd('appconfig feature delete --endpoint {endpoint} --auth-mode login  --feature {feature} --label {label} -y',
                            checks=[self.check('[0].locked', default_locked),
                                    self.check('[0].name', entry_feature),
                                    self.check('[0].description', updated_entry_description),
@@ -426,7 +423,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         })
         updated_lock = True
 
-        self.cmd('appconfig feature lock -n {config_store_name} --feature {feature} -y',
+        self.cmd('appconfig feature lock --endpoint {endpoint} --auth-mode login --feature {feature} -y',
                  checks=[self.check('locked', updated_lock),
                          self.check('name', contains_feature),
                          self.check('description', default_description),
@@ -434,7 +431,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
                          self.check('state', default_state)])
 
         # Unlock feature - ThisBetaVersion
-        self.cmd('appconfig feature unlock -n {config_store_name} --feature {feature} -y',
+        self.cmd('appconfig feature unlock --endpoint {endpoint} --auth-mode login --feature {feature} -y',
                  checks=[self.check('locked', default_locked),
                          self.check('name', contains_feature),
                          self.check('description', default_description),
@@ -443,7 +440,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
 
         # Enable feature - ThisBetaVersion
         on_state = 'on'
-        self.cmd('appconfig feature enable -n {config_store_name} --feature {feature} -y',
+        self.cmd('appconfig feature enable --endpoint {endpoint} --auth-mode login --feature {feature} -y',
                  checks=[self.check('locked', default_locked),
                          self.check('name', contains_feature),
                          self.check('description', default_description),
@@ -451,7 +448,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
                          self.check('state', on_state)])
 
         # Disable feature - ThisBetaVersion
-        self.cmd('appconfig feature disable -n {config_store_name} --feature {feature} -y',
+        self.cmd('appconfig feature disable --endpoint {endpoint} --auth-mode login --feature {feature} -y',
                  checks=[self.check('locked', default_locked),
                          self.check('name', contains_feature),
                          self.check('description', default_description),
@@ -464,13 +461,14 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
             'label': any_label_pattern
         })
 
-        list_features = self.cmd('appconfig feature list -n {config_store_name} --feature {feature} --label {label}').get_output_in_json()
+        list_features = self.cmd('appconfig feature list --endpoint {endpoint} --auth-mode login --feature {feature} --label {label}').get_output_in_json()
         assert len(list_features) == 4
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(parameter_name_for_location='location')
-    def test_azconfig_feature_namespacing(self, resource_group, location):
-        feature_namespace_store_prefix = get_resource_name_prefix('FeatureNamespaceTest')
+    # Uses Entra ID auth (store created with local auth disabled); target a resource group where the
+    # recording principal holds "App Configuration Data Owner". Override via AZURE_CLI_APPCONFIG_TEST_RG.
+    def test_azconfig_feature_namespacing(self):
+        feature_namespace_store_prefix = get_resource_name_prefix('featurenamespacetest')
         config_store_name = self.create_random_name(prefix=feature_namespace_store_prefix, length=24)
 
         location = 'eastus'
@@ -478,10 +476,11 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         self.kwargs.update({
             'config_store_name': config_store_name,
             'rg_loc': location,
-            'rg': resource_group,
-            'sku': sku
+            'rg': get_test_resource_group(),
+            'sku': sku,
+            'endpoint': 'https://' + config_store_name + '.azconfig.io'
         })
-        create_config_store(self, self.kwargs)
+        create_config_store(self, self.kwargs, disable_local_auth=True)
 
         feature_name = 'Beta'
         feature_prefix = 'MyApp:'
@@ -500,7 +499,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         })
 
         # add feature flag with a custom key
-        self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --key {key}  --label {label} -y',
+        self.cmd('appconfig feature set --endpoint {endpoint} --auth-mode login --feature {feature} --key {key}  --label {label} -y',
                  checks=[self.check('locked', default_locked),
                          self.check('name', feature_name),
                          self.check('key', feature_key),
@@ -511,7 +510,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
 
         # Enable the same feature flag using --key
         on_state = 'on'
-        self.cmd('appconfig feature enable -n {config_store_name} --key {key} --label {label} -y',
+        self.cmd('appconfig feature enable --endpoint {endpoint} --auth-mode login --key {key} --label {label} -y',
                  checks=[self.check('locked', default_locked),
                          self.check('name', feature_name),
                          self.check('key', feature_key),
@@ -526,7 +525,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
             'feature': feature_name_2
         })
 
-        self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --key {key}  --label {label} -y',
+        self.cmd('appconfig feature set --endpoint {endpoint} --auth-mode login --feature {feature} --key {key}  --label {label} -y',
                  checks=[self.check('locked', default_locked),
                          self.check('name', feature_name_2),
                          self.check('key', feature_key_2),
@@ -542,7 +541,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
             'key': key_pattern,
             'label': any_label_pattern
         })
-        list_features = self.cmd('appconfig feature list -n {config_store_name} --key {key} --label {label}').get_output_in_json()
+        list_features = self.cmd('appconfig feature list --endpoint {endpoint} --auth-mode login --key {key} --label {label}').get_output_in_json()
         assert len(list_features) == 2
 
         # Invalid key
@@ -552,11 +551,11 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         })
 
         with self.assertRaisesRegex(CLIError, "Feature flag key must start with the reserved prefix"):
-            self.cmd('appconfig feature set -n {config_store_name} --key {key}')
+            self.cmd('appconfig feature set --endpoint {endpoint} --auth-mode login --key {key}')
 
         # Missing key and feature
         with self.assertRaisesRegex(CLIError, "Please provide either `--key` or `--feature` value."):
-            self.cmd('appconfig feature delete -n {config_store_name}')
+            self.cmd('appconfig feature delete --endpoint {endpoint} --auth-mode login')
 
         # Invalid feature name
         invalid_feature_name = "invalid:feature"
@@ -565,13 +564,14 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         })
 
         with self.assertRaisesRegex(CLIError, "Feature name cannot contain the following characters: '%', ':'"):
-            self.cmd('appconfig feature set -n {config_store_name} --feature {feature}')
+            self.cmd('appconfig feature set --endpoint {endpoint} --auth-mode login --feature {feature}')
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(parameter_name_for_location='location')
-    def test_azconfig_feature_telemetry(self, resource_group, location):
+    # Uses Entra ID auth (store created with local auth disabled); target a resource group where the
+    # recording principal holds "App Configuration Data Owner". Override via AZURE_CLI_APPCONFIG_TEST_RG.
+    def test_azconfig_feature_telemetry(self):
         """Test feature flag telemetry functionality."""
-        feature_telemetry_store_prefix = get_resource_name_prefix('FeatureTelemetryTest')
+        feature_telemetry_store_prefix = get_resource_name_prefix('featuretelemetrytest')
         config_store_name = self.create_random_name(prefix=feature_telemetry_store_prefix, length=24)
 
         location = 'eastus'
@@ -579,10 +579,11 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         self.kwargs.update({
             'config_store_name': config_store_name,
             'rg_loc': location,
-            'rg': resource_group,
-            'sku': sku
+            'rg': get_test_resource_group(),
+            'sku': sku,
+            'endpoint': 'https://' + config_store_name + '.azconfig.io'
         })
-        create_config_store(self, self.kwargs)
+        create_config_store(self, self.kwargs, disable_local_auth=True)
 
         # Test creating a feature with telemetry enabled
         feature_name = 'TelemetryFeature'
@@ -596,7 +597,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         })
 
         # Create feature with telemetry enabled
-        self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} --telemetry-enabled true -y',
+        self.cmd('appconfig feature set --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} --telemetry-enabled true -y',
                  checks=[self.check('locked', default_locked),
                          self.check('name', feature_name),
                          self.check('label', entry_label),
@@ -604,23 +605,23 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
                          self.check('telemetry.enabled', True)])
 
         # Show feature to verify telemetry is persisted
-        self.cmd('appconfig feature show -n {config_store_name} --feature {feature} --label {label}',
+        self.cmd('appconfig feature show --endpoint {endpoint} --auth-mode login --feature {feature} --label {label}',
                  checks=[self.check('name', feature_name),
                          self.check('telemetry.enabled', True)])
 
         # Update feature to disable telemetry
-        self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} --telemetry-enabled false -y',
+        self.cmd('appconfig feature set --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} --telemetry-enabled false -y',
                  checks=[self.check('name', feature_name),
                          self.check('telemetry.enabled', False)])
 
         # Verify telemetry is disabled
-        self.cmd('appconfig feature show -n {config_store_name} --feature {feature} --label {label}',
+        self.cmd('appconfig feature show --endpoint {endpoint} --auth-mode login --feature {feature} --label {label}',
                  checks=[self.check('name', feature_name),
                          self.check('telemetry.enabled', False)])
 
         # Verify warning is emitted when enabling telemetry without App Insights linked
         with mock.patch('azure.cli.command_modules.appconfig.feature.logger') as mock_logger:
-            self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} --telemetry-enabled true -y',
+            self.cmd('appconfig feature set --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} --telemetry-enabled true -y',
                      checks=[self.check('name', feature_name),
                              self.check('telemetry.enabled', True)])
             mock_logger.warning.assert_any_call(
@@ -633,7 +634,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
         # in recording/playback mode — the extension index response exceeds the VCR 1024KB limit.
         app_insights_prefix = get_resource_name_prefix('appinsights')
         app_insights_name = self.create_random_name(prefix=app_insights_prefix, length=24)
-        app_insights_id = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/{}/providers/microsoft.insights/components/{}'.format(resource_group, app_insights_name)
+        app_insights_id = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/{}/providers/microsoft.insights/components/{}'.format(self.kwargs['rg'], app_insights_name)
         self.kwargs.update({
             'app_insights_resource_id': app_insights_id
         })
@@ -642,7 +643,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
 
         # Verify no warning when enabling telemetry with App Insights linked
         with mock.patch('azure.cli.command_modules.appconfig.feature.logger') as mock_logger:
-            self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} --telemetry-enabled true -y',
+            self.cmd('appconfig feature set --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} --telemetry-enabled true -y',
                      checks=[self.check('name', feature_name),
                              self.check('telemetry.enabled', True)])
             # The "not set" warning should not have been emitted
@@ -658,9 +659,10 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
         super().__init__(*args, **kwargs)
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(parameter_name_for_location='location')
-    def test_azconfig_feature_filter(self, resource_group, location):
-        feature_filter_store_prefix = get_resource_name_prefix('FeatureFilterTest')
+    # Uses Entra ID auth (store created with local auth disabled); target a resource group where the
+    # recording principal holds "App Configuration Data Owner". Override via AZURE_CLI_APPCONFIG_TEST_RG.
+    def test_azconfig_feature_filter(self):
+        feature_filter_store_prefix = get_resource_name_prefix('featurefiltertest')
         config_store_name = self.create_random_name(prefix=feature_filter_store_prefix, length=24)
 
         location = 'eastus'
@@ -668,10 +670,11 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
         self.kwargs.update({
             'config_store_name': config_store_name,
             'rg_loc': location,
-            'rg': resource_group,
-            'sku': sku
+            'rg': get_test_resource_group(),
+            'sku': sku,
+            'endpoint': 'https://' + config_store_name + '.azconfig.io'
         })
-        create_config_store(self, self.kwargs)
+        create_config_store(self, self.kwargs, disable_local_auth=True)
 
         entry_feature = 'Color'
         internal_feature_key = FeatureFlagConstants.FEATURE_FLAG_PREFIX + entry_feature
@@ -688,7 +691,7 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
         })
 
         # add a brand new feature flag entry
-        self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} -y',
+        self.cmd('appconfig feature set --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} -y',
                  checks=[self.check('locked', default_locked),
                          self.check('name', entry_feature),
                          self.check('key', internal_feature_key),
@@ -717,7 +720,7 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
             'filter_parameters': first_filter_params
         })
 
-        self.cmd('appconfig feature filter add -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} --filter-parameters {filter_parameters} -y',
+        self.cmd('appconfig feature filter add --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} --filter-name {filter_name} --filter-parameters {filter_parameters} -y',
                  checks=[self.check('name', first_filter_name),
                          self.check('parameters', first_filter_params_output)])
 
@@ -735,7 +738,7 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
             'filter_parameters': second_filter_params
         })
 
-        self.cmd('appconfig feature filter add -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} --filter-parameters {filter_parameters} -y',
+        self.cmd('appconfig feature filter add --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} --filter-name {filter_name} --filter-parameters {filter_parameters} -y',
                  checks=[self.check('name', second_filter_name),
                          self.check('parameters', second_filter_params_output)])
 
@@ -745,25 +748,25 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
             'filter_parameters': ''
         })
 
-        self.cmd('appconfig feature filter add -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} --filter-parameters {filter_parameters} -y',
+        self.cmd('appconfig feature filter add --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} --filter-name {filter_name} --filter-parameters {filter_parameters} -y',
                  checks=[self.check('name', first_filter_name),
                          self.check('parameters', {})])
 
         # Show FirstFilter without index will return both instances of this filter
-        filters = self.cmd('appconfig feature filter show -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name}').get_output_in_json()
+        filters = self.cmd('appconfig feature filter show --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} --filter-name {filter_name}').get_output_in_json()
         assert len(filters) == 2
 
         # Show FirstFilter with index will return only one instance of this filter at the specified index
-        self.cmd('appconfig feature filter show -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} --index 2',
+        self.cmd('appconfig feature filter show --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} --filter-name {filter_name} --index 2',
                  checks=[self.check('name', first_filter_name),
                          self.check('parameters', {})])
 
         # List Filters
-        list_filters = self.cmd('appconfig feature filter list -n {config_store_name} --feature {feature} --label {label}').get_output_in_json()
+        list_filters = self.cmd('appconfig feature filter list --endpoint {endpoint} --auth-mode login --feature {feature} --label {label}').get_output_in_json()
         assert len(list_filters) == 3
 
         # Show feature with all filters
-        response_dict = self.cmd('appconfig feature show -n {config_store_name} --feature {feature} --label {label}',
+        response_dict = self.cmd('appconfig feature show --endpoint {endpoint} --auth-mode login --feature {feature} --label {label}',
                                  checks=[self.check('locked', default_locked),
                                          self.check('name', entry_feature),
                                          self.check('key', internal_feature_key),
@@ -777,7 +780,7 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
 
         # Enable feature
         conditional_state = 'conditional'
-        self.cmd('appconfig feature enable -n {config_store_name} --feature {feature} --label {label} -y',
+        self.cmd('appconfig feature enable --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} -y',
                  checks=[self.check('locked', default_locked),
                          self.check('name', entry_feature),
                          self.check('key', internal_feature_key),
@@ -804,7 +807,7 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
         })
         with self.assertRaisesRegex(CLIError, "No filter named '{}' was found for feature".format(non_existent_filter_name)):
             self.cmd(
-                'appconfig feature filter update -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} -y --filter-parameters {filter_parameters}')
+                'appconfig feature filter update --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} --filter-name {filter_name} -y --filter-parameters {filter_parameters}')
 
         # Update Filter without index should throw error when duplicates exist
         self.kwargs.update({
@@ -813,33 +816,33 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
 
         with self.assertRaisesRegex(CLIError, "contains multiple instances of filter"):
             self.cmd(
-                'appconfig feature filter update -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} -y --filter-parameters {filter_parameters}')
+                'appconfig feature filter update --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} --filter-name {filter_name} -y --filter-parameters {filter_parameters}')
 
         # Update Filter with index succeeds when correct index provided
-        self.cmd('appconfig feature filter update -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} --index 0 -y --filter-parameters {filter_parameters}',
+        self.cmd('appconfig feature filter update --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} --filter-name {filter_name} --index 0 -y --filter-parameters {filter_parameters}',
                  checks=[self.check('name', first_filter_name),
                          self.check('parameters', updated_params_output)])
 
 
         # Delete Filter without index should throw error when duplicates exist
         with self.assertRaisesRegex(CLIError, "contains multiple instances of filter"):
-            self.cmd('appconfig feature filter delete -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} -y')
+            self.cmd('appconfig feature filter delete --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} --filter-name {filter_name} -y')
 
         # Delete Filter with index succeeds when correct index is provided
-        self.cmd('appconfig feature filter delete -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} --index 2 -y',
+        self.cmd('appconfig feature filter delete --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} --filter-name {filter_name} --index 2 -y',
                  checks=[self.check('name', first_filter_name),
                          self.check('parameters', {})])
 
         # Delete all Filters
-        cleared_filters = self.cmd('appconfig feature filter delete -n {config_store_name} --feature {feature} --label {label} --all -y').get_output_in_json()
+        cleared_filters = self.cmd('appconfig feature filter delete --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} --all -y').get_output_in_json()
         assert len(cleared_filters) == 2
 
         # Delete Filters when no filters present
-        self.cmd('appconfig feature filter delete -n {config_store_name} --feature {feature} --label {label} --all -y',
+        self.cmd('appconfig feature filter delete --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} --all -y',
                  checks=NoneCheck())
 
         # List Filters when no filters present
-        self.cmd('appconfig feature filter list -n {config_store_name} --feature {feature} --label {label}',
+        self.cmd('appconfig feature filter list --endpoint {endpoint} --auth-mode login --feature {feature} --label {label}',
                  checks=NoneCheck())
 
         # Error on adding filter parameters with invalid JSON escaped string
@@ -850,7 +853,7 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
             'filter_parameters': invalid_filter_params
         })
         with self.assertRaisesRegex(CLIError, "Filter parameter value must be a JSON escaped string"):
-            self.cmd('appconfig feature filter add -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} --filter-parameters {filter_parameters} -y')
+            self.cmd('appconfig feature filter add --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} --filter-name {filter_name} --filter-parameters {filter_parameters} -y')
 
         # Error on adding duplicate filter parameters
         invalid_filter_params = 'Name1=10 Name1=20'
@@ -858,7 +861,7 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
             'filter_parameters': invalid_filter_params
         })
         with self.assertRaisesRegex(CLIError, 'Filter parameter name "Name1" cannot be duplicated.'):
-            self.cmd('appconfig feature filter add -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} --filter-parameters {filter_parameters} -y')
+            self.cmd('appconfig feature filter add --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} --filter-name {filter_name} --filter-parameters {filter_parameters} -y')
 
         # Error on filter parameter with empty name
         invalid_filter_params = '=value'
@@ -866,7 +869,7 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
             'filter_parameters': invalid_filter_params
         })
         with self.assertRaisesRegex(CLIError, 'Parameter name cannot be empty.'):
-            self.cmd('appconfig feature filter add -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} --filter-parameters {filter_parameters} -y')
+            self.cmd('appconfig feature filter add --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} --filter-name {filter_name} --filter-parameters {filter_parameters} -y')
 
         # Test more inputs for filter param value
         filter_name = 'NewFilter'
@@ -887,7 +890,7 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
             'filter_parameters': filter_params
         })
 
-        self.cmd('appconfig feature filter add -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} --filter-parameters {filter_parameters} -y',
+        self.cmd('appconfig feature filter add --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} --filter-name {filter_name} --filter-parameters {filter_parameters} -y',
                  checks=[self.check('name', filter_name),
                          self.check('parameters', filter_params_output)])
 
@@ -905,7 +908,7 @@ class AppConfigFeatureFilterScenarioTest(ScenarioTest):
             'filter_parameters': filter_params
         })
 
-        self.cmd('appconfig feature filter add -n {config_store_name} --feature {feature} --label {label} --filter-name {filter_name} --filter-parameters {filter_parameters} -y',
+        self.cmd('appconfig feature filter add --endpoint {endpoint} --auth-mode login --feature {feature} --label {label} --filter-name {filter_name} --filter-parameters {filter_parameters} -y',
                  checks=[self.check('name', filter_name),
                          self.check('parameters', filter_params_output)])
 

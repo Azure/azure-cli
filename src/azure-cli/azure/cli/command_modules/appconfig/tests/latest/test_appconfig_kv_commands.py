@@ -13,7 +13,7 @@ from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest, KeyVaultPrep
 from azure.cli.command_modules.appconfig._constants import KeyVaultConstants
 from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError, MutuallyExclusiveArgumentError
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.command_modules.appconfig.tests.latest._test_utils import create_config_store, CredentialResponseSanitizer, get_resource_name_prefix
+from azure.cli.command_modules.appconfig.tests.latest._test_utils import create_config_store, CredentialResponseSanitizer, get_resource_name_prefix, get_test_resource_group
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -24,9 +24,12 @@ class AppConfigKVScenarioTest(ScenarioTest):
         super().__init__(*args, **kwargs)
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(parameter_name_for_location='location')
-    def test_azconfig_kv(self, resource_group, location):
-        config_store_prefix = get_resource_name_prefix('KVTest')
+    # Uses Entra ID auth (store created with local auth disabled); target a resource group where the
+    # recording principal holds "App Configuration Data Owner". Override via AZURE_CLI_APPCONFIG_TEST_RG.
+    def test_azconfig_kv(self):
+        # Lowercase store-name prefix so the HTTP-lowercased '<name>.azconfig.io' host matches the
+        # name registered with the recording name-replacer, keeping cassettes scrubbed for playback.
+        config_store_prefix = get_resource_name_prefix('kvtest')
         config_store_name = self.create_random_name(prefix=config_store_prefix, length=24)
 
         location = 'eastus'
@@ -34,10 +37,13 @@ class AppConfigKVScenarioTest(ScenarioTest):
         self.kwargs.update({
             'config_store_name': config_store_name,
             'rg_loc': location,
-            'rg': resource_group,
-            'sku': sku
+            'rg': get_test_resource_group(),
+            'sku': sku,
+            'endpoint': 'https://' + config_store_name + '.azconfig.io'
         })
-        create_config_store(self, self.kwargs)
+        # Create the store with local auth disabled and use Microsoft Entra ID (--auth-mode login)
+        # for all data-plane operations.
+        create_config_store(self, self.kwargs, disable_local_auth=True)
 
         entry_key = "Color"
         entry_label = 'v1.0.0'
@@ -48,7 +54,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
         })
 
         # add a new key-value entry
-        self.cmd('appconfig kv set -n {config_store_name} --key {key} --label {label} -y',
+        self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --label {label} -y',
                  checks=[self.check('contentType', ""),
                          self.check('key', entry_key),
                          self.check('value', ""),
@@ -63,7 +69,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
             'content_type': entry_content_type
         })
 
-        self.cmd('appconfig kv set -n {config_store_name} --key {key} --value {value} --content-type {content_type} --label {label} -y',
+        self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --value {value} --content-type {content_type} --label {label} -y',
                  checks=[self.check('contentType', entry_content_type),
                          self.check('key', entry_key),
                          self.check('value', updated_entry_value),
@@ -75,32 +81,32 @@ class AppConfigKVScenarioTest(ScenarioTest):
             'label': updated_label
         })
 
-        self.cmd('appconfig kv set -n {config_store_name} --key {key} --value {value} --content-type {content_type} --label {label} -y',
+        self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --value {value} --content-type {content_type} --label {label} -y',
                  checks=[self.check('contentType', entry_content_type),
                          self.check('key', entry_key),
                          self.check('value', updated_entry_value),
                          self.check('label', updated_label)])
 
         # show a key-value
-        self.cmd('appconfig kv show -n {config_store_name} --key {key} --label {label}',
+        self.cmd('appconfig kv show --endpoint {endpoint} --auth-mode login --key {key} --label {label}',
                  checks=[self.check('contentType', entry_content_type),
                          self.check('value', updated_entry_value),
                          self.check('label', updated_label)])
 
         list_keys = self.cmd(
-            'appconfig kv list -n {config_store_name}').get_output_in_json()
+            'appconfig kv list --endpoint {endpoint} --auth-mode login').get_output_in_json()
         assert len(list_keys) == 2
 
         revisions = self.cmd(
-            'appconfig revision list -n {config_store_name} --key {key} --label *').get_output_in_json()
+            'appconfig revision list --endpoint {endpoint} --auth-mode login --key {key} --label *').get_output_in_json()
         assert len(revisions) == 3
 
         # Confirm that delete action errors out for empty or whitespace key
         with self.assertRaisesRegex(RequiredArgumentMissingError, "Key cannot be empty."):
-            self.cmd('appconfig kv delete -n {config_store_name} --key " " -y')
+            self.cmd('appconfig kv delete --endpoint {endpoint} --auth-mode login --key " " -y')
 
         # IN CLI, since we support delete by key/label filters, return is a list of deleted items
-        deleted = self.cmd('appconfig kv delete -n {config_store_name} --key {key} --label {label} -y',
+        deleted = self.cmd('appconfig kv delete --endpoint {endpoint} --auth-mode login --key {key} --label {label} -y',
                            checks=[self.check('[0].key', entry_key),
                                    self.check('[0].contentType', entry_content_type),
                                    self.check('[0].value', updated_entry_value),
@@ -120,20 +126,15 @@ class AppConfigKVScenarioTest(ScenarioTest):
             'timestamp': deleted_time
         })
 
-        credential_list = self.cmd(
-            'appconfig credential list -n {config_store_name} -g {rg}').get_output_in_json()
-        self.kwargs.update({
-            'connection_string': credential_list[0]['connectionString']
-        })
-        self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --value {value} --content-type {content_type} --label {label} -y',
+        self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --value {value} --content-type {content_type} --label {label} -y',
                  checks=[self.check('contentType', entry_content_type),
                          self.check('key', entry_key),
                          self.check('value', entry_value),
                          self.check('label', updated_label)])
 
         # Now restore to last modified and ensure that we find updated_entry_value
-        self.cmd('appconfig kv restore -n {config_store_name} --key {key} --label {label} --datetime {timestamp} -y')
-        self.cmd('appconfig kv list -n {config_store_name} --key {key} --label {label}',
+        self.cmd('appconfig kv restore --endpoint {endpoint} --auth-mode login --key {key} --label {label} --datetime {timestamp} -y')
+        self.cmd('appconfig kv list --endpoint {endpoint} --auth-mode login --key {key} --label {label}',
                  checks=[self.check('[0].contentType', entry_content_type),
                          self.check('[0].key', entry_key),
                          self.check('[0].value', updated_entry_value),
@@ -150,7 +151,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
         })
 
         # Add new KeyVault ref
-        self.cmd('appconfig kv set-keyvault --connection-string {connection_string} --key {key} --secret-identifier {secret_identifier} -y',
+        self.cmd('appconfig kv set-keyvault --endpoint {endpoint} --auth-mode login --key {key} --secret-identifier {secret_identifier} -y',
                  checks=[self.check('contentType', KeyVaultConstants.KEYVAULT_CONTENT_TYPE),
                          self.check('key', keyvault_key),
                          self.check('value', keyvault_value)])
@@ -161,14 +162,14 @@ class AppConfigKVScenarioTest(ScenarioTest):
             'label': updated_label
         })
 
-        self.cmd('appconfig kv set-keyvault --connection-string {connection_string} --key {key} --label {label} --secret-identifier {secret_identifier} -y',
+        self.cmd('appconfig kv set-keyvault --endpoint {endpoint} --auth-mode login --key {key} --label {label} --secret-identifier {secret_identifier} -y',
                  checks=[self.check('contentType', KeyVaultConstants.KEYVAULT_CONTENT_TYPE),
                          self.check('key', entry_key),
                          self.check('value', keyvault_value),
                          self.check('label', updated_label)])
 
         # Delete KeyVault ref
-        self.cmd('appconfig kv delete --connection-string {connection_string} --key {key} --label {label} -y',
+        self.cmd('appconfig kv delete --endpoint {endpoint} --auth-mode login --key {key} --label {label} -y',
                  checks=[self.check('[0].key', entry_key),
                          self.check('[0].contentType', KeyVaultConstants.KEYVAULT_CONTENT_TYPE),
                          self.check('[0].value', keyvault_value),
@@ -180,7 +181,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
             'key': kv_with_null_label
         })
 
-        self.cmd('appconfig kv set --connection-string {connection_string} --key {key} -y',
+        self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} -y',
                  checks=[self.check('key', kv_with_null_label),
                          self.check('label', None)])
 
@@ -190,7 +191,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
             'null_label': null_label_pattern
         })
         list_keys = self.cmd(
-            'appconfig kv list --connection-string {connection_string} --label "{null_label}"').get_output_in_json()
+            'appconfig kv list --endpoint {endpoint} --auth-mode login --label "{null_label}"').get_output_in_json()
         assert len(list_keys) == 2
 
         # List key-values with multiple labels
@@ -199,7 +200,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
             'multi_labels': multi_labels
         })
         list_keys = self.cmd(
-            'appconfig kv list --connection-string {connection_string} --label "{multi_labels}"').get_output_in_json()
+            'appconfig kv list --endpoint {endpoint} --auth-mode login --label "{multi_labels}"').get_output_in_json()
         assert len(list_keys) == 3
     
         # # Filter by tags test
@@ -222,13 +223,13 @@ class AppConfigKVScenarioTest(ScenarioTest):
             'tags': tags_str
         })
 
-        self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --label {label} --tags {tags} -y',
+        self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --label {label} --tags {tags} -y',
              checks=[self.check('key', key_with_tags),
              self.check('label', label_with_tags),
             self.check('tags', tags)])
 
         # List key-values with 5 tags
-        list_keys = self.cmd('appconfig kv list --connection-string {connection_string} --key {key} --tags {tags}').get_output_in_json()
+        list_keys = self.cmd('appconfig kv list --endpoint {endpoint} --auth-mode login --key {key} --tags {tags}').get_output_in_json()
         assert(list_keys[0]['key'] == key_with_tags)
         assert(list_keys[0]['label'] == label_with_tags)
         assert(list_keys[0]['tags'] == tags)
@@ -243,13 +244,13 @@ class AppConfigKVScenarioTest(ScenarioTest):
             'tag1': tag1
         })
 
-        self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --label {label} --tags {tag1} -y',
+        self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --label {label} --tags {tag1} -y',
              checks=[self.check('key', key_with_tags),
                  self.check('label', label_with_tag1),
                  self.check('tags', tag1_dict)])
 
         # List key-values with tag1
-        list_keys = self.cmd('appconfig kv list --connection-string {connection_string} --key {key} --tags {tag1}').get_output_in_json()
+        list_keys = self.cmd('appconfig kv list --endpoint {endpoint} --auth-mode login --key {key} --tags {tag1}').get_output_in_json()
         assert len(list_keys) == 2
 
         # Set key-value with empty tag value
@@ -261,17 +262,17 @@ class AppConfigKVScenarioTest(ScenarioTest):
             'tag_with_empty_value': tag_with_empty_value
         })
 
-        self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --label {label} --tags {tag_with_empty_value} -y',
+        self.cmd('appconfig kv set --endpoint {endpoint} --auth-mode login --key {key} --label {label} --tags {tag_with_empty_value} -y',
              checks=[self.check('key', key_with_tags),
                  self.check('label', label_with_empty_tag_value),
                  self.check('tags', empty_tag_value_dict)])
 
         # List key-values with tag with empty value
-        list_keys = self.cmd('appconfig kv list --connection-string {connection_string} --key {key} --tags {tag_with_empty_value}').get_output_in_json()
+        list_keys = self.cmd('appconfig kv list --endpoint {endpoint} --auth-mode login --key {key} --tags {tag_with_empty_value}').get_output_in_json()
         assert len(list_keys) == 1
 
         # Get all key-values with all tags
-        list_keys = self.cmd('appconfig kv list --connection-string {connection_string} --key {key}').get_output_in_json()
+        list_keys = self.cmd('appconfig kv list --endpoint {endpoint} --auth-mode login --key {key}').get_output_in_json()
         assert len(list_keys) == 3
 
         # Delete key-values with tags tag1=value1
@@ -279,7 +280,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
             'label': '*'
         })
 
-        deleted_kvs = self.cmd('appconfig kv delete --connection-string {connection_string} --key {key} --label {label} --tags {tag1} -y',
+        deleted_kvs = self.cmd('appconfig kv delete --endpoint {endpoint} --auth-mode login --key {key} --label {label} --tags {tag1} -y',
              checks=[self.check('[0].key', key_with_tags),
                     self.check('[0].label', label_with_tag1),
                     self.check('[0].tags', tag1_dict)]).get_output_in_json()
@@ -301,11 +302,11 @@ class AppConfigKVScenarioTest(ScenarioTest):
         })
 
         with self.assertRaisesRegex(InvalidArgumentValueError, "Too many tag filters provided. Maximum allowed is 5."):
-            self.cmd('appconfig kv list --connection-string {connection_string} --tags {too_many_tags}')
+            self.cmd('appconfig kv list --endpoint {endpoint} --auth-mode login --tags {too_many_tags}')
 
         # Dry run and yes argument should not be used together
         with self.assertRaisesRegex(MutuallyExclusiveArgumentError, "The '--dry-run' and '--yes' options cannot be specified together."):
-            self.cmd('appconfig kv restore --datetime "2019-05-01T11:24:12Z" --connection-string {connection_string} --key {key} --label {label} --dry-run -y')
+            self.cmd('appconfig kv restore --datetime "2019-05-01T11:24:12Z" --endpoint {endpoint} --auth-mode login --key {key} --label {label} --dry-run -y')
 
 
     @AllowLargeResponse()
@@ -313,7 +314,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
     @KeyVaultPreparer(additional_params="--enable-rbac-authorization false")
     @live_only()
     def test_resolve_keyvault(self, key_vault, resource_group):
-        config_store_prefix = get_resource_name_prefix('KVTest')
+        config_store_prefix = get_resource_name_prefix('kvtest')
         config_store_name = self.create_random_name(prefix=config_store_prefix, length=24)
 
         location = 'eastus'
@@ -322,9 +323,10 @@ class AppConfigKVScenarioTest(ScenarioTest):
             'config_store_name': config_store_name,
             'rg_loc': location,
             'rg': resource_group,
-            'sku': sku
+            'sku': sku,
+            'endpoint': 'https://' + config_store_name + '.azconfig.io'
         })
-        create_config_store(self, self.kwargs)
+        create_config_store(self, self.kwargs, disable_local_auth=True)
 
         # Export secret test
         secret_name = 'testSecret'
@@ -340,9 +342,9 @@ class AppConfigKVScenarioTest(ScenarioTest):
             'secret_identifier': secret["id"]
         })
 
-        self.cmd('appconfig kv set-keyvault -n {config_store_name} --key {secret_name} --secret-identifier {secret_identifier} -y')
+        self.cmd('appconfig kv set-keyvault --endpoint {endpoint} --auth-mode login --key {secret_name} --secret-identifier {secret_identifier} -y')
 
-        self.cmd('appconfig kv list -n {config_store_name} --resolve-keyvault',
+        self.cmd('appconfig kv list --endpoint {endpoint} --auth-mode login --resolve-keyvault',
                  checks=[self.check('[0].key', secret_name),
                          self.check('[0].value', secret_value)])
 
@@ -354,7 +356,7 @@ class AppConfigKVScenarioTest(ScenarioTest):
             'imported_format': 'json',
         })
 
-        self.cmd('appconfig kv export -n {config_store_name} -d file --path "{exported_file_path}" --format json --resolve-keyvault -y')
+        self.cmd('appconfig kv export --endpoint {endpoint} --auth-mode login -d file --path "{exported_file_path}" --format json --resolve-keyvault -y')
         with open(exported_file_path) as json_file:
             exported_kvs = json.load(json_file)
 
@@ -363,9 +365,9 @@ class AppConfigKVScenarioTest(ScenarioTest):
         os.remove(exported_file_path)
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(parameter_name_for_location='location')
-    def test_azconfig_kv_revision_list(self, resource_group, location):
-        config_store_prefix = get_resource_name_prefix('KVRevisionTest')
+    # Uses Entra ID auth (store created with local auth disabled); target a resource group where the
+    # recording principal holds "App Configuration Data Owner". Override via AZURE_CLI_APPCONFIG_TEST_RG.
+    def test_azconfig_kv_revision_list(self):
         # Use an all-lowercase store name prefix. The data-plane endpoint is '<name>.azconfig.io'
         # and HTTP lowercases the host, so a mixed-case name would not match the (case-sensitive)
         # name registered with the recording name-replacer, leaving the live host unscrubbed in the
@@ -378,8 +380,8 @@ class AppConfigKVScenarioTest(ScenarioTest):
         self.kwargs.update({
             'config_store_name': config_store_name,
             'rg_loc': location,
-            'rg': resource_group,
-            'sku': sku
+            'rg': get_test_resource_group(),
+            'sku': sku,
             'endpoint': 'https://' + config_store_name + '.azconfig.io'
         })
         # Create the store with local auth disabled and use Microsoft Entra ID (--auth-mode login)

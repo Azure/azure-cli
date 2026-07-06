@@ -31,7 +31,7 @@ class AppConfigIdentityScenarioTest(ScenarioTest):
             'identity_name': identity_name
         })
 
-        create_config_store(self, self.kwargs)
+        create_config_store(self, self.kwargs, disable_local_auth=True)
         user_assigned_identity = _create_user_assigned_identity(self, self.kwargs)
 
         self.kwargs.update({

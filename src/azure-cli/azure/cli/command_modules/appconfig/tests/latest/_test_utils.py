@@ -28,6 +28,13 @@ def get_resource_name_prefix(prefix):
     resource_prefix = _get_local_test_resource_prefix()
     return prefix if resource_prefix is None else resource_prefix + prefix
 
+def get_test_resource_group():
+    # Data-plane tests use Microsoft Entra ID (--auth-mode login) against a store whose local auth
+    # is disabled. The recording principal must already hold "App Configuration Data Owner" at a
+    # scope covering the store, so tests target a fixed resource group with that standing role
+    # instead of an ephemeral @ResourceGroupPreparer group. Override via AZURE_CLI_APPCONFIG_TEST_RG.
+    return os.environ.get("AZURE_CLI_APPCONFIG_TEST_RG", "mametcal-python")
+
 class CredentialResponseSanitizer(RecordingProcessor):
     def process_response(self, response):
         if is_json_payload(response):

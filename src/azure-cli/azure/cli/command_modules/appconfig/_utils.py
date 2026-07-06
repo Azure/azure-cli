@@ -40,6 +40,12 @@ def construct_connection_string(cmd, config_store_name):
     raise CLIError('Cannot find a read write access key for the App Configuration {}'.format(config_store_name))
 
 
+def get_store_name_from_endpoint(endpoint):
+    if endpoint:
+        return endpoint.split("//")[1].split('.')[0]
+    return None
+
+
 def resolve_store_metadata(cmd, config_store_name):
     resource_group = None
     endpoint = None

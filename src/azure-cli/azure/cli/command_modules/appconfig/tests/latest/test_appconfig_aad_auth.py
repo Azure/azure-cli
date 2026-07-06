@@ -322,7 +322,7 @@ class AppConfigAadAuthLiveScenarioTest(ScenarioTest):
             'rg': resource_group,
             'sku': sku
         })
-        create_config_store(self, self.kwargs)
+        create_config_store(self, self.kwargs, disable_local_auth=True)
         
         appconfig_id = self.cmd('appconfig show -n {config_store_name} -g {rg}').get_output_in_json()['id']
         account_info = self.cmd('account show').get_output_in_json()

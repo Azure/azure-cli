@@ -30,7 +30,7 @@ class AppConfigCredentialScenarioTest(ScenarioTest):
             'sku': sku
         })
 
-        create_config_store(self, self.kwargs)
+        create_config_store(self, self.kwargs, disable_local_auth=True)
 
         credential_list = self.cmd(
             'appconfig credential list -n {config_store_name} -g {rg}').get_output_in_json()
