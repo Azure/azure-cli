@@ -6988,7 +6988,7 @@ def import_ssl_cert(cmd, resource_group_name, key_vault, key_vault_certificate_n
     kv_resource_group_name = kv_id_parts['resource_group']
     kv_subscription = kv_id_parts['subscription']
 
-    # If in the public cloud, check if certificate is an app service certificate, in the same or a diferent
+    # If in the public cloud, check if certificate is an app service certificate in the same or a different
     # subscription. App Service Certificate orders belong to the Microsoft.CertificateRegistration provider,
     # which is no longer exposed by the WebSiteManagementClient SDK, so the ARM REST API is queried directly.
     kv_secret_name = None
