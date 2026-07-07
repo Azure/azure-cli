@@ -2432,6 +2432,42 @@ examples:
     text: az webapp log startup show --name MyWebApp --resource-group MyResourceGroup --instance lw0sdlwk000002
 """
 
+helps['webapp troubleshoot'] = """
+type: group
+short-summary: Diagnose common Linux web app problems.
+long-summary: >
+    Preview command group that pairs built-in configuration checks (from
+    KuduLite on the worker) with the most recent runtime error reported by
+    Azure Resource Manager. Use when a Linux app is failing to start, returning
+    HTTP 502/503, or exhibiting other post-deployment misbehavior.
+"""
+
+helps['webapp troubleshoot config'] = """
+type: command
+short-summary: Validate configuration for a Linux web app and surface the last runtime error.
+long-summary: >
+    Aggregates two data sources into a single report:
+
+    (1) Built-in configuration checks from KuduLite — a set of common
+    Linux App Service settings (linuxFxVersion, port binding, startup
+    command, alwaysOn, health check path, ...) evaluated against the
+    running site's configuration snapshot.
+
+    (2) The most recent runtime error reported by Azure Resource Manager
+    (`/siteStatus`) — echoed verbatim from the platform.
+
+    By default the command returns a structured payload so the standard
+    `-o json/yaml/tsv/table` formatters handle output. Pass `--report` to
+    print a human-readable two-section report to stdout instead.
+examples:
+  - name: Run the built-in configuration checks and show the runtime error, if any
+    text: az webapp troubleshoot config --name MyWebApp --resource-group MyResourceGroup
+  - name: Print the human-readable report
+    text: az webapp troubleshoot config --name MyWebApp --resource-group MyResourceGroup --report
+  - name: Target a deployment slot
+    text: az webapp troubleshoot config --name MyWebApp --resource-group MyResourceGroup --slot staging
+"""
+
 helps['functionapp log'] = """
 type: group
 short-summary: Manage function app logs.

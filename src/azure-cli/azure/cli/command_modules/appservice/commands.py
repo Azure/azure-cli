@@ -48,6 +48,24 @@ def transform_runtime_list_output(result):
     ]) for r in result]
 
 
+def transform_troubleshoot_config_output(result):
+    """Flatten the troubleshoot config payload into a per-setting table.
+
+    Falls back gracefully for non-dict / empty payloads (e.g. --report was
+    passed and the command returned ``None``).
+    """
+    from collections import OrderedDict
+    if not isinstance(result, dict):
+        return []
+    settings = result.get('settings') or []
+    return [OrderedDict([
+        ('Setting', s.get('Setting') or s.get('setting') or ''),
+        ('Value', s.get('Value') if s.get('Value') is not None else s.get('value') or ''),
+        ('Details', s.get('Details') or s.get('details') or ''),
+    ]) for s in settings if isinstance(s, dict)]
+
+
+
 def ex_handler_factory(creating_plan=False):
     def _ex_handler(ex):
         ex = _polish_bad_errors(ex, creating_plan)
@@ -258,6 +276,10 @@ def load_command_table(self, _):
     with self.command_group('webapp log startup', is_preview=True) as g:
         g.custom_command('list', 'list_startup_logs')
         g.custom_show_command('show', 'show_startup_log')
+
+    with self.command_group('webapp troubleshoot', is_preview=True) as g:
+        g.custom_command('config', 'troubleshoot_config',
+                         table_transformer=transform_troubleshoot_config_output)
 
     with self.command_group('functionapp log deployment') as g:
         g.custom_show_command('show', 'show_deployment_log')
