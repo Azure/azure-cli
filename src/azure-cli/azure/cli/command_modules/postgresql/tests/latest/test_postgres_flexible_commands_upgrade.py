@@ -11,7 +11,7 @@ from azure.cli.testsdk import (
     ScenarioTest)
 from .constants import SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH, DEFAULT_LOCATION
 
-PRECHECK_LOCATION = 'eastus2euap'
+PRECHECK_LOCATION = 'eastus'
 
 
 class PostgreSQLFlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
@@ -56,7 +56,7 @@ class PostgreSQLFlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
 
         self.cmd('postgres flexible-server show -g {} -n {}'.format(resource_group, server_name),
                  checks=[JMESPathCheck('version', current_version),
-                         JMESPathCheck('location', 'East US 2 EUAP')])
+                         JMESPathCheck('location', 'East US')])
 
         # Run pre-upgrade validation. With --validate-only we poll until the
         # precheck reaches a terminal status, so the returned status must be
