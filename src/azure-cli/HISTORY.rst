@@ -33,6 +33,7 @@ Release History
 * `az webapp list-runtimes`: Add `--runtime` and `--support` filter parameters (#32903)
 * [BREAKING CHANGE] `az webapp list-runtimes`: Remove deprecated `--linux` and `--show-runtime-details` parameters (#32903)
 * `az webapp log startup`: Add commands to list and view Linux container startup logs (#33256)
+* `az webapp troubleshoot config`: Add preview command that runs built-in configuration checks against a Linux web app and surfaces the last runtime error from ARM
 * `az webapp create`: Add `--site-scoped-certs` parameter to support enabling or disabling site-scoped certificates (#33306)
 * `az webapp up`: Add warning message for future deprecation (#33410)
 * `az functionapp deployment source config-zip`: Fix `KeyError` `'FUNCTIONS_WORKER_RUNTIME'` for Go function apps on Flex Consumption (#33404)
