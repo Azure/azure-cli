@@ -60,7 +60,8 @@ from ._client_factory import (web_client_factory, ex_handler_factory, providers_
 from ._appservice_utils import _generic_site_operation, _generic_settings_operation
 from ._appservice_utils import MSI_LOCAL_ID
 from ._deployment_context_engine import (
-    raise_enriched_deployment_error, EnrichedDeploymentError
+    raise_enriched_deployment_error, EnrichedDeploymentError,
+    raise_enriched_plan_error, extract_status_code_from_message
 )
 from .utils import (_normalize_sku,
                     get_sku_tier,
@@ -884,7 +885,7 @@ def enable_zip_deploy_flex(cmd, resource_group_name, name, src, timeout=None, sl
 
 # This funtion performs deployment using /zipdeploy for both function app and web app
 def enable_zip_deploy(cmd, resource_group_name, name, src, timeout=None, slot=None,
-                      track_status=False, enable_kudu_warmup=True, enriched_errors=False):
+                      track_status=False, enable_kudu_warmup=True, enriched_errors=True):
     logger.warning("Getting scm site credentials for zip deployment")
 
     try:
@@ -5003,12 +5004,47 @@ def is_async_response(poller, timeout_seconds=30):
     return status_code == 202
 
 
+def _raise_enriched_plan_create_error(ex, resource_group_name, name, location, sku):
+    message_parts = []
+    top_message = getattr(ex, 'message', None)
+    if top_message:
+        message_parts.append(str(top_message))
+    inner_message = getattr(getattr(ex, 'error', None), 'message', None)
+    if inner_message:
+        message_parts.append(str(inner_message))
+    response = getattr(ex, 'response', None)
+    if response is not None:
+        try:
+            body = response.text()
+            if body:
+                message_parts.append(body)
+        except Exception:  # pylint: disable=broad-except
+            pass
+    error_message = "\n".join(message_parts) if message_parts else str(ex)
+
+    status_code = getattr(ex, 'status_code', None)
+    if status_code is None:
+        status_code = getattr(response, 'status_code', None)
+    if status_code is None:
+        status_code = extract_status_code_from_message(error_message)
+    raise_enriched_plan_error(
+        resource_group_name=resource_group_name,
+        plan_name=name,
+        location=location,
+        sku=sku,
+        status_code=status_code,
+        error_message=error_message,
+        last_known_step="App Service Plan create (control-plane request)"
+    )
+
+
 def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, per_site_scaling=False,  # pylint: disable=too-many-branches
                             app_service_environment=None, sku=None, number_of_workers=None, location=None,
                             tags=None, no_wait=False, zone_redundant=False, async_scaling_enabled=None,
                             is_managed_instance=None, mi_system_assigned=None, mi_user_assigned=None,
                             default_identity=None, rdp_enabled=None, vnet=None, subnet=None,
-                            registry_adapters=None, install_scripts=None, storage_mounts=None):
+                            registry_adapters=None, install_scripts=None, storage_mounts=None,
+                            enriched_errors=False):
     if is_linux is None:
         is_linux = not hyper_v
     elif is_linux and hyper_v:
@@ -5106,44 +5142,51 @@ has been deployed ".format(app_service_environment)
     os_type = 'Linux' if is_linux else ('Hyper-V' if hyper_v else 'Windows')
     logger.warning("Creating App Service Plan '%s' (%s, SKU: %s).", name, os_type, sku)
 
-    poller = AppServicePlanCreateWithNoWait(cli_ctx=cmd.cli_ctx)(command_args={
-        "name": name,
-        "resource_group": resource_group_name,
-        "location": location,
-        "tags": tags,
-        "sku": sku_def.as_dict(),
-        "reserved": plan_def.reserved,
-        "hyper_v": plan_def.hyper_v,
-        "per_site_scaling": plan_def.per_site_scaling,
-        "hosting_environment_profile": hosting_environment_profile,
-        "async_scaling_enabled": plan_def.async_scaling_enabled,
-        "zone_redundant": zone_redundant if zone_redundant else None,
-        "is_custom_mode": is_managed_instance,
-        "network": {
-            "virtual_network_subnet_id": subnet_resource_id,
-        } if subnet_resource_id else None,
-        "rdp_enabled": rdp_enabled,
-        "mi_system_assigned": str(mi_system_assigned) if mi_system_assigned else None,
-        "mi_user_assigned": mi_user_assigned,
-        "plan_default_identity": plan_default_identity,
-        "registry_adapters": registry_adapters,
-        "install_scripts": install_scripts,
-        "storage_mounts": storage_mounts,
-    })
+    try:
+        poller = AppServicePlanCreateWithNoWait(cli_ctx=cmd.cli_ctx)(command_args={
+            "name": name,
+            "resource_group": resource_group_name,
+            "location": location,
+            "tags": tags,
+            "sku": sku_def.as_dict(),
+            "reserved": plan_def.reserved,
+            "hyper_v": plan_def.hyper_v,
+            "per_site_scaling": plan_def.per_site_scaling,
+            "hosting_environment_profile": hosting_environment_profile,
+            "async_scaling_enabled": plan_def.async_scaling_enabled,
+            "zone_redundant": zone_redundant if zone_redundant else None,
+            "is_custom_mode": is_managed_instance,
+            "network": {
+                "virtual_network_subnet_id": subnet_resource_id,
+            } if subnet_resource_id else None,
+            "rdp_enabled": rdp_enabled,
+            "mi_system_assigned": str(mi_system_assigned) if mi_system_assigned else None,
+            "mi_user_assigned": mi_user_assigned,
+            "plan_default_identity": plan_default_identity,
+            "registry_adapters": registry_adapters,
+            "install_scripts": install_scripts,
+            "storage_mounts": storage_mounts,
+        })
 
-    if no_wait:
-        return poller.result()
+        if no_wait:
+            return poller.result()
 
-    # Check if this is an asynchronous operation
-    is_async = is_async_response(poller)
+        # Check if this is an asynchronous operation
+        is_async = is_async_response(poller)
 
-    if not is_async:
-        # for synchronous operations, or if we are unable to get the initial response, directly return poller result
-        return poller.result()
+        if not is_async:
+            # for synchronous operations, or if we are unable to get the initial response, directly return poller result
+            return poller.result()
 
-    # Asynchronous operation (202 response), use custom progress bar
-    progress_bar = PlanProgressBar(cmd.cli_ctx, resource_group_name, name)
-    return LongRunningOperation(cmd.cli_ctx, progress_bar=progress_bar)(poller)
+        # Asynchronous operation (202 response), use custom progress bar
+        progress_bar = PlanProgressBar(cmd.cli_ctx, resource_group_name, name)
+        return LongRunningOperation(cmd.cli_ctx, progress_bar=progress_bar)(poller)
+    except EnrichedDeploymentError:
+        raise
+    except Exception as ex:  # pylint: disable=broad-except
+        if not (enriched_errors and is_linux):
+            raise
+        _raise_enriched_plan_create_error(ex, resource_group_name, name, location, sku)
 
 
 def update_app_service_plan_with_progress(cmd, resource_group_name, name, app_service_plan):
@@ -10633,7 +10676,7 @@ def get_history_triggered_webjob(cmd, resource_group_name, name, webjob_name, sl
 def webapp_up(cmd, name=None, resource_group_name=None, plan=None, location=None, sku=None,  # pylint: disable=too-many-statements,too-many-branches
               os_type=None, runtime=None, dryrun=False, logs=False, launch_browser=False, html=False,
               app_service_environment=None, track_status=True, enable_kudu_warmup=True, basic_auth="",
-              auto_generated_domain_name_label_scope=None, enriched_errors=False):
+              auto_generated_domain_name_label_scope=None, enriched_errors=True):
     if not name:
         name = generate_default_app_name(cmd)
 
@@ -11074,7 +11117,7 @@ def perform_onedeploy_webapp(cmd,
                              slot=None,
                              track_status=True,
                              enable_kudu_warmup=True,
-                             enriched_errors=False):
+                             enriched_errors=True):
     params = OneDeployParams()
 
     params.cmd = cmd
@@ -11135,7 +11178,7 @@ class OneDeployParams:
         self.enable_kudu_warmup = None
         self.is_linux_webapp = None
         self.is_functionapp = None
-        self.enriched_errors = False
+        self.enriched_errors = True
         # Per-invocation caches. Populated during a single deploy and
         # cleared in _perform_onedeploy_internal's `finally` block. These MUST
         # NOT be logged, serialized, or accessed outside the current call

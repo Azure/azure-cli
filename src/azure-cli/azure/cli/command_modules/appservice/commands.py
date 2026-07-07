@@ -354,11 +354,11 @@ def load_command_table(self, _):
         g.custom_command('add', 'add_plan_managed_instance_network')
         g.custom_command('remove', 'remove_plan_managed_instance_network')
 
-    with self.command_group('appservice plan managed-instance instance', custom_command_type=appservice_custom, is_preview=True) as g:
+    with self.command_group('appservice plan managed-instance instance', custom_command_type=appservice_custom) as g:
         g.custom_command('connect', 'connect_to_plan_instance')
         g.custom_command('recycle', 'recycle_plan_managed_instance')
 
-    with self.command_group('appservice plan identity', is_preview=True) as g:
+    with self.command_group('appservice plan identity') as g:
         g.custom_show_command('show', 'show_plan_identity')
         g.custom_command('assign', 'assign_plan_identity')
         g.custom_command('remove', 'remove_plan_identity')

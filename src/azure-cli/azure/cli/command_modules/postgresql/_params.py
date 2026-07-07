@@ -323,6 +323,16 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             validator=validate_identities
         )
 
+        federated_client_id_arg_type = CLIArgumentType(
+            options_list=['--federated-client-id'],
+            help='The client ID of the federated identity.'
+        )
+
+        backup_federated_client_id_arg_type = CLIArgumentType(
+            options_list=['--backup-federated-client-id', '-f'],
+            help='The client ID of the geo backup federated identity.'
+        )
+
         microsoft_entra_auth_arg_type = CLIArgumentType(
             options_list=['--microsoft-entra-auth'],
             arg_type=get_enum_type(['Enabled', 'Disabled']),
@@ -372,6 +382,23 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             help='The read replicas the virtual endpoints point to.'
         )
 
+        maintenance_event_id_arg_type = CLIArgumentType(
+            options_list=['--maintenance-event-id'],
+            id_part='child_name_1',
+            help='The maintenance event identifier.'
+        )
+
+        maintenance_status_arg_type = CLIArgumentType(
+            options_list=['--maintenance-status'],
+            arg_type=get_enum_type(['Upcoming', 'Past']),
+            help='Filter maintenance events by status.'
+        )
+
+        start_time_arg_type = CLIArgumentType(
+            options_list=['--start-time', '-t'],
+            help='New UTC start time to target rescheduling maintenance (ISO8601 format), e.g., 2026-04-10T10:00:00+00:00.'
+        )
+
         with self.argument_context('{} flexible-server'.format(command_group)) as c:
             c.argument('resource_group_name', arg_type=resource_group_name_type)
             c.argument('server_name', arg_type=server_name_arg_type)
@@ -413,6 +440,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('zone', zone_arg_type)
             c.argument('tags', tags_type)
             c.argument('standby_availability_zone', arg_type=standby_availability_zone_arg_type)
+            c.argument('backup_federated_client_id', arg_type=backup_federated_client_id_arg_type)
+            c.argument('federated_client_id', arg_type=federated_client_id_arg_type)
             c.argument('yes', arg_type=yes_arg_type)
 
         with self.argument_context('{} flexible-server list'.format(command_group)) as c:
@@ -430,6 +459,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
             c.argument('zone', arg_type=zone_arg_type)
             c.argument('yes', arg_type=yes_arg_type)
+            c.argument('backup_federated_client_id', arg_type=backup_federated_client_id_arg_type)
+            c.argument('federated_client_id', arg_type=federated_client_id_arg_type)
             c.argument('byok_key', arg_type=key_arg_type)
             c.argument('byok_identity', arg_type=identity_arg_type)
             c.argument('geo_redundant_backup', default='Disabled', arg_type=geo_redundant_backup_arg_type)
@@ -452,6 +483,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('byok_identity', arg_type=identity_arg_type)
             c.argument('backup_byok_identity', arg_type=backup_identity_arg_type)
             c.argument('backup_byok_key', arg_type=backup_key_arg_type)
+            c.argument('backup_federated_client_id', arg_type=backup_federated_client_id_arg_type)
+            c.argument('federated_client_id', arg_type=federated_client_id_arg_type)
 
         with self.argument_context('{} flexible-server revive-dropped'. format(command_group)) as c:
             c.argument('location', arg_type=get_location_type(self.cli_ctx), required=True)
@@ -481,6 +514,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('byok_identity', arg_type=identity_arg_type)
             c.argument('backup_byok_identity', arg_type=backup_identity_arg_type)
             c.argument('backup_byok_key', arg_type=backup_key_arg_type)
+            c.argument('backup_federated_client_id', arg_type=backup_federated_client_id_arg_type)
+            c.argument('federated_client_id', arg_type=federated_client_id_arg_type)
             c.argument('public_access', arg_type=public_access_update_arg_type)
             c.argument('auto_grow', arg_type=auto_grow_arg_type)
             c.argument('performance_tier', default=None, arg_type=performance_tier_arg_type)
@@ -592,6 +627,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
             c.argument('byok_key', arg_type=key_arg_type)
             c.argument('byok_identity', arg_type=identity_arg_type)
+            c.argument('backup_federated_client_id', arg_type=backup_federated_client_id_arg_type)
+            c.argument('federated_client_id', arg_type=federated_client_id_arg_type)
             c.argument('tier', arg_type=tier_arg_type)
             c.argument('sku_name', arg_type=sku_name_arg_type)
             c.argument('storage_gb', arg_type=storage_gb_arg_type)
@@ -633,6 +670,21 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
         with self.argument_context('{} flexible-server backup delete'.format(command_group)) as c:
             c.argument('yes', arg_type=yes_arg_type)
+
+        # maintenance-event
+        with self.argument_context('{} flexible-server maintenance-event'.format(command_group)) as c:
+            c.argument('server_name', arg_type=server_name_resource_arg_type)
+
+        with self.argument_context('{} flexible-server maintenance-event list'.format(command_group)) as c:
+            c.argument('maintenance_status', arg_type=maintenance_status_arg_type)
+            c.ignore('ids')
+
+        for scope in ['show', 'reschedule', 'apply-now']:
+            with self.argument_context('{} flexible-server maintenance-event {}'.format(command_group, scope)) as c:
+                c.argument('maintenance_event_id', arg_type=maintenance_event_id_arg_type)
+
+        with self.argument_context('{} flexible-server maintenance-event reschedule'.format(command_group)) as c:
+            c.argument('start_time', arg_type=start_time_arg_type, required=True)
 
         # identity
         with self.argument_context('{} flexible-server identity'.format(command_group)) as c:
