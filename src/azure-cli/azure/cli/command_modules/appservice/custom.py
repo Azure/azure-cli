@@ -6695,13 +6695,29 @@ def troubleshoot_status(cmd, resource_group, name, slot=None, instance=None, rep
                 text = (summary_response.text or '').strip()
                 if text:
                     app_wide_fetch_status = text
-        elif summary_response.status_code == 404:
-            # No startup logs in window for any instance, or endpoint not rolled out.
-            pass
         else:
-            logger.warning(
-                "Failed to retrieve startup summary (status %s %s).",
-                summary_response.status_code, summary_response.reason)
+            # Any non-200 response means KuduLite couldn't produce a startup
+            # summary for this app. In practice we see:
+            #   * 404: newer KuduLite doesn't recognize the /summary route yet
+            #     (feature not rolled out to this region / stamp).
+            #   * 400 "Invalid startup log filename.": older KuduLite routes
+            #     /api/startuplogs/{filename} — no /summary sub-route — so it
+            #     treats 'summary' as a filename and rejects it.
+            #   * 5xx / auth errors: transient or config problem.
+            # Surface the status + body so users aren't misled into thinking
+            # their site had no startup attempts.
+            body_snippet = (summary_response.text or '').strip()
+            if len(body_snippet) > 200:
+                body_snippet = body_snippet[:200] + '...'
+            reason = summary_response.reason or ''
+            detail = '{} {}'.format(summary_response.status_code, reason).strip()
+            if body_snippet:
+                detail = '{}: {}'.format(detail, body_snippet)
+            app_wide_fetch_status = (
+                "Startup summary is not available for this app "
+                "(SCM returned {} for {}). This feature requires a platform "
+                "version that may not have rolled out to your app's region yet."
+            ).format(detail, summary_url)
 
     for item in runtime_items:
         machine = item.get('machineName')

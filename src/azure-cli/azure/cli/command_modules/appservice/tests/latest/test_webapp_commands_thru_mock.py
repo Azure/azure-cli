@@ -1005,10 +1005,11 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
                           for hex_id, mn in mapping.items()]}
 
     @staticmethod
-    def _make_response(status_code=200, json_data=None, reason=''):
+    def _make_response(status_code=200, json_data=None, reason='', text=''):
         resp = mock.MagicMock()
         resp.status_code = status_code
         resp.reason = reason
+        resp.text = text
         resp.json.return_value = json_data
         return resp
 
@@ -1120,7 +1121,42 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
 
         result = troubleshoot_status(self.cmd, 'myRG', 'myApp')
 
-        self.assertIsNone(result['instances'][0]['startup'])
+        # A 404 from the /api/startuplogs/summary endpoint means the KuduLite
+        # build doesn't recognize the route yet (feature not rolled out).
+        # Surface that as a SummaryFetchStatus so users aren't misled into
+        # thinking their site had no startup attempts.
+        startup = result['instances'][0]['startup']
+        self.assertIsNotNone(startup)
+        self.assertIn('SCM returned 404', startup.get('SummaryFetchStatus', ''))
+        self.assertIn('not available', startup.get('SummaryFetchStatus', '').lower())
+
+    @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
+                return_value={'Authorization': '******'})
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url',
+                return_value='https://myapp.scm.azurewebsites.net')
+    @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
+    @mock.patch('requests.get')
+    def test_troubleshoot_status_summary_400_invalid_filename_surfaces_message(
+            self, requests_get_mock, send_raw_request_mock, _scm_url_mock, _headers_mock):
+        # Older KuduLite build routes /api/startuplogs/{filename} and has no
+        # /summary sub-route, so it returns 400 "Invalid startup log filename."
+        # This should surface as feature-not-available, not as "no startups".
+        arm_items = [{'instanceId': 'abcde', 'state': 'Started', 'action': 'SiteStarted'}]
+        send_raw_request_mock.side_effect = [
+            mock.MagicMock(json=mock.MagicMock(return_value=self._instances_payload(
+                {'abcde': 'lw0sdlwk0001AA'}))),
+            mock.MagicMock(json=mock.MagicMock(return_value=self._arm_response(arm_items))),
+        ]
+        requests_get_mock.return_value = self._make_response(
+            400, reason='BadRequest', text='Invalid startup log filename.')
+
+        result = troubleshoot_status(self.cmd, 'myRG', 'myApp')
+
+        startup = result['instances'][0]['startup']
+        self.assertIsNotNone(startup)
+        msg = startup.get('SummaryFetchStatus', '')
+        self.assertIn('SCM returned 400', msg)
+        self.assertIn('Invalid startup log filename', msg)
 
     @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
                 return_value={'Authorization': 'Bearer token'})
@@ -1142,7 +1178,7 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
                 return_value='https://myapp.scm.azurewebsites.net')
     @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
     @mock.patch('requests.get')
-    def test_troubleshoot_status_summary_500_logs_warning(
+    def test_troubleshoot_status_summary_500_surfaces_message(
             self, requests_get_mock, send_raw_request_mock, _scm_url_mock, _headers_mock):
         arm_items = [{'instanceId': 'abcde', 'state': 'Started', 'action': 'SiteStarted'}]
         send_raw_request_mock.side_effect = [
@@ -1152,12 +1188,12 @@ class TestTroubleshootStatusMocked(unittest.TestCase):
         ]
         requests_get_mock.return_value = self._make_response(500, reason='Internal Server Error')
 
-        with mock.patch('azure.cli.command_modules.appservice.custom.logger') as logger_mock:
-            result = troubleshoot_status(self.cmd, 'myRG', 'myApp')
+        result = troubleshoot_status(self.cmd, 'myRG', 'myApp')
 
-        self.assertIsNone(result['instances'][0]['startup'])
-        warn_msgs = [c[0][0] for c in logger_mock.warning.call_args_list]
-        self.assertTrue(any('startup summary' in m for m in warn_msgs))
+        # Non-200 -> feature-not-available message, not silent drop.
+        startup = result['instances'][0]['startup']
+        self.assertIsNotNone(startup)
+        self.assertIn('SCM returned 500', startup.get('SummaryFetchStatus', ''))
 
     @mock.patch('azure.cli.command_modules.appservice.custom.get_scm_site_headers',
                 return_value={'Authorization': 'Bearer token'})
